@@ -2,6 +2,8 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools.misc import format_date
+from odoo.release import version
+
 
 from collections import defaultdict
 from pprint import pprint
@@ -9,11 +11,11 @@ from timeit import default_timer as timer
 import datetime
 from dateutil.relativedelta import relativedelta
 import math
-
+import json
 import logging
 _logger = logging.getLogger(__name__)
 
-REFERENCE_DATE = datetime.date(1970, 1, 1)
+REFERENCE_DATE = datetime.date.min
 
 
 def compute_recurence(dates, min_bin_size=0, max_bin_size=5):
@@ -44,7 +46,7 @@ def prune(recurence, min_occurence=5):
     return tree
 
 
-def find(dates, tree):
+def find(dates, tree, after=0):
     max_bin_size = max((len(i) for i in tree.keys()), default=0)
     min_bin_size = min((len(i) for i in tree.keys()), default=0)
     found = set()
@@ -63,7 +65,8 @@ def find(dates, tree):
                             add = False
                             break
                     if add:
-                        found.add(dates[i] + res)
+                        if dates[i] + res > after:  # TODO set the check earlier
+                            found.add(dates[i] + res)
                         break
     return found
 
@@ -73,11 +76,11 @@ class AIWizardProposition(models.Model):
     _description = 'Deduced things'
 
     company_id = fields.Many2one(related='config_id.company_id', store=True, readonly=True)
-    config_id = fields.Many2one('account.ai.config')
+    config_id = fields.Many2one('account.ai.config', required=True)
     account_id = fields.Many2one('account.account')
     partner_id = fields.Many2one('res.partner')
-    range_up = fields.Integer()
-    range_down = fields.Integer()
+    range_up = fields.Float()
+    range_down = fields.Float()
     date = fields.Date()
     date_str = fields.Char()
 
@@ -128,13 +131,15 @@ class AIConfig(models.Model):
     account_ids = fields.Many2many('account.account')
     account_type_ids = fields.Many2many('account.account.type')
     generated_cron_id = fields.Many2one('ir.cron', readonly=True, copy=False)
-    generated_menu_id = fields.Many2one('ir.ui.menu', copy=False)
+    kanban_dashboard_graph = fields.Text(compute='_kanban_dashboard_graph')
+    kanban_dashboard = fields.Text(compute='_kanban_dashboard')
+    last_update = fields.Date()
 
     # find date fields
     amount_grouping = fields.Selection([
         ('amount_range', 'With range'),
         ('amount_range_sign', 'With sign'),
-        ('without_grouping', 'Without grouping')
+        ('no_amount_range', 'Without grouping')
     ], default='amount_range')
     line_ids = fields.One2many('account.ai.finddate.line', 'config_id')
 
@@ -151,7 +156,7 @@ class AIConfig(models.Model):
     def create(self, vals):
         rec = super(AIConfig, self).create(vals)
         if rec.action == 'manual':
-            # rec._create_action_and_menu()
+            pass
         elif rec.action == 'accountbot':
             rec._create_cron()
         else:
@@ -166,16 +171,11 @@ class AIConfig(models.Model):
             if config.action == 'manual':
                 if config.generated_cron_id:
                     config.generated_cron_id.unlink()
-                # config._create_action_and_menu()
             elif config.action == 'odoobot':
-                if config.generated_menu_id:
-                    config.generated_menu_id.unlink()
                 config._create_cron()
 
     def unlink(self):
         for config in self:
-            if config.generated_menu_id:
-                config.generated_menu_id.unlink()
             if config.generated_cron_id:
                 config.generated_cron_id.unlink()
         super(AIConfig, self).unlink()
@@ -199,43 +199,13 @@ class AIConfig(models.Model):
                     'ir_actions_server_id': action.id,
                 })
 
-    def _create_action_and_menu(self):
-        # create action and menu with corresponding external ids, in order to
-        # remove those entries when deinstalling the corresponding module
-        module = 'account'
-        for config in self:
-            if not config.generated_menu_id:
-                data = {
-                    'xml_id': "%s.%s" % (module, 'account_ai_action_' + str(config.id)),
-                    'values': {
-                        'name': config.display_name,
-                        'model_id': self.env.ref('account.model_account_ai_config').id,
-                        'state': 'code',
-                        'code': "action = model.browse(%s).action_view_lines()" % config.id
-                    },
-                    'noupdate': True,
-                }
-                action = self.env['ir.actions.server'].sudo()._load_records([data])
-
-                data = {
-                    'xml_id': "%s.%s" % (module, 'account_ai_menu_' + str(config.id)),
-                    'values': {
-                        'name': config.display_name,
-                        'parent_id': self.env['ir.model.data'].xmlid_to_res_id('account.menu_finance_entries_actions'),
-                        'action': 'ir.actions.server,%s' % (action.id,),
-                    },
-                    'noupdate': True,
-                }
-                menu = self.env['ir.ui.menu'].sudo()._load_records([data])
-
-                config.generated_menu_id = menu
-
     def take_action(self):
         for config in self:
             if config.find == 'date':
                 config._find_date()
             else:
                 raise UserError('not yet implemented')
+            config.last_update = fields.Date.today()
 
     ############################################################################
     # FIND DATE METHODS
@@ -286,10 +256,10 @@ class AIConfig(models.Model):
         dates_grouped = self.env.cr.fetchall()
         return [
             # month granularity
-            {(account, partner, (range.lower, range.upper)): [date.year * 12 + date.month - 1 for date in dates]
+            {(account, partner, (range.lower or 0, range.upper or math.inf)): [date.year * 12 + date.month - 1 for date in dates]
                 for account, partner, range, dates in dates_grouped},
             # day granularity
-            {(account, partner, (range.lower, range.upper)): [(date - REFERENCE_DATE).days for date in dates]
+            {(account, partner, (range.lower or 0, range.upper or math.inf)): [(date - REFERENCE_DATE).days for date in dates]
                 for account, partner, range, dates in dates_grouped},
         ]
 
@@ -303,7 +273,8 @@ class AIConfig(models.Model):
         for config in self:
             start = timer()
             total_algo = 0
-            config.line_ids = self.env['account.ai.finddate.line']
+            config.line_ids.unlink()
+            lock_date = config.company_id.fiscalyear_lock_date or datetime.date.min
             dates_dict_list = config._get_dates(config.amount_grouping)
             propositions = {}
             create_set = defaultdict(list)
@@ -312,7 +283,8 @@ class AIConfig(models.Model):
                     start_algo = timer()
                     recurence = compute_recurence(dates, min(int(math.log10(len(dates))), 4), 10)
                     tree = prune(recurence, 2)
-                    found = find(dates, tree)
+                    after_date = lock_date.year * 12 + lock_date.month - 1 if i == 0 else (lock_date - REFERENCE_DATE).days
+                    found = find(dates, tree, after=after_date)
                     stop_algo = timer()
                     total_algo += stop_algo - start_algo
                     account_id, partner_id, range = key
@@ -345,13 +317,16 @@ class AIConfig(models.Model):
     ############################################################################
     # ACTIONS
     ############################################################################
-    def action_view_lines(self):
+    def action_get_lines(self):
         self.take_action()
+        return self.action_view_lines()
+
+    def action_view_lines(self):
         if self.find == 'date':
             return {
                 'name': self.display_name,
                 'res_model': 'account.ai.finddate.line',
-                'view_mode': 'tree,form',
+                'view_mode': 'tree',
                 'domain': [('config_id', '=', self.id)],
                 'type': 'ir.actions.act_window',
                 'target': 'current',
@@ -389,6 +364,45 @@ class AIConfig(models.Model):
             'type': 'ir.actions.act_window',
             'target': 'current',
         }
+
+    ############################################################################
+    # KANBAN METHODS
+    ############################################################################
+    def _kanban_dashboard(self):
+        for config in self:
+            config.kanban_dashboard = json.dumps({
+                'is_sample_data': False,
+                'graph_type': 'bar',
+                'action': config.action,
+                'display_company': len(self.env.companies) > 1,
+                'last_update': format_date(self.env, config.last_update),
+            })
+
+    @api.depends('kanban_dashboard')
+    def _kanban_dashboard_graph(self):
+        def build_graph_data(date, amount):
+            name = format_date(self.env, date, date_format='d LLLL Y')
+            short_name = format_date(self.env, date, date_format='d MMM')
+            return {'value': amount, 'label': short_name, 'type': 'past'} if graph_type == 'bar' else {'x': short_name, 'y': amount, 'name': name}
+
+        for config in self:
+            today = fields.Date.today()
+            graph_type = ''
+            graph_key = ''
+            color = '#875A7B' if 'e' in version else '#7c7bad'
+            data = []
+            if config.find == 'date':
+                graph_type = json.loads(config.kanban_dashboard)['graph_type']
+                graph_key = 'Number of propositions'
+                query = """
+                    SELECT date, COUNT(id)
+                    FROM account_ai_finddate_line
+                    WHERE config_id = %(config_id)s
+                    GROUP BY date
+                """
+                self.env.cr.execute(query, {'config_id': config.id})
+                data = [build_graph_data(x[0], x[1]) for x in self.env.cr.fetchall()]
+            config.kanban_dashboard_graph = json.dumps([{'values': data, 'title': '', 'key': graph_key, 'area': True, 'color': color}])
 
 
 class MailBot(models.AbstractModel):

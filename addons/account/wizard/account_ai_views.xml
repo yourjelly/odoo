@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="account_ai_wizard_tree_form_view" model="ir.ui.view">
+        <record id="account_ai_finddate_line_tree_form_view" model="ir.ui.view">
             <field name="name">account.ai.finddate.line.tree</field>
             <field name="model">account.ai.finddate.line</field>
             <field name="arch" type="xml">
@@ -87,27 +87,44 @@
                     <field name="name"/>
                     <field name="find"/>
                     <field name="action"/>
+                    <field name="kanban_dashboard"/>
                     <field name="account_ids" widget="many2many_tags"/>
                     <field name="account_type_ids" widget="many2many_tags"/>
                     <templates>
                         <t t-name="kanban-box">
+                            <t t-value="JSON.parse(record.kanban_dashboard.raw_value)" t-set="dashboard"/>
                             <div>
-                                <div class="o_kanban_card_header_title">
-                                    <div class="o_primary">
-                                        <a type="object" name="action_open"><field name="name"/></a>
-                                    </div>
-                                    <div class="o_secondary">
-                                        <field name="action"/>
+                                <div t-if="dashboard.display_company" style="position: absolute;right: 6px;top: 6px;font-size: 9px;"><field name="company_id"/></div>
+                                <div class="o_kanban_card_header">
+                                    <div class="o_kanban_card_header_title">
+                                        <div class="o_primary">
+                                            <a type="object" name="action_open"><field name="name"/></a>
+                                        </div>
+                                        <div class="o_secondary">
+                                            <field name="action"/>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="container o_kanban_card_content">
                                     <div class="row">
-                                        <button type="object" name="action_view_lines" class="btn btn-primary">
+                                        <button t-if="dashboard.action == 'manual'" type="object" name="action_get_lines" class="btn btn-primary">
                                             <span>Execute</span>
+                                        </button>
+                                        <button t-if="dashboard.action == 'accountbot'" type="object" name="action_run_odoo_bot" class="btn btn-secondary">
+                                            <span>Call now</span>
                                         </button>
                                         <field name="account_ids" widget="many2many_tags"/>
                                         <field name="account_type_ids" widget="many2many_tags"/>
                                     </div>
+                                    <div t-if="dashboard.is_sample_data">
+                                        <span class="badge badge-warning text-uppercase o_sample_data_label">Sample data</span>
+                                    </div>
+                                    <div t-if="dashboard.last_update" class="row small text-muted">
+                                        Data last updated: <t t-esc="dashboard.last_update"/>
+                                    </div>
+                                    <a type="object" name="action_view_lines">
+                                        <field name="kanban_dashboard_graph" t-att-graph_type="dashboard.graph_type" widget="dashboard_graph"/>
+                                    </a>
                                 </div>
                             </div>
                         </t>
@@ -116,7 +133,7 @@
             </field>
         </record>
 
-        <record id="account_ai_wizard_action" model="ir.actions.act_window">
+        <record id="account_ai_config_action" model="ir.actions.act_window">
             <field name="name">Do AI things</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">account.ai.config</field>
@@ -124,7 +141,15 @@
             <field name="view_id" ref="account_ai_config_kanban_view"/>
         </record>
 
-        <menuitem id="menu_action_ai_things" parent="account.menu_finance_entries_actions" action="account_ai_wizard_action" sequence="25"/>
+        <record id="account_ai_finddate_line_action" model="ir.actions.act_window">
+            <field name="name">Propositions</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.ai.finddate.line</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="account_ai_finddate_line_tree_form_view"/>
+        </record>
+
+        <menuitem id="menu_action_ai_things" parent="account.menu_finance_entries_actions" action="account_ai_config_action" sequence="25"/>
 
         <record model="res.partner" id="account.partner_accountbot">
             <field name="name">AccountBot</field>
