@@ -225,8 +225,8 @@ class account_payment(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
-        if self.invoice_ids and self.invoice_ids[0].invoice_partner_bank_id:
-            self.partner_bank_account_id = self.invoice_ids[0].invoice_partner_bank_id
+        if self.invoice_ids and self.invoice_ids[0].partner_bank_id:
+            self.partner_bank_account_id = self.invoice_ids[0].partner_bank_id
         elif self.partner_id != self.partner_bank_account_id.partner_id:
             # This condition ensures we use the default value provided into
             # context for partner_bank_account_id properly when provided with a
@@ -461,16 +461,12 @@ class account_payment(models.Model):
         all_move_vals = []
         for payment in self:
             company_currency = payment.company_id.currency_id
+            journal = payment.journal_id
             move_names = payment.move_name.split(payment._get_move_name_transfer_separator()) if payment.move_name else None
 
             # Compute amounts.
             write_off_amount = payment.payment_difference_handling == 'reconcile' and -payment.payment_difference or 0.0
-            if payment.payment_type in ('outbound', 'transfer'):
-                counterpart_amount = payment.amount
-                liquidity_line_account = payment.journal_id.default_debit_account_id
-            else:
-                counterpart_amount = -payment.amount
-                liquidity_line_account = payment.journal_id.default_credit_account_id
+            counterpart_amount = payment.amount if payment.payment_type in ('outbound', 'transfer') else -payment.amount
 
             # Manage currency.
             if payment.currency_id == company_currency:
@@ -484,21 +480,6 @@ class account_payment(models.Model):
                 balance = payment.currency_id._convert(counterpart_amount, company_currency, payment.company_id, payment.payment_date)
                 write_off_balance = payment.currency_id._convert(write_off_amount, company_currency, payment.company_id, payment.payment_date)
                 currency_id = payment.currency_id.id
-
-            # Manage custom currency on journal for liquidity line.
-            if payment.journal_id.currency_id and payment.currency_id != payment.journal_id.currency_id:
-                # Custom currency on journal.
-                if payment.journal_id.currency_id == company_currency:
-                    # Single-currency
-                    liquidity_line_currency_id = False
-                else:
-                    liquidity_line_currency_id = payment.journal_id.currency_id.id
-                liquidity_amount = company_currency._convert(
-                    balance, payment.journal_id.currency_id, payment.company_id, payment.payment_date)
-            else:
-                # Use the payment currency.
-                liquidity_line_currency_id = currency_id
-                liquidity_amount = counterpart_amount
 
             # Compute 'name' to be used in receivable/payable line.
             rec_pay_line_name = ''
@@ -529,8 +510,8 @@ class account_payment(models.Model):
             move_vals = {
                 'date': payment.payment_date,
                 'ref': payment.communication,
-                'journal_id': payment.journal_id.id,
-                'currency_id': payment.journal_id.currency_id.id or payment.company_id.currency_id.id,
+                'journal_id': journal.id,
+                'currency_id': journal.currency_id.id or payment.company_id.currency_id.id,
                 'partner_id': payment.partner_id.id,
                 'line_ids': [
                     # Receivable / Payable / Transfer line.
@@ -548,13 +529,13 @@ class account_payment(models.Model):
                     # Liquidity line.
                     (0, 0, {
                         'name': liquidity_line_name,
-                        'amount_currency': -liquidity_amount if liquidity_line_currency_id else 0.0,
-                        'currency_id': liquidity_line_currency_id,
+                        'amount_currency': -counterpart_amount,
+                        'currency_id': currency_id,
                         'debit': balance < 0.0 and -balance or 0.0,
                         'credit': balance > 0.0 and balance or 0.0,
                         'date_maturity': payment.payment_date,
                         'partner_id': payment.partner_id.commercial_partner_id.id,
-                        'account_id': liquidity_line_account.id,
+                        'account_id': journal.payment_debit_account_id.id if balance < 0.0 else journal.payment_credit_account_id.id,
                         'payment_id': payment.id,
                     }),
                 ],
@@ -596,7 +577,7 @@ class account_payment(models.Model):
                     'date': payment.payment_date,
                     'ref': payment.communication,
                     'partner_id': payment.partner_id.id,
-                    'journal_id': payment.destination_journal_id.id,
+                    'journal_id': journal.id,
                     'line_ids': [
                         # Transfer debit line.
                         (0, 0, {
@@ -619,7 +600,7 @@ class account_payment(models.Model):
                             'credit': balance < 0.0 and -balance or 0.0,
                             'date_maturity': payment.payment_date,
                             'partner_id': payment.partner_id.commercial_partner_id.id,
-                            'account_id': payment.destination_journal_id.default_credit_account_id.id,
+                            'account_id': journal.payment_debit_account_id.id if balance > 0.0 else journal.payment_credit_account_id.id,
                             'payment_id': payment.id,
                         }),
                     ],
@@ -668,7 +649,7 @@ class account_payment(models.Model):
                     raise UserError(_("You have to define a sequence for %s in your company.") % (sequence_code,))
 
             moves = AccountMove.create(rec._prepare_payment_moves())
-            moves.filtered(lambda move: move.journal_id.post_at != 'bank_rec').post()
+            moves.post()
 
             # Update the state / move before performing any reconciliation.
             move_name = self._get_move_name_transfer_separator().join(moves.mapped('name'))
@@ -792,7 +773,7 @@ class payment_register(models.TransientModel):
             'currency_id': invoices[0].currency_id.id,
             'partner_id': invoices[0].commercial_partner_id.id,
             'partner_type': MAP_INVOICE_TYPE_PARTNER_TYPE[invoices[0].move_type],
-            'partner_bank_account_id': invoices[0].invoice_partner_bank_id.id,
+            'partner_bank_account_id': invoices[0].partner_bank_id.id,
         }
         return values
 
@@ -804,7 +785,7 @@ class payment_register(models.TransientModel):
         grouped = defaultdict(lambda: self.env["account.move"])
         for inv in self.invoice_ids:
             if self.group_payment:
-                grouped[(inv.commercial_partner_id, inv.currency_id, inv.invoice_partner_bank_id, MAP_INVOICE_TYPE_PARTNER_TYPE[inv.move_type])] += inv
+                grouped[(inv.commercial_partner_id, inv.currency_id, inv.partner_bank_id, MAP_INVOICE_TYPE_PARTNER_TYPE[inv.move_type])] += inv
             else:
                 grouped[inv.id] += inv
         return [self._prepare_payment_vals(invoices) for invoices in grouped.values()]

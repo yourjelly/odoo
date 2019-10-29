@@ -40,7 +40,7 @@ class AccountInvoiceReport(models.Model):
     fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True)
     invoice_date = fields.Date(readonly=True, string="Invoice Date")
     invoice_payment_term_id = fields.Many2one('account.payment.term', string='Payment Terms', readonly=True)
-    invoice_partner_bank_id = fields.Many2one('res.partner.bank', string='Bank Account', readonly=True)
+    partner_bank_id = fields.Many2one('res.partner.bank', string='Bank Account', readonly=True)
     nbr_lines = fields.Integer(string='Line Count', readonly=True)
     residual = fields.Float(string='Due Amount', readonly=True)
     amount_total = fields.Float(string='Total', readonly=True)
@@ -59,7 +59,7 @@ class AccountInvoiceReport(models.Model):
     _depends = {
         'account.move': [
             'name', 'state', 'move_type', 'partner_id', 'invoice_user_id', 'fiscal_position_id',
-            'invoice_date', 'invoice_date_due', 'invoice_payment_term_id', 'invoice_partner_bank_id',
+            'invoice_date', 'invoice_date_due', 'invoice_payment_term_id', 'partner_bank_id',
         ],
         'account.move.line': [
             'quantity', 'price_subtotal', 'amount_residual', 'balance', 'amount_currency',
@@ -96,7 +96,7 @@ class AccountInvoiceReport(models.Model):
                 move.invoice_date,
                 move.invoice_date_due,
                 move.invoice_payment_term_id,
-                move.invoice_partner_bank_id,
+                move.partner_bank_id,
                 move.amount_residual_signed                                 AS residual,
                 ROUND(
                   line.price_total / COALESCE(
@@ -178,7 +178,7 @@ class AccountInvoiceReport(models.Model):
                 move.invoice_date,
                 move.invoice_date_due,
                 move.invoice_payment_term_id,
-                move.invoice_partner_bank_id,
+                move.partner_bank_id,
                 uom_template.id,
                 template.categ_id,
                 COALESCE(partner.country_id, commercial_partner.country_id)

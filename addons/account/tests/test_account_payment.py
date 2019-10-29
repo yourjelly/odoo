@@ -41,10 +41,8 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
 
     def test_inbound_payment_move_1(self):
         ''' Check created account.move for an account.payment having the 'inbound' type. '''
-        liquidity_account = self.bank_journal.default_credit_account_id
-
         expected_bank_line = {
-            'account_id': liquidity_account.id,
+            'account_id': self.bank_journal.payment_debit_account_id.id,
             'partner_id': self.partner_a.id,
             'currency_id': False,
             'amount_currency': 0.0,
@@ -92,28 +90,10 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
 
         self.inbound_payment.currency_id = self.company_data['currency']
 
-        # Multi currencies: Foreign currency on journal.
-
-        self.inbound_payment.action_draft()
-        self.inbound_payment.journal_id.currency_id = self.currency_data['currency']
-        self.inbound_payment.post()
-
-        self.assertPaymentValues(self.inbound_payment, [
-            {
-                **expected_bank_line,
-                'currency_id': self.currency_data['currency'].id,
-                'amount_currency': 200.0,
-                'debit': 100.0,
-            },
-            expected_receivable_line,
-        ])
-
     def test_outbound_payment_move_1(self):
         ''' Check created account.move for an account.payment having the 'outbound' type. '''
-        liquidity_account = self.bank_journal.default_debit_account_id
-
         expected_bank_line = {
-            'account_id': liquidity_account.id,
+            'account_id': self.bank_journal.payment_credit_account_id.id,
             'partner_id': self.partner_a.id,
             'currency_id': False,
             'amount_currency': 0.0,
@@ -161,27 +141,8 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
 
         self.outbound_payment.currency_id = self.company_data['currency']
 
-        # Multi currencies: Foreign currency on journal.
-
-        self.outbound_payment.action_draft()
-        self.outbound_payment.journal_id.currency_id = self.currency_data['currency']
-        self.outbound_payment.post()
-
-        self.assertPaymentValues(self.outbound_payment, [
-            {
-                **expected_bank_line,
-                'currency_id': self.currency_data['currency'].id,
-                'amount_currency': -200.0,
-                'credit': 100.0,
-            },
-            expected_payable_line,
-        ])
-
     def test_transfer_payment_move_1(self):
         ''' Check created account.move for an account.payment having the 'transfer' type. '''
-        liquidity_bank_account = self.bank_journal.default_debit_account_id
-        liquidity_cash_account = self.cash_journal.default_credit_account_id
-
         cash_transfer_line = {
             'account_id': self.company_data['company'].transfer_account_id.id,
             'partner_id': False,
@@ -199,7 +160,7 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
             'credit': 0.0,
         }
         liquidity_cash_line = {
-            'account_id': liquidity_cash_account.id,
+            'account_id': self.cash_journal.payment_debit_account_id.id,
             'partner_id': False,
             'currency_id': False,
             'amount_currency': 0.0,
@@ -207,7 +168,7 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
             'credit': 0.0,
         }
         liquidity_bank_line = {
-            'account_id': liquidity_bank_account.id,
+            'account_id': self.bank_journal.payment_credit_account_id.id,
             'partner_id': False,
             'currency_id': False,
             'amount_currency': 0.0,
@@ -260,33 +221,3 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
         ])
 
         self.transfer_payment.currency_id = self.company_data['currency']
-
-        # Multi currencies: Foreign currency on journal.
-
-        self.transfer_payment.action_draft()
-        self.transfer_payment.journal_id.currency_id = self.currency_data['currency']
-        self.transfer_payment.destination_journal_id.currency_id = self.currency_data['currency']
-        self.transfer_payment.post()
-
-        self.assertPaymentValues(self.transfer_payment, [
-            {
-                **cash_transfer_line,
-                'credit': 100.0,
-            },
-            {
-                **bank_transfer_line,
-                'debit': 100.0,
-            },
-            {
-                **liquidity_cash_line,
-                'currency_id': self.currency_data['currency'].id,
-                'amount_currency': 200.0,
-                'debit': 100.0,
-            },
-            {
-                **liquidity_bank_line,
-                'currency_id': self.currency_data['currency'].id,
-                'amount_currency': -200.0,
-                'credit': 100.0,
-            },
-        ])

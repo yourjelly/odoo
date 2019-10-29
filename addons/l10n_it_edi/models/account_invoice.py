@@ -490,7 +490,7 @@ class AccountMove(models.Model):
                     else:
                         bank = self.env['res.partner.bank'].search([('acc_number', '=', elements[0].text)])
                     if bank:
-                        invoice_form.invoice_partner_bank_id = bank
+                        invoice_form.partner_bank_id = bank
                     else:
                         message_to_log.append("%s<br/>%s" % (
                             _("Bank account not found, useful informations from XML file:"),
