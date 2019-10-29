@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 @tagged('post_install', '-at_install')
@@ -28,3 +28,16 @@ class TestAccountJournal(AccountTestInvoicingCommon):
 
         with self.assertRaises(UserError), self.cr.savepoint():
             self.company_data['default_journal_sale'].company_id = self.company_data_2['company']
+
+    def test_constraint_currency_consistency_with_accounts(self):
+        ''' Ensure the accounts linked to a bank/cash journal are sharing the same foreign currency. '''
+        journal_bank = self.company_data['default_journal_bank']
+
+        journal_bank.default_debit_account_id.currency_id = self.currency_data['currency']
+        journal_bank.default_debit_account_id.currency_id = self.company_data['currency']
+        journal_bank.currency_id = self.company_data['currency']
+        journal_bank.default_debit_account_id.currency_id = self.currency_data['currency']
+        journal_bank.currency_id = self.currency_data['currency']
+
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            journal_bank.default_debit_account_id.currency_id = self.company_data['currency']
