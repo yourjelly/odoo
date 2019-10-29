@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="field_phone_sms">
+        <input type="text" class="o_field_widget o_input" t-if="widget.mode === 'edit'" t-att-value="widget.value || ''"/>
+        <t t-if="widget.mode === 'readonly'">
+            <a t-att-href="'tel: ' + widget.value" t-esc="widget.value"/>
+            <button t-if="widget.nodeOptions.enable_sms"
+                title="Send SMS Text Message"
+                class="btn btn-link ml-1 d-inline-flex align-items-center o_field_phone_sms">
+                <i class="fa fa-mobile"/>
+                <small class="font-weight-bold ml-1">SMS</small>
+            </button>
+        </t>
+    </t>
+</templates>
