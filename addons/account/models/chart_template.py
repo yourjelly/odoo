@@ -112,14 +112,14 @@ class AccountChartTemplate(models.Model):
     property_advance_tax_payment_account_id = fields.Many2one('account.account.template', string="Advance tax payment account")
 
     @api.model
-    def _prepare_transfer_account_template(self):
+    def _prepare_transfer_account_template(self, prefix=None):
         ''' Prepare values to create the transfer account that is an intermediary account used when moving money
         from a liquidity account to another.
 
         :return:    A dictionary of values to create a new account.account.
         '''
         digits = self.code_digits
-        prefix = self.transfer_account_code_prefix or ''
+        prefix = prefix or self.transfer_account_code_prefix or ''
         # Flatten the hierarchy of chart templates.
         chart_template = self
         chart_templates = self
@@ -324,14 +324,6 @@ class AccountChartTemplate(models.Model):
             })
 
         return bank_journals
-
-    def get_countries_posting_at_bank_rec(self):
-        """ Returns the list of the country codes of the countries for which, by default,
-        payments made on bank journals should be creating draft account.move objects,
-        which get in turn posted when their payment gets reconciled with a bank statement line.
-        This function is an extension hook for localization modules.
-        """
-        return []
 
     @api.model
     def _get_default_bank_journals_data(self):

@@ -740,7 +740,7 @@ tour.register('main_flow_tour', {
     auto: true,
 }, {
     edition: "enterprise",
-    trigger: ".o_selected_row .o_field_widget[name=name]",
+    trigger: ".o_selected_row .o_field_widget[name=payment_ref]",
     content: _t('Let\'s enter a name.'),
     position: "bottom",
     run: "text the_flow.statement.line",
@@ -749,6 +749,11 @@ tour.register('main_flow_tour', {
     trigger: '.o_form_button_save',
     content: _t('Save.'),
     position: 'bottom',
+}, {
+    edition: "enterprise",
+    trigger: ".o_statusbar_buttons > button:enabled:contains('Post')",
+    content: _t('<p><b>Post</p>'),
+    position: "bottom",
 }, {
     edition: "enterprise",
     trigger: ".o_statusbar_buttons > button:enabled:contains('Reconcile')",

@@ -108,15 +108,16 @@ class account_journal(models.Model):
         #(graph is drawn backward)
         date = today
         amount = last_balance
-        query = """SELECT l.date, sum(l.amount) as amount
-                        FROM account_bank_statement_line l
-                        RIGHT JOIN account_bank_statement st ON l.statement_id = st.id
-                        WHERE st.journal_id = %s
-                          AND l.date > %s
-                          AND l.date <= %s
-                        GROUP BY l.date
-                        ORDER BY l.date desc
-                        """
+        query = '''
+            SELECT move.date, sum(st_line.amount) as amount
+            FROM account_bank_statement_line st_line
+            JOIN account_move move ON move.id = st_line.move_id
+            WHERE move.journal_id = %s
+            AND move.date > %s
+            AND move.date <= %s
+            GROUP BY move.date
+            ORDER BY move.date desc
+        '''
         self.env.cr.execute(query, (self.id, last_month, today))
         query_result = self.env.cr.dictfetchall()
         for val in query_result:
@@ -226,13 +227,15 @@ class account_journal(models.Model):
             last_bank_stmt = self.env['account.bank.statement'].search([('journal_id', 'in', self.ids)], order="date desc, id desc", limit=1)
             last_balance = last_bank_stmt and last_bank_stmt[0].balance_end or 0
             #Get the number of items to reconcile for that bank journal
-            self.env.cr.execute("""SELECT COUNT(DISTINCT(line.id))
-                            FROM account_bank_statement_line AS line
-                            LEFT JOIN account_bank_statement AS st
-                            ON line.statement_id = st.id
-                            WHERE st.journal_id IN %s AND st.state = 'open' AND line.amount != 0.0 AND line.account_id IS NULL
-                            AND not exists (select 1 from account_move_line aml where aml.statement_line_id = line.id)
-                        """, (tuple(self.ids),))
+            self._cr.execute('''
+                SELECT COUNT(st_line.id)
+                FROM account_bank_statement_line st_line
+                JOIN account_move st_line_move ON st_line_move.id = st_line.move_id
+                JOIN account_bank_statement st ON st_line.statement_id = st.id
+                WHERE st_line_move.journal_id IN %s
+                AND st.state = 'posted'
+                AND st_line.move_state = 'not_reconciled'
+            ''', [tuple(self.ids)])
             number_to_reconcile = self.env.cr.fetchone()[0]
             to_check_ids = self.to_check_ids()
             number_to_check = len(to_check_ids)

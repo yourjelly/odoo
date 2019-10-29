@@ -248,7 +248,6 @@ class PosSession(models.Model):
                 values['start_at'] = fields.Datetime.now()
             values['state'] = 'opened'
             session.write(values)
-            session.statement_ids.button_open()
         return True
 
     def action_pos_session_closing_control(self):
@@ -545,8 +544,8 @@ class PosSession(models.Model):
                 statement.write({'balance_end_real': statement.balance_end})
             statement.button_confirm_bank()
             all_lines = (
-                  split_cash_statement_lines[statement].mapped('journal_entry_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
-                | combine_cash_statement_lines[statement].mapped('journal_entry_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
+                  split_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
+                | combine_cash_statement_lines[statement].mapped('move_id.line_ids').filtered(lambda aml: aml.account_id.internal_type == 'receivable')
                 | split_cash_receivable_lines[statement]
                 | combine_cash_receivable_lines[statement]
             )
@@ -665,13 +664,21 @@ class PosSession(models.Model):
         return self._credit_amounts(partial_args, amount, amount_converted)
 
     def _get_statement_line_vals(self, statement, receivable_account, amount):
-        return {
-            'date': fields.Date.context_today(self),
+        vals = {
             'amount': amount,
-            'name': self.name,
+            'payment_ref': self.name,
             'statement_id': statement.id,
-            'account_id': receivable_account.id,
+            'journal_id': statement.journal_id.id,
         }
+
+        # Override the temporary account to set directly the receivable one in order to perform the reconciliation
+        # faster without using the statement reconciliation.
+        line_ids_vals = self.env['account.bank.statement.line']._prepare_account_move_line_vals(vals)
+        for line_vals in line_ids_vals:
+            if line_vals['account_id'] == statement.journal_id.transfer_liquidity_account_id.id:
+                line_vals['account_id'] = receivable_account.id
+        vals['line_ids'] = [(0, 0, line_vals) for line_vals in line_ids_vals]
+        return vals
 
     def _update_amounts(self, old_amounts, amounts_to_add, date, round=True):
         new_amounts = {}

@@ -13,7 +13,6 @@ class TestReconciliationMatchingRules(AccountTestCommon):
         super(TestReconciliationMatchingRules, cls).setUpClass()
         cls.company = cls.env.user.company_id
         cls.account_pay = cls.a_pay
-        cls.account_liq = cls.bnk
         cls.account_rcv = cls.a_recv
 
         cls.partner_1 = cls.env['res.partner'].create({'name': 'partner_1', 'company_id': cls.company.id})
@@ -65,14 +64,14 @@ class TestReconciliationMatchingRules(AccountTestCommon):
         })
         cls.bank_line_1 = cls.env['account.bank.statement.line'].create({
             'statement_id': cls.bank_st.id,
-            'name': 'invoice %s-%s' % (invoice_number.split('/')[1], invoice_number.split('/')[2]),
+            'payment_ref': 'invoice %s-%s' % (invoice_number.split('/')[1], invoice_number.split('/')[2]),
             'partner_id': cls.partner_1.id,
             'amount': 100,
             'sequence': 1,
         })
         cls.bank_line_2 = cls.env['account.bank.statement.line'].create({
             'statement_id': cls.bank_st.id,
-            'name': 'xxxxx',
+            'payment_ref': 'xxxxx',
             'partner_id': cls.partner_1.id,
             'amount': 600,
             'sequence': 2,
@@ -84,7 +83,7 @@ class TestReconciliationMatchingRules(AccountTestCommon):
         })
         cls.cash_line_1 = cls.env['account.bank.statement.line'].create({
             'statement_id': cls.cash_st.id,
-            'name': 'yyyyy',
+            'payment_ref': 'yyyyy',
             'partner_id': cls.partner_2.id,
             'amount': -1000,
             'sequence': 1,
@@ -321,16 +320,16 @@ class TestReconciliationMatchingRules(AccountTestCommon):
         })
 
         # Check first line has been well reconciled.
-        self.assertRecordValues(self.bank_line_1.journal_entry_ids, [
+        self.assertRecordValues(self.bank_line_1.line_ids, [
+            {'partner_id': self.partner_1.id, 'debit': 105.0, 'credit': 0.0},
             {'partner_id': self.partner_1.id, 'debit': 0.0, 'credit': 5.0},
             {'partner_id': self.partner_1.id, 'debit': 0.0, 'credit': 100.0},
-            {'partner_id': self.partner_1.id, 'debit': 105.0, 'credit': 0.0},
         ])
 
         # Check second line has been well reconciled.
-        self.assertRecordValues(self.cash_line_1.journal_entry_ids, [
-            {'partner_id': self.partner_2.id, 'debit': 1000.0, 'credit': 0.0},
+        self.assertRecordValues(self.cash_line_1.line_ids, [
             {'partner_id': self.partner_2.id, 'debit': 0.0, 'credit': 1000.0},
+            {'partner_id': self.partner_2.id, 'debit': 1000.0, 'credit': 0.0},
         ])
 
     def test_auto_reconcile_with_tax(self):
@@ -355,20 +354,20 @@ class TestReconciliationMatchingRules(AccountTestCommon):
         )
 
         # Check first line has been well reconciled.
-        self.assertRecordValues(self.bank_line_1.journal_entry_ids, [
+        self.assertRecordValues(self.bank_line_1.line_ids, [
+            {'partner_id': self.partner_1.id, 'debit': 0.0, 'credit': 121.0, 'tax_ids': [], 'tax_line_id': False},
             {'partner_id': self.partner_1.id, 'debit': 100.0, 'credit': 0.0, 'tax_ids': [self.tax21.id], 'tax_line_id': False},
             {'partner_id': self.partner_1.id, 'debit': 21.0, 'credit': 0.0, 'tax_ids': [], 'tax_line_id': self.tax21.id},
-            {'partner_id': self.partner_1.id, 'debit': 0.0, 'credit': 121.0, 'tax_ids': [], 'tax_line_id': False},
         ])
 
     def test_reverted_move_matching(self):
+        partner = self.env['res.partner'].create({'name': 'Eugene'})
         AccountMove = self.env['account.move']
         move = AccountMove.create({
             'name': 'To Revert',
             'journal_id': self.bank_journal.id,
         })
 
-        partner = self.env['res.partner'].create({'name': 'Eugene'})
         AccountMoveLine = self.env['account.move.line'].with_context(check_move_validity=False)
         payment_payable_line = AccountMoveLine.create({
             'account_id': self.account_pay.id,
@@ -378,7 +377,7 @@ class TestReconciliationMatchingRules(AccountTestCommon):
             'debit': 10,
         })
         payment_bnk_line = AccountMoveLine.create({
-            'account_id': self.account_liq.id,
+            'account_id': self.bank_journal.temp_liquidity_account_id.id,
             'move_id': move.id,
             'partner_id': partner.id,
             'name': 'I\'m gonna cut you into little pieces',
@@ -397,7 +396,7 @@ class TestReconciliationMatchingRules(AccountTestCommon):
         bank_st.journal_id.default_debit_account_id = payment_bnk_line.account_id
         bank_line_1 = self.env['account.bank.statement.line'].create({
             'statement_id': bank_st.id,
-            'name': '8',
+            'payment_ref': '8',
             'partner_id': partner.id,
             'amount': -10,
             'sequence': 1,

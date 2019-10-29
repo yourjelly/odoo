@@ -45,4 +45,4 @@ class TestSaleTransaction(AccountTestCommon):
         invoice = order._create_invoices()
         invoice.post()
 
-        self.assertEqual(invoice.invoice_payment_state, 'paid')
+        self.assertEqual(invoice.invoice_payment_state, 'in_payment')

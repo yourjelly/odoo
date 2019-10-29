@@ -395,7 +395,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
             'amount': 1000,
             'partner_id': self.partner4.id,
             'statement_id': account_statement.id,
-            'name': 'EXT001'
+            'payment_ref': 'EXT001'
         })
         # I modify the bank statement and set the Closing Balance.
         account_statement.write({
