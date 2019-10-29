@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 12.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-29 10:09+0000\n"
-"PO-Revision-Date: 2019-03-29 10:09+0000\n"
+"POT-Creation-Date: 2019-10-29 08:56+0000\n"
+"PO-Revision-Date: 2019-10-29 08:56+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -82,7 +82,7 @@ msgid "<?xml version=\"1.0\"?>\n"
 "                    <h1 style=\"color:#A9A9A9;\">THERE'S SOMETHING IN YOUR CART.</h1>\n"
 "                    Would you like to complete your purchase?<br/><br/>\n"
 "                    % if object.order_line:\n"
-"                        % for line in object.order_line:\n"
+"                        % for line in object.website_order_line:\n"
 "                            <hr/>\n"
 "                            <table width=\"100%\">\n"
 "                                <tr>\n"
@@ -437,7 +437,7 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_options.js:88
+#: code:addons/website_sale/static/src/js/website_sale_options.js:87
 #, python-format
 msgid "Add to cart"
 msgstr ""
@@ -782,7 +782,7 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_options.js:87
+#: code:addons/website_sale/static/src/js/website_sale_options.js:86
 #, python-format
 msgid "Continue Shopping"
 msgstr ""
@@ -1002,7 +1002,7 @@ msgid "Enter a name for your new product"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/product.py:93
+#: code:addons/website_sale/models/product.py:144
 #, python-format
 msgid "Error ! You cannot create recursive categories."
 msgstr ""
@@ -1115,7 +1115,7 @@ msgid "Installs the \"Website Delivery Information\" application"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:521
+#: code:addons/website_sale/controllers/main.py:556
 #, python-format
 msgid "Invalid Email! Please enter a valid email address."
 msgstr ""
@@ -1147,7 +1147,7 @@ msgid "Issue invoices to customers"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:174
+#: code:addons/website_sale/models/sale_order.py:194
 #, python-format
 msgid "It is forbidden to modify a sales order which is not in draft status."
 msgstr ""
@@ -1263,7 +1263,7 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale.js:31
+#: code:addons/website_sale/static/src/js/website_sale.js:39
 #, python-format
 msgid "My Cart"
 msgstr ""
@@ -1295,7 +1295,7 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/controllers/main.py:993
+#: code:addons/website_sale/controllers/main.py:1039
 #: code:addons/website_sale/static/src/js/website_sale.editor.js:30
 #, python-format
 msgid "New Product"
@@ -1391,7 +1391,7 @@ msgid "Open your website app here."
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:236
+#: code:addons/website_sale/models/sale_order.py:308
 #, python-format
 msgid "Option for:"
 msgstr ""
@@ -1402,7 +1402,7 @@ msgid "Option not available"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:238
+#: code:addons/website_sale/models/sale_order.py:310
 #, python-format
 msgid "Option:"
 msgstr ""
@@ -1624,7 +1624,7 @@ msgstr ""
 
 #. module: website_sale
 #. openerp-web
-#: code:addons/website_sale/static/src/js/website_sale_options.js:86
+#: code:addons/website_sale/static/src/js/website_sale_options.js:85
 #, python-format
 msgid "Proceed to Checkout"
 msgstr ""
@@ -2060,7 +2060,7 @@ msgid "Sold"
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/controllers/main.py:539
+#: code:addons/website_sale/controllers/main.py:574
 #, python-format
 msgid "Some required fields are empty."
 msgstr ""
@@ -2174,13 +2174,13 @@ msgid "The SEPA QR Code informations are not set correctly."
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:198
+#: code:addons/website_sale/models/sale_order.py:218
 #, python-format
 msgid "The given combination does not exist therefore it cannot be added to cart."
 msgstr ""
 
 #. module: website_sale
-#: code:addons/website_sale/models/sale_order.py:184
+#: code:addons/website_sale/models/sale_order.py:204
 #, python-format
 msgid "The given product does not exist therefore it cannot be added to cart."
 msgstr ""
