@@ -256,10 +256,10 @@ class AIConfig(models.Model):
         dates_grouped = self.env.cr.fetchall()
         return [
             # month granularity
-            {(account, partner, (range.lower or 0, range.upper or math.inf)): [date.year * 12 + date.month - 1 for date in dates]
+            {(account, partner, (range.lower or 0, range.upper or 99999999)): [date.year * 12 + date.month - 1 for date in dates]
                 for account, partner, range, dates in dates_grouped},
             # day granularity
-            {(account, partner, (range.lower or 0, range.upper or math.inf)): [(date - REFERENCE_DATE).days for date in dates]
+            {(account, partner, (range.lower or 0, range.upper or 99999999)): [(date - REFERENCE_DATE).days for date in dates]
                 for account, partner, range, dates in dates_grouped},
         ]
 
