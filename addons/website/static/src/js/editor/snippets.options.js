@@ -229,8 +229,10 @@ options.registry.carousel = options.Class.extend({
         this.$indicators = this.$target.find('.carousel-indicators');
         this.$controls = this.$target.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
         this.$items = this.$target.find('.carousel-item');
-        this.$snippetMenu = this.getParent().getParent();
-        this.$target.on('slid.bs.carousel', () => this._retargetEdition());
+        this.$target.on('slid.bs.carousel.carousel_option', () => {
+            this._retargetEdition();
+            setTimeout(() => this.trigger_up('cover_update'), 400); // FIXME why is this needed dammit
+        });
 
         return this._super.apply(this, arguments);
     },
@@ -239,7 +241,7 @@ options.registry.carousel = options.Class.extend({
      */
     destroy: function () {
         this._super.apply(this, arguments);
-        this.$target.off('slid.bs.carousel');
+        this.$target.off('.carousel_option');
     },
     /**
      * Associates unique ID on slider elements.
@@ -305,7 +307,7 @@ options.registry.carousel = options.Class.extend({
     removeSlide: function (previewMode) {
         const newLength = this.$items.length - 1;
         if (!this.removing && newLength > 0) {
-            this.$target.one('slid.bs.carousel', (event) => {
+            this.$target.one('slid.bs.carousel.carousel_option', () => {
                 this.$items.filter('.active').remove();
                 this.$items = this.$target.find('.carousel-item');
                 this.$indicators.find('li:last').remove();
@@ -347,11 +349,10 @@ options.registry.carousel = options.Class.extend({
      * @private
      */
     _retargetEdition: function () {
-        const $active = this.$items.filter('.active');
-        // Check that active slide not among the parents of the active snippet (in that case, it's already active)
-        if (this.$snippetMenu.$activeSnippet && this.$snippetMenu.$activeSnippet.closest($active).length === 0) {
-            this.trigger_up('activate_snippet', {$snippet: $active});
-        }
+        this.trigger_up('activate_snippet', {
+            $snippet: this.$items.filter('.active'),
+            ifInactiveOptions: true,
+        });
     },
 });
 

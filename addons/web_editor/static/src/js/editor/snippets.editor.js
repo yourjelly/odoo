@@ -1089,7 +1089,6 @@ var SnippetsMenu = Widget.extend({
                 }
 
                 this._enabledEditorHierarchy = editorToEnableHierarchy;
-                this.$activeSnippet = $snippet;
                 return editorToEnable;
             });
         });
