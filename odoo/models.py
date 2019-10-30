@@ -5918,8 +5918,14 @@ Record ids: %(records)s
         todo = list(names or nametree)
         done = set()
 
+        # First onchange: assign all values in model order. When editing a
+        # one2many line, the dictionary 'values' contains the one2many's inverse
+        # field, which is not in 'names'. That inverse field must be assigned as
+        # well, as other fields may depend on it.
+        to_assign = PrefixTree(self.browse(), values) if len(todo) > 1 else todo
+
         # dummy assignment: trigger invalidations on the record
-        for name in todo:
+        for name in to_assign:
             if name == 'id':
                 continue
             value = record[name]
