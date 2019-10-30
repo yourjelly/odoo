@@ -694,6 +694,7 @@ var SnippetsMenu = Widget.extend({
         }
         this.snippetEditors = [];
         this._activateSnippetMutex = new concurrency.Mutex();
+        this._enabledEditorHierarchy = [];
 
         this.setSelectorEditableArea(options.$el, options.selectorEditableArea);
     },
@@ -1046,10 +1047,11 @@ var SnippetsMenu = Widget.extend({
      *        The DOM element whose editor (and its parent ones) need to be
      *        enabled. Only disable the current one if false is given.
      * @param {boolean} [previewMode=false]
+     * @param {boolean} [ifInactiveOptions=false]
      * @returns {Promise<SnippetEditor>}
      *          (might be async when an editor must be created)
      */
-    _activateSnippet: function ($snippet, previewMode) {
+    _activateSnippet: function ($snippet, previewMode, ifInactiveOptions) {
         return this._activateSnippetMutex.exec(() => {
             return new Promise(resolve => {
                 // Take the first parent of the provided DOM (or itself) which
@@ -1062,6 +1064,10 @@ var SnippetsMenu = Widget.extend({
                 }
                 resolve(null);
             }).then(editorToEnable => {
+                if (ifInactiveOptions && this._enabledEditorHierarchy.includes(editorToEnable)) {
+                    return editorToEnable;
+                }
+
                 const editorToEnableHierarchy = [];
                 let current = editorToEnable;
                 while (current && current.$target) {
@@ -1081,6 +1087,8 @@ var SnippetsMenu = Widget.extend({
                     editorToEnable.toggleOverlay(true, previewMode);
                     editorToEnable.toggleOptions(true);
                 }
+
+                this._enabledEditorHierarchy = editorToEnableHierarchy;
                 return editorToEnable;
             });
         });
@@ -1617,7 +1625,7 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _onActivateSnippet: function (ev) {
-        this._activateSnippet(ev.data.$snippet, ev.data.previewMode);
+        this._activateSnippet(ev.data.$snippet, ev.data.previewMode, ev.data.ifInactiveOptions);
     },
     /**
      * Called when a child editor asks to operate some operation on all child
