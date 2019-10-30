@@ -25,8 +25,7 @@ def access_point():
     return get_ip() == '10.11.12.1'
 
 def add_credential(db_uuid, enterprise_code):
-    write_file('odoo-db-uuid.conf', db_uuid)
-    write_file('odoo-enterprise-code.conf', enterprise_code)
+    write_config('iot', {'db_uuid': db_uuid, 'enterprise_code': enterprise_code})
 
 def check_certificate():
     """
@@ -68,10 +67,10 @@ def get_ssid():
     return subprocess.check_output(['sed', 's/.*"\\(.*\\)"/\\1/'], stdin=process_grep.stdout).decode('utf-8').rstrip()
 
 def get_odoo_server_url():
-    return read_file_first_line('odoo-remote-server.conf')
+    return read_config().get('iot', {}).get('odoo_server_url')
 
 def get_token():
-    return read_file_first_line('token')
+    return read_config().get('iot', {}).get('token')
 
 def get_version():
     return '19.10'
@@ -90,8 +89,8 @@ def load_certificate():
     """
     Send a request to Odoo with customer db_uuid and enterprise_code to get a true certificate
     """
-    db_uuid = read_file_first_line('odoo-db-uuid.conf')
-    enterprise_code = read_file_first_line('odoo-enterprise-code.conf')
+    db_uuid = read_config().get('iot', {}).get('db_uuid')
+    enterprise_code = read_config().get('iot', {}).get('enterprise_code')
     if db_uuid and enterprise_code:
         url = 'https://www.odoo.com/odoo-enterprise/iot/x509'
         data = {
@@ -110,7 +109,7 @@ def load_certificate():
         )
         result = json.loads(response.data.decode('utf8'))['result']
         if result:
-            write_file('odoo-subject.conf', result['subject_cn'])
+            write_config('iot', {'subject_cn': result.get('subject_cn')})
             subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/"])
             subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/root_bypass_ramdisks/"])
             Path('/etc/ssl/certs/nginx-cert.crt').write_text(result['x509_pem'])
@@ -143,13 +142,12 @@ def download_drivers(auto=True):
             _logger.error('Could not reach configured server')
             _logger.error('A error encountered : %s ' % e)
 
-def read_file_first_line(filename):
-    path = Path.home() / filename
-    path = Path('/home/pi/' + filename)
+def read_config():
+    path = Path.home() / 'iot-config'
     if path.exists():
         with path.open('r') as f:
-            return f.readline().strip('\n')
-    return ''
+            return json.load(f)
+    return {}
 
 def unlink_file(filename):
     subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/"])
@@ -163,5 +161,15 @@ def write_file(filename, text):
     subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/"])
     path = Path.home() / filename
     path.write_text(text)
+    subprocess.check_call(["sudo", "mount", "-o", "remount,ro", "/"])
+    subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/root_bypass_ramdisks/etc/cups"])
+
+def write_config(parent, dic):
+    subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/"])
+    config = read_config()
+    config.get(parent, config.update({parent: {}})).update(dic)
+    path = Path.home() / 'iot-config'
+    with path.open('w') as f:
+        json.dump(config, f)
     subprocess.check_call(["sudo", "mount", "-o", "remount,ro", "/"])
     subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/root_bypass_ramdisks/etc/cups"])

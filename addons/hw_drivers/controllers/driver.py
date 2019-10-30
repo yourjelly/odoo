@@ -257,7 +257,7 @@ class Manager(Thread):
         """
         server = helpers.get_odoo_server_url()
         if server:
-            subject = helpers.read_file_first_line('odoo-subject.conf')
+            subject = helpers.read_config().get('iot', {}).get('subject_cn')
             if subject:
                 domain = helpers.get_ip().replace('.', '-') + subject.strip('*')
             else:
@@ -493,7 +493,7 @@ printers = conn.getPrinters()
 cups_lock = Lock()  # We can only make one call to Cups at a time
 
 mpdm = MPDManager()
-terminal_id = helpers.read_file_first_line('odoo-six-payment-terminal.conf')
+terminal_id = helpers.read_config().get('SixDriver', {}).get('terminal_id')
 if terminal_id:
     try:
         subprocess.check_output(["pidof", "eftdvs"])  # Check if MPD server is running

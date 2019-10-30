@@ -50,7 +50,7 @@ list_credential_template = jinja_env.get_template('list_credential.html')
 class IoTboxHomepage(web.Home):
 
     def get_six_terminal(self):
-        terminal_id = helpers.read_file_first_line('odoo-six-payment-terminal.conf')
+        terminal_id = helpers.read_config().get('SixDriver', {}).get('terminal_id')
         return terminal_id or 'Not Configured'
 
     def get_homepage_data(self):
@@ -128,8 +128,8 @@ class IoTboxHomepage(web.Home):
         return list_credential_template.render({
             'title': "Odoo's IoT Box - List credential",
             'breadcrumb': 'List credential',
-            'db_uuid': helpers.read_file_first_line('odoo-db-uuid.conf'),
-            'enterprise_code': helpers.read_file_first_line('odoo-enterprise-code.conf'),
+            'db_uuid': helpers.read_config().get('iot', {}).get('db_uuid'),
+            'enterprise_code': helpers.read_config().get('iot', {}).get('enterprise_code'),
         })
 
     @http.route('/save_credential', type='http', auth='none', cors='*', csrf=False)
@@ -140,8 +140,7 @@ class IoTboxHomepage(web.Home):
 
     @http.route('/clear_credential', type='http', auth='none', cors='*', csrf=False)
     def clear_credential(self):
-        helpers.unlink_file('odoo-db-uuid.conf')
-        helpers.unlink_file('odoo-enterprise-code.conf')
+        helpers.add_credential(None, None)
         subprocess.check_call(["sudo", "service", "odoo", "restart"])
         return "<meta http-equiv='refresh' content='20; url=http://" + helpers.get_ip() + ":8069'>"
 
@@ -181,12 +180,12 @@ class IoTboxHomepage(web.Home):
 
     @http.route('/wifi_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_wifi_configuration(self):
-        helpers.unlink_file('wifi_network.txt')
+        helpers.write_config('iot', {'wifi_network': None})
         return "<meta http-equiv='refresh' content='0; url=http://" + helpers.get_ip() + ":8069'>"
 
     @http.route('/server_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_server_configuration(self):
-        helpers.unlink_file('odoo-remote-server.conf')
+        helpers.write_config('iot', {'odoo_server_url': None})
         return "<meta http-equiv='refresh' content='0; url=http://" + helpers.get_ip() + ":8069'>"
 
     @http.route('/drivers_clear', type='http', auth='none', cors='*', csrf=False)
@@ -278,12 +277,12 @@ class IoTboxHomepage(web.Home):
 
     @http.route('/six_payment_terminal_add', type='http', auth='none', cors='*', csrf=False)
     def add_six_payment_terminal(self, terminal_id):
-        helpers.write_file('odoo-six-payment-terminal.conf', terminal_id)
+        helpers.write_config('SixDriver', {'terminal_id': terminal_id})
         subprocess.check_call(["sudo", "service", "odoo", "restart"])
         return 'http://' + helpers.get_ip() + ':8069'
 
     @http.route('/six_payment_terminal_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_six_payment_terminal(self):
-        helpers.unlink_file('odoo-six-payment-terminal.conf')
+        helpers.write_config('SixDriver', {'terminal_id': None})
         subprocess.check_call(["sudo", "service", "odoo", "restart"])
         return "<meta http-equiv='refresh' content='0; url=http://" + helpers.get_ip() + ":8069'>"
