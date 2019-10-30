@@ -64,12 +64,12 @@ class CrmLead(models.Model):
 
     def action_sale_quotations_new(self):
         if not self.partner_id:
-            return self.env.ref("sale_crm.crm_quotation_partner_action").read()[0]
+            return self.env.ref("sale_management_crm.crm_quotation_partner_action").read()[0]
         else:
             return self.action_new_quotation()
 
     def action_new_quotation(self):
-        action = self.env.ref("sale_crm.sale_action_quotations_new").read()[0]
+        action = self.env.ref("sale_management_crm.sale_action_quotations_new").read()[0]
         action['context'] = {
             'search_default_opportunity_id': self.id,
             'default_opportunity_id': self.id,
