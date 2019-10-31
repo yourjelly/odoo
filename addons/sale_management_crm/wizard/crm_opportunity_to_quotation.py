@@ -20,10 +20,3 @@ class Opportunity2Quotation(models.TransientModel):
             self.lead_id._onchange_partner_id()
         return self.lead_id.action_new_quotation()
 
-    def _create_partner(self):
-        """ Create partner based on action.
-            :return int: created res.partner id
-        """
-        self.ensure_one()
-        result = self.lead_id.handle_partner_assignation(action='create')
-        return result.get(self.lead_id.id)
