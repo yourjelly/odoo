@@ -26,12 +26,12 @@ class TestPoSSetup(TestPoSCommon):
 
         config = self.basic_config
         self.assertEqual(config.currency_id, self.company_currency)
-        self.assertEqual(config.pricelist_id.currency_id, self.company_currency)
+        self.assertEqual(config.currency_id, self.company_currency)
 
     def test_other_currency_config_values(self):
         config = self.other_currency_config
         self.assertEqual(config.currency_id, self.other_currency)
-        self.assertEqual(config.pricelist_id.currency_id, self.other_currency)
+        self.assertEqual(config.currency_id, self.other_currency)
 
     def test_product_categories(self):
         # check basic product category

@@ -329,6 +329,8 @@ exports.PosModel = Backbone.Model.extend({
             if (self.config.use_pricelist) {
                 return [['id', 'in', self.config.available_pricelist_ids]];
             } else {
+                // VFE TODO if not use_pricelist do not load any pricelist ?
+                // because in this case, the config shouldn't have a pricelist.
                 return [['id', '=', self.config.pricelist_id[0]]];
             }
         },
@@ -419,6 +421,9 @@ exports.PosModel = Backbone.Model.extend({
             self.db.add_products(_.map(products, function (product) {
                 if (!using_company_currency) {
                     // The Sales price is already converted by the currency_id in the context.
+                    // But the cost (standard price) is expressed in the company currency.
+                    // which may have to be converted because the currency of the pos config
+                    // comes from its journal and not its company.
                     product.standard_price = round_pr(product.standard_price * conversion_rate, self.currency.rounding);
                 }
                 product.lst_price = product.price;
@@ -1354,8 +1359,6 @@ exports.Product = Backbone.Model.extend({
         var self = this;
         var date = moment().startOf('day');
 
-        // In case of nested pricelists, it is necessary that all pricelists are made available in
-        // the POS. Display a basic alert to the user in this case.
         if (pricelist === undefined) {
             return self.lst_price;
         }
@@ -2044,7 +2047,7 @@ exports.Orderline = Backbone.Model.extend({
         };
     },
     display_discount_policy: function(){
-        return this.order.pricelist.discount_policy;
+        return this.order.pricelist ? this.order.pricelist.discount_policy: 'with_discount';
     },
     get_lst_price: function(){
         return this.product.lst_price;

@@ -90,7 +90,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         def compute_tax(product, price, qty=1, taxes=None):
             if taxes is None:
                 taxes = product.taxes_id.filtered(lambda t: t.company_id.id == self.env.user.id)
-            currency = self.pos_config.pricelist_id.currency_id
+            currency = self.pos_config.currency_id
             res = taxes.compute_all(price, currency, qty, product=product)
             untax = res['total_excluded']
             return untax, sum(tax.get('amount', 0.0) for tax in res['taxes'])
@@ -301,7 +301,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         def compute_tax(product, price, qty=1, taxes=None):
             if taxes is None:
                 taxes = product.taxes_id.filtered(lambda t: t.company_id.id == self.env.user.id)
-            currency = self.pos_config.pricelist_id.currency_id
+            currency = self.pos_config.currency_id
             res = taxes.compute_all(price, currency, qty, product=product)
             untax = res['total_excluded']
             return untax, sum(tax.get('amount', 0.0) for tax in res['taxes'])
@@ -422,7 +422,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         def compute_tax(product, price, qty=1, taxes=None):
             if not taxes:
                 taxes = product.taxes_id.filtered(lambda t: t.company_id.id == self.env.user.id)
-            currency = self.pos_config.pricelist_id.currency_id
+            currency = self.pos_config.currency_id
             res = taxes.compute_all(price, currency, qty, product=product)
             untax = res['total_excluded']
             return untax, sum(tax.get('amount', 0.0) for tax in res['taxes'])
@@ -441,7 +441,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
            'amount_total': untax + atax,
            'creation_date': fields.Datetime.to_string(fields.Datetime.now()),
            'fiscal_position_id': False,
-           'pricelist_id': self.pos_config.available_pricelist_ids[0].id,
+           'pricelist_id': self.pos_config.pricelist_id.id,
            'lines': [[0,
              0,
              {'discount': 0,
@@ -475,7 +475,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
            'amount_total': untax + atax,
            'creation_date': fields.Datetime.to_string(fields.Datetime.now()),
            'fiscal_position_id': False,
-           'pricelist_id': self.pos_config.available_pricelist_ids[0].id,
+           'pricelist_id': self.pos_config.pricelist_id.id,
            'lines': [[0,
              0,
              {'discount': 0,
@@ -509,7 +509,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
            'amount_total': untax + atax,
            'creation_date': fields.Datetime.to_string(fields.Datetime.now()),
            'fiscal_position_id': False,
-           'pricelist_id': self.pos_config.available_pricelist_ids[0].id,
+           'pricelist_id': self.pos_config.pricelist_id.id,
            'lines': [[0,
              0,
              {'discount': 0,
@@ -582,7 +582,7 @@ class TestPointOfSaleFlow(TestPointOfSaleCommon):
         def compute_tax(product, price, qty=1, taxes=None):
             if not taxes:
                 taxes = product.taxes_id.filtered(lambda t: t.company_id.id == self.env.user.id)
-            currency = self.pos_config.pricelist_id.currency_id
+            currency = self.pos_config.currency_id
             res = taxes.compute_all(price, currency, qty, product=product)
             untax = res['total_excluded']
             return untax, sum(tax.get('amount', 0.0) for tax in res['taxes'])
