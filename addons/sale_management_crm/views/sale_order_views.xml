@@ -21,9 +21,6 @@
                     <field name="source_id"/>
                 </group>
             </xpath>
-            <xpath expr="//group[@name='technical']" position="inside">
-                <field name="opportunity_id" help="Log in the chatter from which opportunity the order originates" groups="base.group_no_one"/>
-            </xpath>
         </field>
     </record>
 
@@ -48,13 +45,5 @@
             </xpath>
         </field>
     </record>
-
-    <!-- This menu is display in CRM app when sale is installed-->
-    <menuitem
-        id="sale_order_menu_quotations_crm"
-        name="My Quotations"
-        action="sale.action_quotations"
-        parent="crm.crm_menu_sales"
-        sequence="2"/>
 
 </odoo>
