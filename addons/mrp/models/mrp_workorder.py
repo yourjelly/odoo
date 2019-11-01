@@ -432,6 +432,7 @@ class MrpWorkorder(models.Model):
             self.next_work_order_id._apply_update_workorder_lines()
 
         # One a piece is produced, you can launch the next work order
+        self.next_work_order_id.qty_producing = max(0, (self.next_work_order_id.qty_remaining - (self.qty_remaining - self.qty_producing)))
         self._start_nextworkorder()
 
         # Test if the production is done
@@ -447,10 +448,12 @@ class MrpWorkorder(models.Model):
                 candidate_found_in_previous_wo = self._defaults_from_finished_workorder_line(previous_wo.finished_workorder_line_ids)
             if not candidate_found_in_previous_wo:
                 # self is the first workorder
-                self.qty_producing = self.qty_remaining
                 self.finished_lot_id = False
                 if self.product_tracking == 'serial':
                     self.qty_producing = 1
+                else:
+                    qty_remaining = previous_wo.search([ ('next_work_order_id', '=', self.id) ]).qty_remaining
+                    self.qty_producing =  max(0, self.qty_remaining - qty_remaining)
 
             self._apply_update_workorder_lines()
         else:

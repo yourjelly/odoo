@@ -55,6 +55,7 @@ class MrpAbstractWorkorder(models.AbstractModel):
         """
         if self.qty_producing <= 0:
             raise UserError(_('You have to produce at least one %s.') % self.product_uom_id.name)
+
         line_values = self._update_workorder_lines()
         for values in line_values['to_create']:
             self.env[self._workorder_line_ids()._name].new(values)
