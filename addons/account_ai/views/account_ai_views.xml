@@ -133,13 +133,25 @@
             </field>
         </record>
 
-        <record id="account_ai_config_action" model="ir.actions.act_window">
-            <field name="name">Do AI things</field>
+        <record id="account_ai_config_dashboard" model="ir.actions.act_window">
+            <field name="name">Smart Dashboard</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">account.ai.config</field>
-            <field name="view_mode">kanban,tree,form</field>
+            <field name="view_mode">kanban</field>
             <field name="view_id" ref="account_ai_config_kanban_view"/>
         </record>
+
+        <menuitem id="menu_action_ai_dashboard" parent="account.account_reports_management_menu" action="account_ai_config_dashboard" sequence="25"/>
+
+        <record id="account_ai_config_settings" model="ir.actions.act_window">
+            <field name="name">Config Smart Dashboard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.ai.config</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="account_ai_config_kanban_view"/>
+        </record>
+
+        <menuitem id="menu_action_ai_settings" parent="account.account_account_menu" action="account_ai_config_settings" sequence="25"/>
 
         <record id="account_ai_finddate_line_action" model="ir.actions.act_window">
             <field name="name">Propositions</field>
@@ -148,8 +160,6 @@
             <field name="view_mode">tree</field>
             <field name="view_id" ref="account_ai_finddate_line_tree_form_view"/>
         </record>
-
-        <menuitem id="menu_action_ai_things" parent="account.menu_finance_entries_actions" action="account_ai_config_action" sequence="25"/>
 
         <record model="res.partner" id="account_ai.partner_accountbot">
             <field name="name">AccountBot</field>

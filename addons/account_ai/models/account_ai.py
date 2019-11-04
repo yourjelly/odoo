@@ -275,6 +275,61 @@ class AIConfig(models.Model):
             _logger.info('The real computation took %s seconds' % (total_algo))
 
     ############################################################################
+    # FIND UNUSUAL AMOUNT METHODS
+    ############################################################################
+    def _get_amounts(self):
+        cluster_assign = "CASE WHEN sqr_euclid_dis(balance, kmeans.balance1) < sqr_euclid_dis(balance, kmeans.balance2) THEN 1 ELSE 2 END AS cluster_id"
+        cluster_column = """
+                        , (
+                            SELECT AVG(balance)
+                            FROM (
+                                SELECT s.balance
+                                FROM (
+                                    SELECT balance, {cluster_assign}
+                                    FROM account_move_line
+                                    WHERE partner_id = $1
+                                ) s
+                                WHERE cluster_id = %s
+                            ) l
+                        )
+        """.format(cluster_assign=cluster_assign)
+        cluster_columns = "\n".join([cluster_column % i for i in range(1, 3)])
+        self.env.cr.execute("""
+            CREATE OR REPLACE FUNCTION sqr_euclid_dis(
+                balance float, meanbalance float
+            ) RETURNS float AS $$
+                BEGIN
+                    return (balance-meanbalance)*(balance-meanbalance);
+                END
+            $$ LANGUAGE plpgsql;
+
+            CREATE OR REPLACE FUNCTION per_partner(int) RETURNS TABLE (ppbalance numeric, ppid int, pppartner_id int, ppcluster_id int) AS
+            $BODY$
+            BEGIN
+                RETURN QUERY
+                WITH RECURSIVE kmeans(iter, balance1, balance2) AS (
+                    SELECT 1, -1000::float, 1000::float
+                    UNION ALL
+                    SELECT
+                        kmeans.iter + 1
+                        {cluster_columns}
+                    FROM kmeans
+                    WHERE kmeans.iter < {max_iter}
+                )
+
+                SELECT balance, id, partner_id, {cluster_assign}
+                FROM account_move_line, kmeans
+                WHERE iter = {max_iter} AND partner_id = $1;
+                RETURN;
+            END
+            $BODY$
+            LANGUAGE plpgsql;
+
+            WITH ttt AS (SELECT (per_partner(pt.partner_id)).* FROM (SELECT DISTINCT partner_id FROM account_move_line) pt)
+            SELECT STDDEV(ppbalance), AVG(ppbalance), pppartner_id FROM ttt GROUP BY pppartner_id, ppcluster_id
+        """.format(cluster_assign=cluster_assign, cluster_columns=cluster_columns, max_iter=10))
+
+    ############################################################################
     # ACTIONS
     ############################################################################
     def action_get_lines(self):
