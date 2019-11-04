@@ -177,11 +177,16 @@ class AccountFiscalPosition(models.Model):
 
         # First search only matching VAT positions
         vat_required = bool(partner.vat)
-        fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, vat_required)
+        fp = with_vat_fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, vat_required)
 
-        # Then if VAT required found no match, try positions that do not require it
-        if not fp and vat_required:
-            fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, False)
+        # Then if VAT required found and also found without vat, then sort by sequence and take first one
+        if vat_required:
+            without_vat_fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, False)
+            if with_vat_fp and without_vat_fp and with_vat_fp != without_vat_fp:
+                    fp = (fp + without_vat_fp).sorted(key=lambda f: f.sequence)[0]
+            # Then if VAT required found no match, try positions that do not require it
+            elif not fp:
+                fp = without_vat_fp
 
         return fp.id if fp else False
 
