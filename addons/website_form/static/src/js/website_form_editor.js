@@ -239,7 +239,7 @@ odoo.define('website_form_editor', function (require) {
                 // Make a nice array to render the select input
                 var fields_array = _.map(fields, function (v, k) { return {id: k, name: v.name, display_name: v.string}; });
                 // Filter the fields to remove the ones already in the form
-                var fields_in_form = _.map(self.$target.find('.col-form-label'), function (label) { return label.getAttribute('for'); });
+                var fields_in_form = _.map(self.$target.closest('form.s_website_form').find('.col-form-label'), function (label) { return label.getAttribute('for'); });
                 var available_fields = _.filter(fields_array, function (field) { return !_.contains(fields_in_form, field.name); });
                 // Render the select input
                 var fieldSelection = qweb.render("website_form.field_many2one", {
@@ -322,8 +322,17 @@ odoo.define('website_form_editor', function (require) {
 
         append_field: function (field) {
             var self = this;
-            this.render_field(field).then(function (field){
-                self.$target.find(".form-group:has('.o_website_form_send')").before(field);
+            // Copy formatting classes of the current row (field)
+            field.formatInfo = {
+                labelClass: this.$target.find('> div:first').attr('class'),
+                contentClass: this.$target.find('> div:last').attr('class'),
+            };
+            this.render_field(field).then(function (field) {
+                if (self.$target.hasClass('form-field')) {
+                    self.$target.after(field);
+                } else {
+                    self.$target.find(".form-group:has('.o_website_form_send')").before(field);
+                }
             });
         },
 
@@ -532,6 +541,10 @@ odoo.define('website_form_editor', function (require) {
                     string: this.$target.find('.col-form-label').text().trim(),
                     required: self.$target.hasClass('o_website_form_required'),
                     custom: self.$target.hasClass('o_website_form_custom'),
+                    formatInfo: {
+                        labelClass: this.$target.find('> div:first').attr('class'),
+                        contentClass: this.$target.find('> div:last').attr('class'),
+                    },
                 };
 
                 // Build the new records list from the editable select field
@@ -554,10 +567,6 @@ odoo.define('website_form_editor', function (require) {
                 if (this.$target.hasClass('o_website_form_field_hidden')) {
                     $new_select.addClass('o_website_form_field_hidden');
                 }
-                var labelClasses = this.$target.find('> div:first').attr('class');
-                var inputClasses = this.$target.find('> div:last').attr('class');
-                $new_select.find('> div:first').attr('class', labelClasses);
-                $new_select.find('> div:last').attr('class', inputClasses);
                 this.$target.replaceWith($new_select);
             }
         }

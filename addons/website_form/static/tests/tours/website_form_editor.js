@@ -53,8 +53,8 @@ odoo.define('website_form_editor.tour', function(require) {
         },
         // Add the date field
         {
-            content:  "Click on Form snippet",
-            trigger:  ".s_website_form[data-model_name]"
+            content:  "Click on first row of a Form snippet",
+            trigger:  ".s_website_form[data-model_name] .form-field:visible:first"
         },
         {
             content:  "Click on Add a model field",
@@ -90,8 +90,8 @@ odoo.define('website_form_editor.tour', function(require) {
 
         // Add record_name field
         {
-            content:  "Click on Form snippet",
-            trigger:  ".s_website_form[data-model_name]"
+            content:  "Click on first row of a Form snippet",
+            trigger:  ".s_website_form[data-model_name] .form-field:visible:first"
         },
         {
             content:  "Click on Add a model field",
@@ -128,8 +128,8 @@ odoo.define('website_form_editor.tour', function(require) {
 
         // Add body_html field
         {
-            content:  "Click on Form snippet",
-            trigger:  ".s_website_form[data-model_name]"
+            content:  "Click on first row of a Form snippet",
+            trigger:  ".s_website_form[data-model_name] .form-field:visible:first"
         },
         {
             content:  "Click on Add a model field",
@@ -165,8 +165,8 @@ odoo.define('website_form_editor.tour', function(require) {
 
         // Add recipient_ids relational field
         {
-            content:  "Click on Form snippet",
-            trigger:  ".s_website_form[data-model_name]"
+            content:  "Click on first row of a Form snippet",
+            trigger:  ".s_website_form[data-model_name] .form-field:visible:first"
         },
         {
             content:  "Click on Add a model field",
@@ -189,8 +189,8 @@ odoo.define('website_form_editor.tour', function(require) {
 
         // Add a custom multiple checkboxes field
         {
-            content:  "Click on Form snippet",
-            trigger:  ".s_website_form[data-model_name]",
+            content:  "Click on first row of a Form snippet",
+            trigger:  ".s_website_form[data-model_name] .form-field:visible:first",
         },
         {
             content:  "Click on Multiple Checkboxes in menu Add a custom field",
@@ -262,8 +262,8 @@ odoo.define('website_form_editor.tour', function(require) {
 
         // Add a custom radio field
         {
-            content:  "Click on Form snippet",
-            trigger:  ".s_website_form[data-model_name]",
+            content:  "Click on first row of a Form snippet",
+            trigger:  ".s_website_form[data-model_name] .form-field:visible:first",
         },
         {
             content:  "Click on Radio Buttons in menu Add a custom field",
@@ -332,8 +332,8 @@ odoo.define('website_form_editor.tour', function(require) {
 
         // Add a custom selection field
         {
-            content:  "Click on Form snippet",
-            trigger:  ".s_website_form[data-model_name]",
+            content:  "Click on first row of a Form snippet",
+            trigger:  ".s_website_form[data-model_name] .form-field:visible:first",
         },
         {
             content:  "Click on Selection in menu Add a custom field",
@@ -404,8 +404,8 @@ odoo.define('website_form_editor.tour', function(require) {
 
         // Add attachment_ids field
         {
-            content:  "Click on Form snippet",
-            trigger:  ".s_website_form[data-model_name]"
+            content:  "Click on first row of a Form snippet",
+            trigger:  ".s_website_form[data-model_name] .form-field:visible:first"
         },
         {
             content:  "Click on Add a model field",
