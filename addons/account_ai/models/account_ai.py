@@ -71,45 +71,6 @@ def find(dates, tree, after=0):
     return found
 
 
-class AIWizardProposition(models.Model):
-    _name = 'account.ai.finddate.line'
-    _description = 'Deduced things'
-
-    company_id = fields.Many2one(related='config_id.company_id', store=True, readonly=True)
-    config_id = fields.Many2one('account.ai.config', required=True)
-    account_id = fields.Many2one('account.account')
-    partner_id = fields.Many2one('res.partner')
-    range_up = fields.Float()
-    range_down = fields.Float()
-    date = fields.Date()
-    date_str = fields.Char()
-
-    def action_open(self):
-        self.ensure_one()
-        domain = [('account_id', '=', self.account_id.id), ('partner_id', '=', self.partner_id.id)]
-        if self.range_up:
-            domain += [('balance', '<=', self.range_up)]
-        if self.range_down:
-            domain += [('balance', '>=', self.range_down)]
-        return {
-            'name': "{account}, {partner} [{down},{up}], {date}".format(
-                account=self.account_id.display_name,
-                partner=self.partner_id.display_name,
-                down=self.range_down,
-                up=self.range_up,
-                date=self.date_str,
-            ),
-            'type': 'ir.actions.act_window',
-            'res_model': 'account.move.line',
-            'view_mode': 'tree,form',
-            'domain': domain,
-        }
-
-    def action_create(self):
-        self.ensure_one()
-        raise UserError("Not implemented yet, dont be greedy")
-
-
 class AIConfig(models.Model):
     _name = "account.ai.config"
     _description = "Deducer Config"
@@ -181,14 +142,13 @@ class AIConfig(models.Model):
         super(AIConfig, self).unlink()
 
     def _create_cron(self):
-        module = 'account'
         for config in self:
             if not config.generated_cron_id:
                 action = self.env['ir.actions.server'].sudo()._load_records([{
-                    'xml_id': "%s.%s" % (module, 'account_ai_action_cron_' + str(config.id)),
+                    'xml_id': "%s.%s" % ('account_ai', 'account_ai_action_cron_' + str(config.id)),
                     'values': {
                         'name': config.display_name,
-                        'model_id': self.env.ref('account.model_account_ai_config').id,
+                        'model_id': self.env.ref('account_ai.model_account_ai_config').id,
                         'usage': 'ir_cron',
                         'state': 'code',
                         'code': "action = model.browse(%s).action_run_odoo_bot()" % config.id
@@ -333,7 +293,7 @@ class AIConfig(models.Model):
             }
 
     def action_run_odoo_bot(self):
-        accountbot_id = self.env['ir.model.data'].xmlid_to_res_id("account.partner_accountbot")
+        accountbot_id = self.env['ir.model.data'].xmlid_to_res_id("account_ai.partner_accountbot")
         channel = self.env['mail.channel'].search([('channel_partner_ids', 'in', (accountbot_id, self.partner_id.id)), ('channel_type', '=', 'chat'), ('name', '=', 'AccountBot'), ('public', '=', 'private')], limit=1)
         if not channel:
             channel = self.env['mail.channel'].with_context(mail_create_nosubscribe=True).create({
@@ -350,7 +310,7 @@ class AIConfig(models.Model):
             If you want to have a look, tell me: <b>show them</b>""" % len(self.line_ids)
         channel.with_context(mail_create_nosubscribe=True).sudo().message_post(
             body=body,
-            author_id=self.env['ir.model.data'].xmlid_to_res_id("account.partner_accountbot"),
+            author_id=self.env['ir.model.data'].xmlid_to_res_id("account_ai.partner_accountbot"),
             message_type='comment',
             subtype_id=self.env['ir.model.data'].xmlid_to_res_id('mail.mt_comment')
         )
@@ -403,37 +363,3 @@ class AIConfig(models.Model):
                 self.env.cr.execute(query, {'config_id': config.id})
                 data = [build_graph_data(x[0], x[1]) for x in self.env.cr.fetchall()]
             config.kanban_dashboard_graph = json.dumps([{'values': data, 'title': '', 'key': graph_key, 'area': True, 'color': color}])
-
-
-class MailBot(models.AbstractModel):
-    _inherit = 'mail.bot'
-
-    def _apply_logic(self, record, values, command=None):
-        """ Apply bot logic to generate an answer (or not) for the user
-        The logic will only be applied if odoobot is in a chat with a user or
-        if someone pinged odoobot.
-
-         :param record: the mail_thread (or mail_channel) where the user
-            message was posted/odoobot will answer.
-         :param values: msg_values of the message_post or other values needed by logic
-         :param command: the name of the called command if the logic is not triggered by a message_post
-        """
-        accountbot_id = self.env['ir.model.data'].xmlid_to_res_id("account.partner_accountbot")
-        if record.name != 'AccountBot':
-            return super(MailBot, self)._apply_logic(record, values, command)
-
-        if len(record) != 1 or values.get("author_id") == accountbot_id:
-            return
-        if self._is_bot_in_private_channel(record):
-            body = values.get("body", "").replace(u'\xa0', u' ').strip().lower().strip(".?!")
-            answer = 'I am not yet programmed to answer to you 😱 <br>I am learning, I promise.'
-            if answer:
-                message_type = values.get('message_type', 'comment')
-                subtype_id = values.get('subtype_id', self.env['ir.model.data'].xmlid_to_res_id('mail.mt_comment'))
-                record.with_context(mail_create_nosubscribe=True).sudo().message_post(body=answer, author_id=accountbot_id, message_type=message_type, subtype_id=subtype_id)
-
-    def _is_bot_in_private_channel(self, record):
-        accountbot_id = self.env['ir.model.data'].xmlid_to_res_id("account.partner_accountbot")
-        if record._name == 'mail.channel' and record.channel_type == 'chat':
-            return accountbot_id in record.with_context(active_test=False).channel_partner_ids.ids
-        return False

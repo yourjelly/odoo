@@ -151,7 +151,7 @@
 
         <menuitem id="menu_action_ai_things" parent="account.menu_finance_entries_actions" action="account_ai_config_action" sequence="25"/>
 
-        <record model="res.partner" id="account.partner_accountbot">
+        <record model="res.partner" id="account_ai.partner_accountbot">
             <field name="name">AccountBot</field>
             <field name="company_id" ref="base.main_company"/>
             <field name="email">root@example.com</field>
