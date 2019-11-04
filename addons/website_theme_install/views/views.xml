@@ -6,6 +6,7 @@
         <field name="model">ir.module.module</field>
         <field name="arch" type="xml">
             <kanban create="false" class="o_theme_kanban" default_order="state,sequence,name">
+                <field name="id"/>
                 <field name="icon"/>
                 <field name="name"/>
                 <field name="state"/>
@@ -31,6 +32,16 @@
                                 <button type="object" name="button_choose_theme" class="btn btn-primary">Use this theme</button>
                                 <hr t-if="record.url.value"/>
                                 <a role="button" t-if="record.url.value" class="btn btn-secondary" t-att-href="record.url.value" target="_blank">Live Preview</a>
+
+                                <button  t-if="record.url.value" type="button" class="btn btn-primary pokpokpok" t-attf-data-src=".theme-preview-#{record.id.value}">Live Preview</button>
+
+<!--                                 <div t-attf-class="modal fade theme-preview-#{record.id.value}" tabindex="-1" role="dialog" t-attf-aria-labelledby="Preview theme #{record.display_name}" aria-hidden="true">
+                                  <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                      <iframe t-att-src='record.url.value' height="90%" width="90%"></iframe>
+                                    </div>
+                                  </div>
+                                </div> -->
                             </div>
                             <i states="installed" t-if="record.is_installed_on_current_website.raw_value"
                                 class="fa fa-check position-absolute p-1 m-2 rounded-circle bg-primary shadow"
