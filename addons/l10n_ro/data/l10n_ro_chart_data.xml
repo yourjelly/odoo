@@ -9,6 +9,15 @@
         <field name="cash_account_code_prefix">531</field>
         <field name="transfer_account_code_prefix">581</field>
         <field name="code_digits">6</field>
+        <field name="property_account_receivable_id" ref="ro_pcg_recv"/>
+        <field name="property_account_payable_id" ref="ro_pcg_pay"/>
+        <field name="property_account_expense_categ_id" ref="ro_pcg_expense"/>
+        <field name="property_account_income_categ_id" ref="ro_pcg_sale"/>
+        <field name="income_currency_exchange_account_id" ref="pcg_7651"/>
+        <field name="expense_currency_exchange_account_id" ref="pcg_6651"/>
+        <field name="property_tax_payable_account_id" ref="pcg_4423"/>
+        <field name="property_tax_receivable_account_id" ref="pcg_4424"/>
+        <field name="default_pos_receivable_account_id" ref="ro_pcg_recv" />
         <field name="currency_id" ref="base.RON"/>
     </record>
 </odoo>
