@@ -86,13 +86,15 @@ async function nextMicrotaskTick() {
 }
 
 /**
- * Returns a promise that is resolved in the next jobqueue tick so that the
- *  caller can wait on it in order to execute code in the next jobqueue tick.
+ * Returns a promise that will be resolved after the tick after the
+ * nextAnimationFrame
  *
- * @return {Promise} a promise that will be fulfilled in the next jobqueue tick
+ * This is usefull to guarantee that OWL has had the time to render
+ *
+ * @returns {Promise}
  */
 async function nextTick() {
-    return concurrency.delay(0);
+    return testUtilsDom.returnAfterNextAnimationFrame();
 }
 
 // Loading static files cannot be properly simulated when their real content is

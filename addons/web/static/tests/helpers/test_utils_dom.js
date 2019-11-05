@@ -13,6 +13,23 @@ var concurrency = require('web.concurrency');
  */
 
 /**
+ * Returns a promise that will be resolved after the tick after the
+ * nextAnimationFrame
+ *
+ * This is usefull to guarantee that OWL has had the time to render
+ *
+ * @returns {Promise}
+ */
+function returnAfterNextAnimationFrame() {
+    return new Promise((resolve, reject) => {
+        window.requestAnimationFrame(async () => {
+            await concurrency.delay(0);
+            resolve();
+        });
+    });
+}
+
+/**
  * simulate a drag and drop operation between 2 jquery nodes: $el and $to.
  * This is a crude simulation, with only the mousedown, mousemove and mouseup
  * events, but it is enough to help test drag and drop operations with jqueryUI
@@ -117,7 +134,7 @@ async function dragAndDrop($el, $to, options) {
             triggerEvent($el, 'mouseup');
         });
     }
-    return concurrency.delay(0);
+    return returnAfterNextAnimationFrame();
 }
 
 /**
@@ -252,7 +269,8 @@ async function click(el, options={}) {
         target = $(target);
     }
 
-    return concurrency.delay(0);
+    target.click();
+    return returnAfterNextAnimationFrame();
 }
 
 /**
@@ -360,7 +378,7 @@ async function triggerEvent(el, eventType, eventAttrs={}) {
         });
         target.dispatchEvent(event);
     }
-    return concurrency.delay(0);
+    return returnAfterNextAnimationFrame();
 }
 
 
@@ -385,6 +403,7 @@ return {
     clickLast: clickLast,
     triggerEvents: triggerEvents,
     triggerEvent: triggerEvent,
+    returnAfterNextAnimationFrame: returnAfterNextAnimationFrame,
 };
 
 });
