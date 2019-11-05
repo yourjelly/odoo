@@ -5,6 +5,7 @@ import sys
 
 
 from odoo.tools.misc import topological_sort
+from odoo.tools.config import configmanager
 
 
 CALLBACKS = ('button_immediate_install', 'button_immediate_uninstall')
@@ -60,9 +61,10 @@ def main():
     args = parse_args()
 
     # handle paths option
-    paths = args.paths and args.paths[0].split(',')
-    for path in paths:
-        sys.path.insert(0, path)
+    if args.paths:
+        conf = configmanager()
+        paths = args.paths[0]
+        conf.parse_config([f"--addons-path={paths}"])
 
     with odoo.api.Environment.manage():
         with odoo.registry(args.database[0]).cursor() as cr:
