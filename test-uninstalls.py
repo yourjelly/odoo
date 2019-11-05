@@ -11,7 +11,9 @@ from odoo.tools.config import configmanager
 CALLBACKS = ('button_immediate_install', 'button_immediate_uninstall')
 BLACKLIST = {
     'auth_ldap', 'document_ftp', 'base_gengo', 'website_gengo', 'website_instantclick', 'pad',
-    'pad_project', 'note_pad', 'pos_cache', 'pos_blackbox_be', 'base', 'payment_test',
+    'pad_project', 'note_pad', 'pos_cache', 'pos_blackbox_be', 'base', 'payment_test', 'web',
+    'base_import', 'web_cohort', 'web_editor', 'web_enterprise', 'web_gantt', 'web_grid',
+    'web_kanban_gauge', 'web_tour',
 }
 IGNORE = ('hw_', 'theme_', 'l10n_', 'test_', 'payment_')
 
@@ -73,7 +75,9 @@ def main():
             def filter_mod(mod):
                 return not (mod.name in BLACKLIST or mod.name.startswith(IGNORE))
 
-            mods = env['ir.module.module'].search([]).filtered(filter_mod)
+            mods = env['ir.module.module'].search([
+                ('state', 'in', ('installed', 'uninstalled')),
+            ]).filtered(filter_mod)
             sorted_mods = topological_sort({
                 mod.id: mod.dependencies_id.mapped('depend_id').ids for mod in mods
             })
