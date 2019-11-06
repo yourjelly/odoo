@@ -104,11 +104,13 @@ class OgoneController(http.Controller):
     def ogone_validation_form_feedback(self, **post):
         """ Feedback from 3d secure for a bank card validation """
         request.env['payment.transaction'].sudo().form_feedback(post, 'ogone')
+        _logger.info('Ogone: entering form_feedback with post data %s', pprint.pformat(post))  # debug
         return werkzeug.utils.redirect(werkzeug.url_unquote(post.pop('return_url', '/')))
 
     @http.route(['/payment/ogone/s2s/feedback'], auth='none', csrf=False)
     def feedback(self, **kwargs):
         try:
+            _logger.info('Ogone: entering s2s feedback with post data %s', pprint.pformat(kwargs))  # debug
             tx = request.env['payment.transaction'].sudo()._ogone_form_get_tx_from_data(kwargs)
             tx._ogone_s2s_validate_tree(kwargs)
         except ValidationError:
