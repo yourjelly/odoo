@@ -6,6 +6,16 @@ import builtins
 import math
 
 
+def fallback(f):
+    def wrapped(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except AssertionError:
+            # this means that _float_precision_check failed, in which case we revert to
+            # standard CPython float-to-float comparison
+            return getattr(float, f.__name__)(*args, **kwargs)
+    return wrapped
+
 class FloatProxy(float):
 
     def __new__(cls, value, precision_digits=None, precision_rounding=None):
@@ -28,21 +38,27 @@ class FloatProxy(float):
         f1 = self.__float__()
         return float_compare(f1, f2, self.precision_digits, self.precision_rounding)
 
+    @fallback
     def __eq__(self, other):
         return self.__cmp(other) == 0
 
+    @fallback
     def __ne__(self, other):
         return self.__cmp(other) != 0
 
+    @fallback
     def __gt__(self, other):
         return self.__cmp(other) > 0
 
+    @fallback
     def __ge__(self, other):
         return self.__cmp(other) >= 0
 
+    @fallback
     def __lt__(self, other):
         return self.__cmp(other) < 0
 
+    @fallback
     def __le__(self, other):
         return self.__cmp(other) <= 0
 
@@ -51,6 +67,7 @@ class FloatProxy(float):
         return super().__hash__()
 
     def with_precision(self, *, digits=None, rounding=None):
+        # force keyword arguments to avoid any confusion between digits and rounding
         # keep it immutable
         return FloatProxy(self.__float__(), precision_digits=digits, precision_rounding=rounding)
 
