@@ -61,6 +61,7 @@
                 <script type="text/javascript" src="/mail/static/src/js/basic_view.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/thread_field.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/thread_widget.js"></script>
+                <script type="text/javascript" src="/mail/static/src/js/text_emojis_field.js"/>
                 <!-- systray -->
                 <script type="text/javascript" src="/mail/static/src/js/systray/systray_activity_menu.js"></script>
                 <script type="text/javascript" src="/mail/static/src/js/systray/systray_messaging_menu.js"></script>
@@ -97,6 +98,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/activity_view.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/kanban_view.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/attachment_box.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/scss/text_emojis_field.scss"/>
             </xpath>
         </template>
 

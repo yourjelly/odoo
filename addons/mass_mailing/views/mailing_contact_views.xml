@@ -153,7 +153,7 @@
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only"/>
                         <h1>
-                            <field name="name" placeholder="e.g. John Smith"/>
+                            <field name="name" placeholder="e.g. John Smith" widget="text_emojis"/>
                         </h1>
                         <label for="tag_ids" class="oe_edit_only"/>
                         <div>
@@ -166,7 +166,7 @@
                             <div class="o_row o_row_readonly" name="email_details">
                                 <i class="fa fa-ban" style="color: red;" role="img" title="This email is blacklisted for mass mailing"
                                     aria-label="Blacklisted" attrs="{'invisible': [('is_blacklisted', '=', False)]}" groups="base.group_user"></i>
-                                <field name="email" widget="email"/>
+                                <field name="email" widget="text_emojis"/>
                                 <field name="is_blacklisted" invisible="1"/>
                             </div>
                             <field name="title_id"/>

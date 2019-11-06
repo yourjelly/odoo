@@ -1,0 +1,28 @@
+.o_mail_emoji_edit {
+    .o_mail_emoji_input {
+        outline: none;
+        display: inline-block;
+        width: 100%;
+        padding-right: 30px;
+        margin-right: -30px;
+        resize: none;
+        overflow: hidden;
+    }
+    .o_mail_emojis_dropdown {
+        float: right;
+        outline: none;
+        width: 25px;
+        margin-left: 10px;
+        margin-bottom: -25px;
+        padding: 0;
+        .dropdown-toggle::after {
+            display: none;
+        }
+    }
+    .o_mail_emojis_picker {
+        padding: 10px;
+        span {
+            cursor: pointer;
+        }
+    }
+}
