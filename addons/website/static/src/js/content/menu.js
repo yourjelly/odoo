@@ -4,6 +4,7 @@ odoo.define('website.content.menu', function (require) {
 var dom = require('web.dom');
 var publicWidget = require('web.public.widget');
 var wUtils = require('website.utils');
+var animations = require('website.content.snippets.animation');
 
 publicWidget.registry.affixMenu = publicWidget.Widget.extend({
     selector: 'header.o_affix_enabled',
@@ -142,6 +143,7 @@ publicWidget.registry.autohideMenu = publicWidget.Widget.extend({
                 dom.initAutoMoreMenu(self.$el, {unfoldable: '.divider, .divider ~ li'});
             }
             self.$el.removeClass('o_menu_loading');
+            self.$el.trigger('menu_loaded');
         });
     },
     /**
@@ -231,6 +233,149 @@ publicWidget.registry.menuDirection = publicWidget.Widget.extend({
         }
 
         $menu.addClass('dropdown-menu-' + alignment);
+    },
+});
+
+publicWidget.registry.fixedHeader = publicWidget.Widget.extend({
+    selector: 'header.o_header_fixed',
+
+    /**
+     * @override
+     */
+    start: function () {
+        var menuLoading = this.$('.o_menu_loading');
+        if (!menuLoading.length) {
+            this._initializeFixedHeader();
+        } else {
+            this.$el.one('menu_loaded', () => this._initializeFixedHeader());
+        }
+        return this._super.apply(this, arguments);
+    },
+    /**
+     * @override
+     */
+    destroy: function () {
+        $('main').css('padding-top', '');
+        this.$el.removeClass('o_header_affix affixed');
+        this._super.apply(this, arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _initializeFixedHeader: function () {
+        $('main').css('padding-top', this.$el.height());
+        this.$el.addClass('o_header_affix affixed');
+    },
+});
+
+publicWidget.registry.fadeOutHeader = animations.Animation.extend({
+    selector: 'header.o_header_fade_out',
+    effects: [{
+        startEvents: 'scroll',
+        update: '_onWindowScroll',
+    }],
+
+    /**
+     * @override
+     */
+    start: function () {
+        this.scrollingDownwards = true;
+        this.hiddenHeader = false;
+        this.position = 0;
+        this.checkPoint = 0;
+        return this._super.apply(this, arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Called when the window is scrolled
+     *
+     * @private
+     * @param {integer} scrollTop
+     */
+    _onWindowScroll: function (scrollTop) {
+        var scroll = scrollTop;
+        if (scroll > this.position) {
+            if (!this.scrollingDownwards) {
+                this.checkPoint = scroll;
+            }
+            if (!this.hiddenHeader && scroll - this.checkPoint > 200) {
+                this.hiddenHeader = true;
+                this.$el.fadeOut();
+            }
+            this.scrollingDownwards = true;
+        } else {
+            if (this.scrollingDownwards) {
+                this.checkPoint = scroll;
+            }
+            if (this.hiddenHeader && scroll - this.checkPoint < -100) {
+                this.hiddenHeader = false;
+                this.$el.fadeIn();
+            }
+            this.scrollingDownwards = false;
+        }
+        this.position = scroll;
+    },
+});
+
+publicWidget.registry.disappearsHeader = animations.Animation.extend({
+    selector: 'header.o_header_disappears',
+    effects: [{
+        startEvents: 'scroll',
+        update: '_onWindowScroll',
+    }],
+
+    /**
+     * @override
+     */
+    start: function () {
+        this.scrollingDownwards = true;
+        this.hiddenHeader = false;
+        this.position = 0;
+        this.checkPoint = 0;
+        return this._super.apply(this, arguments);
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Called when the window is scrolled
+     *
+     * @private
+     * @param {integer} scrollTop
+     */
+    _onWindowScroll: function (scrollTop) {
+        var scroll = scrollTop;
+        if (scroll > this.position) {
+            if (!this.scrollingDownwards) {
+                this.checkPoint = scroll;
+            }
+            if (!this.hiddenHeader && scroll - this.checkPoint > 400) {
+                this.hiddenHeader = true;
+                this.$el.animate({top: '-=' + this.$el.height()}, "slow");
+            }
+            this.scrollingDownwards = true;
+        } else {
+            if (this.scrollingDownwards) {
+                this.checkPoint = scroll;
+            }
+            if (this.hiddenHeader && scroll - this.checkPoint < -100) {
+                this.hiddenHeader = false;
+                this.$el.animate({top: '+=' + this.$el.height()}, "slow");
+            }
+            this.scrollingDownwards = false;
+        }
+        this.position = scroll;
     },
 });
 });
