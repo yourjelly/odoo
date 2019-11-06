@@ -3,7 +3,7 @@
 
 from math import log10
 
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, tagged
 from odoo.tools import float_compare, float_is_zero, float_repr, float_round, float_split_str
 
 
@@ -234,3 +234,47 @@ class TestFloatPrecision(TransactionCase):
         amount_test = currency.amount_to_text(0.28)
         self.assertNotEqual(amount_test, amount_target,
                             "Amount in text should not depend on float representation")
+
+
+@tagged("float_proxy")
+class TestFloatProxyPrecision(TransactionCase):
+
+    def setUp(self):
+        super().setUp()
+        self.partner1 = self.env['res.partner'].create({'name': 'foo', 'credit_limit': 5.3333})
+
+    def test_eq(self):
+        self.assertEqual(
+            self.partner1.credit_limit.with_precision(digits=3) == 5.3334,
+            float_compare(5.3333, 5.3334, precision_digits=3) == 0,
+        )
+
+    def test_ne(self):
+        self.assertEqual(
+            self.partner1.credit_limit.with_precision(digits=3) != 5.3335,
+            float_compare(5.3333, 5.3335, precision_digits=3) != 0
+        )
+
+    def test_ge(self):
+        self.assertEqual(
+            self.partner1.credit_limit.with_precision(digits=3) >= 5.3334,
+            float_compare(5.3333, 5.3334, precision_digits=3) >= 0,
+        )
+
+    def test_gt(self):
+        self.assertEqual(
+            self.partner1.credit_limit.with_precision(digits=3) > 5.3332,
+            float_compare(5.3333, 5.3332, precision_digits=3) > 0,
+        )
+
+    def test_le(self):
+        self.assertEqual(
+            self.partner1.credit_limit.with_precision(digits=3) <= 5.3334,
+            float_compare(5.3333, 5.3334, precision_digits=3) <= 0,
+        )
+
+    def test_lt(self):
+        self.assertEqual(
+            self.partner1.credit_limit.with_precision(digits=3) < 5.3334,
+            float_compare(5.3333, 5.3334, precision_digits=3) < 0,
+        )

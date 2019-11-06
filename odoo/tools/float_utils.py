@@ -6,6 +6,54 @@ import builtins
 import math
 
 
+class FloatProxy(float):
+
+    def __new__(cls, value, precision_digits=None, precision_rounding=None):
+        # required as float is an immutable class see https://stackoverflow.com/a/1936487
+        return super().__new__(cls, value)
+
+    def __init__(self, value, precision_digits=None, precision_rounding=None):
+        self.__precision_digits = precision_digits
+        self.__precision_rounding = precision_rounding
+
+    @property
+    def precision_digits(self):
+        return self.__precision_digits
+
+    @property
+    def precision_rounding(self):
+        return self.__precision_rounding
+
+    def __cmp(self, f2):
+        f1 = self.__float__()
+        return float_compare(f1, f2, self.precision_digits, self.precision_rounding)
+
+    def __eq__(self, other):
+        return self.__cmp(other) == 0
+
+    def __ne__(self, other):
+        return self.__cmp(other) != 0
+
+    def __gt__(self, other):
+        return self.__cmp(other) > 0
+
+    def __ge__(self, other):
+        return self.__cmp(other) >= 0
+
+    def __lt__(self, other):
+        return self.__cmp(other) < 0
+
+    def __le__(self, other):
+        return self.__cmp(other) <= 0
+
+    def __hash__(self):
+        # keep float and FloatProxy instances comparable by identity
+        return super().__hash__()
+
+    def with_precision(self, *, digits=None, rounding=None):
+        # keep it immutable
+        return FloatProxy(self.__float__(), precision_digits=digits, precision_rounding=rounding)
+
 def round(f):
     # P3's builtin round differs from P2 in the following manner:
     # * it rounds half to even rather than up (away from 0)

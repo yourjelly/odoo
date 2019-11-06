@@ -20,8 +20,12 @@ except ImportError:
 
 import psycopg2
 
-from .tools import float_repr, float_round, frozendict, html_sanitize, human_size, pg_varchar, \
-    ustr, OrderedSet, pycompat, sql, date_utils, unique, IterableGenerator, image_process, merge_sequences
+from .tools import (
+    float_repr, float_round, frozendict, html_sanitize, human_size, pg_varchar, ustr, OrderedSet,
+    pycompat, sql, date_utils, unique, IterableGenerator, image_process, merge_sequences,
+    FloatProxy,
+)
+
 from .tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from .tools import DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 from .tools.translate import html_translate, _
@@ -1187,12 +1191,12 @@ class Float(Field):
         # apply rounding here, otherwise value in cache may be wrong!
         value = float(value or 0.0)
         if not validate:
-            return value
+            return FloatProxy(value)
         digits = self.get_digits(record.env)
-        return float_round(value, precision_digits=digits[1]) if digits else value
+        return FloatProxy(float_round(value, precision_digits=digits[1]) if digits else value)
 
     def convert_to_record(self, value, record):
-        return value or 0.0
+        return FloatProxy(value or 0.0)
 
     def convert_to_export(self, value, record):
         if value or value == 0.0:
