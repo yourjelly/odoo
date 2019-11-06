@@ -2,6 +2,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools.misc import format_date
+from odoo.tools.date_utils import get_fiscal_year
 from odoo.release import version
 
 
@@ -122,8 +123,8 @@ class AIConfig(models.Model):
             rec._create_cron()
         else:
             raise UserError('Action not yet implemented')
-        if rec.find != 'date':
-            raise UserError('For now, only finding the date is implemented; other things are just there to show a possible interface and ideas.')
+        if rec.find not in ('date', 'amount'):
+            raise UserError('For now, only finding the date and unusual amounts are implemented; other things are just there to show a possible interface and ideas.')
         return rec
 
     def write(self, vals):
@@ -163,6 +164,8 @@ class AIConfig(models.Model):
         for config in self:
             if config.find == 'date':
                 config._find_date()
+            elif config.find == 'amount':
+                config._find_amount()
             else:
                 raise UserError('not yet implemented')
             config.last_update = fields.Date.today()
@@ -203,6 +206,7 @@ class AIConfig(models.Model):
             WHERE aml.company_id = %(company)s
             {where_account}
             {where_account_type}
+            AND aml.date > %(fiscal_date)s
             GROUP BY account_id, partner_id, amount_range
         """.format(
             grouping=grouping,
@@ -212,14 +216,16 @@ class AIConfig(models.Model):
             'company': self.company_id.id,
             'accounts': tuple(self.account_ids.ids),
             'account_types': tuple(self.account_type_ids.ids),
+            'fiscal_date': get_fiscal_year(fields.Date.today(), self.company_id.fiscalyear_last_day, int(self.company_id.fiscalyear_last_month))[0]
         })
         dates_grouped = self.env.cr.fetchall()
+        print(dates_grouped)
         return [
             # month granularity
-            {(account, partner, (range.lower or 0, range.upper or 99999999)): [date.year * 12 + date.month - 1 for date in dates]
+            {(account, partner, (range.lower if range.lower is not None else -99999999, range.upper if range.upper is not None else 99999999)): [date.year * 12 + date.month - 1 for date in dates]
                 for account, partner, range, dates in dates_grouped},
             # day granularity
-            {(account, partner, (range.lower or 0, range.upper or 99999999)): [(date - REFERENCE_DATE).days for date in dates]
+            {(account, partner, (range.lower if range.lower is not None else -99999999, range.upper if range.upper is not None else 99999999)): [(date - REFERENCE_DATE).days for date in dates]
                 for account, partner, range, dates in dates_grouped},
         ]
 
@@ -277,10 +283,10 @@ class AIConfig(models.Model):
     ############################################################################
     # FIND UNUSUAL AMOUNT METHODS
     ############################################################################
-    def _get_amounts(self):
+    def _find_amount(self):
         cluster_assign = "CASE WHEN sqr_euclid_dis(balance, kmeans.balance1) < sqr_euclid_dis(balance, kmeans.balance2) THEN 1 ELSE 2 END AS cluster_id"
         cluster_column = """
-                        , (
+                        , COALESCE((
                             SELECT AVG(balance)
                             FROM (
                                 SELECT s.balance
@@ -288,12 +294,14 @@ class AIConfig(models.Model):
                                     SELECT balance, {cluster_assign}
                                     FROM account_move_line
                                     WHERE partner_id = $1
+                                    AND account_id = $2
+                                    AND company_id = #(company_id)s
                                 ) s
                                 WHERE cluster_id = %s
                             ) l
-                        )
+                        ), 0)
         """.format(cluster_assign=cluster_assign)
-        cluster_columns = "\n".join([cluster_column % i for i in range(1, 3)])
+        cluster_columns = "\n".join([cluster_column % i for i in range(1, 3)]).replace('#(company_id)s', '%(company_id)s')
         self.env.cr.execute("""
             CREATE OR REPLACE FUNCTION sqr_euclid_dis(
                 balance float, meanbalance float
@@ -303,7 +311,7 @@ class AIConfig(models.Model):
                 END
             $$ LANGUAGE plpgsql;
 
-            CREATE OR REPLACE FUNCTION per_partner(int) RETURNS TABLE (ppbalance numeric, ppid int, pppartner_id int, ppcluster_id int) AS
+            CREATE OR REPLACE FUNCTION per_tuple(int, int) RETURNS TABLE (ppbalance numeric, ppid int, ppcluster_id int) AS
             $BODY$
             BEGIN
                 RETURN QUERY
@@ -317,17 +325,30 @@ class AIConfig(models.Model):
                     WHERE kmeans.iter < {max_iter}
                 )
 
-                SELECT balance, id, partner_id, {cluster_assign}
-                FROM account_move_line, kmeans
-                WHERE iter = {max_iter} AND partner_id = $1;
+                SELECT aml.balance, aml.id, {cluster_assign}
+                FROM account_move_line aml, kmeans
+                WHERE iter = {max_iter} AND aml.partner_id = $1 AND aml.account_id = $2 AND company_id = %(company_id)s;
                 RETURN;
             END
             $BODY$
             LANGUAGE plpgsql;
 
-            WITH ttt AS (SELECT (per_partner(pt.partner_id)).* FROM (SELECT DISTINCT partner_id FROM account_move_line) pt)
-            SELECT STDDEV(ppbalance), AVG(ppbalance), pppartner_id FROM ttt GROUP BY pppartner_id, ppcluster_id
-        """.format(cluster_assign=cluster_assign, cluster_columns=cluster_columns, max_iter=10))
+            UPDATE account_move_line SET unusual_amount = 'false' WHERE company_id = %(company_id)s; -- This should be done an other way....
+
+            WITH kmean_result AS (
+                SELECT pt.partner_id, pt.account_id, (per_tuple(pt.partner_id, pt.account_id)).* FROM (SELECT DISTINCT account_id, partner_id FROM account_move_line WHERE company_id = %(company_id)s) pt
+            ), kmean_means AS (
+                SELECT STDDEV(ppbalance), AVG(ppbalance), COUNT(ppid), partner_id, account_id, ppcluster_id FROM kmean_result GROUP BY partner_id, account_id, ppcluster_id
+            )
+            --SELECT km.*, a.name as acc, p.name as par FROM kmean_means km JOIN res_partner p ON km.partner_id = p.id JOIN account_account a ON km.account_id = a.id
+            SELECT aml.id FROM account_move_line aml WHERE company_id = %(company_id)s AND NOT EXISTS (SELECT 1 FROM kmean_means km WHERE aml.balance BETWEEN km.avg - 2*stddev AND km.avg + 2*stddev)
+        """.format(cluster_assign=cluster_assign, cluster_columns=cluster_columns, max_iter=10), {'company_id': self.company_id.id})
+
+        # pprint(self.env.cr.dictfetchall())
+
+        result = [r[0] for r in self.env.cr.fetchall()]
+        self.env['account.move.line'].browse(result).write({'unusual_amount': 'true'})
+
 
     ############################################################################
     # ACTIONS
@@ -344,6 +365,16 @@ class AIConfig(models.Model):
                 'view_mode': 'tree',
                 'domain': [('config_id', '=', self.id)],
                 'type': 'ir.actions.act_window',
+                'target': 'current',
+            }
+        if self.find == 'amount':
+            return {
+                'name': self.display_name,
+                'res_model': 'account.move.line',
+                'view_mode': 'tree,form',
+                'domain': [('company_id', '=', self.company_id.id), ('unusual_amount', '=', 'true')],
+                'type': 'ir.actions.act_window',
+                'views': [[self.env.ref('account_ai.account_ai_move_line_tree_view').id, 'tree']],
                 'target': 'current',
             }
 
@@ -363,6 +394,11 @@ class AIConfig(models.Model):
         if self.find == 'date':
             body = """Hello, I found %s propositions for you 😊<br>
             If you want to have a look, tell me: <b>show them</b>""" % len(self.line_ids)
+        if self.find == 'amount':
+            number_found = self.env['account.move.line'].search_count([('company_id', '=', self.company_id.id), ('unusual_amount', '=', 'true')])
+            body = """Hello, some amounts seem a bit off comparing to what you usually do.<br>
+            I found %s journal items that could be wrong 😕<br>
+            If you want to have a look, tell me: <b>show them</b>""" % number_found
         channel.with_context(mail_create_nosubscribe=True).sudo().message_post(
             body=body,
             author_id=self.env['ir.model.data'].xmlid_to_res_id("account_ai.partner_accountbot"),
@@ -406,8 +442,8 @@ class AIConfig(models.Model):
             graph_key = ''
             color = '#875A7B' if 'e' in version else '#7c7bad'
             data = []
+            graph_type = json.loads(config.kanban_dashboard)['graph_type']
             if config.find == 'date':
-                graph_type = json.loads(config.kanban_dashboard)['graph_type']
                 graph_key = 'Number of propositions'
                 query = """
                     SELECT date, COUNT(id)
@@ -416,5 +452,16 @@ class AIConfig(models.Model):
                     GROUP BY date
                 """
                 self.env.cr.execute(query, {'config_id': config.id})
+                data = [build_graph_data(x[0], x[1]) for x in self.env.cr.fetchall()]
+            if config.find == 'amount':
+                graph_key = 'Unusual amount'
+                query = """
+                    SELECT date, COUNT(id)
+                    FROM account_move_line
+                    WHERE company_id = %(company_id)s
+                    AND unusual_amount = 'true'
+                    GROUP BY date
+                """
+                self.env.cr.execute(query, {'company_id': config.company_id.id})
                 data = [build_graph_data(x[0], x[1]) for x in self.env.cr.fetchall()]
             config.kanban_dashboard_graph = json.dumps([{'values': data, 'title': '', 'key': graph_key, 'area': True, 'color': color}])

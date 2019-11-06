@@ -17,6 +17,20 @@
             </field>
         </record>
 
+        <record id="account_ai_move_line_tree_view" model="ir.ui.view">
+            <field name="name">account.move.line.ai.tree</field>
+            <field name="model">account.move.line</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
+            <field name="arch" type="xml">
+                <field name="tag_ids" position="after">
+                    <button name="action_account_ai_open" type="object" icon="fa-expand" title="Open List" aria-label="Open" class="float-right"/>
+                    <button name="action_account_ai_remove" type="object" icon="fa-ban" title="Remove (Don't propose again)" aria-label="Remove (Don't propose again)" class="float-right"/>
+                    <button name="action_account_ai_temp_remove" type="object" icon="fa-trash" title="Remove (For now)" aria-label="Remove (For now)" class="float-right"/>
+                </field>
+            </field>
+        </record>
+
         <record id="view_account_ai_wizard_line_search" model="ir.ui.view">
             <field name="name">account.ai.finddate.line.search</field>
             <field name="model">account.ai.finddate.line</field>
@@ -83,7 +97,7 @@
             <field name="name">account.ai.config.kanban</field>
             <field name="model">account.ai.config</field>
             <field name="arch" type="xml">
-                <kanban>
+                <kanban create="0" edit="0">
                     <field name="name"/>
                     <field name="find"/>
                     <field name="action"/>
