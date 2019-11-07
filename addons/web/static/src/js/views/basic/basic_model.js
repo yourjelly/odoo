@@ -3286,6 +3286,22 @@ var BasicModel = AbstractModel.extend({
         return commands;
     },
     /**
+     * For a given resource of type 'record', get the active field, if any.
+     *
+     * Since the ORM can support both `active` and `x_active` fields for
+     * the archiving mechanism, check if any such field exist and prioritize
+     * them. The `active` field should always take priority over its custom
+     * version.
+     *
+     * @param {Object} record local resource
+     * @returns {String|undefined} the field name to use for archiving purposes
+     *   ('active', 'x_active') or undefined if no such field is present
+     */
+    _getActiveField: function(record) {
+        const fields = Object.keys(record.fields);
+        return fields.find((f) => f === 'active' || f === 'x_active');
+    },
+    /**
      * Every RPC done by the model need to add some context, which is a
      * combination of the context of the session, of the record/list, and/or of
      * the concerned field. This method combines all these contexts and evaluate

@@ -4062,13 +4062,14 @@ Record ids: %(records)s
         :return: the query expressing the given domain as provided in domain
         :rtype: osv.query.Query
         """
-        # if the object has a field named 'active', filter out all inactive
-        # records unless they were explicitely asked for
-        if 'active' in self._fields and active_test and self._context.get('active_test', True):
+        # if the object has an active field ('active', 'x_active'), filter out all
+        # inactive records unless they were explicitely asked for
+        if active_test and self._context.get('active_test', True):
             # the item[0] trick below works for domain items and '&'/'|'/'!'
             # operators too
-            if not any(item[0] == 'active' for item in domain):
-                domain = [('active', '=', 1)] + domain
+            active_field = self._get_active_field()
+            if active_field in self._fields and not any(item[0] == active_field for item in domain):
+                domain = [(active_field, '=', 1)] + domain
 
         if domain:
             e = expression.expression(domain, self)
@@ -4813,24 +4814,37 @@ Record ids: %(records)s
         index = {vals['id']: vals for vals in result}
         return [index[record.id] for record in records if record.id in index]
 
+    @api.model
+    def _get_active_field(self):
+        """Returns the name of the field to use for the archiving mechanism."""
+        if 'active' in self._fields:
+            return 'active'
+        elif 'x_active' in self._fields:
+            return 'x_active'
+        return False
+
     def toggle_active(self):
-        """ Inverse the value of the field ``active`` on the records in ``self``. """
-        for record in self:
-            record.active = not record.active
+        """ Inverse the value of the field ``(x_)active`` on the records in ``self``. """
+        active_field = self._get_active_field()
+        if active_field in self._fields:
+            for record in self:
+                record[active_field] = not record[active_field]
 
     def action_archive(self):
         """
             Set active=False on a recordset, by calling toggle_active to take the
             corresponding actions according to the model
         """
-        return self.filtered(lambda record: record.active).toggle_active()
+        active_field = self._get_active_field()
+        return self.filtered(lambda record: record[active_field]).toggle_active()
 
     def action_unarchive(self):
         """
             Set active=True on a recordset, by calling toggle_active to take the
             corresponding actions according to the model
         """
-        return self.filtered(lambda record: not record.active).toggle_active()
+        active_field = self._get_active_field()
+        return self.filtered(lambda record: not record[active_field]).toggle_active()
 
     def _register_hook(self):
         """ stuff to do right after the registry is built """
