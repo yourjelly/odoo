@@ -64,6 +64,9 @@
                 </div>
             </div>
 
+            <div class="o_booking_details">
+            </div>
+
             <!-- Is there a discount on at least one line? -->
             <t t-set="display_discount" t-value="any([l.discount for l in doc.order_line])"/>
 

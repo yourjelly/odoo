@@ -421,6 +421,9 @@
                 </div>
             </div>
 
+            <div class="o_booking_details">
+            </div>
+
             <section id="details" style="page-break-inside: auto;" class="mt32">
                 <h3 id="details">Details</h3>
 
