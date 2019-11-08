@@ -246,7 +246,7 @@ class TestAccountEntry(TestExpenseCommon):
         payable_move_lines = exp_move_lines.filtered(lambda l: l.account_id.internal_type == 'payable')
         self.assertEqual(len(payable_move_lines), 2)
 
-        WizardRegister = self.env["hr.expense.sheet.register.payment.wizard"].with_context(
+        WizardRegister = self.env["account.payment.register"].with_context(
             active_model=expense._name, active_id=expense.id, active_ids=expense.ids
         )
 

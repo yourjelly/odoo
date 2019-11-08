@@ -9,6 +9,8 @@ class RegisterExpensePayment(models.TransientModel):
     _inherit = "account.payment.register"
 
     expense_sheet_id = fields.Many2one('hr.expense.sheet')
+    # Expense sheet journal_ids are of type purchase.
+    journal_id = fields.Many2one(domain=[('type', 'in', ('bank', 'cash', 'purchase'))])
 
     def get_payments_vals(self):
         if self.expense_sheet_id:
