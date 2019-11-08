@@ -246,27 +246,29 @@ class TestAccountEntry(TestExpenseCommon):
         payable_move_lines = exp_move_lines.filtered(lambda l: l.account_id.internal_type == 'payable')
         self.assertEqual(len(payable_move_lines), 2)
 
-        WizardRegister = self.env["account.payment.register"].with_context(
-            active_model=expense._name, active_id=expense.id, active_ids=expense.ids
-        )
+        # WizardRegister = self.env["account.payment.register"].with_context(
+        #     active_model=expense._name, active_id=expense.id, active_ids=expense.ids
+        # )
 
-        register_pay1 = WizardRegister.create({
+        register_pay1 = self.env["account.payment.register"].create({
             'journal_id': bank_journal.id,
             'payment_method_id': outbound_pay_method.id,
-            'amount': 300,
+            # 'amount': 300,
+            'expense_sheet_id': expense.id,
         })
-        register_pay1.expense_post_payment()
+        register_pay1.create_payments()
 
         exp_move_lines = expense.account_move_id.line_ids
         payable_move_lines = exp_move_lines.filtered(lambda l: l.account_id.internal_type == 'payable')
         self.assertEqual(len(payable_move_lines.filtered(lambda l: l.reconciled)), 1)
 
-        register_pay2 = WizardRegister.create({
+        register_pay2 = self.env["account.payment.register"].create({
             'journal_id': bank_journal.id,
             'payment_method_id': outbound_pay_method.id,
-            'amount': 100,
+            'expense_sheet_id': expense.id,
+            # 'amount': 100,
         })
-        register_pay2.expense_post_payment()
+        register_pay2.create_payments()
         exp_move_lines = expense.account_move_id.line_ids
         payable_move_lines = exp_move_lines.filtered(lambda l: l.account_id.internal_type == 'payable')
         self.assertEqual(len(payable_move_lines.filtered(lambda l: l.reconciled)), 2)

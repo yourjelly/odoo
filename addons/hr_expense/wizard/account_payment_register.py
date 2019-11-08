@@ -22,8 +22,8 @@ class RegisterExpensePayment(models.TransientModel):
 
         if expense_sheet.employee_id.sudo().bank_account_id.id:
             partner_bank_account = expense_sheet.employee_id.sudo().bank_account_id.id
-        elif self.partner_id and len(self.partner_id.bank_ids) > 0:
-            partner_bank_account = self.partner_id.bank_ids[0]
+        elif partner and len(partner.bank_ids) > 0:
+            partner_bank_account = partner.bank_ids[0]
         else:
             partner_bank_account = self.env['res.partner.bank']
 
