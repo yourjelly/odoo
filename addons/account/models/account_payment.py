@@ -706,13 +706,22 @@ class payment_register(models.TransientModel):
                                         "SEPA Credit Transfer: Pay bill from a SEPA Credit Transfer file you submit to your bank. To enable sepa credit transfer, module account_sepa must be installed ")
     invoice_ids = fields.Many2many('account.move', 'account_invoice_payment_rel_transient', 'payment_id', 'invoice_id', string="Invoices", copy=False, readonly=True)
     group_payment = fields.Boolean(help="Only one payment will be created by partner (bank)/ currency.")
+    payment_ids = fields.Many2many('account.payment', string="Payments")
 
     @api.model
     def default_get(self, fields):
         rec = super(payment_register, self).default_get(fields)
+
         active_ids = self._context.get('active_ids')
         if not active_ids:
             return rec
+
+        active_model = self._context.get('active_model')
+        if active_model != 'account.invoice':
+            # Allows extension of this wizard to provide payment for other models
+            # (hr_expense, ...) which doesn't use invoices
+            return rec
+
         invoices = self.env['account.move'].browse(active_ids)
 
         # Check all invoices are open
@@ -800,6 +809,9 @@ class payment_register(models.TransientModel):
         Payment = self.env['account.payment']
         payments = Payment.create(self.get_payments_vals())
         payments.post()
+
+        # Save payments for access in wizard extensions (hr_expense).
+        self.payment_ids += payments
 
         action_vals = {
             'name': _('Payments'),
