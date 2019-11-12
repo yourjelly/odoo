@@ -188,6 +188,7 @@ class SaleOrder(models.Model):
                 if linked_line:
                     # update description of the parent
                     linked_product = linked_line.product_id
+                    # VFE TODO cleanup get_sale_order_line_multiline_description_sale broll?
                     linked_line.name = linked_line.get_sale_order_line_multiline_description_sale(linked_product)
             else:
                 # update line

@@ -19,18 +19,12 @@ class ProductStyle(models.Model):
 
 class ProductPricelist(models.Model):
     _inherit = "product.pricelist"
+    _name = "product.pricelist"
+    _check_company_auto = True
 
-    def _default_website(self):
-        """ Find the first company's website, if there is one. """
-        company_id = self.env.company.id
-
-        if self._context.get('default_company_id'):
-            company_id = self._context.get('default_company_id')
-
-        domain = [('company_id', '=', company_id)]
-        return self.env['website'].search(domain, limit=1)
-
-    website_id = fields.Many2one('website', string="Website", ondelete='restrict', default=_default_website, domain="[('company_id', '=?', company_id)]")
+    # VFE use website publish mixin?
+    website_id = fields.Many2one('website', string="Website", ondelete='restrict', domain="[('company_id', '=?', company_id)]")
+    website_published = fields.Boolean("Available on website", default=True)
     code = fields.Char(string='E-commerce Promotional Code', groups="base.group_user")
     selectable = fields.Boolean(help="Allow the end user to choose this price list")
 
@@ -41,27 +35,13 @@ class ProductPricelist(models.Model):
         website = self.env['website']
         website._get_pl_partner_order.clear_cache(website)
 
-    @api.model
-    def create(self, data):
-        if data.get('company_id') and not data.get('website_id'):
-            # l10n modules install will change the company currency, creating a
-            # pricelist for that currency. Do not use user's company in that
-            # case as module install are done with OdooBot (company 1)
-            self = self.with_context(default_company_id=data['company_id'])
-        res = super(ProductPricelist, self).create(data)
-        self.clear_cache()
-        return res
-
     def write(self, data):
         res = super(ProductPricelist, self).write(data)
-        if data.keys() & {'code', 'active', 'website_id', 'selectable'}:
-            self._check_website_pricelist()
         self.clear_cache()
         return res
 
     def unlink(self):
         res = super(ProductPricelist, self).unlink()
-        self._check_website_pricelist()
         self.clear_cache()
         return res
 
@@ -79,11 +59,6 @@ class ProductPricelist(models.Model):
             res = res.filtered(lambda pl: pl._is_available_on_website(website.id))
         return res
 
-    def _check_website_pricelist(self):
-        for website in self.env['website'].search([]):
-            if not website.pricelist_ids:
-                raise UserError(_("With this action, '%s' website would not have any pricelist available.") % (website.name))
-
     def _is_available_on_website(self, website_id):
         """ To be able to be used on a website, a pricelist should either:
         - Have its `website_id` set to current website (specific pricelist).
@@ -96,13 +71,14 @@ class ProductPricelist(models.Model):
         Change in this method should be reflected in `_get_website_pricelists_domain`.
         """
         self.ensure_one()
-        return self.website_id.id == website_id or (not self.website_id and (self.selectable or self.sudo().code))
+        return self.website_published and (self.website_id.id == website_id or (not self.website_id and (self.selectable or self.sudo().code)))
 
     def _get_website_pricelists_domain(self, website_id):
         ''' Check above `_is_available_on_website` for explanation.
         Change in this method should be reflected in `_is_available_on_website`.
         '''
         return [
+            '&', ('website_published', '=', True),
             '|', ('website_id', '=', website_id),
             '&', ('website_id', '=', False),
             '|', ('selectable', '=', True), ('code', '!=', False),
@@ -118,16 +94,6 @@ class ProductPricelist(models.Model):
         if not company_id and website:
             company_id = website.company_id.id
         return super(ProductPricelist, self)._get_partner_pricelist_multi(partner_ids, company_id)
-
-    @api.constrains('company_id', 'website_id')
-    def _check_websites_in_company(self):
-        '''Prevent misconfiguration multi-website/multi-companies.
-           If the record has a company, the website should be from that company.
-        '''
-        for record in self.filtered(lambda pl: pl.website_id and pl.company_id):
-            if record.website_id.company_id != record.company_id:
-                raise ValidationError(_("Only the company's websites are allowed. \
-                    Leave the Company field empty or select a website from that company."))
 
 
 class ProductPublicCategory(models.Model):
@@ -253,15 +219,14 @@ class ProductTemplate(models.Model):
         This will work when adding website_id to the context, which is done
         automatically when called from routes with website=True.
         """
-        # VFE TODO ensure all calls to _get_combination_info are done with the right company
         self.ensure_one()
 
         current_website = self.env['website']
 
         if self.env.context.get('website_id'):
             current_website = self.env['website'].get_current_website()
+            self = self.with_company(current_website.company_id)
             pricelist = pricelist or current_website.get_current_pricelist()
-            # VFE TODO give company info to the super call (with_company ?)
 
         combination_info = super(ProductTemplate, self)._get_combination_info(
             combination=combination, product_id=product_id,
