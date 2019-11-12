@@ -120,6 +120,7 @@ class EventEvent(models.Model):
     name = fields.Char(
         string='Event', translate=True, required=True,
         readonly=False)
+    note = fields.Text(string='Note')
     active = fields.Boolean(default=True)
     user_id = fields.Many2one(
         'res.users', string='Responsible',

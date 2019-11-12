@@ -314,6 +314,9 @@
                                     <field name="seats_max" attrs="{'invisible': [('seats_availability', '=', 'unlimited')], 'required': [('seats_availability', '=', 'limited')]}"/>
                                 </div>
                             </group>
+                            <group class="w-100">
+                                <field name="note" placeholder="Add a note..." nolabel="1"/>
+                            </group>
                         </group>
                         <notebook>
                             <page string="Communication" name="event_communication">
