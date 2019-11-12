@@ -1516,7 +1516,6 @@ class SaleOrderLine(models.Model):
 
     @api.onchange('product_uom', 'product_uom_qty')
     def quantity_change(self):
-        # VFE TODO remove the context brolls on non relational fields in view.
         if not self.product_uom or not self.product_id:
             self.price_unit = 0.0
         else:
