@@ -638,6 +638,8 @@ class PricelistItem(models.Model):
         res = super(PricelistItem, self).write(values)
         # When the pricelist changes we need the product.template price
         # to be invalided and recomputed.
+        # VFE TODO only invalidate the cache of the correct model and field.
+        self.flush()
         self.invalidate_cache()
         return res
 
