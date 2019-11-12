@@ -438,6 +438,20 @@ class EventEvent(models.Model):
 
         return ''
 
+    def _cron_clean_pipeline(self):
+        """
+        Cron which drags all events which end date is < now (= passed)
+        into the first next (by sequence) stage defined as "Ended"
+        (if they are not already in an ended stage)
+        """
+        ended_events = self.env['event.event'].search([('date_end', '<', fields.Datetime.now()), ('stage_id.ended_stage', '=', False)])
+        first_ended_stage = self.env['event.stage'].search([('ended_stage', '=', True)], order='sequence')
+
+        if not first_ended_stage or not ended_events:
+            return
+
+        ended_events.write({'stage_id': first_ended_stage[0].id})
+
 
 class EventRegistration(models.Model):
     _name = 'event.registration'
