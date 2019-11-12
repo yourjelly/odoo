@@ -1967,6 +1967,7 @@ odoo.define('web.basic_model_tests', function (require) {
             var resultID = await model.load(this.params);
             var record = model.get(resultID);
             assert.deepEqual(record.evalContext, {
+                active: true,
                 active_id: 1,
                 active_ids: [1],
                 active_model: "partner",
@@ -1982,7 +1983,8 @@ odoo.define('web.basic_model_tests', function (require) {
                 product_ids: [],
                 qux: false,
                 reference: false,
-                total: 0
+                total: 0,
+                x_active: true,
             }, "should use the proper eval context");
             model.destroy();
         });
