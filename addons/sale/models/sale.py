@@ -1037,14 +1037,14 @@ class SaleOrderLine(models.Model):
         """
         for line in self:
             price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-            taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.product_uom_qty, product=line.product_id, partner=line.order_id.partner_shipping_id)
+            taxes = line.tax_id.compute_all(price, line.currency_id, line.product_uom_qty, product=line.product_id, partner=line.order_id.partner_shipping_id)
             line.update({
                 'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
                 'price_total': taxes['total_included'],
                 'price_subtotal': taxes['total_excluded'],
             })
 
-    @api.depends('product_id', 'order_id.state', 'qty_invoiced', 'qty_delivered')
+    @api.depends('product_id', 'state', 'qty_invoiced', 'qty_delivered')
     def _compute_product_updatable(self):
         for line in self:
             if line.state in ['done', 'cancel'] or (line.state == 'sale' and (line.qty_invoiced > 0 or line.qty_delivered > 0)):
@@ -1052,14 +1052,14 @@ class SaleOrderLine(models.Model):
             else:
                 line.product_updatable = True
 
-    @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'order_id.state')
+    @api.depends('qty_invoiced', 'qty_delivered', 'product_uom_qty', 'state')
     def _get_to_invoice_qty(self):
         """
         Compute the quantity to invoice. If the invoice policy is order, the quantity to invoice is
         calculated from the ordered quantity. Otherwise, the quantity delivered is used.
         """
         for line in self:
-            if line.order_id.state in ['sale', 'done']:
+            if line.state in ['sale', 'done']:
                 if line.product_id.invoice_policy == 'order':
                     line.qty_to_invoice = line.product_uom_qty - line.qty_invoiced
                 else:
@@ -1131,7 +1131,7 @@ class SaleOrderLine(models.Model):
 
         lines = super().create(vals_list)
         for line in lines:
-            if line.product_id and line.order_id.state == 'sale':
+            if line.product_id and line.state == 'sale':
                 msg = _("Extra line with %s ") % (line.product_id.display_name,)
                 line.order_id.message_post(body=msg)
                 # create an analytic account if at least an expense product
@@ -1174,7 +1174,7 @@ class SaleOrderLine(models.Model):
 
         # Prevent writing on a locked SO.
         protected_fields = self._get_protected_fields()
-        if 'done' in self.mapped('order_id.state') and any(f in values.keys() for f in protected_fields):
+        if 'done' in self.mapped('state') and any(f in values.keys() for f in protected_fields):
             protected_fields_modified = list(set(protected_fields) & set(values.keys()))
             fields = self.env['ir.model.fields'].search([
                 ('name', 'in', protected_fields_modified), ('model', '=', self._name)
@@ -1261,13 +1261,7 @@ class SaleOrderLine(models.Model):
         string="Is a down payment", help="Down payments are made when creating invoices from a sales order."
         " They are not copied when duplicating a sales order.")
 
-    state = fields.Selection([
-        ('draft', 'Quotation'),
-        ('sent', 'Quotation Sent'),
-        ('sale', 'Sales Order'),
-        ('done', 'Done'),
-        ('cancel', 'Cancelled'),
-    ], related='order_id.state', string='Order Status', readonly=True, copy=False, store=True, default='draft')
+    state = fields.Selection(related='order_id.state', string='Order Status', store=True)
 
     customer_lead = fields.Float(
         'Lead Time', required=True, default=0.0,
@@ -1503,7 +1497,7 @@ class SaleOrderLine(models.Model):
         if not self.product_id:
             return
 
-        self = self.with_context(lang=self.order_id.partner_id.lang)
+        self = self.with_context(lang=self.order_partner_id.lang)
 
         self._cleanup_variant_configuration()
         self._update_description()
