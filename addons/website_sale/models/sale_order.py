@@ -349,6 +349,13 @@ class SaleOrder(models.Model):
                 sent_orders |= order
         sent_orders.write({'cart_recovery_email_sent': True})
 
+    def _send_order_confirmation_mail(self):
+        for order in self.filtered(lambda l: l.state in ('draft', 'sent') and not l.user_id and l.website_id):
+            affiliate_id = request.session.get('affiliate_id')
+            salesperson_id = affiliate_id if request.env['res.users'].sudo().browse(affiliate_id).exists() else self.website_id.salesperson_id.id
+            order.write({'user_id': salesperson_id or request.env.ref('base.user_admin').id})
+        return super(SaleOrder, self)._send_order_confirmation_mail()
+
 
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
