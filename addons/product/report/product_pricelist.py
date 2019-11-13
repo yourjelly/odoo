@@ -53,7 +53,7 @@ class report_product_pricelist(models.AbstractModel):
 
     def _get_price(self, pricelist, product, qty):
         sale_price_digits = self.env['decimal.precision'].precision_get('Product Price')
-        price = pricelist.get_product_price(product, qty, False)
+        price = pricelist.get_product_price(product, qty, product.uom_id)
         if not price:
             price = product.list_price
         return float_round(price, precision_digits=sale_price_digits)
