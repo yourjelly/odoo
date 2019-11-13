@@ -8,9 +8,9 @@
         <field name="sequence">5</field>
         <field name="country_id" ref="base.il"/>
     </record>
+
     <record id="account_tax_report_line_in_balance" model="account.tax.report.line">
-        <field name="name">TOTAL VAT INPUTS (TAX) </field> <!-- // 5 -->
-        <field name="tag_name">TOTAL VAT INPUTS (TAX)</field>
+        <field name="name">TOTAL VAT INPUTS (TAX)</field> <!-- // 5 -->
         <field name="code">ILTAX_IN_BALANCE</field>
         <field name="sequence">5</field>
         <field name="parent_id" ref="account_tax_report_line_vat_inputs"/>
@@ -23,8 +23,6 @@
         <field name="code">ILTAX_IN_BALANCE_17</field>
         <field name="sequence">6</field>
         <field name="parent_id" ref="account_tax_report_line_in_balance"/>
-        <field name="groupby">move_id</field>
-        <field name="show_domain">never</field>
         <field name="country_id" ref="base.il"/>
     </record>
 
@@ -34,19 +32,15 @@
         <field name="code">ILTAX_IN_BALANCE_2_3</field>
         <field name="sequence">6</field>
         <field name="parent_id" ref="account_tax_report_line_in_balance"/>
-        <field name="groupby">move_id</field>
-        <field name="show_domain">never</field>
         <field name="country_id" ref="base.il"/>
     </record>
 
     <record id="account_tax_report_line_in_balance_1_4" model="account.tax.report.line">
-        <field name="name">Total VAT Inputs 1/4</field><!-- // 6 -->
+        <field name="name">Total VAT Inputs 1/4</field> <!-- // 6 -->
         <field name="tag_name">Total VAT Inputs 1/4</field>
         <field name="code">ILTAX_IN_BALANCE_1_4</field>
         <field name="sequence">6</field>
         <field name="parent_id" ref="account_tax_report_line_in_balance"/>
-        <field name="groupby">move_id</field>
-        <field name="show_domain">never</field>
         <field name="country_id" ref="base.il"/>
     </record>
 
@@ -62,8 +56,6 @@
         <field name="tag_name">Total Inputs 17%</field>
         <field name="code">ILTAX_IN_BASE_17</field>
         <field name="parent_id" ref="account_tax_report_line_vat_inputs_base"/>
-        <field name="groupby">move_id</field>
-        <field name="show_domain">never</field>
         <field name="country_id" ref="base.il"/>
     </record>
     <record id="account_tax_report_line_in_base_2_3" model="account.tax.report.line">
@@ -71,8 +63,6 @@
         <field name="tag_name">Total Inputs 2/3</field>
         <field name="code">ILTAX_IN_BASE_2_3</field>
         <field name="parent_id" ref="account_tax_report_line_vat_inputs_base"/>
-        <field name="groupby">move_id</field>
-        <field name="show_domain">never</field>
         <field name="country_id" ref="base.il"/>
     </record>
     <record id="account_tax_report_line_in_base_1_4" model="account.tax.report.line">
@@ -80,22 +70,18 @@
         <field name="tag_name">Total Inputs 1/4</field>
         <field name="code">ILTAX_IN_BASE_1_4</field>
 		<field name="parent_id" ref="account_tax_report_line_vat_inputs_base"/>
-        <field name="groupby">move_id</field>
-        <field name="show_domain">never</field>
         <field name="country_id" ref="base.il"/>
     </record> -->
 
 <!-- SALES lines -->
 	<record id="account_tax_report_line_vat_outputs" model="account.tax.report.line">
         <field name="name">TOTAL VAT OUTPUTS (BASE + TAX)</field>
-        <field name="formulas">ILTAX_OUT_BALANCE + ILTAX_OUT_BASE</field>
         <field name="sequence">1</field>
         <field name="country_id" ref="base.il"/>
     </record>
 
 	<record id="account_tax_report_line_vat_sales_tax" model="account.tax.report.line">
         <field name="name">TOTAL VAT SALES (TAX)</field> <!-- //1 -->
-        <field name="tag_name">TOTAL VAT SALES (TAX)</field>
         <field name="code">ILTAX_OUT_BALANCE</field>
         <field name="sequence">1</field>
         <field name="parent_id" ref="account_tax_report_line_vat_outputs"/>
@@ -111,7 +97,7 @@
         <field name="country_id" ref="base.il"/>
     </record>
 
-    <record id="account_financial_report_line_out_balance_pa" model="account.tax.report.line">
+    <record id="account_tax_report_line_out_balance_pa" model="account.tax.report.line">
         <field name="name">Total VAT PA Sales</field>
         <field name="tag_name">Total VAT PA Sales</field>
         <field name="code">ILTAX_OUT_BALANCE_PA</field> <!-- // 2 -->
@@ -132,7 +118,7 @@
     <record id="account_tax_report_line_out_base_exempt" model="account.tax.report.line">
         <field name="name">TOTAL VAT Exempt Sales (BASE)</field>
         <field name="tag_name">TOTAL VAT Exempt Sales (BASE)</field>
-        <field name="code">ILTAX_OUT_BASE_exempt</field><!-- // 4 -->
+        <field name="code">ILTAX_OUT_BASE_exempt</field> <!-- // 4 -->
         <field name="sequence">4</field>
         <field name="parent_id" ref="account_tax_report_line_vat_outputs"/>
         <field name="country_id" ref="base.il"/>
@@ -141,24 +127,24 @@
     <record id="account_tax_report_line_vat_in_fa" model="account.tax.report.line">
         <field name="name">TOTAL VAT INPUTS (fixed assets)</field>
         <field name="tag_name">TOTAL VAT INPUTS (fixed assets)</field>
-        <field name="code">ILTAX_VAT_IN_FA</field><!-- // 7 -->
+        <field name="code">ILTAX_VAT_IN_FA</field> <!-- // 7 -->
         <field name="sequence">7</field>
+        <field name="parent_id" ref="account_tax_report_line_in_balance"/>
         <field name="country_id" ref="base.il"/>
     </record>
 
     <record id="account_tax_report_line_vat_due" model="account.tax.report.line">
         <field name="name">TOTAL VAT DUE</field>
-        <field name="formulas">(ILTAX_OUT_BALANCE_00 + ILTAX_OUT_BALANCE_PA) - (ILTAX_IN_BALANCE_17 + ILTAX_IN_BALANCE_2_3 + ILTAX_IN_BALANCE_1_4)</field> <!--                                - ILTAX_IN_BALANCE_EQUIPMENT// 8 -->
+        <field name="formulas">(ILTAX_OUT_BALANCE_00 + ILTAX_OUT_BALANCE_PA) - (ILTAX_IN_BALANCE_17 + ILTAX_IN_BALANCE_2_3 + ILTAX_IN_BALANCE_1_4) - ILTAX_VAT_IN_FA - ILTAX_IN_BALANCE_EQUIPMENT</field> <!-- -ILTAX_IN_BALANCE_EQUIPMENT// 8 -->
         <field name="sequence">8</field>
         <field name="country_id" ref="base.il"/>
     </record>
 
-    <!-- <record id="account_tax_report_line_in_balance_equipment" model="account.tax.report.line">
+    <record id="account_tax_report_line_in_balance_equipment" model="account.tax.report.line">
         <field name="name">Total VAT equipment inputs</field>
+        <field name="tag_name">Total VAT equipment inputs</field>
         <field name="code">ILTAX_IN_BALANCE_EQUIPMENT</field>
-        <field name="domain" eval="[('tax_line_id.tag_ids', 'in', [ref('l10n_il.tax_tag_equipment_input')])]"/>
-        <field name="groupby">move_id</field>
-        <field name="formulas">balance = sum.balance</field>
+        <field name="sequence">8</field>
         <field name="country_id" ref="base.il"/>
-    </record> --> <!-- vat_equipment_inputs (type purchase) to be subtracted from sales part -->
+    </record> <!-- vat_equipment_inputs (type purchase) to be subtracted from sales part -->
 </odoo>
