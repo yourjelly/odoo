@@ -11,8 +11,6 @@ from odoo.tools.misc import formatLang
 from odoo.osv import expression
 from odoo.tools import float_is_zero, float_compare
 
-
-
 from werkzeug.urls import url_encode
 
 
@@ -109,8 +107,7 @@ class SaleOrder(models.Model):
         """
         Trigger the recompute of the taxes if the fiscal position is changed on the SO.
         """
-        for order in self:
-            order.order_line._compute_tax_id()
+        self.order_line._compute_tax_id()
 
     def _get_payment_type(self):
         self.ensure_one()
@@ -161,10 +158,10 @@ class SaleOrder(models.Model):
 
     pricelist_id = fields.Many2one(
         'product.pricelist', string='Pricelist', check_company=True,  # Unrequired company
-        required=True, readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
+        readonly=True, states={'draft': [('readonly', False)], 'sent': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="If you change the pricelist, only newly added lines will be affected.")
-    currency_id = fields.Many2one("res.currency", related='pricelist_id.currency_id', string="Currency", readonly=True, required=True)
+    currency_id = fields.Many2one("res.currency", string="Currency", compute="_compute_currency_id", store=True)
     analytic_account_id = fields.Many2one(
         'account.analytic.account', 'Analytic Account',
         readonly=True, copy=False, check_company=True,  # Unrequired company
@@ -238,14 +235,25 @@ class SaleOrder(models.Model):
                 bad_products = order.order_line.product_id.filtered(lambda p: p.company_id and p.company_id != order.company_id)
                 raise ValidationError((_("Your quotation contains products from company %s whereas your quotation belongs to company %s. \n Please change the company of your quotation or remove the products from other companies (%s).") % (', '.join(companies.mapped('display_name')), order.company_id.display_name, ', '.join(bad_products.mapped('display_name')))))
 
-    @api.depends('pricelist_id', 'date_order', 'company_id')
+    @api.depends('pricelist_id', 'company_id')
+    def _compute_currency_id(self):
+        for order in self:
+            company = order.company_id or self.env.company
+            order.currency_id = order.pricelist_id.currency_id or company.currency_id
+
+    @api.depends('currency_id', 'date_order', 'company_id')
     def _compute_currency_rate(self):
         for order in self:
             if not order.company_id:
                 order.currency_rate = order.currency_id.with_context(date=order.date_order).rate or 1.0
                 continue
             elif order.company_id.currency_id and order.currency_id:  # the following crashes if any one is undefined
-                order.currency_rate = self.env['res.currency']._get_conversion_rate(order.company_id.currency_id, order.currency_id, order.company_id, order.date_order)
+                order.currency_rate = self.env['res.currency']._get_conversion_rate(
+                    from_currency=order.company_id.currency_id,
+                    to_currency=order.currency_id,
+                    company=order.company_id,
+                    date=order.date_order,
+                )
             else:
                 order.currency_rate = 1.0
 
@@ -339,25 +347,28 @@ class SaleOrder(models.Model):
             })
             return
 
-        addr = self.partner_id.address_get(['delivery', 'invoice'])
-        partner_user = self.partner_id.user_id or self.partner_id.commercial_partner_id.user_id
+        self = self.with_company(self.company_id).with_context(lang=self.partner_id.lang)
+        partner = self.partner_id
+        addr = partner.address_get(['delivery', 'invoice'])
+        partner_user = partner.user_id or partner.commercial_partner_id.user_id
         values = {
-            'pricelist_id': self.partner_id.property_product_pricelist and self.partner_id.property_product_pricelist.id or False,
-            'payment_term_id': self.partner_id.property_payment_term_id and self.partner_id.property_payment_term_id.id or False,
+            'pricelist_id': (partner.property_product_pricelist or self.pricelist_id).id,
+            'payment_term_id': partner.property_payment_term_id.id,
             'partner_invoice_id': addr['invoice'],
             'partner_shipping_id': addr['delivery'],
-            'user_id': partner_user.id or self.env.uid
+            'user_id': partner_user.id or self.env.uid,
+            'team_id': (partner_user.sale_team_id or self.team_id).id
+            # VFE TODO backport fix of sale_team_id to 13.0 or earlier.
         }
+        # VFE TODO FIX in 13.0-- shouldn't it take SO company for the invoice terms ?
         if self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms') and self.env.company.invoice_terms:
-            values['note'] = self.with_context(lang=self.partner_id.lang).env.company.invoice_terms
+            values['note'] = self.env.company.invoice_terms
 
-        # Use team of salesman if any otherwise leave as-is
-        values['team_id'] = partner_user.team_id.id if partner_user and partner_user.team_id else self.team_id
         self.update(values)
 
     @api.onchange('user_id')
     def onchange_user_id(self):
-        if self.user_id and self.user_id.sale_team_id:
+        if self.user_id.sale_team_id:
             self.team_id = self.user_id.sale_team_id
 
     @api.onchange('partner_id')
@@ -378,13 +389,19 @@ class SaleOrder(models.Model):
             if partner.sale_warn != 'block' and partner.parent_id and partner.parent_id.sale_warn == 'block':
                 partner = partner.parent_id
             title = ("Warning for %s") % partner.name
+            # VFE FIXME shouldn't it be translated ???
             message = partner.sale_warn_msg
             warning = {
                     'title': title,
                     'message': message,
             }
             if partner.sale_warn == 'block':
-                self.update({'partner_id': False, 'partner_invoice_id': False, 'partner_shipping_id': False, 'pricelist_id': False})
+                self.update({
+                    'partner_id': False,
+                    'partner_invoice_id': False,
+                    'partner_shipping_id': False,
+                    'pricelist_id': False
+                })
                 return {'warning': warning}
 
         if warning:
@@ -404,15 +421,13 @@ class SaleOrder(models.Model):
 
     @api.model
     def create(self, vals):
+        company_id = vals.get('company_id', self.env.company.id)
         if vals.get('name', _('New')) == _('New'):
             seq_date = None
             if 'date_order' in vals:
                 seq_date = fields.Datetime.context_timestamp(self, fields.Datetime.to_datetime(vals['date_order']))
-            if 'company_id' in vals:
-                vals['name'] = self.env['ir.sequence'].with_company(vals['company_id']).next_by_code(
-                    'sale.order', sequence_date=seq_date) or _('New')
-            else:
-                vals['name'] = self.env['ir.sequence'].next_by_code('sale.order', sequence_date=seq_date) or _('New')
+            vals['name'] = self.env['ir.sequence'].with_company(company_id).next_by_code(
+                'sale.order', sequence_date=seq_date) or _('New')
 
         # Makes sure partner_invoice_id', 'partner_shipping_id' and 'pricelist_id' are defined
         if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
@@ -420,6 +435,7 @@ class SaleOrder(models.Model):
             addr = partner.address_get(['delivery', 'invoice'])
             vals['partner_invoice_id'] = vals.setdefault('partner_invoice_id', addr['invoice'])
             vals['partner_shipping_id'] = vals.setdefault('partner_shipping_id', addr['delivery'])
+            # VFE TODO check if property_product_pricelist returns empty recordset if not set or not.
             vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist and partner.property_product_pricelist.id)
         result = super(SaleOrder, self).create(vals)
         return result
@@ -498,7 +514,7 @@ class SaleOrder(models.Model):
             'ref': self.client_order_ref or '',
             'type': 'out_invoice',
             'narration': self.note,
-            'currency_id': self.pricelist_id.currency_id.id,
+            'currency_id': self.currency_id.id,
             'campaign_id': self.campaign_id.id,
             'medium_id': self.medium_id.id,
             'source_id': self.source_id.id,
@@ -680,8 +696,8 @@ class SaleOrder(models.Model):
     def action_quotation_send(self):
         ''' Opens a wizard to compose an email, with relevant mail template loaded by default '''
         self.ensure_one()
+        lang = self.partner_id.lang
         template_id = self._find_mail_template()
-        lang = self.env.context.get('lang')
         template = self.env['mail.template'].browse(template_id)
         if template.lang:
             lang = template._render_template(template.lang, 'sale.order', self.ids[0])
@@ -792,12 +808,16 @@ class SaleOrder(models.Model):
 
     def _amount_by_group(self):
         for order in self:
-            currency = order.currency_id or order.company_id.currency_id
+            currency = order.currency_id
             fmt = partial(formatLang, self.with_context(lang=order.partner_id.lang).env, currency_obj=currency)
             res = {}
             for line in order.order_line:
                 price_reduce = line.price_unit * (1.0 - line.discount / 100.0)
-                taxes = line.tax_id.compute_all(price_reduce, quantity=line.product_uom_qty, product=line.product_id, partner=order.partner_shipping_id)['taxes']
+                taxes = line.tax_id.compute_all(
+                    price_reduce,
+                    quantity=line.product_uom_qty,
+                    product=line.product_id,
+                    partner=order.partner_shipping_id)['taxes']
                 for tax in line.tax_id:
                     group = tax.tax_group_id
                     res.setdefault(group, {'amount': 0.0, 'base': 0.0})
@@ -861,8 +881,8 @@ class SaleOrder(models.Model):
         :return: The newly created payment.transaction record.
         '''
         # Ensure the currencies are the same.
-        currency = self[0].pricelist_id.currency_id
-        if any([so.pricelist_id.currency_id != currency for so in self]):
+        currency = self.currency_id
+        if len(currency) > 1:
             raise ValidationError(_('A transaction can\'t be linked to sales orders having different currencies.'))
 
         # Ensure the partner are the same.
@@ -1087,7 +1107,6 @@ class SaleOrderLine(models.Model):
         for line in self:
             line = line.with_company(line.company_id)
             fpos = line.order_id.fiscal_position_id or line.order_id.fiscal_position_id.get_fiscal_position(line.order_partner_id.id)
-            # If company_id is set, always filter taxes by the company
             taxes = line.product_id.taxes_id.filtered(lambda t: t.company_id == line.env.company)
             line.tax_id = fpos.map_tax(taxes, line.product_id, line.order_id.partner_shipping_id)
 
@@ -1232,7 +1251,7 @@ class SaleOrderLine(models.Model):
     untaxed_amount_to_invoice = fields.Monetary("Untaxed Amount To Invoice", compute='_compute_untaxed_amount_to_invoice', compute_sudo=True, store=True)
 
     salesman_id = fields.Many2one(related='order_id.user_id', store=True, string='Salesperson', readonly=True)
-    currency_id = fields.Many2one(related='order_id.currency_id', depends=['order_id'], store=True, string='Currency', readonly=True)
+    currency_id = fields.Many2one(related='order_id.currency_id', store=True, string='Currency', readonly=True)
     company_id = fields.Many2one(related='order_id.company_id', string='Company', store=True, readonly=True, index=True)
     order_partner_id = fields.Many2one(related='order_id.partner_id', store=True, string='Customer', readonly=False)
     analytic_tag_ids = fields.Many2many(
@@ -1420,42 +1439,7 @@ class SaleOrderLine(models.Model):
         """
         return {}
 
-    def _get_display_price(self, product):
-        # TO DO: move me in master/saas-16 on sale.order
-        # awa: don't know if it's still the case since we need the "product_no_variant_attribute_value_ids" field now
-        # to be able to compute the full price
-
-        # it is possible that a no_variant attribute is still in a variant if
-        # the type of the attribute has been changed after creation.
-        no_variant_attributes_price_extra = [
-            ptav.price_extra for ptav in self.product_no_variant_attribute_value_ids.filtered(
-                lambda ptav:
-                    ptav.price_extra and
-                    ptav not in product.product_template_attribute_value_ids
-            )
-        ]
-        if no_variant_attributes_price_extra:
-            product = product.with_context(
-                no_variant_attributes_price_extra=tuple(no_variant_attributes_price_extra)
-            )
-
-        if self.order_id.pricelist_id.discount_policy == 'with_discount':
-            return product.with_context(pricelist=self.order_id.pricelist_id.id).price
-        product_context = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order, uom=self.product_uom.id)
-
-        final_price, rule_id = self.order_id.pricelist_id.with_context(product_context).get_product_price_rule(self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
-        base_price, currency = self.with_context(product_context)._get_real_price_currency(product, rule_id, self.product_uom_qty, self.product_uom, self.order_id.pricelist_id.id)
-        if currency != self.order_id.pricelist_id.currency_id:
-            base_price = currency._convert(
-                base_price, self.order_id.pricelist_id.currency_id,
-                self.order_id.company_id or self.env.company, self.order_id.date_order or fields.Date.today())
-        # negative discounts (= surcharge) are included in the display price
-        return max(base_price, final_price)
-
-    @api.onchange('product_id')
-    def product_id_change(self):
-        if not self.product_id:
-            return
+    def _cleanup_variant_configuration(self):
         valid_values = self.product_id.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids
         # remove the is_custom values that don't belong to this template
         for pacv in self.product_custom_attribute_value_ids:
@@ -1467,27 +1451,80 @@ class SaleOrderLine(models.Model):
             if ptav._origin not in valid_values:
                 self.product_no_variant_attribute_value_ids -= ptav
 
-        vals = {}
-        if not self.product_uom or (self.product_id.uom_id.id != self.product_uom.id):
-            vals['product_uom'] = self.product_id.uom_id
-            vals['product_uom_qty'] = self.product_uom_qty or 1.0
+    def _update_description(self):
+        self.name = self.get_sale_order_line_multiline_description_sale(self.product_id)
 
-        product = self.product_id.with_context(
-            lang=self.order_id.partner_id.lang,
-            partner=self.order_id.partner_id,
-            quantity=vals.get('product_uom_qty') or self.product_uom_qty,
-            date=self.order_id.date_order,
-            pricelist=self.order_id.pricelist_id.id,
-            uom=self.product_uom.id
+    def _compute_price(self):
+        self.ensure_one()
+
+        # it is possible that a no_variant attribute is still in a variant if
+        # the type of the attribute has been changed after creation.
+        # VFE INVESTIGATE IS IT STILL POSSIBLE ???
+        if self.product_no_variant_attribute_value_ids:
+            self = self.with_context(p_id=self.product_id.id,ptav_ids=tuple(self.product_no_variant_attribute_value_ids.ids))
+        product = self.product_id
+        price = price_without_discount = 0.0
+        pricelist = self.order_id.pricelist_id
+        pricelist_kwargs = dict(
+            product=product,
+            quantity=self.product_uom_qty,
+            uom=self.product_uom,
+            date=self.order_id.date_order or fields.Date.today(),
+            currency=self.currency_id,
         )
+        if not pricelist or pricelist.discount_policy == 'with_discount':
+            # if not pricelist: use product lst_price instead...
+            price = self.order_id.pricelist_id.get_product_price(**pricelist_kwargs)
+        else:
+            # Price in pricelist currency (== order.currency_id)
+            price, rule_ids = self.order_id.pricelist_id.get_product_price_rules(**pricelist_kwargs)
 
-        vals.update(name=self.get_sale_order_line_multiline_description_sale(product))
+            if rule_ids:
+                last_rule = self.env['product.pricelist.item']
+                for rule_id in rule_ids:
+                    rule = self.env['product.pricelist.item'].browse(rule_id)
+                    if rule.pricelist_id.discount_policy == 'without_discount':
+                        last_rule = rule
+                    else:
+                        # The price given by rule is the price before discount
+                        # because its pricelist has with_discount as discount_policy.
+                        break
 
+                if last_rule:
+                    price_without_discount = last_rule.get_base_price(
+                        **pricelist_kwargs)[0]
+                    # 0 = price, 1 = sub_rules
+
+        if price_without_discount and price:
+            self.discount = ((price_without_discount - price) / price_without_discount) * 100
+            price_unit = price_without_discount
+        else:
+            self.discount = 0
+            price_unit = price
+
+        self.price_unit = self.env['account.tax']._fix_tax_included_price_company(
+            price=price_unit,
+            prod_taxes=product.taxes_id,
+            line_taxes=self.tax_id,
+            company_id=self.company_id)
+
+    @api.onchange('product_id')
+    def product_id_change(self):
+        if not self.product_id:
+            return
+
+        self = self.with_context(lang=self.order_id.partner_id.lang)
+
+        self._cleanup_variant_configuration()
+
+        product = self.product_id
+
+        self.product_uom = product.uom_id
+        self.product_uom_qty = self.product_uom_qty or 1.0
+
+        self._update_description()
         self._compute_tax_id()
-
-        if self.order_id.pricelist_id and self.order_id.partner_id:
-            vals['price_unit'] = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
-        self.update(vals)
+        self._compute_price()
 
         title = False
         message = False
@@ -1505,21 +1542,13 @@ class SaleOrderLine(models.Model):
         return result
 
     @api.onchange('product_uom', 'product_uom_qty')
-    def product_uom_change(self):
+    def quantity_change(self):
+        # VFE TODO remove the context brolls on non relational fields in view.
         if not self.product_uom or not self.product_id:
             self.price_unit = 0.0
-            return
-        if self.order_id.pricelist_id and self.order_id.partner_id:
-            product = self.product_id.with_context(
-                lang=self.order_id.partner_id.lang,
-                partner=self.order_id.partner_id,
-                quantity=self.product_uom_qty,
-                date=self.order_id.date_order,
-                pricelist=self.order_id.pricelist_id.id,
-                uom=self.product_uom.id,
-                fiscal_position=self.env.context.get('fiscal_position')
-            )
-            self.price_unit = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
+        else:
+            # Tax recomputation ?
+            self._compute_price()
 
     def name_get(self):
         result = []
@@ -1555,90 +1584,11 @@ class SaleOrderLine(models.Model):
             raise UserError(_('You can not remove an order line once the sales order is confirmed.\nYou should rather set the quantity to 0.'))
         return super(SaleOrderLine, self).unlink()
 
-    def _get_real_price_currency(self, product, rule_id, qty, uom, pricelist_id):
-        """Retrieve the price before applying the pricelist
-            :param obj product: object of current product record
-            :parem float qty: total quentity of product
-            :param tuple price_and_rule: tuple(price, suitable_rule) coming from pricelist computation
-            :param obj uom: unit of measure of current order line
-            :param integer pricelist_id: pricelist id of sales order"""
-        PricelistItem = self.env['product.pricelist.item']
-        field_name = 'lst_price'
-        currency_id = None
-        product_currency = None
-        if rule_id:
-            pricelist_item = PricelistItem.browse(rule_id)
-            if pricelist_item.pricelist_id.discount_policy == 'without_discount':
-                while pricelist_item.base == 'pricelist' and pricelist_item.base_pricelist_id and pricelist_item.base_pricelist_id.discount_policy == 'without_discount':
-                    price, rule_id = pricelist_item.base_pricelist_id.with_context(uom=uom.id).get_product_price_rule(product, qty, self.order_id.partner_id)
-                    pricelist_item = PricelistItem.browse(rule_id)
-
-            if pricelist_item.base == 'standard_price':
-                field_name = 'standard_price'
-            if pricelist_item.base == 'pricelist' and pricelist_item.base_pricelist_id:
-                field_name = 'price'
-                product = product.with_context(pricelist=pricelist_item.base_pricelist_id.id)
-                product_currency = pricelist_item.base_pricelist_id.currency_id
-            currency_id = pricelist_item.pricelist_id.currency_id
-
-        product_currency = product_currency or(product.company_id and product.company_id.currency_id) or self.env.company.currency_id
-        if not currency_id:
-            currency_id = product_currency
-            cur_factor = 1.0
-        else:
-            if currency_id.id == product_currency.id:
-                cur_factor = 1.0
-            else:
-                cur_factor = currency_id._get_conversion_rate(product_currency, currency_id, self.company_id or self.env.company, self.order_id.date_order or fields.Date.today())
-
-        product_uom = self.env.context.get('uom') or product.uom_id.id
-        if uom and uom.id != product_uom:
-            # the unit price is in a different uom
-            uom_factor = uom._compute_price(1.0, product.uom_id)
-        else:
-            uom_factor = 1.0
-
-        return product[field_name] * uom_factor * cur_factor, currency_id
-
     def _get_protected_fields(self):
         return [
             'product_id', 'name', 'price_unit', 'product_uom', 'product_uom_qty',
             'tax_id', 'analytic_tag_ids'
         ]
-
-    @api.onchange('product_id', 'price_unit', 'product_uom', 'product_uom_qty', 'tax_id')
-    def _onchange_discount(self):
-        if not (self.product_id and self.product_uom and
-                self.order_id.partner_id and self.order_id.pricelist_id and
-                self.order_id.pricelist_id.discount_policy == 'without_discount' and
-                self.env.user.has_group('product.group_discount_per_so_line')):
-            return
-
-        self.discount = 0.0
-        product = self.product_id.with_context(
-            lang=self.order_id.partner_id.lang,
-            partner=self.order_id.partner_id,
-            quantity=self.product_uom_qty,
-            date=self.order_id.date_order,
-            pricelist=self.order_id.pricelist_id.id,
-            uom=self.product_uom.id,
-            fiscal_position=self.env.context.get('fiscal_position')
-        )
-
-        product_context = dict(self.env.context, partner_id=self.order_id.partner_id.id, date=self.order_id.date_order, uom=self.product_uom.id)
-
-        price, rule_id = self.order_id.pricelist_id.with_context(product_context).get_product_price_rule(self.product_id, self.product_uom_qty or 1.0, self.order_id.partner_id)
-        new_list_price, currency = self.with_context(product_context)._get_real_price_currency(product, rule_id, self.product_uom_qty, self.product_uom, self.order_id.pricelist_id.id)
-
-        if new_list_price != 0:
-            if self.order_id.pricelist_id.currency_id != currency:
-                # we need new_list_price in the same currency as price, which is in the SO's pricelist's currency
-                new_list_price = currency._convert(
-                    new_list_price, self.order_id.pricelist_id.currency_id,
-                    self.order_id.company_id or self.env.company, self.order_id.date_order or fields.Date.today())
-            discount = (new_list_price - price) / new_list_price * 100
-            if (discount > 0 and new_list_price > 0) or (discount < 0 and new_list_price < 0):
-                self.discount = discount
 
     def _is_delivery(self):
         self.ensure_one()
