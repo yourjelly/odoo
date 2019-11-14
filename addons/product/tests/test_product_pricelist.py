@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import TransactionCase
+from . import common
 from odoo.tools import float_compare, test_reports
 from odoo.exceptions import UserError
 
 
-class TestProductPricelist(TransactionCase):
+class TestProductPricelist(common.TestPricelistCommon):
 
     def setUp(self):
         super(TestProductPricelist, self).setUp()
@@ -68,7 +68,6 @@ class TestProductPricelist(TransactionCase):
         })
 
         self.uom_unit_id = self.ref('uom.product_uom_unit')
-        self.list0 = self.ref('product.list0')
 
         self.ipad_retina_display.write({'uom_id': self.uom_unit_id, 'categ_id': self.category_5_id})
         self.customer_pricelist = self.ProductPricelist.create({
@@ -77,7 +76,7 @@ class TestProductPricelist(TransactionCase):
                 'name': 'Default pricelist',
                 'compute_price': 'formula',
                 'base': 'pricelist',
-                'base_pricelist_id': self.list0
+                'base_pricelist_id': self.public_pricelist.id,
             }), (0, 0, {
                 'name': '10% Discount on Assemble Computer',
                 'applied_on': '1_product',
