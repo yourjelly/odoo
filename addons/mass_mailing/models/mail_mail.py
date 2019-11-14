@@ -14,7 +14,7 @@ class MailMail(models.Model):
     _inherit = ['mail.mail']
 
     mailing_id = fields.Many2one('mailing.mailing', string='Mass Mailing')
-    mailing_trace_ids = fields.One2many('mailing.trace', 'mail_mail_id', string='Statistics')
+    mailing_trace_ids = fields.One2many('mail.notification', 'mail_id', string='Statistics')
 
     @api.model_create_multi
     def create(self, values_list):
@@ -24,7 +24,7 @@ class MailMail(models.Model):
         for mail, values in zip(mails, values_list):
             if values.get('mailing_trace_ids'):
                 mail_sudo = mail.sudo()
-                mail_sudo.mailing_trace_ids.write({'message_id': mail_sudo.message_id, 'state': 'outgoing'})
+                mail_sudo.mailing_trace_ids.write({'message_id': mail_sudo.message_id, 'notification_status': 'ready'})
         return mails
 
     def _get_tracking_url(self):

@@ -11,7 +11,7 @@ from odoo.osv import expression
 class MailingTrace(models.Model):
     """ Improve statistics model to add SMS support. Main attributes of
     statistics model are used, only some specific data is required. """
-    _inherit = 'mailing.trace'
+    _inherit = 'mail.notification'
     CODE_SIZE = 3
 
     trace_type = fields.Selection(selection_add=[('sms', 'SMS')])

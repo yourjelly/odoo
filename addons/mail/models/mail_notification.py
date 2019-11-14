@@ -14,7 +14,7 @@ class Notification(models.Model):
     _description = 'Message Notifications'
 
     mail_message_id = fields.Many2one(
-        'mail.message', 'Message', index=True, ondelete='cascade', required=True)
+        'mail.message', 'Message', index=True)
     res_partner_id = fields.Many2one(
         'res.partner', 'Needaction Recipient', index=True, ondelete='cascade', required=False)
     is_read = fields.Boolean('Is Read', index=True)
@@ -41,13 +41,6 @@ class Notification(models.Model):
             ], string='Failure type')
     failure_reason = fields.Text('Failure reason', copy=False)
     read_date = fields.Datetime('Read Date', copy=False)
-
-    _sql_constraints = [
-        # email notification;: partner is required
-        ('notification_partner_required',
-            "CHECK(notification_type NOT IN ('email', 'inbox') OR res_partner_id IS NOT NULL)",
-            'Customer is required for inbox / email notification'),
-    ]
 
     def init(self):
         self._cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('mail_notification_res_partner_id_is_read_notification_status_mail_message_id',))

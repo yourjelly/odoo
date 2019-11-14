@@ -12,7 +12,7 @@ class SmsSms(models.Model):
     _inherit = ['sms.sms']
 
     mailing_id = fields.Many2one('mailing.mailing', string='Mass Mailing')
-    mailing_trace_ids = fields.One2many('mailing.trace', 'sms_sms_id', string='Statistics')
+    mailing_trace_ids = fields.One2many('mail.notification', 'sms_sms_id', string='Statistics')
 
     def _update_body_short_links(self):
         """ Override to tweak shortened URLs by adding statistics ids, allowing to
@@ -36,7 +36,7 @@ class SmsSms(models.Model):
         if any(sms.mailing_id for sms in self.env['sms.sms'].sudo().browse(all_sms_ids)):
             for state in self.IAP_TO_SMS_STATE.keys():
                 sms_ids = [item['res_id'] for item in iap_results if item['state'] == state]
-                traces = self.env['mailing.trace'].sudo().search([
+                traces = self.env['mail.notification'].sudo().search([
                     ('sms_sms_id_int', 'in', sms_ids)
                 ])
                 if traces and state == 'success':

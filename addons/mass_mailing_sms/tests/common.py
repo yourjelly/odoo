@@ -20,7 +20,7 @@ class MockSMS(sms_common.MockSMS):
         self.assertEqual(found_sms.filtered(lambda s: s.partner_id).mapped('partner_id'), partners)
         self.assertEqual(set(found_sms.filtered(lambda s: not s.partner_id).mapped('number')), set(numbers))
 
-        found_traces = self.env['mailing.trace'].sudo().search([
+        found_traces = self.env['mail.notification'].sudo().search([
             ('sms_sms_id_int', 'in', found_sms.ids),
         ])
         self.assertEqual(len(found_sms), len(found_traces))
@@ -40,7 +40,7 @@ class MockSMS(sms_common.MockSMS):
             'failure_type': optional: sms_number_missing / sms_number_format / sms_credit / sms_server
             }, { ... }]
         """
-        traces = self.env['mailing.trace'].search([
+        traces = self.env['mail.notification'].search([
             ('mass_mailing_id', 'in', mailing.ids),
             ('res_id', 'in', records.ids)
         ])

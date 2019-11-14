@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="mailing_trace_report_view_pivot" model="ir.ui.view">
-            <field name="name">mailing.trace.report.view.pivot</field>
-            <field name="model">mailing.trace.report</field>
+            <field name="name">mail.notification.report.view.pivot</field>
+            <field name="model">mail.notification.report</field>
             <field name="arch" type="xml">
                 <pivot string="Mass Mailing Statistics" disable_linking="True">
                     <field name="campaign" type="row"/>
@@ -17,8 +17,8 @@
         </record>
 
         <record id="mailing_trace_report_view_graph" model="ir.ui.view">
-            <field name="name">mailing.trace.report.view.graph</field>
-            <field name="model">mailing.trace.report</field>
+            <field name="name">mail.notification.report.view.graph</field>
+            <field name="model">mail.notification.report</field>
             <field name="arch" type="xml">
                 <graph string="Mass Mailing Statistics">
                     <field name="campaign"/>
@@ -28,8 +28,8 @@
         </record>
 
         <record id="mailing_trace_report_view_search" model="ir.ui.view">
-            <field name="name">mailing.trace.report.view.search</field>
-            <field name="model">mailing.trace.report</field>
+            <field name="name">mail.notification.report.view.search</field>
+            <field name="model">mail.notification.report</field>
             <field name="arch" type="xml">
                 <search string="Mass Mailing Statistics">
                     <group expand="0" string="Extended Filters...">
@@ -53,7 +53,7 @@
         <!-- Actions and Menuitems -->
        <record id="mailing_trace_report_action_mail" model="ir.actions.act_window">
            <field name="name">Mass Mailing Analysis</field>
-           <field name="res_model">mailing.trace.report</field>
+           <field name="res_model">mail.notification.report</field>
            <field name="domain">[('mailing_type', '=', 'mail')]</field>
            <field name="view_mode">graph,pivot</field>
            <field name="help" type="html"><p>Mass Mailing Statistics allows you to check different mailing related information like number of bounced mails, opened mails, replied mails. You can sort out your analysis by different groups to get accurate grained analysis.</p></field>

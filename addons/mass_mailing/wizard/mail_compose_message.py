@@ -15,7 +15,7 @@ class MailComposeMessage(models.TransientModel):
 
     def get_mail_values(self, res_ids):
         """ Override method that generated the mail content by creating the
-        mailing.trace values in the o2m of mail_mail, when doing pure
+        mail.notification values in the o2m of mail_mail, when doing pure
         email mass mailing. """
         self.ensure_one()
         res = super(MailComposeMessage, self).get_mail_values(res_ids)

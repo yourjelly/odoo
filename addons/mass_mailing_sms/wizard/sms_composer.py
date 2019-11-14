@@ -26,7 +26,7 @@ class SMSComposer(models.TransientModel):
         )
 
     def _prepare_mass_sms_trace_values(self, record, sms_values):
-        trace_code = self.env['mailing.trace']._get_random_code()
+        trace_code = self.env['mail.notification']._get_random_code()
         trace_values = {
             'model': self.res_model,
             'res_id': record.id,
