@@ -2494,6 +2494,17 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         elif not self._fields['parent_path'].index:
             _logger.error('parent_path field on model %s must be indexed! Add index=True to the field definition)', self._name)
 
+    def _create_constraint(self, key, definition):
+        conname = '%s_%s' % (self._table, key)
+        current_definition = tools.constraint_definition(self._cr, self._table, conname)
+        if not current_definition:
+            # constraint does not exists
+            tools.add_constraint(self._cr, self._table, conname, definition)
+        elif current_definition != definition:
+            # constraint exists but its definition may have changed
+            tools.drop_constraint(self._cr, self._table, conname)
+            tools.add_constraint(self._cr, self._table, conname, definition)
+
     def _add_sql_constraints(self):
         """
 
@@ -2501,25 +2512,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         _sql_constraints.
 
         """
-        cr = self._cr
         foreign_key_re = re.compile(r'\s*foreign\s+key\b.*', re.I)
-
-        def process(key, definition):
-            conname = '%s_%s' % (self._table, key)
-            current_definition = tools.constraint_definition(cr, self._table, conname)
-            if not current_definition:
-                # constraint does not exists
-                tools.add_constraint(cr, self._table, conname, definition)
-            elif current_definition != definition:
-                # constraint exists but its definition may have changed
-                tools.drop_constraint(cr, self._table, conname)
-                tools.add_constraint(cr, self._table, conname, definition)
 
         for (key, definition, _) in self._sql_constraints:
             if foreign_key_re.match(definition):
-                self.pool.post_init(process, key, definition)
+                self.pool.post_init(self._create_constraint, key, definition)
             else:
-                process(key, definition)
+                self._create_constraint(key, definition)
 
     def _execute_sql(self):
         """ Execute the SQL code from the _sql attribute (if any)."""

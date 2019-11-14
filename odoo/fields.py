@@ -236,6 +236,8 @@ class Field(MetaField('DummyField', (object,), {})):
         'group_operator': None,         # operator for aggregating values
         'group_expand': None,           # name of method to expand groups in read_group()
         'prefetch': True,               # whether the field is prefetched
+
+        'unique': False,                # whether to add a unique constraint on this field
     }
 
     def __init__(self, string=Default, **kwargs):
@@ -813,6 +815,11 @@ class Field(MetaField('DummyField', (object,), {})):
         """
         if not self.column_type:
             return
+
+        if self.unique:
+            key = f"{self.name.replace('.', '_')}_unique"
+            definition = f"UNIQUE({self.name})"
+            model.pool.post_init(model._create_constraint, key, definition)
 
         column = columns.get(self.name)
 
