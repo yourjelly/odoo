@@ -87,7 +87,7 @@ class TestMailRace(common.TransactionCase, mail_common.MockEmails):
                     # Only here to simulate the initial use case
                     # If the record is lock, this line would create a deadlock since we are in the same thread
                     # In practice, the update will wait the end of the send() transaction and set the notif as bounce, as expeced
-                    cr.execute("UPDATE mail_message_res_partner_needaction_rel SET notification_status='bounce' WHERE id = %s", [notif.id])
+                    cr.execute("UPDATE mail_message_res_partner_needaction_rel SET notification_status='bounced' WHERE id = %s", [notif.id])
             return message['Message-Id']
         self.env['ir.mail_server']._patch_method('send_email', send_email)
 
