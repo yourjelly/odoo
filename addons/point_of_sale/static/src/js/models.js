@@ -2845,7 +2845,11 @@ exports.Order = Backbone.Model.extend({
         return round_pr(this.orderlines.reduce((function(sum, orderLine) {
             sum += (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
             if (orderLine.display_discount_policy() === 'without_discount'){
+                // VFE TODO ref discount for point_of_sale also ?
+                // or do we consider that in this case, the pricelist is never based
+                // on cost or fixed prices on which the reduction should be based?
                 sum += ((orderLine.get_lst_price() - orderLine.get_unit_price()) * orderLine.get_quantity());
+                // VFE FIXME this function isn't really clear...
             }
             return sum;
         }), 0), this.pos.currency.rounding);
