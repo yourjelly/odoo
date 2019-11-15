@@ -2590,6 +2590,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # a model's base structure depends on its mro (without registry classes)
         cls._model_cache_key = tuple(c for c in cls.mro() if getattr(c, 'pool', None) is None)
 
+        # reset those attributes on the model's class for _setup_fields() below
+        for attr in ('_rec_name', '_active_name'):
+            try:
+                delattr(cls, attr)
+            except AttributeError:
+                pass
+
     @api.model
     def _setup_base(self):
         """ Determine the inherited and custom fields of the model. """
@@ -2656,7 +2663,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # 5. determine and validate rec_name
         if cls._rec_name:
             assert cls._rec_name in cls._fields, \
-                "Invalid rec_name %s for model %s" % (cls._rec_name, cls._name)
+                "Invalid _rec_name=%r for model %r" % (cls._rec_name, cls._name)
         elif 'name' in cls._fields:
             cls._rec_name = 'name'
         elif 'x_name' in cls._fields:
@@ -2665,7 +2672,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         # 6. determine and validate active_name
         if cls._active_name:
             assert cls._active_name in cls._fields, \
-                "Invalid _active_name %r for model %r" % (cls._active_name, cls._name)
+                "Invalid _active_name=%r for model %r" % (cls._active_name, cls._name)
         elif 'active' in cls._fields:
             cls._active_name = 'active'
         elif 'x_active' in cls._fields:
