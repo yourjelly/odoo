@@ -4825,21 +4825,18 @@ Record ids: %(records)s
 
     def toggle_active(self):
         """ Inverse the value of the field ``(x_)active`` on the records in ``self``. """
-        if self._active_name:
-            for record in self:
-                record[self._active_name] = not record[self._active_name]
+        for record in self:
+            record[self._active_name] = not record[self._active_name]
 
     def action_archive(self):
-        """
-            Set active=False on a recordset, by calling toggle_active to take the
-            corresponding actions according to the model
+        """ Set (x-)active=False on a recordset, by calling toggle_active to
+        take the corresponding actions according to the model
         """
         return self.filtered(lambda record: record[self._active_name]).toggle_active()
 
     def action_unarchive(self):
-        """
-            Set active=True on a recordset, by calling toggle_active to take the
-            corresponding actions according to the model
+        """ Set (x-)active=True on a recordset, by calling toggle_active to
+        take the corresponding actions according to the model
         """
         return self.filtered(lambda record: not record[self._active_name]).toggle_active()
 
