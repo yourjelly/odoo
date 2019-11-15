@@ -325,6 +325,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     on the records of the current model using the ``child_of`` and
     ``parent_of`` domain operators.
     """
+    _active_name = None         #: field to use for active records
     _date_name = 'date'         #: field to use for default calendar view
     _fold_name = 'fold'         #: field to determine folded groups in kanban views
 
@@ -2661,6 +2662,15 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         elif 'x_name' in cls._fields:
             cls._rec_name = 'x_name'
 
+        # 6. determine and validate active_name
+        if cls._active_name:
+            assert cls._active_name in cls._fields, \
+                "Invalid _active_name %r for model %r" % (cls._active_name, cls._name)
+        elif 'active' in cls._fields:
+            cls._active_name = 'active'
+        elif 'x_active' in cls._fields:
+            cls._active_name = 'x_active'
+
     @api.model
     def _setup_fields(self):
         """ Setup the fields, except for recomputation triggers. """
@@ -4064,12 +4074,11 @@ Record ids: %(records)s
         """
         # if the object has an active field ('active', 'x_active'), filter out all
         # inactive records unless they were explicitely asked for
-        if active_test and self._context.get('active_test', True):
+        if self._active_name and active_test and self._context.get('active_test', True):
             # the item[0] trick below works for domain items and '&'/'|'/'!'
             # operators too
-            active_field = self._get_active_field()
-            if active_field in self._fields and not any(item[0] == active_field for item in domain):
-                domain = [(active_field, '=', 1)] + domain
+            if not any(item[0] == self._active_name for item in domain):
+                domain = [(self._active_name, '=', 1)] + domain
 
         if domain:
             e = expression.expression(domain, self)
@@ -4306,8 +4315,8 @@ Record ids: %(records)s
             if order_field in self._fields:
                 to_flush[self._name].add(order_field)
 
-        if 'active' in self:
-            to_flush[self._name].add('active')
+        if self._active_name:
+            to_flush[self._name].add(self._active_name)
 
         for model_name, field_names in to_flush.items():
             self.env[model_name].flush(field_names)
@@ -4814,37 +4823,25 @@ Record ids: %(records)s
         index = {vals['id']: vals for vals in result}
         return [index[record.id] for record in records if record.id in index]
 
-    @api.model
-    def _get_active_field(self):
-        """Returns the name of the field to use for the archiving mechanism."""
-        if 'active' in self._fields:
-            return 'active'
-        elif 'x_active' in self._fields:
-            return 'x_active'
-        return False
-
     def toggle_active(self):
         """ Inverse the value of the field ``(x_)active`` on the records in ``self``. """
-        active_field = self._get_active_field()
-        if active_field in self._fields:
+        if self._active_name:
             for record in self:
-                record[active_field] = not record[active_field]
+                record[self._active_name] = not record[self._active_name]
 
     def action_archive(self):
         """
             Set active=False on a recordset, by calling toggle_active to take the
             corresponding actions according to the model
         """
-        active_field = self._get_active_field()
-        return self.filtered(lambda record: record[active_field]).toggle_active()
+        return self.filtered(lambda record: record[self._active_name]).toggle_active()
 
     def action_unarchive(self):
         """
             Set active=True on a recordset, by calling toggle_active to take the
             corresponding actions according to the model
         """
-        active_field = self._get_active_field()
-        return self.filtered(lambda record: not record[active_field]).toggle_active()
+        return self.filtered(lambda record: not record[self._active_name]).toggle_active()
 
     def _register_hook(self):
         """ stuff to do right after the registry is built """

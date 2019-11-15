@@ -161,7 +161,7 @@ class test_search(TransactionCase):
             'model_id': self.env.ref('base.model_res_country').id,
             'ttype': 'boolean',
         })
-        self.assertEqual('x_active', model_country._get_active_field())
+        self.assertEqual('x_active', model_country._active_name)
         country_ussr = model_country.create({'name': 'USSR', 'x_active': False})
         ussr_search = model_country.search([('name', '=', 'USSR')])
         self.assertFalse(ussr_search)
@@ -178,7 +178,7 @@ class test_search(TransactionCase):
             'model_id': self.env.ref('base.model_res_bank').id,
             'ttype': 'boolean',
         })
-        self.assertEqual('active', model_bank._get_active_field())
+        self.assertEqual('active', model_bank._active_name)
         bank_credit_communal = model_bank.create({'name': 'Crédit Communal', 'x_active': False, 'active': True})
         cc_search = model_bank.search([('name', '=', 'Crédit Communal')])
         self.assertIn(bank_credit_communal, cc_search, "Search for active record with x_active set to False has failed")
