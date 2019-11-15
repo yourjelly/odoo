@@ -33,6 +33,7 @@ have real delivered quantities in sales orders.
     'demo': [
         'data/sale_service_demo.xml',
     ],
+    'qweb': ['static/src/xml/*.xml'],
     'auto_install': True,
     'uninstall_hook': 'uninstall_hook',
 }

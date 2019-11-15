@@ -4,6 +4,7 @@
     <template id="assets_backend" name="sale timesheet assets" inherit_id="web.assets_backend">
         <xpath expr="." position="inside">
             <link rel="stylesheet" type="text/scss" href="/sale_timesheet/static/src/scss/sale_timesheet.scss"/>
+            <script type="text/javascript" src="/sale_timesheet/static/src/js/project_overview.js"/>
         </xpath>
     </template>
 
@@ -12,6 +13,7 @@
         <field name="type">qweb</field>
         <field name="model">project.project</field>
         <field name="arch" type="xml">
+        <data js_class="project_overview">
         <nav class="o_qweb_cp_buttons" t-if="actions">
             <button t-foreach="actions" t-as="action"
                     type="action" class="btn btn-primary"
@@ -344,6 +346,7 @@
                 </div>
             </div>
         </div>
+        </data>
         </field>
     </record>
 

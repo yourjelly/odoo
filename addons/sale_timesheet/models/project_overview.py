@@ -17,9 +17,9 @@ class Project(models.Model):
     _inherit = 'project.project'
 
 
-    def _qweb_prepare_qcontext(self, view_id, domain):
-        values = super()._qweb_prepare_qcontext(view_id, domain)
-
+    def _qweb_prepare_qcontext(self, view_id, domain, render_parameters):
+        values = super()._qweb_prepare_qcontext(view_id, domain, render_parameters)
+        print(render_parameters)
         projects = self.search(domain)
         values.update(projects._plan_prepare_values())
         values['actions'] = projects._plan_prepare_actions(values)

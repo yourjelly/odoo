@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates>
+
+    <div t-name="sale_timesheet.ProjectOverviewMenu" class="btn-group o_dropdown">
+        <button class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+            <span t-attf-class="fa {{widget.icon}}"/> <t t-esc="widget.title"/>
+        </button>
+        <div class="dropdown-menu o_dropdown_menu" role="menu">
+            <t t-foreach="widget.presets" t-as="preset">
+                <div t-attf-class="o_menu_item dropdown-item o_poject_filter_preset {{preset.is(widget.value) ?  'selected': 'cc'}}" t-att-id="preset.domId">
+                    <t t-esc="preset.title"/>
+                </div>
+            </t>
+            <div class="dropdown-divider" role="separator" />
+            <div class="dropdown-item-text o_project_overview_filter">
+            </div>
+        </div>
+    </div>
+
+    <div t-name="sale_timesheet.ProjectOverviewMenu" class="btn-group o_dropdown">
+        <button class="o_dropdown_toggler_btn btn btn-secondary dropdown-toggle" data-toggle="dropdown">
+            <span t-attf-class="fa {{widget.icon}}"/> <t t-esc="widget.title"/>
+        </button>
+        <div class="dropdown-menu o_dropdown_menu" role="menu">
+            <t t-foreach="widget.presets" t-as="preset">
+                <div t-attf-class="o_menu_item dropdown-item o_poject_filter_preset {{preset.is(widget.value) ?  'selected': 'cc'}}" t-att-id="preset.domId">
+                    <t t-esc="preset.title"/>
+                </div>
+            </t>
+            <div class="dropdown-divider" role="separator" />
+            <div class="dropdown-item-text o_project_overview_filter">
+            </div>
+        </div>
+    </div>
+
+</templates>
+
+
+<!-- <t t-name="DropdownMenu.MenuItems">
+    <t t-if="widget.items.length !== 0">
+        <t t-set="group" t-value="0"/>
+        <t t-foreach="widget.items" t-as="item">
+            <div t-if="group !== item.groupNumber" role="separator" class="dropdown-divider" data-removable="1"/>
+            <div t-attf-class="o_menu_item"
+                t-att-data-id="item.id">
+                <a role="menuitem" href="#" t-attf-class="dropdown-item#{item.isActive ? ' selected ' : ''}">
+                    <t t-esc="item.description"/>
+                    <span t-if="item.isRemovable" t-att-data-id="item.id" class="o_trash_button" > <span class="fa fa-trash-o"></span> </span>
+                    <span t-if="item.hasOptions" t-att-data-id="item.id" class="o_submenu_switcher">
+                        <span t-att-class="widget.openItems[item.id] ? 'fa fa-caret-down' : 'fa fa-caret-right'"></span>
+                    </span>
+                </a>
+                <ul t-if="item.hasOptions &amp;&amp; widget.openItems[item.id]" class="list-unstyled">
+                    <t t-set="subgroup" t-value="0"/>
+                    <t t-foreach="item.options" t-as="option">
+                        <li t-if="subgroup !== option.groupId" role="separator" class="dropdown-divider" data-removable="1"/>
+                        <li class="o_item_option"
+                            t-att-data-item_id="item.id" t-att-data-option_id="option.optionId">
+                            <a role="menuitem" href="#" t-attf-class="dropdown-item#{item.currentOptionIds.has(option.optionId) ? ' selected': ''} pl-5"><t t-esc="option.description"/></a>
+                        </li>
+                        <t t-set="subgroup" t-value="option.groupId"/>
+                    </t>
+                </ul>
+            </div>
+            <t t-set="group" t-value="item.groupNumber"/>
+        </t>
+    </t>
+</t> -->

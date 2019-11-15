@@ -26,9 +26,23 @@ class Project(models.Model):
         help="Employee/Sale Order Item Mapping:\n Defines to which sales order item an employee's timesheet entry will be linked."
         "By extension, it defines the rate at which an employee's time on the project is billed.")
 
+    # Fields used for Project Overview filters
+    task_user_ids = fields.Many2many(compute='_compute_task_users')
+    task_partner_ids = fields.Many2many(compute='_compute_task_users')
+
     _sql_constraints = [
         ('sale_order_required_if_sale_line', "CHECK((sale_line_id IS NOT NULL AND sale_order_id IS NOT NULL) OR (sale_line_id IS NULL))", 'The Project should be linked to a Sale Order to select an Sale Order Items.'),
     ]
+
+    @api.depends('task_ids.user_id')
+    def _compute_task_users(self):
+        for project in self:
+            project.task_partner_ids = project.task_ids.user_id
+
+    @api.depends('task_ids.partner_id')
+    def _compute_task_users(self):
+        for project in self:
+            project.task_user_ids = project.task_ids.partner_id
 
     @api.depends('sale_order_id', 'sale_line_id', 'sale_line_employee_ids')
     def _compute_billable_type(self):
