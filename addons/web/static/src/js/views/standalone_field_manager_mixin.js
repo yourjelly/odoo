@@ -41,6 +41,7 @@ var StandaloneFieldManagerMixin = _.extend({}, FieldManagerMixin, {
      * @returns {Promise}
      */
     _confirmChange: function (id, fields, event) {
+        console.log(id, fields)
         var result = FieldManagerMixin._confirmChange.apply(this, arguments);
         var record = this.model.get(id);
         _.each(this.registeredWidgets[id], function (widget, fieldName) {

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import babel.dates
 import pytz
+from lxml import etree
 
 from odoo import _, api, fields, models
 from odoo.osv.expression import AND
@@ -177,15 +178,16 @@ class Base(models.AbstractModel):
 
     ##### qweb view hooks #####
     @api.model
-    def qweb_render_view(self, view_id, domain):
+    def qweb_render_view(self, view_id, domain, render_parameters=None):
+        # TODO args and kwargs => real named param.
         assert view_id
         return self.env['ir.qweb'].render(
             view_id, {
             **self.env['ir.ui.view']._prepare_qcontext(),
-            **self._qweb_prepare_qcontext(view_id, domain),
+            **self._qweb_prepare_qcontext(view_id, domain, render_parameters),
         })
 
-    def _qweb_prepare_qcontext(self, view_id, domain):
+    def _qweb_prepare_qcontext(self, view_id, domain, render_parameters=None):
         """
         Base qcontext for rendering qweb views bound to this model
         """
@@ -202,9 +204,11 @@ class Base(models.AbstractModel):
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         r = super().fields_view_get(view_id, view_type, toolbar, submenu)
         # avoid leaking the raw (un-rendered) template, also avoids bloating
-        # the response payload for no reason
+        # the response payload for no reason. Only send the root node,
+        # to send attributes such as `js_class`.
         if r['type'] == 'qweb':
-            r['arch'] = '<qweb/>'
+            root = etree.fromstring(r['arch'])
+            r['arch'] = etree.tostring(etree.Element('qweb', root.attrib))
         return r
 
     @api.model

@@ -28,6 +28,7 @@ var Model = AbstractModel.extend({
             body: '',
             context: {},
             domain: [],
+            renderParams: {},
         };
     },
     /**
@@ -41,6 +42,7 @@ var Model = AbstractModel.extend({
             kwargs: {
                 view_id: state.viewId,
                 domain: state.domain,
+                render_parameters: state.renderParams,
                 context: state.context
             }
         }).then(function (r) {
@@ -58,7 +60,7 @@ var Model = AbstractModel.extend({
      * load
      */
     load: function (params) {
-        _.extend(this._state, _.pick(params, ['viewId', 'modelName', 'domain', 'context']));
+        _.extend(this._state, _.pick(params, ['viewId', 'modelName', 'domain', 'context', 'renderParams']));
 
         return this._fetch();
     },
@@ -66,7 +68,7 @@ var Model = AbstractModel.extend({
      * reload
      */
     reload: function (_id, params) {
-        _.extend(this._state, _.pick(params, ['domain', 'context']));
+        _.extend(this._state, _.pick(params, ['domain', 'context', 'renderParams']));
 
         return this._fetch();
     }
@@ -92,6 +94,9 @@ var Controller = AbstractController.extend({
     events: _.extend({}, AbstractController.prototype.events, {
         'click [type="toggle"]': '_onLazyToggle',
     }),
+    custom_events: {
+        'render_params_changed': '_onRenderParamsChanged',
+    },
 
     init: function () {
         this._super.apply(this, arguments);
@@ -116,6 +121,16 @@ var Controller = AbstractController.extend({
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
+
+    /**
+     * Re-render the view with the updated parameters and reload
+     * @param {OdooEvent} event
+     * @param {Object} event.data Parameters given to the server-side rendering
+     * @return {Promise}
+     */
+    _onRenderParamsChanged(event) {
+        return this.reload({renderParams: event.data});
+    },
 
     /**
      * Lazy toggle. Content is not remembered between unfolds.
