@@ -51,6 +51,8 @@
         <field name="website_published">True</field>
         <field name="subtitle">Enhance your architectural business and improve professional skills.</field>
         <field name="twitter_hashtag">odoo</field>
+        <field eval="(DateTime.now() - timedelta(days=5)).strftime('%Y-%m-%d 08:00:00')" name="start_sale_date"/>
+        <field eval="(DateTime.now() + timedelta(days=9)).strftime('%Y-%m-%d 08:00:00')" name="end_sale_date"/>
         <field name="cover_properties">{"background-image": "url('/website_event/static/src/img/event_cover_2.jpg')", "background-color": "oe_black", "resize_class": "o_record_has_cover cover_mid", "opacity": "0.4"}</field>
         <field name="description"><![CDATA[
 <div class="oe_structure">

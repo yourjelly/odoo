@@ -100,14 +100,6 @@
         <field name="address_id" ref="base.res_partner_1"/>
     </record>
 
-    <function model="event.event" name="button_confirm" eval="[ref('event_0')]"/>
-    <function model="event.event" name="button_confirm" eval="[ref('event_1')]"/>
-    <function model="event.event" name="button_confirm" eval="[ref('event_2')]"/>
-    <function model="event.event" name="button_confirm" eval="[ref('event_3')]"/>
-    <function model="event.event" name="button_confirm" eval="[ref('event_4')]"/>
-    <function model="event.event" name="button_confirm" eval="[ref('event_5')]"/>
-    <function model="event.event" name="button_confirm" eval="[ref('event_6')]"/>
-
     <!-- Attendee -->
     <record id="reg_2_0" model="event.registration">
         <field name="name">Camptocamp</field>

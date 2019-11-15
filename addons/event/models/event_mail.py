@@ -86,10 +86,10 @@ class EventMailScheduler(models.Model):
             else:
                 mail.done = len(mail.mail_registration_ids) == len(mail.event_id.registration_ids) and all(mail.mail_sent for mail in mail.mail_registration_ids)
 
-    @api.depends('event_id.state', 'event_id.date_begin', 'interval_type', 'interval_unit', 'interval_nbr')
+    @api.depends('event_id.date_begin', 'interval_type', 'interval_unit', 'interval_nbr')
     def _compute_scheduled_date(self):
         for mail in self:
-            if mail.event_id.state not in ['confirm', 'done']:
+            if not mail.event_id:
                 mail.scheduled_date = False
             else:
                 if mail.interval_type == 'after_sub':
@@ -98,6 +98,7 @@ class EventMailScheduler(models.Model):
                     date, sign = mail.event_id.date_begin, -1
                 else:
                     date, sign = mail.event_id.date_end, 1
+
                 mail.scheduled_date = date + _INTERVALS[mail.interval_unit](sign * mail.interval_nbr)
 
     def execute(self):

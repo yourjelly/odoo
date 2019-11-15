@@ -31,7 +31,7 @@ class EventMailScheduler(models.Model):
                 if not mail.mail_sent and (mail.interval_type != 'before_event' or mail.event_id.date_end > now) and mail.notification_type == 'sms' and mail.sms_template_id:
                     self.env['event.registration']._message_sms_schedule_mass(
                         template=mail.sms_template_id,
-                        active_domain=[('event_id', '=', mail.event_id.id), ('state', '!=', 'cancel')],
+                        active_domain=[('event_id', '=', mail.event_id.id)],
                         mass_keep_log=True
                     )
                     mail.write({'mail_sent': True})

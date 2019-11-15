@@ -92,7 +92,7 @@ class WebsiteEventController(http.Controller):
             domain_search["country"] = [("country_id", "=", False)]
 
         def dom_without(without):
-            domain = [('state', "in", ['draft', 'confirm', 'done'])]
+            domain = []
             for key, search in domain_search.items():
                 if key != without:
                     domain += search
@@ -242,9 +242,9 @@ class WebsiteEventController(http.Controller):
         domain = request.website.website_domain()
         if country_code:
             country = request.env['res.country'].search([('code', '=', country_code)], limit=1)
-            events = Event.search(domain + ['|', ('address_id', '=', None), ('country_id.code', '=', country_code), ('date_begin', '>=', '%s 00:00:00' % fields.Date.today()), ('state', '=', 'confirm')], order="date_begin")
+            events = Event.search(domain + ['|', ('address_id', '=', None), ('country_id.code', '=', country_code), ('date_begin', '>=', '%s 00:00:00' % fields.Date.today())], order="date_begin")
         if not events:
-            events = Event.search(domain + [('date_begin', '>=', '%s 00:00:00' % fields.Date.today()), ('state', '=', 'confirm')], order="date_begin")
+            events = Event.search(domain + [('date_begin', '>=', '%s 00:00:00' % fields.Date.today())], order="date_begin")
         for event in events:
             if country_code and event.country_id.code == country_code:
                 result['country'] = country

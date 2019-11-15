@@ -33,6 +33,14 @@
             <field name="organizer_id" position="before">
                 <field name="website_id" options="{'no_create': True}" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]" groups="website.group_multi_website"/>
             </field>
+            <field name="user_id" position="after">
+                <label for="start_sale_date" string="Sales Dates"/>
+                <div class="o_row">
+                    <field name="start_sale_date" widget="daterange" nolabel="1" class="oe_inline" options="{'related_end_date': 'end_sale_date'}"/>
+                    <i class="fa fa-long-arrow-right mx-2" aria-label="Arrow icon" title="Arrow"/>
+                    <field name="end_sale_date" widget="daterange" nolabel="1" class="oe_inline" options="{'related_start_date': 'start_sale_date'}"/>
+                </div>
+            </field>
             <div name="button_box" position="inside">
                 <field name="website_url" invisible="1"/>
                 <field name="is_published" widget="website_redirect_button"/>
@@ -41,15 +49,9 @@
                 <field name="website_menu"/>
                 <label for="website_menu" string="Website Menu"/>
             </label>
-            <xpath expr="//button[@name='button_done']" position="before">
+            <xpath expr="//header" position="inside">
                 <button name="action_open_badge_editor"
                     type="object"
-                    states="confirm"
-                    string="Preview Badges"
-                    class="oe_highlight"/>
-                <button name="action_open_badge_editor"
-                    type="object"
-                    states="done"
                     string="Preview Badges"/>
             </xpath>
         </field>

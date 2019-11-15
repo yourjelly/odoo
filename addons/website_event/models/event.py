@@ -38,6 +38,10 @@ class Event(models.Model):
              " of the event on the website.", copy=False)
     menu_id = fields.Many2one('website.menu', 'Event Menu', copy=False)
 
+    # if we are in this range of time, ticket can be buy on website
+    start_sale_date = fields.Datetime('Start date of sales')
+    end_sale_date = fields.Datetime('End date of sales')
+
     def _compute_is_participating(self):
         # we don't allow public user to see participating label
         if self.env.user != self.env['website'].get_current_website().user_id:

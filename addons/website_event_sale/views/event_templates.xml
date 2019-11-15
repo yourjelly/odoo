@@ -9,7 +9,7 @@
 
 <template id="index" inherit_id="website_event.events_list" name="Event's Ticket">
     <xpath expr="//div[@t-foreach='event_ids']//footer" position="inside">
-        <t t-if="event.state in ['draft', 'confirm'] and event.event_ticket_ids">
+        <t t-if="(event.start_sale_date and event.end_sale_date and event.start_sale_date.date() &lt; datetime.date.today() &lt; event.end_sale_date.date()) and event.event_ticket_ids">
             <span t-if="event.seats_availability == 'limited' and not event.seats_available" class="text-danger">Sold Out</span>
             <span t-if="event.seats_availability == 'limited' and event.seats_available and event.seats_available &lt;= ((event.seats_max or 0) / 4)" class="text-muted">
                 <em>Only <t t-esc="event.seats_available"/> Remaining</em>
@@ -110,7 +110,7 @@
         </t>
     </xpath>
     <xpath expr="//form[@id='registration_form']" position="attributes">
-        <attribute name="t-if">event.event_ticket_ids and not all([ticket.is_expired for ticket in event.event_ticket_ids])</attribute>
+        <attribute name="t-if">(event.start_sale_date and event.end_sale_date and event.start_sale_date.date() &lt; datetime.date.today() &lt; event.end_sale_date.date()) and event.event_ticket_ids and not all([ticket.is_expired for ticket in event.event_ticket_ids])</attribute>
     </xpath>
 </template>
 

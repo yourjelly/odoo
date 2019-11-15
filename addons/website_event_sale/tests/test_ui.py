@@ -17,6 +17,8 @@ class TestUi(HttpCaseWithUserDemo):
             'user_id': self.env.ref('base.user_admin').id,
             'date_begin': (Datetime.today()+ timedelta(days=5)).strftime('%Y-%m-%d 07:00:00'),
             'date_end': (Datetime.today()+ timedelta(days=5)).strftime('%Y-%m-%d 16:30:00'),
+            'start_sale_date': (Datetime.today() - timedelta(days=5)).strftime('%Y-%m-%d 07:00:00'),
+            'end_sale_date': (Datetime.today() + timedelta(days=5)).strftime('%Y-%m-%d 16:30:00'),
         })
 
         self.env['event.event.ticket'].create([{
