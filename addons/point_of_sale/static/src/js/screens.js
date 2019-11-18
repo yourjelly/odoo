@@ -676,6 +676,84 @@ var OrderWidget = PosBaseWidget.extend({
     },
 });
 
+// Displays Order selected in parent.
+
+var ListOrderWidget = PosBaseWidget.extend({
+    template:'OrderWidget',
+    init: function(parent, options) {
+        var self = this;
+        this._super(parent,options);
+        this.parent = parent;
+
+        //Object.observe(parent.selectedOrder, this.change_selected_order);
+    },
+
+    change_selected_order: function() {
+        if (this.parent.get('selectedOrder')) {
+            this.bind_order_events();
+            this.numpad_state.reset();
+            this.renderElement();
+        }
+    },
+    render_orderline: function(orderline){
+        var el_str  = QWeb.render('Orderline',{widget:this, line:orderline}); 
+        var el_node = document.createElement('div');
+            el_node.innerHTML = _.str.trim(el_str);
+            el_node = el_node.childNodes[0];
+            el_node.orderline = orderline;
+            el_node.addEventListener('click',this.line_click_handler);
+        var el_lot_icon = el_node.querySelector('.line-lot-icon');
+        if(el_lot_icon){
+            el_lot_icon.addEventListener('click', (function() {
+                this.show_product_lot(orderline);
+            }.bind(this)));
+        }
+
+        orderline.node = el_node;
+        return el_node;
+    },
+    rerender_orderline: function(order_line){
+        var node = order_line.node;
+        var replacement_line = this.render_orderline(order_line);
+        node.parentNode.replaceChild(replacement_line,node);
+    },
+    // overriding the openerp framework replace method for performance reasons
+    replace: function($target){
+        this.renderElement();
+        var target = $target[0];
+        target.parentNode.replaceChild(this.el,target);
+    },
+    renderElement: function(scrollbottom){
+        var order  = this.parent.get('selectedOrder');
+        if (!order) {
+            return;
+        }
+        var orderlines = order.get_orderlines();
+
+        var el_str  = QWeb.render('OrderWidget',{widget:this, order:order, orderlines:orderlines});
+
+        var el_node = document.createElement('div');
+            el_node.innerHTML = _.str.trim(el_str);
+            el_node = el_node.childNodes[0];
+
+
+        var list_container = el_node.querySelector('.orderlines');
+        for(var i = 0, len = orderlines.length; i < len; i++){
+            var orderline = this.render_orderline(orderlines[i]);
+            list_container.appendChild(orderline);
+        }
+
+        if(this.el && this.el.parentNode){
+            this.el.parentNode.replaceChild(el_node,this.el);
+        }
+        this.el = el_node;
+
+        if(scrollbottom){
+            this.el.querySelector('.order-scroller').scrollTop = 100 * orderlines.length;
+        }
+    },
+});
+
 /* ------ The Product Categories ------ */
 
 // Display and navigate the product categories.
@@ -2607,13 +2685,90 @@ define_action_button({
     },
 });
 
+var order_list_screen_widget = ScreenWidget.extend({
+    template: 'OrderListScreenWidget',
+    orders_per_page: 10,
+    show: function() {
+        var self = this;
+        this._super();
+        this.set('selectedOrder', this.pos.get('selectedOrder'));
+        this.get_orders(0).then(function(orders){
+            self.orders_by_id = {}
+            orders.forEach(function(order) {
+                self.orders_by_id[order.id] = order;
+            })
+            self.renderElement();
+            self.renderOrderList(orders);
+        })
+    },
+    hide: function() {
+        this._super();
+    },
+    click_back: function() {
+        this.gui.show_screen(this.previous_screen || 'products');
+    },
+    get_orders: function(page_offset, fields) {
+        fields = (fields || []).concat(['id', 'user_id', 'partner_id', 'pricelist_id', 'pos_reference', 'state', 'date_order','amount_total']);
+        return rpc.query({
+            model: 'pos.order',
+            method: 'search_read',
+            domain: [['state', '=', 'paid']],
+            fields: fields,
+            order_by: ['id desc'],
+            limit: self.orders_per_page,
+            offset: page_offset * this.orders_per_page,
+        });
+    },
+    renderElement: function() {
+        var self = this;
+        this._super();
+        this.$('.back').click(function(){
+            self.click_back();
+        });
+        this.numpad = new NumpadWidget(this,{});
+        this.order_widget = new ListOrderWidget(this,{
+            numpad_state: this.numpad.state,
+        });
+        this.order_widget.replace(this.$('.placeholder-OrderWidget'));
+
+    },
+    renderOrderList: function(orders) {
+        var self = this;
+        var contents = this.$el[0].querySelector('.order-list-contents');
+        contents.innerHTML = QWeb.render('OrderList', {widget: this, orders:orders});
+        this.$('.order-line').click(function() {
+            self.set('selectedOrder', self.orders_by_id[$(this).attr('data-id')]);
+            self.order_widget.renderElement();
+            debugger;
+        });
+    },
+});
+gui.define_screen({name: 'order_list', widget: order_list_screen_widget});
+
+var order_list_button = ActionButtonWidget.extend({
+    template: 'OrderListButton',
+    button_click: function() {
+        this.gui.show_screen('order_list')
+    }
+});
+
+define_action_button({
+    'name': 'show_order_list',
+    'widget': order_list_button,
+    'condition': function(){
+        return true;
+    },
+});
+
 return {
+    order_list_button: order_list_button,
     ReceiptScreenWidget: ReceiptScreenWidget,
     ActionButtonWidget: ActionButtonWidget,
     define_action_button: define_action_button,
     ScreenWidget: ScreenWidget,
     PaymentScreenWidget: PaymentScreenWidget,
     OrderWidget: OrderWidget,
+    ListOrderWidget: ListOrderWidget,
     NumpadWidget: NumpadWidget,
     ProductScreenWidget: ProductScreenWidget,
     ProductListWidget: ProductListWidget,

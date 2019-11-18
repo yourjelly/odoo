@@ -101,7 +101,7 @@
         </div>
     </t>
 
-        <t t-name="ClientScreenWidget">
+    <t t-name="ClientScreenWidget">
         <div class="oe_status">
             <span class="oe_customer_display_text"></span>
             <div class="js_warning oe_icon oe_orange oe_hidden">
@@ -112,6 +112,63 @@
             </div>
             <div class="js_connected oe_icon oe_green oe_hidden">
                 <i class='fa fa-fw fa-desktop' role="img" aria-label="Client Screen Connected" title="Client Screen Connected"></i>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="OrderList">
+        <tr t-foreach='orders' t-as='order' class='order-line' t-att-data-id='order.id'>
+            <td><t t-esc='order.pos_reference' /></td>
+            <td><t t-esc='order.date_order' /></td>
+            <td><t t-esc='order.partner_id ? order.partner_id[1] : ""' /></td>
+            <td><t t-esc='widget.format_currency(order.amount_total)' /></td>
+        </tr>
+    </t>
+
+    <t t-name="OrderListScreenWidget">
+        <div class="order-list-screen screen">
+            <div class="leftpane">
+                <div class="window">
+                    <div class="subwindow">
+                        <div class="subwindow-container">
+                            <div class="subwindow-container-fix">
+                                <div class="placeholder-OrderWidget"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="rightpane">
+            <div class="screen-content">
+                <section class="top-content">
+                    <span class='button back'>
+                        <i class='fa fa-angle-double-left'></i>
+                        Back
+                    </span>
+                </section>
+                <section class="full-content">
+                    <div class='window'>
+                        <section class='subwindow'>
+                            <div class='subwindow-container'>
+                                <div class='subwindow-container-fix touch-scrollable scrollable-y'>
+                                    <table class='order-list'>
+                                        <thead>
+                                            <tr>
+                                                <th>Reference</th>
+                                                <th>Date</th>
+                                                <th>Customer</th>
+                                                <th>total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class='order-list-contents'>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
             </div>
         </div>
     </t>
@@ -134,6 +191,12 @@
     <t t-name="ActionButtonWidget">
         <div class='control-button'>
             <t t-esc='widget.label' />
+        </div>
+    </t>
+
+    <t t-name="OrderListButton">
+        <div class='control-button'>
+            <i class="fa fa-retweet"></i> Order List
         </div>
     </t>
 
