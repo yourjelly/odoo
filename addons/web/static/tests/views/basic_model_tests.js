@@ -12,7 +12,6 @@ odoo.define('web.basic_model_tests', function (require) {
                 partner: {
                     fields: {
                         display_name: { string: "STRING", type: 'char' },
-                        active: {string: "Active", type: 'boolean', default: true},
                         total: { string: "Total", type: 'integer' },
                         foo: { string: "Foo", type: 'char' },
                         bar: { string: "Bar", type: 'integer' },
@@ -22,7 +21,10 @@ odoo.define('web.basic_model_tests', function (require) {
                         category: { string: "Category M2M", type: 'many2many', relation: 'partner_type' },
                         date: { string: "Date Field", type: 'date' },
                         reference: { string: "Reference Field", type: 'reference', selection: [["product", "Product"], ["partner_type", "Partner Type"], ["partner", "Partner"]] },
+                        // keep the following two fields in this order, in order
+                        // to check that 'active' is preferred over 'x_active'
                         x_active: { string: "Custom Active", type: 'boolean', default: true},
+                        active: {string: "Active", type: 'boolean', default: true},
                     },
                     records: [
                         { id: 1, foo: 'blip', bar: 1, product_id: 37, category: [12], display_name: "first partner", date: "2017-01-25" },
