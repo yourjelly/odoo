@@ -280,3 +280,22 @@ class TestAggregate(common.TransactionCase):
             'key_count': 4,
             '__domain': [('key', '=', 1)],
         }])
+
+
+class TestGroupbyFieldAttr(common.TransactionCase):
+
+    def setUp(self):
+        super().setUp()
+        self.rec = self.env['test_read_group.groupby_false'].create(
+            {'password': 'stronkpassword123'}
+        )
+
+    def test_groupby_false_empty_groupby(self):
+        self.assertTrue(self.rec.read_group([], ['password'], []))
+
+    def test_groupby_false_invalid_groupby(self):
+        with self.assertRaises(ValueError):
+            self.rec.read_group([], ['password'], ['password'])
+
+    def test_groupby_false_valid_groupby(self):
+        self.assertTrue(self.rec.read_group([], ['password', 'my_char'], ['my_char']))

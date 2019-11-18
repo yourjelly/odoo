@@ -236,6 +236,7 @@ class Field(MetaField('DummyField', (object,), {})):
         'group_operator': None,         # operator for aggregating values
         'group_expand': None,           # name of method to expand groups in read_group()
         'prefetch': True,               # whether the field is prefetched
+        'groupby': True,                 # whether the field can be grouped by
     }
 
     def __init__(self, string=Default, **kwargs):
@@ -708,6 +709,7 @@ class Field(MetaField('DummyField', (object,), {})):
     _description_change_default = property(attrgetter('change_default'))
     _description_deprecated = property(attrgetter('deprecated'))
     _description_group_operator = property(attrgetter('group_operator'))
+    _description_groupby = property(attrgetter('groupby'))
 
     @property
     def _description_searchable(self):

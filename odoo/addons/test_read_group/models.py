@@ -50,3 +50,11 @@ class FillTemporal(models.Model):
     date = fields.Date()
     datetime = fields.Datetime()
     value = fields.Integer()
+
+
+class GroupbyFalse(models.Model):
+    _name = 'test_read_group.groupby_false'
+    _description = 'Test False Groupby'
+
+    password = fields.Char("My password", groupby=False)
+    my_char = fields.Char("My char")

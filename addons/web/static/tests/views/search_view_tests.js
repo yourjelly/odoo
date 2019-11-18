@@ -19,11 +19,22 @@ QUnit.module('Search View', {
         this.data = {
             partner: {
                 fields: {
-                    date_field: {string: "Date", type: "date", store: true, sortable: true},
-                    birthday: {string: "Birthday", type: "date", store: true, sortable: true},
-                    foo: {string: "Foo", type: "char", store: true, sortable: true},
-                    bar: {string: "Bar", type: "many2one", relation: 'partner'},
-                    float_field: {string: "Float", type: "float", group_operator: 'sum'},
+                    date_field: {
+                        string: "Date", type: "date", store: true, sortable: true, groupby: true,
+                    },
+                    birthday: {
+                        string: "Birthday", type: "date", store: true, sortable: true,
+                        groupby: true,
+                    },
+                    foo: {
+                        string: "Foo", type: "char", store: true, sortable: true, groupby: true,
+                    },
+                    bar: {
+                        string: "Bar", type: "many2one", relation: 'partner', groupby: true,
+                    },
+                    float_field: {
+                        string: "Float", type: "float", group_operator: 'sum', groupby: true,
+                    },
                 },
                 records: [
                     {id: 1, display_name: "First record", foo: "yop", bar: 2, date_field: "2017-01-25", birthday: "1983-07-15", float_field: 1},

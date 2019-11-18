@@ -29,18 +29,40 @@ QUnit.module('Views', {
         this.data = {
             partner: {
                 fields: {
-                    foo: {string: "Foo", type: "integer", searchable: true, group_operator: 'sum'},
-                    bar: {string: "bar", type: "boolean", store: true, sortable: true},
-                    date: {string: "Date", type: "date", store: true, sortable: true},
-                    product_id: {string: "Product", type: "many2one", relation: 'product', store: true},
-                    other_product_id: {string: "Other Product", type: "many2one", relation: 'product', store: true},
-                    non_stored_m2o: {string: "Non Stored M2O", type: "many2one", relation: 'product'},
-                    customer: {string: "Customer", type: "many2one", relation: 'customer', store: true},
-                    computed_field: {string: "Computed and not stored", type: 'integer', compute: true, group_operator: 'sum'},
+                    foo: {
+                        string: "Foo", type: "integer", searchable: true, group_operator: 'sum',
+                        groupby: true,
+                    },
+                    bar: {
+                        string: "bar", type: "boolean", store: true, sortable: true, groupby: true,
+                    },
+                    date: {
+                        string: "Date", type: "date", store: true, sortable: true, groupby: true,
+                    },
+                    product_id: {
+                        string: "Product", type: "many2one", relation: 'product', store: true,
+                        groupby: true,
+                    },
+                    other_product_id: {
+                        string: "Other Product", type: "many2one", relation: 'product',
+                        store: true, groupby: true,
+                    },
+                    non_stored_m2o: {
+                        string: "Non Stored M2O", type: "many2one", relation: 'product',
+                        groupby: true,
+                    },
+                    customer: {
+                        string: "Customer", type: "many2one", relation: 'customer', store: true,
+                        groupby: true,
+                    },
+                    computed_field: {
+                        string: "Computed and not stored", type: 'integer', compute: true,
+                        group_operator: 'sum', groupby: true,
+                    },
                     company_type: {
                         string: "Company Type", type: "selection",
                         selection: [["company", "Company"], ["individual", "individual"]],
-                        searchable: true, sortable: true, store: true,
+                        searchable: true, sortable: true, store: true, groupby: true,
                     },
                 },
                 records: [

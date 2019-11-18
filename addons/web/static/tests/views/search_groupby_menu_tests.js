@@ -26,7 +26,7 @@ QUnit.module('GroupByMenu', {
             },
         ];
         this.fields = {
-            fieldName: {sortable: true, string: 'Super Date', type: 'date'}
+            fieldName: {sortable: true, string: 'Super Date', type: 'date', groupby: true,}
         };
     },
 }, function () {
@@ -61,7 +61,7 @@ QUnit.module('GroupByMenu', {
 
         var groupByMenu = await createGroupByMenu(
             [],
-            {fieldName: {sortable: true, string: 'Super Date', type: 'date'}}
+            {fieldName: {sortable: true, string: 'Super Date', type: 'date', groupby: true,}}
             );
         await testUtils.nextTick();
         await testUtils.dom.click(groupByMenu.$('button:first'));
@@ -74,7 +74,7 @@ QUnit.module('GroupByMenu', {
         assert.expect(2);
 
         var groupByMenu = await createGroupByMenu([],
-            {fieldName: {sortable: true, string: 'Super Date', type: 'date'}}
+            {fieldName: {sortable: true, string: 'Super Date', type: 'date', groupby: true}}
         );
         await testUtils.dom.click(groupByMenu.$('button:first'));
         var selector = groupByMenu.$('select.o_group_selector');
@@ -92,7 +92,10 @@ QUnit.module('GroupByMenu', {
         var groupByMenu = await createGroupByMenu(
             [],
             {
-                fieldName: {sortable: true, name: 'candlelight', string: 'Candlelight', type: 'boolean'},
+                fieldName: {
+                    sortable: true, name: 'candlelight', string: 'Candlelight', type: 'boolean',
+                    groupby: true,
+                },
             },
             {
                 intercepts: {
@@ -193,6 +196,21 @@ QUnit.module('GroupByMenu', {
         // custom group by should not have 'ID' field
         assert.containsNone(groupByMenu, '.o_group_selector option[value="id"]',
             'id field should not be in custom group by');
+
+        groupByMenu.destroy();
+    });
+
+    QUnit.test('test that a field with groupby=false does not show', async function (assert) {
+        assert.expect(1);
+
+        var groupByMenu = await createGroupByMenu(
+            [],
+            {fieldName: {sortable: true, groupby: false, string: 'Super Date', type: 'date'}}
+            );
+        // open groupBy menu
+        testUtils.dom.click(groupByMenu.$('button:first'));
+        assert.containsNone(groupByMenu, '.dropdown-divider, .dropdown-item, .dropdown-item-text',
+            'should have 0 element');
 
         groupByMenu.destroy();
     });

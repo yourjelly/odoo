@@ -1920,8 +1920,11 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         for order_part in orderby.split(','):
             order_split = order_part.split()
             order_field = order_split[0]
+            field = self._fields.get(order_field.split(':')[0], False)
+            if field and not field.groupby:
+                raise ValueError(_("Field %s of model %s cannot be ordered") % (field.name, self._name))
             if order_field == 'id' or order_field in groupby_fields:
-                if self._fields[order_field.split(':')[0]].type == 'many2one':
+                if field.type == 'many2one':
                     order_clause = self._generate_order_by(order_part, query).replace('ORDER BY ', '')
                     if order_clause:
                         orderby_terms.append(order_clause)
@@ -2178,7 +2181,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 fname = fname or name
                 field = self._fields.get(fname)
                 if not field:
-                    raise ValueError("Invalid field %r on model %r" % (fname, self._name))
+                    raise ValueError(_("Invalid field %r on model %r") % (fname, self._name))
                 if not (field.base_field.store and field.base_field.column_type):
                     raise UserError(_("Cannot aggregate field %r.") % fname)
                 if func not in VALID_AGGREGATE_FUNCTIONS:
@@ -2194,11 +2197,22 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 func, fname = field.group_operator, name
 
             fnames.append(fname)
+            # fname is guaranteed to be the field name in any case because of the previous if/else
+            field = self._fields.get(fname)
 
             if fname in groupby_fields:
+                if not field.groupby:
+                    raise ValueError(_(
+                        "Field %s of model %s cannot be grouped") % (fname, self._name))
                 continue
             if name in aggregated_fields:
                 raise UserError(_("Output name %r is used twice.") % name)
+            if fname in aggregated_fields and not field.groupby:
+                raise ValueError(_(
+                    "Field %s of model %s cannot be aggregated") % (fname, self._name))
+            if fname in order and not field.groupby:
+                raise ValueError(_(
+                    "Field %s of model %s cannot be ordered") % (fname, self._name))
             aggregated_fields.append(name)
 
             expr = self._inherits_join_calc(self._table, fname, query)

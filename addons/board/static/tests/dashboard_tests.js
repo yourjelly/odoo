@@ -22,10 +22,18 @@ QUnit.module('Dashboard', {
             },
             partner: {
                 fields: {
-                    display_name: {string: "Displayed name", type: "char", searchable: true},
-                    foo: {string: "Foo", type: "char", default: "My little Foo Value", searchable: true},
-                    bar: {string: "Bar", type: "boolean"},
-                    int_field: {string: "Integer field", type: "integer", group_operator: 'sum'},
+                    display_name: {
+                        string: "Displayed name", type: "char", searchable: true, groupby: true,
+                    },
+                    foo: {
+                        string: "Foo", type: "char", default: "My little Foo Value",
+                        searchable: true, groupby: true,
+                    },
+                    bar: {string: "Bar", type: "boolean", groupby: true,},
+                    int_field: {
+                        string: "Integer field", type: "integer", group_operator: 'sum',
+                        groupby: true,
+                    },
                 },
                 records: [{
                     id: 1,
