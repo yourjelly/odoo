@@ -316,6 +316,7 @@
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="{{!selection_mode ? 'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) : ''}} oe_kanban_card oe_kanban_global_click">
+                            <div class="o_event_kanban_content">
                                 <div class="o_dropdown_kanban dropdown">
 
                                     <a class="dropdown-toggle o-no-caret btn" role="button" data-toggle="dropdown" data-display="static" href="#" aria-label="Dropdown menu" title="Dropdown menu">
@@ -354,6 +355,7 @@
                                         </t>
                                     </h4>
                                 </div>
+                            </div>
                             </div>
                         </t>
                     </templates>
