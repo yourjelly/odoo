@@ -70,6 +70,7 @@ class AccountPaymentTerm(models.Model):
     def unlink(self):
         for terms in self:
             if self.env['account.move'].search([('invoice_payment_term_id', 'in', terms.ids)]):
+                # FP TO CHECK: rename archive into unactive? check in the UI what's the exact name of the button, I am not sure
                 raise UserError(_('You can not delete payment terms as other records still reference it. However, you can archive it.'))
             property_recs = self.env['ir.property'].search([('value_reference', 'in', ['account.payment.term,%s'%payment_term.id for payment_term in terms])])
             property_recs.unlink()
@@ -98,6 +99,8 @@ class AccountPaymentTermLine(models.Model):
         default='day_after_invoice_date', required=True, string='Options'
         )
     payment_id = fields.Many2one('account.payment.term', string='Payment Terms', required=True, index=True, ondelete='cascade')
+
+    # FP TO DO: remove the sequence and, instead, have a logic ordering: by days. Seems like error prone for the end-user if he does not order well
     sequence = fields.Integer(default=10, help="Gives the sequence order when displaying a list of payment terms lines.")
 
     @api.constrains('value', 'value_amount')

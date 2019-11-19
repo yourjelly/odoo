@@ -14,6 +14,8 @@ class AccountAnalyticLine(models.Model):
                                          related='move_id.account_id', store=True, domain=[('deprecated', '=', False)],
                                          compute_sudo=True)
     move_id = fields.Many2one('account.move.line', string='Journal Item', ondelete='cascade', index=True)
+
+    # FP TO CHECK: do we need code & ref on an analytic line? One should be enough
     code = fields.Char(size=8)
     ref = fields.Char(string='Ref.')
 

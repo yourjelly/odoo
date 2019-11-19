@@ -201,6 +201,7 @@ class WebsiteBlog(http.Controller):
 
         pager_url = "/blogpost/%s" % blog_post.id
 
+        # FP TODO: replace the len(...) by a read_group, or implement __len__ in the framework
         pager = request.website.pager(
             url=pager_url,
             total=len(blog_post.website_message_ids),

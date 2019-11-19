@@ -37,6 +37,7 @@ class SaleOrder(models.Model):
                         ('project_id', '!=', False)])
             else:
                 order.timesheet_ids = []
+            # FP TODO: replace by a read_group, to avoid reading all timesheet lines
             order.timesheet_count = len(order.timesheet_ids)
 
     @api.depends('order_line.product_id.project_id')

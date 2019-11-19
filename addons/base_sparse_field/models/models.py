@@ -3,6 +3,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
+# FP TODO: remove this module completely
 
 class IrModelFields(models.Model):
     _inherit = 'ir.model.fields'

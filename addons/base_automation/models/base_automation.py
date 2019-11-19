@@ -157,6 +157,7 @@ class BaseAutomation(models.Model):
         """ Filter the records that satisfy the precondition of action ``self``. """
         if self.filter_pre_domain and records:
             domain = [('id', 'in', records.ids)] + safe_eval(self.filter_pre_domain, self._get_eval_context())
+            # FP TODO: performance: replace records.search by records.filter_domain to avoid an extra SQL query for nothing
             return records.search(domain)
         else:
             return records
@@ -168,6 +169,7 @@ class BaseAutomation(models.Model):
         """ Filter the records that satisfy the postcondition of action ``self``. """
         if self.filter_domain and records:
             domain = [('id', 'in', records.ids)] + safe_eval(self.filter_domain, self._get_eval_context())
+            # FP TODO: performance: replace records.search by records.filter_domain to avoid an extra SQL query for nothing
             return records.search(domain), domain
         else:
             return records, None

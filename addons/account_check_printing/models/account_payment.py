@@ -23,12 +23,14 @@ class AccountPaymentRegister(models.TransientModel):
 class AccountPayment(models.Model):
     _inherit = "account.payment"
 
+    # FP TODO: replace this by a computed field
     check_amount_in_words = fields.Char(string="Amount in Words")
     check_manual_sequencing = fields.Boolean(related='journal_id.check_manual_sequencing', readonly=1)
     check_number = fields.Char(string="Check Number", readonly=True, copy=False,
         help="The selected journal is configured to print check numbers. If your pre-printed check paper already has numbers "
              "or if the current numbering is wrong, you can change it in the journal configuration page.")
 
+    # FP TODO: should be replaced by a computed field
     @api.onchange('amount', 'currency_id')
     def _onchange_amount(self):
         res = super(AccountPayment, self)._onchange_amount()
@@ -39,6 +41,8 @@ class AccountPayment(models.Model):
     def _onchange_journal_id(self):
         if hasattr(super(AccountPayment, self), '_onchange_journal_id'):
             super(AccountPayment, self)._onchange_journal_id()
+
+        # FP TODO: use number from journal instead of sequence
         if self.journal_id.check_manual_sequencing:
             self.check_number = self.journal_id.check_sequence_id.number_next_actual
 

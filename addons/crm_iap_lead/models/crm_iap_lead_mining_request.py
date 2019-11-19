@@ -76,6 +76,7 @@ class CRMLeadMiningRequest(models.Model):
 
     @api.depends('lead_ids')
     def _compute_leads_count(self):
+        # FP TODO: replace by a read_group for performance
         for req in self:
             req.leads_count = len(req.lead_ids)
 

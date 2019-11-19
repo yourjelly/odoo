@@ -32,6 +32,7 @@ class UtmCampaign(models.Model):
 
     @api.depends('mailing_mail_ids')
     def _compute_mailing_mail_count(self):
+        # FP TODO: replace by a read_group: too slow
         for campaign in self:
             campaign.mailing_mail_count = len(campaign.mailing_mail_ids)
 

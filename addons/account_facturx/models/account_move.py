@@ -224,6 +224,8 @@ class AccountMove(models.Model):
 
         return invoice_form.save()
 
+    # FP TODO: Change the logic: PDF invoices are processed if they come from the "Upload" button, not if they are message_posted
+    # Thus, remove this method, it will help the performance (no need to parse every message posted)
     @api.returns('mail.message', lambda value: value.id)
     def message_post(self, **kwargs):
         # OVERRIDE

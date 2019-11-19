@@ -193,6 +193,7 @@ class MaintenanceEquipment(models.Model):
 
     @api.depends('maintenance_ids.stage_id.done')
     def _compute_maintenance_count(self):
+        # FP TODO: read_group instead of this for?
         for equipment in self:
             equipment.maintenance_count = len(equipment.maintenance_ids)
             equipment.maintenance_open_count = len(equipment.maintenance_ids.filtered(lambda x: not x.stage_id.done))

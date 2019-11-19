@@ -31,9 +31,11 @@ class AccountFiscalPosition(models.Model):
     state_ids = fields.Many2many('res.country.state', string='Federal States')
     zip_from = fields.Char(string='Zip Range From')
     zip_to = fields.Char(string='Zip Range To')
-    # To be used in hiding the 'Federal States' field('attrs' in view side) when selected 'Country' has 0 states.
+
+    # FP TODO: remove states_Count from the view, and it's computed method
     states_count = fields.Integer(compute='_compute_states_count')
 
+    # FP TODO: to remove
     def _compute_states_count(self):
         for position in self:
             position.states_count = len(position.country_id.state_ids)
@@ -82,6 +84,7 @@ class AccountFiscalPosition(models.Model):
         if self.country_id:
             self.zip_from = self.zip_to = self.country_group_id = False
             self.state_ids = [(5,)]
+            # FP TODO: to remove
             self.states_count = len(self.country_id.state_ids)
 
     @api.onchange('country_group_id')
@@ -388,6 +391,7 @@ class ResPartner(models.Model):
         groups='account.group_account_invoice')
     currency_id = fields.Many2one('res.currency', compute='_get_company_currency', readonly=True,
         string="Currency", help='Utility field to express amount currency')
+    # FP TO DO: this seems not used; if True, to remove
     journal_item_count = fields.Integer(compute='_compute_journal_item_count', string="Journal Items", type="integer")
     property_account_payable_id = fields.Many2one('account.account', company_dependent=True,
         string="Account Payable",
@@ -418,6 +422,8 @@ class ResPartner(models.Model):
              'It is set either if there\'s not at least an unreconciled debit and an unreconciled credit '
              'or if you click the "Done" button.')
     invoice_ids = fields.One2many('account.move', 'partner_id', string='Invoices', readonly=True, copy=False)
+
+    # FP TO DO: fields seems to not be used, remove it
     contract_ids = fields.One2many('account.analytic.account', 'partner_id', string='Partner Contracts', readonly=True)
     bank_account_count = fields.Integer(compute='_compute_bank_count', string="Bank")
     trust = fields.Selection([('good', 'Good Debtor'), ('normal', 'Normal Debtor'), ('bad', 'Bad Debtor')], string='Degree of trust you have in this debtor', default='normal', company_dependent=True)

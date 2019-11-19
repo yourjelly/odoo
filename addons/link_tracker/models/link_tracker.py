@@ -52,6 +52,7 @@ class LinkTracker(models.Model):
 
     @api.depends('link_click_ids.link_id')
     def _compute_count(self):
+        # FP TODO: too slow, implement a read_group instead of the for: len()
         for tracker in self:
             tracker.count = len(tracker.link_click_ids)
 

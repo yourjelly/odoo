@@ -15,6 +15,7 @@ class UtmCampaign(models.Model):
 
     @api.depends('mailing_sms_ids')
     def _compute_mailing_sms_count(self):
+        # FP TODO: replace by a read_group: reading all SMS records is too slow
         for campaign in self:
             campaign.mailing_sms_count = len(campaign.mailing_sms_ids)
 

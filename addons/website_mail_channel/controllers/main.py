@@ -49,6 +49,7 @@ class MailGroup(http.Controller):
             [], ['res_id'])
         message_data = dict((message['res_id'], message['res_id_count']) for message in messages)
 
+        # FP TODO: for performance reasons, len(group.channel_partner_ids) should be replaced by a read_group
         group_data = dict(
             (group.id, {'monthly_message_nbr': message_data.get(group.id, 0),
                         'members_count': len(group.channel_partner_ids)})

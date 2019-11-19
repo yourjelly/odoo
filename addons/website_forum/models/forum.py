@@ -334,6 +334,7 @@ class Post(models.Model):
 
     @api.depends('favourite_ids')
     def _get_favorite_count(self):
+        # FP TODO: replace by a read_group() as it's too slow
         for post in self:
             post.favourite_count = len(post.favourite_ids)
 
@@ -344,6 +345,7 @@ class Post(models.Model):
 
     @api.depends('child_ids.create_uid', 'website_message_ids')
     def _get_child_count(self):
+        # FP TO CHECK: can we replace this by a read_group and a child_of, to avoid the for loop? It's probably very slow
         def process(node):
             total = len(node.website_message_ids) + len(node.child_ids)
             for child in node.child_ids:
@@ -958,6 +960,7 @@ class Tags(models.Model):
 
     @api.depends("post_ids.tag_ids", "post_ids.state")
     def _get_posts_count(self):
+        # FP TODO: this is very slow, replace by a read_group
         for tag in self:
             tag.posts_count = len(tag.post_ids)
 

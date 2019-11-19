@@ -35,6 +35,7 @@ class CalendarEvent(models.Model):
 
         return defaults
 
+    # FP TODO: check if is_highlighted concept is visually still visible, otherwise remove
     def _compute_is_highlighted(self):
         super(CalendarEvent, self)._compute_is_highlighted()
         if self.env.context.get('active_model') == 'crm.lead':

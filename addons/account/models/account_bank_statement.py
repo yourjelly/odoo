@@ -25,9 +25,14 @@ class AccountCashboxLine(models.Model):
         for cashbox_line in self:
             cashbox_line.subtotal = cashbox_line.coin_value * cashbox_line.number
 
+    # FP TODO: replace float by monetary for coin_value
     coin_value = fields.Float(string='Coin/Bill Value', required=True, digits=0)
+
     number = fields.Integer(string='#Coins/Bills', help='Opening Unit Numbers')
+
+    # FP TODO: replace float by monetary
     subtotal = fields.Float(compute='_sub_total', string='Subtotal', digits=0, readonly=True)
+
     cashbox_id = fields.Many2one('account.bank.statement.cashbox', string="Cashbox")
     currency_id = fields.Many2one('res.currency', related='cashbox_id.currency_id')
 
@@ -77,6 +82,8 @@ class AccountBankStmtCashWizard(models.Model):
             result.append((cashbox.id, _("%s")%(cashbox.total)))
         return result
 
+    # FP TO CHECK: this code seems incorrect and seems to only work for total=0; what if the cashbox is created with some lines?
+    # understand why it has been done that way, and possibly remove the 3 methods below
     @api.model_create_multi
     def create(self, vals):
         cashboxes = super(AccountBankStmtCashWizard, self).create(vals)
@@ -165,6 +172,7 @@ class AccountBankStatement(models.Model):
                 if not statement.currency_id.is_zero(line.amount)
             )
 
+    # FP TODO: to remove
     @api.depends('move_line_ids')
     def _get_move_line_count(self):
         for payment in self:
@@ -225,7 +233,10 @@ class AccountBankStatement(models.Model):
     name = fields.Char(string='Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True)
     reference = fields.Char(string='External Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True, help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)")
     date = fields.Date(required=True, states={'confirm': [('readonly', True)]}, index=True, copy=False, default=fields.Date.context_today)
+
+    # FP TO DO: remove date_done as message_post does the job
     date_done = fields.Datetime(string="Closed On")
+
     balance_start = fields.Monetary(string='Starting Balance', states={'confirm': [('readonly', True)]}, compute='_compute_starting_balance', readonly=False, store=True)
     balance_end_real = fields.Monetary('Ending Balance', states={'confirm': [('readonly', True)]}, compute='_compute_ending_balance', readonly=False, store=True)
     accounting_date = fields.Date(string="Accounting Date", help="If set, the accounting entries created during the bank statement reconciliation process will be created at this date.\n"
@@ -243,6 +254,9 @@ class AccountBankStatement(models.Model):
 
     line_ids = fields.One2many('account.bank.statement.line', 'statement_id', string='Statement lines', states={'confirm': [('readonly', True)]}, copy=True)
     move_line_ids = fields.One2many('account.move.line', 'statement_id', string='Entry lines', states={'confirm': [('readonly', True)]})
+
+    # FP TODO: to remove: it slows down for no real purpose (in the view, use a domain on move_line_ids=False instead)
+    # display move_line_ids in the notebook, like for invoices
     move_line_count = fields.Integer(compute="_get_move_line_count")
 
     all_lines_reconciled = fields.Boolean(compute='_check_lines_reconciled')
@@ -250,9 +264,14 @@ class AccountBankStatement(models.Model):
     cashbox_start_id = fields.Many2one('account.bank.statement.cashbox', string="Starting Cashbox")
     cashbox_end_id = fields.Many2one('account.bank.statement.cashbox', string="Ending Cashbox")
     is_difference_zero = fields.Boolean(compute='_is_difference_zero', string='Is zero', help="Check if difference is zero.")
+
+    # FP TODO: remove this field, and the create(), write() and unlink method()
+    # instead, compute is_valid_balance_Start by reading who is the statement just before this one (do a search in is_valid_balance_start)
+    # is is_valid_balance_start is only used in a form view, that will be more efficient, and we remove ~50 lines of tricky code
     previous_statement_id = fields.Many2one('account.bank.statement', help='technical field to compute starting balance correctly', compute='_get_previous_statement', store=True)
     is_valid_balance_start = fields.Boolean(string="Is Valid Balance Start", compute="_compute_is_valid_balance_start", help="technical field to display a warning message in case starting balance is different than previous ending balance")
 
+    # FP TODO: to remove, see note above on previous_statement_id
     def write(self, values):
         res = super(AccountBankStatement, self).write(values)
         if values.get('date') or values.get('journal'):
@@ -272,6 +291,7 @@ class AccountBankStatement(models.Model):
                 next_statements_to_recompute.modified(['previous_statement_id'])
         return res
 
+    # FP TODO: to remove, see note aboce on previous_statement_id
     @api.model_create_multi
     def create(self, values):
         res = super(AccountBankStatement, self).create(values)
@@ -315,6 +335,7 @@ class AccountBankStatement(models.Model):
                         % (balance_end_real, balance_end))
         return True
 
+    # FP TODO: to remove, see note aboce on previous_statement_id
     def unlink(self):
         for statement in self:
             if statement.state != 'open':

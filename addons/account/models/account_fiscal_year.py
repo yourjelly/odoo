@@ -11,6 +11,7 @@ class AccountFiscalYear(models.Model):
     _name = 'account.fiscal.year'
     _description = 'Fiscal Year'
 
+    # FP TO CHECK: replace name by a name_get method?
     name = fields.Char(string='Name', required=True)
     date_from = fields.Date(string='Start Date', required=True,
         help='Start Date, included in the fiscal year.')

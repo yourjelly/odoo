@@ -1037,6 +1037,7 @@ class StockMove(models.Model):
 
     def _update_next_serial_count(self):
         self.next_serial = None
+        # FP TO CHECK: could be faster, avoid reading all move_lines
         self.next_serial_count = len(self.move_line_ids)
 
     def _update_reserved_quantity(self, need, available_quantity, location_id, lot_id=None, package_id=None, owner_id=None, strict=True):
@@ -1356,6 +1357,8 @@ class StockMove(models.Model):
         moves_todo.mapped('move_line_ids').sorted()._action_done()
         # Check the consistency of the result packages; there should be an unique location across
         # the contained quants.
+
+        # FP TO CHECK: is the "len(p.quant_ids)" necessary? This forces to read all quants. This is probably much faster: try: q1, q2, _ = p.quant_ids; except: pass
         for result_package in moves_todo\
                 .mapped('move_line_ids.result_package_id')\
                 .filtered(lambda p: p.quant_ids and len(p.quant_ids) > 1):

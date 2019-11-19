@@ -5,6 +5,7 @@ from odoo import models, api
 from odoo.addons import iap
 
 
+# FP TODO: I would remove this object, and instead put method directl in crm_lead.py (on the lead object, or not)
 class IapEnrichAPI(models.AbstractModel):
     _name = 'iap.enrich.api'
     _description = 'IAP Lead Enrichment API'

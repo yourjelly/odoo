@@ -224,6 +224,7 @@ class AccountAccount(models.Model):
     code = fields.Char(size=64, required=True, index=True)
     deprecated = fields.Boolean(index=True, default=False)
     used = fields.Boolean(store=False, search='_search_used')
+
     user_type_id = fields.Many2one('account.account.type', string='Type', required=True,
         help="Account Type is used for information purpose, to generate country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.")
     internal_type = fields.Selection(related='user_type_id.type', string="Internal Type", store=True, readonly=True)

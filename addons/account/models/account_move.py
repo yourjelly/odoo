@@ -136,6 +136,9 @@ class AccountMove(models.Model):
         states={'draft': [('readonly', False)]},
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         string='Partner', change_default=True)
+
+    # remove this field and replace .partner_id.commercial_partner_id where it's used (it's confused for end-users to have two partners fields)
+    # but keep the commercial_partner_id on lines (names partner_id)
     commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity', store=True, readonly=True,
         compute='_compute_commercial_partner_id')
 
@@ -204,8 +207,11 @@ class AccountMove(models.Model):
         help="The payment reference to set on journal items.")
     invoice_sent = fields.Boolean(readonly=True, default=False, copy=False,
         help="It indicates that the invoice has been sent.")
+
+    # remove invoice_origin and use the right many2one to related object instead (po, pos.order, so)
     invoice_origin = fields.Char(string='Origin', readonly=True, tracking=True,
         help="The document(s) that generated the invoice.")
+
     invoice_payment_term_id = fields.Many2one('account.payment.term', string='Payment Terms',
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         readonly=True, states={'draft': [('readonly', False)]})
@@ -236,6 +242,8 @@ class AccountMove(models.Model):
         help="Auto-complete from a past bill.")
     invoice_source_email = fields.Char(string='Source Email', tracking=True)
     invoice_partner_display_name = fields.Char(compute='_compute_invoice_partner_display_info', store=True)
+
+    # remove this field, and add the prefix in invoice_partner_display_name when necessary
     invoice_partner_icon = fields.Char(compute='_compute_invoice_partner_display_info', store=False, compute_sudo=True)
 
     # ==== Cash rounding fields ====
@@ -266,6 +274,8 @@ class AccountMove(models.Model):
     restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
     secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False)
     inalterable_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False)
+
+    # FP TODO: remove this field and replace by a method call whereven it's needed
     string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True)
 
     # -------------------------------------------------------------------------
@@ -2377,8 +2387,12 @@ class AccountMoveLine(models.Model):
         index=True, ondelete="cascade",
         domain=[('deprecated', '=', False)])
     account_internal_type = fields.Selection(related='account_id.user_type_id.type', string="Internal Type", store=True, readonly=True)
+
+    # FP TO CHECK: I would remove thid field from the object
     account_root_id = fields.Many2one(related='account_id.root_id', string="Account Root", store=True, readonly=True)
+    # FP TO REMOVE: it's not used as the object is ordered by date, move_name
     sequence = fields.Integer(default=10)
+
     name = fields.Char(string='Label')
     quantity = fields.Float(string='Quantity',
         default=1.0, digits='Product Unit of Measure',
@@ -2436,6 +2450,8 @@ class AccountMoveLine(models.Model):
         help="Tax repartition line that caused the creation of this move line, if any")
     tag_ids = fields.Many2many(string="Tags", comodel_name='account.account.tag', ondelete='restrict',
         help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.")
+
+    # FP TO CHECK: I would not store this field as it's not read often and computation is not too complex (check performance at creation of invoice)
     tax_audit = fields.Char(string="Tax Audit String", compute="_compute_tax_audit", store=True,
         help="Computed field, listing the tax grids impacted by this line, and the amount it applies to each of them.")
 
@@ -2455,6 +2471,8 @@ class AccountMoveLine(models.Model):
 
     # ==== Analytic fields ====
     analytic_line_ids = fields.One2many('account.analytic.line', 'move_id', string='Analytic lines')
+
+    # FP TODO: should be compute, store=True, readonly=False (see account_analytic_default remarks)
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True)
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
 

@@ -50,6 +50,8 @@ class AccountAnalyticDefault(models.Model):
             domain += ['|', ('date_stop', '>=', date), ('date_stop', '=', False)]
         best_index = -1
         res = self.env['account.analytic.default']
+        # FP TODO: Remove this 'for': should return the first one, or False
+        # Instead, the sequence should be a comptue (_compute index), store=True, readonly=False
         for rec in self.search(domain):
             index = 0
             if rec.product_id: index += 1
@@ -68,6 +70,8 @@ class AccountAnalyticDefault(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
+    # FP TODO: would be easier to replace 'account_analytic_id', 'analytic_tag_ids' by computed field, store=True, readonly=False
+    # that would allow to remove these two methods (default_get, _onchange_product_id_account_id) and replace by a single one
     @api.model
     def default_get(self, fields_list):
         defaults = super().default_get(fields_list)

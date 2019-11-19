@@ -42,6 +42,7 @@ class Partner(models.Model):
             partner.opportunity_count = self.env['crm.lead'].search_count([('partner_id', operator, partner.id), ('type', '=', 'opportunity')])
 
     def _compute_meeting_count(self):
+        # FP TODO: replace by a ready_group: it can be slow
         for partner in self:
             partner.meeting_count = len(partner.meeting_ids)
 

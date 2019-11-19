@@ -13,6 +13,7 @@ class AccountJournal(models.Model):
         for journal in self:
             journal.check_printing_payment_method_selected = any(pm.code == 'check_printing' for pm in journal.outbound_payment_method_ids)
 
+    # FP TODO: remove the sequence, and store (prefix,number) on the journal instead (and do +1 from journal current sequence in get)
     @api.depends('check_manual_sequencing')
     def _get_check_next_number(self):
         for journal in self:
@@ -21,6 +22,7 @@ class AccountJournal(models.Model):
             else:
                 journal.check_next_number = 1
 
+    # FP TODO: remove the sequence, and store (prefix,number) on the journal instead (and do +1 from journal current sequence in get)
     def _set_check_next_number(self):
         for journal in self:
             if journal.check_next_number and not re.match(r'^[0-9]+$', journal.check_next_number):
@@ -33,13 +35,17 @@ class AccountJournal(models.Model):
 
     check_manual_sequencing = fields.Boolean('Manual Numbering', default=False,
         help="Check this option if your pre-printed checks are not numbered.")
+    # FP TODO: remove the sequence, and store (prefix,number) on the journal instead (and do +1 from journal current sequence in get)
     check_sequence_id = fields.Many2one('ir.sequence', 'Check Sequence', readonly=True, copy=False,
         help="Checks numbering sequence.")
-    check_next_number = fields.Char('Next Check Number', compute='_get_check_next_number', inverse='_set_check_next_number',
-        help="Sequence number of the next printed check.")
+
+    # FP TODO: should be a regular stored field
+    check_next_number = fields.Char('Next Check Number', compute='_get_check_next_number', inverse='_set_check_next_number')
+
     check_printing_payment_method_selected = fields.Boolean(compute='_compute_check_printing_payment_method_selected',
         help="Technical feature used to know whether check printing was enabled as payment method.")
 
+    # FP TODO: remove this method, as we should check next number instead of a sequence
     @api.model
     def create(self, vals):
         rec = super(AccountJournal, self).create(vals)
@@ -47,12 +53,14 @@ class AccountJournal(models.Model):
             rec._create_check_sequence()
         return rec
 
+    # FP TODO: remove this method, as we should check next number instead of a sequence
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         rec = super(AccountJournal, self).copy(default)
         rec._create_check_sequence()
         return rec
 
+    # FP TODO: remove this method, as we use the check next number instead of a sequence
     def _create_check_sequence(self):
         """ Create a check sequence for the journal """
         for journal in self:
