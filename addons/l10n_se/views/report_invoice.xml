@@ -2,7 +2,7 @@
 <odoo>
     <template id="l10n_in_report_invoice_document_inherit" inherit_id="account.report_invoice_document">
         <xpath expr="//div[hasclass('vat_label')]" position="after">
-            <div t-if="o.partner_id.corporate_id">Corporate ID: <t t-esc="o.partner_id.corporate_id"/></div>
+            <div t-if="o.partner_id.corporate_identification">Corporate ID: <t t-esc="o.partner_id.corporate_identification"/></div>
         </xpath>
     </template>
 </odoo>
