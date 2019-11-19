@@ -98,3 +98,47 @@ class TestPricelist(common.TestPricelistCommon):
         test_unit_price(3500, self.uom_kgm, (tonne_price - 10) / 1000.0)
         test_unit_price(2, self.uom_ton, tonne_price)
         test_unit_price(3, self.uom_ton, tonne_price - 10)
+
+    def test_30_advanced_pricelist(self):
+        # Test pricelist formulas
+        return
+        # cls.advanced_pricelist = cls.env['product.pricelist'].create({
+        #     "name": "Advanced Test",
+        #     "currency_id": cls.currency_3.id,
+        #     "item_ids": [(0, 0, {
+        #         "applied_on": "3_global/2_product_category/1_product/0_product_variant",
+        #         #categ_id,product_id,product_tmpl_id
+        #         "base": "list_price/standard_price/pricelist",
+        #         "compute_price": "percentage/formula",
+        #     })]
+        # })
+
+    def test_40_chained_pricelists(self):
+        return
+        # cls.pricelist_chain_3 = cls.env['product.pricelist'].create({
+        #     "name": "Chained Pricelist - End",
+        #     "currency_id": cls.currency_3.id,
+        #     "item_ids": [(0, 0, {
+        #         "applied_on": "3_global/2_product_category/1_product/0_product_variant",
+        #         #categ_id,product_id,product_tmpl_id
+        #         "base": "list_price/standard_price/pricelist",
+        #         "compute_price": "percentage",
+        #     })]
+        # })
+        #
+        # cls.pricelist_chain_2 = cls.env['product.pricelist'].create({
+        #     "name": "Chained Pricelist - Center",
+        #     "currency_id": cls.currency_3.id,
+        #     "item_ids": [(0, 0, {
+        #         "applied_on": "3_global/2_product_category/1_product/0_product_variant",
+        #         #categ_id,product_id,product_tmpl_id
+        #         "base": "pricelist",
+        #         "compute_price": "formula",
+        #     })]
+        # })
+        #
+        # cls.pricelist_chain_1 = cls.env['product.pricelist'].create({
+        #     "name": "Chained Pricelist - Begin",
+        #     "currency_id": cls.currency_3.id,
+        #     "item_ids": [],
+        # })
