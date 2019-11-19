@@ -58,11 +58,10 @@ class l10n_eu_service(models.TransientModel):
         'account.tax', string='Service VAT', required=True, default=_default_tax_id,
         help="Select your current VAT tax for services. This is the tax that will be mapped "
              "to the corresponding VAT tax in each EU country selected below.")
-    account_collected_id = fields.Many2one(
-        "account.account", string="Tax Collection Account",
-        help="Optional account to use for collecting tax amounts when selling services in "
-             "each EU country selected below. If not set, the current collecting account of "
-             "your Service VAT will be used.")
+    collecting_repartition_line_ids = fields.Many2many('account.tax.repartition.line', 'l10n_eu_service_repartition_line_rel',
+        string="Tax Collection Lines", help="Optional repartition for collecting tax amounts when"
+        "selling services in each EU country selected below. If not set, the current repartition"
+        "of your Service VAT will be used.")
     done_country_ids = fields.Many2many(
         'res.country', 'l10n_eu_service_country_rel_done', default=_default_done_country_ids,
         string='Already Supported')
@@ -81,8 +80,8 @@ class l10n_eu_service(models.TransientModel):
             data_tax = {
                 'name': tax_name,
                 'amount': tax_rate.search([('country_id', '=', country.id)]).rate,
-                'account_id': self.account_collected_id.id or self.tax_id.account_id.id,
-                'refund_account_id': self.account_collected_id.id or self.tax_id.refund_account_id.id,
+                'invoice_repartition_line_ids': [(6, 0, self.collecting_repartition_line_ids.ids or self.tax_id.invoice_repartition_line_ids.ids)],
+                'refund_repartition_line_ids': [(6, 0, self.collecting_repartition_line_ids.ids or self.tax_id.refund_repartition_line_ids.ids)],
                 'type_tax_use': 'sale',
                 'description': "EU-VAT-%s-S" % country.code,
                 'sequence': 1000,
