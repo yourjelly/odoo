@@ -10,44 +10,42 @@ class TestProductPricelist(common.TestPricelistCommon):
 
     def setUp(self):
         super(TestProductPricelist, self).setUp()
-        self.ProductPricelist = self.env['product.pricelist']
-        self.res_partner_4 = self.env['res.partner'].create({'name': 'Ready Mat'})
-        self.res_partner_1 = self.env['res.partner'].create({'name': 'Wood Corner'})
-        self.category_5_id = self.env['product.category'].create({
+        self.category_5 = self.env['product.category'].create({
             'name': 'Office Furniture',
             'parent_id': self.env.ref('product.product_category_1').id
-        }).id
+        })
+        # VFE TODO reuse products from product common ?
         self.computer_SC234 = self.env['product.product'].create({
             'name': 'Desk Combination',
-            'categ_id': self.category_5_id,
+            'categ_id': self.category_5.id,
         })
         self.ipad_retina_display = self.env['product.product'].create({
             'name': 'Customizable Desk',
         })
         self.custom_computer_kit = self.env['product.product'].create({
             'name': 'Corner Desk Right Sit',
-            'categ_id': self.category_5_id,
+            'categ_id': self.category_5.id,
         })
         self.ipad_mini = self.env['product.product'].create({
             'name': 'Large Cabinet',
-            'categ_id': self.category_5_id,
+            'categ_id': self.category_5.id,
             'standard_price': 800.0,
         })
         self.env['product.supplierinfo'].create([
             {
-                'name': self.res_partner_1.id,
+                'name': self.partner_3.id,
                 'product_tmpl_id': self.ipad_mini.product_tmpl_id.id,
                 'delay': 3,
                 'min_qty': 1,
                 'price': 750,
             }, {
-                'name': self.res_partner_4.id,
+                'name': self.partner_2.id,
                 'product_tmpl_id': self.ipad_mini.product_tmpl_id.id,
                 'delay': 3,
                 'min_qty': 1,
                 'price': 790,
             }, {
-                'name': self.res_partner_4.id,
+                'name': self.partner_2.id,
                 'product_tmpl_id': self.ipad_mini.product_tmpl_id.id,
                 'delay': 3,
                 'min_qty': 3,
@@ -56,28 +54,23 @@ class TestProductPricelist(common.TestPricelistCommon):
         ])
         self.apple_in_ear_headphones = self.env['product.product'].create({
             'name': 'Storage Box',
-            'categ_id': self.category_5_id,
+            'categ_id': self.category_5.id,
         })
         self.laptop_E5023 = self.env['product.product'].create({
             'name': 'Office Chair',
-            'categ_id': self.category_5_id,
+            'categ_id': self.category_5.id,
         })
         self.laptop_S3450 = self.env['product.product'].create({
             'name': 'Acoustic Bloc Screens',
-            'categ_id': self.category_5_id,
+            'categ_id': self.category_5.id,
         })
 
         self.uom_unit_id = self.ref('uom.product_uom_unit')
 
-        self.ipad_retina_display.write({'uom_id': self.uom_unit_id, 'categ_id': self.category_5_id})
-        self.customer_pricelist = self.ProductPricelist.create({
+        self.ipad_retina_display.write({'uom_id': self.uom_unit_id, 'categ_id': self.category_5.id})
+        self.customer_pricelist = self.env['product.pricelist'].create({
             'name': 'Customer Pricelist',
             'item_ids': [(0, 0, {
-                'name': 'Default pricelist',
-                'compute_price': 'formula',
-                'base': 'pricelist',
-                'base_pricelist_id': self.public_pricelist.id,
-            }), (0, 0, {
                 'name': '10% Discount on Assemble Computer',
                 'applied_on': '1_product',
                 'product_tmpl_id': self.ipad_retina_display.product_tmpl_id.id,
@@ -85,7 +78,7 @@ class TestProductPricelist(common.TestPricelistCommon):
                 'base': 'list_price',
                 'price_discount': 10
             }), (0, 0, {
-                'name': '1 surchange on Laptop',
+                'name': '1 surcharge on Laptop',
                 'applied_on': '1_product',
                 'product_tmpl_id': self.laptop_E5023.product_tmpl_id.id,
                 'compute_price': 'formula',
@@ -97,10 +90,10 @@ class TestProductPricelist(common.TestPricelistCommon):
                 'min_quantity': 2,
                 'compute_price': 'formula',
                 'base': 'list_price',
-                'categ_id': self.category_5_id,
+                'categ_id': self.category_5.id,
                 'price_discount': 5
             }), (0, 0, {
-                'name': '30% Discount on all products',
+                'name': '30% Christmas Discount on all products',
                 'applied_on': '3_global',
                 'date_start': '2011-12-27',
                 'date_end': '2011-12-31',
@@ -148,16 +141,16 @@ class TestProductPricelist(common.TestPricelistCommon):
         self.assertEqual(float_compare(ipad_mini.price, ipad_mini.lst_price-ipad_mini.lst_price*(0.30), precision_digits=2), 0, msg)
 
         # I check cost price of LCD Monitor.
-        context.update({'quantity': 1, 'date': False, 'partner_id': self.res_partner_4.id})
+        context.update({'quantity': 1, 'date': False, 'partner_id': self.partner_2.id})
         ipad_mini = self.ipad_mini.with_context(context)
-        partner = self.res_partner_4.with_context(context)
+        partner = self.partner_2.with_context(context)
         msg = "Wrong cost price: LCD Monitor. should be 790 instead of %s" % ipad_mini._select_seller(partner_id=partner, quantity=1.0).price
         self.assertEqual(float_compare(ipad_mini._select_seller(partner_id=partner, quantity=1.0).price, 790, precision_digits=2), 0, msg)
 
         # I check cost price of LCD Monitor if more than 3 Unit.
         context.update({'quantity': 3})
         ipad_mini = self.ipad_mini.with_context(context)
-        partner = self.res_partner_4.with_context(context)
+        partner = self.partner_2.with_context(context)
         msg = "Wrong cost price: LCD Monitor if more than 3 Unit.should be 785 instead of %s" % ipad_mini._select_seller(partner_id=partner, quantity=3.0).price
         self.assertEqual(float_compare(ipad_mini._select_seller(partner_id=partner, quantity=3.0).price, 785, precision_digits=2), 0, msg)
 

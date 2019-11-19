@@ -10,8 +10,8 @@ class TestPricelist(common.TestPricelistCommon):
         # Make sure the price using a pricelist is the same than without after
         # applying the computation manually
 
-        datacard = self.env['product.product'].create({'name': 'Office Lamp'})
-        usb_adapter = self.env['product.product'].create({'name': 'Office Chair'})
+        usb_adapter = self.product_5
+        datacard = self.product_6
 
         sale_pricelist = self.env['product.pricelist'].create({
             'name': 'Sale pricelist',
@@ -40,6 +40,7 @@ class TestPricelist(common.TestPricelistCommon):
         self.assertEqual(usb_adapter_with_pricelist.lst_price, usb_adapter_with_pricelist.lst_price)
         self.assertEqual(usb_adapter_without_pricelist.lst_price, usb_adapter_without_pricelist.price)
         self.assertEqual(usb_adapter_with_pricelist.price, usb_adapter_without_pricelist.price*0.9)
+        # VFE TODO ensure pricelist.get_product_price returns the same values as product.price
 
         datacard_without_pricelist = datacard.with_context(public_context)
         datacard_with_pricelist = datacard.with_context(pricelist_context)
@@ -60,7 +61,7 @@ class TestPricelist(common.TestPricelistCommon):
 
     def test_20_pricelist_uom(self):
         # Verify that the pricelist rules are correctly using the product's default UoM
-        # as reference, and return a result according to the target UoM (as specific in the context)
+        # as reference, and return a result according to the target UoM.
         tonne_price = 100
 
         # make sure 'tonne' resolves down to 1 'kg'.

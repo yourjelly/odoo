@@ -105,6 +105,8 @@ class TestProductCommon(common.SavepointCase):
             'uom_id': cls.uom_unit.id,
             'uom_po_id': cls.uom_unit.id})
 
+        cls.env['product.pricelist'].search([]).active = False
+
         cls.public_pricelist = cls.env['product.pricelist'].create({
             "name": "Public Pricelist",
             "sequence": 1,
@@ -131,6 +133,10 @@ class TestPricelistCommon(TestProductCommon):
     @classmethod
     def setUpClass(cls):
         super(TestPricelistCommon, cls).setUpClass()
+
+        cls.partner_2 = cls.env['res.partner'].create({'name': 'Ready Mat'})
+        cls.partner_3 = cls.env['res.partner'].create({'name': 'Wood Corner'})
+        # VFE TODO set a different property_product_pricelist on those two partners
 
         # Setup currencies
         cls.currency_yuan = cls.env.ref("base.CNY")
@@ -162,6 +168,7 @@ class TestPricelistCommon(TestProductCommon):
         # Setup pricelists
 
         cls.empty_pricelist = cls.public_pricelist
+        # VFE TODO fix public_pricelist currency to USD?
 
         cls.basic_pricelist = cls.env['product.pricelist'].create({
             "name": "Basic Test",
@@ -221,6 +228,4 @@ class TestNoPricelistCommon(TestProductCommon):
     def setUpClass(cls):
         super(TestPricelistCommon, cls).setUpClass()
 
-        cls.env['product.pricelist'].with_context(active_test=False).search([]).unlink()
-
-        # TODO set self.env.company.currency to main_company_currency ?
+        cls.public_pricelist.active = False
