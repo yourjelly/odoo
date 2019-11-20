@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <data>
-        <record id="view_company_form_inherit_l10n_se" model="ir.ui.view">
-            <field name="name"> res.company.form.inherit.l10n_se</field>
-            <field name="model">res.company</field>
-            <field name="inherit_id" ref="base.view_company_form"/>
-            <field name="arch" type="xml">
-                <field name="company_registry" position="replace">
-                    <field name="country_code" invisible="1"/>
-                    <div class="o_td_label">
-                        <label for="company_registry" string="Corporate ID" attrs="{'invisible': [('country_code', '!=', 'SE')]}"/>
-                        <label for="company_registry" string="Comoany Registry" attrs="{'invisible': [('country_code', '=', 'SE')]}"/>
-                    </div>
-                    <field name="company_registry" class="oe_inline" nolabel="1"/>
-                </field>
+    <record id="view_company_form" model="ir.ui.view">
+        <field name="name">view.company.form.inherit.l10n_se</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <field name="company_registry" position="attributes">
+                <attribute name="nolabel">1</attribute>
             </field>
-        </record>
-    </data>
+            <field name="company_registry" position="before">
+                <field name="l10n_se_country_code" invisible="1"/>
+                <div class="o_td_label">
+                    <label for="company_registry" string="Corporate ID" attrs="{'invisible': [('l10n_se_country_code', '!=', 'SE')]}"/>
+                    <label for="company_registry" string="Company Registry" attrs="{'invisible': [('l10n_se_country_code', '=', 'SE')]}"/>
+                </div>
+            </field>
+        </field>
+    </record>
 </odoo>

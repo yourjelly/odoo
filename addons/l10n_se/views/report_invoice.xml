@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="l10n_in_report_invoice_document_inherit" inherit_id="account.report_invoice_document">
-        <xpath expr="//div[hasclass('vat_label')]" position="after">
-            <div t-if="o.partner_id.corporate_identification">Corporate ID: <t t-esc="o.partner_id.corporate_identification"/></div>
-        </xpath>
+    <template id="l10n_se_report_invoice_document_inherit" inherit_id="account.report_invoice_document">
+        <div t-if="o.partner_id.vat" position="after">
+            <t t-if="o.company_id.country_id.code == 'SE' and o.partner_id.l10n_se_corporate_identification" class="mt16">
+                <div>Corporate ID: <t t-esc="o.partner_id.l10n_se_corporate_identification"/></div>
+            </t>
+        </div>
     </template>
 </odoo>
