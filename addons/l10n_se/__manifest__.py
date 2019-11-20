@@ -5,5 +5,6 @@
     'data': [
         'views/res_partner_views.xml',
         'views/report_invoice.xml',
+        'views/res_company_views.xml',
     ],
 }
