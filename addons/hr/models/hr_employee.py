@@ -37,7 +37,7 @@ class HrEmployeePrivate(models.Model):
     # required on the resource, make sure required="True" set in the view
     name = fields.Char(string="Employee Name", related='resource_id.name', store=True, readonly=False, tracking=True)
     user_id = fields.Many2one('res.users', 'User', related='resource_id.user_id', store=True, readonly=False)
-    user_partner_id = fields.Many2one(related='user_id.partner_id', related_sudo=False, string="User's partner")
+    user_partner_id = fields.Many2one(related='user_id.partner_id', compute_sudo=False, string="User's partner")
     active = fields.Boolean('Active', related='resource_id.active', default=True, store=True, readonly=False)
     # private partner
     address_home_id = fields.Many2one(
@@ -95,7 +95,7 @@ class HrEmployeePrivate(models.Model):
     km_home_work = fields.Integer(string="Km Home-Work", groups="hr.group_hr_user", tracking=True)
 
     image_1920 = fields.Image(default=_default_image)
-    phone = fields.Char(related='address_home_id.phone', related_sudo=False, string="Private Phone", groups="hr.group_hr_user")
+    phone = fields.Char(related='address_home_id.phone', compute_sudo=False, string="Private Phone", groups="hr.group_hr_user")
     # employee in company
     child_ids = fields.One2many('hr.employee', 'parent_id', string='Direct subordinates')
     category_ids = fields.Many2many(

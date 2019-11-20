@@ -16,7 +16,7 @@ class Website(models.Model):
 
     pricelist_id = fields.Many2one('product.pricelist', compute='_compute_pricelist_id', string='Default Pricelist')
     currency_id = fields.Many2one('res.currency',
-        related='pricelist_id.currency_id', depends=(), related_sudo=False,
+        related='pricelist_id.currency_id', depends=(), compute_sudo=False,
         string='Default Currency', readonly=False)
     salesperson_id = fields.Many2one('res.users', string='Salesperson')
 

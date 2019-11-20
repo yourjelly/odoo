@@ -375,7 +375,7 @@ class Related(models.Model):
     related_related_name = fields.Char(related='related_name', string='A related on a related on Name', readonly=False)
 
     message = fields.Many2one('test_new_api.message')
-    message_name = fields.Text(related="message.body", related_sudo=False, string='Message Body')
+    message_name = fields.Text(related="message.body", compute_sudo=False, string='Message Body')
     message_currency = fields.Many2one(related="message.author", string='Message Author')
 
 class ComputeProtected(models.Model):

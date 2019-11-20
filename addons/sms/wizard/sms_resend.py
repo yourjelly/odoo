@@ -16,7 +16,7 @@ class SMSRecipient(models.TransientModel):
         ('sms_number_missing', 'Missing Number'),
         ('sms_number_format', 'Wrong Number Format'),
         ('sms_credit', 'Insufficient Credit'),
-        ('sms_server', 'Server Error')], related='notification_id.failure_type', related_sudo=True, readonly=True)
+        ('sms_server', 'Server Error')], related='notification_id.failure_type', compute_sudo=True, readonly=True)
     partner_id = fields.Many2one('res.partner', 'Partner', related='notification_id.res_partner_id', readonly=True)
     partner_name = fields.Char('Recipient', readonly='True')
     sms_number = fields.Char('Number')

@@ -2550,7 +2550,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                     inherited=True,
                     inherited_field=field,
                     related=(parent_field, name),
-                    related_sudo=False,
+                    compute_sudo=False,
                     copy=field.copy,
                     readonly=field.readonly,
                 )
