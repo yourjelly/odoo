@@ -200,11 +200,11 @@ class Website(models.Model):
             return
 
         new_homepage_view = '''<t name="Homepage" t-name="website.homepage%s">
-        <t t-call="website.layout">
-            <t t-set="pageName" t-value="'homepage'"/>
-            <div id="wrap" class="oe_structure oe_empty"/>
-            </t>
-        </t>''' % (self.id)
+    <t t-call="website.layout">
+        <t t-set="pageName" t-value="'homepage'"/>
+        <div id="wrap" class="oe_structure oe_empty"/>
+    </t>
+</t>''' % (self.id)
         standard_homepage.with_context(website_id=self.id).arch_db = new_homepage_view
 
         homepage_page = Page.search([
