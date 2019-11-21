@@ -172,7 +172,7 @@
         <t t-set="answer_lines" t-value="answer.user_input_line_ids.filtered(lambda line: line.question_id == question)"/>
         <div class="js_question-wrapper" t-att-id="question.id">
             <h4>
-                <span t-field='question.question' />
+                <span t-field='question.title' />
                 <span t-if="question.constr_mandatory" class="text-danger">*</span>
             </h4>
             <div t-field='question.description' class="text-muted oe_no_empty"/>
