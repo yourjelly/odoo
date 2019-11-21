@@ -272,7 +272,7 @@ class MassMailing(models.Model):
 
     def action_test(self):
         self.ensure_one()
-        ctx = dict(self.env.context, default_mass_mailing_id=self.id)
+        ctx = dict(self.env.context, default_mailing_id=self.id)
         return {
             'name': _('Test Mailing'),
             'type': 'ir.actions.act_window',

@@ -1,30 +1,41 @@
 <?xml version="1.0"?>
 <odoo>
 
-        <record model="ir.ui.view" id="view_mail_mass_mailing_test_form">
-            <field name="name">mailing.mailing.test.form</field>
-            <field name="model">mailing.mailing.test</field>
-            <field name="arch" type="xml">
-                <form string="Send a Sample Mail">
-                    <p class="text-muted">
-                        Send a sample email for testing purpose to the address below.
-                    </p>
-                    <group>
-                        <field name="email_to"/>
-                    </group>
-                    <footer>
-                        <button string="Send Sample Mail" name="send_mail_test" type="object" class="btn-primary"/>
-                        <button string="Cancel" class="btn-secondary" special="cancel" />
-                    </footer>
-                </form>
-            </field>
-        </record>
+    <record id="mailing_mailing_test_view_form" model="ir.ui.view">
+        <field name="name">mailing.mailing.test.form</field>
+        <field name="model">mailing.mailing.test</field>
+        <field name="arch" type="xml">
+            <form string="Send a Sample Mail">
+                <p class="text-muted">
+                    Send a sample email for testing purpose to the address below.
+                </p>
+                <group>
+                    <field name="email_to"/>
+                    <field name="mailing_id" invisible="1"/>
+                </group>
+                <group groups="base.group_no_one">
+                    <label for="use_record" string="Based on a record"/>
+                    <div class="o_row">
+                        <field name="use_record"/>
+                        <i class="fa fa-arrow-right mx-2" role="img" aria-label="Based on" title="Based on" attrs="{'invisible':[('use_record', '=', False)]}"></i>
+                        <field name="resource_ref" nolabel="1" class="oe_inline"
+                            options="{'hide_model': True, 'no_create': True, 'no_edit': True}"
+                            attrs="{'invisible':[('use_record', '=', False)]}"/>
+                    </div>
+                </group>
+                <footer>
+                    <button string="Send Sample Mail" name="send_mail_test" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
 
-        <record id="action_mail_mass_mailing_test" model="ir.actions.act_window">
-            <field name="name">Mailing Test</field>
-            <field name="res_model">mailing.mailing.test</field>
-            <field name="view_mode">form</field>
-            <field name="target">new</field>
-        </record>
+    <record id="mailing_mailing_test_action" model="ir.actions.act_window">
+        <field name="name">Mailing Test</field>
+        <field name="res_model">mailing.mailing.test</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
 
 </odoo>

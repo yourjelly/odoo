@@ -12,6 +12,16 @@
                     <field name="numbers" placeholder="+32 495 85 85 77, +33 545 55 55 55"/>
                     <field name="mailing_id" invisible="1"/>
                 </group>
+                <group groups="base.group_no_one">
+                    <label for="use_record" string="Based on a record"/>
+                    <div class="o_row">
+                        <field name="use_record"  groups="base.group_no_one"/>
+                        <i class="fa fa-arrow-right mx-2" role="img" aria-label="Based on" title="Based on" attrs="{'invisible':[('use_record', '=', False)]}"></i>
+                        <field name="resource_ref" groups="base.group_no_one" nolabel="1" class="oe_inline"
+                            options="{'hide_model': True, 'no_create': True, 'no_edit': True}"
+                            attrs="{'invisible':[('use_record', '=', False)]}"/>
+                    </div>
+                </group>
                 <footer>
                     <button string="Send" name="action_send_sms" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn btn-secondary" special="cancel"/>
