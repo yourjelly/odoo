@@ -161,9 +161,9 @@ class SurveyUserInput(models.Model):
             if challenges:
                 Challenge._cron_update(ids=challenges.ids, commit=False)
 
-    def _get_survey_url(self):
+    def get_start_url(self):
         self.ensure_one()
-        return '/survey/start/%s?answer_token=%s' % (self.survey_id.access_token, self.token)
+        return '%s?answer_token=%s' % (self.survey_id.get_start_url(), self.token)
 
 
 class SurveyUserInputLine(models.Model):
