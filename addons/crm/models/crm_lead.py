@@ -63,7 +63,10 @@ class Lead(models.Model):
         return 10
 
     def _default_stage_id(self):
-        team = self.env['crm.team'].sudo()._get_default_team_id(user_id=self.env.uid)
+        try:
+            team = self.env['crm.team'].sudo()._get_default_team_id(user_id=self.env.uid)
+        except:
+            return False
         return self._stage_find(team_id=team.id, domain=[('fold', '=', False)]).id
 
     name = fields.Char('Opportunity', required=True, index=True)
