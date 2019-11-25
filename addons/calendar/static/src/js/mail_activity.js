@@ -39,7 +39,7 @@ Activity.include({
         if (activity && activity.activity_category === 'meeting' && activity.calendar_event_id) {
             Dialog.confirm(
                 self,
-                _t("The activity is linked to a meeting. Deleting it will remove the meeting as well. Do you want to proceed ?"), {
+                _t("The activity is linked to a meeting. Deleting it will remove the meeting as well. Do you want to proceed?"), {
                     confirm_callback: function () {
                         return self._rpc({
                             model: 'mail.activity',

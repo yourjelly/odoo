@@ -63,6 +63,7 @@ class Lead(models.Model):
                            self._table, ['create_date', 'team_id'])
         return res
 
+    # FP TODO: replace this method by a compute, readonly=False. That way, it will do the onchange too
     def _default_team_id(self, user_id):
         domain = [('use_leads', '=', True)] if self._context.get('default_type') == "lead" or self.type == 'lead' else [('use_opportunities', '=', True)]
         return self.env['crm.team']._get_default_team_id(user_id=user_id, domain=domain)
@@ -120,10 +121,18 @@ class Lead(models.Model):
     expected_revenue = fields.Monetary('Prorated Revenue', currency_field='company_currency', store=True, compute="_compute_expected_revenue")
     date_deadline = fields.Date('Expected Closing', help="Estimate of the date on which the opportunity will be won.")
     color = fields.Integer('Color Index', default=0)
+
+    # FP TODO: merge this field with email_from
     partner_address_email = fields.Char('Partner Contact Email', related='partner_id.email', readonly=True)
+
+    # FP TO CHECK: remove this concept everywhere: the blacklisted concept should ONLY apply to mass mailings, not to personnal mails on leads or others
     partner_is_blacklisted = fields.Boolean('Partner is blacklisted', related='partner_id.is_blacklisted', readonly=True)
+
+
     company_currency = fields.Many2one(string='Currency', related='company_id.currency_id', readonly=True, relation="res.currency")
     user_email = fields.Char('User Email', related='user_id.email', readonly=True)
+
+    # FP TO CHECK: this field does not seem to be used, to remove
     user_login = fields.Char('User Login', related='user_id.login', readonly=True)
 
     # Fields for address, due to separation from crm and res.partner
@@ -246,6 +255,7 @@ class Lead(models.Model):
         for lead in self:
             lead.meeting_count = mapped_data.get(lead.id, 0)
 
+    # FP TODO: merge this method with the one bellow and adapt those using it
     def _onchange_partner_id_values(self, partner_id):
         """ returns the new values when partner_id has changed """
         if partner_id:
@@ -278,6 +288,7 @@ class Lead(models.Model):
         values = self._onchange_partner_id_values(self.partner_id.id if self.partner_id else False)
         self.update(values)
 
+    # Merge these two methods for the onchange with the default method using compute, readonly=False
     @api.model
     def _onchange_user_values(self, user_id):
         """ returns new values when user_id has changed """
@@ -290,6 +301,7 @@ class Lead(models.Model):
         team_id = self._default_team_id(user_id)
         return {'team_id': team_id}
 
+    # Replace by compte readonly False, cfr comment above
     @api.onchange('user_id')
     def _onchange_user_id(self):
         """ When changing the user, also set a team_id or restrict team id to the ones user_id is member of. """
@@ -309,32 +321,39 @@ class Lead(models.Model):
             if self._origin.is_automated_probability:
                 self.probability = self.automated_probability
 
+    # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
     @api.onchange('stage_id')
     def _onchange_stage_id(self):
         self._onchange_compute_probability()
 
+    # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
     @api.onchange('source_id')
     def _onchange_source_id(self):
         self._onchange_compute_probability(optional_field_name='source_id')
 
+    # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
     @api.onchange('automated_probability')
     def _onchange_automated_probability(self):
         """ If was in auto mode before the change, align both fields so that it will stay in auto mode. """
         if self._origin.is_automated_probability:
             self.probability = self.automated_probability
 
+    # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
     @api.onchange('team_id')
     def _onchange_team_id(self):
         self._onchange_compute_probability()
 
+    # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
     @api.onchange('tag_ids')
     def _onchange_tag_ids(self):
         self._onchange_compute_probability()
 
+    # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
     @api.onchange('phone_state')
     def _onchange_phone_state(self):
         self._onchange_compute_probability(optional_field_name='phone_state')
 
+    # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
     @api.onchange('email_state')
     def _onchange_email_state(self):
         self._onchange_compute_probability(optional_field_name='email_state')
@@ -349,18 +368,21 @@ class Lead(models.Model):
 
     @api.onchange('state_id')
     def _onchange_state(self):
+        # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
         self._onchange_compute_probability(optional_field_name='state_id')
         if self.state_id:
             self.country_id = self.state_id.country_id.id
 
     @api.onchange('country_id')
     def _onchange_country_id(self):
+        # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
         self._onchange_compute_probability(optional_field_name='country_id')
         res = {'domain': {'state_id': []}}
         if self.country_id:
             res['domain']['state_id'] = [('country_id', '=', self.country_id.id)]
         return res
 
+    # FP TODO: replace _onchange_compute_probability by a compute field with depends(...), and remove this method
     @api.onchange('lang_id')
     def _onchange_lang_id(self):
         self._onchange_compute_probability(optional_field_name='lang_id')
@@ -507,7 +529,8 @@ class Lead(models.Model):
         return True
 
     def action_set_automated_probability(self):
-        self.write({'probability': self.automated_probability})
+        for record in self:
+            record.probability = record.automated_probability
 
     def action_set_won_rainbowman(self):
         self.ensure_one()

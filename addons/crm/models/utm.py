@@ -6,10 +6,12 @@ from odoo import fields, models, api, SUPERUSER_ID
 class UtmCampaign(models.Model):
     _inherit = 'utm.campaign'
 
+    # FP TODO: Remove this field, instead show the lead button if leads >0 (whether the group is activated or not)
     crm_lead_activated = fields.Boolean('Use Leads', compute='_compute_crm_lead_activated')
     lead_count = fields.Integer('Lead Count', groups='sales_team.group_sale_salesman', compute="_compute_global_opportunity_and_lead_count")
     opportunity_count = fields.Integer('Opportunity Count', groups='sales_team.group_sale_salesman', compute="_compute_global_opportunity_and_lead_count")
 
+    # FP TODO: Remove this medhod
     def _compute_crm_lead_activated(self):
         for campaign in self:
             campaign.crm_lead_activated = self.env.user.has_group('crm.group_use_lead')

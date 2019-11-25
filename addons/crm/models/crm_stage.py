@@ -22,6 +22,7 @@ class Stage(models.Model):
     _rec_name = 'name'
     _order = "sequence, name, id"
 
+    # FP TO CHECK: what about renaming team_id into stage_team_id to avoid these side effects and remove this method
     @api.model
     def default_get(self, fields):
         """ Hack :  when going from the pipeline, creating a stage with a sales team in
@@ -41,9 +42,10 @@ class Stage(models.Model):
     fold = fields.Boolean('Folded in Pipeline',
         help='This stage is folded in the kanban view when there are no records in that stage to display.')
 
-    # This field for interface only
+    # FP TODO: remove this field entirely, and the related attrs in the interface
     team_count = fields.Integer('team_count', compute='_compute_team_count')
 
+    # FP TODO: to remove
     def _compute_team_count(self):
         for stage in self:
             stage.team_count = self.env['crm.team'].search_count([])
