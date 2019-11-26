@@ -26,9 +26,12 @@
 
     <!-- First page of a survey -->
     <template id="survey_page_start" name="Survey: start page">
-        <div class="wrap o_survey_start">
+        <div class="wrap o_survey_start o_survey_session"
+            t-att-data-survey-session-uuid="answer.user_input_session_id.uuid">
             <div class="oe_structure" id="oe_structure_survey_init_1"/>
             <div class='mt32 mb32'>
+                <t t-if="answer.test_entry" t-call="survey.survey_button_form_view" />
+                <h1 t-field='survey.title' />
                 <div t-field='survey.description' class="oe_no_empty"/>
                 <div t-if="survey.is_time_limited">
                     <p>
@@ -36,14 +39,19 @@
                         <span class="font-weight-bold text-danger" t-field="survey.time_limit" t-options="{'widget': 'duration', 'unit': 'minute'}"></span>
                     </p>
                 </div>
-                <button type="submit" value="start" class="btn btn-primary btn-lg">
+                <div t-if="answer.user_input_session_id and answer.user_input_session_id.state == 'ready'" class="font-weight-bold">
+                    You're registered for this session!
+                    It will begin automatically when the host starts.
+                </div>
+                <button t-else="" type="submit" class="btn btn-primary btn-lg">
                     <t t-if="survey.certification">
                         Start Certification
                     </t>
                     <t t-else="">
                         Start Survey
                     </t>
-                </button><span class="o_survey_enter font-weight-bold ml-2">or press Enter</span>
+                </button>
+                <span class="o_survey_enter font-weight-bold ml-2">or press Enter</span>
             </div>
             <div class="oe_structure" id="oe_structure_survey_init_2"/>
         </div>
@@ -51,11 +59,16 @@
 
     <template id="survey_page_main" name="Survey: main page (take survey)">
         <t t-call="survey.layout">
-            <div class="wrap">
+            <div class="wrap o_survey_session"
+                t-att-data-survey-session-uuid="answer.user_input_session_id.uuid">
+                <t t-set="is_survey_session_in_progress" t-value="answer.user_input_session_id and answer.user_input_session_id.state == 'in_progress'" />
+                <t t-set="has_answered" t-value="answer.user_input_line_ids.filtered(lambda line: line.question_id == question)" />
                 <div class="oe_structure" id="oe_structure_survey_survey_1"/>
                 <div class="container o_survey_form">
                     <t t-if="answer.test_entry" t-call="survey.survey_button_form_view" />
-
+                    <t t-if="survey.is_time_limited" t-set="time_limit_type" t-value="'survey_time_limited'" />
+                    <t t-elif="is_survey_session_in_progress and answer.user_input_session_id.questions_time_limit and not answer.is_time_limit_reached and not has_answered" t-set="time_limit_type" t-value="'session_time_limited'" />
+                    <t t-else="" t-set="time_limit_type" t-value="'none'" />
                     <t t-call="survey.survey_page_main_header" />
                     <t t-call="survey.survey_page_content" />
                 </div>
@@ -102,31 +115,43 @@
 
         <t t-if="survey.questions_layout == 'page_per_question'">
             <input type="hidden" name="question_id" t-att-value="question.id" />
-            <t t-call="survey.question_container"/>
+            <!-- User has already answered for this session -->
+            <t t-if="is_survey_session_in_progress and (has_answered or answer.is_time_limit_reached)">
+                <fieldset disabled="disabled">
+                    <t t-call="survey.question_container" />
+                </fieldset>
+                <div t-if="answer.is_time_limit_reached and not has_answered" class="font-weight-bold">Sorry, you have not been fast enough.</div>
+                <div t-else="" class="font-weight-bold">We have registered your answer! Please wait for the host to go to the next question.</div>
+            </t>
+            <t t-else="">
+                <t t-call="survey.question_container"/>
 
-            <div class="row">
-                <div class="col-3"></div>
-                <div class="col-6 text-center mt16 mb128">
-                    <button t-if="survey.users_can_go_back and question != answer.predefined_question_ids[0]" type="submit" class="btn btn-secondary"
-                            name="button_submit" value="previous" t-att-data-previous-page-id="previous_page_id">Back</button>
-                    <button type="submit" t-att-value="'next' if not last else 'finish'" class="btn btn-primary">
-                        Continue</button><span class="o_survey_enter font-weight-bold ml-2">or press Enter</span>
+                <div class="row">
+                    <div class="col-3"></div>
+                    <div class="col-6 text-center mt16 mb128">
+                        <button t-if="survey.users_can_go_back and question != answer.predefined_question_ids[0]" type="submit" class="btn btn-secondary"
+                                name="button_submit" value="previous" t-att-data-previous-page-id="previous_page_id">Back</button>
+                        <button type="submit" t-att-value="'next' if not last else 'finish'" class="btn btn-primary">
+                            Continue</button><span class="o_survey_enter font-weight-bold ml-2">or press Enter</span>
+                    </div>
+                    <div class="col-3">
+                        <t t-call="survey.survey_progression"/>
+                    </div>
                 </div>
-                <div class="col-3">
-                    <t t-call="survey.survey_progression"/>
-                </div>
-            </div>
+            </t>
         </t>
     </template>
 
     <template id="survey_page_content" name="Survey: main page content">
         <t t-set="survey_form_readonly" t-value="false"/>
+        <t t-if="time_limit_type == 'survey_time_limited'" t-set="timer_start" t-value="answer.start_datetime.isoformat()" />
+        <t t-elif="time_limit_type == 'session_time_limited'" t-set="timer_start" t-value="answer.user_input_session_id.current_question_start_time.isoformat()" />
+        <t t-else="" t-set="timer_start" t-value="False" />
         <form role="form" method="post" t-att-name="survey.id"
                 t-att-data-answer-token="answer.access_token"
                 t-att-data-survey-token="survey.access_token"
-                t-att-data-timer="answer.start_datetime.isoformat() if survey.is_time_limited
-                    and answer.start_datetime and not finished else False"
-                t-att-data-time-limit-minutes="survey.time_limit"
+                t-att-data-timer="timer_start"
+                t-att-data-time-limit-minutes="answer.user_input_session_id.questions_time_limit / 60 if time_limit_type == 'session_time_limited' else survey.time_limit"
                 t-att-data-is-start-screen="page == 0"
                 t-att-data-questions-layout="survey.questions_layout">
             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
@@ -162,7 +187,7 @@
             <div class="container m-0 p-0">
                 <div class="row">
                     <div class="col-lg-8"><h1 t-esc="survey.title"></h1></div>
-                    <div t-if="survey.is_time_limited and not finished" class="o_survey_timer col-lg-4 d-none">
+                    <div t-if="time_limit_type != 'none'" class="o_survey_timer col-lg-4 d-none">
                         <h1 class="timer text-right">00:00</h1>
                     </div>
                 </div>
