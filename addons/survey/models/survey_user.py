@@ -39,11 +39,14 @@ class SurveyUserInput(models.Model):
     invite_token = fields.Char('Invite token', readonly=True, copy=False)  # no unique constraint, as it identifies a pool of attempts
     partner_id = fields.Many2one('res.partner', string='Partner', readonly=True)
     email = fields.Char('E-mail', readonly=True)
+    survey_user_nickname = fields.Char('Nickname')
     # questions / answers
     user_input_line_ids = fields.One2many('survey.user_input_line', 'user_input_id', string='Answers', copy=True)
     question_ids = fields.Many2many('survey.question', string='Predefined Questions', readonly=True)
     quizz_score = fields.Float("Score (%)", compute="_compute_quizz_score", store=True, compute_sudo=True)  # stored for perf reasons
     quizz_passed = fields.Boolean('Quizz Passed', compute='_compute_quizz_passed', store=True, compute_sudo=True)  # stored for perf reasons
+    # live session
+    user_input_session_id = fields.Many2one('survey.user_input_session', string="User Input Session")
 
     _sql_constraints = [
         ('unique_token', 'UNIQUE (token)', 'A token must be unique!'),
@@ -72,8 +75,13 @@ class SurveyUserInput(models.Model):
     def _compute_is_time_limit_reached(self):
         """ Checks that the user_input is not exceeding the survey's time limit. """
         for user_input in self:
-            user_input.is_time_limit_reached = user_input.survey_id.is_time_limited and fields.Datetime.now() \
-                > user_input.start_datetime + relativedelta(minutes=user_input.survey_id.time_limit)
+            survey_session = user_input.user_input_session_id
+            if survey_session:
+                user_input.is_time_limit_reached = survey_session.is_questions_time_limited and fields.Datetime.now() \
+                    > user_input.user_input_session_id.current_question_start_time + relativedelta(seconds=survey_session.questions_time_limit)
+            else:
+                user_input.is_time_limit_reached = user_input.survey_id.is_time_limited and fields.Datetime.now() \
+                    > user_input.start_datetime + relativedelta(minutes=user_input.survey_id.time_limit)
 
     @api.depends('state', 'test_entry', 'survey_id.is_attempts_limited', 'partner_id', 'email', 'invite_token')
     def _compute_attempt_number(self):
@@ -194,7 +202,7 @@ class SurveyUserInputLine(models.Model):
     value_free_text = fields.Text('Free Text answer')
     value_suggested = fields.Many2one('survey.label', string="Suggested answer")
     value_suggested_row = fields.Many2one('survey.label', string="Row answer")
-    answer_score = fields.Float('Score')
+    answer_score = fields.Float('Score', compute='_compute_answer_score', store=True, readonly=False)
     answer_is_correct = fields.Boolean('Correct', compute='_compute_answer_is_correct')
 
     @api.depends('value_suggested', 'question_id')
@@ -204,6 +212,13 @@ class SurveyUserInputLine(models.Model):
                 answer.answer_is_correct = answer.value_suggested.is_correct
             else:
                 answer.answer_is_correct = False
+
+    @api.depends('value_suggested.answer_score', 'user_input_id.user_input_session_id')
+    def _compute_answer_score(self):
+        """ We want to compute the score if we're not within a session. """
+        for answer in self:
+            if answer.value_suggested and not answer.user_input_id.user_input_session_id:
+                answer.answer_score = answer.value_suggested.answer_score
 
     @api.constrains('skipped', 'answer_type')
     def _answered_or_skipped(self):
@@ -228,7 +243,7 @@ class SurveyUserInputLine(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             value_suggested = vals.get('value_suggested')
-            if value_suggested:
+            if not vals.get('answer_score') and value_suggested:
                 vals.update({'answer_score': self.env['survey.label'].browse(int(value_suggested)).answer_score})
         return super(SurveyUserInputLine, self).create(vals_list)
 
@@ -238,13 +253,46 @@ class SurveyUserInputLine(models.Model):
             vals.update({'answer_score': self.env['survey.label'].browse(int(value_suggested)).answer_score})
         return super(SurveyUserInputLine, self).write(vals)
 
-    def _get_save_line_values(self, answer, answer_type):
+    def _get_save_line_values(self, answer, answer_type, user_input=False):
         if not answer or (isinstance(answer, str) and not answer.strip()):
             return {'answer_type': None, 'skipped': True}
         if answer_type == 'suggestion':
-            return {'answer_type': answer_type, 'value_suggested': answer}
+            vals = {'answer_type': answer_type, 'value_suggested': answer}
+            answer_score = self._get_speed_rating_score(user_input, answer)
+            if answer_score:
+                vals.update({'answer_score': answer_score})
+            return vals
         value = float(answer) if answer_type == 'number' else answer
         return {'answer_type': answer_type, 'value_' + answer_type: value}
+
+    def _get_speed_rating_score(self, user_input, answer_id):
+        """ If score depends on the speed of the answer, we need to compute it.
+        If the user answers in less than 2 seconds, he gets 100% of the points.
+        If he answers after that, he gets minimum 50% of the points.
+        The 50 other % are ponderated between the time limit and the time it took him to answer. """
+
+        answer = self.env['survey.label'].search([('id', '=', int(answer_id))], limit=1)
+        answer_score = False
+        if user_input and user_input.user_input_session_id and user_input.user_input_session_id.speed_rating:
+            if answer.answer_score and answer.answer_score > 0:
+                max_score_delay = 2
+                time_limit = user_input.user_input_session_id.questions_time_limit
+                now = fields.Datetime.now()
+                seconds_to_answer = (now - user_input.user_input_session_id.current_question_start_time).total_seconds()
+                question_remaining_time = time_limit - seconds_to_answer
+                if seconds_to_answer < max_score_delay:  # if answered within the max_score_delay
+                    answer_score = answer.answer_score
+                elif question_remaining_time < 0:  # if no time left
+                    answer_score = answer.answer_score / 2
+                else:
+                    time_limit -= max_score_delay  # we remove the max_score_delay to have all possible values
+                    question_remaining_time -= max_score_delay
+                    score_proportion = (time_limit - seconds_to_answer) / time_limit
+                    answer_score = (answer.answer_score / 2) * (1 + score_proportion)
+            elif answer.answer_score:  # we don't want to reduce a negative scoring
+                answer_score = answer.answer_score
+
+        return answer_score
 
     @api.model
     def save_lines(self, user_input, question, answer, comment=None):
@@ -270,8 +318,11 @@ class SurveyUserInputLine(models.Model):
 
             if question.save_as_email and answer:
                 user_input.write({'email': answer})
+
+            if question.save_as_nickname and answer:
+                user_input.write({'survey_user_nickname': answer})
         elif question.question_type in ['simple_choice', 'multiple_choice']:
-            self._save_line_choice(vals, old_answers, question, answer, comment)
+            self._save_line_choice(vals, old_answers, question, user_input, answer, comment)
         elif question.question_type == 'matrix':
             self._save_line_matrix(vals, old_answers, answer, comment)
         else:
@@ -293,7 +344,7 @@ class SurveyUserInputLine(models.Model):
         return True
 
     @api.model
-    def _save_line_choice(self, vals, old_answers, question, answers, comment):
+    def _save_line_choice(self, vals, old_answers, question, user_input, answers, comment):
         if not (isinstance(answers, list)):
             answers = [answers]
 
@@ -301,11 +352,11 @@ class SurveyUserInputLine(models.Model):
         if question.question_type == 'simple_choice':
             if not (question.comment_count_as_answer and question.comments_allowed and comment):
                 for answer in answers:
-                    vals.update(self._get_save_line_values(answer, 'suggestion'))
+                    vals.update(self._get_save_line_values(answer, 'suggestion', user_input))
                     vals_list.append(vals.copy())
         elif question.question_type == 'multiple_choice':
             for answer in answers:
-                vals.update(self._get_save_line_values(answer, 'suggestion'))
+                vals.update(self._get_save_line_values(answer, 'suggestion', user_input))
                 vals_list.append(vals.copy())
 
         if comment:

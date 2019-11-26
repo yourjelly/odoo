@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+    <template id="user_input_session" name="Survey User Input Session" inherit_id="web.frontend_layout" primary="True">
+        <xpath expr="//head/t[@t-call-assets][last()]" position="after">
+            <t t-call-assets="survey.survey_user_input_session_assets" lazy_load="True"/>
+            <t t-call-assets="survey.survey_assets" lazy_load="True"/>
+        </xpath>
+        <xpath expr="//header" position="before">
+            <t t-set="no_header" t-value="True"/>
+            <t t-set="no_footer" t-value="True"/>
+        </xpath>
+        <xpath expr="//header" position="after">
+            <div id="wrap" class="oe_structure oe_empty"/>
+        </xpath>
+    </template>
+
+    <template id="user_input_session_open" name="Survey User Input Session Open">
+        <t t-call="survey.user_input_session">
+            <div class="wrap py-3 d-flex min-vh-100 align-items-center justify-content-center o_survey_session_open">
+                <div class="w-75">
+                    <div class="mb-5">
+                        <h1 t-field="survey.title" />
+                        <div t-field="survey.description" />
+                    </div>
+                    <div class="row font-weight-bold">
+                        <div class="col-lg-3" t-if="survey.access_mode == 'public'">
+                            <i class="fa fa-link" /> Reach this session
+                        </div>
+                        <div class="col-lg-9" t-if="survey.access_mode == 'public'">
+                            <a t-att-href="survey.get_start_url()" t-esc="survey.get_start_url()" target="_blank" />
+                        </div>
+                        <div class="col-lg-12 mt-1" />
+                        <div class="col-lg-3" t-if="session.is_questions_time_limited">
+                            <i class="fa fa-hourglass" /> Time limit per question
+                        </div>
+                        <div class="col-lg-9" t-if="session.is_questions_time_limited">
+                            <span class="text-danger" t-field="session.questions_time_limit" t-options="{'widget': 'duration', 'unit': 'second'}" />
+                        </div>
+                        <div class="col-lg-12 mt-1" />
+                        <div class="col-lg-3" t-if="session.competitive_mode and session.speed_rating">
+                            <i class="fa fa-trophy" /> Scoring
+                        </div>
+                        <div class="col-lg-9" t-if="session.competitive_mode and session.speed_rating">
+                            <span>Answer quickly -> Get more points!</span>
+                        </div>
+                        <div class="col-lg-12 mt-5" />
+                        <div class="col-lg-3">
+                            <i class="fa fa-users" /> Participants
+                        </div>
+                        <div class="col-lg-9">
+                            <span t-esc="session.answer_ids_count" />
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a role="button" class="btn btn-primary font-weight-bold" t-att-href="'/survey/session_start/%s' % survey.access_token">
+                            Start Session
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="user_input_session_manage" name="Survey User Input Session Manage">
+        <t t-call="survey.user_input_session">
+            <div class="wrap py-3 d-flex min-vh-100 align-items-center justify-content-center o_survey_session_manage"
+                t-att-data-survey-id="survey.id"
+                t-att-data-input-session-id="session.id"
+                t-att-data-timer="session.current_question_start_time.isoformat()"
+                t-att-data-time-limit-minutes="session.questions_time_limit / 60">
+                <div class="w-75">
+                    <div>
+                        <fieldset disabled="disabled">
+                            <div class="row mb-5">
+                                <div class="col-lg-9"><h1 t-esc="survey.title"></h1></div>
+                                <div t-if="session.is_questions_time_limited" class="o_survey_timer col-lg-3">
+                                    <h1 class="timer text-right">00:00</h1>
+                                </div>
+                            </div>
+                            <t t-set="question" t-value="session.current_question_id" />
+                            <t t-set="answer_lines" t-value="env['survey.user_input_line']" />
+                            <h3 t-field="question.title" class="mb-3" />
+                            <t t-if="question.description"><div class="text-muted oe_no_empty" t-field='question.description'/></t>
+                            <t t-if="question.question_type == 'free_text'"><t t-call="survey.question_free_text"/></t>
+                            <t t-if="question.question_type == 'textbox'"><t t-call="survey.question_textbox"/></t>
+                            <t t-if="question.question_type == 'numerical_box'"><t t-call="survey.question_numerical_box"/></t>
+                            <t t-if="question.question_type == 'date'"><t t-call="survey.question_date"/></t>
+                            <t t-if="question.question_type == 'datetime'"><t t-call="survey.question_datetime"/></t>
+                            <t t-if="question.question_type == 'simple_choice'"><t t-call="survey.question_simple_choice"/></t>
+                            <t t-if="question.question_type == 'multiple_choice'"><t t-call="survey.question_multiple_choice"/></t>
+                            <t t-if="question.question_type == 'matrix'"><t t-call="survey.question_matrix"/></t>
+                        </fieldset>
+                        <h5 class="my-4">
+                            Received answers:
+                            <t t-esc="session.current_question_answer_count" />
+                                / 
+                                <t t-esc="session.answer_ids_count" />
+                        </h5>
+                        <div>
+                            <a t-if="is_last_question" role="button" class="btn btn-primary font-weight-bold float-right o_survey_session_end" href="#">
+                                End Session
+                            </a>
+                            <a t-else="" role="button" class="btn btn-primary font-weight-bold float-right o_survey_session_next" href="#">
+                                Next Question
+                            </a>
+                            <a t-if="show_results" role="button" class="btn btn-secondary font-weight-bold o_survey_session_hide_results" href="#">
+                                Hide Results
+                            </a>
+                            <a t-else="" role="button" class="btn btn-secondary font-weight-bold o_survey_session_show_results" href="#">
+                                Show Results
+                            </a>
+                            <a t-if="show_ranking" role="button" class="btn btn-secondary font-weight-bold o_survey_session_hide_ranking" href="#">
+                                Hide Ranking
+                            </a>
+                            <a t-elif="session.competitive_mode" role="button" class="btn btn-secondary font-weight-bold o_survey_session_show_ranking" href="#">
+                                Show Ranking
+                            </a>
+                            <a class="btn btn-secondary font-weight-bold o_survey_session_full_screen" href="#">
+                                <i class="fa fa-expand" />
+                            </a>
+                            <a class="btn btn-secondary font-weight-bold o_survey_session_exit_full_screen d-none" href="#">
+                                <i class="fa fa-compress" />
+                            </a>
+                        </div>
+                    </div>
+                    <div class="o_survey_result mt-3" t-if="show_results">
+                        <h3>Results</h3>
+                        <t t-call="survey.survey_page_statistics_question">
+                            <t t-set="hide_question_title" t-value="True" />
+                            <t t-set="question_ids" t-value="prepared_question" />
+                        </t>
+                    </div>
+                    <div class="mt-3" t-if="show_ranking and ranking">
+                        <t t-call="survey.user_input_session_ranking" />
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="user_input_session_results" name="Survey User Input Session Results">
+        <t t-call="survey.user_input_session">
+            <div class="wrap">
+                <div class="container">
+                    <t t-call="survey.survey_page_statistics_header" />
+                </div>
+                <t t-if="session.competitive_mode" t-call="survey.user_input_session_ranking" />
+                <div class="container o_survey_result pt-5">
+                    <t t-call="survey.survey_page_statistics_inner">
+                        <t t-set="display_results_overview" t-value="False" />
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="user_input_session_ranking" name="Survey User Input Ranking">
+        <div class="container o_survey_session_ranking my-4">
+            <h2>Ranking</h2>
+            <t t-set="max_score" t-value="ranking[0]['score'] or 1" />
+            <t t-foreach="ranking" t-as="ranking_item">
+                <div class="o_survey_session_ranking_item mb-1">
+                    <div t-esc="'%d.' % (ranking_item_index + 1)" class="o_survey_session_ranking_index d-inline-block font-weight-bold"></div>
+                    <div class="o_survey_session_ranking_bar mr-1 pr-2 align-top d-inline-block text-right font-weight-bold mb-1"
+                        t-esc="ranking_item['nickname']" t-attf-style="width: calc(calc(100% - 10rem) * #{(ranking_item['score'] / max_score)});"></div>
+                    <div class="o_survey_session_ranking_name font-weight-bold align-top d-inline-block">
+                        <span t-esc="'%.0f ' % ranking_item['score']" />
+                        <span>points</span>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </template>
+</data>
+</odoo>

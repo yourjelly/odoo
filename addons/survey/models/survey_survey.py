@@ -97,6 +97,11 @@ class Survey(models.Model):
     certification_give_badge = fields.Boolean('Give Badge')
     certification_badge_id = fields.Many2one('gamification.badge', 'Certification Badge')
     certification_badge_id_dummy = fields.Many2one(related='certification_badge_id', string='Certification Badge ')
+    # live sessions
+    user_input_session_ids = fields.One2many('survey.user_input_session', 'survey_id', string="User Input Sessions")
+    user_input_session_count = fields.Integer('# Sessions', compute='_compute_user_input_session_count')
+    user_input_current_session = fields.Many2one('survey.user_input_session', compute='_compute_user_input_current_session',
+        string="Current User Input Session")
 
     _sql_constraints = [
         ('access_token_unique', 'unique(access_token)', 'Access token should be unique'),
@@ -148,6 +153,28 @@ class Survey(models.Model):
         for survey in self:
             survey.page_ids = survey.question_and_page_ids.filtered(lambda question: question.is_page)
             survey.question_ids = survey.question_and_page_ids - survey.page_ids
+
+    @api.depends('user_input_session_ids')
+    def _compute_user_input_session_count(self):
+        statistics = self.env['survey.user_input_session'].read_group(
+            [('survey_id', 'in', self.ids)],
+            ['survey_id'],
+            ['survey_id']
+        )
+        statistics_by_survey = {
+            statistics_item['survey_id'][0]: statistics_item['survey_id_count']
+            for statistics_item in statistics
+        }
+        for survey in self:
+            survey.user_input_session_count = statistics_by_survey.get(survey.id, 0)
+
+    @api.depends('user_input_session_ids.state')
+    def _compute_user_input_current_session(self):
+        for survey in self:
+            survey.user_input_current_session = self.env['survey.user_input_session'].search([
+                ('id', 'in', survey.user_input_session_ids.ids),
+                ('state', 'in', ['draft', 'ready', 'in_progress'])
+            ], limit=1)
 
     @api.onchange('passing_score')
     def _onchange_passing_score(self):
@@ -237,11 +264,14 @@ class Survey(models.Model):
             if user and not user._is_public():
                 answer_vals['partner_id'] = user.partner_id.id
                 answer_vals['email'] = user.email
+                answer_vals['survey_user_nickname'] = user.name
             elif partner:
                 answer_vals['partner_id'] = partner.id
                 answer_vals['email'] = partner.email
+                answer_vals['survey_user_nickname'] = partner.name
             else:
                 answer_vals['email'] = email
+                answer_vals['survey_user_nickname'] = email
 
             if invite_token:
                 answer_vals['invite_token'] = invite_token
@@ -250,6 +280,9 @@ class Survey(models.Model):
                 # exception made for 'public' access_mode since the attempts pool is global because answers are
                 # created every time the user lands on '/start'
                 answer_vals['invite_token'] = self.env['survey.user_input']._generate_invite_token()
+
+            if survey.user_input_current_session and survey.user_input_current_session.state in ['ready', 'in_progress']:
+                answer_vals['user_input_session_id'] = survey.user_input_current_session.id
 
             answer_vals.update(additional_vals)
             answers += answers.create(answer_vals)
@@ -379,6 +412,10 @@ class Survey(models.Model):
                 to True if she knows that the page to display is the first one!
                 (doing this will probably cause a giant worm to eat her house)
         """
+
+        if user_input.user_input_session_id:
+            return (user_input.user_input_session_id.current_question_id, False)
+
         survey = user_input.survey_id
 
         pages_or_questions = survey._get_pages_or_questions(user_input)
@@ -401,6 +438,9 @@ class Survey(models.Model):
     def _get_survey_questions(self, answer=None, page_id=None, question_id=None):
         questions, page_or_question_id = None, None
 
+        if answer and answer.user_input_session_id and answer.user_input_session_id.state == 'in_progress':
+            current_session_question = answer.user_input_session_id.current_question_id
+            return (current_session_question, current_session_question.id)
         if self.questions_layout == 'page_per_section':
             if not page_id:
                 raise ValueError("Page id is needed for question layout 'page_per_section'")
@@ -532,6 +572,27 @@ class Survey(models.Model):
         action['context'] = ctx
         return action
 
+    def action_user_input_session(self):
+        action_rec = self.env.ref('survey.action_survey_user_input_session')
+        action = action_rec.read()[0]
+        ctx = dict(self.env.context)
+        ctx.update({'search_default_survey_ids': self.ids})
+        action['context'] = ctx
+        return action
+
+    def action_start_input_session(self):
+        if self.user_input_current_session:
+            raise UserError(_('You already have an existing session, close it first before opening a new one.'))
+
+        action_rec = self.env.ref('survey.action_survey_user_input_session')
+        action = action_rec.read()[0]
+        action['context'] = {'default_survey_id': self.id}
+        action['views'] = [(False, 'form')]
+        return action
+
+    def action_end_input_session(self):
+        self.user_input_current_session.write({'state': 'closed'})
+
     def get_start_url(self):
         self.ensure_one()
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
@@ -601,11 +662,13 @@ class Survey(models.Model):
         return filter_display_data
 
     @api.model
-    def prepare_result(self, question, current_filters=None):
+    def prepare_result(self, question, current_filters=None, user_input_session=False):
         """ Compute statistical data for questions by counting number of vote per choice on basis of filter """
         current_filters = current_filters if current_filters else []
         result_summary = {}
         input_lines = question.user_input_line_ids.filtered(lambda line: not line.user_input_id.test_entry)
+        if user_input_session:
+            input_lines = input_lines.filtered(lambda line: line.user_input_id in user_input_session.answer_ids)
 
         # Calculate and return statistics for choice
         if question.question_type in ['simple_choice', 'multiple_choice']:
@@ -659,14 +722,21 @@ class Survey(models.Model):
         return result_summary
 
     @api.model
-    def get_input_summary(self, question, current_filters=None):
+    def get_input_summary(self, question, current_filters=None, user_input_session=False):
         """ Returns overall summary of question e.g. answered, skipped, total_inputs on basis of filter """
         current_filters = current_filters if current_filters else []
         result = {}
+        # TODO awa: clean that search_line_ids unused brol ?
         search_line_ids = current_filters if current_filters else question.user_input_line_ids.ids
+        input_lines = question.user_input_line_ids.filtered(
+            lambda line: line.user_input_id.state != 'new' and not line.user_input_id.test_entry
+        )
 
-        result['answered'] = len([line for line in question.user_input_line_ids if line.user_input_id.state != 'new' and not line.user_input_id.test_entry and not line.skipped])
-        result['skipped'] = len([line for line in question.user_input_line_ids if line.user_input_id.state != 'new' and not line.user_input_id.test_entry and line.skipped])
+        if user_input_session:
+            input_lines = input_lines.filtered(lambda line: line.user_input_id in user_input_session.answer_ids)
+
+        result['answered'] = len([line for line in input_lines if not line.skipped])
+        result['skipped'] = len([line for line in input_lines if line.skipped])
 
         return result
 

@@ -201,10 +201,15 @@ class Survey(BaseSurveyController):
             else:
                 return request.render("survey.survey_403_page", {'survey': survey_sudo})
 
+        current_session_state = answer_sudo.user_input_session_id and answer_sudo.user_input_session_id.state
         # Select the right page
-        if answer_sudo.state == 'new':  # Intro page
+        if answer_sudo.state == 'new' and current_session_state != 'in_progress':  # Intro page
             data = {'survey': survey_sudo, 'answer': answer_sudo, 'page': 0}
-            return request.render('survey.survey_page_start', data)
+            if current_session_state == 'ready' and not answer_token:
+                # force the answer_token to avoid re-creating answers on refresh
+                return request.redirect('/survey/start/%s?answer_token=%s' % (survey_sudo.access_token, answer_sudo.token))
+            else:
+                return request.render('survey.survey_page_start', data)
         else:
             return request.redirect('/survey/fill/%s/%s' % (survey_sudo.access_token, answer_sudo.token))
 
@@ -314,9 +319,10 @@ class Survey(BaseSurveyController):
             for question in questions:
                 answer = prepared_questions[question.id]['answer']
                 comment = prepared_questions[question.id]['comment']
-                request.env['survey.user_input.line'].sudo().save_lines(answer_sudo, question, answer, comment)
+                request.env['survey.user_input_line'].sudo().save_lines(answer_sudo, question, answer, comment)
 
-        if answer_sudo.is_time_limit_reached or survey_sudo.questions_layout == 'one_page':
+        # if we're in a survey session, we don't mark the answer as "done", the host will do it when it ends the session
+        if (answer_sudo.is_time_limit_reached or survey_sudo.questions_layout == 'one_page') and not answer_sudo.user_input_session_id:
             answer_sudo._mark_done()
         elif 'previous_page_id' in post:
             # Go back to specific page using the breadcrumb. Lines are saved and survey continues
@@ -361,27 +367,17 @@ class Survey(BaseSurveyController):
             'format_date': lambda date: format_date(request.env, date)
         })
 
-    @http.route('/survey/results/<model("survey.survey"):survey>', type='http', auth='user', website=True)
-    def survey_report(self, survey, answer_token=None, **post):
+    @http.route([
+        '/survey/results/<model("survey.survey"):survey>',
+        '/survey/results/<model("survey.survey"):survey>/<model("survey.user_input_session"):session>'],
+        type='http', auth='user', website=True)
+    def survey_report(self, survey, session=None, answer_token=None, session_id=None, **post):
         '''Display survey Results & Statistics for given survey.'''
-        current_filters = []
-        filter_display_data = []
+        template_values = self._prepare_survey_result(session.survey_id, session=session, question=False, **post)
+        if session:
+            template_values['ranking'] = self._prepare_ranking_values(session)
 
-        answers = survey.user_input_ids.filtered(lambda answer: answer.state != 'new' and not answer.test_entry)
-        filter_finish = post.get('finished') == 'true'
-        if post or filter_finish:
-            filter_data = self._get_filter_data(post)
-            current_filters = survey.filter_input_ids(filter_data, filter_finish)
-            filter_display_data = survey.get_filter_display_data(filter_data)
-        return request.render('survey.survey_page_statistics',
-                                      {'survey': survey,
-                                       'answers': answers,
-                                       'survey_dict': self._prepare_result_dict(survey, current_filters),
-                                       'page_range': self.page_range,
-                                       'current_filters': current_filters,
-                                       'filter_display_data': filter_display_data,
-                                       'filter_finish': filter_finish
-                                       })
+        return request.render('survey.survey_page_statistics', template_values)
         # Quick retroengineering of what is injected into the template for now:
         # (TODO: flatten and simplify this)
         #

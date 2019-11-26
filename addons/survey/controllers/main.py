@@ -34,36 +34,90 @@ class BaseSurveyController(http.Controller):
     # COMPLETED SURVEY UTILITY METHODS
     # ------------------------------------------------------------
 
-    def _prepare_result_dict(self, survey, current_filters=None):
+    def _prepare_survey_result(self, survey, session=False, **kwargs):
+        """ Prepare survey results for the statistics template.
+        If a survey input session is passed, answers will be filtered based on that session. """
+        current_filters = []
+        filter_display_data = []
+
+        filter_finish = kwargs.get('finished') == 'true'
+        if kwargs or filter_finish:
+            filter_data = self._get_filter_data(kwargs)
+            current_filters = survey.filter_input_ids(filter_data, filter_finish)
+            filter_display_data = survey.get_filter_display_data(filter_data)
+
+        template_params = {
+            'session': session,
+            'survey': survey,
+            'survey_dict': self._prepare_result_dict(survey, current_filters, session),
+            'page_range': self.page_range,
+            'current_filters': current_filters,
+            'filter_display_data': filter_display_data,
+            'filter_finish': filter_finish
+        }
+
+        if session:
+            answers = session.answer_ids.filtered(lambda answer: answer.state != 'new' and not answer.test_entry)
+            template_params['session'] = session
+        else:
+            answers = survey.user_input_ids.filtered(lambda answer: answer.state != 'new' and not answer.test_entry)
+        template_params['answers'] = answers
+
+        return template_params
+
+    def _prepare_result_dict(self, survey, current_filters=None, user_input_session=False):
         """Returns dictionary having values for rendering template"""
         current_filters = current_filters if current_filters else []
         result = {'page_ids': []}
 
         # First append questions without page
-        questions_without_page = [self._prepare_question_values(question, current_filters) for question in survey.question_ids if not question.page_id]
+        questions_without_page = [self._prepare_question_values(question, current_filters, user_input_session) for question in survey.question_ids if not question.page_id]
         if questions_without_page:
             result['page_ids'].append({'page': request.env['survey.question'], 'question_ids': questions_without_page})
 
         # Then, questions in sections
         for page in survey.page_ids:
-            page_dict = {'page': page, 'question_ids': [self._prepare_question_values(question, current_filters) for question in page.question_ids]}
+            page_dict = {'page': page, 'question_ids': [self._prepare_question_values(question, current_filters, user_input_session) for question in page.question_ids]}
             result['page_ids'].append(page_dict)
 
-        if survey.scoring_type in ['scoring_with_answers', 'scoring_without_answers']:
+        if survey.scoring_type in ['scoring_with_answers', 'scoring_without_answers'] and not user_input_session:
             scoring_data = self._get_scoring_data(survey)
             result['success_rate'] = scoring_data['success_rate']
             result['scoring_graph_data'] = json.dumps(scoring_data['graph_data'])
 
         return result
 
-    def _prepare_question_values(self, question, current_filters):
+    def _prepare_question_values(self, question, current_filters, user_input_session):
         Survey = request.env['survey.survey']
         return {
             'question': question,
-            'input_summary': Survey.get_input_summary(question, current_filters),
-            'prepare_result': Survey.prepare_result(question, current_filters),
-            'graph_data': self._get_graph_data(question, current_filters),
+            'input_summary': Survey.get_input_summary(question, current_filters, user_input_session),
+            'prepare_result': Survey.prepare_result(question, current_filters, user_input_session),
+            'graph_data': self._get_graph_data(question, current_filters, user_input_session),
         }
+
+    def _prepare_ranking_values(self, session):
+        """ Prepare the necessary values for the session participants ranking. """
+        survey_results = request.env['survey.user_input_line'].read_group(
+            [('user_input_id', 'in', session.answer_ids.ids)],
+            ['user_input_id', 'answer_score:sum'],
+            ['user_input_id'],
+            orderby="answer_score desc",
+            limit=25
+        )
+        nicknames_by_user_input = {
+            user_input.id: user_input.survey_user_nickname
+            for user_input in session.answer_ids
+        }
+
+        ranking_values = []
+        for survey_result in survey_results:
+            ranking_values.append({
+                'score': round(survey_result.get('answer_score'), 0),
+                'nickname': nicknames_by_user_input.get(survey_result.get('user_input_id')[0]) or _('Anonymous')
+            })
+
+        return ranking_values
 
     def _get_filter_data(self, post):
         """Returns data used for filtering the result"""
@@ -78,7 +132,7 @@ class BaseSurveyController(http.Controller):
                     return filters
         return filters
 
-    def _get_graph_data(self, question, current_filters=None):
+    def _get_graph_data(self, question, current_filters=None, user_input_session=False):
         '''Returns formatted data required by graph library on basis of filter'''
         # TODO refactor this terrible method and merge it with _prepare_result_dict
         current_filters = current_filters if current_filters else []
@@ -86,12 +140,12 @@ class BaseSurveyController(http.Controller):
         result = []
         if question.question_type == 'multiple_choice':
             result.append({'key': ustr(question.title),
-                           'values': Survey.prepare_result(question, current_filters)['answers']
+                           'values': Survey.prepare_result(question, current_filters, user_input_session)['answers']
                            })
         if question.question_type == 'simple_choice':
-            result = Survey.prepare_result(question, current_filters)['answers']
+            result = Survey.prepare_result(question, current_filters, user_input_session)['answers']
         if question.question_type == 'matrix':
-            data = Survey.prepare_result(question, current_filters)
+            data = Survey.prepare_result(question, current_filters, user_input_session)
             for answer in data['answers']:
                 values = []
                 for row in data['rows']:

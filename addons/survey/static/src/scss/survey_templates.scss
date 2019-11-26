@@ -10,3 +10,42 @@
 .js_question-wrapper {
     padding-bottom: 25px;
 }
+
+.o_survey_session_open {
+    font-size: 1rem;
+
+    .fa {
+        width: 1.5rem;
+    }
+}
+
+.o_survey_session_manage {
+    font-size: 1rem;
+
+    .btn {
+        font-variant: small-caps;
+    }
+}
+
+.o_survey_session_ranking {
+    .o_survey_session_ranking_item {
+        line-height: 1.4rem;
+
+        .o_survey_session_ranking_index {
+            width: 1.5rem;
+        }
+
+        .o_survey_session_ranking_bar {
+            height: 1.4rem;
+            color: white;
+            background-color: #007A77;
+        }
+
+        .o_survey_session_ranking_name {
+            width: 7.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+}
