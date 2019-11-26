@@ -6,103 +6,107 @@
             <div class="oe_structure" id="oe_structure_survey_result_1"/>
             <div class="container o_survey_result">
                 <t t-call="survey.survey_button_form_view" />
-                <div class="jumbotron mt32">
-                    <h1><span t-field="survey.title" />
-                    <span style="font-size:1.5em;" t-attf-class="fa fa-bar-chart-o #{'fa-bar-chart-o' if survey.scoring_type == 'no_scoring' else 'fa-trophy' if survey.certificate else 'fa-question-circle-o'} float-right " role="img" aria-label="Chart" title="Chart"/></h1>
-                    <div t-field="survey.description" class="oe_no_empty" />
-                    <h2 t-if="not answers">
-                        Sorry, no one answered this survey yet.
-                    </h2>
-                </div>
-                <div t-if="answers" class="card d-print-none">
-                    <div class="card-header"><span class="fa fa-filter"></span>  Filters <span t-if="filter_display_data" class="float-right text-primary clear_survey_filter"><i class="fa fa-times"></i> Clear All Filters</span></div>
-                    <div class="card-body">
-                        <span t-if="filter_finish == True">
-                            <span class="badge badge-secondary only_left_radius filter-all">All surveys</span><span class="badge badge-primary only_right_radius filter-finished o_active_filter">Finished surveys</span>
-                        </span>
-                        <span t-if="filter_finish == False">
-                            <span class="badge badge-primary only_left_radius filter-all o_active_filter">All surveys</span><span class="badge badge-secondary only_right_radius filter-finished">Finished surveys</span>
-                        </span>
-                        <span t-foreach="filter_display_data" t-as="filter_data">
-                            <span class="badge badge-primary only_left_radius"><i class="fa fa-filter" role="img" aria-label="Filter" title="Filter"></i></span><span class="badge badge-primary no_radius" t-esc="filter_data['question_text']"></span><span class="badge badge-success only_right_radius" t-esc="' > '.join(filter_data['labels'])"></span>
-                        </span>
-                    </div>
-                </div>
-                <div t-if="survey.scoring_type in ['scoring_with_answers', 'scoring_without_answers']">
-                    <h1 class="mt16">Results Overview</h1>
-                    <div>Success rate: <mark class="font-weight-bold"><t t-esc="survey_dict['success_rate']"></t>%</mark></div>
-                    <div class="survey_graph" data-graph-type="pie" t-att-data-graph-data="survey_dict['scoring_graph_data']">
-                        <!-- canvas element for drawing pie chart -->
-                        <canvas/>
-                    </div>
-                    <hr/>
-                </div>
-                <div t-if="answers" t-foreach="survey_dict['page_ids']" t-as='page_ids'>
-                    <t t-set="page" t-value="page_ids['page']"/>
-                    <h1 class="mt16" t-field='page.title'></h1>
-                    <div t-field="page.description" class="oe_no_empty" />
-                    <hr/>
-                    <div t-foreach="page_ids['question_ids']" t-as='question_ids' class="mt16">
-                        <t t-set="input_summary" t-value="question_ids['input_summary']"/>
-                        <t t-set="question" t-value="question_ids['question']"/>
-                        <t t-set="graph_data" t-value="question_ids['graph_data']"/>
-                        <t t-set="prepare_result" t-value="question_ids['prepare_result']"/>
-                        <t t-set="question_with_correct_answers" t-value="survey.scoring_type in ['scoring_with_answers', 'scoring_without_answers'] and question.question_type in ['simple_choice', 'multiple_choice']" />
-                        <h4>
-                            <b>Question </b>
-                            <span t-field='question.question'></span>
-                            <t t-if="question.question_type == 'matrix'">
-                                <small><span class="badge badge-secondary">Matrix: <span t-field='question.matrix_subtype'/></span></small>
-                            </t>
-                            <t t-if="question.question_type in ['simple_choice', 'multiple_choice']">
-                                <small><span t-field='question.question_type' class="badge badge-secondary"></span></small>
-                            </t>
-                            <span class="float-right">
-                                <span class="badge badge-success"><span t-esc="input_summary['answered']"></span> Answered</span>
-                                <span class="badge badge-warning"><span t-esc="input_summary['skipped']"></span> Skipped</span>
-                            </span>
-                        </h4>
-                        <t t-if="question_with_correct_answers">
-                            <t t-set="correct_answers" t-value="question.get_correct_answer_ids()" />
-                            <div t-if="correct_answers">
-                                <t t-if="question.question_type == 'simple_choice'">
-                                    <p><span>Correct answer</span>: <span class="font-weight-bold" t-esc="correct_answers[0].value"></span></p>
-                                </t>
-                                <t t-if="question.question_type == 'multiple_choice'">
-                                    <span>Correct answers</span>:
-                                    <ul>
-                                        <li t-foreach="correct_answers" t-as="correct_answer">
-                                            <t t-esc="correct_answer.value" />
-                                        </li>
-                                    </ul>
-                                </t>
-                            </div>
-                        </t>
-                        <t t-if="input_summary['answered'] != 0">
-                            <t t-if="question.description">
-                                <div class="text-muted oe_no_empty" t-field="question.description" />
-                            </t>
-                            <t t-if="question.question_type in ['textbox', 'free_text', 'date', 'datetime']">
-                                <t t-call="survey.question_result_text"></t>
-                            </t>
-                            <t t-if="question.question_type in ['simple_choice', 'multiple_choice']">
-                                <t t-call="survey.question_result_choice"></t>
-                            </t>
-                            <t t-if="question.question_type == 'matrix'">
-                                <t t-call="survey.question_result_matrix"></t>
-                            </t>
-                            <t t-if="question.question_type == 'numerical_box'">
-                                <t t-call="survey.question_result_number"></t>
-                            </t>
-                        </t>
-                        <t t-if="input_summary['answered'] == 0">
-                            <h2 style="padding-top:30px;padding-bottom:30px;text-align:center;" class="text-muted">Sorry, No one answered this question.</h2>
-                        </t>
-                    </div>
-                </div>
+                <t t-call="survey.survey_page_statistics_inner" />
             </div>
             <div class="oe_structure" id="oe_structure_survey_result_2"/>
         </t>
+    </template>
+
+    <template id="survey_page_statistics_inner" name="Survey: result statistics content">
+        <div class="jumbotron mt32">
+            <h1><span t-field="survey.title" />
+            <span style="font-size:1.5em;" t-attf-class="fa fa-bar-chart-o #{'fa-bar-chart-o' if survey.scoring_type == 'no_scoring' else 'fa-trophy' if survey.certificate else 'fa-question-circle-o'} float-right " role="img" aria-label="Chart" title="Chart"/></h1>
+            <div t-field="survey.description" class="oe_no_empty" />
+            <h2 t-if="not answers">
+                Sorry, no one answered this survey yet.
+            </h2>
+        </div>
+        <div t-if="answers" class="card d-print-none">
+            <div class="card-header"><span class="fa fa-filter"></span>  Filters <span t-if="filter_display_data" class="float-right text-primary clear_survey_filter"><i class="fa fa-times"></i> Clear All Filters</span></div>
+            <div class="card-body">
+                <span t-if="filter_finish == True">
+                    <span class="badge badge-secondary only_left_radius filter-all">All surveys</span><span class="badge badge-primary only_right_radius filter-finished o_active_filter">Finished surveys</span>
+                </span>
+                <span t-if="filter_finish == False">
+                    <span class="badge badge-primary only_left_radius filter-all o_active_filter">All surveys</span><span class="badge badge-secondary only_right_radius filter-finished">Finished surveys</span>
+                </span>
+                <span t-foreach="filter_display_data" t-as="filter_data">
+                    <span class="badge badge-primary only_left_radius"><i class="fa fa-filter" role="img" aria-label="Filter" title="Filter"></i></span><span class="badge badge-primary no_radius" t-esc="filter_data['question_text']"></span><span class="badge badge-success only_right_radius" t-esc="' > '.join(filter_data['labels'])"></span>
+                </span>
+            </div>
+        </div>
+        <div t-if="survey.scoring_type in ['scoring_with_answers', 'scoring_without_answers']">
+            <h1 class="mt16">Results Overview</h1>
+            <div>Success rate: <mark class="font-weight-bold"><t t-esc="survey_dict['success_rate']"></t>%</mark></div>
+            <div class="survey_graph" data-graph-type="pie" t-att-data-graph-data="survey_dict['scoring_graph_data']">
+                <!-- canvas element for drawing pie chart -->
+                <canvas/>
+            </div>
+            <hr/>
+        </div>
+        <div t-if="answers" t-foreach="survey_dict['page_ids']" t-as='page_ids'>
+            <t t-set="page" t-value="page_ids['page']"/>
+            <h1 class="mt16" t-field='page.title'></h1>
+            <div t-field="page.description" class="oe_no_empty" />
+            <hr/>
+            <div t-foreach="page_ids['question_ids']" t-as='question_ids' class="mt16">
+                <t t-set="input_summary" t-value="question_ids['input_summary']"/>
+                <t t-set="question" t-value="question_ids['question']"/>
+                <t t-set="graph_data" t-value="question_ids['graph_data']"/>
+                <t t-set="prepare_result" t-value="question_ids['prepare_result']"/>
+                <t t-set="question_with_correct_answers" t-value="survey.scoring_type in ['scoring_with_answers', 'scoring_without_answers'] and question.question_type in ['simple_choice', 'multiple_choice']" />
+                <h4>
+                    <b>Question </b>
+                            <span t-field='question.question'></span>
+                    <t t-if="question.question_type == 'matrix'">
+                        <small><span class="badge badge-secondary">Matrix: <span t-field='question.matrix_subtype'/></span></small>
+                    </t>
+                    <t t-if="question.question_type in ['simple_choice', 'multiple_choice']">
+                        <small><span t-field='question.question_type' class="badge badge-secondary"></span></small>
+                    </t>
+                    <span class="float-right">
+                        <span class="badge badge-success"><span t-esc="input_summary['answered']"></span> Answered</span>
+                        <span class="badge badge-warning"><span t-esc="input_summary['skipped']"></span> Skipped</span>
+                    </span>
+                </h4>
+                <t t-if="question_with_correct_answers">
+                    <t t-set="correct_answers" t-value="question.get_correct_answer_ids()" />
+                    <div t-if="correct_answers">
+                        <t t-if="question.question_type == 'simple_choice'">
+                            <p><span>Correct answer</span>: <span class="font-weight-bold" t-esc="correct_answers[0].value"></span></p>
+                        </t>
+                        <t t-if="question.question_type == 'multiple_choice'">
+                            <span>Correct answers</span>:
+                            <ul>
+                                <li t-foreach="correct_answers" t-as="correct_answer">
+                                    <t t-esc="correct_answer.value" />
+                                </li>
+                            </ul>
+                        </t>
+                    </div>
+                </t>
+                <t t-if="input_summary['answered'] != 0">
+                    <t t-if="question.description">
+                        <div class="text-muted oe_no_empty" t-field="question.description" />
+                    </t>
+                    <t t-if="question.question_type in ['textbox', 'free_text', 'date', 'datetime']">
+                        <t t-call="survey.question_result_text"></t>
+                    </t>
+                    <t t-if="question.question_type in ['simple_choice', 'multiple_choice']">
+                        <t t-call="survey.question_result_choice"></t>
+                    </t>
+                    <t t-if="question.question_type == 'matrix'">
+                        <t t-call="survey.question_result_matrix"></t>
+                    </t>
+                    <t t-if="question.question_type == 'numerical_box'">
+                        <t t-call="survey.question_result_number"></t>
+                    </t>
+                </t>
+                <t t-if="input_summary['answered'] == 0">
+                    <h2 style="padding-top:30px;padding-bottom:30px;text-align:center;" class="text-muted">Sorry, No one answered this question.</h2>
+                </t>
+            </div>
+        </div>
     </template>
 
     <!-- Result for free_text,textbox and date -->
