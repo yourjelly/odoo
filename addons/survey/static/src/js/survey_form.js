@@ -39,6 +39,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
             });
             self._initChoiceItems();
             self._initTextArea();
+            self._initSessionManagement();
         });
     },
 
@@ -136,6 +137,35 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
         this._submitForm($(event.currentTarget));
     },
 
+    /**
+     * @private
+     * @param {Array[]} notifications
+     */
+    _onNotification: function (notifications) {
+        var self = this;
+
+        if (notifications && notifications.length !== 0) {
+            notifications.forEach(function (notification) {
+                if (notification.length >= 2) {
+                    var event = notification[1];
+                    if (event.type === 'next_question' ||
+                        event.type === 'end_session') {
+                        self._nextScreen(
+                            self._rpc({
+                                route: '/survey/next_page/' + self.options.surveyToken + '/' + self.options.answerToken,
+                            }),
+                            self.$('button[type="submit"]').first()
+                        );
+                    }
+                }
+            });
+        }
+    },
+
+    _onTimeUp: function () {
+        this._submitForm(this.$('.o_survey_timer'));
+    },
+
     // SUBMIT
     // -------------------------------------------------------------------------
 
@@ -176,6 +206,16 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
             this._prepareSubmitValues(formData, params);
         }
 
+        var submitPromise = self._rpc({
+            route: route + self.options.surveyToken + '/' + self.options.answerToken ,
+            params: params,
+        });
+        this._nextScreen(submitPromise, $target);
+    },
+
+    _nextScreen: function (nextScreenPromise, $target) {
+        var self = this;
+
         var resolveFadeOut;
         var fadeOutPromise = new Promise(function (resolve, reject) {resolveFadeOut = resolve;});
 
@@ -186,19 +226,15 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
         self.$(selectorsToFadeout.join(',')).fadeOut(400, function () {
             resolveFadeOut();
         });
-        var submitPromise = self._rpc({
-            route: route + self.options.surveyToken + '/' + self.options.answerToken ,
-            params: params,
-        });
-        Promise.all([fadeOutPromise, submitPromise]).then(function (results) {
+        Promise.all([fadeOutPromise, nextScreenPromise]).then(function (results) {
             if (self.options.isStartScreen) {
                 self.options.isStartScreen = false;
             }
-            return self._onSubmitDone(results[1], $target);
+            return self._onNextScreenDone(results[1], $target);
         });
     },
 
-    _onSubmitDone: function (result, $target) {
+    _onNextScreenDone: function (result, $target) {
         var self = this;
         if (result && !result.error) {
             self.$(".o_survey_form_content").empty();
@@ -207,7 +243,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
                 self._initDateTimePicker($(this));
             });
             self._updateBreadcrumb();
-            if ($target.val() === 'start') {
+            if ($target.val() === 'start' || this.$el.data('surveySessionUuid')) {
                 self._initTimer();
             } else if ($target.val() === 'finish') {
                 self._initResultWidget();
@@ -537,6 +573,22 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
         }
     },
 
+    /**
+     * Will handle bus specific behavior for survey 'sessions'
+     *
+     * @private
+     */
+    _initSessionManagement: function () {
+        var surveySessionUuid = this.$el.data('surveySessionUuid');
+        if (surveySessionUuid) {
+            this.surveySessionUuid = surveySessionUuid;
+            this.call('bus_service', 'addChannel', surveySessionUuid);
+            this.call('bus_service', 'startPolling');
+
+            this.call('bus_service', 'onNotification', this, this._onNotification);
+        }
+    },
+
     _updateBreadcrumb: function () {
         if (this.surveyBreadcrumbWidget) {
             var pageId = this.$('input[name=page_id]').val();
@@ -548,22 +600,28 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
             this._initBreadcrumb();
         }
     },
-    
+
     _initTimer: function () {
-        var self = this;
         var $timer = this.$('.o_survey_timer');
-        if ($timer.length) {
-            var timeLimitMinutes = this.options.timeLimitMinutes;
-            var timer = this.options.timer;
+        var $timerData = this.$('.o_survey_form_content_data');
+        var isTimeLimitReached = $timerData.data('isTimeLimitReached');
+        var timeLimitMinutes = $timerData.data('timeLimitMinutes');
+        var hasAnswered = $timerData.data('hasAnswered');
+        if ($timer.length && !isTimeLimitReached && !hasAnswered && timeLimitMinutes) {
+            var timer = $timerData.data('timer');
             this.surveyTimerWidget = new publicWidget.registry.SurveyTimerWidget(this, {
                 'timer': timer,
                 'timeLimitMinutes': timeLimitMinutes
             });
             this.surveyTimerWidget.attachTo($timer);
-            this.surveyTimerWidget.on('time_up', this, function (ev) {
-                self._submitForm($timer);
-            });
-            $timer.toggleClass('d-none', false);
+            this.surveyTimerWidget.on('time_up', this, this._onTimeUp);
+            $timer.removeClass('d-none');
+            $timer.show(); // somehow the timer gets display: none applied to its style, to investigate
+        } else {
+            if (this.surveyTimerWidget) {
+                this.surveyTimerWidget.off('time_up', this, this._onTimeUp);
+            }
+            $timer.addClass('d-none');
         }
     },
 
