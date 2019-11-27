@@ -1548,7 +1548,8 @@ class StockMove(SavepointCase):
         """
         product = self.env['product.product'].create({
             'name': 'product',
-            'tracking': 'serial'
+            'tracking': 'serial',
+            'type': 'product',
         })
 
         serial_numbers = self.env['stock.production.lot'].create([{
@@ -1579,7 +1580,15 @@ class StockMove(SavepointCase):
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 5)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(product, self.stock_location), 0.0)
+
+        # Check state is changed even with 0 move lines unlinked
+        move1.move_line_ids.write({'qty_done': 1})
+        move1._do_unreserve()
+        self.assertEqual(len(move1.move_line_ids), 5)
+        self.assertEqual(move1.state, 'confirmed')
+        move1._action_assign()
         # set a quantity done on the two first move lines
+        move1.move_line_ids.write({'qty_done': 0})
         move1.move_line_ids[0].qty_done = 1
         move1.move_line_ids[1].qty_done = 1
 

@@ -623,6 +623,9 @@ class StockMove(models.Model):
         if ml_to_update:
             ml_to_update.write({'product_uom_qty': 0})
         ml_to_unlink.unlink()
+        # unlink call _recompute_state but it's possible to have a move with all its
+        # move lines so its state won't be updated
+        moves_to_unreserve._recompute_state()
         return True
 
     def _generate_serial_numbers(self, next_serial_count=False):
