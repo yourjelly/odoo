@@ -33,14 +33,28 @@ class StockRule(models.Model):
 
     @api.model
     def _run_manufacture(self, procurements):
+        procurements_by_domain = defaultdict(list)
         productions_values_by_company = defaultdict(list)
         for procurement, rule in procurements:
             bom = self._get_matching_bom(procurement.product_id, procurement.company_id, procurement.values)
             if not bom:
                 msg = _('There is no Bill of Material of type manufacture or kit found for the product %s. Please define a Bill of Material for this product.') % (procurement.product_id.display_name,)
                 raise ProcurementException([(procurement, msg)])
+            procurements_by_domain[tuple(rule._get_domain_run_manufacture(bom, procurement))].append(procurement)
 
-            productions_values_by_company[procurement.company_id.id].append(rule._prepare_mo_vals(*procurement, bom))
+        for domain, procurements in procurements_by_domain.items():
+            existing_production = self.env['mrp.production'].search(domain).filtered(lambda p:
+                all(m.bom_line_id and m.quantity_done == 0.0 for m in p.move_raw_ids)
+            )
+            if existing_production:
+                replenish_qty = sum(map(lambda p: p.product_qty, procurements))
+                self.env['change.production.qty'].create({
+                    'mo_id': existing_production[0].id,
+                    'product_qty': existing_production[0].product_qty + replenish_qty,
+                }).change_prod_qty()
+            else:
+                for procurement in procurements:
+                    productions_values_by_company[procurement.company_id.id].append(rule._prepare_mo_vals(*procurement, bom))
 
         for company_id, productions_values in productions_values_by_company.items():
             # create the MO as SUPERUSER because the current user may not have the rights to do it (mto product launched by a sale for example)
@@ -65,6 +79,29 @@ class StockRule(models.Model):
         fields = super(StockRule, self)._get_custom_move_fields()
         fields += ['bom_line_id']
         return fields
+
+    def _get_domain_run_manufacture(self, bom, procurement):
+        domain = [
+            ('state', '=', 'confirmed'),
+            ('product_id', '=', procurement.product_id.id),
+            ('bom_id', '=', bom.id),
+            ('picking_type_id', '=', self.picking_type_id.id or procurement.values['warehouse_id'].manu_type_id.id),
+            ('company_id', '=', procurement.values.get('company_id', self.env.company).id),
+            # If orderpoint_id is not set the domain will result as
+            # ('orderpoint_id', '!=', False), ('orderpoint_id', '=', False)
+            # that would result with an empty record set as result.
+            # The purpose is to only merge production from mrp in a first time.
+            # In the future, if we want to merge procurement from all sources
+            # those two lines could be simply remove.
+            ('orderpoint_id', '!=', False),
+            ('orderpoint_id', '=', 'orderpoint_id' in procurement.values and procurement.values['orderpoint_id'].id),
+        ]
+        orderpoint = procurement.values.get('orderpoint_id')
+        if orderpoint:
+            domain = expression.AND([domain, [
+                ('date_planned_start', '<=', fields.Datetime.from_string(procurement.values['date_planned'])),
+            ]])
+        return domain
 
     def _get_matching_bom(self, product_id, company_id, values):
         if values.get('bom_id', False):
