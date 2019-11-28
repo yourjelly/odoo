@@ -126,7 +126,10 @@ class StockRule(models.Model):
         security_delay = self.filtered(lambda r: r.action == 'buy').picking_type_id.company_id.po_lead
         if security_delay:
             lead_days_description += '<tr><td>%s</td><td>+ %d %s</td></tr>' % (_('Purchase Security Lead Time'), security_delay, _('day(s)'))
-        return lead_days + supplier_delay + security_delay, lead_days_description
+        days_to_purchase = self.filtered(lambda r: r.action == 'buy').company_id.days_to_purchase
+        if days_to_purchase:
+            lead_days_description += '<tr><td>%s</td><td>+ %d %s</td></tr>' % (_('Days to Purchase'), days_to_purchase, _('day(s)'))
+        return lead_days + supplier_delay + security_delay + days_to_purchase, lead_days_description
 
     @api.model
     def _get_procurements_to_merge_groupby(self, procurement):
