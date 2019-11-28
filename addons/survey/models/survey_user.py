@@ -247,26 +247,29 @@ class SurveyUserInputLine(models.Model):
         return {'answer_type': answer_type, 'value_' + answer_type: value}
 
     @api.model
-    def save_lines(self, user_input_id, question, answer, comment=None):
+    def save_lines(self, user_input, question, answer, comment=None):
         """ Save answers to questions, depending on question type
 
-            If an answer already exists for question and user_input_id, it will be
+            If an answer already exists for question and user_input, it will be
             overwritten (or deleted for 'choice' questions) (in order to maintain data consistency).
         """
         vals = {
-            'user_input_id': user_input_id,
+            'user_input_id': user_input.id,
             'question_id': question.id,
             'survey_id': question.survey_id.id,
             'skipped': False,
         }
         old_answers = self.search([
-            ('user_input_id', '=', user_input_id),
+            ('user_input_id', '=', user_input.id),
             ('survey_id', '=', question.survey_id.id),
             ('question_id', '=', question.id)
         ])
 
         if question.question_type in ['textbox', 'free_text', 'numerical_box', 'date', 'datetime']:
             self._save_line_simple_answer(vals, old_answers, question, answer)
+
+            if question.save_as_email and answer:
+                user_input.write({'email': answer})
         elif question.question_type in ['simple_choice', 'multiple_choice']:
             self._save_line_choice(vals, old_answers, question, answer, comment)
         elif question.question_type == 'matrix':

@@ -73,6 +73,8 @@ class SurveyQuestion(models.Model):
         ('simple_choice', 'Multiple choice: only one answer'),
         ('multiple_choice', 'Multiple choice: multiple answers allowed'),
         ('matrix', 'Matrix')], string='Question Type')
+    save_as_email = fields.Boolean("Save as user email", compute='_compute_save_as_email', store=True, readonly=False,
+        help="If checked, this option will save this question's answer as the email address of the survey user.")
     # -- simple choice / multiple choice / matrix
     labels_ids = fields.One2many(
         'survey.label', 'question_id', string='Types of answers', copy=True,
@@ -166,6 +168,12 @@ class SurveyQuestion(models.Model):
                         .sorted(reverse=True))),
                     None
                 )
+
+    @api.depends('question_type', 'validation_email')
+    def _compute_save_as_email(self):
+        for question in self:
+            if question.question_type != 'textbox' or not question.validation_email:
+                question.save_as_email = False
 
     # Validation methods
     def validate_question(self, answer, comment=None):
