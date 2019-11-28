@@ -102,6 +102,21 @@ class StockRule(models.Model):
         date_planned = date_planned - relativedelta(days=company_id.manufacturing_lead)
         return date_planned
 
+    def _get_lead_days(self, product_id):
+        delay, delay_description = super(StockRule, self)._get_lead_days(product_id)
+        manufature_rule = self.filtered(lambda r: r.action == 'manufacture')
+        if not manufature_rule:
+            return delay, delay_description
+        manufacture_delay = product_id.produce_delay
+        if manufacture_delay:
+            delay += manufacture_delay
+            delay_description += '<tr><td>%s</td><td>+ %d %s</td></tr>' % (_('Manufacturing Lead Time'), manufacture_delay, _('day(s)'))
+        security_delay = manufature_rule.picking_type_id.company_id.manufacturing_lead
+        if security_delay:
+            delay += security_delay
+            delay_description += '<tr><td>%s</td><td>+ %d %s</td></tr>' % (_('Company Manufacture Lead Time'), security_delay, _('day(s)'))
+        return delay, delay_description
+
     def _push_prepare_move_copy_values(self, move_to_copy, new_date):
         new_move_vals = super(StockRule, self)._push_prepare_move_copy_values(move_to_copy, new_date)
         new_move_vals['production_id'] = False

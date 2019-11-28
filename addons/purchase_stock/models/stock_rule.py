@@ -116,6 +116,18 @@ class StockRule(models.Model):
                         procurement.values, po))
             self.env['purchase.order.line'].sudo().create(po_line_values)
 
+    def _get_lead_days(self, product_id):
+        lead_days, lead_days_description = super(StockRule, self)._get_lead_days(product_id)
+        if 'buy' not in self.mapped('action') or not product_id._prepare_sellers(False):
+            return lead_days, lead_days_description
+        supplier_delay = product_id._prepare_sellers()[0].delay
+        if supplier_delay:
+            lead_days_description += '<tr><td>%s</td><td>+ %d %s</td></tr>' % (_('Vendor Lead Time'), supplier_delay, _('day(s)'))
+        security_delay = self.filtered(lambda r: r.action == 'buy').picking_type_id.company_id.po_lead
+        if security_delay:
+            lead_days_description += '<tr><td>%s</td><td>+ %d %s</td></tr>' % (_('Purchase Security Lead Time'), security_delay, _('day(s)'))
+        return lead_days + supplier_delay + security_delay, lead_days_description
+
     @api.model
     def _get_procurements_to_merge_groupby(self, procurement):
         return procurement.product_id, procurement.product_uom, procurement.values['propagate_date'],\

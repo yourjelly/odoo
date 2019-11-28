@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from datetime import datetime
+from datetime import datetime, time
 from dateutil import relativedelta
 
 from odoo import api, fields, models, _
@@ -66,6 +66,10 @@ class Orderpoint(models.Model):
         default=lambda self: self.env.company)
     allowed_location_ids = fields.One2many(comodel_name='stock.location', compute='_compute_allowed_location_ids')
 
+    lead_days = fields.Integer(compute='_compute_lead_days')
+    lead_days_description = fields.Html(compute='_compute_lead_days')
+    lead_days_date = fields.Date(compute='_compute_lead_days')
+
     _sql_constraints = [
         ('qty_multiple_check', 'CHECK( qty_multiple >= 0 )', 'Qty Multiple must be greater than or equal to zero.'),
     ]
@@ -82,6 +86,14 @@ class Orderpoint(models.Model):
                 loc_domain = expression.AND([loc_domain, ['!', ('id', 'child_of', view_location_id.id)]])
                 loc_domain = expression.AND([loc_domain, ['|', ('company_id', '=', False), ('company_id', '=', orderpoint.company_id.id)]])
             orderpoint.allowed_location_ids = self.env['stock.location'].search(loc_domain)
+
+    @api.depends('product_id', 'location_id', 'company_id', 'warehouse_id',
+    'product_id.seller_ids', 'product_id.seller_ids.delay')
+    def _compute_lead_days(self):
+        for orderpoint in self:
+            rules = orderpoint.product_id._get_rules_from_location(orderpoint.location_id)
+            orderpoint.lead_days, orderpoint.lead_days_description = rules._get_lead_days(orderpoint.product_id)
+            orderpoint.lead_days_date = fields.Date.today() + relativedelta.relativedelta(days=orderpoint.lead_days)
 
     def _quantity_in_progress(self):
         """Return Quantities that are not yet in virtual stock but should be deduced from orderpoint rule
@@ -126,6 +138,7 @@ class Orderpoint(models.Model):
         self.ensure_one()
         return {
             'location': self.location_id.id,
+            'to_date': datetime.combine(self.lead_days_date, time.max)
         }
 
     def _prepare_procurement_values(self, product_qty, date=False, group=False):

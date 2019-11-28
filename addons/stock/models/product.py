@@ -523,6 +523,17 @@ class Product(models.Model):
                 raise UserError(msg)
         return res
 
+    def _get_rules_from_location(self, location_id, rules=False):
+        if not rules:
+            rules = self.env['stock.rule']
+        rule = self.env['procurement.group']._get_rule(self, location_id, {'warehouse_id': location_id.get_warehouse()})
+        if not rule:
+            return rules
+        if rule.procure_method == 'make_to_stock':
+            return rules | rule
+        else:
+            return self._get_rules_from_location(rule.location_src_id, rules | rule)
+
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
     _check_company_auto = True

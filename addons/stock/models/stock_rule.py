@@ -314,6 +314,11 @@ class StockRule(models.Model):
                 user_id=product_id.responsible_id.id or SUPERUSER_ID,
             )
 
+    def _get_lead_days(self, product_id):
+        delay = sum(self.filtered(lambda r: r.action in ['pull', 'pull_push']).mapped('delay'))
+        delay_description = ''.join(['<tr><td>%s %s</td><td>+ %d %s</td></tr>' % (_('Delay on'), rule.name, rule.delay, _('day(s)')) for rule in self if rule.action in ['pull', 'pull_push'] and rule.delay])
+        return delay, delay_description
+
 
 class ProcurementGroup(models.Model):
     """

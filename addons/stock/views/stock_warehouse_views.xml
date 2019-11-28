@@ -207,6 +207,9 @@
             <field name="model">stock.warehouse.orderpoint</field>
             <field name="arch" type="xml">
                 <form string="Reordering Rules">
+                    <field name="lead_days" invisible="1"/>
+                    <field name="lead_days_description" invisible="1"/>
+                    <field name="lead_days_date" invisible="1"/>
                     <div class="alert alert-info" role="alert">
                         <a style="cursor: pointer" class="alert-link o_form_uri" type="action" name="%(action_procurement_compute)d">Run the scheduler</a> manually to trigger the reordering rules right now.
                     </div>
@@ -225,6 +228,7 @@
                                 <div class="o_row">
                                     <field name="product_min_qty"/>
                                     <field name="product_uom_name"/>
+                                    <widget name="lead_days_widget"/>
                                 </div>
                                 <label for="product_max_qty"/>
                                 <div class="o_row">
