@@ -252,6 +252,10 @@ class StockRule(models.Model):
         :rtype: dictionary
         '''
         group_id = False
+        orderpoint_id = values.get('orderpoint_id') and values['orderpoint_id'].id
+        if orderpoint_id and 'move_dest_ids' in values and\
+                any(company != self.company_id for company in values['move_dest_ids'].mapped('company_id')):
+            orderpoint_id = False
         if self.group_propagation_option == 'propagate':
             group_id = values.get('group_id', False) and values['group_id'].id
         elif self.group_propagation_option == 'fixed':
@@ -288,6 +292,7 @@ class StockRule(models.Model):
             'description_picking': product_id._get_description(self.picking_type_id),
             'priority': values.get('priority', "1"),
             'delay_alert': self.delay_alert,
+            'orderpoint_id': values.get('orderpoint_id') and values.get('orderpoint_id').id,
         }
         for field in self._get_custom_move_fields():
             if field in values:
