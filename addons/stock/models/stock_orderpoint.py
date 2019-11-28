@@ -121,6 +121,12 @@ class Orderpoint(models.Model):
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
         return super(Orderpoint, self).write(vals)
 
+    def _procurement_from_orderpoint_get_context(self):
+        """ Make groups for a given orderpoint; by default schedule all operations in one without date """
+        self.ensure_one()
+        return {
+            'location': self.location_id.id,
+        }
 
     def _prepare_procurement_values(self, product_qty, date=False, group=False):
         """ Prepare specific key for moves or other components that will be created from a stock rule
@@ -134,3 +140,6 @@ class Orderpoint(models.Model):
             'orderpoint_id': self,
             'group_id': group or self.group_id,
         }
+
+    def _post_process_scheduler(self):
+        return True

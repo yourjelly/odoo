@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from collections import namedtuple, OrderedDict, defaultdict
+from collections import namedtuple, defaultdict
+from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
 from odoo.tools.misc import split_every
 from psycopg2 import OperationalError
 
 from odoo import api, fields, models, registry, SUPERUSER_ID, _
 from odoo.osv import expression
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, float_compare, float_round
+from odoo.tools import float_compare, float_round, frozendict
 from odoo.exceptions import UserError
 
 import logging
@@ -497,21 +498,7 @@ class ProcurementGroup(models.Model):
 
     @api.model
     def _procurement_from_orderpoint_get_order(self):
-        return 'location_id'
-
-    @api.model
-    def _procurement_from_orderpoint_get_grouping_key(self, orderpoint_ids):
-        orderpoints = self.env['stock.warehouse.orderpoint'].browse(orderpoint_ids)
-        return orderpoints.location_id.id
-
-    @api.model
-    def _procurement_from_orderpoint_get_groups(self, orderpoint_ids):
-        """ Make groups for a given orderpoint; by default schedule all operations in one without date """
-        return [{'to_date': False, 'procurement_values': dict()}]
-
-    @api.model
-    def _procurement_from_orderpoint_post_process(self, orderpoint_ids):
-        return True
+        return 'location_id,company_id'
 
     def _get_orderpoint_domain(self, company_id=False):
         domain = [('company_id', '=', company_id)] if company_id else []
@@ -526,97 +513,81 @@ class ProcurementGroup(models.Model):
             This is appropriate for batch jobs only.
         """
         self = self.with_company(company_id)
-        OrderPoint = self.env['stock.warehouse.orderpoint']
         domain = self._get_orderpoint_domain(company_id=company_id)
-        orderpoints_noprefetch = OrderPoint.with_context(prefetch_fields=False).search(domain,
+        orderpoints = self.env['stock.warehouse.orderpoint']
+        orderpoints_noprefetch = self.env['stock.warehouse.orderpoint'].with_context(prefetch_fields=False).search(domain,
             order=self._procurement_from_orderpoint_get_order()).ids
-        while orderpoints_noprefetch:
+        while orderpoints or orderpoints_noprefetch:
+            orderpoints_exceptions = []
+
             if use_new_cursor:
                 cr = registry(self._cr.dbname).cursor()
                 self = self.with_env(self.env(cr=cr))
-            OrderPoint = self.env['stock.warehouse.orderpoint']
 
-            orderpoints = OrderPoint.browse(orderpoints_noprefetch[:1000])
-            orderpoints_noprefetch = orderpoints_noprefetch[1000:]
+            if not orderpoints:
+                orderpoints = self.env['stock.warehouse.orderpoint'].browse(orderpoints_noprefetch[:1000])
+                orderpoints_noprefetch = orderpoints_noprefetch[1000:]
+            else:
+                orderpoints = self.env['stock.warehouse.orderpoint'].browse(orderpoints)
 
             # Calculate groups that can be executed together
-            location_data = OrderedDict()
+            orderpoints_contexts = {}
 
-            def makedefault():
-                return {
-                    'products': self.env['product.product'],
-                    'orderpoints': self.env['stock.warehouse.orderpoint'],
-                    'groups': []
-                }
-
+            procurements = []
             for orderpoint in orderpoints:
-                key = self._procurement_from_orderpoint_get_grouping_key([orderpoint.id])
-                if not location_data.get(key):
-                    location_data[key] = makedefault()
-                location_data[key]['products'] += orderpoint.product_id
-                location_data[key]['orderpoints'] += orderpoint
-                location_data[key]['groups'] = self._procurement_from_orderpoint_get_groups([orderpoint.id])
+                orderpoint_context = orderpoint._procurement_from_orderpoint_get_context()
+                product_context = frozendict({**self.env.context, **orderpoint_context})
+                if product_context in orderpoints_contexts:
+                    orderpoints_contexts[product_context] |= orderpoint
+                else:
+                    orderpoints_contexts[product_context] = orderpoint
 
-            for location_id, location_data in location_data.items():
-                location_orderpoints = location_data['orderpoints']
-                product_context = dict(self._context, location=location_orderpoints[0].location_id.id)
-                substract_quantity = location_orderpoints._quantity_in_progress()
+            for orderpoint_context, orderpoints_by_context in orderpoints_contexts.items():
+                substract_quantity = orderpoints_by_context._quantity_in_progress()
+                product_quantity = orderpoints_by_context.product_id.with_context(orderpoint_context)._product_available()
 
-                for group in location_data['groups']:
-                    if group.get('from_date'):
-                        product_context['from_date'] = group['from_date'].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                    if group['to_date']:
-                        product_context['to_date'] = group['to_date'].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                    product_quantity = location_data['products'].with_context(product_context)._product_available()
-                    for orderpoint in location_orderpoints:
-                        try:
-                            op_product_virtual = product_quantity[orderpoint.product_id.id]['virtual_available']
-                            if op_product_virtual is None:
-                                continue
-                            if float_compare(op_product_virtual, orderpoint.product_min_qty, precision_rounding=orderpoint.product_uom.rounding) <= 0:
-                                qty = max(orderpoint.product_min_qty, orderpoint.product_max_qty) - op_product_virtual
-                                remainder = orderpoint.qty_multiple > 0 and qty % orderpoint.qty_multiple or 0.0
+                for orderpoint in orderpoints_by_context:
+                    op_product_virtual = product_quantity[orderpoint.product_id.id]['virtual_available']
+                    if op_product_virtual is None:
+                        continue
+                    if float_compare(op_product_virtual, orderpoint.product_min_qty, precision_rounding=orderpoint.product_uom.rounding) <= 0:
+                        qty = max(orderpoint.product_min_qty, orderpoint.product_max_qty) - op_product_virtual
+                        remainder = orderpoint.qty_multiple > 0 and qty % orderpoint.qty_multiple or 0.0
 
-                                if float_compare(remainder, 0.0, precision_rounding=orderpoint.product_uom.rounding) > 0:
-                                    qty += orderpoint.qty_multiple - remainder
+                        if float_compare(remainder, 0.0, precision_rounding=orderpoint.product_uom.rounding) > 0:
+                            qty += orderpoint.qty_multiple - remainder
 
-                                if float_compare(qty, 0.0, precision_rounding=orderpoint.product_uom.rounding) < 0:
-                                    continue
+                        if float_compare(qty, 0.0, precision_rounding=orderpoint.product_uom.rounding) < 0:
+                            continue
 
-                                qty -= substract_quantity[orderpoint.id]
-                                qty_rounded = float_round(qty, precision_rounding=orderpoint.product_uom.rounding)
-                                if qty_rounded > 0:
-                                    values = orderpoint._prepare_procurement_values(qty_rounded, **group['procurement_values'])
-                                    try:
-                                        with self._cr.savepoint():
-                                            #TODO: make it batch
-                                            self.env['procurement.group'].with_context(from_orderpoint=True).run([self.env['procurement.group'].Procurement(
-                                                orderpoint.product_id, qty_rounded, orderpoint.product_uom,
-                                                orderpoint.location_id, orderpoint.name, orderpoint.name,
-                                                orderpoint.company_id, values)], raise_if_exception=False)
-                                    except UserError as error:
-                                        self.env['stock.rule']._log_next_activity(orderpoint.product_id, error.name)
-                                    self._procurement_from_orderpoint_post_process([orderpoint.id])
-                                if use_new_cursor:
-                                    cr.commit()
-
-                        except OperationalError:
-                            if use_new_cursor:
-                                orderpoints_noprefetch += [orderpoint.id]
-                                cr.rollback()
-                                continue
-                            else:
-                                raise
+                        qty -= substract_quantity[orderpoint.id]
+                        qty_rounded = float_round(qty, precision_rounding=orderpoint.product_uom.rounding)
+                        if qty_rounded > 0:
+                            date = datetime.combine(orderpoint_context.get('to_date'), time.min)
+                            values = orderpoint._prepare_procurement_values(qty_rounded, date=date)
+                            procurements.append(self.env['procurement.group'].Procurement(
+                                orderpoint.product_id, qty_rounded, orderpoint.product_uom,
+                                orderpoint.location_id, orderpoint.name, orderpoint.name,
+                                orderpoint.company_id, values))
 
             try:
-                if use_new_cursor:
-                    cr.commit()
+                with self.env.cr.savepoint():
+                    self.env['procurement.group'].with_context(from_orderpoint=True).run(procurements, raise_if_exception=False)
+                    orderpoints._post_process_scheduler()
+                    orderpoints = self.env['stock.warehouse.orderpoint']
+            except ProcurementException as errors:
+                for procurement, error_msg in errors.procurement_exceptions:
+                    orderpoints_exceptions += [(procurement.values.get('orderpoint_id'), error_msg)]
+                orderpoints = [orderpoint.id for orderpoint in orderpoints if orderpoint not in [o[0] for o in orderpoints_exceptions]]
             except OperationalError:
                 if use_new_cursor:
                     cr.rollback()
                     continue
                 else:
                     raise
+
+            for orderpoint, error_msg in orderpoints_exceptions:
+                self.env['stock.rule']._log_next_activity(orderpoint.product_id, error_msg)
 
             if use_new_cursor:
                 cr.commit()
