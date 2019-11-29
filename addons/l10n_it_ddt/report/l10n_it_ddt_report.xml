@@ -27,6 +27,9 @@
                                 <h1 t-esc="ddt_id.name"/>
                             </t>
                         </div>
+                        <div>
+                            <span>DDT number: <h1 t-esc="o.name"/></span>
+                        </div>
                         <div class="clearfix"/>
                         <div class="mb32"/>
                         <table class="table table-bordered">
@@ -64,7 +67,7 @@
                                     <th>Gross Weight</th>
                                     <th><strong>Pick Up Time</strong></th>
                                     <th><strong>Date</strong></th>
-                                    <th>Size</th>
+                                    <!-- <th>Size</th> -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,11 +82,11 @@
                                         <span t-field="o.date_done"/><div class="mt16"/>
                                     </td>
                                     <td>
-                                        <span t-field="o.date"/><div class="mt16"/>
+                                        <span t-field="o.date"/>
                                     </td>
-                                    <td>
+<!--                                     <td>
                                         <span t-field="o.l10n_it_size"/><div class="mt16"/>
-                                    </td>
+                                    </td> -->
                                 </tr>
                             </tbody>
                         </table>
@@ -108,6 +111,9 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <div t-if="o.note">
+                            <b>Note:</b> <span t-field="o.note"/>
+                        </div>
                         <div class="mt64"/>
                         <div class="mt64"/>
                         <table class="table table-sm" name="document_details">

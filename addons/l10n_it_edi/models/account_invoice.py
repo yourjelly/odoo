@@ -43,9 +43,16 @@ class AccountMove(models.Model):
 
     l10n_it_ddt_id = fields.Many2one('l10n_it.ddt', string='DDT', readonly=True, states={'draft': [('readonly', False)]}, copy=False)
 
+    custom_ddt_id=fields.Many2many('stock.picking', string='cusrom DDT', readonly=False, domain="['&', ('origin', '=', 'S00001'), ('state', '=', 'done')]")
+    # compute="display_data", 
     l10n_it_einvoice_name = fields.Char(readonly=True, copy=False)
 
     l10n_it_einvoice_id = fields.Many2one('ir.attachment', string="Electronic invoice", copy=False)
+
+    def display_data(self):
+        stock_id = self.env['stock.picking'].search([('origin', '=', self.invoice_origin)])
+        self.custom_ddt_id = stock_id
+
 
     def post(self):
         # OVERRIDE

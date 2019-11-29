@@ -10,7 +10,7 @@ class StockPicking(models.Model):
     l10n_it_transport_reason_id = fields.Selection([('sale', 'Sale'), ('repair', 'Repair')], string='Transport Reason')
     l10n_it_transport_method_id = fields.Selection([('sender', 'Sender'), ('recipient', 'Recipient'), ('courier', 'Courier service')], string='Transport Reason')
     l10n_it_parcels = fields.Integer(string="Parcels")
-    l10n_it_volume = fields.Integer(string="Volume")
+    l10n_it_volume = fields.Float(string="Volume", related="product_id.volume")
     l10n_it_size = fields.Text(string="Size")
     invoice_ids = fields.Many2many('account.move', string="Invoices")
 
