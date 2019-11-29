@@ -12,6 +12,7 @@ from odoo.modules.registry import Registry
 from odoo.osv import expression
 from odoo.tools import pycompat
 from odoo.tools.safe_eval import safe_eval
+from openerp.modules.module import get_modules
 
 _logger = logging.getLogger(__name__)
 
@@ -906,10 +907,17 @@ class IrModelFields(models.Model):
         fields_data = self._get_manual_field_data(model._name)
         for name, field_data in fields_data.items():
             if name not in model._fields and field_data['state'] == 'manual':
-                field = self._instanciate(field_data)
-                if field:
-                    model._add_field(name, field)
-
+                standard_modules = get_modules()
+                custom_modules = [r['name'] for r in self.env['ir.module.module'].search_read([
+                ('name', 'not in', standard_modules + ['studio_customization'])
+                ], ['name'])]
+                try:
+                    field = self._instanciate(field_data)
+                    if field:
+                        model._add_field(name, field)
+                except:
+                    if not field_data['relation'].split('.')[0] in custom_modules:
+                        raise
 
 class IrModelConstraint(models.Model):
     """
