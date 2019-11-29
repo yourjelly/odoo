@@ -1,0 +1,52 @@
+<odoo>
+    <data>
+        <record id="parent_1" model="res.partner">
+            <field name="name">Parent 1</field>
+        </record>
+        <record id="parent_2" model="res.partner">
+            <field name="name">Parent 2</field>
+        </record>
+        <record id="parent_3" model="res.partner">
+            <field name="name">Parent 3</field>
+        </record>
+
+        <record id="sibling_1" model="res.partner">
+            <field name="name">sibling 1</field>
+        </record>
+        <record id="sibling_2" model="res.partner">
+            <field name="name">sibling 2</field>
+        </record>
+        <record id="sibling_3" model="res.partner">
+            <field name="name">sibling 3</field>
+        </record>
+        <record id="sibling_4" model="res.partner">
+            <field name="name">sibling 4</field>
+        </record>
+        <record id="sibling_5" model="res.partner">
+            <field name="name">sibling 5</field>
+        </record>
+
+
+        <record id="human_1" model="test_many2many.human">
+            <field name="name">Human 1</field>
+            <field name="company_id" ref="base.main_company" />
+            <field name="parent_ids" eval="[(4, ref('parent_1')), (4, ref('parent_2'))]" />
+            <field name="sibling_ids" eval="[(4, ref('sibling_1')), (4, ref('sibling_2'))]" />
+        </record>
+        <record id="human_2" model="test_many2many.human">
+            <field name="name">Human 2</field>
+            <field name="parent_ids" eval="[(4, ref('parent_3')), (4, ref('parent_2'))]" />
+            <field name="sibling_ids" eval="[(4, ref('sibling_3')), (4, ref('sibling_2'))]" />
+        </record>
+
+        <record id="animal_1" model="test_many2many.animal">
+            <field name="owner_id" ref="base.user_admin" />
+            <field name="parent_ids" eval="[(4, ref('parent_1')), (4, ref('parent_2'))]" />
+            <field name="sibling_ids" eval="[(4, ref('sibling_4')), (4, ref('sibling_5'))]" />
+        </record>
+        <record id="animal_2" model="test_many2many.animal">
+            <field name="parent_ids" eval="[(4, ref('parent_1')), (4, ref('parent_3'))]" />
+            <field name="sibling_ids" eval="[(4, ref('sibling_4')), (4, ref('sibling_5'))]" />
+        </record>
+    </data>
+</odoo>

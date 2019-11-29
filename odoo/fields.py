@@ -3111,6 +3111,7 @@ class Many2many(_RelationalMulti):
         'relation': None,               # name of table
         'column1': None,                # column of table referring to model
         'column2': None,                # column of table referring to comodel
+        'rel': 'rel',
         'auto_join': False,             # whether joins are generated upon search
         'limit': None,                  # optional limit to use upon read
         'ondelete': None,               # optional ondelete for the column2 fkey
@@ -3152,7 +3153,7 @@ class Many2many(_RelationalMulti):
                         "%s: Implicit/canonical naming of many2many relationship " \
                         "table is not possible when source and destination models " \
                         "are the same" % self
-                    self.relation = '%s_%s_rel' % tuple(tables)
+                    self.relation = '%s_%s_%s' % tuple(tables + [self.rel])
                 if not self.column1:
                     self.column1 = '%s_id' % model._table
                 if not self.column2:
