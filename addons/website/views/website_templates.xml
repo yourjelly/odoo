@@ -415,7 +415,7 @@
                                 <a href="/website/social/facebook" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-facebook-square"/></a>
                                 <a href="/website/social/twitter" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-twitter"/></a>
                                 <a href="/website/social/linkedin" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-linkedin"/></a>
-                                <a href="/website/social/youtube" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-youtube-play"/></a>
+                                <a href="/website/social/youtube" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-youtube"/></a>
                                 <a href="/website/social/github" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-github"/></a>
                                 <a href="/website/social/instagram" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-instagram"/></a>
                             </p>
@@ -475,12 +475,12 @@
                         </div>
                         <div class="col-lg-7 text-lg-right">
                             <p class="o_footer_social_media_links text-lg-right">
-                                <a href="/website/social/facebook" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-facebook-square"/></a>
-                                <a href="/website/social/twitter" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-twitter"/></a>
-                                <a href="/website/social/linkedin" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-linkedin"/></a>
-                                <a href="/website/social/youtube" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-youtube-play"/></a>
-                                <a href="/website/social/github" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-github"/></a>
-                                <a href="/website/social/instagram" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-instagram"/></a>
+                                <a href="/website/social/facebook" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-facebook-square"/></a>
+                                <a href="/website/social/twitter" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-twitter"/></a>
+                                <a href="/website/social/linkedin" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-linkedin"/></a>
+                                <a href="/website/social/youtube" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-youtube"/></a>
+                                <a href="/website/social/github" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-github"/></a>
+                                <a href="/website/social/instagram" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-instagram"/></a>
                             </p>
                         </div>
                     </div>
@@ -497,12 +497,12 @@
             <section class="s_text_block pt16 pb8">
                 <div class="container">
                     <p class="o_footer_social_media_links">
-                        <a href="/website/social/facebook" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-facebook-square"/></a>
-                        <a href="/website/social/twitter" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-twitter"/></a>
-                        <a href="/website/social/linkedin" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-linkedin"/></a>
-                        <a href="/website/social/youtube" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-youtube-play"/></a>
-                        <a href="/website/social/github" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-github"/></a>
-                        <a href="/website/social/instagram" class="btn btn-sm btn-link" target="_blank"><i class="fa fa-2x fa-instagram"/></a>
+                        <a href="/website/social/facebook" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-facebook-square"/></a>
+                        <a href="/website/social/twitter" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-twitter"/></a>
+                        <a href="/website/social/linkedin" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-linkedin"/></a>
+                        <a href="/website/social/youtube" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-youtube"/></a>
+                        <a href="/website/social/github" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-github"/></a>
+                        <a href="/website/social/instagram" class="btn btn-sm btn-link" target="_blank"><i class="fab fa-2x fa-instagram"/></a>
                     </p>
                     <ul class="list-inline">
                         <li class="list-inline-item"><a href="/">Home</a></li>
