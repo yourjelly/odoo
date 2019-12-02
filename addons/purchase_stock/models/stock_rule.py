@@ -119,7 +119,7 @@ class StockRule(models.Model):
 
     def _get_lead_days(self, product_id):
         lead_days, lead_days_description = super(StockRule, self)._get_lead_days(product_id)
-        if 'buy' not in self.mapped('action') or not product_id._prepare_sellers(False):
+        if 'buy' not in self.mapped('action') or not product_id._prepare_sellers():
             return lead_days, lead_days_description
         supplier_delay = product_id._prepare_sellers()[0].delay
         if supplier_delay:
