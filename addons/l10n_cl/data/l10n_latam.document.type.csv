@@ -35,6 +35,7 @@ dc_li,10,103,Liquidación,LIQ,,LIQ,base.cl,False
 dc_fe_dte,10,110,Factura de Exportación Electrónica,FCXE,invoice,FCXE,base.cl,False
 dc_ndex_dte,10,111,Nota de Débito de Exportación Electrónica,NDXE,debit_note,NDXE,base.cl,False
 dc_ncex_dte,10,112,Nota de Crédito de Exportación Electrónica,NCXE,credit_note,NCXE,base.cl,False
+dc_odc,10,801,Orden de Compra,OC,,OC,base.cl,False
 dc_ndp,10,802,Nota de pedido,NP,,NP,base.cl,False
 dc_cont,10,803,Contrato,CONT,,CONT,base.cl,False
 dc_resol,10,804,Resolución,RES,,RES,base.cl,False
