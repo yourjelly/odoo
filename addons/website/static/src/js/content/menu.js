@@ -273,8 +273,7 @@ publicWidget.registry.fixedHeader = publicWidget.Widget.extend({
     },
 });
 
-publicWidget.registry.fadeOutHeader = animations.Animation.extend({
-    selector: 'header.o_header_fade_out',
+const BaseDisappearingHeader = animations.Animation.extend({
     effects: [{
         startEvents: 'scroll',
         update: '_onWindowScroll',
@@ -290,6 +289,19 @@ publicWidget.registry.fadeOutHeader = animations.Animation.extend({
         this.checkPoint = 0;
         return this._super.apply(this, arguments);
     },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @abstract
+     */
+    _hideHeader: function () {},
+    /**
+     * @private
+     */
+    _showHeader: function () {},
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -309,7 +321,7 @@ publicWidget.registry.fadeOutHeader = animations.Animation.extend({
             }
             if (!this.hiddenHeader && scroll - this.checkPoint > 200) {
                 this.hiddenHeader = true;
-                this.$el.fadeOut();
+                this._hideHeader();
             }
             this.scrollingDownwards = true;
         } else {
@@ -318,7 +330,7 @@ publicWidget.registry.fadeOutHeader = animations.Animation.extend({
             }
             if (this.hiddenHeader && scroll - this.checkPoint < -100) {
                 this.hiddenHeader = false;
-                this.$el.fadeIn();
+                this._showHeader();
             }
             this.scrollingDownwards = false;
         }
@@ -326,56 +338,45 @@ publicWidget.registry.fadeOutHeader = animations.Animation.extend({
     },
 });
 
-publicWidget.registry.disappearsHeader = animations.Animation.extend({
+publicWidget.registry.DisappearingHeader = BaseDisappearingHeader.extend({
     selector: 'header.o_header_disappears',
-    effects: [{
-        startEvents: 'scroll',
-        update: '_onWindowScroll',
-    }],
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
 
     /**
      * @override
      */
-    start: function () {
-        this.scrollingDownwards = true;
-        this.hiddenHeader = false;
-        this.position = 0;
-        this.checkPoint = 0;
-        return this._super.apply(this, arguments);
+    _hideHeader: function () {
+        this.$el.animate({top: '-=' + this.$el.height()}, "slow");
     },
+    /**
+     * @override
+     */
+    _showHeader: function () {
+        this.$el.animate({top: '+=' + this.$el.height()}, "slow");
+    },
+});
+
+publicWidget.registry.FadeOutHeader = BaseDisappearingHeader.extend({
+    selector: 'header.o_header_fade_out',
 
     //--------------------------------------------------------------------------
-    // Handlers
+    // Private
     //--------------------------------------------------------------------------
 
     /**
-     * Called when the window is scrolled
-     *
-     * @private
-     * @param {integer} scrollTop
+     * @override
      */
-    _onWindowScroll: function (scrollTop) {
-        var scroll = scrollTop;
-        if (scroll > this.position) {
-            if (!this.scrollingDownwards) {
-                this.checkPoint = scroll;
-            }
-            if (!this.hiddenHeader && scroll - this.checkPoint > 400) {
-                this.hiddenHeader = true;
-                this.$el.animate({top: '-=' + this.$el.height()}, "slow");
-            }
-            this.scrollingDownwards = true;
-        } else {
-            if (this.scrollingDownwards) {
-                this.checkPoint = scroll;
-            }
-            if (this.hiddenHeader && scroll - this.checkPoint < -100) {
-                this.hiddenHeader = false;
-                this.$el.animate({top: '+=' + this.$el.height()}, "slow");
-            }
-            this.scrollingDownwards = false;
-        }
-        this.position = scroll;
+    _hideHeader: function () {
+        this.$el.fadeOut();
+    },
+    /**
+     * @override
+     */
+    _showHeader: function () {
+        this.$el.fadeIn();
     },
 });
 });
