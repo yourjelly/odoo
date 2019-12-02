@@ -1132,6 +1132,13 @@ table.table_desc tr td {
 
 // Header templates
 header {
+    @include media-breakpoint-up(md) {
+        // Allow to center the logo, ignoring the toggler space
+        .o_navbar_toggler_container {
+            flex: 0 0 0;
+            min-width: 0;
+        }
+    }
     @if index(('showcase', 'space'), o-website-value('header-template')) {
         .navbar-brand, .logo img {
             margin: auto;
@@ -1140,6 +1147,9 @@ header {
             margin-top: $spacer / 2;
         }
         @if o-website-value('header-template') == 'space' {
+            .o_navbar_toggler_container {
+                direction: rtl;
+            }
             .container {
                 padding-top: $spacer;
                 padding-bottom: $spacer;
@@ -1151,14 +1161,22 @@ header {
             }
         }
     } @else if index(('brand', 'pizza'), o-website-value('header-template')) {
-        .navbar-expand-md > .container {
-            flex-wrap: wrap;
-
+        .navbar-expand-md {
+            > .container {
+                flex-wrap: wrap;
+            }
             .navbar-collapse {
                 flex-basis: 100%;
             }
-            .navbar-brand, #top_menu.navbar-nav, .logo img {
-                margin: auto;
+        }
+        .navbar-brand, #top_menu.navbar-nav, .logo img {
+            margin: auto;
+        }
+        .navbar-brand {
+            @if o-website-value('header-template') == 'pizza' {
+                margin-top: $navbar-padding-y;
+            } @else {
+                margin-bottom: $navbar-padding-y;
             }
         }
         @if o-website-value('header-template') == 'pizza' {

@@ -339,6 +339,9 @@
         <attribute name="class" remove="navbar-expand-md" separator=" "/>
     </xpath>
     <xpath expr="//header//a[hasclass('navbar-brand')]" position="before">
+        <div class="o_navbar_toggler_container"></div>
+    </xpath>
+    <xpath expr="//div[hasclass('o_navbar_toggler_container')]" position="inside">
         <xpath expr="//header//button[hasclass('navbar-toggler')]" position="move"/>
     </xpath>
     <xpath expr="//header//ul[hasclass('nav')]" position="attributes">
@@ -349,6 +352,9 @@
 <template id="template_header_logo_hamburger" inherit_id="website.layout" name="Template Header Logo Hamburger" active="False">
     <xpath expr="//header//nav[hasclass('navbar')]" position="attributes">
         <attribute name="class" remove="navbar-expand-md" separator=" "/>
+    </xpath>
+    <xpath expr="//header//button[hasclass('navbar-toggler')]" position="replace">
+        <div class="o_navbar_toggler_container">$0</div>
     </xpath>
     <xpath expr="//header//ul[hasclass('nav')]" position="attributes">
         <attribute name="class" remove="text-right" add="text-center" separator=" "/>
@@ -603,8 +609,8 @@
                 <checkbox><opt data-xmlid="website.layout_logo_show" data-reload="/"/></checkbox>
                 <opt data-widget="input" data-unit="rem" data-variable="logo-height" string="Logo Height"/>
             </list>
-            <list id="header_templates_list" string="Header Template">
-                <selection>
+            <list string="Header Template">
+                <selection id="header_templates_select">
                     <opt id="option_template_header_logo_menu" string="Logo - Menu" data-xmlid="" data-widget="auto" data-variable="header-template" data-value="corporate" data-reload="/"/>
                     <opt id="option_template_header_hamburger_logo_centered" string="Hamburger - Logo" data-xmlid="website.template_header_hamburger_logo_centered" data-widget="auto" data-variable="header-template" data-value="showcase" data-reload="/"/>
                     <opt id="option_template_header_logo_menu_below" string="Logo - Menu" data-xmlid="" data-widget="auto" data-variable="header-template" data-value="brand" data-reload="/"/>
