@@ -2,6 +2,7 @@
 odoo.define('web.web_client', function (require) {
 "use strict";
 
+const makeTestEnvironment = require("web.test_env");
 const session = require("web.session");
 const WebClient = require('web.WebClient');
 
@@ -15,6 +16,7 @@ async function startWebClient() {
 
     await session.is_bound;
     session.owlTemplates = session.owlTemplates.replace(/t-transition/g, 'transition');
+    owl.Component.env = makeTestEnvironment();
 }
 
 startWebClient();

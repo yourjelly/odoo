@@ -17,6 +17,7 @@ var concurrency = require('web.concurrency');
 var DebugManager = require('web.DebugManager.Backend');
 var dom = require('web.dom');
 var testUtilsMock = require('web.test_utils_mock');
+var testUtilsDom = require('web.test_utils_dom');
 var Widget = require('web.Widget');
 
 // Variables used to get the current target and intercepts events
@@ -180,7 +181,7 @@ async function createView(params) {
         // render the view in a fragment as they must be able to render correctly
         // without being in the DOM
         var fragment = document.createDocumentFragment();
-        return view.appendTo(fragment).then(function () {
+        return view.appendTo(fragment).then( () => {
             dom.prepend($actionManager, fragment, {
                 callbacks: [{ widget: view }],
                 in_DOM: true,
@@ -189,6 +190,7 @@ async function createView(params) {
             view.$el.on('click', 'a', function (ev) {
                 ev.preventDefault();
             });
+            // await testUtilsDom.returnAfterNextAnimationFrame();
             return view;
         });
     });

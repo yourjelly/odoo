@@ -87,10 +87,9 @@ async function clickOpenM2ODropdown(fieldName, selector) {
     if (matches.length !== 1) {
         throw new Error(`cannot open m2o: selector ${selector} has been found ${matches.length} instead of 1`);
     }
-    matches[0].click();
-    return await concurrency.delay(0).then(function () {
-        return matches[0];
-    });
+
+    await domUtils.click(matches[0]);
+    return matches[0];
 }
 
 /**

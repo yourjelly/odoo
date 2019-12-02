@@ -16,7 +16,7 @@ var concurrency = require('web.concurrency');
  * Returns a promise that will be resolved after the tick after the
  * nextAnimationFrame
  *
- * This is usefull to guarantee that OWL has had the time to render
+ * This is useful to guarantee that OWL has had the time to render
  *
  * @returns {Promise}
  */
@@ -27,6 +27,8 @@ function returnAfterNextAnimationFrame() {
             resolve();
         });
     });
+
+    // return concurrency.delay(0);
 }
 
 /**
@@ -74,8 +76,8 @@ async function dragAndDrop($el, $to, options) {
     var toOffset = $to.offset();
 
     if (_.isObject(position)) {
-        toOffset.top += position.top;
-        toOffset.left += position.left;
+        toOffset.top += position.top +1;
+        toOffset.left += position.left + 1;
     } else {
         toOffset.top += $to.outerHeight() / 2;
         toOffset.left += $to.outerWidth() / 2;
@@ -97,33 +99,32 @@ async function dragAndDrop($el, $to, options) {
         toOffset.left += bound.left;
         toOffset.top += bound.top;
     }
-    triggerEvent(options.mouseenterTarget || el || $el, 'mouseenter');
+    await triggerEvent(options.mouseenterTarget || el || $el, 'mouseover',{},true);
     if (!(options.continueMove)) {
         elementCenter.left += $el.outerWidth() / 2;
         elementCenter.top += $el.outerHeight() / 2;
 
-        triggerEvent(options.mousedownTarget || el || $el, 'mousedown', {
+        await triggerEvent(options.mousedownTarget || el || $el, 'mousedown', {
             which: 1,
             pageX: elementCenter.left,
             pageY: elementCenter.top
-        });
+        }, true);
     }
-
-    triggerEvent(options.mousemoveTarget || el || $el, 'mousemove', {
+    await triggerEvent(options.mousemoveTarget || el || $el, 'mousemove', {
         which: 1,
         pageX: toOffset.left,
         pageY: toOffset.top
-    });
+    }, true);
 
     if (!options.disableDrop) {
-        triggerEvent(options.mouseupTarget || el || $el, 'mouseup', {
+        await triggerEvent(options.mouseupTarget || el || $el, 'mouseup', {
             which: 1,
             pageX: toOffset.left,
             pageY: toOffset.top,
             ctrlKey: options.ctrlKey,
-        });
+        }, true);
         if (options.withTrailingClick) {
-            triggerEvent(options.mouseupTarget || el || $el, 'click');
+            await triggerEvent(options.mouseupTarget || el || $el, 'click', {}, true);
         }
     } else {
         // It's impossible to drag another element when one is already
@@ -131,7 +132,7 @@ async function dragAndDrop($el, $to, options) {
         // over otherwise it's impossible for the next tests to drag and
         // drop elements.
         $el.on('remove', async () => {
-            triggerEvent($el, 'mouseup');
+            await triggerEvent($el, 'mouseup', {}, true);
         });
     }
     return returnAfterNextAnimationFrame();
@@ -215,7 +216,7 @@ function triggerKeypressEvent(char) {
  * this method also check the unicity and the visibility of the target.
  *
  * @param {string|EventTarget|EventTarget[]} el (if string: it is a (jquery) selector)
- * @param {boolean} [options={}] click options
+ * @param {Object} [options={}] click options
  * @param {boolean} [options.allowInvisible=false] if true, clicks on the
  *   element event if it is invisible
  * @param {boolean} [options.first=false] if true, clicks on the first element
@@ -233,7 +234,7 @@ async function click(el, options={}) {
         // EventTarget
         matches = [el];
     } else {
-        // Any other itterable object containing EventTarget objects (jQuery, HTMLCollection, etc.)
+        // Any other iterable object containing EventTarget objects (jQuery, HTMLCollection, etc.)
         if (el instanceof jQuery) {
             jquery = true;
         }
@@ -265,11 +266,13 @@ async function click(el, options={}) {
     if (validMatches.length === 0 && matches.length > 0) {
         throw new Error(`Element to click on is not visible ${selectorMsg}`);
     }
-    if (jquery) {
-        target = $(target);
-    }
 
-    target.click();
+    let event = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true
+    });
+    target.dispatchEvent(event);
     return returnAfterNextAnimationFrame();
 }
 
@@ -328,27 +331,23 @@ async function triggerEvents(el, events) {
 /**
  * Triggers an event on the specified target.
  * This function will dispatch a native event to an EventTarget or a
- * jQuery event to a jQuery object. This behaviour can be overriden by the
+ * jQuery event to a jQuery object. This behaviour can be overridden by the
  * jquery option.
  *
  * @param {EventTarget|EventTarget[]} el
  * @param {string} eventType event type
  * @param {Object} [eventAttrs] event attributes
  *   on a jQuery element with the `$.fn.trigger` function
+ * @param {Boolean} fast=false true if the trigger event have to wait for a single tick instead of waiting for the next animation frame
  * @returns {Promise}
  */
-async function triggerEvent(el, eventType, eventAttrs={}) {
+async function triggerEvent(el, eventType, eventAttrs={}, fast) {
     let matches;
     let selectorMsg = "";
-    let jquery = false;
     if (el instanceof EventTarget) {
         // EventTarget
         matches = [el];
     } else {
-        // Any other itterable object containing EventTarget objects (jQuery, HTMLCollection, etc.)
-        if (el instanceof jQuery) {
-            jquery = true;
-        }
         matches = [...el];
     }
 
@@ -356,27 +355,104 @@ async function triggerEvent(el, eventType, eventAttrs={}) {
         throw new Error(`Found ${matches.length} elements to trigger "${eventType}" on, instead of 1 ${selectorMsg}`);
     }
 
-    const target = jquery ? $(matches[0]) : matches[0];
+    const target = matches[0];
 
-    if (target[eventType] && !Object.keys(eventAttrs).length) {
-        // Calls the built-in EventTarget or jQuery prototype function
-        // e.g. click(), focus(), etc.
-        target[eventType]();
-    } else if (jquery) {
-        // Triggers a jQuery event
+    let onlyBubble = (args) => {
+        return Object.assign({}, args, {
+            bubbles: true
+        });
+    };
+    let mouseEventMapping = (args) => {
+        return Object.assign({}, args, {
+            view: window,
+            bubbles: true,
+            cancelable: true,
+            clientX: args ? args.pageX: undefined,
+            clientY: args? args.pageY: undefined,
+        });
+    };
+
+    let mouseEventNoBubble = (args) => {
+        return Object.assign({}, args, {
+            view: window,
+            bubbles: false,
+            cancelable: false,
+            clientX: args ? args.pageX: undefined,
+            clientY: args? args.pageY: undefined,
+        });
+    };
+
+    let eventTypes = {
+        'auxclick':{ constructor: MouseEvent , processParameters: mouseEventMapping },
+        'click':{ constructor: MouseEvent , processParameters: mouseEventMapping },
+        'contextmenu':{ constructor: MouseEvent , processParameters: mouseEventMapping },
+        'dblclick':{ constructor: MouseEvent , processParameters: mouseEventMapping },
+        'mousedown':{ constructor: MouseEvent , processParameters: mouseEventMapping },
+        'mouseup':{ constructor: MouseEvent , processParameters: mouseEventMapping },
+
+        'mousemove':{ constructor: MouseEvent , processParameters: mouseEventMapping },
+
+        'mouseenter': {constructor: MouseEvent, processParameters: mouseEventNoBubble},
+        'mouseleave': {constructor: MouseEvent, processParameters: mouseEventNoBubble},
+        'mouseover': {constructor: MouseEvent, processParameters: mouseEventMapping},
+        'mouseout': {constructor: MouseEvent, processParameters: mouseEventMapping},
+
+        'focus':{ constructor: FocusEvent , processParameters: (args) => { return Object.assign({}, args, { bubbles: false }); }},
+        'focusin':{ constructor: FocusEvent , processParameters: onlyBubble },
+        'blur':{ constructor: FocusEvent , processParameters: (args) => { return Object.assign({}, args, { bubbles: false }); }},
+
+        'cut':{ constructor: ClipboardEvent , processParameters: onlyBubble },
+        'copy':{ constructor: ClipboardEvent , processParameters: onlyBubble },
+        'paste':{ constructor: ClipboardEvent , processParameters: onlyBubble },
+
+        'keydown':{ constructor: KeyboardEvent , processParameters: (args) => { return Object.assign({}, args, { bubbles: true, keyCode: args.which }); }},
+        'keypress':{ constructor: KeyboardEvent , processParameters: (args) => { return Object.assign({}, args, { bubbles: true, keyCode: args.which }); }},
+        'keyup':{ constructor: KeyboardEvent , processParameters: (args) => { return Object.assign({}, args, { bubbles: true, keyCode: args.which }); }},
+
+        'drag':{ constructor: DragEvent , processParameters: onlyBubble },
+        'dragend':{ constructor: DragEvent , processParameters: onlyBubble },
+        'dragenter':{ constructor: DragEvent , processParameters: onlyBubble },
+        'dragstart':{ constructor: DragEvent , processParameters: onlyBubble },
+        'dragleave':{ constructor: DragEvent , processParameters: onlyBubble },
+        'dragover':{ constructor: DragEvent , processParameters: onlyBubble },
+        'drop':{ constructor: DragEvent , processParameters: onlyBubble },
+    };
+
+    let event = null;
+
+    // TODO PRO Explain why
+    // https://api.jquery.com/mouseenter/
+    /*if (eventType === 'mouseenter') {
+        eventType = 'mouseover';
+    } else if (eventType === 'mouseleave') {
+        eventType = 'mouseout';
+    }*/
+
+    /*if (['mouseenter', 'mouseleave', 'mousemove', 'mouseover', 'mouseout', 'mouseup', 'mousedown'].includes(eventType)) {
         const event = Object.keys(eventAttrs).length ?
             $.Event(eventType, eventAttrs) :
             eventType;
-        target.trigger(event);
-    } else {
-        // Triggers a new native event
-        const event = new Event(eventType);
-        Object.assign(event, eventAttrs);
-        Object.defineProperty(event, 'target', {
-            writable: false,
-            value: target,
-        });
+        $(target).trigger(event);
+    } else {*/
+        if (!eventTypes[eventType] && !eventTypes[eventType.type])
+            event = new Event(eventType, Object.assign({}, eventAttrs, {bubbles: true}));
+        else {
+            if (typeof eventType === "object") {
+                let eventDescriptor = eventTypes[eventType.type];
+                let eventParameters = eventDescriptor.processParameters(eventType);
+                event = new eventDescriptor.constructor(eventType.type, eventParameters);
+            }else {
+                let eventDescriptor = eventTypes[eventType];
+                event = new eventDescriptor.constructor(eventType, eventDescriptor.processParameters(eventAttrs));
+            }
+        }
+
         target.dispatchEvent(event);
+    //}
+
+
+    if (fast) {
+        return ;
     }
     return returnAfterNextAnimationFrame();
 }

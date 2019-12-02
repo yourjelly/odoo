@@ -20,8 +20,6 @@ var session = require('web.session');
 
 var DebouncedField = basic_fields.DebouncedField;
 
-const originalRequestAnimationFrame = owl.Component.scheduler.requestAnimationFrame;
-const originalDelay = concurrency.delay;
 
 //------------------------------------------------------------------------------
 // Private functions
@@ -49,7 +47,7 @@ function _observe(widget) {
  * and optionally triggers an rpc with the src url as route on a widget.
  * This method is critical and must be fastest (=> no jQuery, no underscore)
  *
- * @param {DOM Node} el
+ * @param {HTMLElement} el
  * @param {[Widget]} widget the widget on which the rpc should be performed
  */
 function removeSrcAttribute(el, widget) {
@@ -573,32 +571,13 @@ function patchSetTimeout() {
     };
 }
 
-function patchRequestAnimationFrame() {
-    owl.Component.scheduler.requestAnimationFrame = callback => {
-        setTimeout(callback);
-        return 1;
-    };
-    concurrency.delay = delay => {
-        return new Promise(resolve => {
-            setTimeout(() => setTimeout(() => resolve()), delay);
-        });
-    };
-}
-
-function unpatchRequestAnimationFrame() {
-    owl.Component.requestAnimationFrame = originalRequestAnimationFrame;
-    concurrency.delay = originalDelay;
-}
-
 return {
     addMockEnvironment: addMockEnvironment,
     fieldsViewGet: fieldsViewGet,
     intercept: intercept,
     patchDate: patchDate,
     patch: patch,
-    patchRequestAnimationFrame: patchRequestAnimationFrame,
     unpatch: unpatch,
-    unpatchRequestAnimationFrame: unpatchRequestAnimationFrame,
     patchSetTimeout: patchSetTimeout,
 };
 
