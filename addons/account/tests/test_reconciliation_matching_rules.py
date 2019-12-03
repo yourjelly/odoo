@@ -339,7 +339,6 @@ class TestReconciliationMatchingRules(AccountTestCommon):
 
     def test_auto_reconcile_with_tax(self):
         ''' Test auto reconciliation with a tax amount included in the bank statement line'''
-
         self.rule_1.write({
             'auto_reconcile': True,
             'rule_type': 'writeoff_suggestion',

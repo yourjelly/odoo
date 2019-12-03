@@ -781,6 +781,7 @@ class TestAccountBankStatement(TestAccountBankStatementCommon):
             },
         ])
         test_invoices.post()
+        statement.button_post()
         counterpart_lines = test_invoices.mapped('line_ids').filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
 
         # Check the full reconciliation.
