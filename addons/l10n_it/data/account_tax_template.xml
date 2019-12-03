@@ -27,13 +27,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -51,13 +51,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -99,13 +99,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -123,13 +123,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -171,13 +171,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -195,13 +195,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -243,13 +243,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -267,13 +267,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -315,13 +315,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -339,13 +339,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -375,12 +375,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -421,13 +421,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -445,13 +445,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -481,18 +481,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 10,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 90,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -527,18 +527,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 15,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 85,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -573,18 +573,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 40,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 60,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -619,12 +619,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -653,18 +653,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -711,13 +711,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -735,13 +735,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -783,13 +783,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -807,13 +807,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -843,12 +843,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -877,18 +877,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -975,18 +975,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1032,12 +1032,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1055,12 +1055,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1100,12 +1100,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1123,12 +1123,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1169,13 +1169,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1205,13 +1205,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1241,13 +1241,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1277,13 +1277,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1313,13 +1313,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1349,13 +1349,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1385,13 +1385,13 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
                 'account_id': ref('2601'),
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1420,12 +1420,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP3')]
+                'tag_ids': [ref('VP2')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP5')]
+                'tag_ids': [ref('VP4')]
             })]"/>
     </record>
 
@@ -1443,18 +1443,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 10,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 90,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1489,18 +1489,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 15,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 85,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1535,18 +1535,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 40,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 60,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1581,12 +1581,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1615,18 +1615,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1661,18 +1661,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 10,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 90,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1707,18 +1707,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 15,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 85,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1753,18 +1753,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 40,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 60,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1799,12 +1799,12 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
@@ -1833,18 +1833,18 @@
             (0, 0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'tag_ids': [ref('VP2')]
+                'tag_ids': [ref('VP3')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
                 'account_id': ref('1601'),
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             }),
             (0, 0, {
                 'factor_percent': 50,
                 'repartition_type': 'tax',
-                'tag_ids': [ref('VP4')]
+                'tag_ids': [ref('VP5')]
             })]"/>
         <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
             (0, 0, {
