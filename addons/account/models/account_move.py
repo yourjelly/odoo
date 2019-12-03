@@ -3512,6 +3512,8 @@ class AccountMoveLine(models.Model):
             all_accounts.append(line.account_id)
             if (line.matched_debit_ids or line.matched_credit_ids) and line.reconciled:
                 raise UserError(_('You are trying to reconcile some entries that are already reconciled.'))
+            if line.move_id.state != 'posted':
+                raise UserError(_('You can only reconcile posted entries.'))
         if len(company_ids) > 1:
             raise UserError(_('To reconcile the entries company should be the same for all entries.'))
         if len(set(all_accounts)) > 1:

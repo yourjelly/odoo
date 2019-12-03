@@ -232,8 +232,8 @@ class TestAccountMove(AccountTestInvoicingCommon):
         with self.assertRaises(UserError), self.cr.savepoint():
             copy_move.date = fields.Date.from_string('2017-01-01')
 
-    def test_misc_draft_reconciled_entries_1(self):
-        draft_moves = self.env['account.move'].create([
+    def test_misc_reconcile_entries_1(self):
+        test_moves = self.env['account.move'].create([
             {
                 'type': 'entry',
                 'line_ids': [
@@ -274,27 +274,25 @@ class TestAccountMove(AccountTestInvoicingCommon):
         # lines[1] = 'move 1 counterpart line'
         # lines[2] = 'move 1 receivable line'
         # lines[3] = 'move 2 counterpart line'
-        lines = draft_moves.mapped('line_ids').sorted('balance')
+        lines = test_moves.mapped('line_ids').sorted('balance')
 
+        # You can only reconcile 'posted' entries.
+        with self.assertRaises(UserError), self.cr.savepoint():
+            (lines[0] + lines[2]).reconcile()
+
+        test_moves.post()
         (lines[0] + lines[2]).reconcile()
 
-        draft_moves.flush()
-        self.cr.execute('SAVEPOINT test_misc_draft_reconciled_entries_1')
-
-        with self.assertRaises(UserError):
-            draft_moves[0].write({
+        with self.assertRaises(UserError), self.cr.savepoint():
+            test_moves[0].write({
                 'line_ids': [
                     (1, lines[1].id, {'credit': lines[1].credit + 100.0}),
                     (1, lines[2].id, {'debit': lines[2].debit + 100.0}),
                 ]
             })
 
-        with self.assertRaises(UserError):
-            draft_moves.unlink()
-
-        draft_moves.flush()
-        draft_moves.invalidate_cache()
-        self.cr.execute('ROLLBACK TO SAVEPOINT test_misc_draft_reconciled_entries_1')
+        with self.assertRaises(UserError), self.cr.savepoint():
+            test_moves.unlink()
 
     def test_misc_unique_sequence_number(self):
         ''' Ensure two journal entries can't share the same name when using the same sequence. '''
