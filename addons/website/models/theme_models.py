@@ -157,7 +157,7 @@ class Theme(models.AbstractModel):
         if not website:  # remove optional website in master
             website = self.env['website'].get_current_website()
 
-        # Reinitialize font customizations
+        # Reinitialize some css customizations
         self.env['web_editor.assets'].make_scss_customization(
             '/website/static/src/scss/options/user_values.scss',
             {
@@ -165,8 +165,13 @@ class Theme(models.AbstractModel):
                 'headings-font-number': 'null',
                 'navbar-font-number': 'null',
                 'buttons-font-number': 'null',
+                'header-template': 'null',
             }
         )
+
+        # Reinitialize header and footer templates
+        self.disable_view('website.template_header_hamburger_logo_centered')
+        self.disable_view('website.template_header_logo_hamburger')
 
         # Call specific theme post copy
         theme_post_copy = '_%s_post_copy' % mod.name
