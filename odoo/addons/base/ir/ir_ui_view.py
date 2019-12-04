@@ -1367,7 +1367,7 @@ actual arch.
         query = """SELECT max(v.id)
                      FROM ir_ui_view v
                 LEFT JOIN ir_model_data md ON (md.model = 'ir.ui.view' AND md.res_id = v.id)
-                    WHERE md.module = %s {0}
+                    WHERE v.arch_fs IS NULL AND md.module = %s {0}
                  GROUP BY coalesce(v.inherit_id, v.id)""".format(xmlid_filter)
         self._cr.execute(query, params)
 
