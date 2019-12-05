@@ -55,12 +55,18 @@ tour.register('main_flow_tour', {
     position: 'right',
 }, {
     trigger: '.o_field_widget[name=route_ids] .custom-checkbox > label:contains("Buy")',
+    extra_trigger: $('.o_field_widget[name=route_ids] .custom-checkbox > label:contains("Manufacture")').is(":checked"),
     content: _t('Uncheck Buy'),
     position: 'right',
 }, {
     trigger: '.o_field_widget[name=route_ids] .custom-checkbox > label:contains("Replenish on Order (MTO)")',
     content: _t('Uncheck  Replenish on Order (MTO)'),
     position: 'right',
+    run: function(){
+        console.log('Manufacture', '.o_field_widget[name=route_ids] .custom-checkbox > label:contains("Manufacture")').is(":checked"));
+        console.log('Buy', '.o_field_widget[name=route_ids] .custom-checkbox > label:contains("Buy")').is(":checked"));
+        console.log('MTO', '.o_field_widget[name=route_ids] .custom-checkbox > label:contains("(MTO)")').is(":checked"));
+    },
 }, {
     trigger: '.o_notebook a:contains("General Information")',
     content: _t('Go to main tab'),
