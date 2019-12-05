@@ -10,7 +10,10 @@ class SaleOrderLine(models.Model):
     margin = fields.Float(compute='_compute_margin', digits='Product Price', store=True)
     purchase_price = fields.Float(string='Cost', compute="_compute_purchase_price", digits='Product Price', store=True, readonly=False)
 
-    @api.depends('product_id', 'company_id', 'currency_id', 'product_uom')
+    def _purchase_price_depends(self):
+        return ['product_id', 'company_id', 'currency_id', 'product_uom']
+
+    @api.depends(lambda self: self._purchase_price_depends())
     def _compute_purchase_price(self):
         for line in self:
             line = line.with_company(line.company_id)
