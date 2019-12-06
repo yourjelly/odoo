@@ -13,8 +13,12 @@ from odoo.exceptions import UserError
 from odoo.osv import expression
 from odoo.tools.float_utils import float_compare, float_round, float_is_zero
 
-PROCUREMENT_PRIORITIES = [('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')]
+import logging
+import psycopg2
 
+_logger = logging.getLogger(__name__)
+
+PROCUREMENT_PRIORITIES = [('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')]
 
 class StockMove(models.Model):
     _name = "stock.move"
@@ -980,6 +984,28 @@ class StockMove(models.Model):
             moves._assign_picking()
         self._push_apply()
         self._check_company()
+
+        for move in self:
+            if not move.partner_id:
+                continue
+            if move.partner_id and move.picking_id.picking_type_code == 'outgoing':
+                field = 'delivery_rank'
+            elif move.partner_id and move.picking_id.picking_type_code == 'incoming':
+                field = 'receipt_rank'
+            else:
+                continue
+            try:
+                with self.env.cr.savepoint():
+                    self.env.cr.execute("SELECT "+field+" FROM res_partner WHERE ID=%s FOR UPDATE NOWAIT", (move.partner_id.id,))
+                    self.env.cr.execute("UPDATE res_partner SET "+field+"="+field+"+1 WHERE ID=%s", (move.partner_id.id,))
+                    self.env.cache.remove(move.partner_id, move.partner_id._fields[field])
+            except psycopg2.DatabaseError as e:
+                if e.pgcode == '55P03':
+                    _logger.debug('Another transaction already locked partner rows. Cannot update partner ranks.')
+                    continue
+                else:
+                    raise e
+
         if merge:
             return self._merge_moves(merge_into=merge_into)
         return self

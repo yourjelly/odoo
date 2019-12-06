@@ -628,6 +628,10 @@ class Partner(models.Model):
                 name = dict(self.fields_get(['type'])['type']['selection'])[partner.type]
             if not partner.is_company:
                 name = self._get_contact_name(partner, name)
+        if name and partner.type == 'invoice':
+            name = name + _("(Invoicing)")
+        if name and partner.type == 'delivery':
+            name = name + _("(Delivery)")
         if self._context.get('show_address_only'):
             name = partner._display_address(without_company=True)
         if self._context.get('show_address'):
