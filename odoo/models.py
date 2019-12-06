@@ -162,13 +162,6 @@ class MetaModel(api.Meta):
         if not self._custom:
             self.module_to_models[self._module].append(self)
 
-        # check for new-api conversion error: leave comma after field definition
-        for key, val in attrs.items():
-            if type(val) is tuple and len(val) == 1 and isinstance(val[0], Field):
-                _logger.error("Trailing comma after field definition: %s.%s", self, key)
-            if isinstance(val, Field):
-                val.args = dict(val.args, _module=self._module)
-
     def _get_addon_name(self, full_name):
         # The (OpenERP) module name can be in the ``odoo.addons`` namespace
         # or not. For instance, module ``sale`` can be imported as
