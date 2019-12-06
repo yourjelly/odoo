@@ -1,18 +1,16 @@
 odoo.define('base_import.import', async function (require) {
 "use strict";
 
-var AbstractAction = require('web.AbstractAction');
-var config = require('web.config');
-var core = require('web.core');
-var session = require('web.session');
-var time = require('web.time');
-var AbstractWebClient = require('web.AbstractWebClient');
-var Loading = require('web.Loading');
+const AbstractAction = require('web.AbstractAction');
+const AbstractWebClient = require('web.AbstractWebClient');
+const config = require('web.config');
+const { _lt, _t, action_registry, qweb } = require('web.core');
+const Loading = require('web.Loading');
+const session = require('web.session');
+const time = require('web.time');
 
-var QWeb = core.qweb;
-var _t = core._t;
-var _lt = core._lt;
-var StateMachine = window.StateMachine;
+const QWeb = new owl.QWeb({ translateFn: _t });
+const StateMachine = window.StateMachine;
 
 
 const { serviceRegistry } = require('web.core');
@@ -79,25 +77,51 @@ function dataFilteredQuery(q) {
 }
 
 class OwlDataImport extends owl.Component {
-
-    static template = "ImportView";
-    state = useState({
-        opts: [
-            { name: 'encoding', label: this.env._lt("Encoding:"), value: '' },
-            { name: 'separator', label: this.env._lt("Separator:"), value: '' },
-            { name: 'quoting', label: this.env._lt("Text Delimiter:"), value: '"' }
-        ],
-        parse_opts_formats: [
-            { name: 'date_format', label: this.env._lt("Date Format:"), value: '' },
-            { name: 'datetime_format', label: this.env._lt("Datetime Format:"), value: '' },
-        ],
-        parse_opts_separators: [
-            { name: 'float_thousand_separator', label: this.env._lt("Thousands Separator:"), value: ',' },
-            { name: 'float_decimal_separator', label: this.env._lt("Decimal Separator:"), value: '.' }
-        ],
-        importTemplates: ["Saab", "Volvo", "BMW"],
-        _ : this.env._,
-    })
+    // events = {
+    //     // 'change .oe_import_grid input': 'import_dryrun',
+    //     'change .oe_import_file': 'loaded_file',
+    //     'change input.oe_import_has_header, .js_import_options input': 'settings_changed',
+    //     'change input.oe_import_advanced_mode': function (e) {
+    //         this.do_not_change_match = true;
+    //         this['settings_changed']();
+    //     },
+    //     'click a.oe_import_toggle': function (e) {
+    //         e.preventDefault();
+    //         this.$('.oe_import_options').toggle();
+    //     },
+    //     'click .oe_import_report a.oe_import_report_count': function (e) {
+    //         e.preventDefault();
+    //         $(e.target).parent().parent().toggleClass('oe_import_report_showmore');
+    //     },
+    //     'click .oe_import_report_see_possible_value': function (e) {
+    //         e.preventDefault();
+    //         $(e.target).parent().toggleClass('oe_import_report_showmore');
+    //     },
+    //     'click .oe_import_moreinfo_action a': function (e) {
+    //         e.preventDefault();
+    //         // #data will parse the attribute on its own, we don't like
+    //         // that sort of things
+    //         var action = JSON.parse($(e.target).attr('data-action'));
+    //         // FIXME: when JS-side clean_action
+    //         action.views = _(action.views).map(function (view) {
+    //             var id = view[0], type = view[1];
+    //             return [
+    //                 id,
+    //                 type !== 'tree' ? type
+    //                     : action.view_type === 'form' ? 'list'
+    //                         : 'tree'
+    //             ];
+    //         });
+    //         this.do_action(_.extend(action, {
+    //             target: 'new',
+    //             flags: {
+    //                 search_view: true,
+    //                 display_title: true,
+    //                 pager: true,
+    //                 list: { selectable: false }
+    //             }
+    //         }));
+    //     },
 
     constructor(env, parent, action) {
         super(...arguments);
@@ -111,16 +135,30 @@ class OwlDataImport extends owl.Component {
         this._title = _t('Import a File'); // Displayed in the breadcrumbs
         this.do_not_change_match = false;
         this.sheets = [];
+        this.opts = [
+            { name: 'encoding', label: _lt("Encoding:"), value: '' },
+            { name: 'separator', label: _lt("Separator:"), value: '' },
+            { name: 'quoting', label: _lt("Text Delimiter:"), value: '"' }
+        ];
+        this.parse_opts_formats = [
+            { name: 'date_format', label: _lt("Date Format:"), value: '' },
+            { name: 'datetime_format', label: _lt("Datetime Format:"), value: '' },
+        ];
+        this.parse_opts_separators = [
+            { name: 'float_thousand_separator', label: _lt("Thousands Separator:"), value: ',' },
+            { name: 'float_decimal_separator', label: _lt("Decimal Separator:"), value: '.' }
+        ];
+        this._ = _; // TODO: MSH: Do we really need this, use native methods instead of underscorejs?
     }
 
     async willStart() {
-        self = this;
+        const self = this;
         var def = this.env.rpc({
             model: this.res_model,
             method: 'get_import_templates',
             context: this.parent_context,
         }).then(function (result) {
-            self.state.importTemplates = result;
+            self.importTemplates = result;
         });
         return Promise.all([def]);
     }
@@ -132,7 +170,7 @@ class OwlDataImport extends owl.Component {
         this.setup_separator_picker();
         this.setup_float_format_picker();
         this.setup_date_format_picker();
-        this.setup_sheets_picker();
+        // this.setup_sheets_picker(); // TODO: MSH: Enable it
 
         return Promise.all([
             self.create_model().then(function (id) {
@@ -140,11 +178,9 @@ class OwlDataImport extends owl.Component {
                 // TODO: remove jquery dependancy
                 $('input[name=import_id]').val(id);
 
-                self.renderButtons();
-                var status = {
-                    cp_content: { $buttons: self.$buttons },
-                };
-                self.env.updateControlPanel(status);
+                // TODO: MSH: Don't like the way buttons are rendered in control panel
+                self.trigger('render_buttons');
+                self.trigger('update_control_panel');
             }),
         ]);
     }
@@ -164,12 +200,12 @@ class OwlDataImport extends owl.Component {
             { tracking_disable: tracking_disable }
         );
         var self = this;
-        this.trigger_up('with_client', {
+        this.trigger('with_client', {
             callback: function () {
                 this.loading.ignore_events = true;
             }
         });
-        $.blockUI({ message: QWeb.render('Throbber') });
+        $.blockUI({ message: this.env.qweb.render('Throbber') });
         $(document.body).addClass('o_ui_blocked');
         var opts = this.import_options();
 
@@ -215,12 +251,43 @@ class OwlDataImport extends owl.Component {
             }).finally(function () {
                 $(document.body).removeClass('o_ui_blocked');
                 $.unblockUI();
-                self.trigger_up('with_client', {
+                self.trigger('with_client', {
                     callback: function () {
                         delete this.loading.ignore_events;
                     }
                 });
             });
+    }
+
+    fieldLoad() {
+        this.el.querySelectorAll('.oe_import_file')[0].click();
+    }
+
+    //- File & settings change section
+    onfile_loaded(event, from, to, arg) {
+        debugger;
+        // arg is null if reload -> don't reset partial import
+        if (arg != null) {
+            this.toggle_partial(null);
+        }
+
+        this.$buttons.filter('.o_import_import, .o_import_validate, .o_import_file_reload').addClass('d-none');
+        if (!this.$('input.oe_import_file').val()) { return this['settings_changed'](); }
+        this.$('.oe_import_date_format').select2('val', '');
+        this.$('.oe_import_datetime_format').val('');
+        this.$('.oe_import_sheet').val('');
+
+        this.$form.removeClass('oe_import_preview oe_import_error');
+        var import_toggle = false;
+        var file = this.$('input.oe_import_file')[0].files[0];
+        // some platforms send text/csv, application/csv, or other things if Excel is prevent
+        if ((file.type && _.last(file.type.split('/')) === "csv") || (_.last(file.name.split('.')) === "csv")) {
+            import_toggle = true;
+        }
+        this.$form.find('.oe_import_box').toggle(import_toggle);
+        jsonp(this.$form, {
+            url: '/base_import/set_file'
+        }, this.proxy('settings_changed'));
     }
 
     onpreview_success(event, from, to, result) {
@@ -325,21 +392,6 @@ class OwlDataImport extends owl.Component {
         });
     }
 
-    renderButtons() {
-        var self = this;
-        this.$buttons = $(QWeb.render("ImportView.buttons", this));
-        this.$buttons.filter('.o_import_validate').on('click', this.validate.bind(this));
-        // this.$buttons.filter('.o_import_import').on('click', this.import.bind(this));
-        // this.$buttons.filter('.o_import_file_reload').on('click', this.loaded_file.bind(this, null));
-        // this.$buttons.filter('.oe_import_file').on('click', function () {
-        //     self.$('.o_content .oe_import_file').click();
-        // });
-        // this.$buttons.filter('.o_import_cancel').on('click', function(e) {
-        //     e.preventDefault();
-        //     self.exit();
-        // });
-    }
-
     setup_encoding_picker() {
         // var input_import = document.getElementsByClassName('oe_import_encoding');
         // TODO: remove jquery dependancy
@@ -426,9 +478,11 @@ class OwlDataImport extends owl.Component {
             initSelection: function ($e, c) {
                 c(_from_data(data, $e.val()) || _make_option($e.val()));
             }
-        })
+        });
     }
 }
+
+OwlDataImport.template = 'ImportView';
 
 const DataImportMixin = {
 
@@ -438,6 +492,11 @@ const DataImportMixin = {
 };
 
 const DataImport = AbstractAction.extend(DataImportMixin, {
+    hasControlPanel: true,
+    events: Object.assign({}, {
+        render_buttons: '_onRenderButtons',
+        update_control_panel: '_onUpdateControlPanel',
+    }),
 
     init(parent, action) {
         this._super(...arguments);
@@ -446,16 +505,61 @@ const DataImport = AbstractAction.extend(DataImportMixin, {
         this.component = null;
     },
     on_attach_callback() {
-        OwlDataImport.env = DataImportMixin.getEnv.call(this);
-        OwlDataImport.env["updateControlPanel"] = this.updateControlPanel;
+        // TODO: MSH: Why do we need to create separate env, can't we use web.env which is there in componenet it self?
+        // OwlDataImport.env = DataImportMixin.getEnv.call(this);
+        // TODO: MSH: Why following line change? to render buttons in controlPanel? weird fix, remove it
+        // OwlDataImport.env["updateControlPanel"] = this.updateControlPanel;
         this.component = new OwlDataImport(null, this.parent, this.action);
-        this.component.mount(this.$el[0]);
+        this.component.mount(this.$el.find('.o_content')[0]);
+    },
+    destroy() {
+        if (this.component) {
+            this.component.destroy();
+            this.component = undefined;
+        }
+        if (this.$buttons) {
+            this.$buttons.off().remove();
+        }
     },
     on_detach_callback: function () {
         this.component.destroy();
         this._super(...arguments);
     },
+
+    renderButtons() {
+        var self = this;
+        // TODO: MSH: weird solution to render buttons here and call components method,
+        // there should be way to convert this AbstractAction in OWL, to avoid this
+        // TODO: MSH: buttons not displayed
+        this.$buttons = $(qweb.render("ImportView.buttons", this));
+        this.$buttons.filter('.o_import_validate').on('click', this.component.validate.bind(this));
+        this.$buttons.filter('.o_import_import').on('click', this.component.import.bind(this));
+        this.$buttons.filter('.o_import_file_reload').on('click', this.component.loaded_file.bind(this, null));
+        this.$buttons.filter('.oe_import_file').on('click', function () {
+            self.component.fieldLoad();
+            // $('.o_content .oe_import_file').click();
+        });
+        this.$buttons.filter('.o_import_cancel').on('click', function (e) {
+            e.preventDefault();
+            self.exit();
+        });
+    },
+    exit() {
+        this.trigger_up('history_back');
+    },
+
+    _onRenderButtons() {
+        this.renderButtons();
+    },
+    _onUpdateControlPanel() {
+        const status = {
+            cp_content: { $buttons: this.$buttons },
+        };
+        this.updateControlPanel(status);
+    },
 });
+
+action_registry.add('import', DataImport);
 
 // FSM-ize DataImport
 StateMachine.create({
@@ -489,7 +593,8 @@ Loading.include({
         this._super.apply(this, arguments);
     }
 });
-AbstractWebClient.prototype.custom_events['with_client'] = function (ev) {
+AbstractWebClient.prototype.events['with_client'] = function (ev) {
+    debugger;
     ev.data.callback.call(this);
 };
 function offset_by(by) {

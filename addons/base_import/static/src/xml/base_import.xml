@@ -1,24 +1,30 @@
 <templates>
+    <!--
+        TODO MSH
+        all template should be called from ImportView Template instead of explicitly
+        pushed in dom, template itself should decide which template should be called
+        based on state
+    -->
     <t t-name="ImportView" owl="1">
-        <t t-set="_id" t-value="state._.uniqueId('export')" />
+        <t t-set="_id" t-value="_.uniqueId('export')" />
         <form action="" method="post" enctype="multipart/form-data" class="oe_import">
             <input type="hidden" name="csrf_token" t-att-value="csrf_token" />
             <input type="hidden" name="import_id" />
             <div class="oe_import_box d-none">
-                <input accept=".csv, .xls, .xlsx, .xlsm, .ods" t-attf-id="file_#{_id}" name="file" class="oe_import_file" type="file" style="display:none;" />
+                <input accept=".csv, .xls, .xlsx, .xlsm, .ods" t-attf-id="file_#{_id}" name="file" class="oe_import_file" type="file" style="display:none;" t-on-change="loaded_file" />
                 <div class="oe_import_with_file row">
                     <a href="#" class="oe_import_toggle col-sm-12">
                         Formatting Options…</a>
                     <div class="row col-sm-12">
                         <div class="oe_import_toggled oe_import_options js_import_options col-md-6 col-lg-4">
-                            <p t-foreach="state.opts" t-as="option">
+                            <p t-foreach="opts" t-as="option">
                                 <h1><span t-esc="option.label"></span></h1>
                                 <label t-attf-for="{{option.name + '_' + _id}}">
                                     <t t-esc="option.label" /></label>
                                 <input t-attf-id="{{option.name +'_' + _id}}" t-attf-class="oe_import_{{option.name}}" style="width: 50%;" t-att-value="option.value" />
                             </p>
                         </div>
-                        <div t-foreach="[state.parse_opts_formats, state.parse_opts_separators]" t-as="options" class="oe_import_toggled oe_import_options col-md-6 col-lg-4">
+                        <div t-foreach="[parse_opts_formats, parse_opts_separators]" t-as="options" class="oe_import_toggled oe_import_options col-md-6 col-lg-4">
                             <p t-foreach="options" t-as="option">
                                 <label t-attf-for="{{option.name + '_' + _id}}">
                                     <t t-esc="option.label" /></label>
@@ -88,7 +94,7 @@
                         Excel files are recommended as fields formatting is automatic.
                     </p>
                     <div class="mt16 mb4">Need Help?</div>
-                    <div t-foreach="state.importTemplates" t-as="template">
+                    <div t-foreach="importTemplates" t-as="template">
                         <a t-att-href="template.template" aria-label="Download" title="Download">
                             <i class="fa fa-download" /> <span>
                                 <t t-esc="template.label" /></span>
@@ -99,6 +105,7 @@
             </div>
         </form>
     </t>
+
     <t t-name="ImportView.buttons">
         <button type="button" class="btn btn-primary o_import_import o_import_import_full d-none">Import</button>
         <button type="button" class="btn btn-primary o_import_import o_import_import_partial d-none">Resume</button>
@@ -107,7 +114,8 @@
         <button type="button" class="btn btn-primary oe_import_file">Load File</button>
         <button type="button" class="btn btn-secondary o_import_cancel">Cancel</button>
     </t>
-    <t t-name="ImportView.create_record_option">
+
+    <t t-name="ImportView.create_record_option" owl="1">
         <div class="mt4">
             <label title="Creates new records if they can't be found (instead of failing to import). Note that the value in the column will be used as the new record's 'name', and assumes this is sufficient to create the record.">
                 <input type="checkbox" class="o_import_create_option" />
@@ -115,7 +123,8 @@
             </label>
         </div>
     </t>
-    <t t-name="ImportView.preview">
+
+    <t t-name="ImportView.preview" owl="1">
         <thead>
             <tr t-if="headers" class="oe_import_grid-header">
                 <td t-foreach="headers" t-as="header" class="oe_import_grid-cell"><span class="o_import_header_name">
@@ -135,7 +144,8 @@
             </tr>
         </tbody>
     </t>
-    <t t-name="ImportView.preview.error">
+
+    <t t-name="ImportView.preview.error" owl="1">
         <div class="oe_import_report alert alert-danger">
             <p>Import preview failed due to:
                 <t t-esc="error" />.</p>
@@ -144,7 +154,8 @@
         </div>
         <pre t-if="preview"><t t-esc="preview"/></pre>
     </t>
-    <ul t-name="ImportView.error">
+
+    <ul t-name="ImportView.error" owl="1">
         <li t-foreach="errors" t-as="error" t-attf-class="oe_import_report alert alert-#{error_value[0].type}">
             <t t-if="error_value.length gt 1">
                 <t t-call="ImportView.error.multi.header">
@@ -175,34 +186,40 @@
             </t>
         </li>
     </ul>
-    <t t-name="ImportView.error.multi.header">
+
+    <t t-name="ImportView.error.multi.header" owl="1">
         <span class="oe_import_report_message">
             <t t-esc="error.message" />
             <t t-esc="at_multi_header(error_length)" />
         </span>
     </t>
-    <t t-name="ImportView.error.multi.body">
+
+    <t t-name="ImportView.error.multi.body" owl="1">
         <span class="oe_import_report_message">
             <t t-esc="at_multi(error.rows)" />
         </span>
     </t>
-    <t t-name="ImportView.error.single">
+
+    <t t-name="ImportView.error.single" owl="1">
         <span class="oe_import_report_message">
             <t t-esc="error.message" />
         </span>
         <t t-if="error.rows" t-esc="at(error.rows)" />
         <t t-if="error.moreinfo" t-raw="info(error.moreinfo)" />
     </t>
+
     <t t-name="ImportView.import_button">
         <button t-if='widget and widget.importEnabled' type="button" class="btn btn-secondary o_button_import">
             Import
         </button>
     </t>
+
     <t t-extend="ListView.buttons">
         <t t-jquery="button.o_list_button_add" t-operation="after">
             <t t-call="ImportView.import_button" />
         </t>
     </t>
+
     <t t-extend="KanbanView.buttons">
         <t t-jquery="button" t-operation="after">
             <t t-call="ImportView.import_button" />

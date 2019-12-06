@@ -13,7 +13,7 @@ const OwlImportService = AbstractService.extend({
         this._super(...arguments);
         this._env = undefined;
     },
-    start(){
+    start() {
         this._super(...arguments);
         session.is_bound.then(() => {
             qwebOwl.addTemplates(session.templatesString);
