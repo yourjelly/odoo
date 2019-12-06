@@ -329,7 +329,6 @@ class OwlDataImport extends owl.Component {
         var self = this;
         this.$buttons = $(QWeb.render("ImportView.buttons", this));
         this.$buttons.filter('.o_import_validate').on('click', this.validate.bind(this));
-        // this.$buttons.filter('.o_import_validate').on('click', this.validate.bind(this));
         // this.$buttons.filter('.o_import_import').on('click', this.import.bind(this));
         // this.$buttons.filter('.o_import_file_reload').on('click', this.loaded_file.bind(this, null));
         // this.$buttons.filter('.oe_import_file').on('click', function () {
@@ -1313,27 +1312,23 @@ return {
 // });
 // core.action_registry.add('import', DataImport);
 
-// // FSM-ize DataImport
+// FSM-ize DataImport
 // StateMachine.create({
-//     target: DataImport.prototype,
+//     target: OwlDataImport.prototype,
 //     events: [
-//         {
-//             name: 'loaded_file',
-//             from: ['none', 'file_loaded', 'preview_error', 'preview_success', 'results'],
-//             to: 'file_loaded'
-//         },
-//         {
-//             name: 'settings_changed',
-//             from: ['file_loaded', 'preview_error', 'preview_success', 'results'],
-//             to: 'previewing'
-//         },
+//         { name: 'loaded_file',
+//           from: ['none', 'file_loaded', 'preview_error', 'preview_success', 'results'],
+//           to: 'file_loaded' },
+//         { name: 'settings_changed',
+//           from: ['file_loaded', 'preview_error', 'preview_success', 'results'],
+//           to: 'previewing' },
 //         { name: 'preview_failed', from: 'previewing', to: 'preview_error' },
 //         { name: 'preview_succeeded', from: 'previewing', to: 'preview_success' },
 //         { name: 'validate', from: 'preview_success', to: 'validating' },
 //         { name: 'validate', from: 'results', to: 'validating' },
 //         { name: 'validated', from: 'validating', to: 'results' },
 //         { name: 'import', from: ['preview_success', 'results'], to: 'importing' },
-//         { name: 'import_succeeded', from: 'importing', to: 'imported' },
+//         { name: 'import_succeeded', from: 'importing', to: 'imported'},
 //         { name: 'import_failed', from: 'importing', to: 'results' }
 //     ],
 // });
