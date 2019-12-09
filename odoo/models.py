@@ -53,7 +53,7 @@ from .exceptions import AccessError, MissingError, ValidationError, UserError
 from .osv.query import Query
 from .tools import frozendict, lazy_classproperty, lazy_property, ormcache, \
                    Collector, LastOrderedSet, OrderedSet, IterableGenerator, \
-                   groupby
+                   groupby, unique
 from .tools.config import config
 from .tools.func import frame_codeinfo
 from .tools.misc import CountingStream, clean_context, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT, get_lang
@@ -5067,7 +5067,14 @@ Record ids: %(records)s
         if isinstance(func, str):
             recs = self
             for name in func.split('.'):
-                recs = recs._mapped_func(operator.itemgetter(name))
+                field = recs._fields[name]
+                values = field.get(recs)
+                if field.relational:
+                    if field.type in ('one2many', 'many2many'):
+                        values = [i for v in values for i in v]
+                    recs = self.env[field.comodel_name].browse(unique(v for v in values if v))
+                else:
+                    recs = [field.convert_to_read(v, recs) for v in values]
             return recs
         else:
             return self._mapped_func(func)
@@ -5472,7 +5479,7 @@ Record ids: %(records)s
             Return at most ``limit`` records.
         """
         recs = self.browse(self._prefetch_ids)
-        ids = [self.id]
+        ids = list(self._ids)
         for record_id in self.env.cache.get_missing_ids(recs - self, field):
             if not record_id:
                 # Do not prefetch `NewId`
