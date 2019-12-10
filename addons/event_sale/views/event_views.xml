@@ -94,6 +94,7 @@
                             <tree string="Tickets" editable="bottom">
                                 <field name="name"/>
                                 <field name="product_id" context="{'default_event_ok':1}"/>
+                                <field name="beginning"/>
                                 <field name="deadline"/>
                                 <field name="price"/>
                                 <field name="seats_max"/>

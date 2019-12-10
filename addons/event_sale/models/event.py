@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import datetime
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 
@@ -81,6 +83,13 @@ class Event(models.Model):
                 for sale_order_line_id in event.sale_order_lines_ids
             ])
 
+    def are_tickets_available(self):
+        self.ensure_one()
+        return (self.seats_available or self.seats_availability == 'unlimited'
+                and any(event_ticket.beginning and event_ticket.deadline
+                        and event_ticket.beginning < datetime.date.today() < event_ticket.deadline
+                        for event_ticket in self.event_ticket_ids))
+
 
 class EventTicket(models.Model):
     _name = 'event.event.ticket'
@@ -98,6 +107,7 @@ class EventTicket(models.Model):
         default=_default_product_id)
     registration_ids = fields.One2many('event.registration', 'event_ticket_id', string='Registrations')
     price = fields.Float(string='Price', digits='Product Price')
+    beginning = fields.Date(string="Sales Start")
     deadline = fields.Date(string="Sales End")
     is_expired = fields.Boolean(string='Is Expired', compute='_compute_is_expired')
 

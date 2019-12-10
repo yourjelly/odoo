@@ -522,10 +522,8 @@
 
 <!-- Event - Registration -->
 <template id="registration_template">
-    <t t-set="tickets_available" t-value="event.seats_available or event.seats_availability == 'unlimited'"/>
-    <t t-if="tickets_available
-             and event.start_sale_date and event.end_sale_date
-             and event.start_sale_date.date() &lt; datetime.date.today() &lt; event.end_sale_date.date()">
+    <t t-set="tickets_available" t-value="event.are_tickets_available()"/>
+    <t t-if="tickets_available">
         <form id="registration_form" t-attf-action="/event/#{slug(event)}/registration/new" method="post" itemscope="itemscope" itemprop="offers" itemtype="http://schema.org/AggregateOffer" class="mb-5">
             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
             <div id="o_wevent_tickets" class="bg-white rounded shadow-sm">
@@ -551,11 +549,8 @@
         </form>
     </t>
     <t t-else="">
-        <div class="alert alert-info mb-5" role="status">
-            <span t-if="not (event.start_sale_date and event.end_sale_date and event.start_sale_date.date() &lt; datetime.date.today() &lt; event.end_sale_date.date())" itemprop="availability" content="http://schema.org/OutOfStock">
-                <b>Event registration not yet started.</b>
-            </span>
-            <a t-if="request.env.user.has_group('event.group_event_manager')" t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event" class="float-right">
+        <div t-if="request.env.user.has_group('event.group_event_manager')" class="alert alert-info mb-5" role="status">
+            <a t-attf-href="/web#id=#{event.id}&amp;view_type=form&amp;model=event.event">
                 <i class="fa fa-pencil mr-2" role="img" aria-label="Create" title="Create"/><em>Configure Event Registration</em>
             </a>
         </div>
