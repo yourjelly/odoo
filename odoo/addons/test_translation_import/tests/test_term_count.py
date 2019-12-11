@@ -187,11 +187,11 @@ class TestTranslationFlow(common.TransactionCase):
         """ Ensure export+import gives the same result as loading a language """
         # load language and generate missing terms to create missing empty terms
         with mute_logger('odoo.addons.base.models.ir_translation'):
-            self.env["base.language.install"].create({'lang': 'fr_FR'}).lang_install()
-        self.env["base.update.translations"].create({'lang': 'fr_FR'}).act_update()
+            self.env["base.language.install"].create({'lang': 'fr_BE', 'overwrite': True}).lang_install()
+        self.env["base.update.translations"].create({'lang': 'fr_BE'}).act_update()
 
         translations = self.env["ir.translation"].search([
-            ('lang', '=', 'fr_FR'),
+            ('lang', '=', 'fr_BE'),
             ('module', '=', 'test_translation_import')
         ])
 
@@ -201,7 +201,7 @@ class TestTranslationFlow(common.TransactionCase):
 
         module = self.env.ref('base.module_test_translation_import')
         export = self.env["base.language.export"].create({
-            'lang': 'fr_FR',
+            'lang': 'fr_BE',
             'format': 'po',
             'modules': [(6, 0, [module.id])]
         })
@@ -213,7 +213,7 @@ class TestTranslationFlow(common.TransactionCase):
 
         import_fr = self.env["base.language.import"].create({
             'name': 'French',
-            'code': 'fr_FR',
+            'code': 'fr_BE',
             'data': export.data,
             'filename': export.name,
         })
@@ -221,7 +221,7 @@ class TestTranslationFlow(common.TransactionCase):
             import_fr.with_context(create_empty_translation=True).import_lang()
 
         import_translation = self.env["ir.translation"].search([
-            ('lang', '=', 'fr_FR'),
+            ('lang', '=', 'fr_BE'),
             ('module', '=', 'test_translation_import')
         ])
         self.assertEqual(init_translation_count, len(import_translation))
