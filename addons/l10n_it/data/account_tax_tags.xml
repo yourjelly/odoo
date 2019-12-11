@@ -22,26 +22,6 @@
         <field name="applicability">taxes</field>
         <field name="country_id" ref="base.it"/>
     </record>
-    <record id="VP6" model="account.account.tag">
-        <field name="name">VP6</field>
-        <field name="applicability">taxes</field>
-        <field name="country_id" ref="base.it"/>
-    </record>
-    <record id="VP7" model="account.account.tag">
-        <field name="name">VP7</field>
-        <field name="applicability">taxes</field>
-        <field name="country_id" ref="base.it"/>
-    </record>
-    <record id="VP8" model="account.account.tag">
-        <field name="name">VP8</field>
-        <field name="applicability">taxes</field>
-        <field name="country_id" ref="base.it"/>
-    </record>
-    <record id="VP9" model="account.account.tag">
-        <field name="name">VP9</field>
-        <field name="applicability">taxes</field>
-        <field name="country_id" ref="base.it"/>
-    </record>
     <record id="VP10" model="account.account.tag">
         <field name="name">VP10</field>
         <field name="applicability">taxes</field>
@@ -52,9 +32,14 @@
         <field name="applicability">taxes</field>
         <field name="country_id" ref="base.it"/>
     </record>
-    <record id="VP12" model="account.account.tag">
-        <field name="name">VP12</field>
-        <field name="applicability">taxes</field>
+    <record id="VP13" model="account.account.tag">
+        <field name="name">VP13</field>
+        <field name="applicability">accounts</field>
+        <field name="country_id" ref="base.it"/>
+    </record>
+    <record id="VP14" model="account.account.tag">
+        <field name="name">VP14</field>
+        <field name="applicability">accounts</field>
         <field name="country_id" ref="base.it"/>
     </record>
 
