@@ -36,6 +36,7 @@ Notes:
         'data/account.account.template.csv',
         'data/account.group.template.csv',
         'data/account_tax_report_line.xml',
+        'data/account_yearly_tax_report_line.xml',
         'data/account.tax.group.csv',
         'data/account_tax_template_2015.xml',
         'data/account.fiscal.position.template-2011.csv',
