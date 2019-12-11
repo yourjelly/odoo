@@ -10,7 +10,7 @@ odoo.define('website_form.animation', function (require) {
     var qweb = core.qweb;
 
     publicWidget.registry.form_builder_send = publicWidget.Widget.extend({
-        selector: '.s_website_form',
+        selector: '.s_website_form form',
 
         willStart: function () {
             var prom;
@@ -75,6 +75,16 @@ odoo.define('website_form.animation', function (require) {
         destroy: function () {
             this._super.apply(this, arguments);
             this.$target.find('button').off('click');
+
+            // Remove saving of the error colors
+            this.$target.find('.o_has_error').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
+
+            // Remove the status message
+            this.$target.find('#o_website_form_result').empty();
+
+            // Remove the success message and display the form
+            this.$target.removeClass('d-none');
+            this.$target.parent().find('.s_website_form_end_message').addClass('d-none');
         },
 
         send: function (e) {
@@ -135,12 +145,18 @@ odoo.define('website_form.animation', function (require) {
                     }
                 } else {
                     // Success, redirect or update status
-                    var success_page = self.$target.attr('data-success_page');
-                    if (success_page) {
-                        $(window.location).attr('href', success_page);
-                    }
-                    else {
-                        self.update_status('success');
+                    const successMode = self.$target[0].dataset.successMode;
+                    switch (successMode) {
+                        case 'redirect':
+                            $(window.location).attr('href', self.$target[0].dataset.success_page);
+                            break;
+                        case 'message':
+                            self.$target[0].classList.add('d-none');
+                            self.$target[0].parentElement.querySelector('.s_website_form_end_message').classList.remove('d-none');
+                            break;
+                        case 'nothing':
+                            self.update_status('success');
+                            break;
                     }
 
                     // Reset the form

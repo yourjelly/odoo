@@ -28,7 +28,7 @@
 }
 
 .editor_enable .o_website_form_field_hidden {
-    display: flex;
+    display: block;
     opacity: 0.5;
 }
 
@@ -37,11 +37,21 @@
 .editor_enable .s_website_form .form-field select {
     pointer-events: none;
 }
-
 // Required fields have a star which is not part of the field label
-.o_website_form_required, .o_website_form_required_custom {
-    > div > div > .col-form-label:after {
-        content: ' *';
+.o_we_required_star {
+    .o_website_form_required, .o_website_form_required_custom {
+        .o_we_form_label:after {
+            content: ' *';
+        }
+    }
+}
+.o_we_required_opt {
+    .form-field {
+        &:not(.o_website_form_required):not(.o_website_form_required_custom) {
+            .o_we_form_label:after {
+                content: ' - Optional.';
+            }
+        }
     }
 }
 
@@ -54,4 +64,38 @@
 // http://stackoverflow.com/questions/22049739/fix-for-firefox-file-input-using-bootstrap-3-1
 .form-field input[type=file].form-control {
     height: 100%;
+}
+
+#oe_snippets > .o_we_customize_panel we-customizeblock-option {
+    we-select {
+        &.o_we_type_select we-select-menu {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    }
+    we-list {
+        table {
+            display: block;
+            max-height: 200px;
+            overflow-y: auto;
+            input {
+                background-color: var(--o-we-bg-color-dark);
+                color: var(--o-we-color);
+                border: none;
+                width: 150px;
+            }
+        }
+
+        we-select {
+            we-select-menu {
+                border-top-style: solid;
+            }
+            we-button {
+                position: relative;
+                z-index: 1;
+                display: block;
+                margin-left: auto;
+            }
+        }
+    }
 }

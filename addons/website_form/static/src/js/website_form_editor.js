@@ -1,633 +1,1026 @@
 odoo.define('website_form_editor', function (require) {
-    'use strict';
+'use strict';
+
+/**
+ * @todo this should be entirely refactored
+ */
+
+var ajax = require('web.ajax');
+var core = require('web.core');
+var FormEditorRegistry = require('website_form.form_editor_registry');
+var options = require('web_editor.snippets.options');
+
+var qweb = core.qweb;
+
+const fieldEditor = options.Class.extend({
 
     /**
-     * @todo this should be entirely refactored
+     * @private
+     * @param {*} value
+     * @param {*} name
+     * @param {*} required
+     * @param {*} hidden
      */
-
-    var ajax = require('web.ajax');
-    var core = require('web.core');
-    var Dialog = require('web.Dialog');
-    var FormEditorRegistry = require('website_form.form_editor_registry');
-    var options = require('web_editor.snippets.options');
-    var wUtils = require('website.utils');
-    var Wysiwyg = require('web_editor.wysiwyg');
-
-    var qweb = core.qweb;
-    var _t = core._t;
-
-    var FormEditorDialog = Dialog.extend({
-        /**
-         * @constructor
-         */
-        init: function (parent, options) {
-            this._super(parent, _.extend({
-                buttons: [{
-                    text: _t('Save'),
-                    classes: 'btn-primary',
-                    close: true,
-                    click: this._onSaveModal.bind(this),
+    _getCustomField: function (value, name, required, hidden) {
+        return {
+            name: name,
+            string: name,
+            custom: true,
+            type: value,
+            required: required,
+            hidden: hidden,
+            // Default values for x2many fields
+            records: [
+                {
+                    id: 'Option 1',
+                    display_name: 'Option 1'
                 }, {
-                    text: _t('Cancel'),
-                    close: true
-                }],
-            }, options));
+                    id: 'Option 2',
+                    display_name: 'Option 2'
+                }, {
+                    id: 'Option 3',
+                    display_name: 'Option 3'
+                },
+            ],
+            // Default values for selection fields
+            selection: [
+                [
+                    'Option 1',
+                    'Option 1'
+                ], [
+                    'Option 2',
+                    'Option 2'
+                ], [
+                    'Option 3',
+                    'Option 3'
+                ],
+            ],
+        };
+    },
+    _getFieldRecords: function (field) {
+        // Convert the required boolean to a value directly usable
+        // in qweb js to avoid duplicating this in the templates
+        field.required = field.required ? 1 : null;
 
-            this.opened(() => {
-                this.$modal.find('.o_website_form_input, .modal-footer .btn').first().focus();
-            });
-        },
-
-        //----------------------------------------------------------------------
-        // Handlers
-        //----------------------------------------------------------------------
-
-        /**
-         * @private
-         */
-        _onSaveModal: function () {
-            if (this.$el[0].checkValidity()) {
-                this.trigger_up('save');
-            } else {
-                _.each(this.$el.find('.o_website_form_input'), function (input) {
-                    var $field = $(input).closest('.form-field');
-                    $field.removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
-                    if (!input.checkValidity()) {
-                        $field.addClass('o_has_error').find('.form-control, .custom-select').addClass('is-invalid');
-                    }
-                });
-            }
-        },
-    });
-
-    options.registry['website_form_editor'] = options.Class.extend({
-        xmlDependencies: ['/website_form/static/src/xml/website_form_editor.xml'],
-
-        start: function () {
-            this.$target.addClass('o_fake_not_editable').attr('contentEditable', false);
-            this.$target.find('label:not(:has(span)), label span').addClass('o_fake_editable').attr('contentEditable', true);
-            return this._super.apply(this, arguments);
-        },
-
-        // Return the fields promise if we already issued a model
-        // fields fetch request, or issue said request.
-        fields: function () {
-            return this.fields_promise || this.fetch_model_fields();
-        },
-
-        fetch_model_fields: function () {
-            return this._rpc({
-                model: "ir.model",
-                method: "get_authorized_fields",
-                args: [this.$target.closest('form').attr('data-model_name')],
-            }).then(function (fields) {
-                // The get_fields function doesn't return the name
-                // in the field dict since it uses it has the key
-                _.each(fields, function (field, field_name) {
-                    field.name = field_name;
-                });
-                return fields;
-            });
-        },
-
-        // Choose a model modal
-        website_form_model_modal: function (previewMode, widgetValue, params) {
-            var self = this;
-            this._rpc({
-                model: "ir.model",
-                method: "search_read",
+        // Fetch possible values for relation fields
+        var fieldRelationProm;
+        if (!field.records && field.relation && field.relation !== 'ir.attachment') {
+            fieldRelationProm = this._rpc({
+                model: field.relation,
+                method: 'search_read',
                 args: [
-                    [['website_form_access', '=', true]],
-                    ['id', 'model', 'name', 'website_form_label', 'website_form_key']
+                    field.domain || [],
+                    ['display_name']
                 ],
-            }).then(function (models) {
-                self.models = models;
-                // Models selection input
-                var modelSelection = qweb.render("website_form.field_many2one", {
-                    field: {
-                        name: 'model_selection',
-                        string: 'Action',
-                        required: true,
-                        records: _.map(models, function (m) {
-                            return {
-                                id: m.id,
-                                display_name: m.website_form_label || m.name,
-                                selected: (m.model === self.$target.attr('data-model_name')) ? 1 : null,
-                            };
-                        }),
-                    }
-                });
-
-                // Success page input
-                var successPage = qweb.render("website_form.field_char", {
-                    field: {
-                        name: 'success_page',
-                        string: 'Thank You Page',
-                        value: self.$target.attr('data-success_page')
-                    }
-                });
-
-                var save = function () {
-                    var successPage = this.$el.find("[name='success_page']").val();
-                    self.init_form();
-                    self.$target.attr('data-success_page', successPage);
-
-                    this.$el.find('.o_form_parameter_custom').each(function () {
-                        var $field = $(this).find('.o_website_form_input');
-                        var value = $field.val();
-                        var fieldName = $field.attr('name');
-                        self.$target.find('.form-group:has("[name=' + fieldName + ']")').remove();
-                        if (value) {
-                            var $hiddenField = $(qweb.render('website_form.field_char', {
-                                field: {
-                                    name: fieldName,
-                                    value: value,
-                                }
-                            })).addClass('d-none');
-                            self.$target.find('.form-group:has(".o_website_form_send")').before($hiddenField);
-                        }
-                    });
-                };
-
-                var cancel = function () {
-                    if (!self.$target.attr('data-model_name')) {
-                        self.$target.remove();
-                    }
-                };
-
-                var $content = $('<form role="form">' + modelSelection + successPage + '</form>');
-                var dialog = new FormEditorDialog(self, {
-                    title: 'Form Parameters',
-                    size: 'medium',
-                    $content: $content,
-                }).open();
-                dialog.on('closed', this, cancel);
-                dialog.on('save', this, ev => {
-                    ev.stopPropagation();
-                    save.call(dialog);
-                });
-
-                wUtils.autocompleteWithPages(self, $content.find("input[name='success_page']"));
-                self.originSuccessPage = $content.find("input[name='success_page']").val();
-                self.originFormID = $content.find("[name='model_selection']").val();
-                self._renderParameterFields($content);
-
-                $content.find("[name='model_selection']").on('change', function () {
-                    self._renderParameterFields($content);
-                });
-            });
-        },
-
-        //--------------------------------------------------------------------------
-        // Private
-        //--------------------------------------------------------------------------
-
-        /**
-         * @private
-         * @returns {Promise}
-         */
-        _renderParameterFields: function ($modal) {
-            var self = this;
-            var $successPage = $modal.find("[name='success_page']");
-            $modal.find('.o_form_parameter_custom').remove();
-            var id = $modal.find("[name='model_selection']").val();
-            this.activeForm = _.findWhere(this.models, {id: parseInt(id)});
-            var formKey = this.activeForm.website_form_key;
-            if (!formKey) {
-                return Promise.resolve();
-            }
-            var proms = [];
-            var formInfo = FormEditorRegistry.get(formKey);
-
-            if (this.originFormID === id) {
-                $successPage.val(this.originSuccessPage || formInfo.successPage || '/contactus-thank-you');
-            } else {
-                $successPage.val(formInfo.successPage || '/contactus-thank-you');
-            }
-
-            if (formInfo.fields && formInfo.fields.length) {
-                _.each(formInfo.fields, function (field) {
-                    var value = self.$target.find('[name="' + field.name + '"]').val();
-                    proms.push(self.render_field(field).then(function ($field) {
-                        $field.addClass('o_form_parameter_custom');
-                        // Remove content editable (Added by render_field)
-                        $field.find('label').removeAttr('contenteditable');
-                        // Set tooltip on label
-                        $field.find('label').attr('title', field.title);
-                        // Set value
-                        $field.find('.o_website_form_input').val(value);
-                        $modal.append($field);
-                    }));
-                });
-            }
-            return Promise.all(proms);
-        },
-
-        // Choose a field modal
-        website_form_field_modal: function (previewMode, widgetValue, params) {
-            var self = this;
-
-            this.fields().then(function (fields) {
-                // Make a nice array to render the select input
-                var fields_array = _.map(fields, function (v, k) { return {id: k, name: v.name, display_name: v.string}; });
-                // Filter the fields to remove the ones already in the form
-                var fields_in_form = _.map(self.$target.find('.col-form-label'), function (label) { return label.getAttribute('for'); });
-                var available_fields = _.filter(fields_array, function (field) { return !_.contains(fields_in_form, field.name); });
-                // Render the select input
-                var fieldSelection = qweb.render("website_form.field_many2one", {
-                    field: {
-                        name: 'field_selection',
-                        string: 'Field',
-                        records: _.sortBy(available_fields, 'display_name')
-                    }
-                });
-
-                var save = function () {
-                    var selectedFieldName = this.$el.find("[name='field_selection']").val();
-                    var selectedField = fields[selectedFieldName];
-                    self.append_field(selectedField);
-                };
-
-                var dialog = new FormEditorDialog(self, {
-                    title: 'Field Parameters',
-                    size: 'medium',
-                    $content: '<form role="form">' + fieldSelection + '</form>',
-                }).open();
-                dialog.on('save', this, ev => {
-                    ev.stopPropagation();
-                    save.call(dialog);
-                });
-            });
-        },
-
-        // Create a custom field
-        website_form_custom_field: function (previewMode, widgetValue, params) {
-            var default_field_name = 'Custom ' + this.el.querySelector(`[data-website_form_custom_field="${widgetValue}"]`).textContent; // TODO improve
-            this.append_field({
-                name: default_field_name,
-                string: default_field_name,
-                custom: true,
-                type: widgetValue,
-                // Default values for x2many fields
-                records: [
-                    {
-                        id: 'Option 1',
-                        display_name: 'Option 1'
-                    },
-                    {
-                        id: 'Option 2',
-                        display_name: 'Option 2'
-                    },
-                    {
-                        id: 'Option 3',
-                        display_name: 'Option 3'
-                    }
-                ],
-                // Default values for selection fields
-                selection: [
-                    [
-                        'Option 1',
-                        'Option 1'
-                    ],
-                    [
-                        'Option 2',
-                        'Option 2'
-                    ],
-                    [
-                        'Option 3',
-                        'Option 3'
-                    ],
-                ]
-            });
-        },
-
-        // Re-render the field and replace the current one
-        // website_form_editor_field_reset: function(previewMode, widgetValue, params) {
-        //     var self = this;
-        //     var target_field_name = this.$target.find('.col-form-label').attr('for');
-        //     this.fields().then(function(fields){
-        //         self.render_field(fields[target_field_name]).done(function(field){
-        //             self.$target.replaceWith(field);
-        //         })
-        //     });
-        // },
-
-        append_field: function (field) {
-            var self = this;
-            // Copy formatting classes of last row (field)
-            var $lastField = this.$target.find('.form-field.row:last');
-            field.formatInfo = {
-                labelClass: $lastField.find('> div:first').attr('class'),
-                contentClass: $lastField.find('> div:last').attr('class'),
-            };
-            this.render_field(field).then(function (field){
-                self.$target.find(".form-group:has('.o_website_form_send')").before(field);
-            });
-        },
-
-        render_field: function (field) {
-            // Convert the required boolean to a value directly usable
-            // in qweb js to avoid duplicating this in the templates
-            field.required = field.required ? 1 : null;
-
-            // Fetch possible values for relation fields
-            var fieldRelationProm;
-            if (field.relation && field.relation !== 'ir.attachment') {
-                fieldRelationProm = this._rpc({
-                    model: field.relation,
-                    method: 'search_read',
-                    args: [
-                        field.domain || [],
-                        ['display_name']
-                    ],
-                }).then(function (records) {
-                    field.records = records;
-                });
-            }
-
-            return Promise.resolve(fieldRelationProm).then(function () {
-                var $content = $(qweb.render("website_form.field_" + field.type, {field: field}));
-                $content.find('label:not(:has(span)), label span').addClass('o_fake_editable').attr('contentEditable', true);
-                return $content;
-            });
-        },
-
-        onBuilt: function () {
-            // Open the parameters modal on snippet drop
-            this.website_form_model_modal('click', null, null);
-        },
-
-        /**
-         * Hide change form parameters option for forms
-         * e.g. User should not be enable to change existing job application form to opportunity form in 'Apply job' page.
-         *
-         * @override
-         */
-        onFocus: function () {
-            this.$el.filter('[data-website_form_model_modal]').toggleClass('d-none', this.$target.attr('hide-change-model') !== undefined);
-        },
-
-        init_form: function () {
-            var self = this;
-            var modelName = this.activeForm.model;
-            var currentModel = this.$target.attr('data-model_name');
-            var formKey = this.activeForm.website_form_key;
-            if (!currentModel) {
-                // Directly change the parameters if model is being set for the first time
-                this.changeFormParameters(modelName, formKey);
-            } else if (modelName !== currentModel) {
-                var warningMessage = _t("Are you sure you want to change the parameters of your form? All the current fields will be discarded.");
-                new Dialog(this, {
-                    title: _t("Warning"),
-                    size: 'medium',
-                    $content: $('<div>', {text: warningMessage}),
-                    buttons: [{
-                        text: _t("Ok"),
-                        classes: 'btn-primary',
-                        click: function () {
-                            self.changeFormParameters(modelName, formKey);
-                        },
-                        close: true,
-                    }, {
-                        text: _t("Discard"),
-                        close: true,
-                    }],
-                }).open({shouldFocusButtons: true});
-            }
-        },
-
-        changeFormParameters: function (modelName, formKey) {
-            var self = this;
-            this.$target.attr('data-model_name', modelName);
-            this.$target.find(".form-field:not(:has('.o_website_form_send')), .o_form_heading").remove();
-            if (formKey) {
-                var formInfo = FormEditorRegistry.get(formKey);
-                ajax.loadXML(formInfo.defaultTemplatePath, qweb).then(function () {
-                    // Append form title
-                    $('<h1>', {
-                        class: 'o_form_heading',
-                        text: self.activeForm.website_form_label,
-                    }).prependTo(self.$target.find('.container'));
-                    self.$target.find('.form-group:has(".o_website_form_send")').before($(qweb.render(formInfo.defaultTemplateName)));
-                });
-            } else {
-                // Force fetch the fields of the new model
-                // and render all model required fields
-                this.fetch_model_fields().then(function (fields) {
-                    _.each(fields, function (field, field_name) {
-                        if (field.required) {
-                            self.append_field(field);
-                        }
-                    });
-                });
-            }
-        },
-
-        cleanForSave: function () {
-            var model = this.$target.data('model_name');
-            // because apparently this can be called on the wrong widget and
-            // we may not have a model, or fields...
-            if (model) {
-                // we may be re-whitelisting already whitelisted fields. Doesn't
-                // really matter.
-                var fields = this.$target.find('input.form-field[name=email_to], .form-field:not(.o_website_form_custom) :input').map(function (_, node) {
-                    return node.getAttribute('name');
-                }).get();
-                if (fields.length) {
-                    // ideally we'd only do this if saving the form
-                    // succeeds... but no idea how to do that
-                    this._rpc({
-                        model: 'ir.model.fields',
-                        method: 'formbuilder_whitelist',
-                        args: [model, _.uniq(fields)],
-                    });
-                }
-            }
-
-            // Prevent saving of the error colors  // TODO: would be better on Edit
-            this.$target.find('.o_has_error').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
-
-            // Prevent saving of the status message  // TODO: would be better on Edit
-            this.$target.find('#o_website_form_result').empty();
-
-            // Update values of custom inputs to mirror their labels
-            var custom_inputs = this.$target.find('.o_website_form_custom .o_website_form_input');
-            _.each(custom_inputs, function (input, index) {
-                // Change the custom field name according to their label
-                var field_label = $(input).closest('.form-field').find('label:first');
-                input.name = field_label.text().trim();
-                field_label.attr('for', input.name);
-
-                // Change the custom radio or checkboxes values according to their label
-                if (input.type === 'radio' || input.type === 'checkbox') {
-                    var checkbox_label = $(input).closest('label').text().trim();
-                    if (checkbox_label) {
-                        input.value = checkbox_label;
-                    }
-                }
-            });
-        }
-    });
-
-    // radio / checkboxes field option to display them horizontally or vertically
-    options.registry['website_form_editor_choice_field_display'] = options.Class.extend({
-        xmlDependencies: ['/website_form/static/src/xml/website_form_editor.xml'],
-
-        /**
-         * @see this.selectClass for parameters
-         */
-        website_form_choice_field_display: function (previewMode, widgetValue, params) {
-            this.$target.toggleClass('o_website_form_flex_fw', widgetValue === 'vertical');
-            this.$target[0].dataset.display = widgetValue;
-        },
-
-        //----------------------------------------------------------------------
-        // Private
-        //----------------------------------------------------------------------
-
-        /**
-         * @override
-         */
-        _computeWidgetState: function (methodName, params) {
-            if (methodName === 'website_form_choice_field_display') {
-                return this.$target.attr('data-display');
-            }
-            return this._super(...arguments);
-        },
-    });
-
-    // Generic custom field options
-    options.registry['website_form_editor_field'] = options.Class.extend({
-        xmlDependencies: ['/website_form/static/src/xml/website_form_editor.xml'],
-
-        // Option to toggle inputs required attribute
-        website_form_field_require: function (previewMode, widgetValue, params) {
-            this.$target.find('.o_website_form_input').each(function (index, input) {
-                input.required = !input.required;
-            });
-        }
-    });
-
-    // Dirty hack to transform select fields into an editable construct
-    options.registry['website_form_editor_field_select'] = options.Class.extend({
-        xmlDependencies: ['/website_form/static/src/xml/website_form_editor.xml'],
-
-        start: function () {
-            if (!this.$target.find('#editable_select').length) {
-                var self = this;
-                var select = this.$target.find('select');
-                select.hide();
-                this.editable_select = $('<div id="editable_select" class="form-control o_website_form_input" contenteditable="true"/>');
-                _.each(select.children(), function (option) {
-                    self.editable_select.append(
-                        $('<div id="' + $(option).attr('value') + '" class="o_website_form_select_item">' + $(option).text().trim() + '</div>')
-                    );
-                });
-                select.after(this.editable_select);
-            }
-            return this._super.apply(this, arguments);
-        },
-
-        cleanForSave: function () {
-            if (this.$target.find('#editable_select').length) {
-                var self = this;
-                // Reconstruct the field from the select tag
-                var select = this.$target.find('select');
-                var field = {
-                    name: select.attr('name'),
-                    string: this.$target.find('.col-form-label').text().trim(),
-                    required: self.$target.hasClass('o_website_form_required'),
-                    custom: self.$target.hasClass('o_website_form_custom'),
-                    formatInfo: {
-                        labelClass: this.$target.find('> div:first').attr('class'),
-                        contentClass: this.$target.find('> div:last').attr('class'),
-                    },
-                };
-
-                // Build the new records list from the editable select field
-                var records = [];
-                var editable_options = this.$target.find('#editable_select .o_website_form_select_item');
-                _.each(editable_options, function (option) {
-                    records.push({
-                        id: self.$target.hasClass('o_website_form_custom') ? $(option).text().trim() : $(option).attr('id'),
-                        display_name: $(option).text().trim()
-                    });
-                });
+            }).then(function (records) {
                 field.records = records;
+            });
+        }
+        return Promise.resolve(fieldRelationProm);
+    },
+    /**
+     * @private
+     * @param {*} field
+     */
+    _renderField: function (field) {
+        return this._getFieldRecords(field).then(() => {
+            return $(qweb.render("website_form.field_" + field.type, {field: field}))[0];
+        });
+    },
+});
 
-                // Replace this field by the new one
-                var $new_select = $(qweb.render("website_form.field_many2one", {field: field}));
-                // Reapply the custom style classes
-                if (this.$target.hasClass('o_website_form_required_custom')) {
-                    $new_select.addClass('o_website_form_required_custom');
-                }
-                if (this.$target.hasClass('o_website_form_field_hidden')) {
-                    $new_select.addClass('o_website_form_field_hidden');
-                }
-                this.$target.replaceWith($new_select);
+options.registry.websiteFormEditor = fieldEditor.extend({
+    xmlDependencies: ['/website_form/static/src/xml/website_form_editor.xml'],
+
+    events: _.extend({}, options.Class.prototype.events || {}, {
+        'click .toggle-edit-message': '_onToggleEndMessageClick',
+    }),
+
+    /**
+     * @override
+     */
+    willStart: async function () {
+        const _super = this._super.bind(this);
+        const args = arguments;
+
+        // Get list of website_form compatible models.
+        this.models = await this._rpc({
+            model: "ir.model",
+            method: "search_read",
+            args: [
+                [['website_form_access', '=', true], ['website_form_key', '!=', false]],
+                ['id', 'model', 'name', 'website_form_label', 'website_form_key']
+            ],
+        });
+        this.selectActionEl = options.buildElement('we-select', 'Action', {
+            dataAttributes: {
+                noPreview: 'true',
+            },
+        });
+        this.models.forEach(el => {
+            const option = options.buildElement('we-button', el.website_form_label, {
+                dataAttributes: {
+                    selectAction: el.id,
+                },
+            });
+            this.selectActionEl.append(option);
+        });
+
+        return _super(...args);
+    },
+    /**
+     * @override
+     */
+    start: function () {
+        const proms = [this._super(...arguments)];
+        // Disable text edition
+        this.$target.addClass('o_fake_not_editable').attr('contentEditable', false);
+        this.$target.find('label:not(:has(span)), label span').addClass('o_fake_not_editable').attr('contentEditable', false);
+        // Get potential message
+        this.$message = this.$target.parent().find('.s_website_form_end_message');
+        this.showEndMessage = false;
+        // Add default attributes
+        const targetModelName = this.$target[0].dataset.model_name;
+        if (targetModelName) {
+            this.activeForm = _.findWhere(this.models, {model: targetModelName});
+        } else {
+            this.activeForm = this.models[0];
+            this.$target[0].dataset.model_name = this.activeForm.model;
+            this._changeFormParameters();
+        }
+        if (!this.$target[0].dataset.successMode) {
+            this.$target[0].dataset.successMode = 'redirect';
+        }
+        proms.push(this._rerenderXML());
+
+        return Promise.all(proms);
+    },
+
+    /**
+     * @override
+     */
+    cleanForSave: function () {
+        var model = this.$target.data('model_name');
+        // because apparently this can be called on the wrong widget and
+        // we may not have a model, or fields...
+        if (model) {
+            // we may be re-whitelisting already whitelisted fields. Doesn't
+            // really matter.
+            var fields = this.$target.find('input.form-field[name=email_to], .form-field:not(.o_website_form_custom) :input').map(function (_, node) {
+                return node.getAttribute('name');
+            }).get();
+            if (fields.length) {
+                // ideally we'd only do this if saving the form
+                // succeeds... but no idea how to do that
+                this._rpc({
+                    model: 'ir.model.fields',
+                    method: 'formbuilder_whitelist',
+                    args: [model, _.uniq(fields)],
+                });
             }
         }
-    });
 
-    // allow breaking of form select items, to create new ones
-    Wysiwyg.include({
-        /**
-         * @override
-         */
-        _editorOptions: function () {
-            var options = this._super.apply(this, arguments);
-            var isUnbreakableNode = options.isUnbreakableNode;
-            options.isUnbreakableNode = function (node) {
-                var isSelItem = $(node).hasClass('o_website_form_select_item');
-                return isUnbreakableNode(node) && !isSelItem;
-            };
-            return options;
-        },
-    });
+        // Update values of custom inputs to mirror their labels
+        var customInputs = this.$target.find('.o_website_form_custom .o_website_form_input');
+        _.each(customInputs, function (input, index) {
+            // Change the custom field name according to their label
+            var fieldLabel = $(input).closest('.form-field').find('label:first');
+            input.name = fieldLabel.text().trim();
+            fieldLabel.attr('for', input.name);
 
-    // Superclass for options that need to disable a button from the snippet overlay
-    var disable_overlay_button_option = options.Class.extend({
-        xmlDependencies: ['/website_form/static/src/xml/website_form_editor.xml'],
-
-        // Disable a button of the snippet overlay
-        disable_button: function (button_name, message) {
-            // TODO refactor in master
-            var className = 'oe_snippet_' + button_name;
-            this.$overlay.add(this.$overlay.data('$optionsSection')).on('click', '.' + className, this.prevent_button);
-            var $button = this.$overlay.add(this.$overlay.data('$optionsSection')).find('.' + className);
-            $button.attr('title', message).tooltip({delay: 0});
-            $button.removeClass(className); // Disable the functionnality
-        },
-
-        prevent_button: function (event) {
-            // Snippet options bind their functions before the editor, so we
-            // can't cleanly unbind the editor onRemove function from here
-            event.preventDefault();
-            event.stopImmediatePropagation();
+            // Change the custom radio or checkboxes values according to their label
+            if (input.type === 'radio' || input.type === 'checkbox') {
+                var checkboxLabel = $(input).closest('label').text().trim();
+                if (checkboxLabel) {
+                    input.value = checkboxLabel;
+                }
+            }
+        });
+        // Display Success Message
+        if (this.$message.length) {
+            this.$target.removeClass('d-none');
+            this.$message.addClass("d-none");
         }
-    });
-
-    // Disable duplicate button for model fields
-    options.registry['website_form_editor_field_model'] = disable_overlay_button_option.extend({
-        start: function () {
-            this.disable_button('clone', 'You can\'t duplicate a model field.');
-            return this._super.apply(this, arguments);
+    },
+    /**
+     * Hide change form parameters option for forms
+     * e.g. User should not be enable to change existing job application form to opportunity form in 'Apply job' page.
+     *
+     * @override
+     */
+    onFocus: function () {
+        this.$el.filter('[data-website_form_model_modal]').toggleClass('d-none', this.$target.attr('hide-change-model') !== undefined);
+    },
+    /**
+     * @override
+     */
+    updateUI: async function () {
+        if (this.rerender) {
+            this.rerender = false;
+            await this._rerenderXML();
+            return;
         }
-    });
+        await this._super.apply(this, arguments);
+        const dataset = this.$target[0].dataset;
 
-    // Disable delete button for model required fields
-    options.registry['website_form_editor_field_required'] = disable_overlay_button_option.extend({
-        start: function () {
-            this.disable_button('remove', 'You can\'t remove a field that is required by the model itself.');
-            return this._super.apply(this, arguments);
-        }
-    });
+        // End Message UI
+        this.updateUIEndMessage();
+        this.$el.find('[data-attribute-name="success_page"]')
+            .toggleClass('d-none', dataset.successMode !== 'redirect');
+        this.$el.find('.toggle-edit-message')
+            .toggleClass('d-none', dataset.successMode !== 'message');
 
-    // Disable duplicate button for non-custom checkboxes and radio buttons
-    options.registry['website_form_editor_field_x2many'] =disable_overlay_button_option.extend({
-        start: function () {
-            this.disable_button('clone', 'You can\'t duplicate an item which refers to an actual record.');
-            return this._super.apply(this, arguments);
+        const successMode = dataset.successMode;
+        const messageInput = this.el.querySelector('[data-attribute-name="successMessage"]');
+        const redirectInput = this.el.querySelector('[ data-attribute-name="success_page"]');
+        redirectInput && redirectInput.classList.toggle('d-none', successMode !== 'redirect');
+        messageInput && messageInput.classList.toggle('d-none', successMode !== 'message');
+    },
+    /**
+     * @see this.updateUI
+     */
+    updateUIEndMessage: function () {
+        this.$target.toggleClass("d-none", this.showEndMessage);
+        this.$message.toggleClass("d-none", !this.showEndMessage);
+        this.trigger_up('cover_update');
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     *
+     */
+    selectAction: function (previewMode, value, params) {
+        this.activeForm = _.findWhere(this.models, {id: parseInt(value)});
+        this.$target[0].dataset.model_name = this.activeForm.model;
+        this.$target[0].querySelectorAll('.related_field').forEach(el => el.remove());
+        this._changeFormParameters();
+        this.rerender = true;
+    },
+    /**
+     *
+     */
+    customSelect: function (previewMode, value, params) {
+        let fieldName = params.fieldName;
+        value = parseInt(value);
+        this._addActionRelatedField(value, fieldName);
+    },
+    /**
+     *
+     */
+    customInput: function (previewMode, value, params) {
+        let fieldName = params.fieldName;
+        this._addActionRelatedField(value, fieldName);
+    },
+    /**
+     *
+     */
+    onSuccess: function (previewMode, value, params) {
+        this.$target[0].dataset.successMode = value;
+        if (value === 'message') {
+            if (!this.$message.length) {
+                this.$message = $(qweb.render('website_form.s_website_form.end_message'));
+            }
+            this.$target.after(this.$message);
+        } else {
+            this.$message.remove();
         }
-    });
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState: function (methodName, params) {
+        switch (methodName) {
+            case 'selectAction':
+                return this.activeForm.id;
+            case 'customSelect':
+                return this.$target.find(`.form-group input[name="${params.fieldName}"]`).val() || '0';
+            case 'customInput':
+                return this.$target.find(`.form-group input[name="${params.fieldName}"]`).val() || '';
+            case 'onSuccess':
+                return this.$target[0].dataset.successMode;
+        }
+        return this._super(...arguments);
+    },
+    /**
+     *@override
+    */
+    _renderCustomXML: function (uiFragment) {
+        const firstOption = uiFragment.querySelector(':first-child');
+        uiFragment.insertBefore(this.selectActionEl.cloneNode(true), firstOption);
+
+        if (!this.activeForm) {
+            return;
+        }
+        const formKey = this.activeForm.website_form_key;
+        var formInfo = FormEditorRegistry.get(formKey);
+        if (!formInfo.fields) {
+            return;
+        }
+
+        var proms = [];
+        formInfo.fields.forEach(field => {
+            proms.push(this._getFieldRecords(field));
+        });
+        return Promise.all(proms).then(() => {
+            formInfo.fields.forEach(field => {
+                let option;
+                switch (field.type) {
+                    case 'many2one':
+                        option = this._buildSelect(field);
+                        break;
+                    case 'char':
+                        option = this._buildInput(field);
+                        break;
+                    default:
+                        break;
+                }
+                uiFragment.insertBefore(option, firstOption);
+            });
+        });
+    },
+    /**
+     * @private
+     * @param {string} value
+     * @param {string} fieldName
+     */
+    _addActionRelatedField: function (value, fieldName) {
+        this.$target.find('.form-group:has("[name=' + fieldName + ']")').remove();
+        if (value) {
+            var $hiddenField = $(qweb.render('website_form.field_char', {
+                field: {
+                    name: fieldName,
+                    value: value,
+                },
+            })).addClass('d-none related_field');
+            this.$target.find('.form-group:has(".o_website_form_send")').before($hiddenField);
+        }
+    },
+    /**
+     * @private
+     */
+    _changeFormParameters: function () {
+        var formKey = this.activeForm.website_form_key;
+        this.$target[0].dataset.model_name = this.activeForm.model;
+        this.$target.find(".o_we_form_rows").remove();
+        var formInfo = FormEditorRegistry.get(formKey);
+        this.$target[0].dataset.success_page = formInfo.successPage || '';
+        ajax.loadXML(formInfo.defaultTemplatePath, qweb).then(() => {
+            this.$target.find('.form-group:has(".o_website_form_send")').before($('<div class="o_we_form_rows row s_col_no_bgcolor">' + qweb.render(formInfo.defaultTemplateName) + '</div>'));
+        });
+    },
+    /**
+     * @private
+     * @param {Object} field
+     * @return {HTMLElement}
+     */
+    _buildSelect: function (field) {
+        const selectEl = options.buildElement('we-select', null, {
+            dataAttributes: {
+                noPreview: 'true',
+                fieldName: field.name,
+            },
+            classes: ['related_element'],
+        });
+        const noneButton = options.buildElement('we-button', 'None', {
+            dataAttributes: {
+                customSelect: 0,
+            },
+            classes: ['custom_select'],
+        });
+        selectEl.append(noneButton);
+        field.records.forEach(el => {
+            const button = options.buildElement('we-button', el.display_name, {
+                dataAttributes: {
+                    customSelect: el.id,
+                },
+                classes: ['custom_select'],
+            });
+            selectEl.append(button);
+        });
+        selectEl.setAttribute('string', field.string);
+        return selectEl;
+    },
+    /**
+     * @private
+     * @param {Object} field
+     * @returns {HTMLElement}
+     */
+    _buildInput: function (field) {
+        const inputEl = options.buildElement('we-input', null, {
+            dataAttributes: {
+                noPreview: 'true',
+                fieldName: field.name,
+                customInput: '',
+            },
+            classes: ['custom_input', 'related_element'],
+        });
+        inputEl.setAttribute('string', field.string);
+        return inputEl;
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _onToggleEndMessageClick: function () {
+        this.showEndMessage = !this.showEndMessage;
+        this.$el.find(".toggle-edit-message").toggleClass('text-primary', this.showEndMessage);
+        this.updateUIEndMessage();
+    },
+});
+
+options.registry.websiteFieldEditor = fieldEditor.extend({
+    events: _.extend({}, fieldEditor.prototype.events, {
+        'click we-button.o_we_select_remove_option': '_onRemoveItemClick',
+        'click we-button.o_we_list_add_optional': '_onAddCustomItemClick',
+        'click we-button.o_we_list_add_existing': '_onAddExistingItemClick',
+        'click we-list we-select': '_onAddItemSelectClick',
+        'input we-list input': '_onListItemInput',
+    }),
+
+    /**
+     * @override
+     */
+    init: function () {
+        this._super.apply(this, arguments);
+        this.formEl = this.$target[0].closest('form');
+    },
+    /**
+     * @override
+     */
+    willStart: async function () {
+        const _super = this._super.bind(this);
+        const args = arguments;
+        this.existingFields = await this._rpc({
+            model: "ir.model",
+            method: "get_authorized_fields",
+            args: [this.formEl.dataset.model_name],
+        }).then(fields => {
+            this.fields = _.each(fields, function (field, fieldName) {
+                field.name = fieldName;
+            });
+            const computedFields = Object.keys(fields).map(key => {
+                return options.buildElement('we-button', fields[key].string, {
+                    dataAttributes: {
+                        existingField: key,
+                    },
+                });
+            }).sort((a, b) => (a.textContent > b.textContent) ? 1 : (a.textContent < b.textContent) ? -1 : 0);
+            if (computedFields.length) {
+                const title = options.buildTitleElement('Existing fields');
+                computedFields.unshift(title);
+            }
+            return computedFields;
+        });
+        return _super(...args);
+    },
+    /**
+     * @override
+     */
+    cleanForSave: function () {
+        this.$target[0].querySelectorAll('#editable_select').forEach(el => el.remove());
+        const select = this.$target[0].querySelector('select');
+        if (select && this.listTable) {
+            select.style.display = '';
+            select.innerHTML = '';
+            this.listTable.querySelectorAll('input').forEach(el => {
+                const option = document.createElement('option');
+                option.textContent = el.value;
+                option.value = el.name || el.value;
+                select.appendChild(option);
+            });
+        }
+    },
+    /**
+     * @override
+     */
+    updateUI: async function () {
+        if (this.rerender) {
+            this.rerender = false;
+            await this._rerenderXML().then(() => this._renderList());
+            return;
+        }
+        await this._super.apply(this, arguments);
+        if (!this.el.childElementCount) {
+            return;
+        }
+        const hasPlaceholder = !!this._getPlaceholderInput();
+        this.el.querySelector('[data-set-placeholder]').classList.toggle('d-none', !hasPlaceholder);
+
+        const isModelRequired = !!this.$target[0].classList.contains('o_website_form_required');
+        this.el.querySelector('[data-select-class="o_website_form_required_custom"]').classList.toggle('d-none', isModelRequired);
+        this.el.querySelector('[data-select-class="o_website_form_field_hidden"]').classList.toggle('d-none', isModelRequired);
+        this.$el.find('we-select:has([data-custom-field])').toggleClass('d-none', isModelRequired);
+        this.el.querySelector('.multi_check').classList.toggle('d-none', !this.$target[0].querySelector('.o_website_form_flex'));
+    },
+
+    //----------------------------------------------------------------------
+    // Options
+    //----------------------------------------------------------------------
+
+    /**
+     *
+     */
+    customField: function (previewMode, value, params) {
+        // Both custom Field and existingField are called when selecting an option
+        // value is '' for the method that should not be called. Do not use the same
+        // value for a custom field and an existing field.
+        if (!value) {
+            return;
+        }
+        const name = this.el.querySelector(`[data-custom-field="${value}"]`).textContent;
+        const field = this._getCustomField(value, `Custom ${name}`);
+        this._replaceField(field);
+    },
+    /**
+     *
+     */
+    existingField: function (previewMode, value, params) {
+        // see customField
+        if (!value) {
+            return;
+        }
+        const field = this.fields[value];
+        this._replaceField(field);
+        // Rerender for the existing fields as we can't have twice the same existing field on the form
+        this.rerender = true;
+    },
+    /**
+     *
+     */
+    setName: function (previewMode, value, params) {
+        this.$target[0].querySelector('.o_we_form_label').textContent = value;
+    },
+    /*
+        *
+        */
+    setPlaceholder: function (previewMode, value, params) {
+        this._setPlaceholder(value);
+    },
+    /**
+     *
+     */
+    selectLabelPosition: function (previewMode, value, params) {
+        const field = this._getActiveField();
+        field.formatInfo.labelPosition = value;
+        this._replaceField(field);
+    },
+    /**
+     *
+     */
+    multiCheckboxDisplay: function (previewMode, value, params) {
+        const target = this.$target[0].querySelector('.o_website_form_flex');
+        target.classList.toggle('o_website_form_flex_fw', value === 'vertical');
+        target.dataset.display = value;
+    },
+
+    //----------------------------------------------------------------------
+    // Private
+    //----------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState: function (methodName, params) {
+        switch (methodName) {
+            case 'customField':
+                return this.$target[0].dataset.type;
+            case 'existingField':
+                return this._getFieldName();
+            case 'setName':
+                return this.$target[0].querySelector('.o_we_form_label').textContent;
+            case 'setPlaceholder':
+                return this._getPlaceholder();
+            case 'selectLabelPosition':
+                return this._getlabelPosition();
+            case 'multiCheckboxDisplay':
+                var target = this.$target[0].querySelector('.o_website_form_flex');
+                return target ? target.dataset.display : '';
+        }
+        return this._super(...arguments);
+    },
+
+    /**
+     *@override
+     */
+    _renderCustomXML: function (uiFragment) {
+        const selectEl = uiFragment.querySelector('we-select.o_we_type_select');
+        var fieldsInForm = Array.from(this.formEl.querySelectorAll('.o_we_form_label')).map(label => label.getAttribute('for')).filter(el => el !== this._getFieldName());
+        this.existingFields.forEach(option => {
+            if (!fieldsInForm.includes(option.dataset.existingField)) {
+                selectEl.append(option.cloneNode(true));
+            }
+        });
+    },
+    /**
+     * @private
+     */
+    _getActiveField: function () {
+        let field;
+        const required = this._isFieldRequired();
+        const hidden = !!this.$target[0].classList.contains('o_website_form_field_hidden');
+        const name = this._getFieldName();
+        if (this.$target[0].classList.contains('o_website_form_custom')) {
+            field = this._getCustomField(this.$target[0].dataset.type, name, required, hidden);
+        } else {
+            field = this.fields[name];
+        }
+        field.placeholder = this._getPlaceholder();
+        field.required = required;
+        field.hidden = hidden;
+
+        field.formatInfo = {
+            labelPosition: this._getlabelPosition(),
+        };
+        field.formatInfo.labelWidth = this.$target[0].querySelector('.o_we_form_label').style.width;
+        return field;
+    },
+    /**
+     * @private
+     * @param {Object} field
+     */
+    _replaceField: function (field) {
+        if (!field.formatInfo) {
+            const activeField = this._getActiveField();
+            field.formatInfo = activeField.formatInfo;
+            field.required = activeField.required;
+            field.hidden = activeField.hidden;
+            field.placeholder = activeField.placeholder;
+        }
+        this._renderField(field).then((htmlField) => {
+            this.$target.html(htmlField.innerHTML);
+            this.$target[0].classList = htmlField.classList;
+            htmlField.dataset.type ? this.$target[0].dataset.type = htmlField.dataset.type : delete this.$target[0].dataset.type;
+            if (field.placeholder) {
+                this._setPlaceholder(field.placeholder);
+            }
+            this.$target.find('label:not(:has(span)), label span').addClass('o_fake_not_editable').attr('contentEditable', false);
+        });
+    },
+    /**
+     * @private
+     * @returns {string}
+     */
+    _getlabelPosition: function () {
+        const label = this.$target[0].querySelector('.o_we_form_label');
+        if (this.$target[0].querySelector('.row')) {
+            if (label.classList.contains('text-right')) {
+                return 'right';
+            } else {
+                return 'left';
+            }
+        } else {
+            if (label.classList.contains('d-none')) {
+                return 'none';
+            } else {
+                return 'top';
+            }
+        }
+    },
+    /**
+     * @private
+     */
+    _setPlaceholder: function (value) {
+        const input = this._getPlaceholderInput();
+        if (input) {
+            input.placeholder = value;
+        }
+    },
+    /**
+     * @private
+     * @returns {string}
+     */
+    _getPlaceholder: function () {
+        const input = this._getPlaceholderInput();
+        return input ? input.placeholder : '';
+    },
+    /**
+     * @private
+     * @returns {HTMLElement}
+     */
+    _getPlaceholderInput: function () {
+        return this.$target[0].querySelector('input[type="text"], input[type="email"], textarea');
+    },
+    /**
+     * @private
+     * @returns {string}
+     */
+    _getFieldName: function () {
+        return this.$target[0].querySelector('.o_we_form_label').getAttribute('for');
+    },
+    /**
+     * @private
+     * @returns {boolean}
+     */
+    _isFieldRequired: function () {
+        const classList = this.$target[0].classList;
+        return classList.contains('o_website_form_required_custom') || classList.contains('o_website_form_required');
+    },
+    /**
+     * @private
+     * @returns {Promise}
+     */
+    _rerender: function () {
+        const select = this.$target[0].querySelector('select');
+        if (select && !this.$target[0].querySelector('#editable_select')) {
+            select.style.display = 'none';
+            const editableSelect = document.createElement('div');
+            editableSelect.id = 'editable_select';
+            editableSelect.classList = 'form-control o_website_form_input';
+            select.parentElement.appendChild(editableSelect);
+        }
+        this.rerender = true;
+    },
+    /**
+     * @private
+     */
+    _renderList: function () {
+        let addItemButton, addItemTitle, listTitle;
+        const select = this.$target[0].querySelector('select');
+        const checkbox = this.$target[0].querySelector('.o_website_form_flex');
+        this.listTable = document.createElement('table');
+        const isCustomOption = !!this.$target[0].classList.contains('o_website_form_custom');
+
+        if (select) {
+            listTitle = 'Options List';
+            addItemTitle = 'Add new Option';
+            select.querySelectorAll('option').forEach(opt => {
+                this._addItemToTable(opt.value, opt.textContent.trim(), !isCustomOption);
+            });
+        } else if (checkbox) {
+            listTitle = 'Checkbox List';
+            addItemTitle = 'Add new Checkbox';
+            checkbox.querySelectorAll('.checkbox').forEach(opt => {
+                this._addItemToTable(opt.querySelector('input').value, opt.querySelector('span').textContent.trim(), !isCustomOption);
+            });
+        } else {
+            return;
+        }
+
+        if (isCustomOption) {
+            addItemButton = options.buildElement('we-button', addItemTitle, {
+                dataAttributes: {
+                    noPreview: 'true',
+                },
+                classes: ['o_we_list_add_optional'],
+            });
+        } else {
+            addItemButton = options.buildElement('we-select');
+            const togglerEl = document.createElement('we-toggler');
+            togglerEl.textContent = addItemTitle;
+            addItemButton.appendChild(togglerEl);
+            const selectMenuEl = document.createElement('we-select-menu');
+            addItemButton.appendChild(selectMenuEl);
+            this._loadListDropdown(selectMenuEl);
+        }
+        const selectInputEl = document.createElement('we-list');
+        selectInputEl.appendChild(options.buildTitleElement(listTitle));
+        selectInputEl.appendChild(this.listTable);
+        selectInputEl.appendChild(addItemButton);
+        this.el.insertBefore(selectInputEl, this.el.querySelector('[data-set-placeholder]'));
+        this._makeListItemsSortable();
+    },
+    /**
+     * @private
+     * @param {HTMLElement} selectMenu
+     */
+    _loadListDropdown: function (selectMenu) {
+        selectMenu = selectMenu || this.el.querySelector('we-list we-select-menu');
+        if (selectMenu) {
+            selectMenu.innerHTML = '';
+            const targetName = this._getFieldName();
+            const field = this.fields[targetName];
+            const optionIds = Array.from(this.listTable.querySelectorAll('input')).map(opt => parseInt(opt.name));
+            this._getFieldRecords(field).then(() => {
+                const buttonItems = field.records.filter(el => !optionIds.includes(el.id)).map(el => {
+                    const option = options.buildElement('we-button', el.display_name, {
+                        dataAttributes: {
+                            addOption: el.id,
+                            noPreview: 'true',
+                        },
+                        classes: ['o_we_list_add_existing'],
+                    });
+                    return option;
+                });
+                const childNodes = buttonItems.length ? buttonItems : [options.buildTitleElement('No more records')];
+                childNodes.forEach(button => selectMenu.appendChild(button));
+            });
+        }
+    },
+    /**
+     *@private
+     */
+    _makeListItemsSortable: function () {
+        $(this.listTable).sortable({
+            axis: 'y',
+            handle: '.drag_handle',
+            items: 'tr',
+            cursor: 'move',
+            opacity: 0.6,
+            stop: (event, ui) => {
+                this._renderListItems();
+            },
+        });
+    },
+    /**
+     * @private
+     * @param {string} id
+     * @param {string} text
+     */
+    _addItemToTable: function (id, text, notEditable) {
+        const draggableEl = options.buildElement('we-button', null, {
+            classes: ['drag_handle', 'fas', 'fa-arrows-alt'],
+            dataAttributes: {
+                noPreview: 'true',
+            },
+        });
+        const inputEl = document.createElement('input');
+        inputEl.type = 'text';
+        inputEl.value = text || '';
+        inputEl.name = id || '';
+        inputEl.disabled = !!notEditable;
+        const trEl = document.createElement('tr');
+        const buttonEl = options.buildElement('we-button', null, {
+            classes: ['o_we_select_remove_option', 'fa', 'fa-fw', 'fa-minus'],
+            dataAttributes: {
+                removeOption: id,
+                noPreview: 'true',
+            },
+        });
+        const draggableTdEl = document.createElement('td');
+        const inputTdEl = document.createElement('td');
+        const buttonTdEl = document.createElement('td');
+        draggableTdEl.appendChild(draggableEl);
+        trEl.appendChild(draggableTdEl);
+        inputTdEl.appendChild(inputEl);
+        trEl.appendChild(inputTdEl);
+        buttonTdEl.appendChild(buttonEl);
+        trEl.appendChild(buttonTdEl);
+        this.listTable.appendChild(trEl);
+        if (!notEditable) {
+            inputEl.focus();
+        }
+        this._renderListItems();
+    },
+    /**
+     * @private
+     */
+    _renderListItems: function () {
+        const checkboxWrap = this.$target[0].querySelector('.o_website_form_flex');
+        const selectWrap = this.$target[0].querySelector('#editable_select');
+        if (checkboxWrap) {
+            checkboxWrap.innerHTML = '';
+            const fieldName = this._getFieldName();
+            const fieldRequired = this.$target[0].classList.contains('o_website_form_required');
+            this.listTable.querySelectorAll('input').forEach(el => {
+                const params = {
+                    record: {
+                        id: el.name || el.value,
+                        display_name: el.value,
+                    },
+                    field: {
+                        name: fieldName,
+                    }
+                };
+                if (fieldRequired) {
+                    params.field.required = fieldRequired;
+                }
+                const $checkbox = $(qweb.render("website_form.checkbox", params));
+                checkboxWrap.appendChild($checkbox[0]);
+            });
+        } else if (selectWrap) {
+            selectWrap.innerHTML = '';
+            this.listTable.querySelectorAll('input').forEach(el => {
+                const $option = $('<div id="' + (el.name || el.value) + '" class="o_website_form_select_item">' + el.value + '</div>');
+                selectWrap.appendChild($option[0]);
+            });
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onRemoveItemClick: function (ev) {
+        ev.target.closest('tr').remove();
+        this._loadListDropdown();
+        this._renderListItems();
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onAddCustomItemClick: function (ev) {
+        this._addItemToTable();
+        this._makeListItemsSortable();
+        this._renderListItems();
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onAddExistingItemClick: function (ev) {
+        const value = ev.currentTarget.dataset.addOption;
+        this._addItemToTable(value, ev.currentTarget.querySelector('we-title').textContent, true);
+        this._makeListItemsSortable();
+        this._loadListDropdown();
+        this._renderListItems();
+    },
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onAddItemSelectClick: function (ev) {
+        ev.currentTarget.querySelector('we-toggler').classList.toggle('active');
+    },
+    /**
+     * @private
+     */
+    _onListItemInput: function () {
+        this._renderListItems();
+    },
+});
+
+options.registry.addField = fieldEditor.extend({
+    /**
+     * @override
+     */
+    isTopOption: function () {
+        return true;
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     *
+     */
+    addField: function (previewMode, value, params) {
+        const field = this._getCustomField('char', 'Custom Text');
+        field.formatInfo = {
+            labelWidth: this.$target[0].querySelector('.o_we_form_label').style.width,
+            labelPosition: 'left',
+        };
+        this._renderField(field).then(htmlField => {
+            this.$target.after(htmlField);
+            this.trigger_up('activate_snippet', {
+                $snippet: $(htmlField),
+            });
+        });
+    },
+});
+
+// Superclass for options that need to disable a button from the snippet overlay
+var disable_overlay_button_option = options.Class.extend({
+    xmlDependencies: ['/website_form/static/src/xml/website_form_editor.xml'],
+
+    // Disable a button of the snippet overlay
+    disable_button: function (button_name, message) {
+        // TODO refactor in master
+        var className = 'oe_snippet_' + button_name;
+        this.$overlay.add(this.$overlay.data('$optionsSection')).on('click', '.' + className, this.prevent_button);
+        var $button = this.$overlay.add(this.$overlay.data('$optionsSection')).find('.' + className);
+        $button.attr('title', message).tooltip({delay: 0});
+        $button.removeClass(className); // Disable the functionnality
+    },
+
+    prevent_button: function (event) {
+        // Snippet options bind their functions before the editor, so we
+        // can't cleanly unbind the editor onRemove function from here
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
+});
+
+// Disable duplicate button for model fields
+options.registry['website_form_editor_field_model'] = disable_overlay_button_option.extend({
+    start: function () {
+        this.disable_button('clone', 'You can\'t duplicate a model field.');
+        return this._super.apply(this, arguments);
+    }
+});
+
+// Disable delete button for model required fields
+options.registry['website_form_editor_field_required'] = disable_overlay_button_option.extend({
+    start: function () {
+        this.disable_button('remove', 'You can\'t remove a field that is required by the model itself.');
+        return this._super.apply(this, arguments);
+    }
+});
 });
