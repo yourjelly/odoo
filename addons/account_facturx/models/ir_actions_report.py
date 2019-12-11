@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
-
-from PyPDF2 import PdfFileWriter, PdfFileReader
+from odoo.tools.pdf import OdooPdfFileReader, OdooPdfFileWriter
 
 import io
 
@@ -19,8 +18,8 @@ class IrActionsReport(models.Model):
 
                 # Add attachment.
                 reader_buffer = io.BytesIO(pdf_content)
-                reader = PdfFileReader(reader_buffer)
-                writer = PdfFileWriter()
+                reader = OdooPdfFileReader(reader_buffer)
+                writer = OdooPdfFileWriter()
                 writer.cloneReaderDocumentRoot(reader)
                 writer.addAttachment('factur-x.xml', xml_content)
                 buffer = io.BytesIO()
