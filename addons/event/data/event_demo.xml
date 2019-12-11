@@ -30,6 +30,14 @@
         <field name="name">Sport</field>
     </record>
 
+    <!-- Location -->
+    <record id="res_partner_aula_magna" model="res.partner">
+        <field name="name">Aula Magna</field>
+    </record>
+    <record id="res_partner_palais_des_congres" model="res.partner">
+        <field name="name">Palais des congrès</field>
+    </record>
+
     <!-- Event -->
     <record id="event_0" model="event.event">
         <field name="name">Design Fair Los Angeles</field>
@@ -38,7 +46,7 @@
         <field eval="(DateTime.now() + timedelta(days=5)).strftime('%Y-%m-%d 18:00:00')" name="date_end"/>
         <field name="seats_availability">limited</field>
         <field name="seats_max">500</field>
-        <field name="address_id" ref="base.res_partner_1"/>
+        <field name="address_id" ref="res_partner_aula_magna"/>
         <field name="event_type_id" ref="event_type_1"/>
         <field name="stage_id" ref="event_stage_booked"/>
     </record>
@@ -49,7 +57,7 @@
         <field eval="(DateTime.today()+ timedelta(days=100)).strftime('%Y-%m-%d 20:15:00')" name="date_begin"/>
         <field eval="(DateTime.today()+ timedelta(days=101)).strftime('%Y-%m-%d 00:30:00')" name="date_end"/>
         <field name="event_type_id" ref="event_type_1"/>
-        <field name="address_id" ref="base.res_partner_1"/>
+        <field name="address_id" ref="res_partner_aula_magna"/>
         <field name="seats_availability">unlimited</field>
         <field name="stage_id" ref="event_stage_booked"/>
     </record>
@@ -60,7 +68,7 @@
         <field eval="(DateTime.today()+ timedelta(days=5)).strftime('%Y-%m-%d 07:00:00')" name="date_begin"/>
         <field eval="(DateTime.today()+ timedelta(days=5)).strftime('%Y-%m-%d 16:30:00')" name="date_end"/>
         <field name="event_type_id" ref="event_type_2"/>
-        <field name="address_id" ref="base.res_partner_4"/>
+        <field name="address_id" ref="res_partner_palais_des_congres"/>
         <field name="seats_availability">limited</field>
         <field name="seats_max">200</field>
         <field name="stage_id" ref="event_stage_booked"/>
@@ -72,7 +80,7 @@
         <field eval="(DateTime.today()+ timedelta(days=130)).strftime('%Y-%m-%d 20:15:00')" name="date_begin"/>
         <field eval="(DateTime.today()+ timedelta(days=133)).strftime('%Y-%m-%d 00:30:00')" name="date_end"/>
         <field name="event_type_id" ref="event_type_3"/>
-        <field name="address_id" ref="base.res_partner_3"/>
+        <field name="address_id" ref="res_partner_palais_des_congres"/>
         <field name="seats_availability">unlimited</field>
         <field name="stage_id" ref="event_stage_announced"/>
     </record>
@@ -83,7 +91,7 @@
         <field eval="(DateTime.today()+ timedelta(days=50)).strftime('%Y-%m-%d 18:00:00')" name="date_begin"/>
         <field eval="(DateTime.today()+ timedelta(days=50)).strftime('%Y-%m-%d 22:30:00')" name="date_end"/>
         <field name="event_type_id" ref="event_type_4"/>
-        <field name="address_id" ref="base.res_partner_4"/>
+        <field name="address_id" ref="res_partner_palais_des_congres"/>
         <field name="stage_id" ref="event_stage_announced"/>
     </record>
 
@@ -93,7 +101,7 @@
         <field eval="(DateTime.today()+ timedelta(days=370)).strftime('%Y-%m-%d 09:00:00')" name="date_begin"/>
         <field eval="(DateTime.today()+ timedelta(days=371)).strftime('%Y-%m-%d 17:00:00')" name="date_end"/>
         <field name="event_type_id" ref="event_type_5"/>
-        <field name="address_id" ref="base.res_partner_1"/>
+        <field name="address_id" ref="res_partner_aula_magna"/>
     </record>
 
     <record id="event.event_6" model="event.event">
@@ -102,7 +110,7 @@
         <field eval="(DateTime.today()+ timedelta(days=30)).strftime('%Y-%m-%d 09:30:00')" name="date_begin"/>
         <field eval="(DateTime.today()+ timedelta(days=30)).strftime('%Y-%m-%d 17:30:00')" name="date_end"/>
         <field name="event_type_id" ref="event_type_1"/>
-        <field name="address_id" ref="base.res_partner_1"/>
+        <field name="address_id" ref="res_partner_aula_magna"/>
     </record>
 
     <!-- Attendee -->
