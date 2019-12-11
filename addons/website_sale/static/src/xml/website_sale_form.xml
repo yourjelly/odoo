@@ -2,38 +2,30 @@
 <templates>
 
     <t t-name="website_sale.default_customer_form">
-        <div class="form-group col-12 form-field  o_website_form_required">
-            <div class="row s_col_no_resize s_col_no_bgcolor">
-                <label style="width: 200px" class="col-auto col-form-label o_we_form_label" for="name">Name</label>
-                <div class="col">
-                    <input type="text" class="form-control o_website_form_input" name="name" required=""/>
-                </div>
-            </div>
-        </div>
-        <div class="form-group col-12 form-field o_website_form_required_custom">
-            <div class="row s_col_no_resize s_col_no_bgcolor">
-                <label style="width: 200px" class="col-auto col-form-label o_we_form_label" for="email">Email</label>
-                <div class="col">
-                    <input type="text" class="form-control o_website_form_input" name="email" required="" />
-                </div>
-            </div>
-        </div>
-        <div class="form-group col-12 form-field">
-            <div class="row s_col_no_resize s_col_no_bgcolor">
-                <label style="width: 200px" class="col-auto col-form-label o_we_form_label" for="phone">Phone</label>
-                <div class="col">
-                    <input type="text" class="form-control o_website_form_input" name="phone" />
-                </div>
-            </div>
-        </div>
-        <div class="form-group col-12 form-field">
-            <div class="row s_col_no_resize s_col_no_bgcolor">
-                <label style="width: 200px" class="col-auto col-form-label o_we_form_label" for="company_name">Company Name</label>
-                <div class="col">
-                    <input type="text" class="form-control o_website_form_input" name="company_name" />
-                </div>
-            </div>
-        </div>
+        <t t-set="field" t-value="{}"/>
+        <t t-set="field.formatInfo" t-value="{}"/>
+        <t t-set="field.formatInfo.labelPosition" t-value="'left'"/>
+        <t t-set="field.formatInfo.labelWidth" t-value="'200px'"/>
+
+        <t t-set="field.modelRequired" t-value="true"/>
+        <t t-set="field.name" t-value="'name'"/>
+        <t t-set="field.string" t-value="'Name'"/>
+        <t t-call="website_form.field_char"/>
+
+        <t t-set="field.modelRequired" t-value="false"/>
+        <t t-set="field.required" t-value="true"/>
+        <t t-set="field.name" t-value="'email_from'"/>
+        <t t-set="field.string" t-value="'Email'"/>
+        <t t-call="website_form.field_char"/>
+
+        <t t-set="field.required" t-value="false"/>
+        <t t-set="field.name" t-value="'phone'"/>
+        <t t-set="field.string" t-value="'Phone'"/>
+        <t t-call="website_form.field_char"/>
+
+        <t t-set="field.name" t-value="'company_name'"/>
+        <t t-set="field.string" t-value="'Company Name'"/>
+        <t t-call="website_form.field_char"/>
     </t>
 
 </templates>

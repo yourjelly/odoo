@@ -32,7 +32,7 @@
 
     <!-- Generic Field Layout -->
     <t t-name="website_form.field">
-        <div t-att-class="'form-group col-12 form-field ' + (field.custom ? ' o_website_form_custom' : '') + (field.required ? ' o_website_form_required_custom' : '') + (field.hidden ? ' o_website_form_field_hidden' : '')"
+        <div t-att-class="'form-group col-12 form-field ' + (field.custom ? ' o_website_form_custom' : '') + (field.required ? ' o_website_form_required_custom' : field.modelRequired ? ' o_website_form_required' : '') + (field.hidden ? ' o_website_form_field_hidden' : '')"
             t-att-data-type="field.custom and field.type">
             <div t-if="field.formatInfo.labelPosition == 'left' || field.formatInfo.labelPosition == 'right'" class="row s_col_no_resize s_col_no_bgcolor">
                 <label t-attf-class="col-form-label col-auto o_we_form_label #{field.formatInfo.labelPosition == 'right' ? 'text-right' : ''}" t-att-style="'width: ' + field.formatInfo.labelWidth" t-att-for="field.name">
@@ -58,7 +58,7 @@
                 type="text"
                 class="form-control o_website_form_input"
                 t-att-name="field.name"
-                t-att-required="field.required"
+                t-att-required="field.required || field.modelRequired"
                 t-att-value="field.value"
             />
         </t>
@@ -70,7 +70,7 @@
             <textarea
                 class="form-control o_website_form_input"
                 t-att-name="field.name"
-                t-att-required="field.required"
+                t-att-required="field.required || field.modelRequired"
             />
         </t>
     </t>
@@ -82,7 +82,7 @@
                 type="email"
                 class="form-control o_website_form_input"
                 t-att-name="field.name"
-                t-att-required="field.required"
+                t-att-required="field.required || field.modelRequired"
             />
         </t>
     </t>
@@ -104,7 +104,7 @@
                 class="form-control o_website_form_input"
                 t-att-name="field.name"
                 step="1"
-                t-att-required="field.required"
+                t-att-required="field.required || field.modelRequired"
             />
         </t>
     </t>
@@ -117,7 +117,7 @@
                 class="form-control o_website_form_input"
                 t-att-name="field.name"
                 step="any"
-                t-att-required="field.required"
+                t-att-required="field.required || field.modelRequired"
             />
         </t>
     </t>
@@ -132,7 +132,7 @@
                         class="form-control datetimepicker-input o_website_form_input"
                         t-attf-data-target="##{datepickerID}"
                         t-att-name="field.name"
-                        t-att-required="field.required"
+                        t-att-required="field.required || field.modelRequired"
                 />
                 <div class="input-group-append" t-attf-data-target="##{datepickerID}" data-toggle="datetimepicker">
                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -151,7 +151,7 @@
                         class="form-control datetimepicker-input o_website_form_input"
                         t-attf-data-target="##{datetimepickerID}"
                         t-att-name="field.name"
-                        t-att-required="field.required"
+                        t-att-required="field.required || field.modelRequired"
                 />
                 <div class="input-group-append" t-attf-data-target="##{datetimepickerID}" data-toggle="datetimepicker">
                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
@@ -169,7 +169,7 @@
                     value="Yes"
                     class="o_website_form_input"
                     t-att-name="field.name"
-                    t-att-required="field.required"
+                    t-att-required="field.required || field.modelRequired"
                 />
             </div>
         </t>
@@ -187,7 +187,7 @@
                                 class="o_website_form_input"
                                 t-att-name="field.name"
                                 t-att-value="option[0]"
-                                t-att-required="field.required"
+                                t-att-required="field.required || field.modelRequired"
                             />
                             <span>
                                 <t t-esc="option[1]"/>
@@ -208,7 +208,7 @@
         <!-- Generic one2many -->
         <t t-if="field.relation != 'ir.attachment'">
             <t t-call="website_form.field">
-                <select class="form-control o_website_form_input" t-att-name="field.name" t-att-required="field.required">
+                <select class="form-control o_website_form_input" t-att-name="field.name" t-att-required="field.required || field.modelRequired">
                     <t t-foreach="field.records" t-as="record">
                         <option t-att-value="record.id" t-att-selected="record.selected">
                             <t t-esc="record.display_name"/>
@@ -236,7 +236,7 @@
                             class="o_website_form_input"
                             t-att-name="field.name"
                             t-att-value="record.id"
-                            t-att-required="field.required"
+                            t-att-required="field.required || field.modelRequired"
                             placeholder="No matching record !"
                         />
                     </t>
@@ -257,7 +257,7 @@
                     class="o_website_form_input"
                     t-att-name="field.name"
                     t-att-value="record.id"
-                    t-att-required="field.required"
+                    t-att-required="field.required || field.modelRequired"
                 />
                 <span>
                     <t t-esc="record.display_name"/>
@@ -278,7 +278,7 @@
                 type="file"
                 class="form-control o_website_form_input"
                 t-att-name="field.name"
-                t-att-required="field.required"
+                t-att-required="field.required || field.modelRequired"
                 t-att-multiple="multiple"
             />
         </t>
