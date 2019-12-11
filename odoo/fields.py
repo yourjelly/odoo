@@ -635,6 +635,7 @@ class Field(MetaField('DummyField', (object,), {})):
     # Cache key for context-dependent fields
     #
 
+    @lru_cache(maxsize=1000)
     def cache_key(self, env):
         """ Return the cache key corresponding to ``self.depends_context``. """
 
