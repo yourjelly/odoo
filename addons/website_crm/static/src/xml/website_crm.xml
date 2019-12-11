@@ -2,54 +2,58 @@
 <templates>
 
     <t t-name="website_crm.default_crm_form">
-        <div class="form-group row form-field o_website_form_required_custom">
-            <div class="col-lg-3 col-md-4">
-                <label class="col-form-label" for="contact_name">Your Name</label>
-            </div>
-            <div class="col-lg-7 col-md-8">
-                <input type="text" class="form-control o_website_form_input" name="contact_name" required=""/>
-            </div>
-        </div>
-        <div class="form-group row form-field">
-            <div class="col-lg-3 col-md-4">
-                <label class="col-form-label" for="phone">Phone Number</label>
-            </div>
-            <div class="col-lg-7 col-md-8">
-                <input type="text" class="form-control o_website_form_input" name="phone" />
-            </div>
-        </div>
-        <div class="form-group row form-field o_website_form_required_custom">
-            <div class="col-lg-3 col-md-4">
-                <label class="col-form-label" for="email_from">Email</label>
-            </div>
-            <div class="col-lg-7 col-md-8">
-                <input type="text" class="form-control o_website_form_input" name="email_from" required="" />
-            </div>
-        </div>
-        <div class="form-group row form-field o_website_form_required_custom">
-            <div class="col-lg-3 col-md-4">
-                <label class="col-form-label" for="partner_name">Your Company</label>
-            </div>
-            <div class="col-lg-7 col-md-8">
-                <input type="text" class="form-control o_website_form_input" name="partner_name" required="" />
-            </div>
-        </div>
-        <div class="form-group row form-field o_website_form_required">
-            <div class="col-lg-3 col-md-4">
-                <label class="col-form-label" for="name">Subject</label>
-            </div>
-            <div class="col-lg-7 col-md-8">
-                <input type="text" class="form-control o_website_form_input" name="name" required="" />
-            </div>
-        </div>
-        <div class="form-group row form-field o_website_form_required_custom">
-            <div class="col-lg-3 col-md-4">
-                <label class="col-form-label" for="description">Your Question</label>
-            </div>
-            <div class="col-lg-7 col-md-8">
-                <textarea class="form-control o_website_form_input" name="description" required=""></textarea>
-            </div>
-        </div>
+        <t t-set="field" t-value="{}"/>
+        <t t-set="field.formatInfo" t-value="{}"/>
+        <t t-set="field.formatInfo.labelPosition" t-value="'left'"/>
+        <t t-set="field.formatInfo.labelWidth" t-value="'200px'"/>
+
+        <t t-call="website_form.field_char">
+            <t t-set="field.custom" t-value="false"/>
+            <t t-set="field.required" t-value="true"/>
+            <t t-set="field.modelRequired" t-value="false"/>
+            <t t-set="field.name" t-value="'contact_name'"/>
+            <t t-set="field.string" t-value="'Your Name'"/>
+        </t>
+
+        <t t-call="website_form.field_char">
+            <t t-set="field.custom" t-value="false"/>
+            <t t-set="field.required" t-value="false"/>
+            <t t-set="field.modelRequired" t-value="false"/>
+            <t t-set="field.name" t-value="'phone'"/>
+            <t t-set="field.string" t-value="'Phone Number'"/>
+        </t>
+
+        <t t-call="website_form.field_email">
+            <t t-set="field.custom" t-value="false"/>
+            <t t-set="field.required" t-value="true"/>
+            <t t-set="field.modelRequired" t-value="false"/>
+            <t t-set="field.name" t-value="'email_from'"/>
+            <t t-set="field.string" t-value="'Email'"/>
+        </t>
+
+        <t t-call="website_form.field_char">
+            <t t-set="field.custom" t-value="false"/>
+            <t t-set="field.required" t-value="true"/>
+            <t t-set="field.modelRequired" t-value="false"/>
+            <t t-set="field.name" t-value="'partner_name'"/>
+            <t t-set="field.string" t-value="'Your Company'"/>
+        </t>
+
+        <t t-call="website_form.field_char">
+            <t t-set="field.custom" t-value="false"/>
+            <t t-set="field.required" t-value="false"/>
+            <t t-set="field.modelRequired" t-value="true"/>
+            <t t-set="field.name" t-value="'name'"/>
+            <t t-set="field.string" t-value="'Subject'"/>
+        </t>
+
+        <t t-call="website_form.field_text">
+            <t t-set="field.custom" t-value="false"/>
+            <t t-set="field.required" t-value="true"/>
+            <t t-set="field.modelRequired" t-value="false"/>
+            <t t-set="field.name" t-value="'description'"/>
+            <t t-set="field.string" t-value="'Your Question'"/>
+        </t>
     </t>
 
 </templates>
