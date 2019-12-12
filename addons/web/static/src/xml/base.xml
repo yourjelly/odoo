@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 
+<div t-name="web.WebClient" class="o_web_client" owl="1" t-on-do-action.stop="_onDoAction">
+    <Menu menus="menus" currentMenuID="currentMenuID" t-on-open-menu="_onOpenMenu"/>
+    <ActionManager actionRequest="state.actionRequest"/>
+</div>
+<div t-name="web.ActionManager" class="o_action_manager" owl="1"
+    t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"
+    t-on-switch-view.stop="_onSwitchView">
+    <Action t-if="currentAction.controller" t-key="currentAction.controller.jsID"
+            Component="currentAction.controller.Component"
+            action="currentAction"
+            options="currentAction.controller.options"/>
+</div>
+
+
+
+
+
 <div t-name="EmptyComponent"/>
 
 <div t-name="Loading" class="o_loading"/>
@@ -1432,27 +1449,6 @@
             <strong><a class="oe_field_translate" t-att-name="field" href="#"><t t-esc="field_value.string"/><t t-if="field_index &lt; _.size(fields)-1">, </t></a></strong>
         </t>
     </div>
-</t>
-
-<t t-name="UserMenu">
-    <li class="o_user_menu">
-        <a role="button" class="dropdown-toggle" data-toggle="dropdown" data-display="static" aria-expanded="false" href="#">
-            <img class="rounded-circle oe_topbar_avatar" t-att-src="_s + '/web/static/src/img/user_menu_avatar.png'" alt="Avatar"/>
-            <span class="oe_topbar_name"/>
-        </a>
-        <div class="dropdown-menu dropdown-menu-right" role="menu">
-            <t t-call="UserMenu.Actions"/>
-        </div>
-    </li>
-</t>
-
-<t t-name="UserMenu.Actions">
-    <a role="menuitem" href="#" data-menu="documentation" class="dropdown-item">Documentation</a>
-    <a role="menuitem" href="#" data-menu="support" class="dropdown-item">Support</a>
-    <div role="separator" class="dropdown-divider"/>
-    <a role="menuitem" href="#" data-menu="settings" class="dropdown-item">Preferences</a>
-    <a role="menuitem" href="#" data-menu="account" class="dropdown-item">My Odoo.com account</a>
-    <a role="menuitem" href="#" data-menu="logout" class="dropdown-item">Log out</a>
 </t>
 
 <t t-name="SwitchCompanyMenu">
