@@ -663,9 +663,9 @@ class Field(MetaField('DummyField', (object,), {})):
         vals, missing_id = records.env.cache.get_values_list(records, self)
         if missing_id:
             # prefetch all / most missing ids
-            remaining = records[:len(vals)]
-            missing = records._browse(records.env, missing_id, remaining._ids)
-            self.__get__(missing)
+            remaining = records[len(vals):] or records
+            missing = records._browse(records.env, (missing_id,), tuple(remaining._ids)[:PREFETCH_MAX])
+            self.__get__(missing, type(missing))
             return vals + self.mapped(remaining)
         return vals
 
@@ -3537,4 +3537,4 @@ def prefetch_x2many_ids(record, field):
 
 # imported here to avoid dependency cycle issues
 from .exceptions import AccessError, MissingError, UserError
-from .models import check_pg_name, BaseModel, NewId, IdType
+from .models import check_pg_name, BaseModel, NewId, IdType, PREFETCH_MAX
