@@ -1,6 +1,7 @@
 odoo.define('point_of_sale.Chrome', function(require) {
     'use strict';
 
+    const { configureGui } = require('point_of_sale.Gui');
     const { useState, useRef } = owl.hooks;
     const { debounce } = owl.utils;
     const { loadCSS } = require('web.ajax');
@@ -60,6 +61,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
         // OVERLOADED METHODS //
 
         mounted() {
+            configureGui({component: this});
             // remove default webclient handlers that induce click delay
             $(document).off();
             $(window).off();
@@ -117,7 +119,10 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 const posModelDefaultAttributes = {
                     rpc: this.rpc.bind(this),
                     session: this.env.session,
-                    do_action: this.props.webClient.do_action.bind(this.props.webClient),
+                    do_action: (...args) => {
+                        // LPE FIXME
+                        return this.env.actionManager.doAction(...args);
+                    },
                     setLoadingMessage: this.setLoadingMessage.bind(this),
                     showLoadingSkip: this.showLoadingSkip.bind(this),
                     setLoadingProgress: this.setLoadingProgress.bind(this),

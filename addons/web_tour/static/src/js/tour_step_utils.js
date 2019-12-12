@@ -71,6 +71,13 @@ return core.Class.extend({
 
     goToAppSteps(dataMenuXmlid, description) {
         return [
+            {
+                 // LPE FIXME: this sounds a little harsh
+                 // But since in owl all the elements actually stay themselves
+                 // We'd better wait that the previous operation is finished
+                 trigger: 'body.o_web_client:not(.oe_wait)',
+                 run: () => {},
+            },
             this.showAppsMenuItem(),
             {
                 trigger: `.o_app[data-menu-xmlid="${dataMenuXmlid}"]`,

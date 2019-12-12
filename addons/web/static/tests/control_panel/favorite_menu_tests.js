@@ -133,7 +133,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
                                 'The right format for the string "sort" should be sent to the server'
                             );
                         }
-                    }
+                    },
                 },
             };
 
@@ -180,7 +180,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
                             );
                             return 1; // serverSideId
                         }
-                    }
+                    },
                 },
             };
             const controlPanel = await createControlPanel(params);
@@ -223,7 +223,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
                             );
                             return 1; // serverSideId
                         }
-                    }
+                    },
                 },
             };
             const controlPanel = await createControlPanel(params);
@@ -269,7 +269,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
                         delete_filter: function () {
                             return Promise.resolve();
                         }
-                    }
+                    },
                 },
             };
             const controlPanel = await createControlPanel(params);
@@ -471,8 +471,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
                                 "sort": "[]",
                                 "user_id": 4,
                             });
-                            return 2; // serverSideId
-                        }
+                        },
                     }
                 },
             };
@@ -544,7 +543,7 @@ odoo.define('web.favorite_menu_tests', function (require) {
                             assert.strictEqual(filter.name, "Awesome Test Customer Filter",
                                 "filter name should be correct");
                         },
-                    }
+                    },
                 },
             });
 

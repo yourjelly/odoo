@@ -44,7 +44,7 @@ const DialogService = AbstractService.extend({
     _listenHomeMenu() {
         bus.on('hide_home_menu', this, this._onHideHomeMenu.bind(this));
         bus.on('show_home_menu', this, this._onShowHomeMenu.bind(this));
-        bus.on('web_client_ready', this, this._onWebClientReady.bind(this));
+        bus.on('web-client-mounted', this, this._onWebClientReady.bind(this));
     },
     /**
      * @private

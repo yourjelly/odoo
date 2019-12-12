@@ -3,7 +3,7 @@ odoo.define('web.web_client', function (require) {
 
     const env = require('web.env');
     const session = require("web.session");
-    const WebClient = require('web.WebClient');
+    const WebClient = require('web.WebClientClass');
 
     owl.config.mode = env.isDebug() ? "dev" : "prod";
     owl.Component.env = env;
@@ -18,8 +18,7 @@ odoo.define('web.web_client', function (require) {
         env.qweb.addTemplates(session.owlTemplates);
 
         await owl.utils.whenReady();
-        webClient.setElement($(document.body));
-        webClient.start();
+        webClient.mount(document.body, { position: 'self' });
     }
 
     startWebClient();

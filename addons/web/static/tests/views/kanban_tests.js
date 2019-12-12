@@ -3646,6 +3646,41 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
+    QUnit.test('quick create should not push state', async function (assert) {
+        assert.expect(6);
+
+        const kanban = await createView({
+            View: KanbanView,
+            model: 'partner',
+            data: this.data,
+            arch: '<kanban>' +
+                        '<field name="product_id"/>' +
+                        '<templates><t t-name="kanban-box">' +
+                            '<div><field name="foo"/></div>' +
+                        '</t></templates>' +
+                    '</kanban>',
+            groupBy: ['product_id'],
+            intercepts: {
+                push_state: function (ev) {
+                    assert.deepEqual(
+                        ev.data.state,
+                        {
+                            model: 'partner',
+                            view_type: 'kanban',
+                        }
+                    );
+                    assert.step(ev.name);
+                },
+            },
+        });
+        assert.verifySteps(['push_state']);
+        await testUtils.dom.click(kanban.el.querySelector('.o_kanban_quick_add'));
+        // Only 1 push_state should be triggered. It comes from the view itself.
+        assert.verifySteps(['push_state']);
+
+        kanban.destroy();
+    });
+
     QUnit.test('if view was not grouped at start, it can be grouped and ungrouped', async function (assert) {
         assert.expect(3);
 

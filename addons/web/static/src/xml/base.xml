@@ -459,7 +459,7 @@
 </t>
 
 <t t-name="web.OwlDialog" owl="1">
-    <Portal target="'body'">
+    <Portal target="props.target">
         <div class="o_dialog" t-on-focus="_onFocus" t-on-click="_onClick">
             <div t-if="props.backdrop" class="modal-backdrop show" t-on-click="_onBackdropClick"/>
             <div role="dialog" class="modal"
@@ -470,7 +470,7 @@
                 >
                 <div class="modal-dialog" t-att-class="size">
                     <div class="modal-content" t-att-class="props.contentClass">
-                        <header t-if="props.renderHeader" class="modal-header">
+                        <header t-if="props.renderHeader" class="modal-header" t-ref="modal-header" >
                             <h4 class="modal-title">
                                 <t t-esc="props.title"/>
                                 <span t-if="props.subtitle" class="o_subtitle text-muted small" t-esc="props.subtitle"/>
@@ -639,6 +639,23 @@
         tabindex="-1"
         t-on-click="trigger('switch-view', { view_type: view.type })"
     />
+</t>
+
+<t t-name="web.OwlHiddenInputFile" owl="1">
+    <div class="o_hidden_input_file" t-att-style="props.fileUploadStyle" aria-atomic="true">
+        <form class="o_form_binary_form" t-att-target="targetID"
+              method="post" enctype="multipart/form-data" t-att-action="props.fileUploadAction || '/web/binary/upload'"
+              t-ref="formRef">
+            <input type="hidden" name="csrf_token" t-att-value="csrfToken"/>
+            <input type="file" class="o_input_file" name="ufile"
+                   t-att="{'multiple': props.multiUpload ? 'multiple' : null, 'accept': props.acceptedFileExtensions || '*'}"
+                   t-ref="fileInputRef"
+                   t-on-change.stop="_onChangedFile"
+                />
+            <t t-slot="default"/>
+        </form>
+        <iframe t-att-id="targetID" t-att-name="targetID" style="display: none" t-on-load.stop="_onFileLoaded"/>
+    </div>
 </t>
 
 <!-- Legacy Templates -->

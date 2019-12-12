@@ -38,6 +38,10 @@ var AbstractService = Class.extend(Mixins.EventDispatcherMixin, ServicesMixin, {
             payload.callback(result);
         } else if (ev.name === 'do_action') {
             this.env.bus.trigger('do-action', payload);
+        } else if (ev.name === 'get_session') {
+            if (payload.callback) {
+                ev.data.callback(this.env.session);
+            }
         }
     },
 });

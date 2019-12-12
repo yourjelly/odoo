@@ -17,7 +17,7 @@ const AbstractStorageService = require('web.AbstractStorageService');
 const NotificationService = require('web.NotificationService');
 const RamStorage = require('web.RamStorage');
 const {
-    createActionManager,
+    createWebClient,
     createView,
     makeTestPromise,
     mock: {
@@ -578,7 +578,7 @@ function afterEach(self) {
  * @param {Object} [param0.env={}]
  * @param {function} [param0.mockRPC]
  * @param {boolean} [param0.hasActionManager=false] if set, use
- *   createActionManager.
+ *   createWebClient.
  * @param {boolean} [param0.hasChatWindow=false] if set, mount chat window
  *   service.
  * @param {boolean} [param0.hasDiscuss=false] if set, mount discuss app.
@@ -703,7 +703,7 @@ async function start(param0 = {}) {
             }
         });
     } else if (hasActionManager) {
-        widget = await createActionManager(kwargs);
+        widget = await createWebClient(kwargs);
         legacyPatch(widget, {
             destroy() {
                 this._super(...arguments);

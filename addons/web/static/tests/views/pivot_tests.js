@@ -9,9 +9,11 @@ var testUtilsDom = require('web.test_utils_dom');
 
 var _t = core._t;
 const cpHelpers = testUtils.controlPanel;
-var createActionManager = testUtils.createActionManager;
+var createWebClient = testUtils.createWebClient;
 var createView = testUtils.createView;
 var patchDate = testUtils.mock.patchDate;
+
+const actionManager = testUtils.actionManager;
 
 /**
  * Helper function that returns, given a pivot instance, the values of the
@@ -2338,7 +2340,7 @@ QUnit.module('Views', {
         // create an action manager to test the interactions with the search view
         var readGroupCount = 0;
 
-        var actionManager = await createActionManager({
+        var webClient = await createWebClient({
             data: this.data,
             archs: {
                 'partner,false,pivot': '<pivot>' +
@@ -2347,12 +2349,6 @@ QUnit.module('Views', {
                 'partner,false,search': '<search><filter name="bayou" string="Bayou" domain="[(\'foo\',\'=\', 12)]"/></search>',
                 'partner,false,list': '<tree><field name="foo"/></tree>',
                 'partner,false,form': '<form><field name="foo"/></form>',
-            },
-            intercepts: {
-                do_action: function (event) {
-                    var action = event.data.action;
-                    actionManager.doAction(action);
-                }
             },
             mockRPC: function (route, args) {
                 if (args.method === 'read_group') {
@@ -2383,23 +2379,23 @@ QUnit.module('Views', {
         });
 
 
-        await cpHelpers.toggleFilterMenu(actionManager);
-        await cpHelpers.toggleMenuItem(actionManager, 0);
+        await cpHelpers.toggleFilterMenu(webClient);
+        await cpHelpers.toggleMenuItem(webClient, 0);
         await testUtils.nextTick();
 
-        await testUtilsDom.click(actionManager.$('.o_pivot_cell_value:nth(1)'));
+        await testUtilsDom.click(webClient.$('.o_pivot_cell_value:nth(1)'));
         await testUtils.nextTick();
 
-        assert.containsOnce(actionManager, '.o_list_view');
+        assert.containsOnce(webClient, '.o_list_view');
 
-        await testUtilsDom.click(actionManager.$('.o_control_panel ol.breadcrumb li.breadcrumb-item').eq(0));
+        await testUtilsDom.click(webClient.$('.o_control_panel ol.breadcrumb li.breadcrumb-item').eq(0));
 
         assert.verifySteps([
             'read_group', 'read_group',
             'read_group', 'read_group',
             'search_read',
             'read_group', 'read_group']);
-        actionManager.destroy();
+        webClient.destroy();
     });
 
     QUnit.test('Cell values are kept when flippin a pivot view in comparison mode', async function (assert) {

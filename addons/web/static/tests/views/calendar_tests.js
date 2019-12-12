@@ -1,18 +1,14 @@
 odoo.define('web.calendar_tests', function (require) {
 "use strict";
 
-var AbstractStorageService = require('web.AbstractStorageService');
 var CalendarView = require('web.CalendarView');
 var CalendarRenderer = require('web.CalendarRenderer');
 var Dialog = require('web.Dialog');
 var ViewDialogs = require('web.view_dialogs');
 var fieldUtils = require('web.field_utils');
 var mixins = require('web.mixins');
-var RamStorage = require('web.RamStorage');
 var testUtils = require('web.test_utils');
 var session = require('web.session');
-
-var createActionManager = testUtils.createActionManager;
 
 CalendarRenderer.include({
     getAvatars: function () {
@@ -282,46 +278,33 @@ QUnit.module('Views', {
     QUnit.test('breadcrumbs are updated with the displayed period', async function (assert) {
         assert.expect(3);
 
-        var archs = {
-            'event,1,calendar': '<calendar date_start="start" date_stop="stop" all_day="allday"/>',
-            'event,false,search': '<search></search>',
-        };
-
-        var actions = [{
-            id: 1,
-            flags: {
+        const calendar = await createCalendarView({
+            View: CalendarView,
+            model: 'event',
+            data: this.data,
+            arch: '<calendar date_start="start" date_stop="stop" all_day="allday"/>',
+            viewOptions: {
+                action: { name: 'Meetings Test' },
                 initialDate: initialDate,
             },
-            name: 'Meetings Test',
-            res_model: 'event',
-            type: 'ir.actions.act_window',
-            views: [[1, 'calendar']],
-        }];
-
-        var actionManager = await createActionManager({
-            actions: actions,
-            archs: archs,
-            data: this.data,
         });
-
-        await actionManager.doAction(1);
-        await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
 
         // displays month mode by default
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(),
+        assert.strictEqual(calendar.$('.o_control_panel .breadcrumb-item').text(),
             'Meetings Test (Dec 11 – 17, 2016)', "should display the current week");
 
         // switch to day mode
-        await testUtils.dom.click($('.o_control_panel .o_calendar_button_day'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(),
+        await testUtils.dom.click(calendar.$('.o_control_panel .o_calendar_button_day'));
+        assert.strictEqual(calendar.$('.o_control_panel .breadcrumb-item').text(),
             'Meetings Test (December 12, 2016)', "should display the current day");
 
         // switch to month mode
-        await testUtils.dom.click($('.o_control_panel .o_calendar_button_month'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(),
+        await testUtils.dom.click(calendar.$('.o_control_panel .o_calendar_button_month'));
+        assert.strictEqual(calendar.$('.o_control_panel .breadcrumb-item').text(),
             'Meetings Test (December 2016)', "should display the current month");
 
-        actionManager.destroy();
+        calendar.destroy();
     });
 
     QUnit.test('create and change events', async function (assert) {
@@ -2561,17 +2544,17 @@ QUnit.module('Views', {
             View: CalendarView,
             model: 'event',
             data: this.data,
-            arch:
-            '<calendar class="o_calendar_test" '+
-                'event_open_popup="true" '+
-                'date_start="start_date" '+
-                'all_day="allday" '+
-                'mode="week" '+
-                'attendee="partner_ids" '+
-                'color="partner_id">'+
-                    '<filter name="user_id" avatar_field="image"/>'+
-                    '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-            '</calendar>',
+            arch: `
+                <calendar class="o_calendar_test"
+                    event_open_popup="true"
+                    date_start="start_date"
+                    all_day="allday"
+                    mode="week"
+                    attendee="partner_ids"
+                    color="partner_id">
+                        <filter name="user_id" avatar_field="image"/>
+                        <field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>
+                </calendar>`,
             archs: archs,
             viewOptions: {
                 initialDate: initialDate,
@@ -2640,32 +2623,16 @@ QUnit.module('Views', {
     QUnit.test('calendar is configured to have no groupBy menu', async function (assert) {
         assert.expect(1);
 
-        var archs = {
-            'event,1,calendar': '<calendar class="o_calendar_test" '+
-                'date_start="start" '+
-                'date_stop="stop" '+
-                'all_day="allday"/>',
-            'event,false,search': '<search></search>',
-        };
-
-        var actions = [{
-            id: 1,
-            name: 'some action',
-            res_model: 'event',
-            type: 'ir.actions.act_window',
-            views: [[1, 'calendar']]
-        }];
-
-        var actionManager = await createActionManager({
-            actions: actions,
-            archs: archs,
+        const calendar = await createCalendarView({
+            View: CalendarView,
+            model: 'event',
             data: this.data,
+            arch: '<calendar date_start="start_date"/>',
         });
 
-        await actionManager.doAction(1);
-        assert.containsNone(actionManager.$('.o_control_panel .o_search_options span.fa.fa-bars'),
+        assert.containsNone(calendar, '.o_control_panel .o_search_options span.fa.fa-bars',
             "the control panel has no groupBy menu");
-        actionManager.destroy();
+        calendar.destroy();
     });
 
     QUnit.test('timezone does not affect current day', async function (assert) {
@@ -2686,7 +2653,6 @@ QUnit.module('Views', {
                     return -2400; // 40 hours timezone
                 },
             },
-
         });
 
         var $sidebar = calendar.$('.o_calendar_sidebar');

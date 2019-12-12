@@ -48,7 +48,6 @@ const DiscussWidget = AbstractAction.extend({
 
         // control panel attributes
         this.action = action;
-        this.actionManager = parent;
         this.controlPanelModelConfig.modelName = 'mail.message';
         this.discuss = undefined;
         this.options = options;
@@ -156,10 +155,11 @@ const DiscussWidget = AbstractAction.extend({
      * @private
      */
     _pushStateActionManager() {
-        this.actionManager.do_push_state({
+        const state = {
             action: this.action.id,
             active_id: this.discuss.activeId,
-        });
+        };
+        this.trigger_up('push_state', { state });
     },
     /**
      * @private

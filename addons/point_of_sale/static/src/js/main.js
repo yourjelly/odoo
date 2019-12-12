@@ -1,11 +1,10 @@
-odoo.define('web.web_client', function (require) {
-    'use strict';
+odoo.define('point_of_sale.main', function (require) {
+    "use strict";
 
     const env = require('web.env');
-    const WebClient = require('web.AbstractWebClient');
     const Chrome = require('point_of_sale.Chrome');
     const Registries = require('point_of_sale.Registries');
-    const { configureGui } = require('point_of_sale.Gui');
+    const PosRoot = require('point_of_sale.owlPosRoot');
 
     owl.config.mode = env.isDebug() ? 'dev' : 'prod';
     owl.Component.env = env;
@@ -24,20 +23,17 @@ odoo.define('web.web_client', function (require) {
 
     setupResponsivePlugin(owl.Component.env);
 
-    async function startPosApp(webClient) {
+    const posRoot = new PosRoot(null);
+
+    async function startPosApp() {
         Registries.Component.freeze();
+        PosRoot.components = { Chrome: Registries.Component.get(Chrome) };
         await env.session.is_bound;
         env.qweb.addTemplates(env.session.owlTemplates);
         await owl.utils.whenReady();
-        await webClient.setElement(document.body);
-        await webClient.start();
-        const chrome = new (Registries.Component.get(Chrome))(null, { webClient });
-        await chrome.mount(document.querySelector('.o_action_manager'));
-        await chrome.start();
-        configureGui({ component: chrome });
+        await posRoot.mount(document.body);
     }
 
-    const webClient = new WebClient();
-    startPosApp(webClient);
-    return webClient;
+    startPosApp();
+    return posRoot;
 });

@@ -10,79 +10,104 @@ odoo.define('web.test_utils_create', function (require) {
      * testUtils file.
      */
 
-    const ActionManager = require('web.ActionManager');
     const ActionMenus = require('web.ActionMenus');
     const concurrency = require('web.concurrency');
-    const config = require('web.config');
     const ControlPanel = require('web.ControlPanel');
     const ControlPanelModel = require('web.ControlPanelModel');
     const customHooks = require('web.custom_hooks');
-    const DebugManager = require('web.DebugManager.Backend');
     const dom = require('web.dom');
-    const makeTestEnvironment = require('web.test_env');
     const Registry = require('web.Registry');
+    const SystrayMenu = require('web.SystrayMenu');
+    const testUtilsAsync = require('web.test_utils_async');
     const testUtilsMock = require('web.test_utils_mock');
     const Widget = require('web.Widget');
+    const WebClient = require('web.WebClient');
 
     const { Component } = owl;
     const { useRef, useState } = owl.hooks;
     const { xml } = owl.tags;
 
+
     /**
-     * Create and return an instance of ActionManager with all rpcs going through a
-     * mock method using the data, actions and archs objects as sources.
+     * Get the target (fixture or body) of the document and adds event listeners
+     * to intercept custom or DOM events.
      *
-     * @param {Object} [params={}]
+     * @param {boolean} [debug=false] if true, the widget will be appended in
+     *      the DOM. Also, RPCs and uncaught OdooEvent will be logged
+     * @returns {HTMLElement}
+     */
+    function prepareTarget(debug = false) {
+        document.body.classList.toggle('debug', debug);
+        return debug ? document.body : document.getElementById('qunit-fixture');
+    }
+
+    /**
+     * Create and return an instance of WebClient with a mocked environment. For
+     * instance, all rpcs are going through a mock method using the data, actions
+     * and archs objects as sources.
+     *
+     * @param {Object} [params]
      * @param {Object} [params.actions] the actions given to the mock server
      * @param {Object} [params.archs] this archs given to the mock server
      * @param {Object} [params.data] the business data given to the mock server
+     * @param {Object} [params.menus] TODO
+     * @param {Object} [params.SystrayItems] the systray items to instantiate
+     * @param {boolean} [params.debug]
      * @param {function} [params.mockRPC]
-     * @returns {Promise<ActionManager>}
+     * @returns {WebClient}
      */
-    async function createActionManager(params = {}) {
+    async function createWebClientFromClass(WCClass, params) {
+        params = params || {};
+
         const target = prepareTarget(params.debug);
+        params.services = Object.assign({}, params.services);
+        const cleanUp = await testUtilsMock.addMockEnvironmentOwl(Component, params);
 
-        const widget = new Widget();
-        // when 'document' addon is installed, the sidebar does a 'search_read' on
-        // model 'ir_attachment' each time a record is open, so we monkey-patch
-        // 'mockRPC' to mute those RPCs, so that the tests can be written uniformly,
-        // whether or not 'document' is installed
-        const mockRPC = params.mockRPC;
-        Object.assign(params, {
-            async mockRPC(route, args) {
-                if (args.model === 'ir.attachment') {
-                    return [];
-                }
-                if (mockRPC) {
-                    return mockRPC.apply(this, arguments);
-                }
-                return this._super(...arguments);
-            },
-        });
-        const mockServer = await testUtilsMock.addMockEnvironment(widget, Object.assign({ debounce: false }, params));
-        await widget.prependTo(target);
-        widget.el.classList.add('o_web_client');
-        if (config.device.isMobile) {
-            widget.el.classList.add('o_touch_device');
+        const SystrayItems = SystrayMenu.Items;
+        SystrayMenu.Items = params.SystrayItems || [];
+
+        let menus = params.menus;
+        if (!menus) {
+            menus = {
+                all_menu_ids: [0],
+                children: [],
+            };
         }
-
-        params.server = mockServer;
-
-        const userContext = params.context && params.context.user_context || {};
-        const actionManager = new ActionManager(widget, userContext);
-
-        const originalDestroy = ActionManager.prototype.destroy;
-        actionManager.destroy = function () {
-            actionManager.destroy = originalDestroy;
-            widget.destroy();
-        };
-        const fragment = document.createDocumentFragment();
-        await actionManager.appendTo(fragment);
-        dom.append(widget.el, fragment, {
-            callbacks: [{ widget: actionManager }],
-            in_DOM: true,
+        odoo.loadMenusPromise = new Promise(async resolve => {
+            await testUtilsAsync.nextTick();
+            resolve(menus);
         });
-        return actionManager;
+
+        const webClient = new WCClass();
+        const patchWC = {
+            _determineCompanyIds() {},
+            _getWindowHash() {
+                return '';
+            },
+            _setWindowHash() {},
+            _setWindowTitle() {},
+            $(selector) {
+                if (!selector) {
+                    return this.el;
+                }
+                return $(this.el).find(selector);
+            }
+        };
+        if (params.webClient) {
+            Object.assign(patchWC, params.webClient);
+        }
+        testUtilsMock.patch(webClient, patchWC);
+
+        const wcDestroy = webClient.destroy;
+        webClient.destroy = function () {
+            wcDestroy.call(webClient);
+            SystrayMenu.Items = SystrayItems;
+            testUtilsMock.unpatch(webClient);
+            cleanUp();
+        };
+
+        await webClient.mount(target);
+        return webClient;
     }
 
     /**
@@ -185,7 +210,6 @@ odoo.define('web.test_utils_create', function (require) {
     async function createControlPanel(params = {}) {
         const config = params.cpStoreConfig || {};
         const debug = params.debug || false;
-        const env = params.env || {};
         const props = Object.assign({
             action: {},
             fields: {},
@@ -213,7 +237,7 @@ odoo.define('web.test_utils_create', function (require) {
             }
         }
         Parent.components = { ControlPanel };
-        Parent.env = makeTestEnvironment(env);
+        const cleanUp = await testUtilsMock.addMockEnvironmentOwl(Parent, params);
         Parent.template = xml`
             <ControlPanel
                 t-ref="controlPanel"
@@ -228,6 +252,7 @@ odoo.define('web.test_utils_create', function (require) {
         const destroy = controlPanel.destroy;
         controlPanel.destroy = function () {
             controlPanel.destroy = destroy;
+            cleanUp();
             parent.destroy();
         };
         controlPanel.getQuery = () => parent._controlPanelModel.getQuery();
@@ -417,7 +442,6 @@ odoo.define('web.test_utils_create', function (require) {
         const viewController = await view.getController(widget);
         // override the view's 'destroy' so that it calls 'destroy' on the widget
         // instead, as the widget is the parent of the view and the mockServer.
-        viewController.__destroy = viewController.destroy;
         viewController.destroy = function () {
             // remove the override to properly destroy the viewController and its children
             // when it will be called the second time (by its parent)
@@ -448,28 +472,15 @@ odoo.define('web.test_utils_create', function (require) {
         return viewController;
     }
 
-    /**
-     * Get the target (fixture or body) of the document and adds event listeners
-     * to intercept custom or DOM events.
-     *
-     * @param {boolean} [debug=false] if true, the widget will be appended in
-     *      the DOM. Also, RPCs and uncaught OdooEvent will be logged
-     * @returns {HTMLElement}
-     */
-    function prepareTarget(debug = false) {
-        document.body.classList.toggle('debug', debug);
-        return debug ? document.body : document.getElementById('qunit-fixture');
-    }
-
     return {
-        createActionManager,
         createCalendarView,
         createComponent,
         createControlPanel,
-        createDebugManager,
         createModel,
         createParent,
         createView,
+        createWebClientFromClass,
+        createWebClient: createWebClientFromClass.bind(null, WebClient),
         prepareTarget,
     };
 });

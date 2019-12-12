@@ -34,6 +34,7 @@ odoo.define('web.OwlDialog', function () {
          * @param {string} [props.stopClicks=true] whether the dialog should stop
          *      the clicks propagation outside of itself.
          * @param {string} [props.subtitle='']
+         * @param {string} [props.target='body']
          * @param {string} [props.title='Odoo']
          * @param {boolean} [props.technical=true] If set to false, the modal will have
          *      the standard frontend style (use this for non-editor frontend features).
@@ -43,6 +44,7 @@ odoo.define('web.OwlDialog', function () {
 
             this.modalRef = useRef('modal');
             this.footerRef = useRef('modal-footer');
+            this.headerRef = useRef('modal-header');
 
             useExternalListener(window, 'keydown', this._onKeydown);
         }
@@ -249,6 +251,7 @@ odoo.define('web.OwlDialog', function () {
         size: 'large',
         stopClicks: true,
         technical: true,
+        target: "body",
         title: "Odoo",
     };
     Dialog.props = {
@@ -262,6 +265,7 @@ odoo.define('web.OwlDialog', function () {
         subtitle: { type: String, optional: 1 },
         technical: Boolean,
         title: String,
+        target: String,
     };
     Dialog.template = 'web.OwlDialog';
 

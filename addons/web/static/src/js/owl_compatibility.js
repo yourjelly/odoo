@@ -93,7 +93,7 @@ odoo.define('web.OwlCompatibility', function () {
                         propsStr += ` ${p}="props.${p}"`;
                     }
                 }
-                template = tags.xml`<t t-component="props.Component"${propsStr}/>`;
+                template = tags.xml`<t t-component="props.Component"${propsStr} t-ref="component"/>`;
             }
             ComponentAdapter.template = template;
             super(...arguments);
@@ -101,6 +101,7 @@ odoo.define('web.OwlCompatibility', function () {
             ComponentAdapter.template = null;
 
             this.widget = null; // widget instance, if Component is a legacy widget
+            this.componentRef = useRef('component'); // component ref, if Component is an Owl Component
         }
 
         /**
@@ -140,17 +141,37 @@ odoo.define('web.OwlCompatibility', function () {
                 if (this.__owl__.vnode) { // not at first rendering
                     this.renderWidget();
                 }
+                this._handleClassObj();
                 vnode.elm = this.widget.el;
             }
             return super.__patch(...arguments);
+        }
+        _handleClassObj() {
+            if (this.__owl__.classObj && !this._classObjHandeld) {
+                const _replaceElement = this.widget._replaceElement;
+                this.widget._replaceElement = ($el) => {
+                    const res = _replaceElement.apply(this.widget, $el);
+                    const classObj = this.__owl__.classObj;
+                    for (let cls in classObj) {
+                        if (classObj[cls]) {
+                            this.widget.el.classList.add(cls);
+                        }
+                    }
+                    return res;
+                };
+                this._classObjHandeld = true;
+            }
         }
 
         /**
          * @override
          */
         mounted() {
-            if (this.widget && this.widget.on_attach_callback) {
-                this.widget.on_attach_callback();
+            if (this.widget) {
+                if (this.widget.on_attach_callback) {
+                    this.widget.on_attach_callback();
+                }
+                this.env.bus.trigger('DOM_updated');
             }
         }
 
@@ -254,6 +275,18 @@ odoo.define('web.OwlCompatibility', function () {
                 return this.env.dataManager
                     .load_filters(payload)
                     .then(payload.on_success);
+            } else if (evType === 'create_filter') {
+                return this.env.dataManager
+                    .create_filter(payload.filter)
+                    .then(payload.on_success);
+            } else if (evType === 'do_action') {
+                return this.env.bus.trigger('do-action', payload);
+            } else if (evType === 'switch_view') {
+                return this.env.bus.trigger('switch-view', payload);
+            } else if (evType === 'history_back') {
+                return this.env.bus.trigger('history-back', payload);
+            } else if (evType === 'show_effect') {
+                return this.env.bus.trigger('show-effect', payload);
             } else {
                 payload.__targetWidget = ev.target;
                 this.trigger(evType.replace(/_/g, '-'), payload);

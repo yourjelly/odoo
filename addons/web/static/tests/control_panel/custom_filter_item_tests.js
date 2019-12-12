@@ -129,6 +129,11 @@ odoo.define('web.filter_menu_generator_tests', function (require) {
                     fields: this.fields,
                 },
                 env: { controlPanelModel },
+                session: {
+                    getTZOffset: function () {
+                        return -240;
+                    },
+                },
             });
 
             await cpHelpers.toggleAddCustomFilter(cfi);
@@ -214,6 +219,11 @@ odoo.define('web.filter_menu_generator_tests', function (require) {
                     },
                 },
                 env: { controlPanelModel },
+                session: {
+                    getTZOffset() {
+                        return -240;
+                    },
+                },
             });
 
             await cpHelpers.toggleAddCustomFilter(cfi);

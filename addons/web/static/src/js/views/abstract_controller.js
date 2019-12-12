@@ -193,6 +193,19 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         return state;
     },
     /**
+     * Adds the model and view type to the state to push in the url.
+     *
+     * @override
+     * @returns {Object}
+     */
+    getState: function () {
+        const state = ActionMixin.getState.call(this, ...arguments);
+        return Object.assign({}, state, {
+            model: this.modelName,
+            view_type: this.viewType,
+        });
+    },
+    /**
      * The use of this method is discouraged.  It is still snakecased, because
      * it currently is used in many templates, but we will move to a simpler
      * mechanism as soon as we can.
