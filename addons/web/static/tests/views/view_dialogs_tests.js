@@ -471,8 +471,8 @@ QUnit.module('Views', {
                         assert.deepEqual(filter.context, expectedContext,
                             "should save the correct context");
                     },
-                }
-            },
+                },
+            }
         });
 
         var dialog;

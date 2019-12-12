@@ -6,8 +6,8 @@ var core = require('web.core');
 var ServicesMixin = require('web.ServicesMixin');
 const session = require('web.session');
 
-var BusService =  CrossTab.extend(ServicesMixin, {
-    dependencies : ['local_storage'],
+var BusService = CrossTab.extend(ServicesMixin, {
+    dependencies: ['local_storage'],
 
     // properties
     _audio: null,
@@ -15,6 +15,7 @@ var BusService =  CrossTab.extend(ServicesMixin, {
     /**
      * As the BusService doesn't extend AbstractService, we have to replicate
      * here what is done in AbstractService
+
      *
      * @param {Object} env
      */
@@ -42,6 +43,8 @@ var BusService =  CrossTab.extend(ServicesMixin, {
             const service = this.env.services[payload.service];
             const result = service[payload.method].apply(service, args);
             payload.callback(result);
+        } else if (ev.name === 'get_session') {
+            ev.data.callback(this.env.session);
         }
     },
     /**

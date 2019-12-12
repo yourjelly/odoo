@@ -43,7 +43,6 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                 autoAccessKeys: true,
             }, options);
             this._areAccessKeyVisible = false;
-            this.BrowserDetection = new BrowserDetection();
         },
         /**
          * @override
@@ -186,9 +185,9 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
             // the ALT key (like the @ sign in most keyboards)
             // for them we do not facilitate the access keys, so they will need to be activated classically
             // though Control + Alt + key (case sensitive), see https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/accesskey
-            if (this.BrowserDetection.isOsMac())
+            if (BrowserDetection.isOsMac) {
                 return;
-
+            }
             if (keyDownEvent.altKey && !keyDownEvent.ctrlKey && keyDownEvent.key.length === 1) { // we don't want to catch the Alt key down, only the characters A to Z and number keys
                 var elementWithAccessKey = [];
                 if (keyDownEvent.keyCode >= 65 && keyDownEvent.keyCode <= 90 || keyDownEvent.keyCode >= 97 && keyDownEvent.keyCode <= 122) {
@@ -196,8 +195,8 @@ odoo.define('web.KeyboardNavigationMixin', function (require) {
                     elementWithAccessKey = document.querySelectorAll('[accesskey="' + String.fromCharCode(keyDownEvent.keyCode).toLowerCase() +
                         '"], [accesskey="' + String.fromCharCode(keyDownEvent.keyCode).toUpperCase() + '"]');
                     if (elementWithAccessKey.length) {
-                        if (this.BrowserDetection.isOsMac() ||
-                            !this.BrowserDetection.isBrowserChrome()) { // on windows and linux, chrome does not prevent the default of the accesskeys
+                        // on windows and linux, chrome does not prevent the default of the accesskeys
+                        if (BrowserDetection.isOsMac || !BrowserDetection.isBrowserChrome) {
                             elementWithAccessKey[0].focus();
                             elementWithAccessKey[0].click();
                             if (keyDownEvent.preventDefault) keyDownEvent.preventDefault(); else keyDownEvent.returnValue = false;

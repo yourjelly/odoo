@@ -16,10 +16,11 @@
         var AbstractController = odoo.__DEBUG__.services['web.AbstractController'];
         var DiscussWidget = odoo.__DEBUG__.services['mail/static/src/widgets/discuss/discuss.js'];
         var WebClient = odoo.__DEBUG__.services["web.WebClient"];
+        var utils = odoo.__DEBUG__.services["web.utils"];
 
-        WebClient.include({
-            current_action_updated : function (action, controller) {
-                this._super(action, controller);
+        utils.patch(WebClient, 'web.WebClientClickAll', {
+            _wcUpdated() {
+                this._super(...arguments);
                 clientActionCount++;
             },
         });

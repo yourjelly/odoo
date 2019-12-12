@@ -510,6 +510,9 @@ var dom = {
             }
 
             var $allItems = $el.children();
+            if (!$allItems.length) {
+                return;
+            }
             var $unfoldableItems = $allItems.filter(options.unfoldable);
             var $items = $allItems.not($unfoldableItems);
 

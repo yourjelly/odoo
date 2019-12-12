@@ -134,6 +134,11 @@ odoo.define('web.filter_menu_generator_tests', function (require) {
                     fields: this.fields,
                 },
                 env: { searchModel },
+                session: {
+                    getTZOffset: function () {
+                        return -240;
+                    },
+                },
             });
 
             await cpHelpers.toggleAddCustomFilter(cfi);
@@ -225,6 +230,11 @@ odoo.define('web.filter_menu_generator_tests', function (require) {
                     },
                 },
                 env: { searchModel },
+                session: { // LPE FIXME
+                    getTZOffset() {
+                        return -240;
+                    },
+                },
             });
 
             await cpHelpers.toggleAddCustomFilter(cfi);
@@ -262,7 +272,7 @@ odoo.define('web.filter_menu_generator_tests', function (require) {
                 props: {
                     fields: this.fields,
                 },
-                session: {
+                session: { // LPE FIXME
                     getTZOffset() {
                         return -240;
                     },

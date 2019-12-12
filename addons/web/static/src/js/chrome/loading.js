@@ -60,7 +60,7 @@ var Loading = Widget.extend({
                 this.$el.text(_t("Loading"));
             }
             this.$el.show();
-            this.getParent().$el.addClass('oe_wait');
+            document.body.classList.add('oe_wait');
         } else {
             this.count = 0;
             clearTimeout(this.long_running_timer);
@@ -70,7 +70,7 @@ var Loading = Widget.extend({
                 framework.unblockUI();
             }
             this.$el.fadeOut();
-            this.getParent().$el.removeClass('oe_wait');
+            document.body.classList.remove('oe_wait');
         }
     }
 });

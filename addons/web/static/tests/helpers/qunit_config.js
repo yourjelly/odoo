@@ -192,6 +192,7 @@ QUnit.on('OdooAfterTestHook', function () {
         for (const el of toRemove) {
             el.remove();
         }
+        $(document.body).removeClass('modal-open');
     }
 });
 
