@@ -3,16 +3,12 @@
 from odoo import api, models, fields, tools, _
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, float_repr
 from odoo.tests.common import Form
-from odoo.exceptions import UserError, except_orm
+from odoo.exceptions import UserError
 
 from datetime import datetime
-from lxml import etree
-from PyPDF2 import PdfFileReader
-
-import io
-import base64
 
 import logging
+
 _logger = logging.getLogger(__name__)
 
 
@@ -224,97 +220,21 @@ class AccountMove(models.Model):
 
         return invoice_form.save()
 
-    @api.returns('mail.message', lambda value: value.id)
-    def message_post(self, **kwargs):
-        # OVERRIDE
-        # /!\ 'default_res_id' in self._context is used to don't process attachment when using a form view.
-        res = super(AccountMove, self).message_post(**kwargs)
-
-        if not self.env.context.get('no_new_invoice') and len(self) == 1 and self.state == 'draft' and (
-            self.env.context.get('default_type', self.type) in self.env['account.move'].get_invoice_types(include_receipts=True)
-            or self.env['account.journal'].browse(self.env.context.get('default_journal_id')).type in ('sale', 'purchase')
-        ):
-            for attachment in self.env['ir.attachment'].browse(kwargs.get('attachment_ids', [])):
-                self._create_invoice_from_attachment(attachment)
-        return res
-
-    def _create_invoice_from_attachment(self, attachment):
-        if 'pdf' in attachment.mimetype:
-            for move in self:
-                move._create_invoice_from_pdf(attachment)
-        if 'xml' in attachment.mimetype:
-            for move in self:
-                move._create_invoice_from_xml(attachment)
-
-    def _create_invoice_from_pdf(self, attachment):
-        content = base64.b64decode(attachment.datas)
-
-        with io.BytesIO(content) as buffer:
-            try:
-                reader = PdfFileReader(buffer)
-
-                # Search for Factur-x embedded file.
-                if reader.trailer['/Root'].get('/Names') and reader.trailer['/Root']['/Names'].get('/EmbeddedFiles'):
-                    # N.B: embedded_files looks like:
-                    # ['file.xml', {'/Type': '/Filespec', '/F': 'file.xml', '/EF': {'/F': IndirectObject(22, 0)}}]
-                    embedded_files = reader.trailer['/Root']['/Names']['/EmbeddedFiles']['/Names']
-                    # '[::2]' because it's a list [fn_1, content_1, fn_2, content_2, ..., fn_n, content_2]
-                    for filename_obj, content_obj in list(zip(embedded_files, embedded_files[1:]))[::2]:
-                        content = content_obj.getObject()['/EF']['/F'].getData()
-
-                        if filename_obj == 'factur-x.xml':
-                            try:
-                                tree = etree.fromstring(content)
-                            except Exception:
-                                continue
-
-                            self._import_facturx_invoice(tree)
-                            self._remove_ocr_option()
-                            buffer.close()
-            except except_orm as e:
-                raise e
-            except Exception as e:
-                # Malformed pdf
-                _logger.exception(e)
+    def _detect_facturx(self, tree, file_name):
+        return {
+            'flag': tree.tag == '{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}CrossIndustryInvoice',
+            'error': None,
+        }
 
     @api.model
     def _get_xml_decoders(self):
-        ''' List of usable decoders to extract invoice from attachments.
+        # OVERRIDE
+        res = super()._get_xml_decoders()
+        res.append(('Factur-X', self._detect_facturx, self._import_facturx_invoice))
+        return res
 
-        :return: a list of triplet (xml_type, check_func, decode_func)
-            * xml_type: The format name, e.g 'UBL 2.1'
-            * check_func: A function taking an etree and a file name as parameter and returning a dict:
-                * flag: The etree is part of this format.
-                * error: Error message.
-            * decode_func: A function taking an etree as parameter and returning an invoice record.
-        '''
-        # TO BE OVERWRITTEN
-        return []
-
-    def _create_invoice_from_xml(self, attachment):
-        decoders = self._get_xml_decoders()
-
-        # Convert attachment -> etree
-        content = base64.b64decode(attachment.datas)
-        try:
-            tree = etree.fromstring(content)
-        except Exception:
-            raise UserError(_('The xml file is badly formatted : {}').format(attachment.name))
-
-        for xml_type, check_func, decode_func in decoders:
-            check_res = check_func(tree, attachment.name)
-
-            if check_res.get('flag') and not check_res.get('error'):
-                invoice_ids = decode_func(tree)
-                if invoice_ids:
-                    invoice_ids._remove_ocr_option()
-                    break
-
-        try:
-            return invoice_ids
-        except UnboundLocalError:
-            raise UserError(_('No decoder was found for the xml file: {}. The file is badly formatted, not supported or the decoder is not installed').format(attachment.name))
-
-    def _remove_ocr_option(self):
-        if 'extract_state' in self:
-            self.write({'extract_state': 'done'})
+    def _embed_edi_files_in_report(self):
+        # OVERRIDE
+        res = super()._embed_edi_files_in_report()
+        res.append(('factur-x.xml', self._export_as_facturx_xml()))
+        return res
