@@ -660,13 +660,29 @@ class Field(MetaField('DummyField', (object,), {})):
         return tuple(get(key) for key in self.depends_context)
 
     def mapped(self, records):
+        if self.name == 'id':
+            # not stored in cache...
+            return [self.__get__(rec, type(rec)) for rec in records]
+
+        if self.compute:
+            # a recompute must be forced for records to_recompute that intersect with input records
+            # otherwise an infinite loop will occur on the next call to flush() / recompute()
+            # as the value will be False in cache and will never trigger a MissingError which,
+            # in turn, triggers a recompute
+            to_compute_ids = records.env.all.tocompute.get(self, set())
+            if not to_compute_ids.isdisjoint(records._ids):
+                self.compute_value(records.browse(to_compute_ids.intersection(records._ids)))
+
+        # /!\ done iteratively on purpose, max recursion depth is easily reached otherwise
         vals, missing_id = records.env.cache.get_values_list(records, self)
-        if missing_id:
-            # prefetch all / most missing ids
-            remaining = records[len(vals):] or records
+        while missing_id:
+            remaining = records[len(vals):]
             missing = records._browse(records.env, (missing_id,), tuple(remaining._ids)[:PREFETCH_MAX])
+            # a call to __get__ is done to trigger the prefetch of all remaining records up to
+            # PREFETCH_MAX, we can then retrieve the values from the cache
             self.__get__(missing, type(missing))
-            return vals + self.mapped(remaining)
+            v, missing_id = records.env.cache.get_values_list(remaining, self)
+            vals += v
         return vals
 
     #

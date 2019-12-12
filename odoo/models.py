@@ -5172,10 +5172,18 @@ Record ids: %(records)s
         if isinstance(func, str):
             recs = self
             for name in func.split('.'):
-                recs = self._fields[name].mapped(recs)
+                recs = self._mapped_post(self._fields[name].mapped(recs), self._fields[name])
             return recs
         else:
             return self._mapped_func(func)
+
+    def _mapped_post(self, vals, field):
+        if self:
+            vals = [field.convert_to_record(val, self) for val in vals]
+            if isinstance(vals[0], BaseModel):
+                return vals[0].union(*vals)
+            return vals
+        return vals if isinstance(vals, BaseModel) else []
 
     def _mapped_cache(self, name_seq):
         """ Same as `~.mapped`, but ``name_seq`` is a dot-separated sequence of
