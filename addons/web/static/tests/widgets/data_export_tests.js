@@ -334,7 +334,7 @@ QUnit.module('widgets', {
     });
 
     QUnit.test('Direct export grouped list ', async function (assert) {
-        assert.expect(2)
+        assert.expect(2);
 
         let list = await createView({
             View: ListView,
@@ -365,7 +365,7 @@ QUnit.module('widgets', {
                             name: 'bar',
                             label: 'Bar',
                         }]
-                    }, "should be called with correct params")
+                    }, "should be called with correct params");
                     args.complete();
                 },
             },
