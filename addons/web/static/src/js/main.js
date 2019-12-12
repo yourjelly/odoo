@@ -18,7 +18,7 @@ odoo.define('web.web_client', function (require) {
         env.qweb.addTemplates(session.owlTemplates);
 
         await owl.utils.whenReady();
-        webClient.mount(document.body); // FIXME: extra div...
+        webClient.mount(document.body, { position: 'self' });
     }
 
     startWebClient();
