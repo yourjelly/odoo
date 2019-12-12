@@ -117,7 +117,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             curView = views[0];
         }
         // use mobile-friendly view by default in mobile, if possible
-        if (this.env.config.device.isMobile) {
+        if (this.env.device.isMobile) {
             if (!curView.isMobileFriendly) {
                 curView = this._findMobileView(views, curView.multiRecord) || curView;
             }
