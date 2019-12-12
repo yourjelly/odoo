@@ -40,11 +40,9 @@
     <t t-foreach="currentApp.children" t-as="secondLvlMenuID">
         <t t-set="secondLvlMenu" t-value="props.menus[secondLvlMenuID]"/>
         <t t-if="!secondLvlMenu.children.length">
-            <t t-set="inNavbar" t-value="true"/>
-            <t t-set="menu" t-value="secondLvlMenu"/>
             <t t-call="web.MenuLink">
-                <!-- <t t-set="inNavbar" t-value="true"/>
-                <t t-set="menu" t-value="secondLvlMenu"/> -->
+                <t t-set="inNavbar" t-value="true"/>
+                <t t-set="menu" t-value="secondLvlMenu"/>
             </t>
         </t>
         <t t-else="">
@@ -59,11 +57,9 @@
                 </a>
                 <div class="dropdown-menu" role="menu">
                     <t t-foreach="secondLvlMenu.children" t-as="thirdLvlMenuID">
-                        <t t-set="depth" t-value="1"/>
-                        <t t-set="menu" t-value="props.menus[thirdLvlMenuID]"/>
                         <t t-call="web.MenuLink">
-                            <!-- <t t-set="depth" t-value="1"/>
-                            <t t-set="menu" t-value="props.menus[thirdLvlMenuID]"/> -->
+                            <t t-set="depth" t-value="1"/>
+                            <t t-set="menu" t-value="props.menus[thirdLvlMenuID]"/>
                         </t>
                     </t>
                 </div>
@@ -99,12 +95,11 @@
         <div t-attf-class="dropdown-header o_menu_header_lvl_{{depth}}">
             <span><t t-esc="menu.name"/></span>
         </div>
-        <!-- <t t-foreach="menu.children" t-as="menuID">
-            <t t-set="menu" t-value="props.menus[menuID]"/>
+        <t t-foreach="menu.children" t-as="menuID">
             <t t-call="web.MenuLink">
                 <t t-set="menu" t-value="props.menus[menuID]"/>
             </t>
-        </t> -->
+        </t>
     </t>
 </t>
 
