@@ -203,15 +203,6 @@ options.registry.websiteFormEditor = fieldEditor.extend({
         }
     },
     /**
-     * Hide change form parameters option for forms
-     * e.g. User should not be enable to change existing job application form to opportunity form in 'Apply job' page.
-     *
-     * @override
-     */
-    onFocus: function () {
-        this.$el.filter('[data-website_form_model_modal]').toggleClass('d-none', this.$target.attr('hide-change-model') !== undefined);
-    },
-    /**
      * @override
      */
     updateUI: async function () {
@@ -313,6 +304,11 @@ options.registry.websiteFormEditor = fieldEditor.extend({
      *@override
     */
     _renderCustomXML: function (uiFragment) {
+        // Hide change form parameters option for forms
+        // e.g. User should not be enable to change existing job application form to opportunity form in 'Apply job' page.
+        if (this.$target.attr('hide-change-model') !== undefined) {
+            return;
+        }
         const firstOption = uiFragment.querySelector(':first-child');
         uiFragment.insertBefore(this.selectActionEl.cloneNode(true), firstOption);
 
@@ -369,11 +365,11 @@ options.registry.websiteFormEditor = fieldEditor.extend({
     _changeFormParameters: function () {
         var formKey = this.activeForm.website_form_key;
         this.$target[0].dataset.model_name = this.activeForm.model;
-        this.$target.find(".o_we_form_rows").remove();
+        this.$target.find(".o_we_form_rows .form-field").remove();
         var formInfo = FormEditorRegistry.get(formKey);
         this.$target[0].dataset.success_page = formInfo.successPage || '';
         ajax.loadXML(formInfo.defaultTemplatePath, qweb).then(() => {
-            this.$target.find('.form-group:has(".o_website_form_send")').before($('<div class="o_we_form_rows row s_col_no_bgcolor">' + qweb.render(formInfo.defaultTemplateName) + '</div>'));
+            this.$target.find('.form-group:has(".o_website_form_send")').before(qweb.render(formInfo.defaultTemplateName));
         });
     },
     /**

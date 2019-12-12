@@ -2,16 +2,16 @@
 <odoo>
         <template id="s_website_form" name="Form">
             <section class="s_website_form">
-                <form action="/website_form/" method="post" enctype="multipart/form-data" class="o_we_required_star">
-                    <div class="container">
-                        <div class="form-group row">
-                            <div class="offset-lg-3 offset-md-4 col-md-8 col-lg-9">
-                                <button class="btn btn-primary btn-lg o_website_form_send">Send</button>
+                <div class="container">
+                    <form action="/website_form/" method="post" enctype="multipart/form-data" class="o_we_required_star">
+                        <div class="o_we_form_rows row s_col_no_bgcolor">
+                            <div class="form-group offset-lg-3 offset-md-4 col-md-8 col-lg-9">
+                                <a href="#" role="button" class="btn btn-primary btn-lg o_website_form_send">Submit</a>
                                 <span id="o_website_form_result"></span>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </section>
         </template>
 
@@ -39,7 +39,7 @@
                     </we-select>
                     <we-input string="Label Width" class="o_we_inline"
                         data-select-style="" data-css-property="width"
-                        data-unit="px" data-apply-to=".o_we_form_label" data-no-preview="true"/>
+                        data-unit="px" data-apply-to=".o_we_form_label"/>
                     <we-row>
                         <we-select string="On Success" data-no-preview="true">
                             <we-button data-on-success="nothing">Nothing</we-button>
