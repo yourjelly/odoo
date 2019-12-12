@@ -436,7 +436,9 @@
                 @include media-breakpoint-down(sm) {
                     display: inline-block;
                     width: percentage(1/3);
-                    // avoid touch_device style
+                }
+                // avoid touch_device style
+                @include media-breakpoint-down(lg) {
                     padding: inherit!important;
                 }
             }
