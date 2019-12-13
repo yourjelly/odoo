@@ -4,26 +4,25 @@ odoo.define('web.WebClient', function (require) {
 const ActionManager = require('web.ActionManager');
 const Menu = require('web.Menu');
 
-const { Component, hooks, useState } = owl;
+const { Component, useState } = owl;
 
-// let nextID = 1;
+let nextID = 1;
 
 class WebClient extends Component {
     constructor() {
         super();
-        this.actionManager = hooks.useRef("actionManager");
         this.state = useState({
             currentMenuID: null,
-            // lastActionRequest: null, // may be cancelled by a switch view
+            lastActionRequest: null, // may be cancelled by a switch view
         });
     }
     async willStart() {
         this.menus = await this._loadMenus();
         this.state.currentMenuID = this.menus.root.children[0];
-        // this.state.lastActionRequest = {
-        //     id: nextID++,
-        //     action: this.menus[this.state.currentMenuID].actionID,
-        // };
+        this.state.lastActionRequest = {
+            id: nextID++,
+            action: this.menus[this.state.currentMenuID].actionID,
+        };
     }
 
     //--------------------------------------------------------------------------
@@ -102,14 +101,12 @@ class WebClient extends Component {
      * @param {function} [ev.payload.on_fail]
      */
     _onDoAction(ev) {
-        this.actionManager.comp._doAction(ev.detail.action, ev.detail.option)
-            .then(ev.detail.on_success || (() => {}));
-        // this.state.lastActionRequest = {
-        //     id: nextID++,
-        //     action: ev.detail.action,
-        //     options: ev.detail.options,
-        //     callback: ev.detail.on_success,
-        // };
+        this.state.lastActionRequest = {
+            id: nextID++,
+            action: ev.detail.action,
+            options: ev.detail.options,
+            callback: ev.detail.on_success,
+        };
         // TODO: honnor on_fail for legacy components ?
         // .guardedCatch(ev.detail.on_fail || (() => {}));
     }
@@ -117,20 +114,14 @@ class WebClient extends Component {
      * @private
      */
     _onOpenMenu(ev) {
-        const action = this.menus[ev.detail.menuID].actionID;
-        this.actionManager.comp._doAction(action, { clear_breadcrumbs: true })
-            .then(() => {
+        this.state.lastActionRequest = {
+            id: nextID++,
+            action: this.menus[ev.detail.menuID].actionID,
+            callback: () => {
                 this.state.currentMenuID = ev.detail.menuID;
-            });
-
-        // this.state.lastActionRequest = {
-        //     id: nextID++,
-        //     action: this.menus[ev.detail.menuID].actionID,
-        //     callback: () => {
-        //         this.state.currentMenuID = ev.detail.menuID;
-        //     },
-        //     options: { clear_breadcrumbs: true },
-        // };
+            },
+            options: { clear_breadcrumbs: true },
+        };
     }
 
 }

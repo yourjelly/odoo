@@ -3,16 +3,16 @@
 
 <body t-name="web.WebClient" class="o_web_client" owl="1" t-on-do-action.stop="_onDoAction">
     <Menu menus="menus" currentMenuID="state.currentMenuID" t-on-open-menu="_onOpenMenu"/>
-    <ActionManager t-ref="actionManager"/>
+    <ActionManager actionRequest="state.lastActionRequest"/>
 </body>
 <div t-name="web.ActionManager" class="o_action_manager" owl="1"
     t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"
     t-on-switch-view.stop="_onSwitchView">
-    <!-- <t t-set="action" t-value="actionRequest.action"/> -->
-    <Action t-if="actionRequest" t-key="actionRequest.action.controller.jsID"
-            Component="actionRequest.action.controller.Component"
-            action="actionRequest.action"
-            options="actionRequest.action.controller.options"/>
+    <t t-set="action" t-value="actionRequest.action"/>
+    <Action t-if="action.controller" t-key="action.controller.jsID"
+            Component="action.controller.Component"
+            action="action"
+            options="action.controller.options"/>
 </div>
 
 

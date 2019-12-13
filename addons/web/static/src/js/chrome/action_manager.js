@@ -37,17 +37,17 @@ class ActionManager extends Component {
         // used to generate unique JS ids
         this.nextID = 1;
     }
-    // willStart() {
-    //     this.actionRequest = this._generateActionRequest(this.props.actionRequest);
-    //     return this._doAction(this.actionRequest.action, this.actionRequest.options);
-    // }
-    // willUpdateProps(nextProps) {
-    //     this.actionRequest = this._generateActionRequest(nextProps.actionRequest);
-    //     return this._doAction(this.actionRequest.action, this.actionRequest.options);
-    // }
-    // shouldUpdate(nextProps) {
-    //     return this.props.actionRequest.id !== nextProps.actionRequest.id;
-    // }
+    willStart() {
+        this.actionRequest = this._generateActionRequest(this.props.actionRequest);
+        return this._doAction(this.actionRequest.action, this.actionRequest.options);
+    }
+    willUpdateProps(nextProps) {
+        this.actionRequest = this._generateActionRequest(nextProps.actionRequest);
+        return this._doAction(this.actionRequest.action, this.actionRequest.options);
+    }
+    shouldUpdate(nextProps) {
+        return this.props.actionRequest.id !== nextProps.actionRequest.id;
+    }
     patched() {
         this._postProcessAction();
     }
@@ -107,8 +107,6 @@ class ActionManager extends Component {
      *   before this one was complete).
      */
     async _doAction(action, options) {
-        this.actionRequest = this._generateActionRequest( { action, options });
-
         const defaultOptions = {
             additional_context: {},
             clear_breadcrumbs: false,
@@ -371,9 +369,6 @@ class ActionManager extends Component {
      * @private
      */
     _postProcessAction() {
-        if (!this.actionRequest) {
-            return;
-        }
         const action = this.actionRequest.action;
         const controller = action.controller;
         this.actions[action.jsID] = action;
