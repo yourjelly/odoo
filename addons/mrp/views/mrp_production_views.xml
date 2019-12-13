@@ -25,6 +25,9 @@
                     <field name="state" optional="show"/>
                     <field name="company_id" readonly="1" groups="base.group_multi_company" optional="show"/>
                     <field name="activity_exception_decoration" widget="activity_exception"/>
+                    <field name="will_be_late" invisible="1"/>
+                    <field name="previous_mrp_production_id" invisible="1"/>
+                    <widget name="mrp_popover_scheduling"/>
                 </tree>
             </field>
         </record>
@@ -164,6 +167,9 @@
                                     ('routing_id', '!=', False),
                                     ('state', 'in', ['draft', 'confirmed'])
                                 ]}"/>
+                                <field name="will_be_late" invisible="1"/>
+                                <field name="previous_mrp_production_id" invisible="1"/>
+                                <widget name="mrp_popover_scheduling"/>
                             </div>
                             <field name="user_id"/>
                             <field name="origin"/>
@@ -323,6 +329,8 @@
                     <separator/>
                     <filter string="Late" name="late" help="Production started late"
                         domain="['&amp;', ('date_deadline', '&lt;', current_date), ('state', '=', 'confirmed')]"/>
+                    <filter string="Will be late" name="will_be_late" help="Production will start late because of it's children production."
+                        domain="[('will_be_late', '=', True)]"/>
                     <separator/>
                     <filter invisible="1" string="Late Activities" name="activities_overdue"
                         domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"

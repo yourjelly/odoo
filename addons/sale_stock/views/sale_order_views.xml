@@ -25,6 +25,10 @@
                     <field name="incoterm" widget="selection" groups="sale_stock.group_display_incoterm"/>
                     <field name="picking_policy" required="True"/>
                 </xpath>
+                <xpath expr="//page[@name='other_information']//field[@name='expected_date']" position="after">
+                    <field name="will_be_late" invisible="1"/>
+                    <i class="ml-3 fa fa-info-circle text-warning" attrs="{'invisible': [('will_be_late', '=', False)]}" title="Will be late because of the stock picking"/>
+                </xpath>
                 <xpath expr="//group[@name='sale_shipping']" position="inside">
                     <field name="effective_date" attrs="{'invisible': [('effective_date', '=', False)]}"/>
                 </xpath>

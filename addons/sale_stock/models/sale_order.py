@@ -36,10 +36,11 @@ class SaleOrder(models.Model):
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
     procurement_group_id = fields.Many2one('procurement.group', 'Procurement Group', copy=False)
     effective_date = fields.Date("Effective Date", compute='_compute_effective_date', store=True, help="Completion date of the first delivery order.")
-    expected_date = fields.Datetime( help="Delivery date you can promise to the customer, computed from the minimum lead time of "
-                                          "the order lines in case of Service products. In case of shipping, the shipping policy of "
-                                          "the order will be taken into account to either use the minimum or maximum lead time of "
-                                          "the order lines.")
+    expected_date = fields.Datetime(help="Delivery date you can promise to the customer, computed from the minimum lead time of "
+                                         "the order lines in case of Service products. In case of shipping, the shipping policy of "
+                                         "the order will be taken into account to either use the minimum or maximum lead time of "
+                                         "the order lines.")
+    will_be_late = fields.Boolean(compute='_compute_will_be_late', string='Will be late')
 
     @api.depends('picking_ids.date_done')
     def _compute_effective_date(self):
@@ -60,6 +61,14 @@ class SaleOrder(models.Model):
             if dates_list:
                 expected_date = min(dates_list) if order.picking_policy == 'direct' else max(dates_list)
                 order.expected_date = fields.Datetime.to_string(expected_date)
+
+    @api.depends('picking_ids.will_be_late')
+    def _compute_will_be_late(self):
+        for sale_order in self:
+            if sale_order.picking_ids:
+                sale_order.will_be_late = any(sale_order.mapped('picking_ids.will_be_late'))
+            else:
+                sale_order.will_be_late = False
 
     def write(self, values):
         if values.get('order_line') and self.state == 'sale':

@@ -5,6 +5,7 @@
             <link rel="stylesheet" type="text/scss" href="/mrp/static/src/scss/mrp_workorder_kanban.scss" />
             <script type="text/javascript" src="/mrp/static/src/js/mrp.js"></script>
             <script type="text/javascript" src="/mrp/static/src/js/mrp_bom_report.js"></script>
+            <script type="text/javascript" src="/mrp/static/src/js/mrp_popover_scheduling.js"></script>
         </xpath>
    </template>
 
@@ -23,7 +24,7 @@
     </template>
 
     <template id="exception_on_mo">
-        <div class="alert alert-warning" role="alert"> 
+        <div class="alert alert-warning" role="alert">
             Exception(s) occurred on the manufacturing order(s):
             <a href="#" data-oe-model="mrp.production" t-att-data-oe-id="production_order.id"><t t-esc="production_order.name"/></a>.
             Manual actions may be needed.
