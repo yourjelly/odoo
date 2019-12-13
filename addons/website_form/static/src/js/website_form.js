@@ -76,6 +76,9 @@ odoo.define('website_form.animation', function (require) {
             this._super.apply(this, arguments);
             this.$target.find('button').off('click');
 
+            // Empty imputs
+            this.$target.find('input, textarea').val('');
+
             // Remove saving of the error colors
             this.$target.find('.o_has_error').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');
 
