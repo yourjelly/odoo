@@ -38,11 +38,11 @@ class ActionManager extends Component {
         this.nextID = 1;
     }
     willStart() {
-        this.renderRequest = this._generateRenderRequest(this.props.actionRequest);
+        this.actionRequest = this._generateActionRequest(this.props.actionRequest);
         return this._doAction(this.actionRequest.action, this.actionRequest.options);
     }
     willUpdateProps(nextProps) {
-        this.renderRequest = this._generateRenderRequest(nextProps.actionRequest);
+        this.actionRequest = this._generateActionRequest(nextProps.actionRequest);
         return this._doAction(this.actionRequest.action, this.actionRequest.options);
     }
     shouldUpdate(nextProps) {
@@ -64,15 +64,16 @@ class ActionManager extends Component {
     //--------------------------------------------------------------------------
 
     _resolveLast(promise) {
-        const requestID = this.renderRequest.id;
+        // return promise;
+        const requestID = this.actionRequest.id;
         return new Promise((resolve, reject) => {
             promise.then((result) => {
-                if (this.renderRequest.id === requestID) {
+                if (this.actionRequest.id === requestID) {
                     resolve(result);
                 }
             });
             promise.guardedCatch((result) => {
-                if (this.renderRequest.id === requestID) {
+                if (this.actionRequest.id === requestID) {
                     reject(result);
                 }
             });
@@ -157,6 +158,7 @@ class ActionManager extends Component {
         // }
 
         // return this.clearUncommittedChanges()
+        console.log('execute action');
         this.state.renderID++; // force a re-rendering
         // this.actionRequest.action = action;
         // this.currentAction = action;
@@ -278,8 +280,8 @@ class ActionManager extends Component {
      * @param {Object} request
      * @returns {Object}
      */
-    _generateRenderRequest(request) {
-        return Object.assign({}, request, { id: nextID++ });
+    _generateActionRequest(request) {
+        return Object.assign({}, request, { id: `request_${this.nextID++}` });
     }
     /**
      * Returns a description of the controllers in the given controller stack.
@@ -458,7 +460,7 @@ class ActionManager extends Component {
     _restoreController(controllerID) {
         const controller = this.controllers[controllerID];
         const action = this.actions[controller.actionID];
-        this.renderRequest = this._generateRenderRequest({ action });
+        this.actionRequest = this._generateActionRequest({ action });
         this._executeAction(action);
 
         // AAB: AbstractAction should define a proper hook to execute code when

@@ -337,7 +337,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
         // }
 
         this._createViewController(action, viewType, viewOptions, { index });
-        this.renderRequest = this._generateRenderRequest({ action });
+        this.actionRequest = this._generateActionRequest({ action });
         this._executeAction(action);
 
         // var newController = function (controllerID) {
@@ -419,6 +419,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
         if (detail.mode) {
             options.mode = detail.mode;
         }
+        console.log('switch view', viewType);
         this._switchController(action, viewType, options);
     },
 });
