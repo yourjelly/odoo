@@ -337,10 +337,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
         // }
 
         this._createViewController(action, viewType, viewOptions, { index });
-        this.actionRequest = {
-            id: this.nextID++,
-            action: action,
-        };
+        this.renderRequest = this._generateRenderRequest({ action });
         this._executeAction(action);
 
         // var newController = function (controllerID) {

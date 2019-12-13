@@ -38,11 +38,11 @@ class ActionManager extends Component {
         this.nextID = 1;
     }
     willStart() {
-        this.actionRequest = Object.assign({}, this.props.actionRequest, { id: this.nextID++ });
+        this.renderRequest = this._generateRenderRequest(this.props.actionRequest);
         return this._doAction(this.actionRequest.action, this.actionRequest.options);
     }
     willUpdateProps(nextProps) {
-        this.actionRequest = Object.assign({}, nextProps.actionRequest, { id: this.nextID++ });
+        this.renderRequest = this._generateRenderRequest(nextProps.actionRequest);
         return this._doAction(this.actionRequest.action, this.actionRequest.options);
     }
     shouldUpdate(nextProps) {
@@ -64,15 +64,15 @@ class ActionManager extends Component {
     //--------------------------------------------------------------------------
 
     _resolveLast(promise) {
-        const requestID = this.actionRequest.id;
+        const requestID = this.renderRequest.id;
         return new Promise((resolve, reject) => {
             promise.then((result) => {
-                if (this.actionRequest.id === requestID) {
+                if (this.renderRequest.id === requestID) {
                     resolve(result);
                 }
             });
             promise.guardedCatch((result) => {
-                if (this.actionRequest.id === requestID) {
+                if (this.renderRequest.id === requestID) {
                     reject(result);
                 }
             });
@@ -274,6 +274,14 @@ class ActionManager extends Component {
         return this._doAction(action, options);
     }
     /**
+     * @private
+     * @param {Object} request
+     * @returns {Object}
+     */
+    _generateRenderRequest(request) {
+        return Object.assign({}, request, { id: nextID++ });
+    }
+    /**
      * Returns a description of the controllers in the given controller stack.
      * It is used to render the breadcrumbs. It is an array of Objects with keys
      * 'title' (what to display in the breadcrumbs) and 'controllerID' (the ID
@@ -450,10 +458,7 @@ class ActionManager extends Component {
     _restoreController(controllerID) {
         const controller = this.controllers[controllerID];
         const action = this.actions[controller.actionID];
-        this.actionRequest = {
-            id: this.nextID++,
-            action: action,
-        };
+        this.renderRequest = this._generateRenderRequest({ action });
         this._executeAction(action);
 
         // AAB: AbstractAction should define a proper hook to execute code when

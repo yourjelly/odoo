@@ -26,14 +26,6 @@ class WebClient extends Component {
     }
 
     //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    // get currentActionID() {
-    //     return this.state.menus[this.state.currentMenuID].actionID;
-    // }
-
-    //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
@@ -113,16 +105,15 @@ class WebClient extends Component {
             id: nextID++,
             action: ev.detail.action,
             options: ev.detail.options,
+            callback: ev.detail.on_success,
         };
-        // TODO: honnor on_success and on_fail for legacy components
-        // .then(ev.detail.on_success || (() => {}))
+        // TODO: honnor on_fail for legacy components ?
         // .guardedCatch(ev.detail.on_fail || (() => {}));
     }
     /**
      * @private
      */
     _onOpenMenu(ev) {
-        console.log('open menu', ev.detail.menuID)
         this.state.lastActionRequest = {
             id: nextID++,
             action: this.menus[ev.detail.menuID].actionID,
