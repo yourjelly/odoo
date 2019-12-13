@@ -483,14 +483,28 @@ class StockMoveLine(models.Model):
             })
             self.write({'lot_id': lot.id})
 
-    def _reservation_is_updatable(self, quantity, reserved_quant):
-        self.ensure_one()
-        if (self.product_id.tracking != 'serial' and
-                self.location_id.id == reserved_quant.location_id.id and
-                self.lot_id.id == reserved_quant.lot_id.id and
-                self.package_id.id == reserved_quant.package_id.id and
-                self.owner_id.id == reserved_quant.owner_id.id):
-            return True
+    def _reservation_is_updatable(self, quantity, reserved_quant, move_lines_vals=None):
+        if move_lines_vals is None:
+            move_lines_vals = []
+        # Try first to find a candidate on `self`, if not found update `move_lines_vals` in place.
+        for move_line in self:
+            if (move_line.product_id.tracking != 'serial' and
+                    move_line.location_id.id == reserved_quant.location_id.id and
+                    move_line.lot_id.id == reserved_quant.lot_id.id and
+                    move_line.package_id.id == reserved_quant.package_id.id and
+                    move_line.owner_id.id == reserved_quant.owner_id.id):
+                move_line.with_context(bypass_reservation_update=True).product_uom_qty += self.product_id.uom_id._compute_quantity(quantity, move_line.product_uom_id, rounding_method='HALF-UP')
+                return True
+        for vals in move_lines_vals:
+            product = self.env['product.product'].browse(vals['product_id'])
+            uom = self.env['uom.uom'].browse(vals['product_uom_id'])
+            if (product.tracking != 'serial' and
+                    vals['location_id'] == reserved_quant.location_id.id and
+                    vals['lot_id'] == reserved_quant.lot_id.id and
+                    vals['package_id'] == reserved_quant.package_id.id and
+                    vals['owner_id'] == reserved_quant.owner_id.id):
+                vals['product_uom_qty'] += product.uom_id._compute_quantity(quantity, uom, rounding_method='HALF-UP')
+                return True
         return False
 
     def _log_message(self, record, move, template, vals):

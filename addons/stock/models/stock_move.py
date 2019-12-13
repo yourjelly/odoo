@@ -1040,6 +1040,8 @@ class StockMove(models.Model):
         """
         self.ensure_one()
 
+        move_lines_vals = []
+
         if not lot_id:
             lot_id = self.env['stock.production.lot']
         if not package_id:
@@ -1079,16 +1081,13 @@ class StockMove(models.Model):
 
         # Find a candidate move line to update or create a new one.
         for reserved_quant, quantity in quants:
-            to_update = self.move_line_ids.filtered(lambda ml: ml._reservation_is_updatable(quantity, reserved_quant))
-            if to_update:
-                to_update[0].with_context(bypass_reservation_update=True).product_uom_qty += self.product_id.uom_id._compute_quantity(quantity, to_update[0].product_uom_id, rounding_method='HALF-UP')
-            else:
+            if not self.move_line_ids._reservation_is_updatable(quantity, reserved_quant, move_lines_vals=move_lines_vals):
                 if self.product_id.tracking == 'serial':
                     for i in range(0, int(quantity)):
-                        self.env['stock.move.line'].create(self._prepare_move_line_vals(quantity=1, reserved_quant=reserved_quant))
+                        move_lines_vals.append(self._prepare_move_line_vals(quantity=1, reserved_quant=reserved_quant))
                 else:
-                    self.env['stock.move.line'].create(self._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
-        return taken_quantity
+                    move_lines_vals.append(self._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant))
+        return taken_quantity, move_lines_vals
 
     def _should_bypass_reservation(self):
         self.ensure_one()
@@ -1143,7 +1142,8 @@ class StockMove(models.Model):
                     available_quantity = self.env['stock.quant']._get_available_quantity(move.product_id, move.location_id, package_id=forced_package_id)
                     if available_quantity <= 0:
                         continue
-                    taken_quantity = move._update_reserved_quantity(need, available_quantity, move.location_id, package_id=forced_package_id, strict=False)
+                    taken_quantity, move_lines_vals = move._update_reserved_quantity(need, available_quantity, move.location_id, package_id=forced_package_id, strict=False)
+                    move_line_vals_list.extend(move_lines_vals)
                     if float_is_zero(taken_quantity, precision_rounding=rounding):
                         continue
                     if float_compare(need, taken_quantity, precision_rounding=rounding) == 0:
@@ -1201,6 +1201,9 @@ class StockMove(models.Model):
                             available_move_lines[(move_line.location_id, move_line.lot_id, move_line.result_package_id, move_line.owner_id)] -= move_line.product_qty
                     for (location_id, lot_id, package_id, owner_id), quantity in available_move_lines.items():
                         need = move.product_qty - sum(move.move_line_ids.mapped('product_qty'))
+                        not_yet_created_ml_vals_list = [vals for vals in move_line_vals_list if vals['move_id'] == move.id]
+                        for not_yet_created_ml_vals in not_yet_created_ml_vals_list:
+                            need -= self.env['uom.uom'].browse(not_yet_created_ml_vals['product_uom_id'])._compute_quantity(not_yet_created_ml_vals['product_uom_qty'], move.product_id.uom_id, rounding_method='HALF-UP')
                         # `quantity` is what is brought by chained done move lines. We double check
                         # here this quantity is available on the quants themselves. If not, this
                         # could be the result of an inventory adjustment that removed totally of
@@ -1211,7 +1214,8 @@ class StockMove(models.Model):
                             move.product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
                         if float_is_zero(available_quantity, precision_rounding=rounding):
                             continue
-                        taken_quantity = move._update_reserved_quantity(need, min(quantity, available_quantity), location_id, lot_id, package_id, owner_id)
+                        taken_quantity, move_lines_vals = move._update_reserved_quantity(need, min(quantity, available_quantity), location_id, lot_id, package_id, owner_id)
+                        move_line_vals_list.extend(move_lines_vals)
                         if float_is_zero(taken_quantity, precision_rounding=rounding):
                             continue
                         if float_is_zero(need - taken_quantity, precision_rounding=rounding):
