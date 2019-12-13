@@ -2,16 +2,17 @@
 <templates id="template" xml:space="preserve">
 
 <body t-name="web.WebClient" class="o_web_client" owl="1" t-on-do-action.stop="_onDoAction">
-    <Menu menus="menus" currentMenuID="currentMenuID" t-on-open-menu="_onOpenMenu"/>
-    <ActionManager actionRequest="state.actionRequest"/>
+    <Menu menus="menus" currentMenuID="state.currentMenuID" t-on-open-menu="_onOpenMenu"/>
+    <ActionManager actionRequest="state.lastActionRequest"/>
 </body>
 <div t-name="web.ActionManager" class="o_action_manager" owl="1"
     t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"
     t-on-switch-view.stop="_onSwitchView">
-    <Action t-if="currentAction.controller" t-key="currentAction.controller.jsID"
-            Component="currentAction.controller.Component"
-            action="currentAction"
-            options="currentAction.controller.options"/>
+    <t t-set="action" t-value="actionRequest.action"/>
+    <Action t-if="action.controller" t-key="action.controller.jsID"
+            Component="action.controller.Component"
+            action="action"
+            options="action.controller.options"/>
 </div>
 
 

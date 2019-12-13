@@ -85,7 +85,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
      */
     _executeAction(action) {
         this._super(...arguments);
-        this.state.currentControllerID = action.controller.jsID;
+        // this.state.currentControllerID = action.controller.jsID;
     },
     /**
      * Executes actions of type 'ir.actions.act_window'.
@@ -99,7 +99,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
      * @returns {Promise} resolved when the action is appended to the DOM
      */
     async _executeWindowAction(action, options) {
-        const fieldsViews = await this._loadViews(action);
+        const fieldsViews = await this._resolveLast(this._loadViews(action));
         const views = this._generateActionViews(action, fieldsViews);
         action._views = action.views; // save the initial attribute
         action.views = views;
@@ -247,7 +247,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             context: action.context,
             views_descr: views,
         };
-        return this.env.dataManager.load_views(params, options);
+        return this._resolveLast(this.env.dataManager.load_views(params, options));
     },
     /**
      * Overrides to handle the case where the controller to restore is from an
@@ -292,11 +292,11 @@ patch(ActionManager, 'ActionManagerActWindow', {
     _switchController(action, viewType, viewOptions) {
         var viewDescr = action.views.find(view => view.type === viewType);
         if (!viewDescr) {
-            // can't switch to an unknown view
-            return Promise.reject();
+            throw new Error(`View type ${viewType} is not available in current action`, action);
         }
 
-        const currentController = this.currentAction.controller;
+        const currentControllerID = this.controllerStack[this.controllerStack.length - 1];
+        const currentController = this.controllers[currentControllerID];
         let index;
 
         // TODO: handle the go back to breadcrumbs (to another action) case
@@ -337,6 +337,10 @@ patch(ActionManager, 'ActionManagerActWindow', {
         // }
 
         this._createViewController(action, viewType, viewOptions, { index });
+        this.actionRequest = {
+            id: this.nextID++,
+            action: action,
+        };
         this._executeAction(action);
 
         // var newController = function (controllerID) {
@@ -404,12 +408,14 @@ patch(ActionManager, 'ActionManagerActWindow', {
     _onSwitchView(ev) {
         const detail = ev.detail;
         const viewType = ev.detail.view_type;
-        var action = this.currentAction;
+        const currentControllerID = this.controllerStack[this.controllerStack.length - 1];
+        const currentController = this.controllers[currentControllerID];
+        const action = this.actions[currentController.actionID];
         // TODO: find a way to save/restore state
         // const currentController = action.controller;
         // var currentControllerState = currentController.widget.exportState();
         // action.controllerState = _.extend({}, action.controllerState, currentControllerState);
-        var options = {
+        const options = {
             // controllerState: action.controllerState,
             currentId: detail.res_id,
         };

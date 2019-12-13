@@ -6,18 +6,22 @@ const Menu = require('web.Menu');
 
 const { Component, useState } = owl;
 
+let nextID = 1;
+
 class WebClient extends Component {
     constructor() {
         super();
         this.state = useState({
-            actionRequest: null,
+            currentMenuID: null,
+            lastActionRequest: null, // may be cancelled by a switch view
         });
     }
     async willStart() {
         this.menus = await this._loadMenus();
-        this.currentMenuID = this.menus.root.children[0];
-        this.state.actionRequest = {
-            action: this.menus[this.currentMenuID].actionID,
+        this.state.currentMenuID = this.menus.root.children[0];
+        this.state.lastActionRequest = {
+            id: nextID++,
+            action: this.menus[this.state.currentMenuID].actionID,
         };
     }
 
@@ -34,6 +38,7 @@ class WebClient extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * FIXME: consider moving this to menu.js
      * Loads and sanitizes the menu data
      *
      * @private
@@ -104,7 +109,8 @@ class WebClient extends Component {
      * @param {function} [ev.payload.on_fail]
      */
     _onDoAction(ev) {
-        this.state.actionRequest = {
+        this.state.lastActionRequest = {
+            id: nextID++,
             action: ev.detail.action,
             options: ev.detail.options,
         };
@@ -117,9 +123,12 @@ class WebClient extends Component {
      */
     _onOpenMenu(ev) {
         console.log('open menu', ev.detail.menuID)
-        this.currentMenuID = ev.detail.menuID;
-        this.state.actionRequest = {
-            action: this.menus[this.currentMenuID].actionID,
+        this.state.lastActionRequest = {
+            id: nextID++,
+            action: this.menus[ev.detail.menuID].actionID,
+            callback: () => {
+                this.state.currentMenuID = ev.detail.menuID;
+            },
             options: { clear_breadcrumbs: true },
         };
     }

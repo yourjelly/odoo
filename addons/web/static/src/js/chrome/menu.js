@@ -14,6 +14,10 @@ class Menu extends Component {
         return this.props.menus[currentAppID];
     }
 
+    shouldUpdate(nextProps) {
+        return this.props.currentMenuID !== nextProps.currentMenuID;
+    }
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------

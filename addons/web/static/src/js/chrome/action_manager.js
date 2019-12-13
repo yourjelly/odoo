@@ -8,7 +8,6 @@ const Context = require('web.Context');
 const { redirect } = require('web.framework');
 var pyUtils = require('web.py_utils');
 const Widget = require('web.Widget');
-// const Widget = require('web.Widget');
 
 const { Component, useState } = owl;
 
@@ -30,19 +29,24 @@ class ActionManager extends Component {
         // displayed in the current window
         this.controllerStack = [];
 
-        this.currentAction = null;
+        // we use a renderID in the state to force re-renderings
         this.state = useState({
-            currentActionID: null,
+            renderID: 0,
         });
 
-        // used to generate action and controller js ids
+        // used to generate unique JS ids
         this.nextID = 1;
     }
     willStart() {
-        return this._doAction(this.props.actionRequest.action, this.props.actionRequest.options);
+        this.actionRequest = Object.assign({}, this.props.actionRequest, { id: this.nextID++ });
+        return this._doAction(this.actionRequest.action, this.actionRequest.options);
     }
     willUpdateProps(nextProps) {
-        return this._doAction(nextProps.actionRequest.action, nextProps.actionRequest.options);
+        this.actionRequest = Object.assign({}, nextProps.actionRequest, { id: this.nextID++ });
+        return this._doAction(this.actionRequest.action, this.actionRequest.options);
+    }
+    shouldUpdate(nextProps) {
+        return this.props.actionRequest.id !== nextProps.actionRequest.id;
     }
     patched() {
         this._postProcessAction();
@@ -58,6 +62,22 @@ class ActionManager extends Component {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
+
+    _resolveLast(promise) {
+        const requestID = this.actionRequest.id;
+        return new Promise((resolve, reject) => {
+            promise.then((result) => {
+                if (this.actionRequest.id === requestID) {
+                    resolve(result);
+                }
+            });
+            promise.guardedCatch((result) => {
+                if (this.actionRequest.id === requestID) {
+                    reject(result);
+                }
+            });
+        });
+    }
 
     /**
      * Executes Odoo actions, given as an ID in database, an xml ID, a client
@@ -102,19 +122,22 @@ class ActionManager extends Component {
             action = { type: 'ir.actions.client', tag: action };
         } else if (typeof action === 'string' || typeof action === 'number') {
             // action is an id or xml id
-            action = await this.env.dataManager.load_action(action, {
+            const loadActionProm = this.env.dataManager.load_action(action, {
                 active_id: options.additional_context.active_id,
                 active_ids: options.additional_context.active_ids,
                 active_model: options.additional_context.active_model,
             });
+            action = await this._resolveLast(loadActionProm);
+        } else {
+            // FIXME: must clone action here...
         }
 
         // action.target 'main' is equivalent to 'current' except that it
         // also clears the breadcrumbs
         options.clear_breadcrumbs = action.target === 'main' || options.clear_breadcrumbs;
 
-        action = this._preprocessAction(action, options);
-        return this._handleAction(action, options);
+        this.actionRequest.action = this._preprocessAction(action, options);
+        return this._handleAction(this.actionRequest.action, options);
     }
     /**
      * Executes actions for which a controller has to be appended to the DOM,
@@ -134,23 +157,11 @@ class ActionManager extends Component {
         // }
 
         // return this.clearUncommittedChanges()
-        this.currentAction = action;
-        this.state.currentActionID = action.jsID;
+        this.state.renderID++; // force a re-rendering
+        // this.actionRequest.action = action;
+        // this.currentAction = action;
+        // this.state.currentActionID = action.jsID;
 
-        // const fiber = this.__owl__.currentFiber;
-        // const flush = Component.scheduler.flush;
-        // const prom = new Promise((resolve, reject) => {
-        //     Component.scheduler.flush = function () {
-        //         flush.call(Component.scheduler);
-        //         if (fiber.root.isCompleted && !fiber.root.error) {
-        //             resolve();
-        //         } else if (fiber.root.error) {
-        //             reject(fiber.root.error);
-        //         }
-        //     };
-        // });
-        // prom.then(() => console.log('after', new Date().getMilliseconds()));
-        // console.log('before', new Date().getMilliseconds());
         //     .then(function () {
         //         if (self.currentDialogController) {
         //             self._closeDialog({ silent: true });
@@ -186,7 +197,7 @@ class ActionManager extends Component {
                 // whose returned value might be another action to execute
                 const nextAction = ClientAction(this, action);
                 if (nextAction) {
-                    return this._doAction(nextAction, options);
+                    return this._resolveLast(this._doAction(nextAction, options));
                 }
             }
         }
@@ -251,13 +262,14 @@ class ActionManager extends Component {
      * @returns {Promise} resolved when the action has been executed
      */
     async _executeServerAction(action, options) {
-        action = await this.rpc({
+        const runActionProm = this.rpc({
             route: '/web/action/run',
             params: {
                 action_id: action.id,
                 context: action.context || {},
             },
         });
+        action = await this._resolveLast(runActionProm);
         action = action || { type: 'ir.actions.act_window_close' };
         return this._doAction(action, options);
     }
@@ -347,7 +359,7 @@ class ActionManager extends Component {
      * @private
      */
     _postProcessAction() {
-        const action = this.currentAction;
+        const action = this.actionRequest.action;
         const controller = action.controller;
         this.actions[action.jsID] = action;
         this.controllers[controller.jsID] = controller;
@@ -366,6 +378,12 @@ class ActionManager extends Component {
 
         // store the action into the sessionStorage so that it can be fully restored on F5
         this.env.services.session_storage.setItem('current_action', action._originalAction);
+
+        if (this.actionRequest.callback) {
+            this.actionRequest.callback();
+        }
+
+        this.actionRequest = null;
 
         console.warn(this.controllerStack);
         console.warn(this.controllers);
@@ -431,9 +449,12 @@ class ActionManager extends Component {
      */
     _restoreController(controllerID) {
         const controller = this.controllers[controllerID];
-        const index = this.controllerStack.indexOf(controllerID);
         const action = this.actions[controller.actionID];
-        this._executeAction(action, { index });
+        this.actionRequest = {
+            id: this.nextID++,
+            action: action,
+        };
+        this._executeAction(action);
 
         // AAB: AbstractAction should define a proper hook to execute code when
         // it is restored (other than do_show), and it should return a promise
