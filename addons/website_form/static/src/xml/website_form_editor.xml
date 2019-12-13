@@ -34,7 +34,7 @@
     <t t-name="website_form.field">
         <div t-att-class="'form-group col-12 form-field ' + (field.custom ? ' o_website_form_custom' : '') + (field.required ? ' o_website_form_required_custom' : field.modelRequired ? ' o_website_form_required' : '') + (field.hidden ? ' o_website_form_field_hidden' : '') + (field.dnone ? ' d-none' : '')"
             t-att-data-type="field.custom and field.type">
-            <div t-if="field.formatInfo.labelPosition == 'left' || field.formatInfo.labelPosition == 'right'" class="row s_col_no_resize s_col_no_bgcolor">
+            <div t-if="field.formatInfo.labelPosition == 'left' || field.formatInfo.labelPosition == 'right'" class="row s_no_resize s_col_no_bgcolor">
                 <label t-attf-class="col-form-label col-auto o_we_form_label #{field.formatInfo.labelPosition == 'right' ? 'text-right' : ''}" t-att-style="'width: ' + field.formatInfo.labelWidth" t-att-for="field.name">
                     <t t-esc="field.string"/>
                 </label>
