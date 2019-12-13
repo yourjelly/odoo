@@ -77,7 +77,7 @@
                         <we-button data-custom-field="datetime">Date &amp; Time</we-button>
                         <we-button data-custom-field="binary">File Upload</we-button>
                     </we-select>
-                    <we-select class="multi_check" string="MultiCheckbox Display" data-no-preview="true">
+                    <we-select class="o_we_multi_check" string="MultiCheckbox Display" data-no-preview="true">
                         <we-button data-multi-checkbox-display="horizontal">Horizontal</we-button>
                         <we-button data-multi-checkbox-display="vertical">Vertical</we-button>
                     </we-select>

@@ -32,10 +32,10 @@
 
     <!-- Generic Field Layout -->
     <t t-name="website_form.field">
-        <div t-att-class="'form-group col-12 form-field ' + (field.custom ? ' o_website_form_custom' : '') + (field.required ? ' o_website_form_required_custom' : field.modelRequired ? ' o_website_form_required' : '') + (field.hidden ? ' o_website_form_field_hidden' : '') + (field.dnone ? ' d-none' : '')"
+        <div t-attf-class="form-group col-12 form-field #{field.custom and 'o_website_form_custom'} #{field.required ? 'o_website_form_required_custom' : field.modelRequired and 'o_website_form_required'} #{field.hidden and 'o_website_form_field_hidden'} #{field.dnone and 'd-none'}"
             t-att-data-type="field.custom and field.type">
-            <div t-if="field.formatInfo.labelPosition == 'left' || field.formatInfo.labelPosition == 'right'" class="row s_no_resize s_col_no_bgcolor">
-                <label t-attf-class="col-form-label col-auto o_we_form_label #{field.formatInfo.labelPosition == 'right' ? 'text-right' : ''}" t-att-style="'width: ' + field.formatInfo.labelWidth" t-att-for="field.name">
+            <div t-if="field.formatInfo.labelPosition != 'none' and field.formatInfo.labelPosition != 'top'" class="row s_no_resize s_col_no_bgcolor">
+                <label t-attf-class="col-form-label col-auto o_we_form_label #{field.formatInfo.labelPosition == 'right' and 'text-right'}" t-attf-style="#{field.formatInfo.labelWidth and 'width: ' + field.formatInfo.labelWidth}" t-att-for="field.name">
                     <t t-esc="field.string"/>
                 </label>
                 <div class="col">
@@ -43,7 +43,7 @@
                 </div>
             </div>
             <t t-else="">
-                <label t-attf-class="o_we_form_label #{field.formatInfo.labelPosition == 'none' ? 'd-none' : ''}" t-att-style="'width: ' + field.formatInfo.labelWidth" t-att-for="field.name">
+                <label t-attf-class="o_we_form_label #{field.formatInfo.labelPosition == 'none' and 'd-none'}" t-attf-style="#{field.formatInfo.labelWidth and 'width: ' + field.formatInfo.labelWidth}" t-att-for="field.name">
                     <t t-esc="field.string"/>
                 </label>
                 <t t-raw="0"/>
@@ -54,6 +54,7 @@
     <!-- Hidden Field -->
     <t t-name="website_form.field_hidden">
         <t t-set="field.dnone" t-value="true"/>
+        <t t-set="field.formatInfo" t-value="{}"/>
         <t t-call="website_form.field">
             <input
                 type="hidden"
