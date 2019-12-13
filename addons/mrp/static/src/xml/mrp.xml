@@ -7,6 +7,14 @@
         </div>
     </t>
 
+    <div t-name="mrp.popoverContent">
+        <div>
+            <p>This manufacturing order should be rescheduled considering the fact that its components, manufactured in
+                <span class="text-primary o_mrp_popover_previous_mo"  t-if="data.previous_mrp_production_id.data" t-esc="data.previous_mrp_production_id.data.display_name"/>, will be late.</p>
+            <button class="btn btn-link o_mrp_popover_reschedule">Reschedule</button>
+        </div>
+    </div>
+
     <form class="form-inline" t-name="mrp.report_bom_search">
         <div class="form-group col-lg-4">
             <label>Quantity:</label>

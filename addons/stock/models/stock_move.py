@@ -177,10 +177,52 @@ class StockMove(models.Model):
     next_serial = fields.Char('First SN')
     next_serial_count = fields.Integer('Number of SN')
 
+    will_be_late = fields.Boolean('Will be late', compute='_compute_will_be_late', default=False)
+
     @api.onchange('product_id', 'picking_type_id')
     def onchange_product(self):
         if self.product_id:
             self.description_picking = self.product_id._get_description(self.picking_type_id)
+
+    @api.depends('date_expected', 'move_orig_ids.date_expected', 'date', 'state')
+    def _compute_will_be_late(self):
+        for stock_move in self:
+            stock_move.will_be_late = bool(stock_move._get_delay_time())
+
+    def _get_delay_time(self):
+        """Compute the delay time, if the stock move will be late."""
+        self.ensure_one()
+        if self.state in {'done', 'cancel'} or not self.date_expected or not self.move_orig_ids:
+            return False
+
+        max_date_expected = max(
+            move_orig_id.date if move_orig_id.state == 'done'
+            else move_orig_id.date_expected
+            for move_orig_id in self.move_orig_ids)
+
+        if not max_date_expected:
+            return False
+
+        delta_time = (max_date_expected - self.date_expected).total_seconds()
+
+        if delta_time <= 0:
+            return False
+        return relativedelta.relativedelta(seconds=delta_time)
+
+    def action_group_reschedule(self):
+        """Reschedule in batch the ``stock.move``.
+
+        Take the maximum ``delta_time`` of all ``stock.move`` (x), and move them
+        all in the future by "x". So no more stock move in the group are
+        late and the distance between us is still the same.
+        """
+        if not self:
+            return
+
+        delta_time = max(stock_move._get_delay_time() for stock_move in self)
+        if delta_time:
+            for stock_move in self:
+                stock_move.date_expected += delta_time
 
     @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'picking_type_id.show_reserved', 'picking_type_id.show_operations')
     def _compute_display_assign_serial(self):
@@ -276,7 +318,7 @@ class StockMove(models.Model):
                 move.product_uom_qty, move.product_id.uom_id, rounding_method=rounding_method)
 
     def _get_move_lines(self):
-        """ This will return the move lines to consider when applying _quantity_done_compute on a stock.move. 
+        """ This will return the move lines to consider when applying _quantity_done_compute on a stock.move.
         In some context, such as MRP, it is necessary to compute quantity_done on filtered sock.move.line."""
         self.ensure_one()
         return self.move_line_ids or self.move_line_nosuggest_ids
@@ -339,7 +381,7 @@ class StockMove(models.Model):
         and is represented by the aggregated `product_qty` on the linked move lines. If the move
         is force assigned, the value will be 0.
         """
-        result = {data['move_id'][0]: data['product_qty'] for data in 
+        result = {data['move_id'][0]: data['product_qty'] for data in
             self.env['stock.move.line'].read_group([('move_id', 'in', self.ids)], ['move_id','product_qty'], ['move_id'])}
         for rec in self:
             rec.reserved_availability = rec.product_id.uom_id._compute_quantity(result.get(rec.id, 0.0), rec.product_uom, rounding_method='HALF-UP')
@@ -458,6 +500,7 @@ class StockMove(models.Model):
                 receipt_moves_to_reassign |= (self - move_to_unreserve).filtered(lambda m: m.location_id.usage == 'supplier' and m.state in ('partially_available', 'assigned'))
 
         # Handle the propagation of `date_expected` and `date` fields.
+
         propagated_date_field = False
         if vals.get('date_expected'):
             propagated_date_field = 'date_expected'
@@ -1261,7 +1304,7 @@ class StockMove(models.Model):
         """ If the quantity done on a move exceeds its quantity todo, this method will create an
         extra move attached to a (potentially split) move line. If the previous condition is not
         met, it'll return an empty recordset.
-        
+
         The rationale for the creation of an extra move is the application of a potential push
         rule that will handle the extra quantities.
         """

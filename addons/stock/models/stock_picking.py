@@ -369,6 +369,11 @@ class Picking(models.Model):
     package_level_ids = fields.One2many('stock.package_level', 'picking_id')
     package_level_ids_details = fields.One2many('stock.package_level', 'picking_id')
 
+    # The stock picking will be late if one of its stock move will be late
+    will_be_late = fields.Boolean(compute='_compute_will_be_late')
+
+    previous_stock_picking_id = fields.Many2one('stock.picking', string='Previous stock picking', compute='_compute_previous_stock_picking_id')
+
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
@@ -376,6 +381,23 @@ class Picking(models.Model):
     def _compute_has_tracking(self):
         for picking in self:
             picking.has_tracking = any(m.has_tracking != 'none' for m in picking.move_lines)
+
+    @api.depends('move_lines.will_be_late')
+    def _compute_will_be_late(self):
+        for stock_picking in self:
+            stock_picking.will_be_late = any(move_line.will_be_late for move_line in stock_picking.move_lines)
+
+    @api.depends('move_lines')
+    def _compute_previous_stock_picking_id(self):
+        for stock_picking in self:
+            prev_stock_moves = stock_picking.mapped('move_lines.move_orig_ids')
+            print(prev_stock_moves)
+            prev_stock_picking = self.env['stock.picking'].search([('move_lines', 'in', prev_stock_moves.ids)])
+            stock_picking.previous_stock_picking_id = prev_stock_picking[0] if prev_stock_picking else False
+
+    def action_reschedule(self):
+        for stock_picking in self:
+            stock_picking.move_lines.action_group_reschedule()
 
     @api.depends('picking_type_id.show_operations')
     def _compute_show_operations(self):

@@ -206,6 +206,9 @@
                     <field name="picking_type_id" optional="hide"/>
                     <field name="company_id" groups="base.group_multi_company" optional="show"/>
                     <field name="activity_exception_decoration" widget="activity_exception"/>
+                    <field name="will_be_late" invisible="1"/>
+                    <field name="previous_stock_picking_id" invisible="1"/>
+                    <widget name="stock_picking_popover_scheduling"/>
                 </tree>
             </field>
         </record>
@@ -294,7 +297,13 @@
                             <field name="backorder_id" attrs="{'invisible': [('backorder_id','=',False)]}"/>
                         </group>
                         <group>
-                            <field name="scheduled_date" attrs="{'required': [('id', '!=', False)]}"/>
+                            <label for="scheduled_date"/>
+                            <div class="o_row">
+                                <field name="scheduled_date" attrs="{'required': [('id', '!=', False)]}"/>
+                                <field name="will_be_late" invisible="1"/>
+                                <field name="previous_stock_picking_id" invisible="1"/>
+                                <widget name="stock_picking_popover_scheduling"/>
+                            </div>
                             <field name="date_done" string="Effective Date" attrs="{'invisible': [('state', '!=', 'done')]}"/>
                             <field name="origin" placeholder="e.g. PO0032"/>
                             <field name="owner_id" groups="stock.group_tracking_owner"

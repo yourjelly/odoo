@@ -5,4 +5,13 @@
             <a tabindex="0" t-att-class="widget.icon + ' o_html_popover_icon ' + widget.color"/>
         </div>
     </div>
+
+    <div t-name="stock.StockPickingSchedule">
+        <div>
+            <p>The preceding transfer
+                <span class="text-primary o_stock_popover_previous_stock_picking"  t-if="data.previous_stock_picking_id" t-esc="data.previous_stock_picking_id.data.display_name"/>
+                has been delayed so you will probably be later for this one. Do you want to update the scheduled date ?</p>
+            <button class="btn btn-link o_stock_popover_reschedule">Reschedule</button>
+        </div>
+    </div>
 </templates>

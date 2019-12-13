@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
+from datetime import timedelta
 from collections import defaultdict
 from itertools import groupby
 
@@ -95,11 +96,13 @@ class MrpProduction(models.Model):
         help="Location where the system will stock the finished products.")
     date_planned_start = fields.Datetime(
         'Planned Date', copy=False, default=fields.Datetime.now,
+        compute='_compute_date_planned_start', inverse='_set_date_planned_start', readonly=False,
         help="Date at which you plan to start the production.",
         index=True, required=True, store=True)
     date_planned_finished = fields.Datetime(
         'Planned End Date',
         default=_get_default_date_planned_finished,
+        compute='_compute_date_planned_finished', inverse='_set_date_planned_finished', readonly=False,
         help="Date at which you plan to finish the production.",
         copy=False, store=True)
     date_deadline = fields.Datetime(
@@ -220,6 +223,61 @@ class MrpProduction(models.Model):
     picking_ids = fields.Many2many('stock.picking', compute='_compute_picking_ids', string='Picking associated to this manufacturing order')
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
     confirm_cancel = fields.Boolean(compute='_compute_confirm_cancel')
+
+    will_be_late = fields.Boolean(compute='_compute_will_be_late', default=False, store=True)
+
+    previous_mrp_production_id = fields.Many2one('mrp.production', string='Previous MO', compute='_compute_previous_mrp_production_id')
+    ideal_planned_start_date = fields.Datetime('Date compute based on delay', compute='_compute_ideal_planned_start_date')
+
+    @api.depends('move_raw_ids.date_expected')
+    def _compute_date_planned_start(self):
+        for mrp_production in self:
+            if mrp_production.move_raw_ids:
+                mrp_production.date_planned_start = max(mrp_production.mapped('move_raw_ids.date_expected'))
+            else:
+                mrp_production.date_planned_start = fields.Datetime.now()
+
+    def _set_date_planned_start(self):
+        for mrp_production in self:
+            mrp_production.move_raw_ids.write({'date_expected': self.date_planned_start})
+            if not mrp_production.routing_id and mrp_production.date_planned_start:
+                mrp_production.date_planned_finished = mrp_production.date_planned_start + datetime.timedelta(hours=1)
+
+    @api.depends('move_finished_ids.date_expected')
+    def _compute_date_planned_finished(self):
+        for mrp_production in self:
+            if mrp_production.move_finished_ids:
+                mrp_production.date_planned_finished = max(mrp_production.mapped('move_finished_ids.date_expected'))
+            else:
+                mrp_production.date_planned_finished = fields.Datetime.now()
+
+    def _set_date_planned_finished(self):
+        for mrp_production in self:
+            mrp_production.move_finished_ids.write({'date_expected': self.date_planned_finished})
+
+    @api.depends('move_raw_ids.will_be_late', 'date_planned_finished', 'date_planned_start')
+    def _compute_will_be_late(self):
+        for mrp_production in self:
+            if mrp_production.move_raw_ids:
+                mrp_production.will_be_late = any(
+                    stock_move.will_be_late
+                    for stock_move in mrp_production.move_raw_ids)
+            else:
+                mrp_production.will_be_late = False
+
+    def action_reschedule(self):
+        if self.move_raw_ids:
+            self.move_raw_ids.action_group_reschedule()
+            self.date_planned_finished = self.date_planned_start + timedelta(hours=1)
+
+    @api.depends('move_raw_ids')
+    def _compute_previous_mrp_production_id(self):
+        for mrp_production in self:
+            if mrp_production.move_raw_ids:
+                prev_stock_moves = self.env['mrp.production'].search([('move_dest_ids', 'in', mrp_production.move_raw_ids.ids)])
+                mrp_production.previous_mrp_production_id = prev_stock_moves[-1] if prev_stock_moves else False
+            else:
+                mrp_production.previous_mrp_production_id = False
 
     @api.depends('move_raw_ids.state', 'move_finished_ids.state')
     def _compute_confirm_cancel(self):
@@ -430,15 +488,6 @@ class MrpProduction(models.Model):
         self.move_raw_ids = [(2, move.id) for move in self.move_raw_ids.filtered(lambda m: m.bom_line_id)]
         self.picking_type_id = self.bom_id.picking_type_id or self.picking_type_id
 
-    @api.onchange('date_planned_start')
-    def _onchange_date_planned_start(self):
-        self.move_raw_ids.update({
-            'date': self.date_planned_start,
-            'date_expected': self.date_planned_start,
-        })
-        if not self.routing_id:
-            self.date_planned_finished = self.date_planned_start + datetime.timedelta(hours=1)
-
     @api.onchange('bom_id', 'product_id', 'product_qty', 'product_uom_id')
     def _onchange_move_raw(self):
         if self.bom_id and self.product_qty > 0:
@@ -478,12 +527,7 @@ class MrpProduction(models.Model):
 
     def write(self, vals):
         res = super(MrpProduction, self).write(vals)
-        if 'date_planned_start' in vals:
-            moves = (self.mapped('move_raw_ids') + self.mapped('move_finished_ids')).filtered(
-                lambda r: r.state not in ['done', 'cancel'])
-            moves.write({
-                'date_expected': fields.Datetime.to_datetime(vals['date_planned_start']),
-            })
+
         for production in self:
             if 'date_planned_start' in vals:
                 if production.state in ['done', 'cancel']:
