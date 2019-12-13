@@ -519,3 +519,4 @@ class ResPartner(models.Model):
                     _logger.debug('Another transaction already locked partner rows. Cannot update partner ranks.')
                 else:
                     raise e
+#test
