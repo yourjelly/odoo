@@ -675,7 +675,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
         # /!\ done iteratively on purpose, max recursion depth is easily reached otherwise
         vals, missing_id = records.env.cache.get_values_list(records, self)
-        while missing_id:
+        while missing_id or (isinstance(missing_id, NewId) and missing_id.origin):
             remaining = records[len(vals):]
             missing = records._browse(records.env, (missing_id,), tuple(remaining._ids)[:PREFETCH_MAX])
             # a call to __get__ is done to trigger the prefetch of all remaining records up to
