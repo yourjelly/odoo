@@ -2202,6 +2202,7 @@ class StockMove(SavepointCase):
         -> reserve move2 and 3 in batch.
         """
         self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 3.0)
+        self.env['stock.quant']._update_available_quantity(self.product, self.pack_location, 3.0)
         move1 = self.env['stock.move'].create({
             'name': 'test_link_assign_10_1',
             'location_id': self.stock_location.id,
