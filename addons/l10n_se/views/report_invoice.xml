@@ -6,5 +6,10 @@
                 <div>Corporate ID: <t t-esc="o.partner_id.l10n_se_corporate_identification"/></div>
             </t>
         </div>
+        <xpath expr="//tbody/t" position="before">
+            <tr t-if="o.fiscal_position_id and o.fiscal_position_id.country_group_id and o.fiscal_position_id.country_group_id.id == o.env.ref('base.europe').id">
+                <td colspan="99">REVERSE CHARGE, INTRA-COMMUNITY SUPPLY OF GOODS.</td>
+            </tr>
+        </xpath>
     </template>
 </odoo>
