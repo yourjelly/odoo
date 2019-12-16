@@ -804,6 +804,9 @@ class Field(MetaField('DummyField', (object,), {})):
         """
         return False if value is None else value
 
+    def convert_to_record_multi(self, values, record):
+        return [self.convert_to_record(value, record) for value in values]
+
     def convert_to_read(self, value, record, use_name_get=True):
         """ Convert ``value`` from the record format to the format returned by
         method :meth:`BaseModel.read`.
@@ -2432,6 +2435,11 @@ class Many2one(_Relational):
         prefetch_ids = IterableGenerator(prefetch_many2one_ids, record, self)
         return record.pool[self.comodel_name]._browse(record.env, ids, prefetch_ids)
 
+    def convert_to_record_multi(self, values, record):
+        prefetch_ids = IterableGenerator(prefetch_many2one_ids, record, self)
+        ids = tuple(unique(val for val in values if val is not None))
+        return record.pool[self.comodel_name]._browse(record.env, ids, prefetch_ids)
+
     def convert_to_read(self, value, record, use_name_get=True):
         if use_name_get and value:
             # evaluate name_get() as superuser, because the visibility of a
@@ -2696,6 +2704,11 @@ class _RelationalMulti(_Relational):
         if 'active' in corecords and record.env.context.get('active_test', True):
             corecords = corecords.filtered('active').with_prefetch(prefetch_ids)
         return corecords
+
+    def convert_to_record_multi(self, values, record):
+        prefetch_ids = IterableGenerator(prefetch_x2many_ids, record, self)
+        ids = tuple(i for v in values for i in v)
+        return record.pool[self.comodel_name]._browse(record.env, ids, prefetch_ids)
 
     def convert_to_read(self, value, record, use_name_get=True):
         return value.ids

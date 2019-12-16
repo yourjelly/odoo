@@ -5172,7 +5172,8 @@ Record ids: %(records)s
         if isinstance(func, str):
             recs = self
             for name in func.split('.'):
-                recs = self._mapped_post(self._fields[name].mapped(recs), self._fields[name])
+                field = recs._fields[name]
+                recs = field.convert_to_record_multi(field.mapped(recs), recs)
             return recs
         else:
             return self._mapped_func(func)
