@@ -46,12 +46,6 @@ class MrpProduction(models.Model):
             location = self.env['stock.warehouse'].search([('company_id', '=', company_id)], limit=1).lot_stock_id
         return location and location.id or False
 
-    @api.model
-    def _get_default_date_planned_finished(self):
-        if self.env.context.get('default_date_planned_start'):
-            return fields.Datetime.to_datetime(self.env.context.get('default_date_planned_start')) + datetime.timedelta(hours=1)
-        return datetime.datetime.now() + datetime.timedelta(hours=1)
-
     name = fields.Char(
         'Reference', copy=False, readonly=True, default=lambda x: _('New'))
     origin = fields.Char(
@@ -94,14 +88,13 @@ class MrpProduction(models.Model):
         states={'draft': [('readonly', False)]}, check_company=True,
         help="Location where the system will stock the finished products.")
     date_planned_start = fields.Datetime(
-        'Planned Date', copy=False, default=fields.Datetime.now,
+        'Planned Date', compute='_compute_date_planned_start', inverse='_set_date_planned_start',
         help="Date at which you plan to start the production.",
-        index=True, required=True, store=True)
+        index=True, store=True)
     date_planned_finished = fields.Datetime(
-        'Planned End Date',
-        default=_get_default_date_planned_finished,
+        'Planned End Date', compute='_compute_date_planned_finished', inverse='_set_date_planned_finished',
         help="Date at which you plan to finish the production.",
-        copy=False, store=True)
+        store=True)
     date_deadline = fields.Datetime(
         'Deadline', copy=False, index=True,
         help="Informative date allowing to define when the manufacturing order should be processed at the latest to fulfill delivery on time.")
@@ -281,6 +274,34 @@ class MrpProduction(models.Model):
     def _compute_show_lots(self):
         for production in self:
             production.show_final_lots = production.product_id.tracking != 'none'
+
+    @api.depends('move_raw_ids.date_expected')
+    def _compute_date_planned_start(self):
+        for mo in self:
+            if mo.move_raw_ids:
+                mo.date_planned_start = max(mo.move_raw_ids.mapped('date_expected'))
+            else:
+                mo.date_planned_start = datetime.datetime.now()
+
+    @api.depends('date_planned_start')
+    def _compute_date_planned_finished(self):
+        for mo in self:
+            if mo.date_planned_start:
+                mo.date_planned_finished = mo.date_planned_start + datetime.timedelta(hours=1)
+            else:
+                mo.date_planned_finished = datetime.datetime.now() + datetime.timedelta(hours=1)
+
+    def _set_date_planned_start(self):
+        for mo in self:
+            if mo.state in ('done', 'cancel'):
+                raise UserError(_("You cannot change the planned date on a done or cancelled production."))
+            mo.move_raw_ids.write({'date_expected': mo.date_planned_start})
+
+    def _set_date_planned_finished(self):
+        for mo in self:
+            if mo.state in ('done', 'cancel'):
+                raise UserError(_("You cannot change the planned date on a done or cancelled production."))
+            mo.move_finished_ids.write({'date_expected': mo.date_planned_finished})
 
     def _inverse_lines(self):
         """ Little hack to make sure that when you change something on these objects, it gets saved"""
