@@ -623,8 +623,8 @@ form: module.record_id""" % (xml_id,)
             view_id = self.id_get(tpl_id, raise_if_not_found=False)
             if self.mode != "update" or not view_id:
                 record.append(Field(name='active', eval=el.get('active')))
-        if el.get('customize_show') in ("True", "False"):
-            record.append(Field(name='customize_show', eval=el.get('customize_show')))
+        if el.get('customize_show'):
+            record.append(Field(el.get('customize_show'), name='customize_show'))
         groups = el.attrib.pop('groups', None)
         if groups:
             grp_lst = [("ref('%s')" % x) for x in groups.split(',')]

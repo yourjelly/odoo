@@ -699,7 +699,7 @@ class TestCowViewSaving(common.TransactionCase):
         add_to_wishlist = View.create({
             'name': 'Wishlist',
             'active': True,
-            'customize_show': True,
+            'customize_show': 'Wishlist',
             'inherit_id': products_item.id,
             'key': '_website_sale_wishlist.add_to_wishlist',
             'arch': '''
@@ -710,7 +710,7 @@ class TestCowViewSaving(common.TransactionCase):
         products_list_view = View.create({
             'name': 'List View',
             'active': False,  # <- That's the reason of why this behavior needed a fix
-            'customize_show': True,
+            'customize_show': 'List View',
             'inherit_id': products.id,
             'key': '_website_sale.products_list_view',
             'arch': '''
@@ -948,18 +948,18 @@ class Crawler(HttpCase):
         })
         self.inherit_view.write({'name': 'Main layout', 'key': '_website.layout'})
 
-        self.inherit_view.copy({'name': 'Show Sign In', 'customize_show': True, 'key': '_portal.portal_show_sign_in'})
+        self.inherit_view.copy({'name': 'Show Sign In', 'customize_show': 'Show Sign In', 'key': '_portal.portal_show_sign_in'})
         view_logo = self.inherit_view.copy({
             'name': 'Show Logo',
             'inherit_id': self.inherit_view.id,
-            'customize_show': True,
+            'customize_show': 'Show Logo',
             'key': '_website.layout_logo_show',
         })
         view_logo.copy({'name': 'Affix Top Menu', 'key': '_website.affix_top_menu'})
 
         event_child_view = self.inherit_view.copy({
             'name': 'Filters',
-            'customize_show': True,
+            'customize_show': 'Filters',
             'inherit_id': event_main_view.id,
             'key': '_website_event.event_left_column',
             'priority': 30,
@@ -1107,7 +1107,7 @@ class Crawler(HttpCase):
             'key': '_website_sale.child_view_w1',
             'website_id': website_1.id,
             'active': False,
-            'customize_show': True,
+            'customize_show': 'Child View W1',
         })
 
         # Simulate theme view instal + load on website
@@ -1125,7 +1125,7 @@ class Crawler(HttpCase):
             'arch': '<xpath expr="//body" position="replace">Really really not important for this test</xpath>',
             'key': '_theme_kea_sale.products',
             'website_id': website_2.id,
-            'customize_show': True,
+            'customize_show': 'Products Theme Kea',
         })
         self.env['ir.model.data'].create({
             'module': '_theme_kea_sale',
