@@ -83,10 +83,10 @@ patch(ActionManager, 'ActionManagerActWindow', {
      *
      * @override
      */
-    _executeAction(action) {
-        this._super(...arguments);
-        // this.state.currentControllerID = action.controller.jsID;
-    },
+    // _executeAction(action) {
+    //     this._super(...arguments);
+    //     // this.state.currentControllerID = action.controller.jsID;
+    // },
     /**
      * Executes actions of type 'ir.actions.act_window'.
      *
@@ -98,7 +98,9 @@ patch(ActionManager, 'ActionManagerActWindow', {
      * @param {string} [options.viewType] the view to open
      * @returns {Promise} resolved when the action is appended to the DOM
      */
-    async _executeWindowAction(action, options) {
+    async _executeWindowAction(actionRequest) {
+        const action = actionRequest.action;
+        const options = actionRequest.options;
         const fieldsViews = await this._resolveLast(this._loadViews(action));
         const views = this._generateActionViews(action, fieldsViews);
         action._views = action.views; // save the initial attribute
@@ -151,7 +153,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             index: this._getControllerStackIndex(options),
         });
         action.controller.options = options;
-        return this._executeAction(action);
+        return this._executeAction(actionRequest);
         // })
         // .guardedCatch(function () {
         //     if (lazyControllerID) {
@@ -216,9 +218,9 @@ patch(ActionManager, 'ActionManagerActWindow', {
      * @override
      * @private
      */
-    _handleAction(action, options) {
-        if (action.type === 'ir.actions.act_window') {
-            return this._executeWindowAction(action, options);
+    _handleAction(actionRequest) {
+        if (actionRequest.action.type === 'ir.actions.act_window') {
+            return this._executeWindowAction(actionRequest);
         }
         return this._super(...arguments);
     },
@@ -338,7 +340,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
 
         this._createViewController(action, viewType, viewOptions, { index });
         this.actionRequest = this._generateActionRequest({ action });
-        this._executeAction(action);
+        this._executeAction(this.actionRequest);
 
         // var newController = function (controllerID) {
         //     var options = {

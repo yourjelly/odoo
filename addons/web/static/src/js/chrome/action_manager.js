@@ -39,11 +39,22 @@ class ActionManager extends Component {
     }
     willStart() {
         this.actionRequest = this._generateActionRequest(this.props.actionRequest);
-        return this._doAction(this.actionRequest.action, this.actionRequest.options);
+        return this._doAction(this.actionRequest);
     }
     willUpdateProps(nextProps) {
         this.actionRequest = this._generateActionRequest(nextProps.actionRequest);
-        return this._doAction(this.actionRequest.action, this.actionRequest.options);
+        return new Promise((resolve, reject) => {
+            this._doAction(this.actionRequest)
+                .then(resolve)
+                .guardedCatch((reason) => {
+                    console.log(reason);
+                    if (reason === 'EUOFIZEJF') {
+                        resolve();
+                    } else {
+                        reject(reason);
+                    }
+                });
+        });
     }
     shouldUpdate(nextProps) {
         return this.props.actionRequest.id !== nextProps.actionRequest.id;
@@ -55,7 +66,7 @@ class ActionManager extends Component {
         this._postProcessAction();
     }
 
-    //-------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
@@ -64,19 +75,26 @@ class ActionManager extends Component {
     //--------------------------------------------------------------------------
 
     _resolveLast(promise) {
+        // poor solution for now... let it do eveything, and simply prevent the
+        // state change au dernier moment
+        // however, must wait for all ('cancelled') rpcs to return before
+        // displaying new result
+        // new solution: expose reject function, and reject as soon as a new
+        // request arrives + handle rejection in willUpdateProps
         // return promise;
         const requestID = this.actionRequest.id;
         return new Promise((resolve, reject) => {
+            this.promReject = reject;
             promise.then((result) => {
                 if (this.actionRequest.id === requestID) {
                     resolve(result);
                 }
             });
-            promise.guardedCatch((result) => {
-                if (this.actionRequest.id === requestID) {
-                    reject(result);
-                }
-            });
+            // promise.guardedCatch((result) => {
+            //     if (this.actionRequest.id === requestID) {
+            //         reject(result);
+            //     }
+            // });
         });
     }
 
@@ -106,7 +124,7 @@ class ActionManager extends Component {
      *   executed (e.g. if doAction has been called to execute another action
      *   before this one was complete).
      */
-    async _doAction(action, options) {
+    async _doAction(actionRequest) {
         const defaultOptions = {
             additional_context: {},
             clear_breadcrumbs: false,
@@ -115,7 +133,9 @@ class ActionManager extends Component {
             // pushState: true,
             replace_last_action: false,
         };
-        options = Object.assign(defaultOptions, options);
+        actionRequest.options = Object.assign(defaultOptions, actionRequest.options);
+        let action = actionRequest.action;
+        let options = actionRequest.options;
 
         // build or load an action descriptor for the given action
         if (typeof action === 'string' && action_registry.contains(action)) {
@@ -137,8 +157,8 @@ class ActionManager extends Component {
         // also clears the breadcrumbs
         options.clear_breadcrumbs = action.target === 'main' || options.clear_breadcrumbs;
 
-        this.actionRequest.action = this._preprocessAction(action, options);
-        return this._handleAction(this.actionRequest.action, options);
+        actionRequest.action = this._preprocessAction(action, options);
+        return this._handleAction(actionRequest);
     }
     /**
      * Executes actions for which a controller has to be appended to the DOM,
@@ -152,14 +172,18 @@ class ActionManager extends Component {
      *   controller in a dialog
      * @param {Object} options @see _doAction for details
      */
-    _executeAction(action) {
+    _executeAction(actionRequest) {
         // if (action.target === 'new') {
         //     return this._executeActionInDialog(action, options);
         // }
 
         // return this.clearUncommittedChanges()
-        console.log('execute action');
-        this.state.renderID++; // force a re-rendering
+        if (this.actionRequest.id === actionRequest.id) {
+            console.log('execute action');
+            this.state.renderID++; // force a re-rendering
+        } else {
+            console.log('do nothing, something new came up');
+        }
         // this.actionRequest.action = action;
         // this.currentAction = action;
         // this.state.currentActionID = action.jsID;
@@ -187,7 +211,9 @@ class ActionManager extends Component {
      * @param {string} action.tag the key of the action in the action_registry
      * @param {Object} options @see _doAction for details
      */
-    _executeClientAction(action, options) {
+    _executeClientAction(actionRequest) {
+        const action = actionRequest.action;
+        const options = actionRequest.options;
         const ClientAction = action_registry.get(action.tag);
         if (!ClientAction) {
             console.error(`Could not find client action ${action.tag}`, action);
@@ -199,7 +225,8 @@ class ActionManager extends Component {
                 // whose returned value might be another action to execute
                 const nextAction = ClientAction(this, action);
                 if (nextAction) {
-                    return this._resolveLast(this._doAction(nextAction, options));
+                    actionRequest.action = nextAction;
+                    return this._resolveLast(this._doAction(actionRequest));
                 }
             }
         }
@@ -216,7 +243,7 @@ class ActionManager extends Component {
             options: options,
             // title: widget.getTitle(),
         };
-        this._executeAction(action);
+        this._executeAction(actionRequest);
         // prom.then(function () {
         //     // AAB: this should be done automatically in AbstractAction, so that
         //     // it can be overridden by actions that have specific stuff to push
@@ -238,7 +265,9 @@ class ActionManager extends Component {
      * @returns {Promise} resolved when the redirection is done (immediately
      *   when redirecting to a new page)
      */
-    _executeURLAction(action, options) {
+    _executeURLAction(actionRequest) {
+        const action = actionRequest.action;
+        const options = actionRequest.options;
         if (action.target === 'self') {
             redirect(action.url);
         } else {
@@ -263,7 +292,8 @@ class ActionManager extends Component {
      * @param {Object} options @see _doAction for details
      * @returns {Promise} resolved when the action has been executed
      */
-    async _executeServerAction(action, options) {
+    async _executeServerAction(actionRequest) {
+        let action = actionRequest.action;
         const runActionProm = this.rpc({
             route: '/web/action/run',
             params: {
@@ -272,8 +302,8 @@ class ActionManager extends Component {
             },
         });
         action = await this._resolveLast(runActionProm);
-        action = action || { type: 'ir.actions.act_window_close' };
-        return this._doAction(action, options);
+        actionRequest.action = action || { type: 'ir.actions.act_window_close' };
+        return this._doAction(actionRequest);
     }
     /**
      * @private
@@ -281,6 +311,9 @@ class ActionManager extends Component {
      * @returns {Object}
      */
     _generateActionRequest(request) {
+        if (this.promReject) {
+            this.promReject('EUOFIZEJF');
+        }
         return Object.assign({}, request, { id: `request_${this.nextID++}` });
     }
     /**
@@ -341,20 +374,21 @@ class ActionManager extends Component {
      *   if the type of action isn't supported, or if the action can't be
      *   executed
      */
-    _handleAction(action, options) {
+    _handleAction(actionRequest) {
+        const action = actionRequest.action;
         if (!action.type) {
             console.error(`No type for action ${action}`);
             return Promise.reject();
         }
         switch (action.type) {
             case 'ir.actions.act_url':
-                return this._executeURLAction(action, options);
+                return this._executeURLAction(actionRequest);
             // case 'ir.actions.act_window_close':
-            //     return this._executeCloseAction(action, options);
+            //     return this._executeCloseAction(actionRequest);
             case 'ir.actions.client':
-                return this._executeClientAction(action, options);
+                return this._executeClientAction(actionRequest);
             case 'ir.actions.server':
-                return this._executeServerAction(action, options);
+                return this._executeServerAction(actionRequest);
             default:
                 console.error(`The ActionManager can't handle actions of type ${action.type}`, action);
                 return Promise.reject();
@@ -461,7 +495,7 @@ class ActionManager extends Component {
         const controller = this.controllers[controllerID];
         const action = this.actions[controller.actionID];
         this.actionRequest = this._generateActionRequest({ action });
-        this._executeAction(action);
+        this._executeAction(this.actionRequest);
 
         // AAB: AbstractAction should define a proper hook to execute code when
         // it is restored (other than do_show), and it should return a promise
