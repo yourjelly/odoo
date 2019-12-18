@@ -14,9 +14,8 @@ class AccountJournal(models.Model):
         'AFIP POS Number', help='This is the point of sale number assigned by AFIP in order to generate invoices')
     company_partner = fields.Many2one('res.partner', related='company_id.partner_id')
     l10n_ar_afip_pos_partner_id = fields.Many2one(
-        'res.partner', 'AFIP POS Address', help='This is the address used for invoice reports of this POS',
-        domain="['|', ('id', '=', company_partner), '&', ('id', 'child_of', company_partner), ('type', '!=', 'contact')]"
-    )
+        'res.partner', 'AFIP POS Address', help='This is the address used for invoice reports of this POS')
+    l10n_ar_company_partner_id = fields.Many2one('res.partner', related='company_id.partner_id')
     l10n_ar_sequence_ids = fields.One2many('ir.sequence', 'l10n_latam_journal_id', string="Sequences")
     l10n_ar_share_sequences = fields.Boolean(
         'Unified Book', help='Use same sequence for documents with the same letter')
