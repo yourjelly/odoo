@@ -11,8 +11,6 @@ const { patch } = require('web.utils');
 const viewRegistry = require('web.view_registry');
 
 patch(ActionManager, 'ActionManagerActWindow', {
-    // FIXME: would like to override constructor to initialize state.currentControllerID
-
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -76,17 +74,6 @@ patch(ActionManager, 'ActionManagerActWindow', {
         };
         action.controllers[viewType] = action.controller;
     },
-    /**
-     * Overrides to set the current controller jsID in the state (necessary to
-     * force a re-rendering when switching to another controller of the same
-     * action).
-     *
-     * @override
-     */
-    // _executeAction(action) {
-    //     this._super(...arguments);
-    //     // this.state.currentControllerID = action.controller.jsID;
-    // },
     /**
      * Executes actions of type 'ir.actions.act_window'.
      *
@@ -337,9 +324,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
         // }
 
         this._createViewController(action, viewType, viewOptions, { index });
-        // this.actionRequest = this._generateActionRequest({ action });
         this._pushController(action.controller);
-        // this._executeAction(this.actionRequest);
 
         // var newController = function (controllerID) {
         //     var options = {

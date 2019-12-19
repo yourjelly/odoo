@@ -41,7 +41,7 @@ class ActionManager extends Component {
         // displayed in the current window
         this.currentStack = [];
         this.state = useState({
-            pendingStack: []
+            pendingStack: null,
         });
     }
     willStart() {
@@ -328,17 +328,6 @@ class ActionManager extends Component {
         action = action || { type: 'ir.actions.act_window_close' };
         return this.doAction(action);
     }
-    // /**
-    //  * @private
-    //  * @param {Object} request
-    //  * @returns {Object}
-    //  */
-    // _generateActionRequest(request) {
-    //     if (this.promReject) {
-    //         this.promReject('EUOFIZEJF');
-    //     }
-    //     return Object.assign({}, request, { id: `request_${this.nextID++}` });
-    // }
     /**
      * Returns a description of the controllers in the given controller stack.
      * It is used to render the breadcrumbs. It is an array of Objects with keys
@@ -498,11 +487,7 @@ class ActionManager extends Component {
      * @param {string} controllerID
      */
     _restoreController(controllerID) {
-        // const controller = this.controllers[controllerID];
-        // const action = this.actions[controller.actionID];
         this._pushController(this.controllers[controllerID]);
-        // this.actionRequest = this._generateActionRequest({ action });
-        // this._executeAction(this.actionRequest);
 
         // AAB: AbstractAction should define a proper hook to execute code when
         // it is restored (other than do_show), and it should return a promise

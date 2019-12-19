@@ -13,27 +13,6 @@ const AdapterComponent = require('web.AdapterComponent');
 
 const { Component, tags } = owl;
 
-// from https://medium.com/javascript-in-plain-english/how-to-deep-copy-objects-and-arrays-in-javascript-7c911359b089
-const deepClone = inObject => {
-  let outObject, value, key
-
-  if(typeof inObject !== "object" || inObject === null) {
-    return inObject; // Return the value if inObject is not an object
-  }
-
-  // Create an array or object to hold the values
-  outObject = Array.isArray(inObject) ? [] : {};
-
-  for (key in inObject) {
-    value = inObject[key];
-
-    // Recursively (deep) copy for nested objects, including arrays
-    outObject[key] = (typeof value === "object" && value !== null) ? deepClone(value) : value;
-  }
-
-  return outObject;
-};
-
 class Action extends AdapterComponent {
     constructor(parent, props) {
         if (props.Component.prototype instanceof Component) {
@@ -62,7 +41,6 @@ class Action extends AdapterComponent {
     }
 
     get widgetArgs() {
-        // return [deepClone(this.props.action), deepClone(this.props.options)];
         return [this.props.action, this.props.options];
     }
 
