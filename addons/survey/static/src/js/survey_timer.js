@@ -3,10 +3,6 @@ odoo.define('survey.timer', function (require) {
 
 var publicWidget = require('web.public.widget');
 
-var interval = null;
-var $timer = null;
-var countDownDate = null;
-
 publicWidget.registry.SurveyTimerWidget = publicWidget.Widget.extend({
     //--------------------------------------------------------------------------
     // Widget
@@ -30,13 +26,12 @@ publicWidget.registry.SurveyTimerWidget = publicWidget.Widget.extend({
     start: function () {
         var superDef = this._super.apply(this, arguments);
 
-        countDownDate = moment.utc(this.$timer).add(this.$timeLimitMinutes, 'minutes');
-        if (this.$timeLimitMinutes <= 0 || countDownDate.diff(moment.utc(), 'seconds') < 0) {
+        this.countDownDate = moment.utc(this.$timer).add(this.$timeLimitMinutes, 'minutes');
+        if (this.$timeLimitMinutes <= 0 || this.countDownDate.diff(moment.utc(), 'seconds') < 0) {
             this.trigger_up('time_up');
         } else {
-            $timer = this.$el.find('.timer');
             this._updateTimer(this);
-            interval = setInterval(this._updateTimer.bind(this), 1000);
+            this.interval = setInterval(this._updateTimer.bind(this), 1000);
         }
 
         return superDef;
@@ -55,14 +50,14 @@ publicWidget.registry.SurveyTimerWidget = publicWidget.Widget.extend({
     * When the time runs out, it triggers a 'time_up' event to notify the parent widget.
     */
     _updateTimer: function () {
-        var timeLeft = countDownDate.diff(moment.utc(), 'seconds');
+        var timeLeft = this.countDownDate.diff(moment.utc(), 'seconds');
 
         if (timeLeft >= 0) {
             var timeLeftMinutes = parseInt(timeLeft / 60);
             var timeLeftSeconds = timeLeft - (timeLeftMinutes * 60);
-            $timer.html(this._formatTime(timeLeftMinutes) + ':' + this._formatTime(timeLeftSeconds));
+            this.$el.text(this._formatTime(timeLeftMinutes) + ':' + this._formatTime(timeLeftSeconds));
         } else {
-            clearInterval(interval);
+            clearInterval(this.interval);
             this.trigger_up('time_up');
         }
     },

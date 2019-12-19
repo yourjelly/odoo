@@ -227,7 +227,7 @@ class Survey(http.Controller):
         data = {
             'format_datetime': lambda dt: format_datetime(request.env, dt, dt_format=False),
             'format_date': lambda date: format_date(request.env, date),
-            'is_survey_session_in_progress': answer_sudo.user_input_session_id and answer_sudo.user_input_session_id.state == 'in_progress',
+            'is_survey_session_in_progress': answer_sudo.user_input_session_id and answer_sudo.user_input_session_id.state in ['ready', 'in_progress'],
         }
 
         timer_start = False
@@ -268,7 +268,8 @@ class Survey(http.Controller):
 
         # Select the right page
         if answer_sudo.state == 'new':  # Start page
-            return {'survey': survey_sudo, 'answer': answer_sudo, 'page': 0}
+            data.update({'survey': survey_sudo, 'answer': answer_sudo, 'page': 0})
+            return data
         elif answer_sudo.state == 'started':  # First Page
             page_or_question_id, is_last = survey_sudo.next_page_or_question(answer_sudo, 0)
             data.update({

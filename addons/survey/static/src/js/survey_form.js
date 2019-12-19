@@ -229,7 +229,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
         if ($target.val() === 'finish') {
             selectorsToFadeout.push('.breadcrumb', '.o_survey_timer');
         }
-        self.$(selectorsToFadeout.join(',')).fadeOut(400, function () {
+        self.$(selectorsToFadeout.join(',')).fadeOut(1000, function () {
             resolveFadeOut();
         });
         Promise.all([fadeOutPromise, nextScreenPromise]).then(function (results) {
@@ -256,11 +256,11 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
             }
             self._initChoiceItems();
             self._initTextArea();
-            self.$('.o_survey_form_content').fadeIn(400);
+            self.$('.o_survey_form_content').fadeIn(1000);
             $("html, body").animate({ scrollTop: 0 }, "fast");
         }
         else if (result && result.fields && result.error === 'validation') {
-            self.$('.o_survey_form_content').fadeIn(400);
+            self.$('.o_survey_form_content').fadeIn(1000);
             self._showErrors(result.fields);
             return false;
         } else {
@@ -608,26 +608,27 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
     },
 
     _initTimer: function () {
-        var $timer = this.$('.o_survey_timer');
+        if (this.surveyTimerWidget) {
+            this.surveyTimerWidget.destroy();
+        }
+
         var $timerData = this.$('.o_survey_form_content_data');
         var isTimeLimitReached = $timerData.data('isTimeLimitReached');
         var timeLimitMinutes = $timerData.data('timeLimitMinutes');
         var hasAnswered = $timerData.data('hasAnswered');
-        if ($timer.length && !isTimeLimitReached && !hasAnswered && timeLimitMinutes) {
+
+        if (!isTimeLimitReached && !hasAnswered && timeLimitMinutes) {
             var timer = $timerData.data('timer');
+            var $timer = $('<span>', {
+                class: 'o_survey_timer'
+            });
+            this.$('.o_survey_timer_container').append($timer);
             this.surveyTimerWidget = new publicWidget.registry.SurveyTimerWidget(this, {
                 'timer': timer,
                 'timeLimitMinutes': timeLimitMinutes
             });
             this.surveyTimerWidget.attachTo($timer);
             this.surveyTimerWidget.on('time_up', this, this._onTimeUp);
-            $timer.removeClass('d-none');
-            $timer.show(); // somehow the timer gets display: none applied to its style, to investigate
-        } else {
-            if (this.surveyTimerWidget) {
-                this.surveyTimerWidget.off('time_up', this, this._onTimeUp);
-            }
-            $timer.addClass('d-none');
         }
     },
 

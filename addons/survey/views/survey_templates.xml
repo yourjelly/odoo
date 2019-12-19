@@ -10,8 +10,8 @@
             <t t-call-assets="survey.survey_assets" lazy_load="True"/>
         </xpath>
         <xpath expr="//header" position="before">
-            <t t-set="no_header" t-value="no_header or survey.certification"/>
-            <t t-set="no_footer" t-value="no_footer or survey.certification"/>
+            <t t-set="no_header" t-value="no_header or survey.certification or is_survey_session_in_progress"/>
+            <t t-set="no_footer" t-value="no_footer or survey.certification or is_survey_session_in_progress"/>
         </xpath>
         <xpath expr="//header" position="after">
             <div id="wrap" class="oe_structure oe_empty"/>
@@ -136,7 +136,13 @@
                         <button t-if="not is_survey_session_in_progress and survey.users_can_go_back and question != answer.predefined_question_ids[0]" type="submit" class="btn btn-secondary"
                                 name="button_submit" value="previous" t-att-data-previous-page-id="previous_page_id">Back</button>
                         <button type="submit" t-att-value="'next' if not last else 'finish'" class="btn btn-primary">
-                            Continue</button><span class="o_survey_enter font-weight-bold ml-2">or press Enter</span>
+                            <t t-if="is_survey_session_in_progress">
+                                Submit
+                            </t>
+                            <t t-else="">
+                                Continue
+                            </t>
+                        </button><span class="o_survey_enter font-weight-bold ml-2">or press Enter</span>
                     </div>
                     <div class="col-3">
                         <t t-call="survey.survey_progression"/>
@@ -187,9 +193,7 @@
             <div class="container m-0 p-0">
                 <div class="row">
                     <div class="col-lg-8"><h1 t-esc="survey.title"></h1></div>
-                    <div class="o_survey_timer col-lg-4 d-none">
-                        <h1 class="timer text-right">00:00</h1>
-                    </div>
+                    <h1 class="o_survey_timer_container col-lg-4 text-right" />
                 </div>
             </div>
             <div t-att-class="'o_survey_breadcrumb_container mt8' + (' d-none ' if not page else '')"
