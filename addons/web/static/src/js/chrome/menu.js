@@ -6,16 +6,17 @@ const SystrayMenu = require('web.SystrayMenu');
 const { Component } = owl;
 
 class Menu extends Component {
+    constructor() {
+        super(...arguments);
+        this.currentMenuID = this.props.initialMenuID;
+        this.menus = this.props.menus;
+    }
     get apps() {
-        return this.props.menus.root.children.map(childID => this.props.menus[childID]);
+        return this.menus.root.children.map(childID => this.menus[childID]);
     }
     get currentApp() {
-        const currentAppID = this.props.menus[this.props.currentMenuID].appID;
-        return this.props.menus[currentAppID];
-    }
-
-    shouldUpdate(nextProps) {
-        return this.props.currentMenuID !== nextProps.currentMenuID;
+        const currentAppID = this.menus[this.currentMenuID].appID;
+        return this.menus[currentAppID];
     }
 
     //--------------------------------------------------------------------------

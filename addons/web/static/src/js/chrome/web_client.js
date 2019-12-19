@@ -4,25 +4,20 @@ odoo.define('web.WebClient', function (require) {
 const ActionManager = require('web.ActionManager');
 const Menu = require('web.Menu');
 
-const { Component, useState } = owl;
-
-let nextID = 1;
+const { Component, hooks } = owl;
+const useRef = hooks.useRef;
 
 class WebClient extends Component {
     constructor() {
         super();
-        this.state = useState({
-            currentMenuID: null,
-            lastActionRequest: null, // may be cancelled by a switch view
-        });
+        this.actionManager = useRef('actionManager');
+        this.menu = useRef('menu');
     }
+
     async willStart() {
         this.menus = await this._loadMenus();
-        this.state.currentMenuID = this.menus.root.children[0];
-        this.state.lastActionRequest = {
-            id: nextID++,
-            action: this.menus[this.state.currentMenuID].actionID,
-        };
+        this.initialMenuID = this.menus.root.children[0];
+        this.initialAction = this.menus[this.initialMenuID].actionID;
     }
 
     //--------------------------------------------------------------------------
@@ -101,27 +96,19 @@ class WebClient extends Component {
      * @param {function} [ev.payload.on_fail]
      */
     _onDoAction(ev) {
-        this.state.lastActionRequest = {
-            id: nextID++,
-            action: ev.detail.action,
-            options: ev.detail.options,
-            callback: ev.detail.on_success,
-        };
+        this.actionManager.comp.doAction(ev.detail.action, ev.detail.options);
         // TODO: honnor on_fail for legacy components ?
+        // callback: ev.detail.on_success,
         // .guardedCatch(ev.detail.on_fail || (() => {}));
     }
     /**
      * @private
      */
     _onOpenMenu(ev) {
-        this.state.lastActionRequest = {
-            id: nextID++,
-            action: this.menus[ev.detail.menuID].actionID,
-            callback: () => {
-                this.state.currentMenuID = ev.detail.menuID;
-            },
-            options: { clear_breadcrumbs: true },
-        };
+        const action = this.menus[ev.detail.menuID].actionID;
+        this.actionManager.comp.doAction(action, { clear_breadcrumbs: true });
+        // TODO: change menu (in postprocessAction??)
+        // this.state.currentMenuID = ev.detail.menuID;
     }
 
 }

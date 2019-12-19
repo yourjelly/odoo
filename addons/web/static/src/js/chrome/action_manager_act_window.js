@@ -56,12 +56,12 @@ patch(ActionManager, 'ActionManagerActWindow', {
 
         options = options || {};
         const index = options.index || 0;
-        const controllerID = options.controllerID || this.nextID++;
+        const controllerID = options.controllerID || this._nextID('controller');
         // build the view options from different sources
         const flags = action.flags || {};
         viewOptions = Object.assign({}, flags, flags[viewType], viewOptions, {
             action: action,
-            breadcrumbs: this._getBreadcrumbs(this.controllerStack.slice(0, index)),
+            breadcrumbs: this._getBreadcrumbs(this.currentStack.slice(0, index)),
             // pass the controllerID to the views as an hook for further communication
             controllerID: controllerID,
         });
@@ -98,9 +98,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
      * @param {string} [options.viewType] the view to open
      * @returns {Promise} resolved when the action is appended to the DOM
      */
-    async _executeWindowAction(actionRequest) {
-        const action = actionRequest.action;
-        const options = actionRequest.options;
+    async _executeWindowAction(action, options) {
         const fieldsViews = await this._resolveLast(this._loadViews(action));
         const views = this._generateActionViews(action, fieldsViews);
         action._views = action.views; // save the initial attribute
@@ -149,11 +147,11 @@ patch(ActionManager, 'ActionManagerActWindow', {
             controllerState: options.controllerState,
             currentId: options.resID,
         };
-        this._createViewController(action, curView.type, viewOptions, {
-            index: this._getControllerStackIndex(options),
-        });
+        const index = this._getControllerStackIndex(options);
+        this._createViewController(action, curView.type, viewOptions, { index });
         action.controller.options = options;
-        return this._executeAction(actionRequest);
+        this._pushController(action.controller);
+        // return this._executeAction(actionRequest);
         // })
         // .guardedCatch(function () {
         //     if (lazyControllerID) {
@@ -218,9 +216,9 @@ patch(ActionManager, 'ActionManagerActWindow', {
      * @override
      * @private
      */
-    _handleAction(actionRequest) {
-        if (actionRequest.action.type === 'ir.actions.act_window') {
-            return this._executeWindowAction(actionRequest);
+    _handleAction(action, options) {
+        if (action.type === 'ir.actions.act_window') {
+            return this._executeWindowAction(action, options);
         }
         return this._super(...arguments);
     },
@@ -297,7 +295,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             throw new Error(`View type ${viewType} is not available in current action`, action);
         }
 
-        const currentControllerID = this.controllerStack[this.controllerStack.length - 1];
+        const currentControllerID = this.currentStack[this.currentStack.length - 1];
         const currentController = this.controllers[currentControllerID];
         let index;
 
@@ -323,24 +321,25 @@ patch(ActionManager, 'ActionManagerActWindow', {
         if (viewDescr.multiRecord) {
             // cases 1) and 2) (with multi record views): replace the first
             // controller linked to the same action in the stack
-            index = _.findIndex(this.controllerStack, controllerID => {
+            index = _.findIndex(this.currentStack, controllerID => {
                 return this.controllers[controllerID].actionID === action.jsID;
             });
         } else if (!_.findWhere(action.views, {type: currentController.viewType}).multiRecord) {
             // case 2) (with mono record views): replace the last
             // controller by the new one if they are from the same action
             // and if they both are mono record
-            index = this.controllerStack.length - 1;
+            index = this.currentStack.length - 1;
         } else {
             // case 3): insert the controller on the top of the controller
             // stack
-            index = this.controllerStack.length;
+            index = this.currentStack.length;
         }
         // }
 
         this._createViewController(action, viewType, viewOptions, { index });
-        this.actionRequest = this._generateActionRequest({ action });
-        this._executeAction(this.actionRequest);
+        // this.actionRequest = this._generateActionRequest({ action });
+        this._pushController(action.controller);
+        // this._executeAction(this.actionRequest);
 
         // var newController = function (controllerID) {
         //     var options = {
@@ -407,7 +406,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
     _onSwitchView(ev) {
         const detail = ev.detail;
         const viewType = ev.detail.view_type;
-        const currentControllerID = this.controllerStack[this.controllerStack.length - 1];
+        const currentControllerID = this.currentStack[this.currentStack.length - 1];
         const currentController = this.controllers[currentControllerID];
         const action = this.actions[currentController.actionID];
         // TODO: find a way to save/restore state

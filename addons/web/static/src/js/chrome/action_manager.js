@@ -9,7 +9,19 @@ const { redirect } = require('web.framework');
 var pyUtils = require('web.py_utils');
 const Widget = require('web.Widget');
 
-const { Component, useState } = owl;
+const { Component, tags, useState } = owl;
+const xml = tags.xml;
+
+// Fake loading action that never resolves. Will be replaced by a real Action as
+// soon as its description will be loaded.
+class LoadingAction extends Component {
+    willStart() {
+        return new Promise(() => {});
+    }
+}
+LoadingAction.template = xml`<div/>`;
+
+let nextID = 1;
 
 class ActionManager extends Component {
     constructor() {
@@ -27,37 +39,17 @@ class ActionManager extends Component {
 
         // 'controllerStack' is the stack of ids of the controllers currently
         // displayed in the current window
-        this.controllerStack = [];
-
-        // we use a renderID in the state to force re-renderings
+        this.currentStack = [];
         this.state = useState({
-            renderID: 0,
+            pendingStack: []
         });
-
-        // used to generate unique JS ids
-        this.nextID = 1;
     }
     willStart() {
-        this.actionRequest = this._generateActionRequest(this.props.actionRequest);
-        return this._doAction(this.actionRequest);
-    }
-    willUpdateProps(nextProps) {
-        this.actionRequest = this._generateActionRequest(nextProps.actionRequest);
-        return new Promise((resolve, reject) => {
-            this._doAction(this.actionRequest)
-                .then(resolve)
-                .guardedCatch((reason) => {
-                    console.log(reason);
-                    if (reason === 'EUOFIZEJF') {
-                        resolve();
-                    } else {
-                        reject(reason);
-                    }
-                });
-        });
-    }
-    shouldUpdate(nextProps) {
-        return this.props.actionRequest.id !== nextProps.actionRequest.id;
+        if (this.props.initialAction) {
+            this.doAction(this.props.initialAction);
+        }
+        // this.actionRequest = this._generateActionRequest(this.props.actionRequest);
+        // return this.doAction(this.actionRequest);
     }
     patched() {
         this._postProcessAction();
@@ -69,34 +61,6 @@ class ActionManager extends Component {
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    _resolveLast(promise) {
-        // poor solution for now... let it do eveything, and simply prevent the
-        // state change au dernier moment
-        // however, must wait for all ('cancelled') rpcs to return before
-        // displaying new result
-        // new solution: expose reject function, and reject as soon as a new
-        // request arrives + handle rejection in willUpdateProps
-        // return promise;
-        const requestID = this.actionRequest.id;
-        return new Promise((resolve, reject) => {
-            this.promReject = reject;
-            promise.then((result) => {
-                if (this.actionRequest.id === requestID) {
-                    resolve(result);
-                }
-            });
-            // promise.guardedCatch((result) => {
-            //     if (this.actionRequest.id === requestID) {
-            //         reject(result);
-            //     }
-            // });
-        });
-    }
 
     /**
      * Executes Odoo actions, given as an ID in database, an xml ID, a client
@@ -124,7 +88,10 @@ class ActionManager extends Component {
      *   executed (e.g. if doAction has been called to execute another action
      *   before this one was complete).
      */
-    async _doAction(actionRequest) {
+    async doAction(action, options) {
+        // cancel potential current rendering
+        this._pushController({jsID: this._nextID('controller'), loading: true});
+
         const defaultOptions = {
             additional_context: {},
             clear_breadcrumbs: false,
@@ -133,9 +100,7 @@ class ActionManager extends Component {
             // pushState: true,
             replace_last_action: false,
         };
-        actionRequest.options = Object.assign(defaultOptions, actionRequest.options);
-        let action = actionRequest.action;
-        let options = actionRequest.options;
+        options = Object.assign(defaultOptions, options);
 
         // build or load an action descriptor for the given action
         if (typeof action === 'string' && action_registry.contains(action)) {
@@ -149,71 +114,131 @@ class ActionManager extends Component {
                 active_model: options.additional_context.active_model,
             });
             action = await this._resolveLast(loadActionProm);
-        } else {
-            // FIXME: must clone action here...
         }
 
         // action.target 'main' is equivalent to 'current' except that it
         // also clears the breadcrumbs
         options.clear_breadcrumbs = action.target === 'main' || options.clear_breadcrumbs;
 
-        actionRequest.action = this._preprocessAction(action, options);
-        return this._handleAction(actionRequest);
+        action = this._preprocessAction(action, options);
+        this.actions[action.jsID] = action;
+        return this._handleAction(action, options);
     }
+
+    //--------------------------------------------------------------------------
+    // Getters
+    //--------------------------------------------------------------------------
+
+    get pendingControllerID() {
+        return this.state.pendingStack[this.state.pendingStack.length - 1];
+    }
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
     /**
-     * Executes actions for which a controller has to be appended to the DOM,
-     * either in the main content (target="current", by default), or in a dialog
-     * (target="new").
+     * Wraps a promise to resolve/reject it when it is resolved/rejected: iff
+     * the pending controller hasn't changed between the moment when the request
+     * was initiated and the moment it is completed. If the controller changed,
+     * the returned promise stays pending forever.
+     *
+     * TODO: find a better name, and validate this solution (!= DropPrevious)
+     * TODO: memory leak?
      *
      * @private
-     * @param {Object} action
-     * @param {widget} action.controller a Widget instance to append to the DOM
-     * @param {string} [action.target="current"] set to "new" to render the
-     *   controller in a dialog
-     * @param {Object} options @see _doAction for details
+     * @param {Promise} promise
+     * @returns {Promise}
      */
-    _executeAction(actionRequest) {
-        // if (action.target === 'new') {
-        //     return this._executeActionInDialog(action, options);
-        // }
-
-        // return this.clearUncommittedChanges()
-        if (this.actionRequest.id === actionRequest.id) {
-            console.log('execute action');
-            this.state.renderID++; // force a re-rendering
-        } else {
-            console.log('do nothing, something new came up');
-        }
-        // this.actionRequest.action = action;
-        // this.currentAction = action;
-        // this.state.currentActionID = action.jsID;
-
-        //     .then(function () {
-        //         if (self.currentDialogController) {
-        //             self._closeDialog({ silent: true });
-        //         }
-
-        //         // store the optional 'on_reverse_breadcrumb' handler
-        //         // AAB: store it on the AbstractAction instance, and call it
-        //         // automatically when the action is restored
-        //         if (options.on_reverse_breadcrumb) {
-        //             var currentAction = self.getCurrentAction();
-        //             if (currentAction) {
-        //                 currentAction.on_reverse_breadcrumb = options.on_reverse_breadcrumb;
-        //             }
-        //         }
+    _resolveLast(promise) {
+        const pendingControllerID = this.pendingControllerID;
+        return new Promise((resolve, reject) => {
+            promise.then(result => {
+                if (pendingControllerID === this.pendingControllerID) {
+                    resolve(result);
+                }
+            });
+            promise.guardedCatch(reason => {
+                if (pendingControllerID === this.pendingControllerID) {
+                    reject(reason);
+                }
+            });
+        });
     }
+
+    /**
+     * Cleans this.actions and this.controllers according to the current stack.
+     *
+     * @private
+     */
+    _cleanActions() {
+        const usedActionIDs = this.currentStack.map(controllerID => {
+            return this.controllers[controllerID].actionID;
+        });
+        for (const controllerID in this.controllers) {
+            const controller = this.controllers[controllerID];
+            if (!usedActionIDs.includes(controller.actionID)) {
+                delete this.controllers[controllerID];
+                // controller.widget.destroy(); // TODO: destroy component
+            }
+        }
+        const unusedActionIDs = Object.keys(this.actions).filter(actionID => {
+            return !usedActionIDs.includes(actionID);
+        });
+        unusedActionIDs.forEach(actionID => delete this.actions[actionID]);
+    }
+    // /**
+    //  * Executes actions for which a controller has to be appended to the DOM,
+    //  * either in the main content (target="current", by default), or in a dialog
+    //  * (target="new").
+    //  *
+    //  * @private
+    //  * @param {Object} action
+    //  * @param {widget} action.controller a Widget instance to append to the DOM
+    //  * @param {string} [action.target="current"] set to "new" to render the
+    //  *   controller in a dialog
+    //  * @param {Object} options @see doAction for details
+    //  */
+    // _executeAction(actionRequest) {
+    //     // if (action.target === 'new') {
+    //     //     return this._executeActionInDialog(action, options);
+    //     // }
+
+    //     // return this.clearUncommittedChanges()
+    //     if (this.actionRequest.id === actionRequest.id) {
+    //         console.log('execute action');
+    //         this.state.renderID++; // force a re-rendering
+    //     } else {
+    //         console.log('do nothing, something new came up');
+    //     }
+    //     // this.actionRequest.action = action;
+    //     // this.currentAction = action;
+    //     // this.state.currentActionID = action.jsID;
+
+    //     //     .then(function () {
+    //     //         if (self.currentDialogController) {
+    //     //             self._closeDialog({ silent: true });
+    //     //         }
+
+    //     //         // store the optional 'on_reverse_breadcrumb' handler
+    //     //         // AAB: store it on the AbstractAction instance, and call it
+    //     //         // automatically when the action is restored
+    //     //         if (options.on_reverse_breadcrumb) {
+    //     //             var currentAction = self.getCurrentAction();
+    //     //             if (currentAction) {
+    //     //                 currentAction.on_reverse_breadcrumb = options.on_reverse_breadcrumb;
+    //     //             }
+    //     //         }
+    // }
     /**
      * Executes actions of type 'ir.actions.client'.
      *
      * @private
      * @param {Object} action the description of the action to execute
      * @param {string} action.tag the key of the action in the action_registry
-     * @param {Object} options @see _doAction for details
+     * @param {Object} options @see doAction for details
      */
-    _executeClientAction(actionRequest) {
-        const action = actionRequest.action;
-        const options = actionRequest.options;
+    _executeClientAction(action, options) {
         const ClientAction = action_registry.get(action.tag);
         if (!ClientAction) {
             console.error(`Could not find client action ${action.tag}`, action);
@@ -225,15 +250,15 @@ class ActionManager extends Component {
                 // whose returned value might be another action to execute
                 const nextAction = ClientAction(this, action);
                 if (nextAction) {
-                    actionRequest.action = nextAction;
-                    return this._resolveLast(this._doAction(actionRequest));
+                    action = nextAction;
+                    return this._resolveLast(this.doAction(action));
                 }
             }
         }
 
-        const controllerID = this.nextID++;
+        const controllerID = this._nextID('controller');
         const index = this._getControllerStackIndex(options);
-        options.breadcrumbs = this._getBreadcrumbs(this.controllerStack.slice(0, index));
+        options.breadcrumbs = this._getBreadcrumbs(this.currentStack.slice(0, index));
         options.controllerID = controllerID;
         action.controller = {
             actionID: action.jsID,
@@ -243,7 +268,8 @@ class ActionManager extends Component {
             options: options,
             // title: widget.getTitle(),
         };
-        this._executeAction(actionRequest);
+        this._pushController(action.controller);
+        // this._executeAction(action);
         // prom.then(function () {
         //     // AAB: this should be done automatically in AbstractAction, so that
         //     // it can be overridden by actions that have specific stuff to push
@@ -261,13 +287,11 @@ class ActionManager extends Component {
      * @param {string} action.url
      * @param {string} [action.target] set to 'self' to redirect in the current page,
      *   redirects to a new page by default
-     * @param {Object} options @see _doAction for details
+     * @param {Object} options @see doAction for details
      * @returns {Promise} resolved when the redirection is done (immediately
      *   when redirecting to a new page)
      */
-    _executeURLAction(actionRequest) {
-        const action = actionRequest.action;
-        const options = actionRequest.options;
+    _executeURLAction(action, options) {
         if (action.target === 'self') {
             redirect(action.url);
         } else {
@@ -289,11 +313,10 @@ class ActionManager extends Component {
      * @param {Object} action the description of the action to execute
      * @param {integer} action.id the db ID of the action to execute
      * @param {Object} [action.context]
-     * @param {Object} options @see _doAction for details
+     * @param {Object} options @see doAction for details
      * @returns {Promise} resolved when the action has been executed
      */
-    async _executeServerAction(actionRequest) {
-        let action = actionRequest.action;
+    async _executeServerAction(action) {
         const runActionProm = this.rpc({
             route: '/web/action/run',
             params: {
@@ -302,20 +325,20 @@ class ActionManager extends Component {
             },
         });
         action = await this._resolveLast(runActionProm);
-        actionRequest.action = action || { type: 'ir.actions.act_window_close' };
-        return this._doAction(actionRequest);
+        action = action || { type: 'ir.actions.act_window_close' };
+        return this.doAction(action);
     }
-    /**
-     * @private
-     * @param {Object} request
-     * @returns {Object}
-     */
-    _generateActionRequest(request) {
-        if (this.promReject) {
-            this.promReject('EUOFIZEJF');
-        }
-        return Object.assign({}, request, { id: `request_${this.nextID++}` });
-    }
+    // /**
+    //  * @private
+    //  * @param {Object} request
+    //  * @returns {Object}
+    //  */
+    // _generateActionRequest(request) {
+    //     if (this.promReject) {
+    //         this.promReject('EUOFIZEJF');
+    //     }
+    //     return Object.assign({}, request, { id: `request_${this.nextID++}` });
+    // }
     /**
      * Returns a description of the controllers in the given controller stack.
      * It is used to render the breadcrumbs. It is an array of Objects with keys
@@ -355,9 +378,9 @@ class ActionManager extends Component {
         } else if (options.clear_breadcrumbs) {
             index = 0;
         } else if (options.replace_last_action) {
-            index = this.controllerStack.length - 1;
+            index = this.currentStack.length - 1;
         } else {
-            index = this.controllerStack.length;
+            index = this.currentStack.length;
         }
         return index;
     }
@@ -374,25 +397,27 @@ class ActionManager extends Component {
      *   if the type of action isn't supported, or if the action can't be
      *   executed
      */
-    _handleAction(actionRequest) {
-        const action = actionRequest.action;
+    _handleAction(action, options) {
         if (!action.type) {
             console.error(`No type for action ${action}`);
             return Promise.reject();
         }
         switch (action.type) {
             case 'ir.actions.act_url':
-                return this._executeURLAction(actionRequest);
+                return this._executeURLAction(action, options);
             // case 'ir.actions.act_window_close':
-            //     return this._executeCloseAction(actionRequest);
+            //     return this._executeCloseAction(action);
             case 'ir.actions.client':
-                return this._executeClientAction(actionRequest);
+                return this._executeClientAction(action, options);
             case 'ir.actions.server':
-                return this._executeServerAction(actionRequest);
+                return this._executeServerAction(action, options);
             default:
                 console.error(`The ActionManager can't handle actions of type ${action.type}`, action);
                 return Promise.reject();
         }
+    }
+    _nextID(type) {
+        return `${type}${nextID++}`;
     }
     /**
      * Called when an action has been correctly executed. Adds its reference to
@@ -403,33 +428,26 @@ class ActionManager extends Component {
      * @private
      */
     _postProcessAction() {
-        const action = this.actionRequest.action;
-        const controller = action.controller;
-        this.actions[action.jsID] = action;
-        this.controllers[controller.jsID] = controller;
+        if (this.state.pendingStack === null) {
+            return;
+        }
+        this.currentStack = this.state.pendingStack.slice();
+        this.state.pendingStack = null;
+        this._cleanActions();
 
-        // push the new controller to the stack at the given position, and
-        // remove controllers with an higher index
-        let toRemove = this.controllerStack.slice(controller.index);
-        // reject from the list of controllers to destroy those linked to the
-        // same action as the current one
-        toRemove = toRemove.filter(controllerID => {
-           return this.controllers[controllerID].actionID !== controller.actionID;
-        });
-        this._removeControllers(toRemove);
-        this.controllerStack = this.controllerStack.slice(0, controller.index);
-        this.controllerStack.push(controller.jsID);
+        const controllerID = this.currentStack[this.currentStack.length - 1];
+        const controller = this.controllers[controllerID];
 
         // store the action into the sessionStorage so that it can be fully restored on F5
+        const action = this.actions[controller.actionID];
         this.env.services.session_storage.setItem('current_action', action._originalAction);
 
-        if (this.actionRequest.callback) {
-            this.actionRequest.callback();
-        }
+        // TODO: callback
+        // if (this.actionRequest.callback) {
+        //     this.actionRequest.callback();
+        // }
 
-        this.actionRequest = null;
-
-        console.warn(this.controllerStack);
+        console.warn(this.currentStack);
         console.warn(this.controllers);
         console.warn(this.actions);
     }
@@ -452,36 +470,24 @@ class ActionManager extends Component {
         }
 
         action._originalAction = JSON.stringify(action);
-        action.jsID = this.nextID++;
+        action.jsID = this._nextID('action');
         // action.pushState = options.pushState;
 
         return action;
     }
     /**
-     * Unlinks the given action and its controller from the internal structures
-     * and destroys its controllers.
+     * Updates the pendingStack with a given controller. It triggers a rendering
+     * of the ActionManager with that controller as active controller (last one
+     * of the stack).
      *
      * @private
-     * @param {string} actionID the id of the action to remove
+     * @param {Object} controller
      */
-    _removeAction(actionID) {
-        const action = this.actions[actionID];
-        delete this.actions[action.jsID];
-        delete this.controllers[action.controller.jsID];
-        // controller.widget.destroy(); // TODO: destroy component
-    }
-    /**
-     * Removes the given controllers and their corresponding actions.
-     *
-     * @see _removeAction
-     * @private
-     * @param {string[]} controllerIDs
-     */
-    _removeControllers(controllerIDs) {
-        const actionIDs = controllerIDs.map(controllerID => {
-            return this.controllers[controllerID].actionID;
-        });
-        [...new Set(actionIDs)].forEach(actionID => this._removeAction(actionID));
+    _pushController(controller) {
+        this.controllers[controller.jsID] = controller;
+        this.state.pendingStack = this.currentStack.slice();
+        this.state.pendingStack.splice(controller.index);
+        this.state.pendingStack.push(controller.jsID);
     }
     /**
      * Restores a controller from the controllerStack and removes all
@@ -492,10 +498,11 @@ class ActionManager extends Component {
      * @param {string} controllerID
      */
     _restoreController(controllerID) {
-        const controller = this.controllers[controllerID];
-        const action = this.actions[controller.actionID];
-        this.actionRequest = this._generateActionRequest({ action });
-        this._executeAction(this.actionRequest);
+        // const controller = this.controllers[controllerID];
+        // const action = this.actions[controller.actionID];
+        this._pushController(this.controllers[controllerID]);
+        // this.actionRequest = this._generateActionRequest({ action });
+        // this._executeAction(this.actionRequest);
 
         // AAB: AbstractAction should define a proper hook to execute code when
         // it is restored (other than do_show), and it should return a promise
@@ -537,7 +544,7 @@ class ActionManager extends Component {
         this._restoreController(ev.detail.controllerID);
     }
 }
-ActionManager.components = { Action };
+ActionManager.components = { Action, LoadingAction };
 ActionManager.template = 'web.ActionManager';
 
 return ActionManager;
