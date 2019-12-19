@@ -237,7 +237,7 @@ class Survey(http.Controller):
                 and answer_sudo.user_input_session_id.is_questions_time_limited:
             timer_start = answer_sudo.user_input_session_id.current_question_start_time.isoformat()
             time_limit_minutes = answer_sudo.user_input_session_id.questions_time_limit / 60
-        elif survey_sudo.is_time_limited:
+        elif survey_sudo.is_time_limited and answer_sudo.start_datetime:
             timer_start = answer_sudo.start_datetime.isoformat()
             time_limit_minutes = survey_sudo.time_limit
         data['timer_start'] = timer_start
