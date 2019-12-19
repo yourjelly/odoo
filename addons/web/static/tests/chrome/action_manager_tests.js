@@ -1,21 +1,23 @@
 odoo.define('web.action_manager_tests', function (require) {
 "use strict";
 
-var ReportClientAction = require('report.client_action');
-var Notification = require('web.Notification');
-var NotificationService = require('web.NotificationService');
-var AbstractAction = require('web.AbstractAction');
-var AbstractStorageService = require('web.AbstractStorageService');
-var BasicFields = require('web.basic_fields');
-var core = require('web.core');
-var ListController = require('web.ListController');
-var StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
-var RamStorage = require('web.RamStorage');
-var ReportService = require('web.ReportService');
-var SessionStorageService = require('web.SessionStorageService');
-var testUtils = require('web.test_utils');
-var Widget = require('web.Widget');
-var createActionManager = testUtils.createActionManager;
+const AbstractAction = require('web.AbstractAction');
+const AbstractStorageService = require('web.AbstractStorageService');
+const BasicFields = require('web.basic_fields');
+const core = require('web.core');
+const ListController = require('web.ListController');
+const Notification = require('web.Notification');
+const NotificationService = require('web.NotificationService');
+const RamStorage = require('web.RamStorage');
+const ReportClientAction = require('report.client_action');
+const ReportService = require('web.ReportService');
+const SessionStorageService = require('web.SessionStorageService');
+const StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
+const testUtils = require('web.test_utils');
+const Widget = require('web.Widget');
+
+const { createActionManager, nextTick } = testUtils;
+const { Component, tags } = owl;
 
 QUnit.module('ActionManager', {
     beforeEach: function () {
@@ -1787,8 +1789,8 @@ QUnit.module('ActionManager', {
 
     QUnit.module('Client Actions');
 
-    QUnit.test('can execute client actions from tag name', async function (assert) {
-        assert.expect(3);
+    QUnit.test('can execute client actions from tag name (legacy)', async function (assert) {
+        assert.expect(2);
 
         var ClientAction = AbstractAction.extend({
             start: function () {
@@ -1802,14 +1804,37 @@ QUnit.module('ActionManager', {
             mockRPC: function (route, args) {
                 assert.step(args.method || route);
                 return this._super.apply(this, arguments);
-            }
+            },
         });
-        await actionManager.doAction('HelloWorldTest');
+        actionManager.doAction('HelloWorldTest');
+        await nextTick();
 
-        assert.strictEqual(actionManager.$('.o_control_panel:visible').length, 0,
-            "shouldn't have rendered a control panel");
-        assert.strictEqual(actionManager.$('.o_client_action_test').text(),
-            'Hello World', "should have correctly rendered the client action");
+        assert.strictEqual(actionManager.el.innerHTML,
+            '<div class="o_action o_client_action_test">Hello World</div>');
+        assert.verifySteps([]);
+
+        actionManager.destroy();
+        delete core.action_registry.map.HelloWorldTest;
+    });
+
+    QUnit.test('can execute client actions from tag name', async function (assert) {
+        assert.expect(2);
+
+        class ClientAction extends Component {}
+        ClientAction.template = tags.xml`<div class="o_client_action_test">Hello World</div>`;
+        core.action_registry.add('HelloWorldTest', ClientAction);
+
+        var actionManager = await createActionManager({
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                return this._super.apply(this, arguments);
+            },
+        });
+        actionManager.doAction('HelloWorldTest');
+        await nextTick();
+
+        assert.strictEqual(actionManager.el.innerHTML,
+            '<div class="o_client_action_test o_action">Hello World</div>');
         assert.verifySteps([]);
 
         actionManager.destroy();
@@ -2305,12 +2330,11 @@ QUnit.module('ActionManager', {
                 return this._super.apply(this, arguments);
             },
         });
-        await actionManager.doAction(1);
+        actionManager.doAction(1);
+        await nextTick();
 
-        assert.strictEqual(actionManager.$('.o_control_panel').length, 1,
-            "should have rendered a control panel");
-        assert.containsOnce(actionManager, '.o_kanban_view',
-            "should have rendered a kanban view");
+        assert.containsOnce(actionManager, '.o_control_panel');
+        assert.containsOnce(actionManager, '.o_kanban_view');
         assert.verifySteps([
             '/web/action/load',
             'load_views',

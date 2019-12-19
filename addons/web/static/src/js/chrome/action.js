@@ -18,11 +18,11 @@ class Action extends AdapterComponent {
         if (props.Component.prototype instanceof Component) {
             // FIXME: try to set it on Action again
             Action.components[props.Component] = props.Component;
-            Action.template = tags.xml`<t t-component="Component" action="props.action" options="props.options"/>`;
+            Action.template = tags.xml`<t t-component="props.Component" class="o_action" action="props.action" options="props.options"/>`;
             super(...arguments);
             this.components = Action.components;
             this.template = Action.template;
-            Action.components = null;
+            // Action.components = null;
             Action.template = null;
         } else {
             super(...arguments);
