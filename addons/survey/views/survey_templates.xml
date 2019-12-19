@@ -398,9 +398,9 @@
                 <t t-set="item_idx" t-value="0"/>
                 <tr t-foreach="question.matrix_row_ids" t-as="row_label">
                     <th><span t-field="row_label.value" /></th>
-                    <td t-foreach="question.suggested_answer_ids" t-as="col_label">
+                    <t t-foreach="question.suggested_answer_ids" t-as="col_label">
                         <t t-set="answer" t-value="answer_lines.filtered(lambda line: line.suggested_answer_id == col_label and line.matrix_row_id == row_label)"/>
-                        <div t-att-class="'o_survey_matrix_btn' + (' o_survey_selected ' if answer else '')">
+                        <td t-att-class="'o_survey_matrix_btn' + (' o_survey_selected ' if answer else '')">
                             <input t-att-type="'checkbox' if question.matrix_subtype == 'multiple' else 'radio'"
                                    t-att-name="'%s_%s' % (question.id, row_label.id)" t-att-value='col_label.id'
                                    t-att-checked="'checked' if answer else None"
@@ -412,9 +412,9 @@
                                  <span class="o_survey_key">Key</span>
                                  <span t-esc="letters[item_idx]"/>
                             </div>
-                        </div>
-                        <t t-set="item_idx" t-value="item_idx + 1"/>
-                    </td>
+                            <t t-set="item_idx" t-value="item_idx + 1"/>
+                        </td>
+                    </t>
                 </tr>
             </tbody>
         </table>
