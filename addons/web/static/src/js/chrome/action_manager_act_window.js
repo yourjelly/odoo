@@ -39,6 +39,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
     _createViewController(action, viewType, viewOptions, options) {
         if (action.controllers[viewType]) {
             action.controller = action.controllers[viewType];
+            action.controller.viewOptions.breadcrumbs = this._getBreadcrumbs(this.currentStack.slice(0, action.controller.index));
             Object.assign(action.controller.viewOptions, viewOptions); // FIXME: restore controller instead of destroying/re-creating it
             return;
         }

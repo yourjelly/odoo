@@ -42,21 +42,7 @@ async function createActionManager(params) {
     params = params || {};
     const target = prepareTarget(params.debug);
 
-    class ParentComponent extends Component {
-        constructor() {
-            super(...arguments);
-            this.actionManager = hooks.useRef('actionManager');
-        }
-    }
-    ParentComponent.components = { ActionManager };
-    ParentComponent.template = tags.xml`
-        <div class="o_web_client">
-            <ActionManager t-ref="actionManager"/>
-        </div>`;
-    // FIXME: seeems wrong
-    // if (config.device.isMobile) {
-    //     parent.el.classList.add('o_touch_device');
-    // }
+    // build env
     let Server = MockServer;
     if (params.mockRPC) {
         Server = MockServer.extend({ _performRpc: params.mockRPC });
@@ -106,18 +92,41 @@ async function createActionManager(params) {
             ajax: {
                 rpc: server.performRpc.bind(server),
             },
+            local_storage: new RamStorageService(),
             session_storage: new RamStorageService(),
         },
     };
-    ParentComponent.env = makeTestEnvironment(env);
-    const parent = new ParentComponent();
+
+    // define Parent component, embedding an ActionManager
+    class Parent extends Component {
+        constructor() {
+            super(...arguments);
+            this.actionManager = hooks.useRef('actionManager');
+        }
+    }
+    Parent.env = makeTestEnvironment(env);
+    Parent.components = { ActionManager };
+    Parent.template = tags.xml`
+        <div class="o_web_client">
+            <ActionManager t-ref="actionManager"/>
+        </div>`;
+    // FIXME: seeems wrong
+    // if (config.device.isMobile) {
+    //     parent.el.classList.add('o_touch_device');
+    // }
+
+    // instantiation
+    const parent = new Parent();
     await parent.mount(target);
     const actionManager = parent.actionManager.comp;
+
+    // patch actionManager's destroy to properly destroy parent
     const originalDestroy = actionManager.destroy;
     actionManager.destroy = function () {
         actionManager.destroy = originalDestroy;
         parent.destroy();
     };
+
     return actionManager;
 
     // when 'document' addon is installed, the sidebar does a 'search_read' on
