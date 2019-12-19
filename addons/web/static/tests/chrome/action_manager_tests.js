@@ -161,13 +161,13 @@ QUnit.module('ActionManager', {
         });
 
         await actionManager.doAction(4);
-        assert.ok(!$('.o_control_panel').is(':visible'),
+        assert.ok(!actionManager.$('.o_control_panel').is(':visible'),
             "control panel should not be visible");
 
         await actionManager.doAction(1, {clear_breadcrumbs: true});
-        assert.ok($('.o_control_panel').is(':visible'),
+        assert.ok(actionManager.$('.o_control_panel').is(':visible'),
             "control panel should now be visible");
-        assert.strictEqual($('.o_control_panel .breadcrumb').text(), "Partners Action 1",
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb').text(), "Partners Action 1",
             "should have only one current action visible in breadcrumbs");
 
         actionManager.destroy();
@@ -198,11 +198,11 @@ QUnit.module('ActionManager', {
         var n = delta;
         await actionManager.doAction(4);
         // kanban view is loaded, switch to list view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_list'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_list'));
         // open a record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
         // go back to action 7 in breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a:first'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a:first'));
 
         assert.strictEqual(delta, n,
             "should have properly destroyed all other widgets");
@@ -405,12 +405,12 @@ QUnit.module('ActionManager', {
             data: this.data,
         });
         await actionManager.doAction(3);
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
 
         // push another action flagged with 'no_breadcrumbs=true'
         await actionManager.doAction(4);
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 0,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 0,
             "the breadcrumbs should be empty");
 
         actionManager.destroy();
@@ -431,7 +431,7 @@ QUnit.module('ActionManager', {
 
         // execute action 4 without 'on_reverse_breadcrumb' handler, then go back
         await actionManager.doAction(4);
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a:first'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a:first'));
         assert.verifySteps([]);
 
         // execute action 4 with an 'on_reverse_breadcrumb' handler, then go back
@@ -440,7 +440,7 @@ QUnit.module('ActionManager', {
                 assert.step('on_reverse_breadcrumb');
             }
         });
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a:first'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a:first'));
         assert.verifySteps(['on_reverse_breadcrumb']);
 
         actionManager.destroy();
@@ -460,9 +460,9 @@ QUnit.module('ActionManager', {
         actionManager.trigger_up('history_back');
 
         await testUtils.nextTick();
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
             "breadcrumbs should display the display_name of the action");
 
         actionManager.destroy();
@@ -500,7 +500,7 @@ QUnit.module('ActionManager', {
 
         // go back using the breadcrumbs
         assert.step('go back to action 3');
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
 
         assert.verifySteps([
             'execute action 3',
@@ -759,7 +759,7 @@ QUnit.module('ActionManager', {
             action: 1,
         });
 
-        assert.strictEqual($('.o_control_panel').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel').length, 1,
             "should have rendered a control panel");
         assert.containsOnce(actionManager, '.o_kanban_view',
             "should have rendered a kanban view");
@@ -792,7 +792,7 @@ QUnit.module('ActionManager', {
 
         assert.containsOnce(actionManager, '.o_form_view',
             "should have rendered a form view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Second record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Second record',
             "should have opened the second record");
 
         assert.verifySteps([
@@ -886,13 +886,13 @@ QUnit.module('ActionManager', {
             "should not have rendered a list view");
         assert.containsOnce(actionManager, '.o_form_view',
             "should have rendered a form view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'Second record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'Second record',
             "breadcrumbs should contain the display_name of the opened record");
 
         // go back to Lst
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
         assert.containsOnce(actionManager, '.o_list_view',
             "should now display the list view");
         assert.containsNone(actionManager, '.o_form_view',
@@ -918,9 +918,9 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(4);
 
-        assert.strictEqual($('.o_control_panel .breadcrumb li').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb li').length, 1,
             "there should be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb li').text(), 'Partners Action 4',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb li').text(), 'Partners Action 4',
             "breadcrumbs should contain the display_name of the opened record");
 
         await actionManager.doAction(3, {
@@ -928,17 +928,17 @@ QUnit.module('ActionManager', {
             viewType: 'form',
         });
 
-        assert.strictEqual($('.o_control_panel .breadcrumb li').length, 3,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb li').length, 3,
             "there should be three controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb li').text(), 'Partners Action 4PartnersSecond record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb li').text(), 'Partners Action 4PartnersSecond record',
             "the breadcrumb elements should be correctly ordered");
 
         // go back to List
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a:last'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a:last'));
 
-        assert.strictEqual($('.o_control_panel .breadcrumb li').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb li').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb li').text(), 'Partners Action 4Partners',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb li').text(), 'Partners Action 4Partners',
             "the breadcrumb elements should be correctly ordered");
 
         actionManager.destroy();
@@ -1018,9 +1018,9 @@ QUnit.module('ActionManager', {
             "should not display the kanban view anymore");
         assert.containsOnce(actionManager, '.o_form_view',
             "should have switched to the form view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'Fourth record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'Fourth record',
             "should have opened the requested record");
 
         // verify steps to ensure that the whole action hasn't been re-executed
@@ -1056,7 +1056,7 @@ QUnit.module('ActionManager', {
 
         assert.containsOnce(actionManager, '.o_form_view',
             "should have rendered a form view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'First record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'First record',
             "should have opened the first record");
 
         // switch to record 4
@@ -1068,9 +1068,9 @@ QUnit.module('ActionManager', {
 
         assert.containsOnce(actionManager, '.o_form_view',
             "should still display the form view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'Fourth record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'Fourth record',
             "should have switched to the requested record");
 
         // verify steps to ensure that the whole action hasn't been re-executed
@@ -1196,7 +1196,7 @@ QUnit.module('ActionManager', {
 
         assert.strictEqual(actionManager.$('.o_client_action .o_content').text(), 'default value',
             "should have rendered the client action");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
 
         // update param 'a' in the url
@@ -1207,7 +1207,7 @@ QUnit.module('ActionManager', {
 
         assert.strictEqual(actionManager.$('.o_client_action .o_content').text(), 'new value',
             "should have rerendered the client action with the correct param");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should still be one controller in the breadcrumbs");
 
         // should have executed the client action twice
@@ -1247,7 +1247,7 @@ QUnit.module('ActionManager', {
 
         assert.containsOnce(actionManager, '.o_kanban_view',
             "should display a kanban view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
             "breadcrumbs should display the display_name of the action");
 
          await actionManager.loadState({
@@ -1255,7 +1255,7 @@ QUnit.module('ActionManager', {
             view_type: 'list',
         });
 
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
             "should still be in the same action");
         assert.containsNone(actionManager, '.o_kanban_view',
             "should no longer display a kanban view");
@@ -1336,11 +1336,11 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(4);
         // kanban view is loaded, switch to list view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_list'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_list'));
 
         // here, list view is not ready yet, because def is not resolved
         // switch back to kanban view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_kanban'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_kanban'));
 
         // here, we want the kanban view to reload itself, regardless of list view
         assert.verifySteps([
@@ -1384,7 +1384,7 @@ QUnit.module('ActionManager', {
 
         def.resolve();
         await testUtils.nextTick();
-        assert.strictEqual($('.o_control_panel .breadcrumb-item.active').text(), 'Partners Action 4',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item.active').text(), 'Partners Action 4',
             'action 4 should be loaded');
 
         actionManager.destroy();
@@ -1420,14 +1420,14 @@ QUnit.module('ActionManager', {
 
         // click on the breadcrumbs for the form view, then on the kanban view
         // before the form view is fully reloaded
-        await testUtils.dom.click($('.o_control_panel .breadcrumb-item:eq(1)'));
-        await testUtils.dom.click($('.o_control_panel .breadcrumb-item:eq(0)'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb-item:eq(1)'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb-item:eq(0)'));
 
         // resolve the form view read
         def.resolve();
         await testUtils.nextTick();
 
-        assert.strictEqual($('.o_control_panel .breadcrumb-item.active').text(), 'Partners Action 4',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item.active').text(), 'Partners Action 4',
             'action 4 should be loaded and visible');
 
         actionManager.destroy();
@@ -1462,7 +1462,7 @@ QUnit.module('ActionManager', {
         // click to go back to Kanban (this request is blocked)
         def = testUtils.makeTestPromise();
         await testUtils.nextTick();
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
 
         assert.containsOnce(actionManager, '.o_form_view',
         "should still display the form view of action 4");
@@ -1660,7 +1660,7 @@ QUnit.module('ActionManager', {
             "should display the kanban view of action 4");
         assert.containsNone(actionManager, '.o_list_view',
             "should not display the list view of action 3");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
 
         assert.verifySteps([
@@ -1708,7 +1708,7 @@ QUnit.module('ActionManager', {
             "should display the kanban view of action 4");
         assert.containsNone(actionManager, '.o_list_view',
             "should not display the list view of action 3");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
 
         assert.verifySteps([
@@ -1746,17 +1746,17 @@ QUnit.module('ActionManager', {
             "should display the list view");
         assert.containsN(actionManager, '.o_list_view .o_data_row', 5,
             "list view should contain 5 records");
-        assert.strictEqual($('.o_control_panel .o_list_buttons').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_list_buttons').length, 1,
             "list view buttons should be displayed in control panel");
 
         // reload (the search_read RPC will be blocked)
         def = testUtils.makeTestPromise();
         await testUtils.nextTick();
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_list'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_list'));
 
         assert.containsN(actionManager, '.o_list_view .o_data_row', 5,
             "list view should still contain 5 records");
-        assert.strictEqual($('.o_control_panel .o_list_buttons').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_list_buttons').length, 1,
             "list view buttons should still be displayed in control panel");
 
         // open a record in form view
@@ -1764,9 +1764,9 @@ QUnit.module('ActionManager', {
 
         assert.containsOnce(actionManager, '.o_form_view',
             "should display the form view");
-        assert.strictEqual($('.o_control_panel .o_list_buttons').length, 0,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_list_buttons').length, 0,
             "list view buttons should no longer be displayed in control panel");
-        assert.strictEqual($('.o_control_panel .o_form_buttons_view').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_form_buttons_view').length, 1,
             "form view buttons should be displayed instead");
 
         // unblock the search_read RPC
@@ -1777,9 +1777,9 @@ QUnit.module('ActionManager', {
             "should display the form view");
         assert.containsNone(actionManager, '.o_list_view',
             "should not display the list view");
-        assert.strictEqual($('.o_control_panel .o_list_buttons').length, 0,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_list_buttons').length, 0,
             "list view buttons should still not be displayed in control panel");
-        assert.strictEqual($('.o_control_panel .o_form_buttons_view').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_form_buttons_view').length, 1,
             "form view buttons should still be displayed instead");
 
         actionManager.destroy();
@@ -1806,7 +1806,7 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction('HelloWorldTest');
 
-        assert.strictEqual($('.o_control_panel:visible').length, 0, // AAB: global selector until the ControlPanel is moved from ActionManager to the Views
+        assert.strictEqual(actionManager.$('.o_control_panel:visible').length, 0,
             "shouldn't have rendered a control panel");
         assert.strictEqual(actionManager.$('.o_client_action_test').text(),
             'Hello World', "should have correctly rendered the client action");
@@ -1833,11 +1833,11 @@ QUnit.module('ActionManager', {
         var actionManager = await createActionManager();
         await actionManager.doAction('HelloWorldTest');
 
-        assert.strictEqual($('.o_control_panel:visible').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel:visible').length, 1,
             "should have rendered a control panel");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Hello',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Hello',
             "breadcrumbs should still display the title of the controller");
         assert.strictEqual(actionManager.$('.o_client_action_test .o_content').text(),
             'Hello World', "should have correctly rendered the client action");
@@ -1988,7 +1988,7 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(2);
 
-        assert.strictEqual($('.o_control_panel:visible').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel:visible').length, 1,
             "should have rendered a control panel");
         assert.containsOnce(actionManager, '.o_kanban_view',
             "should have rendered a kanban view");
@@ -2307,7 +2307,7 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(1);
 
-        assert.strictEqual($('.o_control_panel').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel').length, 1,
             "should have rendered a control panel");
         assert.containsOnce(actionManager, '.o_kanban_view',
             "should have rendered a kanban view");
@@ -2371,14 +2371,14 @@ QUnit.module('ActionManager', {
             "should display the list view");
 
         // switch to kanban view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_kanban'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_kanban'));
         assert.containsNone(actionManager, '.o_list_view',
             "should no longer display the list view");
         assert.containsOnce(actionManager, '.o_kanban_view',
             "should display the kanban view");
 
         // switch back to list view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_list'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_list'));
         assert.containsOnce(actionManager, '.o_list_view',
             "should display the list view");
         assert.containsNone(actionManager, '.o_kanban_view',
@@ -2394,7 +2394,7 @@ QUnit.module('ActionManager', {
             "should have opened the correct record");
 
         // go back to list view using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
         assert.containsOnce(actionManager, '.o_list_view',
             "should display the list view");
         assert.containsNone(actionManager, '.o_form_view',
@@ -2479,54 +2479,54 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(3);
 
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Partners',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Partners',
             "breadcrumbs should display the display_name of the action");
 
         // switch to kanban view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_kanban'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_kanban'));
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should still be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Partners',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Partners',
             "breadcrumbs should still display the display_name of the action");
 
         // open a record in form view
         await testUtils.dom.click(actionManager.$('.o_kanban_view .o_kanban_record:first'));
         await testUtils.nextTick();
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'First record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'First record',
             "breadcrumbs should contain the display_name of the opened record");
 
         // go back to kanban view using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Partners',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Partners',
             "breadcrumbs should display the display_name of the action");
 
         // switch back to list view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_list'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_list'));
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should still be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Partners',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Partners',
             "breadcrumbs should still display the display_name of the action");
 
         // open a record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'First record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'First record',
             "breadcrumbs should contain the display_name of the opened record");
 
         // go back to list view using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
         assert.containsOnce(actionManager, '.o_list_view',
             "should be back on list view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').text(), 'Partners',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').text(), 'Partners',
             "breadcrumbs should display the display_name of the action");
 
         actionManager.destroy();
@@ -2542,43 +2542,43 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(3);
 
-        assert.strictEqual($('.o_control_panel .o_cp_switch_buttons button').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_cp_switch_buttons button').length, 2,
             "should have two switch buttons (list and kanban)");
-        assert.strictEqual($('.o_control_panel .o_cp_switch_buttons button.active').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_cp_switch_buttons button.active').length, 1,
             "should have only one active button");
-        assert.hasClass($('.o_control_panel .o_cp_switch_buttons button:first'),'o_cp_switch_list',
+        assert.hasClass(actionManager.$('.o_control_panel .o_cp_switch_buttons button:first'),'o_cp_switch_list',
             "list switch button should be the first one");
-        assert.hasClass($('.o_control_panel .o_cp_switch_list'),'active',
+        assert.hasClass(actionManager.$('.o_control_panel .o_cp_switch_list'),'active',
             "list should be the active view");
 
         // switch to kanban view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_kanban'));
-        assert.strictEqual($('.o_control_panel .o_cp_switch_buttons button').length, 2,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_kanban'));
+        assert.strictEqual(actionManager.$('.o_control_panel .o_cp_switch_buttons button').length, 2,
             "should still have two switch buttons (list and kanban)");
-        assert.strictEqual($('.o_control_panel .o_cp_switch_buttons button.active').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_cp_switch_buttons button.active').length, 1,
             "should still have only one active button");
-        assert.hasClass($('.o_control_panel .o_cp_switch_buttons button:first'),'o_cp_switch_list',
+        assert.hasClass(actionManager.$('.o_control_panel .o_cp_switch_buttons button:first'),'o_cp_switch_list',
             "list switch button should still be the first one");
-        assert.hasClass($('.o_control_panel .o_cp_switch_kanban'),'active',
+        assert.hasClass(actionManager.$('.o_control_panel .o_cp_switch_kanban'),'active',
             "kanban should now be the active view");
 
         // switch back to list view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_list'));
-        assert.strictEqual($('.o_control_panel .o_cp_switch_buttons button').length, 2,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_list'));
+        assert.strictEqual(actionManager.$('.o_control_panel .o_cp_switch_buttons button').length, 2,
             "should still have two switch buttons (list and kanban)");
-        assert.hasClass($('.o_control_panel .o_cp_switch_list'),'active',
+        assert.hasClass(actionManager.$('.o_control_panel .o_cp_switch_list'),'active',
             "list should now be the active view");
 
         // open a record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
-        assert.strictEqual($('.o_control_panel .o_cp_switch_buttons button').length, 0,
+        assert.strictEqual(actionManager.$('.o_control_panel .o_cp_switch_buttons button').length, 0,
             "should not have any switch buttons");
 
         // go back to list view using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
-        assert.strictEqual($('.o_control_panel .o_cp_switch_buttons button').length, 2,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
+        assert.strictEqual(actionManager.$('.o_control_panel .o_cp_switch_buttons button').length, 2,
             "should have two switch buttons (list and kanban)");
-        assert.hasClass($('.o_control_panel .o_cp_switch_list'),'active',
+        assert.hasClass(actionManager.$('.o_control_panel .o_cp_switch_list'),'active',
             "list should be the active view");
 
         actionManager.destroy();
@@ -2594,37 +2594,37 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(4);
 
-        assert.strictEqual($('.o_control_panel .o_pager_value').text(), '1-5',
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_value').text(), '1-5',
             "value should be correct for kanban");
-        assert.strictEqual($('.o_control_panel .o_pager_limit').text(), '5',
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_limit').text(), '5',
             "limit should be correct for kanban");
 
         // switch to list view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_list'));
-        assert.strictEqual($('.o_control_panel .o_pager_value').text(), '1-3',
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_list'));
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_value').text(), '1-3',
             "value should be correct for list");
-        assert.strictEqual($('.o_control_panel .o_pager_limit').text(), '5',
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_limit').text(), '5',
             "limit should be correct for list");
 
         // open a record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
-        assert.strictEqual($('.o_control_panel .o_pager_value').text(), '1',
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_value').text(), '1',
             "value should be correct for form");
-        assert.strictEqual($('.o_control_panel .o_pager_limit').text(), '3',
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_limit').text(), '3',
             "limit should be correct for form");
 
         // go back to list view using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
-        assert.strictEqual($('.o_control_panel .o_pager_value').text(), '1-3',
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_value').text(), '1-3',
             "value should be correct for list");
-        assert.strictEqual($('.o_control_panel .o_pager_limit').text(), '5',
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_limit').text(), '5',
             "limit should be correct for list");
 
         // switch back to kanban view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_kanban'));
-        assert.strictEqual($('.o_control_panel .o_pager_value').text(), '1-5',
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_kanban'));
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_value').text(), '1-5',
             "value should be correct for kanban");
-        assert.strictEqual($('.o_control_panel .o_pager_limit').text(), '5',
+        assert.strictEqual(actionManager.$('.o_control_panel .o_pager_limit').text(), '5',
             "limit should be correct for kanban");
 
         actionManager.destroy();
@@ -2681,7 +2681,7 @@ QUnit.module('ActionManager', {
 
         // switch to kanban view
         def = testUtils.makeTestPromise();
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_kanban'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_kanban'));
         assert.containsOnce(actionManager, '.o_list_view',
             "should still display the list view");
         assert.containsNone(actionManager, '.o_kanban_view',
@@ -2695,7 +2695,7 @@ QUnit.module('ActionManager', {
 
         // switch back to list view
         def = testUtils.makeTestPromise();
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_list'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_list'));
         assert.containsOnce(actionManager, '.o_kanban_view',
             "should still display the kanban view");
         assert.containsNone(actionManager, '.o_list_view',
@@ -2714,7 +2714,7 @@ QUnit.module('ActionManager', {
             "should still display the list view");
         assert.containsNone(actionManager, '.o_form_view',
             "shouldn't display the form view yet");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should still be one controller in the breadcrumbs");
         def.resolve();
         await testUtils.nextTick();
@@ -2722,17 +2722,17 @@ QUnit.module('ActionManager', {
             "should no longer display the list view");
         assert.containsOnce(actionManager, '.o_form_view',
             "should display the form view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
 
         // go back to list view using the breadcrumbs
         def = testUtils.makeTestPromise();
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
         assert.containsOnce(actionManager, '.o_form_view',
             "should still display the form view");
         assert.containsNone(actionManager, '.o_list_view',
             "shouldn't display the list view yet");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should still be two controllers in the breadcrumbs");
         def.resolve();
         await testUtils.nextTick();
@@ -2740,7 +2740,7 @@ QUnit.module('ActionManager', {
             "should no longer display the form view");
         assert.containsOnce(actionManager, '.o_list_view',
             "should display the list view");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
 
         actionManager.destroy();
@@ -2758,19 +2758,19 @@ QUnit.module('ActionManager', {
 
         // open a record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'First record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'First record',
             "breadcrumbs should contain the display_name of the opened record");
 
         // switch to edit mode and change the display_name
-        await testUtils.dom.click($('.o_control_panel .o_form_button_edit'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_form_button_edit'));
         await testUtils.fields.editInput(actionManager.$('.o_field_widget[name=display_name]'), 'New name');
-        await testUtils.dom.click($('.o_control_panel .o_form_button_save'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_form_button_save'));
 
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should still be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'New name',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'New name',
             "breadcrumbs should contain the display_name of the opened record");
 
         actionManager.destroy();
@@ -2821,12 +2821,12 @@ QUnit.module('ActionManager', {
         await actionManager.doAction(3);
 
         // create a new record
-        await testUtils.dom.click($('.o_control_panel .o_list_button_add'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_list_button_add'));
         assert.containsOnce(actionManager, '.o_form_view.o_form_editable',
             "should have opened the form view in edit mode");
 
         // discard
-        await testUtils.dom.click($('.o_control_panel .o_form_button_cancel'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_form_button_cancel'));
         assert.containsOnce(actionManager, '.o_list_view',
             "should have switched back to the list view");
 
@@ -2910,10 +2910,10 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
 
         // click on 'Execute action' button (should execute an action)
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two parts in the breadcrumbs");
         await testUtils.dom.click(actionManager.$('.o_form_view button:contains(Execute action)'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 3,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 3,
             "the returned action should have been stacked over the previous one");
         assert.containsOnce(actionManager, '.o_kanban_view',
             "the returned action should have been executed");
@@ -2992,17 +2992,17 @@ QUnit.module('ActionManager', {
 
         // open the first record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'First record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'First record',
             "breadcrumbs should contain the display_name of the opened record");
         assert.strictEqual(actionManager.$('.o_field_widget[name=foo]').text(), 'yop',
             "should have opened the correct record");
 
         // go back to list view using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a'));
 
         // open the second record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:nth(1)'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'Second record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'Second record',
             "breadcrumbs should contain the display_name of the opened record");
         assert.strictEqual(actionManager.$('.o_field_widget[name=foo]').text(), 'blip',
             "should have opened the correct record");
@@ -3032,23 +3032,23 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(3);
 
-        assert.hasClass($('.o_control_panel  .fa-bar-chart-o'),'active',
+        assert.hasClass(actionManager.$('.o_control_panel  .fa-bar-chart-o'),'active',
             "bar chart button is active");
-        assert.doesNotHaveClass($('.o_control_panel  .fa-area-chart'), 'active',
+        assert.doesNotHaveClass(actionManager.$('.o_control_panel  .fa-area-chart'), 'active',
             "line chart button is not active");
 
         // display line chart
-        await testUtils.dom.click($('.o_control_panel  .fa-area-chart'));
-        assert.hasClass($('.o_control_panel  .fa-area-chart'),'active',
+        await testUtils.dom.click(actionManager.$('.o_control_panel  .fa-area-chart'));
+        assert.hasClass(actionManager.$('.o_control_panel  .fa-area-chart'),'active',
             "line chart button is now active");
 
         // switch to kanban and back to graph view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_kanban'));
-        assert.strictEqual($('.o_control_panel  .fa-area-chart').length, 0,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_kanban'));
+        assert.strictEqual(actionManager.$('.o_control_panel  .fa-area-chart').length, 0,
             "graph buttons are no longer in control panel");
 
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_graph'));
-        assert.hasClass($('.o_control_panel  .fa-area-chart'),'active',
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_graph'));
+        assert.hasClass(actionManager.$('.o_control_panel  .fa-area-chart'),'active',
             "line chart button is still active");
         actionManager.destroy();
     });
@@ -3068,16 +3068,16 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(3);
 
-        assert.hasClass($('.o_control_panel .o_cp_switch_list'),'active',
+        assert.hasClass(actionManager.$('.o_control_panel .o_cp_switch_list'),'active',
             "list button in control panel is active");
-        assert.doesNotHaveClass($('.o_control_panel .o_cp_switch_graph'), 'active',
+        assert.doesNotHaveClass(actionManager.$('.o_control_panel .o_cp_switch_graph'), 'active',
             "graph button in control panel is not active");
 
         // switch to graph view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_graph'));
-        assert.doesNotHaveClass($('.o_control_panel .o_cp_switch_list'), 'active',
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_graph'));
+        assert.doesNotHaveClass(actionManager.$('.o_control_panel .o_cp_switch_list'), 'active',
             "list button in control panel is not active");
-        assert.hasClass($('.o_control_panel .o_cp_switch_graph'),'active',
+        assert.hasClass(actionManager.$('.o_control_panel .o_cp_switch_graph'),'active',
             "graph button in control panel is active");
         actionManager.destroy();
     });
@@ -3101,10 +3101,10 @@ QUnit.module('ActionManager', {
             "list view is not grouped");
 
         // open group by dropdown
-        await testUtils.dom.click($('.o_control_panel .o_cp_right button:contains(Group By)'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_right button:contains(Group By)'));
 
         // click on first link
-        await testUtils.dom.click($('.o_control_panel .o_group_by_menu a:first'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_group_by_menu a:first'));
 
         assert.hasClass(actionManager.$('.o_list_table'),'o_list_table_grouped',
             'list view is now grouped');
@@ -3146,7 +3146,7 @@ QUnit.module('ActionManager', {
         // open first record in form view
         await testUtils.dom.click(actionManager.$('.o_data_row:first'));
         // click on edit
-        await testUtils.dom.click($('.o_control_panel .o_form_button_edit'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_form_button_edit'));
 
         // click on external button for m2o
         await testUtils.dom.click(actionManager.$('.o_external_button'));
@@ -3176,11 +3176,11 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click(actionManager.$('.o_kanban_record:first'));
 
         // edit record
-        await testUtils.dom.click($('.o_control_panel button.o_form_button_edit'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel button.o_form_button_edit'));
         await testUtils.fields.editInput(actionManager.$('input[name="foo"]'), 'pinkypie');
 
         // go back to kanban view
-        await testUtils.dom.click($('.o_control_panel .breadcrumb-item:first a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb-item:first a'));
 
         assert.strictEqual($('.modal .modal-body').text(),
             "The record has been modified, your changes will be discarded. Do you want to proceed?",
@@ -3193,7 +3193,7 @@ QUnit.module('ActionManager', {
             "should still be in form view");
 
         // go back again to kanban view
-        await testUtils.dom.click($('.o_control_panel .breadcrumb-item:first a'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb-item:first a'));
 
         // confirm discard
         await testUtils.dom.click($('.modal .modal-footer button.btn-primary'));
@@ -3221,7 +3221,7 @@ QUnit.module('ActionManager', {
             "should only display 2 record");
 
         // switch to kanban view
-        await testUtils.dom.click($('.o_control_panel .o_cp_switch_kanban'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_switch_kanban'));
 
         assert.strictEqual(actionManager.$('.o_kanban_record:not(.o_kanban_ghost)').length, 2,
             "should only display 2 record");
@@ -3241,35 +3241,35 @@ QUnit.module('ActionManager', {
 
         // open a record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'First record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'First record',
             "breadcrumbs should contain the display_name of the opened record");
 
         // push another action on top of the first one, and come back to the form view
         await actionManager.doAction(4);
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 3,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 3,
             "there should be three controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'Partners Action 4',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'Partners Action 4',
             "breadcrumbs should contain the name of the current action");
         // go back using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a:nth(1)'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a:nth(1)'));
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'First record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'First record',
             "breadcrumbs should contain the display_name of the opened record");
 
         // push again the other action on top of the first one, and come back to the list view
         await actionManager.doAction(4);
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 3,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 3,
             "there should be three controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'Partners Action 4',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'Partners Action 4',
             "breadcrumbs should contain the name of the current action");
         // go back using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a:first'));
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 1,
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a:first'));
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'Partners',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'Partners',
             "breadcrumbs should contain the name of the current action");
 
         actionManager.destroy();
@@ -3288,13 +3288,13 @@ QUnit.module('ActionManager', {
         // open a record in form view
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
         // switch to edit mode
-        await testUtils.dom.click($('.o_control_panel .o_form_button_edit'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_form_button_edit'));
 
         assert.hasClass(actionManager.$('.o_form_view'), 'o_form_editable');
         // do some other action
         await actionManager.doAction(4);
         // go back to form view
-        await testUtils.dom.clickLast($('.o_control_panel .breadcrumb a'));
+        await testUtils.dom.clickLast(actionManager.$('.o_control_panel .breadcrumb a'));
         await testUtils.nextTick();
         assert.hasClass(actionManager.$('.o_form_view'), 'o_form_readonly');
 
@@ -3324,14 +3324,14 @@ QUnit.module('ActionManager', {
             "should be grouped by 'bar' (two groups) at first load");
 
         // groupby 'bar' using the searchview
-        await testUtils.dom.click($('.o_control_panel .o_cp_right button:contains(Group By)'));
-        await testUtils.dom.click($('.o_control_panel .o_group_by_menu a:first'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_cp_right button:contains(Group By)'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_group_by_menu a:first'));
 
         assert.containsN(actionManager, '.o_group_header', 5,
             "should be grouped by 'foo' (five groups)");
 
         // remove the groupby in the searchview
-        await testUtils.dom.click($('.o_control_panel .o_searchview .o_facet_remove'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_searchview .o_facet_remove'));
 
         assert.containsOnce(actionManager, '.o_list_table_grouped',
             "should still be grouped");
@@ -3427,16 +3427,16 @@ QUnit.module('ActionManager', {
             "should contain 5 records");
 
         // filter on bar
-        await testUtils.dom.click($('.o_control_panel .o_search_options .o_dropdown_toggler_btn:contains(Filters)'));
-        await testUtils.dom.click($('.o_control_panel .o_filters_menu a:contains(Bar)'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options .o_dropdown_toggler_btn:contains(Filters)'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_filters_menu a:contains(Bar)'));
 
         assert.containsN(actionManager, '.o_data_row', 2);
 
         // save filter
-        await testUtils.dom.click($('.o_control_panel .o_search_options .o_dropdown_toggler_btn:contains(Favorites)'));
-        await testUtils.dom.click($('.o_control_panel .o_add_favorite'));
-        $('.o_control_panel .o_favorite_name input[type=text]').val('some name'); // name the filter
-        await testUtils.dom.click($('.o_control_panel .o_save_favorite button'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options .o_dropdown_toggler_btn:contains(Favorites)'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_add_favorite'));
+        actionManager.$('.o_control_panel .o_favorite_name input[type=text]').val('some name'); // name the filter
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_save_favorite button'));
 
         testUtils.mock.unpatch(ListController);
         actionManager.destroy();
@@ -3519,7 +3519,7 @@ QUnit.module('ActionManager', {
             "the search options should be available");
 
         // go back using the breadcrumbs
-        await testUtils.dom.click($('.o_control_panel .breadcrumb a:first'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .breadcrumb a:first'));
         assert.strictEqual($('.o_search_options .o_dropdown:visible .o_filters_menu').length, 1,
             "the search options should be available");
 
@@ -3610,9 +3610,9 @@ QUnit.module('ActionManager', {
         });
         assert.containsNone(actionManager, '.o_list_view');
         assert.containsOnce(actionManager, '.o_form_view');
-        assert.strictEqual($('.o_control_panel .breadcrumb-item').length, 2,
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item').length, 2,
             "there should be two controllers in the breadcrumbs");
-        assert.strictEqual($('.o_control_panel .breadcrumb-item:last').text(), 'Second record',
+        assert.strictEqual(actionManager.$('.o_control_panel .breadcrumb-item:last').text(), 'Second record',
             "breadcrumbs should contain the display_name of the opened record");
 
         await actionManager.doAction(1, {clear_breadcrumbs: true});
@@ -3865,7 +3865,7 @@ QUnit.module('ActionManager', {
         });
         await actionManager.doAction(1);
 
-        assert.strictEqual($('.o_control_panel').length, 1,
+        assert.strictEqual(actionManager.$('.o_control_panel').length, 1,
             "should have rendered a control panel");
         assert.containsOnce(actionManager, '.o_kanban_view',
             "should have rendered a kanban view");
@@ -4294,7 +4294,7 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click(actionManager.$('.o_list_view .o_data_row:first'));
         assert.containsOnce(actionManager, '.o_form_view.o_form_readonly');
 
-        await testUtils.dom.click($('.o_control_panel .o_form_button_edit'));
+        await testUtils.dom.click(actionManager.$('.o_control_panel .o_form_button_edit'));
         assert.containsOnce(actionManager, '.o_form_view.o_form_editable');
 
         await testUtils.fields.editInput(actionManager.$('input[name=foo]'), 'val');
