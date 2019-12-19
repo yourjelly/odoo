@@ -130,7 +130,10 @@ class ActionManager extends Component {
     //--------------------------------------------------------------------------
 
     get pendingControllerID() {
-        return this.state.pendingStack[this.state.pendingStack.length - 1];
+        if (this.state.pendingStack) {
+            return this.state.pendingStack[this.state.pendingStack.length - 1];
+        }
+        return null;
     }
 
     //--------------------------------------------------------------------------

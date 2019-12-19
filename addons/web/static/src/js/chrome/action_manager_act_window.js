@@ -7,6 +7,8 @@ odoo.define('web.ActWindowActionManager', function (require) {
  */
 
 const ActionManager = require('web.ActionManager');
+const Context = require('web.Context');
+var pyUtils = require('web.py_utils');
 const { patch } = require('web.utils');
 const viewRegistry = require('web.view_registry');
 
@@ -378,6 +380,126 @@ patch(ActionManager, 'ActionManagerActWindow', {
     // Handlers
     //--------------------------------------------------------------------------
 
+    /**
+     * Handler for event 'execute_action', which is typically called when a
+     * button is clicked. The button may be of type 'object' (call a given
+     * method of a given model) or 'action' (execute a given action).
+     * Alternatively, the button may have the attribute 'special', and in this
+     * case an 'ir.actions.act_window_close' is executed.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {Object} ev.detail.action_data typically, the html attributes of the
+     *   button extended with additional information like the context
+     * @param {Object} [ev.detail.action_data.special=false]
+     * @param {Object} [ev.detail.action_data.type] 'object' or 'action', if set
+     * @param {Object} ev.detail.env
+     * @param {function} [ev.detail.on_closed]
+     * @param {function} [ev.detail.on_fail]
+     * @param {function} [ev.detail.on_success]
+     */
+    _onExecuteAction: function (ev) {
+        // cancel potential current rendering
+        this._pushController({jsID: this._nextID('controller'), loading: true});
+
+        const actionData = ev.detail.action_data;
+        const env = ev.detail.env;
+        const context = new Context(env.context, actionData.context || {});
+        const recordID = env.currentID || null; // pyUtils handles null value, not undefined
+        let prom;
+
+        // determine the action to execute according to the actionData
+        if (actionData.special) {
+            prom = Promise.resolve({
+                type: 'ir.actions.act_window_close',
+                infos: { special: true },
+            });
+        } else if (actionData.type === 'object') {
+            // call a Python Object method, which may return an action to execute
+            let args = recordID ? [[recordID]] : [env.resIDs];
+            if (actionData.args) {
+                try {
+                    // warning: quotes and double quotes problem due to json and xml clash
+                    // maybe we should force escaping in xml or do a better parse of the args array
+                    const additionalArgs = JSON.parse(actionData.args.replace(/'/g, '"'));
+                    args = args.concat(additionalArgs);
+                } catch (e) {
+                    console.error("Could not JSON.parse arguments", actionData.args);
+                }
+            }
+            prom = this.rpc({
+                route: '/web/dataset/call_button',
+                params: {
+                    args: args,
+                    kwargs: {context: context.eval()},
+                    method: actionData.name,
+                    model: env.model,
+                },
+            });
+        } else if (actionData.type === 'action') {
+            // FIXME: couldn't we directly call doAction?
+            // execute a given action, so load it first
+            const additionalContext = Object.assign(pyUtils.eval('context', context), {
+                active_model: env.model,
+                active_ids: env.resIDs,
+                active_id: recordID,
+            });
+            prom = this.env.dataManager.load_action(actionData.name, additionalContext);
+        } else {
+            prom = Promise.reject();
+        }
+
+        this._resolveLast(prom).then(action => {
+            // show effect if button have effect attribute
+            // rainbowman can be displayed from two places: from attribute on a button or from python
+            // code below handles the first case i.e 'effect' attribute on button.
+            let effect = false;
+            if (actionData.effect) {
+                effect = pyUtils.py_eval(actionData.effect);
+            }
+
+            if (action && action.constructor === Object) {
+                // filter out context keys that are specific to the current action, because:
+                //  - wrong default_* and search_default_* values won't give the expected result
+                //  - wrong group_by values will fail and forbid rendering of the destination view
+                const ctx = new Context(
+                    _.object(_.reject(_.pairs(env.context), function (pair) {
+                        return pair[0].match('^(?:(?:default_|search_default_|show_).+|' +
+                                             '.+_view_ref|group_by|group_by_no_leaf|active_id|' +
+                                             'active_ids|orderedBy)$') !== null;
+                    }))
+                );
+                ctx.add(actionData.context || {});
+                ctx.add({active_model: env.model});
+                if (recordID) {
+                    ctx.add({
+                        active_id: recordID,
+                        active_ids: [recordID],
+                    });
+                }
+                ctx.add(action.context || {});
+                action.context = ctx;
+                // in case an effect is returned from python and there is already an effect
+                // attribute on the button, the priority is given to the button attribute
+                action.effect = effect || action.effect;
+            } else {
+                // if action doesn't return anything, but there is an effect
+                // attribute on the button, display rainbowman
+                action = {
+                    effect: effect,
+                    type: 'ir.actions.act_window_close',
+                };
+            }
+            const options = { on_close: ev.detail.on_closed };
+            action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
+            this.doAction(action, options);
+            // TODO need on_success, on_Fail?
+            //.then(ev.detail.on_success, ev.detail.on_fail);
+        });
+            // TODO need on_fail??
+            // .guardedCatch(ev.detail.on_fail);
+
+    },
     /**
      * @private
      * @param {OdooEvent} ev

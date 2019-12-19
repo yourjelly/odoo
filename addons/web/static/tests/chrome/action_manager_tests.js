@@ -1506,7 +1506,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.skip('execute a new action while handling a call_button', async function (assert) {
+    QUnit.test('execute a new action while handling a call_button', async function (assert) {
         // FIXME: execute action not implemented
         assert.expect(16);
 
