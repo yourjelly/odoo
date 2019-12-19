@@ -4,7 +4,7 @@
     <!-- Main survey layout -->
     <template id="survey.layout" name="Survey Layout" inherit_id="web.frontend_layout" primary="True">
         <xpath expr="//div[@id='wrapwrap']" position="attributes">
-            <attribute name="t-att-style" add="('height: 100%; overflow: overlay; background: url(' + '/web/image/survey.survey/%s/image' % survey.id + ') no-repeat fixed center; box-shadow: inset 0 0 0 10000px rgba(255,255,255,.7); background-size: cover;') if survey.image else 'height: 100%;    overflow: overlay;'"/>
+            <attribute name="t-att-style" add="('height: 100%; overflow: overlay; background: url(' + '/survey/background/%s' % survey.id + ') no-repeat fixed center; box-shadow: inset 0 0 0 10000px rgba(255,255,255,.7); background-size: cover;') if survey.image else 'height: 100%;    overflow: overlay;'"/>
         </xpath>
         <xpath expr="//head/t[@t-call-assets][last()]" position="after">
             <t t-call-assets="survey.survey_assets" lazy_load="True"/>
