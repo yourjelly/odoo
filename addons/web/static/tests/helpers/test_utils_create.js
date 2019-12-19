@@ -42,7 +42,7 @@ async function createActionManager(params) {
     params = params || {};
     const target = prepareTarget(params.debug);
 
-    // build env
+    // build env and mockServer
     let Server = MockServer;
     if (params.mockRPC) {
         Server = MockServer.extend({ _performRpc: params.mockRPC });
@@ -90,7 +90,7 @@ async function createActionManager(params) {
         },
         services: {
             ajax: {
-                rpc: server.performRpc.bind(server),
+                rpc: server.performRpc.bind(server), // for legacy sub widgets
             },
             local_storage: new RamStorageService(),
             session_storage: new RamStorageService(),
@@ -104,7 +104,7 @@ async function createActionManager(params) {
             this.actionManager = hooks.useRef('actionManager');
         }
     }
-    Parent.env = makeTestEnvironment(env);
+    Parent.env = makeTestEnvironment(env, server.performRpc.bind(server));
     Parent.components = { ActionManager };
     Parent.template = tags.xml`
         <div class="o_web_client">
