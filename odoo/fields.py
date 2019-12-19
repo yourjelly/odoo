@@ -673,9 +673,10 @@ class Field(MetaField('DummyField', (object,), {})):
             if not to_compute_ids.isdisjoint(records._ids):
                 self.compute_value(records.browse(to_compute_ids.intersection(records._ids)))
 
-        # /!\ done iteratively on purpose, max recursion depth is easily reached otherwise
         vals, missing_id = records.env.cache.get_values_list(records, self)
-        while missing_id or (isinstance(missing_id, NewId) and missing_id.origin):
+        # /!\ done iteratively on purpose, max recursion depth is easily reached otherwise
+        # NewId records are falsy but they should be handled by __get__, too
+        while missing_id or isinstance(missing_id, NewId):
             remaining = records[len(vals):]
             missing = records._browse(records.env, (missing_id,), tuple(remaining._ids)[:PREFETCH_MAX])
             # a call to __get__ is done to trigger the prefetch of all remaining records up to
