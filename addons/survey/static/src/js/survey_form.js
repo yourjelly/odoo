@@ -55,20 +55,23 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
         var aIndex = 'a'.charCodeAt(0);
         var zIndex = 'z'.charCodeAt(0);
         var code = event.keyCode;
+        var insideTextArea = this.$("textarea").is(":focus");
+        var $choiceInputs = this.$("input[type='radio'],input[type='checkbox']");
+        var isFieldsetDisabled = this.$("fieldset:disabled").length > 0;
         // Handle Start / Next / Submit
-        if (code == 13 && !self.$("textarea").is(":focus")) {  // Enter : go Next
+        if (code == 13 && !insideTextArea) {  // Enter : go Next
             event.preventDefault();
             this.$("button.btn-primary").click();
         } else if (aIndex <= code < zIndex
                 && self.options.questionsLayout === 'page_per_question'
-                && !self.$("input[type='text'],textarea").is(":focus")) {
+                && $choiceInputs.length && !insideTextArea
+                && !isFieldsetDisabled) {
             var keyIndex = code - aIndex;
-            var $inputs = this.$("input[type='radio'],input[type='checkbox']");
-            if ($inputs.length > 26) {
+            if ($choiceInputs.length > 26) {
                 return;
             }
-            if ($inputs.length >= keyIndex) {
-                var $targetInput = $($inputs[keyIndex]);
+            if ($choiceInputs.length >= keyIndex) {
+                var $targetInput = $($choiceInputs[keyIndex]);
                 if ($targetInput.attr('type') === 'radio') {
                     $targetInput.prop("checked", true).trigger('change');
                 } else {
@@ -106,8 +109,8 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
         var $matrixBtn = $target.parents('.o_survey_matrix_btn');
         if ($target.attr('type') === 'radio') {
             if ($matrixBtn.length > 0) {
-                $matrixBtn.parents('tr').find('td').toggleClass('o_survey_selected', false);
-                $matrixBtn.toggleClass('o_survey_selected', true);
+                $matrixBtn.parents('tr').find('td').removeClass('o_survey_selected');
+                $matrixBtn.addClass('o_survey_selected');
             } else {
                 $choiceItemGroup.find('label').toggleClass('o_survey_selected', false);
                 $target.closest('label').toggleClass('o_survey_selected', true);
@@ -123,12 +126,15 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
     },
 
     _onMatrixBtnClick: function (event) {
-        var $target = $(event.currentTarget);
-        var $input = $target.find('input');
-        if ($input.attr('type') === 'radio') {
-            $input.prop("checked", true).trigger('change');
-        } else {
-            $input.prop("checked", !$input.prop("checked")).trigger('change');
+        var isFieldsetDisabled = this.$("fieldset:disabled").length > 0;
+        if (!isFieldsetDisabled) {
+            var $target = $(event.currentTarget);
+            var $input = $target.find('input');
+            if ($input.attr('type') === 'radio') {
+                $input.prop("checked", true).trigger('change');
+            } else {
+                $input.prop("checked", !$input.prop("checked")).trigger('change');
+            }
         }
     },
 
