@@ -25,24 +25,6 @@ publicWidget.registry.SurveySession = publicWidget.Widget.extend({
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {Array[]} notifications
-     */
-    _onNotification: function (notifications) {
-        if (notifications && notifications.length !== 0) {
-            notifications.forEach(function (notification) {
-                if (notification.length >= 2) {
-                    var event = notification[1];
-                    if (event.type === 'next_question' ||
-                        event.type === 'end_session') {
-                        document.location.reload();
-                    }
-                }
-            });
-        }
-    }
 });
 
 return publicWidget.registry.SurveySession;

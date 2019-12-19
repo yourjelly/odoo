@@ -225,8 +225,22 @@ class Survey(http.Controller):
     def _prepare_survey_data(self, survey_sudo, answer_sudo, **post):
         data = {
             'format_datetime': lambda dt: format_datetime(request.env, dt, dt_format=False),
-            'format_date': lambda date: format_date(request.env, date)
+            'format_date': lambda date: format_date(request.env, date),
+            'is_survey_session_in_progress': answer_sudo.user_input_session_id and answer_sudo.user_input_session_id.state == 'in_progress',
         }
+
+        timer_start = False
+        time_limit_minutes = False
+        if answer_sudo.user_input_session_id \
+                and answer_sudo.user_input_session_id.state == 'in_progress' \
+                and answer_sudo.user_input_session_id.is_questions_time_limited:
+            timer_start = answer_sudo.user_input_session_id.current_question_start_time.isoformat()
+            time_limit_minutes = answer_sudo.user_input_session_id.questions_time_limit / 60
+        elif survey_sudo.is_time_limited:
+            timer_start = answer_sudo.start_datetime.isoformat()
+            time_limit_minutes = survey_sudo.time_limit
+        data['timer_start'] = timer_start
+        data['time_limit_minutes'] = time_limit_minutes
 
         page_or_question_key = 'question' if survey_sudo.questions_layout == 'page_per_question' else 'page'
 
@@ -238,14 +252,18 @@ class Survey(http.Controller):
                 'survey': survey_sudo,
                 page_or_question_key: request.env['survey.question'].sudo().browse(previous_page_or_question_id),
                 'answer': answer_sudo,
-                'previous_page_id': new_previous_id
+                'previous_page_id': new_previous_id,
+                'has_answered': answer_sudo.user_input_line_ids.filtered(lambda line: line.question_id == new_previous_id)
             })
             return data
 
         if answer_sudo.state == 'new' \
                 and answer_sudo.user_input_session_id \
                 and answer_sudo.user_input_session_id.state == 'in_progress':
-            answer_sudo.write({'state': 'skip'})
+            answer_sudo.write({
+                'start_datetime': fields.Datetime.now(),
+                'state': 'skip'
+            })
 
         # Select the right page
         if answer_sudo.state == 'new':  # Start page
@@ -256,6 +274,7 @@ class Survey(http.Controller):
                 'survey': survey_sudo,
                 page_or_question_key: page_or_question_id,
                 'answer': answer_sudo,
+                'has_answered': answer_sudo.user_input_line_ids.filtered(lambda line: line.question_id == page_or_question_id)
             })
             if is_last:
                 data.update({'last': True})
@@ -265,7 +284,7 @@ class Survey(http.Controller):
                 'state': 'skip'
             })
             return data
-        elif answer_sudo.state == 'done' or answer_sudo.is_time_limit_reached:  # Display success message
+        elif answer_sudo.state == 'done' or answer_sudo.is_time_limit_reached and not answer_sudo.user_input_session_id:  # Display success message
             return self._prepare_survey_finished_values(survey_sudo, answer_sudo)
         else:  # answer_sudo.state == 'skip'
             page_or_question_id, is_last = survey_sudo.next_page_or_question(answer_sudo, answer_sudo.last_displayed_page_id.id)
@@ -274,6 +293,7 @@ class Survey(http.Controller):
                 'survey': survey_sudo,
                 page_or_question_key: page_or_question_id,
                 'answer': answer_sudo,
+                'has_answered': answer_sudo.user_input_line_ids.filtered(lambda line: line.question_id == page_or_question_id)
             })
             if survey_sudo.questions_layout != 'one_page':
                 data.update({
@@ -324,6 +344,15 @@ class Survey(http.Controller):
             return {'error': _("The survey was already started.")}
 
         answer_sudo.state = "started"
+        return self._prepare_question_html(survey_sudo, answer_sudo, **post)
+
+    @http.route('/survey/next_page/<string:survey_token>/<string:answer_token>', type='json', auth='public', website=True)
+    def survey_next_page(self, survey_token, answer_token, **post):
+        access_data = self._get_access_data(survey_token, answer_token, ensure_token=True)
+        if access_data['validity_code'] is not True:
+            return {'error': access_data['validity_code']}
+        survey_sudo, answer_sudo = access_data['survey_sudo'], access_data['answer_sudo']
+
         return self._prepare_question_html(survey_sudo, answer_sudo, **post)
 
     @http.route('/survey/submit/<string:survey_token>/<string:answer_token>', type='json', auth='public', website=True)

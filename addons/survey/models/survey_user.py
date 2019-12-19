@@ -72,18 +72,22 @@ class SurveyUserInput(models.Model):
         for user_input in self:
             user_input.scoring_success = user_input.scoring_percentage >= user_input.survey_id.scoring_success_min
 
-    @api.depends('start_datetime', 'survey_id.is_time_limited', 'survey_id.time_limit')
+    @api.depends(
+        'start_datetime',
+        'survey_id.is_time_limited',
+        'survey_id.time_limit',
+        'user_input_session_id.is_questions_time_limited',
+        'user_input_session_id.current_question_start_time')
     def _compute_is_time_limit_reached(self):
         """ Checks that the user_input is not exceeding the survey's time limit. """
         for user_input in self:
-            if user_input.start_datetime and user_input.survey_id.is_time_limited:
-                survey_session = user_input.user_input_session_id
-                if survey_session:
-                    user_input.is_time_limit_reached = survey_session.is_questions_time_limited and fields.Datetime.now() \
-                        > user_input.user_input_session_id.current_question_start_time + relativedelta(seconds=survey_session.questions_time_limit)
-                else:
-                    user_input.is_time_limit_reached = user_input.survey_id.is_time_limited and fields.Datetime.now() \
-                        > user_input.start_datetime + relativedelta(minutes=user_input.survey_id.time_limit)
+            survey_session = user_input.user_input_session_id
+            if survey_session:
+                user_input.is_time_limit_reached = survey_session.is_questions_time_limited and fields.Datetime.now() \
+                    > user_input.user_input_session_id.current_question_start_time + relativedelta(seconds=survey_session.questions_time_limit)
+            elif user_input.survey_id.is_time_limited and user_input.start_datetime:
+                user_input.is_time_limit_reached = user_input.survey_id.is_time_limited and fields.Datetime.now() \
+                    > user_input.start_datetime + relativedelta(minutes=user_input.survey_id.time_limit)
             else:
                 user_input.is_time_limit_reached = False
 
