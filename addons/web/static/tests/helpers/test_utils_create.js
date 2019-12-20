@@ -96,6 +96,7 @@ async function createActionManager(params) {
             session_storage: new RamStorageService(),
         },
     };
+    Component.env = makeTestEnvironment(env, server.performRpc.bind(server));
 
     // define Parent component, embedding an ActionManager
     class Parent extends Component {
@@ -104,7 +105,6 @@ async function createActionManager(params) {
             this.actionManager = hooks.useRef('actionManager');
         }
     }
-    Parent.env = makeTestEnvironment(env, server.performRpc.bind(server));
     Parent.components = { ActionManager };
     Parent.template = tags.xml`
         <div class="o_web_client">
