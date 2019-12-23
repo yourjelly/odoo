@@ -136,7 +136,8 @@ class SurveyUserInputSession(models.Model):
         self.ensure_one()
 
         survey_results = self.env['survey.user_input.line'].read_group(
-            [('user_input_id', 'in', self.answer_ids.ids)],
+            [('user_input_id', 'in', self.answer_ids.ids),
+            ('answer_score', '!=', 0)],
             ['user_input_id', 'answer_score:sum'],
             ['user_input_id'],
             orderby="answer_score desc",
