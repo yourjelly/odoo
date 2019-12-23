@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <div t-name="TranslationDialogTransifex" t-extend="TranslationDialog">
+        <t t-jquery="div.translation" t-operation="inside">
+            <a class="transifex-link" t-att-href="widget.transifex_url"/>
+        </div>
+    </div>
+</templates>

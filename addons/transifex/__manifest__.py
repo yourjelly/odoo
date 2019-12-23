@@ -23,6 +23,7 @@ project.
     'data': [
         'data/transifex_data.xml',
         'data/ir_translation_view.xml',
+        'data/webclient_templates.xml',
     ],
     'depends': ['base'],
 }
