@@ -45,14 +45,15 @@ class StockMoveLine(models.Model):
             lines |= raw_moves_lines.filtered(lambda ml: ml.product_id == self.product_id and (ml.lot_id or ml.lot_name))
         return lines
 
-    def _reservation_is_updatable(self, quantity, reserved_quant):
-        self.ensure_one()
-        if self.lot_produced_ids:
-            ml_remaining_qty = self.qty_done - self.product_uom_qty
-            ml_remaining_qty = self.product_uom_id._compute_quantity(ml_remaining_qty, self.product_id.uom_id, rounding_method="HALF-UP")
-            if float_compare(ml_remaining_qty, quantity, precision_rounding=self.product_id.uom_id.rounding) < 0:
+    @api.model
+    def _reservation_is_updatable(self, move_line, quantity, reserved_quant):
+        if move_line.get('lot_produced_ids'):
+            product = self.env['product.product'].browse(move_line['product_id'])
+            ml_remaining_qty = move_line['qty_done'] - move_line['product_uom_qty']
+            ml_remaining_qty = self.env['uom.uom'].browse(move_line['product_uom_id'])._compute_quantity(ml_remaining_qty, product.uom_id, rounding_method="HALF-UP")
+            if float_compare(ml_remaining_qty, quantity, precision_rounding=product.uom_id.rounding) < 0:
                 return False
-        return super(StockMoveLine, self)._reservation_is_updatable(quantity, reserved_quant)
+        return super()._reservation_is_updatable(move_line, quantity, reserved_quant)
 
     def write(self, vals):
         for move_line in self:
@@ -153,6 +154,10 @@ class StockMove(models.Model):
                 move.move_line_ids.write({'production_id': move.raw_material_production_id.id,
                                                'workorder_id': move.workorder_id.id,})
         return res
+    @api.model
+    def _action_assign_get_move_lines_fields_to_read(self):
+        res = super()._action_assign_get_move_lines_fields_to_read()
+        return res + ['lot_produced_ids']
 
     def _action_confirm(self, merge=True, merge_into=False):
         moves = self.env['stock.move']
