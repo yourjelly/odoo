@@ -15,7 +15,7 @@ class ProductTemplate(models.Model):
     _name = "product.template"
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Product Template"
-    _order = "name"
+    _order = "sequence, name"
 
     def _get_default_category_id(self):
         if self._context.get('categ_id') or self._context.get('default_categ_id'):
