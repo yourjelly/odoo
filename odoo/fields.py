@@ -671,6 +671,8 @@ class Field(MetaField('DummyField', (object,), {})):
             # in turn, triggers a recompute
             to_compute_ids = records.env.all.tocompute.get(self, set())
             if not to_compute_ids.isdisjoint(records._ids):
+                to_compute_ids = to_compute_ids.intersection(records._ids).difference(
+                    records.env._protected.get(self, ()))
                 self.compute_value(records.browse(to_compute_ids.intersection(records._ids)))
 
         vals, missing_id = records.env.cache.get_values_list(records, self)
