@@ -2713,7 +2713,10 @@ class _RelationalMulti(_Relational):
     def convert_to_record_multi(self, values, record):
         prefetch_ids = IterableGenerator(prefetch_x2many_ids, record, self)
         ids = tuple(unique(i for v in values for i in v))
-        return record.pool[self.comodel_name]._browse(record.env, ids, prefetch_ids)
+        corecords = record.pool[self.comodel_name]._browse(record.env, ids, prefetch_ids)
+        if 'active' in corecords and record.env.context.get('active_test', True):
+            corecords = corecords.filtered('active').with_prefetch(prefetch_ids)
+        return corecords
 
     def convert_to_read(self, value, record, use_name_get=True):
         return value.ids
