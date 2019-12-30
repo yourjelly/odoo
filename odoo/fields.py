@@ -675,17 +675,14 @@ class Field(MetaField('DummyField', (object,), {})):
                     records.env._protected.get(self, ()))
                 self.compute_value(records.browse(to_compute_ids.intersection(records._ids)))
 
-        vals, missing_id = records.env.cache.get_values_list(records, self)
-        # /!\ done iteratively on purpose, max recursion depth is easily reached otherwise
-        # NewId records are falsy but they should be handled by __get__, too
-        while missing_id or isinstance(missing_id, NewId):
+        vals = records.env.cache.get_values_list(records, self)
+        if len(vals) < len(records):
             remaining = records[len(vals):]
-            missing = records._browse(records.env, (missing_id,), tuple(remaining._ids)[:PREFETCH_MAX])
+            missing = records._browse(records.env, (records._ids[0],), tuple(remaining._ids)[:PREFETCH_MAX])
             # a call to __get__ is done to trigger the prefetch of all remaining records up to
             # PREFETCH_MAX, we can then retrieve the values from the cache
             self.__get__(missing, type(missing))
-            v, missing_id = records.env.cache.get_values_list(remaining, self)
-            vals += v
+            return vals + self.mapped(remaining)
         return vals
 
     #

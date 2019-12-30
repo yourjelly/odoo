@@ -801,7 +801,6 @@ class Cache(object):
         field_cache = self._data[field]
         key = field.cache_key(records.env) if field.depends_context else None
         vals = []
-        missing_id = False
         for record_id in records._ids:
             try:
                 if key is not None:
@@ -809,9 +808,8 @@ class Cache(object):
                 else:
                     vals.append(field_cache[record_id])
             except KeyError:
-                missing_id = record_id
                 break
-        return vals, missing_id
+        return vals
 
 
 
