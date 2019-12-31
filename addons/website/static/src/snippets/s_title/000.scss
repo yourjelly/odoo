@@ -1,5 +1,5 @@
 
-.s_title {
+@include snippet-versioning('s_title') {
     .s_title_boxed {
         > * {
             display: inline-block;

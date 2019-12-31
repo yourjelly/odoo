@@ -1,5 +1,5 @@
 
-.s_faq_collapse {
+@include snippet-versioning('s_faq_collapse') {
     .accordion .card {
         .card-header {
             cursor: pointer;

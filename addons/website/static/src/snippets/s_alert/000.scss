@@ -1,5 +1,5 @@
 
-.s_alert {
+@include snippet-versioning('s_alert') {
     margin: $grid-gutter-width/2 0;
     border: 1px solid;
     border-radius: 0.25rem;

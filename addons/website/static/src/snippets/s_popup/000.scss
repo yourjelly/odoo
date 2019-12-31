@@ -1,5 +1,5 @@
-// s_popup
-.s_popup_main {
+
+@include snippet-versioning('s_popup_main') {
     .s_popup_content {
         min-height: var(--o-we-toolbar-height);
         box-shadow: $modal-content-box-shadow-sm-up;

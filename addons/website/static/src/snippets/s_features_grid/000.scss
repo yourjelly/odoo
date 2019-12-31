@@ -1,5 +1,5 @@
 
-.s_features_grid {
+@include snippet-versioning('s_features_grid') {
     &_content {
         overflow: hidden;
         p {

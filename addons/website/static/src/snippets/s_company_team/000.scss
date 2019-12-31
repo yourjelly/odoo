@@ -1,5 +1,5 @@
 
-.s_company_team {
+@include snippet-versioning('s_company_team') {
     @include media-breakpoint-down(md) {
         img {
             max-width: 50%;

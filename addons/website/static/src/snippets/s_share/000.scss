@@ -1,5 +1,5 @@
 
-.s_share {
+@include snippet-versioning('s_share') {
     > * {
         display: inline-block;
         vertical-align: middle;

@@ -1,5 +1,5 @@
 
-.s_comparisons {
+@include snippet-versioning('s_comparisons') {
     .card-body {
         .card-title {
             margin: 0;

@@ -1,5 +1,5 @@
 
-.s_quotes_carousel {
+@include snippet-versioning('s_quotes_carousel') {
     blockquote {
         padding: $grid-gutter-width;
         margin-bottom: 0;

@@ -1,4 +1,5 @@
-.s_three_columns {
+
+@include snippet-versioning('s_three_columns') {
     .align-items-stretch .card {
         height: 100%;
     }

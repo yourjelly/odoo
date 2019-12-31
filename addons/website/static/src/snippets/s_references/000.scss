@@ -1,4 +1,6 @@
 
-.s_references .img-thumbnail {
-    border: none;
+@include snippet-versioning('s_references') {
+    .img-thumbnail {
+        border: none;
+    }
 }

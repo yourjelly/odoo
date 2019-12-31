@@ -1,0 +1,10 @@
+
+@mixin snippet-versioning($name, $version-number: '000') {
+    $version-str: '[data-vcss="#{$version-number}"]';
+    @if $version-number == '000' {
+        $version-str: ':not([data-vcss])';
+    }
+    .#{$name}#{$version-str} {
+        @content;
+    }
+}

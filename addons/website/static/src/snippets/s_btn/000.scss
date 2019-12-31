@@ -1,5 +1,5 @@
 
-.s_btn {
+@include snippet-versioning('s_btn') {
     .btn + .btn {
         margin-left: .75rem;
     }

@@ -1,5 +1,5 @@
 
-.o_gallery {
+@include snippet-versioning('o_gallery') {
     &.o_grid, &.o_masonry {
         .img {
             width: 100%;
@@ -99,9 +99,6 @@
     .carousel-inner .item img {
         max-width: none;
     }
-}
-.o_gallery,
-.modal-body {
     &.o_slideshow {
         .carousel {
             height: 100%;
@@ -153,4 +150,8 @@
             }
         }
     }
+}
+
+@include snippet-versioning('modal-body.o_slideshow') {
+    @extend .o_gallery.o_slideshow;
 }
