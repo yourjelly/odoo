@@ -332,7 +332,7 @@ var PublicWidget = Widget.extend({
  * The registry object contains the list of widgets that should be instantiated
  * thanks to their selector property if any.
  */
-var registry = {};
+var registry = new RootWidgetRegistry(null);
 
 /**
  * This is a fix for apple device (<= IPhone 4, IPad 2)
@@ -340,17 +340,19 @@ var registry = {};
  * Unfortunatly some layouts use a <div/> tag instead. The fix forces an empty
  * click handler on these div, which allows standard bootstrap to work.
  */
-registry._fixAppleCollapse = PublicWidget.extend({
-    selector: 'div[data-toggle="collapse"]',
+const FixAppleCollapse = PublicWidget.extend({
     events: {
         'click': function () {},
     },
 });
+registry.add(FixAppleCollapse, 'div[data-toggle="collapse"]');
 
 return {
     RootWidget: RootWidget,
     RootWidgetRegistry: RootWidgetRegistry,
     Widget: PublicWidget,
     registry: registry,
+
+    FixAppleCollapse: FixAppleCollapse,
 };
 });

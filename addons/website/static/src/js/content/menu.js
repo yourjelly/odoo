@@ -233,4 +233,8 @@ publicWidget.registry.menuDirection = publicWidget.Widget.extend({
         $menu.addClass('dropdown-menu-' + alignment);
     },
 });
+
+return {
+    AffixMenu: AffixMenu,
+};
 });

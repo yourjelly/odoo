@@ -73,14 +73,14 @@ var WebsiteRoot = publicRootData.PublicRoot.extend({
     /**
      * @override
      */
-    _getPublicWidgetsRegistry: function (options) {
-        var registry = this._super.apply(this, arguments);
+    _getPublicWidgetsData: function (options) {
+        const data = this._super.apply(this, arguments);
         if (options.editableMode) {
-            return _.pick(registry, function (PublicWidget) {
-                return !PublicWidget.prototype.disabledInEditableMode;
+            return data.filter(({Widget, selector}) => {
+                return !Widget.prototype.disabledInEditableMode;
             });
         }
-        return registry;
+        return data;
     },
 
     //--------------------------------------------------------------------------

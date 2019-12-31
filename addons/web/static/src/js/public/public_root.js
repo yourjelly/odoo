@@ -152,10 +152,10 @@ var PublicRoot = publicWidget.RootWidget.extend(ServiceProviderMixin, {
     /**
      * @private
      * @param {Object} [options]
-     * @returns {Object}
+     * @returns {Object[]} @see RootWidgetRegistry.get
      */
-    _getPublicWidgetsRegistry: function (options) {
-        return publicWidget.registry;
+    _getPublicWidgetsData: function (options) {
+        return publicWidget.registry.get();
     },
     /**
      * As the root instance is designed to be unique, the associated
@@ -181,8 +181,6 @@ var PublicRoot = publicWidget.RootWidget.extend(ServiceProviderMixin, {
      * @returns {Deferred}
      */
     _startWidgets: function ($from, options) {
-        var self = this;
-
         if ($from === undefined) {
             $from = this.$('#wrapwrap');
             if (!$from.length) {
@@ -198,18 +196,17 @@ var PublicRoot = publicWidget.RootWidget.extend(ServiceProviderMixin, {
 
         this._stopWidgets($from);
 
-        var defs = _.map(this._getPublicWidgetsRegistry(options), function (PublicWidget) {
-            var selector = PublicWidget.prototype.selector || '';
+        const proms = this._getPublicWidgetsData(options).map(({Widget, selector}) => {
             var $target = dom.cssFind($from, selector, true);
 
-            var defs = _.map($target, function (el) {
-                var widget = new PublicWidget(self, options);
-                self.publicWidgets.push(widget);
+            const proms = _.map($target, el => {
+                var widget = new Widget(this, options);
+                this.publicWidgets.push(widget);
                 return widget.attachTo($(el));
             });
-            return Promise.all(defs);
+            return Promise.all(proms);
         });
-        return Promise.all(defs);
+        return Promise.all(proms);
     },
     /**
      * Destroys all registered widget instances. Website would need this before
