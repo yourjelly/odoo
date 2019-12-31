@@ -661,7 +661,7 @@ class Field(MetaField('DummyField', (object,), {})):
 
     def mapped(self, records):
         if self.name == 'id':
-            # not stored in cache...
+            # not stored in cache
             return records._ids
 
         if self.compute:
@@ -675,17 +675,17 @@ class Field(MetaField('DummyField', (object,), {})):
                     records.env._protected.get(self, ()))
                 self.compute_value(records.browse(to_compute_ids.intersection(records._ids)))
 
-        vals = records.env.cache.get_values_list(records, self)
+        vals = records.env.cache.get_until_miss(records, self)
         if len(vals) < len(records):
             remaining = records[len(vals):]
 
             remaining_new = remaining.filtered(lambda r: not r.id)
             if remaining_new:
-                # set in cache...
+                # populate the cache for each NewId record
                 [self.__get__(rec, type(rec)) for rec in remaining_new]
             else:
                 missing = records._browse(records.env, (remaining._ids[0],), tuple(remaining._ids))
-                # a call to __get__ is done to trigger the prefetch of all remaining records
+                # trigger the prefetch of all remaining records and store the values in cache
                 self.__get__(missing, type(missing))
             return vals + self.mapped(remaining)
         return vals
@@ -3574,4 +3574,4 @@ def prefetch_x2many_ids(record, field):
 
 # imported here to avoid dependency cycle issues
 from .exceptions import AccessError, MissingError, UserError
-from .models import check_pg_name, BaseModel, NewId, IdType, PREFETCH_MAX
+from .models import check_pg_name, BaseModel, NewId, IdType
