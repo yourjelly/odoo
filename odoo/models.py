@@ -5216,8 +5216,10 @@ Record ids: %(records)s
             records.filtered("partner_id.is_company")
         """
         if isinstance(func, str):
-            vals = self.mapped(func)
-            return self.browse([rec.id for rec, val in zip(self, vals) if val])
+            name = func
+            func = lambda rec: any(rec.mapped(name))
+            # populate cache
+            self.mapped(name)
         return self.browse([rec.id for rec in self if func(rec)])
 
     def filtered_domain(self, domain):
