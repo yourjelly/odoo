@@ -46,8 +46,6 @@ class SurveyUserInput(models.Model):
     predefined_question_ids = fields.Many2many('survey.question', string='Predefined Questions', readonly=True)
     scoring_percentage = fields.Float("Score (%)", compute="_compute_scoring_percentage", store=True, compute_sudo=True)  # stored for perf reasons
     scoring_success = fields.Boolean('Quizz Passed', compute='_compute_scoring_success', store=True, compute_sudo=True)  # stored for perf reasons
-    # live session
-    user_input_session_id = fields.Many2one('survey.user_input_session', string="User Input Session")
 
     _sql_constraints = [
         ('unique_token', 'UNIQUE (access_token)', 'An access token must be unique!'),
@@ -76,15 +74,14 @@ class SurveyUserInput(models.Model):
         'start_datetime',
         'survey_id.is_time_limited',
         'survey_id.time_limit',
-        'user_input_session_id.is_questions_time_limited',
-        'user_input_session_id.current_question_start_time')
+        'survey_id.session_is_questions_time_limited',
+        'survey_id.session_current_question_start_time')
     def _compute_is_time_limit_reached(self):
         """ Checks that the user_input is not exceeding the survey's time limit. """
         for user_input in self:
-            survey_session = user_input.user_input_session_id
-            if survey_session:
-                user_input.is_time_limit_reached = survey_session.is_questions_time_limited and fields.Datetime.now() \
-                    > user_input.user_input_session_id.current_question_start_time + relativedelta(seconds=survey_session.questions_time_limit)
+            if user_input.survey_id.session_state == 'in_progress':
+                user_input.is_time_limit_reached = user_input.survey_id.session_is_questions_time_limited and fields.Datetime.now() \
+                    > user_input.survey_id.session_current_question_start_time + relativedelta(seconds=user_input.survey_id.session_questions_time_limit)
             elif user_input.survey_id.is_time_limited and user_input.start_datetime:
                 user_input.is_time_limit_reached = user_input.survey_id.is_time_limited and fields.Datetime.now() \
                     > user_input.start_datetime + relativedelta(minutes=user_input.survey_id.time_limit)
@@ -297,12 +294,12 @@ class SurveyUserInput(models.Model):
 
         answer = self.env['survey.question.answer'].search([('id', '=', int(answer_id))], limit=1)
         answer_score = False
-        if self.user_input_session_id and self.user_input_session_id.speed_rating:
+        if self.survey_id.session_state == 'in_progress' and self.survey_id.session_speed_rating:
             if answer.answer_score and answer.answer_score > 0:
                 max_score_delay = 2
-                time_limit = self.user_input_session_id.questions_time_limit
+                time_limit = self.survey_id.session_questions_time_limit
                 now = fields.Datetime.now()
-                seconds_to_answer = (now - self.user_input_session_id.current_question_start_time).total_seconds()
+                seconds_to_answer = (now - self.survey_id.session_current_question_start_time).total_seconds()
                 question_remaining_time = time_limit - seconds_to_answer
                 if seconds_to_answer < max_score_delay:  # if answered within the max_score_delay
                     answer_score = answer.answer_score

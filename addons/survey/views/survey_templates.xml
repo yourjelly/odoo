@@ -27,7 +27,7 @@
     <!-- First page of a survey -->
     <template id="survey_page_start" name="Survey: start page">
         <div class="wrap o_survey_start"
-            t-att-data-survey-session-uuid="answer.user_input_session_id.uuid">
+            t-att-data-survey-access-token="survey.access_token">
             <div class="oe_structure" id="oe_structure_survey_init_1"/>
             <div class='mt32 mb32'>
                 <t t-if="answer.test_entry" t-call="survey.survey_button_form_view" />
@@ -39,7 +39,7 @@
                         <span class="font-weight-bold text-danger" t-field="survey.time_limit" t-options="{'widget': 'duration', 'unit': 'minute'}"></span>
                     </p>
                 </div>
-                <t t-if="answer.user_input_session_id and answer.user_input_session_id.state == 'ready'">
+                <t t-if="survey.session_state == 'ready'">
                     <div class="font-weight-bold">
                         You're registered for this session!<br/>
                         It will begin automatically when the host starts.
@@ -66,7 +66,7 @@
             <div class="wrap">
                 <div class="oe_structure" id="oe_structure_survey_survey_1"/>
                 <div class="container o_survey_form"
-                    t-att-data-survey-session-uuid="answer.user_input_session_id.uuid">
+                    t-att-data-survey-access-token="survey.access_token">
                     <t t-call="survey.survey_page_main_header" />
                     <t t-call="survey.survey_page_content" />
                 </div>
@@ -117,7 +117,7 @@
         </t>
 
         <t t-if="survey.questions_layout == 'page_per_question'">
-            <t t-set="is_survey_session_in_progress" t-value="answer.user_input_session_id and answer.user_input_session_id.state == 'in_progress'" />
+            <t t-set="is_survey_session_in_progress" t-value="survey.session_state == 'in_progress'" />
             <input type="hidden" name="question_id" t-att-value="question.id" />
             <!-- User has already answered for this session -->
             <t t-if="is_survey_session_in_progress and (has_answered or answer.is_time_limit_reached)">

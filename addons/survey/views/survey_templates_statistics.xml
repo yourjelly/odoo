@@ -38,7 +38,7 @@
                 </span>
             </div>
         </div>
-        <div t-if="session and session.competitive_mode" class="o_survey_session_ranking mb-5 mt-1">
+        <div t-if="survey.session_competitive_mode" class="o_survey_session_ranking mb-5 mt-1">
             <h2 class="mt16 text-uppercase text-muted">Ranking</h2>
             <t t-call="survey.user_input_session_ranking" />
         </div>

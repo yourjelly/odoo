@@ -35,11 +35,11 @@
                             </h3>
                             <input class="o_survey_session_copy_url d-none" type="text" t-att-value="survey_url" />
                         </div>
-                        <div class="col-lg-6 text-right mr-3 font-weight-light" t-if="session.is_questions_time_limited">
-                            Time per question <span class="ml-1 font-weight-bold" t-field="session.questions_time_limit" t-options="{'widget': 'duration', 'unit': 'second'}" />
+                        <div class="col-lg-6 text-right mr-3 font-weight-light" t-if="survey.session_is_questions_time_limited">
+                            Time per question <span class="ml-1 font-weight-bold" t-field="survey.session_questions_time_limit" t-options="{'widget': 'duration', 'unit': 'second'}" />
                         </div>
-                        <div class="col-lg-4 ml-3 font-weight-light" t-if="session.is_questions_time_limited">
-                            Participants <span class="ml-1 font-weight-bold" t-esc="session.answer_ids_count" />
+                        <div class="col-lg-4 ml-3 font-weight-light">
+                            Participants <span class="ml-1 font-weight-bold" t-esc="survey.session_user_input_count" />
                         </div>
                     </div>
                     <div class="text-center mt-5">
@@ -64,9 +64,8 @@
             t-att-data-is-transitioned="is_transitioned"
             t-att-data-survey-id="survey.id"
             t-att-data-survey-access-token="survey.access_token"
-            t-att-data-input-session-id="session.id"
-            t-att-data-timer="session.current_question_start_time.isoformat()"
-            t-att-data-time-limit-minutes="session.questions_time_limit / 60">
+            t-att-data-timer="survey.session_current_question_start_time.isoformat()"
+            t-att-data-time-limit-minutes="survey.session_questions_time_limit / 60">
             <div class="w-75 p-4 o_survey_session_manage_container">
                 <div>
                     <fieldset disabled="disabled">
@@ -76,16 +75,16 @@
                                 <span class="o_survey_timer"/>
                             </h1>
                         </div>
-                        <t t-set="question" t-value="session.current_question_id" />
+                        <t t-set="question" t-value="survey.session_current_question_id" />
                         <t t-set="answer_lines" t-value="env['survey.user_input.line']" />
                         <t t-call="survey.question_container" />
                     </fieldset>
                     <div class="text-right mb-5">
                         <div class="font-weight-bold my-2">
                             Received answers:
-                            <t t-esc="session.current_question_answer_count" />
+                            <t t-esc="survey.session_current_question_answer_count" />
                                 / 
-                                <t t-esc="session.answer_ids_count" />
+                                <t t-esc="survey.session_user_input_count" />
                         </div>
                     </div>
                     <div class="text-center">
@@ -115,7 +114,7 @@
                 </div>
             </div>
             <br/>
-            <div t-if="session.competitive_mode" class="w-75 px-4 py-2 o_survey_session_manage_container o_survey_session_ranking">
+            <div t-if="survey.session_competitive_mode" class="w-75 px-4 py-2 o_survey_session_manage_container o_survey_session_ranking">
                 <div class="row m-0 d-flex align-items-center">
                     <div class="col-lg-10 m-0 p-0">
                         <h3 class="m-0">Ranking</h3>

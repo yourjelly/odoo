@@ -7,14 +7,18 @@
         <field name="arch" type="xml">
             <form string="Survey" class="o_survey_form">
                 <field name="id" invisible="1"/>
-                <field name="user_input_current_session" invisible="1"/>
+                <field name="session_state" invisible="1"/>
                 <header>
                     <button name="action_open" string="Start Survey" type="object" class="oe_highlight" attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('id', '=', False)]}"/>
                     <button name="action_send_survey" string="Share" type="object" class="oe_highlight" states="open"/>
                     <button name="action_result_survey" string="See results" type="object" class="oe_highlight"
                       attrs="{'invisible': ['|', ('state', '=', 'draft'), ('answer_done_count', '&lt;=', 0)]}"/>
-                    <button name="action_start_input_session" string="Create Live Session" type="object"
-                        attrs="{'invisible': [('questions_layout', '!=', 'page_per_question')]}"/>
+                    <button name="action_start_session" string="Create Live Session" type="object"
+                        attrs="{'invisible': [('session_state', '!=', 'closed')]}" />
+                    <button name="action_open_session_manager" string="Open Session Manager" type="object"
+                        attrs="{'invisible': [('session_state', '=', 'closed')]}" />
+                    <button name="action_end_session" string="Close Live Session" type="object"
+                        attrs="{'invisible': [('session_state', '!=', 'in_progress')]}" />
                     <button name="action_draft" string="Set to draft" type="object" states="closed"/>
                     <button name="action_test_survey" string="Test" type="object" attrs="{'invisible': ['|', ('state', '=', 'closed'), ('id', '=', False)]}"/>
                     <button name="action_print_survey" string="Print" type="object" attrs="{'invisible': [('id', '=', False)]}"/>
@@ -42,13 +46,6 @@
                             class="oe_stat_button"
                             icon="fa-pencil-square-o">
                             <field string="Answers" name="answer_done_count" widget="statinfo"/>
-                        </button>
-                        <button name="action_user_input_session"
-                            type="object"
-                            class="oe_stat_button"
-                            icon="fa-users"
-                            attrs="{'invisible': [('user_input_session_count', '=', 0)]}">
-                            <field string="Sessions" name="user_input_session_count" widget="statinfo"/>
                         </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
@@ -129,6 +126,19 @@
                                            options="{'no_create': True}"
                                            context="{'form_view_ref': 'survey.gamification_badge_form_view_simplified'}"/>
                                 </group>
+                            </group>
+                        </page>
+                        <page string="Live Session" name="live_session">
+                            <group string="Session Settings">
+                                <field name="session_competitive_mode" />
+                                <label for="session_is_questions_time_limited" string="Time Limit"/>
+                                <div>
+                                    <field name="session_is_questions_time_limited" nolabel="1"/>
+                                    <field name="session_questions_time_limit" nolabel="1" class="oe_inline"
+                                        attrs="{'invisible': [('session_is_questions_time_limited', '=', False)]}" />
+                                        <span attrs="{'invisible': [('session_is_questions_time_limited', '=', False)]}"> seconds per question</span>
+                                </div>
+                                <field name="session_speed_rating" attrs="{'invisible': [('session_is_questions_time_limited', '=', False)]}" />
                             </group>
                         </page>
                     </notebook>

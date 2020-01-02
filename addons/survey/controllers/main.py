@@ -227,16 +227,14 @@ class Survey(http.Controller):
         data = {
             'format_datetime': lambda dt: format_datetime(request.env, dt, dt_format=False),
             'format_date': lambda date: format_date(request.env, date),
-            'is_survey_session_in_progress': answer_sudo.user_input_session_id and answer_sudo.user_input_session_id.state in ['ready', 'in_progress'],
+            'is_survey_session_in_progress': survey_sudo.session_state in ['ready', 'in_progress'],
         }
 
         timer_start = False
         time_limit_minutes = False
-        if answer_sudo.user_input_session_id \
-                and answer_sudo.user_input_session_id.state == 'in_progress' \
-                and answer_sudo.user_input_session_id.is_questions_time_limited:
-            timer_start = answer_sudo.user_input_session_id.current_question_start_time.isoformat()
-            time_limit_minutes = answer_sudo.user_input_session_id.questions_time_limit / 60
+        if survey_sudo.session_state == 'in_progress' and survey_sudo.session_is_questions_time_limited:
+            timer_start = survey_sudo.session_current_question_start_time.isoformat()
+            time_limit_minutes = survey_sudo.session_questions_time_limit / 60
         elif survey_sudo.is_time_limited and answer_sudo.start_datetime:
             timer_start = answer_sudo.start_datetime.isoformat()
             time_limit_minutes = survey_sudo.time_limit
@@ -258,9 +256,7 @@ class Survey(http.Controller):
             })
             return data
 
-        if answer_sudo.state == 'new' \
-                and answer_sudo.user_input_session_id \
-                and answer_sudo.user_input_session_id.state == 'in_progress':
+        if answer_sudo.state == 'new' and survey_sudo.session_state == 'in_progress':
             answer_sudo.write({
                 'start_datetime': fields.Datetime.now(),
                 'state': 'skip'
@@ -286,7 +282,7 @@ class Survey(http.Controller):
                 'state': 'skip'
             })
             return data
-        elif answer_sudo.state == 'done' or answer_sudo.is_time_limit_reached and not answer_sudo.user_input_session_id:  # Display success message
+        elif answer_sudo.state == 'done' or (answer_sudo.is_time_limit_reached and survey_sudo.session_state != 'in_progress'):  # Display success message
             return self._prepare_survey_finished_values(survey_sudo, answer_sudo)
         else:  # answer_sudo.state == 'skip'
             page_or_question_id, is_last = survey_sudo.next_page_or_question(answer_sudo, answer_sudo.last_displayed_page_id.id)
@@ -411,7 +407,7 @@ class Survey(http.Controller):
             comment = prepared_questions[question.id]['comment']
             answer_sudo.save_lines(question, answer, comment)
 
-        if (not answer_sudo.user_input_session_id and answer_sudo.is_time_limit_reached) or survey_sudo.questions_layout == 'one_page':
+        if (survey_sudo.session_state != 'in_progress' and answer_sudo.is_time_limit_reached) or survey_sudo.questions_layout == 'one_page':
             answer_sudo._mark_done()
         elif 'previous_page_id' in post:
             # Go back to specific page using the breadcrumb. Lines are saved and survey continues
@@ -553,11 +549,9 @@ class Survey(http.Controller):
     # REPORTING SURVEY ROUTES
     # ------------------------------------------------------------
 
-    @http.route([
-        '/survey/results/<model("survey.survey"):survey>',
-        '/survey/results/<model("survey.survey"):survey>/<model("survey.user_input_session"):session>'],
+    @http.route(['/survey/results/<model("survey.survey"):survey>'],
         type='http', auth='user', website=True)
-    def survey_report(self, survey, session=None, answer_token=None, **post):
+    def survey_report(self, survey, answer_token=None, **post):
         """ Display survey Results & Statistics for given survey.
 
         New structure: {
@@ -568,13 +562,12 @@ class Survey(http.Controller):
             'search_finished': either filter on finished inputs only or not,
         }
         """
-        user_input_lines, search_filters = self._extract_filters_data(survey, session, post)
+        user_input_lines, search_filters = self._extract_filters_data(survey, post)
         survey_data = survey._prepare_statistics(user_input_lines)
         question_and_page_data = survey.question_and_page_ids._prepare_statistics(user_input_lines)
 
         template_values = {
             # survey and its statistics
-            'session': session,
             'survey': survey,
             'question_and_page_data': question_and_page_data,
             'survey_data': survey_data,
@@ -583,12 +576,12 @@ class Survey(http.Controller):
             'search_finished': post.get('finished') == 'true',
         }
 
-        if session and session.competitive_mode:
-            template_values['ranking'] = session._prepare_ranking_values()
+        if survey.session_competitive_mode:
+            template_values['ranking'] = survey._prepare_ranking_values()
 
         return request.render('survey.survey_page_statistics', template_values)
 
-    def _extract_filters_data(self, survey, session, post):
+    def _extract_filters_data(self, survey, post):
         search_filters = []
         line_filter_domain, line_choices = [], []
         for data in post.get('filters', '').split('|'):
@@ -615,9 +608,6 @@ class Survey(http.Controller):
             line_filter_domain = expression.AND([[('suggested_answer_id', 'in', line_choices)], line_filter_domain])
 
         user_input_domain = ['&', ('test_entry', '=', False), ('survey_id', '=', survey.id)]
-
-        if session:
-            user_input_domain = expression.AND([[('id', 'in', session.answer_ids.ids)], user_input_domain])
 
         if line_filter_domain:
             matching_line_ids = request.env['survey.user_input.line'].sudo().search(line_filter_domain).ids

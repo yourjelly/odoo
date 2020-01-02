@@ -27,21 +27,19 @@ class UserInputSession(http.Controller):
           ranking or go to the next question of the session. """
 
         survey_sudo = self._fetch_from_access_token(survey_token)
-        current_session = survey_sudo.user_input_current_session
 
-        if not current_session:
+        if survey_sudo.session_state == 'closed':
             # no open session
             return werkzeug.utils.redirect('/')
 
-        if current_session.state == 'ready':
+        if survey_sudo.session_state == 'ready':
             base_url = request.env['ir.config_parameter'].sudo().get_param("web.base.url")
             return request.render('survey.user_input_session_open', {
-                'session': current_session,
                 'survey': survey_sudo,
                 'survey_url': url_join(base_url, survey_sudo.get_start_url())
             })
         else:
-            template_values = self._prepare_manage_session_values(survey_sudo, current_session)
+            template_values = self._prepare_manage_session_values(survey_sudo)
             return request.render('survey.user_input_session_manage', template_values)
 
     @http.route('/survey/session_next_question/<string:survey_token>', type='json', auth='user', website=True)
@@ -52,18 +50,17 @@ class UserInputSession(http.Controller):
         questions using a AJAX call to be able to display a bioutiful fade in/out effect. """
 
         survey_sudo = self._fetch_from_access_token(survey_token)
-        current_session = survey_sudo.user_input_current_session
 
-        if not current_session:
+        if survey_sudo.session_state == 'closed':
             # no open session
             return werkzeug.utils.redirect('/')
 
-        if current_session.state == 'ready':
-            current_session.write({'state': 'in_progress'})
-            current_session.flush(['state'])
+        if survey_sudo.session_state == 'ready':
+            survey_sudo.write({'session_state': 'in_progress'})
+            survey_sudo.flush(['session_state'])
 
-        current_session.next_question()
-        template_values = self._prepare_manage_session_values(survey_sudo, current_session)
+        survey_sudo.next_question()
+        template_values = self._prepare_manage_session_values(survey_sudo)
         template_values['is_transitioned'] = True
         return request.env.ref('survey.user_input_session_manage_content').render(template_values).decode('UTF-8')
 
@@ -75,24 +72,22 @@ class UserInputSession(http.Controller):
         an AJAX request to be able to include the results in the currently displayed page. """
 
         survey_sudo = self._fetch_from_access_token(survey_token)
-        current_session = survey_sudo.user_input_current_session
 
-        if not current_session:
+        if not survey_sudo.session_state:
             # no open session
             return werkzeug.utils.redirect('/')
 
         user_input_lines = request.env['survey.user_input.line'].search([
-            ('user_input_id', 'in', current_session.answer_ids.ids),
-            ('question_id', '=', current_session.current_question_id.id)
+            ('user_input_id', 'in', survey_sudo.user_input_ids.ids),
+            ('question_id', '=', survey_sudo.session_current_question_id.id)
         ])
-        questions_statistics = current_session.current_question_id._prepare_statistics(user_input_lines)[0]
+        questions_statistics = survey_sudo.session_current_question_id._prepare_statistics(user_input_lines)[0]
 
         return request.env.ref('survey.survey_page_statistics_question').render({
             'page_record_limit': 10,
             'hide_question_title': True,
             'survey': survey_sudo,
-            'session': current_session,
-            'question': current_session.current_question_id,
+            'question': survey_sudo.session_current_question_id,
             'question_data': questions_statistics
         }).decode('UTF-8')
 
@@ -104,24 +99,22 @@ class UserInputSession(http.Controller):
         using an AJAX request to be able to include the results in the currently displayed page. """
 
         survey_sudo = self._fetch_from_access_token(survey_token)
-        current_session = survey_sudo.user_input_current_session
 
-        if not current_session:
+        if not survey_sudo.session_state:
             # no open session
             return werkzeug.utils.redirect('/')
 
         return request.env.ref('survey.user_input_session_ranking').render({
-            'ranking': current_session._prepare_ranking_values()
+            'ranking': survey_sudo._prepare_ranking_values()
         }).decode('UTF-8')
 
-    def _prepare_manage_session_values(self, survey, session):
+    def _prepare_manage_session_values(self, survey):
         question_ids = list(enumerate(survey.question_ids))
         current_question_index = question_ids.index(
-            next(question for question in question_ids if question[1] == session.current_question_id)
+            next(question for question in question_ids if question[1] == survey.session_current_question_id)
         )
 
         vals = {
-            'session': session,
             'answer': request.env['survey.user_input'],
             'survey': survey,
             'is_last_question': current_question_index == (len(survey.question_ids) - 1),

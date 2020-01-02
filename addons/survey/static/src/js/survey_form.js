@@ -249,7 +249,7 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
                 self._initDateTimePicker($(this));
             });
             self._updateBreadcrumb();
-            if ($target.val() === 'start' || this.$el.data('surveySessionUuid')) {
+            if ($target.val() === 'start' || this.$el.data('surveyAccessToken')) {
                 self._initTimer();
             } else if ($target.val() === 'finish') {
                 self._initResultWidget();
@@ -585,10 +585,10 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
      * @private
      */
     _initSessionManagement: function () {
-        var surveySessionUuid = this.$el.data('surveySessionUuid');
-        if (surveySessionUuid) {
-            this.surveySessionUuid = surveySessionUuid;
-            this.call('bus_service', 'addChannel', surveySessionUuid);
+        var surveyAccessToken = this.$el.data('surveyAccessToken');
+        if (surveyAccessToken) {
+            this.surveyAccessToken = surveyAccessToken;
+            this.call('bus_service', 'addChannel', surveyAccessToken);
             this.call('bus_service', 'startPolling');
 
             this.call('bus_service', 'onNotification', this, this._onNotification);

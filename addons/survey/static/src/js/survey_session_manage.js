@@ -29,7 +29,6 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
         return this._super.apply(this, arguments).then(function () {
             self.surveyId = self.$el.data('surveyId');
             self.surveyAccessToken = self.$el.data('surveyAccessToken');
-            self.inputSessionId = self.$el.data('inputSessionId');
 
             var isTransitioned = self.$el.data('isTransitioned');
             if (!isTransitioned) {
@@ -130,14 +129,13 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
         ev.preventDefault();
 
         this._rpc({
-            model: 'survey.user_input_session',
+            model: 'survey.survey',
             method: 'action_end_session',
-            args: [[this.inputSessionId]],
+            args: [[this.surveyId]],
         }).then(function () {
             document.location = _.str.sprintf(
-                '/survey/results/%s/%s',
-                self.surveyId,
-                self.inputSessionId
+                '/survey/results/%s',
+                self.surveyId
             );
         });
     },
