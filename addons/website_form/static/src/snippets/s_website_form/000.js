@@ -20,9 +20,9 @@ odoo.define('website_form.animation', function (require) {
             return Promise.all([this._super.apply(this, arguments), prom]);
         },
 
-        start: function (editable_mode) {
-            if (editable_mode) {
-                this.stop();
+        start: function () {
+            if (this.editableMode) {
+                this.destroy();
                 return;
             }
             var self = this;
@@ -30,7 +30,6 @@ odoo.define('website_form.animation', function (require) {
             this.$target.find('.o_website_form_send').on('click',function (e) {self.send(e);});
 
             // Initialize datetimepickers
-            var l10n = _t.database.parameters;
             var datepickers_options = {
                 minDate: moment({ y: 1900 }),
                 maxDate: moment({ y: 9999, M: 11, d: 31 }),
