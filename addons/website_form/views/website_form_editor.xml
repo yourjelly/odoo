@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- End Message -->
+    <template id="website_form.s_website_form_end_message">
+        <div class="s_website_form_end_message d-none">
+            <div class="text-center alert alert-info css_non_editable_mode_hidden o_not_editable" t-ignore="True" role="status">
+                The following message will become visible <strong>only</strong> once the form is sent.
+            </div>
+            <div class="oe_structure">
+                <section class="s_text_block pt32 pb32">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12 pt32 pb32">
+                                <h2 class="text-center">Thank You For Your Feedback</h2>
+                                <p class="text-center">
+                                    Our team will message you back as soon as possible.<br/>
+                                    In the meantime we invite you to try our awesome <a href="/">website</a>.<br/>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </template>
+
+    <template id="website_form.submit_button">
+        <div class="form-group col-12 o_we_form_submit">
+            <div class="row s_no_resize s_col_no_bgcolor">
+                <div style="width: 200px" class="col-auto o_we_form_label"/>
+                <div class="col">
+                    <a href="#" role="button" class="btn btn-primary btn-lg o_website_form_send">Submit</a>
+                    <span id="o_website_form_result"></span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Generic Field Layout -->
+    <template id="website_form.field">
+        <div t-attf-class="form-group s_website_form_field #{col or 'col-12'} #{custom and 'o_website_form_custom'} #{(required and 'o_website_form_required_custom') or (modelRequired and 'o_website_form_required')} #{hidden and 'o_website_form_field_hidden'} #{dnone and 'd-none'}"
+            t-attf-data-type="#{custom and type or None}">
+            <div t-if="labelPosition != 'none' and labelPosition != 'top'" class="row s_no_resize s_col_no_bgcolor">
+                <label t-attf-class="col-form-label col-auto o_we_form_label #{labelPosition == 'right' and 'text-right'}" t-attf-style="width: #{labelWidth or '200px'}" t-att-for="name">
+                    <t t-ignore="true" t-call="website_form.label_content"/>
+                </label>
+                <div class="col">
+                    <t t-raw="0"/>
+                </div>
+            </div>
+            <t t-else="">
+                <label t-attf-class="o_we_form_label #{labelPosition == 'none' and 'd-none'}" t-attf-style="width: #{labelWidth or '200px'}" t-att-for="name">
+                    <t t-ignore="true" t-call="website_form.label_content"/>
+                </label>
+                <t t-raw="0"/>
+            </t>
+        </div>
+    </template>
+
+    <template id="website_form.label_content">
+        <t t-if="custom" t-set="label" t-value="name"/>
+        <t t-esc="label"/>
+        <t t-if="required or modelRequired">
+            <span class="o_website_form_mark" t-if="requiredMark" t-esc="requiredMark"/>
+        </t>
+        <t t-else="">
+            <span class="o_website_form_mark" t-if="optionnalMark" t-esc="optionnalMark"/>
+        </t>
+    </template>
+
+    <!-- Hidden Field -->
+    <template id="website_form.field_hidden">
+        <t t-set="dnone" t-value="true"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <input
+                type="hidden"
+                class="form-control o_website_form_input"
+                t-att-name="name"
+                t-att-value="value"
+            />
+        </t>
+    </template>
+
+    <!-- Char Field -->
+    <template id="website_form.field_char">
+        <t t-set="type" t-value="'char'"/>
+        <span t-esc="field"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <input
+                type="text"
+                class="form-control o_website_form_input"
+                t-att-name="name"
+                t-att-value="value"
+                t-att-required="required or modelRequired or None"
+                t-att-placeholder="placeholder"
+            />
+        </t>
+    </template>
+
+    <!-- Text Field -->
+    <template id="website_form.field_text">
+        <t t-set="type" t-value="'text'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <textarea
+                class="form-control o_website_form_input"
+                t-att-name="name"
+                t-att-required="required or modelRequired or None"
+                t-att-placeholder="placeholder"
+            />
+        </t>
+    </template>
+
+    <!-- Email Field -->
+    <template id="website_form.field_email">
+        <t t-set="type" t-value="'email'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <input
+                type="email"
+                class="form-control o_website_form_input"
+                t-att-name="name"
+                t-att-value="value"
+                t-att-required="required or modelRequired or None"
+                t-att-placeholder="placeholder"
+            />
+        </t>
+    </template>
+
+    <!-- HTML Field -->
+    <template id="website_form.field_html">
+        <!--
+            Maybe use web_editor ? Not sure it actually makes
+            sense to have random people editing html in a form...
+        -->
+        <t t-set="type" t-value="'html'"/>
+        <t t-ignore="true" t-call="website_form.field_text"/>
+    </template>
+
+    <!-- Integer Field -->
+    <template id="website_form.field_integer">
+        <t t-set="type" t-value="'integer'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <input
+                type="number"
+                class="form-control o_website_form_input"
+                t-att-name="name"
+                step="1"
+                t-att-required="required or modelRequired or None"
+                t-att-placeholder="placeholder"
+            />
+        </t>
+    </template>
+
+    <!-- Float Field -->
+    <template id="website_form.field_float">
+        <t t-set="type" t-value="'float'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <input
+                type="number"
+                class="form-control o_website_form_input"
+                t-att-name="name"
+                step="any"
+                t-att-required="required or modelRequired or None"
+                t-att-placeholder="placeholder"
+            />
+        </t>
+    </template>
+
+    <!-- Date Field -->
+    <template id="website_form.field_date">
+        <t t-set="type" t-value="'date'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <t t-set="datepickerID" t-value="_.uniqueId('datepicker')"/>
+            <div class="o_website_form_date input-group date" t-att-id="datepickerID" data-target-input="nearest">
+                <input
+                        type="text"
+                        class="form-control datetimepicker-input o_website_form_input"
+                        t-attf-data-target="##{datepickerID}"
+                        t-att-name="name"
+                        t-att-required="required or modelRequired or None"
+                        t-att-placeholder="placeholder"
+                />
+                <div class="input-group-append" t-attf-data-target="##{datepickerID}" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Datetime Field -->
+    <template id="website_form.field_datetime">
+        <t t-set="type" t-value="'datetime'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <t t-set="datetimepickerID" t-value="_.uniqueId('datetimepicker')"/>
+            <div class="o_website_form_datetime input-group date" t-att-id="datetimepickerID" data-target-input="nearest">
+                <input
+                        type="text"
+                        class="form-control datetimepicker-input o_website_form_input"
+                        t-attf-data-target="##{datetimepickerID}"
+                        t-att-name="name"
+                        t-att-required="required or modelRequired or None"
+                        t-att-placeholder="placeholder"
+                />
+                <div class="input-group-append" t-attf-data-target="##{datetimepickerID}" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Boolean Field -->
+    <template id="website_form.field_boolean">
+        <t t-set="type" t-value="'boolean'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <div class="col-form-label">
+                <input
+                    type="checkbox"
+                    value="Yes"
+                    class="o_website_form_input"
+                    t-att-name="name"
+                    t-att-required="required or modelRequired or None"
+                />
+            </div>
+        </t>
+    </template>
+
+    <!-- Selection Field -->
+    <template id="website_form.field_selection">
+        <t t-set="type" t-value="'selection'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <div class="o_website_form_flex" data-display="horizontal">
+                <t t-foreach="selection" t-as="record">
+                    <t t-ignore="true" t-call="website_form.radio"/>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <!-- Radio -->
+    <template id="website_form.radio">
+        <div class="radio o_website_form_flex_item">
+            <label class="col-form-label">
+                <input
+                    type="radio"
+                    class="o_website_form_input"
+                    t-att-name="name"
+                    t-att-value="record[0]"
+                    t-att-required="required or modelRequired or None"
+                />
+                <span>
+                    <t t-esc="record[1]"/>
+                </span>
+            </label>
+        </div>
+    </template>
+
+    <!-- Many2One Field -->
+    <template id="website_form.field_many2one">
+        <t t-set="type" t-value="'many2one'"/>
+        <!-- Binary one2many -->
+        <t t-if="relation == 'ir.attachment'">
+            <t t-ignore="true" t-call="website_form.field_binary"/>
+        </t>
+        <!-- Generic one2many -->
+        <t t-if="relation != 'ir.attachment'">
+            <t t-ignore="true" t-call="website_form.field">
+                <select class="form-control o_website_form_input" t-att-name="name" t-att-required="required or modelRequired or None">
+                    <t t-foreach="records" t-as="record">
+                        <option t-att-value="record.id" t-att-selected="record.selected">
+                            <t t-esc="record.display_name"/>
+                        </option>
+                    </t>
+                </select>
+            </t>
+        </t>
+    </template>
+
+    <!-- One2Many Field -->
+    <template id="website_form.field_one2many">
+        <t t-set="type" t-value="'one2many'"/>
+        <!-- Binary one2many -->
+        <t t-if="relation == 'ir.attachment'">
+            <t t-ignore="true" t-call="website_form.field_binary">
+                <t t-set="multiple" t-value="1"/>
+            </t>
+        </t>
+        <!-- Generic one2many -->
+        <t t-if="relation != 'ir.attachment'">
+            <t t-ignore="true" t-call="website_form.field">
+                <div class="o_website_form_flex" data-display="horizontal">
+                    <t t-if="!records">
+                        <input
+                            class="o_website_form_input"
+                            t-att-name="name"
+                            t-att-value="record.id"
+                            t-att-required="required or modelRequired or None"
+                            placeholder="No matching record !"
+                        />
+                    </t>
+                    <t t-foreach="records" t-as="record">
+                        <t t-ignore="true" t-call="website_form.checkbox"/>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- Checkbox -->
+    <template id="website_form.checkbox">
+        <div class="checkbox o_website_form_flex_item">
+            <label class="col-form-label">
+                <input
+                    type="checkbox"
+                    class="o_website_form_input"
+                    t-att-name="name"
+                    t-att-value="record.id"
+                    t-att-required="required or modelRequired or None"
+                />
+                <span>
+                    <t t-esc="record.display_name"/>
+                </span>
+            </label>
+        </div>
+    </template>
+
+    <!-- Many2Many Field -->
+    <template id="website_form.field_many2many">
+        <t t-ignore="true" t-call="website_form.field_one2many"/>
+    </template>
+
+    <!-- Binary Field -->
+    <template id="website_form.field_binary">
+        <t t-set="type" t-value="'binary'"/>
+        <t t-ignore="true" t-call="website_form.field">
+            <input
+                type="file"
+                class="form-control-file o_website_form_input"
+                t-att-name="name"
+                t-att-required="required or modelRequired or None"
+                t-att-multiple="multiple"
+            />
+        </t>
+    </template>
+
+    <!-- Monetary Field -->
+    <template id="website_form.field_monetary">
+        <t t-ignore="true" t-call="website_form.field_float" />
+    </template>
+</odoo>

@@ -249,7 +249,7 @@ odoo.define('website_form_editor.tour', function (require) {
         {
             content:  "Try to send empty form",
             extra_trigger:  "form[data-model_name='mail.mail']" +
-                            "[data-successPage='/contactus-thank-you']" +
+                            "[data-success-page='/contactus-thank-you']" +
                             ":has(.s_website_form_field:has(label:contains('Your Name')):has(input[type='text'][name='Your Name'][required]))" +
                             ":has(.s_website_form_field:has(label:contains('Email')):has(input[type='email'][name='email_from'][required]))" +
                             ":has(.s_website_form_field:has(label:contains('Your Question')):has(textarea[name='Your Question'][required]))" +

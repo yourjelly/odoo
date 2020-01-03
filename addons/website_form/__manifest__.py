@@ -13,6 +13,7 @@
         'views/assets.xml',
         'views/ir_model_views.xml',
         'views/snippets/s_website_form.xml',
+        'views/website_form_editor.xml',
         'views/website_form_templates.xml',
     ],
     'installable': True,

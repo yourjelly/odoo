@@ -3,7 +3,7 @@
     <template id="s_website_form" name="Form">
         <section class="s_website_form" data-vjs="001" data-vcss="001">
             <div class="container">
-                <form action="/website_form/" method="post" enctype="multipart/form-data" class="o_we_required_star">
+                <form action="/website_form/" method="post" enctype="multipart/form-data" data-required-mark="*">
                     <div class="o_form_rows row s_col_no_bgcolor">
                         <div class="form-group col-12 o_we_form_submit">
                             <div class="row s_no_resize s_col_no_bgcolor">
@@ -34,11 +34,8 @@
         <xpath expr="//div" position="after">
             <!-- Form -->
             <div data-js="WebsiteFormEditor" data-selector=".s_website_form" data-target="form">
-                <we-select string="Required Fields Mark" data-no-preview="true">
-                    <we-button data-select-class="o_we_required_none">None</we-button>
-                    <we-button data-select-class="o_we_required_star">Asterisk</we-button>
-                    <we-button data-select-class="o_we_required_opt">Optional</we-button>
-                </we-select>
+                <we-input string="Required Fields Mark" data-set-required-mark=""/>
+                <we-input string="Optionnal Fields Mark" data-set-optionnal-mark=""/>
                 <we-input string="Labels Width" class="o_we_inline"
                     data-select-style="" data-css-property="width"
                     data-unit="px" data-apply-to=".o_we_form_label"/>

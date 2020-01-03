@@ -743,7 +743,7 @@
                         <div class="col-12 col-xl order-xl-1 oe_cart">
                             <section class="s_website_form" data-vjs="001" data-vcss="001">
                                 <div class="container">
-                                    <form action="/website_form/" method="post" class="o_we_required_star" enctype="multipart/form-data" data-force_action="shop.sale.order" data-model_name="sale.order" data-success-mode="redirect" data-successPage="/shop/payment" hide-change-model="true">
+                                    <form action="/website_form/" method="post" enctype="multipart/form-data" data-force_action="shop.sale.order" data-model_name="sale.order" data-success-mode="redirect" data-success-page="/shop/payment" hide-change-model="true">
                                         <div class="o_form_rows row s_col_no_bgcolor">
                                             <div class="form-group col-12 s_website_form_field o_website_form_custom" data-type="char">
                                                 <div class="row s_no_resize s_col_no_bgcolor">

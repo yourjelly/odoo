@@ -76,7 +76,7 @@ publicWidget.registry.s_website_form_001 = publicWidget.Widget.extend({
         this.$target.find('button').off('click');
 
         // Empty imputs
-        this.$target.find('input, textarea').val('');
+        this.$target.find('input[type="text"], input[type="email"], input[type="number"] , textarea').val('');
 
         // Remove saving of the error colors
         this.$target.find('.o_has_error').removeClass('o_has_error').find('.form-control, .custom-select').removeClass('is-invalid');

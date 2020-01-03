@@ -40,27 +40,9 @@
         display: none;
     }
 
-    // Required fields have a star which is not part of the field label
-    .o_we_required_star {
-        .s_website_form_field {
-            &.o_website_form_required, &.o_website_form_required_custom {
-                .o_we_form_label:after {
-                    content: ' *';
-                }
-            }
-        }
-    }
-    // Optional fields have an indication which is not part of the field label
-    .o_we_required_opt {
-        .s_website_form_field {
-            &:not(.o_website_form_required):not(.o_website_form_required_custom) {
-                .o_we_form_label:after {
-                    content: ' - Opt.';
-                    font-size: 10px;
-                    font-weight: 400;
-                }
-            }
-        }
+    span.o_website_form_mark {
+        font-size: 12px;
+        font-weight: 400;
     }
 
     // Display the editable select as a single big field

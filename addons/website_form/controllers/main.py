@@ -18,6 +18,33 @@ from odoo.addons.base.models.ir_qweb_fields import nl2br
 
 class WebsiteForm(http.Controller):
 
+    @http.route('/website_form/editor_templates', type='json', auth="user", website=True)
+    def get_editor_templates(self):
+        templates = [
+            'website_form.s_website_form_end_message',
+            'website_form.field',
+            'website_form.label_content',
+            'website_form.field_hidden',
+            'website_form.field_char',
+            'website_form.field_text',
+            'website_form.field_email',
+            'website_form.field_html',
+            'website_form.field_integer',
+            'website_form.field_float',
+            'website_form.field_date',
+            'website_form.field_datetime',
+            'website_form.field_boolean',
+            'website_form.field_selection',
+            'website_form.radio',
+            'website_form.field_many2one',
+            'website_form.field_one2many',
+            'website_form.checkbox',
+            'website_form.field_many2many',
+            'website_form.field_binary',
+            'website_form.field_nometary',
+        ]
+        return request.env['ir.ui.view'].search([('key', 'in', templates)]).mapped('arch')
+
     # Check and insert values from the form on the model <model>
     @http.route('/website_form/<string:model_name>', type='http', auth="public", methods=['POST'], website=True)
     def website_form(self, model_name, **kwargs):
