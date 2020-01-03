@@ -177,6 +177,28 @@ class StockMove(models.Model):
     next_serial_count = fields.Integer('Number of SN')
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Original Reordering Rule', check_company=True)
 
+    origin_move_id = fields.Many2one('stock.move')
+    split_move_ids = fields.One2many('stock.move', 'origin_move_id')
+    reserved_qty = fields.Float()
+    done_qty = fields.Float()
+    lot_name = fields.Char('Lot/Serial Number Name')
+    lot_id = fields.Many2one(
+        'stock.production.lot', 'Lot/Serial Number',
+        domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
+    package_id = fields.Many2one(
+        'stock.quant.package', 'Source Package', ondelete='restrict',
+        check_company=True,
+        domain="[('location_id', '=', location_id)]")
+    result_package_id = fields.Many2one(
+        'stock.quant.package', 'Destination Package',
+        ondelete='restrict', required=False, check_company=True,
+        domain="['|', '|', ('location_id', '=', False), ('location_id', '=', location_dest_id), ('id', '=', package_id)]",
+        help="If set, the operations are packed into this package")
+    owner_id = fields.Many2one(
+        'res.partner', 'From Owner',
+        check_company=True,
+        help="When validating the transfer, the products will be taken from this owner.")
+
     @api.onchange('product_id', 'picking_type_id')
     def onchange_product(self):
         if self.product_id:
