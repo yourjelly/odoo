@@ -90,6 +90,18 @@
                                 <span class="o_stat_text">Scraps</span>
                             </div>
                         </button>
+                        <button class="oe_stat_button" name="action_view_child_production" type="object" icon="fa-wrench" attrs="{'invisible': [('child_production_count', '=', 0)]}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="child_production_count"/></span>
+                                <span class="o_stat_text">MO Generated</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" name="action_view_source_production" type="object" icon="fa-wrench" attrs="{'invisible': [('source_production_id', '=', False)]}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">1</span>
+                                <span class="o_stat_text">MO Source</span>
+                            </div>
+                        </button>
                         <field name="workorder_ids" invisible="1"/>
                     </div>
                     <div class="oe_title">

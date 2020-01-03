@@ -111,8 +111,12 @@ class StockRule(models.Model):
         new_move_vals['production_id'] = False
         return new_move_vals
 
+
 class ProcurementGroup(models.Model):
     _inherit = 'procurement.group'
+
+    target_production_ids = fields.One2many('mrp.production', 'source_production_id', string="Child MO of source")
+    source_production_id = fields.Many2one('mrp.production', string="MO Source")
 
     @api.model
     def run(self, procurements):

@@ -264,3 +264,9 @@ class StockRule(models.Model):
         res = super(StockRule, self)._push_prepare_move_copy_values(move_to_copy, new_date)
         res['purchase_line_id'] = None
         return res
+
+
+class ProcurementGroup(models.Model):
+    _inherit = 'procurement.group'
+
+    purchase_order_ids = fields.One2many('purchase.order', 'group_id')

@@ -14,6 +14,10 @@ It is basically used when we want to keep track of production orders generated
 from purchase order.
     """,
     'depends': ['mrp', 'purchase_stock'],
+    'data': [
+        'views/mrp_production_views.xml',
+        'views/purchase_views.xml'
+    ],
     'installable': True,
     'auto_install': True,
 }
