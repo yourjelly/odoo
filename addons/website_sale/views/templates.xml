@@ -1092,9 +1092,9 @@
                                 </div>
                             </t>
                             <div class="d-flex justify-content-between mt-3">
-                                <a role="button" href="/shop/" class="btn btn-secondary mb32">
+                                <a role="button" href="/parking_selectio/" class="btn btn-secondary mb32">
                                     <i class="fa fa-chevron-left"/>
-                                    <span>Select a service</span>
+                                    <span>Select a parking</span>
                                 </a>
                                 <a role="button" href="/shop/confirm_order" class="btn btn-primary mb32">
                                     <span>Confirm</span>
@@ -1356,9 +1356,9 @@
                                     <t t-set="partner_id" t-value="partner"/>
 
                                     <t t-set="back_button_icon_class" t-value="'fa-chevron-left'"/>
-                                    <t t-set="back_button_txt">Select a service</t>
+                                    <t t-set="back_button_txt">Select a parking</t>
                                     <t t-set="back_button_class" t-value="'btn btn-secondary'"/>
-                                    <t t-set="back_button_link" t-value="'/shop/'"/>
+                                    <t t-set="back_button_link" t-value="'/parking_selection/'"/>
                                 </t>
                             </div>
 
