@@ -483,17 +483,6 @@ class StockMoveLine(models.Model):
             })
             self.write({'lot_id': lot.id})
 
-    @api.model
-    def _reservation_is_updatable(self, move_line, quantity, reserved_quant):
-        tracking = self.env['product.product'].browse(move_line['product_id']).tracking
-        if (tracking != 'serial' and
-                move_line['location_id'] == reserved_quant.location_id.id and
-                move_line['lot_id'] == reserved_quant.lot_id.id and
-                move_line['package_id'] == reserved_quant.package_id.id and
-                move_line['owner_id'] == reserved_quant.owner_id.id):
-            return True
-        return False
-
     def _log_message(self, record, move, template, vals):
         data = vals.copy()
         if 'lot_id' in vals and vals['lot_id'] != move.lot_id.id:

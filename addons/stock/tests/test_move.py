@@ -52,11 +52,8 @@ class StockMove(SavepointCase):
         quants = self.env['stock.quant']._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
         return quants.filtered(lambda q: not (q.quantity == 0 and q.reserved_quantity == 0))
 
-    @unittest.skip(reason='unskip me')
     def test_in_1(self):
-        """ Receive products from a supplier. Check that a move line is created and that the
-        reception correctly increase a single quant in stock.
-        """
+        """Receive non-tracked products from a supplier."""
         # creation
         move1 = self.env['stock.move'].create({
             'name': 'test_in_1',
@@ -75,13 +72,13 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        self.assertEqual(len(move1.split_move_ids), 0)
 
-        # fill the move line
-        move_line = move1.move_line_ids[0]
-        self.assertEqual(move_line.product_qty, 100.0)
-        self.assertEqual(move_line.qty_done, 0.0)
-        move_line.qty_done = 100.0
+        # process the move
+        self.assertEqual(move1.product_uom_qty, 100.0)
+        self.assertEqual(move1.reserved_qty, 100.0)
+        self.assertEqual(move1.done_qty, 0.0)
+        move1.done_qty = 100
 
         # validation
         move1._action_done()
@@ -93,12 +90,8 @@ class StockMove(SavepointCase):
         self.assertEqual(len(self.gather_relevant(self.product, self.supplier_location)), 1.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 1.0)
 
-    @unittest.skip(reason='unskip me')
     def test_in_2(self):
-        """ Receive 5 tracked products from a supplier. The create move line should have 5
-        reserved. If i assign the 5 items to lot1, the reservation should not change. Once
-        i validate, the reception correctly increase a single quant in stock.
-        """
+        """Receive products tracked by lot from a supplier."""
         # creation
         move1 = self.env['stock.move'].create({
             'name': 'test_in_1',
@@ -118,15 +111,13 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
-        move_line = move1.move_line_ids[0]
-        self.assertEqual(move_line.product_qty, 5)
-        move_line.lot_name = 'lot1'
-        move_line.qty_done = 5.0
-        self.assertEqual(move_line.product_qty, 5)  # don't change reservation
+        self.assertEqual(move1.reserved_qty, 5)
+        move1.lot_name = 'lot1'
+        move1.done_qty = 5.0
+        self.assertEqual(move1.reserved_qty, 5)  # don't change reservation
 
         move1._action_done()
-        self.assertEqual(move_line.product_qty, 0)  # change reservation to 0 for done move
+        self.assertEqual(move1.reserved_qty, 0)  # change reservation to 0 for done move
         self.assertEqual(move1.state, 'done')
 
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_lot, self.supplier_location), 0.0)
@@ -140,11 +131,8 @@ class StockMove(SavepointCase):
         for quant in quants:
             self.assertNotEqual(quant.in_date, False)
 
-    @unittest.skip(reason='unskip me')
     def test_in_3(self):
-        """ Receive 5 serial-tracked products from a supplier. The system should create 5 different
-        move line.
-        """
+        """Receive products tracked by serial from a supplier."""
         # creation
         move1 = self.env['stock.move'].create({
             'name': 'test_in_1',
@@ -164,23 +152,26 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 5)
-        move_line = move1.move_line_ids[0]
-        self.assertEqual(move1.reserved_availability, 5)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 5)
+        self.assertEqual(sum(moves.mapped('reserved_qty')), 5)
 
+        # process
         i = 0
-        for move_line in move1.move_line_ids:
-            move_line.lot_name = 'sn%s' % i
-            move_line.qty_done = 1
+        for move in moves:
+            move.lot_name = 'sn%s' % i
+            move.done_qty = 1
             i += 1
-        self.assertEqual(move1.quantity_done, 5.0)
-        self.assertEqual(move1.product_qty, 5)  # don't change reservation
+        self.assertEqual(sum(moves.mapped('done_qty')), 5)
+        self.assertEqual(sum(moves.mapped('reserved_qty')), 5)
+        self.assertEqual(sum(moves.mapped('product_uom_qty')), 5)
 
-        move1._action_done()
-
-        self.assertEqual(move1.quantity_done, 5.0)
-        self.assertEqual(move1.product_qty, 5)  # don't change reservation
-        self.assertEqual(move1.state, 'done')
+        # validation
+        moves._action_done()
+        self.assertEqual(sum(moves.mapped('done_qty')), 5)
+        self.assertEqual(sum(moves.mapped('reserved_qty')), 0)
+        self.assertEqual(sum(moves.mapped('product_uom_qty')), 5)
+        self.assertTrue(all(move.state == 'done' for move in moves))
 
         # Quant balance should result with 5 quant in supplier and stock
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.supplier_location), 0.0)
@@ -194,11 +185,8 @@ class StockMove(SavepointCase):
         for quant in quants:
             self.assertNotEqual(quant.in_date, False)
 
-    @unittest.skip(reason='unskip me')
     def test_out_1(self):
-        """ Send products to a client. Check that a move line is created reserving products in
-        stock and that the delivery correctly remove the single quant in stock.
-        """
+        """Send non-tracked, reservable products to a customer."""
         # make some stock
         self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 100)
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 1.0)
@@ -222,16 +210,15 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        self.assertEqual(move1.reserved_qty, 100)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
         # Should be a reserved quantity and thus a quant.
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 1.0)
 
-        # fill the move line
-        move_line = move1.move_line_ids[0]
-        self.assertEqual(move_line.product_qty, 100.0)
-        self.assertEqual(move_line.qty_done, 0.0)
-        move_line.qty_done = 100.0
+        # process
+        move1.done_qty = 100.0
 
         # validation
         move1._action_done()
@@ -243,11 +230,8 @@ class StockMove(SavepointCase):
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 0.0)
 
-    @unittest.skip(reason='unskip me')
     def test_out_2(self):
-        """ Send a consumable product to a client. Check that a move line is created but
-            quants are not impacted.
-        """
+        """Send a cconsumable product to a customer."""
         # make some stock
 
         self.product.type = 'consu'
@@ -272,16 +256,14 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
         # Should be a reserved quantity and thus a quant.
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 0.0)
 
-        # fill the move line
-        move_line = move1.move_line_ids[0]
-        self.assertEqual(move_line.product_qty, 100.0)
-        self.assertEqual(move_line.qty_done, 0.0)
-        move_line.qty_done = 100.0
+        # process
+        move1.done_qty = 100.0
 
         # validation
         move1._action_done()
@@ -293,7 +275,6 @@ class StockMove(SavepointCase):
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 0.0)
 
-    @unittest.skip(reason='unskip me')
     def test_mixed_tracking_reservation_1(self):
         """ Send products tracked by lot to a customer. In your stock, there are tracked and
         untracked quants. Two moves lines should be created: one for the tracked ones, another
@@ -320,7 +301,8 @@ class StockMove(SavepointCase):
         move1._action_confirm()
         move1._action_assign()
 
-        self.assertEqual(len(move1.move_line_ids), 2)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 2)
 
     @unittest.skip(reason='unskip me')
     def test_mixed_tracking_reservation_2(self):
@@ -698,7 +680,6 @@ class StockMove(SavepointCase):
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location, strict=True), 1.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location, lot_id=lot1, strict=True), 1.0)
 
-    @unittest.skip(reason='unskip me')
     def test_putaway_1(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
         the receipt move line.
@@ -735,12 +716,12 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
 
         # check if the putaway was rightly applied
-        self.assertEqual(move1.move_line_ids.location_dest_id.id, shelf1_location.id)
+        self.assertEqual(move1.location_dest_id.id, shelf1_location.id)
 
-    @unittest.skip(reason='unskip me')
     def test_putaway_2(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
         the receipt move line.
@@ -777,12 +758,12 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
 
         # check if the putaway was rightly applied
-        self.assertEqual(move1.move_line_ids.location_dest_id.id, shelf1_location.id)
+        self.assertEqual(move1.location_dest_id.id, shelf1_location.id)
 
-    @unittest.skip(reason='unskip me')
     def test_putaway_3(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
         the receipt move line.
@@ -832,12 +813,12 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
 
         # check if the putaway was rightly applied
-        self.assertEqual(move1.move_line_ids.location_dest_id.id, shelf2_location.id)
+        self.assertEqual(move1.location_dest_id.id, shelf2_location.id)
 
-    @unittest.skip(reason='unskip me')
     def test_putaway_4(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
         the receipt move line.
@@ -889,12 +870,12 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
 
         # check if the putaway was rightly applied
-        self.assertEqual(move1.move_line_ids.location_dest_id.id, shelf1_location.id)
+        self.assertEqual(move1.location_dest_id.id, shelf1_location.id)
 
-    @unittest.skip(reason='unskip me')
     def test_putaway_5(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
         the receipt move line.
@@ -933,12 +914,12 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
 
         # check if the putaway was rightly applied
-        self.assertEqual(move1.move_line_ids.location_dest_id.id, shelf_location.id)
+        self.assertEqual(move1.location_dest_id.id, shelf_location.id)
 
-    @unittest.skip(reason='unskip me')
     def test_putaway_6(self):
         """ Receive products from a supplier. Check that putaway rules are rightly applied on
         the receipt move line.
@@ -993,12 +974,12 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
 
         # check if the putaway was rightly applied
-        self.assertEqual(move1.move_line_ids.location_dest_id.id, shelf2_location.id)
+        self.assertEqual(move1.location_dest_id.id, shelf2_location.id)
 
-    @unittest.skip(reason='unskip me')
     def test_putaway_7(self):
         """ Checks parents locations are also browsed when looking for putaways.
 
@@ -1047,12 +1028,12 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
 
         # check if the putaway was rightly applied
-        self.assertEqual(move1.move_line_ids.location_dest_id.id, shelf2.id)
+        self.assertEqual(move1.location_dest_id.id, shelf2.id)
 
-    @unittest.skip(reason='unskip me')
     def test_availability_1(self):
         """ Check that the `availability` field on a move is correctly computed when there is
         more than enough products in stock.
@@ -1062,7 +1043,7 @@ class StockMove(SavepointCase):
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 1.0)
 
         move1 = self.env['stock.move'].create({
-            'name': 'test_putaway_1',
+            'name': 'test_availability_1',
             'location_id': self.stock_location.id,
             'location_dest_id': self.supplier_location.id,
             'product_id': self.product.id,
@@ -1074,7 +1055,6 @@ class StockMove(SavepointCase):
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 1.0)
         self.assertEqual(move1.availability, 100.0)
 
-    @unittest.skip(reason='unskip me')
     def test_availability_2(self):
         """ Check that the `availability` field on a move is correctly computed when there is
         not enough products in stock.
@@ -1084,7 +1064,7 @@ class StockMove(SavepointCase):
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 1.0)
 
         move1 = self.env['stock.move'].create({
-            'name': 'test_putaway_1',
+            'name': 'test_availability_2',
             'location_id': self.stock_location.id,
             'location_dest_id': self.supplier_location.id,
             'product_id': self.product.id,
@@ -1096,7 +1076,6 @@ class StockMove(SavepointCase):
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 1.0)
         self.assertEqual(move1.availability, 50.0)
 
-    @unittest.skip(reason='unskip me')
     def test_availability_3(self):
         lot1 = self.env['stock.production.lot'].create({
             'name': 'lot1',
@@ -1121,10 +1100,12 @@ class StockMove(SavepointCase):
         move1._action_confirm()
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(move1.reserved_availability, 1.0)
+        self.assertEqual(move1.reserved_qty, 1.0)
 
-    @unittest.skip(reason='unskip me')
     def test_availability_4(self):
+        """With two stock moves reserved for a total quantity Q, process all the quantity Q on the
+        first move and validate it. The second move should be unreserved.
+        """
         self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 30.0)
         move1 = self.env['stock.move'].create({
             'name': 'test_availability_4',
@@ -1150,14 +1131,14 @@ class StockMove(SavepointCase):
         move2._action_assign()
 
         # set 15 as quantity done for the first and 30 as the second
-        move1.move_line_ids.qty_done = 15
-        move2.move_line_ids.qty_done = 30
+        move1.done_qty = 15
+        move2.done_qty = 30
 
         # validate the second, the first should be unreserved
         move2._action_done()
 
         self.assertEqual(move1.state, 'confirmed')
-        self.assertEqual(move1.move_line_ids.qty_done, 15)
+        self.assertEqual(move1.done_qty, 15)
         self.assertEqual(move2.state, 'done')
 
         stock_quants = self.gather_relevant(self.product, self.stock_location)
@@ -1166,13 +1147,11 @@ class StockMove(SavepointCase):
         self.assertEqual(customer_quants.quantity, 30)
         self.assertEqual(customer_quants.reserved_quantity, 0)
 
-    @unittest.skip(reason='unskip me')
     def test_availability_5(self):
         """ Check that rerun action assign only create new stock move
         lines instead of adding quantity in existing one.
         """
         self.env['stock.quant']._update_available_quantity(self.product_serial, self.stock_location, 2.0)
-        # move from shelf1
         move = self.env['stock.move'].create({
             'name': 'test_edit_moveline_1',
             'location_id': self.stock_location.id,
@@ -1183,13 +1162,19 @@ class StockMove(SavepointCase):
         })
         move._action_confirm()
         move._action_assign()
-
+        self.assertEqual(len(move + move.split_move_ids), 3)  # two reserved moves, one unreserved
+        self.assertEqual(move.product_uom_qty, 2)
+        for split_move in move.split_move_ids:
+            self.assertEqual(split_move.reserved_qty, 1)
+            self.assertEqual(split_move.product_uom_qty, 1)
         self.env['stock.quant']._update_available_quantity(self.product_serial, self.stock_location, 4.0)
         move._action_assign()
+        self.assertEqual(len(move + move.split_move_ids), 4)
+        for move in move + move.split_move_ids:
+            self.assertEqual(move.reserved_qty, 1)
+            self.assertEqual(move.product_uom_qty, 1)
+            self.assertEqual(move.product_qty, 1)
 
-        self.assertEqual(len(move.move_line_ids), 4.0)
-
-    @unittest.skip(reason='unskip me')
     def test_availability_6(self):
         """ Check that, in the scenario where a move is in a bigger uom than the uom of the quants
         and this uom only allows entire numbers, we don't make a partial reservation when the
@@ -1232,22 +1217,21 @@ class StockMove(SavepointCase):
 
         # Check it isn't possible to set any value to quantity_done
         with self.assertRaises(UserError):
-            move.quantity_done = 0.1
+            move.done_qty= 0.1
             move._action_done()
 
         with self.assertRaises(UserError):
-            move.quantity_done = 1.1
+            move.done_qty = 1.1
             move._action_done()
 
         with self.assertRaises(UserError):
-            move.quantity_done = 0.9
+            move.done_qty = 0.9
             move._action_done()
 
-        move.quantity_done = 1
+        move.done_qty = 1
         move._action_done()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.customer_location), 12.0)
 
-    @unittest.skip(reason='unskip me')
     def test_availability_7(self):
         """ Check that, in the scenario where a move is in a bigger uom than the uom of the quants
         and this uom only allows entire numbers, we only reserve quantity honouring the uom's
@@ -1261,7 +1245,7 @@ class StockMove(SavepointCase):
             lot_id = self.env['stock.production.lot'].create({
                 'name': 'lot%s' % str(i),
                 'product_id': self.product_serial.id,
-            'company_id': self.env.company.id,
+                'company_id': self.env.company.id,
             })
             self.env['stock.quant']._update_available_quantity(self.product_serial, self.stock_location, 1.0, lot_id=lot_id)
 
@@ -1276,21 +1260,24 @@ class StockMove(SavepointCase):
         })
         move._action_confirm()
         move._action_assign()
-        self.assertEqual(move.state, 'assigned')
-        self.assertEqual(len(move.move_line_ids.mapped('product_uom_id')), 1)
-        self.assertEqual(move.move_line_ids.mapped('product_uom_id'), self.uom_unit)
 
-        for move_line in move.move_line_ids:
-            move_line.qty_done = 1
-        move._action_done()
+        self.assertEqual(len(move + move.split_move_ids), 12)
+        for m in move + move.split_move_ids:
+            self.assertEqual(m.state, 'assigned')
+            self.assertEqual(m.reserved_qty, 1)
+            self.assertEqual(m.product_uom, self.uom_unit)
+            m.done_qty = 1
 
-        self.assertEqual(move.product_uom_qty, 1)
-        self.assertEqual(move.product_uom.id, self.uom_dozen.id)
-        self.assertEqual(move.state, 'done')
+        (move + move.split_move_ids)._action_done()
+
+        for m in move + move.split_move_ids:
+            self.assertEqual(m.state, 'done')
+            self.assertEqual(m.reserved_qty, 0)
+            self.assertEqual(m.product_qty, 1)
+
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.customer_location), 12.0)
         self.assertEqual(len(self.gather_relevant(self.product_serial, self.customer_location)), 12)
 
-    @unittest.skip(reason='unskip me')
     def test_availability_8(self):
         """ Test the assignment mechanism when the product quantity is decreased on a partially
             reserved stock move.
@@ -1316,7 +1303,6 @@ class StockMove(SavepointCase):
         move_partial._action_assign()
         self.assertEqual(move_partial.state, 'assigned')
 
-    @unittest.skip(reason='unskip me')
     def test_availability_9(self):
         """ Test the assignment mechanism when the product quantity is increase
         on a receipt move.
@@ -1336,9 +1322,8 @@ class StockMove(SavepointCase):
         move_receipt.product_uom_qty = 3.0
         move_receipt._action_assign()
         self.assertEqual(move_receipt.state, 'assigned')
-        self.assertEqual(move_receipt.move_line_ids.product_uom_qty, 3)
+        self.assertEqual(move_receipt.reserved_qty, 36)
 
-    @unittest.skip(reason='unskip me')
     def test_unreserve_1(self):
         """ Check that unreserving a stock move sets the products reserved as available and
         set the state back to confirmed.
@@ -1366,16 +1351,17 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 50.0)
 
         # unreserve
         move1._do_unreserve()
-        self.assertEqual(len(move1.move_line_ids), 0)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 150.0)
         self.assertEqual(move1.state, 'confirmed')
 
-    @unittest.skip(reason='unskip me')
     def test_unreserve_2(self):
         """ Check that unreserving a stock move sets the products reserved as available and
         set the state back to confirmed even if they are in a pack.
@@ -1405,16 +1391,18 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
+        self.assertEqual(move1.package_id, package1)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location, package_id=package1), 50.0)
 
         # unreserve
         move1._do_unreserve()
-        self.assertEqual(len(move1.move_line_ids), 0)
+        moves = move1 + move1.split_move_ids
+        self.assertEqual(len(moves), 1)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location, package_id=package1), 150.0)
         self.assertEqual(move1.state, 'confirmed')
 
-    @unittest.skip(reason='unskip me')
     def test_unreserve_3(self):
         """ Similar to `test_unreserve_1` but checking the quants more in details.
         """
@@ -1441,7 +1429,6 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
 
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
         quants = self.gather_relevant(self.product, self.stock_location)
@@ -1454,9 +1441,7 @@ class StockMove(SavepointCase):
         self.assertEqual(len(quants), 1.0)
         self.assertEqual(quants.quantity, 2.0)
         self.assertEqual(quants.reserved_quantity, 0.0)
-        self.assertEqual(len(move1.move_line_ids), 0.0)
 
-    @unittest.skip(reason='unskip me')
     def test_unreserve_4(self):
         """ Check the unreservation of a partially available stock move.
         """
@@ -1483,7 +1468,6 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'partially_available')
-        self.assertEqual(len(move1.move_line_ids), 1)
 
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
         quants = self.gather_relevant(self.product, self.stock_location)
@@ -1496,9 +1480,7 @@ class StockMove(SavepointCase):
         self.assertEqual(len(quants), 1.0)
         self.assertEqual(quants.quantity, 2.0)
         self.assertEqual(quants.reserved_quantity, 0.0)
-        self.assertEqual(len(move1.move_line_ids), 0.0)
 
-    @unittest.skip(reason='unskip me')
     def test_unreserve_5(self):
         """ Check the unreservation of a stock move reserved on multiple quants.
         """
@@ -1530,7 +1512,6 @@ class StockMove(SavepointCase):
         # assignment
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
         move1._do_unreserve()
 
         quants = self.gather_relevant(self.product, self.stock_location)
@@ -1538,7 +1519,6 @@ class StockMove(SavepointCase):
         for quant in quants:
             self.assertEqual(quant.reserved_quantity, 0)
 
-    @unittest.skip(reason='unskip me')
     def test_unreserve_6(self):
         """ In a situation with a negative and a positive quant, reserve and unreserve.
         """
@@ -1569,18 +1549,15 @@ class StockMove(SavepointCase):
         move1._action_confirm()
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
-        self.assertEqual(move1.move_line_ids.product_qty, 10)
+        self.assertEqual(move1.reserved_qty, 10)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
         self.assertEqual(q2.reserved_quantity, 20)
 
         move1._do_unreserve()
         self.assertEqual(move1.state, 'confirmed')
-        self.assertEqual(len(move1.move_line_ids), 0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 10.0)
         self.assertEqual(q2.reserved_quantity, 10)
 
-    @unittest.skip(reason='unskip me')
     def test_link_assign_1(self):
         """ Test the assignment mechanism when two chained stock moves try to move one unit of an
         untracked product.
@@ -1610,15 +1587,13 @@ class StockMove(SavepointCase):
 
         (move_stock_pack + move_pack_cust)._action_confirm()
         move_stock_pack._action_assign()
-        move_stock_pack.move_line_ids[0].qty_done = 1.0
+        move_stock_pack.done_qty = 1.0
         move_stock_pack._action_done()
-        self.assertEqual(len(move_pack_cust.move_line_ids), 1)
-        move_line = move_pack_cust.move_line_ids[0]
-        self.assertEqual(move_line.location_id.id, self.pack_location.id)
-        self.assertEqual(move_line.location_dest_id.id, self.customer_location.id)
         self.assertEqual(move_pack_cust.state, 'assigned')
+        self.assertEqual(move_pack_cust.reserved_qty, 1)
+        self.assertEqual(move_pack_cust.location_id.id, self.pack_location.id)
+        self.assertEqual(move_pack_cust.location_dest_id.id, self.customer_location.id)
 
-    @unittest.skip(reason='unskip me')
     def test_link_assign_2(self):
         """ Test the assignment mechanism when two chained stock moves try to move one unit of a
         tracked product.
@@ -1655,23 +1630,20 @@ class StockMove(SavepointCase):
         (move_stock_pack + move_pack_cust)._action_confirm()
         move_stock_pack._action_assign()
 
-        move_line_stock_pack = move_stock_pack.move_line_ids[0]
-        self.assertEqual(move_line_stock_pack.lot_id.id, lot1.id)
+        self.assertEqual(move_stock_pack.lot_id.id, lot1.id)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location, lot_id=lot1), 0.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location, lot1)), 1.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.pack_location, lot1)), 0.0)
 
-        move_line_stock_pack.qty_done = 1.0
+        move_stock_pack.done_qty = 1.0
         move_stock_pack._action_done()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location, lot_id=lot1), 0.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location, lot1)), 0.0)
 
-        move_line_pack_cust = move_pack_cust.move_line_ids[0]
-        self.assertEqual(move_line_pack_cust.lot_id.id, lot1.id)
+        self.assertEqual(move_pack_cust.lot_id.id, lot1.id)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.pack_location, lot_id=lot1), 0.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.pack_location, lot1)), 1.0)
 
-    @unittest.skip(reason='unskip me')
     def test_link_assign_3(self):
         """ Test the assignment mechanism when three chained stock moves (2 sources, 1 dest) try to
         move multiple units of an untracked product.
@@ -1713,37 +1685,30 @@ class StockMove(SavepointCase):
         # assign and fulfill the first move
         move_stock_pack_1._action_assign()
         self.assertEqual(move_stock_pack_1.state, 'assigned')
-        self.assertEqual(len(move_stock_pack_1.move_line_ids), 1)
-        move_stock_pack_1.move_line_ids[0].qty_done = 1.0
+        move_stock_pack_1.done_qty = 1.0
         move_stock_pack_1._action_done()
         self.assertEqual(move_stock_pack_1.state, 'done')
 
         # the destination move should be partially available and have one move line
         self.assertEqual(move_pack_cust.state, 'partially_available')
-        self.assertEqual(len(move_pack_cust.move_line_ids), 1)
         # Should have 1 quant in stock_location and another in pack_location
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 1.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.pack_location)), 1.0)
 
         move_stock_pack_2._action_assign()
         self.assertEqual(move_stock_pack_2.state, 'assigned')
-        self.assertEqual(len(move_stock_pack_2.move_line_ids), 1)
-        move_stock_pack_2.move_line_ids[0].qty_done = 1.0
+        move_stock_pack_2.done_qty = 1.0
         move_stock_pack_2._action_done()
         self.assertEqual(move_stock_pack_2.state, 'done')
 
         self.assertEqual(len(self.gather_relevant(self.product, self.stock_location)), 0.0)
         self.assertEqual(len(self.gather_relevant(self.product, self.pack_location)), 1.0)
 
-        self.assertEqual(move_pack_cust.state, 'assigned')
-        self.assertEqual(len(move_pack_cust.move_line_ids), 1)
-        move_line_1 = move_pack_cust.move_line_ids[0]
-        self.assertEqual(move_line_1.location_id.id, self.pack_location.id)
-        self.assertEqual(move_line_1.location_dest_id.id, self.customer_location.id)
-        self.assertEqual(move_line_1.product_qty, 2.0)
+        self.assertEqual(move_pack_cust.location_id.id, self.pack_location.id)
+        self.assertEqual(move_pack_cust.location_dest_id.id, self.customer_location.id)
+        self.assertEqual(move_pack_cust.reserved_qty, 2.0)
         self.assertEqual(move_pack_cust.state, 'assigned')
 
-    @unittest.skip(reason='unskip me')
     def test_link_assign_4(self):
         """ Test the assignment mechanism when three chained stock moves (2 sources, 1 dest) try to
         move multiple units of a tracked by lot product.
@@ -1790,29 +1755,22 @@ class StockMove(SavepointCase):
 
         # assign and fulfill the first move
         move_stock_pack_1._action_assign()
-        self.assertEqual(len(move_stock_pack_1.move_line_ids), 1)
-        self.assertEqual(move_stock_pack_1.move_line_ids[0].lot_id.id, lot1.id)
-        move_stock_pack_1.move_line_ids[0].qty_done = 1.0
+        self.assertEqual(move_stock_pack_1.lot_id.id, lot1.id)
+        move_stock_pack_1.done_qty = 1.0
         move_stock_pack_1._action_done()
 
         # the destination move should be partially available and have one move line
-        self.assertEqual(len(move_pack_cust.move_line_ids), 1)
-
         move_stock_pack_2._action_assign()
-        self.assertEqual(len(move_stock_pack_2.move_line_ids), 1)
-        self.assertEqual(move_stock_pack_2.move_line_ids[0].lot_id.id, lot1.id)
-        move_stock_pack_2.move_line_ids[0].qty_done = 1.0
+        self.assertEqual(move_stock_pack_2.lot_id.id, lot1.id)
+        move_stock_pack_2.done_qty = 1.0
         move_stock_pack_2._action_done()
 
-        self.assertEqual(len(move_pack_cust.move_line_ids), 1)
-        move_line_1 = move_pack_cust.move_line_ids[0]
-        self.assertEqual(move_line_1.location_id.id, self.pack_location.id)
-        self.assertEqual(move_line_1.location_dest_id.id, self.customer_location.id)
-        self.assertEqual(move_line_1.product_qty, 2.0)
-        self.assertEqual(move_line_1.lot_id.id, lot1.id)
+        self.assertEqual(move_pack_cust.location_id.id, self.pack_location.id)
+        self.assertEqual(move_pack_cust.location_dest_id.id, self.customer_location.id)
+        self.assertEqual(move_pack_cust.product_qty, 2.0)
+        self.assertEqual(move_pack_cust.lot_id.id, lot1.id)
         self.assertEqual(move_pack_cust.state, 'assigned')
 
-    @unittest.skip(reason='unskip me')
     def test_link_assign_5(self):
         """ Test the assignment mechanism when three chained stock moves (1 sources, 2 dest) try to
         move multiple units of an untracked product.
@@ -1852,19 +1810,13 @@ class StockMove(SavepointCase):
 
         # assign and fulfill the first move
         move_stock_pack._action_assign()
-        self.assertEqual(len(move_stock_pack.move_line_ids), 1)
-        move_stock_pack.move_line_ids[0].qty_done = 2.0
+        move_stock_pack.done_qty = 2.0
         move_stock_pack._action_done()
 
         # the destination moves should be available and have one move line
-        self.assertEqual(len(move_pack_cust_1.move_line_ids), 1)
-        self.assertEqual(len(move_pack_cust_2.move_line_ids), 1)
+        self.assertEqual(move_pack_cust_1.state, 'assigned')
+        self.assertEqual(move_pack_cust_2.state, 'assigned')
 
-        move_pack_cust_1.move_line_ids[0].qty_done = 1.0
-        move_pack_cust_2.move_line_ids[0].qty_done = 1.0
-        (move_pack_cust_1 + move_pack_cust_2)._action_done()
-
-    @unittest.skip(reason='unskip me')
     def test_link_assign_6(self):
         """ Test the assignment mechanism when four chained stock moves (2 sources, 2 dest) try to
         move multiple units of an untracked by lot product. This particular test case simulates a two
@@ -1915,7 +1867,7 @@ class StockMove(SavepointCase):
 
         # do the fist move, it'll bring 3 units in stock location so only `move_stock_stock_1`
         # should be assigned
-        move_supp_stock_1.move_line_ids.qty_done = 3.0
+        move_supp_stock_1.done_qty = 3.0
         move_supp_stock_1._action_done()
         self.assertEqual(move_supp_stock_1.state, 'done')
         self.assertEqual(move_supp_stock_2.state, 'confirmed')
@@ -2238,7 +2190,6 @@ class StockMove(SavepointCase):
         self.assertAlmostEqual(move_pack_cust.reserved_availability, 1.0)
         self.assertEqual(move_pack_cust.state, 'partially_available')
 
-    @unittest.skip(reason='unskip me')
     def test_link_assign_11(self):
         """Test the following:
 
@@ -2280,7 +2231,7 @@ class StockMove(SavepointCase):
 
         (move1 + move2 + move3)._action_confirm()
         move1._action_assign()
-        move1.quantity_done = 3
+        move1.done_qty = 3
         move1._action_done()
 
         (move2 + move3)._do_unreserve()
@@ -2290,7 +2241,7 @@ class StockMove(SavepointCase):
         move2.product_uom_qty = 3
         self.assertEqual(move2.state, 'partially_available')
 
-        (move2 + move3).with_context(debug=True)._action_assign()
+        (move2 + move3)._action_assign()
         self.assertEqual(move2.state, 'assigned')
         self.assertEqual(move3.state, 'waiting')
 
@@ -3793,7 +3744,6 @@ class StockMove(SavepointCase):
         self.assertEqual(receipt2.state, 'done')
         self.assertEqual(receipt3.state, 'done')
 
-    @unittest.skip(reason='unskip me')
     def test_set_quantity_done_1(self):
         move1 = self.env['stock.move'].create({
             'name': 'test_set_quantity_done_1',
@@ -3816,7 +3766,6 @@ class StockMove(SavepointCase):
         self.assertEqual(move1.quantity_done, 1)
         self.assertEqual(move2.quantity_done, 1)
 
-    @unittest.skip(reason='unskip me')
     def test_initial_demand_1(self):
         """ Check that the initial demand is set to 0 when creating a move by hand, and
         that changing the product on the move do not reset the initial demand.
@@ -3835,7 +3784,6 @@ class StockMove(SavepointCase):
         move1.onchange_product_id()
         self.assertEqual(move1.product_uom_qty, 100)
 
-    @unittest.skip(reason='unskip me')
     def test_scrap_1(self):
         """ Check the created stock move and the impact on quants when we scrap a
         storable product.
@@ -3850,11 +3798,10 @@ class StockMove(SavepointCase):
         self.assertEqual(scrap.state, 'done')
         move = scrap.move_id
         self.assertEqual(move.state, 'done')
-        self.assertEqual(move.quantity_done, 1)
+        self.assertEqual(move.done_qty, 1)
         self.assertEqual(move.scrapped, True)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0)
 
-    @unittest.skip(reason='unskip me')
     def test_scrap_2(self):
         """ Check the created stock move and the impact on quants when we scrap a
         consumable product.
@@ -3870,11 +3817,10 @@ class StockMove(SavepointCase):
         self.assertEqual(scrap.state, 'done')
         move = scrap.move_id
         self.assertEqual(move.state, 'done')
-        self.assertEqual(move.quantity_done, 1)
+        self.assertEqual(move.done_qty, 1)
         self.assertEqual(move.scrapped, True)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_consu, self.stock_location), 0)
 
-    @unittest.skip(reason='unskip me')
     def test_scrap_3(self):
         """ Scrap the product of a reserved move line. Check that the move line is
         correctly deleted and that the associated stock move is not assigned anymore.
@@ -3891,7 +3837,8 @@ class StockMove(SavepointCase):
         move1._action_confirm()
         move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
-        self.assertEqual(len(move1.move_line_ids), 1)
+        self.assertEqual(move1.reserved_qty, 1)
+        self.assertEqual(move1.reserved_uom_qty, 1)
 
         scrap = self.env['stock.scrap'].create({
             'product_id': self.product.id,
@@ -3900,9 +3847,9 @@ class StockMove(SavepointCase):
         })
         scrap.do_scrap()
         self.assertEqual(move1.state, 'confirmed')
-        self.assertEqual(len(move1.move_line_ids), 0)
+        self.assertEqual(move1.reserved_qty, 0)
 
-    @unittest.skip(reason='unskip me')
+    @unittest.skip(reason="pour bientot")
     def test_scrap_4(self):
         """ Scrap the product of a picking. Then modify the
         done linked stock move and ensure the scrap quantity is also
@@ -3946,7 +3893,6 @@ class StockMove(SavepointCase):
         scrapped_move.quantity_done = 8
         self.assertEqual(scrap.scrap_qty, 8, 'Scrap quantity is not updated.')
 
-    @unittest.skip(reason='unskip me')
     def test_scrap_5(self):
         """ Scrap the product of a reserved move line where the product is reserved in another
         unit of measure. Check that the move line is correctly updated after the scrap.
@@ -3974,7 +3920,8 @@ class StockMove(SavepointCase):
         })
         move1._action_confirm()
         move1._action_assign()
-        self.assertEqual(move1.reserved_availability, 0.33)
+        self.assertEqual(move1.reserved_qty, 3.96)
+        self.assertEqual(move1.reserved_uom_qty, 0.33)
 
         # scrap a unit
         scrap = self.env['stock.scrap'].create({
@@ -3986,9 +3933,8 @@ class StockMove(SavepointCase):
         scrap.action_validate()
 
         self.assertEqual(scrap.state, 'done')
-        self.assertEqual(move1.reserved_availability, 0.25)
+        self.assertEqual(move1.reserved_qty, 0.25)
 
-    @unittest.skip(reason='unskip me')
     def test_scrap_6(self):
         """ Check that scrap correctly handle UoM. """
         self.env['stock.quant']._update_available_quantity(self.product, self.stock_location, 1)
@@ -4007,7 +3953,6 @@ class StockMove(SavepointCase):
         insufficient_qty_wizard.action_done()
         self.assertEqual(self.env['stock.quant']._gather(self.product, self.stock_location).quantity, -11)
 
-    @unittest.skip(reason='unskip me')
     def test_in_date_1(self):
         """ Check that moving a tracked quant keeps the incoming date.
         """
@@ -4022,8 +3967,8 @@ class StockMove(SavepointCase):
         })
         move1._action_confirm()
         move1._action_assign()
-        move1.move_line_ids.lot_name = 'lot1'
-        move1.move_line_ids.qty_done = 1
+        move1.lot_name = 'lot1'
+        move1.done_qty = 1
         move1._action_done()
 
         quant = self.gather_relevant(self.product_lot, self.stock_location)
@@ -4043,7 +3988,7 @@ class StockMove(SavepointCase):
         })
         move2._action_confirm()
         move2._action_assign()
-        move2.move_line_ids.qty_done = 1
+        move2.done_qty = 1
         move2._action_done()
 
         quant = self.gather_relevant(self.product_lot, self.pack_location)
@@ -4264,7 +4209,6 @@ class StockMove(SavepointCase):
             elif quant.lot_id == lot2:
                 self.assertAlmostEqual(quant.in_date, initial_in_date_lot2, delta=timedelta(seconds=1))
 
-    @unittest.skip(reason='unskip me')
     def test_edit_initial_demand_1(self):
         """ Increase initial demand once everything is reserved and check if
         the existing move_line is updated.
@@ -4284,9 +4228,8 @@ class StockMove(SavepointCase):
         # _action_assign is automatically called
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(move1.product_uom_qty, 15)
-        self.assertEqual(len(move1.move_line_ids), 1)
+        self.assertEqual(len(move1 + move1.split_move_ids), 1)
 
-    @unittest.skip(reason='unskip me')
     def test_edit_initial_demand_2(self):
         """ Decrease initial demand once everything is reserved and check if
         the existing move_line has been dropped after the updated and another
@@ -4307,7 +4250,7 @@ class StockMove(SavepointCase):
         move1.product_uom_qty = 5
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(move1.product_uom_qty, 5)
-        self.assertEqual(len(move1.move_line_ids), 1)
+        self.assertEqual(len(move1 + move1.split_move_ids), 1)
 
     @unittest.skip(reason='unskip me')
     def test_initial_demand_3(self):
@@ -4363,7 +4306,6 @@ class StockMove(SavepointCase):
         picking.action_assign()
         self.assertEqual(move1.state, 'assigned')
 
-    @unittest.skip(reason='unskip me')
     def test_change_product_type(self):
         """ Changing type of an existing product will raise a user error if some move
         are reserved.
