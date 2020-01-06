@@ -430,7 +430,11 @@
 
                 <title t-esc="title or 'Odoo'"/>
                 <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/web/static/src/img/favicon.ico'"/>
-
+                <style>
+                    .loader {
+                        background-color: #9198e5;
+                    }
+                </style>
                 <script type="text/javascript">
                     var odoo = {
                         csrf_token: "<t t-esc="request.csrf_token(None)"/>",
@@ -440,7 +444,7 @@
 
                 <t t-raw="head or ''"/>
             </head>
-            <body t-att-class="body_classname">
+            <body class="loader" t-att-class="body_classname">
                 <t t-raw="0"/>
             </body>
         </html>
