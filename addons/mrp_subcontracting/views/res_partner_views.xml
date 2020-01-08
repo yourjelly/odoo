@@ -7,7 +7,19 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='property_stock_supplier']" position="after">
                 <field name="property_stock_subcontractor"/>
+                <field name="is_subcontractor" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_partner_mrp_subcontracting_filter" model="ir.ui.view">
+        <field name="name">res.partner.select.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter" />
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='type_company']" position="after">
+                <filter string="Subcontractors" name="type_subcontractors" domain="[('is_subcontractor', '=', True)]" />
             </xpath>
         </field>
     </record>
 </odoo>
+
