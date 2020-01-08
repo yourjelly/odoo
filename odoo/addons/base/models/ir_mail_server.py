@@ -60,12 +60,12 @@ class IrMailServer(models.Model):
     """Represents an SMTP server, able to send outgoing emails, with SSL and TLS capabilities."""
     _name = "ir.mail_server"
     _description = 'Mail Server'
-    _order = 'sequence'
+    _order = 'sequence, id'
 
     NO_VALID_RECIPIENT = ("At least one valid recipient address should be "
                           "specified for outgoing emails (To/Cc/Bcc)")
 
-    name = fields.Char(string='Description', required=True, index=True)
+    name = fields.Char(required=True, index=True)
     smtp_host = fields.Char(string='SMTP Server', required=True, help="Hostname or IP of SMTP server")
     smtp_port = fields.Integer(string='SMTP Port', required=True, default=25, help="SMTP Port. Usually 465 for SSL, and 25 or 587 for other cases.")
     smtp_user = fields.Char(string='Username', help="Optional username for SMTP authentication", groups='base.group_system')
@@ -78,12 +78,13 @@ class IrMailServer(models.Model):
                                             "- None: SMTP sessions are done in cleartext.\n"
                                             "- TLS (STARTTLS): TLS encryption is requested at start of SMTP session (Recommended)\n"
                                             "- SSL/TLS: SMTP sessions are encrypted with SSL/TLS through a dedicated port (default: 465)")
-    smtp_debug = fields.Boolean(string='Debugging', help="If enabled, the full output of SMTP sessions will "
-                                                         "be written to the server log at DEBUG level "
+    smtp_debug = fields.Boolean(string='Log debug data', help="If enabled, the full output of SMTP sessions will "
+                                                                     "be written to the server log at DEBUG level "
                                                          "(this is very verbose and may include confidential info!)")
     sequence = fields.Integer(string='Priority', default=10, help="When no specific mail server is requested for a mail, the highest priority one "
                                                                   "is used. Default priority is 10 (smaller number = higher priority)")
     active = fields.Boolean(default=True)
+    mail_domain = fields.Char(compute='_compute_mail_domain', store=False)
 
     def test_smtp_connection(self):
         for server in self:
@@ -435,6 +436,11 @@ class IrMailServer(models.Model):
             raise MailDeliveryException(_("Mail Delivery Failed"), msg)
         return message_id
 
+    @api.onchange('smtp_host')
+    def _onchange(self):
+        if not self.name:
+            self.name = self.smtp_host
+
     @api.onchange('smtp_encryption')
     def _onchange_encryption(self):
         result = {}
@@ -448,3 +454,8 @@ class IrMailServer(models.Model):
         else:
             self.smtp_port = 25
         return result
+
+    def _compute_mail_domain(self):
+        mail_domain = self.env["ir.config_parameter"].sudo().get_param("mail.catchall.domain")
+        for record in self:
+            record.mail_domain = mail_domain

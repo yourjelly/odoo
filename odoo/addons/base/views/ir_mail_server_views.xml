@@ -1,27 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <!-- ir.mail.server -->
+
         <record model="ir.ui.view" id="ir_mail_server_form">
             <field name="model">ir.mail_server</field>
             <field name="arch" type="xml">
                 <form string="Outgoing Mail Servers">
-                  <sheet>
-                    <group col="4">
-                        <field name="name"/>
-                        <field name="sequence"/>
-                    </group>
-                    <group col="4" string="Connection Information">
-                        <field name="smtp_host"/>
-                        <field name="smtp_port"/>
-                        <field name="smtp_debug" groups="base.group_no_one"/>
-                     </group>
-                     <group string="Security and Authentication" colspan="4">
-                        <field name="smtp_encryption"/>
-                        <field name="smtp_user"/>
-                        <field name="smtp_pass" password="True"/>
-                        <button name="test_smtp_connection" type="object" string="Test Connection" icon="fa-television"/>
-                    </group>
-                  </sheet>  
+                    <sheet>
+                        <group string="1. Server Settings">
+                            <group>
+                                <field name="smtp_host"/>
+                                <field name="smtp_port"/>
+                                <field name="smtp_encryption"/>
+                            </group>
+                            <group>
+                                <div class="text-muted">
+                                    The system needs to know about your server settings.
+                                    If you don't know what to fill in here, <b>ask your mail
+                                    provider or system administrator.</b>
+                                </div>
+                            </group>
+                        </group>
+                        <group string="2. Mailbox Credentials">
+                            <group>
+                                <field name="smtp_user"/>
+                                <field name="smtp_pass" password="True"/>
+                            </group>
+                            <group>
+                                <div class="text-muted">
+                                    Most of mail providers require that you authenticate
+                                    to be able to send emails.
+                                </div>
+                            </group>
+                        </group>
+                        <group string="3. Choose a name for your server">
+                            <group>
+                                <field name="name"/>
+                            </group>
+                            <group>
+                                <div class="text-muted">
+                                    Odoo pre-generates a name for you,
+                                    but you can edit it.
+                                </div>
+                            </group>
+                        </group>
+                        <group string="4. Test that everything is working fine">
+                            <button name="test_smtp_connection" type="object" string="Test Connection" class="btn-primary"/>
+                        </group>
+                        <group string="Need more?">
+                        </group>
+                        <notebook>
+                            <page string="My emails are marked as spam!">
+                                <div>
+                                    <p>Your database is configured to send emails from the domain <code><field name="mail_domain" class="oe_inline"/></code>.</p>
+                                    <p>If your emails are marked as spams, please double-check with your system administrator if this domain is fully configured.</p>
+                                    <ul>
+                                        <li>Configure a SPF record for this domain.</li>
+                                        <li>If your SMTP server supports it, configure DKIM authentication for your outgoing emails.</li>
+                                    </ul>
+                                </div>
+                            </page>
+                            <page string="Advanced features">
+                                <group col="4">
+                                    <field name="sequence"/>
+                                    <field name="active"/>
+                                    <field name="smtp_debug"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
                 </form>
             </field>
         </record>
@@ -29,7 +75,8 @@
         <record model="ir.ui.view" id="ir_mail_server_list">
             <field name="model">ir.mail_server</field>
             <field name="arch" type="xml">
-                <tree string="Outgoing Mail Servers">
+                <tree decoration-muted="active == False" string="Outgoing Mail Servers">
+                    <field name="active" invisible="1"/>
                     <field name="sequence"/>
                     <field name="name"/>
                     <field name="smtp_host"/>
@@ -47,8 +94,10 @@
                         filter_domain="['|', '|', ('name','ilike',self), ('smtp_host','ilike',self), ('smtp_user','ilike',self)]"
                         string="Outgoing Mail Server"/>
                     <field name="smtp_encryption"/>
-                    <separator/>
+                    <filter string="All Servers" name="all_servers" domain="['|', ('active', '=', False), ('active', '=', True)]"/>
                     <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                    <filter string="Connection Security" name='smtp_encryption' context="{'group_by': 'smtp_encryption'}"/>
+                    <filter string="Host" name='host' context="{'group_by': 'smtp_host'}"/>
                 </search>
             </field>
         </record>
@@ -59,6 +108,7 @@
             <field name="view_mode">tree,form</field>
             <field name="view_id" ref="ir_mail_server_list" />
             <field name="search_view_id" ref="view_ir_mail_server_search"/>
+            <field name="context">{'search_default_all_servers': 1}</field>
         </record>
 
         <menuitem id="menu_mail_servers" parent="menu_email" action="action_ir_mail_server_list" sequence="5" groups="base.group_no_one"/>
