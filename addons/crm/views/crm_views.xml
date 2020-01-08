@@ -57,5 +57,4 @@
             parent="crm_menu_config"
             action="sales_team.mail_activity_type_action_config_sales"
             sequence="10"/>
-
 </odoo>
