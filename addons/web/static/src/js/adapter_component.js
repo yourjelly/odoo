@@ -72,7 +72,7 @@ class AdapterComponent extends Component {
                 .load_filters(payload)
                 .then(payload.on_success);
         } else {
-            this.trigger(evType.replace(/_/g, '-'), payload);
+            this.trigger(evType.replace(/_/g, '-'), payload); // warning: changes ev.target
         }
     }
 

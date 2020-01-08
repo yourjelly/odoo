@@ -511,6 +511,8 @@ class ActionManager extends Component {
     //--------------------------------------------------------------------------
 
     /**
+     * TODO: remove this... Already handled by webclient
+     *
      * @private
      * @param {OdooEvent} ev
      * @param {string|integer|Object} ev.payload.action

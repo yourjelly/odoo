@@ -16,6 +16,7 @@ const { Component, tags } = owl;
 class Action extends AdapterComponent {
     constructor(parent, props) {
         if (props.Component.prototype instanceof Component) {
+            // FIXME: move this to adapter_component + handle class (t-attf)
             // FIXME: try to set it on Action again
             Action.components[props.Component] = props.Component;
             Action.template = tags.xml`<t t-component="props.Component" class="o_action" action="props.action" options="props.options"/>`;
