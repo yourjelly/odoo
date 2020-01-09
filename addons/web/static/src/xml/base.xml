@@ -5,7 +5,7 @@
 
 <t t-name="web.WebClient" owl="1">
     <body class="o_web_client" t-on-do-action.stop="_onDoAction">
-        <Menu menus="menus" initialMenuID="initialMenuID" t-on-open-menu="_onOpenMenu"/>
+        <Menu t-ref="menu" menus="menus" initialMenuID="initialMenuID" t-on-open-menu="_onOpenMenu"/>
         <ActionManager t-ref="actionManager" initialAction="initialAction"/>
     </body>
 </t>
