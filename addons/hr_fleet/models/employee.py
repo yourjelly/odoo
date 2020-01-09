@@ -9,6 +9,7 @@ class Employee(models.Model):
 
     employee_cars_count = fields.Integer(compute="_compute_employee_cars_count", string="Cars", groups="fleet.fleet_group_manager")
     mobility_card = fields.Char(groups="fleet.fleet_group_user")
+    license_plate = fields.Char(string="License Plate")
 
     def action_open_employee_cars(self):
         self.ensure_one()

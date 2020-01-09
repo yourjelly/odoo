@@ -13,3 +13,5 @@ class FleetVehicle(models.Model):
     def _compute_mobility_card(self):
         for vehicle in self:
             vehicle.mobility_card = vehicle.driver_id.user_ids[:1].employee_id.mobility_card
+            vehicle._origin.driver_id.user_ids[:1].employee_id.license_plate = False
+            vehicle.driver_id.user_ids[:1].employee_id.license_plate = vehicle.license_plate

@@ -24,6 +24,9 @@
                     <field name="mobility_card"/>
                 </group>
             </xpath>
+            <xpath expr="//field[@name='km_home_work']" position="after">
+                <field name="license_plate" readonly='1'/>
+            </xpath>
         </field>
     </record>
 
@@ -45,6 +48,17 @@
                         attrs="{'invisible': [('employee_cars_count','=', 0)]}">
                     <field name="employee_cars_count" widget="statinfo" />
                 </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_employee_filter_inherit" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.hr.fleet</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_filter" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='job_id']" position="after">
+                <field string="Vehicle" name="name" filter_domain="['|', ('name', 'ilike', self), ('license_plate', 'ilike', self)]"/>
             </xpath>
         </field>
     </record>
