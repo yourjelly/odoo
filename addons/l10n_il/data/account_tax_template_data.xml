@@ -1,6 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <record id="tax_tag_retention_10_base" model="account.account.tag">
+        <field name="name">Retention 10% (Base)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_retention_35_base" model="account.account.tag">
+        <field name="name">Retention 35% (Base)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_retention_30_base" model="account.account.tag">
+        <field name="name">Retention 30% (Base)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_retention_25_base" model="account.account.tag">
+        <field name="name">Retention 25% (Base)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_retention_10_tax" model="account.account.tag">
+        <field name="name">Retention 10% (Tax)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_retention_35_tax" model="account.account.tag">
+        <field name="name">Retention 35% (Tax)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_retention_30_tax" model="account.account.tag">
+        <field name="name">Retention 30% (Tax)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
+    <record id="tax_tag_retention_25_tax" model="account.account.tag">
+        <field name="name">Retention 25% (Tax)</field>
+        <field name="applicability">taxes</field>
+    </record>
+
     <!-- Sales Taxes -->
     <record id="il_vat_sales_17" model="account.tax.template">
         <field name="sequence">1</field>
@@ -280,6 +320,282 @@
         <field name="type_tax_use">purchase</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tax_group_id" ref="tax_group_vat_exempt"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
+    <record id="il_vat_retention_10" model="account.tax.template">
+        <field name="sequence">13</field>
+        <field name="description">Retention 10%</field>
+        <field name="name">Retention 10%</field>
+        <field name="amount">-10</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="chart_template_id" ref="il_chart_template"/>
+        <field name="tax_group_id" ref="tax_group_retention_purchase"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('tax_tag_retention_10_base')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('il_account_111200'),
+                'tag_ids': [ref('tax_tag_retention_10_tax')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('tax_tag_retention_10_base')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('il_account_111200'),
+                'tag_ids': [ref('tax_tag_retention_10_tax')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="il_vat_retention_35" model="account.tax.template">
+        <field name="sequence">14</field>
+        <field name="description">Retention 35%</field>
+        <field name="name">Retention 35%</field>
+        <field name="amount">-35</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="chart_template_id" ref="il_chart_template"/>
+        <field name="tax_group_id" ref="tax_group_retention_purchase"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('tax_tag_retention_35_base')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('il_account_111200'),
+                'tag_ids': [ref('tax_tag_retention_35_tax')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('tax_tag_retention_35_base')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('il_account_111200'),
+                'tag_ids': [ref('tax_tag_retention_35_tax')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="il_vat_retention_30" model="account.tax.template">
+        <field name="sequence">15</field>
+        <field name="description">Retention 30%</field>
+        <field name="name">Retention 30%</field>
+        <field name="amount">-30</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="chart_template_id" ref="il_chart_template"/>
+        <field name="tax_group_id" ref="tax_group_retention_purchase"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('tax_tag_retention_30_base')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('il_account_111220'),
+                'tag_ids': [ref('tax_tag_retention_30_tax')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('tax_tag_retention_30_base')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('il_account_111220'),
+                'tag_ids': [ref('tax_tag_retention_30_tax')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="il_vat_retention_25" model="account.tax.template">
+        <field name="sequence">16</field>
+        <field name="description">Retention 25%</field>
+        <field name="name">Retention 25%</field>
+        <field name="amount">-25</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="chart_template_id" ref="il_chart_template"/>
+        <field name="tax_group_id" ref="tax_group_retention_purchase"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('tax_tag_retention_25_base')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('il_account_111220'),
+                'tag_ids': [ref('tax_tag_retention_25_tax')],
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('tax_tag_retention_25_base')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+                'account_id': ref('il_account_111220'),
+                'tag_ids': [ref('tax_tag_retention_25_tax')],
+            }),
+        ]"/>
+    </record>
+
+    <record id="il_vat_inputs_retention_10" model="account.tax.template">
+        <field name="sequence">15</field>
+        <field name="description">VAT and WT10</field>
+        <field name="name">VAT and Retention 10%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('il_vat_inputs_17'), ref('il_vat_retention_10')])]"/>
+        <field name="chart_template_id" ref="il_chart_template"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
+    <record id="il_vat_inputs_retention_35" model="account.tax.template">
+        <field name="sequence">16</field>
+        <field name="description">VAT and WT35</field>
+        <field name="name">VAT and Retention 35%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('il_vat_inputs_17'), ref('il_vat_retention_35')])]"/>
+        <field name="chart_template_id" ref="il_chart_template"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
+    <record id="il_vat_inputs_retention_30" model="account.tax.template">
+        <field name="sequence">17</field>
+        <field name="description">VAT and WT30</field>
+        <field name="name">VAT and Retention 30%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('il_vat_inputs_17'), ref('il_vat_retention_30')])]"/>
+        <field name="chart_template_id" ref="il_chart_template"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+    </record>
+
+    <record id="il_vat_inputs_retention_25" model="account.tax.template">
+        <field name="sequence">18</field>
+        <field name="description">VAT and WT25</field>
+        <field name="name">VAT and Retention 25%</field>
+        <field name="price_include" eval="0"/>
+        <field name="amount">0</field>
+        <field name="amount_type">group</field>
+        <field name="type_tax_use">purchase</field>
+        <field name="children_tax_ids" eval="[(6, 0, [ref('il_vat_inputs_17'), ref('il_vat_retention_25')])]"/>
+        <field name="chart_template_id" ref="il_chart_template"/>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
