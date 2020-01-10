@@ -52,9 +52,10 @@ class AccountAnalyticLine(models.Model):
         compute='_compute_display_timer',
         help="Technical field used to display the timer if the encoding unit is 'Hours'.")
 
+    @api.depends('project_id')
     def _compute_encoding_uom_id(self):
         for analytic_line in self:
-            analytic_line.encoding_uom_id = self.env.company.timesheet_encode_uom_id
+            analytic_line.encoding_uom_id = analytic_line.project_id.company_id.timesheet_encode_uom_id or self.env.company.timesheet_encode_uom_id
 
     @api.onchange('project_id')
     def onchange_project_id(self):
