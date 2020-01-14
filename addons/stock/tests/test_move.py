@@ -304,7 +304,6 @@ class StockMove(SavepointCase):
         moves = move1 + move1.split_move_ids
         self.assertEqual(len(moves), 2)
 
-    @unittest.skip(reason='unskip me')
     def test_mixed_tracking_reservation_2(self):
         """ Send products tracked by lot to a customer. In your stock, there are two tracked and
         mulitple untracked quants. There should be as many move lines as there are quants
@@ -336,8 +335,8 @@ class StockMove(SavepointCase):
         })
         move1._action_confirm()
         move1._action_assign()
-        self.assertEqual(len(move1.move_line_ids), 4)
-        for ml in move1.move_line_ids:
+        self.assertEqual(len(move1 + move1.split_move_ids), 4)
+        for ml in move1 + move1.split_move_ids:
             self.assertEqual(ml.product_qty, 1.0)
 
         # assign lot3 and lot 4 to both untracked move lines
@@ -351,10 +350,10 @@ class StockMove(SavepointCase):
             'product_id': self.product_serial.id,
             'company_id': self.env.company.id,
         })
-        untracked_move_line = move1.move_line_ids.filtered(lambda ml: not ml.lot_id)
+        untracked_move_line = (move1 + move1.split_move_ids).filtered(lambda ml: not ml.lot_id)
         untracked_move_line[0].lot_id = lot3
         untracked_move_line[1].lot_id = lot4
-        for ml in move1.move_line_ids:
+        for ml in move1 + move1.split_move_ids:
             self.assertEqual(ml.product_qty, 1.0)
 
         # no changes on quants, even if i made some move lines with a lot id whom reserved on untracked quants
@@ -364,7 +363,7 @@ class StockMove(SavepointCase):
         self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot3, strict=True)), 0)
         self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location, lot_id=lot4, strict=True)), 0)
 
-        move1.move_line_ids.write({'qty_done': 1.0})
+        (move1 + move1.split_move_ids).write({'done_qty': 1.0})
 
         move1._action_done()
 
@@ -406,7 +405,8 @@ class StockMove(SavepointCase):
         })
         move1._action_confirm()
         move1._action_assign()
-        move1.move_line_ids.write({'qty_done': 1.0})
+        self.assertEqual(len(move1 + move1.split_move_ids), 2)
+        (move1 + move1.split_move_ids).write({'done_qty': 1.0})
         move1._action_done()
 
         self.env['stock.quant']._update_available_quantity(self.product_serial, self.stock_location, 2)
@@ -421,23 +421,25 @@ class StockMove(SavepointCase):
             'company_id': self.env.company.id,
         })
 
-        self.env['stock.move.line'].create({
-            'move_id': move1.id,
+        self.env['stock.move'].create({
+            'origin_move_id': move1.id,
             'product_id': move1.product_id.id,
-            'qty_done': 1,
-            'product_uom_id': move1.product_uom.id,
+            'done_qty': 1,
+            'product_uom': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
             'lot_id': lot3.id,
+            'name': 'xxx',
         })
-        self.env['stock.move.line'].create({
-            'move_id': move1.id,
+        self.env['stock.move'].create({
+            'origin_move_id': move1.id,
             'product_id': move1.product_id.id,
-            'qty_done': 1,
-            'product_uom_id': move1.product_uom.id,
+            'done_qty': 1,
+            'product_uom': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
-            'lot_id': lot4.id
+            'lot_id': lot4.id,
+            'name': 'xxx',
         })
 
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location), 0.0)
@@ -499,7 +501,6 @@ class StockMove(SavepointCase):
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location, lot_id=lot2, strict=True), 1.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location, lot_id=lot3, strict=True), 0.0)
 
-    @unittest.skip(reason='unskip me')
     def test_mixed_tracking_reservation_5(self):
         move1 = self.env['stock.move'].create({
             'name': 'test_jenaimarre_1',
@@ -522,20 +523,19 @@ class StockMove(SavepointCase):
         })
 
         # create a new move line with a lot not assigned to any quant
-        self.env['stock.move.line'].create({
-            'move_id': move1.id,
+        self.env['stock.move'].create({
+            'origin_move_id': move1.id,
             'product_id': move1.product_id.id,
-            'qty_done': 1,
-            'product_uom_id': move1.product_uom.id,
+            'done_qty': 1,
+            'product_uom': move1.product_uom.id,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
-            'lot_id': lot1.id
+            'lot_id': lot1.id,
+            'name': 'xxx',
         })
-        self.assertEqual(len(move1.move_line_ids), 1)
-        self.assertEqual(move1.reserved_availability, 0)
 
         # validating the move line should move the lot, not create a negative quant in stock
-        move1._action_done()
+        (move1 + move1.split_move_ids)._action_done()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location), 0.0)
         self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location)), 0.0)
 
@@ -578,7 +578,6 @@ class StockMove(SavepointCase):
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location), 0.0)
         self.assertEqual(len(self.gather_relevant(self.product_serial, self.stock_location)), 0.0)
 
-    @unittest.skip(reason='unskip me')
     def test_mixed_tracking_reservation_7(self):
         """ Similar test_mixed_tracking_reservation_2 but creates first the tracked quant, then the
         untracked ones. When adding a lot to the untracked move line, it should not decrease the
@@ -610,17 +609,17 @@ class StockMove(SavepointCase):
         })
         move1._action_confirm()
         move1._action_assign()
-        self.assertEqual(len(move1.move_line_ids), 2)
-        for ml in move1.move_line_ids:
+        self.assertEqual(len(move1 + move1.split_move_ids), 2)
+        for ml in move1 + move1.split_move_ids:
             self.assertEqual(ml.product_qty, 1.0)
 
-        untracked_move_line = move1.move_line_ids.filtered(lambda ml: not ml.lot_id).lot_id = lot2
-        for ml in move1.move_line_ids:
+        untracked_move_line = (move1 + move1.split_move_ids).filtered(lambda ml: not ml.lot_id).lot_id = lot2
+        for ml in move1 + move1.split_move_ids:
             self.assertEqual(ml.product_qty, 1.0)
 
-        move1.move_line_ids.write({'qty_done': 1.0})
+        (move1 + move1.split_move_ids).write({'done_qty': 1.0})
 
-        move1._action_done()
+        (move1 + move1.split_move_ids)._action_done()
 
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location), 0.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product_serial, self.stock_location, lot_id=lot1, strict=True), 0.0)
