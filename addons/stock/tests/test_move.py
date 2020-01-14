@@ -2244,7 +2244,6 @@ class StockMove(SavepointCase):
         self.assertEqual(move2.state, 'assigned')
         self.assertEqual(move3.state, 'waiting')
 
-    @unittest.skip(reason='unskip me')
     def test_use_reserved_move_line_1(self):
         """ Test that _free_reservation work when quantity is only available on
         reserved move lines.
@@ -2277,7 +2276,7 @@ class StockMove(SavepointCase):
             'product_id': self.product.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 0.0,
-            'quantity_done': 1.0,
+            'done_qty': 1.0,
         })
         move3._action_confirm()
         move3._action_assign()
@@ -2287,7 +2286,6 @@ class StockMove(SavepointCase):
         self.assertEqual(quant.quantity, 9.0)
         self.assertEqual(quant.reserved_quantity, 9.0)
 
-    @unittest.skip(reason='unskip me')
     def test_use_unreserved_move_line_1(self):
         """ Test that validating a stock move linked to an untracked product reserved by another one
         correctly unreserves the other one.
@@ -2323,24 +2321,23 @@ class StockMove(SavepointCase):
         self.assertEqual(move2.state, 'confirmed')
 
         # use the product from the first one
-        move2.write({'move_line_ids': [(0, 0, {
+        move2.write({'split_move_ids': [(0, 0, {
             'product_id': self.product.id,
-            'product_uom_id': self.uom_unit.id,
-            'qty_done': 1,
-            'product_uom_qty': 0,
+            'product_uom': self.uom_unit.id,
+            'done_qty': 1,
             'lot_id': False,
             'package_id': False,
             'result_package_id': False,
             'location_id': move2.location_id.id,
             'location_dest_id': move2.location_dest_id.id,
+            'name': 'xxx',
         })]})
-        move2._action_done()
+        (move2 + move2.split_move_ids)._action_done()
 
         # the first move should go back to confirmed
         self.assertEqual(move1.state, 'confirmed')
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
 
-    @unittest.skip(reason='unskip me')
     def test_use_unreserved_move_line_2(self):
         """ Test that validating a stock move linked to a tracked product reserved by another one
         correctly unreserves the other one.
@@ -2382,24 +2379,23 @@ class StockMove(SavepointCase):
         self.assertEqual(move2.state, 'confirmed')
 
         # use the product from the first one
-        move2.write({'move_line_ids': [(0, 0, {
+        move2.write({'split_move_ids': [(0, 0, {
             'product_id': self.product.id,
-            'product_uom_id': self.uom_unit.id,
-            'qty_done': 1,
-            'product_uom_qty': 0,
+            'product_uom': self.uom_unit.id,
+            'done_qty': 1,
             'lot_id': lot1.id,
             'package_id': False,
             'result_package_id': False,
             'location_id': move2.location_id.id,
             'location_dest_id': move2.location_dest_id.id,
+            'name': 'xxx',
         })]})
-        move2._action_done()
+        (move2 + move2.split_move_ids)._action_done()
 
         # the first move should go back to confirmed
         self.assertEqual(move1.state, 'confirmed')
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location, lot_id=lot1), 0.0)
 
-    @unittest.skip(reason='unskip me')
     def test_use_unreserved_move_line_3(self):
         """ Test the behavior of `_free_reservation` when ran on a recordset of move lines where
         some are assigned and some are force assigned. `_free_reservation` should not use an
@@ -2417,21 +2413,22 @@ class StockMove(SavepointCase):
         })
         move1._action_confirm()
         move1._action_assign()
-        move1.quantity_done = 1
+        move1.done_qty = 1
 
         # add a forced move line in `move1`
-        move1.write({'move_line_ids': [(0, 0, {
+        move1.write({'split_move_ids': [(0, 0, {
             'product_id': self.product.id,
-            'product_uom_id': self.uom_unit.id,
-            'qty_done': 2,
+            'product_uom': self.uom_unit.id,
+            'done_qty': 2,
             'product_uom_qty': 0,
             'lot_id': False,
             'package_id': False,
             'result_package_id': False,
             'location_id': move1.location_id.id,
             'location_dest_id': move1.location_dest_id.id,
+            'name': 'xxx',
         })]})
-        move1._action_done()
+        (move1 + move1.split_move_ids)._action_done()
 
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.customer_location), 3.0)
 
