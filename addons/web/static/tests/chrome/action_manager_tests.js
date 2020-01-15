@@ -1507,7 +1507,6 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('execute a new action while handling a call_button', async function (assert) {
-        // FIXME: execute action not implemented
         assert.expect(16);
 
         var self = this;
@@ -2470,7 +2469,7 @@ QUnit.module('ActionManager', {
                 orderedBy: [],
             }],
         };
-        actionManager.trigger_up('search', searchData);
+        actionManager.trigger('search', searchData);
 
         // Sort records
         await testUtils.dom.click($(actionManager.el).find('.o_list_view th.o_column_sortable'));
@@ -4123,7 +4122,7 @@ QUnit.module('ActionManager', {
             },
         });
 
-        actionManager.trigger_up('history_back');
+        actionManager.trigger('history_back');
         assert.verifySteps(['on_close'], "should have called the on_close handler");
 
         actionManager.destroy();
@@ -4169,7 +4168,7 @@ QUnit.module('ActionManager', {
             data: this.data,
         });
         await actionManager.doAction('ClientAction');
-        actionManager.trigger_up('navigation_move', {direction:'down'});
+        actionManager.trigger('navigation_move', {direction:'down'});
 
         assert.ok(true); // no error so it's good
         actionManager.destroy();
@@ -4346,14 +4345,14 @@ QUnit.module('ActionManager', {
         assert.containsOnce(actionManager, '.o_form_view.o_form_editable');
 
         await testUtils.fields.editInput($(actionManager.el).find('input[name=foo]'), 'val');
-        actionManager.trigger_up('clear_uncommitted_changes');
+        actionManager.trigger('clear_uncommitted_changes');
         await nextTick();
 
         assert.containsOnce($('body'), '.modal'); // confirm discard dialog
         // confirm discard changes
         await testUtils.dom.click($('.modal .modal-footer .btn-primary'));
 
-        actionManager.trigger_up('clear_uncommitted_changes');
+        actionManager.trigger('clear_uncommitted_changes');
         await nextTick();
 
         assert.containsNone($('body'), '.modal');
