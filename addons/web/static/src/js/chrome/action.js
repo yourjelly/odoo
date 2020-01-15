@@ -11,6 +11,8 @@ odoo.define('web.Action', function (require) {
 const AbstractView = require('web.AbstractView');
 const { ComponentAdapter } = require('web.OwlCompatibility');
 
+var dom = require('web.dom');
+
 class Action extends ComponentAdapter {
     constructor(parent, props) {
         super(...arguments);
@@ -46,9 +48,13 @@ class Action extends ComponentAdapter {
 
     shouldUpdate(nextProps) {
         if (this.legacy) {
+            const activatingViewType = nextProps.action.controller.viewType;
             const starting = this.starting;
-            this.starting = false
-            return nextProps.shouldUpdateWidget && !starting;
+            this.starting = false;
+            if (activatingViewType === this.widget.viewType) {
+                this.legacyZombie = false;
+            }
+            return nextProps.shouldUpdateWidget && !starting && !this.legacyZombie;
         }
         return super.shouldUpdate(nextProps);
     }
@@ -59,9 +65,6 @@ class Action extends ComponentAdapter {
             await this.widget.reload(
                 {
                     offset: 0,
-                    domain: action.domain,
-                    groupBy: action.groupBy,
-                    context: action.context,
                     controllerState
                 }
             );
@@ -74,22 +77,21 @@ class Action extends ComponentAdapter {
         const widget = this.widget;
         const controllerReload = widget.reload;
         this.widget.reload = async function(params) {
+            await controllerReload.call(widget, ...arguments);
             const controllerState = widget.exportState();
             const commonState = {};
-            commonState.domain = params.domain || widget._getSearchDomain();
             if (params) {
-                if (params.groupBy) {commonState.groupBy = params.groupBy;}
                 if (params.context) {commonState.context = params.context;}
             }
-
             self.trigger('reloading-legacy', { commonState , controllerState });
-            return controllerReload.call(widget, ...arguments);
         }
     }
     destroy() {
         if (this.legacy) {
             // keep legacy stuff alive because some stuff
-            // are kept by AbstractModel (e.g.: orderedBy)
+-           // are kept by AbstractModel (e.g.: orderedBy)
+            dom.detach([{widget: this.widget}]);
+            this.legacyZombie = true;
             return;
         }
         return super.destroy();

@@ -23,7 +23,7 @@
                     Component="controller.Component"
                     action="actions[controller.actionID]"
                     options="controller.options"
-                    shouldUpdateWidget="state.pendingStack === null"/>
+                    shouldUpdateWidget="state.pendingStack !== null"/>
         </t>
     </div>
 </t>
