@@ -8,7 +8,7 @@ var createView = testUtils.createView;
 var BasicView = require("web.BasicView");
 var BasicRenderer = require("web.BasicRenderer");
 const AbstractRenderer = require('web.AbstractRendererOwl');
-const ControllerAdapter = require('web.ControllerAdapter');
+const AbstractControllerAdapter = require('web.AbstractControllerAdapter');
 const RendererWrapper = require('web.RendererWrapper');
 
 function getHtmlRenderer(html) {
@@ -26,10 +26,10 @@ function getOwlView(owlRenderer, viewType) {
         viewType: viewType,
         config: _.extend({}, BasicView.prototype.config, {
             Renderer: owlRenderer,
-            Controller: ControllerAdapter.extend({})
+            Controller: AbstractControllerAdapter,
         }),
         getRenderer() {
-            return new RendererWrapper(null, {}, this.config.Renderer);
+            return new RendererWrapper(null, this.config.Renderer, {});
         }
     });
 }
@@ -96,9 +96,8 @@ QUnit.module("Views", {
         assert.verifySteps(["a1", "a2", "method", "method", "descr", "descr2"]);
 
         view.destroy();
-    }
-    );
-    
+    });
+
     QUnit.test('OWL Renderer correctly destroyed', async function (assert) {
         assert.expect(2);
 
