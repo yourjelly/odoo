@@ -211,11 +211,10 @@ var AbstractController = mvc.Controller.extend(ActionMixin, WidgetAdapterMixin, 
         var searchPanelUpdateProm;
         var controllerState = params.controllerState || {};
         var cpState = controllerState.cpState;
-        const proms = [];
         if (this._controlPanel && cpState) {
-            proms.push(this._controlPanel.importState(cpState).then(function (searchQuery) {
+            await this._controlPanel.importState(cpState).then(function (searchQuery) {
                 params = _.extend({}, params, searchQuery);
-            }));
+            });
         }
         var postponeRendering = false;
         if (this._searchPanel) {
@@ -230,12 +229,10 @@ var AbstractController = mvc.Controller.extend(ActionMixin, WidgetAdapterMixin, 
             }
             params.domain = this.controlPanelDomain.concat(this.searchPanelDomain);
         }
-        proms.push(this.update(params, {}));
-        proms.push(searchPanelUpdateProm);
+        await Promise.all([this.update(params, {}), searchPanelUpdateProm]);
         if (postponeRendering) {
-            proms.push(this.renderer._render());
+            return this.renderer._render();
         }
-        return Promise.all(proms);
     },
     /**
      * For views that require a pager, this method will be called to allow the
