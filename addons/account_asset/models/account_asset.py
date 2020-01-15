@@ -139,14 +139,27 @@ class AccountAssetAsset(models.Model):
         # Entries generated : one by grouped category and one by asset from ungrouped category
         created_move_ids = []
         type_domain = []
+        batch_size = self.env.context.get('batch_size')
         if asset_type:
             type_domain = [('type', '=', asset_type)]
 
         ungrouped_assets = self.env['account.asset.asset'].search(type_domain + [('state', '=', 'open'), ('category_id.group_entries', '=', False)])
-        created_move_ids += ungrouped_assets._compute_entries(date, group_entries=False)
+        if batch_size:
+            for idx in range(0, len(ungrouped_assets), batch_size):
+                created_move_ids += ungrouped_assets[idx:idx+batch_size]._compute_entries(date, group_entries=False)
+                self.env.cr.commit()
+        else:
+            created_move_ids += ungrouped_assets._compute_entries(date, group_entries=False)
 
+        assets = self.env['account.asset.asset']
         for grouped_category in self.env['account.asset.category'].search(type_domain + [('group_entries', '=', True)]):
-            assets = self.env['account.asset.asset'].search([('state', '=', 'open'), ('category_id', '=', grouped_category.id)])
+            assets |= self.env['account.asset.asset'].search([('state', '=', 'open'), ('category_id', '=', grouped_category.id)])
+
+        if batch_size:
+            for idx in range(0, len(assets), batch_size):
+                created_move_ids += assets[idx:idx+batch_size]._compute_entries(date, group_entries=True)
+                self.env.cr.commit()
+        else:
             created_move_ids += assets._compute_entries(date, group_entries=True)
         return created_move_ids
 
