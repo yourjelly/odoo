@@ -2395,22 +2395,21 @@ var PaymentScreenWidget = ScreenWidget.extend({
             if (order.wait_for_push_order()){
                 var server_ids = [];
                 ordered.then(function (ids) {
-                  server_ids = ids;
-                }).finally(function() {
+                    server_ids = ids;
                     var post_push_promise = [];
                     post_push_promise = self.post_push_order_resolve(order, server_ids);
                     post_push_promise.then(function () {
-                            self.gui.show_screen('receipt');
-                        }).catch(function (error) {
-                          self.gui.show_screen('receipt');
-                          if (error) {
-                              self.gui.show_popup('error',{
-                                  'title': "Error: no internet connection",
-                                  'body':  error,
-                              });
-                          }
-                        });
-                  });
+                        self.gui.show_screen('receipt');
+                    }).catch(function (error) {
+                        self.gui.show_screen('receipt');
+                        if (error) {
+                            self.gui.show_popup('error',{
+                                'title': "Error: no internet connection",
+                                'body':  error,
+                            });
+                        }
+                    });
+                });
             }
             else {
               self.gui.show_screen('receipt');

@@ -448,7 +448,7 @@ class PosConfig(models.Model):
 
     def write(self, vals):
         opened_session = self.mapped('session_ids').filtered(lambda s: s.state != 'closed')
-        if opened_session:
+        if opened_session and not self.env.context.get('allow_modify'):
             raise UserError(_('Unable to modify this PoS Configuration because there is an open PoS Session based on it.'))
         result = super(PosConfig, self).write(vals)
 

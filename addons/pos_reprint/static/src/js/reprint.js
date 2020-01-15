@@ -53,6 +53,7 @@ screens.define_action_button({
 
 return {
     ReprintReceiptScreenWidget: ReprintReceiptScreenWidget,
+    ReprintButton: ReprintButton
 };
 
 });
