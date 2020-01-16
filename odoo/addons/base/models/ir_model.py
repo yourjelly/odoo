@@ -1036,6 +1036,7 @@ class IrModelSelection(models.Model):
         model_name = model._name.replace('.', '_')
         xml_id_pattern = '%s.selection__%s__%s__%s'
         to_xmlids = []
+        xmlids = set()
 
         def make_xml_id(field_name, value):
             # the field value may contains exotic chars like spaces
@@ -1058,8 +1059,12 @@ class IrModelSelection(models.Model):
             if module:
                 for value, modules in field._selection_modules(model).items():
                     if module in modules:
+                        xmlid = make_xml_id(field.name, value)
+                        if xmlid in xmlids:
+                            raise ValueError("DUPLICATE XMLID BAD, TERMINATE HUMAN")
+                        xmlids.add(xmlid)
                         to_xmlids.append(dict(
-                            xml_id=make_xml_id(field.name, value),
+                            xml_id=xmlid,
                             record=self.browse(rows[value]['id']),
                         ))
 
