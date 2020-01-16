@@ -19,6 +19,14 @@ class Action extends ComponentAdapter {
         if (!(props.Component.prototype instanceof owl.Component)) {
             this.legacy = true;
         }
+        this.boundController = this.props.action.controller;
+    }
+
+    get title() {
+        if (this.legacy && this.widget) {
+            return this.widget.getTitle();
+        }
+        return this.props.action.name;
     }
 
     async willStart() {
@@ -61,7 +69,7 @@ class Action extends ComponentAdapter {
     async willUpdateProps(nextProps) {
         if (this.legacy === 'view') {
             const action = nextProps.action;
-            const controllerState = action.controllerState;
+            const controllerState = Object.assign({}, action.controllerState, action.controller.viewOptions);
             await this.widget.reload(
                 {
                     offset: 0,
