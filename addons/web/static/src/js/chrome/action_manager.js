@@ -343,10 +343,18 @@ class ActionManager extends Component {
      * @returns {Object[]}
      */
     _getBreadcrumbs(controllerStack) {
+        const owlChildren = Object.values(this.__owl__.children);
         return controllerStack.map(controllerID => {
+            const controller = this.controllers[controllerID];
+            const component = owlChildren.find(comp => comp.boundController.jsID === controllerID);
+            if (component) {
+                controller.title = component.title;
+            } else if (!controller.title) {
+                controller.title = this.actions[controllerID].name;
+            }
             return {
                 controllerID: controllerID,
-                title: this.controllers[controllerID].title,
+                title: controller.title,
             };
         });
     }
