@@ -2490,7 +2490,6 @@ QUnit.module('ActionManager', {
             actions: this.actions,
             archs: this.archs,
             data: this.data,
-            debug:1,
         });
         actionManager.doAction(3);
         await nextTick();
@@ -3706,7 +3705,7 @@ QUnit.module('ActionManager', {
         await nextTick();
         await testUtils.dom.click($(actionManager.el).find('.o_list_button_add'));
         assert.containsOnce(actionManager, '.o_form_view.o_form_editable');
-        assert.containsOnce(actionManager, '.o_form_uri:contains(First record)');
+        assert.containsOnce($(actionManager.el), '.o_form_uri:contains(First record)');
         assert.strictEqual($(actionManager.el).find('.o_control_panel .breadcrumb-item').text(),
             "PartnersNew");
 
