@@ -78,6 +78,7 @@ class Action extends ComponentAdapter {
                     controllerState
                 },
             );
+            await this.widget.willRestore();
             await this.widget.reload(reloadParam);
         }
         return super.willUpdateProps(...arguments);
@@ -100,7 +101,7 @@ class Action extends ComponentAdapter {
     destroy() {
         if (this.legacy) {
             // keep legacy stuff alive because some stuff
--           // are kept by AbstractModel (e.g.: orderedBy)
+            // are kept by AbstractModel (e.g.: orderedBy)
             dom.detach([{widget: this.widget}]);
             this.legacyZombie = true;
             return;
