@@ -114,7 +114,7 @@ class AccountAnalyticLine(models.Model):
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         """ Set the correct label for `unit_amount`, depending on company UoM """
         result = super(AccountAnalyticLine, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
-        result['arch'] = self._apply_timesheet_label(result['arch'])
+        # result['arch'] = self._apply_timesheet_label(result['arch'])
         return result
 
     @api.model
