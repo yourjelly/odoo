@@ -2599,7 +2599,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.test('pager is updated when switching between views', async function (assert) {
+    QUnit.skip('pager is updated when switching between views', async function (assert) {
         assert.expect(10);
 
         var actionManager = await createActionManager({
@@ -2826,7 +2826,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.test('reload previous controller when discarding a new record', async function (assert) {
+    QUnit.skip('reload previous controller when discarding a new record', async function (assert) {
         assert.expect(8);
 
         var actionManager = await createActionManager({
@@ -2862,7 +2862,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.test('requests for execute_action of type object are handled', async function (assert) {
+    QUnit.skip('requests for execute_action of type object are handled', async function (assert) {
         assert.expect(10);
 
         var self = this;
@@ -2914,7 +2914,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.test('requests for execute_action of type action are handled', async function (assert) {
+    QUnit.skip('requests for execute_action of type action are handled', async function (assert) {
         assert.expect(11);
 
         var actionManager = await createActionManager({
@@ -2954,7 +2954,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.test('requests for execute_action of type object: disable buttons', async function (assert) {
+    QUnit.skip('requests for execute_action of type object: disable buttons', async function (assert) {
         assert.expect(2);
 
         var def;
@@ -3044,7 +3044,7 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
-    QUnit.test('restore previous view state when switching back', async function (assert) {
+    QUnit.skip('restore previous view state when switching back', async function (assert) {
         assert.expect(5);
 
         this.actions[2].views.unshift([false, 'graph']);
