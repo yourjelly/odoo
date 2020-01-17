@@ -92,6 +92,9 @@ function getMockedOwlEnv(params) {
             session_storage: new RamStorageService(),
         },
     };
+    if (params.dataManager) {
+        Object.assign(env.dataManager, params.dataManager);
+    }
     return makeTestEnvironment(env, server.performRpc.bind(server));
 }
 

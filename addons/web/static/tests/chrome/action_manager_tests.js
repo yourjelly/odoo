@@ -3498,9 +3498,9 @@ QUnit.module('ActionManager', {
             actions: this.actions,
             archs: this.archs,
             data: this.data,
-            intercepts: {
-                load_filters: function (ev) {
-                    ev.data.on_success([
+            dataManager: {
+                load_filters: async function () {
+                    return Promise.resolve([
                         {
                             user_id: [2, "Mitchell Admin"],
                             name: 'favorite filter',
@@ -3510,8 +3510,8 @@ QUnit.module('ActionManager', {
                             domain: '[("bar", "=", 1)]'
                         }
                     ]);
-                },
-            },
+                }
+            }
         });
 
         actionManager.doAction(12);
