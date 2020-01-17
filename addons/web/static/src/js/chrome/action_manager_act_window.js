@@ -42,7 +42,12 @@ patch(ActionManager, 'ActionManagerActWindow', {
         if (action.controllers[viewType]) {
             action.controller = action.controllers[viewType];
             action.controller.viewOptions.breadcrumbs = this._getBreadcrumbs(this.currentStack.slice(0, action.controller.index));
-            Object.assign(action.controller.viewOptions, viewOptions); // FIXME: restore controller instead of destroying/re-creating it
+            const originalViewOptions = Object.assign({}, action.controller.viewOptions);
+            // Compatibility before BasicView Refactor
+            // let BasicView/Controller decide what is their mode
+            // based on *other* parameters
+            delete originalViewOptions.mode;
+            action.controller.viewOptions = Object.assign(originalViewOptions, viewOptions); // FIXME: restore controller instead of destroying/re-creating it
             return;
         }
 
