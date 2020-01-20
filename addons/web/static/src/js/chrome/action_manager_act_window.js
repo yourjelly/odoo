@@ -191,7 +191,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
                     viewID: view[0],
                     View: View,
                 });
-            } else if (this.env.config.isDebug('assets')) {
+            } else if (this.env.isDebug('assets')) {
                 console.log("View type '" + viewType + "' is not present in the view registry.");
             }
         });
