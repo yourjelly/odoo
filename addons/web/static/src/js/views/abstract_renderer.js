@@ -8,11 +8,12 @@ odoo.define('web.AbstractRenderer', function (require) {
  */
 
 var mvc = require('web.mvc');
+const { WidgetAdapterMixin } = require('web.OwlCompatibility');
 
 /**
  * @class AbstractRenderer
  */
-return mvc.Renderer.extend({
+return mvc.Renderer.extend(WidgetAdapterMixin, {
     /**
      * @override
      * @param {string} [params.noContentHelp]
@@ -22,6 +23,10 @@ return mvc.Renderer.extend({
         this.arch = params.arch;
         this.noContentHelp = params.noContentHelp;
         this.withSearchPanel = params.withSearchPanel;
+    },
+    destroy: function () {
+        this._super.apply(this, arguments);
+        WidgetAdapterMixin.destroy.call(this);
     },
     /**
      * The rendering is asynchronous. The start
@@ -39,11 +44,15 @@ return mvc.Renderer.extend({
     /**
      * Called each time the renderer is attached into the DOM.
      */
-    on_attach_callback: function () {},
+    on_attach_callback: function () {
+        WidgetAdapterMixin.on_attach_callback.call(this);
+    },
     /**
      * Called each time the renderer is detached from the DOM.
      */
-    on_detach_callback: function () {},
+    on_detach_callback: function () {
+        WidgetAdapterMixin.on_detach_callback.call(this);
+    },
 
     //--------------------------------------------------------------------------
     // Public
