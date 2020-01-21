@@ -13,13 +13,14 @@ ChangeLine.props = ["changeLine", 'ordering'];
 class ShowReseqenceRenderer extends OwlAbstractRenderer {
     constructor(...args) {
         super(...args);
-        this.data = useState({
+        this.data = this.value ? JSON.parse(this.value) : {
             changeLines: [],
             ordering: 'date',
-        });
+        }
     }
-    updateProps(props) {
-        Object.assign(this.data, JSON.parse(props));
+    async willUpdateProps(nextProps) {
+        await super.willUpdateProps(nextProps);
+        Object.assign(this.data, JSON.parse(this.value));
     }
 }
 ShowReseqenceRenderer.template = 'account.ResequenceRenderer';
