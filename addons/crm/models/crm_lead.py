@@ -286,6 +286,19 @@ class Lead(models.Model):
             }
         return {}
 
+    @api.model
+    def form_view_auto_fill_yaha(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'crm.lead',
+            'target': 'self',
+            'context': {
+                'default_name': self.env.context.get('params', {}).get('name'),
+            }
+        }
+
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
         values = self._onchange_partner_id_values(self.partner_id.id if self.partner_id else False)

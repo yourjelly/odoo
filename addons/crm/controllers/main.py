@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
+import werkzeug
 
 from odoo.addons.mail.controllers.main import MailController
 from odoo import http
@@ -42,3 +43,9 @@ class CrmController(http.Controller):
                 _logger.exception("Could not convert crm.lead to opportunity")
                 return MailController._redirect_to_messaging()
         return redirect
+
+    @http.route('/lead/redirect_form_view', type='http', auth='user', methods=['GET'])
+    def crm_lead_redirect_form_view(self, name):
+        # http://localhost:8069/lead/redirect_form_view?name=bouhbouh
+        server_action = http.request.env.ref("crm.superaction_youhou")
+        return werkzeug.utils.redirect("web?&#action=%s&model=crm.lead&view_type=form&name=%s" % (server_action.id, name))
