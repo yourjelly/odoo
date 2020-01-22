@@ -67,10 +67,6 @@ class StockMove(SavepointCase):
 
         # confirmation
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
 
@@ -109,10 +105,6 @@ class StockMove(SavepointCase):
 
         # confirmation
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
         move_line = move1.move_line_ids[0]
@@ -154,10 +146,6 @@ class StockMove(SavepointCase):
 
         # confirmation
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 5)
         move_line = move1.move_line_ids[0]
@@ -714,10 +702,6 @@ class StockMove(SavepointCase):
             'product_uom_qty': 100.0,
         })
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
 
@@ -755,10 +739,6 @@ class StockMove(SavepointCase):
             'product_uom_qty': 100.0,
         })
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
 
@@ -809,10 +789,6 @@ class StockMove(SavepointCase):
             'product_uom_qty': 100.0,
         })
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
 
@@ -865,10 +841,6 @@ class StockMove(SavepointCase):
             'product_uom_qty': 100.0,
         })
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
 
@@ -908,10 +880,6 @@ class StockMove(SavepointCase):
             'product_uom_qty': 100.0,
         })
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
 
@@ -967,10 +935,6 @@ class StockMove(SavepointCase):
             'product_uom_qty': 100.0,
         })
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
 
@@ -1020,10 +984,6 @@ class StockMove(SavepointCase):
             'product_uom_qty': 100.0,
         })
         move1._action_confirm()
-        self.assertEqual(move1.state, 'confirmed')
-
-        # assignment
-        move1._action_assign()
         self.assertEqual(move1.state, 'assigned')
         self.assertEqual(len(move1.move_line_ids), 1)
 
@@ -1863,9 +1823,8 @@ class StockMove(SavepointCase):
         move_stock_stock_2.write({'move_orig_ids': [(4, move_supp_stock_1.id, 0), (4, move_supp_stock_2.id, 0)]})
 
         (move_supp_stock_1 + move_supp_stock_2 + move_stock_stock_1 + move_stock_stock_2)._action_confirm()
-        move_supp_stock_1._action_assign()
         self.assertEqual(move_supp_stock_1.state, 'assigned')
-        self.assertEqual(move_supp_stock_2.state, 'confirmed')
+        self.assertEqual(move_supp_stock_2.state, 'assigned')
         self.assertEqual(move_stock_stock_1.state, 'waiting')
         self.assertEqual(move_stock_stock_2.state, 'waiting')
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0.0)
@@ -1875,7 +1834,7 @@ class StockMove(SavepointCase):
         move_supp_stock_1.move_line_ids.qty_done = 3.0
         move_supp_stock_1._action_done()
         self.assertEqual(move_supp_stock_1.state, 'done')
-        self.assertEqual(move_supp_stock_2.state, 'confirmed')
+        self.assertEqual(move_supp_stock_2.state, 'assigned')
         self.assertEqual(move_stock_stock_1.state, 'assigned')
         self.assertEqual(move_stock_stock_2.state, 'waiting')
 

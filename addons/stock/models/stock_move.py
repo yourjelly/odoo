@@ -1032,10 +1032,15 @@ class StockMove(models.Model):
         # assign picking in batch for all confirmed move that share the same details
         for moves in to_assign.values():
             moves._assign_picking()
+
         self._push_apply()
         self._check_company()
         if merge:
-            return self._merge_moves(merge_into=merge_into)
+            res = self._merge_moves(merge_into=merge_into)
+            # call `_action_assign` on every confirmed move which location_id bypasses the reservation
+            res.filtered(lambda m: m.location_id.usage in (
+                'supplier', 'inventory', 'production') and m.state == 'confirmed')._action_assign()
+            return res
         return self
 
     def _prepare_procurement_values(self):
