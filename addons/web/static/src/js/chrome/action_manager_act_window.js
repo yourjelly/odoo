@@ -1,531 +1,398 @@
 odoo.define('web.ActWindowActionManager', function (require) {
-"use strict";
-
-/**
- * The purpose of this file is to add the support of Odoo actions of type
- * 'ir.actions.act_window' to the ActionManager.
- */
-
-const { ActionManagerPlugin } = require('web.ActionManager');
-const Context = require('web.Context');
-var pyUtils = require('web.py_utils');
-const { patch } = require('web.utils');
-const viewRegistry = require('web.view_registry');
-
-//patch(ActionManager, 'ActionManagerActWindow', {
-class ActionManagerActWindowPlugin extends ActionManagerPlugin {
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
+    "use strict";
 
     /**
-     * Instantiates the controller for a given action and view type, and adds it
-     * to the list of controllers in the action.
-     *
-     * @private
-     * @param {Object} action
-     * @param {AbstractController[]} action.controllers the already created
-     *   controllers for this action
-     * @param {Object[]} action.views the views available for the action, each
-     *   one containing its fieldsView
-     * @param {Object} action.env
-     * @param {string} viewType
-     * @param {Object} [viewOptions] dict of options passed to the initialization
-     *   of the controller's widget
-     * @param {Object} [options]
-     * @param {string} [options.controllerID=false] when the controller has
-     *   previously been lazy-loaded, we want to keep its jsID when loading it
-     * @param {integer} [options.index=0] the controller's index in the stack
-     * @param {boolean} [options.lazy=false] set to true to differ the
-     *   initialization of the controller's widget
+     * The purpose of this file is to add the support of Odoo actions of type
+     * 'ir.actions.act_window' to the ActionManager.
      */
-    _createViewController(action, viewType, viewOptions, options) {
-        if (action.controllers[viewType]) {
-            action.controller = action.controllers[viewType];
-            action.controller.viewOptions.breadcrumbs = this._getBreadcrumbs(this.currentStack.slice(0, action.controller.index));
-            Object.assign(action.controller.viewOptions, viewOptions);
-            return;
+
+    const ActionManager = require('web.ActionManager');
+    const Context = require('web.Context');
+    var pyUtils = require('web.py_utils');
+    const viewRegistry = require('web.view_registry');
+
+    class WindowActionPlugin extends ActionManager.AbstractPlugin {
+        constructor() {
+            super(...arguments);
+            this.env.bus.on('switch-view', this, this._onSwitchView);
         }
 
-        const viewDescr = action.views.find(view => view.type === viewType);
-        if (!viewDescr) {
-            const { controller } = this._getCurrentAction();
-            return this._restoreController(controller.jsID);
-        }
+        //--------------------------------------------------------------------------
+        // Private
+        //--------------------------------------------------------------------------
 
-        options = options || {};
-        const index = options.index || 0;
-        const controllerID = options.controllerID || this._nextID('controller');
-        // build the view options from different sources
-        const flags = action.flags || {};
-        viewOptions = Object.assign({}, flags, flags[viewType], viewOptions, {
-            action: action,
-            breadcrumbs: this._getBreadcrumbs(this.currentStack.slice(0, index)),
-            // pass the controllerID to the views as an hook for further communication
-            controllerID: controllerID,
-        });
-        action.controller = {
-            actionID: action.jsID,
-            // className: 'o_act_window', // used to remove the padding in dialogs
-            Component: viewDescr.View,
-            index: index,
-            jsID: controllerID,
-            viewType: viewType,
-            viewOptions: viewOptions,
-        };
-        action.controllers[viewType] = action.controller;
-    }
-    /**
-     * Executes actions of type 'ir.actions.act_window'.
-     *
-     * @private
-     * @param {Object} action the description of the action to execute
-     * @param {Array} action.views list of tuples [viewID, viewType]
-     * @param {Object} options @see doAction for details
-     * @param {integer} [options.resID] the current res ID
-     * @param {string} [options.viewType] the view to open
-     * @returns {Promise} resolved when the action is appended to the DOM
-     */
-    async _executeWindowAction(action, options) {
-        const fieldsViews = await this._resolveLast(this._loadViews(action));
-        const views = this._generateActionViews(action, fieldsViews);
-        action._views = action.views; // save the initial attribute
-        action.views = views;
-        action.controlPanelFieldsView = fieldsViews.search;
-        action.controllers = {};
-        // select the current view to display, and optionally the main view
-        // of the action which will be lazyloaded
-        let curView = options.viewType && views.find(view => view.type === options.viewType);
-        let lazyView;
-        if (curView) {
-            if (!curView.multiRecord && views[0].multiRecord) {
-                lazyView = views[0];
+        /**
+         * Instantiates the controller for a given action and view type, and adds it
+         * to the list of controllers in the action.
+         *
+         * @private
+         * @param {Object} action
+         * @param {AbstractController[]} action.controllers the already created
+         *   controllers for this action
+         * @param {Object[]} action.views the views available for the action, each
+         *   one containing its fieldsView
+         * @param {Object} action.env
+         * @param {string} viewType
+         * @param {Object} [viewOptions] dict of options passed to the initialization
+         *   of the controller's widget
+         * @param {Object} [options]
+         * @param {string} [options.controllerID=false] when the controller has
+         *   previously been lazy-loaded, we want to keep its jsID when loading it
+         * @param {integer} [options.index=0] the controller's index in the stack
+         * @param {boolean} [options.lazy=false] set to true to differ the
+         *   initialization of the controller's widget
+         */
+        _createViewController(action, viewType, viewOptions, options) {
+            if (action.controllers[viewType]) {
+                action.controller = action.controllers[viewType];
+                action.controller.viewOptions.breadcrumbs = this._getBreadcrumbs(this.currentStack.slice(0, action.controller.index));
+                Object.assign(action.controller.viewOptions, viewOptions);
+                return;
             }
-        } else {
-            curView = views[0];
-        }
-        // use mobile-friendly view by default in mobile, if possible
-        if (this.env.device.isMobile) {
-            if (!curView.isMobileFriendly) {
-                curView = this._findMobileView(views, curView.multiRecord) || curView;
-            }
-            if (lazyView && !lazyView.isMobileFriendly) {
-                lazyView = this._findMobileView(views, lazyView.multiRecord) || lazyView;
-            }
-        }
-        // TODO: handle this
-        // let lazyViewDef;
-        // let lazyControllerID;
-        // if (lazyView) {
-        //     // if the main view is lazy-loaded, its (lazy-loaded) controller is inserted
-        //     // into the controller stack (so that breadcrumbs can be correctly computed),
-        //     // so we force clear_breadcrumbs to false so that it won't be removed when the
-        //     // current controller will be inserted afterwards
-        //     options.clear_breadcrumbs = false;
-        //     // this controller being lazy-loaded, this call is actually sync
-        //     lazyViewDef = self._createViewController(action, lazyView.type, {}, {lazy: true})
-        //         .then(function (lazyLoadedController) {
-        //             lazyControllerID = lazyLoadedController.jsID;
-        //             self.controllerStack.push(lazyLoadedController.jsID);
-        //         });
-        // }
-        //     return self.dp.add(Promise.resolve(lazyViewDef))
-        //         .then(function () {
-        const viewOptions = {
-            controllerState: options.controllerState,
-            currentId: options.resID,
-        };
-        const index = this._getControllerStackIndex(options);
-        this._createViewController(action, curView.type, viewOptions, { index });
-        action.controller.options = options;
-        this._pushController(action.controller);
-        // return this._executeAction(actionRequest);
-        // })
-        // .guardedCatch(function () {
-        //     if (lazyControllerID) {
-        //         var index = self.controllerStack.indexOf(lazyControllerID);
-        //         self.controllerStack = self.controllerStack.slice(0, index);
-        //     }
-        //     self._destroyWindowAction(action);
-        // });
-    }
-    /**
-     * Helper function to find the first mobile-friendly view, if any.
-     *
-     * @private
-     * @param {Array} views an array of views
-     * @param {boolean} multiRecord set to true iff we search for a multiRecord
-     *   view
-     * @returns {Object|undefined} a mobile-friendly view of the requested
-     *   multiRecord type, undefined if there is no such view
-     */
-    _findMobileView(views, multiRecord) {
-        return views.find(view => view.isMobileFriendly && view.multiRecord === multiRecord);
-    }
-    /**
-     * Generate the description of the views of a given action. For each view,
-     * it generates a dict with information like the fieldsView, the view type,
-     * the Component to use...
-     *
-     * @private
-     * @param {Object} action
-     * @param {Object} fieldsViews
-     * @returns {Object}
-     */
-    _generateActionViews(action, fieldsViews) {
-        const views = [];
-        action.views.forEach(view => {
-            const viewType = view[1];
-            const fieldsView = fieldsViews[viewType];
-            const parsedXML = new DOMParser().parseFromString(fieldsView.arch, "text/xml");
-            const key = parsedXML.documentElement.getAttribute('js_class');
-            const View = viewRegistry.get(key || viewType);
-            if (View) {
-                views.push({
-                    accessKey: View.prototype.accessKey || View.prototype.accesskey,
-                    displayName: View.prototype.display_name,
-                    fieldsView: fieldsView,
-                    icon: View.prototype.icon,
-                    isMobileFriendly: View.prototype.mobile_friendly,
-                    multiRecord: View.prototype.multi_record,
-                    type: viewType,
-                    viewID: view[0],
-                    View: View,
-                });
-            } else if (this.env.isDebug('assets')) {
-                console.log("View type '" + viewType + "' is not present in the view registry.");
-            }
-        });
-        return views;
-    }
-    _getCurrentAction() {
-        const currentControllerID = this.currentStack[this.currentStack.length - 1];
-        const currentController = this.controllers[currentControllerID];
-        return {
-            action: this.actions[currentController.actionID],
-            controller: currentController,
-        }
-    }
-    /**
-     * Overrides to handle the 'ir.actions.act_window' actions.
-     *
-     * @override
-     * @private
-     */
-    _handleAction(action, options) {
-        if (action.type === 'ir.actions.act_window') {
-            return this._executeWindowAction(action, options);
-        }
-        return this._super(...arguments);
-    }
-    /**
-     * Loads the fields_views and fields for the given action.
-     *
-     * @private
-     * @param {Object} action
-     * @returns {Promise}
-     */
-    _loadViews(action) {
-        const inDialog = action.target === 'new';
-        const inline = action.target === 'inline';
-        const options = {
-            action_id: action.id,
-            toolbar: !inDialog && !inline,
-        };
-        const views = action.views.slice();
-        if (!inline && !(inDialog && action.views[0][1] === 'form')) {
-            options.load_filters = true;
-            const searchviewID = action.search_view_id && action.search_view_id[0];
-            views.push([searchviewID || false, 'search']);
-        }
-        const params = {
-            model: action.res_model,
-            context: action.context,
-            views_descr: views,
-        };
-        return this._resolveLast(this.env.dataManager.load_views(params, options));
-    }
-    /**
-     * Overrides to handle the case where the controller to restore is from an
-     * 'ir.actions.act_window' action. In this case we simply switch to this
-     * controller.
-     *
-     * For instance, when going back to the list controller from a form
-     * controller of the same action using the breadcrumbs, the form controller
-     * is kept, as it might be reused in the future.
-     *
-     * @override
-     * @private
-     */
-    _restoreController(controllerID) {
-        const controller = this.controllers[controllerID];
-        const action = this.actions[controller.actionID];
-        if (action.type === 'ir.actions.act_window') {
-            this._switchController(action, controller.viewType);
-            // return this.clearUncommittedChanges().then(function () {
-                // AAB: this will be done directly in AbstractAction's restore
-                // function
-                // var def = Promise.resolve();
-                // if (action.on_reverse_breadcrumb) {
-                //     def = action.on_reverse_breadcrumb();
-                // }
-                // return Promise.resolve(def).then(function () {
-                //     return self._switchController(action, controller.viewType);
-                // });
-            // });
-        } else {
-            this._super(...arguments);
-        }
-    }
-    /**
-     * Handles the switch from a controller to another (either inside the same
-     * window action, or from a window action to another using the breadcrumbs).
-     *
-     * @private
-     * @param {Object} controller the controller to switch to
-     * @param {Object} [viewOptions]
-     */
-    _switchController(action, viewType, viewOptions) {
-        var viewDescr = action.views.find(view => view.type === viewType);
 
-        const currentControllerID = this.currentStack[this.currentStack.length - 1];
-        const currentController = this.controllers[currentControllerID];
-        let index;
-        // the requested controller is from the same action as the current
-        // one, so we either
-        //   1) go one step back from a mono record view to a multi record
-        //      one using the breadcrumbs
-        //   2) or we switched from a view to another  using the view
-        //      switcher
-        //   3) or we opened a record from a multi record view
-        if (viewDescr && viewDescr.multiRecord) {
-            // cases 1) and 2) (with multi record views): replace the first
-            // controller linked to the same action in the stack
-            index = _.findIndex(this.currentStack, controllerID => {
-                return this.controllers[controllerID].actionID === action.jsID;
+            const viewDescr = action.views.find(view => view.type === viewType);
+            // FIXME
+            // if (!viewDescr) {
+            //     const { controller } = this._getCurrentAction();
+            //     return this._restoreController(controller.jsID);
+            // }
+
+            options = options || {};
+            const index = options.index || 0;
+            const controllerID = options.controllerID || this._nextID('controller');
+            // build the view options from different sources
+            const flags = action.flags || {};
+            viewOptions = Object.assign({}, flags, flags[viewType], viewOptions, {
+                action: action,
+                breadcrumbs: this._getBreadcrumbs(this.currentStack.slice(0, index)),
+                // pass the controllerID to the views as an hook for further communication
+                controllerID: controllerID,
             });
-        } else if (!viewDescr || !_.findWhere(action.views, {type: currentController.viewType}).multiRecord) {
-            // case 2) (with mono record views): replace the last
-            // controller by the new one if they are from the same action
-            // and if they both are mono record
-            index = this.currentStack.length - 1;
-        } else {
-            // case 3): insert the controller on the top of the controller
-            // stack
-            index = this.currentStack.length;
+            action.controller = {
+                actionID: action.jsID,
+                // className: 'o_act_window', // used to remove the padding in dialogs
+                Component: viewDescr.View,
+                index: index,
+                jsID: controllerID,
+                viewType: viewType,
+                viewOptions: viewOptions,
+            };
+            action.controllers[viewType] = action.controller;
         }
-        // }
-
-        this._createViewController(action, viewType, viewOptions, { index });
-        this._pushController(action.controller);
-
-        // var newController = function (controllerID) {
-        //     var options = {
-        //         controllerID: controllerID,
-        //         index: index,
-        //     };
-        //     return self
-        //         ._createViewController(action, viewType, viewOptions, options)
-        //         .then(function (controller) {
-        //             return self._startController(controller);
-        //         });
-        // };
-
-        // var controllerDef = action.controllers[viewType];
-        // if (controllerDef) {
-        //     controllerDef = controllerDef.then(function (controller) {
-        //         if (!controller.widget) {
-        //             // lazy loaded -> load it now (with same jsID)
-        //             return newController(controller.jsID);
-        //         } else {
-        //             return Promise.resolve(controller.widget.willRestore()).then(function () {
-        //                 viewOptions = _.extend({}, viewOptions, {
-        //                     breadcrumbs: self._getBreadcrumbs(self.controllerStack.slice(0, index)),
-        //                 });
-        //                 return controller.widget.reload(viewOptions).then(function () {
-        //                     return controller;
-        //                 });
-        //             });
-        //         }
-        //     }, function () {
-        //         // if the controllerDef is rejected, it probably means that the js
-        //         // code or the requests made to the server crashed.  In that case,
-        //         // if we reuse the same promise, then the switch to the view is
-        //         // definitely blocked.  We want to use a new controller, even though
-        //         // it is very likely that it will recrash again.  At least, it will
-        //         // give more feedback to the user, and it could happen that one
-        //         // record crashes, but not another.
-        //         return newController();
-        //     });
-        // } else {
-        //     controllerDef = newController();
-        // }
-
-        // return this.dp.add(controllerDef).then(function (controller) {
-        //     return self._pushController(controller);
-        // });
-    }
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * Handler for event 'execute_action', which is typically called when a
-     * button is clicked. The button may be of type 'object' (call a given
-     * method of a given model) or 'action' (execute a given action).
-     * Alternatively, the button may have the attribute 'special', and in this
-     * case an 'ir.actions.act_window_close' is executed.
-     *
-     * @private
-     * @param {OdooEvent} ev
-     * @param {Object} ev.detail.action_data typically, the html attributes of the
-     *   button extended with additional information like the context
-     * @param {Object} [ev.detail.action_data.special=false]
-     * @param {Object} [ev.detail.action_data.type] 'object' or 'action', if set
-     * @param {Object} ev.detail.env
-     * @param {function} [ev.detail.on_closed]
-     * @param {function} [ev.detail.on_fail]
-     * @param {function} [ev.detail.on_success]
-     */
-    _onExecuteAction(ev) {
-        // cancel potential current rendering
-        this._pushController({jsID: this._nextID('controller'), loading: true});
-
-        const actionData = ev.detail.action_data;
-        const env = ev.detail.env;
-        const context = new Context(env.context, actionData.context || {});
-        const recordID = env.currentID || null; // pyUtils handles null value, not undefined
-        let prom;
-
-        // determine the action to execute according to the actionData
-        if (actionData.special) {
-            prom = Promise.resolve({
-                type: 'ir.actions.act_window_close',
-                infos: { special: true },
-            });
-        } else if (actionData.type === 'object') {
-            // call a Python Object method, which may return an action to execute
-            let args = recordID ? [[recordID]] : [env.resIDs];
-            if (actionData.args) {
-                try {
-                    // warning: quotes and double quotes problem due to json and xml clash
-                    // maybe we should force escaping in xml or do a better parse of the args array
-                    const additionalArgs = JSON.parse(actionData.args.replace(/'/g, '"'));
-                    args = args.concat(additionalArgs);
-                } catch (e) {
-                    console.error("Could not JSON.parse arguments", actionData.args);
+        /**
+         * Executes actions of type 'ir.actions.act_window'.
+         *
+         * @override
+         * @param {Object} action the description of the action to execute
+         * @param {Array} action.views list of tuples [viewID, viewType]
+         * @param {Object} options @see doAction for details
+         * @param {integer} [options.resID] the current res ID
+         * @param {string} [options.viewType] the view to open
+         * @returns {Promise} resolved when the action is appended to the DOM
+         */
+        async executeAction(action, options) {
+            const fieldsViews = await this._resolveLast(this._loadViews(action));
+            const views = this._generateActionViews(action, fieldsViews);
+            action._views = action.views; // save the initial attribute
+            action.views = views;
+            action.controlPanelFieldsView = fieldsViews.search;
+            action.controllers = {};
+            // select the current view to display, and optionally the main view
+            // of the action which will be lazyloaded
+            let curView = options.viewType && views.find(view => view.type === options.viewType);
+            let lazyView;
+            if (curView) {
+                if (!curView.multiRecord && views[0].multiRecord) {
+                    lazyView = views[0];
                 }
-            }
-            prom = this.rpc({
-                route: '/web/dataset/call_button',
-                params: {
-                    args: args,
-                    kwargs: {context: context.eval()},
-                    method: actionData.name,
-                    model: env.model,
-                },
-            });
-        } else if (actionData.type === 'action') {
-            // FIXME: couldn't we directly call doAction?
-            // execute a given action, so load it first
-            const additionalContext = Object.assign(pyUtils.eval('context', context), {
-                active_model: env.model,
-                active_ids: env.resIDs,
-                active_id: recordID,
-            });
-            prom = this.env.dataManager.load_action(actionData.name, additionalContext);
-        } else {
-            prom = Promise.reject();
-        }
-
-        this._resolveLast(prom).then(action => {
-            // show effect if button have effect attribute
-            // rainbowman can be displayed from two places: from attribute on a button or from python
-            // code below handles the first case i.e 'effect' attribute on button.
-            let effect = false;
-            if (actionData.effect) {
-                effect = pyUtils.py_eval(actionData.effect);
-            }
-
-            if (action && action.constructor === Object) {
-                // filter out context keys that are specific to the current action, because:
-                //  - wrong default_* and search_default_* values won't give the expected result
-                //  - wrong group_by values will fail and forbid rendering of the destination view
-                const ctx = new Context(
-                    _.object(_.reject(_.pairs(env.context), function (pair) {
-                        return pair[0].match('^(?:(?:default_|search_default_|show_).+|' +
-                                             '.+_view_ref|group_by|group_by_no_leaf|active_id|' +
-                                             'active_ids|orderedBy)$') !== null;
-                    }))
-                );
-                ctx.add(actionData.context || {});
-                ctx.add({active_model: env.model});
-                if (recordID) {
-                    ctx.add({
-                        active_id: recordID,
-                        active_ids: [recordID],
-                    });
-                }
-                ctx.add(action.context || {});
-                action.context = ctx;
-                // in case an effect is returned from python and there is already an effect
-                // attribute on the button, the priority is given to the button attribute
-                action.effect = effect || action.effect;
             } else {
-                // if action doesn't return anything, but there is an effect
-                // attribute on the button, display rainbowman
-                action = {
-                    effect: effect,
-                    type: 'ir.actions.act_window_close',
-                };
+                curView = views[0];
             }
-            const options = { on_close: ev.detail.on_closed };
-            action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
-            this.doAction(action, options);
-            // TODO need on_success, on_Fail?
-            //.then(ev.detail.on_success, ev.detail.on_fail);
-        });
-            // TODO need on_fail??
-            // .guardedCatch(ev.detail.on_fail);
-
-    },
-    /**
-     * @private
-     * @param {OdooEvent} ev
-     * @param {string} ev.detail.controllerID the id of the controller that
-     *   triggered the event
-     * @param {string} ev.detail.viewType the type of view to switch to
-     * @param {integer} [ev.detail.res_id] the id of the record to open (for
-     *   mono-record views)
-     * @param {mode} [ev.detail.mode] the mode to open, i.e. 'edit' or 'readonly'
-     *   (only relevant for form views)
-     */
-    _onSwitchView(ev) {
-        const detail = ev.detail;
-        const viewType = ev.detail.view_type;
-        const { action } = this._getCurrentAction();
-        // TODO: find a way to save/restore state
-        // const currentController = action.controller;
-        // var currentControllerState = currentController.widget.exportState();
-        // action.controllerState = _.extend({}, action.controllerState, currentControllerState);
-        const options = {
-            // controllerState: action.controllerState,
-            currentId: detail.res_id,
-        };
-        if (detail.mode) {
-            options.mode = detail.mode;
+            // use mobile-friendly view by default in mobile, if possible
+            if (this.env.device.isMobile) {
+                if (!curView.isMobileFriendly) {
+                    curView = this._findMobileView(views, curView.multiRecord) || curView;
+                }
+                if (lazyView && !lazyView.isMobileFriendly) {
+                    lazyView = this._findMobileView(views, lazyView.multiRecord) || lazyView;
+                }
+            }
+            // TODO: handle this
+            // let lazyViewDef;
+            // let lazyControllerID;
+            // if (lazyView) {
+            //     // if the main view is lazy-loaded, its (lazy-loaded) controller is inserted
+            //     // into the controller stack (so that breadcrumbs can be correctly computed),
+            //     // so we force clear_breadcrumbs to false so that it won't be removed when the
+            //     // current controller will be inserted afterwards
+            //     options.clear_breadcrumbs = false;
+            //     // this controller being lazy-loaded, this call is actually sync
+            //     lazyViewDef = self._createViewController(action, lazyView.type, {}, {lazy: true})
+            //         .then(function (lazyLoadedController) {
+            //             lazyControllerID = lazyLoadedController.jsID;
+            //             self.controllerStack.push(lazyLoadedController.jsID);
+            //         });
+            // }
+            //     return self.dp.add(Promise.resolve(lazyViewDef))
+            //         .then(function () {
+            const viewOptions = {
+                controllerState: options.controllerState,
+                currentId: options.resID,
+            };
+            const index = this._getControllerStackIndex(options);
+            this._createViewController(action, curView.type, viewOptions, { index });
+            action.controller.options = options;
+            this._pushController(action.controller);
+            // return this._executeAction(actionRequest);
+            // })
+            // .guardedCatch(function () {
+            //     if (lazyControllerID) {
+            //         var index = self.controllerStack.indexOf(lazyControllerID);
+            //         self.controllerStack = self.controllerStack.slice(0, index);
+            //     }
+            //     self._destroyWindowAction(action);
+            // });
         }
-        console.log('switch view', viewType);
-        this._switchController(action, viewType, options);
-    },
-    _onReloadingLegacy(ev) {
-        const detail = ev.detail;
-        const { action } = this._getCurrentAction();
-        Object.assign(action, detail.commonState);
-        action.controllerState = Object.assign({}, action.controllerState, detail.controllerState);
-    },
-});
+        /**
+         * Helper function to find the first mobile-friendly view, if any.
+         *
+         * @private
+         * @param {Array} views an array of views
+         * @param {boolean} multiRecord set to true iff we search for a multiRecord
+         *   view
+         * @returns {Object|undefined} a mobile-friendly view of the requested
+         *   multiRecord type, undefined if there is no such view
+         */
+        _findMobileView(views, multiRecord) {
+            return views.find(view => view.isMobileFriendly && view.multiRecord === multiRecord);
+        }
+        /**
+         * Generate the description of the views of a given action. For each view,
+         * it generates a dict with information like the fieldsView, the view type,
+         * the Component to use...
+         *
+         * @private
+         * @param {Object} action
+         * @param {Object} fieldsViews
+         * @returns {Object}
+         */
+        _generateActionViews(action, fieldsViews) {
+            const views = [];
+            action.views.forEach(view => {
+                const viewType = view[1];
+                const fieldsView = fieldsViews[viewType];
+                const parsedXML = new DOMParser().parseFromString(fieldsView.arch, "text/xml");
+                const key = parsedXML.documentElement.getAttribute('js_class');
+                const View = viewRegistry.get(key || viewType);
+                if (View) {
+                    views.push({
+                        accessKey: View.prototype.accessKey || View.prototype.accesskey,
+                        displayName: View.prototype.display_name,
+                        fieldsView: fieldsView,
+                        icon: View.prototype.icon,
+                        isMobileFriendly: View.prototype.mobile_friendly,
+                        multiRecord: View.prototype.multi_record,
+                        type: viewType,
+                        viewID: view[0],
+                        View: View,
+                    });
+                } else if (this.env.isDebug('assets')) {
+                    console.log("View type '" + viewType + "' is not present in the view registry.");
+                }
+            });
+            return views;
+        }
+        /**
+         * Loads the fields_views and fields for the given action.
+         *
+         * @private
+         * @param {Object} action
+         * @returns {Promise}
+         */
+        _loadViews(action) {
+            const inDialog = action.target === 'new';
+            const inline = action.target === 'inline';
+            const options = {
+                action_id: action.id,
+                toolbar: !inDialog && !inline,
+            };
+            const views = action.views.slice();
+            if (!inline && !(inDialog && action.views[0][1] === 'form')) {
+                options.load_filters = true;
+                const searchviewID = action.search_view_id && action.search_view_id[0];
+                views.push([searchviewID || false, 'search']);
+            }
+            const params = {
+                model: action.res_model,
+                context: action.context,
+                views_descr: views,
+            };
+            return this._resolveLast(this.env.dataManager.load_views(params, options));
+        }
+        /**
+         * Overrides to handle the case where the controller to restore is from an
+         * 'ir.actions.act_window' action. In this case we simply switch to this
+         * controller.
+         *
+         * For instance, when going back to the list controller from a form
+         * controller of the same action using the breadcrumbs, the form controller
+         * is kept, as it might be reused in the future.
+         *
+         * @override
+         * @private
+         */
+        _restoreController(controllerID) {
+            const controller = this.controllers[controllerID];
+            const action = this.actions[controller.actionID];
+            if (action.type === 'ir.actions.act_window') {
+                this._switchController(action, controller.viewType);
+                // return this.clearUncommittedChanges().then(function () {
+                    // AAB: this will be done directly in AbstractAction's restore
+                    // function
+                    // var def = Promise.resolve();
+                    // if (action.on_reverse_breadcrumb) {
+                    //     def = action.on_reverse_breadcrumb();
+                    // }
+                    // return Promise.resolve(def).then(function () {
+                    //     return self._switchController(action, controller.viewType);
+                    // });
+                // });
+            } else {
+                this._super(...arguments);
+            }
+        }
+        /**
+         * Handles the switch from a controller to another (either inside the same
+         * window action, or from a window action to another using the breadcrumbs).
+         *
+         * @private
+         * @param {Object} controller the controller to switch to
+         * @param {Object} [viewOptions]
+         */
+        _switchController(action, viewType, viewOptions) {
+            var viewDescr = action.views.find(view => view.type === viewType);
+
+            const currentControllerID = this.currentStack[this.currentStack.length - 1];
+            const currentController = this.controllers[currentControllerID];
+            let index;
+            // the requested controller is from the same action as the current
+            // one, so we either
+            //   1) go one step back from a mono record view to a multi record
+            //      one using the breadcrumbs
+            //   2) or we switched from a view to another  using the view
+            //      switcher
+            //   3) or we opened a record from a multi record view
+            if (viewDescr && viewDescr.multiRecord) {
+                // cases 1) and 2) (with multi record views): replace the first
+                // controller linked to the same action in the stack
+                index = _.findIndex(this.currentStack, controllerID => {
+                    return this.controllers[controllerID].actionID === action.jsID;
+                });
+            } else if (!viewDescr || !_.findWhere(action.views, {type: currentController.viewType}).multiRecord) {
+                // case 2) (with mono record views): replace the last
+                // controller by the new one if they are from the same action
+                // and if they both are mono record
+                index = this.currentStack.length - 1;
+            } else {
+                // case 3): insert the controller on the top of the controller
+                // stack
+                index = this.currentStack.length;
+            }
+            // }
+
+            this._createViewController(action, viewType, viewOptions, { index });
+            this._pushController(action.controller);
+
+            // var newController = function (controllerID) {
+            //     var options = {
+            //         controllerID: controllerID,
+            //         index: index,
+            //     };
+            //     return self
+            //         ._createViewController(action, viewType, viewOptions, options)
+            //         .then(function (controller) {
+            //             return self._startController(controller);
+            //         });
+            // };
+
+            // var controllerDef = action.controllers[viewType];
+            // if (controllerDef) {
+            //     controllerDef = controllerDef.then(function (controller) {
+            //         if (!controller.widget) {
+            //             // lazy loaded -> load it now (with same jsID)
+            //             return newController(controller.jsID);
+            //         } else {
+            //             return Promise.resolve(controller.widget.willRestore()).then(function () {
+            //                 viewOptions = _.extend({}, viewOptions, {
+            //                     breadcrumbs: self._getBreadcrumbs(self.controllerStack.slice(0, index)),
+            //                 });
+            //                 return controller.widget.reload(viewOptions).then(function () {
+            //                     return controller;
+            //                 });
+            //             });
+            //         }
+            //     }, function () {
+            //         // if the controllerDef is rejected, it probably means that the js
+            //         // code or the requests made to the server crashed.  In that case,
+            //         // if we reuse the same promise, then the switch to the view is
+            //         // definitely blocked.  We want to use a new controller, even though
+            //         // it is very likely that it will recrash again.  At least, it will
+            //         // give more feedback to the user, and it could happen that one
+            //         // record crashes, but not another.
+            //         return newController();
+            //     });
+            // } else {
+            //     controllerDef = newController();
+            // }
+
+            // return this.dp.add(controllerDef).then(function (controller) {
+            //     return self._pushController(controller);
+            // });
+        }
+
+        //--------------------------------------------------------------------------
+        // Handlers
+        //--------------------------------------------------------------------------
+
+        /**
+         * @private
+         * @param {Object} payload
+         * @param {string} payload.controllerID the id of the controller that
+         *   triggered the event
+         * @param {string} payload.viewType the type of view to switch to
+         * @param {integer} [payload.res_id] the id of the record to open (for
+         *   mono-record views)
+         * @param {mode} [payload.mode] the mode to open, i.e. 'edit' or 'readonly'
+         *   (only relevant for form views)
+         */
+        _onSwitchView(payload) {
+            const viewType = payload.view_type;
+            const { action } = this._getCurrentAction();
+            // TODO: find a way to save/restore state
+            // const currentController = action.controller;
+            // var currentControllerState = currentController.widget.exportState();
+            // action.controllerState = _.extend({}, action.controllerState, currentControllerState);
+            const options = {
+                // controllerState: action.controllerState,
+                currentId: payload.res_id,
+            };
+            if (payload.mode) {
+                options.mode = payload.mode;
+            }
+            console.log('switch view', viewType);
+            this._switchController(action, viewType, options);
+        }
+        _onReloadingLegacy(ev) {
+            const detail = ev.detail;
+            const { action } = this._getCurrentAction();
+            Object.assign(action, detail.commonState);
+            action.controllerState = Object.assign({}, action.controllerState, detail.controllerState);
+        }
+    }
+    WindowActionPlugin.type = 'ir.actions.act_window';
+    ActionManager.registerPlugin(WindowActionPlugin);
+
+    return WindowActionPlugin;
 
 });
 
