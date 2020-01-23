@@ -14,13 +14,32 @@ const xml = tags.xml;
 
 let nextID = 1;
 
+class ActionManagerPlugin {
+    constructor(actionManager, env) {
+        this.actionManager = actionManager;
+        this.env = env;
+    }
+    async executeAction() {
+        throw new Error(`ActionManagerPlugin for type ${this.type} doesn't implement executeAction.`);
+    }
+}
+ActionManagerPlugin.type = null;
+
 class ActionManager extends core.EventBus {
+    static registerPlugin(Plugin) {
+        if (!(Plugin.prototype instanceof ActionManagerPlugin)) {
+            throw new Error('Plugin must be sublass of ActionManagerPlugin');
+        };
+        // TODO control Plugin.type
+        ActionManager.Plugins[Plugin.type]= Plugin;
+    }
     constructor(env) {
         super();
         this.env = env;
         this.env.bus.on('do-action', this, payload => {
             this.doAction(payload.action, payload.options);
         });
+        this.plugins = {};
         //this.env.bus.on('switch-view', this, this.switchView);
 
         // handled by the ActionManager (either stacked in the current window,
@@ -85,6 +104,7 @@ class ActionManager extends core.EventBus {
         options = Object.assign(defaultOptions, options);
 
         // build or load an action descriptor for the given action
+        // TODO maybe registry can do this
         if (typeof action === 'string' && action_registry.contains(action)) {
             // action is a tag of a client action
             action = { type: 'ir.actions.client', tag: action };
@@ -366,6 +386,18 @@ class ActionManager extends core.EventBus {
             console.error(`No type for action ${action}`);
             return Promise.reject();
         }
+        let plugin = this.plugins[action.type];
+        if (!plugin) {
+            const Plugin = this.Plugins[action.type];
+            if (!Plugin) {
+                console.error(`The ActionManager can't handle actions of type ${action.type}`, action);
+                return Promise.reject();
+            }
+            plugin = new Plugin(this, this.env);
+            this.plugins[action.type] = plugin;
+        }
+        return plugin.executeAction();
+/*
         switch (action.type) {
             case 'ir.actions.act_url':
                 return this._executeURLAction(action, options);
@@ -378,7 +410,7 @@ class ActionManager extends core.EventBus {
             default:
                 console.error(`The ActionManager can't handle actions of type ${action.type}`, action);
                 return Promise.reject();
-        }
+        }*/
     }
     _nextID(type) {
         return `${type}${nextID++}`;
@@ -1430,6 +1462,10 @@ return ActionManager;
 //     },
 // });
 
-// return ActionManager;
+ActionManager.Plugins = {};
+return {
+    ActionManager,
+    ActionManagerPlugin,
+};
 
 });

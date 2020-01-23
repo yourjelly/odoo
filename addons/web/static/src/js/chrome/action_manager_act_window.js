@@ -6,13 +6,14 @@ odoo.define('web.ActWindowActionManager', function (require) {
  * 'ir.actions.act_window' to the ActionManager.
  */
 
-const ActionManager = require('web.ActionManager');
+const { ActionManagerPlugin } = require('web.ActionManager');
 const Context = require('web.Context');
 var pyUtils = require('web.py_utils');
 const { patch } = require('web.utils');
 const viewRegistry = require('web.view_registry');
 
-patch(ActionManager, 'ActionManagerActWindow', {
+//patch(ActionManager, 'ActionManagerActWindow', {
+class ActionManagerActWindowPlugin extends ActionManagerPlugin {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
@@ -73,7 +74,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             viewOptions: viewOptions,
         };
         action.controllers[viewType] = action.controller;
-    },
+    }
     /**
      * Executes actions of type 'ir.actions.act_window'.
      *
@@ -147,7 +148,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
         //     }
         //     self._destroyWindowAction(action);
         // });
-    },
+    }
     /**
      * Helper function to find the first mobile-friendly view, if any.
      *
@@ -160,7 +161,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
      */
     _findMobileView(views, multiRecord) {
         return views.find(view => view.isMobileFriendly && view.multiRecord === multiRecord);
-    },
+    }
     /**
      * Generate the description of the views of a given action. For each view,
      * it generates a dict with information like the fieldsView, the view type,
@@ -196,7 +197,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             }
         });
         return views;
-    },
+    }
     _getCurrentAction() {
         const currentControllerID = this.currentStack[this.currentStack.length - 1];
         const currentController = this.controllers[currentControllerID];
@@ -204,7 +205,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             action: this.actions[currentController.actionID],
             controller: currentController,
         }
-    },
+    }
     /**
      * Overrides to handle the 'ir.actions.act_window' actions.
      *
@@ -216,7 +217,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             return this._executeWindowAction(action, options);
         }
         return this._super(...arguments);
-    },
+    }
     /**
      * Loads the fields_views and fields for the given action.
      *
@@ -243,7 +244,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
             views_descr: views,
         };
         return this._resolveLast(this.env.dataManager.load_views(params, options));
-    },
+    }
     /**
      * Overrides to handle the case where the controller to restore is from an
      * 'ir.actions.act_window' action. In this case we simply switch to this
@@ -275,7 +276,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
         } else {
             this._super(...arguments);
         }
-    },
+    }
     /**
      * Handles the switch from a controller to another (either inside the same
      * window action, or from a window action to another using the breadcrumbs).
@@ -363,7 +364,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
         // return this.dp.add(controllerDef).then(function (controller) {
         //     return self._pushController(controller);
         // });
-    },
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -387,7 +388,7 @@ patch(ActionManager, 'ActionManagerActWindow', {
      * @param {function} [ev.detail.on_fail]
      * @param {function} [ev.detail.on_success]
      */
-    _onExecuteAction: function (ev) {
+    _onExecuteAction(ev) {
         // cancel potential current rendering
         this._pushController({jsID: this._nextID('controller'), loading: true});
 

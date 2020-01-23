@@ -17,6 +17,9 @@ class Menu extends Component {
         const currentAppID = this.menus[this.props.menuID].appID;
         return this.menus[currentAppID];
     }
+    shouldUpdate(nextProps) {
+        return nextProps.menuID && nextProps.menuID !== this.props.menuID;
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
