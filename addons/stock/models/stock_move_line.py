@@ -214,6 +214,8 @@ class StockMoveLine(models.Model):
         if 'product_id' in vals and any(vals.get('state', ml.state) != 'draft' and vals['product_id'] != ml.product_id.id for ml in self):
             raise UserError(_("Changing the product is only allowed in 'Draft' state."))
 
+        move_to_recompute_state = self.env['stock.move']
+
         Quant = self.env['stock.quant']
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         # We forbid to change the reserved quantity in the interace, but it is needed in the
@@ -272,6 +274,7 @@ class StockMoveLine(models.Model):
                                 pass
                     if new_product_qty != ml.product_qty:
                         new_product_uom_qty = ml.product_id.uom_id._compute_quantity(new_product_qty, ml.product_uom_id, rounding_method='HALF-UP')
+                        move_to_recompute_state |= ml.move_id
                         ml.with_context(bypass_reservation_update=True).product_uom_qty = new_product_uom_qty
 
         # When editing a done move line, the reserved availability of a potential chained move is impacted. Take care of running again `_action_assign` on the concerned moves.
@@ -337,6 +340,10 @@ class StockMoveLine(models.Model):
                 move.product_uom_qty = move.quantity_done
         next_moves._do_unreserve()
         next_moves._action_assign()
+
+        if move_to_recompute_state:
+            self.recompute()
+            move_to_recompute_state._recompute_state()
         return res
 
     def unlink(self):

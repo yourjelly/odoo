@@ -2429,6 +2429,7 @@ class StockMove(TransactionCase):
         move1.move_line_ids.location_id = shelf2_location.id
 
         self.assertEqual(move1.reserved_availability, 0.0)
+        self.assertEqual(move1.state, 'confirmed')
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product1, self.stock_location), 1.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product1, shelf1_location), 1.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product1, shelf2_location), 0.0)
