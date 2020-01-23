@@ -18,9 +18,13 @@ const Widget = require('web.Widget');
 
 const { createWebClient, nextTick } = testUtils;
 
-const doAction = action => {
+const doAction = (action, options) => {
     const env = owl.Component.env;
-    env.bus.trigger('do-action', action);
+    let payload = {action, options};
+    if (typeof action === 'number') {
+        payload = {action: action}
+    }
+    env.bus.trigger('do-action', payload);
     return Promise.resolve();
 };
 
@@ -1866,7 +1870,7 @@ QUnit.module('ActionManager', {
         doAction('HelloWorldTest');
         await nextTick();
 
-        assert.strictEqual(webClient.el.innerHTML,
+        assert.strictEqual(webClient.el.querySelector('.o_action_manager').innerHTML,
             '<div class="o_action o_client_action_test">Hello World</div>');
         assert.verifySteps([]);
 

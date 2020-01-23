@@ -120,6 +120,9 @@ class WebClient extends Component {
             menuID: ev.detail.menuID,
         });
     }
+    _onSwitchView(ev) {
+        
+    }
 
 }
 WebClient.components = { Action, Menu };
