@@ -80,6 +80,25 @@ class AccountReconcileModelLine(models.Model):
                     raise UserError(_('The regex is not valid'))
 
 
+class AccountReconcileModelPartnerMatchLine(models.Model):
+    _name = 'account.reconcile.model.partner.match.line'
+    _description = 'Partner match line'
+    _order = 'sequence, id'
+
+    # name = fields.Char(string='Name', required=True)
+    sequence = fields.Integer(required=True, default=1)
+    model_id = fields.Many2one('account.reconcile.model', readonly=True)
+
+    partner_id = fields.Many2one('res.partner', string="Partner", required=True)
+
+    match = fields.Selection(selection=[
+        ('contains', 'Contains'),
+        ('match_regex', 'Match Regex'),
+    ], string='Label or Note', default='contains', required=True, help='''The reconciliation model will only be applied when the label or note:
+        * Contains: The proposition note must contains this string (case insensitive).
+        * Match Regex: Define your own regular expression.''')
+    match_param = fields.Char(string='Parameter')
+
 class AccountReconcileModel(models.Model):
     _name = 'account.reconcile.model'
     _description = 'Preset to create journal entries during a invoices and payments matching'
@@ -90,10 +109,14 @@ class AccountReconcileModel(models.Model):
     sequence = fields.Integer(required=True, default=10)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
+    # partner matching specifics
+    match_lines = fields.One2many('account.reconcile.model.partner.match.line', 'model_id')
+
     rule_type = fields.Selection(selection=[
         ('writeoff_button', 'Manually create a write-off on clicked button.'),
         ('writeoff_suggestion', 'Suggest counterpart values.'),
-        ('invoice_matching', 'Match existing invoices/bills.')
+        ('invoice_matching', 'Match existing invoices/bills.'),
+        ('partner_matching', 'Match partners.'),
     ], string='Type', default='writeoff_button', required=True)
     auto_reconcile = fields.Boolean(string='Auto-validate',
         help='Validate the statement line automatically (reconciliation based on your rule).')
@@ -432,6 +455,40 @@ class AccountReconcileModel(models.Model):
         with_tables += ', partners_table AS (' + partners_table + ')'
         return with_tables
 
+    def _get_partner_matching_query(self, st_lines_ids):
+        ''' Get the query matching bank statement lines to patners
+        :param st_lines_ids:        Account.bank.statement.lines ids tuple.
+        '''
+        if any(m.rule_type != 'partner_matching' for m in self):
+            raise UserError(_('Programmation Error: Can\'t call _get_partner_matching_query() for different rules than \'partner_matching\''))
+
+        whens = []
+        params = []
+        for rule in self:
+            for match_line in rule.match_lines.sorted(key=lambda m: (m.sequence, m.id)):
+                if match_line.match == 'contains':
+                    whens += ['WHEN name ILIKE %s OR note ILIKE %s THEN %s']
+                    params += ['%%%s%%' % match_line.match_param, '%%%s%%' % match_line.match_param, match_line.partner_id.id]
+                else:
+                    whens += ['WHEN name ~* %s OR note ILIKE ~* %s THEN %s']
+                    params += [match_line.match_param, match_line.match_param, match_line.partner_id.id]
+        query = '''
+        SELECT id as st_line_id, matched_partner_id FROM (
+                SELECT
+                id,
+                CASE ''' + '\n                    '.join(whens) + '''
+                    ELSE NULL
+            END AS matched_partner_id
+            FROM account_bank_statement_line
+            WHERE partner_id IS NULL
+            AND id in %s
+            ) partner_match
+        WHERE matched_partner_id IS NOT NULL'''
+
+        params += [st_lines_ids]
+
+        return query, params
+
     def _get_invoice_matching_query(self, st_lines, excluded_ids=None, partner_map=None):
         ''' Get the query applying all rules trying to match existing entries with the given statement lines.
         :param st_lines:        Account.bank.statement.lines recordset.
@@ -686,6 +743,24 @@ class AccountReconcileModel(models.Model):
         ordered_models = available_models.sorted(key=lambda m: (m.sequence, m.id))
 
         grouped_candidates = {}
+
+        # Type == 'partner_matching'.
+        # Map st_lines to partners.
+        partner_models = ordered_models.filtered(lambda m: m.rule_type == 'partner_matching')
+
+        # do not check st_lines that already have a match in partner_map
+        not_none_partner_map_keys = tuple(filter(lambda map: map[1] is not None, partner_map.items()))
+        filtered_st_lines = st_lines.filtered(lambda line: line.id not in not_none_partner_map_keys)
+        st_lines_ids = tuple(filtered_st_lines.ids)
+
+        if partner_models and len(st_lines_ids):
+            query, params = partner_models._get_partner_matching_query(st_lines_ids)
+            self._cr.execute(query, params)
+            query_res = self._cr.dictfetchall()
+            if len(query_res):
+                partner_map = partner_map or {}
+                for match in query_res:
+                    partner_map[match['st_line_id']] = match['matched_partner_id']
 
         # Type == 'invoice_matching'.
         # Map each (st_line.id, model_id) with matching amls.
