@@ -490,7 +490,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, WidgetAdapterMixin, 
     _update: function (state, params) {
         // AAB: update the control panel -> this will be moved elsewhere at some point
         var cpContent = _.extend({}, this.controlPanelElements);
-        this.controlPanel.update();
         this.updateControlPanel({
             breadcrumbs: params && params.breadcrumbs,
             cp_content: cpContent,

@@ -19,20 +19,154 @@ class ActionManagerPlugin {
         this.actionManager = actionManager;
         this.env = env;
     }
-    async executeAction() {
+    async executeAction(/*action, options*/) {
         throw new Error(`ActionManagerPlugin for type ${this.type} doesn't implement executeAction.`);
+    }
+    rpc() {
+        return this.env.services.rpc(...arguments);
+    }
+    _resolveLast() {
+        return this.actionManager._resolveLast(...arguments);
+    }
+
+
+    // FIXME: create a 'createController' or something function and get rid of these
+    _getBreadcrumbs() {
+        return this.actionManager._getBreadcrumbs(...arguments);
+    }
+    _getControllerStackIndex() {
+        return this.actionManager._getControllerStackIndex(...arguments);
+    }
+    _pushController() {
+        return this.actionManager._pushController(...arguments);
+    }
+    _nextID() {
+        return this.actionManager._nextID(...arguments);
+    }
+    get currentStack() {
+        return this.actionManager.currentStack;
+    }
+    get controllers() {
+        return this.actionManager.controllers;
+    }
+    get actions() {
+        return this.actionManager.actions;
+    }
+    _getCurrentAction() {
+        return this.actionManager.getCurrentAction();
     }
 }
 ActionManagerPlugin.type = null;
+
+class UrlActionPlugin extends ActionManagerPlugin {
+    /**
+     * Executes actions of type 'ir.actions.act_url', i.e. redirects to the
+     * given url.
+     *
+     * @param {Object} action the description of the action to execute
+     * @param {string} action.url
+     * @param {string} [action.target] set to 'self' to redirect in the current page,
+     *   redirects to a new page by default
+     * @param {Object} options @see doAction for details
+     */
+    executeAction(action, options) {
+        if (action.target === 'self') {
+            redirect(action.url);
+        } else {
+            const w = window.open(action.url, '_blank');
+            if (!w || w.closed || typeof w.closed === 'undefined') {
+                // TODO: implement notification service
+                // const message = _t('A popup window has been blocked. You ' +
+                //              'may need to change your browser settings to allow ' +
+                //              'popup windows for this page.');
+                // this.do_warn(_t('Warning'), message, true);
+            }
+            options.on_close();
+        }
+    }
+}
+UrlActionPlugin.type = 'ir.actions.act_url';
+
+class ServerActionPlugin extends ActionManagerPlugin {
+    /**
+     * Executes actions of type 'ir.actions.server'.
+     *
+     * @param {Object} action the description of the action to execute
+     * @param {integer} action.id the db ID of the action to execute
+     * @param {Object} [action.context]
+     * @param {Object} options @see doAction for details
+     * @returns {Promise} resolved when the action has been executed
+     */
+    async executeAction(action, options) {
+        const runActionProm = this.rpc({
+            route: '/web/action/run',
+            params: {
+                action_id: action.id,
+                context: action.context || {},
+            },
+        });
+        action = await this._resolveLast(runActionProm);
+        action = action || { type: 'ir.actions.act_window_close' };
+        return this.actionManager.doAction(action, options);
+    }
+}
+ServerActionPlugin.type = 'ir.actions.server';
+
+class ClientActionPlugin extends ActionManagerPlugin {
+    /**
+     * Executes actions of type 'ir.actions.client'.
+     *
+     * @param {Object} action the description of the action to execute
+     * @param {string} action.tag the key of the action in the action_registry
+     * @param {Object} options @see doAction for details
+     */
+    async executeAction(action, options) {
+        const ClientAction = action_registry.get(action.tag);
+        if (!ClientAction) {
+            console.error(`Could not find client action ${action.tag}`, action);
+            return Promise.reject();
+        } else {
+            const proto = ClientAction.prototype;
+            if (!(proto instanceof Component) && !(proto instanceof Widget)) {
+                // the client action might be a function, which is executed and
+                // whose returned value might be another action to execute
+                const nextAction = ClientAction(this.actionManager, action);
+                if (nextAction) {
+                    action = nextAction;
+                    return this._resolveLast(this.doAction(action));
+                }
+            }
+        }
+
+        const controllerID = this._nextID('controller');
+        const index = this._getControllerStackIndex(options);
+        options.breadcrumbs = this._getBreadcrumbs(this.currentStack.slice(0, index));
+        options.controllerID = controllerID;
+        action.controller = {
+            actionID: action.jsID,
+            Component: ClientAction,
+            index: index,
+            jsID: controllerID,
+            options: options,
+            // title: widget.getTitle(),
+        };
+        this._pushController(action.controller);
+    }
+}
+ClientActionPlugin.type = 'ir.actions.client';
+
+
+
 
 class ActionManager extends core.EventBus {
     static registerPlugin(Plugin) {
         if (!(Plugin.prototype instanceof ActionManagerPlugin)) {
             throw new Error('Plugin must be sublass of ActionManagerPlugin');
-        };
+        }
         // TODO control Plugin.type
-        ActionManager.Plugins[Plugin.type]= Plugin;
+        ActionManager.Plugins[Plugin.type] = Plugin;
     }
+
     constructor(env) {
         super();
         this.env = env;
@@ -40,7 +174,6 @@ class ActionManager extends core.EventBus {
             this.doAction(payload.action, payload.options);
         });
         this.plugins = {};
-        //this.env.bus.on('switch-view', this, this.switchView);
 
         // handled by the ActionManager (either stacked in the current window,
         // or opened in dialogs)
@@ -126,39 +259,166 @@ class ActionManager extends core.EventBus {
         this.actions[action.jsID] = action;
         return this._handleAction(action, options);
     }
+    /**
+     * Handler for event 'execute_action', which is typically called when a
+     * button is clicked. The button may be of type 'object' (call a given
+     * method of a given model) or 'action' (execute a given action).
+     * Alternatively, the button may have the attribute 'special', and in this
+     * case an 'ir.actions.act_window_close' is executed.
+     *
+     * @param {Object} params
+     * @param {Object} params.action_data typically, the html attributes of the
+     *   button extended with additional information like the context
+     * @param {Object} [params.action_data.special=false]
+     * @param {Object} [params.action_data.type] 'object' or 'action', if set
+     * @param {Object} params.env
+     * @param {function} [params.on_closed]
+     * @param {function} [params.on_fail]
+     * @param {function} [params.on_success]
+     */
+    async executeContextualActionTODONAME(params) {
+        // cancel potential current rendering
+        this.trigger('cancel');
+        this.currentRequestID++;
+
+        const actionData = params.action_data;
+        const env = params.env;
+        const context = new Context(env.context, actionData.context || {});
+        const recordID = env.currentID || null; // pyUtils handles null value, not undefined
+        let prom;
+
+        // determine the action to execute according to the actionData
+        if (actionData.special) {
+            prom = Promise.resolve({
+                type: 'ir.actions.act_window_close',
+                infos: { special: true },
+            });
+        } else if (actionData.type === 'object') {
+            // call a Python Object method, which may return an action to execute
+            let args = recordID ? [[recordID]] : [env.resIDs];
+            if (actionData.args) {
+                try {
+                    // warning: quotes and double quotes problem due to json and xml clash
+                    // maybe we should force escaping in xml or do a better parse of the args array
+                    const additionalArgs = JSON.parse(actionData.args.replace(/'/g, '"'));
+                    args = args.concat(additionalArgs);
+                } catch (e) {
+                    console.error("Could not JSON.parse arguments", actionData.args);
+                }
+            }
+            prom = this.rpc({
+                route: '/web/dataset/call_button',
+                params: {
+                    args: args,
+                    kwargs: {context: context.eval()},
+                    method: actionData.name,
+                    model: env.model,
+                },
+            });
+        } else if (actionData.type === 'action') {
+            // FIXME: couldn't we directly call doAction?
+            // execute a given action, so load it first
+            const additionalContext = Object.assign(pyUtils.eval('context', context), {
+                active_model: env.model,
+                active_ids: env.resIDs,
+                active_id: recordID,
+            });
+            prom = this.env.dataManager.load_action(actionData.name, additionalContext);
+        } else {
+            prom = Promise.reject();
+        }
+
+        return this._resolveLast(prom).then(action => {
+            // show effect if button have effect attribute
+            // rainbowman can be displayed from two places: from attribute on a button or from python
+            // code below handles the first case i.e 'effect' attribute on button.
+            let effect = false;
+            if (actionData.effect) {
+                effect = pyUtils.py_eval(actionData.effect);
+            }
+
+            if (action && action.constructor === Object) {
+                // filter out context keys that are specific to the current action, because:
+                //  - wrong default_* and search_default_* values won't give the expected result
+                //  - wrong group_by values will fail and forbid rendering of the destination view
+                const ctx = new Context(
+                    _.object(_.reject(_.pairs(env.context), function (pair) {
+                        return pair[0].match('^(?:(?:default_|search_default_|show_).+|' +
+                                             '.+_view_ref|group_by|group_by_no_leaf|active_id|' +
+                                             'active_ids|orderedBy)$') !== null;
+                    }))
+                );
+                ctx.add(actionData.context || {});
+                ctx.add({active_model: env.model});
+                if (recordID) {
+                    ctx.add({
+                        active_id: recordID,
+                        active_ids: [recordID],
+                    });
+                }
+                ctx.add(action.context || {});
+                action.context = ctx;
+                // in case an effect is returned from python and there is already an effect
+                // attribute on the button, the priority is given to the button attribute
+                action.effect = effect || action.effect;
+            } else {
+                // if action doesn't return anything, but there is an effect
+                // attribute on the button, display rainbowman
+                action = {
+                    effect: effect,
+                    type: 'ir.actions.act_window_close',
+                };
+            }
+            const options = { on_close: params.on_closed };
+            action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
+            return this.doAction(action, options);
+            // TODO need on_success, on_Fail?
+            //.then(params.on_success, params.on_fail);
+        });
+            // TODO need on_fail??
+            // .guardedCatch(params.on_fail);
+    }
+    /**
+     * @returns {Object}
+     */
+    getCurrentAction() {
+        const currentControllerID = this.currentStack[this.currentStack.length - 1];
+        const currentController = this.controllers[currentControllerID];
+        return {
+            action: this.actions[currentController.actionID],
+            controller: currentController,
+        };
+    }
+    /**
+     * Restores a controller from the controllerStack and removes all
+     * controllers stacked over the given controller (called when coming back
+     * using the breadcrumbs).
+     *
+     * @param {string} controllerID
+     */
+    restoreController(controllerID) {
+        // TODO
+        //  - move logic from act window (clear uncommitted changes + on _reverse_bc)
+        //  - add hook onRestoreController (async)
+        this._pushController(this.controllers[controllerID]);
+
+        // AAB: AbstractAction should define a proper hook to execute code when
+        // it is restored (other than do_show), and it should return a promise
+        // var def;
+        // if (action.on_reverse_breadcrumb) {
+        //     def = action.on_reverse_breadcrumb();
+        // }
+        // return Promise.resolve(def).then(function () {
+        //     return Promise.resolve(controller.widget.do_show()).then(function () {
+        //         var index = _.indexOf(self.controllerStack, controllerID);
+        //         self._pushController(controller, index);
+        //     });
+        // });
+    }
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-
-    /**
-     * Wraps a promise to resolve/reject it when it is resolved/rejected: iff
-     * the pending controller hasn't changed between the moment when the request
-     * was initiated and the moment it is completed. If the controller changed,
-     * the returned promise stays pending forever.
-     *
-     * TODO: find a better name, and validate this solution (!= DropPrevious)
-     * TODO: memory leak?
-     *
-     * @private
-     * @param {Promise} promise
-     * @returns {Promise}
-     */
-    _resolveLast(promise) {
-        const currentRequestID = this.currentRequestID;
-        return new Promise((resolve, reject) => {
-            promise.then(result => {
-                if (currentRequestID === this.currentRequestID) {
-                    resolve(result);
-                }
-            });
-            promise.guardedCatch(reason => {
-                if (currentRequestID === this.currentRequestID) {
-                    reject(reason);
-                }
-            });
-        });
-    }
 
     /**
      * Cleans this.actions and this.controllers according to the current stack.
@@ -180,147 +440,6 @@ class ActionManager extends core.EventBus {
             return !usedActionIDs.includes(actionID);
         });
         unusedActionIDs.forEach(actionID => delete this.actions[actionID]);
-    }
-    // /**
-    //  * Executes actions for which a controller has to be appended to the DOM,
-    //  * either in the main content (target="current", by default), or in a dialog
-    //  * (target="new").
-    //  *
-    //  * @private
-    //  * @param {Object} action
-    //  * @param {widget} action.controller a Widget instance to append to the DOM
-    //  * @param {string} [action.target="current"] set to "new" to render the
-    //  *   controller in a dialog
-    //  * @param {Object} options @see doAction for details
-    //  */
-    // _executeAction(actionRequest) {
-    //     // if (action.target === 'new') {
-    //     //     return this._executeActionInDialog(action, options);
-    //     // }
-
-    //     // return this.clearUncommittedChanges()
-    //     if (this.actionRequest.id === actionRequest.id) {
-    //         console.log('execute action');
-    //         this.state.renderID++; // force a re-rendering
-    //     } else {
-    //         console.log('do nothing, something new came up');
-    //     }
-    //     // this.actionRequest.action = action;
-    //     // this.currentAction = action;
-    //     // this.state.currentActionID = action.jsID;
-
-    //     //     .then(function () {
-    //     //         if (self.currentDialogController) {
-    //     //             self._closeDialog({ silent: true });
-    //     //         }
-
-    //     //         // store the optional 'on_reverse_breadcrumb' handler
-    //     //         // AAB: store it on the AbstractAction instance, and call it
-    //     //         // automatically when the action is restored
-    //     //         if (options.on_reverse_breadcrumb) {
-    //     //             var currentAction = self.getCurrentAction();
-    //     //             if (currentAction) {
-    //     //                 currentAction.on_reverse_breadcrumb = options.on_reverse_breadcrumb;
-    //     //             }
-    //     //         }
-    // }
-    /**
-     * Executes actions of type 'ir.actions.client'.
-     *
-     * @private
-     * @param {Object} action the description of the action to execute
-     * @param {string} action.tag the key of the action in the action_registry
-     * @param {Object} options @see doAction for details
-     */
-    _executeClientAction(action, options) {
-        const ClientAction = action_registry.get(action.tag);
-        if (!ClientAction) {
-            console.error(`Could not find client action ${action.tag}`, action);
-            return Promise.reject();
-        } else {
-            const proto = ClientAction.prototype;
-            if (!(proto instanceof Component) && !(proto instanceof Widget)) {
-                // the client action might be a function, which is executed and
-                // whose returned value might be another action to execute
-                const nextAction = ClientAction(this, action);
-                if (nextAction) {
-                    action = nextAction;
-                    return this._resolveLast(this.doAction(action));
-                }
-            }
-        }
-
-        const controllerID = this._nextID('controller');
-        const index = this._getControllerStackIndex(options);
-        options.breadcrumbs = this._getBreadcrumbs(this.currentStack.slice(0, index));
-        options.controllerID = controllerID;
-        action.controller = {
-            actionID: action.jsID,
-            Component: ClientAction,
-            index: index,
-            jsID: controllerID,
-            options: options,
-            // title: widget.getTitle(),
-        };
-        this._pushController(action.controller);
-        // this._executeAction(action);
-        // prom.then(function () {
-        //     // AAB: this should be done automatically in AbstractAction, so that
-        //     // it can be overridden by actions that have specific stuff to push
-        //     // (e.g. Discuss, Views)
-        //     self._pushState(controllerID, {});
-        // });
-        // return prom;
-    }
-    /**
-     * Executes actions of type 'ir.actions.act_url', i.e. redirects to the
-     * given url.
-     *
-     * @private
-     * @param {Object} action the description of the action to execute
-     * @param {string} action.url
-     * @param {string} [action.target] set to 'self' to redirect in the current page,
-     *   redirects to a new page by default
-     * @param {Object} options @see doAction for details
-     * @returns {Promise} resolved when the redirection is done (immediately
-     *   when redirecting to a new page)
-     */
-    _executeURLAction(action, options) {
-        if (action.target === 'self') {
-            redirect(action.url);
-        } else {
-            const w = window.open(action.url, '_blank');
-            if (!w || w.closed || typeof w.closed === 'undefined') {
-                // TODO: implement notification service
-                // const message = _t('A popup window has been blocked. You ' +
-                //              'may need to change your browser settings to allow ' +
-                //              'popup windows for this page.');
-                // this.do_warn(_t('Warning'), message, true);
-            }
-            options.on_close();
-        }
-    }
-    /**
-     * Executes actions of type 'ir.actions.server'.
-     *
-     * @private
-     * @param {Object} action the description of the action to execute
-     * @param {integer} action.id the db ID of the action to execute
-     * @param {Object} [action.context]
-     * @param {Object} options @see doAction for details
-     * @returns {Promise} resolved when the action has been executed
-     */
-    async _executeServerAction(action, options) {
-        const runActionProm = this.rpc({
-            route: '/web/action/run',
-            params: {
-                action_id: action.id,
-                context: action.context || {},
-            },
-        });
-        action = await this._resolveLast(runActionProm);
-        action = action || { type: 'ir.actions.act_window_close' };
-        return this.doAction(action, options);
     }
     /**
      * Returns a description of the controllers in the given controller stack.
@@ -388,7 +507,7 @@ class ActionManager extends core.EventBus {
         }
         let plugin = this.plugins[action.type];
         if (!plugin) {
-            const Plugin = this.Plugins[action.type];
+            const Plugin = ActionManager.Plugins[action.type];
             if (!Plugin) {
                 console.error(`The ActionManager can't handle actions of type ${action.type}`, action);
                 return Promise.reject();
@@ -396,39 +515,21 @@ class ActionManager extends core.EventBus {
             plugin = new Plugin(this, this.env);
             this.plugins[action.type] = plugin;
         }
-        return plugin.executeAction();
-/*
-        switch (action.type) {
-            case 'ir.actions.act_url':
-                return this._executeURLAction(action, options);
-            // case 'ir.actions.act_window_close':
-            //     return this._executeCloseAction(action);
-            case 'ir.actions.client':
-                return this._executeClientAction(action, options);
-            case 'ir.actions.server':
-                return this._executeServerAction(action, options);
-            default:
-                console.error(`The ActionManager can't handle actions of type ${action.type}`, action);
-                return Promise.reject();
-        }*/
+        return plugin.executeAction(action, options);
+        //     // case 'ir.actions.act_window_close':
+        //     //     return this._executeCloseAction(action);
     }
     _nextID(type) {
         return `${type}${nextID++}`;
     }
     /**
-     * Called when an action has been correctly executed. Adds its reference to
-     * the internal structures of the ActionManager: actions, controllers and
-     * controllerStack. Also removes the potential actions/controllers that are
-     * replaced by the current action.
+     * Preprocesses the action before it is handled by the ActionManager
+     * (assigns a JS id, evaluates its context and domains...).
      *
--    /**
--     * Preprocesses the action before it is handled by the ActionManager
--     * (assigns a JS id, evaluates its context and domains...).
--     *
--     * @param {Object} action
--     * @param {Object} options
--     * @returns {Object} shallow copy of action with some new/updated values
--     */
+     * @param {Object} action
+     * @param {Object} options
+     * @returns {Object} shallow copy of action with some new/updated values
+     */
     _preprocessAction(action, options) {
         action = Object.assign({}, action);
 
@@ -456,7 +557,7 @@ class ActionManager extends core.EventBus {
     _pushController(controller) {
         this.controllers[controller.jsID] = controller;
         const action = this.actions[controller.actionID];
-        const onSuccess = (component) => {
+        const onSuccess = component => {
             controller.component = component;
             this.currentStack.splice(controller.index);
             this.currentStack.push(controller.jsID);
@@ -472,63 +573,46 @@ class ActionManager extends core.EventBus {
         this.trigger('update', {
             action,
             controller,
-            menuID: controller.options.menuID,
+            menuID: controller.options && controller.options.menuID,
             onSuccess,
         });
     }
     /**
-     * Restores a controller from the controllerStack and removes all
-     * controllers stacked over the given controller (called when coming back
-     * using the breadcrumbs).
+     * Wraps a promise to resolve/reject it when it is resolved/rejected: iff
+     * the pending controller hasn't changed between the moment when the request
+     * was initiated and the moment it is completed. If the controller changed,
+     * the returned promise stays pending forever.
+     *
+     * TODO: find a better name, and validate this solution (!= DropPrevious)
+     * TODO: memory leak?
      *
      * @private
-     * @param {string} controllerID
+     * @param {Promise} promise
+     * @returns {Promise}
      */
-    _restoreController(controllerID) {
-        this._pushController(this.controllers[controllerID]);
-
-        // AAB: AbstractAction should define a proper hook to execute code when
-        // it is restored (other than do_show), and it should return a promise
-        // var def;
-        // if (action.on_reverse_breadcrumb) {
-        //     def = action.on_reverse_breadcrumb();
-        // }
-        // return Promise.resolve(def).then(function () {
-        //     return Promise.resolve(controller.widget.do_show()).then(function () {
-        //         var index = _.indexOf(self.controllerStack, controllerID);
-        //         self._pushController(controller, index);
-        //     });
-        // });
-    }
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
-    /**
-     * TODO: remove this... Already handled by webclient
-     *
-     * @private
-     * @param {OdooEvent} ev
-     * @param {string|integer|Object} ev.payload.action
-     * @param {Object} [ev.payload.options]
-     * @param {function} [ev.payload.on_success]
-     * @param {function} [ev.payload.on_fail]
-     */
-    _onDoAction(ev) {
-        this.doAction(ev.detail.action, ev.detail.options)
-            .then(ev.detail.on_success || (() => {}))
-            .guardedCatch(ev.detail.on_fail || (() => {}));
-    }
-    /**
-     * @private
-     * @param {OdooEvent} ev
-     * @param {integer} ev.detail.controllerID
-     */
-    _onBreadcrumbClicked(ev) {
-        this._restoreController(ev.detail.controllerID);
+    _resolveLast(promise) {
+        const currentRequestID = this.currentRequestID;
+        return new Promise((resolve, reject) => {
+            promise.then(result => {
+                if (currentRequestID === this.currentRequestID) {
+                    resolve(result);
+                }
+            });
+            promise.guardedCatch(reason => {
+                if (currentRequestID === this.currentRequestID) {
+                    reject(reason);
+                }
+            });
+        });
     }
 }
+ActionManager.Plugins = {};
+ActionManager.AbstractPlugin = ActionManagerPlugin;
+
+ActionManager.registerPlugin(ServerActionPlugin);
+ActionManager.registerPlugin(ClientActionPlugin);
+ActionManager.registerPlugin(UrlActionPlugin);
+
 
 return ActionManager;
 
@@ -1462,10 +1546,6 @@ return ActionManager;
 //     },
 // });
 
-ActionManager.Plugins = {};
-return {
-    ActionManager,
-    ActionManagerPlugin,
-};
+// return ActionManager;
 
 });

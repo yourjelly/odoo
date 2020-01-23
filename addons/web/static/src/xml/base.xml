@@ -5,10 +5,10 @@
 
 <t t-name="web.WebClient" owl="1">
     <body class="o_web_client">
+        <t t-if="currentRenderingInfo"> <!-- FIXME: remove this -->
         <Menu t-ref="menu" menus="menus" menuID="currentRenderingInfo.menuID" t-on-open-menu="_onOpenMenu"/>
         <div class="o_action_manager"
             t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"
-            t-on-switch-view.stop="_onSwitchView"
             t-on-execute-action.stop="_onExecuteAction"
             t-on-reloading-legacy.stop="_onReloadingLegacy">
             <Action class="o_action" t-ref="currentControllerComponent" t-key="currentRenderingInfo.controller.jsID"
@@ -16,6 +16,7 @@
                     action="currentRenderingInfo.action"
                     options="currentRenderingInfo.controller.options"/>
         </div>
+        </t>
     </body>
 </t>
 

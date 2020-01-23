@@ -38,6 +38,9 @@ class WebClient extends Component {
         });
     }
 
+    catchError() {
+    }
+
     __render() {
         console.log('__render WC');
         return super.__render(...arguments);
@@ -120,10 +123,22 @@ class WebClient extends Component {
             menuID: ev.detail.menuID,
         });
     }
-    _onSwitchView(ev) {
-        
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     * @param {integer} ev.detail.controllerID
+     */
+    _onBreadcrumbClicked(ev) {
+        this.actionManager.restoreController(ev.detail.controllerID);
     }
-
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     * @param {Object} ev.detail
+     */
+    _onExecuteAction(ev) {
+        this.actionManager.executeContextualActionTODONAME(ev.detail);
+    }
 }
 WebClient.components = { Action, Menu };
 WebClient.template = 'web.WebClient';

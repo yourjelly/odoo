@@ -20,12 +20,8 @@ const { createWebClient, nextTick } = testUtils;
 
 const doAction = (action, options) => {
     const env = owl.Component.env;
-    let payload = {action, options};
-    if (typeof action === 'number') {
-        payload = {action: action}
-    }
-    env.bus.trigger('do-action', payload);
-    return Promise.resolve();
+    env.bus.trigger('do-action', {action, options});
+    return nextTick();
 };
 
 QUnit.module('ActionManager', {
@@ -1919,7 +1915,7 @@ QUnit.module('ActionManager', {
                 return {foo: 'baz'};
             }
         });
-        const actionManager = await createWebClient({
+        const webClient = await createWebClient({
             intercepts: {
                 push_state: function (ev) {
                     const expectedState = {action: 'HelloWorldTest', foo: 'baz', title: 'a title'};
@@ -1978,7 +1974,7 @@ QUnit.module('ActionManager', {
             _animation: false,
         });
 
-        const actionManager = await createWebClient({
+        const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
@@ -2050,8 +2046,7 @@ QUnit.module('ActionManager', {
                 return this._super.apply(this, arguments);
             },
         });
-        doAction(2);
-        await nextTick();
+        await doAction(2);
 
         assert.containsOnce(webClient, '.o_control_panel');
         assert.containsOnce(webClient, '.o_kanban_view');
