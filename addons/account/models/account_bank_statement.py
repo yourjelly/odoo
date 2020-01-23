@@ -311,14 +311,14 @@ class AccountBankStatement(models.Model):
                         'date': stmt.date,
                     }
 
-                    # Override the suspense account.
-                    amls_vals = self.env['account.bank.statement.line']._prepare_account_move_line_vals(st_line_vals)
-                    for aml_vals in amls_vals:
-                        if aml_vals['account_id'] == stmt.journal_id.suspense_account_id.id:
-                            aml_vals['account_id'] = account.id
+                    # Override the suspense account with the profit/loss account.
+                    default_aml_values = self.env['account.bank.statement.line']._prepare_move_line_default_vals(st_line_vals)
+                    for vals in default_aml_values:
+                        if vals['account_id'] == stmt.journal_id.suspense_account_id.id:
+                            vals['account_id'] = account.id
                             break
 
-                    st_line_vals['line_ids'] = [(0, 0, aml_vals) for aml_vals in amls_vals]
+                    st_line_vals['line_ids'] = [(0, 0, vals) for vals in default_aml_values]
 
                     self.env['account.bank.statement.line'].create(st_line_vals)
                 else:
@@ -392,8 +392,8 @@ class AccountBankStatement(models.Model):
                 continue
             statement.name = statement.journal_id.sequence_id.next_by_id(sequence_date=statement.date)
 
-        self.mapped('line_ids.move_id').post()
         self.write({'state': 'posted'})
+        self.mapped('line_ids.move_id').post()
 
     def button_validate(self):
         if any(statement.state != 'posted' or not statement.all_lines_reconciled for statement in self):
@@ -431,8 +431,8 @@ class AccountBankStatement(models.Model):
         if any(statement.state == 'draft' for statement in self):
             raise UserError(_("Only validated statements can be reset to new."))
 
-        self.mapped('line_ids.move_id').button_draft()
         self.write({'state': 'open'})
+        self.mapped('line_ids.move_id').button_draft()
 
     def button_journal_entries(self):
         return {
@@ -453,6 +453,10 @@ class AccountBankStatementLine(models.Model):
     _inherits = {'account.move': 'move_id'}
     _description = "Bank Statement Line"
     _order = "statement_id desc, date, sequence, id desc"
+
+    # TODO: Fields having the same name in both tables are confusing. We don't change it because:
+    # - It's a mess to track/fix.
+    # - Some fields here could be simplify when the onchanges will be gone in account.move.
 
     # == Stored fields ==
     sequence = fields.Integer(index=True, help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
@@ -482,15 +486,14 @@ class AccountBankStatementLine(models.Model):
 
     # == Not-stored fields ==
     state = fields.Selection(related='statement_id.state', string='Status', readonly=True)
-    move_state = fields.Selection([
-            ('broken', 'Broken'),
-            ('not_reconciled', 'Not Reconciled'),
-            ('reconciled', 'Reconciled'),
-        ],
+    move_state = fields.Selection([('not_reconciled', 'Not Reconciled'), ('reconciled', 'Reconciled')],
         string='Journal Entry State',
         store=True, default='not_reconciled',
         compute='_compute_move_state',
-        help="Technical Field used in the form view to represent the current journal entry state.")
+        help="""Technical field representing the state of the statement line regarding the state of its journal entry.
+        This field is used to detect the consistency of both models since the user if free to edit directly the journal 
+        entry like he want and then, to adapt the form view accordingly (e.g. by displaying the button to unreconcile 
+        the journal items).""")
 
     # -------------------------------------------------------------------------
     # HELPERS
@@ -680,7 +683,7 @@ class AccountBankStatementLine(models.Model):
         }
 
     @api.model
-    def _prepare_account_move_line_vals(self, vals):
+    def _prepare_move_line_default_vals(self, vals):
         ''' Prepare the dictionary to create the default account.move.lines for the current account.bank.statement.line
         record.
         :return: A list of python dictionary to be passed to the account.move.line's 'create' method.
@@ -726,7 +729,7 @@ class AccountBankStatementLine(models.Model):
             return 0.0
         else:
             liquidity_lines, transfer_lines, other_lines = self._seek_for_lines()
-            return transfer_lines.balance
+            return sum(transfer_lines.mapped('balance'))
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -734,19 +737,18 @@ class AccountBankStatementLine(models.Model):
 
     @api.depends('move_id.line_ids')
     def _compute_move_state(self):
+        ''' Compute the state of the statement line regarding the state of its journal entry.
+        This field is used to detect the consistency of both models since the user if free to edit
+        directly the journal entry like he want and then, to adapt the form view accordingly
+        (e.g. by displaying the button to unreconcile the journal items).
+        '''
         for st_line in self:
             liquidity_lines, transfer_lines, other_lines = st_line._seek_for_lines()
 
             if st_line.currency_id.is_zero(st_line.amount):
                 st_line.move_state = 'reconciled'
-            elif not st_line.id:
+            elif not st_line.id or transfer_lines:
                 # New record: The journal items are not yet there.
-                st_line.move_state = 'not_reconciled'
-            elif len(liquidity_lines) != 1 or st_line.move_id.state == 'cancel':
-                # The user messed up the journal entry.
-                st_line.move_state = 'broken'
-            elif transfer_lines:
-                # Nothing yet reconciled.
                 st_line.move_state = 'not_reconciled'
             else:
                 # The journal entry seems reconciled.
@@ -829,7 +831,7 @@ class AccountBankStatementLine(models.Model):
             if len(liquidity_lines) != 1 or len(counter_part_lines) != 1:
                 raise UserError(_("The journal entry has been manually edited and then, isn't longer recognized as a valid statement line."))
 
-            line_vals_list = self._prepare_account_move_line_vals(st_line._convert_to_dict())
+            line_vals_list = self._prepare_move_line_default_vals(st_line._convert_to_dict())
             line_ids_commands = [
                 (1, liquidity_lines.id, {k: v for k, v in line_vals_list[0].items() if k in ('debit', 'credit', 'currency_id', 'amount_currency')}),
                 (1, counter_part_lines.id, {k: v for k, v in line_vals_list[1].items() if k in ('debit', 'credit', 'currency_id', 'amount_currency')}),
@@ -865,6 +867,24 @@ class AccountBankStatementLine(models.Model):
             if not st_line.foreign_currency_id and st_line.amount_currency:
                 raise ValidationError(_("You can't provide an amount in foreign currency without specifying a foreign currency."))
 
+    def _is_account_move_valid(self):
+        ''' Method triggered manually when writing on journal entries linked to
+        the statement lines through the _inherits to detect some unconsistencies
+        between both models.
+        :return True if the modifications are valid, False otherwise.
+        '''
+        for st_line in self:
+            move = st_line.move_id
+            liquidity_lines, transfer_lines, other_lines = st_line._seek_for_lines()
+
+            if st_line.state == 'open' and move.state != 'draft':
+                return False
+            if st_line.state == 'posted' and move.state != 'posted':
+                return False
+            if len(liquidity_lines) != 1:
+                return False
+        return True
+
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
@@ -885,7 +905,7 @@ class AccountBankStatementLine(models.Model):
                 vals['date'] = statement.date
             # Create two default account.move.lines for each statement line.
             if 'line_ids' not in vals:
-                vals['line_ids'] = [(0, 0, line_vals) for line_vals in self._prepare_account_move_line_vals(vals)]
+                vals['line_ids'] = [(0, 0, line_vals) for line_vals in self._prepare_move_line_default_vals(vals)]
         st_lines = super().create(vals_list)
         for st_line in st_lines:
             st_line.line_ids.write({'statement_line_id': st_line.id})
@@ -909,9 +929,6 @@ class AccountBankStatementLine(models.Model):
         self.ensure_one()
 
         liquidity_lines, transfer_lines, other_lines = self._seek_for_lines()
-
-        if self.move_state == 'broken':
-            raise UserError(_("The statement line has been corrupted."))
         if not self.move_id.to_check and other_lines:
             raise UserError(_("The statement line has already been reconciled."))
 
@@ -1027,23 +1044,25 @@ class AccountBankStatementLine(models.Model):
         ''' Undo the reconciliation mades on the statement line and reset their journal items
         to their original states.
         '''
-        moves = self.mapped('move_id')
-        draft_moves = moves.filtered(lambda move: move.state == 'draft')
-        posted_moves = moves.filtered(lambda move: move.state == 'posted')
-        all_moves = draft_moves + posted_moves # Don't consider moves having a different state.
-
-        # Reset to draft.
-        posted_moves.button_draft()
-        draft_moves.mapped('line_ids').remove_move_reconcile()
-
-        # Create new journal items.
         for st_line in self:
-            if st_line.move_id not in all_moves:
+            move = st_line.move_id
+            move_state = move.state
+
+            # Use 'check_move_validity' to avoid the check on consistency between the journal entries and
+            # the statement lines.
+
+            # Process only posted & draft moves.
+            if move_state == 'posted':
+                move.with_context(check_move_validity=False).button_draft()
+            elif move_state != 'draft':
                 continue
 
-            st_line.move_id.write({
+            st_line.move_id.with_context(check_move_validity=False).write({
                 'to_check': False,
-                'line_ids': [(5, 0)] + [(0, 0, line_vals) for line_vals in self._prepare_account_move_line_vals(st_line._convert_to_dict())],
+                'line_ids': [(5, 0)] + [(0, 0, line_vals) for line_vals in self._prepare_move_line_default_vals(st_line._convert_to_dict())],
             })
 
-        posted_moves.post()
+            if move_state == 'posted':
+                move.post()
+
+            move._check_balanced()

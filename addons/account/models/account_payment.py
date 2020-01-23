@@ -439,7 +439,8 @@ class account_payment(models.Model):
 
         journal = journal or self.journal_id
         liquidity_account = journal.default_debit_account_id if self.amount >= 0.0 else journal.default_credit_account_id
-        if self.env.user.has_group('account.group_account_user'):
+        account_accountant_module = self.env['ir.module.module'].search([('name', '=', 'account_accountant')], limit=1)
+        if account_accountant_module.state == 'installed':
             return journal.payment_transfer_account_id
         else:
             return liquidity_account

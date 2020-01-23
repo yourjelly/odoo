@@ -260,8 +260,12 @@ class TestAccountBankStatement(AccountTestInvoicingCommon):
         cls.bank_journal_3 = cls.bank_journal_2.copy()
         cls.bank_journal_2.default_debit_account_id = cls.bank_journal_1.default_debit_account_id.copy()
         cls.bank_journal_2.default_credit_account_id = cls.bank_journal_1.default_credit_account_id.copy()
+        cls.bank_journal_2.payment_transfer_account_id = cls.bank_journal_1.payment_transfer_account_id.copy()
+        cls.bank_journal_2.suspense_account_id = cls.bank_journal_1.suspense_account_id.copy()
         cls.bank_journal_3.default_debit_account_id = cls.bank_journal_2.default_debit_account_id.copy()
         cls.bank_journal_3.default_credit_account_id = cls.bank_journal_2.default_credit_account_id.copy()
+        cls.bank_journal_3.payment_transfer_account_id = cls.bank_journal_2.payment_transfer_account_id.copy()
+        cls.bank_journal_3.suspense_account_id = cls.bank_journal_2.suspense_account_id.copy()
         cls.currency_1 = cls.company_data['currency']
         cls.currency_2 = cls.currency_data['currency']
         cls.currency_3 = cls.currency_data_2['currency']
@@ -522,6 +526,8 @@ class TestAccountBankStatement(AccountTestInvoicingCommon):
             'amount_currency': 0.0,
         }
 
+        # ==== Test constraints at creation ====
+
         # Amount can't be 0.0 on a statement line.
         assertStatementLineConstraint(statement_vals, {
             **statement_line_vals,
@@ -546,6 +552,41 @@ class TestAccountBankStatement(AccountTestInvoicingCommon):
             **statement_line_vals,
             'amount_currency': 10.0,
         })
+
+        # ==== Test constraints at edition ====
+
+        statement = self.env['account.bank.statement'].create({
+            **statement_vals,
+            'line_ids': [(0, 0, statement_line_vals)],
+        })
+        st_line = statement.line_ids
+
+        # You can't messed up the journal entry by adding another liquidity line.
+        addition_lines_to_create = [
+            {
+                'debit': 1.0,
+                'credit': 0,
+                'account_id': self.bank_journal_2.default_debit_account_id.id,
+                'move_id': st_line.move_id.id,
+            },
+            {
+                'debit': 0,
+                'credit': 1.0,
+                'account_id': self.company_data['default_account_revenue'].id,
+                'move_id': st_line.move_id.id,
+            },
+        ]
+        with self.assertRaises(UserError), self.cr.savepoint():
+            st_line.move_id.write({
+                'line_ids': [(0, 0, vals) for vals in addition_lines_to_create]
+            })
+
+        with self.assertRaises(UserError), self.cr.savepoint():
+            st_line.line_ids.create(addition_lines_to_create)
+
+        # You can't set the journal entry in an unconsistent state.
+        with self.assertRaises(UserError), self.cr.savepoint():
+            st_line.move_id.post()
 
     def test_statement_line_move_onchange_1(self):
         ''' Test the consistency between the account.bank.statement.line and the generated account.move.lines

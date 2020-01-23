@@ -657,7 +657,6 @@ action = model.setting_init_bank_account_action()
                                 <tree string="Statement lines"
                                       editable="bottom"
                                       decoration-muted="move_state == 'reconciled'"
-                                      decoration-warning="move_state == 'broken'"
                                       limit="500">
 
                                     <!-- Invisible fields -->
@@ -687,7 +686,7 @@ action = model.setting_init_bank_account_action()
 
                                     <!-- Buttons -->
                                     <button name="button_undo_reconciliation" type="object"
-                                            attrs="{'invisible': [('move_state', 'not in', ('reconciled', 'broken'))]}"
+                                            attrs="{'invisible': [('move_state', '!=', 'reconciled')]}"
                                             string="Revert reconciliation" icon="fa-undo"/>
                                 </tree>
                             </field>

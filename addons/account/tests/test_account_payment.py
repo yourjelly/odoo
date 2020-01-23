@@ -41,13 +41,8 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
 
     def test_inbound_payment_move_1(self):
         ''' Check created account.move for an account.payment having the 'inbound' type. '''
-        if self.env.user.has_group('account.group_account_user'):
-            liquidity_account = self.bank_journal.payment_transfer_account_id
-        else:
-            liquidity_account = self.bank_journal.default_credit_account_id
-
         expected_bank_line = {
-            'account_id': liquidity_account.id,
+            'account_id': self.inbound_payment._get_liquidity_account().id,
             'partner_id': self.partner_a.id,
             'currency_id': False,
             'amount_currency': 0.0,
@@ -113,13 +108,8 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
 
     def test_outbound_payment_move_1(self):
         ''' Check created account.move for an account.payment having the 'outbound' type. '''
-        if self.env.user.has_group('account.group_account_user'):
-            liquidity_account = self.bank_journal.payment_transfer_account_id
-        else:
-            liquidity_account = self.bank_journal.default_debit_account_id
-
         expected_bank_line = {
-            'account_id': liquidity_account.id,
+            'account_id': self.outbound_payment._get_liquidity_account().id,
             'partner_id': self.partner_a.id,
             'currency_id': False,
             'amount_currency': 0.0,
@@ -185,13 +175,6 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
 
     def test_transfer_payment_move_1(self):
         ''' Check created account.move for an account.payment having the 'transfer' type. '''
-        if self.env.user.has_group('account.group_account_user'):
-            liquidity_bank_account = self.bank_journal.payment_transfer_account_id
-            liquidity_cash_account = self.cash_journal.payment_transfer_account_id
-        else:
-            liquidity_bank_account = self.bank_journal.default_debit_account_id
-            liquidity_cash_account = self.cash_journal.default_credit_account_id
-
         cash_transfer_line = {
             'account_id': self.company_data['company'].transfer_account_id.id,
             'partner_id': False,
@@ -209,7 +192,7 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
             'credit': 0.0,
         }
         liquidity_cash_line = {
-            'account_id': liquidity_cash_account.id,
+            'account_id': self.transfer_payment._get_liquidity_account(journal=self.cash_journal).id,
             'partner_id': False,
             'currency_id': False,
             'amount_currency': 0.0,
@@ -217,7 +200,7 @@ class TestAccountMovePayment(AccountTestInvoicingCommon):
             'credit': 0.0,
         }
         liquidity_bank_line = {
-            'account_id': liquidity_bank_account.id,
+            'account_id': self.transfer_payment._get_liquidity_account(journal=self.bank_journal).id,
             'partner_id': False,
             'currency_id': False,
             'amount_currency': 0.0,

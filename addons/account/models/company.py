@@ -45,7 +45,7 @@ class ResCompany(models.Model):
     cash_account_code_prefix = fields.Char(string='Prefix of the cash accounts')
     default_cash_difference_income_account_id = fields.Many2one('account.account', string="Cash Difference Income Account")
     default_cash_difference_expense_account_id = fields.Many2one('account.account', string="Cash Difference Expense Account")
-    default_journal_suspense_account_id = fields.Many2one('account.account', string='Journal Suspense Account')
+    account_journal_suspense_account_id = fields.Many2one('account.account', string='Journal Suspense Account')
     transfer_account_code_prefix = fields.Char(string='Prefix of the transfer accounts')
     account_sale_tax_id = fields.Many2one('account.tax', string="Default Sale Tax")
     account_purchase_tax_id = fields.Many2one('account.tax', string="Default Purchase Tax")

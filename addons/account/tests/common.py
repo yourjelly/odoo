@@ -139,7 +139,7 @@ class AccountTestCommon(SavepointCase):
             'code': 'X1115',
             'user_type_id': cls.env.ref('account.data_account_type_current_assets').id,
         })
-        cls.company.default_journal_suspense_account_id = cls.sus
+        cls.company.account_journal_suspense_account_id = cls.sus
 
         # Profit and Loss
         cls.income_fx_income = cls.env['account.account'].create({

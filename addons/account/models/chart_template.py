@@ -105,7 +105,7 @@ class AccountChartTemplate(models.Model):
         string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
     expense_currency_exchange_account_id = fields.Many2one('account.account.template',
         string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
-    default_journal_suspense_account_id = fields.Many2one('account.account.template', string='Journal Suspense Account')
+    account_journal_suspense_account_id = fields.Many2one('account.account.template', string='Journal Suspense Account')
     default_cash_difference_income_account_id = fields.Many2one('account.account.template', string="Cash Difference Income Account")
     default_cash_difference_expense_account_id = fields.Many2one('account.account.template', string="Cash Difference Expense Account")
     default_pos_receivable_account_id = fields.Many2one('account.account.template', string="PoS receivable account")
@@ -240,11 +240,11 @@ class AccountChartTemplate(models.Model):
         company.write({
             'default_cash_difference_income_account_id': acc_template_ref.get(self.default_cash_difference_income_account_id.id, False),
             'default_cash_difference_expense_account_id': acc_template_ref.get(self.default_cash_difference_expense_account_id.id, False),
-            'default_journal_suspense_account_id': acc_template_ref.get(self.default_journal_suspense_account_id.id),
+            'account_journal_suspense_account_id': acc_template_ref.get(self.account_journal_suspense_account_id.id),
         })
 
-        if not company.default_journal_suspense_account_id:
-            company.default_journal_suspense_account_id = self.env['account.account'].create({
+        if not company.account_journal_suspense_account_id:
+            company.account_journal_suspense_account_id = self.env['account.account'].create({
                 'name': _("Bank Suspense Account"),
                 'code': self.env['account.account']._search_new_account_code(company, self.code_digits, company.transfer_account_code_prefix),
                 'user_type_id': self.env.ref('account.data_account_type_current_assets').id,

@@ -284,7 +284,7 @@ class account_journal(models.Model):
                 number_to_check = read[0]['__count']
                 to_check_balance = read[0]['amount_total']
 
-        difference = currency.round(account_sum - last_balance) + 0.0
+        difference = currency.round(account_sum - last_balance)
 
         is_sample_data = self.kanban_dashboard_graph and any(data.get('is_sample_data', False) for data in json.loads(self.kanban_dashboard_graph))
 

@@ -405,6 +405,42 @@ class AccountAccount(models.Model):
         if ids:
             raise ValidationError(_('Some journal items already exist with this account but in other journals than the allowed ones.'))
 
+    @api.constrains('currency_id')
+    def _check_journal_consistency(self):
+        ''' Ensure the currency set on the journal is the same as the currency set on the
+        linked accounts.
+        '''
+        if not self:
+            return
+
+        self.env['account.account'].flush(['currency_id'])
+        self.env['account.journal'].flush([
+            'currency_id',
+            'default_debit_account_id',
+            'default_credit_account_id',
+            'payment_transfer_account_id',
+            'suspense_account_id',
+        ])
+        self._cr.execute('''
+            SELECT account.id, journal.id
+            FROM account_account account
+            JOIN res_company company ON company.id = account.company_id
+            JOIN account_journal journal ON
+                journal.default_debit_account_id = account.id
+                OR
+                journal.default_credit_account_id = account.id
+                OR
+                journal.payment_transfer_account_id = account.id
+            WHERE account.id IN %s
+            AND (CASE WHEN account.currency_id IS NULL OR account.currency_id = company.currency_id THEN 0 ELSE account.currency_id END) 
+            != (CASE WHEN journal.currency_id IS NULL OR journal.currency_id = company.currency_id THEN 0 ELSE journal.currency_id END)
+        ''', [tuple(self.ids)])
+        res = self._cr.fetchone()
+        if res:
+            account = self.env['account.account'].browse(res[0])
+            journal = self.env['account.journal'].browse(res[1])
+            raise ValidationError(_("The foreign currency set on the journal '%s' and the account '%s' must be the same.") % (journal.display_name, account.display_name))
+
     @api.constrains('company_id')
     def _check_company_consistency(self):
         if not self:
@@ -1016,8 +1052,8 @@ class AccountJournal(models.Model):
                 journal.suspense_account_id = False
             elif journal.suspense_account_id:
                 journal.suspense_account_id = journal.suspense_account_id
-            elif journal.company_id.default_journal_suspense_account_id:
-                journal.suspense_account_id = journal.company_id.default_journal_suspense_account_id
+            elif journal.company_id.account_journal_suspense_account_id:
+                journal.suspense_account_id = journal.company_id.account_journal_suspense_account_id
             else:
 
                 journal.suspense_account_id = False
@@ -1100,15 +1136,6 @@ class AccountJournal(models.Model):
         """, tuple(self.ids))
         if self._cr.fetchone():
             raise ValidationError(_('Some journal items already exist in this journal but with other accounts than the allowed ones.'))
-
-    @api.constrains('currency_id', 'default_credit_account_id', 'default_debit_account_id')
-    def _check_currency(self):
-        for journal in self:
-            if journal.currency_id:
-                if journal.default_credit_account_id and not journal.default_credit_account_id.currency_id.id == journal.currency_id.id:
-                    raise ValidationError(_('The currency of the journal should be the same than the default credit account.'))
-                if journal.default_debit_account_id and not journal.default_debit_account_id.currency_id.id == journal.currency_id.id:
-                    raise ValidationError(_('The currency of the journal should be the same than the default debit account.'))
 
     @api.constrains('type', 'bank_account_id')
     def _check_bank_account(self):
@@ -1222,10 +1249,6 @@ class AccountJournal(models.Model):
                     new_prefix = 'R' + vals['code'].upper() + '/%(range_year)s/'
                     journal.refund_sequence_id.write({'prefix': new_prefix})
             if 'currency_id' in vals:
-                if not 'default_debit_account_id' in vals and journal.default_debit_account_id:
-                    journal.default_debit_account_id.currency_id = vals['currency_id']
-                if not 'default_credit_account_id' in vals and journal.default_credit_account_id:
-                    journal.default_credit_account_id.currency_id = vals['currency_id']
                 if journal.bank_account_id:
                     journal.bank_account_id.currency_id = vals['currency_id']
             if 'bank_account_id' in vals:
@@ -1243,6 +1266,13 @@ class AccountJournal(models.Model):
                     field_string = self._fields['restrict_mode_hash_table'].get_description(self.env)['string']
                     raise UserError(_("You cannot modify the field %s of a journal that already has accounting entries.") % field_string)
         result = super(AccountJournal, self).write(vals)
+
+        for journal in self:
+            # Ensure all accounts are sharing the same foreign currency as the journal one.
+            accounts = journal.default_debit_account_id \
+                       + journal.default_credit_account_id \
+                       + journal.payment_transfer_account_id
+            accounts.write({'currency_id': journal.currency_id.id})
 
         # Create the bank_account_id if necessary
         if 'bank_acc_number' in vals:

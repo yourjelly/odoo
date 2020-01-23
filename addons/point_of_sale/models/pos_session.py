@@ -712,7 +712,7 @@ class PosSession(models.Model):
 
         # Override the temporary account to set directly the receivable one in order to perform the reconciliation
         # faster without using the statement reconciliation.
-        line_ids_vals = self.env['account.bank.statement.line']._prepare_account_move_line_vals(vals)
+        line_ids_vals = self.env['account.bank.statement.line']._prepare_move_line_default_vals(vals)
         for line_vals in line_ids_vals:
             if line_vals['account_id'] == statement.journal_id.suspense_account_id.id:
                 line_vals['account_id'] = receivable_account.id

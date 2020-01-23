@@ -1446,6 +1446,14 @@ class AccountMove(models.Model):
                 raise UserError(message)
         return True
 
+    def _check_statement_lines_consistency(self):
+        ''' Constraint triggered manually when writing on the journal entries to prevent
+        unconsistent modifications regarding the linked statement lines.
+        '''
+        statement_lines = self.env['account.bank.statement.line'].search([('move_id', 'in', self.ids)])
+        if not statement_lines._is_account_move_valid():
+            raise UserError(_("You can't perform such modifications on journal entry linked to a statement line."))
+
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
@@ -1623,6 +1631,10 @@ class AccountMove(models.Model):
 
         # Trigger 'action_invoice_paid' when the invoice becomes paid after a write.
         not_paid_invoices.filtered(lambda move: move.payment_state in ('paid', 'in_payment')).action_invoice_paid()
+
+        # Ensure the move is still valid regarding the linked statement lines.
+        if self._context.get('check_move_validity', True):
+            self._check_statement_lines_consistency()
 
         return res
 
@@ -3074,7 +3086,7 @@ class AccountMoveLine(models.Model):
     def _check_constrains_account_id_journal_id(self):
         for line in self:
             account = line.account_id
-            journal = line.journal_id
+            journal = line.move_id.journal_id
 
             if account.deprecated:
                 raise UserError(_('The account %s (%s) is deprecated.') % (account.name, account.code))
@@ -3216,6 +3228,7 @@ class AccountMoveLine(models.Model):
         moves = lines.mapped('move_id')
         if self._context.get('check_move_validity', True):
             moves._check_balanced()
+            moves._check_statement_lines_consistency()
         moves._check_fiscalyear_lock_date()
         lines._check_tax_lock_date()
 
@@ -3363,6 +3376,7 @@ class AccountMoveLine(models.Model):
         # Check total_debit == total_credit in the related moves.
         if self._context.get('check_move_validity', True):
             self.mapped('move_id')._check_balanced()
+            self.mapped('move_id')._check_statement_lines_consistency()
 
         return result
 
@@ -3574,7 +3588,7 @@ class AccountMoveLine(models.Model):
                     'exchange_move_id': exchange_move_id,
                 })
 
-        # This compute is used by the invoice to compute the 'invoice_payment_state' and must be triggered manually
+        # This compute is used by the invoice to compute the 'payment_state' and must be triggered manually
         # when reconciling a statement line with an existing payment.
         # This is not done on account.bank.statement.line.reconcile method because the point of sale
         # is using directly this method for performance reason.
@@ -3828,9 +3842,9 @@ class AccountMoveLine(models.Model):
 
     def remove_move_reconcile(self):
         """ Undo a reconciliation """
-        # Update the involved business models manually that have a state dependent of the
+        # Update the involved business models (invoices/payments) manually that have a state dependent of the
         # reconciliation.
-        # Even the invoice_payment_state of invoices is a computed field, we need to handle that
+        # Even the payment_state of invoices is a computed field, we need to handle that
         # manually because this is a limitation of the ORM: The computed fields are not triggered
         # when deleting a record (account.partial.reconcile here).
         if any(line.statement_line_id for line in self):
