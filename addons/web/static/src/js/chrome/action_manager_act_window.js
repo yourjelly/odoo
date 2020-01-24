@@ -241,7 +241,7 @@ odoo.define('web.ActWindowActionManager', function (require) {
          * @override
          * @private
          */
-        _restoreController(controllerID) {
+/*        _restoreController(controllerID) {
             const controller = this.controllers[controllerID];
             const action = this.actions[controller.actionID];
             if (action.type === 'ir.actions.act_window') {
@@ -260,6 +260,9 @@ odoo.define('web.ActWindowActionManager', function (require) {
             } else {
                 this._super(...arguments);
             }
+        }*/
+        restoreControllerHook(action, controller) {
+            this._switchController(action, controller.viewType);
         }
         /**
          * Handles the switch from a controller to another (either inside the same
@@ -270,6 +273,7 @@ odoo.define('web.ActWindowActionManager', function (require) {
          * @param {Object} [viewOptions]
          */
         _switchController(action, viewType, viewOptions) {
+            this.actionManager.trigger('cancel');
             var viewDescr = action.views.find(view => view.type === viewType);
 
             const currentControllerID = this.currentStack[this.currentStack.length - 1];
@@ -381,12 +385,6 @@ odoo.define('web.ActWindowActionManager', function (require) {
             }
             console.log('switch view', viewType);
             this._switchController(action, viewType, options);
-        }
-        _onReloadingLegacy(ev) {
-            const detail = ev.detail;
-            const { action } = this._getCurrentAction();
-            Object.assign(action, detail.commonState);
-            action.controllerState = Object.assign({}, action.controllerState, detail.controllerState);
         }
     }
     WindowActionPlugin.type = 'ir.actions.act_window';
