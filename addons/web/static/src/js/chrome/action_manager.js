@@ -401,8 +401,10 @@ class ActionManager extends core.EventBus {
         //  - move logic from act window (clear uncommitted changes + on _reverse_bc)
         //  - add hook onRestoreController (async)
         //await this.clearUncommittedChanges();
+        this.trigger('cancel');
         const { action , controller } = this.getAction(controllerID);
         const plugin = this._getPlugin(action.type);
+        if (!plugin) {return Promise.reject();}
         if (plugin.restoreControllerHook) {
             return plugin.restoreControllerHook(action, controller);
         }

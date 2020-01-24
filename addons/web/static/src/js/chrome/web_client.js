@@ -21,29 +21,30 @@ class WebClient extends Component {
         });
         this.actionManager.on('update', this, payload => {
             this.currentRenderingInfo = payload;
-            this.render().then(() => {
-                payload.onSuccess(this.currentControllerComponent.comp);
-                this.currentRenderingInfo = null;
-            });
+            this.render();
         });
         this.menu = useRef('menu');
     }
 
     async willStart() {
         this.menus = await this._loadMenus();
-        const menuID = this.menus.root.children[0];
+        const menuID = this.menus && this.menus.root.children[0];
+        if (!menuID) {return Promise.resolve();}
         const initialAction = this.menus[menuID].actionID;
         return this.actionManager.doAction(initialAction, { menuID }).then(() => {
             console.log('action loaded');
         });
     }
-
-    catchError() {
+    mounted() {
+        super.mounted();
+        this._wcUpdated();
+    }
+    patched() {
+        super.patched();
+        this._wcUpdated();
     }
 
-    __render() {
-        console.log('__render WC');
-        return super.__render(...arguments);
+    catchError() {
     }
 
     //--------------------------------------------------------------------------
@@ -108,6 +109,12 @@ class WebClient extends Component {
             return menus;
         });
     }
+    _wcUpdated() {
+        if (this.currentRenderingInfo) {
+            this.currentRenderingInfo.onSuccess(this.currentControllerComponent.comp);
+        }
+        this.currentRenderingInfo = null;
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -138,6 +145,9 @@ class WebClient extends Component {
      */
     _onExecuteAction(ev) {
         this.actionManager.executeContextualActionTODONAME(ev.detail);
+    }
+    _onReloadingLegacy(ev) {
+        this.actionManager.reloadingLegacy(ev);
     }
 }
 WebClient.components = { Action, Menu };

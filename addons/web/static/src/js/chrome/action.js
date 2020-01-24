@@ -32,7 +32,6 @@ class Action extends ComponentAdapter {
     async willStart() {
         if (this.props.Component.prototype instanceof AbstractView) {
             this.legacy = 'view';
-            this.starting = true;
             const action = this.props.action;
             const viewDescr = action.views.find(view => view.type === action.controller.viewType);
             const viewParams = Object.assign(
@@ -57,16 +56,14 @@ class Action extends ComponentAdapter {
     shouldUpdate(nextProps) {
         if (this.legacy) {
             const activatingViewType = nextProps.action.controller.viewType;
-            const starting = this.starting;
-            this.starting = false;
             if (activatingViewType === this.widget.viewType) {
                 this.legacyZombie = false;
             }
-            return nextProps.shouldUpdateWidget && !starting && !this.legacyZombie;
+            return !this.legacyZombie;
         }
         return super.shouldUpdate(nextProps);
     }
-    async willUpdateProps(nextProps) {
+    async update(nextProps) {
         if (this.legacy === 'view') {
             const action = nextProps.action;
             const controllerState = action.controllerState || {};
@@ -79,9 +76,9 @@ class Action extends ComponentAdapter {
                 },
             );
             await this.widget.willRestore();
-            await this.widget.reload(reloadParam);
+            return this.widget.reload(reloadParam);
         }
-        return super.willUpdateProps(...arguments);
+        return super.update(...arguments);
     }
 
     _reHookControllerMethods() {
@@ -99,7 +96,7 @@ class Action extends ComponentAdapter {
         }
     }
     destroy() {
-        if (this.legacy) {
+        if (this.legacy && this.widget) {
             // keep legacy stuff alive because some stuff
             // are kept by AbstractModel (e.g.: orderedBy)
             dom.detach([{widget: this.widget}]);
