@@ -515,15 +515,15 @@ class ActionManager extends core.EventBus {
         return index;
     }
     _getPlugin(actionType) {
-        let plugin = this.plugins.get([actionType]);
+        const Plugin = ActionManager.Plugins[actionType];
+        if (!Plugin) {
+            console.error(`The ActionManager can't handle actions of type ${actionType}`);
+            return null;
+        }
+        let plugin = this.plugins.get(Plugin);
         if (!plugin) {
-            const Plugin = ActionManager.Plugins[actionType];
-            if (!Plugin) {
-                console.error(`The ActionManager can't handle actions of type ${actionType}`);
-                return null;
-            }
             plugin = new Plugin(this, this.env);
-            this.plugins.set([actionType], plugin);
+            this.plugins.set(Plugin, plugin);
         }
         return plugin;
     }
