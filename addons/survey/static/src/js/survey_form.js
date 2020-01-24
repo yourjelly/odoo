@@ -670,9 +670,15 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
     * without having to manually get the focus (only if the input has the right type - can write something inside -)
     */
     _focusOnFirstInput: function () {
-        var $inputs = this.$("input[type='text'],input[type='number'],textarea").not('.o_survey_comment');
-        if ($inputs.length > 0) {
-            $inputs.first().focus();
+        var $textInputs = this.$("input[type='text'],input[type='number'],textarea")
+                              .filter('.form-control').not('.o_survey_comment');
+        if ($textInputs.length > 0) {
+            var $firstTextInput = $textInputs.first();
+            // Only focus if first text input is the first question on the page.
+            // If comment 'count as answer' option on question, the input is disabled, so it won't focus anyway.
+            if ($firstTextInput.closest('.js_question-wrapper').attr('id') === this.$(".js_question-wrapper").first().attr('id')) {
+                $firstTextInput.focus();
+            }
         }
     },
 
