@@ -60,6 +60,12 @@ async function createWebClient(params) {
     let menus = params.menus;
     if (!menus) {
         menus = {
+            all_menu_ids: [0],
+            children: [],
+        }
+    }
+/*    if (!menus) {
+        menus = {
             all_menu_ids: [1],
             children: [{
                 id: 1,
@@ -81,7 +87,7 @@ async function createWebClient(params) {
             delete core.action_registry.map.InitialClientAction;
             SystrayMenu.Items = SystrayItems;
         };
-    }
+    }*/
 
     odoo.loadMenusPromise = new Promise(async resolve => {
         await testUtilsAsync.nextTick();
