@@ -196,6 +196,22 @@ class ActionManager extends core.EventBus {
     //--------------------------------------------------------------------------
 
     /**
+     * This function is called when the current controller is about to be
+     * removed from the DOM, because a new one will be pushed, or an old one
+     * will be restored. It ensures that the current controller can be left (for
+     * instance, that it has no unsaved changes).
+     *
+     * @returns {Promise} resolved if the current controller can be left,
+     *   rejected otherwise.
+     */
+    clearUncommittedChanges() {
+        const { controller } = this.getCurrentAction();
+        if (controller) {
+            return controller.widget.canBeRemoved();
+        }
+        return Promise.resolve();
+    }
+    /**
      * Executes Odoo actions, given as an ID in database, an xml ID, a client
      * action tag or an action descriptor.
      *
@@ -378,16 +394,19 @@ class ActionManager extends core.EventBus {
             // TODO need on_fail??
             // .guardedCatch(params.on_fail);
     }
+    getAction(controllerID) {
+        const currentController = this.controllers[controllerID];
+        return {
+            action: this.actions[currentController.actionID],
+            controller: currentController,
+        };
+    }
     /**
      * @returns {Object}
      */
     getCurrentAction() {
         const currentControllerID = this.currentStack[this.currentStack.length - 1];
-        const currentController = this.controllers[currentControllerID];
-        return {
-            action: this.actions[currentController.actionID],
-            controller: currentController,
-        };
+        return this.getAction(currentControllerID);
     }
     /**
      * Restores a controller from the controllerStack and removes all
@@ -534,6 +553,15 @@ class ActionManager extends core.EventBus {
     }
     _nextID(type) {
         return `${type}${nextID++}`;
+    }
+    reloadingLegacy(ev) {
+        const detail = ev.detail;
+        const { action } = this.getCurrentAction();
+        Object.assign(action, detail.commonState);
+        action.controllerState = Object.assign({}, action.controllerState, detail.controllerState);
+    }
+    rpc() {
+        return this.env.services.rpc(...arguments);
     }
     /**
      * Preprocesses the action before it is handled by the ActionManager
