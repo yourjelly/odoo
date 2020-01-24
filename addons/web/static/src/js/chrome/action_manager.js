@@ -173,7 +173,7 @@ class ActionManager extends core.EventBus {
         this.env.bus.on('do-action', this, payload => {
             this.doAction(payload.action, payload.options);
         });
-        this.plugins = {};
+        this.plugins = new WeakMap();
 
         // handled by the ActionManager (either stacked in the current window,
         // or opened in dialogs)
@@ -396,10 +396,16 @@ class ActionManager extends core.EventBus {
      *
      * @param {string} controllerID
      */
-    restoreController(controllerID) {
+    async restoreController(controllerID) {
         // TODO
         //  - move logic from act window (clear uncommitted changes + on _reverse_bc)
         //  - add hook onRestoreController (async)
+        //await this.clearUncommittedChanges();
+        const { action , controller } = this.getAction(controllerID);
+        const plugin = this._getPlugin(action.type);
+        if (plugin.restoreControllerHook) {
+            return plugin.restoreControllerHook(action, controller);
+        }
         this._pushController(this.controllers[controllerID]);
 
         // AAB: AbstractAction should define a proper hook to execute code when
@@ -487,6 +493,19 @@ class ActionManager extends core.EventBus {
         }
         return index;
     }
+    _getPlugin(actionType) {
+        let plugin = this.plugins.get([actionType]);
+        if (!plugin) {
+            const Plugin = ActionManager.Plugins[actionType];
+            if (!Plugin) {
+                console.error(`The ActionManager can't handle actions of type ${actionType}`);
+                return null;
+            }
+            plugin = new Plugin(this, this.env);
+            this.plugins.set([actionType], plugin);
+        }
+        return plugin;
+    }
     /**
      * Dispatches the given action to the corresponding handler to execute it,
      * according to its type. This function can be overridden to extend the
@@ -505,16 +524,8 @@ class ActionManager extends core.EventBus {
             console.error(`No type for action ${action}`);
             return Promise.reject();
         }
-        let plugin = this.plugins[action.type];
-        if (!plugin) {
-            const Plugin = ActionManager.Plugins[action.type];
-            if (!Plugin) {
-                console.error(`The ActionManager can't handle actions of type ${action.type}`, action);
-                return Promise.reject();
-            }
-            plugin = new Plugin(this, this.env);
-            this.plugins[action.type] = plugin;
-        }
+        const plugin = this._getPlugin(action.type);
+        if (!plugin) {return Promise.reject();}
         return plugin.executeAction(action, options);
         //     // case 'ir.actions.act_window_close':
         //     //     return this._executeCloseAction(action);
