@@ -70,8 +70,8 @@ class Action extends ComponentAdapter {
             const reloadParam = Object.assign(
                 {offset: 0,},
                 action.controller.viewOptions,
+                nextProps.options,
                 {
-                    breadcrumbs: controllerState.breadcrumbs,
                     controllerState
                 },
             );

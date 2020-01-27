@@ -2542,7 +2542,7 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('breadcrumbs are updated when switching between views', async function (assert) {
-        assert.expect(15);
+        assert.expect(16);
 
         const webClient = await createWebClient({
             actions: this.actions,
@@ -2575,6 +2575,7 @@ QUnit.module('ActionManager', {
 
         // go back to kanban view using the breadcrumbs
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .breadcrumb a'));
+        assert.containsOnce(webClient, '.o_kanban_view', "should be back on kanban view");
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').length, 1,
             "there should be one controller in the breadcrumbs");
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners',
