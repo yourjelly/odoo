@@ -1450,7 +1450,8 @@ class AccountMove(models.Model):
         ''' Constraint triggered manually when writing on the journal entries to prevent
         unconsistent modifications regarding the linked statement lines.
         '''
-        statement_lines = self.env['account.bank.statement.line'].search([('move_id', 'in', self.ids)])
+        # Make the search in sudo mode since you could not have the access rights on the statement lines.
+        statement_lines = self.env['account.bank.statement.line'].sudo().search([('move_id', 'in', self.ids)])
         if not statement_lines._is_account_move_valid():
             raise UserError(_("You can't perform such modifications on journal entry linked to a statement line."))
 
