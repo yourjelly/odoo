@@ -163,6 +163,13 @@ class ReturnPicking(models.TransientModel):
 class Orderpoint(models.Model):
     _inherit = "stock.warehouse.orderpoint"
 
+    def _commpute_allowed_route_ids(self):
+        super()._commpute_allowed_route_ids()
+        if not self.user_has_groups('stock.group_adv_location'):
+            route_buy = self.env['stock.rule'].search([('action', '=', 'buy')]).route_id
+            for orderpoint in self:
+                orderpoint.allowed_route_ids |= route_buy
+
     def _quantity_in_progress(self):
         res = super(Orderpoint, self)._quantity_in_progress()
         for poline in self.env['purchase.order.line'].search([('state', 'in', ('draft', 'sent', 'to approve')), ('orderpoint_id', 'in', self.ids), ('move_dest_ids', '=', False)]):
