@@ -52,10 +52,10 @@ odoo.define('web.ActWindowActionManager', function (require) {
 
             const viewDescr = action.views.find(view => view.type === viewType);
             // FIXME
-            // if (!viewDescr) {
-            //     const { controller } = this._getCurrentAction();
-            //     return this._restoreController(controller.jsID);
-            // }
+            if (!viewDescr) {
+                const { controller } = this._getCurrentAction();
+                return this.restoreController(controller.jsID);
+            }
 
             options = options || {};
             const index = options.index || 0;

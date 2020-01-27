@@ -43,6 +43,9 @@ class ActionManagerPlugin {
     _nextID() {
         return this.actionManager._nextID(...arguments);
     }
+    restoreController(controllerID) {
+        return this.actionManager.restoreController(controllerID);
+    }
     get currentStack() {
         return this.actionManager.currentStack;
     }
