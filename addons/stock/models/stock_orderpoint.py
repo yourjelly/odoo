@@ -156,11 +156,6 @@ class StockWarehouseOrderpoint(models.Model):
                         qty_to_order += orderpoint.qty_multiple - remainder
                 orderpoint.qty_to_order = qty_to_order
 
-    def _quantity_in_progress(self):
-        """Return Quantities that are not yet in virtual stock but should be deduced from orderpoint rule
-        (example: purchases created from orderpoints)"""
-        return dict(self.mapped(lambda x: (x.id, 0.0)))
-
     @api.constrains('product_id')
     def _check_product_uom(self):
         ''' Check if the UoM has the same category as the product standard UoM '''
@@ -168,7 +163,7 @@ class StockWarehouseOrderpoint(models.Model):
             raise ValidationError(_('You have to select a product unit of measure that is in the same category than the default unit of measure of the product'))
 
     @api.onchange('warehouse_id')
-    def onchange_warehouse_id(self):
+    def _onchange_warehouse_id(self):
         """ Finds location id for changed warehouse. """
         if self.warehouse_id:
             self.location_id = self.warehouse_id.lot_stock_id.id
@@ -283,3 +278,8 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _post_process_scheduler(self):
         return True
+
+    def _quantity_in_progress(self):
+        """Return Quantities that are not yet in virtual stock but should be deduced from orderpoint rule
+        (example: purchases created from orderpoints)"""
+        return dict(self.mapped(lambda x: (x.id, 0.0)))
