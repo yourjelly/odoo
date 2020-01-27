@@ -266,7 +266,6 @@
                 <field name="color"/>
                 <field name="priority"/>
                 <field name="user_id"/>
-                <field name="user_email"/>
                 <field name="partner_name"/>
                 <field name="type_id"/>
                 <field name="partner_id"/>

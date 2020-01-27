@@ -41,6 +41,7 @@ class AccountFiscalPosition(models.Model):
     # To be used in hiding the 'Federal States' field('attrs' in view side) when selected 'Country' has 0 states.
     states_count = fields.Integer(compute='_compute_states_count')
 
+    @api.depends('country_id.state_ids')
     def _compute_states_count(self):
         for position in self:
             position.states_count = len(position.country_id.state_ids)
@@ -82,7 +83,6 @@ class AccountFiscalPosition(models.Model):
         if self.country_id:
             self.zip_from = self.zip_to = self.country_group_id = False
             self.state_ids = [(5,)]
-            self.states_count = len(self.country_id.state_ids)
 
     @api.onchange('country_group_id')
     def _onchange_country_group_id(self):
@@ -337,11 +337,6 @@ class ResPartner(models.Model):
         for partner, child_ids in all_partners_and_children.items():
             partner.total_invoiced = sum(price['total'] for price in price_totals if price['partner_id'] in child_ids)
 
-    def _compute_journal_item_count(self):
-        AccountMoveLine = self.env['account.move.line']
-        for partner in self:
-            partner.journal_item_count = AccountMoveLine.search_count([('partner_id', '=', partner.id)])
-
     def _compute_has_unreconciled_entries(self):
         for partner in self:
             # Avoid useless work if has_unreconciled_entries is not relevant for this partner
@@ -399,7 +394,6 @@ class ResPartner(models.Model):
         groups='account.group_account_invoice,account.group_account_readonly')
     currency_id = fields.Many2one('res.currency', compute='_get_company_currency', readonly=True,
         string="Currency", help='Utility field to express amount currency')
-    journal_item_count = fields.Integer(compute='_compute_journal_item_count', string="Journal Items")
     property_account_payable_id = fields.Many2one('account.account', company_dependent=True,
         string="Account Payable",
         domain="[('internal_type', '=', 'payable'), ('deprecated', '=', False), ('company_id', '=', current_company_id)]",
@@ -432,7 +426,6 @@ class ResPartner(models.Model):
              'It is set either if there\'s not at least an unreconciled debit and an unreconciled credit '
              'or if you click the "Done" button.')
     invoice_ids = fields.One2many('account.move', 'partner_id', string='Invoices', readonly=True, copy=False)
-    contract_ids = fields.One2many('account.analytic.account', 'partner_id', string='Partner Contracts', readonly=True)
     bank_account_count = fields.Integer(compute='_compute_bank_count', string="Bank")
     trust = fields.Selection([('good', 'Good Debtor'), ('normal', 'Normal Debtor'), ('bad', 'Bad Debtor')], string='Degree of trust you have in this debtor', default='normal', company_dependent=True)
     invoice_warn = fields.Selection(WARNING_MESSAGE, 'Invoice', help=WARNING_HELP, default="no-message")

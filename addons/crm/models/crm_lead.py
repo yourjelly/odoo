@@ -64,8 +64,6 @@ class Lead(models.Model):
     # Description
     name = fields.Char('Opportunity', index=True, required=True)
     user_id = fields.Many2one('res.users', string='Salesperson', index=True, tracking=True, default=lambda self: self.env.user)
-    user_email = fields.Char('User Email', related='user_id.email', readonly=True)
-    user_login = fields.Char('User Login', related='user_id.login', readonly=True)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company.id)
     referred = fields.Char('Referred By')
     description = fields.Text('Notes')

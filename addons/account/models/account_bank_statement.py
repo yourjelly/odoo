@@ -26,9 +26,9 @@ class AccountCashboxLine(models.Model):
         for cashbox_line in self:
             cashbox_line.subtotal = cashbox_line.coin_value * cashbox_line.number
 
-    coin_value = fields.Float(string='Coin/Bill Value', required=True, digits=0)
+    coin_value = fields.Monetary(string='Coin/Bill Value', required=True)
     number = fields.Integer(string='#Coins/Bills', help='Opening Unit Numbers')
-    subtotal = fields.Float(compute='_sub_total', string='Subtotal', digits=0, readonly=True)
+    subtotal = fields.Monetary(compute='_sub_total', string='Subtotal')
     cashbox_id = fields.Many2one('account.bank.statement.cashbox', string="Cashbox")
     currency_id = fields.Many2one('res.currency', related='cashbox_id.currency_id')
 

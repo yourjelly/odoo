@@ -472,7 +472,6 @@
                     <field name="planned_revenue"/>
                     <field name="kanban_state"/>
                     <field name="activity_date_deadline"/>
-                    <field name="user_email"/>
                     <field name="user_id"/>
                     <field name="partner_address_email"/>
                     <field name="message_needaction_counter"/>
