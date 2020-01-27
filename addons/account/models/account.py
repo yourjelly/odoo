@@ -1565,65 +1565,6 @@ class AccountJournal(models.Model):
             if vals_write:
                 journal.write(vals_write)
 
-    # -------------------------------------------------------------------------
-    # REPORTING METHODS
-    # -------------------------------------------------------------------------
-
-    def _get_journal_balance(self, domain=None):
-        ''' Get the balance of the current journal by filtering the journal items using the journal's accounts.
-
-        /!\ The current journal is not part of the applied domain. This is the expected behavior since we only want
-        a logic based on accounts.
-
-        :param domain:  An additional domain to be applied on the account.move.line model.
-        :return:        The balance expressed in the journal's currency.
-        '''
-        self.ensure_one()
-        self.env['account.move.line'].check_access_rights('read')
-
-        accounts = self.default_debit_account_id + self.default_credit_account_id
-        if not accounts:
-            return 0.0
-
-        domain = (domain or []) + [('account_id', 'in', tuple(accounts.ids))] + [
-            ('display_type', 'not in', ('line_section', 'line_note')),
-            ('move_id.state', '!=', 'cancel'),
-        ]
-        query = self.env['account.move.line']._where_calc(domain)
-        tables, where_clause, where_params = query.get_sql()
-
-        query = '''
-            SELECT
-                SUM(account_move_line.balance),
-                SUM(account_move_line.amount_currency),
-                account_move_line.currency_id
-            FROM ''' + tables + '''
-            WHERE ''' + where_clause + '''
-            GROUP BY account_move_line.currency_id
-        '''
-        self._cr.execute(query, where_params)
-
-        company_currency = self.company_id.currency_id
-        journal_currency = self.currency_id if self.currency_id and self.currency_id != company_currency else False
-
-        account_balance = 0.0
-        for balance, amount_currency, currency_id in self._cr.fetchall():
-            if journal_currency:
-                account_balance += amount_currency
-            else:
-                account_balance += balance
-
-        return account_balance
-
-    def _get_last_bank_statement(self, domain=None):
-        ''' Retrieve the last bank statement created using this journal.
-        :param domain:  An additional domain to be applied on the account.bank.statement model.
-        :return:        An account.bank.statement record or an empty recordset.
-        '''
-        self.ensure_one()
-        last_statement_domain = (domain or []) + [('journal_id', '=', self.id)]
-        return self.env['account.bank.statement'].search(last_statement_domain, order="date desc, id desc", limit=1)
-
 
 class ResPartnerBank(models.Model):
     _inherit = "res.partner.bank"

@@ -435,15 +435,15 @@ class account_payment(models.Model):
         return super(account_payment, self).unlink()
 
     def _get_liquidity_account(self, journal=None):
+        ''' Method used to retrieve the account from the bank/cash journal.
+        :param journal: An optional account.journal used to manage the correct journal when making an internal transfer.
+        :return:        An account.account record.
+        '''
         self.ensure_one()
 
         journal = journal or self.journal_id
         liquidity_account = journal.default_debit_account_id if self.amount >= 0.0 else journal.default_credit_account_id
-        account_accountant_module = self.env['ir.module.module'].search([('name', '=', 'account_accountant')], limit=1)
-        if account_accountant_module.state == 'installed':
-            return journal.payment_transfer_account_id
-        else:
-            return liquidity_account
+        return liquidity_account
 
     def _prepare_payment_moves(self):
         ''' Prepare the creation of journal entries (account.move) by creating a list of python dictionary to be passed

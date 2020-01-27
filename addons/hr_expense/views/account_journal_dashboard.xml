@@ -4,7 +4,7 @@
     <record id="account_journal_dashboard_kanban_view_inherit_hr_expense" model="ir.ui.view">
         <field name="name">account.journal.dashboard.kanban</field>
         <field name="model">account.journal</field>
-        <field name="inherit_id" ref="account.account_journal_dashboard_kanban_view" />
+        <field name="inherit_id" ref="account_accountant.account_journal_dashboard_kanban_view" />
         <field name="arch" type="xml">
             <xpath expr="//t[@id='account.JournalBodySalePurchase']//div[hasclass('o_kanban_primary_right')]" position="inside">
                 <div class="row">

@@ -29,9 +29,8 @@
                                         <field name="credit" attrs="{'readonly':[('parent_state','=','posted')]}"/>
                                         <field name="quantity" attrs="{'readonly':[('parent_state','=','posted')]}"/>
                                     </group>
-                                    <group string="Accounting Documents">
+                                    <group id="section_accounting_documents" string="Accounting Documents">
                                         <field name="move_id" attrs="{'readonly':[('parent_state','=','posted')]}"/>
-                                        <field name="statement_id" readonly="True" attrs="{'invisible': [('statement_id','=',False)]}"/>
                                     </group>
                                     <group string="Dates">
                                         <field name="date" groups="account.group_account_readonly"/>
@@ -143,7 +142,6 @@
                     <field name="move_id" optional="show"/>
                     <field name="account_id" options="{'no_open': True}" groups="account.group_account_readonly"/>
                     <field name="partner_id" optional="show"/>
-                    <field name="statement_id" invisible="1"/>
                     <field name="ref" optional="show"/>
                     <field name="name" optional="show"/>
                     <field name="analytic_account_id" groups="account.group_account_readonly" optional="show"/>
@@ -176,7 +174,6 @@
                     <field name="account_id" optional="show" options="{'no_open': True, 'no_create': True}"
                            domain="[('company_id', '=', company_id)]"
                            groups="account.group_account_readonly"/>
-                    <field name="statement_id" invisible="1"/>
                     <field name="partner_id" optional="show" readonly="1"/>
                     <field name="ref" optional="hide"/>
                     <field name="name"/>

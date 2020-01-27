@@ -1446,15 +1446,6 @@ class AccountMove(models.Model):
                 raise UserError(message)
         return True
 
-    def _check_statement_lines_consistency(self):
-        ''' Constraint triggered manually when writing on the journal entries to prevent
-        unconsistent modifications regarding the linked statement lines.
-        '''
-        # Make the search in sudo mode since you could not have the access rights on the statement lines.
-        statement_lines = self.env['account.bank.statement.line'].sudo().search([('move_id', 'in', self.ids)])
-        if not statement_lines._is_account_move_valid():
-            raise UserError(_("You can't perform such modifications on journal entry linked to a statement line."))
-
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
@@ -1632,10 +1623,6 @@ class AccountMove(models.Model):
 
         # Trigger 'action_invoice_paid' when the invoice becomes paid after a write.
         not_paid_invoices.filtered(lambda move: move.payment_state in ('paid', 'in_payment')).action_invoice_paid()
-
-        # Ensure the move is still valid regarding the linked statement lines.
-        if self._context.get('check_move_validity', True):
-            self._check_statement_lines_consistency()
 
         return res
 
@@ -2465,11 +2452,6 @@ class AccountMoveLine(models.Model):
     reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False, readonly=True)
     payment_id = fields.Many2one('account.payment', string="Originator Payment", copy=False,
         help="Payment that created this entry")
-    statement_line_id = fields.Many2one('account.bank.statement.line',
-        string='Bank statement line reconciled with this entry',
-        index=True, copy=False, readonly=True)
-    statement_id = fields.Many2one(related='statement_line_id.statement_id', store=True, index=True, copy=False,
-        help="The bank statement used for bank reconciliation")
 
     # ==== Tax fields ====
     tax_ids = fields.Many2many('account.tax', string='Taxes', help="Taxes that apply on the base amount")
@@ -3229,7 +3211,6 @@ class AccountMoveLine(models.Model):
         moves = lines.mapped('move_id')
         if self._context.get('check_move_validity', True):
             moves._check_balanced()
-            moves._check_statement_lines_consistency()
         moves._check_fiscalyear_lock_date()
         lines._check_tax_lock_date()
 
@@ -3377,7 +3358,6 @@ class AccountMoveLine(models.Model):
         # Check total_debit == total_credit in the related moves.
         if self._context.get('check_move_validity', True):
             self.mapped('move_id')._check_balanced()
-            self.mapped('move_id')._check_statement_lines_consistency()
 
         return result
 
