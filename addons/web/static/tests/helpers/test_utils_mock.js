@@ -417,6 +417,9 @@ function getMockedOwlEnv(params) {
         },
         session: params.session || {},
     };
+    if (params.dataManager) {
+        Object.assign(env.dataManager, params.dataManager);
+    }
     if (params.services) {
         for (let serv in params.services) {
             const Service = params.services[serv];

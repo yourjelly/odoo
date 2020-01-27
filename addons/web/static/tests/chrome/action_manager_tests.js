@@ -3531,13 +3531,14 @@ QUnit.module('ActionManager', {
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            intercepts: {
-                create_filter: function (event) {
-                    var filter = event.data.filter;
+            dataManager: {
+                create_filter: function (payload) {
+                    var filter = payload.filter;
                     assert.deepEqual(filter.domain, `[("bar", "=", 1)]`,
                         "should save the correct domain");
                     assert.deepEqual(filter.context, {shouldBeInFilterContext: true},
                         "should save the correct context");
+                    return Promise.resolve();
                 },
             },
         });

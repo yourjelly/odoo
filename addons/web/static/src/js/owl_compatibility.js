@@ -254,6 +254,10 @@ odoo.define('web.OwlCompatibility', function () {
                 return this.env.dataManager
                     .load_filters(payload)
                     .then(payload.on_success);
+            } else if (evType === 'create_filter') {
+                return this.env.dataManager
+                    .create_filter(payload)
+                    .then(payload.on_success);
             } else if (evType === 'do_action') {
                 return this.env.bus.trigger('do-action', payload);
             } else if (evType === 'switch_view') {
