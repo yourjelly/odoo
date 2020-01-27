@@ -144,4 +144,5 @@
         id="menu_reordering_rules_config"
         action="action_orderpoint"
         name="Reordering Rules" parent="menu_stock_inventory_control" sequence="10"/>
+    
 </odoo>
