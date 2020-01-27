@@ -300,7 +300,6 @@ class AccountMove(models.Model):
     restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
     secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False)
     inalterable_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False)
-    string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True)
 
     @api.model
     def _field_will_change(self, record, vals, field_name):
@@ -2427,30 +2426,32 @@ class AccountMove(models.Model):
         """ Computes the hash of the browse_record given as self, based on the hash
         of the previous record in the company's securisation sequence given as parameter"""
         self.ensure_one()
-        hash_string = sha256((previous_hash + self.string_to_hash).encode('utf-8'))
+        hash_string = sha256((previous_hash + self._compute_string_to_hash()).encode('utf-8'))
         return hash_string.hexdigest()
 
     def _compute_string_to_hash(self):
+        self.ensure_one()
+        move = self
         def _getattrstring(obj, field_str):
             field_value = obj[field_str]
             if obj._fields[field_str].type == 'many2one':
                 field_value = field_value.id
             return str(field_value)
 
-        for move in self:
-            values = {}
-            for field in INTEGRITY_HASH_MOVE_FIELDS:
-                values[field] = _getattrstring(move, field)
+        values = {}
+        for field in INTEGRITY_HASH_MOVE_FIELDS:
+            values[field] = _getattrstring(move, field)
 
-            for line in move.line_ids:
-                for field in INTEGRITY_HASH_LINE_FIELDS:
-                    k = 'line_%d_%s' % (line.id, field)
-                    values[k] = _getattrstring(line, field)
-            #make the json serialization canonical
-            #  (https://tools.ietf.org/html/draft-staykov-hu-json-canonical-form-00)
-            move.string_to_hash = dumps(values, sort_keys=True,
-                                                ensure_ascii=True, indent=None,
-                                                separators=(',',':'))
+        for line in move.line_ids:
+            for field in INTEGRITY_HASH_LINE_FIELDS:
+                k = 'line_%d_%s' % (line.id, field)
+                values[k] = _getattrstring(line, field)
+        #make the json serialization canonical
+        #  (https://tools.ietf.org/html/draft-staykov-hu-json-canonical-form-00)
+        return dumps(
+            values, sort_keys=True,
+            ensure_ascii=True, indent=None,
+            separators=(',',':'))
 
     def action_invoice_print(self):
         """ Print the invoice and mark it as sent, so that we can see more

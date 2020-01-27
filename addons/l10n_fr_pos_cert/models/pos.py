@@ -47,7 +47,6 @@ class pos_order(models.Model):
 
     l10n_fr_hash = fields.Char(string="Inalteralbility Hash", readonly=True, copy=False)
     l10n_fr_secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False)
-    l10n_fr_string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True, store=False)
 
     def _get_new_hash(self, secure_seq_number):
         """ Returns the hash to write on pos orders when they get posted"""
@@ -68,10 +67,12 @@ class pos_order(models.Model):
         """ Computes the hash of the browse_record given as self, based on the hash
         of the previous record in the company's securisation sequence given as parameter"""
         self.ensure_one()
-        hash_string = sha256((previous_hash + self.l10n_fr_string_to_hash).encode('utf-8'))
+        hash_string = sha256((previous_hash + self._compute_string_to_hash()).encode('utf-8'))
         return hash_string.hexdigest()
 
     def _compute_string_to_hash(self):
+        self.ensure_one()
+        order = self
         def _getattrstring(obj, field_str):
             field_value = obj[field_str]
             if obj._fields[field_str].type == 'many2one':
@@ -80,20 +81,20 @@ class pos_order(models.Model):
                 field_value = field_value.sorted().ids
             return str(field_value)
 
-        for order in self:
-            values = {}
-            for field in ORDER_FIELDS:
-                values[field] = _getattrstring(order, field)
+        values = {}
+        for field in ORDER_FIELDS:
+            values[field] = _getattrstring(order, field)
 
-            for line in order.lines:
-                for field in LINE_FIELDS:
-                    k = 'line_%d_%s' % (line.id, field)
-                    values[k] = _getattrstring(line, field)
-            #make the json serialization canonical
-            #  (https://tools.ietf.org/html/draft-staykov-hu-json-canonical-form-00)
-            order.l10n_fr_string_to_hash = dumps(values, sort_keys=True,
-                                                ensure_ascii=True, indent=None,
-                                                separators=(',',':'))
+        for line in order.lines:
+            for field in LINE_FIELDS:
+                k = 'line_%d_%s' % (line.id, field)
+                values[k] = _getattrstring(line, field)
+        #make the json serialization canonical
+        #  (https://tools.ietf.org/html/draft-staykov-hu-json-canonical-form-00)
+        return dumps(
+            values, sort_keys=True,
+            ensure_ascii=True, indent=None,
+            separators=(',',':'))
 
     def write(self, vals):
         has_been_posted = False
