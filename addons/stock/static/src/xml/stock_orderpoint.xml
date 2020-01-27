@@ -26,4 +26,14 @@
             </tbody>
         </table>
     </div>
+
+    <t t-name="StockOrderpoint.Buttons">
+        <button type="button" class="btn btn-secondary o_button_order">
+            Order
+        </button>
+        <button type="button" class="btn btn-secondary o_button_run_scheduler">
+            Run Scheduler
+        </button>
+    </t>
+
 </templates>
