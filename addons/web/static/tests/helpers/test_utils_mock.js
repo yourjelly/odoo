@@ -417,6 +417,16 @@ function getMockedOwlEnv(params) {
         },
         session: params.session || {},
     };
+    if (params.services) {
+        for (let serv in params.services) {
+            const Service = params.services[serv];
+            if (Service.constructor) {
+                env.services[serv] = new Service();
+            } else {
+                env.services[serv] = Service;
+            }
+        }
+    }
     return makeTestEnvironment(env, server.performRpc.bind(server));
 }
 
