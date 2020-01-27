@@ -209,7 +209,6 @@ class AccountReconcileModel(models.Model):
         '''
         self.ensure_one()
         balance = base_line_dict['balance']
-        currency = base_line_dict.get('currency_id') and self.env['res.currency'].browse(base_line_dict['currency_id'])
 
         res = tax.compute_all(balance)
 
@@ -258,10 +257,11 @@ class AccountReconcileModel(models.Model):
             if line.amount_type == 'percentage':
                 balance = residual_balance * (line.amount / 100.0)
             elif line.amount_type == "regex":
-                match = re.search(line.amount_string, st_line.name)
+                match = re.search(line.amount_string, st_line.payment_ref)
                 if match:
-                    amount = float(re.sub(r'\D' + line.decimal_separator, '', match.group(1)).replace(line.decimal_separator, '.'))
-                    balance = copysign(amount * (1 if residual_balance > 0.0 else -1), residual_balance)
+                    sign = 1 if residual_balance > 0.0 else -1
+                    extracted_balance = float(re.sub(r'\D' + self.decimal_separator, '', match.group(1)).replace(self.decimal_separator, '.'))
+                    balance = copysign(extracted_balance * sign, residual_balance)
                 else:
                     balance = 0
             else:
@@ -277,6 +277,8 @@ class AccountReconcileModel(models.Model):
                 'reconcile_model_id': self.id,
             }
             lines_vals_list.append(writeoff_line)
+
+            residual_balance -= balance
 
             if line.tax_ids:
                 writeoff_line['tax_ids'] = [(6, None, line.tax_ids.ids)]
