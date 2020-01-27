@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
 from datetime import datetime, time
 from json import dumps
 
@@ -9,6 +10,7 @@ from dateutil import relativedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
+from odoo.tools import float_compare, frozendict
 
 
 class StockWarehouseOrderpoint(models.Model):
@@ -31,6 +33,11 @@ class StockWarehouseOrderpoint(models.Model):
     name = fields.Char(
         'Name', copy=False, required=True, readonly=True,
         default=lambda self: self.env['ir.sequence'].next_by_code('stock.orderpoint'))
+    trigger = fields.Selection([
+        ('auto', 'Auto'),
+        ('manual', 'Manual'),
+        ('on_order', 'On Order'),
+    ], 'trigger', default='auto', required=1)
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the orderpoint without removing it.")
@@ -68,6 +75,12 @@ class StockWarehouseOrderpoint(models.Model):
 
     json_lead_days_popover = fields.Char(compute='_compute_lead_days')
     lead_days_date = fields.Date(compute='_compute_lead_days')
+    allowed_route_ids = fields.One2many('stock.location.route', compute='_commpute_allowed_route_ids')
+    route_id = fields.Many2one(
+        'stock.location.route', string='Route', domain="[('id', 'in', allowed_route_ids)]")
+    qty_on_hand = fields.Float('On Hand', compute_sudo=False, compute='_compute_qty', readonly=1)
+    qty_forecast = fields.Float('Forecast', compute_sudo=False, compute='_compute_qty', readonly=1)
+    qty_to_order = fields.Float('To Order', compute_sudo=False, compute='_compute_qty', readonly=1)
 
     _sql_constraints = [
         ('qty_multiple_check', 'CHECK( qty_multiple >= 0 )', 'Qty Multiple must be greater than or equal to zero.'),
@@ -86,11 +99,25 @@ class StockWarehouseOrderpoint(models.Model):
                 loc_domain = expression.AND([loc_domain, ['|', ('company_id', '=', False), ('company_id', '=', orderpoint.company_id.id)]])
             orderpoint.allowed_location_ids = self.env['stock.location'].search(loc_domain)
 
+    @api.depends('warehouse_id', 'location_id')
+    def _commpute_allowed_route_ids(self):
+        if self.user_has_groups('stock.group_adv_location'):
+            for orderpoint in self:
+                orderpoint.allowed_route_ids = self.env['stock.location.route'].search([
+                    '|', '|',
+                    ('warehouse_ids', 'in', orderpoint.warehouse_id.id),
+                    ('product_selectable', '=', True),
+                    ('product_categ_selectable', '=', True)
+                ])
+        else:
+            for orderpoint in self:
+                orderpoint.allowed_route_ids = orderpoint.location_id.get_warehouse().delivery_route_id
+
     @api.depends('product_id', 'location_id', 'company_id', 'warehouse_id',
                  'product_id.seller_ids', 'product_id.seller_ids.delay')
     def _compute_lead_days(self):
         for orderpoint in self:
-            rules = orderpoint.product_id._get_rules_from_location(orderpoint.location_id)
+            rules = orderpoint.product_id._get_rules_from_location(orderpoint.location_id, route_ids=orderpoint.route_id)
             lead_days, lead_days_description = rules._get_lead_days(orderpoint.product_id)
             lead_days_date = fields.Date.today() + relativedelta.relativedelta(days=lead_days)
             orderpoint.json_lead_days_popover = dumps({
@@ -101,6 +128,29 @@ class StockWarehouseOrderpoint(models.Model):
                 'today': fields.Date.to_string(fields.Date.today()),
             })
             orderpoint.lead_days_date = lead_days_date
+
+    def _compute_qty(self):
+        orderpoints_contexts = defaultdict(lambda: self.env['stock.warehouse.orderpoint'])
+        for orderpoint in self:
+            orderpoint_context = orderpoint._get_product_context()
+            product_context = frozendict({**self.env.context, **orderpoint_context})
+            orderpoints_contexts[product_context] |= orderpoint
+        for orderpoint_context, orderpoints_by_context in orderpoints_contexts.items():
+            products_qty = orderpoints_by_context.product_id.with_context(orderpoint_context)._product_available()
+            products_qty_in_progress = orderpoints_by_context._quantity_in_progress()
+            for orderpoint in orderpoints_by_context:
+                orderpoint.qty_on_hand = products_qty[orderpoint.product_id.id]['qty_available']
+                orderpoint.qty_forecast = products_qty[orderpoint.product_id.id]['virtual_available'] + products_qty_in_progress[orderpoint.id]
+
+                qty_to_order = 0.0
+                rounding = orderpoint.product_uom.rounding
+                if float_compare(orderpoint.qty_forecast, orderpoint.product_min_qty, precision_rounding=rounding) < 0:
+                    qty_to_order = max(orderpoint.product_min_qty, orderpoint.product_max_qty) - orderpoint.qty_forecast
+
+                    remainder = orderpoint.qty_multiple > 0 and qty_to_order % orderpoint.qty_multiple or 0.0
+                    if float_compare(remainder, 0.0, precision_rounding=rounding) > 0:
+                        qty_to_order += orderpoint.qty_multiple - remainder
+                orderpoint.qty_to_order = qty_to_order
 
     def _quantity_in_progress(self):
         """Return Quantities that are not yet in virtual stock but should be deduced from orderpoint rule

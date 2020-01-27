@@ -540,8 +540,9 @@ class ProcurementGroup(models.Model):
         return 'location_id,company_id'
 
     def _get_orderpoint_domain(self, company_id=False):
-        domain = [('company_id', '=', company_id)] if company_id else []
-        domain += [('product_id.active', '=', True)]
+        domain = [('trigger', '=', 'auto'), ('product_id.active', '=', True)]
+        if company_id:
+            domain += [('company_id', '=', company_id)]
         return domain
 
     @api.model
@@ -564,43 +565,15 @@ class ProcurementGroup(models.Model):
             orderpoints_batch = self.env['stock.warehouse.orderpoint'].browse(orderpoints_batch)
             orderpoints_exceptions = []
             while orderpoints_batch:
-
-                # Calculate groups that can be executed together
-                orderpoints_contexts = defaultdict(lambda: self.env['stock.warehouse.orderpoint'])
-
                 procurements = []
                 for orderpoint in orderpoints_batch:
-                    orderpoint_context = orderpoint._get_product_context()
-                    product_context = frozendict({**self.env.context, **orderpoint_context})
-                    orderpoints_contexts[product_context] |= orderpoint
-
-                for orderpoint_context, orderpoints_by_context in orderpoints_contexts.items():
-                    substract_quantity = orderpoints_by_context._quantity_in_progress()
-                    product_quantity = orderpoints_by_context.product_id.with_context(orderpoint_context)._product_available()
-
-                    for orderpoint in orderpoints_by_context:
-                        op_product_virtual = product_quantity[orderpoint.product_id.id]['virtual_available']
-                        if op_product_virtual is None:
-                            continue
-                        if float_compare(op_product_virtual, orderpoint.product_min_qty, precision_rounding=orderpoint.product_uom.rounding) <= 0:
-                            qty = max(orderpoint.product_min_qty, orderpoint.product_max_qty) - op_product_virtual
-                            remainder = orderpoint.qty_multiple > 0 and qty % orderpoint.qty_multiple or 0.0
-
-                            if float_compare(remainder, 0.0, precision_rounding=orderpoint.product_uom.rounding) > 0:
-                                qty += orderpoint.qty_multiple - remainder
-
-                            if float_compare(qty, 0.0, precision_rounding=orderpoint.product_uom.rounding) < 0:
-                                continue
-
-                            qty -= substract_quantity[orderpoint.id]
-                            qty_rounded = float_round(qty, precision_rounding=orderpoint.product_uom.rounding)
-                            if qty_rounded > 0:
-                                date = datetime.combine(orderpoint_context.get('to_date'), time.min)
-                                values = orderpoint._prepare_procurement_values(qty_rounded, date=date)
-                                procurements.append(self.env['procurement.group'].Procurement(
-                                    orderpoint.product_id, qty_rounded, orderpoint.product_uom,
-                                    orderpoint.location_id, orderpoint.name, orderpoint.name,
-                                    orderpoint.company_id, values))
+                    if float_compare(orderpoint.qty_to_order, 0.0, precision_rounding=orderpoint.product_uom.rounding) == 1:
+                        date = datetime.combine(orderpoint.lead_days_date, time.min)
+                        values = orderpoint._prepare_procurement_values(orderpoint.qty_to_order, date=date)
+                        procurements.append(self.env['procurement.group'].Procurement(
+                            orderpoint.product_id, orderpoint.qty_to_order, orderpoint.product_uom,
+                            orderpoint.location_id, orderpoint.name, orderpoint.name,
+                            orderpoint.company_id, values))
 
                 try:
                     with self.env.cr.savepoint():
