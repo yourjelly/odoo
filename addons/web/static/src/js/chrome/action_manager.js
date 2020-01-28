@@ -220,7 +220,7 @@ class ActionManager extends core.EventBus {
     clearUncommittedChanges() {
         const { controller } = this.getCurrentAction();
         if (controller) {
-            return controller.widget.canBeRemoved();
+            return controller.component.canBeRemoved();
         }
         return Promise.resolve();
     }
@@ -252,6 +252,7 @@ class ActionManager extends core.EventBus {
      */
     async doAction(action, options) {
         // cancel potential current rendering
+        await this.clearUncommittedChanges();
         this.trigger('cancel');
         this.currentRequestID++;
 
@@ -419,7 +420,7 @@ class ActionManager extends core.EventBus {
      */
     getCurrentAction() {
         const currentControllerID = this.currentStack[this.currentStack.length - 1];
-        return this.getAction(currentControllerID);
+        return currentControllerID ? this.getAction(currentControllerID) : {controller: null, action: null};
     }
     /**
      * Restores a controller from the controllerStack and removes all
@@ -432,7 +433,7 @@ class ActionManager extends core.EventBus {
         // TODO
         //  - move logic from act window (clear uncommitted changes + on _reverse_bc)
         //  - add hook onRestoreController (async)
-        //await this.clearUncommittedChanges();
+        await this.clearUncommittedChanges();
         this.trigger('cancel');
         const { action , controller } = this.getAction(controllerID);
         const plugin = this._getPlugin(action.type);
