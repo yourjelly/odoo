@@ -28,7 +28,7 @@ class ActionManagerPlugin {
     _resolveLast() {
         return this.actionManager._resolveLast(...arguments);
     }
-
+    loadState(/* state, options */) {}
 
     // FIXME: create a 'createController' or something function and get rid of these
     _getBreadcrumbs() {
@@ -54,6 +54,9 @@ class ActionManagerPlugin {
     }
     get actions() {
         return this.actionManager.actions;
+    }
+    doAction() {
+        return this.actionManager.doAction(...arguments);
     }
     _getCurrentAction() {
         return this.actionManager.getCurrentAction();
@@ -154,6 +157,19 @@ class ClientActionPlugin extends ActionManagerPlugin {
             // title: widget.getTitle(),
         };
         this._pushController(action.controller);
+    }
+    /**
+     * @override
+     */
+    loadState(state, options) {
+        if (typeof state.action === 'string' && action_registry.contains(state.action)) {
+            const action = {
+                params: state,
+                tag: state.action,
+                type: 'ir.actions.client',
+            };
+            return this.doAction(action, options);
+        }
     }
 }
 ClientActionPlugin.type = 'ir.actions.client';
@@ -411,7 +427,7 @@ class ActionManager extends core.EventBus {
     getAction(controllerID) {
         const currentController = this.controllers[controllerID];
         return {
-            action: this.actions[currentController.actionID],
+            action: currentController && this.actions[currentController.actionID],
             controller: currentController,
         };
     }
@@ -421,6 +437,104 @@ class ActionManager extends core.EventBus {
     getCurrentAction() {
         const currentControllerID = this.currentStack[this.currentStack.length - 1];
         return currentControllerID ? this.getAction(currentControllerID) : {controller: null, action: null};
+    }
+    /**
+     * @param {Object} state
+     * @returns {Promise}
+     */
+    async loadState(state, options) {
+        const pluginKeys = Object.keys(ActionManager.Plugins);
+        const plugins = pluginKeys.map(key => this._getPlugin(key));
+        options = Object.assign({ clear_breadcrumbs: true }, options);
+        let result;
+        for (const plugin of plugins) {
+            result = plugin.loadState(state, options);
+            if (result) {
+                break;
+            }
+        }
+        return result;
+
+
+ //        var action;
+ //        if (!state.action) {
+ //            return Promise.resolve();
+ //        }
+ //        // if (_.isString(state.action) && core.action_registry.contains(state.action)) {
+ //        //     action = {
+ //        //         params: state,
+ //        //         tag: state.action,
+ //        //         type: 'ir.actions.client',
+ //        //     };
+ //        // } else {
+ //        //     action = state.action;
+ //        // }
+ //        return this.doAction(action, {
+ //            clear_breadcrumbs: true,
+ //            pushState: false,
+ //        });
+
+ // // --------------------------------------------------------------------------
+
+ //        let action;
+ //        let options = {
+ //            clear_breadcrumbs: true,
+ //        };
+ //        if (state.action) {
+ //            const x = this.getCurrentAction(); // FIXME
+ //            const currentAction = x.action;
+ //            const currentController = x.controller;
+ //            if (currentAction && currentAction.id === state.action &&
+ //                currentAction.type === 'ir.actions.act_window') {
+ //                // the action to load is already the current one, so update it
+ //                this._closeDialog(true); // there may be a currently opened dialog, close it
+ //                var viewOptions = {currentId: state.id};
+ //                var viewType = state.view_type || currentController.viewType;
+ //                return this._switchController(currentAction, viewType, viewOptions);
+ //            } else if (!core.action_registry.contains(state.action)) {
+ //                // the action to load isn't the current one, so execute it
+ //                var context = {};
+ //                if (state.active_id) {
+ //                    context.active_id = state.active_id;
+ //                }
+ //                if (state.active_ids) {
+ //                    // jQuery's BBQ plugin does some parsing on values that are valid integers
+ //                    // which means that if there's only one item, it will do parseInt() on it,
+ //                    // otherwise it will keep the comma seperated list as string
+ //                    context.active_ids = state.active_ids.split(',').map(function (id) {
+ //                        return parseInt(id, 10) || id;
+ //                    });
+ //                } else if (state.active_id) {
+ //                    context.active_ids = [state.active_id];
+ //                }
+ //                context.params = state;
+ //                action = state.action;
+ //                options = Object.assign(options, {
+ //                    additional_context: context,
+ //                    resID: state.id || undefined, // empty string with bbq
+ //                    viewType: state.view_type,
+ //                });
+ //            }
+ //        } else if (state.model && state.id) {
+ //            action = {
+ //                res_model: state.model,
+ //                res_id: state.id,
+ //                type: 'ir.actions.act_window',
+ //                views: [[state.view_id || false, 'form']],
+ //            };
+ //        } else if (state.model && state.view_type) {
+ //            // this is a window action on a multi-record view, so restore it
+ //            // from the session storage
+ //            var storedAction = this.call('session_storage', 'getItem', 'current_action');
+ //            var lastAction = JSON.parse(storedAction || '{}');
+ //            if (lastAction.res_model === state.model) {
+ //                action = lastAction;
+ //                options.viewType = state.view_type;
+ //            }
+ //        }
+ //        if (action) {
+ //            return this.doAction(action, options);
+ //        }
     }
     /**
      * Restores a controller from the controllerStack and removes all

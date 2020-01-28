@@ -75,14 +75,14 @@ class Action extends ComponentAdapter {
     async update(nextProps) {
         if (this.legacy === 'view') {
             const action = nextProps.action;
-            const controllerState = action.controllerState || {};
+            // const controllerState = action.controllerState || {};
             const reloadParam = Object.assign(
                 {offset: 0,},
                 action.controller.viewOptions,
                 nextProps.options,
-                {
-                    controllerState
-                },
+                // {
+                //     controllerState
+                // },
             );
             await this.widget.willRestore();
             return this.widget.reload(reloadParam);

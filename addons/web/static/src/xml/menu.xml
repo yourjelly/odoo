@@ -4,13 +4,15 @@
 <header t-name="web.Menu" owl="1">
     <nav class="o_main_navbar">
         <t t-call="web.AppsMenu"/>
-        <a class="o_menu_brand" role="button"
-            t-on-click="trigger('open-menu', {menuID: currentApp.id})">
-                <t t-esc="currentApp.name"/>
-        </a>
-        <ul class="o_menu_sections" role="menu">
-            <t t-call="web.MenuSections"/>
-        </ul>
+        <t t-if="currentApp">
+            <a class="o_menu_brand" role="button"
+                t-on-click="trigger('open-menu', {menuID: currentApp.id})">
+                    <t t-esc="currentApp.name"/>
+            </a>
+            <ul class="o_menu_sections" role="menu">
+                <t t-call="web.MenuSections"/>
+            </ul>
+        </t>
         <SystrayMenu/>
     </nav>
 </header>

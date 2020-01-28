@@ -22,23 +22,51 @@ class WebClient extends Component {
         });
         this.actionManager.on('update', this, payload => {
             this.renderingInfo.done = false;
-            this.renderingInfo.main = Object.assign(this.renderingInfo.main || {}, payload.main);
+            this.renderingInfo.main = Object.assign({}, this.renderingInfo.main, payload.main);
             this.renderingInfo.dialog = payload.dialog;
+            if (!this.renderingInfo.main.menuID && !this.state.menu_id) {
+                // retrieve menu_id from action
+                const menu = Object.values(this.menus).find(menu => {
+                    return menu.actionID === payload.action.id;
+                });
+                this.renderingInfo.main.menuID = menu && menu.id;
+            }
             this.render();
         });
         this.menu = useRef('menu');
+
+        this.ignoreHashchange = false;
+
+        // the state of the webclient contains information like the current
+        // menu id, action id, view type (for act_window actions)...
+        this.state = {};
     }
 
     async willStart() {
         this.menus = await this._loadMenus();
-        const menuID = this.menus && this.menus.root.children[0];
-        if (!menuID) {return Promise.resolve();}
-        const initialAction = this.menus[menuID].actionID;
-        return this.actionManager.doAction(initialAction, { menuID }).then(() => {
-            console.log('action loaded');
-        });
+
+        const state = this._getUrlState();
+        // if (Object.keys(state).length === 1 && Object.keys(state)[0] === "cids") {
+        if (Object.keys(state).length === 0) {
+            const menuID = this.menus && this.menus.root.children[0];
+            if (!menuID) {
+                return Promise.resolve();
+            }
+            const initialAction = this.menus[menuID].actionID;
+            return this.actionManager.doAction(initialAction, { menuID });
+        } else {
+            return this.actionManager.loadState(state, { menuID: state.menu_id });
+        }
     }
     mounted() {
+        window.addEventListener('hashchange', () => {
+            if (!this.ignoreHashchange) {
+                const state = this._getUrlState();
+                this.actionManager.loadState(state, { menuID: state.menu_id });
+            }
+            this.ignoreHashchange = false;
+            // TODO: reset oldURL in case of failure?
+        }, false);
         super.mounted();
         this._wcUpdated();
     }
@@ -55,6 +83,20 @@ class WebClient extends Component {
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @returns {Object}
+     */
+    _getUrlState() {
+        const hash = window.location.hash;
+        const hashParts = hash ? hash.substr(1).split("&") : [];
+        const state = {};
+        for (const part of hashParts) {
+            const [ key, val ] = part.split('=');
+            state[key] = isNaN(val) ? val : parseInt(val, 10);
+        }
+        return state;
+    }
     /**
      * FIXME: consider moving this to menu.js
      * Loads and sanitizes the menu data
@@ -103,7 +145,7 @@ class WebClient extends Component {
                     name: menu.name,
                     children: menu.children.map(submenu => submenu.id),
                     actionModel: action ? action[0] : false,
-                    actionID: action ? action[1] : false,
+                    actionID: action ? parseInt(action[1], 10) : false,
                     xmlid: menu.xmlid,
                 };
             }
@@ -115,20 +157,29 @@ class WebClient extends Component {
     }
     /**
      * @private
-     * @param {Object} urlState
+     * @param {Object} state
      */
-    _updateURL(urlState) {
-        urlState.menu_id = this.menu.comp.props.menuID;
-        $.bbq.pushState(urlState, 2);
+    _updateState(state) {
+        // the action and menu_id may not have changed
+        state.action = state.action || this.state.action || '';
+        state.menu_id = state.menu_id || this.state.menu_id || '';
+        this.state = state;
+        const hashParts = Object.keys(state).map(key => `${key}=${state[key]}`);
+        const hash = "#" + hashParts.join("&");
+        if (hash !== window.location.hash) {
+            this.ignoreHashchange = true;
+            window.location.hash = hash;
+        }
     }
     _wcUpdated() {
         if (this.renderingInfo.main && this.renderingInfo.main.onSuccess) {
             const controller = this.currentControllerComponent.comp;
             this.renderingInfo.main.onSuccess(controller);
             this.renderingInfo.main.onSuccess = null;
-            const urlState = controller.getState();
-            urlState.action_id = this.renderingInfo.main.action.id;
-            this._updateURL(urlState);
+            const state = controller.getState();
+            state.action = this.renderingInfo.main.action.id;
+            state.menu_id = this.renderingInfo.main.menuID;
+            this._updateState(state);
         }
         this.renderingInfo.done = true;
     }
@@ -173,7 +224,7 @@ class WebClient extends Component {
      * @param {Object} ev.detail.state
      */
     _onPushState(ev) {
-        this._updateURL(ev.detail.state);
+        this._updateState(ev.detail.state);
     }
     _onReloadingLegacy(ev) {
         this.actionManager.reloadingLegacy(ev);

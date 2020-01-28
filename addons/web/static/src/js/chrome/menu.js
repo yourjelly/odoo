@@ -14,7 +14,7 @@ class Menu extends Component {
         return this.menus.root.children.map(childID => this.menus[childID]);
     }
     get currentApp() {
-        const currentAppID = this.menus[this.props.menuID].appID;
+        const currentAppID = this.props.menuID && this.menus[this.props.menuID].appID;
         return this.menus[currentAppID];
     }
     shouldUpdate(nextProps) {

@@ -7,14 +7,79 @@ odoo.define('web.ActWindowActionManager', function (require) {
      */
 
     const ActionManager = require('web.ActionManager');
-    const Context = require('web.Context');
-    var pyUtils = require('web.py_utils');
+    const { action_registry } = require('web.core');
     const viewRegistry = require('web.view_registry');
 
     class WindowActionPlugin extends ActionManager.AbstractPlugin {
         constructor() {
             super(...arguments);
             this.env.bus.on('switch-view', this, this._onSwitchView);
+        }
+
+        //--------------------------------------------------------------------------
+        // Public
+        //--------------------------------------------------------------------------
+
+        /**
+         * @override
+         */
+        loadState(state, options) {
+            let action;
+            if (state.action) {
+                const x = this._getCurrentAction(); // FIXME
+                const currentAction = x.action;
+                const currentController = x.controller;
+                if (currentAction && currentAction.id === state.action &&
+                    currentAction.type === 'ir.actions.act_window') {
+                    // the action to load is already the current one, so update it
+                    // this._closeDialog(true); // there may be a currently opened dialog, close it // FIXME
+                    var viewOptions = {currentId: state.id};
+                    var viewType = state.view_type || currentController.viewType;
+                    return this._switchController(currentAction, viewType, viewOptions);
+                } else if (!action_registry.contains(state.action)) {
+                    // the action to load isn't the current one, so execute it
+                    var context = {};
+                    if (state.active_id) {
+                        context.active_id = state.active_id;
+                    }
+                    if (state.active_ids) {
+                        // jQuery's BBQ plugin does some parsing on values that are valid integers
+                        // which means that if there's only one item, it will do parseInt() on it,
+                        // otherwise it will keep the comma seperated list as string
+                        context.active_ids = state.active_ids.split(',').map(function (id) {
+                            return parseInt(id, 10) || id;
+                        });
+                    } else if (state.active_id) {
+                        context.active_ids = [state.active_id];
+                    }
+                    context.params = state;
+                    action = state.action;
+                    options = Object.assign(options, {
+                        additional_context: context,
+                        resID: state.id || undefined, // empty string with bbq
+                        viewType: state.view_type,
+                    });
+                }
+            } else if (state.model && state.id) {
+                action = {
+                    res_model: state.model,
+                    res_id: state.id,
+                    type: 'ir.actions.act_window',
+                    views: [[state.view_id || false, 'form']],
+                };
+            } else if (state.model && state.view_type) {
+                // this is a window action on a multi-record view, so restore it
+                // from the session storage
+                const storedAction = this.env.services.session_storage.getItem('current_action');
+                const lastAction = JSON.parse(storedAction || '{}');
+                if (lastAction.res_model === state.model) {
+                    action = lastAction;
+                    options.viewType = state.view_type;
+                }
+            }
+            if (action) {
+                return this.doAction(action, options);
+            }
         }
 
         //--------------------------------------------------------------------------
@@ -260,7 +325,8 @@ odoo.define('web.ActWindowActionManager', function (require) {
             } else {
                 this._super(...arguments);
             }
-        }*/
+        }
+*/
         restoreControllerHook(action, controller) {
             this._switchController(action, controller.viewType);
         }
@@ -273,7 +339,6 @@ odoo.define('web.ActWindowActionManager', function (require) {
          * @param {Object} [viewOptions]
          */
         _switchController(action, viewType, viewOptions) {
-            this.actionManager.trigger('cancel');
             var viewDescr = action.views.find(view => view.type === viewType);
 
             const currentControllerID = this.currentStack[this.currentStack.length - 1];
