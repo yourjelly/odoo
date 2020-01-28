@@ -104,6 +104,14 @@ class Action extends ComponentAdapter {
             self.trigger('reloading-legacy', { commonState , controllerState });
         }
     }
+
+    getState() {
+        if (this.widget) {
+            return this.widget.getState();
+        }
+        return {}; // TODO
+    }
+
     destroy() {
         if (this.legacy && this.widget) {
             // keep legacy stuff alive because some stuff
