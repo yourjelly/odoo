@@ -20,7 +20,7 @@ Install some generic chart of accounts.
         'data/l10n_generic_coa_post.xml',
     ],
     'demo': [
-        'demo/account_bank_statement_demo.xml',
+        # 'demo/account_bank_statement_demo.xml',
         'demo/account_invoice_demo.xml',
         'demo/account_reconcile_model.xml',
     ],

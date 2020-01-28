@@ -5,13 +5,9 @@ from . import account
 from . import account_reconcile_model
 from . import account_payment
 from . import account_payment_term
-from . import account_bank_statement
 from . import account_move
-from . import account_payment_term
-from . import account_bank_statement
 from . import chart_template
 from . import account_analytic_line
-from . import account_journal_dashboard
 from . import product
 from . import account_fiscal_year
 from . import company

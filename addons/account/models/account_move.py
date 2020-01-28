@@ -2139,13 +2139,6 @@ class AccountMove(models.Model):
                     to_write['line_ids'].append((1, line.id, {'name': to_write['invoice_payment_ref']}))
                 move.write(to_write)
 
-            if move == move.company_id.account_opening_move_id and not move.company_id.account_bank_reconciliation_start:
-                # For opening moves, we set the reconciliation date threshold
-                # to the move's date if it wasn't already set (we don't want
-                # to have to reconcile all the older payments -made before
-                # installing Accounting- with bank statements)
-                move.company_id.account_bank_reconciliation_start = move.date
-
         for move in self:
             if not move.partner_id: continue
             if move.type.startswith('out_'):
@@ -2460,11 +2453,6 @@ class AccountMoveLine(models.Model):
     reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False, readonly=True)
     payment_id = fields.Many2one('account.payment', string="Originator Payment", copy=False,
         help="Payment that created this entry")
-    statement_line_id = fields.Many2one('account.bank.statement.line',
-        string='Bank statement line reconciled with this entry',
-        index=True, copy=False, readonly=True)
-    statement_id = fields.Many2one(related='statement_line_id.statement_id', store=True, index=True, copy=False,
-        help="The bank statement used for bank reconciliation")
 
     # ==== Tax fields ====
     tax_ids = fields.Many2many('account.tax', string='Taxes', help="Taxes that apply on the base amount")
@@ -4069,11 +4057,7 @@ class AccountMoveLine(models.Model):
 
     @api.model
     def _get_suspense_moves_domain(self):
-        return [
-            ('move_id.to_check', '=', True),
-            ('full_reconcile_id', '=', False),
-            ('statement_line_id', '!=', False),
-        ]
+        return [('move_id.to_check', '=', True), ('full_reconcile_id', '=', False)]
 
     def action_transfer_accounts_wizard(self):
         wizard = self.env['account.transfer.wizard'].create({})

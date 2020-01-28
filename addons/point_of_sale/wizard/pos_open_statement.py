@@ -23,8 +23,8 @@ class PosOpenStatement(models.TransientModel):
                 raise UserError(_("No sequence defined on the journal"))
             BankStatement += BankStatement.create({'journal_id': journal.id, 'user_id': self.env.uid, 'name': number})
 
-        tree_id = self.env.ref('account.view_bank_statement_tree').id
-        form_id = self.env.ref('account.view_bank_statement_form').id
+        tree_id = self.env.ref('account_accountant.view_bank_statement_tree').id
+        form_id = self.env.ref('account_accountant.view_bank_statement_form').id
         search_id = self.env.ref('account.view_bank_statement_search').id
 
         return {

@@ -991,6 +991,8 @@ class AccountJournal(models.Model):
     journal_group_ids = fields.Many2many('account.journal.group', domain="[('company_id', '=', company_id)]", string="Journal Groups")
 
     secure_sequence_id = fields.Many2one('ir.sequence', help='Sequence to use to ensure the securisation of data', readonly=True, copy=False)
+    color = fields.Integer("Color Index", default=0)
+    show_on_dashboard = fields.Boolean(string='Show journal on dashboard', help="Whether this journal should be displayed on the dashboard or not", default=True)
 
     _sql_constraints = [
         ('code_company_uniq', 'unique (code, name, company_id)', 'The code and name of the journal must be unique per company !'),
