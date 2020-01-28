@@ -29,9 +29,14 @@ class Action extends ComponentAdapter {
         return this.props.action.name;
     }
 
+    canBeRemoved() {
+        if (this.legacy && this.widget) {
+            return this.widget.canBeRemoved();
+        }
+    }
+
     async willStart() {
         if (this.props.Component.prototype instanceof AbstractView) {
-            this.legacy = 'view';
             const action = this.props.action;
             const viewDescr = action.views.find(view => view.type === action.controller.viewType);
             const viewParams = Object.assign(
@@ -41,6 +46,7 @@ class Action extends ComponentAdapter {
             );
             const view = new viewDescr.View(viewDescr.fieldsView, viewParams);
             this.widget = await view.getController(this);
+            this.legacy = 'view';
             this._reHookControllerMethods();
             return this.widget._widgetRenderAndInsert(() => {});
         } else if (this.legacy) {

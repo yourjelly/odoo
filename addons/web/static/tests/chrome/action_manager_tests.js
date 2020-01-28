@@ -3782,11 +3782,6 @@ QUnit.module('ActionManager', {
                 }
                 return this._super.apply(this, arguments);
             },
-            intercepts: {
-                do_action: function (ev) {
-                    doAction(ev.data.action, {});
-                },
-            },
         });
 
         // execute an action and create a new record

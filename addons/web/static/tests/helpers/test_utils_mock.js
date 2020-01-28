@@ -373,6 +373,16 @@ function fieldsViewGet(server, params) {
  */
 function getMockedOwlEnv(params) {
     params = params || {};
+
+    /**
+     * MISC STUFF: Alter some classes/object of the real world
+     * to fit our needs
+     */
+    var initialDebounceValue = DebouncedField.prototype.DEBOUNCE;
+    DebouncedField.prototype.DEBOUNCE = params.fieldDebounce || 0;
+    var initialDOMDebounceValue = dom.DEBOUNCE;
+    dom.DEBOUNCE = 0;
+
     let Server = MockServer;
     if (params.mockRPC) {
         Server = MockServer.extend({ _performRpc: params.mockRPC });
