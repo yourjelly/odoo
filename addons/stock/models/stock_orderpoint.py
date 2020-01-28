@@ -187,6 +187,9 @@ class StockWarehouseOrderpoint(models.Model):
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
         return super().write(vals)
 
+    def action_replenish(self):
+        self._procure_orderpoint_confirm(company_id=self.env.company)
+
     def _get_product_context(self):
         """Used to call `virtual_available` when running an orderpoint."""
         self.ensure_one()
@@ -208,7 +211,7 @@ class StockWarehouseOrderpoint(models.Model):
             'group_id': group or self.group_id,
         }
 
-    def _procure_orderpoint_confirm(self, use_new_cursor=False, company_id=None):
+    def _procure_orderpoint_confirm(self, use_new_cursor=False, company_id=None, raise_user_error=True):
         """ Create procurements based on orderpoints.
         :param bool use_new_cursor: if set, use a dedicated cursor and auto-commit after processing
             1000 orderpoints.
@@ -237,7 +240,7 @@ class StockWarehouseOrderpoint(models.Model):
 
                 try:
                     with self.env.cr.savepoint():
-                        self.env['procurement.group'].with_context(from_orderpoint=True).run(procurements, raise_user_error=False)
+                        self.env['procurement.group'].with_context(from_orderpoint=True).run(procurements, raise_user_error=raise_user_error)
                 except ProcurementException as errors:
                     for procurement, error_msg in errors.procurement_exceptions:
                         orderpoints_exceptions += [(procurement.values.get('orderpoint_id'), error_msg)]

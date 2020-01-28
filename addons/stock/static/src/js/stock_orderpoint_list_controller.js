@@ -24,10 +24,10 @@ var StockOrderpointListController = ListController.extend({
     renderButtons: function ($node) {
         this._super.apply(this, arguments);
         var $buttons = $(qweb.render('StockOrderpoint.Buttons'));
-        var $buttonRunScheduler = $buttons.find('o_button_run_scheduler');
-        var $buttonOrder = $buttons.find('o_button_order');
+        var $buttonRunScheduler = $buttons.find('.o_button_run_scheduler');
+        var $buttonOrder = $buttons.find('.o_button_order');
         $buttonRunScheduler.on('click', this._onRunScheduler.bind(this));
-        $buttonOrder.on('click', this._onOrder.bind(this));
+        $buttonOrder.on('click', this._onReplenish.bind(this));
         $buttons.appendTo($node.find('.o_list_buttons'));
     },
 
@@ -35,8 +35,8 @@ var StockOrderpointListController = ListController.extend({
     // Handlers
     // -------------------------------------------------------------------------
 
-    _onOrder: function () {
-        debugger;
+    _onReplenish: function () {
+        this.model.replenish(this.getSelectedRecords());
     },
 
     _onRunScheduler: function () {
