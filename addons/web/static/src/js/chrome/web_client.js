@@ -4,6 +4,7 @@ odoo.define('web.WebClient', function (require) {
 const ActionManager = require('web.ActionManager');
 const Action = require('web.Action');
 const Menu = require('web.Menu');
+const OwlDialog = require('web.OwlDialog');
 
 const { Component, hooks } = owl;
 const useRef = hooks.useRef;
@@ -11,16 +12,18 @@ const useRef = hooks.useRef;
 class WebClient extends Component {
     constructor() {
         super();
-        this.currentRenderingInfo = null;
+        this.renderingInfo = {};
         this.currentControllerComponent = useRef('currentControllerComponent');
         this.actionManager = new ActionManager(this.env);
         this.actionManager.on('cancel', this, () => {
-            if (this.currentRenderingInfo) {
+            if (this.renderingInfo.done === false) {
                 this.__owl__.currentFiber.cancel();
             }
         });
         this.actionManager.on('update', this, payload => {
-            this.currentRenderingInfo = payload;
+            this.renderingInfo.done = false;
+            this.renderingInfo.main = Object.assign(this.renderingInfo.main || {}, payload.main);
+            this.renderingInfo.dialog = payload.dialog;
             this.render();
         });
         this.menu = useRef('menu');
@@ -110,10 +113,11 @@ class WebClient extends Component {
         });
     }
     _wcUpdated() {
-        if (this.currentRenderingInfo) {
-            this.currentRenderingInfo.onSuccess(this.currentControllerComponent.comp);
+        if (this.renderingInfo.main && this.renderingInfo.main.onSuccess) {
+            this.renderingInfo.main.onSuccess(this.currentControllerComponent.comp);
+            this.renderingInfo.main.onSuccess = null;
         }
-        this.currentRenderingInfo = null;
+        this.renderingInfo.done = true;
     }
 
     //--------------------------------------------------------------------------
@@ -138,6 +142,10 @@ class WebClient extends Component {
     _onBreadcrumbClicked(ev) {
         this.actionManager.restoreController(ev.detail.controllerID);
     }
+    _onDialogClosed() {
+        this.renderingInfo.dialog = null;
+        this.render();
+    }
     /**
      * @private
      * @param {OdooEvent} ev
@@ -150,7 +158,7 @@ class WebClient extends Component {
         this.actionManager.reloadingLegacy(ev);
     }
 }
-WebClient.components = { Action, Menu };
+WebClient.components = { Action, Menu, OwlDialog};
 WebClient.template = 'web.WebClient';
 
 return WebClient;

@@ -5,18 +5,28 @@
 
 <t t-name="web.WebClient" owl="1">
     <body class="o_web_client">
-        <t t-if="currentRenderingInfo"> <!-- FIXME: remove this -->
-        <Menu t-ref="menu" menus="menus" menuID="currentRenderingInfo.menuID" t-on-open-menu="_onOpenMenu"/>
+        <t t-set='mainRenderingInfo' t-value='renderingInfo.main' />
+        <Menu t-ref="menu" menus="menus" menuID="mainRenderingInfo.menuID" t-on-open-menu="_onOpenMenu"/>
         <div class="o_action_manager"
             t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"
             t-on-execute-action.stop="_onExecuteAction"
-            t-on-reloading-legacy.stop="_onReloadingLegacy">
-            <Action class="o_action" t-ref="currentControllerComponent" t-key="currentRenderingInfo.controller.jsID"
-                    Component="currentRenderingInfo.controller.Component"
-                    action="currentRenderingInfo.action"
-                    options="currentRenderingInfo.controller.options"/>
+            t-on-reloading-legacy.stop="_onReloadingLegacy"
+            t-on-dialog-closed="_onDialogClosed">
+
+            <Action class="o_action" t-ref="currentControllerComponent" t-key="mainRenderingInfo.controller.jsID"
+                    Component="mainRenderingInfo.controller.Component"
+                    action="mainRenderingInfo.action"
+                    options="mainRenderingInfo.controller.options"
+                    shouldUpdate='!mainRenderingInfo.hold'/>
+
+            <t t-set='dialogRenderingInfo' t-value='renderingInfo.dialog' />
+            <OwlDialog t-if='dialogRenderingInfo'>
+                <Action class="o_action" t-key="dialogRenderingInfo.controller.jsID"
+                    Component="dialogRenderingInfo.controller.Component"
+                    action="dialogRenderingInfo.action"
+                    options="dialogRenderingInfo.controller.options"/>
+            </OwlDialog>
         </div>
-        </t>
     </body>
 </t>
 
