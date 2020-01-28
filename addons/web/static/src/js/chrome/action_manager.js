@@ -158,6 +158,16 @@ class ClientActionPlugin extends ActionManagerPlugin {
 }
 ClientActionPlugin.type = 'ir.actions.client';
 
+class CloseActionPlugin extends ActionManagerPlugin {
+    async executeAction(action, options) {
+        this.actionManager.trigger('update', {
+            main: {hold: false},
+            dialog: null,
+        });
+    }
+
+}
+CloseActionPlugin.type = 'ir.actions.act_window_close';
 
 
 
@@ -601,25 +611,39 @@ class ActionManager extends core.EventBus {
     _pushController(controller) {
         this.controllers[controller.jsID] = controller;
         const action = this.actions[controller.actionID];
-        const onSuccess = component => {
-            controller.component = component;
-            this.currentStack.splice(controller.index);
-            this.currentStack.push(controller.jsID);
-            this._cleanActions();
 
-            // store the action into the sessionStorage so that it can be fully restored on F5
-            this.env.services.session_storage.setItem('current_action', action._originalAction);
-
-            console.warn(this.currentStack);
-            console.warn(this.controllers);
-            console.warn(this.actions);
-        };
-        this.trigger('update', {
-            action,
-            controller,
-            menuID: controller.options && controller.options.menuID,
-            onSuccess,
-        });
+        let payload;
+        if (action.target === 'new') {
+            payload = {
+                dialog: {
+                    action,
+                    controller,
+                    menuID: controller.options && controller.options.menuID,
+                },
+                main: {
+                    hold: true,
+                }
+            }
+        } else {
+            const onSuccess = component => {
+                controller.component = component;
+                this.currentStack.splice(controller.index);
+                this.currentStack.push(controller.jsID);
+                this._cleanActions();
+                // store the action into the sessionStorage so that it can be fully restored on F5
+                this.env.services.session_storage.setItem('current_action', action._originalAction);
+            };
+            payload = {
+                main: {
+                    action,
+                    controller,
+                    menuID: controller.options && controller.options.menuID,
+                    onSuccess: onSuccess,
+                    hold: false,
+                },
+            }
+        }
+        this.trigger('update', payload);
     }
     /**
      * Wraps a promise to resolve/reject it when it is resolved/rejected: iff
@@ -656,7 +680,7 @@ ActionManager.AbstractPlugin = ActionManagerPlugin;
 ActionManager.registerPlugin(ServerActionPlugin);
 ActionManager.registerPlugin(ClientActionPlugin);
 ActionManager.registerPlugin(UrlActionPlugin);
-
+ActionManager.registerPlugin(CloseActionPlugin);
 
 return ActionManager;
 

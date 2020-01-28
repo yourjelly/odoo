@@ -54,6 +54,9 @@ class Action extends ComponentAdapter {
     }
 
     shouldUpdate(nextProps) {
+        if (nextProps.shouldUpdate === false) {
+            return false;
+        }
         if (this.legacy) {
             const activatingViewType = nextProps.action.controller.viewType;
             if (activatingViewType === this.widget.viewType) {
