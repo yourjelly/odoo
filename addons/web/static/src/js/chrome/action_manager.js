@@ -619,12 +619,11 @@ class ActionManager extends core.EventBus {
                 dialog: {
                     action,
                     controller,
-                    menuID: controller.options && controller.options.menuID,
                 },
                 main: {
                     hold: true,
                 }
-            }
+            };
         } else {
             const onSuccess = component => {
                 controller.component = component;
@@ -642,7 +641,7 @@ class ActionManager extends core.EventBus {
                     onSuccess: onSuccess,
                     hold: false,
                 },
-            }
+            };
         }
         this.trigger('update', payload);
     }

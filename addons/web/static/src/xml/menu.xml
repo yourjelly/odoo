@@ -22,12 +22,11 @@
         </a>
         <div class="dropdown-menu" role="menu">
             <t t-foreach="apps" t-as="app">
-                <a role="menuitem" class="dropdown-item o_app"
-                    t-attf-href="#menu_id={{app.id}}"
+                <a role="menuitem" href="#" class="dropdown-item o_app"
                     t-att-data-menu-id="app.id"
                     t-att-data-menu-xmlid="app.xmlid"
                     t-att-data-action-id="app.actionID"
-                    t-on-click="trigger('open-menu', { menuID: app.id })">
+                    t-on-click.prevent="trigger('open-menu', { menuID: app.id })">
                         <t t-esc="app.name"/>
                 </a>
             </t>
@@ -47,7 +46,7 @@
         </t>
         <t t-else="">
             <li>
-                <a href="#" class="dropdown-toggle o-no-caret o_menu_header_lvl_1" role="button"
+                <a role="button" href="#" class="dropdown-toggle o-no-caret o_menu_header_lvl_1"
                     aria-expanded="false"
                     data-display="static"
                     data-toggle="dropdown"
@@ -73,8 +72,7 @@
 
     <t t-if="!menu.children.length">
         <t t-set="_link">
-            <a role="menuitem" data-toggle="collapse" data-target="#o_navbar_collapse.in"
-                t-attf-href="#menu_id={{menu.id}}&amp;action={{menu.actionID || ''}}"
+            <a role="menuitem" href="#" data-toggle="collapse" data-target="#o_navbar_collapse.in"
                 t-att-data-menu-id="menu.id"
                 t-att-data-action-model="menu.actionModel"
                 t-att-data-action-id="menu.actionID"

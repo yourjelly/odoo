@@ -4,8 +4,8 @@
 <!-- Owl Templates -->
 
 <t t-name="web.WebClient" owl="1">
-    <body class="o_web_client">
-        <t t-set='mainRenderingInfo' t-value='renderingInfo.main' />
+    <body class="o_web_client" t-on-push-state="_onPushState">
+        <t t-set="mainRenderingInfo" t-value="renderingInfo.main"/>
         <Menu t-ref="menu" menus="menus" menuID="mainRenderingInfo.menuID" t-on-open-menu="_onOpenMenu"/>
         <div class="o_action_manager"
             t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"

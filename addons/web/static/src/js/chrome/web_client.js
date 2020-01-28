@@ -47,7 +47,8 @@ class WebClient extends Component {
         this._wcUpdated();
     }
 
-    catchError() {
+    catchError(e) {
+        throw e;
     }
 
     //--------------------------------------------------------------------------
@@ -112,10 +113,22 @@ class WebClient extends Component {
             return menus;
         });
     }
+    /**
+     * @private
+     * @param {Object} urlState
+     */
+    _updateURL(urlState) {
+        urlState.menu_id = this.menu.comp.props.menuID;
+        $.bbq.pushState(urlState, 2);
+    }
     _wcUpdated() {
         if (this.renderingInfo.main && this.renderingInfo.main.onSuccess) {
-            this.renderingInfo.main.onSuccess(this.currentControllerComponent.comp);
+            const controller = this.currentControllerComponent.comp;
+            this.renderingInfo.main.onSuccess(controller);
             this.renderingInfo.main.onSuccess = null;
+            const urlState = controller.getState();
+            urlState.action_id = this.renderingInfo.main.action.id;
+            this._updateURL(urlState);
         }
         this.renderingInfo.done = true;
     }
@@ -153,6 +166,14 @@ class WebClient extends Component {
      */
     _onExecuteAction(ev) {
         this.actionManager.executeContextualActionTODONAME(ev.detail);
+    }
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     * @param {Object} ev.detail.state
+     */
+    _onPushState(ev) {
+        this._updateURL(ev.detail.state);
     }
     _onReloadingLegacy(ev) {
         this.actionManager.reloadingLegacy(ev);
