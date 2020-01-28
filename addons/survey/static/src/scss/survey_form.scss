@@ -95,6 +95,11 @@
 .o_survey_form {
     min-height: 100%;
 
+    .o_survey_powered_by div {
+        position: relative;
+        border-radius: 0.25rem;
+    }
+
     .o_survey_choice_btn {
         background-color: rgba($o-brand-primary, 0.5);
         border: 2px solid $o-brand-primary;
@@ -159,6 +164,13 @@
  **********************************************************/
 
 .o_survey_print {
+    .o_survey_question_text_box,
+    .o_survey_question_date,
+    .o_survey_question_datetime,
+    .o_survey_question_numerical_box {
+        padding-left: 0px;
+    }
+
     .o_survey_choice_btn {
         background-color: $gray-500;
         border-color: transparent;
