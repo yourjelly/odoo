@@ -185,7 +185,7 @@
                 <div t-field="survey.description_done" class="oe_no_empty" />
                 <div class="row">
                     <div class="col">
-                        <t t-if="survey.scoring_type != 'no_scoring'">
+                        <t t-if="survey.scoring_type != 'no_scoring' and survey.scoring_success_min">
                             <div>You scored <t t-esc="answer.scoring_percentage" />%</div>
                             <t t-if="answer.scoring_success">
                                 <div>Congratulations, you have passed the test!</div>
