@@ -799,8 +799,9 @@ var DataImport = AbstractAction.extend({
                     if (from === to) {
                         return _.str.sprintf(_t("at row %d%s"), from, rowName);
                     }
-                    return _.str.sprintf(_t("between rows %d and %d"),
-                                         from, to);
+                    // return _.str.sprintf(_t("between rows %d and %d"),
+                    //                      from, to);
+                        return _.str.sprintf(_t("at row %d%s"), results.skip-1, rowName);
                 },
                 at_multi: function (rows) {
                     var from = rows.from + offset;

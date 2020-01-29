@@ -1020,7 +1020,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             self.pool.reset_changes()
 
         nextrow = info['rows']['to'] + 1
-        if nextrow < limit:
+        if nextrow > limit:
             nextrow = 0
         return {
             'ids': ids,
