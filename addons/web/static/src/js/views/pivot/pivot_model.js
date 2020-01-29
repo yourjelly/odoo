@@ -718,6 +718,7 @@ var PivotModel = AbstractModel.extend({
      * @param {Array} values
      */
     _addGroup: function (groupTree, labels, values) {
+        debugger;
         var tree = groupTree;
         // we assume here that the group with value value.slice(value.length - 2) has already been added.
         values.slice(0, values.length - 1).forEach(function (value) {
