@@ -85,7 +85,6 @@
                         </strong>
                     </t>
                 </div>
-                <div class="ml-3 text-muted" t-field="question.description"/>
             </div>
             <!-- Question info -->
             <span class="badge badge-info" t-field='question.question_type'/>
@@ -103,6 +102,10 @@
             <span class="badge badge-info ml-3"><span t-esc="len(question_data['answer_input_done_ids'])"></span> Answered</span>
             <span class="badge badge-info ml-1"><span t-esc="len(question_data['answer_input_skipped_ids'])"></span> Skipped</span>
         </div>
+
+        <!-- Question Description -->
+        <div class="ml-3 text-muted" t-field="question.description"/>
+
         <t t-if="question.question_type in ['text_box', 'char_box', 'date', 'datetime']">
             <t t-call="survey.question_result_text"/>
         </t>
