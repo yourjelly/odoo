@@ -227,9 +227,6 @@ class WebClient extends Component {
     _onPushState(ev) {
         this._updateState(ev.detail.state);
     }
-    _onReloadingLegacy(ev) {
-        this.actionManager.reloadingLegacy(ev);
-    }
 }
 WebClient.components = { Action, Menu, OwlDialog};
 WebClient.template = 'web.WebClient';

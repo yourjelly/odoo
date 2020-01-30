@@ -118,8 +118,7 @@ odoo.define('web.ActWindowActionManager', function (require) {
             const viewDescr = action.views.find(view => view.type === viewType);
             // FIXME
             if (!viewDescr) {
-                const { controller } = this._getCurrentAction();
-                return this.restoreController(controller.jsID);
+                return this.restoreController();
             }
 
             options = options || {};
@@ -181,6 +180,15 @@ odoo.define('web.ActWindowActionManager', function (require) {
                 if (lazyView && !lazyView.isMobileFriendly) {
                     lazyView = this._findMobileView(views, lazyView.multiRecord) || lazyView;
                 }
+            }
+
+            if (lazyView) {
+                const index = this._getControllerStackIndex(options);
+                this._createViewController(action, lazyView.type, {controllerState: options.controllerState}, {index});
+                action.controller.options = options;
+                this.controllers[action.controller.jsID] = action.controller;
+                this.currentStack.push(action.controller.jsID);
+                options.clear_breadcrumbs = false;
             }
             // TODO: handle this
             // let lazyViewDef;

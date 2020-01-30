@@ -46,6 +46,11 @@ class Action extends ComponentAdapter {
             );
             const view = new viewDescr.View(viewDescr.fieldsView, viewParams);
             this.widget = await view.getController(this);
+            const initState = this.widget.exportState();
+            const controllerState = {
+                resIds: initState.resIds,
+            }
+            this.env.bus.trigger('legacy-loaded', { controllerState });
             this.legacy = 'view';
             this._reHookControllerMethods();
             return this.widget._widgetRenderAndInsert(() => {});
@@ -101,7 +106,7 @@ class Action extends ComponentAdapter {
             if (params) {
                 if (params.context) {commonState.context = params.context;}
             }
-            self.trigger('reloading-legacy', { commonState , controllerState });
+            self.env.bus.trigger('legacy-reloaded', { commonState , controllerState });
         }
     }
 
