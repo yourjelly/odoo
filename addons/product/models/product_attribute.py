@@ -391,9 +391,10 @@ class ProductTemplateAttributeValue(models.Model):
     # configuration fields: the price_extra and the exclusion rules
     price_extra = fields.Float(
         string="Value Price Extra",
-        default=0.0,
         digits='Product Price',
         help="Extra price for the variant with this attribute value on sale price. eg. 200 price extra, 1000 + 200 = 1200.")
+    currency_id = fields.Many2one(related='attribute_line_id.product_tmpl_id.currency_id', store=True)
+
     exclude_for = fields.One2many(
         'product.template.attribute.exclusion',
         'product_template_attribute_value_id',
