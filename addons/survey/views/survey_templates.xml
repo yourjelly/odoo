@@ -55,15 +55,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="o_survey_powered_by py-2">
-                        <div class="float-right px-3 py-2 bg-white">
-                            <t t-call="web.brand_promotion_message">
-                                <t t-set="_message"></t>
-                                <t t-set="_utm_medium" t-valuef="survey"/>
-                            </t>
-                        </div>
-                    </div>
                 </div>
             </div>
         </t>
