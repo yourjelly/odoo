@@ -64,6 +64,13 @@ async function createWebClient(params) {
     DebouncedField.prototype.DEBOUNCE = params.fieldDebounce || 0;
     const initialDOMDebounceValue = dom.DEBOUNCE;
     dom.DEBOUNCE = 0;
+    const initialUnderscoreDebounce = _.debounce;
+    // Defaulting to no debounce
+    if (params.debounce !== true) {
+        _.debounce = function (func) {
+            return func;
+        };
+    }
 
     // FIX Systray Items
     const SystrayItems = SystrayMenu.Items;
@@ -95,6 +102,7 @@ async function createWebClient(params) {
         wcDestroy.call(webClient);
         DebouncedField.prototype.DEBOUNCE = initialDebounceValue;
         SystrayMenu.Items = SystrayItems;
+        _.debounce = initialUnderscoreDebounce;
         testUtilsMock.unpatch(webClient);
     }
 

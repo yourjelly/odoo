@@ -199,6 +199,17 @@ class ActionManager extends core.EventBus {
         this.env.bus.on('do-action', this, payload => {
             this.doAction(payload.action, payload.options);
         });
+        // Special event that is trigger by legacy views
+        // When they are loaded
+        this.env.bus.on('legacy-loaded', this, payload => {
+            this.legacyLoaded(payload, true);
+        });
+        // same as above except it is triggered on their reload
+        // Made for clarity and transparency
+        this.env.bus.on('legacy-reloaded', this, payload => {
+            this.legacyLoaded(payload, false);
+        });
+        this.env.bus.on('history-back', this, this._onHistoryBack);
         this.plugins = new WeakMap();
 
         // handled by the ActionManager (either stacked in the current window,
@@ -566,7 +577,6 @@ class ActionManager extends core.EventBus {
             controllerID = this.currentStack[this.currentStack.length -1];
         }
         await this.clearUncommittedChanges();
-        this.trigger('cancel');
         const { action , controller } = this.getStateFromController(controllerID);
         const plugin = this._getPlugin(action.type);
         if (!plugin) {return Promise.reject();}
@@ -627,10 +637,11 @@ class ActionManager extends core.EventBus {
      */
     _getBreadcrumbs(controllerStack) {
         return controllerStack.map(controllerID => {
-            const component = this.controllers[controllerID].component;
+            const controller = this.controllers[controllerID];
+            const component = controller.component;
             return {
                 controllerID: controllerID,
-                title: component.title,
+                title: component && component.title || this.actions[controller.actionID].name,
             };
         });
     }
@@ -700,11 +711,16 @@ class ActionManager extends core.EventBus {
     _nextID(type) {
         return `${type}${nextID++}`;
     }
-    reloadingLegacy(ev) {
-        const detail = ev.detail;
+    legacyLoaded(payload, initialLoading) {
+        if (initialLoading) {
+            // Initial legacy loading, nothing is in dom,
+            // actionManager state is either empty or not accurate
+            this.legacyInitState = payload;
+            return;
+        }
         const { action } = this.getCurrentState().main;
-        Object.assign(action, detail.commonState);
-        action.controllerState = Object.assign({}, action.controllerState, detail.controllerState);
+        Object.assign(action, payload.commonState);
+        action.controllerState = Object.assign({}, action.controllerState, payload.controllerState);
     }
     rpc() {
         return this.env.services.rpc(...arguments);
@@ -773,6 +789,10 @@ class ActionManager extends core.EventBus {
             this.currentStack.splice(newMain.controller.index);
             this.currentStack.push(newMain.controller.jsID);
             this._cleanActions();
+            if (this.legacyInitState) {
+                this.legacyLoaded(this.legacyInitState);
+                this.legacyInitState = null;
+            }
             // store the action into the sessionStorage so that it can be fully restored on F5
             this.env.services.session_storage.setItem('current_action', action._originalAction);
         };
@@ -811,6 +831,23 @@ class ActionManager extends core.EventBus {
                 }
             });
         });
+    }
+    /**
+     * Goes back in the history: if a controller is opened in a dialog, closes
+     * the dialog, otherwise, restores the second to last controller from the
+     * stack.
+     *
+     * @private
+     */
+    _onHistoryBack() {
+        if (this.currentDialogController) {
+            this.doAction({type: 'ir.actions.act_window_close'});
+        } else {
+            const length = this.currentStack.length;
+            if (length > 1) {
+                this.restoreController(this.currentStack[length - 2]);
+            }
+        }
     }
 }
 ActionManager.Plugins = {};

@@ -1354,7 +1354,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('handle switching view and switching back on slow network', async function (assert) {
+    QUnit.test('handle switching view and switching back on slow network', async function (assert) {
         // FIXME: can't reload controller by clicking on view switcher anymore
         assert.expect(8);
 
@@ -1480,8 +1480,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('execute a new action while loading a lazy-loaded controller', async function (assert) {
-        // FIXME: lazy loading not implemented
+    QUnit.test('execute a new action while loading a lazy-loaded controller', async function (assert) {
         assert.expect(15);
 
         var def;
@@ -1498,13 +1497,12 @@ QUnit.module('ActionManager', {
                 }
                 return result;
             },
+            webClient: {
+                _getWindowHash() {
+                    return "#action=3&id=2&view_type=form"
+                }
+            }
         });
-         await webClient.loadState({
-            action: 4,
-            id: 2,
-            view_type: 'form',
-        });
-
         assert.containsOnce(webClient, '.o_form_view',
             "should display the form view of action 4");
 
@@ -2660,7 +2658,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('pager is updated when switching between views', async function (assert) {
+    QUnit.test('pager is updated when switching between views', async function (assert) {
         assert.expect(10);
 
         const webClient = await createWebClient({
@@ -2892,7 +2890,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('reload previous controller when discarding a new record', async function (assert) {
+    QUnit.test('reload previous controller when discarding a new record', async function (assert) {
         assert.expect(8);
 
         const webClient = await createWebClient({
@@ -2929,7 +2927,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('requests for execute_action of type object are handled', async function (assert) {
+    QUnit.test('requests for execute_action of type object are handled', async function (assert) {
         assert.expect(10);
 
         var self = this;
@@ -2982,7 +2980,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('requests for execute_action of type action are handled', async function (assert) {
+    QUnit.test('requests for execute_action of type action are handled', async function (assert) {
         assert.expect(11);
 
         const webClient = await createWebClient({
@@ -3023,7 +3021,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('requests for execute_action of type object: disable buttons', async function (assert) {
+    QUnit.test('requests for execute_action of type object: disable buttons', async function (assert) {
         assert.expect(2);
 
         var def;
@@ -3115,7 +3113,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('restore previous view state when switching back', async function (assert) {
+    QUnit.test('restore previous view state when switching back', async function (assert) {
         assert.expect(5);
 
         this.actions[2].views.unshift([false, 'graph']);
@@ -3734,11 +3732,12 @@ QUnit.module('ActionManager', {
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-        });
-        await webClient.loadState({
-            action: 3,
-            id: 2,
-            view_type: 'form',
+            debug: true,
+            webClient: {
+                _getWindowHash() {
+                    return `#action=3&id=2&view_type=form`;
+                }
+            }
         });
         assert.containsNone(webClient, '.o_list_view');
         assert.containsOnce(webClient, '.o_form_view');
