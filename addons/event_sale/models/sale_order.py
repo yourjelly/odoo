@@ -45,6 +45,26 @@ class SaleOrderLine(models.Model):
         help="Choose an event ticket and it will automatically create a registration for this event ticket.")
     event_ok = fields.Boolean(related='product_id.event_ok', readonly=True)
 
+    @api.onchange('product_uom', 'product_uom_qty')
+    def quantity_change(self):
+        self.ensure_one()
+        # removing / adding attendees
+        if not (self.event_id and self.event_ticket_id):
+            return super(SaleOrderLine, self).quantity_change()
+        registrations = self.env['event.registration'].search([
+                ('state', '!=', 'cancel'),
+                ('sale_order_id', '=', self._origin.id),
+                ('event_ticket_id', '=', self.event_ticket_id.id),
+            ], order='create_date asc')
+        missing_qty = self.product_uom_qty - len(registrations)
+        if missing_qty > 0:
+            self._update_registrations()
+        elif missing_qty < 0:
+            # Cancel latest registrations if quantity decreased.
+            registrations[missing_qty::].action_cancel()
+
+        super(SaleOrderLine, self).quantity_change()
+
     def _update_registrations(self, confirm=True, cancel_to_draft=False, registration_data=None):
         """ Create or update registrations linked to a sales order line. A sale
         order line has a product_uom_qty attribute that will be the number of
@@ -82,14 +102,19 @@ class SaleOrderLine(models.Model):
         if self.event_ticket_id and (not self.event_id or self.event_id != self.event_ticket_id.event_id):
             self.event_ticket_id = None
 
-    @api.onchange('product_uom', 'product_uom_qty')
-    def product_uom_change(self):
-        if not self.event_ticket_id:
-            super(SaleOrderLine, self).product_uom_change()
+    def _compute_price(self):
+        self.ensure_one()
+        if self.event_ticket_id and self.event_id:
+            self = self.with_context(
+                fixed_sales_price=self.event_ticket_id.price,
+                fixed_sales_currency_id=self.event_ticket_id.currency_id.id,
+            )
+        super(SaleOrderLine, self)._compute_price()
 
     @api.onchange('event_ticket_id')
     def _onchange_event_ticket_id(self):
         # we call this to force update the default name
+        # and update of price
         self.product_id_change()
 
     def get_sale_order_line_multiline_description_sale(self, product):
@@ -106,14 +131,3 @@ class SaleOrderLine(models.Model):
             return ticket._get_ticket_multiline_description_sale() + self._get_sale_order_line_multiline_description_variants()
         else:
             return super(SaleOrderLine, self).get_sale_order_line_multiline_description_sale(product)
-
-    def _get_display_price(self, product):
-        if self.event_ticket_id and self.event_id:
-            company = self.event_id.company_id or self.env.company.id
-            currency = company.currency_id
-            return currency._convert(
-                self.event_ticket_id.price, self.order_id.currency_id,
-                self.order_id.company_id or self.env.company.id,
-                self.order_id.date_order or fields.Date.today())
-        else:
-            return super()._get_display_price(product)

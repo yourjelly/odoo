@@ -23,6 +23,7 @@ class EventTicket(models.Model):
     price = fields.Float(string='Price', digits='Product Price')
     price_reduce = fields.Float(string="Price Reduce", compute="_compute_price_reduce", digits='Product Price')
     price_reduce_taxinc = fields.Float(compute='_get_price_reduce_tax', string='Price Reduce Tax inc')
+    currency_id = fields.Many2one('res.currency', compute="_compute_currency_id", store=True)
     # sale
     start_sale_date = fields.Date(string="Sales Start")
     end_sale_date = fields.Date(string="Sales End")
@@ -39,6 +40,11 @@ class EventTicket(models.Model):
     seats_available = fields.Integer(string='Available Seats', compute='_compute_seats', store=True)
     seats_unconfirmed = fields.Integer(string='Unconfirmed Seat Reservations', compute='_compute_seats', store=True)
     seats_used = fields.Integer(compute='_compute_seats', store=True)
+
+    @api.depends('company_id')
+    def _compute_currency_id(self):
+        for ticket in self:
+            ticket.currency_id = ticket.company_id.currency_id or self.env.company.currency_id
 
     def _compute_is_expired(self):
         for ticket in self:
@@ -116,6 +122,7 @@ class EventTicket(models.Model):
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
+        # VFE TODO make price compute stored updatable
         self.price = self.product_id.list_price or 0
 
     def _get_ticket_multiline_description_sale(self):
