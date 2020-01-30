@@ -144,7 +144,7 @@ class Survey(http.Controller):
     # QUICK ACCESS SURVEY ROUTES
     # ------------------------------------------------------------
 
-    @http.route('/s', type='http', auth='public', website=True)
+    @http.route('/s', type='http', auth='public', website=True, sitemap=False)
     def survey_access_code(self, **post):
         """
             Render the survey access code page route. This page allows the user to enter the short code of the survey.
