@@ -12,24 +12,22 @@ const useRef = hooks.useRef;
 class WebClient extends Component {
     constructor() {
         super();
-        this.renderingInfo = {};
+        this.renderingInfo = null;
         this.currentControllerComponent = useRef('currentControllerComponent');
         this.actionManager = new ActionManager(this.env);
         this.actionManager.on('cancel', this, () => {
-            if (this.renderingInfo.done === false) {
+            if (this.renderingInfo) {
                 this.__owl__.currentFiber.cancel();
             }
         });
         this.actionManager.on('update', this, payload => {
-            this.renderingInfo.done = false;
-            this.renderingInfo.main = Object.assign({}, this.renderingInfo.main, payload.main);
-            this.renderingInfo.dialog = payload.dialog;
-            if (!this.renderingInfo.main.menuID && !this.state.menu_id) {
+            this.renderingInfo = payload;
+            if (!this.renderingInfo.menuID && !this.state.menu_id) {
                 // retrieve menu_id from action
                 const menu = Object.values(this.menus).find(menu => {
-                    return menu.actionID === payload.action.id;
+                    return menu.actionID === payload.main.action.id;
                 });
-                this.renderingInfo.main.menuID = menu && menu.id;
+                this.renderingInfo.menuID = menu && menu.id;
             }
             this.render();
         });
@@ -82,13 +80,21 @@ class WebClient extends Component {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-
+    _getWindowHash() {
+        return window.location.hash;
+    }
+    _setWindowHash(newHash) {
+        if (newHash !== this._getWindowHash()) {
+            this.ignoreHashchange = true;
+            window.location.hash = newHash;
+        }
+    }
     /**
      * @private
      * @returns {Object}
      */
     _getUrlState() {
-        const hash = window.location.hash;
+        const hash = this._getWindowHash();
         const hashParts = hash ? hash.substr(1).split("&") : [];
         const state = {};
         for (const part of hashParts) {
@@ -166,22 +172,18 @@ class WebClient extends Component {
         this.state = state;
         const hashParts = Object.keys(state).map(key => `${key}=${state[key]}`);
         const hash = "#" + hashParts.join("&");
-        if (hash !== window.location.hash) {
-            this.ignoreHashchange = true;
-            window.location.hash = hash;
-        }
+        this._setWindowHash(hash);
     }
     _wcUpdated() {
-        if (this.renderingInfo.main && this.renderingInfo.main.onSuccess) {
+        if (this.renderingInfo) {
             const controller = this.currentControllerComponent.comp;
-            this.renderingInfo.main.onSuccess(controller);
-            this.renderingInfo.main.onSuccess = null;
+            this.renderingInfo.onSuccess(controller);
             const state = controller.getState();
             state.action = this.renderingInfo.main.action.id;
-            state.menu_id = this.renderingInfo.main.menuID;
+            state.menu_id = this.renderingInfo.menuID;
             this._updateState(state);
         }
-        this.renderingInfo.done = true;
+        this.renderingInfo= null;
     }
 
     //--------------------------------------------------------------------------
@@ -207,8 +209,7 @@ class WebClient extends Component {
         this.actionManager.restoreController(ev.detail.controllerID);
     }
     _onDialogClosed() {
-        this.renderingInfo.dialog = null;
-        this.render();
+        this.actionManager.doAction({type: 'ir.actions.act_window_close'});
     }
     /**
      * @private

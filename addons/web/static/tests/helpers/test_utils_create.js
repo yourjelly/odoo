@@ -12,6 +12,7 @@ odoo.define('web.test_utils_create', function (require) {
 
 var AbstractAction = require('web.AbstractAction');
 var ActionManager = require('web.ActionManager');
+const basic_fields = require('web.basic_fields');
 var ControlPanelView = require('web.ControlPanelView');
 var concurrency = require('web.concurrency');
 const core = require('web.core');
@@ -25,9 +26,11 @@ var testUtilsMock = require('web.test_utils_mock');
 var Widget = require('web.Widget');
 var WebClient = require('web.WebClient');
 
+
 const AbstractStorageService = require('web.AbstractStorageService');
 const RamStorage = require('web.RamStorage');
 
+const DebouncedField = basic_fields.DebouncedField;
 
 const { Component, hooks, tags } = owl;
 
@@ -49,13 +52,32 @@ const { Component, hooks, tags } = owl;
  */
 async function createWebClient(params) {
     params = params || {};
+
     const target = prepareTarget(params.debug);
     Component.env = testUtilsMock.getMockedOwlEnv(params);
+    /*
+     * MISC STUFF: Alter some classes/object of the real world
+     * to fit our needs
+     */
+    // FIX Debounce to allow trigger input to work
+    const initialDebounceValue = DebouncedField.prototype.DEBOUNCE;
+    DebouncedField.prototype.DEBOUNCE = params.fieldDebounce || 0;
+    const initialDOMDebounceValue = dom.DEBOUNCE;
+    dom.DEBOUNCE = 0;
 
+    // FIX Systray Items
     const SystrayItems = SystrayMenu.Items;
     SystrayMenu.Items = [] || params.SystrayItems;
 
     const webClient = new WebClient();
+    const patchWC = {
+        _getWindowHash() {return ''},
+        _setWindowHash() {},
+    }
+    if (params.webClient) {
+        Object.assign(patchWC, params.webClient);
+    }
+    testUtilsMock.patch(webClient, patchWC);
 
     let menus = params.menus;
     if (!menus) {
@@ -64,35 +86,17 @@ async function createWebClient(params) {
             children: [],
         }
     }
-/*    if (!menus) {
-        menus = {
-            all_menu_ids: [1],
-            children: [{
-                id: 1,
-                action: 'ir.actions.client,InitialClientAction',
-                name: "Initial Action",
-                children: [],
-            }],
-        };
-        const ClientAction = AbstractAction.extend({
-            start: function () {
-                this.$el.text('Hello World');
-            },
-        });
-        core.action_registry.add('InitialClientAction', ClientAction);
-
-        const destroy = webClient.destroy;
-        webClient.destroy = function () {
-            destroy.call(webClient);
-            delete core.action_registry.map.InitialClientAction;
-            SystrayMenu.Items = SystrayItems;
-        };
-    }*/
-
     odoo.loadMenusPromise = new Promise(async resolve => {
         await testUtilsAsync.nextTick();
         resolve(menus);
     });
+    const wcDestroy = webClient.destroy;
+    webClient.destroy = function () {
+        wcDestroy.call(webClient);
+        DebouncedField.prototype.DEBOUNCE = initialDebounceValue;
+        SystrayMenu.Items = SystrayItems;
+        testUtilsMock.unpatch(webClient);
+    }
 
     await webClient.mount(target);
     return webClient;
