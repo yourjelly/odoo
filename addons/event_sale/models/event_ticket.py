@@ -21,8 +21,6 @@ class EventTicket(models.Model):
         required=True, domain=[("event_ok", "=", True)],
         default=_default_product_id)
     price = fields.Float(string='Price', digits='Product Price')
-    price_reduce = fields.Float(string="Price Reduce", compute="_compute_price_reduce", digits='Product Price')
-    price_reduce_taxinc = fields.Float(compute='_get_price_reduce_tax', string='Price Reduce Tax inc')
     currency_id = fields.Many2one('res.currency', compute="_compute_currency_id", store=True)
     # sale
     start_sale_date = fields.Date(string="Sales Start")
@@ -66,19 +64,6 @@ class EventTicket(models.Model):
                 ticket.sale_available = False
             else:
                 ticket.sale_available = True
-
-    def _compute_price_reduce(self):
-        for record in self:
-            product = record.product_id
-            discount = product.lst_price and (product.lst_price - product.price) / product.lst_price or 0.0
-            record.price_reduce = (1.0 - discount) * record.price
-
-    def _get_price_reduce_tax(self):
-        for record in self:
-            # sudo necessary here since the field is most probably accessed through the website
-            tax_ids = record.sudo().product_id.taxes_id.filtered(lambda r: r.company_id == record.event_id.company_id)
-            taxes = tax_ids.compute_all(record.price_reduce, record.event_id.company_id.currency_id, 1.0, product=record.product_id)
-            record.price_reduce_taxinc = taxes['total_included']
 
     @api.depends('seats_max', 'registration_ids.state')
     def _compute_seats(self):
