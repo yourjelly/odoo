@@ -188,6 +188,10 @@ class StockWarehouseOrderpoint(models.Model):
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
         return super().write(vals)
 
+    @api.model
+    def action_view_orderpoints(self):
+        return self._get_orderpoint_action()
+
     def action_replenish(self):
         self._procure_orderpoint_confirm(company_id=self.env.company)
 
@@ -197,6 +201,26 @@ class StockWarehouseOrderpoint(models.Model):
         return {
             'location': self.location_id.id,
             'to_date': datetime.combine(self.lead_days_date, time.max)
+        }
+
+    @api.model
+    def _get_orderpoint_action(self, domain):
+        return {
+            'name': _('Reordering Rules'),
+            'view_type': 'tree',
+            'view_mode': 'list',
+            'view_id': self.env.ref('stock.view_warehouse_orderpoint_tree_editable').id,
+            'res_model': 'stock.warehouse.orderpoint',
+            'type': 'ir.actions.act_window',
+            'context': dict(self.env.context or {}),
+            'domain': domain or [],
+            'help': """
+                <p class="o_view_nocontent_smiling_face">
+                    Create a reordering rule
+                </p><p>
+                    Define a minimum stock rule so that Odoo creates automatically requests for quotations or draft manufacturing orders to resupply your stock.
+                </p>
+            """
         }
 
     def _prepare_procurement_values(self, date=False, group=False):
