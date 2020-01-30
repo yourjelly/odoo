@@ -59,7 +59,8 @@ class ActionManagerPlugin {
         return this.actionManager.doAction(...arguments);
     }
     _getCurrentAction() {
-        return this.actionManager.getCurrentAction();
+        const currentState = this.actionManager.getCurrentState();
+        return currentState.main || {};
     }
 }
 ActionManagerPlugin.type = null;
@@ -176,12 +177,8 @@ ClientActionPlugin.type = 'ir.actions.client';
 
 class CloseActionPlugin extends ActionManagerPlugin {
     async executeAction(action, options) {
-        this.actionManager.trigger('update', {
-            main: {hold: false},
-            dialog: null,
-        });
+        return this.restoreController();
     }
-
 }
 CloseActionPlugin.type = 'ir.actions.act_window_close';
 
@@ -217,6 +214,7 @@ class ActionManager extends core.EventBus {
         // 'controllerStack' is the stack of ids of the controllers currently
         // displayed in the current window
         this.currentStack = [];
+        this.currentDialogController = null;
 
         this.currentRequestID = 0;
     }
@@ -234,9 +232,9 @@ class ActionManager extends core.EventBus {
      *   rejected otherwise.
      */
     clearUncommittedChanges() {
-        const { controller } = this.getCurrentAction();
-        if (controller) {
-            return controller.component.canBeRemoved();
+        const mainState = this.getCurrentState().main;
+        if (mainState && mainState.controller) {
+            return mainState.controller.component.canBeRemoved();
         }
         return Promise.resolve();
     }
@@ -424,19 +422,36 @@ class ActionManager extends core.EventBus {
             // TODO need on_fail??
             // .guardedCatch(params.on_fail);
     }
-    getAction(controllerID) {
-        const currentController = this.controllers[controllerID];
+    getStateFromController(controllerID) {
+        const controller = this.controllers[controllerID];
         return {
-            action: currentController && this.actions[currentController.actionID],
-            controller: currentController,
+            action: controller && this.actions[controller.actionID],
+            controller: controller,
         };
     }
     /**
      * @returns {Object}
      */
-    getCurrentAction() {
+    getCurrentState() {
+        const res = {
+            main: null,
+            dialog: null,
+        };
         const currentControllerID = this.currentStack[this.currentStack.length - 1];
-        return currentControllerID ? this.getAction(currentControllerID) : {controller: null, action: null};
+        if (currentControllerID) {
+            const {action, controller} = this.getStateFromController(currentControllerID);
+            res.main = {
+                action: action,
+                controller: controller,
+            }
+         }
+         if (this.currentDialogController) {
+             res.dialog = {
+                 action: this.getStateFromController(this.currentDialogController.jsID).action,
+                 controller: this.currentDialogController,
+              }
+         }
+         return res;
     }
     /**
      * @param {Object} state
@@ -547,9 +562,12 @@ class ActionManager extends core.EventBus {
         // TODO
         //  - move logic from act window (clear uncommitted changes + on _reverse_bc)
         //  - add hook onRestoreController (async)
+        if (!controllerID) {
+            controllerID = this.currentStack[this.currentStack.length -1];
+        }
         await this.clearUncommittedChanges();
         this.trigger('cancel');
-        const { action , controller } = this.getAction(controllerID);
+        const { action , controller } = this.getStateFromController(controllerID);
         const plugin = this._getPlugin(action.type);
         if (!plugin) {return Promise.reject();}
         if (plugin.restoreControllerHook) {
@@ -684,7 +702,7 @@ class ActionManager extends core.EventBus {
     }
     reloadingLegacy(ev) {
         const detail = ev.detail;
-        const { action } = this.getCurrentAction();
+        const { action } = this.getCurrentState().main;
         Object.assign(action, detail.commonState);
         action.controllerState = Object.assign({}, action.controllerState, detail.controllerState);
     }
@@ -727,35 +745,42 @@ class ActionManager extends core.EventBus {
         this.controllers[controller.jsID] = controller;
         const action = this.actions[controller.actionID];
 
-        let payload;
-        if (action.target === 'new') {
-            payload = {
-                dialog: {
-                    action,
-                    controller,
-                },
-                main: {
-                    hold: true,
-                }
-            };
+        const { main, dialog } = this.getCurrentState();
+        let newMain = {};
+        let newDialog = null;
+        let newMenuID;
+        if (action.target !== 'new') {
+            newMain.reload = true;
+            newMain.action = action;
+            newMain.controller = controller;
+            newMenuID = controller.options && controller.options.menuID;
         } else {
-            const onSuccess = component => {
-                controller.component = component;
-                this.currentStack.splice(controller.index);
-                this.currentStack.push(controller.jsID);
-                this._cleanActions();
-                // store the action into the sessionStorage so that it can be fully restored on F5
-                this.env.services.session_storage.setItem('current_action', action._originalAction);
-            };
-            payload = {
-                main: {
-                    action,
-                    controller,
-                    menuID: controller.options && controller.options.menuID,
-                    onSuccess: onSuccess,
-                    hold: false,
-                },
-            };
+            newMain = main;
+            newMain.reload = false;
+            newDialog = {};
+            newDialog.action = action;
+            newDialog.controller = controller;
+            newMenuID: this.currentMenuID;
+        }
+        const onSuccess = component => {
+            if (action.target !== 'new') {
+                newMain.controller.component = component;
+                this.currentDialogController = newDialog;
+                this.menuID = newMenuID;
+            } else {
+                this.currentDialogController = newDialog.controller
+            }
+            this.currentStack.splice(newMain.controller.index);
+            this.currentStack.push(newMain.controller.jsID);
+            this._cleanActions();
+            // store the action into the sessionStorage so that it can be fully restored on F5
+            this.env.services.session_storage.setItem('current_action', action._originalAction);
+        };
+        const payload = {
+            main: newMain,
+            dialog: newDialog,
+            menuID: newMenuID,
+            onSuccess: onSuccess,
         }
         this.trigger('update', payload);
     }
