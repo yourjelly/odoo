@@ -497,6 +497,7 @@ class ProcurementGroup(models.Model):
         # Minimum stock rules
         domain = self._get_orderpoint_domain(company_id=company_id)
         orderpoints = self.env['stock.warehouse.orderpoint'].search(domain)
+        orderpoints._compute_qty()
         orderpoints.sudo()._procure_orderpoint_confirm(use_new_cursor=use_new_cursor, company_id=company_id, raise_user_error=False)
 
         # Search all confirmed stock_moves and try to assign them
