@@ -283,11 +283,12 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
             this._prepareSubmitValues(formData, params);
         }
 
+        // prevent user from submitting more times using enter key
+        this.preventEnterSubmit = true;
+        
         if (this.options.sessionInProgress) {
             // reset the fadeInOutDelay when attendee is submitting form
             this.fadeInOutDelay = 400;
-            // prevent user from submitting more times using enter key
-            this.preventEnterSubmit = true;
             // prevent user from clicking on matrix options when form is submitted
             this.readonly = true;
         }
@@ -333,6 +334,11 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
    _onNextScreenDone: function (result, options) {
         var self = this;
 
+        if (!(options && options.isFinish)
+            && !this.options.sessionInProgress) {
+            this.preventEnterSubmit = false;
+        }
+
         if (result && !result.error) {
             this.$(".o_survey_form_content").empty();
             this.$(".o_survey_form_content").html(result);
@@ -356,8 +362,6 @@ publicWidget.registry.SurveyFormWidget = publicWidget.Widget.extend({
                 if (this.surveyTimerWidget) {
                     this.surveyTimerWidget.destroy();
                 }
-                // survey is done, no need to submit anything else
-                self.preventEnterSubmit = true;
             } else {
                 this._updateBreadcrumb();
             }
