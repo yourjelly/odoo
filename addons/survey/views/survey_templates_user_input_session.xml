@@ -92,13 +92,13 @@
             <div class="tab-content w-75">
             <div role="tabpanel" id="o_survey_session_manage_question"
                 class="p-4 px-5 flex-column tab-pane fade show active o_survey_session_manage_question o_survey_session_manage_container">
-                <div class="position-absolute w-75 pr-5" t-if="survey.access_mode == 'public'">
-                    <h4 class="float-right pr-5">
+                <t t-if="survey.access_mode == 'public'">
+                    <h4 class="text-right">
                         <a t-att-href="survey_url" t-esc="survey_url" target="_blank" />
                         <i class="fa fa-copy font-weight-normal ml-3 mr-1 o_survey_session_copy" />
                     </h4>
                     <input class="o_survey_session_copy_url d-none" type="text" t-att-value="survey_url" />
-                </div>
+                </t>
                 <div class="d-flex flex-column justify-content-center flex-grow-1">
                     <div>
                         <fieldset disabled="disabled">
