@@ -9,6 +9,33 @@ class TestMrpByProduct(common.TransactionCase):
 
     def setUp(self):
         super(TestMrpByProduct, self).setUp()
+        user_group_stock_user = self.env.ref('stock.group_stock_user')
+        user_group_mrp_user = self.env.ref('mrp.group_mrp_user')
+        user_group_mrp_manager = self.env.ref('mrp.group_mrp_manager')
+        user_group_mrp_byproducts = self.env.ref('mrp.group_mrp_byproducts')
+
+        Users = self.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        self.user_mrp_user = Users.create({
+            'name': 'Hilda Ferachwal',
+            'login': 'hilda',
+            'email': 'h.h@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_user.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+        self.user_mrp_manager = Users.create({
+            'name': 'Gary Youngwomen',
+            'login': 'gary',
+            'email': 'g.g@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_manager.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+
         self.MrpBom = self.env['mrp.bom']
         self.warehouse = self.env.ref('stock.warehouse0')
         route_manufacture = self.warehouse.manufacture_pull_id.route_id.id
@@ -25,6 +52,7 @@ class TestMrpByProduct(common.TransactionCase):
         self.product_a = create_product('Product A', route_ids=[(6, 0, [route_manufacture, route_mto])])
         self.product_b = create_product('Product B', route_ids=[(6, 0, [route_manufacture, route_mto])])
         self.product_c_id = create_product('Product C', route_ids=[]).id
+        self.env = self.env(user=self.user_mrp_user)
 
     def test_00_mrp_byproduct(self):
         """ Test by product with production order."""

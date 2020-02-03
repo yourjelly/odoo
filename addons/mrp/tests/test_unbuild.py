@@ -9,7 +9,7 @@ class TestUnbuild(TestMrpCommon):
     def setUp(self):
         super(TestUnbuild, self).setUp()
         self.stock_location = self.env.ref('stock.stock_location_stock')
-        self.env.ref('base.group_user').write({
+        self.env.ref('base.group_user').sudo().write({
             'implied_ids': [(4, self.env.ref('stock.group_production_lot').id)]
         })
 
@@ -474,17 +474,17 @@ class TestUnbuild(TestMrpCommon):
         and then a picking should be generated for transferring components from QC/Unbuild location to stock.
         """
         StockQuant = self.env['stock.quant']
-        ProductObj = self.env['product.product']
+        ProductObj = self.env['product.product'].with_user(self.user_mrp_manager)
         # Create new QC/Unbuild location
         warehouse = self.env.ref('stock.warehouse0')
-        unbuild_location = self.env['stock.location'].create({
+        unbuild_location = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'QC/Unbuild',
             'usage': 'internal',
             'location_id': warehouse.view_location_id.id
         })
 
         # Create a product route containing a stock rule that will move product from QC/Unbuild location to stock
-        product_route = self.env['stock.location.route'].create({
+        product_route = self.env['stock.location.route'].with_user(self.user_stock_manager).create({
             'name': 'QC/Unbuild -> Stock',
             'warehouse_selectable': True,
             'warehouse_ids': [(4, warehouse.id)],
@@ -512,7 +512,7 @@ class TestUnbuild(TestMrpCommon):
         })
 
         # Create bom and add components
-        bom = self.env['mrp.bom'].create({
+        bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': finshed_product.id,
             'product_tmpl_id': finshed_product.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,

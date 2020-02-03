@@ -13,22 +13,22 @@ class TestMrpCommon(common2.TestStockCommon):
         the tracking/qty for each different products. It returns the
         MO, used bom and the tree products.
         """
-        product_to_build = self.env['product.product'].create({
+        product_to_build = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Young Tom',
             'type': 'product',
             'tracking': tracking_final,
         })
-        product_to_use_1 = self.env['product.product'].create({
+        product_to_use_1 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Botox',
             'type': 'product',
             'tracking': tracking_base_1,
         })
-        product_to_use_2 = self.env['product.product'].create({
+        product_to_use_2 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Old Tom',
             'type': 'product',
             'tracking': tracking_base_2,
         })
-        bom_1 = self.env['mrp.bom'].create({
+        bom_1 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': product_to_build.id,
             'product_tmpl_id': product_to_build.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -178,3 +178,4 @@ class TestMrpCommon(common2.TestStockCommon):
             'tracking': 'none',
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
+        cls.env = cls.env(user=cls.user_mrp_user)

@@ -59,7 +59,7 @@ class TestMrpOrder(TestMrpCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
         test_date_planned = Dt.now() - timedelta(days=1)
         test_quantity = 2.0
@@ -128,7 +128,7 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(production_2.reservation_state, 'confirmed', 'Production order should be availability for waiting state')
 
         # Update Inventory
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].with_user(self.user_stock_manager).with_context(inventory_mode=True).create({
             'product_id': self.product_2.id,
             'inventory_quantity': 2.0,
             'location_id': self.stock_location_14.id
@@ -139,7 +139,7 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(production_2.reservation_state, 'confirmed', 'Production order should be availability for partially available state')
 
         # Update Inventory
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].with_user(self.user_stock_manager).with_context(inventory_mode=True).create({
             'product_id': self.product_2.id,
             'inventory_quantity': 5.0,
             'location_id': self.stock_location_14.id
@@ -151,7 +151,7 @@ class TestMrpOrder(TestMrpCommon):
 
     def test_empty_routing(self):
         """ Check what happens when you work with an empty routing"""
-        routing = self.env['mrp.routing'].create({'name': 'Routing without operations'})
+        routing = self.env['mrp.routing'].with_user(self.user_mrp_manager).create({'name': 'Routing without operations'})
         self.bom_3.routing_id = routing.id
         production_form = Form(self.env['mrp.production'])
         production_form.product_id = self.product_6
@@ -191,24 +191,24 @@ class TestMrpOrder(TestMrpCommon):
 
         # create a bom for `custom_laptop` with components that aren't tracked
         unit = self.ref("uom.product_uom_unit")
-        custom_laptop = self.env['product.product'].create({
+        custom_laptop = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Drawer',
             'type': 'product',
             'uom_id': unit,
             'uom_po_id': unit,
         })
 
-        product_charger = self.env['product.product'].create({
+        product_charger = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Charger',
             'type': 'product',
             'uom_id': unit,
             'uom_po_id': unit})
-        product_keybord = self.env['product.product'].create({
+        product_keybord = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Usb Keybord',
             'type': 'product',
             'uom_id': unit,
             'uom_po_id': unit})
-        self.env['mrp.bom'].create({
+        self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': custom_laptop.product_tmpl_id.id,
             'product_qty': 1,
             'product_uom_id': unit,
@@ -241,7 +241,7 @@ class TestMrpOrder(TestMrpCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
         # create a mo for this bom
         mo_custom_laptop_form = Form(self.env['mrp.production'])
@@ -404,7 +404,7 @@ class TestMrpOrder(TestMrpCommon):
         This implementation allows to implement an efficiency notion (see rev 347f140fe63612ee05e).
         """
         self.product_6.uom_id.rounding = 1.0
-        bom_eff = self.env['mrp.bom'].create({
+        bom_eff = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': self.product_6.id,
             'product_tmpl_id': self.product_6.product_tmpl_id.id,
             'product_qty': 1,
@@ -538,7 +538,7 @@ class TestMrpOrder(TestMrpCommon):
         mo, _, p_final, p1, p2 = self.generate_mo(tracking_base_1='lot', qty_base_1=10, qty_final=1)
         self.assertEqual(len(mo), 1, 'MO should have been created')
 
-        mo.bom_id.consumption = 'flexible'  # Because we will over consume.
+        mo.with_user(self.user_mrp_manager).bom_id.consumption = 'flexible'  # Because we will over consume.
         first_lot_for_p1 = self.env['stock.production.lot'].create({
             'name': 'lot1',
             'product_id': p1.id,
@@ -669,7 +669,7 @@ class TestMrpOrder(TestMrpCommon):
         })
 
         mo.move_raw_ids.filtered(lambda m: m.state != 'done')[0].quantity_done = 0
-        update_quantity_wizard.change_prod_qty()
+        update_quantity_wizard.sudo().change_prod_qty()
 
         self.assertEqual(len(mo.move_raw_ids), 2)
 
@@ -860,7 +860,7 @@ class TestMrpOrder(TestMrpCommon):
         Check qty producing update and moves finished values.
         """
         dozen = self.env.ref('uom.product_uom_dozen')
-        self.byproduct1 = self.env['product.product'].create({
+        self.byproduct1 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Byproduct 1',
             'type': 'product',
             'tracking': 'serial'
@@ -876,7 +876,7 @@ class TestMrpOrder(TestMrpCommon):
             'company_id': self.env.company.id,
         })
 
-        self.byproduct2 = self.env['product.product'].create({
+        self.byproduct2 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Byproduct 2',
             'type': 'product',
             'tracking': 'lot',
@@ -892,7 +892,7 @@ class TestMrpOrder(TestMrpCommon):
             'company_id': self.env.company.id,
         })
 
-        self.byproduct3 = self.env['product.product'].create({
+        self.byproduct3 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Byproduct 3',
             'type': 'product',
             'tracking': 'none',
@@ -1017,7 +1017,7 @@ class TestMrpOrder(TestMrpCommon):
         self.env['stock.quant']._update_available_quantity(p1, self.stock_location, 4)
         self.env['stock.quant']._update_available_quantity(p2, self.stock_location, 1)
 
-        mo.bom_id.consumption = 'flexible'  # Because we'll over-consume with a product not defined in the BOM
+        mo.with_user(self.user_mrp_manager).bom_id.consumption = 'flexible'  # Because we'll over-consume with a product not defined in the BOM
         mo.action_assign()
 
         produce_form = Form(self.env['mrp.product.produce'].with_context({
@@ -1114,10 +1114,10 @@ class TestMrpOrder(TestMrpCommon):
     def test_product_produce_duplicate_3(self):
         """ produce a finished product with by-product tracked by serial number 2
         times with the same SN. Check that an error is raised the second time"""
-        finished_product = self.env['product.product'].create({'name': 'finished product'})
-        byproduct = self.env['product.product'].create({'name': 'byproduct', 'tracking': 'serial'})
-        component = self.env['product.product'].create({'name': 'component'})
-        bom = self.env['mrp.bom'].create({
+        finished_product = self.env['product.product'].with_user(self.user_mrp_manager).create({'name': 'finished product'})
+        byproduct = self.env['product.product'].with_user(self.user_mrp_manager).create({'name': 'byproduct', 'tracking': 'serial'})
+        component = self.env['product.product'].with_user(self.user_mrp_manager).create({'name': 'component'})
+        bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': finished_product.id,
             'product_tmpl_id': finished_product.product_tmpl_id.id,
             'product_uom_id': finished_product.uom_id.id,
@@ -1218,23 +1218,23 @@ class TestMrpOrder(TestMrpCommon):
         and quantity = 1."""
         dozen = self.env.ref('uom.product_uom_dozen')
         unit = self.env.ref('uom.product_uom_unit')
-        plastic_laminate = self.env['product.product'].create({
+        plastic_laminate = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Plastic Laminate',
             'type': 'product',
             'uom_id': unit.id,
             'uom_po_id': unit.id,
             'tracking': 'serial',
         })
-        ply_veneer = self.env['product.product'].create({
+        ply_veneer = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Ply Veneer',
             'type': 'product',
             'uom_id': unit.id,
             'uom_po_id': unit.id,
         })
-        routing = self.env['mrp.routing'].create({
+        routing = self.env['mrp.routing'].with_user(self.user_mrp_manager).create({
             'name': 'Secondary Assembly',
         })
-        bom = self.env['mrp.bom'].create({
+        bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': plastic_laminate.product_tmpl_id.id,
             'product_uom_id': unit.id,
             'sequence': 1,
@@ -1291,27 +1291,27 @@ class TestMrpOrder(TestMrpCommon):
 
         unit = self.env.ref("uom.product_uom_unit")
         categ_unit_id = self.env.ref('uom.product_uom_categ_unit')
-        paire = self.env['uom.uom'].create({
+        paire = self.env['uom.uom'].with_user(self.user_mrp_manager).create({
             'name': 'Paire',
             'factor_inv': 2,
             'uom_type': 'bigger',
             'rounding': 0.001,
             'category_id': categ_unit_id.id
         })
-        binocular = self.env['product.product'].create({
+        binocular = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Binocular',
             'type': 'product',
             'uom_id': unit.id,
             'uom_po_id': unit.id
         })
-        nocular = self.env['product.product'].create({
+        nocular = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Nocular',
             'type': 'product',
             'tracking': 'serial',
             'uom_id': unit.id,
             'uom_po_id': unit.id
         })
-        bom_binocular = self.env['mrp.bom'].create({
+        bom_binocular = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': binocular.product_tmpl_id.id,
             'product_qty': 1,
             'product_uom_id': unit.id,
@@ -1347,19 +1347,19 @@ class TestMrpOrder(TestMrpCommon):
 
     def test_product_type_service_1(self):
         # Create finished product
-        finished_product = self.env['product.product'].create({
+        finished_product = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Geyser',
             'type': 'product',
         })
 
         # Create service type product
-        product_raw = self.env['product.product'].create({
+        product_raw = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'raw Geyser',
             'type': 'service',
         })
 
         # Create bom for finish product
-        bom = self.env['mrp.bom'].create({
+        bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': finished_product.id,
             'product_tmpl_id': finished_product.product_tmpl_id.id,
             'product_uom_id': self.env.ref('uom.product_uom_unit').id,

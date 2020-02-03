@@ -56,7 +56,7 @@ class TestProcurement(TestMrpCommon):
         #    Product2 48 Unit
         # ---------------------
         # Update Inventory
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].with_user(self.user_stock_manager).with_context(inventory_mode=True).create({
             'product_id': self.product_2.id,
             'inventory_quantity': 48,
             'location_id': self.warehouse.lot_stock_id.id,
@@ -85,7 +85,7 @@ class TestProcurement(TestMrpCommon):
         # ------------------
 
         # Update Inventory
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].with_user(self.user_stock_manager).with_context(inventory_mode=True).create({
             'product_id': self.product_2.id,
             'inventory_quantity': 12,
             'location_id': self.warehouse.lot_stock_id.id,
@@ -125,8 +125,8 @@ class TestProcurement(TestMrpCommon):
         # set the MTO route to the parent category (all)
         self.warehouse = self.env.ref('stock.warehouse0')
         mto_route = self.warehouse.mto_pull_id.route_id
-        mto_route.product_categ_selectable = True
-        all_categ_id.write({'route_ids': [(6, 0, [mto_route.id])]})
+        mto_route.with_user(self.user_stock_manager).product_categ_selectable = True
+        all_categ_id.with_user(self.user_mrp_manager).write({'route_ids': [(6, 0, [mto_route.id])]})
 
         # create MO, but check it raises error as components are in make to order and not everyone has
         with self.assertRaises(UserError):
@@ -141,16 +141,16 @@ class TestProcurement(TestMrpCommon):
         """ Check propagation of shedule date for manufaturing route."""
 
         # create a product with manufacture route
-        product_1 = self.env['product.product'].create({
+        product_1 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'AAA',
             'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))]
         })
 
-        component_1 = self.env['product.product'].create({
+        component_1 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'component',
         })
 
-        self.env['mrp.bom'].create({
+        self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': product_1.id,
             'product_tmpl_id': product_1.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -207,16 +207,16 @@ class TestProcurement(TestMrpCommon):
 
     def test_finished_move_cancellation(self):
         """Check state of finished move on cancellation of raw moves. """
-        product_bottle = self.env['product.product'].create({
+        product_bottle = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Plastic Bottle',
             'route_ids': [(4, self.ref('mrp.route_warehouse0_manufacture'))]
         })
 
-        component_mold = self.env['product.product'].create({
+        component_mold = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Plastic Mold',
         })
 
-        self.env['mrp.bom'].create({
+        self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': product_bottle.id,
             'product_tmpl_id': product_bottle.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -252,24 +252,24 @@ class TestProcurement(TestMrpCommon):
         """Check if the delay alert is set to True on the stock move."""
         self.env['stock.rule'].search([]).delay_alert = True
 
-        parent_product = self.env['product.template'].create({
+        parent_product = self.env['product.template'].with_user(self.user_mrp_manager).create({
             'name': 'Parent product',
             'route_ids': [
                 (4, self.env.ref('mrp.route_warehouse0_manufacture').id, 0),
                 (4, self.env.ref('stock.route_warehouse0_mto').id, 0)
             ]
         })
-        child_product = self.env['product.template'].create({
+        child_product = self.env['product.template'].with_user(self.user_mrp_manager).create({
             'name': 'Child product',
             'route_ids': [
                 (4, self.env.ref('mrp.route_warehouse0_manufacture').id, 0),
                 (4, self.env.ref('stock.route_warehouse0_mto').id, 0)
             ]
         })
-        child_component = self.env['product.template'].create({
+        child_component = self.env['product.template'].with_user(self.user_mrp_manager).create({
             'name': 'Child product',
         })
-        parent_bom = self.env['mrp.bom'].create({
+        parent_bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': parent_product.product_variant_ids.id,
             'product_tmpl_id': parent_product.id,
             'product_uom_id': self.uom_unit.id,
@@ -277,12 +277,12 @@ class TestProcurement(TestMrpCommon):
             'routing_id': self.routing_2.id,
             'type': 'normal',
         })
-        self.env['mrp.bom.line'].create({
+        self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': parent_bom.id,
             'product_id': child_product.product_variant_ids.id,
             'product_qty': 2,
         })
-        child_bom = self.env['mrp.bom'].create({
+        child_bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': child_product.product_variant_ids.id,
             'product_tmpl_id': child_product.id,
             'product_uom_id': self.uom_unit.id,
@@ -290,7 +290,7 @@ class TestProcurement(TestMrpCommon):
             'routing_id': self.routing_2.id,
             'type': 'normal',
         })
-        self.env['mrp.bom.line'].create({
+        self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': child_bom.id,
             'product_id': child_component.product_variant_ids.id,
             'product_qty': 2,
@@ -313,11 +313,11 @@ class TestProcurement(TestMrpCommon):
         self.warehouse = self.env.ref('stock.warehouse0')
         route_manufacture = self.warehouse.manufacture_pull_id.route_id.id
         route_mto = self.warehouse.mto_pull_id.route_id.id
-        product = self.env['product.product'].create({
+        product = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Clafoutis',
             'route_ids': [(6, 0, [route_manufacture, route_mto])]
         })
-        self.env['mrp.bom'].create({
+        self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': product.id,
             'product_tmpl_id': product.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -340,7 +340,7 @@ class TestProcurement(TestMrpCommon):
         self.assertFalse(production.move_raw_ids)
         self.assertEqual(production.state, 'draft')
 
-        comp1 = self.env['product.product'].create({
+        comp1 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'egg',
         })
         move_values = production._get_move_raw_values(comp1, 40.0, self.env.ref('uom.product_uom_unit'))

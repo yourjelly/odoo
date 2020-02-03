@@ -9,10 +9,19 @@ class TestMultistepManufacturing(TestMrpCommon):
 
     def setUp(self):
         super(TestMultistepManufacturing, self).setUp()
+        Users = self.env['res.users'].sudo().with_context(no_reset_password=True)
+
+        # Create a sales manager
+        self.user_manager = Users.create({
+            'name': 'Andrew Manager',
+            'login': 'manager',
+            'email': 'a.m@example.com',
+            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_manager').id])]
+        })
 
         self.MrpProduction = self.env['mrp.production']
         # Create warehouse
-        warehouse_form = Form(self.env['stock.warehouse'])
+        warehouse_form = Form(self.env['stock.warehouse'].with_user(self.user_stock_manager))
         warehouse_form.name = 'Test'
         warehouse_form.code = 'Test'
         self.warehouse = warehouse_form.save()
@@ -20,7 +29,7 @@ class TestMultistepManufacturing(TestMrpCommon):
         self.uom_unit = self.env.ref('uom.product_uom_unit')
 
         # Create manufactured product
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_mrp_manager))
         product_form.name = 'Stick'
         product_form.uom_id = self.uom_unit
         product_form.uom_po_id = self.uom_unit
@@ -30,14 +39,14 @@ class TestMultistepManufacturing(TestMrpCommon):
         self.product_manu = product_form.save()
 
         # Create raw product for manufactured product
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_mrp_manager))
         product_form.name = 'Raw Stick'
         product_form.uom_id = self.uom_unit
         product_form.uom_po_id = self.uom_unit
         self.product_raw = product_form.save()
 
         # Create bom for manufactured product
-        bom_product_form = Form(self.env['mrp.bom'])
+        bom_product_form = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_product_form.product_id = self.product_manu
         bom_product_form.product_tmpl_id = self.product_manu.product_tmpl_id
         bom_product_form.product_qty = 1.0
@@ -48,8 +57,8 @@ class TestMultistepManufacturing(TestMrpCommon):
         self.bom_prod_manu = bom_product_form.save()
 
         # Create sale order
-        sale_form = Form(self.env['sale.order'])
-        sale_form.partner_id = self.env['res.partner'].create({'name': 'My Test Partner'})
+        sale_form = Form(self.env['sale.order'].with_user(self.user_manager))
+        sale_form.partner_id = self.env['res.partner'].with_user(self.user_mrp_manager).create({'name': 'My Test Partner'})
         sale_form.picking_policy = 'direct'
         sale_form.warehouse_id = self.warehouse
         with sale_form.order_line.new() as line:
@@ -94,7 +103,7 @@ class TestMultistepManufacturing(TestMrpCommon):
             demands from child MO has been cancelled.
         """
 
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_mrp_manager))
         product_form.name = 'Screw'
         self.product_screw = product_form.save()
 
@@ -105,7 +114,7 @@ class TestMultistepManufacturing(TestMrpCommon):
             p1.route_ids.add(self.warehouse_1.mto_pull_id.route_id)
 
         # New BoM for raw material product, it will generate another Production order i.e. child Production order
-        bom_product_form = Form(self.env['mrp.bom'])
+        bom_product_form = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_product_form.product_id = self.product_raw
         bom_product_form.product_tmpl_id = self.product_raw.product_tmpl_id
         bom_product_form.product_qty = 1.0

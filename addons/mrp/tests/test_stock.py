@@ -12,21 +12,21 @@ class TestWarehouse(common.TestMrpCommon):
 
         unit = self.env.ref("uom.product_uom_unit")
         self.stock_location = self.env.ref('stock.stock_location_stock')
-        self.depot_location = self.env['stock.location'].create({
+        self.depot_location = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'Depot',
             'usage': 'internal',
             'location_id': self.stock_location.id,
         })
-        self.env["stock.putaway.rule"].create({
+        self.env["stock.putaway.rule"].with_user(self.user_stock_manager).create({
             "location_in_id": self.stock_location.id,
             "location_out_id": self.depot_location.id,
             'category_id': self.env.ref('product.product_category_all').id,
         })
-        mrp_workcenter = self.env['mrp.workcenter'].create({
+        mrp_workcenter = self.env['mrp.workcenter'].with_user(self.user_mrp_manager).create({
             'name': 'Assembly Line 1',
             'resource_calendar_id': self.env.ref('resource.resource_calendar_std').id,
         })
-        mrp_routing = self.env['mrp.routing'].create({
+        mrp_routing = self.env['mrp.routing'].with_user(self.user_mrp_manager).create({
             'name': 'Primary Assembly',
             'operation_ids': [(0, 0, {
                 'workcenter_id': mrp_workcenter.id,
@@ -43,9 +43,9 @@ class TestWarehouse(common.TestMrpCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
-        self.bom_laptop = self.env['mrp.bom'].create({
+        self.bom_laptop = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': self.laptop.product_tmpl_id.id,
             'product_qty': 1,
             'product_uom_id': unit.id,
@@ -130,8 +130,8 @@ class TestWarehouse(common.TestMrpCommon):
                 (0, 0, {'product_id': self.product_2.id, 'product_uom_id': self.product_2.uom_id.id, 'product_qty': 12, 'prod_lot_id': lot_product_2.id, 'location_id': self.stock_location_14.id})
             ]})
         (stock_inv_product_4 | stock_inv_product_2)._action_start()
-        stock_inv_product_2.action_validate()
-        stock_inv_product_4.action_validate()
+        stock_inv_product_2.with_user(self.user_stock_manager).action_validate()
+        stock_inv_product_4.with_user(self.user_stock_manager).action_validate()
 
         #Create Manufacturing order.
         production_form = Form(self.env['mrp.production'])
@@ -233,7 +233,7 @@ class TestKitPicking(common.TestMrpCommon):
         super(TestKitPicking, self).setUp()
 
         def create_product(name):
-            p = Form(self.env['product.product'])
+            p = Form(self.env['product.product'].with_user(self.user_mrp_manager))
             p.name = name
             p.type = 'product'
             return p.save()
@@ -264,11 +264,11 @@ class TestKitPicking(common.TestMrpCommon):
         kit_3 = create_product('kit 3')
         self.kit_parent = create_product('Kit Parent')
         # Linking the kits and the components via some 'phantom' BoMs
-        bom_kit_1 = self.env['mrp.bom'].create({
+        bom_kit_1 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': kit_1.product_tmpl_id.id,
             'product_qty': 1.0,
             'type': 'phantom'})
-        BomLine = self.env['mrp.bom.line']
+        BomLine = self.env['mrp.bom.line'].with_user(self.user_mrp_manager)
         BomLine.create({
             'product_id': component_a.id,
             'product_qty': 2.0,
@@ -281,7 +281,7 @@ class TestKitPicking(common.TestMrpCommon):
             'product_id': component_c.id,
             'product_qty': 3.0,
             'bom_id': bom_kit_1.id})
-        bom_kit_2 = self.env['mrp.bom'].create({
+        bom_kit_2 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': kit_2.product_tmpl_id.id,
             'product_qty': 1.0,
             'type': 'phantom'})
@@ -293,7 +293,7 @@ class TestKitPicking(common.TestMrpCommon):
             'product_id': kit_1.id,
             'product_qty': 2.0,
             'bom_id': bom_kit_2.id})
-        bom_kit_parent = self.env['mrp.bom'].create({
+        bom_kit_parent = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': self.kit_parent.product_tmpl_id.id,
             'product_qty': 1.0,
             'type': 'phantom'})
@@ -305,7 +305,7 @@ class TestKitPicking(common.TestMrpCommon):
             'product_id': kit_2.id,
             'product_qty': 2.0,
             'bom_id': bom_kit_parent.id})
-        bom_kit_3 = self.env['mrp.bom'].create({
+        bom_kit_3 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': kit_3.product_tmpl_id.id,
             'product_qty': 1.0,
             'type': 'phantom'})
@@ -323,10 +323,10 @@ class TestKitPicking(common.TestMrpCommon):
             'bom_id': bom_kit_parent.id})
 
         # We create an 'immediate transfer' receipt for x3 kit_parent
-        self.test_partner = self.env['res.partner'].create({
+        self.test_partner = self.env['res.partner'].with_user(self.user_mrp_manager).create({
             'name': 'Notthat Guyagain',
         })
-        self.test_supplier = self.env['stock.location'].create({
+        self.test_supplier = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'supplier',
             'usage': 'supplier',
             'location_id': self.env.ref('stock.stock_location_stock').id,

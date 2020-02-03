@@ -11,23 +11,23 @@ class TestMrpAccount(TestWorkOrderProcessCommon):
     def setUpClass(cls):
         super(TestMrpAccount, cls).setUpClass()
 
-        cls.categ_standard = cls.env['product.category'].create({
+        cls.categ_standard = cls.env['product.category'].with_user(cls.user_mrp_manager).create({
             'name': 'STANDARD',
             'property_cost_method': 'standard'
         })
-        cls.categ_real = cls.env['product.category'].create({
+        cls.categ_real = cls.env['product.category'].with_user(cls.user_mrp_manager).create({
             'name': 'REAL',
             'property_cost_method': 'fifo'
         })
-        cls.categ_average = cls.env['product.category'].create({
+        cls.categ_average = cls.env['product.category'].with_user(cls.user_mrp_manager).create({
             'name': 'AVERAGE',
             'property_cost_method': 'average'
         })
-        cls.dining_table.categ_id = cls.categ_real.id
-        cls.product_table_sheet.categ_id = cls.categ_real.id
-        cls.product_table_leg.categ_id = cls.categ_average.id
-        cls.product_bolt.categ_id = cls.categ_standard.id
-        cls.product_screw.categ_id = cls.categ_standard.id
+        cls.dining_table.with_user(cls.user_stock_manager).categ_id = cls.categ_real.id
+        cls.product_table_sheet.with_user(cls.user_stock_manager).categ_id = cls.categ_real.id
+        cls.product_table_leg.with_user(cls.user_stock_manager).categ_id = cls.categ_average.id
+        cls.product_bolt.with_user(cls.user_stock_manager).categ_id = cls.categ_standard.id
+        cls.product_screw.with_user(cls.user_stock_manager).categ_id = cls.categ_standard.id
         cls.env['stock.move'].search([('product_id', 'in', [cls.product_bolt.id, cls.product_screw.id])])._do_unreserve()
         (cls.product_bolt + cls.product_screw).write({'type': 'product'})
         cls.dining_table.tracking = 'none'
@@ -84,7 +84,7 @@ class TestMrpAccount(TestWorkOrderProcessCommon):
         produce_wizard = produce_form.save()
         produce_wizard.do_produce()
         production_table.post_inventory()
-        move_value = production_table.move_finished_ids.filtered(lambda x: x.state == "done").stock_valuation_layer_ids.value
+        move_value = production_table.with_user(self.user_stock_manager).move_finished_ids.filtered(lambda x: x.state == "done").stock_valuation_layer_ids.value
 
         # 1 table head at 20 + 4 table leg at 15 + 4 bolt at 10 + 10 screw at 10 + 1*20 (extra cost)
         self.assertEqual(move_value, 141, 'Thing should have the correct price')

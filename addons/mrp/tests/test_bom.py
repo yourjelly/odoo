@@ -21,7 +21,7 @@ class TestBoM(TestMrpCommon):
             set((self.bom_2 | self.bom_3).mapped('bom_line_ids').filtered(lambda line: not line.child_bom_id or line.child_bom_id.type != 'phantom').ids))
 
     def test_10_variants(self):
-        test_bom = self.env['mrp.bom'].create({
+        test_bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': self.product_7_3.id,
             'product_tmpl_id': self.product_7_template.id,
             'product_uom_id': self.uom_unit.id,
@@ -29,18 +29,18 @@ class TestBoM(TestMrpCommon):
             'routing_id': self.routing_2.id,
             'type': 'normal',
         })
-        test_bom_l1 = self.env['mrp.bom.line'].create({
+        test_bom_l1 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom.id,
             'product_id': self.product_2.id,
             'product_qty': 2,
         })
-        test_bom_l2 = self.env['mrp.bom.line'].create({
+        test_bom_l2 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom.id,
             'product_id': self.product_3.id,
             'product_qty': 2,
             'bom_product_template_attribute_value_ids': [(4, self.product_7_attr1_v1.id)],
         })
-        test_bom_l3 = self.env['mrp.bom.line'].create({
+        test_bom_l3 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom.id,
             'product_id': self.product_4.id,
             'product_qty': 2,
@@ -65,29 +65,29 @@ class TestBoM(TestMrpCommon):
         self.assertIn(test_bom_l3, [l[0] for l in lines])
 
     def test_11_multi_level_variants(self):
-        tmp_picking_type = self.env['stock.picking.type'].create({
+        tmp_picking_type = self.env['stock.picking.type'].with_user(self.user_stock_manager).create({
             'name': 'Manufacturing',
             'code': 'mrp_operation',
             'sequence_code': 'TMP',
-            'sequence_id': self.env['ir.sequence'].create({
+            'sequence_id': self.env['ir.sequence'].sudo().create({
                 'code': 'mrp.production',
                 'name': 'tmp_production_sequence',
             }).id,
         })
-        test_bom_1 = self.env['mrp.bom'].create({
+        test_bom_1 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': self.product_5.product_tmpl_id.id,
             'product_uom_id': self.product_5.uom_id.id,
             'product_qty': 1.0,
             'routing_id': self.routing_1.id,
             'type': 'phantom'
         })
-        test_bom_1_l1 = self.env['mrp.bom.line'].create({
+        test_bom_1_l1 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom_1.id,
             'product_id': self.product_3.id,
             'product_qty': 3,
         })
 
-        test_bom_2 = self.env['mrp.bom'].create({
+        test_bom_2 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': self.product_7_3.id,
             'product_tmpl_id': self.product_7_template.id,
             'product_uom_id': self.uom_unit.id,
@@ -95,24 +95,24 @@ class TestBoM(TestMrpCommon):
             'routing_id': self.routing_2.id,
             'type': 'normal',
         })
-        test_bom_2_l1 = self.env['mrp.bom.line'].create({
+        test_bom_2_l1 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom_2.id,
             'product_id': self.product_2.id,
             'product_qty': 2,
         })
-        test_bom_2_l2 = self.env['mrp.bom.line'].create({
+        test_bom_2_l2 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom_2.id,
             'product_id': self.product_5.id,
             'product_qty': 2,
             'bom_product_template_attribute_value_ids': [(4, self.product_7_attr1_v1.id)],
         })
-        test_bom_2_l3 = self.env['mrp.bom.line'].create({
+        test_bom_2_l3 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom_2.id,
             'product_id': self.product_5.id,
             'product_qty': 2,
             'bom_product_template_attribute_value_ids': [(4, self.product_7_attr1_v2.id)],
         })
-        test_bom_2_l4 = self.env['mrp.bom.line'].create({
+        test_bom_2_l4 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom_2.id,
             'product_id': self.product_4.id,
             'product_qty': 2,
@@ -138,26 +138,26 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(set((test_bom_2_l1 | test_bom_2_l4 | self.bom_2.bom_line_ids).ids), set([l[0].id for l in lines]))
 
         #check recursion
-        test_bom_3 = self.env['mrp.bom'].create({
+        test_bom_3 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': self.product_9.id,
             'product_tmpl_id': self.product_9.product_tmpl_id.id,
             'product_uom_id': self.product_9.uom_id.id,
             'product_qty': 1.0,
             'type': 'normal'
         })
-        test_bom_4 = self.env['mrp.bom'].create({
+        test_bom_4 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': self.product_10.id,
             'product_tmpl_id': self.product_10.product_tmpl_id.id,
             'product_uom_id': self.product_10.uom_id.id,
             'product_qty': 1.0,
             'type': 'phantom'
         })
-        test_bom_3_l1 = self.env['mrp.bom.line'].create({
+        test_bom_3_l1 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom_3.id,
             'product_id': self.product_10.id,
             'product_qty': 1.0,
         })
-        test_bom_4_l1 = self.env['mrp.bom.line'].create({
+        test_bom_4_l1 = self.env['mrp.bom.line'].with_user(self.user_mrp_manager).create({
             'bom_id': test_bom_4.id,
             'product_id': self.product_9.id,
             'product_qty': 1.0,
@@ -168,9 +168,9 @@ class TestBoM(TestMrpCommon):
     def test_12_multi_level_variants2(self):
         """Test skip bom line with same attribute values in bom lines."""
 
-        Product = self.env['product.product']
-        ProductAttribute = self.env['product.attribute']
-        ProductAttributeValue = self.env['product.attribute.value']
+        Product = self.env['product.product'].with_user(self.user_mrp_manager)
+        ProductAttribute = self.env['product.attribute'].with_user(self.user_stock_manager)
+        ProductAttributeValue = self.env['product.attribute.value'].with_user(self.user_stock_manager)
 
         # Product Attribute
         att_color = ProductAttribute.create({'name': 'Color', 'sequence': 1})
@@ -184,7 +184,7 @@ class TestBoM(TestMrpCommon):
         att_size_medium = ProductAttributeValue.create({'name': 'medium', 'attribute_id': att_size.id, 'sequence': 2})
 
         # Create Template Product
-        product_template = self.env['product.template'].create({
+        product_template = self.env['product.template'].with_user(self.user_stock_manager).create({
             'name': 'Sofa',
             'attribute_line_ids': [
                 (0, 0, {
@@ -211,7 +211,7 @@ class TestBoM(TestMrpCommon):
             'name': 'Clothes'})
 
         # Create BOM
-        self.env['mrp.bom'].create({
+        self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': product_template.id,
             'product_qty': 1.0,
             'type': 'normal',
@@ -252,27 +252,27 @@ class TestBoM(TestMrpCommon):
         """
         uom_kg = self.env.ref('uom.product_uom_kgm')
         uom_litre = self.env.ref('uom.product_uom_litre')
-        crumble = self.env['product.product'].create({
+        crumble = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Crumble',
             'type': 'product',
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
         })
-        butter = self.env['product.product'].create({
+        butter = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Butter',
             'type': 'product',
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
             'standard_price': 7.01
         })
-        biscuit = self.env['product.product'].create({
+        biscuit = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Biscuit',
             'type': 'product',
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
             'standard_price': 1.5
         })
-        bom_form_crumble = Form(self.env['mrp.bom'])
+        bom_form_crumble = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_form_crumble.product_tmpl_id = crumble.product_tmpl_id
         bom_form_crumble.product_qty = 11
         bom_form_crumble.product_uom_id = uom_kg
@@ -288,12 +288,12 @@ class TestBoM(TestMrpCommon):
                 line.product_uom_id = uom_kg
                 line.product_qty = 6
 
-        workcenter = self.env['mrp.workcenter'].create({
+        workcenter = self.env['mrp.workcenter'].with_user(self.user_mrp_manager).create({
             'costs_hour': 10,
             'name': 'Deserts Table'
         })
 
-        routing_form = Form(self.env['mrp.routing'])
+        routing_form = Form(self.env['mrp.routing'].with_user(self.user_mrp_manager))
         routing_form.name = "Crumble process"
         routing_crumble = routing_form.save()
 
@@ -364,18 +364,18 @@ class TestBoM(TestMrpCommon):
         self.assertEqual(report_values_23['lines']['operations_cost'], operation_cost)
 
         # Create a more complex BoM with a sub product
-        cheese_cake = self.env['product.product'].create({
+        cheese_cake = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Cheese Cake 300g',
             'type': 'product',
         })
-        cream = self.env['product.product'].create({
+        cream = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'cream',
             'type': 'product',
             'uom_id': uom_litre.id,
             'uom_po_id': uom_litre.id,
             'standard_price': 5.17,
         })
-        bom_form_cheese_cake = Form(self.env['mrp.bom'])
+        bom_form_cheese_cake = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_form_cheese_cake.product_tmpl_id = cheese_cake.product_tmpl_id
         bom_form_cheese_cake.product_qty = 60
         bom_form_cheese_cake.product_uom_id = self.uom_unit
@@ -391,14 +391,14 @@ class TestBoM(TestMrpCommon):
                 line.product_uom_id = uom_kg
                 line.product_qty = 5.4
 
-        workcenter_2 = self.env['mrp.workcenter'].create({
+        workcenter_2 = self.env['mrp.workcenter'].with_user(self.user_mrp_manager).create({
             'name': 'cake mounting',
             'costs_hour': 20,
             'time_start': 10,
             'time_stop': 15
         })
 
-        routing_form = Form(self.env['mrp.routing'])
+        routing_form = Form(self.env['mrp.routing'].with_user(self.user_mrp_manager))
         routing_form.name = "Cheese cake process"
         routing_cheese = routing_form.save()
 
@@ -461,22 +461,22 @@ class TestBoM(TestMrpCommon):
         Check the price for a red car -> 10.5l of red paint -> 210$
         """
         # Create a product template car with attributes gps(yes, no), color(red, blue)
-        self.car = self.env['product.template'].create({
+        self.car = self.env['product.template'].with_user(self.user_mrp_manager).create({
             'name': 'Car',
         })
-        self.gps_attribute = self.env['product.attribute'].create({'name': 'GPS', 'sequence': 1})
-        self.gps_yes = self.env['product.attribute.value'].create({
+        self.gps_attribute = self.env['product.attribute'].with_user(self.user_stock_manager).create({'name': 'GPS', 'sequence': 1})
+        self.gps_yes = self.env['product.attribute.value'].with_user(self.user_stock_manager).create({
             'name': 'Yes',
             'attribute_id': self.gps_attribute.id,
             'sequence': 1,
         })
-        self.gps_no = self.env['product.attribute.value'].create({
+        self.gps_no = self.env['product.attribute.value'].with_user(self.user_stock_manager).create({
             'name': 'No',
             'attribute_id': self.gps_attribute.id,
             'sequence': 2,
         })
 
-        self.car_gps_attribute_line = self.env['product.template.attribute.line'].create({
+        self.car_gps_attribute_line = self.env['product.template.attribute.line'].with_user(self.user_stock_manager).create({
             'product_tmpl_id': self.car.id,
             'attribute_id': self.gps_attribute.id,
             'value_ids': [(6, 0, [self.gps_yes.id, self.gps_no.id])],
@@ -484,19 +484,19 @@ class TestBoM(TestMrpCommon):
         self.car_gps_yes = self.car_gps_attribute_line.product_template_value_ids[0]
         self.car_gps_no = self.car_gps_attribute_line.product_template_value_ids[1]
 
-        self.color_attribute = self.env['product.attribute'].create({'name': 'Color', 'sequence': 1})
-        self.color_red = self.env['product.attribute.value'].create({
+        self.color_attribute = self.env['product.attribute'].with_user(self.user_stock_manager).create({'name': 'Color', 'sequence': 1})
+        self.color_red = self.env['product.attribute.value'].with_user(self.user_stock_manager).create({
             'name': 'Red',
             'attribute_id': self.color_attribute.id,
             'sequence': 1,
         })
-        self.color_blue = self.env['product.attribute.value'].create({
+        self.color_blue = self.env['product.attribute.value'].with_user(self.user_stock_manager).create({
             'name': 'Blue',
             'attribute_id': self.color_attribute.id,
             'sequence': 2,
         })
 
-        self.car_color_attribute_line = self.env['product.template.attribute.line'].create({
+        self.car_color_attribute_line = self.env['product.template.attribute.line'].with_user(self.user_stock_manager).create({
             'product_tmpl_id': self.car.id,
             'attribute_id': self.color_attribute.id,
             'value_ids': [(6, 0, [self.color_red.id, self.color_blue.id])],
@@ -506,12 +506,12 @@ class TestBoM(TestMrpCommon):
 
         # Blue and red paint
         uom_litre = self.env.ref('uom.product_uom_litre')
-        self.paint = self.env['product.template'].create({
+        self.paint = self.env['product.template'].with_user(self.user_mrp_manager).create({
             'name': 'Paint',
             'uom_id': uom_litre.id,
             'uom_po_id': uom_litre.id
         })
-        self.paint_color_attribute_line = self.env['product.template.attribute.line'].create({
+        self.paint_color_attribute_line = self.env['product.template.attribute.line'].with_user(self.user_stock_manager).create({
             'product_tmpl_id': self.paint.id,
             'attribute_id': self.color_attribute.id,
             'value_ids': [(6, 0, [self.color_red.id, self.color_blue.id])],
@@ -521,12 +521,12 @@ class TestBoM(TestMrpCommon):
 
         self.paint.product_variant_ids.write({'standard_price': 20})
 
-        self.dashboard = self.env['product.template'].create({
+        self.dashboard = self.env['product.template'].with_user(self.user_mrp_manager).create({
             'name': 'Dashboard',
             'standard_price': 1000,
         })
 
-        self.dashboard_gps_attribute_line = self.env['product.template.attribute.line'].create({
+        self.dashboard_gps_attribute_line = self.env['product.template.attribute.line'].with_user(self.user_stock_manager).create({
             'product_tmpl_id': self.dashboard.id,
             'attribute_id': self.gps_attribute.id,
             'value_ids': [(6, 0, [self.gps_yes.id, self.gps_no.id])],
@@ -534,7 +534,7 @@ class TestBoM(TestMrpCommon):
         self.dashboard_gps_yes = self.dashboard_gps_attribute_line.product_template_value_ids[0]
         self.dashboard_gps_no = self.dashboard_gps_attribute_line.product_template_value_ids[1]
 
-        self.dashboard_color_attribute_line = self.env['product.template.attribute.line'].create({
+        self.dashboard_color_attribute_line = self.env['product.template.attribute.line'].with_user(self.user_stock_manager).create({
             'product_tmpl_id': self.dashboard.id,
             'attribute_id': self.color_attribute.id,
             'value_ids': [(6, 0, [self.color_red.id, self.color_blue.id])],
@@ -542,12 +542,12 @@ class TestBoM(TestMrpCommon):
         self.dashboard_color_red = self.dashboard_color_attribute_line.product_template_value_ids[0]
         self.dashboard_color_blue = self.dashboard_color_attribute_line.product_template_value_ids[1]
 
-        self.gps = self.env['product.product'].create({
+        self.gps = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'GPS',
             'standard_price': 700,
         })
 
-        bom_form_car = Form(self.env['mrp.bom'])
+        bom_form_car = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_form_car.product_tmpl_id = self.car
         bom_form_car.product_qty = 5
         with bom_form_car.bom_line_ids.new() as line:
@@ -582,7 +582,7 @@ class TestBoM(TestMrpCommon):
             line.bom_product_template_attribute_value_ids.add(self.car_color_blue)
         bom_car = bom_form_car.save()
 
-        bom_dashboard = Form(self.env['mrp.bom'])
+        bom_dashboard = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_dashboard.product_tmpl_id = self.dashboard
         bom_dashboard.product_qty = 2
         with bom_dashboard.bom_line_ids.new() as line:
@@ -668,28 +668,28 @@ class TestBoM(TestMrpCommon):
         uom_dozen = self.env.ref('uom.product_uom_dozen')
         uom_litre = self.env.ref('uom.product_uom_litre')
 
-        finished = self.env['product.product'].create({
+        finished = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Finished',
             'type': 'product',
             'uom_id': uom_unit.id,
             'uom_po_id': uom_unit.id,
         })
 
-        semi_finished = self.env['product.product'].create({
+        semi_finished = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Semi-Finished',
             'type': 'product',
             'uom_id': uom_kg.id,
             'uom_po_id': uom_kg.id,
         })
 
-        assembly = self.env['product.product'].create({
+        assembly = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Assembly',
             'type': 'product',
             'uom_id': uom_dozen.id,
             'uom_po_id': uom_dozen.id,
         })
 
-        raw_material = self.env['product.product'].create({
+        raw_material = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Raw Material',
             'type': 'product',
             'uom_id': uom_litre.id,
@@ -698,7 +698,7 @@ class TestBoM(TestMrpCommon):
         })
 
         #Create bom
-        bom_finished = Form(self.env['mrp.bom'])
+        bom_finished = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_finished.product_tmpl_id = finished.product_tmpl_id
         bom_finished.product_qty = 100
         with bom_finished.bom_line_ids.new() as line:
@@ -707,7 +707,7 @@ class TestBoM(TestMrpCommon):
             line.product_qty = 5
         bom_finished = bom_finished.save()
 
-        bom_semi_finished = Form(self.env['mrp.bom'])
+        bom_semi_finished = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_semi_finished.product_tmpl_id = semi_finished.product_tmpl_id
         bom_semi_finished.product_qty = 11
         with bom_semi_finished.bom_line_ids.new() as line:
@@ -716,7 +716,7 @@ class TestBoM(TestMrpCommon):
             line.product_qty = 2
         bom_semi_finished = bom_semi_finished.save()
 
-        bom_assembly = Form(self.env['mrp.bom'])
+        bom_assembly = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_assembly.product_tmpl_id = assembly.product_tmpl_id
         bom_assembly.product_qty = 5
         with bom_assembly.bom_line_ids.new() as line:

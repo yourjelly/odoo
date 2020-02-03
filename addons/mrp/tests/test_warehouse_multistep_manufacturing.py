@@ -11,7 +11,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         super(TestMultistepManufacturingWarehouse, self).setUp()
         # Create warehouse
         self.customer_location = self.env['ir.model.data'].xmlid_to_res_id('stock.stock_location_customers')
-        warehouse_form = Form(self.env['stock.warehouse'])
+        warehouse_form = Form(self.env['stock.warehouse'].with_user(self.user_stock_manager))
         warehouse_form.name = 'Test Warehouse'
         warehouse_form.code = 'TWH'
         self.warehouse = warehouse_form.save()
@@ -19,7 +19,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.uom_unit = self.env.ref('uom.product_uom_unit')
 
         # Create manufactured product
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_mrp_manager))
         product_form.name = 'Stick'
         product_form.uom_id = self.uom_unit
         product_form.uom_po_id = self.uom_unit
@@ -30,7 +30,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.finished_product = product_form.save()
 
         # Create raw product for manufactured product
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_mrp_manager))
         product_form.name = 'Raw Stick'
         product_form.type = 'product'
         product_form.uom_id = self.uom_unit
@@ -38,7 +38,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.raw_product = product_form.save()
 
         # Create bom for manufactured product
-        bom_product_form = Form(self.env['mrp.bom'])
+        bom_product_form = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_product_form.product_id = self.finished_product
         bom_product_form.product_tmpl_id = self.finished_product.product_tmpl_id
         bom_product_form.product_qty = 1.0

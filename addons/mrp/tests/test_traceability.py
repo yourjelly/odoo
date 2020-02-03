@@ -9,7 +9,7 @@ class TestTraceability(TestMrpCommon):
     TRACKING_TYPES = ['none', 'serial', 'lot']
 
     def _create_product(self, tracking):
-        return self.env['product.product'].create({
+        return self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Product %s' % tracking,
             'type': 'product',
             'tracking': tracking,
@@ -38,9 +38,9 @@ class TestTraceability(TestMrpCommon):
                 (0,0, {'product_id': consumed_serial.id, 'product_qty': 1, 'prod_lot_id': self.env['stock.production.lot'].create({'name': 'S3', 'product_id': consumed_serial.id, 'company_id': self.env.company.id}).id, 'location_id': stock_id}),
             ]
         })
-        inventory_adjustment.action_validate()
+        inventory_adjustment.with_user(self.user_stock_manager).action_validate()
         for finished_product in [finished_no_track, finished_lot, finished_serial]:
-            bom = self.env['mrp.bom'].create({
+            bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
                 'product_id': finished_product.id,
                 'product_tmpl_id': finished_product.product_tmpl_id.id,
                 'product_uom_id': self.env.ref('uom.product_uom_unit').id,
@@ -114,32 +114,32 @@ class TestTraceability(TestMrpCommon):
                 )
 
     def test_tracking_on_byproducts(self):
-        product_final = self.env['product.product'].create({
+        product_final = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Finished Product',
             'type': 'product',
             'tracking': 'serial',
         })
-        product_1 = self.env['product.product'].create({
+        product_1 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Raw 1',
             'type': 'product',
             'tracking': 'serial',
         })
-        product_2 = self.env['product.product'].create({
+        product_2 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Raw 2',
             'type': 'product',
             'tracking': 'serial',
         })
-        byproduct_1 = self.env['product.product'].create({
+        byproduct_1 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Byproduct 1',
             'type': 'product',
             'tracking': 'serial',
         })
-        byproduct_2 = self.env['product.product'].create({
+        byproduct_2 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Byproduct 2',
             'type': 'product',
             'tracking': 'serial',
         })
-        bom_1 = self.env['mrp.bom'].create({
+        bom_1 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': product_final.id,
             'product_tmpl_id': product_final.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,

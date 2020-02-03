@@ -16,14 +16,14 @@ class TestWorkOrderProcessCommon(TestMrpCommon):
         cls.source_location_id = cls.stock_location_14.id
         cls.warehouse = cls.env.ref('stock.warehouse0')
         # setting up alternative workcenters
-        cls.wc_alt_1 = cls.env['mrp.workcenter'].create({
+        cls.wc_alt_1 = cls.env['mrp.workcenter'].with_user(cls.user_mrp_manager).create({
             'name': 'Nuclear Workcenter bis',
             'capacity': 3,
             'time_start': 9,
             'time_stop': 5,
             'time_efficiency': 80,
         })
-        cls.wc_alt_2 = cls.env['mrp.workcenter'].create({
+        cls.wc_alt_2 = cls.env['mrp.workcenter'].with_user(cls.user_mrp_manager).create({
             'name': 'Nuclear Workcenter ter',
             'capacity': 1,
             'time_start': 10,
@@ -31,7 +31,7 @@ class TestWorkOrderProcessCommon(TestMrpCommon):
             'time_efficiency': 85,
         })
         cls.product_4.uom_id = cls.uom_unit
-        cls.planning_bom = cls.env['mrp.bom'].create({
+        cls.planning_bom = cls.env['mrp.bom'].with_user(cls.user_mrp_manager).create({
             'product_id': cls.product_4.id,
             'product_tmpl_id': cls.product_4.product_tmpl_id.id,
             'product_uom_id': cls.uom_unit.id,
@@ -42,42 +42,42 @@ class TestWorkOrderProcessCommon(TestMrpCommon):
                 (0, 0, {'product_id': cls.product_2.id, 'product_qty': 2}),
                 (0, 0, {'product_id': cls.product_1.id, 'product_qty': 4})
             ]})
-        cls.dining_table = cls.env['product.product'].create({
+        cls.dining_table = cls.env['product.product'].with_user(cls.user_mrp_manager).create({
             'name': 'Table (MTO)',
             'type': 'product',
             'tracking': 'serial',
         })
-        cls.product_table_sheet = cls.env['product.product'].create({
+        cls.product_table_sheet = cls.env['product.product'].with_user(cls.user_mrp_manager).create({
             'name': 'Table Top',
             'type': 'product',
             'tracking': 'serial',
         })
-        cls.product_table_leg = cls.env['product.product'].create({
+        cls.product_table_leg = cls.env['product.product'].with_user(cls.user_mrp_manager).create({
             'name': 'Table Leg',
             'type': 'product',
             'tracking': 'lot',
         })
-        cls.product_bolt = cls.env['product.product'].create({
+        cls.product_bolt = cls.env['product.product'].with_user(cls.user_mrp_manager).create({
             'name': 'Bolt',
             'type': 'product',
         })
-        cls.product_screw = cls.env['product.product'].create({
+        cls.product_screw = cls.env['product.product'].with_user(cls.user_mrp_manager).create({
             'name': 'Screw',
             'type': 'product',
         })
 
-        cls.mrp_workcenter = cls.env['mrp.workcenter'].create({
+        cls.mrp_workcenter = cls.env['mrp.workcenter'].with_user(cls.user_mrp_manager).create({
             'name': 'Assembly Line 1',
             'resource_calendar_id': cls.env.ref('resource.resource_calendar_std').id,
         })
-        cls.routing = cls.env['mrp.routing'].create({
+        cls.routing = cls.env['mrp.routing'].with_user(cls.user_mrp_manager).create({
             'name': 'Assemble Furniture',
             'operation_ids': [(0, 0, {
                 'workcenter_id': cls.mrp_workcenter.id,
                 'name': 'Manual Assembly',
             })]
         })
-        cls.mrp_bom_desk = cls.env['mrp.bom'].create({
+        cls.mrp_bom_desk = cls.env['mrp.bom'].with_user(cls.user_mrp_manager).create({
             'product_tmpl_id': cls.dining_table.product_tmpl_id.id,
             'product_uom_id': cls.env.ref('uom.product_uom_unit').id,
             'sequence': 3,
@@ -110,15 +110,15 @@ class TestWorkOrderProcessCommon(TestMrpCommon):
                     'operation_id': cls.routing.operation_ids.id}),
             ]
         })
-        cls.mrp_workcenter_1 = cls.env['mrp.workcenter'].create({
+        cls.mrp_workcenter_1 = cls.env['mrp.workcenter'].with_user(cls.user_mrp_manager).create({
             'name': 'Drill Station 1',
             'resource_calendar_id': cls.env.ref('resource.resource_calendar_std').id,
         })
-        cls.mrp_workcenter_3 = cls.env['mrp.workcenter'].create({
+        cls.mrp_workcenter_3 = cls.env['mrp.workcenter'].with_user(cls.user_mrp_manager).create({
             'name': 'Assembly Line 1',
             'resource_calendar_id': cls.env.ref('resource.resource_calendar_std').id,
         })
-        cls.routing_1 = cls.env['mrp.routing'].create({
+        cls.routing_1 = cls.env['mrp.routing'].with_user(cls.user_mrp_manager).create({
             'name': 'Secondary Assembly',
             'operation_ids': [
                 (0, 0, {
@@ -144,8 +144,8 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
     def full_availability(self):
         """set full availability for all calendars"""
         calendar = self.env['resource.calendar'].search([])
-        calendar.write({'attendance_ids': [(5, 0, 0)]})
-        calendar.write({'attendance_ids': [
+        calendar.sudo().write({'attendance_ids': [(5, 0, 0)]})
+        calendar.sudo().write({'attendance_ids': [
             (0, 0, {'name': 'Monday', 'dayofweek': '0', 'hour_from': 0, 'hour_to': 24, 'day_period': 'morning'}),
             (0, 0, {'name': 'Tuesday', 'dayofweek': '1', 'hour_from': 0, 'hour_to': 24, 'day_period': 'morning'}),
             (0, 0, {'name': 'Wednesday', 'dayofweek': '2', 'hour_from': 0, 'hour_to': 24, 'day_period': 'morning'}),
@@ -215,7 +215,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
         # Create work order
         production_table.button_plan()
@@ -318,7 +318,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
         # Create work order
         production_table.button_plan()
@@ -410,7 +410,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         man_order = man_order_form.save()
         # reset quantities
         self.product_1.type = "product"
-        self.env['stock.quant'].with_context(inventory_mode=True).create({
+        self.env['stock.quant'].with_user(self.user_stock_manager).with_context(inventory_mode=True).create({
             'product_id': self.product_1.id,
             'inventory_quantity': 0.0,
             'location_id': self.warehouse_1.lot_stock_id.id,
@@ -467,7 +467,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
         # re-assign consume material
         man_order.action_assign()
@@ -528,7 +528,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
     def test_01_without_workorder(self):
         """ Testing consume quants and produced quants without workorder """
         unit = self.ref("uom.product_uom_unit")
-        custom_laptop = self.env['product.product'].create({
+        custom_laptop = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Drawer',
             'type': 'product',
             'tracking': 'lot',
@@ -536,13 +536,13 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
 
         # Create new product charger and keybord
         # --------------------------------------
-        product_charger = self.env['product.product'].create({
+        product_charger = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Charger',
             'type': 'product',
             'tracking': 'lot',
             'uom_id': unit,
             'uom_po_id': unit})
-        product_keybord = self.env['product.product'].create({
+        product_keybord = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Usb Keybord',
             'type': 'product',
             'tracking': 'lot',
@@ -551,7 +551,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
 
         # Create bill of material for customized laptop.
 
-        bom_custom_laptop = self.env['mrp.bom'].create({
+        bom_custom_laptop = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': custom_laptop.product_tmpl_id.id,
             'product_qty': 10,
             'product_uom_id': unit,
@@ -609,7 +609,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
         # Check consumed move status
         mo_custom_laptop.action_assign()
@@ -695,20 +695,20 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         kg = self.ref("uom.product_uom_kgm")
         gm = self.ref("uom.product_uom_gram")
         # Create Product A, B, C
-        product_A = self.env['product.product'].create({
+        product_A = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Product A',
             'type': 'product',
             'tracking': 'lot',
             'uom_id': dozen,
             'uom_po_id': dozen,
             'route_ids': [(6, 0, [route_manufacture, route_mto])]})
-        product_B = self.env['product.product'].create({
+        product_B = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Product B',
             'type': 'product',
             'tracking': 'lot',
             'uom_id': dozen,
             'uom_po_id': dozen})
-        product_C = self.env['product.product'].create({
+        product_C = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Product C',
             'type': 'product',
             'tracking': 'lot',
@@ -724,7 +724,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         #     Product C 600 gram
         # -----------------------------------
 
-        bom_a = self.env['mrp.bom'].create({
+        bom_a = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': product_A.product_tmpl_id.id,
             'product_qty': 2,
             'product_uom_id': unit,
@@ -783,7 +783,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
         # Start Production ...
         # --------------------
@@ -820,7 +820,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
 
         laptop.tracking = 'serial'
 
-        bom_laptop = self.env['mrp.bom'].create({
+        bom_laptop = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': laptop.product_tmpl_id.id,
             'product_qty': 1,
             'product_uom_id': unit.id,
@@ -872,22 +872,22 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         serial number. It should be allowed since the first workorder did not
         specify a seiral number.
         """
-        drawer = self.env['product.product'].create({
+        drawer = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Drawer',
             'type': 'product',
             'tracking': 'lot',
         })
-        drawer_drawer = self.env['product.product'].create({
+        drawer_drawer = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Drawer Black',
             'type': 'product',
             'tracking': 'lot',
         })
-        drawer_case = self.env['product.product'].create({
+        drawer_case = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Drawer Case Black',
             'type': 'product',
             'tracking': 'lot',
         })
-        bom = self.env['mrp.bom'].create({
+        bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': drawer.product_tmpl_id.id,
             'product_uom_id': self.env.ref('uom.product_uom_unit').id,
             'sequence': 2,
@@ -919,7 +919,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_validate()
+        inventory.with_user(self.user_stock_manager).action_validate()
 
         product = bom.product_tmpl_id.product_variant_id
         product.tracking = 'serial'
@@ -1160,7 +1160,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         # Allow second workorder to start once the first one is not ended yet
         self.operation_2.batch = 'yes'
         self.operation_2.batch_size = 1
-        self.env['mrp.workcenter'].search([]).write({'capacity': 1})
+        self.env['mrp.workcenter'].search([]).with_user(self.user_mrp_manager).write({'capacity': 1})
         # workcenters work 24/7
         self.full_availability()
 
@@ -1194,7 +1194,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         calendar after second mo: [mo2][mo1] """
 
         self.workcenter_1.alternative_workcenter_ids = self.wc_alt_1 | self.wc_alt_2
-        self.env['mrp.workcenter'].search([]).write({'tz': 'UTC'}) # compute all date in UTC
+        self.env['mrp.workcenter'].search([]).with_user(self.user_mrp_manager).write({'tz': 'UTC'}) # compute all date in UTC
 
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.product_4
@@ -1232,7 +1232,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         available. Planning a workorder on it should raise an error"""
 
         self.workcenter_1.alternative_workcenter_ids = self.wc_alt_1 | self.wc_alt_2
-        self.env['resource.calendar'].search([]).write({'attendance_ids': [(5, False, False)]})
+        self.env['resource.calendar'].search([]).sudo().write({'attendance_ids': [(5, False, False)]})
 
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.product_4
@@ -1263,15 +1263,15 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         the reservation slot in the calendar the be able to reserve the next
         production sooner """
         self.workcenter_1.alternative_workcenter_ids = self.wc_alt_1 | self.wc_alt_2
-        self.env['mrp.workcenter'].search([]).write({'tz': 'UTC'}) # compute all date in UTC
-        mrp_routing_0 = self.env['mrp.routing'].create({
+        self.env['mrp.workcenter'].search([]).with_user(self.user_mrp_manager).write({'tz': 'UTC'}) # compute all date in UTC
+        mrp_routing_0 = self.env['mrp.routing'].with_user(self.user_mrp_manager).create({
             'name': 'Primary Assembly',
         })
-        mrp_workcenter_3 = self.env['mrp.workcenter'].create({
+        mrp_workcenter_3 = self.env['mrp.workcenter'].with_user(self.user_mrp_manager).create({
             'name': 'Assembly Line 1',
             'resource_calendar_id': self.env.ref('resource.resource_calendar_std').id,
         })
-        mrp_routing_workcenter_0 = self.env['mrp.routing.workcenter'].create({
+        mrp_routing_workcenter_0 = self.env['mrp.routing.workcenter'].with_user(self.user_mrp_manager).create({
             'routing_id': mrp_routing_0.id,
             'workcenter_id': mrp_workcenter_3.id,
             'name': 'Manual Assembly',
@@ -1369,7 +1369,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             - wo line 2 (comp1, qty=4)
             - wo line 3 (comp2, qty=1) """
         # Kit bom
-        self.env['mrp.bom'].create({
+        self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': self.product_4.id,
             'product_tmpl_id': self.product_4.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -1381,7 +1381,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             ]})
 
         # Main bom
-        main_bom = self.env['mrp.bom'].create({
+        main_bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': self.product_5.id,
             'product_tmpl_id': self.product_5.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -1501,6 +1501,33 @@ class TestRoutingAndKits(SavepointCase):
             - operation 1
         """
         super(TestRoutingAndKits, cls).setUpClass()
+        user_group_stock_user = cls.env.ref('stock.group_stock_user')
+        user_group_mrp_user = cls.env.ref('mrp.group_mrp_user')
+        user_group_mrp_manager = cls.env.ref('mrp.group_mrp_manager')
+        user_group_mrp_byproducts = cls.env.ref('mrp.group_mrp_byproducts')
+
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        cls.user_mrp_user = Users.create({
+            'name': 'Hilda Ferachwal',
+            'login': 'hilda',
+            'email': 'h.h@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_user.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+        cls.user_mrp_manager = Users.create({
+            'name': 'Gary Youngwomen',
+            'login': 'gary',
+            'email': 'g.g@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_manager.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+
         cls.uom_unit = cls.env['uom.uom'].search([
             ('category_id', '=', cls.env.ref('uom.product_uom_categ_unit').id),
             ('uom_type', '=', 'reference')
@@ -1571,6 +1598,7 @@ class TestRoutingAndKits(SavepointCase):
             'bom_line_ids': [
                 (0, 0, {'product_id': cls.compkit1.id, 'product_qty': 1}),
             ]})
+        cls.env = cls.env(user=cls.user_mrp_user)
 
     def test_1(self):
         """Operations are set on `self.bom_kit1` but none on `self.bom_finished1`."""
@@ -1631,15 +1659,15 @@ class TestRoutingAndKits(SavepointCase):
         without routing was added to `self.bom_finished1`. We expect the component of the kit
         without routing to be consumed at the last workorder of the main BoM.
         """
-        kit2 = self.env['product.product'].create({
+        kit2 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'kit2',
             'type': 'consu',
         })
-        compkit2 = self.env['product.product'].create({
+        compkit2 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'compkit2',
             'type': 'product',
         })
-        bom_kit2 = self.env['mrp.bom'].create({
+        bom_kit2 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': kit2.id,
             'product_tmpl_id': kit2.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -1675,15 +1703,15 @@ class TestRoutingAndKits(SavepointCase):
         self.bom_kit1.bom_line_ids.operation_id = self.bom_kit1.routing_id.operation_ids
 
         # Main bom: add a kit without routing
-        kit2 = self.env['product.product'].create({
+        kit2 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'kit2',
             'type': 'consu',
         })
-        compkit2 = self.env['product.product'].create({
+        compkit2 = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'compkit2',
             'type': 'product',
         })
-        bom_kit2 = self.env['mrp.bom'].create({
+        bom_kit2 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': kit2.id,
             'product_tmpl_id': kit2.product_tmpl_id.id,
             'product_uom_id': self.uom_unit.id,
@@ -1764,7 +1792,7 @@ class TestRoutingAndKits(SavepointCase):
         on a specific operation and check that the produce is consumed into the
         right workorder. """
         self.bom_finished1.consumption = 'flexible'
-        add_product = self.env['product.product'].create({
+        add_product = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Additional',
         })
         mo_form = Form(self.env['mrp.production'])
@@ -1797,7 +1825,7 @@ class TestRoutingAndKits(SavepointCase):
         on a specific operation and check that the produce is consumed into the
         right workorder. """
         self.bom_finished1.consumption = 'flexible'
-        add_product = self.env['product.product'].create({
+        add_product = self.env['product.product'].with_user(self.user_mrp_manager).create({
             'name': 'Additional',
         })
         mo_form = Form(self.env['mrp.production'])
