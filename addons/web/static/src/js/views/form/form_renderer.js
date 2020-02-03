@@ -7,6 +7,8 @@ var core = require('web.core');
 var dom = require('web.dom');
 var viewUtils = require('web.viewUtils');
 
+const { WidgetAdapterMixin } = require('web.OwlCompatibility');
+
 var _t = core._t;
 var qweb = core.qweb;
 
@@ -963,14 +965,16 @@ var FormRenderer = BasicRenderer.extend({
             if (self.state.res_id in self.alertFields) {
                 self.displayTranslationAlert();
             }
-        }).then(function(){
+        }).then(function () {
             if (self.lastActivatedFieldIndex >= 0) {
                 self._activateNextFieldWidget(self.state, self.lastActivatedFieldIndex);
             }
             if (self._isInDom) {
-                _.forEach(self.allFieldWidgets, function (widgets){
+                _.forEach(self.allFieldWidgets, function (widgets) {
                     _.invoke(widgets, 'on_attach_callback');
                 });
+                // mark Owl sub components as mounted
+                // WidgetAdapterMixin.on_attach_callback.call(self); // check if still necessary
             }
         }).guardedCatch(function () {
             $form.remove();

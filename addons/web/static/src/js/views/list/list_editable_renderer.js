@@ -16,6 +16,8 @@ var dom = require('web.dom');
 var ListRenderer = require('web.ListRenderer');
 var utils = require('web.utils');
 
+const { WidgetAdapterMixin } = require('web.OwlCompatibility');
+
 var _t = core._t;
 
 ListRenderer.include({
@@ -462,6 +464,9 @@ ListRenderer.include({
         }
 
         return Promise.all(defs).then(function () {
+            // mark Owl sub components as mounted
+            WidgetAdapterMixin.on_attach_callback.call(self);
+
             // necessary to trigger resize on fieldtexts
             core.bus.trigger('DOM_updated');
         });

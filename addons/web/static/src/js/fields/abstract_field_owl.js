@@ -228,6 +228,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
          * @returns {boolean}
          */
         get isSet() {
+            console.log('is set', this.value);
             return !!this.value;
         }
         /**

@@ -111,11 +111,17 @@ odoo.define('web.FieldWrapper', function (require) {
         isValid() {
             return this.componentRef.comp.isValid;
         }
+        removeInvalidClass() {
+            return this.componentRef.comp.removeInvalidClass();
+        }
         reset(record, event) {
             return this.update({record, event});
         }
         setIDForLabel(id) {
             return this.componentRef.comp.setIDForLabel(id);
+        }
+        setInvalidClass() {
+            return this.componentRef.comp.setInvalidClass();
         }
         updateModifiersValue(modifiers) {
             return this.componentRef.comp.updateModifiersValue(modifiers);

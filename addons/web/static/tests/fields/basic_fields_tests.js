@@ -263,12 +263,14 @@ QUnit.module('basic_fields', {
         assert.containsOnce(form, '.o_field_boolean input:checked',
         "checkbox should now be checked");
         // blindly press enter again, it should uncheck the checkbox
-        $(document.activeElement).trigger({type: "keydown", which: $.ui.keyCode.ENTER});
+        await testUtils.dom.triggerEvent(document.activeElement, "keydown",
+            {which: $.ui.keyCode.ENTER});
         assert.containsNone(form, '.o_field_boolean input:checked',
         "checkbox should not be checked");
         await testUtils.nextTick();
         // blindly press enter again, it should check the checkbox back
-        $(document.activeElement).trigger({type: "keydown", which: $.ui.keyCode.ENTER});
+        await testUtils.dom.triggerEvent(document.activeElement, "keydown",
+            {which: $.ui.keyCode.ENTER});
         assert.containsOnce(form, '.o_field_boolean input:checked',
             "checkbox should still be checked");
 
@@ -279,62 +281,54 @@ QUnit.module('basic_fields', {
         form.destroy();
     });
 
-    QUnit.test('boolean field in editable list view', async function (assert) {
-        assert.expect(11);
+    QUnit.only('boolean field in editable list view', async function (assert) {
+        assert.expect(9);
 
         var list = await createView({
             View: ListView,
             model: 'partner',
             data: this.data,
             arch: '<tree editable="bottom"><field name="bar"/></tree>',
+            debug: 1,
         });
+        window.CC = list;
+        debugger;
+        // assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input').length, 5,
+        //     "should have 5 checkboxes");
+        // assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked').length, 4,
+        //     "should have 4 checked input");
 
-        assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input').length, 5,
-            "should have 5 checkboxes");
-        assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked').length, 4,
-            "should have 4 checked input");
+        // // Edit a line
+        // var $cell = list.$('tr.o_data_row:has(.custom-checkbox input:checked) td:not(.o_list_record_selector)').first();
+        // assert.ok($cell.find('.custom-checkbox input:checked').prop('disabled'),
+        //     "input should be disabled in readonly mode");
+        // await testUtils.dom.click($cell);
+        // assert.ok(!$cell.find('.custom-checkbox input:checked').prop('disabled'),
+        //     "input should not have the disabled property in edit mode");
+        // await testUtils.dom.click($cell.find('.custom-checkbox input:checked'));
 
-        // Edit a line
-        var $cell = list.$('tr.o_data_row:has(.custom-checkbox input:checked) td:not(.o_list_record_selector)').first();
-        assert.ok($cell.find('.custom-checkbox input:checked').prop('disabled'),
-            "input should be disabled in readonly mode");
-        await testUtils.dom.click($cell);
-        assert.ok(!$cell.find('.custom-checkbox input:checked').prop('disabled'),
-            "input should not have the disabled property in edit mode");
-        await testUtils.dom.click($cell.find('.custom-checkbox input:checked'));
+        // // save
+        // await testUtils.dom.click(list.$buttons.find('.o_list_button_save'));
+        // $cell = list.$('tr.o_data_row:has(.custom-checkbox input:not(:checked)) td:not(.o_list_record_selector)').first();
+        // assert.ok($cell.find('.custom-checkbox input:not(:checked)').prop('disabled'),
+        //     "input should be disabled again");
+        // assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input').length, 5,
+        //     "should still have 5 checkboxes");
+        // assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked').length, 3,
+        //     "should now have only 3 checked input");
 
-        // save
-        await testUtils.dom.click(list.$buttons.find('.o_list_button_save'));
-        $cell = list.$('tr.o_data_row:has(.custom-checkbox input:not(:checked)) td:not(.o_list_record_selector)').first();
-        assert.ok($cell.find('.custom-checkbox input:not(:checked)').prop('disabled'),
-            "input should be disabled again");
-        assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input').length, 5,
-            "should still have 5 checkboxes");
-        assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked').length, 3,
-            "should now have only 3 checked input");
+        // // Re-Edit the line and fake-check the checkbox
+        // await testUtils.dom.click($cell);
+        // await testUtils.dom.click($cell.find('.custom-checkbox input'));
+        // await testUtils.dom.click($cell.find('.custom-checkbox input'));
 
-        // Re-Edit the line and fake-check the checkbox
-        await testUtils.dom.click($cell);
-        await testUtils.dom.click($cell.find('.custom-checkbox input'));
-        await testUtils.dom.click($cell.find('.custom-checkbox input'));
-
-        // Save
-        await testUtils.dom.click(list.$buttons.find('.o_list_button_save'));
-        assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input').length, 5,
-            "should still have 5 checkboxes");
-        assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked').length, 3,
-            "should still have only 3 checked input");
-
-        // Re-Edit the line to check the checkbox back but this time click on
-        // the checkbox directly in readonly mode !
-        $cell = list.$('tr.o_data_row:has(.custom-checkbox input:not(:checked)) td:not(.o_list_record_selector)').first();
-        await testUtils.dom.click($cell.find('.custom-checkbox .custom-control-label'));
-
-        assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input').length, 5,
-            "should still have 5 checkboxes");
-        assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked').length, 4,
-            "should now have 4 checked input back");
-        list.destroy();
+        // // Save
+        // await testUtils.dom.click(list.$buttons.find('.o_list_button_save'));
+        // assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input').length, 5,
+        //     "should still have 5 checkboxes");
+        // assert.strictEqual(list.$('tbody td:not(.o_list_record_selector) .custom-checkbox input:checked').length, 3,
+        //     "should still have only 3 checked input");
+        // list.destroy();
     });
 
     QUnit.module('FieldBooleanToggle');

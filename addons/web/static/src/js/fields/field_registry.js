@@ -11,6 +11,7 @@ odoo.define('web._field_registry', function (require) {
 
 var AbstractField = require('web.AbstractField');
 var basic_fields = require('web.basic_fields');
+var basic_fields_owl = require('web.basic_fields_owl');
 var relational_fields = require('web.relational_fields');
 var registry = require('web.field_registry');
 var special_fields = require('web.special_fields');
@@ -21,7 +22,7 @@ registry
     .add('abstract', AbstractField)
     .add('input', basic_fields.InputField)
     .add('integer', basic_fields.FieldInteger)
-    .add('boolean', basic_fields.FieldBoolean)
+    .add('boolean', basic_fields_owl.FieldBoolean)
     .add('date', basic_fields.FieldDate)
     .add('datetime', basic_fields.FieldDateTime)
     .add('daterange', basic_fields.FieldDateRange)
