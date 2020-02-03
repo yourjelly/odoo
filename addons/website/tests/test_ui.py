@@ -110,3 +110,21 @@ class TestUi(odoo.tests.HttpCase):
                 ])]
         })
         self.phantom_js("/", "odoo.__DEBUG__.services['web_tour.tour'].run('restricted_editor')", "odoo.__DEBUG__.services['web_tour.tour'].tours.restricted_editor.ready", login='restricted')
+
+    def test_04_specific_website_editor(self):
+        website_default = self.env['website'].search([], limit=1)
+        new_website = self.env['website'].create({'name': 'New Website'})
+        website_editor_assets_view = self.env.ref('website.assets_wysiwyg')
+        self.env['ir.ui.view'].create({
+            'name': 'Editor Extension',
+            'type': 'qweb',
+            'inherit_id': website_editor_assets_view.id,
+            'website_id': new_website.id,
+            'arch': """
+                <xpath expr="." position="inside">
+                    <script type="text/javascript">document.body.dataset.hello = 'world';</script>
+                </xpath>
+            """,
+        })
+        self.phantom_js("/?fw=%s" % website_default.id, "odoo.__DEBUG__.services['web_tour.tour'].run('generic_website_editor')", "odoo.__DEBUG__.services['web_tour.tour'].tours.generic_website_editor.ready", login='admin')
+        self.phantom_js("/?fw=%s" % new_website.id, "odoo.__DEBUG__.services['web_tour.tour'].run('specific_website_editor')", "odoo.__DEBUG__.services['web_tour.tour'].tours.specific_website_editor.ready", login='admin')

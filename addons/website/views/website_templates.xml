@@ -124,6 +124,7 @@
     <script type="text/javascript" src="/website/static/src/js/tours/customize.js"/>
     <script type="text/javascript" src="/website/static/src/js/tours/restricted_editor.js"/>
     <script type="text/javascript" src="/website/static/src/js/tours/rte.js"/>
+    <script type="text/javascript" src="/website/static/src/js/tours/specific_website_editor.js"/>
 
     <script type="text/javascript" src="/website/static/src/js/widgets/ace.js"/>
     <script type="text/javascript" src="/website/static/src/js/widgets/theme.js"/>
