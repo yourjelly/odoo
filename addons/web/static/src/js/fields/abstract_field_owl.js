@@ -426,13 +426,26 @@ odoo.define('web.AbstractFieldOwl', function (require) {
          * @param {KeyEvent} ev
          */
         _onKeydown(ev) {
+            let navEvent;
+            let isStopped;
             switch (ev.which) {
                 case $.ui.keyCode.TAB:
-                    this.trigger('navigation-move', {
+                    navEvent = this.trigger('navigation-move', {
                         direction: ev.shiftKey ? 'previous' : 'next',
                     });
-                    // TODO: stop/prevent original event if navigation-move event
-                    // has been handled
+                    // stop/prevent original event if navigation event has been handled
+                    // legacyEvent: event has bubbled up through the Owl compatibility layer,
+                    // so check if the legacyEvent has been stoppped
+                    // otherwise, check is the original Owl event has been stopped
+                    if (navEvent.detail.__legacyEvent) {
+                        isStopped = navEvent.detail.__legacyEvent.is_stopped();
+                    } else {
+                        isStopped = navEvent.cancelBubble;
+                    }
+                    if (isStopped) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                    }
                     break;
                 case $.ui.keyCode.ENTER:
                     // We preventDefault the ENTER key because of two coexisting behaviours:

@@ -37,6 +37,6 @@
         if (this.env[odoo.widgetSymbol]) {
             this.env[odoo.widgetSymbol](evType);
         }
-        originalTrigger.call(this, component, evType, payload);
+        return originalTrigger.call(this, component, evType, payload);
     };
 })();

@@ -469,7 +469,10 @@ odoo.define('web.OwlCompatibility', function () {
                     // stopImmediatePropagation to prevent from getting here)
                     if (!ev.cancelBubble) {
                         ev.stopPropagation();
-                        this.parentWidget.trigger_up(ev.type.replace(/-/g, '_'), ev.detail);
+                        const newEvent = this.parentWidget.trigger_up(ev.type.replace(/-/g, '_'), ev.detail);
+                        // store the new (legacy) event on the old (Owl) one, so that the initiator
+                        // can track, e.g., if is has been stopped
+                        ev.detail.__legacyEvent = newEvent;
                     }
                 });
             }
