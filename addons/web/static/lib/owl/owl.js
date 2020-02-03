@@ -3883,7 +3883,7 @@
          * willUnmount().
          */
         trigger(eventType, payload) {
-            this.__trigger(this, eventType, payload);
+            return this.__trigger(this, eventType, payload);
         }
         //--------------------------------------------------------------------------
         // Private
@@ -3968,6 +3968,7 @@
                     triggerHook(ev);
                 }
                 this.el.dispatchEvent(ev);
+                return ev;
             }
         }
         /**
