@@ -24,39 +24,43 @@ class ReportStockQuantity(models.Model):
 
     def init(self):
         tools.drop_view_if_exists(self._cr, 'report_stock_quantity')
+        domain_locations = self.env['product.product']._get_domain_locations()
+        domain_in, domain_out = domain_locations[1], domain_locations[2]
+        from_in, where_clause_in, params_in = self.env['stock.move']._where_calc(domain_in).get_sql()
+        from_out, where_clause_out, params_out = self.env['stock.move']._where_calc(domain_out).get_sql()
         query = """
 CREATE or REPLACE VIEW report_stock_quantity AS (
 SELECT
-    m.id,
-    product_id,
-    CASE
-        WHEN (ls.usage = 'internal' OR ls.usage = 'transit' AND ls.company_id IS NOT NULL) AND ld.usage != 'internal' THEN 'out'
-        WHEN ls.usage != 'internal' AND (ld.usage = 'internal' OR ld.usage = 'transit' AND ld.company_id IS NOT NULL) THEN 'in'
-    END AS state,
-    date_expected::date AS date,
-    CASE
-        WHEN (ls.usage = 'internal' OR ls.usage = 'transit' AND ls.company_id IS NOT NULL) AND ld.usage != 'internal' THEN -product_qty
-        WHEN ls.usage != 'internal' AND (ld.usage = 'internal' OR ld.usage = 'transit' AND ld.company_id IS NOT NULL) THEN product_qty
-    END AS product_qty,
-    m.company_id,
-    CASE
-        WHEN (ls.usage = 'internal' OR ls.usage = 'transit' AND ls.company_id IS NOT NULL) AND ld.usage != 'internal' THEN whs.id
-        WHEN ls.usage != 'internal' AND (ld.usage = 'internal' OR ld.usage = 'transit' AND ld.company_id IS NOT NULL) THEN whd.id
-    END AS warehouse_id
+    stock_move.id,
+    stock_move.product_id,
+    'in' AS state,
+    stock_move.date_expected::date AS date,
+    stock_move.product_qty,
+    stock_move.company_id,
+    stock_warehouse.id AS warehouse_id
 FROM
-    stock_move m
-LEFT JOIN stock_location ls on (ls.id=m.location_id)
-LEFT JOIN stock_location ld on (ld.id=m.location_dest_id)
-LEFT JOIN stock_warehouse whs ON ls.parent_path like concat('%/', whs.view_location_id, '/%')
-LEFT JOIN stock_warehouse whd ON ld.parent_path like concat('%/', whd.view_location_id, '/%')
-LEFT JOIN product_product pp on pp.id=m.product_id
-LEFT JOIN product_template pt on pt.id=pp.product_tmpl_id
+    stock_warehouse,
+    %s
 WHERE
-    pt.type = 'product' AND
-    product_qty != 0 AND (
-    (ls.usage = 'internal' OR ls.usage = 'transit' AND ls.company_id IS NOT NULL) AND ld.usage != 'internal' OR
-    ls.usage != 'internal' AND (ld.usage = 'internal' OR ld.usage = 'transit' AND ld.company_id IS NOT NULL)) AND
-    m.state NOT IN ('cancel', 'draft', 'done')
+    stock_move__location_dest_id.parent_path LIKE CONCAT('%%%%/', stock_warehouse.view_location_id, '/%%%%') AND
+    stock_move.state NOT IN ('cancel', 'draft', 'done') AND
+    %s
+UNION
+SELECT
+    stock_move.id,
+    stock_move.product_id,
+    'out' AS state,
+    stock_move.date_expected::date AS date,
+    - stock_move.product_qty AS product_qty,
+    stock_move.company_id,
+    stock_warehouse.id AS warehouse_id
+FROM
+    stock_warehouse,
+    %s
+WHERE
+    stock_move__location_id.parent_path LIKE CONCAT('%%%%/', stock_warehouse.view_location_id, '/%%%%') AND
+    stock_move.state NOT IN ('cancel', 'draft', 'done') AND
+    %s
 UNION
 SELECT
     -q.id as id,
@@ -71,48 +75,81 @@ FROM
     (now() at time zone 'utc')::date + interval '3 month', '1 day'::interval) date,
     stock_quant q
 LEFT JOIN stock_location l on (l.id=q.location_id)
-LEFT JOIN stock_warehouse wh ON l.parent_path like concat('%/', wh.view_location_id, '/%')
+LEFT JOIN stock_warehouse wh ON l.parent_path like concat('%%%%/', wh.view_location_id, '/%%%%')
 WHERE
     l.usage = 'internal'
 UNION
 SELECT
-    m.id,
-    product_id,
+    stock_move.id,
+    stock_move.product_id,
     'forecast' as state,
     GENERATE_SERIES(
-    CASE
-        WHEN m.state = 'done' THEN (now() at time zone 'utc')::date - interval '3month'
-        ELSE date_expected::date
-    END,
-    CASE
-        WHEN m.state != 'done' THEN (now() at time zone 'utc')::date + interval '3 month'
-        ELSE date::date - interval '1 day'
-    END, '1 day'::interval)::date date,
-    CASE
-        WHEN (ls.usage = 'internal' OR ls.usage = 'transit' AND ls.company_id IS NOT NULL) AND ld.usage != 'internal' AND m.state = 'done' THEN product_qty
-        WHEN ls.usage != 'internal' AND (ld.usage = 'internal' OR ld.usage = 'transit' AND ld.company_id IS NOT NULL) AND m.state = 'done' THEN -product_qty
-        WHEN (ls.usage = 'internal' OR ls.usage = 'transit' AND ls.company_id IS NOT NULL) AND ld.usage != 'internal' THEN -product_qty
-        WHEN ls.usage != 'internal' AND (ld.usage = 'internal' OR ld.usage = 'transit' AND ld.company_id IS NOT NULL) THEN product_qty
-    END AS product_qty,
-    m.company_id,
-    CASE
-        WHEN (ls.usage = 'internal' OR ls.usage = 'transit' AND ls.company_id IS NOT NULL) AND ld.usage != 'internal' THEN whs.id
-        WHEN ls.usage != 'internal' AND (ld.usage = 'internal' OR ld.usage = 'transit' AND ld.company_id IS NOT NULL) THEN whd.id
-    END AS warehouse_id
+        (now() at time zone 'utc')::date - interval '3month', date::date - interval '1 day', '1 day'::interval
+    )::date date,
+    - stock_move.product_qty AS product_qty,
+    stock_move.company_id,
+    stock_warehouse.id
 FROM
-    stock_move m
-LEFT JOIN stock_location ls on (ls.id=m.location_id)
-LEFT JOIN stock_location ld on (ld.id=m.location_dest_id)
-LEFT JOIN stock_warehouse whs ON ls.parent_path like concat('%/', whs.view_location_id, '/%')
-LEFT JOIN stock_warehouse whd ON ld.parent_path like concat('%/', whd.view_location_id, '/%')
-LEFT JOIN product_product pp on pp.id=m.product_id
-LEFT JOIN product_template pt on pt.id=pp.product_tmpl_id
+    stock_warehouse,
+    %s
 WHERE
-    pt.type = 'product' AND
-    product_qty != 0 AND (
-    (ls.usage = 'internal' OR ls.usage = 'transit' AND ls.company_id IS NOT NULL) AND ld.usage != 'internal' OR
-    ls.usage != 'internal' AND (ld.usage = 'internal' OR ld.usage = 'transit' AND ld.company_id IS NOT NULL)) AND
-    m.state NOT IN ('cancel', 'draft')
+    stock_move__location_dest_id.parent_path LIKE CONCAT('%%%%/', stock_warehouse.view_location_id, '/%%%%') AND
+    stock_move.state = 'done' AND
+    %s
+UNION
+SELECT
+    stock_move.id,
+    stock_move.product_id,
+    'forecast' as state,
+    GENERATE_SERIES(
+        (now() at time zone 'utc')::date - interval '3month', date::date - interval '1 day', '1 day'::interval
+    )::date date,
+    stock_move.product_qty AS product_qty,
+    stock_move.company_id,
+    stock_warehouse.id
+FROM
+    stock_warehouse,
+    %s
+WHERE
+    stock_move__location_id.parent_path LIKE CONCAT('%%%%/', stock_warehouse.view_location_id, '/%%%%') AND
+    stock_move.state = 'done' AND
+    %s
+UNION
+SELECT
+    stock_move.id,
+    stock_move.product_id,
+    'forecast' as state,
+    GENERATE_SERIES(
+        date_expected::date, (now() at time zone 'utc')::date + interval '3 month', '1 day'::interval
+    )::date date,
+    stock_move.product_qty AS product_qty,
+    stock_move.company_id,
+    stock_warehouse.id
+FROM
+    stock_warehouse,
+    %s
+WHERE
+    stock_move__location_dest_id.parent_path LIKE CONCAT('%%%%/', stock_warehouse.view_location_id, '/%%%%') AND
+    stock_move.state IN ('confirmed', 'waiting', 'assigned', 'partially_available') AND
+    %s
+UNION
+SELECT
+    stock_move.id,
+    stock_move.product_id,
+    'forecast' as state,
+    GENERATE_SERIES(
+        date_expected::date, (now() at time zone 'utc')::date + interval '3 month', '1 day'::interval
+    )::date date,
+    - stock_move.product_qty AS product_qty,
+    stock_move.company_id,
+    stock_warehouse.id
+FROM
+    stock_warehouse,
+    %s
+WHERE
+    stock_move__location_id.parent_path LIKE CONCAT('%%%%/', stock_warehouse.view_location_id, '/%%%%') AND
+    stock_move.state IN ('confirmed', 'waiting', 'assigned', 'partially_available') AND
+    %s
 );
-"""
-        self.env.cr.execute(query)
+""" % tuple([from_in, where_clause_in, from_out, where_clause_out] * 3)
+        self.env.cr.execute(query, (params_in + params_out) * 3)
