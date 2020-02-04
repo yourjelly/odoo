@@ -279,6 +279,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
         test_template = self.env['mail.template'].browse(self.test_template_full.id)
         # TODO XDO/TDE FIXME non deterministic between 25 and 28 queries
         with self.assertQueryCount(__system__=28, emp=28):
+            self.env.cr.pudb = True
             composer = self.env['mail.compose.message'].with_context({
                 'default_composition_mode': 'comment',
                 'default_model': test_record._name,
@@ -286,6 +287,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
                 'default_template_id': test_template.id,
             }).create({})
             composer.onchange_template_id_wrapper()
+            self.env.cr.pudb = False
 
         with self.assertQueryCount(__system__=46, emp=51):
             composer.send_mail()

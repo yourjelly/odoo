@@ -172,7 +172,7 @@ class Cursor(object):
         self.sql_log = _logger.isEnabledFor(logging.DEBUG)
 
         self.sql_log_count = 0
-
+        self.pudb = False
         # avoid the call of close() (by __del__) if an exception
         # is raised by any of the following initialisations
         self._closed = True
@@ -231,9 +231,9 @@ class Cursor(object):
             # psycopg2's TypeError is not clear if you mess up the params
             raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
 
-        if self.sql_log:
+        if self.sql_log or self.pudb:
             encoding = psycopg2.extensions.encodings[self.connection.encoding]
-            _logger.debug("query: %s", self._obj.mogrify(query, params).decode(encoding, 'replace'))
+            _logger.warning("query: %s", self._obj.mogrify(query, params).decode(encoding, 'replace'))
         now = time.time()
         try:
             params = params or None
