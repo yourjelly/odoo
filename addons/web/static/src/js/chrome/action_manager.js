@@ -574,14 +574,15 @@ class ActionManager extends core.EventBus {
         //  - move logic from act window (clear uncommitted changes + on _reverse_bc)
         //  - add hook onRestoreController (async)
         if (!controllerID) {
-            controllerID = this.currentStack[this.currentStack.length -1];
+            controllerID = this.currentStack[this.currentStack.length - 1];
         }
         await this.clearUncommittedChanges();
-        const { action , controller } = this.getStateFromController(controllerID);
-        const plugin = this._getPlugin(action.type);
-        if (!plugin) {return Promise.reject();}
-        if (plugin.restoreControllerHook) {
-            return plugin.restoreControllerHook(action, controller);
+        const { action, controller } = this.getStateFromController(controllerID);
+        if (action) {
+            const plugin = this._getPlugin(action.type);
+            if (plugin.restoreControllerHook) {
+                return plugin.restoreControllerHook(action, controller);
+            }
         }
         this._pushController(this.controllers[controllerID]);
 
@@ -612,11 +613,16 @@ class ActionManager extends core.EventBus {
         const usedActionIDs = this.currentStack.map(controllerID => {
             return this.controllers[controllerID].actionID;
         });
+        if (this.currentDialogController) {
+            usedActionIDs.push(this.currentDialogController.actionID);
+        }
         for (const controllerID in this.controllers) {
             const controller = this.controllers[controllerID];
             if (!usedActionIDs.includes(controller.actionID)) {
+                if (controller.component) { // component may not exist yet
+                    controller.component.destroy(true);
+                }
                 delete this.controllers[controllerID];
-                // controller.widget.destroy(); // TODO: destroy component
             }
         }
         const unusedActionIDs = Object.keys(this.actions).filter(actionID => {
@@ -758,21 +764,32 @@ class ActionManager extends core.EventBus {
      * @param {Object} controller
      */
     _pushController(controller) {
+        if (!controller) {
+            // TODO: maybe have a specific closeDialog function
+            this.trigger('update', {
+                main: null,
+                dialog: null,
+            });
+            return;
+        }
         this.controllers[controller.jsID] = controller;
         const action = this.actions[controller.actionID];
 
         const { main, dialog } = this.getCurrentState();
-        let newMain = {};
+        let newMain = null;
         let newDialog = null;
         let newMenuID;
         if (action.target !== 'new') {
+            newMain = {};
             newMain.reload = true;
             newMain.action = action;
             newMain.controller = controller;
             newMenuID = controller.options && controller.options.menuID;
         } else {
-            newMain = main;
-            newMain.reload = false;
+            if (main) {
+                newMain = main;
+                newMain.reload = false;
+            }
             newDialog = {};
             newDialog.action = action;
             newDialog.controller = controller;
@@ -786,8 +803,10 @@ class ActionManager extends core.EventBus {
             } else {
                 this.currentDialogController = newDialog.controller
             }
-            this.currentStack.splice(newMain.controller.index);
-            this.currentStack.push(newMain.controller.jsID);
+            this.currentStack.splice(newMain ? newMain.controller.index : 0);
+            if (newMain) {
+                this.currentStack.push(newMain.controller.jsID);
+            }
             this._cleanActions();
             if (this.legacyInitState) {
                 this.legacyLoaded(this.legacyInitState);

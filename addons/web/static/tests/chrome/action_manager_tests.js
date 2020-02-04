@@ -4,6 +4,7 @@ odoo.define('web.action_manager_tests', function (require) {
 const AbstractAction = require('web.AbstractAction');
 const AbstractStorageService = require('web.AbstractStorageService');
 const BasicFields = require('web.basic_fields');
+const { CrashManager } = require('web.CrashManager');
 const core = require('web.core');
 const ListController = require('web.ListController');
 const Notification = require('web.Notification');
@@ -202,6 +203,7 @@ QUnit.module('ActionManager', {
             data: this.data,
             menus: this.menus,
         });
+
         await doAction(8);
 
         var n = delta;
@@ -210,7 +212,7 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_cp_switch_list'));
         // open a record in form view
         await testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
-        // go back to action 7 in breadcrumbs
+        // go back to action 8 in breadcrumbs
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .breadcrumb a:first'));
 
         assert.strictEqual(delta, n,
@@ -242,6 +244,7 @@ QUnit.module('ActionManager', {
             data: this.data,
             menus: this.menus,
         });
+
         var n = delta;
 
         await doAction(5);
@@ -2103,7 +2106,7 @@ QUnit.module('ActionManager', {
     QUnit.module('Report actions');
 
     QUnit.test('can execute report actions from db ID', async function (assert) {
-        assert.expect(5);
+        assert.expect(7);
 
         const webClient = await createWebClient({
             actions: this.actions,
@@ -2111,7 +2114,9 @@ QUnit.module('ActionManager', {
             data: this.data,
             menus: this.menus,
             services: {
+                blockUI: () => assert.step('blockUI'),
                 report: ReportService,
+                unblockUI: () => assert.step('unblockUI'),
             },
             mockRPC: function (route, args) {
                 assert.step(args.method || route);
@@ -2138,7 +2143,9 @@ QUnit.module('ActionManager', {
         assert.verifySteps([
             '/web/action/load',
             '/report/check_wkhtmltopdf',
+            'blockUI',
             '/report/download',
+            'unblockUI',
             'on_close',
         ]);
 
@@ -2146,7 +2153,7 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('report actions can close modals and reload views', async function (assert) {
-        assert.expect(8);
+        assert.expect(12);
 
         const webClient = await createWebClient({
             actions: this.actions,
@@ -2154,7 +2161,9 @@ QUnit.module('ActionManager', {
             data: this.data,
             menus: this.menus,
             services: {
+                blockUI: () => assert.step('blockUI'),
                 report: ReportService,
+                unblockUI: () => assert.step('unblockUI'),
             },
             mockRPC: function (route, args) {
                 if (route === '/report/check_wkhtmltopdf') {
@@ -2197,9 +2206,13 @@ QUnit.module('ActionManager', {
         "the modal should have been closed after the action report");
 
         assert.verifySteps([
+            'blockUI',
             '/report/download',
+            'unblockUI',
             'on_printed',
+            'blockUI',
             '/report/download',
+            'unblockUI',
             'on_close',
         ]);
 
@@ -2207,7 +2220,7 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('should trigger a notification if wkhtmltopdf is to upgrade', async function (assert) {
-        assert.expect(5);
+        assert.expect(7);
 
         const webClient = await createWebClient({
             actions: this.actions,
@@ -2215,11 +2228,11 @@ QUnit.module('ActionManager', {
             data: this.data,
             menus: this.menus,
             services: {
+                blockUI: () => assert.step('blockUI'),
+                unblockUI: () => assert.step('unblockUI'),
                 report: ReportService,
                 notification: NotificationService.extend({
-                    notify: function (params) {
-                        assert.step(params.type || 'notification');
-                    }
+                    notify: () => assert.step('warning'),
                 }),
             },
             mockRPC: function (route, args) {
@@ -2243,7 +2256,9 @@ QUnit.module('ActionManager', {
             '/web/action/load',
             '/report/check_wkhtmltopdf',
             'warning',
+            'blockUI',
             '/report/download',
+            'unblockUI',
         ]);
 
         webClient.destroy();
@@ -2275,9 +2290,7 @@ QUnit.module('ActionManager', {
             services: {
                 report: ReportService,
                 notification: NotificationService.extend({
-                    notify: function (params) {
-                        assert.step(params.type || 'notification');
-                    }
+                    notify: () => assert.step('warning'),
                 })
             },
             mockRPC: function (route, args) {
@@ -2314,14 +2327,22 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('crashmanager service called on failed report download actions', async function (assert) {
-        assert.expect(1);
+        assert.expect(3);
 
         const webClient = await createWebClient({
             data: this.data,
             actions: this.actions,
-            services: {
-                report: ReportService,
             menus: this.menus,
+            services: {
+                blockUI: () => {},
+                unblockUI: () => {},
+                crash_manager: CrashManager.extend({
+                    rpc_error: () => assert.step('rpc_error'),
+                }),
+                notification: NotificationService.extend({
+                    notify: (params) => assert.step(`notification ${params.type}`),
+                }),
+                report: ReportService,
             },
             mockRPC: function (route) {
                 if (route === '/report/check_wkhtmltopdf') {
@@ -2350,6 +2371,8 @@ QUnit.module('ActionManager', {
             // otherwise, it is an Error, which is not what we expect
             assert.strictEqual(e, undefined);
         }
+
+        assert.verifySteps(['rpc_error', 'notification danger']);
 
         webClient.destroy();
     });
@@ -4429,11 +4452,6 @@ QUnit.module('ActionManager', {
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            intercepts: {
-                clear_uncommitted_changes: function () {
-                    webClient.clearUncommittedChanges();
-                },
-            },
         });
 
         // execute an action and edit existing record
@@ -4446,17 +4464,17 @@ QUnit.module('ActionManager', {
         assert.containsOnce(webClient, '.o_form_view.o_form_editable');
 
         await testUtils.fields.editInput($(webClient.el).find('input[name=foo]'), 'val');
-        webClient.trigger('clear_uncommitted_changes');
+        webClient.actionManager.clearUncommittedChanges();
         await nextTick();
 
-        assert.containsOnce($('body'), '.modal'); // confirm discard dialog
+        assert.containsOnce(document.body, '.modal'); // confirm discard dialog
         // confirm discard changes
         await testUtils.dom.click($('.modal .modal-footer .btn-primary'));
 
-        webClient.trigger('clear_uncommitted_changes');
+        webClient.actionManager.clearUncommittedChanges();
         await nextTick();
 
-        assert.containsNone($('body'), '.modal');
+        assert.containsNone(document.body, '.modal');
 
         webClient.destroy();
     });

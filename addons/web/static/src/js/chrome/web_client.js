@@ -22,7 +22,7 @@ class WebClient extends Component {
         });
         this.actionManager.on('update', this, payload => {
             this.renderingInfo = payload;
-            if (!this.renderingInfo.menuID && !this.state.menu_id) {
+            if (!this.renderingInfo.menuID && !this.state.menu_id && payload.main) {
                 // retrieve menu_id from action
                 const menu = Object.values(this.menus).find(menu => {
                     return menu.actionID === payload.main.action.id;
@@ -175,15 +175,15 @@ class WebClient extends Component {
         this._setWindowHash(hash);
     }
     _wcUpdated() {
-        if (this.renderingInfo) {
+        if (this.renderingInfo && this.renderingInfo.main) {
             const controller = this.currentControllerComponent.comp;
-            this.renderingInfo.onSuccess(controller);
+            this.renderingInfo.onSuccess(controller); // FIXME: onSuccess not called if no background controller
             const state = controller.getState();
             state.action = this.renderingInfo.main.action.id;
             state.menu_id = this.renderingInfo.menuID;
             this._updateState(state);
         }
-        this.renderingInfo= null;
+        this.renderingInfo = null;
     }
 
     //--------------------------------------------------------------------------

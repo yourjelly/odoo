@@ -14,7 +14,8 @@
                 t-on-dialog-closed="_onDialogClosed">
 
                 <t t-set="mainRenderingInfo" t-value="renderingInfo.main"/>
-                <Action class="o_action" t-ref="currentControllerComponent" t-key="mainRenderingInfo.controller.jsID"
+                <Action t-if="mainRenderingInfo" class="o_action" t-ref="currentControllerComponent"
+                        t-key="mainRenderingInfo.controller.jsID"
                         Component="mainRenderingInfo.controller.Component"
                         action="mainRenderingInfo.action"
                         options="mainRenderingInfo.controller.options"
