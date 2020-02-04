@@ -40,6 +40,15 @@ class WebClient extends Component {
         this.state = {};
     }
 
+    get titleParts() {
+        this._titleParts = this._titleParts || {};
+        return this._titleParts;
+    }
+    // TODO: handle set_title* events
+    setTitlePart(part, title) {
+        this.titleParts[part] = title;
+    }
+
     async willStart() {
         this.menus = await this._loadMenus();
 
@@ -84,10 +93,8 @@ class WebClient extends Component {
         return window.location.hash;
     }
     _setWindowHash(newHash) {
-        if (newHash !== this._getWindowHash()) {
-            this.ignoreHashchange = true;
-            window.location.hash = newHash;
-        }
+        this.ignoreHashchange = true;
+        window.location.hash = newHash;
     }
     /**
      * @private
@@ -99,7 +106,8 @@ class WebClient extends Component {
         const state = {};
         for (const part of hashParts) {
             const [ key, val ] = part.split('=');
-            state[key] = isNaN(val) ? val : parseInt(val, 10);
+            const decodedVal = decodeURI(val);
+            state[key] = isNaN(decodedVal) ? decodedVal : parseInt(decodedVal, 10);
         }
         return state;
     }
@@ -168,11 +176,22 @@ class WebClient extends Component {
     _updateState(state) {
         // the action and menu_id may not have changed
         state.action = state.action || this.state.action || '';
-        state.menu_id = state.menu_id || this.state.menu_id || '';
+        const menuID = state.menu_id || this.state.menu_id || '';
+        if (menuID) {
+            state.menu_id = menuID;
+        }
+        if ('title' in state) {
+            this.setTitlePart('action', state.title);
+            delete state.title
+        }
         this.state = state;
-        const hashParts = Object.keys(state).map(key => `${key}=${state[key]}`);
+        const hashParts = Object.keys(state).map(key => `${key}=${encodeURI(state[key])}`);
         const hash = "#" + hashParts.join("&");
-        this._setWindowHash(hash);
+        if (hash !== this._getWindowHash()) {
+            this._setWindowHash(hash);
+        }
+        const fullTitle = this._computeTitle();
+        this._setWindowTitle(fullTitle);
     }
     _wcUpdated() {
         if (this.renderingInfo && this.renderingInfo.main) {
@@ -180,10 +199,34 @@ class WebClient extends Component {
             this.renderingInfo.onSuccess(controller); // FIXME: onSuccess not called if no background controller
             const state = controller.getState();
             state.action = this.renderingInfo.main.action.id;
-            state.menu_id = this.renderingInfo.menuID;
-            this._updateState(state);
+            if (this.renderingInfo.menuID) {
+                state.menu_id = this.renderingInfo.menuID;
+            }
+            if (!('title' in state)) {
+                state.title = controller.title;
+            }
+            if (!this.renderingInfo.dialog) {
+                this._updateState(state);
+            }
         }
         this.renderingInfo = null;
+    }
+    _computeTitle() {
+        const parts = Object.keys(this.titleParts).sort();
+        let tmp = "";
+        for (let part of parts) {
+            const title = this.titleParts[part];
+            if (title) {
+                tmp = tmp ? tmp + " - " + title : title;
+            }
+        }
+        return tmp;
+    }
+    _setWindowTitle(title) {
+        document.title = title;
+    }
+    _getWindowTitle() {
+        return document.title;
     }
 
     //--------------------------------------------------------------------------

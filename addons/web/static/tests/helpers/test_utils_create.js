@@ -80,6 +80,7 @@ async function createWebClient(params) {
     const patchWC = {
         _getWindowHash() {return ''},
         _setWindowHash() {},
+        _setWindowTitle() {},
     }
     if (params.webClient) {
         Object.assign(patchWC, params.webClient);
