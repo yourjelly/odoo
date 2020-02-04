@@ -424,8 +424,8 @@ function getMockedOwlEnv(params) {
     if (params.services) {
         for (let serv in params.services) {
             const Service = params.services[serv];
-            if (Service.constructor) {
-                env.services[serv] = new Service();
+            if (Service.constructor.name === 'Class') {
+                env.services[serv] = new Service(env);
             } else {
                 env.services[serv] = Service;
             }

@@ -117,8 +117,8 @@ class Action extends ComponentAdapter {
         return {}; // TODO
     }
 
-    destroy() {
-        if (this.legacy && this.widget) {
+    destroy(force) {
+        if (this.legacy && this.widget && !force) {
             // keep legacy stuff alive because some stuff
             // are kept by AbstractModel (e.g.: orderedBy)
             dom.detach([{widget: this.widget}]);
