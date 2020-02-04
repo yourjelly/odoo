@@ -619,6 +619,11 @@
 
     <template id="product_price">
       <div itemprop="offers" itemscope="itemscope" itemtype="http://schema.org/Offer" class="product_price mt16">
+          <div class="d-none">
+            <div itemprop="priceValidUntil" class="d-none">2040-12-31</div>
+            <div itemprop="availability" itemtype="http://schema.org/InStock">InStock</div>
+            <span itemprop="url" t-esc="'%sshop/product/%s' % (request.httprequest.url_root, slug(product))"/>
+          </div>
           <h4 class="oe_price_h4 css_editable_mode_hidden">
               <span t-attf-class="text-danger oe_default_price {{'' if combination_info['has_discounted_price'] else 'd-none'}}" style="text-decoration: line-through; white-space: nowrap;"
                   t-esc="combination_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
