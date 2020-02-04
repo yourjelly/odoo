@@ -13,6 +13,20 @@ class TestSaleMrpLeadTime(TestStockCommon):
 
     def setUp(self):
         super(TestSaleMrpLeadTime, self).setUp()
+        Users = self.env['res.users'].with_context(no_reset_password=True)
+
+        self.user_salesperson = Users.create({
+            'name': 'Mark User',
+            'login': 'user',
+            'email': 'm.u@example.com',
+            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_salesman').id])]
+        })
+        self.user_salesmanager = Users.create({
+            'name': 'Andrew Manager',
+            'login': 'manager',
+            'email': 'a.m@example.com',
+            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_manager').id])]
+        })
 
         # Update the product_1 with type, route, Manufacturing Lead Time and Customer Lead Time
         with Form(self.product_1) as p1:
@@ -35,6 +49,8 @@ class TestSaleMrpLeadTime(TestStockCommon):
                 line.product_id = self.product_2
                 line.product_qty = 4
 
+        self.env = self.env(user=self.user_salesperson)
+
     def test_00_product_company_level_delays(self):
         """ In order to check schedule date, set product's Manufacturing Lead Time
             and Customer Lead Time and also set company's Manufacturing Lead Time
@@ -43,7 +59,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
         company = self.env.ref('base.main_company')
 
         # Update company with Manufacturing Lead Time and Sales Safety Days
-        company.write({'manufacturing_lead': 3.0,
+        company.sudo().write({'manufacturing_lead': 3.0,
                        'security_lead': 3.0})
 
         # Create sale order of product_1
@@ -101,7 +117,7 @@ class TestSaleMrpLeadTime(TestStockCommon):
         order.action_confirm()
 
         # Run scheduler
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].sudo().run_scheduler()
 
         # Check manufacturing order created or not
         manufacturing_order = self.env['mrp.production'].search([('product_id', '=', self.product_1.id)]) 

@@ -17,10 +17,37 @@ class TestBom(common.TransactionCase):
 
     def setUp(self):
         super(TestBom, self).setUp()
-        self.Product = self.env['product.product']
-        self.Bom = self.env['mrp.bom']
-        self.Routing = self.env['mrp.routing']
-        self.operation = self.env['mrp.routing.workcenter']
+        user_group_stock_user = self.env.ref('stock.group_stock_user')
+        user_group_mrp_user = self.env.ref('mrp.group_mrp_user')
+        user_group_mrp_manager = self.env.ref('mrp.group_mrp_manager')
+        user_group_mrp_byproducts = self.env.ref('mrp.group_mrp_byproducts')
+
+        Users = self.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        self.user_mrp_user = Users.create({
+            'name': 'Hilda Ferachwal',
+            'login': 'hilda',
+            'email': 'h.h@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_user.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+        self.user_mrp_manager = Users.create({
+            'name': 'Gary Youngwomen',
+            'login': 'gary',
+            'email': 'g.g@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_manager.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+        self.env = self.env(user=self.user_mrp_user)
+        self.Product = self.env['product.product'].with_user(self.user_mrp_manager)
+        self.Bom = self.env['mrp.bom'].with_user(self.user_mrp_manager)
+        self.Routing = self.env['mrp.routing'].with_user(self.user_mrp_manager)
+        self.operation = self.env['mrp.routing.workcenter'].with_user(self.user_mrp_manager)
 
         # Products.
         self.dining_table = self._create_product('Dining Table', 1000)
@@ -107,7 +134,7 @@ class TestBom(common.TransactionCase):
 
     def test_01_compute_price_operation_cost(self):
         """Test calcuation of bom cost with operations."""
-        workcenter_from1 = Form(self.env['mrp.workcenter'])
+        workcenter_from1 = Form(self.env['mrp.workcenter'].with_user(self.user_mrp_manager))
         workcenter_from1.name = 'Workcenter'
         workcenter_from1.time_efficiency = 100
         workcenter_from1.capacity = 2

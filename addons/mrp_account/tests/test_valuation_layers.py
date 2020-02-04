@@ -11,6 +11,33 @@ class TestMrpValuationCommon(TestStockValuationCommon):
     @classmethod
     def setUpClass(cls):
         super(TestMrpValuationCommon, cls).setUpClass()
+        user_group_stock_user = cls.env.ref('stock.group_stock_user')
+        user_group_mrp_user = cls.env.ref('mrp.group_mrp_user')
+        user_group_mrp_manager = cls.env.ref('mrp.group_mrp_manager')
+        user_group_mrp_byproducts = cls.env.ref('mrp.group_mrp_byproducts')
+
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        cls.user_mrp_user = Users.create({
+            'name': 'Hilda Ferachwal',
+            'login': 'hilda',
+            'email': 'h.h@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_user.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+        cls.user_mrp_manager = Users.create({
+            'name': 'Gary Youngwomen',
+            'login': 'gary',
+            'email': 'g.g@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_manager.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+
         cls.component_category = cls.env['product.category'].create(
             {'name': 'category2'}
         )
@@ -28,6 +55,7 @@ class TestMrpValuationCommon(TestStockValuationCommon):
             'bom_line_ids': [
                 (0, 0, {'product_id': cls.component.id, 'product_qty': 1})
             ]})
+        cls.env = cls.env(user=cls.user_mrp_user)
 
     def _make_mo(self, bom, quantity=1):
         mo_form = Form(self.env['mrp.production'])

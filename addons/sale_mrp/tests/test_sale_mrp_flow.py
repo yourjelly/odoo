@@ -14,6 +14,50 @@ class TestSaleMrpFlow(AccountTestCommon):
     @classmethod
     def setUpClass(cls):
         super(TestSaleMrpFlow, cls).setUpClass()
+        cls.main_company = cls.env.ref('base.main_company')
+        Users = cls.env['res.users'].with_context(no_reset_password=True)
+
+        user_group_stock_user = cls.env.ref('stock.group_stock_user')
+        user_group_mrp_manager = cls.env.ref('mrp.group_mrp_manager')
+        user_group_mrp_byproducts = cls.env.ref('mrp.group_mrp_byproducts')
+        res_users_account_manager = cls.env.ref('account.group_account_manager')
+        partner_manager = cls.env.ref('base.group_partner_manager')
+
+        cls.user_salesperson = Users.create({
+            'name': 'Mark User',
+            'login': 'user',
+            'email': 'm.u@example.com',
+            'groups_id': [(6, 0, [cls.env.ref('sales_team.group_sale_salesman').id])]
+        })
+        cls.user_salesmanager = Users.create({
+            'name': 'Andrew Manager',
+            'login': 'manager',
+            'email': 'a.m@example.com',
+            'groups_id': [(6, 0, [cls.env.ref('sales_team.group_sale_manager').id])]
+        })
+        cls.user_mrp_manager = Users.create({
+            'name': 'Gary Youngwomen',
+            'login': 'gary',
+            'email': 'g.g@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_manager.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+        cls.user_stock_manager = Users.create({
+            'name': 'Julie Tablier',
+            'login': 'julie',
+            'email': 'j.j@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [cls.env.ref('stock.group_stock_manager').id])]})
+        cls.account_manager = Users.create({
+            'name': 'Adviser',
+            'company_id': cls.main_company.id,
+            'login': 'fm',
+            'email': 'accountmanager@yourcompany.com',
+            'groups_id': [(6, 0, [res_users_account_manager.id, partner_manager.id])]
+        })
         # Useful models
         cls.StockMove = cls.env['stock.move']
         cls.UoM = cls.env['uom.uom']
@@ -151,10 +195,11 @@ class TestSaleMrpFlow(AccountTestCommon):
             'product_id': cls.kit_3.id,
             'product_qty': 2.0,
             'bom_id': bom_kit_parent.id})
+        cls.env = cls.env(user=cls.user_salesperson)
 
     @classmethod
     def _cls_create_product(cls, name, uom_id, routes=()):
-        p = Form(cls.env['product.product'])
+        p = Form(cls.env['product.product'].with_user(cls.user_salesmanager))
         p.name = name
         p.type = 'product'
         p.uom_id = uom_id
@@ -165,7 +210,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         return p.save()
 
     def _create_product(self, name, uom_id, routes=()):
-        p = Form(self.env['product.product'])
+        p = Form(self.env['product.product'].with_user(self.user_salesmanager))
         p.name = name
         p.type = 'product'
         p.uom_id = uom_id
@@ -245,7 +290,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         # ------------------------------------------------------------------------------------------
 
         # Bill of materials for Product A.
-        with Form(self.env['mrp.bom']) as f:
+        with Form(self.env['mrp.bom'].with_user(self.user_mrp_manager)) as f:
             f.product_tmpl_id = product_a.product_tmpl_id
             f.product_qty = 2
             f.product_uom_id = self.uom_dozen
@@ -263,7 +308,7 @@ class TestSaleMrpFlow(AccountTestCommon):
                 line.product_uom_id = self.uom_unit
 
         # Bill of materials for Product B.
-        with Form(self.env['mrp.bom']) as f:
+        with Form(self.env['mrp.bom'].with_user(self.user_mrp_manager)) as f:
             f.product_tmpl_id = product_b.product_tmpl_id
             f.product_qty = 1
             f.product_uom_id = self.uom_unit
@@ -274,7 +319,7 @@ class TestSaleMrpFlow(AccountTestCommon):
                 line.product_uom_id = self.uom_kg
 
         # Bill of materials for Product D.
-        with Form(self.env['mrp.bom']) as f:
+        with Form(self.env['mrp.bom'].with_user(self.user_mrp_manager)) as f:
             f.product_tmpl_id = product_d.product_tmpl_id
             f.product_qty = 1
             f.product_uom_id = self.uom_unit
@@ -288,7 +333,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         # ----------------------------------------
 
         order_form = Form(self.env['sale.order'])
-        order_form.partner_id = self.env['res.partner'].create({'name': 'My Test Partner'})
+        order_form.partner_id = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         with order_form.order_line.new() as line:
             line.product_id = product_a
             line.product_uom = self.uom_dozen
@@ -330,7 +375,7 @@ class TestSaleMrpFlow(AccountTestCommon):
 
         # Check quantity, unit of measure and state of manufacturing order.
         # -----------------------------------------------------------------
-        self.env['procurement.group'].run_scheduler()
+        self.env['procurement.group'].sudo().run_scheduler()
         mnf_product_a = self.env['mrp.production'].search([('product_id', '=', product_a.id)])
 
         self.assertTrue(mnf_product_a, 'Manufacturing order not created.')
@@ -502,7 +547,7 @@ class TestSaleMrpFlow(AccountTestCommon):
     def test_01_sale_mrp_delivery_kit(self):
         """ Test delivered quantity on SO based on delivered quantity in pickings."""
         # intial so
-        product = self.env['product.product'].create({
+        product = self.env['product.product'].with_user(self.user_salesmanager).create({
             'name': 'Table Kit',
             'type': 'consu',
             'invoice_policy': 'delivery',
@@ -511,15 +556,15 @@ class TestSaleMrpFlow(AccountTestCommon):
         # Remove the MTO route as purchase is not installed and since the procurement removal the exception is directly raised
         product.write({'route_ids': [(6, 0, [self.warehouse.manufacture_pull_id.route_id.id])]})
 
-        product_wood_panel = self.env['product.product'].create({
+        product_wood_panel = self.env['product.product'].with_user(self.user_salesmanager).create({
             'name': 'Wood Panel',
             'type': 'product',
         })
-        product_desk_bolt = self.env['product.product'].create({
+        product_desk_bolt = self.env['product.product'].with_user(self.user_salesmanager).create({
             'name': 'Bolt',
             'type': 'product',
         })
-        self.env['mrp.bom'].create({
+        self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': product.product_tmpl_id.id,
             'product_uom_id': self.env.ref('uom.product_uom_unit').id,
             'sequence': 2,
@@ -537,7 +582,7 @@ class TestSaleMrpFlow(AccountTestCommon):
             ]
         })
 
-        partner = self.env['res.partner'].create({'name': 'My Test Partner'})
+        partner = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         # if `delivery` module is installed, a default property is set for the carrier to use
         # However this will lead to an extra line on the SO (the delivery line), which will force
         # the SO to have a different flow (and `invoice_state` value)
@@ -599,23 +644,23 @@ class TestSaleMrpFlow(AccountTestCommon):
             'uom_type': 'bigger',
             'rounding': 1.0})
         self.company = self.env.ref('base.main_company')
-        self.company.anglo_saxon_accounting = True
-        self.partner = self.env['res.partner'].create({'name': 'My Test Partner'})
-        self.category = self.env.ref('product.product_category_1').copy({'name': 'Test category','property_valuation': 'real_time', 'property_cost_method': 'fifo'})
-        account_type = self.env['account.account.type'].create({'name': 'RCV type', 'type': 'other', 'internal_group': 'asset'})
-        self.account_receiv = self.env['account.account'].create({'name': 'Receivable', 'code': 'RCV00' , 'user_type_id': account_type.id, 'reconcile': True})
-        account_expense = self.env['account.account'].create({'name': 'Expense', 'code': 'EXP00' , 'user_type_id': account_type.id, 'reconcile': True})
-        account_output = self.env['account.account'].create({'name': 'Output', 'code': 'OUT00' , 'user_type_id': account_type.id, 'reconcile': True})
-        account_valuation = self.env['account.account'].create({'name': 'Valuation', 'code': 'STV00' , 'user_type_id': account_type.id, 'reconcile': True})
+        self.company.sudo().anglo_saxon_accounting = True
+        self.partner = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
+        self.category = self.env.ref('product.product_category_1').with_user(self.user_salesmanager).copy({'name': 'Test category','property_valuation': 'real_time', 'property_cost_method': 'fifo'})
+        account_type = self.env['account.account.type'].with_user(self.account_manager).create({'name': 'RCV type', 'type': 'other', 'internal_group': 'asset'})
+        self.account_receiv = self.env['account.account'].with_user(self.account_manager).create({'name': 'Receivable', 'code': 'RCV00' , 'user_type_id': account_type.id, 'reconcile': True})
+        account_expense = self.env['account.account'].with_user(self.account_manager).create({'name': 'Expense', 'code': 'EXP00' , 'user_type_id': account_type.id, 'reconcile': True})
+        account_output = self.env['account.account'].with_user(self.account_manager).create({'name': 'Output', 'code': 'OUT00' , 'user_type_id': account_type.id, 'reconcile': True})
+        account_valuation = self.env['account.account'].with_user(self.account_manager).create({'name': 'Valuation', 'code': 'STV00' , 'user_type_id': account_type.id, 'reconcile': True})
         self.partner.property_account_receivable_id = self.account_receiv
         self.category.property_account_income_categ_id = self.account_receiv
         self.category.property_account_expense_categ_id = account_expense
         self.category.property_stock_account_input_categ_id = self.account_receiv
         self.category.property_stock_account_output_categ_id = account_output
         self.category.property_stock_valuation_account_id = account_valuation
-        self.category.property_stock_journal = self.env['account.journal'].create({'name': 'Stock journal', 'type': 'sale', 'code': 'STK00'})
+        self.category.property_stock_journal = self.env['account.journal'].with_user(self.account_manager).create({'name': 'Stock journal', 'type': 'sale', 'code': 'STK00'})
 
-        Product = self.env['product.product']
+        Product = self.env['product.product'].with_user(self.user_salesmanager)
         self.finished_product = Product.create({
                 'name': 'Finished product',
                 'type': 'product',
@@ -634,21 +679,21 @@ class TestSaleMrpFlow(AccountTestCommon):
                 'uom_id': self.uom_unit.id,
                 'categ_id': self.category.id,
                 'standard_price': 10})
-        self.env['stock.quant'].create({
+        self.env['stock.quant'].with_user(self.user_stock_manager).with_context(inventory_mode=True).create({
             'product_id': self.component1.id,
             'location_id': self.env.ref('stock.stock_location_stock').id,
-            'quantity': 6.0,
+            'inventory_quantity': 6.0,
         })
-        self.env['stock.quant'].create({
+        self.env['stock.quant'].with_user(self.user_stock_manager).with_context(inventory_mode=True).create({
             'product_id': self.component2.id,
             'location_id': self.env.ref('stock.stock_location_stock').id,
-            'quantity': 3.0,
+            'inventory_quantity': 3.0,
         })
-        self.bom = self.env['mrp.bom'].create({
+        self.bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
                 'product_tmpl_id': self.finished_product.product_tmpl_id.id,
                 'product_qty': 1.0,
                 'type': 'phantom'})
-        BomLine = self.env['mrp.bom.line']
+        BomLine = self.env['mrp.bom.line'].with_user(self.user_mrp_manager)
         BomLine.create({
                 'product_id': self.component1.id,
                 'product_qty': 2.0,
@@ -673,6 +718,7 @@ class TestSaleMrpFlow(AccountTestCommon):
             'pricelist_id': self.env.ref('product.list0').id,
             'company_id': self.company.id,
         }
+
         self.so = self.env['sale.order'].create(so_vals)
         # Validate the SO
         self.so.action_confirm()
@@ -685,7 +731,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         wiz.process()
         # Create the invoice
         self.so._create_invoices()
-        self.invoice = self.so.invoice_ids
+        self.invoice = self.so.sudo().invoice_ids
         # Changed the invoiced quantity of the finished product to 2
         move_form = Form(self.invoice)
         with move_form.invoice_line_ids.edit(0) as line_form:
@@ -719,7 +765,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         self.env['stock.quant']._update_available_quantity(self.component_c, stock_location, 30)
 
         # Creation of a sale order for x10 kit_1
-        partner = self.env['res.partner'].create({'name': 'My Test Partner'})
+        partner = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         f = Form(self.env['sale.order'])
         f.partner_id = partner
         with f.order_line.new() as line:
@@ -843,7 +889,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         self.env['stock.quant']._update_available_quantity(self.component_g, stock_location, 28)
 
         # Creation of a sale order for x7 kit_parent
-        partner = self.env['res.partner'].create({'name': 'My Test Partner'})
+        partner = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         f = Form(self.env['sale.order'])
         f.partner_id = partner
         with f.order_line.new() as line:
@@ -988,7 +1034,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         # Process all components and validate the picking
         wiz_act = return_pick.button_validate()
         wiz = Form(self.env[wiz_act['res_model']].with_context(wiz_act['context'])).save()
-        wiz.process()
+        wiz.sudo().process()
 
         # Now quantity delivered should be 3 again
         self.assertEqual(order_line.qty_delivered, 3)
@@ -1031,11 +1077,11 @@ class TestSaleMrpFlow(AccountTestCommon):
         informations when a kit is ordered
         """
 
-        warehouse_1 = self.env['stock.warehouse'].create({
+        warehouse_1 = self.env['stock.warehouse'].with_user(self.user_stock_manager).create({
             'name': 'Warehouse 1',
             'code': 'WH1'
         })
-        warehouse_2 = self.env['stock.warehouse'].create({
+        warehouse_2 = self.env['stock.warehouse'].with_user(self.user_stock_manager).create({
             'name': 'Warehouse 2',
             'code': 'WH2'
         })
@@ -1065,7 +1111,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         # Creation of a sale order for x7 kit_parent
         qty_ordered = 7
         f = Form(self.env['sale.order'])
-        f.partner_id = self.env['res.partner'].create({'name': 'My Test Partner'})
+        f.partner_id = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         f.warehouse_id = warehouse_2
         with f.order_line.new() as line:
             line.product_id = self.kit_parent
@@ -1145,12 +1191,12 @@ class TestSaleMrpFlow(AccountTestCommon):
 
         kit_uom_1 = self._create_product('Kit 1', self.uom_unit)
 
-        bom_kit_uom_1 = self.env['mrp.bom'].create({
+        bom_kit_uom_1 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': kit_uom_1.product_tmpl_id.id,
             'product_qty': 1.0,
             'type': 'phantom'})
 
-        BomLine = self.env['mrp.bom.line']
+        BomLine = self.env['mrp.bom.line'].with_user(self.user_mrp_manager)
         BomLine.create({
             'product_id': component_uom_unit.id,
             'product_qty': 2.0,
@@ -1175,7 +1221,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         self.env['stock.quant']._update_available_quantity(component_uom_kg, stock_location, 0.03)
 
         # Creation of a sale order for x10 kit_1
-        partner = self.env['res.partner'].create({'name': 'My Test Partner'})
+        partner = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         f = Form(self.env['sale.order'])
         f.partner_id = partner
         with f.order_line.new() as line:
@@ -1252,12 +1298,12 @@ class TestSaleMrpFlow(AccountTestCommon):
         kit_uom_1 = self._create_product('Sub Kit 1', self.uom_unit)
         kit_uom_in_kit = self._create_product('Parent Kit', self.uom_unit)
 
-        bom_kit_uom_1 = self.env['mrp.bom'].create({
+        bom_kit_uom_1 = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': kit_uom_1.product_tmpl_id.id,
             'product_qty': 1.0,
             'type': 'phantom'})
 
-        BomLine = self.env['mrp.bom.line']
+        BomLine = self.env['mrp.bom.line'].with_user(self.user_mrp_manager)
         BomLine.create({
             'product_id': component_uom_unit.id,
             'product_qty': 2.0,
@@ -1274,7 +1320,7 @@ class TestSaleMrpFlow(AccountTestCommon):
             'product_uom_id': self.uom_gm.id,
             'bom_id': bom_kit_uom_1.id})
 
-        bom_kit_uom_in_kit = self.env['mrp.bom'].create({
+        bom_kit_uom_in_kit = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_tmpl_id': kit_uom_in_kit.product_tmpl_id.id,
             'product_qty': 1.0,
             'type': 'phantom'})
@@ -1291,7 +1337,7 @@ class TestSaleMrpFlow(AccountTestCommon):
             'bom_id': bom_kit_uom_in_kit.id})
 
         # Create a simple warehouse to receives some products
-        warehouse_1 = self.env['stock.warehouse'].create({
+        warehouse_1 = self.env['stock.warehouse'].with_user(self.user_stock_manager).create({
             'name': 'Warehouse 1',
             'code': 'WH1'
         })
@@ -1305,7 +1351,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         # Creation of a sale order for x5 kit_uom_in_kit
         qty_ordered = 5
         f = Form(self.env['sale.order'])
-        f.partner_id = self.env['res.partner'].create({'name': 'My Test Partner'})
+        f.partner_id = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         f.warehouse_id = warehouse_1
         with f.order_line.new() as line:
             line.product_id = kit_uom_in_kit
@@ -1354,11 +1400,11 @@ class TestSaleMrpFlow(AccountTestCommon):
         # kit_1 --|- component_shelf1   x3
         #         |- component_shelf2   x2
 
-        stock_location_components = self.env['stock.location'].create({
+        stock_location_components = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'Shelf 1',
             'location_id': self.env.ref('stock.warehouse0').lot_stock_id.id,
         })
-        stock_location_14 = self.env['stock.location'].create({
+        stock_location_14 = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'Shelf 2',
             'location_id': self.env.ref('stock.warehouse0').lot_stock_id.id,
         })
@@ -1367,7 +1413,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         component_shelf1 = self._create_product('Comp Shelf1', self.uom_unit)
         component_shelf2 = self._create_product('Comp Shelf2', self.uom_unit)
 
-        with Form(self.env['mrp.bom']) as bom:
+        with Form(self.env['mrp.bom'].with_user(self.user_mrp_manager)) as bom:
             bom.product_tmpl_id = kit_1.product_tmpl_id
             bom.product_qty = 1
             bom.product_uom_id = self.uom_unit
@@ -1382,7 +1428,7 @@ class TestSaleMrpFlow(AccountTestCommon):
                 line.product_uom_id = self.uom_unit
 
         # Creating 2 specific routes for each of the components of the kit
-        route_shelf1 = self.env['stock.location.route'].create({
+        route_shelf1 = self.env['stock.location.route'].with_user(self.user_stock_manager).create({
             'name': 'Shelf1 -> Customer',
             'product_selectable': True,
             'rule_ids': [(0, 0, {
@@ -1394,7 +1440,7 @@ class TestSaleMrpFlow(AccountTestCommon):
             })],
         })
 
-        route_shelf2 = self.env['stock.location.route'].create({
+        route_shelf2 = self.env['stock.location.route'].with_user(self.user_stock_manager).create({
             'name': 'Shelf2 -> Customer',
             'product_selectable': True,
             'rule_ids': [(0, 0, {
@@ -1417,7 +1463,7 @@ class TestSaleMrpFlow(AccountTestCommon):
 
         # Creating a sale order for 5 kits and confirming it
         order_form = Form(self.env['sale.order'])
-        order_form.partner_id = self.env['res.partner'].create({'name': 'My Test Partner'})
+        order_form.partner_id = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         with order_form.order_line.new() as line:
             line.product_id = kit_1
             line.product_uom = self.uom_unit
@@ -1450,7 +1496,7 @@ class TestSaleMrpFlow(AccountTestCommon):
         component_unit = self._create_product('Comp Unit', self.uom_unit)
         component_kg = self._create_product('Comp Kg', self.uom_kg)
 
-        with Form(self.env['mrp.bom']) as bom:
+        with Form(self.env['mrp.bom'].with_user(self.user_mrp_manager)) as bom:
             bom.product_tmpl_id = kit_1.product_tmpl_id
             bom.product_qty = 2
             bom.product_uom_id = self.uom_dozen
@@ -1465,7 +1511,7 @@ class TestSaleMrpFlow(AccountTestCommon):
                 line.product_uom_id = self.uom_kg
 
         # Create a simple warehouse to receives some products
-        warehouse_1 = self.env['stock.warehouse'].create({
+        warehouse_1 = self.env['stock.warehouse'].with_user(self.user_stock_manager).create({
             'name': 'Warehouse 1',
             'code': 'WH1'
         })
@@ -1475,7 +1521,7 @@ class TestSaleMrpFlow(AccountTestCommon):
 
         # Creating a sale order for 3 Units of kit_1 and confirming it
         order_form = Form(self.env['sale.order'])
-        order_form.partner_id = self.env['res.partner'].create({'name': 'My Test Partner'})
+        order_form.partner_id = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         order_form.warehouse_id = warehouse_1
         with order_form.order_line.new() as line:
             line.product_id = kit_1
@@ -1501,20 +1547,20 @@ class TestSaleMrpFlow(AccountTestCommon):
         self.uom_unit = self.env.ref('uom.product_uom_unit')
 
         # Create finished product
-        finished_product = self.env['product.product'].create({
+        finished_product = self.env['product.product'].with_user(self.user_salesmanager).create({
             'name': 'Geyser',
             'type': 'product',
             'route_ids': [(4, route_mto), (4, route_manufacture)],
         })
 
         # Create service type product
-        product_raw = self.env['product.product'].create({
+        product_raw = self.env['product.product'].with_user(self.user_salesmanager).create({
             'name': 'raw Geyser',
             'type': 'service',
         })
 
         # Create bom for finish product
-        bom = self.env['mrp.bom'].create({
+        bom = self.env['mrp.bom'].with_user(self.user_mrp_manager).create({
             'product_id': finished_product.id,
             'product_tmpl_id': finished_product.product_tmpl_id.id,
             'product_uom_id': self.env.ref('uom.product_uom_unit').id,
@@ -1525,7 +1571,7 @@ class TestSaleMrpFlow(AccountTestCommon):
 
         # Create sale order
         sale_form = Form(self.env['sale.order'])
-        sale_form.partner_id = self.env['res.partner'].create({'name': 'My Test Partner'})
+        sale_form.partner_id = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'My Test Partner'})
         with sale_form.order_line.new() as line:
             line.name = finished_product.name
             line.product_id = finished_product

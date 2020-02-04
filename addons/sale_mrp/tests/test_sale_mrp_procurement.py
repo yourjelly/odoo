@@ -9,6 +9,44 @@ from odoo.tools import mute_logger
 
 class TestSaleMrpProcurement(TransactionCase):
 
+    def setUp(self):
+        super(TestSaleMrpProcurement, self).setUp()
+        Users = self.env['res.users'].with_context(no_reset_password=True)
+
+        user_group_stock_user = self.env.ref('stock.group_stock_user')
+        user_group_mrp_manager = self.env.ref('mrp.group_mrp_manager')
+        user_group_mrp_byproducts = self.env.ref('mrp.group_mrp_byproducts')
+
+        self.user_salesperson = Users.create({
+            'name': 'Mark User',
+            'login': 'user',
+            'email': 'm.u@example.com',
+            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_salesman').id])]
+        })
+        self.user_salesmanager = Users.create({
+            'name': 'Andrew Manager',
+            'login': 'manager',
+            'email': 'a.m@example.com',
+            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_manager').id])]
+        })
+        self.user_mrp_manager = Users.create({
+            'name': 'Gary Youngwomen',
+            'login': 'gary',
+            'email': 'g.g@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_manager.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+        self.user_stock_manager = Users.create({
+            'name': 'Julie Tablier',
+            'login': 'julie',
+            'email': 'j.j@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_manager').id])]})
+        self.env = self.env(user=self.user_salesperson)
+
     def test_sale_mrp(self):
         warehouse0 = self.env.ref('stock.warehouse0')
         # In order to test the sale_mrp module in OpenERP, I start by creating a new product 'Slider Mobile'
@@ -17,7 +55,7 @@ class TestSaleMrpProcurement(TransactionCase):
         with mute_logger('odoo.tests.common.onchange'):
             # Suppress warning on "Changing your cost method" when creating a
             # product category
-            pc = Form(self.env['product.category'])
+            pc = Form(self.env['product.category'].with_user(self.user_salesmanager))
         pc.name = 'Mobile Products Sellable'
         product_category_allproductssellable0 = pc.save()
 
@@ -26,7 +64,7 @@ class TestSaleMrpProcurement(TransactionCase):
         self.assertIn("seller_ids", self.env['product.template'].fields_get())
 
         # I define product for Slider Mobile.
-        product = Form(self.env['product.template'])
+        product = Form(self.env['product.template'].with_user(self.user_salesmanager))
 
         product.categ_id = product_category_allproductssellable0
         product.list_price = 200.0
@@ -41,11 +79,11 @@ class TestSaleMrpProcurement(TransactionCase):
 
         product_template_slidermobile0.standard_price = 189
 
-        product_component = Form(self.env['product.product'])
+        product_component = Form(self.env['product.product'].with_user(self.user_salesmanager))
         product_component.name = 'Battery'
         product_product_bettery = product_component.save()
 
-        with Form(self.env['mrp.bom']) as bom:
+        with Form(self.env['mrp.bom'].with_user(self.user_mrp_manager)) as bom:
             bom.product_tmpl_id = product_template_slidermobile0
             with bom.bom_line_ids.new() as line:
                 line.product_id = product_product_bettery
@@ -53,7 +91,7 @@ class TestSaleMrpProcurement(TransactionCase):
 
         # I create a sale order for product Slider mobile
         so_form = Form(self.env['sale.order'])
-        so_form.partner_id = self.env['res.partner'].create({'name': 'Another Test Partner'})
+        so_form.partner_id = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'Another Test Partner'})
         with so_form.order_line.new() as line:
             line.product_id = product_template_slidermobile0.product_variant_ids
             line.price_unit = 200
@@ -76,7 +114,7 @@ class TestSaleMrpProcurement(TransactionCase):
 
         # Create warehouse
         self.customer_location = self.env['ir.model.data'].xmlid_to_res_id('stock.stock_location_customers')
-        warehouse_form = Form(self.env['stock.warehouse'])
+        warehouse_form = Form(self.env['stock.warehouse'].with_user(self.user_stock_manager))
         warehouse_form.name = 'Test Warehouse'
         warehouse_form.code = 'TWH'
         self.warehouse = warehouse_form.save()
@@ -84,7 +122,7 @@ class TestSaleMrpProcurement(TransactionCase):
         self.uom_unit = self.env.ref('uom.product_uom_unit')
 
         # Create raw product for manufactured product
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_salesmanager))
         product_form.name = 'Raw Stick'
         product_form.type = 'product'
         product_form.uom_id = self.uom_unit
@@ -92,7 +130,7 @@ class TestSaleMrpProcurement(TransactionCase):
         self.raw_product = product_form.save()
 
         # Create manufactured product
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_salesmanager))
         product_form.name = 'Stick'
         product_form.uom_id = self.uom_unit
         product_form.uom_po_id = self.uom_unit
@@ -103,7 +141,7 @@ class TestSaleMrpProcurement(TransactionCase):
         self.finished_product = product_form.save()
 
         # Create manifactured product which uses another manifactured
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_salesmanager))
         product_form.name = 'Arrow'
         product_form.type = 'product'
         product_form.route_ids.clear()
@@ -112,7 +150,7 @@ class TestSaleMrpProcurement(TransactionCase):
         self.complex_product = product_form.save()
 
         ## Create raw product for manufactured product
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_salesmanager))
         product_form.name = 'Raw Iron'
         product_form.type = 'product'
         product_form.uom_id = self.uom_unit
@@ -120,7 +158,7 @@ class TestSaleMrpProcurement(TransactionCase):
         self.raw_product_2 = product_form.save()
 
         # Create bom for manufactured product
-        bom_product_form = Form(self.env['mrp.bom'])
+        bom_product_form = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_product_form.product_id = self.finished_product
         bom_product_form.product_tmpl_id = self.finished_product.product_tmpl_id
         bom_product_form.product_qty = 1.0
@@ -132,7 +170,7 @@ class TestSaleMrpProcurement(TransactionCase):
         self.bom = bom_product_form.save()
 
         ## Create bom for manufactured product
-        bom_product_form = Form(self.env['mrp.bom'])
+        bom_product_form = Form(self.env['mrp.bom'].with_user(self.user_mrp_manager))
         bom_product_form.product_id = self.complex_product
         bom_product_form.product_tmpl_id = self.complex_product.product_tmpl_id
         with bom_product_form.bom_line_ids.new() as line:
@@ -148,7 +186,7 @@ class TestSaleMrpProcurement(TransactionCase):
             warehouse.manufacture_steps = 'pbm_sam'
 
         so_form = Form(self.env['sale.order'])
-        so_form.partner_id = self.env['res.partner'].create({'name': 'Another Test Partner'})
+        so_form.partner_id = self.env['res.partner'].with_user(self.user_salesmanager).create({'name': 'Another Test Partner'})
         with so_form.order_line.new() as line:
             line.product_id = self.complex_product
             line.price_unit = 1
