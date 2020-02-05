@@ -36,7 +36,7 @@ var Dialog = Widget.extend({
      *        or 'small'
      * @param {boolean} [options.fullscreen=false] - whether or not the dialog
      *        should be open in fullscreen mode (the main usecase is mobile)
-     * @param {string} [options.dialogClass] - class to add to the modal-body
+     * @param {string} [options.dialogClass] - class to add to the modal-content
      * @param {jQuery} [options.$content]
      *        Element which will be the $el, replace the .modal-body and get the
      *        modal-body class
@@ -114,6 +114,7 @@ var Dialog = Widget.extend({
         return this._super.apply(this, arguments).then(function () {
             // Render modal once xml dependencies are loaded
             self.$modal = $(QWeb.render('Dialog', {
+                dialogClass: self.dialogClass,
                 fullscreen: self.fullscreen,
                 title: self.title,
                 subtitle: self.subtitle,
@@ -150,7 +151,7 @@ var Dialog = Widget.extend({
         if (this.$content) {
             this.setElement(this.$content);
         }
-        this.$el.addClass('modal-body ' + this.dialogClass);
+        this.$el.addClass('modal-body');
     },
     //--------------------------------------------------------------------------
     // Public

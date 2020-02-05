@@ -23,5 +23,5 @@ odoo.define('web.web_client', function (require) {
 
     startWebClient();
 
-    // return webClient; // FIXME: remove requires
+    return webClient;
 });

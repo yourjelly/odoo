@@ -108,9 +108,10 @@ odoo.define('web.ActWindowActionManager', function (require) {
          *   initialization of the controller's widget
          */
         _createViewController(action, viewType, viewOptions, options) {
+            options = options || {};
             if (action.controllers[viewType]) {
                 action.controller = action.controllers[viewType];
-                action.controller.viewOptions.breadcrumbs = this._getBreadcrumbs(this.currentStack.slice(0, action.controller.index));
+                action.controller.viewOptions.breadcrumbs = this._getBreadcrumbs(options.virtualStack || this.currentStack.slice(0, action.controller.index));
                 Object.assign(action.controller.viewOptions, viewOptions);
                 return;
             }
@@ -121,20 +122,19 @@ odoo.define('web.ActWindowActionManager', function (require) {
                 return this.restoreController();
             }
 
-            options = options || {};
             const index = options.index || 0;
             const controllerID = options.controllerID || this._nextID('controller');
             // build the view options from different sources
             const flags = action.flags || {};
             viewOptions = Object.assign({}, flags, flags[viewType], viewOptions, {
                 action: action,
-                breadcrumbs: this._getBreadcrumbs(this.currentStack.slice(0, index)),
+                breadcrumbs: this._getBreadcrumbs(options.virtualStack || this.currentStack.slice(0, index)),
                 // pass the controllerID to the views as an hook for further communication
                 controllerID: controllerID,
             });
             action.controller = {
                 actionID: action.jsID,
-                // className: 'o_act_window', // used to remove the padding in dialogs
+                className: 'o_act_window', // used to remove the padding in dialogs
                 Component: viewDescr.View,
                 index: index,
                 jsID: controllerID,
@@ -182,49 +182,34 @@ odoo.define('web.ActWindowActionManager', function (require) {
                 }
             }
 
+            let index = this._getControllerStackIndex(options);
+            const virtualStack = this.currentStack.slice(0, index);
+
+            let lazyControllerID;
             if (lazyView) {
-                const index = this._getControllerStackIndex(options);
-                this._createViewController(action, lazyView.type, {controllerState: options.controllerState}, {index});
+                this._createViewController(action, lazyView.type, {controllerState: options.controllerState}, {
+                    index,
+                    virtualStack,
+                });
                 action.controller.options = options;
                 this.controllers[action.controller.jsID] = action.controller;
-                this.currentStack.push(action.controller.jsID);
-                options.clear_breadcrumbs = false;
+                virtualStack.push(action.controller.jsID);
+                index += 1;
+                lazyControllerID = action.controller.jsID;
             }
-            // TODO: handle this
-            // let lazyViewDef;
-            // let lazyControllerID;
-            // if (lazyView) {
-            //     // if the main view is lazy-loaded, its (lazy-loaded) controller is inserted
-            //     // into the controller stack (so that breadcrumbs can be correctly computed),
-            //     // so we force clear_breadcrumbs to false so that it won't be removed when the
-            //     // current controller will be inserted afterwards
-            //     options.clear_breadcrumbs = false;
-            //     // this controller being lazy-loaded, this call is actually sync
-            //     lazyViewDef = self._createViewController(action, lazyView.type, {}, {lazy: true})
-            //         .then(function (lazyLoadedController) {
-            //             lazyControllerID = lazyLoadedController.jsID;
-            //             self.controllerStack.push(lazyLoadedController.jsID);
-            //         });
-            // }
-            //     return self.dp.add(Promise.resolve(lazyViewDef))
-            //         .then(function () {
+
             const viewOptions = {
                 controllerState: options.controllerState,
                 currentId: options.resID,
             };
-            const index = this._getControllerStackIndex(options);
-            this._createViewController(action, curView.type, viewOptions, { index });
+            this._createViewController(action, curView.type, viewOptions, { index, virtualStack });
             action.controller.options = options;
-            this._pushController(action.controller);
-            // return this._executeAction(actionRequest);
-            // })
-            // .guardedCatch(function () {
-            //     if (lazyControllerID) {
-            //         var index = self.controllerStack.indexOf(lazyControllerID);
-            //         self.controllerStack = self.controllerStack.slice(0, index);
-            //     }
-            //     self._destroyWindowAction(action);
-            // });
+            this._pushController(action.controller, () => {
+                // FIXME: can we find a better way?
+                if (lazyControllerID) {
+                    this.currentStack.splice(this.currentStack.length - 1, 0, lazyControllerID);
+                }
+            });
         }
         /**
          * Helper function to find the first mobile-friendly view, if any.
@@ -352,30 +337,38 @@ odoo.define('web.ActWindowActionManager', function (require) {
             const currentControllerID = this.currentStack[this.currentStack.length - 1];
             const currentController = this.controllers[currentControllerID];
             let index;
-            // the requested controller is from the same action as the current
-            // one, so we either
-            //   1) go one step back from a mono record view to a multi record
-            //      one using the breadcrumbs
-            //   2) or we switched from a view to another  using the view
-            //      switcher
-            //   3) or we opened a record from a multi record view
-            if (viewDescr && viewDescr.multiRecord) {
-                // cases 1) and 2) (with multi record views): replace the first
-                // controller linked to the same action in the stack
-                index = _.findIndex(this.currentStack, controllerID => {
-                    return this.controllers[controllerID].actionID === action.jsID;
-                });
-            } else if (!viewDescr || !_.findWhere(action.views, {type: currentController.viewType}).multiRecord) {
-                // case 2) (with mono record views): replace the last
-                // controller by the new one if they are from the same action
-                // and if they both are mono record
-                index = this.currentStack.length - 1;
+            if (currentController.actionID === action.jsID) {
+                // the requested controller is from the same action as the current
+                // one, so we either
+                //   1) go one step back from a mono record view to a multi record
+                //      one using the breadcrumbs
+                //   2) or we switched from a view to another  using the view
+                //      switcher
+                //   3) or we opened a record from a multi record view
+                if (viewDescr && viewDescr.multiRecord) {
+                    // cases 1) and 2) (with multi record views): replace the first
+                    // controller linked to the same action in the stack
+                    index = _.findIndex(this.currentStack, controllerID => {
+                        return this.controllers[controllerID].actionID === action.jsID;
+                    });
+                } else if (!viewDescr || !_.findWhere(action.views, {type: currentController.viewType}).multiRecord) {
+                    // case 2) (with mono record views): replace the last
+                    // controller by the new one if they are from the same action
+                    // and if they both are mono record
+                    index = this.currentStack.length - 1;
+                } else {
+                    // case 3): insert the controller on the top of the controller
+                    // stack
+                    index = this.currentStack.length;
+                }
             } else {
-                // case 3): insert the controller on the top of the controller
-                // stack
-                index = this.currentStack.length;
+                // the requested controller is from another action, so we went back
+                // to a previous action using the breadcrumbs
+                index = this.currentStack.findIndex(controllerID => {
+                    const c = this.controllers[controllerID];
+                    return c.viewType === viewType && c.actionID === action.jsID;
+                });
             }
-            // }
 
             this._createViewController(action, viewType, viewOptions, { index });
             this._pushController(action.controller);

@@ -55,6 +55,19 @@ async function createWebClient(params) {
 
     const target = prepareTarget(params.debug);
     Component.env = testUtilsMock.getMockedOwlEnv(params);
+
+    // while we have a mix between Owl and legacy stuff, some of them triggering
+    // events on the env.bus (a new Bus instance especially created for the current
+    // test), the others using core.bus, we have to ensure that events triggered
+    // on env.bus are also triggered on core.bus (note that outside the testing
+    // environment, both are the exact same instance of Bus)
+    const envBusTrigger = Component.env.bus.trigger;
+    const busTrigger = function () {
+        core.bus.trigger(...arguments);
+        envBusTrigger.call(Component.env.bus, ...arguments);
+    };
+    Component.env.bus.trigger = busTrigger;
+
     /*
      * MISC STUFF: Alter some classes/object of the real world
      * to fit our needs
@@ -105,7 +118,7 @@ async function createWebClient(params) {
         SystrayMenu.Items = SystrayItems;
         _.debounce = initialUnderscoreDebounce;
         testUtilsMock.unpatch(webClient);
-    }
+    };
 
     await webClient.mount(target);
     return webClient;
