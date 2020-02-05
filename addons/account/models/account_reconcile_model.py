@@ -467,21 +467,11 @@ class AccountReconcileModel(models.Model):
                                  (
                                      line_partner.partner_id = 0
                                      AND
-                                     substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
+                                     st_line.name ~* '[0-9]'
                                      AND
-                                     (
-                                         regexp_split_to_array(substring(REGEXP_REPLACE(move.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
-                                         &&
-                                         regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
-                                         OR
-                                         (
-                                             move.ref IS NOT NULL
-                                             AND
-                                                 regexp_split_to_array(substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
-                                                 &&
-                                                 regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
-                                         )
-                                     )
+                                     regexp_split_to_array(substring(REGEXP_REPLACE(concat(move.name, ' ', move.ref) , '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
+                                     &&
+                                     regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                                  )
                              )
                              AND
