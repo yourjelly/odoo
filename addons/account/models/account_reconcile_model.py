@@ -503,13 +503,13 @@ class AccountReconcileModel(models.Model):
             # Filter on the same currency.
             if rule.match_same_currency:
                 query += '''
-                    AND COALESCE(st_line.currency_id, journal.currency_id, company.currency_id) = COALESCE(aml.currency_id, company.currency_id)
+                    AND COALESCE(st_line.currency_id, journal.currency_id, company.currency_id) = COALESCE(amls.currency_id, company.currency_id)
                 '''
 
             params = [rule.sequence, rule.id, tuple(st_lines.ids)]
             # Filter out excluded account.move.line.
             if excluded_ids:
-                query += 'AND aml.id NOT IN %s'
+                query += 'AND amls.id NOT IN %s'
                 params += [tuple(excluded_ids)]
             query, params = rule._apply_conditions(query, params)
             queries.append(query)
