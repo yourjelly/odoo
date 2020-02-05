@@ -109,6 +109,7 @@ class Registry(Mapping):
         self._assertion_report = assertion_report.assertion_report()
         self._fields_by_model = None
         self._post_init_queue = deque()
+        self._constraint_queue = deque()
 
         # modules fully loaded (maintained during init phase by `loading` module)
         self._init_modules = set()
@@ -295,7 +296,15 @@ class Registry(Mapping):
         """ Register a function to call at the end of :meth:`~.init_models`. """
         self._post_init_queue.append(partial(func, *args, **kwargs))
 
-    def init_models(self, cr, model_names, context):
+    def register_constraint(self, func, *args, **kwargs):
+        """ Register a constraint function to call at the end of :meth:`~.init_models`. """
+        self._constraint_queue.appendleft(partial(func, *args, **kwargs))
+
+    def register_foreign_key(self, func, *args, **kwargs):
+        """ Register a foreign key function to call at the end of :meth:`~.init_models`. """
+        self._constraint_queue.append(partial(func, *args, **kwargs))
+
+    def init_models(self, cr, model_names, context, *, mode='init'):
         """ Initialize a list of models (given by their name). Call methods
             ``_auto_init`` and ``init`` on each model to create or update the
             database tables supporting the models.
@@ -312,7 +321,7 @@ class Registry(Mapping):
         env = odoo.api.Environment(cr, SUPERUSER_ID, context)
         models = [env[model_name] for model_name in model_names]
 
-        # make sure the queue does not contain some leftover from a former call
+        # make sure the queues do not contain some leftover from a former call
         self._post_init_queue.clear()
 
         for model in models:
@@ -324,6 +333,10 @@ class Registry(Mapping):
             func()
 
         env['base'].flush()
+
+        while mode == 'init' and self._constraint_queue:
+            func = self._constraint_queue.popleft()
+            func()
 
         # make sure all tables are present
         self.check_tables_exist(cr)

@@ -2365,7 +2365,7 @@ class Many2one(_Relational):
 
     def update_db_column(self, model, column):
         super(Many2one, self).update_db_column(model, column)
-        model.pool.post_init(self.update_db_foreign_key, model, column)
+        model.pool.register_foreign_key(self.update_db_foreign_key, model, column)
 
     def update_db_foreign_key(self, model, column):
         comodel = model.env[self.comodel_name]
@@ -3189,7 +3189,7 @@ class Many2many(_RelationalMulti):
             """.format(rel=self.relation, id1=self.column1, id2=self.column2)
             cr.execute(query, ['RELATION BETWEEN %s AND %s' % (model._table, comodel._table)])
             _schema.debug("Create table %r: m2m relation between %r and %r", self.relation, model._table, comodel._table)
-            model.pool.post_init(self.update_db_foreign_keys, model)
+            model.pool.register_foreign_key(self.update_db_foreign_keys, model)
             return True
         elif sql.table_kind(cr, comodel._table) != 'v' and self.ondelete != 'cascade':
             # Fix foreign key references with ondelete, unless the targets are

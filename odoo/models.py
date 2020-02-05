@@ -2528,9 +2528,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         for (key, definition, _) in self._sql_constraints:
             if foreign_key_re.match(definition):
-                self.pool.post_init(process, key, definition)
+                self.pool.register_foreign_key(process, key, definition)
             else:
-                process(key, definition)
+                self.pool.register_constraint(process, key, definition)
 
     def _execute_sql(self):
         """ Execute the SQL code from the _sql attribute (if any)."""
