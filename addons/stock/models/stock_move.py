@@ -10,7 +10,7 @@ from re import split as regex_split
 
 from dateutil import relativedelta
 
-from odoo import SUPERUSER_ID, _, api, fields, models
+from odoo import SUPERUSER_ID, _, api, fields, models, tools
 from odoo.exceptions import UserError
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 
@@ -369,9 +369,10 @@ class StockMove(models.Model):
             raise UserError(user_warning)
 
     def init(self):
-        self._cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('stock_move_product_location_index',))
-        if not self._cr.fetchone():
-            self._cr.execute('CREATE INDEX stock_move_product_location_index ON stock_move (product_id, location_id, location_dest_id, company_id, state)')
+        tools.create_index(
+            self._cr, 'stock_move_product_location_index',
+            self._table, ['product_id', 'location_id', 'location_dest_id', 'company_id', 'state']
+        )
 
     @api.model
     def default_get(self, fields_list):
