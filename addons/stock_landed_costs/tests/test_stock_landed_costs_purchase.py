@@ -100,7 +100,7 @@ class TestLandedCosts(TestStockLandedCostsCommon):
         # Validate the landed cost.
         stock_landed_cost.button_validate()
         self.assertTrue(stock_landed_cost.account_move_id, 'Landed costs should be available account move lines')
-        account_entry = self.env['account.move.line'].read_group(
+        account_entry = self.env['account.move.line'].with_user(self.account_manager).read_group(
             [('move_id', '=', stock_landed_cost.account_move_id.id)], ['debit', 'credit', 'move_id'], ['move_id'])[0]
         self.assertEqual(account_entry['debit'], account_entry['credit'], 'Debit and credit are not equal')
         self.assertEqual(account_entry['debit'], 430.0, 'Wrong Account Entry')
@@ -183,7 +183,7 @@ class TestLandedCosts(TestStockLandedCostsCommon):
         stock_negative_landed_cost.button_validate()
         self.assertEqual(stock_negative_landed_cost.state, 'done', 'Negative landed costs should be in done state')
         self.assertTrue(stock_negative_landed_cost.account_move_id, 'Landed costs should be available account move lines')
-        account_entry = self.env['account.move.line'].read_group(
+        account_entry = self.env['account.move.line'].with_user(self.account_manager).read_group(
             [('move_id', '=', stock_negative_landed_cost.account_move_id.id)], ['debit', 'credit', 'move_id'], ['move_id'])[0]
         self.assertEqual(account_entry['debit'], account_entry['credit'], 'Debit and credit are not equal')
         move_lines = [

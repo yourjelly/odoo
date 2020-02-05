@@ -12,6 +12,7 @@ class TestStockValuationCommon(SavepointCase):
     @classmethod
     def setUpClass(cls):
         super(TestStockValuationCommon, cls).setUpClass()
+        cls.main_company = cls.env.ref('base.main_company')
         cls.stock_location = cls.env.ref('stock.stock_location_stock')
         cls.customer_location = cls.env.ref('stock.stock_location_customers')
         cls.supplier_location = cls.env.ref('stock.stock_location_suppliers')
@@ -21,8 +22,35 @@ class TestStockValuationCommon(SavepointCase):
             'type': 'product',
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
+
+        res_users_account_manager = cls.env.ref('account.group_account_manager')
+        partner_manager = cls.env.ref('base.group_partner_manager')
+
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        cls.user_stock_user = Users.create({
+            'name': 'Pauline Poivraisselle',
+            'login': 'pauline',
+            'email': 'p.p@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [cls.env.ref('stock.group_stock_user').id])]
+        })
+        cls.user_stock_manager = Users.create({
+            'name': 'Julie Tablier',
+            'login': 'julie',
+            'email': 'j.j@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [cls.env.ref('stock.group_stock_manager').id])]})
+        cls.account_manager = Users.create({
+            'name': 'Adviser',
+            'company_id': cls.main_company.id,
+            'login': 'fm',
+            'email': 'accountmanager@yourcompany.com',
+            'groups_id': [(6, 0, [res_users_account_manager.id, partner_manager.id])]
+        })
+
         cls.picking_type_in = cls.env.ref('stock.picking_type_in')
         cls.picking_type_out = cls.env.ref('stock.picking_type_out')
+        cls.env = cls.env(user=cls.user_stock_user)
 
     def setUp(self):
         super(TestStockValuationCommon, self).setUp()
@@ -55,7 +83,7 @@ class TestStockValuationCommon(SavepointCase):
         in_move._action_confirm()
         in_move._action_assign()
         in_move.move_line_ids.qty_done = quantity
-        in_move._action_done()
+        in_move.with_user(self.user_stock_manager)._action_done()
 
         self.days += 1
         return in_move.with_context(svl=True)
@@ -123,7 +151,7 @@ class TestStockValuationCommon(SavepointCase):
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
         return_pick.move_lines[0].move_line_ids[0].qty_done = quantity_to_return
-        return_pick._action_done()
+        return_pick.with_user(self.user_stock_manager)._action_done()
         return return_pick.move_lines
 
 
@@ -639,7 +667,7 @@ class TestStockValuationChangeCostMethod(TestStockValuationCommon):
         move2 = self._make_in_move(self.product1, 10)
         move3 = self._make_out_move(self.product1, 1)
 
-        cat2 = self.env['product.category'].create({'name': 'fifo'})
+        cat2 = self.env['product.category'].with_user(self.user_stock_manager).create({'name': 'fifo'})
         cat2.property_cost_method = 'fifo'
         self.product1.product_tmpl_id.categ_id = cat2
         self.assertEqual(self.product1.value_svl, 190)
@@ -768,7 +796,7 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
         self.assertEqual(len(self.product1.stock_valuation_layer_ids.mapped('account_move_id')), 0)
         self.assertEqual(len(self.product1.stock_valuation_layer_ids), 1)
 
-        cat2 = self.env['product.category'].create({'name': 'standard auto'})
+        cat2 = self.env['product.category'].with_user(self.user_stock_manager).create({'name': 'standard auto'})
         cat2.property_cost_method = 'standard'
         cat2.property_valuation = 'real_time'
         cat2.write({
@@ -819,7 +847,7 @@ class TestStockValuationChangeValuation(TestStockValuationCommon):
         self.assertEqual(len(self.product1.stock_valuation_layer_ids.mapped('account_move_id')), 1)
         self.assertEqual(len(self.product1.stock_valuation_layer_ids), 1)
 
-        cat2 = self.env['product.category'].create({'name': 'fifo'})
+        cat2 = self.env['product.category'].with_user(self.user_stock_manager).create({'name': 'fifo'})
         cat2.property_cost_method = 'standard'
         cat2.property_valuation = 'manual_periodic'
         self.product1.with_context(debug=True).categ_id = cat2

@@ -13,7 +13,7 @@ class TestStockValuationLCCommon(TestStockValuationCommon, StockAccountTestCommo
     @classmethod
     def setUpClass(cls):
         super(TestStockValuationLCCommon, cls).setUpClass()
-        cls.productlc1 = cls.env['product.product'].create({
+        cls.productlc1 = cls.env['product.product'].with_user(cls.user_stock_manager).create({
             'name': 'product1',
             'type': 'service',
             'categ_id': cls.env.ref('product.product_category_all').id,
@@ -31,7 +31,7 @@ class TestStockValuationLCCommon(TestStockValuationCommon, StockAccountTestCommo
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
-        cls.payable_account = cls.env['account.account'].create({
+        cls.payable_account = cls.env['account.account'].with_user(cls.account_manager).create({
             'name': 'payable',
             'code': 'payable',
             'user_type_id': cls.env.ref('account.data_account_type_payable').id,
@@ -39,7 +39,7 @@ class TestStockValuationLCCommon(TestStockValuationCommon, StockAccountTestCommo
         })
 
     def _get_stock_input_move_lines(self):
-        return self.env['account.move.line'].search([
+        return self.env['account.move.line'].with_user(self.account_manager).search([
             ('account_id', '=', self.stock_input_account.id),
         ], order='id')
 
@@ -49,23 +49,23 @@ class TestStockValuationLCCommon(TestStockValuationCommon, StockAccountTestCommo
         ], order='id')
 
     def _get_stock_valuation_move_lines(self):
-        return self.env['account.move.line'].search([
+        return self.env['account.move.line'].with_user(self.account_manager).search([
             ('account_id', '=', self.stock_valuation_account.id),
         ], order='id')
 
     def _get_payable_move_lines(self):
-        return self.env['account.move.line'].search([
+        return self.env['account.move.line'].with_user(self.account_manager).search([
             ('account_id', '=', self.payable_account.id),
         ], order='id')
 
     def _get_expense_move_lines(self):
-        return self.env['account.move.line'].search([
+        return self.env['account.move.line'].with_user(self.account_manager).search([
             ('account_id', '=', self.expense_account.id),
         ], order='id')
 
     def _make_lc(self, move, amount):
         picking = move.picking_id
-        lc = Form(self.env['stock.landed.cost'])
+        lc = Form(self.env['stock.landed.cost'].with_user(self.user_stock_manager))
         lc.account_journal_id = self.stock_journal
         lc.picking_ids.add(move.picking_id)
         with lc.cost_lines.new() as cost_line:
@@ -73,7 +73,7 @@ class TestStockValuationLCCommon(TestStockValuationCommon, StockAccountTestCommo
             cost_line.price_unit = amount
         lc = lc.save()
         lc.compute_landed_cost()
-        lc.button_validate()
+        lc.sudo().button_validate()
         return lc
 
 
@@ -238,21 +238,23 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
     @classmethod
     def setUpClass(cls):
         super(TestStockValuationLCFIFOVB, cls).setUpClass()
-        cls.vendor1 = cls.env['res.partner'].create({'name': 'vendor1'})
+        cls.vendor1 = cls.env['res.partner'].sudo().create({'name': 'vendor1'})
         cls.vendor1.property_account_payable_id = cls.payable_account
-        cls.vendor2 = cls.env['res.partner'].create({'name': 'vendor2'})
+        cls.vendor2 = cls.env['res.partner'].sudo().create({'name': 'vendor2'})
         cls.vendor2.property_account_payable_id = cls.payable_account
         cls.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
         cls.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
+        cls.user = cls.env.ref('base.user_admin')
 
     def test_vendor_bill_flow_anglo_saxon_1(self):
         """In anglo saxon accounting, receive 10@10 and invoice. Then invoice 1@50 as a landed costs
         and create a linked landed costs record.
         """
+        self.env = self.env(user=self.user)
         self.env.company.anglo_saxon_accounting = True
 
         # Create an RFQ for self.product1, 10@10
-        rfq = Form(self.env['purchase.order'])
+        rfq = Form(self.env['purchase.order'].sudo())
         rfq.partner_id = self.vendor1
 
         with rfq.order_line.new() as po_line:
@@ -337,6 +339,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         """In anglo saxon accounting, receive 10@10 and invoice with the addition of 1@50 as a
         landed costs and create a linked landed costs record.
         """
+        self.env = self.env(user=self.user)
         self.env.company.anglo_saxon_accounting = True
 
         # Create an RFQ for self.product1, 10@10
@@ -390,6 +393,7 @@ class TestStockValuationLCFIFOVB(TestStockValuationLCCommon):
         """In continental accounting, receive 10@10 and invoice. Then invoice 1@50 as a landed costs
         and create a linked landed costs record.
         """
+        self.env = self.env(user=self.user)
         self.env.company.anglo_saxon_accounting = False
 
         # Create an RFQ for self.product1, 10@10

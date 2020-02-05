@@ -10,15 +10,25 @@ class TestSaleStockMargin(TestStockValuationCommon):
     # UTILS #
     #########
 
+    def setUp(self):
+        super(TestSaleStockMargin, self).setUp()
+        Users = self.env['res.users'].sudo().with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        self.user_salesmanager = Users.create({
+            'name': 'Andrew Manager',
+            'login': 'manager',
+            'email': 'a.m@example.com',
+            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_manager').id])]
+        })
+
     def _create_sale_order(self):
-        return self.env['sale.order'].create({
+        return self.env['sale.order'].with_user(self.user_salesmanager).create({
             'name': 'Sale order',
             'partner_id': self.env.ref('base.partner_admin').id,
             'partner_invoice_id': self.env.ref('base.partner_admin').id,
         })
 
     def _create_sale_order_line(self, sale_order, product, quantity, price_unit=0):
-        return self.env['sale.order.line'].create({
+        return self.env['sale.order.line'].with_user(self.user_salesmanager).create({
             'name': 'Sale order',
             'order_id': sale_order.id,
             'price_unit': price_unit,
@@ -28,7 +38,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
         })
 
     def _create_product(self):
-        product_template = self.env['product.template'].create({
+        product_template = self.env['product.template'].with_user(self.user_stock_manager).create({
             'name': 'Super product',
         })
         product_template.categ_id.property_cost_method = 'fifo'

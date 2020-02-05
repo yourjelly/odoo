@@ -24,6 +24,31 @@ class TestStockLandedCostsCommon(AccountTestCommon):
         self.stock_location_id = self.ref('stock.stock_location_stock')
         self.customer_location_id = self.ref('stock.stock_location_customers')
         self.categ_all = self.env.ref('product.product_category_all')
+        self.main_company = self.env.ref('base.main_company')
+        res_users_account_manager = self.env.ref('account.group_account_manager')
+        partner_manager = self.env.ref('base.group_partner_manager')
+        # create user
+        Users = self.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        self.user_stock_user = Users.create({
+            'name': 'Pauline Poivraisselle',
+            'login': 'pauline',
+            'email': 'p.p@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_user').id])]
+        })
+        self.user_stock_manager = Users.create({
+            'name': 'Julie Tablier',
+            'login': 'julie',
+            'email': 'j.j@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_manager').id])]})
+        self.account_manager = Users.create({
+            'name': 'Adviser',
+            'company_id': self.main_company.id,
+            'login': 'fm',
+            'email': 'accountmanager@yourcompany.com',
+            'groups_id': [(6, 0, [res_users_account_manager.id, partner_manager.id])]
+        })
         # Create account
         self.default_account = self.env['account.account'].create({
             'name': "Purchased Stocks",
@@ -63,6 +88,7 @@ class TestStockLandedCostsCommon(AccountTestCommon):
         self.brokerage_quantity = self._create_services('Brokerage Cost')
         self.transportation_weight = self._create_services('Transportation Cost')
         self.packaging_volume = self._create_services('Packaging Cost')
+        self.env = self.env(user=self.user_stock_user)
 
     def _create_services(self, name):
         return self.Product.create({

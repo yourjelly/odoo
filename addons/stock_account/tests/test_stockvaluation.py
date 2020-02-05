@@ -14,31 +14,31 @@ def _create_accounting_data(env):
     :param env: environment used to create the records
     :return: an input account, an output account, a valuation account, an expense account, a stock journal
     """
-    stock_input_account = env['account.account'].create({
+    stock_input_account = env['account.account'].sudo().create({
         'name': 'Stock Input',
         'code': 'StockIn',
         'user_type_id': env.ref('account.data_account_type_current_assets').id,
         'reconcile': True,
     })
-    stock_output_account = env['account.account'].create({
+    stock_output_account = env['account.account'].sudo().create({
         'name': 'Stock Output',
         'code': 'StockOut',
         'user_type_id': env.ref('account.data_account_type_current_assets').id,
         'reconcile': True,
     })
-    stock_valuation_account = env['account.account'].create({
+    stock_valuation_account = env['account.account'].sudo().create({
         'name': 'Stock Valuation',
         'code': 'Stock Valuation',
         'user_type_id': env.ref('account.data_account_type_current_assets').id,
         'reconcile': True,
     })
-    expense_account = env['account.account'].create({
+    expense_account = env['account.account'].sudo().create({
         'name': 'Expense Account',
         'code': 'Expense Account',
         'user_type_id': env.ref('account.data_account_type_expenses').id,
         'reconcile': True,
     })
-    stock_journal = env['account.journal'].create({
+    stock_journal = env['account.journal'].sudo().create({
         'name': 'Stock Journal',
         'code': 'STJTEST',
         'type': 'general',
@@ -54,6 +54,7 @@ class TestStockValuation(SavepointCase):
         cls.customer_location = cls.env.ref('stock.stock_location_customers')
         cls.supplier_location = cls.env.ref('stock.stock_location_suppliers')
         cls.partner = cls.env['res.partner'].create({'name': 'xxx'})
+        cls.main_company = cls.env.ref('base.main_company')
         cls.owner1 = cls.env['res.partner'].create({'name': 'owner1'})
         cls.uom_unit = cls.env.ref('uom.product_uom_unit')
         cls.product1 = cls.env['product.product'].create({
@@ -67,12 +68,30 @@ class TestStockValuation(SavepointCase):
             'type': 'product',
             'categ_id': cls.env.ref('product.product_category_all').id,
         })
-        cls.inventory_user = cls.env['res.users'].create({
+
+        res_users_account_manager = cls.env.ref('account.group_account_manager')
+        partner_manager = cls.env.ref('base.group_partner_manager')
+
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        cls.user_stock_user = Users.create({
             'name': 'Pauline Poivraisselle',
             'login': 'pauline',
             'email': 'p.p@example.com',
             'notification_type': 'inbox',
             'groups_id': [(6, 0, [cls.env.ref('stock.group_stock_user').id])]
+        })
+        cls.user_stock_manager = Users.create({
+            'name': 'Julie Tablier',
+            'login': 'julie',
+            'email': 'j.j@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [cls.env.ref('stock.group_stock_manager').id])]})
+        cls.account_manager = Users.create({
+            'name': 'Adviser',
+            'company_id': cls.main_company.id,
+            'login': 'fm',
+            'email': 'accountmanager@yourcompany.com',
+            'groups_id': [(6, 0, [res_users_account_manager.id, partner_manager.id])]
         })
 
         cls.stock_input_account, cls.stock_output_account, cls.stock_valuation_account, cls.expense_account, cls.stock_journal = _create_accounting_data(cls.env)
@@ -87,19 +106,20 @@ class TestStockValuation(SavepointCase):
             'property_stock_valuation_account_id': cls.stock_valuation_account.id,
             'property_stock_journal': cls.stock_journal.id,
         })
+        cls.env = cls.env(user=cls.user_stock_user)
 
     def _get_stock_input_move_lines(self):
-        return self.env['account.move.line'].search([
+        return self.env['account.move.line'].with_user(self.account_manager).search([
             ('account_id', '=', self.stock_input_account.id),
         ], order='date, id')
 
     def _get_stock_output_move_lines(self):
-        return self.env['account.move.line'].search([
+        return self.env['account.move.line'].with_user(self.account_manager).search([
             ('account_id', '=', self.stock_output_account.id),
         ], order='date, id')
 
     def _get_stock_valuation_move_lines(self):
-        return self.env['account.move.line'].search([
+        return self.env['account.move.line'].with_user(self.account_manager).search([
             ('account_id', '=', self.stock_valuation_account.id),
         ], order='date, id')
 
@@ -303,7 +323,7 @@ class TestStockValuation(SavepointCase):
         move1.quantity_done = 12
 
         # stock_account values for move3
-        self.assertEqual(move1.stock_valuation_layer_ids.sorted()[-1].unit_cost, 10.0)
+        self.assertEqual(move1.with_user(self.user_stock_manager).stock_valuation_layer_ids.sorted()[-1].unit_cost, 10.0)
         self.assertEqual(sum(move1.stock_valuation_layer_ids.mapped('remaining_qty')), 9.0)
         self.assertEqual(sum(move1.stock_valuation_layer_ids.mapped('value')), 120.0)  # move 1 is now 10@10 + 2@10
 
@@ -451,8 +471,8 @@ class TestStockValuation(SavepointCase):
         move6.quantity_done = 8
 
         # stock_account values for move6
-        self.assertEqual(move6.stock_valuation_layer_ids.sorted()[-1].remaining_qty, -2)
-        self.assertEqual(move6.stock_valuation_layer_ids.sorted()[-1].value, -20)
+        self.assertEqual(move6.with_user(self.user_stock_manager).stock_valuation_layer_ids.sorted()[-1].remaining_qty, -2)
+        self.assertEqual(move6.with_user(self.user_stock_manager).stock_valuation_layer_ids.sorted()[-1].value, -20)
 
         # account values for move1
         input_aml = self._get_stock_input_move_lines()
@@ -684,7 +704,7 @@ class TestStockValuation(SavepointCase):
             ('usage', '=', 'transit'),
             ('active', '=', False)
         ], limit=1)
-        transit_location.active = True
+        transit_location.with_user(self.user_stock_manager).active = True
         move8 = self.env['stock.move'].create({
             'name': 'Send 10 units in transit',
             'location_id': self.stock_location.id,
@@ -953,7 +973,7 @@ class TestStockValuation(SavepointCase):
         stock_return_picking_action = stock_return_picking.create_returns()
         return_pick = self.env['stock.picking'].browse(stock_return_picking_action['res_id'])
         return_pick.move_lines[0].move_line_ids[0].qty_done = 1.0
-        return_pick._action_done()
+        return_pick.with_user(self.user_stock_manager)._action_done()
 
         self.assertEqual(self.product1.standard_price, 16)
 
@@ -1507,7 +1527,7 @@ class TestStockValuation(SavepointCase):
 
         self.assertEqual(sum(move2.stock_valuation_layer_ids.mapped('value')), 220.0)  # after correction, the move should be valued at 11@20
         self.assertEqual(sum(move2.stock_valuation_layer_ids.mapped('remaining_qty')), 11.0)
-        self.assertEqual(move2.stock_valuation_layer_ids.sorted()[-1].unit_cost, 20.0)
+        self.assertEqual(move2.with_user(self.user_stock_manager).stock_valuation_layer_ids.sorted()[-1].unit_cost, 20.0)
 
         self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('debit')), 320)
         self.assertEqual(sum(self._get_stock_valuation_move_lines().mapped('credit')), 0)
@@ -1696,7 +1716,7 @@ class TestStockValuation(SavepointCase):
         })
         self.assertEqual(sum(move1.stock_valuation_layer_ids.mapped('value')), 200.0)
         self.assertEqual(sum(move1.stock_valuation_layer_ids.mapped('remaining_qty')), 20.0)
-        self.assertEqual(move1.stock_valuation_layer_ids.sorted()[-1].unit_cost, 10.0)
+        self.assertEqual(move1.with_user(self.user_stock_manager).stock_valuation_layer_ids.sorted()[-1].unit_cost, 10.0)
 
         self.assertEqual(len(move1.account_move_ids), 2)
 
@@ -1959,7 +1979,7 @@ class TestStockValuation(SavepointCase):
         self.assertEqual(self.product1.value_svl, 0)
 
     def test_fifo_standard_price_upate_1(self):
-        product = self.env['product.product'].create({
+        product = self.env['product.product'].with_user(self.user_stock_manager).create({
             'name': 'product1',
             'type': 'product',
             'categ_id': self.env.ref('product.product_category_all').id,
@@ -1971,7 +1991,7 @@ class TestStockValuation(SavepointCase):
         self.assertEqual(product.standard_price, 23)
 
     def test_fifo_standard_price_upate_2(self):
-        product = self.env['product.product'].create({
+        product = self.env['product.product'].with_user(self.user_stock_manager).create({
             'name': 'product1',
             'type': 'product',
             'categ_id': self.env.ref('product.product_category_all').id,
@@ -1984,7 +2004,7 @@ class TestStockValuation(SavepointCase):
 
     def test_fifo_standard_price_upate_3(self):
         """Standard price must be set on move in if no product and if first move."""
-        product = self.env['product.product'].create({
+        product = self.env['product.product'].with_user(self.user_stock_manager).create({
             'name': 'product1',
             'type': 'product',
             'categ_id': self.env.ref('product.product_category_all').id,
@@ -2171,7 +2191,7 @@ class TestStockValuation(SavepointCase):
         self.assertEqual(self.product1.quantity_svl, -5)
         self.assertEqual(self.product1.value_svl, -62.5)
 
-        move2.move_line_ids.qty_done = 20
+        move2.with_user(self.user_stock_manager).move_line_ids.qty_done = 20
         # incrementing the receipt triggered the vacuum, the negative stock is corrected
         self.assertEqual(self.product1.stock_valuation_layer_ids[-1].value, -12.5)
 
@@ -2378,7 +2398,7 @@ class TestStockValuation(SavepointCase):
 
         self.assertAlmostEqual(self.product1.standard_price, 14.0)
         self.assertAlmostEqual(len(move1.stock_valuation_layer_ids), 2)
-        self.assertAlmostEqual(move1.stock_valuation_layer_ids.sorted()[-1].value, 100)
+        self.assertAlmostEqual(move1.with_user(self.user_stock_manager).stock_valuation_layer_ids.sorted()[-1].value, 100)
         self.assertAlmostEqual(self.product1.quantity_svl, 25)
         self.assertAlmostEqual(self.product1.value_svl, 350)
 
@@ -2710,7 +2730,7 @@ class TestStockValuation(SavepointCase):
         move5._action_confirm()
         move5._action_assign()
         move5.move_line_ids.qty_done = 20.0
-        move5._action_done()
+        move5.with_user(self.user_stock_manager)._action_done()
         self.assertEqual(move5.stock_valuation_layer_ids.value, 400.0)
 
         # Move 4 is now fixed, it initially sent 30@15 but the 5 last units were negative and estimated
@@ -2834,7 +2854,7 @@ class TestStockValuation(SavepointCase):
 
         self.product1.standard_price = 10.0
 
-        move1 = self.env['stock.move'].with_user(self.inventory_user).create({
+        move1 = self.env['stock.move'].create({
             'name': 'IN 10 units',
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
@@ -2854,7 +2874,7 @@ class TestStockValuation(SavepointCase):
 
         self.product1.standard_price = 10.0
 
-        move1 = self.env['stock.move'].with_user(self.inventory_user).create({
+        move1 = self.env['stock.move'].create({
             'name': 'IN 10 units',
             'location_id': self.supplier_location.id,
             'location_dest_id': self.stock_location.id,
@@ -3015,14 +3035,14 @@ class TestStockValuation(SavepointCase):
         """
         self.product1.categ_id.property_cost_method = 'fifo'
 
-        view_location = self.env['stock.location'].create({'name': 'view', 'usage': 'view'})
-        subloc1 = self.env['stock.location'].create({
+        view_location = self.env['stock.location'].with_user(self.user_stock_manager).create({'name': 'view', 'usage': 'view'})
+        subloc1 = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'internal',
             'usage': 'internal',
             'location_id': view_location.id,
         })
         # sane settings for a scrap location, company_id doesn't matter
-        subloc2 = self.env['stock.location'].create({
+        subloc2 = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'scrap',
             'usage': 'inventory',
             'location_id': view_location.id,
@@ -3059,12 +3079,12 @@ class TestStockValuation(SavepointCase):
         ]})
 
         move1._action_done()
-        self.assertEqual(move1.stock_valuation_layer_ids.value, 10)
+        self.assertEqual(move1.with_user(self.user_stock_manager).stock_valuation_layer_ids.value, 10)
         self.assertEqual(move1.stock_valuation_layer_ids.remaining_qty, 1)
         self.assertAlmostEqual(self.product1.qty_available, 0.0)
         self.assertAlmostEqual(self.product1.quantity_svl, 1.0)
         self.assertEqual(self.product1.value_svl, 10)
-        self.assertTrue(len(move1.account_move_ids), 1)
+        self.assertTrue(len(move1.with_user(self.account_manager).account_move_ids), 1)
 
         move2 = self.env['stock.move'].create({
             'name': '2 units out',
@@ -3103,7 +3123,7 @@ class TestStockValuation(SavepointCase):
         """
         # an internal move should be considered as OUT if any of its move line
         # is moved in a scrap location
-        scrap = self.env['stock.location'].create({
+        scrap = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'scrap',
             'usage': 'inventory',
             'location_id': self.stock_location.id,
@@ -3140,12 +3160,12 @@ class TestStockValuation(SavepointCase):
 
         # a move should be considered as invalid if some of its move lines are
         # entering the company and some are leaving
-        customer1 = self.env['stock.location'].create({
+        customer1 = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'customer',
             'usage': 'customer',
             'location_id': self.stock_location.id,
         })
-        supplier1 = self.env['stock.location'].create({
+        supplier1 = self.env['stock.location'].with_user(self.user_stock_manager).create({
             'name': 'supplier',
             'usage': 'supplier',
             'location_id': self.stock_location.id,
@@ -3456,7 +3476,7 @@ class TestStockValuation(SavepointCase):
         move5.stock_valuation_layer_ids._write({'create_date': date5})
 
         # the vacuum ran
-        move4.stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date6})
+        move4.with_user(self.user_stock_manager).stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date6})
 
         self.assertEqual(self.product1.quantity_svl, 85)
         self.assertEqual(self.product1.value_svl, 1275)
@@ -3563,7 +3583,7 @@ class TestStockValuation(SavepointCase):
         move4.move_line_ids.qty_done = 10
         move4._action_done()
         move4.date = date4
-        move3.stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date4})
+        move3.with_user(self.user_stock_manager).stock_valuation_layer_ids.sorted()[-1]._write({'create_date': date4})
         move4.stock_valuation_layer_ids._write({'create_date': date4})
 
         self.assertAlmostEqual(self.product1.quantity_svl, 0.0)

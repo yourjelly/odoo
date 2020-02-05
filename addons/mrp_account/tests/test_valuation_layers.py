@@ -11,15 +11,29 @@ class TestMrpValuationCommon(TestStockValuationCommon):
     @classmethod
     def setUpClass(cls):
         super(TestMrpValuationCommon, cls).setUpClass()
-        cls.component_category = cls.env['product.category'].create(
+        user_group_stock_user = cls.env.ref('stock.group_stock_user')
+        user_group_mrp_manager = cls.env.ref('mrp.group_mrp_manager')
+        user_group_mrp_byproducts = cls.env.ref('mrp.group_mrp_byproducts')
+        cls.component_category = cls.env['product.category'].with_user(cls.user_stock_manager).create(
             {'name': 'category2'}
         )
-        cls.component = cls.env['product.product'].create({
+        cls.component = cls.env['product.product'].with_user(cls.user_stock_manager).create({
             'name': 'component1',
             'type': 'product',
             'categ_id': cls.component_category.id,
         })
-        cls.bom = cls.env['mrp.bom'].create({
+        Users = cls.env['res.users'].sudo().with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        cls.user_mrp_manager = Users.create({
+            'name': 'Gary Youngwomen',
+            'login': 'gary',
+            'email': 'g.g@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [
+                user_group_mrp_manager.id,
+                user_group_stock_user.id,
+                user_group_mrp_byproducts.id
+            ])]})
+        cls.bom = cls.env['mrp.bom'].with_user(cls.user_mrp_manager).create({
             'product_id': cls.product1.id,
             'product_tmpl_id': cls.product1.product_tmpl_id.id,
             'product_uom_id': cls.uom_unit.id,
@@ -30,7 +44,7 @@ class TestMrpValuationCommon(TestStockValuationCommon):
             ]})
 
     def _make_mo(self, bom, quantity=1):
-        mo_form = Form(self.env['mrp.production'])
+        mo_form = Form(self.env['mrp.production'].with_user(self.user_mrp_manager))
         mo_form.product_id = bom.product_id
         mo_form.bom_id = bom
         mo_form.product_qty = quantity
@@ -39,7 +53,7 @@ class TestMrpValuationCommon(TestStockValuationCommon):
         return mo
 
     def _produce(self, mo, quantity=0):
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
+        produce_form = Form(self.env['mrp.product.produce'].with_user(self.user_mrp_manager).with_context({
             'active_id': mo.id,
             'active_ids': [mo.id],
         }))

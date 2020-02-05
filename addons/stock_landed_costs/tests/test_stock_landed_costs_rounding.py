@@ -14,14 +14,14 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon, StockAccountTestC
 
         # Define undivisible units
         product_uom_unit_round_1 = self.env.ref('uom.product_uom_unit')
-        product_uom_unit_round_1.write({
+        product_uom_unit_round_1.with_user(self.user_stock_manager).write({
             'name': 'Undivisible Units',
             'rounding': 1.0,
         })
 
         # I create 2 products with different cost prices and configure them for real_time
         # valuation and real price costing method
-        product_landed_cost_3 = self.env['product.product'].create({
+        product_landed_cost_3 = self.env['product.product'].with_user(self.user_stock_manager).create({
             'name': "LC product 3",
             'uom_id': product_uom_unit_round_1.id,
         })
@@ -29,7 +29,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon, StockAccountTestC
         product_landed_cost_3.product_tmpl_id.categ_id.property_stock_account_input_categ_id = self.o_expense
         product_landed_cost_3.product_tmpl_id.categ_id.property_stock_account_output_categ_id = self.o_income
 
-        product_landed_cost_4 = self.env['product.product'].create({
+        product_landed_cost_4 = self.env['product.product'].with_user(self.user_stock_manager).create({
             'name': "LC product 4",
             'uom_id': product_uom_unit_round_1.id,
         })
@@ -85,7 +85,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon, StockAccountTestC
         picking_landed_cost_3.action_assign()
         picking_landed_cost_3._action_done()
 
-        virtual_interior_design = self.env['product.product'].create({'name': 'Virtual Interior Design'})
+        virtual_interior_design = self.env['product.product'].with_user(self.user_stock_manager).create({'name': 'Virtual Interior Design'})
 
         # I create a landed cost for picking 3
         default_vals = self.env['stock.landed.cost'].default_get(list(self.env['stock.landed.cost'].fields_get()))
@@ -101,7 +101,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon, StockAccountTestC
         stock_landed_cost_2.cost_lines.split_method = 'equal'
         stock_landed_cost_2.cost_lines.price_unit = 15
         vals = stock_landed_cost_2._convert_to_write(stock_landed_cost_2._cache)
-        stock_landed_cost_2 = self.env['stock.landed.cost'].create(vals)
+        stock_landed_cost_2 = self.env['stock.landed.cost'].with_user(self.user_stock_manager).create(vals)
 
         # I compute the landed cost using Compute button
         stock_landed_cost_2.compute_landed_cost()
@@ -111,7 +111,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon, StockAccountTestC
             self.assertEqual(valuation.additional_landed_cost, 15)
 
         # I confirm the landed cost
-        stock_landed_cost_2.button_validate()
+        stock_landed_cost_2.sudo().button_validate()
 
         # I check that the landed cost is now "Closed" and that it has an accounting entry
         self.assertEqual(stock_landed_cost_2.state, 'done')
@@ -138,7 +138,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon, StockAccountTestC
         stock_landed_cost_3.cost_lines.split_method = 'equal'
         stock_landed_cost_3.cost_lines.price_unit = 11
         vals = stock_landed_cost_3._convert_to_write(stock_landed_cost_3._cache)
-        stock_landed_cost_3 = self.env['stock.landed.cost'].create(vals)
+        stock_landed_cost_3 = self.env['stock.landed.cost'].with_user(self.user_stock_manager).create(vals)
 
         # I compute the landed cost using Compute button
         stock_landed_cost_3.compute_landed_cost()
@@ -148,7 +148,7 @@ class TestStockLandedCostsRounding(TestStockLandedCostsCommon, StockAccountTestC
             self.assertEqual(valuation.additional_landed_cost, 11)
 
         # I confirm the landed cost
-        stock_landed_cost_3.button_validate()
+        stock_landed_cost_3.sudo().button_validate()
 
         # I check that the landed cost is now "Closed" and that it has an accounting entry
         self.assertEqual(stock_landed_cost_3.state, 'done')

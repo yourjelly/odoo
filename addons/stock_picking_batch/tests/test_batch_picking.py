@@ -64,6 +64,22 @@ class TestBatchPicking(TransactionCase):
             'picking_ids': [(4, self.picking_client_1.id), (4, self.picking_client_2.id)]
         })
 
+        Users = self.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        self.user_stock_user = Users.create({
+            'name': 'Pauline Poivraisselle',
+            'login': 'pauline',
+            'email': 'p.p@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_user').id])]
+        })
+        self.user_stock_manager = Users.create({
+            'name': 'Julie Tablier',
+            'login': 'julie',
+            'email': 'j.j@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_manager').id])]})
+        self.env = self.env(user=self.user_stock_user)
+
     def test_simple_batch_with_manual_qty_done(self):
         """ Test a simple batch picking with all quantity for picking available.
         The user set all the quantity_done on picking manually and no wizard are used.
