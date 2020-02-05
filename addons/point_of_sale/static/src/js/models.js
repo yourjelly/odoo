@@ -1710,6 +1710,7 @@ exports.Orderline = Backbone.Model.extend({
     //used to create a json of the ticket, to be sent to the printer
     export_for_printing: function(){
         return {
+            id: this.id,
             quantity:           this.get_quantity(),
             unit_name:          this.get_unit().name,
             price:              this.get_unit_display_price(),
@@ -2304,6 +2305,7 @@ exports.Paymentline = Backbone.Model.extend({
     //exports as JSON for receipt printing
     export_for_printing: function(){
         return {
+            cid: this.cid,
             amount: this.get_amount(),
             payment_method: this.payment_method.name,
         };
