@@ -388,8 +388,8 @@ class AccountReconcileModel(models.Model):
                 SELECT
                     j.id AS journal_id, currency.decimal_places AS dp
                 FROM account_journal j
-                LEFT JOIN res_company c ON j.company_id = c.id
-                LEFT JOIN res_currency currency ON COALESCE(j.currency_id, c.currency_id) = currency.id
+                JOIN res_company c ON j.company_id = c.id
+                JOIN res_currency currency ON COALESCE(j.currency_id, c.currency_id) = currency.id
                 WHERE j.type IN ('bank', 'cash')
             )'''
         # Compute partners values table.
@@ -423,98 +423,92 @@ class AccountReconcileModel(models.Model):
                 %s                                  AS sequence,
                 %s                                  AS model_id,
                 st_line.id                          AS id,
-                aml.id                              AS aml_id,
-                aml.currency_id                     AS aml_currency_id,
-                aml.date_maturity                   AS aml_date_maturity,
-                aml.amount_residual                 AS aml_amount_residual,
-                aml.amount_residual_currency        AS aml_amount_residual_currency,
-                aml.balance                         AS aml_balance,
-                aml.amount_currency                 AS aml_amount_currency,
-                account.internal_type               AS account_internal_type,
+                amls.id                              AS aml_id,
+                amls.currency_id                     AS aml_currency_id,
+                amls.date_maturity                   AS aml_date_maturity,
+                amls.amount_residual                 AS aml_amount_residual,
+                amls.amount_residual_currency        AS aml_amount_residual_currency,
+                amls.balance                         AS aml_balance,
+                amls.amount_currency                 AS aml_amount_currency,
+                amls.internal_type               AS account_internal_type,
 
                 -- Determine a matching or not with the statement line communication using the move.name or move.ref.
                 -- only digits are considered and reference are split by any space characters
-                regexp_split_to_array(substring(REGEXP_REPLACE(move.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
+                regexp_split_to_array(substring(REGEXP_REPLACE(amls.move_name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                 && regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                 OR
                 (
-                    move.ref IS NOT NULL
+                    amls.move_ref IS NOT NULL
                     AND
-                        regexp_split_to_array(substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
+                        regexp_split_to_array(substring(REGEXP_REPLACE(amls.move_ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                         &&
                         regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                 )                                   AS communication_flag
             FROM account_bank_statement_line st_line
-            LEFT JOIN account_journal journal       ON journal.id = st_line.journal_id
-            LEFT JOIN jnl_precision                 ON jnl_precision.journal_id = journal.id
-            LEFT JOIN res_company company           ON company.id = st_line.company_id
-            LEFT JOIN partners_table line_partner   ON line_partner.line_id = st_line.id
-            , account_move_line aml
-            LEFT JOIN account_move move             ON move.id = aml.move_id
-            LEFT JOIN account_account account       ON account.id = aml.account_id
-            WHERE st_line.id IN %s
-                AND aml.company_id = st_line.company_id
-                AND (
-                        -- the field match_partner of the rule might enforce the second part of
-                        -- the OR condition, later in _apply_conditions()
-                        line_partner.partner_id = 0
-                        OR
-                        aml.partner_id = line_partner.partner_id
-                    )
-                AND CASE WHEN st_line.amount > 0.0
-                         THEN aml.balance > 0
-                         ELSE aml.balance < 0
-                    END
+            JOIN account_journal journal       ON journal.id = st_line.journal_id
+            JOIN res_company company           ON company.id = st_line.company_id
+            JOIN jnl_precision                 ON jnl_precision.journal_id = journal.id
+            JOIN partners_table line_partner   ON line_partner.line_id = st_line.id
+            JOIN LATERAL (SELECT aml.id,aml.currency_id ,aml.date_maturity,aml.amount_residual,aml.amount_residual_currency,aml.balance ,aml.amount_currency ,account.internal_type,move.name as move_name,move.ref as move_ref
+                            FROM account_move_line aml
+                            JOIN account_move move             ON move.id = aml.move_id
+                            JOIN account_account account       ON account.id = aml.account_id
+                           WHERE aml.company_id = st_line.company_id
+                             AND line_partner.partner_id IN (0, aml.partner_id)
+                             AND SIGN(st_line.amount)=SIGN(aml.balance) -- they should be both positive or negative.
+                             AND
+                             (
+                                 (
+                                     line_partner.partner_id != 0
+                                     AND
+                                     aml.partner_id = line_partner.partner_id
+                                 )
+                                 OR
+                                 (
+                                     line_partner.partner_id = 0
+                                     AND
+                                     substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
+                                     AND
+                                     (
+                                         regexp_split_to_array(substring(REGEXP_REPLACE(move.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
+                                         &&
+                                         regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
+                                         OR
+                                         (
+                                             move.ref IS NOT NULL
+                                             AND
+                                                 regexp_split_to_array(substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
+                                                 &&
+                                                 regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
+                                         )
+                                     )
+                                 )
+                             )
+                             AND
+                             (
+                                 (
+                                 -- blue lines appearance conditions
+                                 aml.account_id IN (journal.default_credit_account_id, journal.default_debit_account_id)
+                                 AND aml.statement_id IS NULL
+                                 AND (
+                                     company.account_bank_reconciliation_start IS NULL
+                                     OR
+                                     aml.date > company.account_bank_reconciliation_start
+                                     )
+                                 )
+                                 OR
+                                 (
+                                 -- black lines appearance conditions
+                                 account.reconcile IS TRUE
+                                 AND aml.reconciled IS FALSE
+                                 )
+                             )
 
+            ) amls ON true
+            WHERE st_line.id IN %s
                 -- if there is a partner, propose all aml of the partner, otherwise propose only the ones
                 -- matching the statement line communication
-                AND
-                (
-                    (
-                        line_partner.partner_id != 0
-                        AND
-                        aml.partner_id = line_partner.partner_id
-                    )
-                    OR
-                    (
-                        line_partner.partner_id = 0
-                        AND
-                        substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
-                        AND
-                        (
-                            regexp_split_to_array(substring(REGEXP_REPLACE(move.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
-                            &&
-                            regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
-                            OR
-                            (
-                                move.ref IS NOT NULL
-                                AND
-                                    regexp_split_to_array(substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
-                                    &&
-                                    regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
-                            )
-                        )
-                    )
-                )
-                AND
-                (
-                    (
-                    -- blue lines appearance conditions
-                    aml.account_id IN (journal.default_credit_account_id, journal.default_debit_account_id)
-                    AND aml.statement_id IS NULL
-                    AND (
-                        company.account_bank_reconciliation_start IS NULL
-                        OR
-                        aml.date > company.account_bank_reconciliation_start
-                        )
-                    )
-                    OR
-                    (
-                    -- black lines appearance conditions
-                    account.reconcile IS TRUE
-                    AND aml.reconciled IS FALSE
-                    )
-                )
+
             '''
             # Filter on the same currency.
             if rule.match_same_currency:
