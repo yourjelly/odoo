@@ -118,7 +118,7 @@ class Action extends ComponentAdapter {
     }
 
     destroy(force) {
-        if (this.legacy && this.widget && !force) {
+        if (this.__owl__.isMounted && this.legacy && this.widget && !force) {
             // keep legacy stuff alive because some stuff
             // are kept by AbstractModel (e.g.: orderedBy)
             dom.detach([{widget: this.widget}]);
