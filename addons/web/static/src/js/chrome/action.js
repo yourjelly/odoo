@@ -10,6 +10,7 @@ odoo.define('web.Action', function (require) {
 
 const AbstractView = require('web.AbstractView');
 const { ComponentAdapter } = require('web.OwlCompatibility');
+const OwlDialog = require('web.OwlDialog');
 
 var dom = require('web.dom');
 
@@ -46,11 +47,20 @@ class Action extends ComponentAdapter {
             );
             const view = new viewDescr.View(viewDescr.fieldsView, viewParams);
             this.widget = await view.getController(this);
-            const initState = this.widget.exportState();
-            const controllerState = {
-                resIds: initState.resIds,
+            if (this.__owl__.isDestroyed) { // the action has been destroyed meanwhile
+                this.widget.destroy();
+                return;
             }
-            this.env.bus.trigger('legacy-loaded', { controllerState });
+            if (!('inDialog' in this.props)) {
+                const initState = this.widget.exportState();
+                const controllerState = {
+                    resIds: initState.resIds,
+                }
+                this.env.bus.trigger('legacy-loaded', { controllerState });
+            }
+            if ('inDialog' in this.props) {
+                this.env.bus.trigger('legacy-action', this.widget);
+            }
             this.legacy = 'view';
             this._reHookControllerMethods();
             return this.widget._widgetRenderAndInsert(() => {});
@@ -96,17 +106,19 @@ class Action extends ComponentAdapter {
     }
 
     _reHookControllerMethods() {
-        const self = this;
-        const widget = this.widget;
-        const controllerReload = widget.reload;
-        this.widget.reload = async function(params) {
-            await controllerReload.call(widget, ...arguments);
-            const controllerState = widget.exportState();
-            const commonState = {};
-            if (params) {
-                if (params.context) {commonState.context = params.context;}
+        if (!('inDialog' in this.props)) {
+            const self = this;
+            const widget = this.widget;
+            const controllerReload = widget.reload;
+            this.widget.reload = async function(params) {
+                await controllerReload.call(widget, ...arguments);
+                const controllerState = widget.exportState();
+                const commonState = {};
+                if (params) {
+                    if (params.context) {commonState.context = params.context;}
+                }
+                self.env.bus.trigger('legacy-reloaded', { commonState , controllerState });
             }
-            self.env.bus.trigger('legacy-reloaded', { commonState , controllerState });
         }
     }
 
@@ -118,7 +130,7 @@ class Action extends ComponentAdapter {
     }
 
     destroy(force) {
-        if (this.__owl__.isMounted && this.legacy && this.widget && !force) {
+        if (this.__owl__.isMounted && this.legacy && this.widget && !force) { // FIXME: do not detach twice?
             // keep legacy stuff alive because some stuff
             // are kept by AbstractModel (e.g.: orderedBy)
             dom.detach([{widget: this.widget}]);
@@ -129,6 +141,30 @@ class Action extends ComponentAdapter {
     }
 }
 
-return Action;
+class DialogAction extends owl.Component {
+    constructor() {
+        super(...arguments);
+        this.dialog = owl.hooks.useRef('dialog');
+        this.legacyActionWigdet = null;
+        this.env.bus.on('legacy-action', this, (legacyWidget) => {
+            this.legacyActionWigdet = legacyWidget;
+        });
+    }
+    mounted() {
+        if (this.legacyActionWigdet) {
+            const footer = this.dialog.comp.footerRef.el;
+            footer.innerHTML = "";
+            this.legacyActionWigdet.renderButtons($(footer));
+        }
+        return super.mounted();
+    }
+}
+DialogAction.template = owl.tags.xml`
+    <OwlDialog t-props="props" t-ref="dialog">
+        <t t-slot="default"/>
+    </OwlDialog>`
+DialogAction.components = { OwlDialog };
+
+return { Action, DialogAction };
 
 });

@@ -423,9 +423,11 @@ function getMockedOwlEnv(params) {
     }
     if (params.services) {
         for (let serv in params.services) {
+            // FIXME: doesn't handle dependencies between services
             const Service = params.services[serv];
             if (Service.constructor.name === 'Class') {
                 env.services[serv] = new Service(env);
+                env.services[serv].start();
             } else {
                 env.services[serv] = Service;
             }

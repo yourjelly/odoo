@@ -3,8 +3,8 @@ odoo.define('web.ActionManager', function (require) {
 
 // const AbstractAction = require('web.AbstractAction');
 const Action = require('web.Action');
-const { action_registry } = require('web.core');
 const Context = require('web.Context');
+const { _t, action_registry } = require('web.core');
 const { redirect } = require('web.framework');
 var pyUtils = require('web.py_utils');
 const Widget = require('web.Widget');
@@ -82,11 +82,15 @@ class UrlActionPlugin extends ActionManagerPlugin {
         } else {
             const w = window.open(action.url, '_blank');
             if (!w || w.closed || typeof w.closed === 'undefined') {
-                // TODO: implement notification service
-                // const message = _t('A popup window has been blocked. You ' +
-                //              'may need to change your browser settings to allow ' +
-                //              'popup windows for this page.');
-                // this.do_warn(_t('Warning'), message, true);
+                const message = _t('A popup window has been blocked. You ' +
+                    'may need to change your browser settings to allow ' +
+                    'popup windows for this page.');
+                this.env.services.notification.notify({
+                    title: _t('Warning'),
+                    type: 'danger',
+                    message: message,
+                    sticky: true,
+                });
             }
             options.on_close();
         }
@@ -137,11 +141,12 @@ class ClientActionPlugin extends ActionManagerPlugin {
             if (!(proto instanceof Component) && !(proto instanceof Widget)) {
                 // the client action might be a function, which is executed and
                 // whose returned value might be another action to execute
-                const nextAction = ClientAction(this.actionManager, action);
+                const nextAction = ClientAction(this.env, action);
                 if (nextAction) {
                     action = nextAction;
                     return this._resolveLast(this.doAction(action));
                 }
+                return;
             }
         }
 
@@ -157,6 +162,7 @@ class ClientActionPlugin extends ActionManagerPlugin {
             options: options,
             // title: widget.getTitle(),
         };
+        action.id = action.id || action.tag;
         this._pushController(action.controller);
     }
     /**
@@ -177,6 +183,7 @@ ClientActionPlugin.type = 'ir.actions.client';
 
 class CloseActionPlugin extends ActionManagerPlugin {
     async executeAction(action, options) {
+        action.options = options;
         return this.restoreController();
     }
 }
@@ -480,87 +487,6 @@ class ActionManager extends core.EventBus {
             }
         }
         return result;
-
-
- //        var action;
- //        if (!state.action) {
- //            return Promise.resolve();
- //        }
- //        // if (_.isString(state.action) && core.action_registry.contains(state.action)) {
- //        //     action = {
- //        //         params: state,
- //        //         tag: state.action,
- //        //         type: 'ir.actions.client',
- //        //     };
- //        // } else {
- //        //     action = state.action;
- //        // }
- //        return this.doAction(action, {
- //            clear_breadcrumbs: true,
- //            pushState: false,
- //        });
-
- // // --------------------------------------------------------------------------
-
- //        let action;
- //        let options = {
- //            clear_breadcrumbs: true,
- //        };
- //        if (state.action) {
- //            const x = this.getCurrentAction(); // FIXME
- //            const currentAction = x.action;
- //            const currentController = x.controller;
- //            if (currentAction && currentAction.id === state.action &&
- //                currentAction.type === 'ir.actions.act_window') {
- //                // the action to load is already the current one, so update it
- //                this._closeDialog(true); // there may be a currently opened dialog, close it
- //                var viewOptions = {currentId: state.id};
- //                var viewType = state.view_type || currentController.viewType;
- //                return this._switchController(currentAction, viewType, viewOptions);
- //            } else if (!core.action_registry.contains(state.action)) {
- //                // the action to load isn't the current one, so execute it
- //                var context = {};
- //                if (state.active_id) {
- //                    context.active_id = state.active_id;
- //                }
- //                if (state.active_ids) {
- //                    // jQuery's BBQ plugin does some parsing on values that are valid integers
- //                    // which means that if there's only one item, it will do parseInt() on it,
- //                    // otherwise it will keep the comma seperated list as string
- //                    context.active_ids = state.active_ids.split(',').map(function (id) {
- //                        return parseInt(id, 10) || id;
- //                    });
- //                } else if (state.active_id) {
- //                    context.active_ids = [state.active_id];
- //                }
- //                context.params = state;
- //                action = state.action;
- //                options = Object.assign(options, {
- //                    additional_context: context,
- //                    resID: state.id || undefined, // empty string with bbq
- //                    viewType: state.view_type,
- //                });
- //            }
- //        } else if (state.model && state.id) {
- //            action = {
- //                res_model: state.model,
- //                res_id: state.id,
- //                type: 'ir.actions.act_window',
- //                views: [[state.view_id || false, 'form']],
- //            };
- //        } else if (state.model && state.view_type) {
- //            // this is a window action on a multi-record view, so restore it
- //            // from the session storage
- //            var storedAction = this.call('session_storage', 'getItem', 'current_action');
- //            var lastAction = JSON.parse(storedAction || '{}');
- //            if (lastAction.res_model === state.model) {
- //                action = lastAction;
- //                options.viewType = state.view_type;
- //            }
- //        }
- //        if (action) {
- //            return this.doAction(action, options);
- //        }
     }
     /**
      * Restores a controller from the controllerStack and removes all
@@ -579,6 +505,10 @@ class ActionManager extends core.EventBus {
         await this.clearUncommittedChanges();
         const { action, controller } = this.getStateFromController(controllerID);
         if (action) {
+            if (controller.onReverseBreadcrumb) {
+                await controller.onReverseBreadcrumb();
+            }
+            // TODO: call willRestore here?
             const plugin = this._getPlugin(action.type);
             if (plugin.restoreControllerHook) {
                 return plugin.restoreControllerHook(action, controller);
@@ -598,6 +528,12 @@ class ActionManager extends core.EventBus {
         //         self._pushController(controller, index);
         //     });
         // });
+    }
+    storeScrollPosition(scrollPosition) {
+        const currentState = this.getCurrentState();
+        if (currentState.main) {
+            currentState.main.controller.scrollPosition = scrollPosition;
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -763,12 +699,26 @@ class ActionManager extends core.EventBus {
      * @private
      * @param {Object} controller
      */
-    _pushController(controller) {
+    _pushController(controller, cb) {
         if (!controller) {
             // TODO: maybe have a specific closeDialog function
+            if (this.currentDialogController) {
+                const {action,controller} = this.getStateFromController(this.currentDialogController.jsID);
+                this.currentDialogController.options.on_close(action.infos);
+            } else {
+                // At this point we are completely empty
+                // And safe to say we are closing a close_action
+                const allActions = Object.keys(this.actions);
+                const actKey = allActions.sort()[allActions.length-1]; // LOOOL !
+                const action = this.actions[actKey];
+                action.options.on_close(action.infos);
+            }
             this.trigger('update', {
                 main: null,
                 dialog: null,
+                onSuccess: () => {
+                    this.currentDialogController = null;
+                },
             });
             return;
         }
@@ -793,34 +743,71 @@ class ActionManager extends core.EventBus {
             newDialog = {};
             newDialog.action = action;
             newDialog.controller = controller;
-            newMenuID: this.currentMenuID;
+            newMenuID = this.currentMenuID;
         }
-        const onSuccess = component => {
-            if (action.target !== 'new') {
-                newMain.controller.component = component;
-                this.currentDialogController = newDialog;
-                this.menuID = newMenuID;
+        if (dialog) {
+            const oldCt = dialog.controller;
+            if (newDialog) {
+                const newCt = newDialog.controller;
+                newCt.options.on_close = oldCt.options.on_close;
             } else {
-                this.currentDialogController = newDialog.controller
+                oldCt.options.on_close(action.infos);
             }
-            this.currentStack.splice(newMain ? newMain.controller.index : 0);
-            if (newMain) {
-                this.currentStack.push(newMain.controller.jsID);
+        }
+        const nextStack = this.currentStack.slice(0, newMain ? newMain.controller.index : 0);
+        if (newMain) {
+            nextStack.push(newMain.controller.jsID);
+        }
+        const onSuccess = (mainComponent, dialogComponent) => {
+            if (action.target !== 'new') {
+                newMain.controller.component = mainComponent;
+                this.currentDialogController = newDialog;
+                this.menuID = newMenuID || this.menuID;
+                // FIXME: we could probably get rid of this on_reverse_breadcrumb stuff, and use
+                // the willRestore hook instead (but some client actions would need to be adapted)
+                if (controller.options && controller.options.on_reverse_breadcrumb) {
+                    const currentControllerID = this.currentStack[this.currentStack.length - 1];
+                    if (currentControllerID) {
+                        const currentController = this.controllers[currentControllerID];
+                        currentController.onReverseBreadcrumb = controller.options.on_reverse_breadcrumb;
+                    }
+                }
+
+                // always close dialogs when the current controller changes
+                // use case: have a controller that opens a dialog, and from this dialog, have a
+                // link/button to perform an action that will be stacked in the breadcrumbs
+                // (for instance, a many2one in readonly)
+                this.env.bus.trigger('close_dialogs');
+
+                // store the action into the sessionStorage so that it can be fully restored on F5
+                this.env.services.session_storage.setItem('current_action', action._originalAction);
+            } else {
+                this.currentDialogController = newDialog.controller;
             }
+            this.currentStack = nextStack;
             this._cleanActions();
             if (this.legacyInitState) {
                 this.legacyLoaded(this.legacyInitState);
                 this.legacyInitState = null;
             }
-            // store the action into the sessionStorage so that it can be fully restored on F5
-            this.env.services.session_storage.setItem('current_action', action._originalAction);
+
+            // FIXME: for lazy loaded controllers... we must find a better solution
+            if (cb) {
+                cb();
+            }
         };
+
+        const fullscreen = nextStack.find(controllerID => {
+            const controller = this.controllers[controllerID];
+            return this.actions[controller.actionID].target === 'fullscreen';
+        });
         const payload = {
             main: newMain,
             dialog: newDialog,
+            fullscreen: fullscreen,
             menuID: newMenuID,
             onSuccess: onSuccess,
-        }
+        };
         this.trigger('update', payload);
     }
     /**

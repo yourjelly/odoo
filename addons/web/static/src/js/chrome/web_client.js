@@ -2,7 +2,7 @@ odoo.define('web.WebClient', function (require) {
 "use strict";
 
 const ActionManager = require('web.ActionManager');
-const Action = require('web.Action');
+const { Action, DialogAction } = require('web.Action');
 const Menu = require('web.Menu');
 const OwlDialog = require('web.OwlDialog');
 
@@ -76,6 +76,11 @@ class WebClient extends Component {
         }, false);
         super.mounted();
         this._wcUpdated();
+    }
+    willPatch() {
+        super.willPatch();
+        const scrollPosition = this._getScrollPosition();
+        this.actionManager.storeScrollPosition(scrollPosition);
     }
     patched() {
         super.patched();
@@ -194,23 +199,33 @@ class WebClient extends Component {
         this._setWindowTitle(fullTitle);
     }
     _wcUpdated() {
-        if (this.renderingInfo && this.renderingInfo.main) {
-            const controller = this.currentControllerComponent.comp;
-            this.renderingInfo.onSuccess(controller); // FIXME: onSuccess not called if no background controller
-            const state = controller.getState();
-            state.action = this.renderingInfo.main.action.id;
+        if (this.renderingInfo) {
+            let mainComponent;
+            let state = {};
+            if (this.renderingInfo.main) {
+                mainComponent = this.currentControllerComponent.comp;
+                Object.assign(state, mainComponent.getState());
+                state.action = this.renderingInfo.main.action.id;
+                if (!('title' in state)) {
+                    state.title = mainComponent.title;
+                }
+                const scrollPosition = this.renderingInfo.main.controller.scrollPosition;
+                if (scrollPosition) {
+                    this._scrollTo(scrollPosition);
+                }
+            }
+            if (this.renderingInfo.onSuccess) {
+                this.renderingInfo.onSuccess(mainComponent); // FIXME: onSuccess not called if no background controller
+            }
             if (this.renderingInfo.menuID) {
                 state.menu_id = this.renderingInfo.menuID;
-            }
-            if (!('title' in state)) {
-                state.title = controller.title;
             }
             if (!this.renderingInfo.dialog) {
                 this._updateState(state);
             }
         }
         this.renderingInfo = null;
-    }
+       }
     _computeTitle() {
         const parts = Object.keys(this.titleParts).sort();
         let tmp = "";
@@ -222,11 +237,44 @@ class WebClient extends Component {
         }
         return tmp;
     }
+    /**
+     * Returns the left and top scroll positions of the main scrolling area
+     * (i.e. the '.o_content' div in desktop).
+     *
+     * @private
+     * @returns {Object} with keys left and top
+     */
+    _getScrollPosition() {
+        var scrollingEl = this.el.getElementsByClassName('o_content')[0];
+        return {
+            left: scrollingEl ? scrollingEl.scrollLeft : 0,
+            top: scrollingEl ? scrollingEl.scrollTop : 0,
+        };
+    }
     _setWindowTitle(title) {
         document.title = title;
     }
     _getWindowTitle() {
         return document.title;
+    }
+    _scrollTo(scrollPosition) {
+        const scrollingEl = this.el.getElementsByClassName('o_content')[0];
+        if (!scrollingEl) {
+            return;
+        }
+        // TODO: handle scrollTo events ( + scrolling to a selector)
+        // let offset = {
+        //     top: scrollPosition.top,
+        //     left: scrollPosition.left || 0,
+        // };
+        // if (!offset.top) {
+        //     offset = dom.getPosition(document.querySelector(ev.data.selector));
+        //     // Substract the position of the scrolling element
+        //     offset.top -= dom.getPosition(scrollingEl).top;
+        // }
+
+        scrollingEl.scrollTop = scrollPosition.top || 0;
+        scrollingEl.scrollLeft = scrollPosition.left || 0;
     }
 
     //--------------------------------------------------------------------------
@@ -271,7 +319,7 @@ class WebClient extends Component {
         this._updateState(ev.detail.state);
     }
 }
-WebClient.components = { Action, Menu, OwlDialog};
+WebClient.components = { Action, Menu, DialogAction };
 WebClient.template = 'web.WebClient';
 
 return WebClient;

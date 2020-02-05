@@ -260,8 +260,8 @@ QUnit.module('ActionManager', {
     QUnit.test('no memory leaks when executing an action while switching view', async function (assert) {
         assert.expect(1);
 
-        var def;
-        var delta = 0;
+        let def;
+        let delta = 0;
         testUtils.mock.patch(Widget, {
             init: function () {
                 delta += 1;
@@ -279,16 +279,16 @@ QUnit.module('ActionManager', {
             data: this.data,
             menus: this.menus,
             mockRPC: function (route, args) {
-                var result = this._super.apply(this, arguments);
+                const result = this._super.apply(this, arguments);
                 if (args.method === 'read') {
-                    return Promise.resolve(def).then(_.constant(result));
+                    return Promise.resolve(def).then(() => result);
                 }
                 return result;
             },
         });
 
         await doAction(4);
-        var n = delta;
+        const n = delta;
 
         await doAction(3, {clear_breadcrumbs: true});
 
@@ -303,8 +303,7 @@ QUnit.module('ActionManager', {
         def.resolve();
         await nextTick();
 
-        assert.strictEqual(n, delta,
-            "all widgets of action 3 should have been destroyed");
+        assert.strictEqual(delta, n, "all widgets of action 3 should have been destroyed");
 
         webClient.destroy();
         testUtils.mock.unpatch(Widget);
@@ -476,10 +475,10 @@ QUnit.module('ActionManager', {
 
         await doAction(4);
         await doAction(3);
-        webClient.trigger_up('history_back');
-
+        webClient.env.bus.trigger('history-back');
         await nextTick();
-        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').length, 1,
+
+        assert.containsOnce(webClient, '.o_control_panel .breadcrumb-item',
             "there should be one controller in the breadcrumbs");
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
             "breadcrumbs should display the display_name of the action");
@@ -488,22 +487,21 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('stores and restores scroll position', async function (assert) {
-        assert.expect(7);
+        assert.expect(5);
 
-        var left;
-        var top;
+        var left = 0;
+        var top = 0;
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            intercepts: {
-                getScrollPosition: function (ev) {
-                    assert.step('getScrollPosition');
-                    ev.data.callback({left: left, top: top});
+            webClient: {
+                _getScrollPosition: function () {
+                    return { top, left };
                 },
-                scrollTo: function (ev) {
-                    assert.step('scrollTo left ' + ev.data.left + ', top ' + ev.data.top);
+                _scrollTo: function (to) {
+                    assert.step('scrollTo left ' + to.left + ', top ' + to.top);
                 },
             },
         });
@@ -525,9 +523,7 @@ QUnit.module('ActionManager', {
         assert.verifySteps([
             'execute action 3',
             'execute action 4',
-            'getScrollPosition', // of action 3, before leaving it
             'go back to action 3',
-            'getScrollPosition', // of action 4, before leaving it
             'scrollTo left 50, top 100', // restore scroll position of action 3
         ]);
 
@@ -614,7 +610,6 @@ QUnit.module('ActionManager', {
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            debug: true,
             webClient: {
                 _updateState(state) {
                     var descr = stateDescriptions.shift();
@@ -731,10 +726,11 @@ QUnit.module('ActionManager', {
                 _getWindowHash() {
                     return '#res_model=partner'; // the valid key for the model is 'model', not 'res_model'
                 }
-            }
+            },
         });
 
-        assert.strictEqual($(webClient.el).text(), '', "should display nothing");
+        assert.strictEqual(webClient.el.querySelector('.o_action_manager').textContent, '',
+            "should display nothing");
         assert.verifySteps([]);
 
         webClient.destroy();
@@ -986,9 +982,10 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('lazy loaded multi record view with failing mono record one', async function (assert) {
-        assert.expect(4);
+    QUnit.test('lazy loaded multi record view with failing mono record one', async function (assert) {
+        assert.expect(3);
 
+        let hash = '';
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
@@ -1002,20 +999,14 @@ QUnit.module('ActionManager', {
             },
             webClient: {
                 _getWindowHash() {
-                    return '#action=3&id=2&view_type=form';
+                    return hash;
                 }
             }
         });
-/*
-        await webClient.loadState({
-            action: 3,
-            id: 2,
-            view_type: 'form',
-        }).then(function () {
-            assert.ok(false, 'should not resolve the deferred');
-        }).catch(function () {
-            assert.ok(true, 'should reject the deferred');
-        });*/
+
+        hash = '#action=3&id=2&view_type=form';
+        window.dispatchEvent(new Event('hashchange'));
+        await nextTick();
 
         assert.containsNone(webClient, '.o_form_view');
         assert.containsNone(webClient, '.o_list_view');
@@ -1144,31 +1135,38 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.test('should not push a loaded state', async function (assert) {
-        assert.expect(3);
+    QUnit.test('should not load twice a loaded state', async function (assert) {
+        // This test is historical, and has been roughly re-written when the
+        // webclient/action manager have been converted to in Owl. It's purpose was
+        // to ensure that, when loading a state from the url, that state wasn't
+        // pushed back to the url when loaded, which would re-trigger a loading
+        // of that exact same state, again, and again...
+        assert.expect(6);
 
-        // Really does this apply to us ?
-        let newHash = '';
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                return this._super(...arguments);
+            },
             webClient: {
-                _setWindowHash() {
-                    assert.step('push_state');
-                },
                 _getWindowHash() {
                     return '#action=3';
-                }
+                },
             },
         });
-        assert.verifySteps([], "should not push the loaded state");
+        assert.verifySteps([
+            '/web/action/load',
+            'load_views',
+            '/web/dataset/search_read'
+        ], "should load the action only once");
 
         await testUtils.dom.click($(webClient.el).find('tr.o_data_row:first'));
 
-        assert.verifySteps(['push_state'],
-            "should push the state of it changes afterwards");
+        assert.verifySteps(['read'], "should correctly load the subsequent view");
 
         webClient.destroy();
     });
@@ -1392,7 +1390,6 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('handle switching view and switching back on slow network', async function (assert) {
-        // FIXME: can't reload controller by clicking on view switcher anymore
         assert.expect(8);
 
         var def = testUtils.makeTestPromise();
@@ -1951,12 +1948,12 @@ QUnit.module('ActionManager', {
             }
         });
         const webClient = await createWebClient({
-            intercepts: {
-                push_state: function (ev) {
-                    const expectedState = {action: 'HelloWorldTest', foo: 'baz', title: 'a title'};
-                    assert.deepEqual(ev.data.state, expectedState,
-                        "should include a complete state description, including custom state");
-                    assert.step('push state');
+            webClient: {
+                _setWindowHash(hash) {
+                    assert.step(`hash: ${hash}`);
+                },
+                _setWindowTitle(title) {
+                    assert.step(`title: ${title}`);
                 },
             },
         });
@@ -1964,8 +1961,10 @@ QUnit.module('ActionManager', {
 
         await doAction('HelloWorldTest');
 
-        assert.verifySteps(['push state']);
-
+        assert.verifySteps([
+            "hash: #foo=baz&action=HelloWorldTest",
+            "title: a title",
+        ]);
         webClient.destroy();
         delete core.action_registry.map.HelloWorldTest;
     });
@@ -2096,8 +2095,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('handle server actions returning false', async function (assert) {
-        // FIXME: actions in target 'new' not supported yet
+    QUnit.test('handle server actions returning false', async function (assert) {
         assert.expect(9);
 
         const webClient = await createWebClient({
@@ -3789,7 +3787,6 @@ QUnit.module('ActionManager', {
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            debug: true,
             webClient: {
                 _getWindowHash() {
                     return `#action=3&id=2&view_type=form`;
@@ -3900,11 +3897,11 @@ QUnit.module('ActionManager', {
         });
         await doAction(5);
 
-        assert.strictEqual($('.o_technical_modal .o_form_view').length, 1,
+        assert.containsOnce(document.body, '.o_technical_modal .o_form_view',
             "should have rendered a form view in a modal");
-        assert.hasClass($('.o_technical_modal .modal-body'),'o_act_window',
+        assert.hasClass($('.o_technical_modal .modal-content'), 'o_act_window',
             "dialog main element should have classname 'o_act_window'");
-        assert.hasClass($('.o_technical_modal .o_form_view'),'o_form_editable',
+        assert.hasClass($('.o_technical_modal .o_form_view'), 'o_form_editable',
             "form view should be in edit mode");
 
         assert.verifySteps([
@@ -3971,13 +3968,11 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('on_attach_callback is called for actions in target="new"', async function (assert) {
-        assert.expect(4);
+        assert.expect(3);
 
         var ClientAction = AbstractAction.extend({
             on_attach_callback: function () {
                 assert.step('on_attach_callback');
-                assert.ok(webClient.currentDialogController,
-                    "the currentDialogController should have been set already");
             },
             start: function () {
                 this.$el.addClass('o_test');
@@ -3997,7 +3992,7 @@ QUnit.module('ActionManager', {
             type: 'ir.actions.client',
         });
 
-        assert.strictEqual($('.modal .o_test').length, 1,
+        assert.containsOnce(document.body, '.modal .o_test',
             "should have rendered the client action in a dialog");
         assert.verifySteps(['on_attach_callback']);
 
@@ -4049,11 +4044,6 @@ QUnit.module('ActionManager', {
                 assert.step(args.method || route);
                 return this._super.apply(this, arguments);
             },
-            intercepts: {
-                toggle_fullscreen: function () {
-                    assert.step('toggle_fullscreen');
-                },
-            },
         });
         await doAction(1);
 
@@ -4061,11 +4051,11 @@ QUnit.module('ActionManager', {
             "should have rendered a control panel");
         assert.containsOnce(webClient, '.o_kanban_view',
             "should have rendered a kanban view");
+        assert.hasClass(webClient.el, 'o_fullscreen');
         assert.verifySteps([
             '/web/action/load',
             'load_views',
             '/web/dataset/search_read',
-            'toggle_fullscreen',
         ]);
 
         webClient.destroy();
@@ -4075,43 +4065,26 @@ QUnit.module('ActionManager', {
         assert.expect(3);
 
         this.actions[0].target = 'fullscreen';
-        this.archs['partner,false,form'] = '<form>' +
-                                            '<button name="1" type="action" class="oe_stat_button" />' +
-                                        '</form>';
+        this.archs['partner,false,form'] = `
+            <form>
+                <button name="1" type="action" class="oe_stat_button"/>
+            </form>`;
 
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            intercepts: {
-                toggle_fullscreen: function (ev) {
-                    var fullscreen = ev.data.fullscreen;
-
-                    switch (toggleFullscreenCalls) {
-                        case 0:
-                            assert.strictEqual(fullscreen, false);
-                            break;
-                        case 1:
-                            assert.strictEqual(fullscreen, true);
-                            break;
-                        case 2:
-                            assert.strictEqual(fullscreen, false);
-                            break;
-                    }
-                },
-            },
-
         });
 
-        var toggleFullscreenCalls = 0;
         await doAction(6);
+        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
 
-        toggleFullscreenCalls = 1;
         await testUtils.dom.click($(webClient.el).find('button[name=1]'));
+        assert.hasClass(webClient.el, 'o_fullscreen');
 
-        toggleFullscreenCalls = 2;
         await testUtils.dom.click($(webClient.el).find('.breadcrumb li a:first'));
+        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
 
         webClient.destroy();
     });
@@ -4120,28 +4093,26 @@ QUnit.module('ActionManager', {
         assert.expect(3);
 
         this.actions[5].target = 'fullscreen';
-        this.archs['partner,false,form'] = '<form>' +
-                                            '<button name="1" type="action" class="oe_stat_button" />' +
-                                        '</form>';
+        this.archs['partner,false,form'] = `
+            <form>
+                <button name="1" type="action" class="oe_stat_button"/>
+            </form>`;
 
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            intercepts: {
-                toggle_fullscreen: function (ev) {
-                    var fullscreen = ev.data.fullscreen;
-                    assert.strictEqual(fullscreen, true);
-                },
-            },
         });
 
         await doAction(6);
+        assert.hasClass(webClient.el, 'o_fullscreen');
 
         await testUtils.dom.click($(webClient.el).find('button[name=1]'));
+        assert.hasClass(webClient.el, 'o_fullscreen');
 
         await testUtils.dom.click($(webClient.el).find('.breadcrumb li a:first'));
+        assert.hasClass(webClient.el, 'o_fullscreen');
 
         webClient.destroy();
     });
@@ -4274,7 +4245,8 @@ QUnit.module('ActionManager', {
             },
         });
 
-        webClient.trigger('history_back');
+        webClient.env.bus.trigger('history-back');
+        await testUtils.nextTick();
         assert.verifySteps(['on_close'], "should have called the on_close handler");
 
         webClient.destroy();
