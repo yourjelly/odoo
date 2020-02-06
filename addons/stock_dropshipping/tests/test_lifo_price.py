@@ -9,19 +9,49 @@ from odoo.tests import common, Form
 
 class TestLifoPrice(StockAccountTestCommon):
 
+    def setUp(self):
+        super(TestLifoPrice, self).setUp()
+        self.main_company = self.env.ref('base.main_company')
+        Users = self.env['res.users'].with_context(no_reset_password=True)
+
+        self.user_stock_user = Users.create({
+            'name': 'Pauline Poivraisselle',
+            'login': 'pauline',
+            'email': 'p.p@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_user').id])]})
+        self.user_stock_manager = Users.create({
+            'name': 'Julie Tablier',
+            'login': 'julie',
+            'email': 'j.j@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_manager').id])]})
+        self.user_salesmanager = Users.create({
+            'name': 'Andrew Manager',
+            'login': 'manager',
+            'email': 'a.m@example.com',
+            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_manager').id])]})
+        self.users_purchase_manager = Users.create({
+            'company_id': self.main_company.id,
+            'name': "Purchase Manager",
+            'login': "pm",
+            'email': "purchasemanager@yourcompany.com",
+            'groups_id': [(6, 0, [self.env.ref('purchase.group_purchase_manager').id])]})
+        self.env = self.env(user=self.user_stock_user)
+
     def test_lifoprice(self):
 
         # Set product category removal strategy as LIFO
-        product_category_001 = self.env['product.category'].create({
+        product_category_001 = self.env['product.category'].with_user(self.user_stock_manager).create({
             'name': 'Lifo Category',
             'removal_strategy_id': self.env.ref('stock.removal_lifo').id,
             'property_valuation': 'real_time',
             'property_cost_method': 'fifo',
         })
-        res_partner_3 = self.env['res.partner'].create({'name': 'My Test Partner'})
+        res_partner_3 = self.env['res.partner'].with_user(self.user_stock_manager).create({'name': 'My Test Partner'})
 
         # Set a product as using lifo price
-        product_form = Form(self.env['product.product'])
+        product_form = Form(self.env['product.product'].with_user(self.user_stock_manager))
         product_form.default_code = 'LIFO'
         product_form.name = 'LIFO Ice Cream'
         product_form.type = 'product'
@@ -41,7 +71,7 @@ class TestLifoPrice(StockAccountTestCommon):
         product_lifo_icecream.standard_price = 70.0
 
         # I create a draft Purchase Order for first in move for 10 pieces at 60 euro
-        order_form = Form(self.env['purchase.order'])
+        order_form = Form(self.env['purchase.order'].with_user(self.users_purchase_manager))
         order_form.partner_id = res_partner_3
         with order_form.order_line.new() as line:
             line.product_id = product_lifo_icecream
@@ -50,7 +80,7 @@ class TestLifoPrice(StockAccountTestCommon):
         purchase_order_lifo1 = order_form.save()
 
         # I create a draft Purchase Order for second shipment for 30 pieces at 80 euro
-        order2_form = Form(self.env['purchase.order'])
+        order2_form = Form(self.env['purchase.order'].with_user(self.users_purchase_manager))
         order2_form.partner_id = res_partner_3
         with order2_form.order_line.new() as line:
             line.product_id = product_lifo_icecream
@@ -92,4 +122,4 @@ class TestLifoPrice(StockAccountTestCommon):
         outgoing_lifo_shipment.button_validate()
 
         # Check if the move value correctly reflects the fifo costing method
-        self.assertEqual(outgoing_lifo_shipment.move_lines.stock_valuation_layer_ids.value, -1400.0, 'Stock move value should have been 1400 euro')
+        self.assertEqual(outgoing_lifo_shipment.with_user(self.user_stock_manager).move_lines.stock_valuation_layer_ids.value, -1400.0, 'Stock move value should have been 1400 euro')

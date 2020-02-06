@@ -6,24 +6,54 @@ from odoo.tools import mute_logger
 
 
 class TestDropship(common.TransactionCase):
+    def setUp(self):
+        super(TestDropship, self).setUp()
+        self.main_company = self.env.ref('base.main_company')
+        Users = self.env['res.users'].with_context(no_reset_password=True)
+
+        self.user_stock_user = Users.create({
+            'name': 'Pauline Poivraisselle',
+            'login': 'pauline',
+            'email': 'p.p@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_user').id])]})
+        self.user_stock_manager = Users.create({
+            'name': 'Julie Tablier',
+            'login': 'julie',
+            'email': 'j.j@example.com',
+            'notification_type': 'inbox',
+            'groups_id': [(6, 0, [self.env.ref('stock.group_stock_manager').id])]})
+        self.user_salesmanager = Users.create({
+            'name': 'Andrew Manager',
+            'login': 'manager',
+            'email': 'a.m@example.com',
+            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_manager').id])]})
+        self.users_purchase_manager = Users.create({
+            'company_id': self.main_company.id,
+            'name': "Purchase Manager",
+            'login': "pm",
+            'email': "purchasemanager@yourcompany.com",
+            'groups_id': [(6, 0, [self.env.ref('purchase.group_purchase_manager').id])]})
+        self.env = self.env(user=self.user_stock_user)
+
     def test_change_qty(self):
         # enable the dropship and MTO route on the product
-        prod = self.env['product.product'].create({'name': 'Large Desk'})
+        prod = self.env['product.product'].with_user(self.user_stock_manager).create({'name': 'Large Desk'})
         dropshipping_route = self.env.ref('stock_dropshipping.route_drop_shipping')
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         prod.write({'route_ids': [(6, 0, [dropshipping_route.id, mto_route.id])]})
 
         # add a vendor
-        vendor1 = self.env['res.partner'].create({'name': 'vendor1'})
-        seller1 = self.env['product.supplierinfo'].create({
+        vendor1 = self.env['res.partner'].with_user(self.user_stock_manager).create({'name': 'vendor1'})
+        seller1 = self.env['product.supplierinfo'].with_user(self.user_stock_manager).create({
             'name': vendor1.id,
             'price': 8,
         })
         prod.write({'seller_ids': [(6, 0, [seller1.id])]})
 
         # sell one unit of this product
-        cust = self.env['res.partner'].create({'name': 'customer1'})
-        so = self.env['sale.order'].create({
+        cust = self.env['res.partner'].with_user(self.user_stock_manager).create({'name': 'customer1'})
+        so = self.env['sale.order'].with_user(self.user_salesmanager).create({
             'partner_id': cust.id,
             'partner_invoice_id': cust.id,
             'partner_shipping_id': cust.id,
@@ -45,11 +75,11 @@ class TestDropship(common.TransactionCase):
         self.assertAlmostEqual(po_line.product_qty, 1.00)
 
         # Update qty on SO and check PO
-        so.write({'order_line': [[1, so.order_line.id, {'product_uom_qty': 2.00}]]})
+        so.sudo().write({'order_line': [[1, so.order_line.id, {'product_uom_qty': 2.00}]]})
         self.assertAlmostEqual(po_line.product_qty, 2.00)
 
         # Create a new so line
-        sol2 = self.env['sale.order.line'].create({
+        sol2 = self.env['sale.order.line'].sudo().create({
             'order_id': so.id,
             'name': prod.name,
             'product_id': prod.id,
@@ -67,10 +97,10 @@ class TestDropship(common.TransactionCase):
     def test_00_dropship(self):
 
         # Create a vendor
-        supplier_dropship = self.env['res.partner'].create({'name': 'Vendor of Dropshipping test'})
+        supplier_dropship = self.env['res.partner'].with_user(self.user_stock_manager).create({'name': 'Vendor of Dropshipping test'})
 
         # Create new product without any routes
-        drop_shop_product = self.env['product.product'].create({
+        drop_shop_product = self.env['product.product'].with_user(self.user_stock_manager).create({
             'name': "Pen drive",
             'type': "product",
             'categ_id': self.env.ref('product.product_category_1').id,
@@ -86,8 +116,8 @@ class TestDropship(common.TransactionCase):
         })
 
         # Create a sales order with a line of 200 PCE incoming shipment, with route_id drop shipping
-        so_form = Form(self.env['sale.order'])
-        so_form.partner_id = self.env['res.partner'].create({'name': 'My Test Partner'})
+        so_form = Form(self.env['sale.order'].with_user(self.user_salesmanager))
+        so_form.partner_id = self.env['res.partner'].with_user(self.user_stock_manager).create({'name': 'My Test Partner'})
         so_form.payment_term_id = self.env.ref('account.account_payment_term_end_following_month')
         with mute_logger('odoo.tests.common.onchange'):
             # otherwise complains that there's not enough inventory and
@@ -108,7 +138,7 @@ class TestDropship(common.TransactionCase):
         # Check a quotation was created to a certain vendor and confirm so it becomes a confirmed purchase order
         purchase = self.env['purchase.order'].search([('partner_id', '=', supplier_dropship.id)])
         self.assertTrue(purchase, "an RFQ should have been created by the scheduler")
-        purchase.button_confirm()
+        purchase.with_user(self.users_purchase_manager).button_confirm()
         self.assertEqual(purchase.state, 'purchase', 'Purchase order should be in the approved state')
         self.assertEqual(len(purchase.ids), 1, 'There should be one picking')
 
