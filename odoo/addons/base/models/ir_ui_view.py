@@ -842,7 +842,8 @@ actual arch.
         """ Compute and set on node access rights based on view type. Specific
         views can add additional specific rights like creating columns for
         many2one-based grouping views. """
-        Model = self.env[model]
+        # testing ACL as real user
+        Model = self.env[model].sudo(False)
         is_base_model = self.env.context.get('base_model_name', model) == model
 
         if node.tag in ('kanban', 'tree', 'form', 'activity'):
@@ -949,7 +950,7 @@ actual arch.
                         }
                 attrs['views'] = views
                 if field.comodel_name in self.env:
-                    Comodel = self.env[field.comodel_name]
+                    Comodel = self.env[field.comodel_name].sudo(False)
                     node_info['attr_model'] = Comodel
                     if field.type in ('many2one', 'many2many'):
                         can_create = Comodel.check_access_rights('create', raise_exception=False)
@@ -1483,7 +1484,7 @@ actual arch.
             return template
         if '.' not in template:
             raise ValueError('Invalid template id: %r' % template)
-        view = self.search([('key', '=', template)], limit=1)
+        view = self.sudo().search([('key', '=', template)], limit=1)
         return view and view.id or self.env['ir.model.data'].xmlid_to_res_id(template, raise_if_not_found=True)
 
     def clear_cache(self):
@@ -1605,7 +1606,7 @@ actual arch.
             time=time,
             datetime=datetime,
             relativedelta=relativedelta,
-            xmlid=self.key,
+            xmlid=self.sudo().key,
             viewid=self.id,
             to_text=pycompat.to_text,
             image_data_uri=image_data_uri,

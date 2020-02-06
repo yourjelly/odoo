@@ -49,7 +49,7 @@ class QWeb(models.AbstractModel):
 
     def _compile_directive_snippet(self, el, options):
         el.set('t-call', el.attrib.pop('t-snippet'))
-        View = self.env['ir.ui.view']
+        View = self.env['ir.ui.view'].sudo()
         view_id = View.get_view_id(el.attrib.get('t-call'))
         name = View.browse(view_id).name
         thumbnail = el.attrib.pop('t-thumbnail', "oe-thumbnail")

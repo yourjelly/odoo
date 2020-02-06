@@ -647,7 +647,7 @@ class Website(models.Model):
             :param raise_if_not_found: should the method raise an error if no view found
             :return: The view record or empty recordset
         '''
-        View = self.env['ir.ui.view']
+        View = self.env['ir.ui.view'].sudo()
         view = View
         if isinstance(view_id, str):
             if 'website_id' in self._context:
