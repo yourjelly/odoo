@@ -439,6 +439,8 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
             migrations.migrate_module(package, 'end')
 
         # STEP 3.6: apply constraints in case of an upgrade
+        if registry._constraint_queue:
+            _logger.info("Applying remaining constraints")
         while registry._constraint_queue:
             func = registry._constraint_queue.popleft()
             func()

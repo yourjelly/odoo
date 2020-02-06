@@ -297,12 +297,7 @@ class Registry(Mapping):
         self._post_init_queue.append(partial(func, *args, **kwargs))
 
     def register_constraint(self, func, *args, **kwargs):
-        """ Register a constraint function to call at the end of :meth:`~.init_models`. """
         self._constraint_queue.appendleft(partial(func, *args, **kwargs))
-
-    def register_foreign_key(self, func, *args, **kwargs):
-        """ Register a foreign key function to call at the end of :meth:`~.init_models`. """
-        self._constraint_queue.append(partial(func, *args, **kwargs))
 
     def init_models(self, cr, model_names, context, *, mode='init'):
         """ Initialize a list of models (given by their name). Call methods
@@ -333,10 +328,6 @@ class Registry(Mapping):
             func()
 
         env['base'].flush()
-
-        while mode == 'init' and self._constraint_queue:
-            func = self._constraint_queue.popleft()
-            func()
 
         # make sure all tables are present
         self.check_tables_exist(cr)

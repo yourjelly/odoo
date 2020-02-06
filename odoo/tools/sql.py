@@ -104,17 +104,19 @@ def convert_column(cr, tablename, columnname, columntype):
         cr.execute(query.format(tablename, columnname, columntype))
     _schema.debug("Table %r: column %r changed to type %s", tablename, columnname, columntype)
 
-def set_not_null(cr, tablename, columnname):
+def set_not_null(cr, tablename, columnname, log_error=False):
     """ Add a NOT NULL constraint on the given column. """
     query = 'ALTER TABLE "{}" ALTER COLUMN "{}" SET NOT NULL'.format(tablename, columnname)
     try:
         with cr.savepoint(flush=False):
-            cr.execute(query)
+            cr.execute(query, log_exceptions=log_error and None)
             _schema.debug("Table %r: column %r: added constraint NOT NULL", tablename, columnname)
+        return True
     except Exception:
         msg = "Table %r: unable to set NOT NULL on column %r!\n" \
               "If you want to have it, you should update the records and execute manually:\n%s"
-        _schema.warning(msg, tablename, columnname, query, exc_info=True)
+        level = logging.ERROR if log_error else logging.INFO
+        _schema.log(level, msg, tablename, columnname, query, exc_info=True)
 
 def drop_not_null(cr, tablename, columnname):
     """ Drop the NOT NULL constraint on the given column. """
@@ -132,28 +134,32 @@ def constraint_definition(cr, tablename, constraintname):
     cr.execute(query, (tablename, constraintname))
     return cr.fetchone()[0] if cr.rowcount else None
 
-def add_constraint(cr, tablename, constraintname, definition):
+def add_constraint(cr, tablename, constraintname, definition, log_error=False):
     """ Add a constraint on the given table. """
     query1 = 'ALTER TABLE "{}" ADD CONSTRAINT "{}" {}'.format(tablename, constraintname, definition)
     query2 = 'COMMENT ON CONSTRAINT "{}" ON "{}" IS %s'.format(constraintname, tablename)
     try:
         with cr.savepoint(flush=False):
-            cr.execute(query1)
-            cr.execute(query2, (definition,))
+            cr.execute(query1, log_exceptions=log_error and None)
+            cr.execute(query2, (definition,), log_exceptions=log_error and None)
             _schema.debug("Table %r: added constraint %r as %s", tablename, constraintname, definition)
+        return True
     except Exception:
         msg = "Table %r: unable to add constraint %r!\n" \
               "If you want to have it, you should update the records and execute manually:\n%s"
-        _schema.warning(msg, tablename, constraintname, query1, exc_info=True)
+        level = logging.WARNING if log_error else logging.INFO
+        _schema.log(level, msg, tablename, constraintname, query1, exc_info=True)
 
-def drop_constraint(cr, tablename, constraintname):
+def drop_constraint(cr, tablename, constraintname, log_error=False):
     """ drop the given constraint. """
     try:
         with cr.savepoint(flush=False):
-            cr.execute('ALTER TABLE "{}" DROP CONSTRAINT "{}"'.format(tablename, constraintname))
+            cr.execute('ALTER TABLE "{}" DROP CONSTRAINT "{}"'.format(tablename, constraintname), log_exceptions=log_error and None)
             _schema.debug("Table %r: dropped constraint %r", tablename, constraintname)
+        return True
     except Exception:
-        _schema.warning("Table %r: unable to drop constraint %r!", tablename, constraintname)
+        level = logging.WARNING if log_error else logging.INFO
+        _schema.log(level, "Table %r: unable to drop constraint %r!", tablename, constraintname)
 
 def add_foreign_key(cr, tablename1, columnname1, tablename2, columnname2, ondelete):
     """ Create the given foreign key, and return ``True``. """

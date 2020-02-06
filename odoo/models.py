@@ -2515,22 +2515,25 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         cr = self._cr
         foreign_key_re = re.compile(r'\s*foreign\s+key\b.*', re.I)
 
-        def process(key, definition):
+        def process(key, definition, log_error=True):
             conname = '%s_%s' % (self._table, key)
-            current_definition = tools.constraint_definition(cr, self._table, conname)
+            current_definition = tools.constraint_definition(cr, self._table, conname) 
             if not current_definition:
                 # constraint does not exists
-                tools.add_constraint(cr, self._table, conname, definition)
+                return tools.add_constraint(cr, self._table, conname, definition, log_error=log_error)
             elif current_definition != definition:
                 # constraint exists but its definition may have changed
-                tools.drop_constraint(cr, self._table, conname)
-                tools.add_constraint(cr, self._table, conname, definition)
+                if not tools.drop_constraint(cr, self._table, conname, log_error=log_error):
+                    return False
+                return tools.add_constraint(cr, self._table, conname, definition, log_error=log_error)
+            return True
 
         for (key, definition, _) in self._sql_constraints:
             if foreign_key_re.match(definition):
-                self.pool.register_foreign_key(process, key, definition)
+                self.pool.post_init(process, key, definition)
             else:
-                self.pool.register_constraint(process, key, definition)
+                if not process(key, definition, log_error=False):
+                    self.pool.register_constraint(process, key, definition)
 
     def _execute_sql(self):
         """ Execute the SQL code from the _sql attribute (if any)."""
