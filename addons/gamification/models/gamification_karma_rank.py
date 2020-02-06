@@ -25,8 +25,16 @@ class KarmaRank(models.Model):
     @api.model_create_multi
     def create(self, values_list):
         res = super(KarmaRank, self).create(values_list)
-        users = self.env['res.users'].sudo().search([('karma', '>', 0)])
-        users._recompute_rank()
+        if res:
+            # VFE dunno when it happens to call create without any value in the list
+            # but in this case, the mapped returns an empty list and min crashes.
+            min_karma_min = min(res.mapped('karma_min'))
+            max_karma_min = max(res.mapped('karma_min'))
+            users = self.env['res.users'].sudo().search([
+                ('karma', '>', min_karma_min),
+                ('rank_id.karma_min', '<', max_karma_min),
+            ])
+            users._recompute_rank()
         return res
 
     def write(self, vals):
