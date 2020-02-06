@@ -717,7 +717,11 @@ class Field(MetaField('DummyField', (object,), {})):
                 _logger.warning("Field %s depends on itself; please fix its decorator @api.depends().", self)
             model, path = model0, path0
             for fname in dotnames.split('.'):
-                field = model._fields[fname]
+                try:
+                    field = model._fields[fname]
+                except KeyError as e:
+                    _logger.exception("Field %(field)s has invalid dependencies: %(deps)s" % {'field': self, 'deps': dotnames})
+                    raise e
                 result.append((model, field, path))
                 model = model0.env.get(field.comodel_name)
                 path = None if path is None else path + [fname]
