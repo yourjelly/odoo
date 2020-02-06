@@ -30,7 +30,8 @@ class StockMoveLine(models.Model):
     product_qty = fields.Float(
         'Real Reserved Quantity', digits=0,
         compute='_compute_product_qty', inverse='_set_product_qty', store=True)
-    product_uom_qty = fields.Float('Reserved', default=0.0, digits='Product Unit of Measure', required=True)
+    product_uom_qty = fields.Float('Reserved', default=0.0, digits='Product Unit of Measure', required=True, copy=False)  # FIXME: to 11?
+    demand_qty = fields.Float('Demand', digits=0, readonly=True, copy=False)
     qty_done = fields.Float('Done', default=0.0, digits='Product Unit of Measure', copy=False)
     package_id = fields.Many2one(
         'stock.quant.package', 'Source Package', ondelete='restrict',
@@ -181,7 +182,7 @@ class StockMoveLine(models.Model):
                     new_move = self.env['stock.move'].create({
                         'name': _('New Move:') + product.display_name,
                         'product_id': product.id,
-                        'product_uom_qty': 'qty_done' in vals and vals['qty_done'] or 0,
+                        'product_uom_qty': vals.get('demand_qty') or vals.get('qty_done') or 0,
                         'product_uom': vals['product_uom_id'],
                         'location_id': 'location_id' in vals and vals['location_id'] or picking.location_id.id,
                         'location_dest_id': 'location_dest_id' in vals and vals['location_dest_id'] or picking.location_dest_id.id,
@@ -476,6 +477,7 @@ class StockMoveLine(models.Model):
         # Reset the reserved quantity as we just moved it to the destination location.
         (self - ml_to_delete).with_context(bypass_reservation_update=True).write({
             'product_uom_qty': 0.00,
+            'demand_qty': 0,
             'date': fields.Datetime.now(),
         })
 
@@ -498,14 +500,73 @@ class StockMoveLine(models.Model):
             })
             self.write({'lot_id': lot.id})
 
-    def _reservation_is_updatable(self, quantity, reserved_quant):
-        self.ensure_one()
-        if (self.product_id.tracking != 'serial' and
-                self.location_id.id == reserved_quant.location_id.id and
-                self.lot_id.id == reserved_quant.lot_id.id and
-                self.package_id.id == reserved_quant.package_id.id and
-                self.owner_id.id == reserved_quant.owner_id.id):
-            return True
+    def _update_reserved_quantity(self, quantity, location_id, lot_id, package_id, owner_id, uom_id=False, location_dest_id=False):
+        """Increase the `product_uom_qty` field of one of the `stock.move.line` records in `self`
+        according to some policies.
+
+        :return: whether a candiate was updated
+        :rtype: bool
+        """
+        tracking = self.product_id.tracking
+        if tracking == 'serial':
+            remaining_quantity = quantity
+        for move_line in self:
+            # previous condition
+            if (
+                tracking != 'serial' and
+                move_line.location_id.id == location_id.id and
+                move_line.lot_id.id == lot_id.id and
+                move_line.package_id.id == package_id.id and
+                move_line.owner_id.id == owner_id.id
+            ):
+                quantity_in_move_line_uom = self.product_id.uom_id._compute_quantity(
+                    quantity, move_line.product_uom_id, rounding_method='HALF-UP')
+                quantity_back_in_product_uon = move_line.product_uom_id._compute_quantity(
+                    quantity_in_move_line_uom, move_line.product_id.uom_id)
+                rounding = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+                if float_compare(quantity, quantity_back_in_product_uon, precision_digits=rounding):
+                    if not move_line.product_uom_qty or move_line._should_bypass_reservation(move_line.location_id):
+                        move_line\
+                            .with_context(bypass_reservation_update=True)\
+                            .product_uom_qty += quantity
+                        move_line.product_uom_id = move_line.product_id.uom_id
+                        return True
+                    return False
+                move_line\
+                    .with_context(bypass_reservation_update=True)\
+                    .product_uom_qty += quantity_in_move_line_uom
+                return True
+
+            # most of the time re-use unprocess/unreserved movelines created at action_confirm
+            rounding = move_line.product_uom_id.rounding
+            unprocessed = float_is_zero(move_line.qty_done, precision_rounding=rounding)
+            unreserved = float_is_zero(move_line.product_uom_qty, precision_rounding=rounding) or\
+                move_line._should_bypass_reservation(move_line.location_id)
+            if unprocessed and unreserved:
+#                if move_line.product_uom_id != move_line.product_id.uom_id:
+#                    move_line.product_uom_id 
+                move_line.location_id = location_id.id
+                move_line.lot_id = lot_id.id
+                move_line.package_id = package_id.id
+                move_line.owner_id = owner_id.id
+                if tracking == 'serial':
+                    move_line.product_uom_id = move_line.product_id.uom_id
+                    move_line\
+                        .with_context(bypass_reservation_update=True)\
+                        .product_uom_qty = 1
+                    remaining_quantity -= 1  # FIXME; so much crap in this, to refactore and return the qty not set
+                    if float_is_zero(remaining_quantity, precision_rounding=move_line.product_id.uom_id.rounding):
+                        return True
+                else:
+                    move_line.product_uom_id = move_line.product_id.uom_id
+#                    quantity_in_move_line_uom = move_line.product_id.uom_id._compute_quantity(
+#                        quantity, move_line.product_uom_id, rounding_method='HALF-UP')
+#                    move_line.product_uom_qty += quantity_in_move_line_uom
+                    move_line\
+                        .with_context(bypass_reservation_update=True)\
+                        .product_uom_qty += quantity
+                    return True
+            # TODO: unreserved but processed move lines
         return False
 
     def _log_message(self, record, move, template, vals):
@@ -587,3 +648,83 @@ class StockMoveLine(models.Model):
     def _should_bypass_reservation(self, location):
         self.ensure_one()
         return location.should_bypass_reservation() or self.product_id.type != 'product'
+
+    def _adjust_demand(self, demand):
+        """Distribue `demand` amongst the move lines in `self`."""
+        to_update = []
+        to_create = []
+        to_remove = []
+        if not self:
+            return {'to_create': to_create, 'to_update': to_update, 'to_remove': to_remove}
+        move = self.move_id
+        move.ensure_one()
+        product = self.move_id.product_id
+        remaining_demand = demand
+        for move_line in self.sorted(lambda ml: (ml.product_uom_qty, ml.qty_done), reverse=True):
+            rounding = move_line.product_uom_id.rounding
+            if float_is_zero(remaining_demand, precision_rounding=product.uom_id.rounding):
+                # The whole demand has already been distributed: do nothing.
+                if move_line.qty_done or move_line.product_uom_qty:
+                    to_update.append((move_line, {'demand_qty': 0}))
+                else:
+                    to_remove.append(move_line)
+            elif (not float_is_zero(move_line.product_uom_qty, precision_rounding=move_line.product_uom_id.rounding) and
+                  float_is_zero(move_line.qty_done, move_line.product_uom_id.rounding)):
+                # Apply demand == reservation if no quantities has been processed.
+                to_update.append((move_line, {'demand_qty': move_line.product_uom_qty}))
+                remaining_demand -= move_line.product_qty
+            elif self.product_id.tracking == 'serial':
+                # Serial should always have a demand of 1 (unless overprocessed? to handle)
+                remaining_demand -= 1
+                to_update.append((move_line, {'demand_qty': 1}))
+            elif (not float_is_zero(move_line.qty_done, precision_rounding=product.uom_id.rounding) and
+                  float_compare(move_line.qty_done, move_line.demand_qty, precision_rounding=rounding) < 0):
+                new_demand_qty = move_line.demand_qty - move_line.qty_done
+                move_line.demand_qty = move_line.qty_done
+                vals = move_line.copy_data()[0]
+                vals.update({
+                    'location_id': move.location_id.id,
+                    'location_dest_id': move.location_dest_id.id,
+                    'demand_qty': new_demand_qty,
+                    'lot_name': False,
+                })
+                to_create.append(vals)
+                remaining_demand -= move_line.demand_qty
+                remaining_demand -= new_demand_qty
+            else:
+                remaining_demand -= move_line.demand_qty
+        # If there's still demand to distribute, update or create a new move line.
+        if not float_is_zero(remaining_demand, precision_rounding=product.uom_id.rounding):
+            if len(self) == 1 and ((self.product_id.tracking in ('serial', 'lot') and not self.product_uom_qty) or (self.product_id.tracking == 'none' and self.location_id == self.move_id.location_id)):
+                candidate = self
+            else:
+                candidate = self.filtered(lambda ml: ml.qty_done == 0 and ml.product_uom_qty == 0)[:1]
+            if candidate:
+                for ml, vals in to_update:
+                    if ml == candidate:
+                        vals['demand_qty'] += remaining_demand
+                        break
+                else:
+                    to_update.append((candidate, {'demand_qty': candidate.demand_qty + remaining_demand}))
+            else:
+                if not self.product_id.tracking == 'serial':
+                    vals = move_line.copy_data()[0]
+                    vals.update({
+                        'location_id': move.location_id.id,
+                        'location_dest_id': move.location_dest_id.id,
+                        'demand_qty': remaining_demand,
+                        'lot_name': False,
+                    })
+                    to_create.append(vals)
+                else:
+                    d = int(remaining_demand)
+                    while d:
+                        vals = move_line.copy_data()[0]
+                        vals.update({
+                            'location_id': move.location_id.id,
+                            'location_dest_id': move.location_dest_id.id,
+                            'demand_qty': 1,
+                        })
+                        to_create.append(vals)
+                        d -= 1
+        return {'to_create': to_create, 'to_update': to_update, 'to_remove': to_remove}

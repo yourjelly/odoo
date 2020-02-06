@@ -10,6 +10,7 @@ from . import test_generate_serial_numbers
 from . import test_inventory
 from . import test_move
 from . import test_move2
+from . import test_move_line_demand
 from . import test_multicompany
 from . import test_robustness
 from . import test_packing

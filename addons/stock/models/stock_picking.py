@@ -556,6 +556,42 @@ class Picking(models.Model):
                     )
                     self.move_line_ids_without_package = move_lines_commands
 
+        onchange_vals_list = self.env.context.get('onchange_vals_list')
+        if not onchange_vals_list:
+            return
+        move_line_ids_to_adjust = []
+        for onchange_vals in onchange_vals_list:
+            if onchange_vals[0] == 2:
+                move_line_ids_to_adjust.append(onchange_vals[1])
+            elif onchange_vals[0] == 1 and 'qty_done' in onchange_vals[2]:
+                move_line_ids_to_adjust.append(onchange_vals[1])
+        if not move_line_ids_to_adjust:
+            return
+        move_lines_to_adjust = self._origin.move_line_ids_without_package\
+            .filtered(lambda ml: ml.id in move_line_ids_to_adjust)
+        moves_to_adjust = move_lines_to_adjust.move_id
+
+        for move_to_adjust in moves_to_adjust:
+            res = self.move_line_ids_without_package\
+                .filtered(lambda ml: ml.move_id == move_to_adjust)\
+                ._adjust_demand(move_to_adjust.product_qty)
+            if res.get('to_update'):
+                for to_update, vals in res['to_update']:
+                    to_write = self.move_line_ids_without_package.filtered(lambda ml: ml == to_update)
+                    to_write.ensure_one()
+                    to_write.update(vals)
+            if res.get('to_create'):
+                for vals in res['to_create']:
+                    self.move_line_ids_without_package.new(vals)
+            for move_line in res.get('to_remove'):
+                self.move_line_ids_without_package -= move_line
+
+    def onchange(self, values, field_name, field_onchange):
+        if field_name == 'move_line_ids_without_package'\
+                or field_name == ['move_line_ids_without_package']:
+            self = self.with_context(onchange_vals_list=values.get('move_line_ids_without_package'))
+        return super().onchange(values, field_name, field_onchange)
+
     @api.model
     def create(self, vals):
         defaults = self.default_get(['name', 'picking_type_id'])
@@ -629,11 +665,11 @@ class Picking(models.Model):
 
     def action_confirm(self):
         self._check_company()
-        self.mapped('package_level_ids').filtered(lambda pl: pl.state == 'draft' and not pl.move_ids)._generate_moves()
+        self.package_level_ids.filtered(lambda pl: pl.state == 'draft' and not pl.move_ids)._generate_moves()
         # call `_action_confirm` on every draft move
-        self.mapped('move_lines')\
-            .filtered(lambda move: move.state == 'draft')\
-            ._action_confirm()
+        moves_to_confirm = self.move_lines.filtered(lambda m: m.state == 'draft')
+        if moves_to_confirm:
+            moves_to_confirm._action_confirm()
         return True
 
     def action_assign(self):

@@ -1243,7 +1243,7 @@ class StockMove(SavepointCase):
         self.assertEqual(move_partial.state, 'assigned')
 
     def test_availability_9(self):
-        """ Test the assignment mechanism when the product quantity is increase
+        """ Test the assignment mechanism when the product quantity is increased
         on a receipt move.
         """
         move_receipt = self.env['stock.move'].create({
@@ -1259,7 +1259,6 @@ class StockMove(SavepointCase):
         move_receipt._action_assign()
         self.assertEqual(move_receipt.state, 'assigned')
         move_receipt.product_uom_qty = 3.0
-        move_receipt._action_assign()
         self.assertEqual(move_receipt.state, 'assigned')
         self.assertEqual(move_receipt.move_line_ids.product_uom_qty, 3)
 
