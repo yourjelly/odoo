@@ -11,7 +11,7 @@ Adds a reporting menu in products that computes sales, purchases, margins and ot
 
 The wizard to launch the report has several options to help you get the data you need.
 """,
-    'depends': ['account'],
+    'depends': ['account_analytic'],
     'data': [
         'security/ir.model.access.csv',
         'wizard/product_margin_view.xml',

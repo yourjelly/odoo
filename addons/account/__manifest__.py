@@ -15,7 +15,7 @@ You could use this simplified accounting in case you work with an (external) acc
     'category': 'Accounting/Accounting',
     'website': 'https://www.odoo.com/page/billing',
     'images' : ['images/accounts.jpeg','images/bank_statement.jpeg','images/cash_register.jpeg','images/chart_of_accounts.jpeg','images/customer_invoice.jpeg','images/journal_entries.jpeg'],
-    'depends' : ['base_setup', 'product', 'analytic', 'portal', 'digest'],
+    'depends' : ['base_setup', 'product', 'portal', 'digest'],
     'data': [
         'security/account_security.xml',
         'security/ir.model.access.csv',
@@ -39,7 +39,6 @@ You could use this simplified accounting in case you work with an (external) acc
         'wizard/account_validate_move_view.xml',
         'views/account_end_fy.xml',
         'views/product_view.xml',
-        'views/account_analytic_view.xml',
         'views/account_tip_data.xml',
         'views/account.xml',
         'views/report_invoice.xml',

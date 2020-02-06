@@ -1432,7 +1432,6 @@ class AccountTax(models.Model):
         help="Check this if the price you use on the product and invoices includes this tax.")
     include_base_amount = fields.Boolean(string='Affect Base of Subsequent Taxes', default=False,
         help="If set, taxes which are computed after this one will be computed based on the price tax included.")
-    analytic = fields.Boolean(string="Include in Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
     tax_group_id = fields.Many2one('account.tax.group', string="Tax Group", default=_default_tax_group, required=True)
     # Technical field to make the 'tax_exigibility' field invisible if the same named field is set to false in 'res.company' model
     hide_tax_exigibility = fields.Boolean(string='Hide Use Cash Basis Option', related='company_id.tax_exigibility', readonly=True)
@@ -1660,7 +1659,7 @@ class AccountTax(models.Model):
         rep_lines = self.mapped(is_refund and 'refund_repartition_line_ids' or 'invoice_repartition_line_ids')
         return rep_lines.filtered(lambda x: x.repartition_type == repartition_type).mapped('tag_ids')
 
-    def compute_all(self, price_unit, currency=None, quantity=1.0, product=None, partner=None, is_refund=False, handle_price_include=True):
+    def compute_all(self, price_unit, currency=None, quantity=1.0, product=None, partner=None, is_refund=False, handle_price_include=True, flattened_taxes=None):
         """ Returns all information required to apply taxes (in self + their children in case of a tax group).
             We consider the sequence of the parent for group of taxes.
                 Eg. considering letters as taxes and alphabetic order as sequence :
@@ -1680,7 +1679,6 @@ class AccountTax(models.Model):
                 'sequence': int,
                 'account_id': int,
                 'refund_account_id': int,
-                'analytic': boolean,
             }],
         } """
         if not self:
@@ -1689,7 +1687,7 @@ class AccountTax(models.Model):
             company = self[0].company_id
 
         # 1) Flatten the taxes.
-        taxes = self.flatten_taxes_hierarchy()
+        taxes = flattened_taxes or self.flatten_taxes_hierarchy()
 
         # 2) Avoid mixing taxes having price_include=False && include_base_amount=True
         # with taxes having price_include=True. This use case is not supported as the
@@ -1890,7 +1888,6 @@ class AccountTax(models.Model):
                     'base': round(sign * base, prec),
                     'sequence': tax.sequence,
                     'account_id': tax.cash_basis_transition_account_id.id if tax.tax_exigibility == 'on_payment' else repartition_line.account_id.id,
-                    'analytic': tax.analytic,
                     'price_include': tax.price_include or self._context.get('force_price_include'),
                     'tax_exigibility': tax.tax_exigibility,
                     'tax_repartition_line_id': repartition_line.id,

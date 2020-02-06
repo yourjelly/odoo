@@ -891,8 +891,6 @@ action = model.setting_init_bank_account_action()
                                     <field name="journal_id" domain="[('type', '=', 'general'), ('company_id', '=', company_id)]" attrs="{'column_invisible': [('parent.rule_type', '!=', 'writeoff_button')]}"/>
                                     <field name="amount_string"/>
                                     <field name="tax_ids" widget="many2many_tags"/>
-                                    <field name="analytic_account_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]" groups="analytic.group_analytic_tags"/>
-                                    <field name="analytic_tag_ids" groups="analytic.group_analytic_tags" widget="many2many_tags"/>
                                     <field name="show_force_tax_included" invisible="1"/>
                                     <field name="force_tax_included" attrs="{'invisible': [('show_force_tax_included', '=', False)]}" widget="boolean_toggle"/>
                                     <field name="company_id" invisible="1"/>
@@ -926,8 +924,6 @@ action = model.setting_init_bank_account_action()
                             <field name="show_force_tax_included" invisible="1"/>
                             <field name="force_tax_included"
                                    attrs="{'invisible': [('show_force_tax_included', '=', False)]}" force_save="1"/>
-                            <field name="analytic_account_id" domain="['|', ('company_id', '=', company_id), ('company_id', '=', False)]" groups="analytic.group_analytic_accounting"/>
-                            <field name="analytic_tag_ids" groups="analytic.group_analytic_tags" widget="many2many_tags"/>
                             <field name="company_id" invisible="1"/>
                         </group>
                         <group>
@@ -1192,7 +1188,6 @@ action = model.setting_init_bank_account_action()
                                 <group>
                                     <field name="description" attrs="{'invisible':[('amount_type','=', 'group')]}"/>
                                     <field name="tax_group_id"/>
-                                    <field name="analytic" attrs="{'invisible':[('amount_type','=', 'group')]}" groups="analytic.group_analytic_accounting" />
                                     <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                 </group>
                                 <group name="advanced_booleans">
@@ -1568,7 +1563,6 @@ action = model.setting_init_bank_account_action()
                                 <group name="advanced_definitions">
                                     <group>
                                         <field name="description" attrs="{'invisible':[('amount_type','=', 'group')]}"/>
-                                        <field name="analytic" attrs="{'invisible':[('amount_type','=', 'group')]}" groups="analytic.group_analytic_accounting" />
                                     </group>
                                     <group name="price_definitions">
                                         <field name="price_include" attrs="{'invisible':[('amount_type','=', 'group')]}" />

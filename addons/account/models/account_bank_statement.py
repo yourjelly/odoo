@@ -775,7 +775,7 @@ class AccountBankStatementLine(models.Model):
                 - 'credit'
                 - 'account_id'
                 - (optional) 'tax_ids'
-                - (optional) Other account.move.line fields like analytic_account_id or analytics_id
+                - (optional) Other account.move.line fields
                 - (optional) 'reconcile_model_id'
 
             :returns: The journal entries with which the transaction was matched. If there was at least an entry in counterpart_aml_dicts or new_aml_dicts, this list contains

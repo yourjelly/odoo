@@ -55,13 +55,6 @@ access_account_move_line_readonly,account.move.line readonly,model_account_move_
 access_account_move_line_uinvoice,account.move.line invoice,model_account_move_line,account.group_account_invoice,1,1,1,1
 access_account_invoice_portal,account.move.portal,account.model_account_move,base.group_portal,1,0,0,0
 access_account_invoice_line_portal,account.move.line.portal,account.model_account_move_line,base.group_portal,1,0,0,0
-
-access_account_analytic_line_manager,account.analytic.line manager,model_account_analytic_line,account.group_account_manager,1,0,0,0
-access_account_analytic_account,account.analytic.account,analytic.model_account_analytic_account,base.group_user,1,0,0,0
-access_account_analytic_line_readonly,account.analytic.line invoice,model_account_analytic_line,account.group_account_readonly,1,0,0,0
-access_account_analytic_line_invoice,account.analytic.line invoice,model_account_analytic_line,account.group_account_invoice,1,1,1,1
-access_account_analytic_accountant,account.analytic.account accountant,analytic.model_account_analytic_account,account.group_account_user,1,1,1,1
-
 access_account_journal_readonly,account.journal,model_account_journal,account.group_account_readonly,1,0,0,0
 access_account_journal_manager,account.journal,model_account_journal,account.group_account_manager,1,1,1,1
 access_account_journal_invoice,account.journal invoice,model_account_journal,account.group_account_invoice,1,0,0,0

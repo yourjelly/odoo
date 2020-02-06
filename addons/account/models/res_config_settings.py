@@ -26,9 +26,6 @@ class ResConfigSettings(models.TransientModel):
         ('round_globally', 'Round globally calculation of taxes '),
         ], related='company_id.tax_calculation_rounding_method', string='Tax calculation rounding method', readonly=False)
     module_account_accountant = fields.Boolean(string='Accounting')
-    group_analytic_accounting = fields.Boolean(string='Analytic Accounting',
-        implied_group='analytic.group_analytic_accounting')
-    group_analytic_tags = fields.Boolean(string='Analytic Tags', implied_group='analytic.group_analytic_tags')
     group_warning_account = fields.Boolean(string="Warnings in Invoices", implied_group='account.group_warning_account')
     group_cash_rounding = fields.Boolean(string="Cash Rounding", implied_group='account.group_cash_rounding')
     group_fiscal_year = fields.Boolean(string='Fiscal Years', implied_group='account.group_fiscal_year')
@@ -52,7 +49,6 @@ class ResConfigSettings(models.TransientModel):
         ('tax_included', 'Tax-Included')], string="Line Subtotals Tax Display",
         required=True, default='tax_excluded',
         config_parameter='account.show_line_subtotals_tax_selection')
-    module_account_budget = fields.Boolean(string='Budget Management')
     module_account_payment = fields.Boolean(string='Invoice Online Payment')
     module_account_reports = fields.Boolean("Dynamic Reports")
     module_account_check_printing = fields.Boolean("Allow check printing and deposits")
@@ -116,16 +112,6 @@ class ResConfigSettings(models.TransientModel):
                 'group_show_line_subtotals_tax_included': True,
                 'group_show_line_subtotals_tax_excluded': False,
             })
-
-    @api.onchange('group_analytic_accounting')
-    def onchange_analytic_accounting(self):
-        if self.group_analytic_accounting:
-            self.module_account_accountant = True
-
-    @api.onchange('module_account_budget')
-    def onchange_module_account_budget(self):
-        if self.module_account_budget:
-            self.group_analytic_accounting = True
 
     @api.onchange('module_account_yodlee')
     def onchange_account_yodlee(self):

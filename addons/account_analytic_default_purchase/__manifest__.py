@@ -11,6 +11,6 @@ Set default values for your analytic accounts on your hr expenses.
 
 Allows to automatically select analytic accounts based on Product
     """,
-    'depends': ['account_analytic_default', 'purchase'],
+    'depends': ['account_analytic', 'purchase'],
     'auto_install': True,
 }

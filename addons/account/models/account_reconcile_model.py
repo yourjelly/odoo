@@ -34,9 +34,6 @@ class AccountReconcileModelLine(models.Model):
     * Fixed: The fixed value of the writeoff. The amount will count as a debit if it is negative, as a credit if it is positive.
     * From Label: There is no need for regex delimiter, only the regex is needed. For instance if you want to extract the amount from\nR:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\nYou could enter\nBRT: ([\d,]+)""")
     tax_ids = fields.Many2many('account.tax', string='Taxes', ondelete='restrict')
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', ondelete='set null')
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags',
-                                        relation='account_reconcile_model_analytic_tag_rel')
 
     @api.onchange('tax_ids')
     def _onchange_tax_ids(self):
@@ -223,8 +220,6 @@ class AccountReconcileModel(models.Model):
                 'partner_id': base_line_dict.get('partner_id'),
                 'debit': tax_res['amount'] > 0 and tax_res['amount'] or 0,
                 'credit': tax_res['amount'] < 0 and -tax_res['amount'] or 0,
-                'analytic_account_id': tax.analytic and base_line_dict['analytic_account_id'],
-                'analytic_tag_ids': tax.analytic and base_line_dict['analytic_tag_ids'],
                 'tax_exigible': tax_res['tax_exigibility'],
                 'tax_repartition_line_id': tax_res['tax_repartition_line_id'],
                 'tax_ids': [(6, 0, tax_res['tax_ids'])],
@@ -237,6 +232,15 @@ class AccountReconcileModel(models.Model):
             base_line_dict['credit'] = tax_res['base'] < 0 and -tax_res['base'] or base_line_dict['credit']
         base_line_dict['tag_ids'] = [(6, 0, res['base_tags'])]
         return new_aml_dicts
+
+    def _get_writeoff_line(self, line, st_line, line_balance):
+        return {
+                'name': line.label or st_line.name,
+                'account_id': line.account_id.id,
+                'debit': line_balance > 0 and line_balance or 0,
+                'credit': line_balance < 0 and -line_balance or 0,
+                'reconcile_model_id': self.id,
+        }
 
     def _get_write_off_move_lines_dict(self, st_line, move_lines=None, residual_balance=None):
         ''' Get move.lines dict (to be passed to the create()) corresponding to the reconciliation model's write-off lines.
@@ -273,15 +277,7 @@ class AccountReconcileModel(models.Model):
                     line_balance = 0
             else:
                 line_balance = line.amount * (1 if residual_balance > 0.0 else -1)
-            writeoff_line = {
-                'name': line.label or st_line.name,
-                'account_id': line.account_id.id,
-                'analytic_account_id': line.analytic_account_id.id,
-                'analytic_tag_ids': [(6, 0, line.analytic_tag_ids.ids)],
-                'debit': line_balance > 0 and line_balance or 0,
-                'credit': line_balance < 0 and -line_balance or 0,
-                'reconcile_model_id': self.id,
-            }
+            writeoff_line = self._get_writeoff_line(line, st_line, line_balance)
             new_aml_dicts.append(writeoff_line)
 
             residual_balance -= line_balance

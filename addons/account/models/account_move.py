@@ -410,8 +410,6 @@ class AccountMove(models.Model):
             'tax_repartition_line_id': tax_line.tax_repartition_line_id.id,
             'account_id': tax_line.account_id.id,
             'currency_id': tax_line.currency_id.id,
-            'analytic_tag_ids': [(6, 0, tax_line.tax_line_id.analytic and tax_line.analytic_tag_ids.ids or [])],
-            'analytic_account_id': tax_line.tax_line_id.analytic and tax_line.analytic_account_id.id,
             'tax_ids': [(6, 0, tax_line.tax_ids.ids)],
             'tag_ids': [(6, 0, tax_line.tag_ids.ids)],
         }
@@ -430,8 +428,6 @@ class AccountMove(models.Model):
             'tax_repartition_line_id': tax_vals['tax_repartition_line_id'],
             'account_id': account.id,
             'currency_id': base_line.currency_id.id,
-            'analytic_tag_ids': [(6, 0, tax_vals['analytic'] and base_line.analytic_tag_ids.ids or [])],
-            'analytic_account_id': tax_vals['analytic'] and base_line.analytic_account_id.id,
             'tax_ids': [(6, 0, tax_vals['tax_ids'])],
             'tag_ids': [(6, 0, tax_vals['tag_ids'])],
         }
@@ -2091,7 +2087,7 @@ class AccountMove(models.Model):
         move.message_subscribe(list(all_followers_ids))
         return move
 
-    def post(self):
+    def _pre_post(self):
         for move in self:
             if not move.line_ids.filtered(lambda line: not line.display_type):
                 raise UserError(_('You need to add a line before posting.'))
@@ -2123,8 +2119,8 @@ class AccountMove(models.Model):
                 move.date = move.company_id.tax_lock_date + timedelta(days=1)
                 move.with_context(check_move_validity=False)._onchange_currency()
 
-        # Create the analytic lines in batch is faster as it leads to less cache invalidation.
-        self.mapped('line_ids').create_analytic_lines()
+    def post(self):
+        self._pre_post()
         self.state = 'posted'
         self.posted_before = True
         for move in self:
@@ -2211,8 +2207,6 @@ class AccountMove(models.Model):
                 raise UserError(_('You cannot reset to draft a tax cash basis journal entry.'))
             if move.restrict_mode_hash_table and move.state == 'posted' and move.id not in excluded_move_ids:
                 raise UserError(_('You cannot modify a posted entry of this journal because it is in strict mode.'))
-            # We remove all the analytics entries for this journal
-            move.mapped('line_ids.analytic_line_ids').unlink()
 
         self.mapped('line_ids').remove_move_reconcile()
         self.write({'state': 'draft'})
@@ -2523,11 +2517,6 @@ class AccountMoveLine(models.Model):
     matched_credit_ids = fields.One2many('account.partial.reconcile', 'debit_move_id', string='Matched Credits',
         help='Credit journal items that are matched with this journal item.', readonly=True)
     matching_number = fields.Char(string="Matching #", compute='_compute_matching_number', store=True, help="Matching number for this line, 'P' if it is only partially reconcile, or the name of the full reconcile if it exists.")
-
-    # ==== Analytic fields ====
-    analytic_line_ids = fields.One2many('account.analytic.line', 'move_id', string='Analytic lines')
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
 
     # ==== Onchange / display purpose fields ====
     recompute_tax_line = fields.Boolean(store=False, readonly=True,
@@ -2865,7 +2854,7 @@ class AccountMoveLine(models.Model):
     # ONCHANGE METHODS
     # -------------------------------------------------------------------------
 
-    @api.onchange('amount_currency', 'currency_id', 'debit', 'credit', 'tax_ids', 'account_id', 'analytic_account_id', 'analytic_tag_ids')
+    @api.onchange('amount_currency', 'currency_id', 'debit', 'credit', 'tax_ids', 'account_id')
     def _onchange_mark_recompute_taxes(self):
         ''' Recompute the dynamic onchange based on taxes.
         If the edited line is a tax line, don't recompute anything as the user must be able to
@@ -3830,18 +3819,19 @@ class AccountMoveLine(models.Model):
 
         return True
 
+    def _compute_writeoff_counterpart_vals(self, values):
+        line_values = values.copy()
+        line_values['debit'], line_values['credit'] = line_values['credit'], line_values['debit']
+        if 'amount_currency' in values:
+            line_values['amount_currency'] = -line_values['amount_currency']
+        return line_values
+
     def _create_writeoff(self, writeoff_vals):
         """ Create a writeoff move per journal for the account.move.lines in self. If debit/credit is not specified in vals,
             the writeoff amount will be computed as the sum of amount_residual of the given recordset.
             :param writeoff_vals: list of dicts containing values suitable for account_move_line.create(). The data in vals will
-                be processed to create bot writeoff account.move.line and their enclosing account.move.
+                be processed to create both writeoff account.move.line and their enclosing account.move.
         """
-        def compute_writeoff_counterpart_vals(values):
-            line_values = values.copy()
-            line_values['debit'], line_values['credit'] = line_values['credit'], line_values['debit']
-            if 'amount_currency' in values:
-                line_values['amount_currency'] = -line_values['amount_currency']
-            return line_values
         # Group writeoff_vals by journals
         writeoff_dict = {}
         for val in writeoff_vals:
@@ -3875,8 +3865,6 @@ class AccountMoveLine(models.Model):
                     date = vals['date']
                 if 'name' not in vals:
                     vals['name'] = self._context.get('comment') or _('Write-Off')
-                if 'analytic_account_id' not in vals:
-                    vals['analytic_account_id'] = self.env.context.get('analytic_id', False)
                 #compute the writeoff amount if not given
                 if 'credit' not in vals and 'debit' not in vals:
                     amount = sum([r.amount_residual for r in self])
@@ -3890,7 +3878,7 @@ class AccountMoveLine(models.Model):
                     vals['amount_currency'] = sign * abs(sum([r.amount_residual_currency for r in self]))
                     total_currency += vals['amount_currency']
 
-                writeoff_lines.append(compute_writeoff_counterpart_vals(vals))
+                writeoff_lines.append(self._compute_writeoff_counterpart_vals(vals))
 
             # Create balance line
             writeoff_lines.append({
@@ -3986,79 +3974,7 @@ class AccountMoveLine(models.Model):
                         matched_percentage_per_move[line.move_id.id] = currency.round(total_reconciled_currency) / currency.round(total_amount_currency)
         return matched_percentage_per_move
 
-    def _get_analytic_tag_ids(self):
-        self.ensure_one()
-        return self.analytic_tag_ids.filtered(lambda r: not r.active_analytic_distribution).ids
 
-    def create_analytic_lines(self):
-        """ Create analytic items upon validation of an account.move.line having an analytic account or an analytic distribution.
-        """
-        lines_to_create_analytic_entries = self.env['account.move.line']
-        analytic_line_vals = []
-        for obj_line in self:
-            for tag in obj_line.analytic_tag_ids.filtered('active_analytic_distribution'):
-                for distribution in tag.analytic_distribution_ids:
-                    analytic_line_vals.append(obj_line._prepare_analytic_distribution_line(distribution))
-            if obj_line.analytic_account_id:
-                lines_to_create_analytic_entries |= obj_line
-
-        # create analytic entries in batch
-        if lines_to_create_analytic_entries:
-            analytic_line_vals += lines_to_create_analytic_entries._prepare_analytic_line()
-
-        self.env['account.analytic.line'].create(analytic_line_vals)
-
-    def _prepare_analytic_line(self):
-        """ Prepare the values used to create() an account.analytic.line upon validation of an account.move.line having
-            an analytic account. This method is intended to be extended in other modules.
-            :return list of values to create analytic.line
-            :rtype list
-        """
-        result = []
-        for move_line in self:
-            amount = (move_line.credit or 0.0) - (move_line.debit or 0.0)
-            default_name = move_line.name or (move_line.ref or '/' + ' -- ' + (move_line.partner_id and move_line.partner_id.name or '/'))
-            result.append({
-                'name': default_name,
-                'date': move_line.date,
-                'account_id': move_line.analytic_account_id.id,
-                'tag_ids': [(6, 0, move_line._get_analytic_tag_ids())],
-                'unit_amount': move_line.quantity,
-                'product_id': move_line.product_id and move_line.product_id.id or False,
-                'product_uom_id': move_line.product_uom_id and move_line.product_uom_id.id or False,
-                'amount': amount,
-                'general_account_id': move_line.account_id.id,
-                'ref': move_line.ref,
-                'move_id': move_line.id,
-                'user_id': move_line.move_id.invoice_user_id.id or self._uid,
-                'partner_id': move_line.partner_id.id,
-                'company_id': move_line.analytic_account_id.company_id.id or self.env.company.id,
-            })
-        return result
-
-    def _prepare_analytic_distribution_line(self, distribution):
-        """ Prepare the values used to create() an account.analytic.line upon validation of an account.move.line having
-            analytic tags with analytic distribution.
-        """
-        self.ensure_one()
-        amount = -self.balance * distribution.percentage / 100.0
-        default_name = self.name or (self.ref or '/' + ' -- ' + (self.partner_id and self.partner_id.name or '/'))
-        return {
-            'name': default_name,
-            'date': self.date,
-            'account_id': distribution.account_id.id,
-            'partner_id': self.partner_id.id,
-            'tag_ids': [(6, 0, [distribution.tag_id.id] + self._get_analytic_tag_ids())],
-            'unit_amount': self.quantity,
-            'product_id': self.product_id and self.product_id.id or False,
-            'product_uom_id': self.product_uom_id and self.product_uom_id.id or False,
-            'amount': amount,
-            'general_account_id': self.account_id.id,
-            'ref': self.ref,
-            'move_id': self.id,
-            'user_id': self.move_id.invoice_user_id.id or self._uid,
-            'company_id': distribution.account_id.company_id.id or self.env.company.id,
-        }
 
     @api.model
     def _query_get(self, domain=None):
@@ -4104,12 +4020,6 @@ class AccountMoveLine(models.Model):
 
         if context.get('account_ids'):
             domain += [('account_id', 'in', context['account_ids'].ids)]
-
-        if context.get('analytic_tag_ids'):
-            domain += [('analytic_tag_ids', 'in', context['analytic_tag_ids'].ids)]
-
-        if context.get('analytic_account_ids'):
-            domain += [('analytic_account_id', 'in', context['analytic_account_ids'].ids)]
 
         if context.get('partner_ids'):
             domain += [('partner_id', 'in', context['partner_ids'].ids)]
@@ -4315,6 +4225,35 @@ class AccountPartialReconcile(models.Model):
     def _get_amount_tax_cash_basis(self, amount, line):
         return line.company_id.currency_id.round(amount)
 
+    def _get_cash_basis_entry_params(self, newly_created_move, line, amount, rounded_amt):
+        return {
+            'name': line.move_id.name,
+            'debit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
+            'credit': rounded_amt if rounded_amt > 0 else 0.0,
+            'account_id': line.account_id.id,
+            'tax_exigible': True,
+            'amount_currency': line.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
+            'currency_id': line.currency_id.id,
+            'move_id': newly_created_move.id,
+            'partner_id': line.partner_id.id,
+        }
+
+    def _get_cash_basis_account_and_tax_params(self, newly_created_move, line, amount, rounded_amt):
+        return {
+            'name': line.name,
+            'debit': rounded_amt if rounded_amt > 0 else 0.0,
+            'credit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
+            'account_id': line.tax_repartition_line_id.account_id.id or line.account_id.id,
+            'tax_exigible': True,
+            'amount_currency': line.amount_currency and line.currency_id.round(line.amount_currency * amount / line.balance) or 0.0,
+            'currency_id': line.currency_id.id,
+            'move_id': newly_created_move.id,
+            'partner_id': line.partner_id.id,
+            'tax_repartition_line_id': line.tax_repartition_line_id.id,
+            'tax_base_amount': line.tax_base_amount,
+            'tag_ids': [(6, 0, line.tag_ids.ids)],
+        }
+
     def create_tax_cash_basis_entry(self, percentage_before_rec):
         self.ensure_one()
         move_date = self.debit_move_id.date
@@ -4341,36 +4280,13 @@ class AccountPartialReconcile(models.Model):
                         if not newly_created_move:
                             newly_created_move = self._create_tax_basis_move()
                         #create cash basis entry for the tax line
-                        to_clear_aml = self.env['account.move.line'].with_context(check_move_validity=False).create({
-                            'name': line.move_id.name,
-                            'debit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
-                            'credit': rounded_amt if rounded_amt > 0 else 0.0,
-                            'account_id': line.account_id.id,
-                            'analytic_account_id': line.analytic_account_id.id,
-                            'analytic_tag_ids': line.analytic_tag_ids.ids,
-                            'tax_exigible': True,
-                            'amount_currency': line.amount_currency and line.currency_id.round(-line.amount_currency * amount / line.balance) or 0.0,
-                            'currency_id': line.currency_id.id,
-                            'move_id': newly_created_move.id,
-                            'partner_id': line.partner_id.id,
-                        })
+                        to_clear_aml = self.env['account.move.line'].with_context(check_move_validity=False).create(
+                            self._get_cash_basis_entry_params(newly_created_move, line, amount, rounded_amt)
+                        )
                         # Group by cash basis account and tax
-                        self.env['account.move.line'].with_context(check_move_validity=False).create({
-                            'name': line.name,
-                            'debit': rounded_amt if rounded_amt > 0 else 0.0,
-                            'credit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
-                            'account_id': line.tax_repartition_line_id.account_id.id or line.account_id.id,
-                            'analytic_account_id': line.analytic_account_id.id,
-                            'analytic_tag_ids': line.analytic_tag_ids.ids,
-                            'tax_exigible': True,
-                            'amount_currency': line.amount_currency and line.currency_id.round(line.amount_currency * amount / line.balance) or 0.0,
-                            'currency_id': line.currency_id.id,
-                            'move_id': newly_created_move.id,
-                            'partner_id': line.partner_id.id,
-                            'tax_repartition_line_id': line.tax_repartition_line_id.id,
-                            'tax_base_amount': line.tax_base_amount,
-                            'tag_ids': [(6, 0, line.tag_ids.ids)],
-                        })
+                        self.env['account.move.line'].with_context(check_move_validity=False).create(
+                            self._get_cash_basis_account_and_tax_params(newly_created_move, line, amount, rounded_amt)
+                        )
                         if line.account_id.reconcile and not line.reconciled:
                             #setting the account to allow reconciliation will help to fix rounding errors
                             to_clear_aml |= line
