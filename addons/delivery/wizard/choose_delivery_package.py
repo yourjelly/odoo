@@ -44,9 +44,6 @@ class ChooseDeliveryPackage(models.TransientModel):
 
     def put_in_pack(self):
         picking_move_lines = self.picking_id.move_line_ids
-        if not self.picking_id.picking_type_id.show_reserved:
-            picking_move_lines = self.picking_id.move_line_nosuggest_ids
-
         move_line_ids = picking_move_lines.filtered(lambda ml:
             float_compare(ml.qty_done, 0.0, precision_rounding=ml.product_uom_id.rounding) > 0
             and not ml.result_package_id

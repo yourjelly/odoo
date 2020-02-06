@@ -687,8 +687,6 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(moves_gB_kg.product_uom_qty, 0.526, 'Wrong move quantity (%s found instead of 0.526)' % (moves_gB_kg.product_uom_qty))
         self.assertEqual(moves_gB_kg.product_uom.id, self.uom_kg.id, 'Wrong uom in move for product gB.')
 
-        # TODO Test extra move once the uom is editable in the move_lines
-
         # ----------------------------------------------------------------------
         # Check Back order of Incoming shipment.
         # ----------------------------------------------------------------------

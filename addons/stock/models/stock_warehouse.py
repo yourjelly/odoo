@@ -832,7 +832,6 @@ class Warehouse(models.Model):
                 'default_location_src_id': False,
                 'sequence': max_sequence + 1,
                 'barcode': self.code.replace(" ", "").upper() + "-RECEIPTS",
-                'show_reserved': False,
                 'sequence_code': 'IN',
                 'company_id': self.company_id.id,
             }, 'out_type_id': {

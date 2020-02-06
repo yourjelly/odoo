@@ -131,7 +131,7 @@ class TestAngloSaxonValuation(SavepointCase):
             'price_unit': 8,
         })
         in_move_1._action_confirm()
-        in_move_1.quantity_done = 1
+        in_move_1._set_quantity_done(1)
         in_move_1._action_done()
         in_move_2 = self.env['stock.move'].create({
             'name': 'a',
@@ -143,7 +143,7 @@ class TestAngloSaxonValuation(SavepointCase):
             'price_unit': 10,
         })
         in_move_2._action_confirm()
-        in_move_2.quantity_done = 1
+        in_move_2._set_quantity_done(1)
         in_move_2._action_done()
 
     # -------------------------------------------------------------------------
@@ -201,7 +201,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         wiz = sale_order.picking_ids.button_validate()
         wiz = Form(self.env[wiz['res_model']].with_context(wiz['context'])).save()
         wiz.process()
@@ -234,7 +234,7 @@ class TestAngloSaxonValuation(SavepointCase):
         self.product.standard_price = 14.0
 
         # deliver the backorder
-        sale_order.picking_ids[0].move_lines.quantity_done = 1
+        sale_order.picking_ids[0].move_lines._set_quantity_done(1)
         sale_order.picking_ids[0].button_validate()
 
         # change the standard price to 16
@@ -273,7 +273,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         wiz = sale_order.picking_ids.button_validate()
         wiz = Form(self.env[wiz['res_model']].with_context(wiz['context'])).save()
         wiz.process()
@@ -282,7 +282,7 @@ class TestAngloSaxonValuation(SavepointCase):
         self.product.standard_price = 14.0
 
         # deliver the backorder
-        sale_order.picking_ids.filtered('backorder_id').move_lines.quantity_done = 1
+        sale_order.picking_ids.filtered('backorder_id').move_lines._set_quantity_done(1)
         sale_order.picking_ids.filtered('backorder_id').button_validate()
 
         # Invoice the sale order.
@@ -340,7 +340,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         wiz = sale_order.picking_ids.button_validate()
         wiz = Form(self.env[wiz['res_model']].with_context(wiz['context'])).save()
         wiz.process()
@@ -373,7 +373,7 @@ class TestAngloSaxonValuation(SavepointCase):
         self.product.standard_price = 14.0
 
         # deliver the backorder
-        sale_order.picking_ids[0].move_lines.quantity_done = 1
+        sale_order.picking_ids[0].move_lines._set_quantity_done(1)
         sale_order.picking_ids[0].button_validate()
 
         # change the standard price to 16
@@ -412,7 +412,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         wiz = sale_order.picking_ids.button_validate()
         wiz = Form(self.env[wiz['res_model']].with_context(wiz['context'])).save()
         wiz.process()
@@ -421,7 +421,7 @@ class TestAngloSaxonValuation(SavepointCase):
         self.product.standard_price = 14.0
 
         # deliver the backorder
-        sale_order.picking_ids.filtered('backorder_id').move_lines.quantity_done = 1
+        sale_order.picking_ids.filtered('backorder_id').move_lines._set_quantity_done(1)
         sale_order.picking_ids.filtered('backorder_id').button_validate()
 
         # Invoice the sale order.
@@ -492,7 +492,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         wiz = sale_order.picking_ids.button_validate()
         wiz = Form(self.env[wiz['res_model']].with_context(wiz['context'])).save()
         wiz.process()
@@ -530,7 +530,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 2
+        sale_order.picking_ids.move_lines._set_quantity_done(2)
         sale_order.picking_ids.button_validate()
 
         # Invoice the sale order.
@@ -586,7 +586,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         wiz = sale_order.picking_ids.button_validate()
         wiz = Form(self.env[wiz['res_model']].with_context(wiz['context'])).save()
         wiz.process()
@@ -623,7 +623,7 @@ class TestAngloSaxonValuation(SavepointCase):
         # Create and confirm a sale order for 2@12
         sale_order = self._so_and_confirm_two_units()
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 2
+        sale_order.picking_ids.move_lines._set_quantity_done(2)
         sale_order.picking_ids.button_validate()
 
         # Invoice the sale order.
@@ -692,7 +692,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         wiz = sale_order.picking_ids.button_validate()
         wiz = Form(self.env[wiz['res_model']].with_context(wiz['context'])).save()
         wiz.process()
@@ -735,7 +735,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 2
+        sale_order.picking_ids.move_lines._set_quantity_done(2)
         sale_order.picking_ids.button_validate()
 
         # Invoice the sale order.
@@ -788,7 +788,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         wiz = sale_order.picking_ids.button_validate()
         wiz = Form(self.env[wiz['res_model']].with_context(wiz['context'])).save()
         wiz.process()
@@ -832,7 +832,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order = self._so_and_confirm_two_units()
 
         # Deliver one.
-        sale_order.picking_ids.move_lines.quantity_done = 2
+        sale_order.picking_ids.move_lines._set_quantity_done(2)
         sale_order.picking_ids.button_validate()
 
         # Invoice the sale order.
@@ -872,7 +872,7 @@ class TestAngloSaxonValuation(SavepointCase):
             'price_unit': 10,
         })
         in_move_1._action_confirm()
-        in_move_1.quantity_done = 8
+        in_move_1._set_quantity_done(8)
         in_move_1._action_done()
 
         # Create and confirm a sale order for 2@12
@@ -891,7 +891,7 @@ class TestAngloSaxonValuation(SavepointCase):
         sale_order.action_confirm()
 
         # Deliver 10
-        sale_order.picking_ids.move_lines.quantity_done = 10
+        sale_order.picking_ids.move_lines._set_quantity_done(10)
         sale_order.picking_ids.button_validate()
 
         # Make the second receipt
@@ -905,7 +905,7 @@ class TestAngloSaxonValuation(SavepointCase):
             'price_unit': 12,
         })
         in_move_2._action_confirm()
-        in_move_2.quantity_done = 2
+        in_move_2._set_quantity_done(2)
         in_move_2._action_done()
         self.assertEqual(self.product.stock_valuation_layer_ids[-1].value, -4)  # we sent two at 10 but they should have been sent at 12
         self.assertEqual(self.product.stock_valuation_layer_ids[-1].quantity, 0)

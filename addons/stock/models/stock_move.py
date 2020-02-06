@@ -140,7 +140,6 @@ class StockMove(models.Model):
     picking_type_id = fields.Many2one('stock.picking.type', 'Operation Type', check_company=True)
     inventory_id = fields.Many2one('stock.inventory', 'Inventory', check_company=True)
     move_line_ids = fields.One2many('stock.move.line', 'move_id')
-    move_line_nosuggest_ids = fields.One2many('stock.move.line', 'move_id', domain=['|', ('product_qty', '=', 0.0), ('qty_done', '!=', 0.0)])
     origin_returned_move_id = fields.Many2one(
         'stock.move', 'Origin return move', copy=False, index=True,
         help='Move that created the return move', check_company=True)
@@ -160,16 +159,13 @@ class StockMove(models.Model):
         check_company=True)
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', help="Technical field depicting the warehouse to consider for the route selection on the next procurement (if any).")
     has_tracking = fields.Selection(related='product_id.tracking', string='Product with Tracking')
-    quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', digits='Product Unit of Measure', inverse='_quantity_done_set')
-    show_operations = fields.Boolean(related='picking_id.picking_type_id.show_operations', readonly=False)
-    show_details_visible = fields.Boolean('Details Visible', compute='_compute_show_details_visible')
+    quantity_done = fields.Float('Quantity Done', compute='_quantity_done_compute', digits='Product Unit of Measure')
     show_reserved_availability = fields.Boolean('From Supplier', compute='_compute_show_reserved_availability')
     picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
     product_type = fields.Selection(related='product_id.type', readonly=True)
     additional = fields.Boolean("Whether the move was added after the picking's confirmation", default=False)
     is_locked = fields.Boolean(compute='_compute_is_locked', readonly=True)
     is_initial_demand_editable = fields.Boolean('Is initial demand editable', compute='_compute_is_initial_demand_editable')
-    is_quantity_done_editable = fields.Boolean('Is quantity done editable', compute='_compute_is_quantity_done_editable')
     reference = fields.Char(compute='_compute_reference', string="Reference", store=True)
     has_move_lines = fields.Boolean(compute='_compute_has_move_lines')
     package_level_id = fields.Many2one('stock.package_level', 'Package Level', check_company=True)
@@ -202,26 +198,6 @@ class StockMove(models.Model):
             else:
                 move.is_locked = False
 
-    @api.depends('product_id', 'has_tracking')
-    def _compute_show_details_visible(self):
-        """ According to this field, the button that calls `action_show_details` will be displayed
-        to work on a move from its picking form view, or not.
-        """
-        has_package = self.user_has_groups('stock.group_tracking_lot')
-        multi_locations_enabled = self.user_has_groups('stock.group_stock_multi_locations')
-        consignment_enabled = self.user_has_groups('stock.group_tracking_owner')
-
-        show_details_visible = multi_locations_enabled or has_package
-
-        for move in self:
-            if not move.product_id:
-                move.show_details_visible = False
-            else:
-                move.show_details_visible = (((consignment_enabled and move.picking_id.picking_type_id.code != 'incoming') or
-                                             show_details_visible or move.has_tracking != 'none') and
-                                             (move.state != 'draft' or (move.picking_id.immediate_transfer and move.state == 'draft')) and
-                                             move.picking_id.picking_type_id.show_operations is False)
-
     def _compute_show_reserved_availability(self):
         """ This field is only of use in an attrs in the picking view, in order to hide the
         "available" column if the move is coming from a supplier.
@@ -238,22 +214,6 @@ class StockMove(models.Model):
                 move.is_initial_demand_editable = True
             else:
                 move.is_initial_demand_editable = False
-
-    @api.depends('state', 'picking_id', 'product_id')
-    def _compute_is_quantity_done_editable(self):
-        for move in self:
-            if not move.product_id:
-                move.is_quantity_done_editable = False
-            elif not move.picking_id.immediate_transfer and move.picking_id.state == 'draft':
-                move.is_quantity_done_editable = False
-            elif move.picking_id.is_locked and move.state in ('done', 'cancel'):
-                move.is_quantity_done_editable = False
-            elif move.show_details_visible:
-                move.is_quantity_done_editable = False
-            elif move.show_operations:
-                move.is_quantity_done_editable = False
-            else:
-                move.is_quantity_done_editable = True
 
     @api.depends('picking_id', 'name')
     def _compute_reference(self):
@@ -280,9 +240,9 @@ class StockMove(models.Model):
         """ This will return the move lines to consider when applying _quantity_done_compute on a stock.move.
         In some context, such as MRP, it is necessary to compute quantity_done on filtered sock.move.line."""
         self.ensure_one()
-        return self.move_line_ids or self.move_line_nosuggest_ids
+        return self.move_line_ids
 
-    @api.depends('move_line_ids.qty_done', 'move_line_ids.product_uom_id', 'move_line_nosuggest_ids.qty_done')
+    @api.depends('move_line_ids.qty_done', 'move_line_ids.product_uom_id')
     def _quantity_done_compute(self):
         """ This field represents the sum of the move lines `qty_done`. It allows the user to know
         if there is still work to do.
@@ -312,20 +272,6 @@ class StockMove(models.Model):
                 self.env['uom.uom'].browse(line_uom_id)._compute_quantity(qty, uom, round=False)
                 for line_uom_id, qty in rec.get(move.id, [])
             )
-
-    def _quantity_done_set(self):
-        quantity_done = self[0].quantity_done  # any call to create will invalidate `move.quantity_done`
-        for move in self:
-            move_lines = move._get_move_lines()
-            if not move_lines:
-                if quantity_done:
-                    # do not impact reservation here
-                    move_line = self.env['stock.move.line'].create(dict(move._prepare_move_line_vals(), qty_done=quantity_done))
-                    move.write({'move_line_ids': [(4, move_line.id)]})
-            elif len(move_lines) == 1:
-                move_lines[0].qty_done = quantity_done
-            else:
-                raise UserError(_("Cannot set the done quantity from this stock move, work directly with the move lines."))
 
     def _set_product_qty(self):
         """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
@@ -530,55 +476,6 @@ class StockMove(models.Model):
                 self.write({'delay_alert_date': previous_moves_date})
             else:
                 self.write({'delay_alert_date': False})
-
-    def action_show_details(self):
-        """ Returns an action that will open a form view (in a popup) allowing to work on all the
-        move lines of a particular move. This form view is used when "show operations" is not
-        checked on the picking type.
-        """
-        self.ensure_one()
-
-        picking_type_id = self.picking_type_id or self.picking_id.picking_type_id
-        
-        # If "show suggestions" is not checked on the picking type, we have to filter out the
-        # reserved move lines. We do this by displaying `move_line_nosuggest_ids`. We use
-        # different views to display one field or another so that the webclient doesn't have to
-        # fetch both.
-        if picking_type_id.show_reserved:
-            view = self.env.ref('stock.view_stock_move_operations')
-        else:
-            view = self.env.ref('stock.view_stock_move_nosuggest_operations')
-
-        return {
-            'name': _('Detailed Operations'),
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': 'stock.move',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
-            'target': 'new',
-            'res_id': self.id,
-            'context': dict(
-                self.env.context,
-                show_owner=self.picking_type_id.code != 'incoming',
-                show_lots_m2o=self.has_tracking != 'none' and (picking_type_id.use_existing_lots or self.state == 'done' or self.origin_returned_move_id.id),  # able to create lots, whatever the value of ` use_create_lots`.
-                show_lots_text=self.has_tracking != 'none' and picking_type_id.use_create_lots and not picking_type_id.use_existing_lots and self.state != 'done' and not self.origin_returned_move_id.id,
-                show_source_location=self.picking_type_id.code != 'incoming',
-                show_destination_location=self.picking_type_id.code != 'outgoing',
-                show_package=not self.location_id.usage == 'supplier',
-                show_reserved_quantity=self.state != 'done' and not self.picking_id.immediate_transfer and self.picking_type_id.code != 'incoming'
-            ),
-        }
-
-    def action_assign_serial_show_details(self):
-        """ On `self.move_line_ids`, assign `lot_name` according to
-        `self.next_serial` before returning `self.action_show_details`.
-        """
-        self.ensure_one()
-        if not self.next_serial:
-            raise UserError(_("You need to set a Serial Number before generating more."))
-        self._generate_serial_numbers()
-        return self.action_show_details()
 
     def action_assign_serial(self):
         """ Opens a wizard to assign SN's name on each move lines.
@@ -793,35 +690,6 @@ class StockMove(models.Model):
         self.name = product.partner_ref
         self.product_uom = product.uom_id.id
 
-    @api.onchange('move_line_ids', 'move_line_nosuggest_ids')
-    def onchange_move_line_ids(self):
-        if not self.picking_type_id.use_create_lots:
-            # This onchange manages the creation of multiple lot name. We don't
-            # need that if the picking type disallows the creation of new lots.
-            return
-
-        breaking_char = '\n'
-        if self.picking_type_id.show_reserved:
-            move_lines = self.move_line_ids
-        else:
-            move_lines = self.move_line_nosuggest_ids
-
-        for move_line in move_lines:
-            # Look if the `lot_name` contains multiple values.
-            if breaking_char in (move_line.lot_name or ''):
-                split_lines = move_line.lot_name.split(breaking_char)
-                split_lines = list(filter(None, split_lines))
-                move_line.lot_name = split_lines[0]
-                move_lines_commands = self._generate_serial_move_line_commands(
-                    split_lines[1:],
-                    origin_move_line=move_line,
-                )
-                if self.picking_type_id.show_reserved:
-                    self.update({'move_line_ids': move_lines_commands})
-                else:
-                    self.update({'move_line_nosuggest_ids': move_lines_commands})
-                break
-
     @api.onchange('product_uom')
     def onchange_product_uom(self):
         if self.product_uom.factor > self.product_id.uom_id.factor:
@@ -899,19 +767,19 @@ class StockMove(models.Model):
         :rtype: list
         """
         self.ensure_one()
-
-        # Select the right move lines depending of the picking type configuration.
         move_lines = self.env['stock.move.line']
-        if self.picking_type_id.show_reserved:
-            move_lines = self.move_line_ids.filtered(lambda ml: not ml.lot_id and not ml.lot_name)
+        # Select the right move lines depending of the picking type configuration.
+        if hasattr(origin_move_line, '_origin'):
+            move_lines = origin_move_line.picking_id.move_line_ids.filtered(lambda ml: not ml.lot_id and not ml.lot_name) - origin_move_line._origin
         else:
-            move_lines = self.move_line_nosuggest_ids.filtered(lambda ml: not ml.lot_id and not ml.lot_name)
+            move_lines = self.move_line_ids.filtered(lambda ml: not ml.lot_id and not ml.lot_name)
 
         if origin_move_line:
             location_dest = origin_move_line.location_dest_id
         else:
             location_dest = self.location_dest_id._get_putaway_strategy(self.product_id)
         move_line_vals = {
+            'picking_id': self.picking_id.id,
             'location_dest_id': location_dest.id or self.location_dest_id.id,
             'location_id': self.location_id.id,
             'product_id': self.product_id.id,

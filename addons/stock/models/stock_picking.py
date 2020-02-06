@@ -22,11 +22,6 @@ class PickingType(models.Model):
     _order = 'sequence, id'
     _check_company_auto = True
 
-    def _default_show_operations(self):
-        return self.user_has_groups('stock.group_production_lot,'
-                                    'stock.group_stock_multi_locations,'
-                                    'stock.group_tracking_lot')
-
     name = fields.Char('Operation Type', required=True, translate=True)
     color = fields.Integer('Color')
     sequence = fields.Integer('Sequence', help="Used to order the 'All Operations' kanban view")
@@ -57,13 +52,6 @@ class PickingType(models.Model):
     use_existing_lots = fields.Boolean(
         'Use Existing Lots/Serial Numbers', default=True,
         help="If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. ")
-    show_operations = fields.Boolean(
-        'Show Detailed Operations', default=_default_show_operations,
-        help="If this checkbox is ticked, the pickings lines will represent detailed stock operations. If not, the picking lines will represent an aggregate of detailed stock operations.")
-    show_reserved = fields.Boolean(
-        'Pre-fill Detailed Operations', default=True,
-        help="If this checkbox is ticked, Odoo will automatically pre-fill the detailed "
-        "operations with the corresponding products, locations and lot/serial numbers.")
 
     count_picking_draft = fields.Integer(compute='_compute_picking_count')
     count_picking_ready = fields.Integer(compute='_compute_picking_count')
@@ -167,11 +155,6 @@ class PickingType(models.Model):
     def _onchange_picking_code(self):
         warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.company_id.id)], limit=1)
         stock_location = warehouse.lot_stock_id
-        self.show_operations = self.code != 'incoming' and self.user_has_groups(
-            'stock.group_production_lot,'
-            'stock.group_stock_multi_locations,'
-            'stock.group_tracking_lot'
-        )
         if self.code == 'incoming':
             self.default_location_src_id = self.env.ref('stock.stock_location_suppliers').id
             self.default_location_dest_id = stock_location.id
@@ -192,11 +175,6 @@ class PickingType(models.Model):
             self.warehouse_id = warehouse
         else:
             self.warehouse_id = False
-
-    @api.onchange('show_operations')
-    def _onchange_show_operations(self):
-        if self.show_operations and self.code != 'incoming':
-            self.show_reserved = True
 
     def _get_action(self, action_xmlid):
         action = self.env.ref(action_xmlid).read()[0]
@@ -334,7 +312,6 @@ class Picking(models.Model):
         default=lambda self: self.env.user)
     move_line_ids = fields.One2many('stock.move.line', 'picking_id', 'Operations')
     move_line_ids_without_package = fields.One2many('stock.move.line', 'picking_id', 'Operations without package', domain=['|',('package_level_id', '=', False), ('picking_type_entire_packs', '=', False)])
-    move_line_nosuggest_ids = fields.One2many('stock.move.line', 'picking_id', domain=[('product_qty', '=', 0.0)])
     move_line_exist = fields.Boolean(
         'Has Pack Operations', compute='_compute_move_line_exist',
         help='Check the existence of pack operation on the picking')
@@ -361,10 +338,7 @@ class Picking(models.Model):
     is_locked = fields.Boolean(default=True, help='When the picking is not done this allows changing the '
                                'initial demand. When the picking is done this allows '
                                'changing the done quantities.')
-    # Used to search on pickings
     product_id = fields.Many2one('product.product', 'Product', related='move_lines.product_id', readonly=True)
-    show_operations = fields.Boolean(compute='_compute_show_operations')
-    show_reserved = fields.Boolean(related='picking_type_id.show_reserved')
     show_lots_text = fields.Boolean(compute='_compute_show_lots_text')
     has_tracking = fields.Boolean(compute='_compute_has_tracking')
     immediate_transfer = fields.Boolean(default=False)
@@ -385,20 +359,6 @@ class Picking(models.Model):
         delay_alert_date_data = {data['picking_id'][0]: data['delay_alert_date'] for data in delay_alert_date_data}
         for picking in self:
             picking.delay_alert_date = delay_alert_date_data.get(picking.id, False)
-
-    @api.depends('picking_type_id.show_operations')
-    def _compute_show_operations(self):
-        for picking in self:
-            if self.env.context.get('force_detailed_view'):
-                picking.show_operations = True
-                continue
-            if picking.picking_type_id.show_operations:
-                if (picking.state == 'draft' and picking.immediate_transfer) or picking.state != 'draft':
-                    picking.show_operations = True
-                else:
-                    picking.show_operations = False
-            else:
-                picking.show_operations = False
 
     @api.depends('move_line_ids', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
     def _compute_show_lots_text(self):
@@ -576,6 +536,25 @@ class Picking(models.Model):
                     'title': ("Warning for %s") % partner.name,
                     'message': partner.picking_warn_msg
                 }}
+
+    @api.onchange('move_line_ids_without_package')
+    def _onchange_move_line_ids(self):
+        if self.picking_type_id.use_create_lots:
+            breaking_char = '\n'
+            move_lines = self.move_line_ids_without_package
+            for move_line in move_lines:
+                # Look if the `lot_name` contains multiple values.
+                if breaking_char in (move_line.lot_name or ''):
+                    split_lines = move_line.lot_name.split(breaking_char)
+                    split_lines = list(filter(None, split_lines))
+                    move_line.lot_name = split_lines[0]
+                    if not move_line.move_id:
+                        continue
+                    move_lines_commands = move_line.move_id._generate_serial_move_line_commands(
+                        split_lines[1:],
+                        origin_move_line=move_line,
+                    )
+                    self.move_line_ids_without_package = move_lines_commands
 
     @api.model
     def create(self, vals):
@@ -1227,12 +1206,6 @@ class Picking(models.Model):
         self.ensure_one()
         if self.state not in ('done', 'cancel'):
             picking_move_lines = self.move_line_ids
-            if (
-                not self.picking_type_id.show_reserved
-                and not self.env.context.get('barcode_view')
-            ):
-                picking_move_lines = self.move_line_nosuggest_ids
-
             move_line_ids = picking_move_lines.filtered(lambda ml:
                 float_compare(ml.qty_done, 0.0, precision_rounding=ml.product_uom_id.rounding) > 0
                 and not ml.result_package_id

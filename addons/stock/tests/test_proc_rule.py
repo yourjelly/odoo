@@ -157,8 +157,8 @@ class TestProcRule(TransactionCase):
             'propagate_date_minimum_delta': 5,
             'location_id': self.ref('stock.stock_location_stock'),
             'location_dest_id': self.ref('stock.stock_location_output'),
-            'quantity_done': 10,
         })
+        move_orig._set_quantity_done(10)
         move_orig.date_expected -= timedelta(days=6)
         move_dest_initial_date = move_dest.date_expected
         move_orig_initial_date = move_orig.date_expected

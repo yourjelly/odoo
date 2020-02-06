@@ -240,7 +240,7 @@ class TestStockValuation(TransactionCase):
 
         picking1 = po1.picking_ids[0]
         move1 = picking1.move_lines[0]
-        move1.quantity_done = 15
+        move1._set_quantity_done(15)
         picking1.button_validate()
 
         # there should be only one move
@@ -272,7 +272,7 @@ class TestStockValuation(TransactionCase):
 
         picking1 = po1.picking_ids[0]
         move1 = picking1.move_lines[0]
-        move1.quantity_done = 5
+        move1._set_quantity_done(5)
         res_dict = picking1.button_validate()
         self.assertEqual(res_dict['res_model'], 'stock.backorder.confirmation')
         wizard = self.env[(res_dict.get('res_model'))].browse(res_dict.get('res_id')).with_context(res_dict['context'])
@@ -373,7 +373,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
         })
         po1.button_confirm()
         receipt_po1 = po1.picking_ids[0]
-        receipt_po1.move_lines.quantity_done = 10
+        receipt_po1.move_lines._set_quantity_done(10)
         receipt_po1.button_validate()
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
@@ -398,7 +398,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
         })
         po2.button_confirm()
         receipt_po2 = po2.picking_ids[0]
-        receipt_po2.move_lines.quantity_done = 10
+        receipt_po2.move_lines._set_quantity_done(10)
         receipt_po2.button_validate()
 
         move_form = Form(self.env['account.move'].with_context(default_move_type='in_invoice'))
@@ -456,7 +456,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_lines.quantity_done = 1
+        receipt.move_lines._set_quantity_done(1)
         receipt.button_validate()
 
         # Create an invoice with a different price
@@ -514,7 +514,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
         })
         po1.button_confirm()
         receipt_po1 = po1.picking_ids[0]
-        receipt_po1.move_lines.quantity_done = 10
+        receipt_po1.move_lines._set_quantity_done(10)
         receipt_po1.button_validate()
 
         # valuation of product1 should be 15 as the tax with no account set
@@ -874,9 +874,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
 
         today = date_delivery
         picking = po.picking_ids
-        (picking.move_lines
-            .filtered(lambda l: l.purchase_line_id == line_product_avg)
-            .write({'quantity_done': 1.0}))
+        picking.move_lines.filtered(lambda l: l.purchase_line_id == line_product_avg)._set_quantity_done(1)
 
         picking.button_validate()
         # 5 Units received at rate 0.7 = 42.86
@@ -1050,9 +1048,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
 
         today = date_delivery
         picking = po.picking_ids
-        (picking.move_lines
-            .filtered(lambda l: l.purchase_line_id == line_product_avg)
-            .write({'quantity_done': 5.0}))
+        picking.move_lines.filtered(lambda l: l.purchase_line_id == line_product_avg)._set_quantity_done(5)
 
         picking.button_validate()
         picking._action_done()  # Create Backorder
@@ -1082,9 +1078,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
 
         today = date_delivery1
         backorder_picking = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
-        (backorder_picking.move_lines
-            .filtered(lambda l: l.purchase_line_id == line_product_avg)
-            .write({'quantity_done': 5.0}))
+        backorder_picking.move_lines.filtered(lambda l: l.purchase_line_id == line_product_avg)._set_quantity_done(5)
         backorder_picking.button_validate()
         # 5 Units received at rate 0.7 (42.86) + 5 Units received at rate 0.8 (37.50) = 40.18
         self.assertAlmostEqual(product_avg.standard_price, 40.18)
@@ -1211,7 +1205,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_lines.quantity_done = 1
+        receipt.move_lines._set_quantity_done(1)
         receipt.button_validate()
 
         # Create an invoice with a different price and a discount
@@ -1258,7 +1252,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_lines.quantity_done = 1
+        receipt.move_lines._set_quantity_done(1)
         receipt.button_validate()
 
         # Create an invoice with a different price and a discount
@@ -1305,7 +1299,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
 
         # Receive the goods
         receipt = order.picking_ids[0]
-        receipt.move_lines.quantity_done = 1
+        receipt.move_lines._set_quantity_done(1)
         receipt.button_validate()
 
         # Create an invoice with a different price and a discount

@@ -1160,18 +1160,18 @@ class StockMove(SavepointCase):
 
         # Check it isn't possible to set any value to quantity_done
         with self.assertRaises(UserError):
-            move.quantity_done = 0.1
+            move.move_line_ids.qty_done = 0.1
             move._action_done()
 
         with self.assertRaises(UserError):
-            move.quantity_done = 1.1
+            move.move_line_ids.qty_done = 1.1
             move._action_done()
 
         with self.assertRaises(UserError):
-            move.quantity_done = 0.9
+            move.move_line_ids.qty_done = 0.9
             move._action_done()
 
-        move.quantity_done = 1
+        move.move_line_ids.qty_done = 1
         move._action_done()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.customer_location), 12.0)
 
@@ -2171,7 +2171,14 @@ class StockMove(SavepointCase):
         })
         move_out._action_confirm()
         move_out._action_assign()
-        move_out.quantity_done = 1.0
+        self.env['stock.move.line'].create({
+            'move_id': move_out.id,
+            'product_id': move_out.product_id.id,
+            'qty_done': 1,
+            'product_uom_id': move_out.product_uom.id,
+            'location_id': move_out.location_id.id,
+            'location_dest_id': move_out.location_dest_id.id,
+        })
         move_out._action_done()
         self.assertEqual(len(self.gather_relevant(self.product, self.pack_location)), 1.0)
 
@@ -2196,7 +2203,7 @@ class StockMove(SavepointCase):
 
         (move_stock_pack + move_pack_cust)._action_confirm()
         move_stock_pack._action_assign()
-        move_stock_pack.quantity_done = 2.0
+        move_stock_pack.move_line_ids.qty_done = 2.0
         move_stock_pack._action_done()
         self.assertEqual(len(move_pack_cust.move_line_ids), 1)
 
@@ -2235,10 +2242,17 @@ class StockMove(SavepointCase):
             'product_id': self.product.id,
             'product_uom': self.uom_unit.id,
             'product_uom_qty': 0.0,
-            'quantity_done': 1.0,
         })
         move3._action_confirm()
         move3._action_assign()
+        self.env['stock.move.line'].create({
+            'move_id': move3.id,
+            'product_id': move3.product_id.id,
+            'qty_done': 1,
+            'product_uom_id': move3.product_uom.id,
+            'location_id': move3.location_id.id,
+            'location_dest_id': move3.location_dest_id.id,
+        })
         move3._action_done()
         self.assertEqual(move3.state, 'done')
         quant = self.env['stock.quant']._gather(self.product, self.stock_location)
@@ -2413,7 +2427,7 @@ class StockMove(SavepointCase):
         })
         move1._action_confirm()
         move1._action_assign()
-        move1.quantity_done = 1
+        move1.move_line_ids.qty_done = 1
 
         # add a forced move line in `move1`
         move1.write({'move_line_ids': [(0, 0, {
@@ -3856,7 +3870,7 @@ class StockMove(SavepointCase):
         self.assertEqual(scrapped_move.scrap_ids.ids, [scrap.id], 'Wrong scrap linked to the move.')
         self.assertEqual(scrap.scrap_qty, 5, 'Scrap quantity has been modified and is not correct anymore.')
 
-        scrapped_move.quantity_done = 8
+        scrapped_move.move_line_ids.qty_done = 8
         self.assertEqual(scrap.scrap_qty, 8, 'Scrap quantity is not updated.')
 
     def test_scrap_5(self):
@@ -4330,7 +4344,7 @@ class StockMove(SavepointCase):
         })
         picking.action_confirm()
         picking.action_assign()
-        move1.quantity_done = 10
+        move1.move_line_ids.qty_done = 10
         picking._action_done()
 
         self.assertEqual(len(picking.move_lines), 1, 'One move should exist for the picking.')
@@ -4373,7 +4387,7 @@ class StockMove(SavepointCase):
         picking.action_confirm()
         picking.action_assign()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0)
-        move1.quantity_done = 1
+        move1.move_line_ids.qty_done = 1
         picking.put_in_pack()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0)
         self.assertEqual(len(picking.move_line_ids), 2)
@@ -4472,9 +4486,9 @@ class StockMove(SavepointCase):
         picking.action_assign()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product, self.stock_location), 0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(product1, self.stock_location), 0)
-        move1.quantity_done = 1
+        move1.move_line_ids.qty_done = 1
         picking.put_in_pack()
-        move2.quantity_done = 2
+        move2.move_line_ids.qty_done = 2
         picking.put_in_pack()
         self.assertEqual(len(picking.move_line_ids), 2)
         line1_result_package = picking.move_line_ids[0].result_package_id

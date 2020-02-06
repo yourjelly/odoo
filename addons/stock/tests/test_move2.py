@@ -639,7 +639,7 @@ class TestPickShip(TestStockCommon):
 
         # make some stock
         self.env['stock.quant']._update_available_quantity(self.productA, location, 10.0)
-        picking_pick.move_lines.quantity_done = 5.0
+        picking_pick.move_lines._set_quantity_done(5.0)
         backorder_wizard_values = picking_pick.button_validate()
         backorder_wizard = self.env[(backorder_wizard_values.get('res_model'))].browse(backorder_wizard_values.get('res_id')).with_context(backorder_wizard_values['context'])
         backorder_wizard.process()
@@ -657,7 +657,7 @@ class TestPickShip(TestStockCommon):
         picking_client.action_assign()
 
         back_order = self.env['stock.picking'].search([('backorder_id', '=', picking_pick.id)])
-        back_order.move_lines.quantity_done = 5
+        back_order.move_lines._set_quantity_done(5)
         back_order.button_validate()
 
         self.assertEqual(picking_client.move_lines.reserved_availability, 10, 'The total quantity should be reserved since everything is available.')
@@ -1043,7 +1043,7 @@ class TestSinglePicking(TestStockCommon):
             'location_dest_id': self.customer_location,
             'picking_type_id': self.picking_type_out,
         })
-        self.MoveObj.create({
+        m = self.MoveObj.create({
             'name': self.productA.name,
             'product_id': self.productA.id,
             'product_uom_qty': 5,
@@ -1053,6 +1053,7 @@ class TestSinglePicking(TestStockCommon):
             'location_id': self.stock_location,
             'location_dest_id': self.customer_location,
         })
+        m._set_quantity_done(10)
         stock_location = self.env['stock.location'].browse(self.stock_location)
         self.env['stock.quant']._update_available_quantity(self.productA, stock_location, 5)
         delivery.action_confirm()
@@ -1063,7 +1064,6 @@ class TestSinglePicking(TestStockCommon):
                 'name': self.productA.name,
                 'product_id': self.productA.id,
                 'product_uom_qty': 0,
-                'quantity_done': 10,
                 'state': 'assigned',
                 'product_uom': self.productA.uom_id.id,
                 'picking_id': delivery.id,
@@ -1071,6 +1071,7 @@ class TestSinglePicking(TestStockCommon):
                 'location_dest_id': self.customer_location,
             })]
         })
+        delivery.move_lines[-1]._set_quantity_done(10)
         delivery._action_done()
         self.assertEqual(len(delivery.move_lines), 2, 'Move should not be merged together')
         for move in delivery.move_lines:
@@ -1088,16 +1089,16 @@ class TestSinglePicking(TestStockCommon):
             'picking_type_id': self.picking_type_out,
         })
         product = self.kgB
-        self.MoveObj.create({
+        m = self.MoveObj.create({
             'name': product.name,
             'product_id': product.id,
             'product_uom_qty': 5.5,
-            'quantity_done': 5.95,
             'product_uom': product.uom_id.id,
             'picking_id': delivery.id,
             'location_id': self.stock_location,
             'location_dest_id': self.customer_location,
         })
+        m._set_quantity_done(5.95)
         stock_location = self.env['stock.location'].browse(self.stock_location)
         self.env['stock.quant']._update_available_quantity(product, stock_location, 5.5)
         delivery.action_confirm()
@@ -1193,8 +1194,8 @@ class TestSinglePicking(TestStockCommon):
 
         # Check reserved quantity
         self.assertEqual(move1.reserved_availability, 1.0)
-        self.assertEqual(len(move1.move_line_ids), 1)
-        self.assertEqual(move1.move_line_ids.product_qty, 1)
+        self.assertEqual(len(move1.move_line_ids), 2)
+        self.assertEqual(move1.move_line_ids[0].product_qty, 1)
 
         inventory = self.env['stock.inventory'].create({
             'name': 'remove product1',
@@ -1253,8 +1254,8 @@ class TestSinglePicking(TestStockCommon):
 
         # Check reserved quantity
         self.assertEqual(move1.reserved_availability, 1.0)
-        self.assertEqual(len(move1.move_line_ids), 1)
-        self.assertEqual(move1.move_line_ids.product_qty, 1)
+        self.assertEqual(len(move1.move_line_ids), 2)
+        self.assertEqual(move1.move_line_ids[0].product_qty, 1)
 
         inventory = self.env['stock.inventory'].create({
             'name': 'remove product1',
@@ -1320,8 +1321,8 @@ class TestSinglePicking(TestStockCommon):
 
         # Check reserved quantity
         self.assertEqual(move1.reserved_availability, 1.0)
-        self.assertEqual(len(move1.move_line_ids), 1)
-        self.assertEqual(move1.move_line_ids.product_qty, 1)
+        self.assertEqual(len(move1.move_line_ids), 2)
+        self.assertEqual(move1.move_line_ids[0].product_qty, 1)
 
         inventory = self.env['stock.inventory'].create({
             'name': 'remove product1',
@@ -1410,7 +1411,7 @@ class TestSinglePicking(TestStockCommon):
         })
 
         delivery_order.action_confirm()
-        delivery_order.move_lines.quantity_done = 2
+        delivery_order.move_lines._set_quantity_done(2)
         move_line = delivery_order.move_lines.move_line_ids
 
         # not lot_name set, should raise
@@ -1450,7 +1451,7 @@ class TestSinglePicking(TestStockCommon):
         })
 
         delivery_order.action_confirm()
-        delivery_order.move_lines.quantity_done = 2
+        delivery_order.move_lines._set_quantity_done(2)
         move_line = delivery_order.move_lines.move_line_ids
 
         # not lot_name set, should raise
@@ -1490,7 +1491,7 @@ class TestSinglePicking(TestStockCommon):
         })
 
         delivery_order.action_confirm()
-        delivery_order.move_lines.quantity_done = 2
+        delivery_order.move_lines._set_quantity_done(2)
         move_line = delivery_order.move_lines.move_line_ids
 
         # not lot_name set, should raise
@@ -1634,8 +1635,8 @@ class TestSinglePicking(TestStockCommon):
             'location_dest_id': self.stock_location,
             'origin': 'PO0001'
         })
-        move_1.quantity_done = 5
-        move_2.quantity_done = 5
+        move_1._set_quantity_done(5)
+        move_2._set_quantity_done(5)
         receipt.button_validate()
         self.assertEqual(len(receipt.move_lines), 2, 'Moves were not merged')
 
@@ -1764,7 +1765,7 @@ class TestSinglePicking(TestStockCommon):
         })
         delivery_order.action_confirm()
         delivery_order.action_assign()
-        move_a.quantity_done = 1
+        move_a._set_quantity_done(1)
         delivery_order.button_validate()
 
         self.assertEqual(move_a.state, 'done')
@@ -1817,8 +1818,8 @@ class TestSinglePicking(TestStockCommon):
             'location_dest_id': self.stock_location,
         })
         receipt.action_confirm()
-        move_1.quantity_done = 10
-        move_2.quantity_done = 10
+        move_1._set_quantity_done(10)
+        move_2._set_quantity_done(10)
         receipt.button_validate()
         self.assertEqual(self.productA.qty_available, 10)
         self.assertEqual(self.productB.qty_available, 10)
@@ -1966,7 +1967,7 @@ class TestSinglePicking(TestStockCommon):
         receipt_form.location_id = supplier_location
         receipt_form.location_dest_id = stock_location
         receipt = receipt_form.save()
-        with receipt_form.move_line_nosuggest_ids.new() as move_line:
+        with receipt_form.move_line_ids_without_package.new() as move_line:
             move_line.product_id = self.productA
 
         receipt = receipt_form.save()

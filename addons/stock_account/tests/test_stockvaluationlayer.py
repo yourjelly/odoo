@@ -91,7 +91,7 @@ class TestStockValuationCommon(SavepointCase):
                 'location_id': out_move.location_id.id,
                 'location_dest_id': out_move.location_dest_id.id,
             })
-        out_move.move_line_ids.qty_done = quantity
+        out_move.move_line_ids[-1].qty_done = quantity
         out_move._action_done()
 
         self.days += 1

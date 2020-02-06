@@ -65,14 +65,14 @@ class TestLifoPrice(StockAccountTestCommon):
         self.assertEqual(purchase_order_lifo1.state, 'purchase')
 
         # Process the receipt of purchase order 1
-        purchase_order_lifo1.picking_ids[0].move_lines.quantity_done = purchase_order_lifo1.picking_ids[0].move_lines.product_qty
+        purchase_order_lifo1.picking_ids[0].move_lines._set_quantity_done(purchase_order_lifo1.picking_ids[0].move_lines.product_qty)
         purchase_order_lifo1.picking_ids[0].button_validate()
 
         # I confirm the second purchase order
         purchase_order_lifo2.button_confirm()
 
         # Process the receipt of purchase order 2
-        purchase_order_lifo2.picking_ids[0].move_lines.quantity_done = purchase_order_lifo2.picking_ids[0].move_lines.product_qty
+        purchase_order_lifo2.picking_ids[0].move_lines._set_quantity_done(purchase_order_lifo2.picking_ids[0].move_lines.product_qty)
         purchase_order_lifo2.picking_ids[0].button_validate()
 
         # Let us send some goods
@@ -81,9 +81,9 @@ class TestLifoPrice(StockAccountTestCommon):
         out_form.immediate_transfer = True
         with out_form.move_ids_without_package.new() as move:
             move.product_id = product_lifo_icecream
-            move.quantity_done = 20.0
             move.date_expected = fields.Datetime.now()
         outgoing_lifo_shipment = out_form.save()
+        outgoing_lifo_shipment.move_lines._set_quantity_done(20)
 
         # I assign this outgoing shipment
         outgoing_lifo_shipment.action_assign()

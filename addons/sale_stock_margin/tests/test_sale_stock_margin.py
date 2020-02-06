@@ -72,7 +72,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
         self.assertEqual(order_line.purchase_price, 32)
         self.assertAlmostEqual(sale_order.margin, 36)
 
-        sale_order.picking_ids.move_lines.quantity_done = 2
+        sale_order.picking_ids.move_lines._set_quantity_done(2)
         sale_order.picking_ids.button_validate()
 
         self.assertAlmostEqual(order_line.purchase_price, 24.5)

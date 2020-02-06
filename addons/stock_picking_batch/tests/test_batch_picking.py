@@ -80,8 +80,8 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
         self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.picking_client_1.move_lines.quantity_done = 10
-        self.picking_client_2.move_lines.quantity_done = 10
+        self.picking_client_1.move_lines._set_quantity_done(10)
+        self.picking_client_2.move_lines._set_quantity_done(10)
         self.batch.action_done()
 
         self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
@@ -145,8 +145,8 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
         self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.picking_client_1.move_lines.quantity_done = 5
-        self.picking_client_2.move_lines.quantity_done = 10
+        self.picking_client_1.move_lines._set_quantity_done(5)
+        self.picking_client_2.move_lines._set_quantity_done(10)
 
         # There should be a wizard asking to process picking without quantity done
         back_order_wizard_dict = self.batch.action_done()
@@ -225,7 +225,7 @@ class TestBatchPicking(TransactionCase):
         self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
         self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.picking_client_1.move_lines.quantity_done = 5
+        self.picking_client_1.move_lines._set_quantity_done(5)
         # There should be a wizard asking to process picking without quantity done
         immediate_transfer_wizard_dict = self.batch.action_done()
         self.assertTrue(immediate_transfer_wizard_dict)

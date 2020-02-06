@@ -48,8 +48,6 @@
                                 <field name="code"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                                 <field attrs='{"invisible": [("code", "not in", ["incoming", "outgoing", "internal"])]}' name="return_picking_type_id"/>
-                                <field name="show_operations"/>
-                                <field name="show_reserved" attrs="{'invisible': [('code', '!=', 'incoming')]}"/>
                             </group>
                         </group>
                         <group>
@@ -228,8 +226,6 @@
                 <field name="show_lots_text" invisible="1"/>
                 <field name="immediate_transfer" invisible="1"/>
                 <field name="picking_type_code" invisible="1"/>
-                <field name="show_operations" invisible="1" readonly="1"/>
-                <field name="show_reserved" invisible="1" readonly="1"/>
                 <field name="move_line_exist" invisible="1"/>
                 <field name="has_packages" invisible="1"/>
                 <field name="picking_type_entire_packs" invisible="1"/>
@@ -272,7 +268,7 @@
                             type="object"
                             help="List view of operations"
                             groups="base.group_no_one"
-                            attrs="{'invisible': ['|', '&amp;', ('show_operations', '=', True), '|', ('is_locked', '=', True), ('state', '=', 'done'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"
+                            attrs="{'invisible': [('state', '=', 'done'), ('is_locked', '=', True)]}"
                             context="{'picking_type_code': picking_type_code, 'default_picking_id': id, 'form_view_ref':'stock.view_move_form', 'address_in_id': partner_id, 'default_picking_type_id': picking_type_id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id}">
                             <div class="o_form_field o_stat_info">
                                 <span class="o_stat_text">Operations</span>
@@ -312,27 +308,11 @@
                         </group>
                     </group>
                     <notebook>
-                        <!-- Reservation hidden -->
-                        <page string="Detailed Operations"
-                            name="detailed_operations_hidden"
-                            attrs="{'invisible': ['|', ('show_operations', '=', False), ('show_reserved', '=', True)]}">
-                            <field name="move_line_nosuggest_ids"
-                                   attrs="{'readonly': ['|', '|', ('show_operations', '=', False), ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"
-                                   context="{'tree_view_ref': 'stock.view_stock_move_line_detailed_operation_tree', 'default_picking_id': id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}"/>
-                               <field name="package_level_ids_details"
-                                   context="{'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}"
-                                   attrs="{'readonly': [('state', '=', 'done')], 'invisible': ['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', False)]}" />
-                            <button class="oe_highlight" name="put_in_pack" type="object" string="Put in Pack" attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}" groups="stock.group_tracking_lot"/>
-                        </page>
-
-                        <!-- Reservation displayed -->
-                        <page string="Detailed Operations"
-                            name="detailed_operations_shown"
-                            attrs="{'invisible': ['|', ('show_operations', '=', False), ('show_reserved', '=', False)]}">
+                        <page string="Detailed Operations" name="detailed_operations_shown">
                             <field name="move_line_ids_without_package"
-                                   attrs="{'readonly': ['|', '|', ('show_operations', '=', False), ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"
+                                   attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"
                                    context="{'tree_view_ref': 'stock.view_stock_move_line_detailed_operation_tree', 'default_picking_id': id, 'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}"/>
-                            <field name="package_level_ids_details" context="{'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}" attrs="{'readonly': [('state', '=', 'done')], 'invisible': ['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', False)]}" />
+                            <field name="package_level_ids_details" context="{'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}" attrs="{'readonly': [('state', '=', 'done')], 'invisible': [('picking_type_entire_packs', '=', False)]}" />
                             <button class="oe_highlight" name="put_in_pack" type="object" string="Put in Pack" attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}" groups="stock.group_tracking_lot"/>
                         </page>
 
@@ -348,9 +328,7 @@
                                     <field name="scrapped" invisible="1"/>
                                     <field name="picking_code" invisible="1"/>
                                     <field name="product_type" invisible="1"/>
-                                    <field name="show_details_visible" invisible="1"/>
                                     <field name="show_reserved_availability" invisible="1"/>
-                                    <field name="show_operations" invisible="1" readonly="1"/>
                                     <field name="additional" invisible="1"/>
                                     <field name="has_move_lines" invisible="1"/>
                                     <field name="is_locked" invisible="1"/>
@@ -359,20 +337,17 @@
                                     <field name="display_assign_serial" invisible="1"/>
                                     <field name="product_id" required="1" attrs="{'readonly': ['|', '&amp;', ('state', '!=', 'draft'), ('additional', '=', False), ('has_move_lines', '=', True)]}"/>
                                     <field name="description_picking" string="Description" optional="hide"/>
-                                    <field name="date_expected" optional="hide" attrs="{'readonly': [('show_operations', '=', True), ('is_locked', '=', True)]}"/>
+                                    <field name="date_expected" optional="hide" attrs="{'readonly': [('is_locked', '=', True)]}"/>
                                     <field name="is_initial_demand_editable" invisible="1"/>
-                                    <field name="is_quantity_done_editable" invisible="1"/>
-                                    <field name="product_uom_qty" string="Demand" attrs="{'column_invisible': [('parent.immediate_transfer', '=', True)], 'readonly': ['|', ('is_initial_demand_editable', '=', False), '&amp;', ('show_operations', '=', True), ('is_locked', '=', True)]}"/>
+                                    <field name="product_uom_qty" string="Demand" attrs="{'column_invisible': [('parent.immediate_transfer', '=', True)], 'readonly': [('is_locked', '=', True)]}"/>
                                     <field name="reserved_availability" string="Reserved" attrs="{'column_invisible': (['|','|', ('parent.state','=', 'done'), ('parent.picking_type_code', '=', 'incoming'), ('parent.immediate_transfer', '=', True)])}"/>
-                                    <field name="quantity_done" string="Done" attrs="{'readonly': [('is_quantity_done_editable', '=', False)]}"/>
+                                    <field name="quantity_done" string="Done"/>
                                     <field name="product_uom" attrs="{'readonly': [('state', '!=', 'draft'), ('additional', '=', False)]}" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
-                                    <button name="action_show_details" string="Register lots, packs, location" type="object" icon="fa-list" width="0.1"
-                                            attrs="{'invisible': [('show_details_visible', '=', False)]}" options='{"warn": true}'/>
                                     <button name="action_assign_serial" type="object"
                                             icon="fa-plus-square"
                                             width="0.1"
                                             role="img" title="Assign Serial Numbers"
-                                            attrs="{'invisible': ['|', ('display_assign_serial', '=', False), ('show_operations', '=', False)]}"/>
+                                            attrs="{'invisible': [('display_assign_serial', '=', False)]}"/>
                                 </tree>
                                 <form string="Stock Moves">
                                     <header>
@@ -385,17 +360,16 @@
                                         <field name="company_id" invisible="1"/>
                                         <field name="product_id" required="1" attrs="{'readonly': ['|', '&amp;', ('state', '!=', 'draft'), ('additional', '=', False), ('has_move_lines', '=', True)]}"/>
                                         <field name="is_initial_demand_editable" invisible="1"/>
-                                        <field name="is_quantity_done_editable" invisible="1"/>
-                                        <field name="product_uom_qty" attrs="{'invisible': [('parent.immediate_transfer', '=', True)], 'readonly': [('is_initial_demand_editable', '=', False)]}"/>
+                                        <field name="product_uom_qty" attrs="{'invisible': [('parent.immediate_transfer', '=', True)]}"/>
                                         <field name="reserved_availability" string="Reserved" attrs="{'invisible': (['|','|', ('parent.state','=', 'done'), ('parent.picking_type_code', '=', 'incoming'), ('parent.immediate_transfer', '=', True)])}"/>
-                                        <field name="quantity_done" string="Done" attrs="{'readonly': [('is_quantity_done_editable', '=', False)]}"/>
+                                        <field name="quantity_done" string="Done"/>
                                         <field name="product_uom" attrs="{'readonly': [('state', '!=', 'draft'), ('additional', '=', False)]}" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="uom.group_uom"/>
                                         <field name="description_picking" string="Description"/>
                                     </group>
                                 </form>
                             </field>
                             <field name="id" invisible="1"/>
-                            <field name="package_level_ids" context="{'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}" attrs="{'readonly': [('state', '=', 'done')], 'invisible': ['|', ('picking_type_entire_packs', '=', False), ('show_operations', '=', True)]}" />
+                            <field name="package_level_ids" context="{'default_location_id': location_id, 'default_location_dest_id': location_dest_id, 'default_company_id': company_id}" attrs="{'readonly': [('state', '=', 'done')], 'invisible': [('picking_type_entire_packs', '=', False)]}" />
                             <button class="oe_highlight" name="put_in_pack" type="object" string="Put in Pack" attrs="{'invisible': [('state', 'in', ('draft', 'done', 'cancel'))]}" groups="stock.group_tracking_lot"/>
                         </page>
                         <page string="Additional Info" name="extra">

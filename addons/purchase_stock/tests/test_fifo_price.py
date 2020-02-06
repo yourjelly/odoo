@@ -252,7 +252,7 @@ class TestFifoPrice(PurchaseTestCommon, StockAccountTestCommon):
 
         # Process the delivery of the first outgoing shipment
         outgoing_shipment_neg.action_confirm()
-        outgoing_shipment_neg.move_lines[0].quantity_done = 100.0
+        outgoing_shipment_neg.move_lines[0]._set_quantity_done(100)
         outgoing_shipment_neg._action_done()
 
         # Check qty available = -100
@@ -278,7 +278,7 @@ class TestFifoPrice(PurchaseTestCommon, StockAccountTestCommon):
 
         # Process the delivery of the outgoing shipments
         outgoing_shipment_neg2.action_confirm()
-        outgoing_shipment_neg2.move_lines[0].quantity_done = 400.0
+        outgoing_shipment_neg2.move_lines[0]._set_quantity_done(400.0)
         outgoing_shipment_neg2._action_done()
 
         # Check qty available = -500
