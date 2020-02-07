@@ -8,35 +8,6 @@ odoo.define('web.test_env', async function (require) {
     const session = require('web.session');
 
     /**
-     * Wrap the target object in a Proxy, giving it a generic getter that will
-     * throw an error instead of returning `undefined` in case the property has
-     * not been set.
-     *
-     * @param {Object} target
-     * @param {string} name
-     * @returns {Proxy}
-     */
-    function _proxify(target, name) {
-        for (const prop in target) {
-            if (
-                target.hasOwnProperty(prop) &&
-                typeof target[prop] === 'object' &&
-                target[prop] !== null
-            ) {
-                target[prop] = _proxify(target[prop], `${name}.${prop}`);
-            }
-        }
-        return new Proxy(target, {
-            get(object, property) {
-                if (typeof property === 'string' && !(property in object)) {
-                    throw new Error(`Property "${property}" not implemented in "${name}".`);
-                }
-                return object[property];
-            },
-        });
-    }
-
-    /**
      * Creates a test environment with the given environment object.
      * Any access to a key that has not been explicitly defined in the given environment object
      * will result in an error.
