@@ -10,16 +10,12 @@ odoo.define('web.test_utils_create', function (require) {
  * testUtils file.
  */
 
-var AbstractAction = require('web.AbstractAction');
-var ActionManager = require('web.ActionManager');
 const basic_fields = require('web.basic_fields');
 var ControlPanelView = require('web.ControlPanelView');
 var concurrency = require('web.concurrency');
 const core = require('web.core');
 var DebugManager = require('web.DebugManager.Backend');
 var dom = require('web.dom');
-const makeTestEnvironment = require('web.test_env');
-const MockServer = require('web.MockServer');
 const SystrayMenu = require('web.SystrayMenu');
 var testUtilsAsync = require('web.test_utils_async');
 var testUtilsMock = require('web.test_utils_mock');
@@ -27,12 +23,9 @@ var Widget = require('web.Widget');
 var WebClient = require('web.WebClient');
 
 
-const AbstractStorageService = require('web.AbstractStorageService');
-const RamStorage = require('web.RamStorage');
-
 const DebouncedField = basic_fields.DebouncedField;
 
-const { Component, hooks, tags } = owl;
+const { Component } = owl;
 
 
 /**
@@ -123,87 +116,6 @@ async function createWebClient(params) {
     await webClient.mount(target);
     return webClient;
 }
-
-/**
- * Create and return an instance of ActionManager with a mocked environment. For
- * instance, all rpcs are going through a mock method using the data, actions
- * and archs objects as sources.
- *
- * @param {Object} [params]
- * @param {Object} [params.actions] the actions given to the mock server
- * @param {Object} [params.archs] this archs given to the mock server
- * @param {Object} [params.data] the business data given to the mock server
- * @param {Object} [params.menus] the business data given to the mock server
- * @param {boolean} [params.debug]
- * @param {function} [params.mockRPC]
- * @returns {ActionManager}
- */
-// async function createActionManager(params) {
-//     params = params || {};
-//     const target = prepareTarget(params.debug);
-//     Component.env = testUtilsMock.getMockedOwlEnv(params);
-
-//     // define Parent component, embedding an ActionManager
-//     class Parent extends Component {
-//         constructor() {
-//             super(...arguments);
-//             this.actionManager = hooks.useRef('actionManager');
-//         }
-//     }
-//     Parent.components = { ActionManager };
-//     Parent.template = tags.xml`
-//         <div class="o_web_client">
-//             <ActionManager t-ref="actionManager"/>
-//         </div>`;
-//     // FIXME: seeems wrong
-//     // if (config.device.isMobile) {
-//     //     parent.el.classList.add('o_touch_device');
-//     // }
-
-//     // instantiation
-//     const parent = new Parent();
-//     await parent.mount(target);
-//     const actionManager = parent.actionManager.comp;
-
-//     // patch actionManager's destroy to properly destroy parent
-//     const originalDestroy = actionManager.destroy;
-//     actionManager.destroy = function () {
-//         actionManager.destroy = originalDestroy;
-//         parent.destroy();
-//     };
-
-//     return actionManager;
-
-//     // when 'document' addon is installed, the sidebar does a 'search_read' on
-//     // model 'ir_attachment' each time a record is open, so we monkey-patch
-//     // 'mockRPC' to mute those RPCs, so that the tests can be written uniformly,
-//     // whether or not 'document' is installed
-//     // var mockRPC = params.mockRPC;
-//     // _.extend(params, {
-//     //     mockRPC: function (route, args) {
-//     //         if (args.model === 'ir.attachment') {
-//     //             return Promise.resolve([]);
-//     //         }
-//     //         if (mockRPC) {
-//     //             return mockRPC.apply(this, arguments);
-//     //         }
-//     //         return this._super.apply(this, arguments);
-//     //     },
-//     // });
-//     // testUtilsMock.addMockEnvironment(widget, _.defaults(params, { debounce: false }));
-
-//     // var userContext = params.context && params.context.user_context || {};
-//     // var actionManager = new ActionManager(widget, userContext);
-
-//     // var fragment = document.createDocumentFragment();
-//     // return actionManager.appendTo(fragment).then(function () {
-//     //     dom.append(widget.$el, fragment, {
-//     //         callbacks: [{ widget: actionManager }],
-//     //         in_DOM: true,
-//     //     });
-//     //     return actionManager;
-//     // });
-// }
 
 /**
  * create a view from various parameters.  Here, a view means a javascript
