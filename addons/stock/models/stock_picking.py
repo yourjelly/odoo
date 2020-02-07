@@ -485,9 +485,12 @@ class Picking(models.Model):
             picking.move_lines.write({'date_expected': picking.scheduled_date})
 
     def _has_scrap_move(self):
+        move_datas = self.env['stock.move'].read_group(
+            [('picking_id', 'in', self.ids), ('scrapped', '=', True)],
+            ['picking_id'], ['picking_id'])
+        mapped_data = [m['picking_id'][0] for m in move_datas]
         for picking in self:
-            # TDE FIXME: better implementation
-            picking.has_scrap_move = bool(self.env['stock.move'].search_count([('picking_id', '=', picking.id), ('scrapped', '=', True)]))
+            picking.has_scrap_move = picking.id in mapped_data
 
     def _compute_move_line_exist(self):
         for picking in self:
