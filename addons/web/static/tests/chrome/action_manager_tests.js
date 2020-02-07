@@ -19,11 +19,12 @@ const Widget = require('web.Widget');
 
 const { createWebClient, nextTick } = testUtils;
 
-const doAction = (action, options) => {
+const doAction = testUtils.doAction;
+/*const doAction = (action, options) => {
     const env = owl.Component.env;
     env.bus.trigger('do-action', {action, options});
     return nextTick();
-};
+};*/
 
 QUnit.module('ActionManager', {
     beforeEach: function () {

@@ -87,6 +87,12 @@ async function createWebClient(params) {
         _getWindowHash() {return ''},
         _setWindowHash() {},
         _setWindowTitle() {},
+        $(selector) {
+            if (!selector) {
+                return this.el;
+            }
+            return $(this.el).find(selector);
+        }
     }
     if (params.webClient) {
         Object.assign(patchWC, params.webClient);

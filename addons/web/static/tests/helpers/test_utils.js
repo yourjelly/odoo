@@ -138,6 +138,11 @@ return Promise.all([
         nextTick: testUtilsAsync.nextTick,
         prepareTarget: testUtilsCreate.prepareTarget,
         returnAfterNextAnimationFrame: testUtilsDom.returnAfterNextAnimationFrame,
+        doAction: (action, options) => {
+            const env = owl.Component.env;
+            env.bus.trigger('do-action', {action, options});
+            return testUtilsAsync.nextTick();
+        },
 
         // backward-compatibility
         addMockEnvironment: deprecated(testUtilsMock.addMockEnvironment, 'mock'),
