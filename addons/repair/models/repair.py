@@ -203,10 +203,6 @@ class Repair(models.Model):
                 raise UserError(_('You can not delete a repair order which is linked to an invoice which has been posted once.'))
         return super().unlink()
 
-    def button_dummy(self):
-        # TDE FIXME: this button is very interesting
-        return True
-
     def action_repair_cancel_draft(self):
         if self.filtered(lambda repair: repair.state != 'cancel'):
             raise UserError(_("Repair must be canceled in order to reset it to draft."))
