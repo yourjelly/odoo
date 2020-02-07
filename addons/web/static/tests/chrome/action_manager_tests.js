@@ -4175,7 +4175,11 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.test('doAction resolved with an action', async function (assert) {
+    QUnit.skip('doAction resolved with an action', async function (assert) {
+        // We could quite easily do something equivalent, with an success callback
+        // given in the do-action event payload. However, I'm not sure it's still
+        // useful, so if it is not strictly necessary, I would not re-implement
+        // the feature for now
         assert.expect(4);
 
         this.actions.push({
