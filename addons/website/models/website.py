@@ -810,7 +810,7 @@ class Website(models.Model):
         if query_string:
             domain += [('url', 'like', query_string)]
 
-        pages = self.get_website_pages(domain)
+        pages = self.sudo().get_website_pages(domain)
 
         for page in pages:
             record = {'loc': page['url'], 'id': page['id'], 'name': page['name']}
