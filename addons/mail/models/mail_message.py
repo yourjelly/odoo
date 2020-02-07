@@ -182,8 +182,8 @@ class Message(models.Model):
         """ Compute if the message is starred by the current user. """
         # TDE FIXME: use SQL
         starred = self.sudo().filtered(lambda msg: self.env.user.partner_id in msg.starred_partner_ids)
-        for message in self:
-            message.starred = message in starred
+        starred.starred = True
+        (self-starred).starred = False
 
     @api.model
     def _search_starred(self, operator, operand):
@@ -192,8 +192,8 @@ class Message(models.Model):
         return [('starred_partner_ids', 'not in', [self.env.user.partner_id.id])]
 
     def _compute_need_moderation(self):
-        for message in self:
-            message.need_moderation = False
+        # This doesn't seem to be extended anywhere (and never set to True)
+        self.need_moderation = False
 
     @api.model
     def _search_need_moderation(self, operator, operand):
