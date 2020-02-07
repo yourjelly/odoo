@@ -62,6 +62,7 @@ class IrFieldsConverter(models.AbstractModel):
         """
         # make sure model is new api
         model = self.env[model._name]
+        full_data = self._context.get('data', {})
 
         converters = {
             name: self.to_field(model, field, fromtype)
@@ -85,6 +86,22 @@ class IrFieldsConverter(models.AbstractModel):
                             w = ImportWarning(w)
                         log(field, w)
                 except ValueError as e:
+                    if isinstance(value[0], str):
+                        values = value[0]
+                    else:
+                        values = [value for value in value[0].values()]
+                    index = -1
+                    for d in full_data:
+                        if values[0] in d and isinstance(values, list):
+                            index = full_data.index(d)
+                            full_data[index][full_data[index].index(values[0])] = ''
+                            break
+                        elif values in d:
+                            index = full_data.index(d)
+                            full_data[index][full_data[index].index(values)] = ''
+                            break
+                    if index > -1 and len(e.args) > 1:
+                        e.args[1]['index'] = index + 1
                     log(field, e)
             return converted
 

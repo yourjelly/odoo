@@ -679,7 +679,7 @@ class TestBatching(TransactionCase):
         )
         self.assertFalse(results['messages'])
         self.assertEqual(len(results['ids']), 1, "should have imported the first record in full, got %s" % results['ids'])
-        self.assertEqual(results['nextrow'], 0)
+        self.assertEqual(results['nextrow'], 10)
 
         results = import_wizard.do(
             ['name', 'value/value'], [],
@@ -687,7 +687,7 @@ class TestBatching(TransactionCase):
         )
         self.assertFalse(results['messages'])
         self.assertEqual(len(results['ids']), 2, "should have importe the first two records, got %s" % results['ids'])
-        self.assertEqual(results['nextrow'], 0)
+        self.assertEqual(results['nextrow'], 20)
 
 
     def test_batches(self):
@@ -729,7 +729,7 @@ g,g@example.com
         results = import_wizard.do(['name', 'email'], [], {**opts, 'limit': 10, 'skip': 3})
         self.assertFalse(results['messages'])
         self.assertEqual(len(results['ids']), 4)
-        self.assertEqual(results['nextrow'], 7)
+        self.assertEqual(results['nextrow'], 0)
         partners_3 = self.env['res.partner'].search([]) - (partners_before | partners_1 | partners_2)
         self.assertEqual(partners_3.mapped('name'), ['d', 'e', 'f', 'g'])
 

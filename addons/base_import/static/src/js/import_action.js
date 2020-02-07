@@ -796,12 +796,12 @@ var DataImport = AbstractAction.extend({
                     if (results.name.length > rows.from && results.name[rows.from] !== '') {
                         rowName = _.str.sprintf(' (%s)', results.name[rows.from]);
                     }
-                    if (from === to) {
-                        return _.str.sprintf(_t("at row %d%s"), from, rowName);
-                    }
+                    // if (from === to) {
+                    //     return _.str.sprintf(_t("%s"), rowName);
+                    // }
                     // return _.str.sprintf(_t("between rows %d and %d"),
                     //                      from, to);
-                        return _.str.sprintf(_t("at row %d%s"), results.skip-1, rowName);
+                    return _.str.sprintf(_t("%s"), rowName);
                 },
                 at_multi: function (rows) {
                     var from = rows.from + offset;
@@ -810,11 +810,12 @@ var DataImport = AbstractAction.extend({
                     if (results.name.length > rows.from && results.name[rows.from] !== '') {
                         rowName = _.str.sprintf(' (%s)', results.name[rows.from]);
                     }
-                    if (from === to) {
-                        return _.str.sprintf(_t("Row %d%s"), from, rowName);
-                    }
-                    return _.str.sprintf(_t("Between rows %d and %d"),
-                                         from, to);
+                    // if (from === to) {
+                    //     return _.str.sprintf(_t("Row %s"), rowName);
+                    // }
+                    // return _.str.sprintf(_t("Between rows %d and %d"),
+                    //                      from, to);
+                    return _.str.sprintf(_t("%s"), rowName);
                 },
                 at_multi_header: function (numberLines) {
                     return _.str.sprintf(_t("at %d different rows:"),

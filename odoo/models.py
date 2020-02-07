@@ -1001,7 +1001,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             limit = float('inf')
         extracted = flush_self._extract_records(fields, data, log=messages.append, limit=limit)
 
-        converted = flush_self._convert_records(extracted, log=messages.append)
+        converted = flush_self.with_context(data=data)._convert_records(extracted, log=messages.append)
 
         info = {'rows': {'to': -1}}
         for id, xid, record, info in converted:
@@ -1020,7 +1020,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             self.pool.reset_changes()
 
         nextrow = info['rows']['to'] + 1
-        if nextrow > limit:
+        if nextrow < limit:
             nextrow = 0
         return {
             'ids': ids,
@@ -1117,11 +1117,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         :returns: a list of triplets of (id, xid, record)
         :rtype: list((int|None, str|None, dict))
         """
+        data = self._context.get('data', {})
         field_names = {name: field.string for name, field in self._fields.items()}
         if self.env.lang:
             field_names.update(self.env['ir.translation'].get_field_string(self._name))
 
-        convert = self.env['ir.fields.converter'].for_model(self)
+        convert = self.env['ir.fields.converter'].with_context(data=data).for_model(self)
 
         def _log(base, record, field, exception):
             type = 'warning' if isinstance(exception, Warning) else 'error'

@@ -207,6 +207,10 @@
     </t>
     <t t-name="ImportView.error.multi.body">
         <span class="oe_import_report_message">
+            <t>at row
+                <t t-if="error.rows.from + 1 != error.index" t-esc="error.index + error.rows.from"/>
+                <t t-else="" t-esc="error.index"/>
+            </t>
             <t t-esc="at_multi(error.rows)"/>
         </span>
     </t>
@@ -214,6 +218,10 @@
         <span class="oe_import_report_message">
             <t t-esc="error.message"/>
         </span>
+        <t>at row
+            <t t-if="error.rows.from + 1 != error.index" t-esc="error.index + error.rows.from"/>
+            <t t-else="" t-esc="error.index"/>
+        </t>
         <t t-if="error.rows"  t-esc="at(error.rows)"/>
         <t t-if="error.moreinfo" t-raw="info(error.moreinfo)"/>
     </t>
