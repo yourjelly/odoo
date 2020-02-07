@@ -10,7 +10,7 @@ class UserMenu extends owl.Component {
         });
     }
 }
-UserMenu.template = 'web.UserMenu';
+UserMenu.template = 'web.OwlUserMenu';
 
 return UserMenu;
 

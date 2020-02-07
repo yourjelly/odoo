@@ -46,9 +46,6 @@ odoo.define('web.test_env', async function (require) {
      * @returns {Proxy}
      */
     function makeTestEnvironment(env = {}, providedRPC = null) {
-        const RamStorageService = AbstractStorageService.extend({
-            storage: new RamStorage(),
-        });
         const defaultEnv = {
             _t: env._t || (s => s),
             _lt: env._lt || (s => s),
@@ -56,25 +53,13 @@ odoo.define('web.test_env', async function (require) {
             device: Object.assign({
                 isMobile: false,
             }, env.device),
-            isDebug: env.isDebug || (() => false),
             qweb: new owl.QWeb({ templates: session.owlTemplates }),
             services: Object.assign({
-                ajax: { // for legacy subwidgets
-                    rpc() {
-                        const prom = testEnv.session.rpc(...arguments);
-                        prom.abort = function () {
-                            throw new Error("Can't abort this request");
-                        };
-                        return prom;
-                    },
-                },
                 getCookie() { },
                 rpc(params, options) {
                     const query = buildQuery(params);
                     return env.session.rpc(query.route, query.params, options);
                 },
-                local_storage: new RamStorageService(),
-                session_storage: new RamStorageService(),
             }, env.services),
             session: Object.assign({
                 rpc(route, params, options) {
