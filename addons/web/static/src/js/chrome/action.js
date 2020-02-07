@@ -87,7 +87,7 @@ class Action extends ComponentAdapter {
         }
         return super.shouldUpdate(nextProps);
     }
-    async update(nextProps) {
+    async updateWidget(nextProps) {
         if (this.legacy === 'view') {
             const action = nextProps.action;
             const controllerState = action.controllerState || {};
@@ -102,7 +102,7 @@ class Action extends ComponentAdapter {
             await this.widget.willRestore();
             return this.widget.reload(reloadParam);
         }
-        return super.update(...arguments);
+        return super.updateWidget(...arguments);
     }
 
     _reHookControllerMethods() {

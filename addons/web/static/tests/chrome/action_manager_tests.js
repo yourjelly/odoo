@@ -4376,7 +4376,8 @@ QUnit.module('ActionManager', {
         // display a form view
         await testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
 
-        readOnFirstRecordDef.reject("not working as intended");
+        readOnFirstRecordDef.reject(new Error("not working as intended"));
+        await testUtils.nextTick();
 
         assert.containsOnce(webClient, '.o_list_view',
             "there should still be a list view in dom");

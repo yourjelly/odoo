@@ -10,6 +10,7 @@ odoo.define('web.test_utils_mock', function (require) {
  * testUtils file.
  */
 
+const AbstractStorageService = require('web.AbstractStorageService');
 const basic_fields = require('web.basic_fields');
 const config = require('web.config');
 const core = require('web.core');
@@ -17,6 +18,7 @@ const dom = require('web.dom');
 const makeTestEnvironment = require('web.test_env');
 const MockServer = require('web.MockServer');
 const session = require('web.session');
+const RamStorage = require('web.RamStorage');
 
 const DebouncedField = basic_fields.DebouncedField;
 
@@ -383,6 +385,9 @@ function getMockedOwlEnv(params) {
         archs: params.archs,
         debug: params.debug,
     });
+    const RamStorageService = AbstractStorageService.extend({
+        storage: new RamStorage(),
+    });
     const env = {
         dataManager: {
             load_action: (actionID, context) => {
@@ -415,6 +420,13 @@ function getMockedOwlEnv(params) {
                 }
                 return Promise.resolve([]);
             },
+        },
+        services: {
+            ajax: {
+                rpc: server.performRpc.bind(server), // for legacy sub widgets
+            },
+            local_storage: new RamStorageService(),
+            session_storage: new RamStorageService(),
         },
         session: params.session || {},
     };
