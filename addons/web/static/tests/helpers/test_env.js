@@ -17,12 +17,13 @@ odoo.define('web.test_env', async function (require) {
      * @returns {Proxy}
      */
     function makeTestEnvironment(env = {}, providedRPC = null) {
+        const globalEnv = Object.assign({}, owl.Component.env);
         const defaultEnv = {
             _t: env._t || (s => s),
             _lt: env._lt || (s => s),
             bus: new Bus(),
             device: Object.assign({
-                isMobile: false,
+                isMobile: globalEnv.device ? globalEnv.device.isMobile : false,
             }, env.device),
             qweb: new owl.QWeb({ templates: session.owlTemplates }),
             services: Object.assign({
@@ -43,7 +44,7 @@ odoo.define('web.test_env', async function (require) {
             }, env.session),
             isDebug: env.isDebug || (() => false),
         };
-        return Object.assign(env, defaultEnv);
+        return Object.assign(globalEnv, env, defaultEnv);
     }
 
     /**
