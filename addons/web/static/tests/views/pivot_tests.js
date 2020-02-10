@@ -8,7 +8,6 @@ var testUtils = require('web.test_utils');
 var testUtilsDom = require('web.test_utils_dom');
 
 var _t = core._t;
-var createActionManager = testUtils.createActionManager;
 var createView = testUtils.createView;
 var patchDate = testUtils.mock.patchDate;
 

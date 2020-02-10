@@ -6,7 +6,6 @@ var view_registry = require('web.view_registry');
 
 var createView = testUtils.createView;
 var BaseSettingsView = view_registry.get('base_settings');
-var createActionManager = testUtils.createActionManager;
 
 
 QUnit.module('base_settings_tests', {
