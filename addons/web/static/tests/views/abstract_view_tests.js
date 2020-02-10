@@ -137,7 +137,7 @@ QUnit.module('Views', {
             },
         });
 
-        await testUtils.doAction(1);
+        await testUtils.actionManager.doAction(1);
 
         webClient.destroy();
     });

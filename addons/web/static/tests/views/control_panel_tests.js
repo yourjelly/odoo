@@ -6,7 +6,7 @@ const ControlPanelView = require('web.ControlPanelView');
 const core = require('web.core');
 const testUtils = require('web.test_utils');
 
-const createActionManager = testUtils.createActionManager;
+const createWebClient = testUtils.createWebClient;
 const createControlPanel = testUtils.createControlPanel;
 
 function createControlPanelFactory(arch, fields) {
@@ -384,16 +384,16 @@ QUnit.module('Views', {
         });
         core.action_registry.add('ConcreteAction', ConcreteAction);
 
-        const actionManager = await createActionManager();
-        await actionManager.doAction({id: 1,
+        const webClient = await createWebClient();
+        await testUtils.actionManager.doAction({id: 1,
             name: 'A Concrete Action',
             tag: 'ConcreteAction',
             type: 'ir.actions.client',
         });
 
-        assert.strictEqual(actionManager.$('.breadcrumb').text(), 'A Concrete Action');
+        assert.strictEqual(webClient.$('.breadcrumb').text(), 'A Concrete Action');
 
-        actionManager.destroy();
+        webClient.destroy();
     });
 
     QUnit.test('fiels and filters with groups/invisible attribute are not always rendered but activable as search default', async function (assert) {
