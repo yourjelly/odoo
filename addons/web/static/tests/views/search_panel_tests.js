@@ -1940,15 +1940,15 @@ QUnit.module('Views', {
         assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_kanban_view');
         assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_search_panel');
 
-        await testUtils.dom.click(webClient.$('.o_cp_switch_pivot'));
+        await testUtils.dom.click(webClient.el.querySelector('.o_cp_switch_pivot'));
         assert.containsOnce(webClient, '.o_content .o_pivot');
         assert.containsNone(webClient, '.o_content .o_search_panel');
 
-        await testUtils.dom.click(webClient.$('.o_cp_switch_list'));
+        await testUtils.dom.click(webClient.el.querySelector('.o_cp_switch_list'));
         assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_list_view');
         assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_search_panel');
 
-        await testUtils.dom.click(webClient.$('.o_data_row .o_data_cell:first'));
+        await testUtils.dom.click($(webClient.el).find('.o_data_row .o_data_cell:first'));
         assert.containsOnce(webClient, '.o_content .o_form_view');
         assert.containsNone(webClient, '.o_content .o_search_panel');
 
