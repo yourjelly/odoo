@@ -80,10 +80,11 @@ class Action extends ComponentAdapter {
         }
         if (this.legacy) {
             const activatingViewType = nextProps.action.controller.viewType;
+            let zombie = this.legacyZombie;
             if (activatingViewType === this.widget.viewType) {
-                this.legacyZombie = false;
+                zombie = false;
             }
-            return !this.legacyZombie;
+            return !zombie;
         }
         return super.shouldUpdate(nextProps);
     }
@@ -145,6 +146,14 @@ class Action extends ComponentAdapter {
             return;
         }
         return super.destroy();
+    }
+    patched() {
+        if (this.legacy && this.legacyZombie) {
+            if (this.widget && this.widget.on_attach_callback) {
+                this.widget.on_attach_callback();
+            }
+            this.legacyZombie = false;
+        }
     }
 }
 
