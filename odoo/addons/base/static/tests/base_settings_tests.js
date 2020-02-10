@@ -124,7 +124,7 @@ QUnit.module('base_settings_tests', {
             },
         });
 
-        await testUtils.doAction(1);
+        await testUtils.actionManager.doAction(1);
         await testUtils.dom.click(webClient.el.querySelector('button[name="4"]'));
         await testUtils.dom.click($('.o_control_panel .breadcrumb-item a'));
         assert.hasClass(webClient.el.querySelector('.o_form_view'), 'o_form_editable');
@@ -204,7 +204,7 @@ QUnit.module('base_settings_tests', {
             },
         });
 
-        await testUtils.doAction(1);
+        await testUtils.actionManager.doAction(1);
         assert.containsNone(webClient, '.o_field_boolean input:checked',
             "checkbox should not be checked");
 
