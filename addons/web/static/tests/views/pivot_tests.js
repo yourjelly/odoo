@@ -2340,7 +2340,7 @@ QUnit.module('Views', {
             }
         });
 
-        await testUtils.doAction({
+        await testUtils.actionManager.doAction({
             res_model: 'partner',
             type: 'ir.actions.act_window',
             views: [[false, 'pivot']],
