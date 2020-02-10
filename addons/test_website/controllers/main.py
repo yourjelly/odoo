@@ -120,6 +120,12 @@ class WebsiteTest(Home):
     def get_post_method_no_multilang(self, **kw):
         return request.make_response('get_post_nomultilang')
 
+    @http.route(['/test_route_json_http'], type='*', auth="public", methods=['GET', 'POST'], csrf=False)
+    def test_route_json_http(self, **kw):
+        if hasattr(request, 'jsonrequest'):
+            return request.jsonrequest
+        return str(kw)
+
     # Test Perfs
 
     @http.route(['/empty_controller_test'], type='http', auth='public', website=True, multilang=False, sitemap=False)

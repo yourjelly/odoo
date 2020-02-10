@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import odoo.tests
 
 
@@ -29,3 +30,25 @@ class TestWebsiteControllerArgs(odoo.tests.HttpCase):
         req = self.url_open('/ignore_args/kw?a=valueA&b=valueB')
         self.assertEqual(req.status_code, 200)
         self.assertEqual(req.json(), {'a': 'valueA', 'kw': {'b': 'valueB'}})
+
+    def test_route_type(self):
+        response = self.url_open('/test_route_json_http?param=value')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, "{'param': 'value'}")
+
+        response = self.url_open(
+            '/test_route_json_http',
+            data=b"param=value",
+            headers={'Content-type': 'application/x-www-form-urlencoded'}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.text, "{'param': 'value'}")
+
+        response = self.url_open(
+            '/test_route_json_http',
+            data=b'{"a": "value", "b": {"c": 2}}',
+            headers={'Content-type': 'application/json'}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['result'], {"a": "value", "b": {"c": 2}})
