@@ -11,7 +11,6 @@ class WebsiteVisitorTests(tests.HttpCase):
         self.Visitor = self.env['website.visitor']
         self.Track = self.env['website.track']
         untracked_view = View.create({
-            'name': 'Base',
             'type': 'qweb',
             'arch': '''<t name="Homepage" t-name="website.base_view">
                         <t t-call="website.layout">
@@ -22,7 +21,6 @@ class WebsiteVisitorTests(tests.HttpCase):
             'track': False,
         })
         tracked_view = View.create({
-            'name': 'Base',
             'type': 'qweb',
             'arch': '''<t name="Homepage" t-name="website.base_view">
                         <t t-call="website.layout">

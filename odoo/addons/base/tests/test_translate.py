@@ -583,7 +583,6 @@ class TestXMLTranslation(TransactionCase):
 
     def create_view(self, archf, terms, **kwargs):
         view = self.env['ir.ui.view'].create({
-            'name': 'test',
             'model': 'res.partner',
             'arch': archf % terms,
         })

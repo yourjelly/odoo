@@ -29,7 +29,6 @@ class TestACL(TransactionCaseWithUserDemo):
 
         # Add a view that adds a label for the field we are going to check
         extension = self.env["ir.ui.view"].create({
-            "name": "Add separate label for decimal_places",
             "model": "res.currency",
             "inherit_id": self.env.ref("base.view_currency_form").id,
             "arch": """

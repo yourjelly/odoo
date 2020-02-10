@@ -140,7 +140,6 @@ class TestJavascriptAssetsBundle(FileTouchable):
         """
         bundle = self.browse_ref(self.jsbundle_xmlid)
         view = self.env['ir.ui.view'].create({
-            'name': 'test bundle inheritance',
             'type': 'qweb',
             'arch': view_arch,
             'inherit_id': bundle.id,
@@ -221,7 +220,6 @@ class TestJavascriptAssetsBundle(FileTouchable):
         """
         bundle = self.browse_ref(self.cssbundle_xmlid)
         view = self.env['ir.ui.view'].create({
-            'name': 'test bundle inheritance',
             'type': 'qweb',
             'arch': view_arch,
             'inherit_id': bundle.id,
@@ -421,7 +419,6 @@ class TestJavascriptAssetsBundle(FileTouchable):
         """
         bundle = self.browse_ref(self.cssbundle_xmlid)
         view = self.env['ir.ui.view'].create({
-            'name': 'test bundle inheritance',
             'type': 'qweb',
             'arch': view_arch,
             'inherit_id': bundle.id,
@@ -536,7 +533,6 @@ class TestAssetsBundleInBrowser(HttpCase):
         </data>
         """
         self.env['ir.ui.view'].create({
-            'name': 'test bundle inheritance inline js',
             'type': 'qweb',
             'arch': view_arch,
             'inherit_id': self.browse_ref('test_assetsbundle.bundle1').id,

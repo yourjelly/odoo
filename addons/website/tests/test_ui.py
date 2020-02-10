@@ -118,7 +118,6 @@ class TestUi(odoo.tests.HttpCase):
         new_website = self.env['website'].create({'name': 'New Website'})
         website_editor_assets_view = self.env.ref('website.assets_wysiwyg')
         self.env['ir.ui.view'].create({
-            'name': 'Editor Extension',
             'type': 'qweb',
             'inherit_id': website_editor_assets_view.id,
             'website_id': new_website.id,

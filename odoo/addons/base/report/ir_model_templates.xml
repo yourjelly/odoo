@@ -81,14 +81,12 @@
                     <tr>
                         <td><strong>Seq</strong></td>
                         <td><strong>Type</strong></td>
-                        <td colspan="4"><strong>Name</strong></td>
                         <td colspan="6"><strong>XML ID</strong></td>
                         <td colspan="8"><strong>Inherited</strong></td>
                     </tr>
                     <tr t-foreach="o.view_ids" t-as="view">
                         <td><span t-field="view.priority"/></td>
                         <td><span t-field="view.type"/></td>
-                        <td colspan="4"><span t-field="view.name"/></td>
                         <td colspan="6"><span t-field="view.xml_id"/></td>
                         <td colspan="8" t-if="view.inherit_id.xml_id"><span t-field="view.inherit_id.xml_id"/></td>
                         <td colspan="8" t-if="not view.inherit_id.xml_id"><span t-field="view.inherit_id.name"/></td>

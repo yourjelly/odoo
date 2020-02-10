@@ -66,7 +66,6 @@ class TestQWebTField(TransactionCase):
 
     def test_render_t_options(self):
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy"><root><span t-esc="5" t-options="{'widget': 'char'}" t-options-widget="'float'" t-options-precision="4"/></root></t>
@@ -77,7 +76,7 @@ class TestQWebTField(TransactionCase):
 
     def test_xss_breakout(self):
         view = self.env['ir.ui.view'].create({
-            'name': 'dummy', 'type': 'qweb',
+            'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
                     <root>
@@ -112,7 +111,6 @@ class TestQWebNS(TransactionCase):
         """
 
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">%s</t>
@@ -150,7 +148,6 @@ class TestQWebNS(TransactionCase):
         """
 
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">%s</t>
@@ -163,7 +160,6 @@ class TestQWebNS(TransactionCase):
         """ Test that redundant namespaces are stripped upon rendering.
         """
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -198,7 +194,6 @@ class TestQWebNS(TransactionCase):
         """
 
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">%s</t>
@@ -212,7 +207,6 @@ class TestQWebNS(TransactionCase):
         handles the t-esc attribute and keep the ns declaration.
         """
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -230,7 +224,6 @@ class TestQWebNS(TransactionCase):
         handles the t-esc attribute and keep the ns declaration, and distribute correctly the ns declaration to its children.
         """
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -254,7 +247,6 @@ class TestQWebNS(TransactionCase):
         handles the t-attf attribute and keep the ns declaration.
         """
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -294,7 +286,6 @@ class TestQWebNS(TransactionCase):
         handles the t-attf attribute and that redundant namespaces are stripped upon rendering.
         """
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -333,7 +324,6 @@ class TestQWebNS(TransactionCase):
 
     def test_render_dynamic_xml_with_namespace_2(self):
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -366,7 +356,6 @@ class TestQWebNS(TransactionCase):
 
     def test_render_static_xml_with_namespaced_attributes(self):
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -381,7 +370,6 @@ class TestQWebNS(TransactionCase):
 
     def test_render_dynamic_xml_with_namespaced_attributes(self):
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -396,7 +384,6 @@ class TestQWebNS(TransactionCase):
 
     def test_render_static_xml_with_t_call(self):
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -415,7 +402,6 @@ class TestQWebNS(TransactionCase):
 
         # view2 will t-call view1
         view2 = self.env['ir.ui.view'].create({
-            'name': "dummy2",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy2">
@@ -450,7 +436,6 @@ class TestQWebNS(TransactionCase):
         """
         # primary view
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -467,7 +452,6 @@ class TestQWebNS(TransactionCase):
         })
         # extension patching the primary view
         view2 = self.env['ir.ui.view'].create({
-            'name': "dummy_ext",
             'type': 'qweb',
             'inherit_id': view1.id,
             'arch': u"""
@@ -499,7 +483,6 @@ class TestQWebNS(TransactionCase):
             that evaluates code with errors, the proper exception is raised
         """
         view1 = self.env['ir.ui.view'].create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.dummy">
@@ -529,7 +512,6 @@ class TestQWebNS(TransactionCase):
         })
 
         view1 = self.env['ir.ui.view'].create({
-            'name': "callee",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.callee">
@@ -545,7 +527,6 @@ class TestQWebNS(TransactionCase):
         })
 
         view2 = self.env['ir.ui.view'].create({
-            'name': "calling",
             'type': 'qweb',
             'arch': u"""
                 <t t-name="base.calling">
@@ -633,7 +614,6 @@ class TestPageSplit(TransactionCase):
     # HtmlElement and a convenience _Element
     def test_split_before(self):
         t = self.env['ir.ui.view'].create({
-            'name': 'test',
             'type': 'qweb',
             'arch_db': '''<t t-name='test'>
             <div>
@@ -656,7 +636,6 @@ class TestPageSplit(TransactionCase):
 
     def test_split_after(self):
         t = self.env['ir.ui.view'].create({
-            'name': 'test',
             'type': 'qweb',
             'arch_db': '''<t t-name='test'>
             <div>
@@ -681,7 +660,6 @@ class TestPageSplit(TransactionCase):
 
     def test_dontsplit(self):
         t = self.env['ir.ui.view'].create({
-            'name': 'test',
             'type': 'qweb',
             'arch_db': '''<t t-name='test'>
             <div>

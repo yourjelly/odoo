@@ -75,7 +75,6 @@ class IrUiView(models.Model):
 
         vals = {
             'inherit_id': self.id,
-            'name': '%s (%s)' % (self.name, el.get('id')),
             'arch': self._pretty_arch(arch),
             'key': '%s_%s' % (self.key, el.get('id')),
             'type': 'qweb',

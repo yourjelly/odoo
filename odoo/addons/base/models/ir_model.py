@@ -697,13 +697,13 @@ class IrModelFields(models.Model):
                 raise UserError("\n".join([
                     _("Cannot rename/delete fields that are still present in views:"),
                     _("Fields: %s") % ", ".join(str(f) for f in fields),
-                    _("View: %s") % view.name,
+                    _("View: %s") % view.display_name,
                 ]))
             else:
                 # uninstall mode
                 _logger.warning("The following fields were force-deleted to prevent a registry crash "
                         + ", ".join(str(f) for f in fields)
-                        + " the following view might be broken %s" % view.name)
+                        + " the following view might be broken %s" % view.display_name)
         finally:
             # the registry has been modified, restore it
             self.pool.setup_models(self._cr)

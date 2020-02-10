@@ -177,7 +177,7 @@ class View(models.Model):
                     # reuse the COW mechanism to create
                     # website-specific copies, it will take
                     # care of creating pages and menus.
-                    view.with_context(website_id=website.id).write({'name': view.name})
+                    view.with_context(website_id=website.id).write({'customize_show': view.customize_show})
 
         specific_views = self.env['ir.ui.view']
         if self and self.pool._init:

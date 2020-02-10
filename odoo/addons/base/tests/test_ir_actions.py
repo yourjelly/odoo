@@ -288,7 +288,6 @@ class TestCustomFields(common.TransactionCase):
     def create_view(self, name):
         """ create a view with the given field name """
         return self.env['ir.ui.view'].create({
-            'name': 'yet another view',
             'model': self.MODEL,
             'arch': '<tree string="X"><field name="%s"/></tree>' % name,
         })

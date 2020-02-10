@@ -203,7 +203,6 @@ class Assets(models.AbstractModel):
             IrUiView = self.env["ir.ui.view"]
             view_to_xpath = IrUiView.get_related_views(bundle_xmlid, bundles=True).filtered(views_linking_url)
             new_view = {
-                'name': custom_url,
                 'key': 'web_editor.%s_%s' % (file_type, str(uuid.uuid4())[:6]),
                 'mode': "extension",
                 'inherit_id': view_to_xpath.id,

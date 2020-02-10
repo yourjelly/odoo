@@ -68,13 +68,12 @@ class TestBaseDocumentLayoutHelpers(TransactionCase):
 
     def _set_templates_and_layouts(self):
         self.layout_template1 = self.env['ir.ui.view'].create({
-            'name': 'layout_template1',
             'key': 'layout_template1',
             'type': 'qweb',
             'arch': '''<div></div>''',
         })
         self.env['ir.model.data'].create({
-            'name': self.layout_template1.name,
+            'name': 'layout_template2',
             'model': 'ir.ui.view',
             'module': 'base',
             'res_id': self.layout_template1.id,
@@ -85,23 +84,22 @@ class TestBaseDocumentLayoutHelpers(TransactionCase):
         }
         self.report_layout1 = self.env['report.layout'].create({
             'view_id': self.layout_template1.id,
-            'name': 'report_%s' % self.layout_template1.name,
+            'name': 'report_layout_template1',
         })
         self.layout_template2 = self.env['ir.ui.view'].create({
-            'name': 'layout_template2',
             'key': 'layout_template2',
             'type': 'qweb',
             'arch': '''<div></div>''',
         })
         self.env['ir.model.data'].create({
-            'name': self.layout_template2.name,
+            'name': 'layout_template1',
             'model': 'ir.ui.view',
             'module': 'base',
             'res_id': self.layout_template2.id,
         })
         self.report_layout2 = self.env['report.layout'].create({
             'view_id': self.layout_template2.id,
-            'name': 'report_%s' % self.layout_template2.name,
+            'name': 'report_layout_template2',
         })
 
 

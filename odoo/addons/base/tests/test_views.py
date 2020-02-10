@@ -167,7 +167,6 @@ class TestViewInheritance(ViewCase):
         """
         view = self.View.create({
             'model': self.model,
-            'name': name,
             'arch': arch or self.arch_for(name, parent=parent),
             'inherit_id': parent,
             'priority': 5, # higher than default views
@@ -573,16 +572,14 @@ class TestApplyInheritedArchs(ViewCase):
 class TestNoModel(ViewCase):
     def test_create_view_nomodel(self):
         view = self.View.create({
-            'name': 'dummy',
             'arch': '<template name="foo"/>',
             'inherit_id': False,
             'type': 'qweb',
         })
-        fields = ['name', 'arch', 'type', 'priority', 'inherit_id', 'model']
+        fields = ['arch', 'type', 'priority', 'inherit_id', 'model']
         [data] = view.read(fields)
         self.assertEqual(data, {
             'id': view.id,
-            'name': 'dummy',
             'arch': '<template name="foo"/>',
             'type': 'qweb',
             'priority': 16,
@@ -611,7 +608,6 @@ class TestNoModel(ViewCase):
         TEXT_EN = "Copyright copyrighter"
         TEXT_FR = u"Copyrighter, tous droits réservés"
         view = self.View.create({
-            'name': 'dummy',
             'arch': ARCH % TEXT_EN,
             'inherit_id': False,
             'type': 'qweb',
@@ -635,7 +631,6 @@ class TestTemplating(ViewCase):
 
     def test_branding_inherit(self):
         view1 = self.View.create({
-            'name': "Base view",
             'type': 'qweb',
             'arch': """<root>
                 <item order="1"/>
@@ -643,7 +638,6 @@ class TestTemplating(ViewCase):
             """
         })
         view2 = self.View.create({
-            'name': "Extension",
             'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="//item" position="before">
@@ -675,7 +669,6 @@ class TestTemplating(ViewCase):
 
     def test_branding_inherit_replace_node(self):
         view1 = self.View.create({
-            'name': "Base view",
             'type': 'qweb',
             'arch': """<hello>
                 <world></world>
@@ -685,7 +678,6 @@ class TestTemplating(ViewCase):
             """
         })
         self.View.create({
-            'name': "Extension",
             'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="/hello/world[1]" position="replace">
@@ -730,7 +722,6 @@ class TestTemplating(ViewCase):
 
     def test_branding_inherit_replace_node2(self):
         view1 = self.View.create({
-            'name': "Base view",
             'type': 'qweb',
             'arch': """<hello>
                 <world></world>
@@ -740,7 +731,6 @@ class TestTemplating(ViewCase):
             """
         })
         self.View.create({
-            'name': "Extension",
             'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="/hello/world[1]" position="replace">
@@ -784,7 +774,6 @@ class TestTemplating(ViewCase):
 
     def test_branding_primary_inherit(self):
         view1 = self.View.create({
-            'name': "Base view",
             'type': 'qweb',
             'arch': """<root>
                 <item order="1"/>
@@ -792,7 +781,6 @@ class TestTemplating(ViewCase):
             """
         })
         view2 = self.View.create({
-            'name': "Extension",
             'type': 'qweb',
             'mode': 'primary',
             'inherit_id': view1.id,
@@ -832,14 +820,12 @@ class TestTemplating(ViewCase):
         extension
         """
         view1 = self.View.create({
-            'name': "Base view",
             'type': 'qweb',
             'arch': """<root>
                 <item order="1"/>
             </root>"""
         })
         view2 = self.View.create({
-            'name': "Extension",
             'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="//item" position="before">
@@ -879,7 +865,6 @@ class TestTemplating(ViewCase):
 
     def test_call_no_branding(self):
         view = self.View.create({
-            'name': "Base View",
             'type': 'qweb',
             'arch': """<root>
                 <item><span t-call="foo"/></item>
@@ -894,7 +879,6 @@ class TestTemplating(ViewCase):
 
     def test_esc_no_branding(self):
         view = self.View.create({
-            'name': "Base View",
             'type': 'qweb',
             'arch': """<root>
                 <item><span t-esc="foo"/></item>
@@ -909,7 +893,6 @@ class TestTemplating(ViewCase):
 
     def test_ignore_unbrand(self):
         view1 = self.View.create({
-            'name': "Base view",
             'type': 'qweb',
             'arch': """<root>
                 <item order="1" t-ignore="true">
@@ -918,7 +901,6 @@ class TestTemplating(ViewCase):
             </root>"""
         })
         view2 = self.View.create({
-            'name': "Extension",
             'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """<xpath expr="//item[@order='1']" position="inside">
@@ -956,11 +938,10 @@ class TestViews(ViewCase):
 
     def test_nonexistent_attribute_removal(self):
         self.View.create({
-            'name': 'Test View',
             'model': 'ir.ui.view',
             'inherit_id': self.ref('base.view_view_tree'),
             'arch': """<?xml version="1.0"?>
-                        <xpath expr="//field[@name='name']" position="attributes">
+                        <xpath expr="//field[@name='model']" position="attributes">
                             <attribute name="non_existing_attribute"></attribute>
                         </xpath>
                     """,
@@ -986,7 +967,6 @@ class TestViews(ViewCase):
 
         # validation of a single view
         vid = self._insert_view(
-            name='base view',
             model=model,
             priority=1,
             arch_db="""<?xml version="1.0"?>
@@ -999,13 +979,11 @@ class TestViews(ViewCase):
 
         # validation of a inherited view
         self._insert_view(
-            name='inherited view',
             model=model,
             priority=1,
             inherit_id=vid,
             arch_db="""<?xml version="1.0"?>
                         <xpath expr="//field[@name='url']" position="before">
-                          <field name="name"/>
                         </xpath>
                     """,
         )
@@ -1013,12 +991,11 @@ class TestViews(ViewCase):
 
         # validation of a second inherited view (depending on 1st)
         self._insert_view(
-            name='inherited view 2',
             model=model,
             priority=5,
             inherit_id=vid,
             arch_db="""<?xml version="1.0"?>
-                        <xpath expr="//field[@name='name']" position="after">
+                        <xpath expr="//field[@name='url']" position="after">
                           <field name="target"/>
                         </xpath>
                     """,
@@ -1027,7 +1004,6 @@ class TestViews(ViewCase):
 
     def test_view_inheritance(self):
         view1 = self.View.create({
-            'name': "bob",
             'model': 'ir.ui.view',
             'arch': """
                 <form string="Base title">
@@ -1040,7 +1016,6 @@ class TestViews(ViewCase):
             """
         })
         view2 = self.View.create({
-            'name': "edmund",
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
             'arch': """
@@ -1060,7 +1035,6 @@ class TestViews(ViewCase):
             """
         })
         view3 = self.View.create({
-            'name': 'jake',
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
             'priority': 17,
@@ -1093,12 +1067,10 @@ class TestViews(ViewCase):
     def test_view_inheritance_text_inside(self):
         """ Test view inheritance when adding elements and text. """
         view1 = self.View.create({
-            'name': "alpha",
             'model': 'ir.ui.view',
             'arch': '<form string="F">(<div/>)</form>',
         })
         view2 = self.View.create({
-            'name': "beta",
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
             'arch': '<div position="inside">a<p/>b<p/>c</div>',
@@ -1113,12 +1085,10 @@ class TestViews(ViewCase):
     def test_view_inheritance_text_after(self):
         """ Test view inheritance when adding elements and text. """
         view1 = self.View.create({
-            'name': "alpha",
             'model': 'ir.ui.view',
             'arch': '<form string="F">(<div/>)</form>',
         })
         view2 = self.View.create({
-            'name': "beta",
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
             'arch': '<div position="after">a<p/>b<p/>c</div>',
@@ -1133,12 +1103,10 @@ class TestViews(ViewCase):
     def test_view_inheritance_text_before(self):
         """ Test view inheritance when adding elements and text. """
         view1 = self.View.create({
-            'name': "alpha",
             'model': 'ir.ui.view',
             'arch': '<form string="F">(<div/>)</form>',
         })
         view2 = self.View.create({
-            'name': "beta",
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
             'arch': '<div position="before">a<p/>b<p/>c</div>',
@@ -1152,7 +1120,6 @@ class TestViews(ViewCase):
 
     def test_view_inheritance_divergent_models(self):
         view1 = self.View.create({
-            'name': "bob",
             'model': 'ir.ui.view.custom',
             'arch': """
                 <form string="Base title">
@@ -1165,7 +1132,6 @@ class TestViews(ViewCase):
             """
         })
         view2 = self.View.create({
-            'name': "edmund",
             'model': 'ir.ui.view',
             'inherit_id': view1.id,
             'arch': """
@@ -1185,7 +1151,6 @@ class TestViews(ViewCase):
             """
         })
         view3 = self.View.create({
-            'name': 'jake',
             'model': 'ir.ui.menu',
             'inherit_id': view1.id,
             'priority': 17,
@@ -1258,7 +1223,6 @@ class TestViews(ViewCase):
     def test_invalid_field(self):
         self.assertInvalid("""
                 <form string="View">
-                    <field name="name"/>
                     <field name="not_a_field"/>
                 </form>
             """, 'Field "not_a_field" does not exist in model "ir.ui.view"')
@@ -1272,14 +1236,11 @@ class TestViews(ViewCase):
     def test_invalid_subfield(self):
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'invalid subfield',
                 'model': 'ir.ui.view',
                 'arch': """
                     <form string="View">
-                        <field name="name"/>
                         <field name="inherit_children_ids">
                             <tree name="Children">
-                                <field name="name"/>
                                 <field name="not_a_field"/>
                             </tree>
                         </field>
@@ -1291,18 +1252,16 @@ class TestViews(ViewCase):
     def test_context_in_view(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_id" context="{'stuff': model}"/>
             </form>
         """
         self.View.create({
-            'name': 'valid context',
             'model': 'ir.ui.view',
             'arch': arch % '<field name="model"/>',
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid context',
                 'model': 'ir.ui.view',
                 'arch': arch % '',
             })
@@ -1311,30 +1270,27 @@ class TestViews(ViewCase):
     def test_context_in_subview(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
                     <form string="Children">
-                        <field name="name"/>%s
+                        %s
                         <field name="inherit_id" context="{'stuff': model}"/>
                     </form>
                 </field>
             </form>
         """
         self.View.create({
-            'name': 'valid context',
             'model': 'ir.ui.view',
             'arch': arch % ('', '<field name="model"/>'),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid context',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', ''),
             })
         with self.assertRaises(ValidationError):
             # field is in view but not in subview
             self.View.create({
-                'name': 'valid context',
                 'model': 'ir.ui.view',
                 'arch': arch % ('<field name="model"/>', ''),
             })
@@ -1343,29 +1299,26 @@ class TestViews(ViewCase):
     def test_context_in_subview_with_parent(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
                     <form string="Children">
-                        <field name="name"/>%s
+                        %s
                         <field name="inherit_id" context="{'stuff': parent.model}"/>
                     </form>
                 </field>
             </form>
         """
         self.View.create({
-            'name': 'valid context',
             'model': 'ir.ui.view',
             'arch': arch % ('<field name="model"/>', ''),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid context',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid context',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '<field name="model"/>'),
             })
@@ -1374,13 +1327,13 @@ class TestViews(ViewCase):
     def test_context_in_subsubview_with_parent(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
                     <form string="Children">
-                        <field name="name"/>%s
+                        %s
                         <field name="inherit_children_ids">
                             <form string="Children">
-                                <field name="name"/>%s
+                                %s
                                 <field name="inherit_id" context="{'stuff': parent.parent.model}"/>
                             </form>
                         </field>
@@ -1389,25 +1342,21 @@ class TestViews(ViewCase):
             </form>
         """
         self.View.create({
-            'name': 'valid context',
             'model': 'ir.ui.view',
             'arch': arch % ('<field name="model"/>', '', ''),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid context',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid context',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '<field name="model"/>', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid context',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '', '<field name="model"/>'),
             })
@@ -1432,7 +1381,7 @@ class TestViews(ViewCase):
         self.assertValid(arch % ('', '1', '1'))
         self.assertValid(arch % ('', '0', '1'))
         # self.assertInvalid(arch % ('', '1', '0'))
-        self.assertValid(arch % ('<field name="name"/>', '0 if name else 1', '1'))
+        self.assertValid(arch % ('<field name="display_name"/>', '0 if display_name else 1', '1'))
         # self.assertInvalid(arch % ('<field name="name"/><field name="type"/>', "'tata' if name else 'tutu'", 'type'), 'xxxx')
         self.assertInvalid(
             arch % ('', '0 if name else 1', '1'),
@@ -1443,18 +1392,16 @@ class TestViews(ViewCase):
     def test_domain_in_view(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_id" domain="[('model', '=', model)]"/>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % '<field name="model"/>',
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % '',
             })
@@ -1462,7 +1409,6 @@ class TestViews(ViewCase):
     def test_domain_unknown_field(self):
         self.assertInvalid("""
                 <form string="View">
-                    <field name="name"/>
                     <field name="inherit_id" domain="[('invalid_field', '=', 'res.users')]"/>
                 </form>
             """,
@@ -1472,7 +1418,6 @@ class TestViews(ViewCase):
     def test_domain_field_searchable(self):
         arch = """
             <form string="View">
-                <field name="name"/>
                 <field name="inherit_id" domain="[('%s', '=', 'test')]"/>
             </form>
         """
@@ -1488,37 +1433,34 @@ class TestViews(ViewCase):
     def test_domain_field_no_comodel(self):
         self.assertInvalid("""
             <form string="View">
-                <field name="name" domain="[('test', '=', 'test')]"/>
+                <field name="display_name" domain="[('test', '=', 'test')]"/>
             </form>
-        """, "Domain on field without comodel makes no sense for \"name\" (domain:[('test', '=', 'test')])")
+        """, "Domain on field without comodel makes no sense for \"display_name\" (domain:[('test', '=', 'test')])")
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_domain_in_subview(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
                     <form string="Children">
-                        <field name="name"/>%s
+                        %s
                         <field name="inherit_id" domain="[('model', '=', model)]"/>
                     </form>
                 </field>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % ('', '<field name="model"/>'),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ('<field name="model"/>', ''),
             })
@@ -1527,34 +1469,30 @@ class TestViews(ViewCase):
     def test_domain_in_subview_with_parent(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
                     <form string="Children">
-                        <field name="name"/>%s
+                        %s
                         <field name="inherit_id" domain="[('model', '=', parent.model)]"/>
                     </form>
                 </field>%s
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % ('<field name="model"/>', '', ''),
         })
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % ('', '', '<field name="model"/>'),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '<field name="model"/>', ''),
             })
@@ -1566,18 +1504,16 @@ class TestViews(ViewCase):
 
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_id"/>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % '<field name="model"/>',
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % '',
             })
@@ -1589,29 +1525,26 @@ class TestViews(ViewCase):
 
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
                     <form string="Children">
-                        <field name="name"/>%s
+                        %s
                         <field name="inherit_id"/>
                     </form>
                 </field>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % ('', '<field name="model"/>'),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ('<field name="model"/>', ''),
             })
@@ -1623,29 +1556,25 @@ class TestViews(ViewCase):
 
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
-                    <form string="Children">
-                        <field name="name"/>%s
+                    <form string="Children">%s
                         <field name="inherit_id"/>
                     </form>
                 </field>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % ('<field name="model"/>', ''),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '<field name="model"/>'),
             })
@@ -1657,23 +1586,19 @@ class TestViews(ViewCase):
 
         arch = """
             <form string="View">
-                <field name="name"/>
                 <field name="inherit_children_ids">
                     <tree string="Children"%s>
-                        <field name="name"/>
                         <field name="inherit_id"/>
                     </tree>
                 </field>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % '',
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % ' editable="bottom"',
             })
@@ -1685,12 +1610,10 @@ class TestViews(ViewCase):
 
         arch = """
             <form string="View">
-                <field name="name"/>
                 <field name="inherit_id" readonly="1"/>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch,
         })
@@ -1698,12 +1621,10 @@ class TestViews(ViewCase):
         self.patch(field, 'readonly', True)
         arch = """
             <form string="View">
-                <field name="name"/>
                 <field name="inherit_id"/>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch,
         })
@@ -1715,23 +1636,19 @@ class TestViews(ViewCase):
 
         arch = """
             <form string="View">
-                <field name="name"/>
                 <field name="inherit_children_ids"%s>
                     <form string="Children">
-                        <field name="name"/>
                         <field name="inherit_id"/>
                     </form>
                 </field>
             </form>
         """
         self.View.create({
-            'name': 'valid domain',
             'model': 'ir.ui.view',
             'arch': arch % ' readonly="1"',
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid domain',
                 'model': 'ir.ui.view',
                 'arch': arch % '',
             })
@@ -1740,7 +1657,7 @@ class TestViews(ViewCase):
     def test_modifier_attribute_is_boolean(self):
         arch = """
             <form string="View">
-                <field name="name" readonly="%s"/>
+                <field name="display_name" readonly="%s"/>
             </form>
         """
         self.assertValid(arch % '1')
@@ -1759,20 +1676,7 @@ class TestViews(ViewCase):
                 <filter string="Dummy" name="draft" domain="[('%s', '=', 'dummy')]"/>
             </search>
         """
-        self.assertValid(arch % ('name', 'name'))
-        self.assertValid(arch % ('name', 'inherit_children_ids.name'))
-        self.assertInvalid(
-            arch % ('invalid_field', 'name'),
-            'Field "invalid_field" does not exist in model "ir.ui.view"',
-        )
-        self.assertInvalid(
-            arch % ('name', 'invalid_field'),
-            """Unknow field "ir.ui.view.invalid_field" in domain of <filter name="draft"> "[('invalid_field', '=', 'dummy')]""",
-        )
-        self.assertInvalid(
-            arch % ('name', 'inherit_children_ids.invalid_field'),
-            """Unknow field "ir.ui.view.invalid_field" in domain of <filter name="draft"> "[('inherit_children_ids.invalid_field', '=', 'dummy')]""",
-        )
+      
         # todo add check for non searchable fields and group by
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
@@ -1782,7 +1686,6 @@ class TestViews(ViewCase):
                 <filter string="Date" name="month" domain="[]" context="{'group_by':'%s'}"/>
             </search>
         """
-        self.assertValid(arch % 'name')
         self.assertInvalid(
             arch % 'invalid_field',
             """Unknow field "invalid_field" in "group_by" value in context="{'group_by':'invalid_field'}""",
@@ -1843,7 +1746,7 @@ class TestViews(ViewCase):
     def test_groups_field(self):
         arch = """
             <form string="View">
-                <field name="name" groups="%s"/>
+                <field name="display_name" groups="%s"/>
             </form>
         """
         self.assertValid(arch % 'base.group_no_one')
@@ -1853,19 +1756,17 @@ class TestViews(ViewCase):
     def test_attrs_field(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_id"
                        attrs="{'readonly': [('model', '=', 'ir.ui.view')]}"/>
             </form>
         """
         self.View.create({
-            'name': 'valid attrs',
             'model': 'ir.ui.view',
             'arch': arch % '<field name="model"/>',
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid attrs',
                 'model': 'ir.ui.view',
                 'arch': arch % '',
             })
@@ -1874,7 +1775,6 @@ class TestViews(ViewCase):
     def test_attrs_invalid_domain(self):
         arch = """
             <form string="View">
-                <field name="name"/>
                 <field name="model"/>
                 <field name="inherit_id"
                        attrs="{'readonly': [('model', 'ir.ui.view')]}"/>
@@ -1889,10 +1789,10 @@ class TestViews(ViewCase):
     def test_attrs_subfield(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
                     <form string="Children">
-                        <field name="name"/>%s
+                        %s
                         <field name="inherit_id"
                                attrs="{'readonly': [('model', '=', 'ir.ui.view')]}"/>
                     </form>
@@ -1900,19 +1800,16 @@ class TestViews(ViewCase):
             </form>
         """
         self.View.create({
-            'name': 'valid attrs',
             'model': 'ir.ui.view',
             'arch': arch % ('', '<field name="model"/>'),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid attrs',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid attrs',
                 'model': 'ir.ui.view',
                 'arch': arch % ('<field name="model"/>', ''),
             })
@@ -1921,10 +1818,10 @@ class TestViews(ViewCase):
     def test_attrs_subfield_with_parent(self):
         arch = """
             <form string="View">
-                <field name="name"/>%s
+                %s
                 <field name="inherit_children_ids">
                     <form string="Children">
-                        <field name="name"/>%s
+                        %s
                         <field name="inherit_id"
                                attrs="{'readonly': [('parent.model', '=', 'ir.ui.view')]}"/>
                     </form>
@@ -1932,19 +1829,16 @@ class TestViews(ViewCase):
             </form>
         """
         self.View.create({
-            'name': 'valid attrs',
             'model': 'ir.ui.view',
             'arch': arch % ('<field name="model"/>', ''),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid attrs',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'valid attrs',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '<field name="model"/>'),
             })
@@ -1982,7 +1876,6 @@ class TestViews(ViewCase):
     def test_tree(self):
         arch = """
             <tree>
-                <field name="name"/>
                 <button type='object' name="action_archive"/>
                 %s
             </tree>
@@ -1994,7 +1887,6 @@ class TestViews(ViewCase):
     def test_tree_groupby(self):
         arch = """
             <tree>
-                <field name="name"/>
                 <groupby name="%s">
                     <button type="object" name="action_archive"/>
                 </groupby>
@@ -2008,7 +1900,6 @@ class TestViews(ViewCase):
     def test_tree_groupby_many2one(self):
         arch = """
             <tree>
-                <field name="name"/>
                 %s
                 <groupby name="model_data_id">
                     %s
@@ -2017,25 +1908,21 @@ class TestViews(ViewCase):
             </tree>
         """
         self.View.create({
-            'name': 'valid groupby',
             'model': 'ir.ui.view',
             'arch': arch % ('', '<field name="noupdate"/>'),
         })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'invalid groupby',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'invalid groupby',
                 'model': 'ir.ui.view',
                 'arch': arch % ('<field name="noupdate"/>', ''),
             })
         with self.assertRaises(ValidationError):
             self.View.create({
-                'name': 'invalid groupby',
                 'model': 'ir.ui.view',
                 'arch': arch % ('', '<field name="noupdate"/><field name="fake_field"/>'),
             })
@@ -2149,7 +2036,6 @@ class TestViews(ViewCase):
         # pe_partner_address_form
         address_arch = """<form><div class="o_address_format"><field name="parent_name"/></div></form>"""
         address_view = self.View.create({
-            'name': 'view',
             'model': 'res.partner',
             'arch': address_arch,
             'priority': 900,
@@ -2158,7 +2044,6 @@ class TestViews(ViewCase):
         # view can be created without address_view
         form_arch = """<form><field name="id"/><div class="o_address_format"><field name="street"/></div></form>"""
         partner_view = self.View.create({
-            'name': 'view',
             'model': 'res.partner',
             'arch': form_arch,
         })
@@ -2185,7 +2070,6 @@ class TestViews(ViewCase):
 
     def assertValid(self, arch, name='valid view'):
         self.View.create({
-            'name': name,
             'model': 'ir.ui.view',
             'arch': arch,
         })
@@ -2193,12 +2077,11 @@ class TestViews(ViewCase):
     def assertInvalid(self, arch, expected_message=None, name='invalid view'):
         with self.assertRaises(ValidationError) as catcher, mute_logger('odoo.addons.base.models.ir_ui_view'):
             self.View.create({
-                'name': name,
                 'model': 'ir.ui.view',
                 'arch': arch,
             })
         message = str(catcher.exception.args[0])
-        self.assertIn('\nView name: %s\nError context:\n' % name, message)
+        self.assertIn('Error context:\n', message)
         if expected_message:
             self.assertIn(expected_message, message)
         else:
@@ -2207,13 +2090,12 @@ class TestViews(ViewCase):
     def assertWarning(self, arch, expected_message=None, name='invalid view'):
         with self.assertLogs('odoo.addons.base.models.ir_ui_view', level="WARNING") as log_catcher:
             self.View.create({
-                'name': name,
                 'model': 'ir.ui.view',
                 'arch': arch,
             })
         self.assertEqual(len(log_catcher.output), 1, "Exactly one warning should be logged")
         message = log_catcher.output[0]
-        self.assertIn('\nView name: %s\nError context:\n' % name, message)
+        self.assertIn('\nError context:\n', message)
         if expected_message:
             self.assertIn(expected_message, message)
 
@@ -2638,7 +2520,6 @@ class TestQWebRender(ViewCase):
 
     def test_render(self):
         view1 = self.View.create({
-            'name': "dummy",
             'type': 'qweb',
             'arch': """
                 <t t-name="base.dummy">
@@ -2647,7 +2528,6 @@ class TestQWebRender(ViewCase):
         """
         })
         view2 = self.View.create({
-            'name': "dummy_ext",
             'type': 'qweb',
             'inherit_id': view1.id,
             'arch': """
@@ -2657,7 +2537,6 @@ class TestQWebRender(ViewCase):
             """
         })
         view3 = self.View.create({
-            'name': "dummy_primary_ext",
             'type': 'qweb',
             'inherit_id': view1.id,
             'mode': 'primary',
@@ -2745,5 +2624,5 @@ class TestAllViews(common.TransactionCase):
         for index, view in enumerate(views):
             if index % 500 == 0:
                 _logger.info('checked %s/%s views', index, len(views))
-            with self.subTest(name=view.name):
+            with self.subTest(name=view.display_name):
                 view._check_xml()

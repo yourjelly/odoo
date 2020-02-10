@@ -51,7 +51,6 @@ class ThemeView(models.Model):
 
         new_view = {
             'type': self.type or 'qweb',
-            'name': self.name,
             'arch': self.arch,
             'key': self.key,
             'inherit_id': inherit and inherit.id,

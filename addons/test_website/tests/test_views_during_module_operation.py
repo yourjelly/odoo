@@ -43,13 +43,11 @@ class TestViewsDuringModuleOperation(TransactionCase):
         # Create IMD so when updating the module the views will be removed (not found in file)
         Imd.create({
             'module': 'test_website',
-            'name': 'update_module_view_to_be_t_called',
             'model': 'ir.ui.view',
             'res_id': update_module_view_to_be_t_called.id,
         })
         Imd.create({
             'module': 'test_website',
-            'name': 'update_module_child_view',
             'model': 'ir.ui.view',
             'res_id': update_module_child_view.id,
         })
