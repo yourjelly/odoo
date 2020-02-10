@@ -11,6 +11,6 @@ function doAction(action, options) {
 
 return {
     doAction: doAction,
-}
+};
 
 });

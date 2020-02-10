@@ -3,8 +3,6 @@ odoo.define('web.action_manager_mobile_tests', function (require) {
 
 var testUtils = require('web.test_utils');
 
-var createActionManager = testUtils.createActionManager;
-
 QUnit.module('ActionManager', {
     beforeEach: function () {
         this.env = {
