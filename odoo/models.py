@@ -5765,8 +5765,16 @@ Record ids: %(records)s
         if fnames is None:
             # recompute everything
             fields_to_compute = self.env.fields_to_compute()
+            done = defaultdict(set)
             while fields_to_compute:
-                process(next(iter(fields_to_compute)))
+                field = next(iter(fields_to_compute))
+                recs = self.env.records_to_compute(field)
+                if not done[field].isdisjoint(recs._ids):
+                    # detect potential infinite loop
+                    recs = recs.browse(done[field].intersection(recs._ids))
+                    _logger.warning("%s.%s already recomputed", recs, field.name)
+                done[field].update(recs._ids)
+                process(field)
         else:
             fields = [self._fields[fname] for fname in fnames]
 
