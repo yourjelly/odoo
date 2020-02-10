@@ -11,6 +11,7 @@ from lxml import etree
 from odoo.http import request
 from odoo import http, tools, _
 from odoo.exceptions import UserError
+from odoo.osv import expression
 
 logger = logging.getLogger(__name__)
 
@@ -450,3 +451,13 @@ class Web_Editor(http.Controller):
                 be found
         """
         request.env['web_editor.assets'].reset_asset(url, bundle_xmlid)
+
+    @http.route("/web_editor/name_search_read", type="json", auth="user", website=True)
+    def name_search_read(self, model, name='', args=None, operator='ilike', limit=100, fields=None, order=None):
+        """
+        Performs a name_search followed by a search_read of the desired fields
+        """
+        Model = request.env[model]
+        records = Model._name_search(name, args, operator, limit)
+        ids = [record[0] for record in records]
+        return Model.search_read([('id', 'in', ids)], fields=fields, order=order)
