@@ -99,6 +99,7 @@ class SequenceMixin(models.AbstractModel):
             where_string += " AND id != %(id)s "
             param['id'] = self.id or self.id.origin
         query = "SELECT {field} FROM {table} {where_string} ORDER BY {field} DESC LIMIT 1 FOR UPDATE".format(table=self._table, where_string=where_string, field=self._sequence_field)
+
         self.flush([self._sequence_field])
         self.env.cr.execute(query, param)
         return (self.env.cr.fetchone() or [None])[0]

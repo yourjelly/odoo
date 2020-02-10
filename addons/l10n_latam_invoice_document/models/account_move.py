@@ -21,6 +21,19 @@ class AccountMove(models.Model):
     l10n_latam_country_code = fields.Char(
         related='company_id.country_id.code', help='Technical field used to hide/show fields regarding the localization')
 
+    @api.onchange('l10n_latam_document_type_id')
+    def _onchange_document_type(self):
+        for rec in self:
+            rec.name = '/'
+            rec._compute_highest_name()
+            rec._compute_name()
+
+    @api.depends('journal_id', 'date', 'state')
+    def _compute_highest_name(self):
+        latam_bills = self.filtered(lambda b: b.is_purchase_document() and b.l10n_latam_use_documents)
+        latam_bills.highest_name = ''
+        super(AccountMove, self - latam_bills)._compute_highest_name()
+
     @api.model
     def _deduce_sequence_number_reset(self, name):
         if self.l10n_latam_use_documents:
@@ -36,7 +49,9 @@ class AccountMove(models.Model):
 
     def _get_starting_sequence(self):
         if self.l10n_latam_use_documents:
-            return "%s 0001-00000000" % (self.l10n_latam_document_type_id.doc_code_prefix)
+            if self.l10n_latam_document_type_id:
+                return "%s 0001-00000000" % (self.l10n_latam_document_type_id.doc_code_prefix)
+            return ""
         return super(AccountMove, self)._get_starting_sequence()
 
     def _compute_l10n_latam_amount_and_taxes(self):
