@@ -15,6 +15,7 @@ var core = require('web.core');
 var relationalFields = require('web.relational_fields');
 var session = require('web.session');
 var testUtilsAsync = require('web.test_utils_async');
+const testUtilsActionManager = require('web.test_utils_action_manager');
 var testUtilsCreate = require('web.test_utils_create');
 var testUtilsDom = require('web.test_utils_dom');
 var testUtilsFields = require('web.test_utils_fields');
@@ -56,6 +57,9 @@ return Promise.all([
         QUnit.start();
     }, 0);
     return {
+        actionManager: {
+            doAction: testUtilsActionManager.doAction,
+        },
         mock: {
             addMockEnvironment: testUtilsMock.addMockEnvironment,
             getMockedOwlEnv: testUtilsMock.getMockedOwlEnv,
@@ -138,11 +142,6 @@ return Promise.all([
         nextTick: testUtilsAsync.nextTick,
         prepareTarget: testUtilsCreate.prepareTarget,
         returnAfterNextAnimationFrame: testUtilsDom.returnAfterNextAnimationFrame,
-        doAction: (action, options) => {
-            const env = owl.Component.env;
-            env.bus.trigger('do-action', {action, options});
-            return testUtilsAsync.nextTick();
-        },
 
         // backward-compatibility
         addMockEnvironment: deprecated(testUtilsMock.addMockEnvironment, 'mock'),

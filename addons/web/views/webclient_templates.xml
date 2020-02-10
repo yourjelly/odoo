@@ -642,6 +642,7 @@
         </style>
 
         <script type="text/javascript" src="/web/static/tests/helpers/test_utils_async.js"></script>
+        <script type="text/javascript" src="/web/static/tests/helpers/test_utils_action_manager.js"></script>
         <script type="text/javascript" src="/web/static/tests/helpers/test_utils_create.js"></script>
         <script type="text/javascript" src="/web/static/tests/helpers/test_utils_dom.js"></script>
         <script type="text/javascript" src="/web/static/tests/helpers/test_utils_fields.js"></script>
@@ -827,6 +828,7 @@
                 </style>
 
                 <script type="text/javascript" src="/web/static/tests/helpers/test_utils_async.js"></script>
+                <script type="text/javascript" src="/web/static/tests/helpers/test_utils_action_manager.js"></script>
                 <script type="text/javascript" src="/web/static/tests/helpers/test_utils_create.js"></script>
                 <script type="text/javascript" src="/web/static/tests/helpers/test_utils_dom.js"></script>
                 <script type="text/javascript" src="/web/static/tests/helpers/test_utils_fields.js"></script>
