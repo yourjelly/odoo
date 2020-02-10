@@ -1,0 +1,6 @@
+"id","chart_template_id/id","name","to_check"
+"escompte_template","l10nbe_chart_template","Escompte",""
+"frais_bancaires_htva_template","l10nbe_chart_template","Frais bancaires HTVA",""
+"frais_bancaires_tva21_template","l10nbe_chart_template","Frais bancaires TVA21",""
+"virements_internes_template","l10nbe_chart_template","Virements internes","False"
+"compte_attente_template","l10nbe_chart_template","Compte Attente","True"

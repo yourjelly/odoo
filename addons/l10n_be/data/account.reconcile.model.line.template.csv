@@ -1,0 +1,5 @@
+"id","model_id/id","account_id/id","amount_type","tax_ids/id","amount_string","label"
+"escompte_line_template","l10n_be.escompte_template","a653","percentage","","100","Escompte accordé"
+"frais_bancaires_htva_line_template","l10n_be.frais_bancaires_htva_template","a656","percentage","","100","Frais bancaires HTVA"
+"frais_bancaires_tva21_line_template","l10n_be.frais_bancaires_tva21_template","a656","percentage","l10n_be.attn_TVA-21-inclus-dans-prix","100","Frais bancaires TVA21"
+"compte_attente_line_template","l10n_be.compte_attente_template","a4990","percentage","","100",""
