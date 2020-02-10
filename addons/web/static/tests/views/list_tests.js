@@ -16,7 +16,7 @@ var widgetRegistry = require('web.widget_registry');
 var Widget = require('web.Widget');
 
 var _t = core._t;
-var createActionManager = testUtils.createActionManager;
+var createWebClient = testUtils.createWebClient;
 var createView = testUtils.createView;
 
 
@@ -1125,7 +1125,7 @@ QUnit.module('Views', {
 
         this.data.foo.fields.foo = {string: "Foo", type: "char", required:true};
 
-        var actionManager = await createActionManager({
+        var webClient = await createWebClient({
             actions: [{
                id: 11,
                name: 'Partners Action 11',
@@ -1144,21 +1144,21 @@ QUnit.module('Views', {
             data: this.data,
         });
 
-        await actionManager.doAction(11);
-        await testUtils.dom.click(actionManager.$('.o_list_button_add'));
+        await testUtils.actionManager.doAction(11);
+        await testUtils.dom.click(webClient.$('.o_list_button_add'));
 
-        assert.isNotVisible(actionManager.$('.o_list_button_add'),
+        assert.isNotVisible(webClient.$('.o_list_button_add'),
             "create button should be invisible");
-        assert.isVisible(actionManager.$('.o_list_button_save'), "save button should be visible");
+        assert.isVisible(webClient.$('.o_list_button_save'), "save button should be visible");
 
-        await testUtils.dom.click(actionManager.$('.o_dropdown_toggler_btn:contains("Group By")'));
-        await testUtils.dom.click(actionManager.$('.o_group_by_menu .o_menu_item a:contains("candle")'));
+        await testUtils.dom.click(webClient.$('.o_dropdown_toggler_btn:contains("Group By")'));
+        await testUtils.dom.click(webClient.$('.o_group_by_menu .o_menu_item a:contains("candle")'));
 
-        assert.isNotVisible(actionManager.$('.o_list_button_add'), "create button should be invisible");
-        assert.isNotVisible(actionManager.$('.o_list_button_save'),
+        assert.isNotVisible(webClient.$('.o_list_button_add'), "create button should be invisible");
+        assert.isNotVisible(webClient.$('.o_list_button_save'),
             "save button should be invisible after applying groupby");
 
-        actionManager.destroy();
+        webClient.destroy();
     });
 
     QUnit.test('selection changes are triggered correctly', async function (assert) {
@@ -8418,90 +8418,94 @@ QUnit.module('Views', {
             storage: new RamStorage(),
         });
 
-        var actionManager = await testUtils.createActionManager({
+        let newHash = '';
+        var webClient = await testUtils.createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             services: {
                 local_storage: RamStorageService,
             },
+            webClient: {
+                _getWindowHash() {
+                    return newHash;
+                }
+            }
         });
-        await actionManager.doAction(2);
+        await testUtils.actionManager.doAction(2);
 
-        assert.containsOnce(actionManager, '.o_list_view',
+        assert.containsOnce(webClient, '.o_list_view',
             "should have rendered a list view");
 
-        assert.containsN(actionManager, 'th', 3, "should display 3 th (selector + 2 fields)");
+        assert.containsN(webClient, 'th', 3, "should display 3 th (selector + 2 fields)");
 
         // enable optional field
-        await testUtils.dom.click(actionManager.$('table .o_optional_columns_dropdown_toggle'));
-        assert.notOk(actionManager.$('div.o_optional_columns div.dropdown-item [name="m2o"]').is(":checked"));
-        assert.ok(actionManager.$('div.o_optional_columns div.dropdown-item [name="o2m"]').is(":checked"));
-        await testUtils.dom.click(actionManager.$('div.o_optional_columns div.dropdown-item:first'));
-        assert.containsN(actionManager, 'th', 4, "should display 4 th (selector + 3 fields)");
-        assert.ok(actionManager.$('th:contains(M2O field)').is(':visible'),
+        await testUtils.dom.click(webClient.$('table .o_optional_columns_dropdown_toggle'));
+        assert.notOk(webClient.$('div.o_optional_columns div.dropdown-item [name="m2o"]').is(":checked"));
+        assert.ok(webClient.$('div.o_optional_columns div.dropdown-item [name="o2m"]').is(":checked"));
+        await testUtils.dom.click(webClient.$('div.o_optional_columns div.dropdown-item:first'));
+        assert.containsN(webClient, 'th', 4, "should display 4 th (selector + 3 fields)");
+        assert.ok(webClient.$('th:contains(M2O field)').is(':visible'),
             "should have a visible m2o field"); //m2o field
 
         // switch to kanban view
-        await actionManager.loadState({
-            action: 2,
-            view_type: 'kanban',
-        });
+        newHash = '#action=2&view_type=kanban';
+        window.dispatchEvent(new Event('hashchange'));
+        await testUtils.nextTick();
 
-        assert.containsNone(actionManager, '.o_list_view',
+        assert.containsNone(webClient, '.o_list_view',
             "should not display the list view anymore");
-        assert.containsOnce(actionManager, '.o_kanban_view',
+        assert.containsOnce(webClient, '.o_kanban_view',
             "should have switched to the kanban view");
 
         // switch back to list view
-        await actionManager.loadState({
-            action: 2,
-            view_type: 'list',
-        });
+        newHash = '#action=2&view_type=list';
+        window.dispatchEvent(new Event('hashchange'));
+        await testUtils.nextTick();
 
-        assert.containsNone(actionManager, '.o_kanban_view',
+        assert.containsNone(webClient, '.o_kanban_view',
             "should not display the kanban view anymoe");
-        assert.containsOnce(actionManager, '.o_list_view',
+        assert.containsOnce(webClient, '.o_list_view',
             "should display the list view");
 
-        assert.containsN(actionManager, 'th', 4, "should display 4 th");
-        assert.ok(actionManager.$('th:contains(M2O field)').is(':visible'),
+        assert.containsN(webClient, 'th', 4, "should display 4 th");
+        assert.ok(webClient.$('th:contains(M2O field)').is(':visible'),
             "should have a visible m2o field"); //m2o field
-        assert.ok(actionManager.$('th:contains(O2M field)').is(':visible'),
+        assert.ok(webClient.$('th:contains(O2M field)').is(':visible'),
             "should have a visible o2m field"); //m2o field
 
         // disable optional field
-        await testUtils.dom.click(actionManager.$('table .o_optional_columns_dropdown_toggle'));
-        assert.ok(actionManager.$('div.o_optional_columns div.dropdown-item [name="m2o"]').is(":checked"));
-        assert.ok(actionManager.$('div.o_optional_columns div.dropdown-item [name="o2m"]').is(":checked"));
-        await testUtils.dom.click(actionManager.$('div.o_optional_columns div.dropdown-item:last input'));
-        assert.ok(actionManager.$('th:contains(M2O field)').is(':visible'),
+        await testUtils.dom.click(webClient.$('table .o_optional_columns_dropdown_toggle'));
+        assert.ok(webClient.$('div.o_optional_columns div.dropdown-item [name="m2o"]').is(":checked"));
+        assert.ok(webClient.$('div.o_optional_columns div.dropdown-item [name="o2m"]').is(":checked"));
+        await testUtils.dom.click(webClient.$('div.o_optional_columns div.dropdown-item:last input'));
+        assert.ok(webClient.$('th:contains(M2O field)').is(':visible'),
             "should have a visible m2o field"); //m2o field
-        assert.notOk(actionManager.$('th:contains(O2M field)').is(':visible'),
+        assert.notOk(webClient.$('th:contains(O2M field)').is(':visible'),
             "should have a visible o2m field"); //m2o field
-        assert.containsN(actionManager, 'th', 3, "should display 3 th");
+        assert.containsN(webClient, 'th', 3, "should display 3 th");
 
-        await actionManager.doAction(1);
+        await testUtils.actionManager.doAction(1);
 
-        assert.containsNone(actionManager, '.o_list_view',
+        assert.containsNone(webClient, '.o_list_view',
             "should not display the list view anymore");
-        assert.containsOnce(actionManager, '.o_kanban_view',
+        assert.containsOnce(webClient, '.o_kanban_view',
             "should have switched to the kanban view");
 
-        await actionManager.doAction(2);
+        await testUtils.actionManager.doAction(2);
 
-        assert.containsNone(actionManager, '.o_kanban_view',
+        assert.containsNone(webClient, '.o_kanban_view',
             "should not havethe kanban view anymoe");
-        assert.containsOnce(actionManager, '.o_list_view',
+        assert.containsOnce(webClient, '.o_list_view',
             "should display the list view");
 
-        assert.containsN(actionManager, 'th', 3, "should display 3 th");
-        assert.ok(actionManager.$('th:contains(M2O field)').is(':visible'),
+        assert.containsN(webClient, 'th', 3, "should display 3 th");
+        assert.ok(webClient.$('th:contains(M2O field)').is(':visible'),
             "should have a visible m2o field"); //m2o field
-        assert.notOk(actionManager.$('th:contains(O2M field)').is(':visible'),
+        assert.notOk(webClient.$('th:contains(O2M field)').is(':visible'),
             "should have a visible o2m field"); //m2o field
 
-        actionManager.destroy();
+        webClient.destroy();
     });
 
     QUnit.test('list view with optional fields rendering and local storage mock', async function (assert) {
