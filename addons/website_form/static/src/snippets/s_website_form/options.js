@@ -21,9 +21,10 @@ const FormEditor = options.Class.extend({
      *
      * @private
      * @param {Object} field
+     * @param {boolean} noLimit
      * @returns {Promise<Object>}
      */
-    _fetchFieldRecords: async function (field) {
+    _fetchFieldRecords: async function (field, noLimit) {
         // Convert the required boolean to a value directly usable
         // in qweb js to avoid duplicating this in the templates
         field.required = field.required ? 1 : null;
@@ -45,6 +46,9 @@ const FormEditor = options.Class.extend({
                     field.domain,
                     ['display_name']
                 ],
+                kwargs: {
+                    limit: noLimit ? null : 10,
+                },
             });
         }
         return field.records;
@@ -520,7 +524,7 @@ options.registry.WebsiteFormEditor = FormEditor.extend({
         if (!formInfo || !formInfo.fields) {
             return;
         }
-        const proms = formInfo.fields.map(field => this._fetchFieldRecords(field));
+        const proms = formInfo.fields.map(field => this._fetchFieldRecords(field, true));
         return Promise.all(proms).then(() => {
             formInfo.fields.forEach(field => {
                 let option;
@@ -691,8 +695,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         'click we-button.o_we_select_remove_option': '_onRemoveItemClick',
         'click we-button.o_we_list_add_optional': '_onAddCustomItemClick',
         'click we-button.o_we_list_add_existing': '_onAddExistingItemClick',
-        'click we-list we-select': '_onAddItemSelectClick',
-        'input we-list input': '_onListItemInput',
+        'input we-list table input': '_onListItemInput',
     }),
 
     /**
@@ -761,7 +764,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 select.parentElement.appendChild(editableSelect);
             }
             this.rerender = false;
-            await this._rerenderXML().then(() => this._renderList());
+            await this._rerenderXML();
             return;
         }
         await this._super.apply(this, arguments);
@@ -861,6 +864,18 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             name: 'field_mark',
         });
     },
+    /**
+     * Add a record from the m2o search field to the we-list
+     */
+    addM2ORecord: function (previewMode, value, params) {
+        this._addExistingItemToTable(value.id, value.display_name);
+    },
+    /**
+     * Add a record from we-select selection to the we-list
+     */
+    addRecord: function (previewMode, value, params) {
+        this._addExistingItemToTable(value, params);
+    },
 
     //----------------------------------------------------------------------
     // Private
@@ -920,29 +935,6 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             availableFields.unshift(title);
             availableFields.forEach(option => selectEl.append(option.cloneNode(true)));
         }
-    },
-    /**
-     * Replace the target content with the field provided
-     *
-     * @private
-     * @param {Object} field
-     * @returns {Promise}
-     */
-    _replaceField: async function (field) {
-        await this._fetchFieldRecords(field);
-        const htmlField = this._renderField(field);
-        [...this.$target[0].childNodes].forEach(node => node.remove());
-        [...htmlField.childNodes].forEach(node => this.$target[0].appendChild(node));
-        [...htmlField.attributes].forEach(el => this.$target[0].removeAttribute(el.nodeName));
-        [...htmlField.attributes].forEach(el => this.$target[0].setAttribute(el.nodeName, el.nodeValue));
-    },
-
-    /**
-     * To do after rerenderXML to add the list to the options
-     *
-     * @private
-     */
-    _renderList: function () {
         let addItemButton, addItemTitle, listTitle;
         const select = this._getSelect();
         const multipleInputs = this._getMultipleInputs();
@@ -972,14 +964,17 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
             addItemButton.classList.add('o_we_list_add_optional');
             addItemButton.dataset.noPreview = 'true';
         } else {
+            const field = this._getActiveField();
             addItemButton = document.createElement('we-select');
-            addItemButton.classList.add('o_we_user_value_widget'); // Todo dont use user value widget class
-            const togglerEl = document.createElement('we-toggler');
-            togglerEl.textContent = addItemTitle;
-            addItemButton.appendChild(togglerEl);
-            const selectMenuEl = document.createElement('we-select-menu');
-            addItemButton.appendChild(selectMenuEl);
-            this._loadListDropdown(selectMenuEl);
+            if (field.type === 'selection') {
+                this._loadListDropdown();
+            } else {
+                const searchInput = document.createElement('we-many2one-input');
+                searchInput.dataset.model = field.relation;
+                searchInput.dataset.addM2ORecord = '';
+                searchInput.dataset.string = addItemTitle;
+                addItemButton.appendChild(searchInput);
+            }
         }
         const selectInputEl = document.createElement('we-list');
         const title = document.createElement('we-title');
@@ -990,17 +985,33 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         tableWrapper.appendChild(this.listTable);
         selectInputEl.appendChild(tableWrapper);
         selectInputEl.appendChild(addItemButton);
-        this.el.insertBefore(selectInputEl, this.el.querySelector('[data-set-placeholder]'));
+        uiFragment.insertBefore(selectInputEl, uiFragment.querySelector('[data-set-placeholder]'));
         this._makeListItemsSortable();
     },
     /**
-     * Load the dropdown of the list with the records missing from the list.
+     * Replace the target content with the field provided
      *
      * @private
-     * @param {HTMLElement} selectMenu
+     * @param {Object} field
+     * @returns {Promise}
      */
-    _loadListDropdown: function (selectMenu) {
-        selectMenu = selectMenu || this.el.querySelector('we-list we-select-menu');
+    _replaceField: async function (field) {
+        await this._fetchFieldRecords(field);
+        const htmlField = this._renderField(field);
+        [...this.$target[0].childNodes].forEach(node => node.remove());
+        [...htmlField.childNodes].forEach(node => this.$target[0].appendChild(node));
+        [...htmlField.attributes].forEach(el => this.$target[0].removeAttribute(el.nodeName));
+        [...htmlField.attributes].forEach(el => this.$target[0].setAttribute(el.nodeName, el.nodeValue));
+    },
+
+    /**
+     * @private
+     */
+    _loadListDropdown: function () {
+        if (this.$target[0].dataset.type !== 'selection') {
+            return;
+        }
+        const selectMenu = this.el.querySelector('we-list we-select-menu');
         if (selectMenu) {
             selectMenu.innerHTML = '';
             const field = Object.assign({}, this.fields[this._getFieldName()]);
@@ -1013,8 +1024,7 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
                 if (availableRecords.length) {
                     buttonItems = availableRecords.map(el => {
                         const option = document.createElement('we-button');
-                        option.classList.add('o_we_list_add_existing');
-                        option.dataset.addOption = el.id;
+                        option.dataset.addRecord = el.id;
                         option.dataset.noPreview = 'true';
                         option.textContent = el.display_name;
                         return option;
@@ -1080,6 +1090,18 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         if (isCustomField) {
             inputEl.focus();
         }
+    },
+
+    /**
+     *
+     * @param {integer} id
+     * @param {string} name
+     */
+    _addExistingItemToTable: function (id, name) {
+        this._addItemToTable(id, name);
+        this._makeListItemsSortable();
+        this._loadListDropdown();
+        this._renderListItems();
     },
     /**
      * Apply the we-list on the target and rebuild the input(s)
@@ -1173,24 +1195,6 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
         this._addItemToTable();
         this._makeListItemsSortable();
         this._renderListItems();
-    },
-    /**
-     * @private
-     * @param {Event} ev
-     */
-    _onAddExistingItemClick: function (ev) {
-        const value = ev.currentTarget.dataset.addOption;
-        this._addItemToTable(value, ev.currentTarget.textContent);
-        this._makeListItemsSortable();
-        this._loadListDropdown();
-        this._renderListItems();
-    },
-    /**
-     * @private
-     * @param {Event} ev
-     */
-    _onAddItemSelectClick: function (ev) {
-        ev.currentTarget.querySelector('we-toggler').classList.toggle('active');
     },
     /**
      * @private
