@@ -362,6 +362,14 @@ function fieldsViewGet(server, params) {
     return fieldsView;
 }
 
+function mockLegacyConfigFromEnv(env) {
+    const initialConfig = Object.assign({}, config);
+    initialConfig.device = Object.assign({}, config.device);
+    Object.assign(config.device, env.device);
+    return function() {
+        Object.assign(config.device, initialConfig.device);
+    }
+}
 /**
  * Returns a mocked environment to be used by OWL components in tests.
  *
@@ -444,6 +452,9 @@ function getMockedOwlEnv(params) {
                 env.services[serv] = Service;
             }
         }
+    }
+    if (params.env) {
+        Object.assign(env, params.env);
     }
     return makeTestEnvironment(env, server.performRpc.bind(server));
 }
@@ -663,6 +674,7 @@ return {
     addMockEnvironment: addMockEnvironment,
     fieldsViewGet: fieldsViewGet,
     getMockedOwlEnv: getMockedOwlEnv,
+    mockLegacyConfigFromEnv: mockLegacyConfigFromEnv,
     intercept: intercept,
     patchDate: patchDate,
     patch: patch,

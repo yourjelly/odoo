@@ -48,6 +48,7 @@ async function createWebClient(params) {
 
     const target = prepareTarget(params.debug);
     Component.env = testUtilsMock.getMockedOwlEnv(params);
+    const revertConfig = testUtilsMock.mockLegacyConfigFromEnv(Component.env);
 
     // while we have a mix between Owl and legacy stuff, some of them triggering
     // events on the env.bus (a new Bus instance especially created for the current
@@ -116,6 +117,7 @@ async function createWebClient(params) {
         DebouncedField.prototype.DEBOUNCE = initialDebounceValue;
         SystrayMenu.Items = SystrayItems;
         _.debounce = initialUnderscoreDebounce;
+        revertConfig();
         testUtilsMock.unpatch(webClient);
     };
 
