@@ -67,13 +67,13 @@ QUnit.module('ActionManager', {
         });
 
         // should default on a mobile-friendly view (kanban) for action 1
-        await testUtils.doAction(1);
+        await testUtils.actionManager.doAction(1);
 
         assert.containsNone(webClient, '.o_list_view');
         assert.containsOnce(webClient, '.o_kanban_view');
 
         // there is no mobile-friendly view for action 2, should use the first one (list)
-        await testUtils.doAction(2);
+        await testUtils.actionManager.doAction(2);
 
         assert.containsOnce(webClient, '.o_list_view');
         assert.containsNone(webClient, '.o_kanban_view');
@@ -128,7 +128,7 @@ QUnit.module('ActionManager', {
             data: this.data,
             env: this.env,
         });
-        await testUtils.doAction(1);
+        await testUtils.actionManager.doAction(1);
 
         assert.containsOnce(webClient.el.querySelector('.o_control_panel'), '.o_cp_switch_buttons button[data-toggle="dropdown"]');
         assert.hasClass(webClient.el.querySelector('.o_cp_switch_buttons .o_cp_switch_kanban'), 'active');

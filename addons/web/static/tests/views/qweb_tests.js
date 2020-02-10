@@ -46,7 +46,7 @@ QUnit.module("Views", {
         });
         try {
             var resolved = false;
-            webClient.doAction({
+            utils.actionManager.doAction({
                 type: 'ir.actions.act_window',
                 views: [[false, 'qweb']],
                 res_model: 'test',
