@@ -87,6 +87,13 @@ class Action extends ComponentAdapter {
         }
         return super.shouldUpdate(nextProps);
     }
+    _trigger_up(ev) {
+        if (ev.name === "switch_view" && this.legacy === 'view') {
+            const controllerState = this.widget.exportState();
+            this.env.bus.trigger('legacy-reloaded', { controllerState });
+        }
+        return super._trigger_up(...arguments);
+    }
     async updateWidget(nextProps) {
         if (this.legacy === 'view') {
             const action = nextProps.action;
