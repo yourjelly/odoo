@@ -1118,6 +1118,11 @@ actual arch.
     def _validate_tag_search(self, node, name_manager, node_info):
         if len([c for c in node if c.tag == 'searchpanel']) > 1:
             self.handle_view_error(_('Search tag can only contains one search panel'))
+        for child in node.iterchildren(tag=etree.Element):
+            if child.tag == 'field':
+                return
+        self.handle_view_error(
+            _('Search tag requires at least one field element'), raise_exception=False)
 
     def _validate_tag_searchpanel(self, node, name_manager, node_info):
         for child in node.iterchildren(tag=etree.Element):

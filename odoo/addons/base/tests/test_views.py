@@ -2183,6 +2183,21 @@ class TestViews(ViewCase):
             'A <graph> can only contains <field> nodes, found a <label>'
         )
 
+    @mute_logger('odoo.addons.base.models.ir_ui_view')
+    def test_search_view_field_present(self):
+        # test that there's at least one field present in a search view
+        invalid_arch = """
+            <search string="Search">
+            </search>
+        """
+        self.assertInvalid(invalid_arch)
+        valid_arch = """
+            <search string="Search">
+                <field name="name"/>
+            </search>
+        """
+        self.assertValid(valid_arch)
+
     def assertValid(self, arch, name='valid view'):
         self.View.create({
             'name': name,
