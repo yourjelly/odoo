@@ -3876,6 +3876,103 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
+    QUnit.test('open form view, use the pager, execute action, and come back', async function (assert) {
+        assert.expect(8);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+        });
+
+        // execute an action and open a record
+        await doAction(3);
+        assert.containsOnce(webClient, '.o_list_view');
+        assert.containsN(webClient, '.o_list_view .o_data_row', 5);
+        await testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.strictEqual($(webClient.el).find('.o_field_widget[name=display_name]').text(), 'First record');
+
+        // switch to second record
+        await testUtils.dom.click($(webClient.el).find('.o_pager_next'));
+        assert.strictEqual($(webClient.el).find('.o_field_widget[name=display_name]').text(), 'Second record');
+
+        // execute an action from the second record
+        await testUtils.dom.click($(webClient.el).find('.o_statusbar_buttons button[name=4]'));
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        // go back using the breadcrumbs
+        await testUtils.dom.click($(webClient.el).find('.o_control_panel .breadcrumb-item:nth(1) a'));
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.strictEqual($(webClient.el).find('.o_field_widget[name=display_name]').text(), 'Second record');
+
+        webClient.destroy();
+    });
+
+    QUnit.test('create a new record in a form view, execute action, and come back', async function (assert) {
+        assert.expect(8);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+        });
+
+        // execute an action and create a new record
+        await doAction(3);
+        assert.containsOnce(webClient, '.o_list_view');
+        await testUtils.dom.click($(webClient.el).find('.o_list_button_add'));
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.hasClass($(webClient.el).find('.o_form_view'), 'o_form_editable');
+        await testUtils.fields.editInput($(webClient.el).find('.o_field_widget[name=display_name]'), 'another record');
+        await testUtils.dom.click($(webClient.el).find('.o_form_button_save'));
+        assert.hasClass($(webClient.el).find('.o_form_view'), 'o_form_readonly');
+
+        // execute an action from the second record
+        await testUtils.dom.click($(webClient.el).find('.o_statusbar_buttons button[name=4]'));
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        // go back using the breadcrumbs
+        await testUtils.dom.click($(webClient.el).find('.o_control_panel .breadcrumb-item:nth(1) a'));
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.hasClass($(webClient.el).find('.o_form_view'), 'o_form_readonly');
+        assert.strictEqual($(webClient.el).find('.o_field_widget[name=display_name]').text(), 'another record');
+
+        webClient.destroy();
+    });
+
+    QUnit.test('open a record, come back, and create a new record', async function (assert) {
+        assert.expect(7);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+        });
+
+        // execute an action and open a record
+        await doAction(3);
+        assert.containsOnce(webClient, '.o_list_view');
+        assert.containsN(webClient, '.o_list_view .o_data_row', 5);
+        await testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.hasClass($(webClient.el).find('.o_form_view'), 'o_form_readonly');
+
+        // go back using the breadcrumbs
+        await testUtils.dom.click($(webClient.el).find('.o_control_panel .breadcrumb-item a'));
+        assert.containsOnce(webClient, '.o_list_view');
+
+        // create a new record
+        await testUtils.dom.click($(webClient.el).find('.o_list_button_add'));
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.hasClass($(webClient.el).find('.o_form_view'), 'o_form_editable');
+
+        webClient.destroy();
+    });
+
     QUnit.module('Actions in target="new"');
 
     QUnit.test('can execute act_window actions in target="new"', async function (assert) {
