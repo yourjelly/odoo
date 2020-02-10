@@ -7,11 +7,9 @@ var createActionManager = testUtils.createActionManager;
 
 QUnit.module('ActionManager', {
     beforeEach: function () {
-        const env = {
+        this.env = {
             device: {isMobile: true}
         };
-        owl.Component.env = env;
-
         this.data = {
             partner: {
                 fields: {
@@ -65,7 +63,7 @@ QUnit.module('ActionManager', {
             actions: this.actions,
             archs: this.archs,
             data: this.data,
-            debug: true,
+            env: this.env,
         });
 
         // should default on a mobile-friendly view (kanban) for action 1
@@ -90,28 +88,23 @@ QUnit.module('ActionManager', {
             actions: this.actions,
             archs: this.archs,
             data: this.data,
+            env: this.env,
             mockRPC: function (route, args) {
                 assert.step(args.method || route);
                 return this._super.apply(this, arguments);
             },
-            debug: true,
             webClient: {
                 _getWindowHash() {
-                    return '#ation=1&view_type=form';
+                    return '#action=1&view_type=form';
                 }
             }
         });
-        /*await webClient.loadState({
-            action: 1,
-            view_type: 'form',
-        });*/
-
         assert.containsNone(webClient, '.o_list_view');
         assert.containsNone(webClient, '.o_kanban_view');
         assert.containsOnce(webClient, '.o_form_view');
 
         // go back to lazy loaded view
-        await testUtils.dom.click(webClient.$('.o_control_panel .breadcrumb .breadcrumb-item:first'));
+        await testUtils.dom.click(webClient.el.querySelectorAll('.o_control_panel .breadcrumb .breadcrumb-item')[0]);
         assert.containsNone(webClient, '.o_form_view');
         assert.containsNone(webClient, '.o_list_view');
         assert.containsOnce(webClient, '.o_kanban_view');
@@ -133,13 +126,13 @@ QUnit.module('ActionManager', {
             actions: this.actions,
             archs: this.archs,
             data: this.data,
+            env: this.env,
         });
-
         await testUtils.doAction(1);
 
-        assert.containsOnce(webClient.$('.o_control_panel'), '.o_cp_switch_buttons button[data-toggle="dropdown"]');
-        assert.hasClass(webClient.$('.o_cp_switch_buttons .o_cp_switch_kanban'), 'active');
-        assert.hasClass(webClient.$('.o_cp_switch_buttons .o_switch_view_button_icon'), 'fa-th-large');
+        assert.containsOnce(webClient.el.querySelector('.o_control_panel'), '.o_cp_switch_buttons button[data-toggle="dropdown"]');
+        assert.hasClass(webClient.el.querySelector('.o_cp_switch_buttons .o_cp_switch_kanban'), 'active');
+        assert.hasClass(webClient.el.querySelector('.o_cp_switch_buttons .o_switch_view_button_icon'), 'fa-th-large');
 
         webClient.destroy();
     });
