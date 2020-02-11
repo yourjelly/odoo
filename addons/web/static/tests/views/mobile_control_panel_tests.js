@@ -3,10 +3,14 @@ odoo.define('web.search_tests', function (require) {
 
 var testUtils = require('web.test_utils');
 
-var createActionManager = testUtils.createActionManager;
+var createWebClient = testUtils.createWebClient;
 
 QUnit.module('Mobile Search view Screen', {
     beforeEach: function () {
+        this.env = {
+            device: {isMobile: true}
+        };
+
         this.data = {
             partner: {
                 fields: {
@@ -44,10 +48,11 @@ QUnit.module('Mobile Search view Screen', {
 
         var searchRPCFlag = false;
 
-        var actionManager = await createActionManager({
+        var webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
+            env: this.env,
             mockRPC: function (route, args) {
                 if (searchRPCFlag) {
                     assert.deepEqual(args.domain, [['foo', 'ilike', 'A']],
@@ -57,7 +62,7 @@ QUnit.module('Mobile Search view Screen', {
             },
         });
 
-        await actionManager.doAction(1);
+        await testUtils.actionManager.doAction(1);
 
         assert.strictEqual($('button.o_enable_searchview.fa-search').length, 1,
             "should display a button to open the searchview");
@@ -78,7 +83,7 @@ QUnit.module('Mobile Search view Screen', {
             .val("A")
             .trigger($.Event('keypress', { which: 65, keyCode: 65 }));
         await testUtils.nextTick();
-        actionManager.$('.o_searchview_input')
+        $(webClient.el).find('.o_searchview_input')
             .trigger($.Event('keydown', { which: $.ui.keyCode.ENTER, keyCode: $.ui.keyCode.ENTER }));
         await testUtils.nextTick();
 
@@ -89,7 +94,7 @@ QUnit.module('Mobile Search view Screen', {
         assert.deepEqual($('.o_searchview_input_container:visible').length, 0,
             "Quick search input should be hidden");
 
-        actionManager.destroy();
+        webClient.destroy();
     });
 
     QUnit.test('can activate a filter with mobile search view in full screen mode', async function (assert) {
@@ -97,10 +102,11 @@ QUnit.module('Mobile Search view Screen', {
 
         var filterActiveFlag = false;
 
-        var actionManager = await createActionManager({
+        var webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
+            env: this.env,
             mockRPC: function (route, args) {
                 if (filterActiveFlag) {
                     assert.deepEqual(args.domain, [['boolean_field', '=', true]],
@@ -110,7 +116,7 @@ QUnit.module('Mobile Search view Screen', {
             },
         });
 
-        await actionManager.doAction(1);
+        await testUtils.actionManager.doAction(1);
 
         assert.ok(!$('.o_mobile_search').is(':visible'),
             'mobile search view is not visible');
@@ -133,7 +139,7 @@ QUnit.module('Mobile Search view Screen', {
         assert.ok(!$('.o_mobile_search').is(':visible'),
             'mobile search view is not visible');
 
-        actionManager.destroy();
+        webClient.destroy();
     });
 
 });

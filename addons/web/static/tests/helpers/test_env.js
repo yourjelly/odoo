@@ -1,9 +1,7 @@
 odoo.define('web.test_env', async function (require) {
     "use strict";
 
-    const AbstractStorageService = require('web.AbstractStorageService');
     const Bus = require("web.Bus");
-    const RamStorage = require('web.RamStorage');
     const { buildQuery } = require("web.rpc");
     const session = require('web.session');
 
