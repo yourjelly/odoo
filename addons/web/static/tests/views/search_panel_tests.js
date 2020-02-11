@@ -1928,6 +1928,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('search panel is available on list and kanban by default', async function (assert) {
+        // TODO, that one my be undeterministic
         assert.expect(8);
 
         var webClient = await createWebClient({
