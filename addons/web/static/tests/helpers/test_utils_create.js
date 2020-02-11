@@ -85,6 +85,7 @@ async function createWebClient(params) {
 
     const webClient = new WebClient();
     const patchWC = {
+        _determineCompanyIds() {},
         _getWindowHash() {return ''},
         _setWindowHash() {},
         _setWindowTitle() {},

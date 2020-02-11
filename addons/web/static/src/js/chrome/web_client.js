@@ -121,12 +121,13 @@ class WebClient extends Component {
         return state;
     }
     _determineCompanyIds(state) {
-        const currentCompanyId = this.env.session.user_companies.current_company[0];
+        const userCompanies = this.env.session.user_companies;
+        const currentCompanyId = userCompanies.current_company[0];
         if (!state.cids) {
             state.cids = this.env.services.getCookie('cids') || currentCompanyId;
         }
-        const stateCompanyIds = state.cids.toString().split(',').map(parseInt);
-        const userCompanyIds =  this.env.session.user_companies.allowed_companies.map(company => company[0]);
+        let stateCompanyIds = state.cids.toString().split(',').map(id => parseInt(id, 10));
+        const userCompanyIds = userCompanies.allowed_companies.map(company => company[0]);
         // Check that the user has access to all the companies
         if (!_.isEmpty(_.difference(stateCompanyIds, userCompanyIds))) {
             state.cids = String(currentCompanyId);
