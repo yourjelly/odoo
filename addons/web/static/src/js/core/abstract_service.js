@@ -23,6 +23,10 @@ var AbstractService = Class.extend(Mixins.EventDispatcherMixin, ServicesMixin, {
      * @param {OdooEvent} ev
      */
     _trigger_up: function (ev) {
+        Mixins.EventDispatcherMixin._trigger_up.apply(this, arguments);
+        if (ev.is_stopped()) {
+            return;
+        }
         if (ev.name === 'call_service') {
             const payload = ev.data;
             let args = payload.args || [];
@@ -33,6 +37,12 @@ var AbstractService = Class.extend(Mixins.EventDispatcherMixin, ServicesMixin, {
             const service = this.env.services[payload.service];
             const result = service[payload.method].apply(service, args);
             payload.callback(result);
+        } else if (ev.name === 'do_action') {
+            this.env.bus.trigger('do-action', ev.data);
+        } else if (ev.name === 'get_session') {
+            if (ev.data.callback) {
+                ev.data.callback(this.env.session);
+            }
         }
     },
 });
