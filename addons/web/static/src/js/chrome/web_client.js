@@ -66,15 +66,15 @@ class WebClient extends Component {
         }
     }
     mounted() {
-        window.addEventListener('hashchange', () => {
+        this._onHashchange = () => {
             if (!this.ignoreHashchange) {
                 const state = this._getUrlState();
-                this._determineCompanyIds(state);
                 this.actionManager.loadState(state, { menuID: state.menu_id });
             }
             this.ignoreHashchange = false;
             // TODO: reset oldURL in case of failure?
-        }, false);
+        };
+        window.addEventListener('hashchange', this._onHashchange);
         super.mounted();
         this._wcUpdated();
     }
@@ -90,6 +90,9 @@ class WebClient extends Component {
 
     catchError(e) {
         throw e;
+    }
+    willUnmount() {
+        window.removeEventListener('hashchange', this._onHashchange);
     }
 
     //--------------------------------------------------------------------------
