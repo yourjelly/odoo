@@ -21,6 +21,7 @@ class Action extends ComponentAdapter {
             this.legacy = true;
         }
         this.boundController = this.props.action.controller;
+        this.inDialog = 'inDialog' in this.props;
     }
 
     get title() {
@@ -51,18 +52,10 @@ class Action extends ComponentAdapter {
                 this.widget.destroy();
                 return;
             }
-            if (!('inDialog' in this.props)) {
-                const initState = this.widget.exportState();
-                const controllerState = {
-                    resIds: initState.resIds,
-                }
-                this.env.bus.trigger('legacy-loaded', { controllerState });
-            }
-            if ('inDialog' in this.props) {
+            if (this.inDialog) {
                 this.env.bus.trigger('legacy-action', this.widget);
             }
             this.legacy = 'view';
-            this._reHookControllerMethods();
             return this.widget._widgetRenderAndInsert(() => {});
         } else if (this.legacy) {
             this.legacy = 'action';
@@ -90,7 +83,7 @@ class Action extends ComponentAdapter {
     }
     _trigger_up(ev) {
         const evType = ev.name;
-        if (this.legacy === 'view' && this.widget && (evType === "switch_view" || evType === "execute_action")) {
+        if (!this.inDialog && this.legacy === 'view' && this.widget && (evType === "switch_view" || evType === "execute_action")) {
             const controllerState = this.widget.exportState();
             this.env.bus.trigger('legacy-reloaded', { controllerState });
         }
@@ -114,7 +107,7 @@ class Action extends ComponentAdapter {
         return super.updateWidget(...arguments);
     }
 
-    _reHookControllerMethods() {
+/*    _reHookControllerMethods() {
         if (!('inDialog' in this.props)) {
             const self = this;
             const widget = this.widget;
@@ -129,7 +122,7 @@ class Action extends ComponentAdapter {
                 self.env.bus.trigger('legacy-reloaded', { commonState , controllerState });
             }
         }
-    }
+    }*/
 
     getState() {
         if (this.widget) {
@@ -139,7 +132,7 @@ class Action extends ComponentAdapter {
     }
 
     destroy(force) {
-        if (this.__owl__.isMounted && this.legacy && this.widget && !force) { // FIXME: do not detach twice?
+        if (!this.inDialog && this.__owl__.isMounted && this.legacy && this.widget && !force) { // FIXME: do not detach twice?
             // keep legacy stuff alive because some stuff
             // are kept by AbstractModel (e.g.: orderedBy)
             dom.detach([{widget: this.widget}]);

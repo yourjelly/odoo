@@ -203,15 +203,10 @@ class ActionManager extends core.EventBus {
         this.env.bus.on('do-action', this, payload => {
             this.doAction(payload.action, payload.options);
         });
-        // Special event that is trigger by legacy views
-        // When they are loaded
-        this.env.bus.on('legacy-loaded', this, payload => {
-            this.legacyLoaded(payload, true);
-        });
         // same as above except it is triggered on their reload
         // Made for clarity and transparency
         this.env.bus.on('legacy-reloaded', this, payload => {
-            this.legacyLoaded(payload, false);
+            this.legacyLoaded(payload);
         });
         this.env.bus.on('history-back', this, this._onHistoryBack);
         this.plugins = new WeakMap();
@@ -651,12 +646,6 @@ class ActionManager extends core.EventBus {
         return `${type}${nextID++}`;
     }
     legacyLoaded(payload, initialLoading) {
-        if (initialLoading) {
-            // Initial legacy loading, nothing is in dom,
-            // actionManager state is either empty or not accurate
-            this.legacyInitState = payload;
-            return;
-        }
         const { action } = this.getCurrentState().main;
         Object.assign(action, payload.commonState);
         action.controllerState = Object.assign({}, action.controllerState, payload.controllerState);
@@ -783,10 +772,6 @@ class ActionManager extends core.EventBus {
             }
             this.currentStack = nextStack;
             this._cleanActions();
-            if (this.legacyInitState) {
-                this.legacyLoaded(this.legacyInitState);
-                this.legacyInitState = null;
-            }
 
             // FIXME: for lazy loaded controllers... we must find a better solution
             if (cb) {
