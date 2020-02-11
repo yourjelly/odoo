@@ -35,11 +35,14 @@ class ColorPaletteAdapter extends ComponentAdapter {
     _trigger_up(ev) {
         const evType = ev.name;
         if (evType === 'color_picked') {
-            return props.handlers.colorPickedHandler(ev);
+            return this.props.handlers.colorPickedHandler(ev);
         } else if (evType === 'color_reset') {
-            return props.handler.colorResetHandler(ev);
+            return this.props.handlers.colorResetHandler(ev);
         }
         return super._trigger_up(...arguments);
+    }
+    get widgetArgs() {
+        return [this.props.widgetArgs];
     }
 }
 
@@ -60,7 +63,6 @@ renderer.createPalette = function ($container, options) {
             }
             mutex.exec(() => {
                 const oldColorpicker = colorpicker;
-                const hookEl = oldColorpicker ? oldColorpicker.el : elem;
 
                 const r = range.create();
                 const targetNode = r.sc;
@@ -80,6 +82,7 @@ renderer.createPalette = function ($container, options) {
                 }
                 const colorResetHandler = ev => applyColor(ev.data.target, eventName, 'inherit');
                 let replaceFn;
+                let hookEl;
                 if (parent instanceof owl.Component) {
                     const colorPickerProps = {
                         Component: ColorPaletteWidget,
@@ -88,11 +91,13 @@ renderer.createPalette = function ($container, options) {
                     };
                     colorpicker = new ColorPaletteAdapter(parent, colorPickerProps);
                     replaceFn = colorpicker.mount.bind(colorpicker);
+                    hookEl = elem;
                 } else {
                     colorpicker = new ColorPaletteWidget(parent, colorPickerArgs);
                     colorpicker.on('color_picked', null, colorPickedHandler);
                     colorpicker.on('color_reset', null, colorResetHandler);
                     replaceFn = colorpicker.replace.bind(colorpicker);
+                    hookEl = oldColorpicker ? oldColorpicker.el : elem;
                 }
 
                 return replaceFn(hookEl).then(() => {
