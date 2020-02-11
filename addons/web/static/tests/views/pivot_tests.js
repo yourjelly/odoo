@@ -2311,12 +2311,6 @@ QUnit.module('Views', {
                 'partner,false,list': '<tree><field name="foo"/></tree>',
                 'partner,false,form': '<form><field name="foo"/></form>',
             },
-/*            intercepts: {
-                do_action: function (event) {
-                    var action = event.data.action;
-                    actionManager.doAction(action);
-                }
-            },*/
             mockRPC: function (route, args) {
                 if (args.method === 'read_group') {
                     assert.step('read_group');
@@ -2344,6 +2338,7 @@ QUnit.module('Views', {
             type: 'ir.actions.act_window',
             views: [[false, 'pivot']],
         });
+        await testUtils.owlCompatibilityExtraNextTick();
 
         await testUtilsDom.click(webClient.el.querySelector('.o_filters_menu_button'));
         await testUtilsDom.click($(webClient.el).find('.o_menu_item:contains("Bayou")'));
@@ -2353,6 +2348,7 @@ QUnit.module('Views', {
         assert.containsOnce(webClient.el, '.o_list_view');
 
         await testUtilsDom.click($(webClient.el).find('.o_control_panel .breadcrumb-item:first() a'));
+        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.verifySteps([
             'read_group', 'read_group',

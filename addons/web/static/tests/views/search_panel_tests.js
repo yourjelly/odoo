@@ -1928,7 +1928,6 @@ QUnit.module('Views', {
     });
 
     QUnit.test('search panel is available on list and kanban by default', async function (assert) {
-        // TODO, that one my be undeterministic
         assert.expect(8);
 
         var webClient = await createWebClient({
@@ -1942,6 +1941,7 @@ QUnit.module('Views', {
         assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_search_panel');
 
         await testUtils.dom.click(webClient.el.querySelector('.o_cp_switch_pivot'));
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_content .o_pivot');
         assert.containsNone(webClient, '.o_content .o_search_panel');
 
@@ -1983,6 +1983,7 @@ QUnit.module('Views', {
         assert.containsNone(webClient, '.o_content .o_search_panel');
 
         await testUtils.dom.click(webClient.$('.o_cp_switch_pivot'));
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_pivot');
         assert.containsOnce(webClient, '.o_content.o_controller_with_searchpanel .o_search_panel');
 
@@ -2109,6 +2110,7 @@ QUnit.module('Views', {
 
         // switch to pivot
         await testUtils.dom.click(webClient.$('.o_cp_switch_pivot'));
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_content .o_pivot');
         assert.containsNone(webClient, '.o_content .o_search_panel');
         assert.strictEqual(webClient.$('.o_pivot_cell_value').text(), '15');
