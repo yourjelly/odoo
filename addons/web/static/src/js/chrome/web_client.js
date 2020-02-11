@@ -52,6 +52,7 @@ class WebClient extends Component {
         this.menus = await this._loadMenus();
 
         const state = this._getUrlState();
+        this._determineCompanyIds(state);
         // if (Object.keys(state).length === 1 && Object.keys(state)[0] === "cids") {
         if (Object.keys(state).length === 0) {
             const menuID = this.menus && this.menus.root.children[0];
@@ -68,6 +69,7 @@ class WebClient extends Component {
         window.addEventListener('hashchange', () => {
             if (!this.ignoreHashchange) {
                 const state = this._getUrlState();
+                this._determineCompanyIds(state);
                 this.actionManager.loadState(state, { menuID: state.menu_id });
             }
             this.ignoreHashchange = false;
@@ -114,6 +116,20 @@ class WebClient extends Component {
             state[key] = isNaN(decodedVal) ? decodedVal : parseInt(decodedVal, 10);
         }
         return state;
+    }
+    _determineCompanyIds(state) {
+        const currentCompanyId = this.env.session.user_companies.current_company[0];
+        if (!state.cids) {
+            state.cids = this.env.services.getCookie('cids') || currentCompanyId;
+        }
+        const stateCompanyIds = state.cids.toString().split(',').map(parseInt);
+        const userCompanyIds =  this.env.session.user_companies.allowed_companies.map(company => company[0]);
+        // Check that the user has access to all the companies
+        if (!_.isEmpty(_.difference(stateCompanyIds, userCompanyIds))) {
+            state.cids = String(currentCompanyId);
+            stateCompanyIds = [currentCompanyId];
+        }
+        this.env.session.user_context.allowed_company_ids = stateCompanyIds;
     }
     /**
      * FIXME: consider moving this to menu.js
