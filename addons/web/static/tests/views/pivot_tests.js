@@ -3,7 +3,6 @@ odoo.define('web.pivot_tests', function (require) {
 
 var core = require('web.core');
 var PivotView = require('web.PivotView');
-var PivotRenderer = require('web.PivotRenderer');
 var testUtils = require('web.test_utils');
 var testUtilsDom = require('web.test_utils_dom');
 
