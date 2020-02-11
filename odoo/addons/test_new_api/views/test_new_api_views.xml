@@ -36,7 +36,6 @@
 
         <!-- Discussion form view -->
         <record id="discussion_form" model="ir.ui.view">
-            <field name="name">discussion form view</field>
             <field name="model">test_new_api.discussion</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
@@ -110,7 +109,6 @@
 
         <!-- Discussion form view with editable list -->
         <record id="discussion_form_2" model="ir.ui.view">
-            <field name="name">discussion form view</field>
             <field name="model">test_new_api.discussion</field>
             <field name="priority" eval="10"/>
             <field name="arch" type="xml">
@@ -154,7 +152,6 @@
 
         <!-- Discussion form view with embedded list -->
         <record id="discussion_form_3" model="ir.ui.view">
-            <field name="name">discussion form view</field>
             <field name="model">test_new_api.discussion</field>
             <field name="priority" eval="11"/>
             <field name="arch" type="xml">
@@ -190,7 +187,6 @@
 
         <!-- Message tree view -->
         <record id="message_tree" model="ir.ui.view">
-            <field name="name">message tree view</field>
             <field name="model">test_new_api.message</field>
             <field name="arch" type="xml">
                 <tree string="Messages">
@@ -204,7 +200,6 @@
 
         <!-- Message form view -->
         <record id="message_form" model="ir.ui.view">
-            <field name="name">message form view</field>
             <field name="model">test_new_api.message</field>
             <field name="arch" type="xml">
                 <form string="Message">
@@ -224,7 +219,6 @@
 
         <!-- Category tree view -->
         <record id="category_tree" model="ir.ui.view">
-            <field name="name">category tree view</field>
             <field name="model">test_new_api.category</field>
             <field name="arch" type="xml">
                 <tree string="Categories">
@@ -235,7 +229,6 @@
 
         <!-- Category form view -->
         <record id="category_form" model="ir.ui.view">
-            <field name="name">category form view</field>
             <field name="model">test_new_api.category</field>
             <field name="arch" type="xml">
                 <form string="Category">
@@ -254,7 +247,6 @@
 
         <!-- Multi tree view -->
         <record id="multi_tree" model="ir.ui.view">
-            <field name="name">multi tree view</field>
             <field name="model">test_new_api.multi</field>
             <field name="arch" type="xml">
                 <tree string="Multi">
@@ -265,7 +257,6 @@
 
         <!-- Multi form view -->
         <record id="multi_form" model="ir.ui.view">
-            <field name="name">multi form view</field>
             <field name="model">test_new_api.multi</field>
             <field name="arch" type="xml">
                 <form string="Multi">

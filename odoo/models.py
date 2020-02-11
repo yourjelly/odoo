@@ -1469,9 +1469,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         if view_id:
             # read the view with inherited views applied
-            root_view = View.browse(view_id).read_combined(['id', 'name', 'field_parent', 'type', 'model', 'arch'])
+            root_view = View.browse(view_id).read_combined(['id', 'field_parent', 'type', 'model', 'arch'])
             result['arch'] = root_view['arch']
-            result['name'] = root_view['name']
             result['type'] = root_view['type']
             result['view_id'] = root_view['id']
             result['field_parent'] = root_view['field_parent']
@@ -1482,7 +1481,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 arch_etree = getattr(self, '_get_default_%s_view' % view_type)()
                 result['arch'] = etree.tostring(arch_etree, encoding='unicode')
                 result['type'] = view_type
-                result['name'] = 'default'
             except AttributeError:
                 raise UserError(_("No default view of type '%s' could be found !") % view_type)
         return result

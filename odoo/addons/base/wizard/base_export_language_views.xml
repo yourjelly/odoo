@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="wizard_lang_export" model="ir.ui.view">
-            <field name="name">Export Translations</field>
             <field name="model">base.language.export</field>
             <field name="arch" type="xml">
                 <form string="Export Translations">

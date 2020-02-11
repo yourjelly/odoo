@@ -4,7 +4,6 @@
 
         <!-- Partner Titles -->
         <record id="view_partner_title_tree" model="ir.ui.view">
-            <field name="name">res.partner.title.tree</field>
             <field name="model">res.partner.title</field>
             <field name="arch" type="xml">
                 <tree string="Partner Titles" editable="bottom">
@@ -14,7 +13,6 @@
             </field>
         </record>
         <record id="view_partner_title_form" model="ir.ui.view">
-            <field name="name">res.partner.title.form</field>
             <field name="model">res.partner.title</field>
             <field name="arch" type="xml">
                 <form string="Partner Titles">
@@ -39,7 +37,6 @@
 
         <!-- Partner -->
         <record id="view_partner_tree" model="ir.ui.view">
-            <field name="name">res.partner.tree</field>
             <field name="model">res.partner</field>
             <field eval="8" name="priority"/>
             <field name="arch" type="xml">
@@ -63,7 +60,6 @@
         </record>
 
         <record id="view_partner_simple_form" model="ir.ui.view">
-            <field name="name">res.partner.simplified.form</field>
             <field name="model">res.partner</field>
             <field name="arch" type="xml">
                 <form string="Contact">
@@ -94,7 +90,6 @@
 
         <!-- Open partner address -->
         <record id="view_partner_address_form" model="ir.ui.view">
-            <field name="name">res.partner.form.address</field>
             <field name="model">res.partner</field>
             <field name="priority" eval="20"/>
             <field name="arch" type="xml">
@@ -131,7 +126,6 @@
         </record>
 
         <record id="view_partner_short_form" model="ir.ui.view">
-            <field name="name">res.partner.form</field>
             <field name="model">res.partner</field>
             <field name="priority" eval="2"/>
             <field name="arch" type="xml">
@@ -196,7 +190,6 @@
         </record>
 
         <record id="view_partner_form" model="ir.ui.view">
-            <field name="name">res.partner.form</field>
             <field name="model">res.partner</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
@@ -417,7 +410,6 @@
       <!-- Special restricted view for private address, with limited "named" info that
            can be traced back to the employee -->
         <record id="res_partner_view_form_private" model="ir.ui.view">
-            <field name="name">res.partner.view.form.private</field>
             <field name="model">res.partner</field>
             <field name="priority" eval="300"/>
             <field name="arch" type="xml">
@@ -461,7 +453,6 @@
         </record>
 
        <record id="view_res_partner_filter" model="ir.ui.view">
-            <field name="name">res.partner.select</field>
             <field name="model">res.partner</field>
             <field name="arch" type="xml">
                 <search string="Search Partner">
@@ -489,7 +480,6 @@
 
         <!-- Partner Kanban View -->
         <record model="ir.ui.view" id="res_partner_kanban_view">
-            <field name="name">res.partner.kanban</field>
             <field name="model">res.partner</field>
             <field name="arch" type="xml">
                 <kanban class="o_res_partner_kanban">
@@ -675,7 +665,6 @@
 
         <!-- Categories -->
         <record id="view_partner_category_form" model="ir.ui.view">
-            <field name="name">Contact Tags</field>
             <field name="model">res.partner.category</field>
             <field name="arch" type="xml">
                 <form string="Contact Tag">
@@ -691,7 +680,6 @@
         </record>
 
         <record id="view_partner_category_list" model="ir.ui.view">
-            <field name="name">Contact Tags</field>
             <field name="model">res.partner.category</field>
             <field eval="6" name="priority"/>
             <field name="arch" type="xml">
@@ -702,7 +690,6 @@
         </record>
 
         <record id="res_partner_category_view_search" model="ir.ui.view">
-            <field name="name">res.partner.category.view.search</field>
             <field name="model">res.partner.category</field>
             <field name="arch" type="xml">
                 <search string="Search Partner Category">
@@ -730,7 +717,6 @@
 
         <!-- Industry -->
         <record id="res_partner_industry_view_form" model="ir.ui.view">
-            <field name="name">Industry</field>
             <field name="model">res.partner.industry</field>
             <field name="arch" type="xml">
                 <form string="Industry">
@@ -746,7 +732,6 @@
         </record>
 
         <record id="res_partner_industry_view_tree" model="ir.ui.view">
-            <field name="name">Industry</field>
             <field name="model">res.partner.industry</field>
             <field eval="6" name="priority"/>
             <field name="arch" type="xml">
@@ -759,7 +744,6 @@
         </record>
 
         <record id="res_partner_industry_view_search" model="ir.ui.view">
-            <field name="name">res.partner.industry.view.search</field>
             <field name="model">res.partner.industry</field>
             <field name="arch" type="xml">
                 <search string="Search Partner Industry">

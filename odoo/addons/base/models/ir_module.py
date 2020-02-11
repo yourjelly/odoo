@@ -225,7 +225,7 @@ class Module(models.Model):
                 return self.env[model].browse(imd_models[model]).exists()
 
             def format_view(v):
-                return '%s%s (%s)' % (v.inherit_id and '* INHERIT ' or '', v.name, v.type)
+                return '%s (%s)' % (v.inherit_id and '* INHERIT ' or '',v.type)
 
             module.views_by_module = "\n".join(sorted(format_view(v) for v in browse('ir.ui.view')))
             module.reports_by_module = "\n".join(sorted(r.name for r in browse('ir.actions.report')))

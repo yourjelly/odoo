@@ -21,7 +21,6 @@ action = {
     </record>
 
     <record model="ir.ui.view" id="demo_failures_dialog">
-        <field name="name">Demo Failure Dialog</field>
         <field name="model">ir.demo_failure.wizard</field>
         <field name="arch" type="xml">
             <form>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="view_menu" model="ir.ui.view">
-            <field name="name">ir.ui.menu.tree</field>
             <field name="model">ir.ui.menu</field>
             <field name="arch" type="xml">
                 <tree string="Menu">
@@ -62,7 +61,6 @@
         </record>
 
         <record id="edit_menu_access_search" model="ir.ui.view">
-            <field name="name">ir.ui.menu.search</field>
             <field name="model">ir.ui.menu</field>
             <field name="arch" type="xml">
                 <search string="Menu">

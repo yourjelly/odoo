@@ -3,7 +3,6 @@
     <data>
 
         <record model="ir.ui.view" id="view_decimal_precision_form">
-            <field name="name">Decimal Precision</field>
             <field name="model">decimal.precision</field>
             <field name="arch" type="xml">
                 <form string="Decimal Precision">
@@ -17,7 +16,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="view_decimal_precision_tree">
-            <field name="name">Decimal Precision List</field>
             <field name="model">decimal.precision</field>
             <field name="arch" type="xml">
                 <tree string="Decimal Precision">

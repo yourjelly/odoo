@@ -8,7 +8,6 @@
                   <sheet>
                     <group>
                         <group>
-                            <field name="name"/>
                             <field name="type"/>
                             <field name="model"/>
                             <field name="priority"/>
@@ -36,7 +35,6 @@
                                 <tree default_order="priority,id">
                                     <field name="id"/>
                                     <field name="priority"/>
-                                    <field name="name"/>
                                     <field name="xml_id"/>
                                 </tree>
                             </field>
@@ -52,7 +50,6 @@
             <field name="arch" type="xml">
                 <tree string="Views">
                     <field name="priority" string="Sequence" widget="handle"/>
-                    <field name="name"/>
                     <field name="type"/>
                     <field name="model"/>
                     <field name="xml_id" groups="base.group_no_one"/>
@@ -65,7 +62,6 @@
             <field name="model">ir.ui.view</field>
             <field name="arch" type="xml">
                 <search string="Views">
-                    <field name="name" filter_domain="['|', '|', ('name','ilike',self), ('model','ilike',self), ('model_data_id','ilike',self)]" string="View"/>
                     <field name="key"/>
                     <field name="model"/>
                     <field name="inherit_id"/>
@@ -101,13 +97,11 @@
 
         <!-- Reset view wizard -->
         <record id="reset_view_arch_wizard_view" model="ir.ui.view">
-            <field name="name">Reset View Architecture</field>
             <field name="model">reset.view.arch.wizard</field>
             <field name="arch" type="xml">
                 <form string="Reset View Architecture">
                     <group>
                         <field name="view_id" invisible="1"/>
-                        <field name="view_name"/>
                         <field name="reset_mode" widget="radio"/>
                     </group>
                     <field name="arch_diff" attrs="{'invisible': [('arch_diff', '=', False)]}"/>

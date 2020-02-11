@@ -3,7 +3,6 @@
     <data>
 
         <record id="view_test_exceptions_model" model="ir.ui.view">
-            <field name="name">Test exceptions</field>
             <field name="model">test.exceptions.model</field>
             <field name="arch" type="xml">
                 <form string="Test exceptions">

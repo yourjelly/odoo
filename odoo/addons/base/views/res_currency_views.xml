@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_currency_rate_search" model="ir.ui.view">
-            <field name="name">res.currency.rate.search</field>
             <field name="model">res.currency.rate</field>
             <field name="arch" type="xml">
                 <search string="Currency Rates">
@@ -12,7 +11,6 @@
         </record>
 
         <record id="view_currency_rate_tree" model="ir.ui.view">
-            <field name="name">res.currency.rate.tree</field>
             <field name="model">res.currency.rate</field>
             <field name="arch" type="xml">
                 <tree string="Currency Rates" editable="bottom">
@@ -24,7 +22,6 @@
         </record>
 
         <record id="view_currency_rate_form" model="ir.ui.view">
-            <field name="name">res.currency.rate.form</field>
             <field name="model">res.currency.rate</field>
             <field name="arch" type="xml">
                 <form string="Currency Rate">
@@ -55,7 +52,6 @@
            res_model="res.currency.rate"/>
 
         <record id="view_currency_search" model="ir.ui.view">
-            <field name="name">res.currency.search</field>
             <field name="model">res.currency</field>
             <field name="arch" type="xml">
                 <search string="Currencies">
@@ -67,7 +63,6 @@
         </record>
 
         <record id="view_currency_tree" model="ir.ui.view">
-            <field name="name">res.currency.tree</field>
             <field name="model">res.currency</field>
             <field name="arch" type="xml">
                 <tree string="Currencies" decoration-muted="(not active)">
@@ -82,7 +77,6 @@
         </record>
 
         <record id="view_currency_kanban" model="ir.ui.view">
-            <field name="name">res.currency.kanban</field>
             <field name="model">res.currency</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -113,7 +107,6 @@
         </record>
 
         <record id="view_currency_form" model="ir.ui.view">
-            <field name="name">res.currency.form</field>
             <field name="model">res.currency</field>
             <field name="arch" type="xml">
                 <form string="Currency">

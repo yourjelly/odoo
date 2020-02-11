@@ -4,7 +4,6 @@
         <!-- ir.actions -->
 
         <record id="action_view" model="ir.ui.view">
-            <field name="name">ir.actions.actions</field>
             <field name="model">ir.actions.actions</field>
             <field name="arch" type="xml">
                 <form string="Action">
@@ -18,7 +17,6 @@
             </field>
         </record>
         <record id="action_view_tree" model="ir.ui.view">
-            <field name="name">ir.actions.actions.tree</field>
             <field name="model">ir.actions.actions</field>
             <field name="arch" type="xml">
                 <tree string="Action">
@@ -28,7 +26,6 @@
             </field>
         </record>
         <record id="action_view_search" model="ir.ui.view">
-            <field name="name">ir.actions.actions.search</field>
             <field name="model">ir.actions.actions</field>
             <field name="arch" type="xml">
                 <search string="Action">
@@ -49,7 +46,6 @@
         <!-- ir.actions.report -->
 
         <record id="act_report_xml_view" model="ir.ui.view">
-            <field name="name">ir.actions.report</field>
             <field name="model">ir.actions.report</field>
             <field name="arch" type="xml">
                 <form string="Report">
@@ -95,7 +91,6 @@
             </field>
         </record>
         <record id="act_report_xml_view_tree" model="ir.ui.view">
-            <field name="name">ir.actions.report.tree</field>
             <field name="model">ir.actions.report</field>
             <field name="arch" type="xml">
                 <tree string="Report xml">
@@ -109,7 +104,6 @@
             </field>
         </record>
         <record id="act_report_xml_search_view" model="ir.ui.view">
-            <field name="name">ir.actions.report.search</field>
             <field name="model">ir.actions.report</field>
             <field name="arch" type="xml">
                 <search string="Report Xml">
@@ -136,7 +130,6 @@
         <!-- ir.actions.act_window -->
 
         <record id="view_window_action_tree" model="ir.ui.view">
-            <field name="name">ir.actions.windows.tree</field>
             <field name="model">ir.actions.act_window</field>
             <field name="arch" type="xml">
                 <tree string="Open Window">
@@ -149,7 +142,6 @@
             </field>
         </record>
         <record id="view_window_action_form" model="ir.ui.view">
-            <field name="name">ir.actions.windows.form</field>
             <field name="model">ir.actions.act_window</field>
             <field name="arch" type="xml">
                 <form string="Open a Window">
@@ -210,7 +202,6 @@
             </field>
         </record>
         <record id="view_window_action_search" model="ir.ui.view">
-            <field name="name">ir.actions.windows.search</field>
             <field name="model">ir.actions.act_window</field>
             <field name="arch" type="xml">
                 <search string="Open a Window">
@@ -241,7 +232,6 @@
         <!-- ir.actions.server -->
 
         <record id="view_server_action_form" model="ir.ui.view">
-            <field name="name">Server Action</field>
             <field name="model">ir.actions.server</field>
             <field name="arch" type="xml">
                 <form string="Server Action">
@@ -348,7 +338,6 @@ env['res.partner'].create({'name': partner_name})
             </field>
         </record>
         <record id="view_server_action_tree" model="ir.ui.view">
-            <field name="name">Server Actions</field>
             <field name="model">ir.actions.server</field>
             <field name="arch" type="xml">
                 <tree string="Server Actions">
@@ -361,7 +350,6 @@ env['res.partner'].create({'name': partner_name})
             </field>
         </record>
         <record id="view_server_action_search" model="ir.ui.view">
-            <field name="name">ir.actions.server.search</field>
             <field name="model">ir.actions.server</field>
             <field name="arch" type="xml">
                 <search string="Server Actions">
@@ -391,7 +379,6 @@ env['res.partner'].create({'name': partner_name})
 
         <record id="ir_actions_todo_tree" model="ir.ui.view">
             <field name="model">ir.actions.todo</field>
-            <field name="name">Config Wizard Steps</field>
             <field name="arch" type="xml">
                 <tree string="Config Wizard Steps">
                     <field name="sequence" widget='handle'/>
@@ -406,7 +393,6 @@ env['res.partner'].create({'name': partner_name})
         </record>
         <record id="config_wizard_step_view_form" model="ir.ui.view">
             <field name="model">ir.actions.todo</field>
-            <field name="name">Config Wizard Steps</field>
             <field name="arch" type="xml">
                 <form string="Config Wizard Steps">
                   <header>
@@ -430,7 +416,6 @@ env['res.partner'].create({'name': partner_name})
         </record>
         <record id="config_wizard_step_view_search" model="ir.ui.view">
             <field name="model">ir.actions.todo</field>
-            <field name="name">ir.actions.todo.select</field>
             <field name="arch" type="xml">
                 <search string="Search Actions">
                     <filter string="To Do" name="todo" domain=" [('state','=','open')]" help="Wizards to be Launched"/>

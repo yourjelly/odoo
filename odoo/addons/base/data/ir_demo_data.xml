@@ -7,7 +7,6 @@
     </record>
 
     <record model="ir.ui.view" id="demo_force_install_form">
-        <field name="name">ir.demo.form</field>
         <field name="model">ir.demo</field>
         <field name="arch" type="xml">
             <form>

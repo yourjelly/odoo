@@ -3,7 +3,6 @@
 
         <!-- menu_create from model form -->
         <record id="view_model_menu_create" model="ir.ui.view">
-            <field name="name">Create Menu</field>
             <field name="model">wizard.ir.model.menu.create</field>
             <field name="arch" type="xml">
                 <form string="Create Menu">
@@ -608,7 +607,6 @@
 
         <!-- ir.model.access -->
         <record id="ir_access_view_tree" model="ir.ui.view">
-            <field name="name">ir.model.access.view.tree</field>
             <field name="model">ir.model.access</field>
             <field name="arch" type="xml">
                 <tree string="Access Rights"
@@ -626,7 +624,6 @@
             </field>
         </record>
         <record id="ir_access_view_tree_edition" model="ir.ui.view">
-            <field name="name">ir.model.access.view.tree.edition</field>
             <field name="model">ir.model.access</field>
             <field name="arch" type="xml">
                 <tree string="Access Rights" editable="top"

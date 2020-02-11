@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="lunch_cashmove_view_search" model="ir.ui.view">
-        <field name='name'>lunch.cashmove.search</field>
         <field name='model'>lunch.cashmove</field>
         <field name='arch' type='xml'>
             <search string="lunch employee payment">

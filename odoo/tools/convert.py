@@ -606,7 +606,8 @@ form: module.record_id""" % (xml_id,)
         name = el.get('name', tpl_id)
 
         record = etree.Element('record', attrib=record_attrs)
-        record.append(Field(name, name='name'))
+        if model != 'ir.ui.view':
+            record.append(Field(name, name='name'))
         record.append(Field(full_tpl_id, name='key'))
         record.append(Field("qweb", name='type'))
         if 'track' in el.attrib:

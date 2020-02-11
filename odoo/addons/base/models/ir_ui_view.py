@@ -202,9 +202,8 @@ WRONGCLASS = re.compile(r"(@class\s*=|=\s*@class|contains\(@class)")
 class View(models.Model):
     _name = 'ir.ui.view'
     _description = 'View'
-    _order = "priority,name,id"
+    _order = "priority,id"
 
-    name = fields.Char(string='View Name', required=True)
     model = fields.Char(index=True)
     key = fields.Char()
     priority = fields.Integer(string='Sequence', default=16, required=True)
@@ -388,7 +387,7 @@ actual arch.
                     view_docs = view_docs[0]
                 for view_arch in view_docs:
                     check = valid_view(view_arch, env=self.env, model=view.model)
-                    view_name = ('%s (%s)' % (view.name, view.xml_id)) if view.xml_id else view.name
+                    view_name = ('(%s)' % (view.xml_id)) if view.xml_id else False
                     if not check:
                         raise ValidationError(_('Invalid view %s definition in %s') % (view_name, view.arch_fs))
                     if check == "Warning":
@@ -442,7 +441,6 @@ actual arch.
                 if values.get('inherit_id'):
                     values['type'] = self.browse(values['inherit_id']).type
                 else:
-
                     try:
                         if not values.get('arch') and not values.get('arch_base'):
                             raise ValidationError(_('Missing view architecture.'))
@@ -455,8 +453,6 @@ actual arch.
                 values['key'] = "gen_key.%s" % str(uuid.uuid4())[:6]
                 if values.get('model'):
                     values['key'] = "%s.gen_key_%s" % (values.get('model'), str(uuid.uuid4())[:6])
-            if not values.get('name'):
-                values['name'] = "%s %s" % (values.get('model'), values['type'])
             # Create might be called with either `arch` (xml files), `arch_base` (form view) or `arch_db`.
             values['arch_prev'] = values.get('arch_base') or values.get('arch_db') or values.get('arch')
             values.update(self._compute_defaults(values))
@@ -600,8 +596,6 @@ actual arch.
             at exception creation)
         """
         lines = [message]
-        if self.name:
-            lines.append("\n%s: %s" % (_('View name'), self.name))
 
         error_context = {
             'view': self,
@@ -1686,7 +1680,6 @@ class ResetViewArchWizard(models.TransientModel):
         return view_id
 
     view_id = fields.Many2one('ir.ui.view', string='View', default=_default_view_id)
-    view_name = fields.Char(related='view_id.name', string='View Name')
     arch_diff = fields.Html(string='Architecture Diff', compute='_compute_arch_diff', readonly=True, sanitize_tags=False)
     reset_mode = fields.Selection([
         ('soft', 'Restore previous version (soft reset).'),

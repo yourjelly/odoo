@@ -2,7 +2,6 @@
 <odoo>
     <data>
          <record id="wizard_update_translations" model="ir.ui.view">
-            <field name="name">Generate Missing Terms</field>
             <field name="model">base.update.translations</field>
             <field name="arch" type="xml">
                 <form string="Generate Missing Terms">

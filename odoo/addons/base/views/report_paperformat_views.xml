@@ -3,7 +3,6 @@
     <data>
         <!-- report.paperformat -->
         <record id="paperformat_view_tree" model="ir.ui.view">
-            <field name="name">paper_format_view_tree</field>
             <field name="model">report.paperformat</field>
             <field name="arch" type="xml">
                 <tree string="Paper format configuration">
@@ -12,7 +11,6 @@
             </field>
         </record>
         <record id="paperformat_view_form" model="ir.ui.view">
-            <field name="name">paper_format_view_form</field>
             <field name="model">report.paperformat</field>
             <field name="arch" type="xml">
                 <form string="Paper format configuration">

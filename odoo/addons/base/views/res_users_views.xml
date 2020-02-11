@@ -4,7 +4,6 @@
 
         <!-- change password wizard -->
         <record id="change_password_wizard_view" model="ir.ui.view">
-            <field name="name">Change Password</field>
             <field name="model">change.password.wizard</field>
             <field name="arch" type="xml">
                 <form string="Change Password">
@@ -17,7 +16,6 @@
             </field>
         </record>
         <record id="change_password_wizard_user_tree_view" model="ir.ui.view">
-            <field name="name">Change Password Users</field>
             <field name="model">change.password.user</field>
             <field name="arch" type="xml">
                 <!-- the user list is editable, but one cannot add or delete rows -->
@@ -35,7 +33,6 @@
 
         <!-- res.groups -->
         <record id="view_groups_search" model="ir.ui.view">
-            <field name="name">res.groups.search</field>
             <field name="model">res.groups</field>
             <field name="arch" type="xml">
                 <search string="Groups">
@@ -47,7 +44,6 @@
             </field>
         </record>
         <record id="view_groups_form" model="ir.ui.view">
-            <field name="name">res.groups.form</field>
             <field name="model">res.groups</field>
             <field name="arch" type="xml">
                 <form string="Groups">
@@ -114,7 +110,6 @@
 
         <!-- res.users -->
         <record id="view_users_simple_form" model="ir.ui.view">
-            <field name="name">res.users.simplified.form</field>
             <field name="model">res.users</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -151,7 +146,6 @@
             </field>
         </record>
         <record id="view_users_form" model="ir.ui.view">
-            <field name="name">res.users.form</field>
             <field name="model">res.users</field>
             <field name="arch" type="xml">
                 <form string="Users">
@@ -241,7 +235,6 @@
         </record>
 
         <record id="view_users_tree" model="ir.ui.view">
-            <field name="name">res.users.tree</field>
             <field name="model">res.users</field>
             <field name="arch" type="xml">
                 <tree string="Users">
@@ -254,7 +247,6 @@
             </field>
         </record>
         <record id="view_res_users_kanban" model="ir.ui.view">
-            <field name="name">res.users.kanban</field>
             <field name="model">res.users</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -288,7 +280,6 @@
             </field>
         </record>
         <record id="view_users_search" model="ir.ui.view">
-            <field name="name">res.users.search</field>
             <field name="model">res.users</field>
             <field name="arch" type="xml">
                 <search string="Users">
@@ -302,7 +293,6 @@
             </field>
         </record>
         <record id="user_groups_view" model="ir.ui.view">
-            <field name="name">res.users.groups</field>
             <field name="model">res.users</field>
             <field name="inherit_id" ref="view_users_form"/>
             <field name="arch" type="xml">
@@ -337,7 +327,6 @@
         <menuitem action="action_res_users" id="menu_action_res_users" parent="base.menu_users" sequence="0"/>
 
         <record id="view_users_form_simple_modif" model="ir.ui.view">
-            <field name="name">res.users.preferences.form</field>
             <field name="model">res.users</field>
             <field eval="18" name="priority"/>
             <field name="arch" type="xml">

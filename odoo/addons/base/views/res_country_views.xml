@@ -5,7 +5,6 @@
         Country
         -->
         <record id="view_country_tree" model="ir.ui.view">
-            <field name="name">res.country.tree</field>
             <field name="model">res.country</field>
             <field name="arch" type="xml">
                 <tree string="Country">
@@ -16,7 +15,6 @@
         </record>
 
         <record id="view_country_form" model="ir.ui.view">
-            <field name="name">res.country.form</field>
             <field name="model">res.country</field>
             <field name="arch" type="xml">
                 <form>
@@ -62,7 +60,6 @@
         </record>
 
         <record id="view_country_group_tree" model="ir.ui.view">
-            <field name="name">res.country.group.tree</field>
             <field name="model">res.country.group</field>
             <field name="arch" type="xml">
                 <tree string="Country Group">
@@ -72,7 +69,6 @@
         </record>
 
         <record id="view_country_group_form" model="ir.ui.view">
-            <field name="name">res.country.group.form</field>
             <field name="model">res.country.group</field>
             <field name="arch" type="xml">
                 <form string="Country Group">
@@ -98,7 +94,6 @@
 
         <!-- State -->
         <record id="view_country_state_tree" model="ir.ui.view">
-            <field name="name">res.country.state.tree</field>
             <field name="model">res.country.state</field>
             <field name="arch" type="xml">
                 <tree string="State" editable="bottom">
@@ -110,7 +105,6 @@
         </record>
 
         <record id="view_country_state_form" model="ir.ui.view">
-            <field name="name">res.country.state.form</field>
             <field name="model">res.country.state</field>
             <field name="arch" type="xml">
                 <form string="State">
@@ -126,7 +120,6 @@
         </record>
 
         <record id="view_country_state_search" model="ir.ui.view">
-            <field name="name">res.country.state.search</field>
             <field name="model">res.country.state</field>
             <field name="arch" type="xml">
                 <search string="Country">
