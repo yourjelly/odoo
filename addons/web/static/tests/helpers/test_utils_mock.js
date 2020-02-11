@@ -11,7 +11,9 @@ odoo.define('web.test_utils_mock', function (require) {
  */
 
 const AbstractStorageService = require('web.AbstractStorageService');
+const AjaxService = require('web.AjaxService');
 const basic_fields = require('web.basic_fields');
+const Bus = require('web.Bus');
 const config = require('web.config');
 const core = require('web.core');
 const dom = require('web.dom');
@@ -312,10 +314,18 @@ function addMockEnvironment(widget, params) {
     }
 
     // Deploy services
+    const env = Object.assign({}, params.env);
+    env.session = session;
+    if (!env.bus) {
+        env.bus = new Bus();
+    }
     var done = false;
     var servicesToDeploy = _.clone(params.services);
     if (!servicesToDeploy.ajax) {
-        services.ajax = null; // use mocked ajax from mocked server
+        const MockedAjaxService = AjaxService.extend({
+            rpc: mockServer.performRpc.bind(mockServer),
+        });
+        services.ajax = new MockedAjaxService({ services });
     }
     while (!done) {
         var serviceName = _.findKey(servicesToDeploy, function (Service) {
@@ -325,7 +335,7 @@ function addMockEnvironment(widget, params) {
         });
         if (serviceName) {
             var Service = servicesToDeploy[serviceName];
-            var service = services[serviceName] = new Service(widget);
+            var service = services[serviceName] = new Service(Object.assign({ services }, env));
             delete servicesToDeploy[serviceName];
 
             intercept(service, "get_session", function (event) {
