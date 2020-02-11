@@ -9,8 +9,18 @@ function doAction(action, options) {
     return testUtilsAsync.nextTick();
 }
 
+function loadState(webClient, state) {
+    webClient._getWindowHash = () => {
+        const hash = Object.keys(state).map(k => `${k}=${state[k]}`).join('&');
+        return `#${hash}`;
+    };
+    webClient._onHashchange();
+    return testUtilsAsync.nextTick();
+}
+
 return {
     doAction: doAction,
+    loadState: loadState,
 };
 
 });

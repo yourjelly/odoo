@@ -59,6 +59,7 @@ return Promise.all([
     return {
         actionManager: {
             doAction: testUtilsActionManager.doAction,
+            loadState: testUtilsActionManager.loadState,
         },
         mock: {
             addMockEnvironment: testUtilsMock.addMockEnvironment,

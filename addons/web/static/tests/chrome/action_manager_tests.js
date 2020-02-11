@@ -981,7 +981,6 @@ QUnit.module('ActionManager', {
     QUnit.test('lazy loaded multi record view with failing mono record one', async function (assert) {
         assert.expect(3);
 
-        let hash = '';
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
@@ -993,16 +992,13 @@ QUnit.module('ActionManager', {
                 }
                 return this._super.apply(this, arguments);
             },
-            webClient: {
-                _getWindowHash() {
-                    return hash;
-                }
-            }
         });
 
-        hash = '#action=3&id=2&view_type=form';
-        window.dispatchEvent(new Event('hashchange'));
-        await nextTick();
+        await testUtils.actionManager.loadState(webClient, {
+            action: 3,
+            id: 2,
+            view_type: 'form',
+        });
 
         assert.containsNone(webClient, '.o_form_view');
         assert.containsNone(webClient, '.o_list_view');
@@ -1017,7 +1013,6 @@ QUnit.module('ActionManager', {
     QUnit.test('change the viewType of the current action', async function (assert) {
         assert.expect(13);
 
-        let newHash = '';
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
@@ -1027,11 +1022,6 @@ QUnit.module('ActionManager', {
                 assert.step(args.method || route);
                 return this._super.apply(this, arguments);
             },
-            webClient: {
-                _getWindowHash() {
-                    return newHash;
-                }
-            }
         });
         await doAction(3);
 
@@ -1039,9 +1029,10 @@ QUnit.module('ActionManager', {
             "should have rendered a list view");
 
         // switch to kanban view
-        newHash = '#action=3&view_type=kanban';
-        window.dispatchEvent(new Event('hashchange'));
-        await testUtils.nextTick();
+        await testUtils.actionManager.loadState(webClient, {
+            action: 3,
+            view_type: 'kanban',
+        });
 
         assert.containsNone(webClient, '.o_list_view',
             "should not display the list view anymore");
@@ -1049,9 +1040,11 @@ QUnit.module('ActionManager', {
             "should have switched to the kanban view");
 
         // switch to form view, open record 4
-        newHash = '#action=3&id=4&view_type=form';
-        window.dispatchEvent(new Event('hashchange'));
-        await testUtils.nextTick();
+        await testUtils.actionManager.loadState(webClient, {
+            action: 3,
+            id: 4,
+            view_type: 'form',
+        });
 
         assert.containsNone(webClient, '.o_kanban_view',
             "should not display the kanban view anymore");
@@ -1079,7 +1072,6 @@ QUnit.module('ActionManager', {
     QUnit.test('change the id of the current action', async function (assert) {
         assert.expect(11);
 
-        let newHash = '';
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
@@ -1089,11 +1081,6 @@ QUnit.module('ActionManager', {
                 assert.step(args.method || route);
                 return this._super.apply(this, arguments);
             },
-            webClient: {
-                _getWindowHash() {
-                    return newHash;
-                }
-            }
         });
 
         // execute action 3 and open the first record in a form view
@@ -1106,9 +1093,11 @@ QUnit.module('ActionManager', {
             "should have opened the first record");
 
         // switch to record 4
-        newHash = '#action=3&id=4&view_type=form';
-        window.dispatchEvent(new Event('hashchange'));
-        await testUtils.nextTick();
+        await testUtils.actionManager.loadState(webClient, {
+            action: 3,
+            id: 4,
+            view_type: 'form',
+        });
 
         assert.containsOnce(webClient, '.o_form_view',
             "should still display the form view");
@@ -1154,6 +1143,7 @@ QUnit.module('ActionManager', {
                 },
             },
         });
+
         assert.verifySteps([
             '/web/action/load',
             'load_views',
@@ -1208,6 +1198,7 @@ QUnit.module('ActionManager', {
                 }
             },
         });
+
         assert.verifySteps([], "should not push the loaded state");
 
         await testUtils.dom.click($(webClient.el).find('button'));
@@ -1241,17 +1232,11 @@ QUnit.module('ActionManager', {
         });
         core.action_registry.add('ClientAction', ClientAction);
 
-        let newHash = '';
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            webClient: {
-                _getWindowHash() {
-                    return newHash;
-                }
-            }
         });
 
         // execute the client action
@@ -1263,9 +1248,7 @@ QUnit.module('ActionManager', {
             "there should be one controller in the breadcrumbs");
 
         // update param 'a' in the url
-        newHash = '#action=9&a=new%20value'
-        window.dispatchEvent(new Event('hashchange'));
-        await testUtils.nextTick();
+        await testUtils.actionManager.loadState(webClient, { action: 9, a: 'new value' });
 
         assert.strictEqual($(webClient.el).find('.o_client_action .o_content').text(), 'new value',
             "should have rerendered the client action with the correct param");
@@ -1294,7 +1277,6 @@ QUnit.module('ActionManager', {
             }
         });
 
-        let newHash = '';
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
@@ -1307,11 +1289,6 @@ QUnit.module('ActionManager', {
                 assert.step(args.method || route);
                 return this._super.apply(this, arguments);
             },
-            webClient: {
-                _getWindowHash() {
-                    return newHash;
-                }
-            }
         });
         await doAction(4);
 
@@ -1320,9 +1297,7 @@ QUnit.module('ActionManager', {
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
             "breadcrumbs should display the display_name of the action");
 
-        newHash = '#view_type=list&model=partner';
-        window.dispatchEvent(new Event('hashchange'));
-        await testUtils.nextTick();
+        await testUtils.actionManager.loadState(webClient, { model: 'partner', view_type: 'list' });
 
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 4',
             "should still be in the same action");
@@ -1529,10 +1504,11 @@ QUnit.module('ActionManager', {
             },
             webClient: {
                 _getWindowHash() {
-                    return "#action=3&id=2&view_type=form"
-                }
-            }
+                    return "#action=3&id=2&view_type=form";
+                },
+            },
         });
+
         assert.containsOnce(webClient, '.o_form_view',
             "should display the form view of action 4");
 
