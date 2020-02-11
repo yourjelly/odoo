@@ -92,7 +92,7 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     _waitBeforeTourStart: function () {
         return new Promise(function (resolve) {
             $(function () {
-                setTimeout(resolve);
+                core.bus.on('web-client-mounted', null, resolve);
             });
         });
     },

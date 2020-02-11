@@ -77,6 +77,8 @@ class WebClient extends Component {
         window.addEventListener('hashchange', this._onHashchange);
         super.mounted();
         this._wcUpdated();
+        
+        this.env.bus.trigger('web-client-mounted');
     }
     willPatch() {
         super.willPatch();
