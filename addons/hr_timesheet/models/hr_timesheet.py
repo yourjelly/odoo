@@ -44,7 +44,7 @@ class AccountAnalyticLine(models.Model):
         'Task',
         compute='_compute_task_id',
         store=True,
-        readonly=True,
+        readonly=False,
         index=True,
         domain="[('company_id', '=', company_id),"
                 "('project_id.allow_timesheets',"" '=', True),"
