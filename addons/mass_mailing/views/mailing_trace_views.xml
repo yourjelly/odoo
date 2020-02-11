@@ -2,7 +2,6 @@
 <odoo>
     <!--  MAILING TRACE !-->
     <record model="ir.ui.view" id="mailing_trace_view_search">
-        <field name="name">mailing.trace.search</field>
         <field name="model">mailing.trace</field>
         <field name="arch" type="xml">
            <search string="Mail Statistics">
@@ -32,7 +31,6 @@
     </record>
 
     <record model="ir.ui.view" id="mailing_trace_view_tree">
-        <field name="name">mailing.trace.tree</field>
         <field name="model">mailing.trace</field>
         <field name="arch" type="xml">
             <tree string="Mail Statistics" create="0">
@@ -53,7 +51,6 @@
     </record>
 
     <record model="ir.ui.view" id="mailing_trace_view_form">
-        <field name="name">mailing.trace.form</field>
         <field name="model">mailing.trace</field>
         <field name="arch" type="xml">
             <form string="Mail Statistics" create="0">
@@ -105,7 +102,6 @@
     </record>
 
     <record id="view_mail_mail_statistics_graph" model="ir.ui.view">
-        <field name="name">Mail Statistics Graph</field>
         <field name="model">mailing.trace</field>
         <field name="arch" type="xml">
             <graph string="Mail Statistics" type="bar" stacked="True" interval="day">

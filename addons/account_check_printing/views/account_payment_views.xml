@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="view_account_payment_form_inherited" model="ir.ui.view">
-            <field name="name">account.payment.form.inherited</field>
             <field name="model">account.payment</field>
             <field name="inherit_id" ref="account.view_account_payment_form" />
             <field name="arch" type="xml">
@@ -21,7 +20,6 @@
         </record>
 
         <record id="view_payment_check_printing_search" model="ir.ui.view">
-            <field name="name">account.payment.check.printing.search</field>
             <field name="model">account.payment</field>
             <field name="inherit_id" ref="account.view_account_payment_search"/>
             <field name="arch" type="xml">

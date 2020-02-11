@@ -21,7 +21,6 @@
 
     <!-- Applicants -->
     <record model="ir.ui.view" id="crm_case_tree_view_job">
-        <field name="name">Applicants</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
             <tree string="Applicants" decoration-bf="message_needaction==True" multi_edit="1">
@@ -48,7 +47,6 @@
     </record>
 
     <record id="hr_applicant_view_tree_activity" model="ir.ui.view">
-        <field name="name">hr.applicant.view.tree.activity</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
             <tree string="Next Activities" decoration-danger="activity_date_deadline &lt; current_date" default_order="activity_date_deadline">
@@ -64,7 +62,6 @@
     </record>
 
     <record model="ir.ui.view" id="hr_applicant_view_form">
-        <field name="name">Jobs - Recruitment Form</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
           <form string="Jobs - Recruitment Form">
@@ -157,7 +154,6 @@
     </record>
 
     <record model="ir.ui.view" id="crm_case_pivot_view_job">
-        <field name="name">Jobs - Recruitment</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
               <pivot string="Job Applications">
@@ -168,7 +164,6 @@
     </record>
 
     <record model="ir.ui.view" id="crm_case_graph_view_job">
-        <field name="name">Jobs - Recruitment Graph</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
               <graph string="Cases By Stage and Estimates" type="bar" orientation="vertical" stacked="True">
@@ -178,7 +173,6 @@
     </record>
 
     <record id="hr_applicant_view_search_bis" model="ir.ui.view">
-        <field name="name">hr.applicant.view.search</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
             <search string="Search Applicants">
@@ -224,7 +218,6 @@
     </record>
 
     <record model="ir.ui.view" id="hr_applicant_calendar_view">
-        <field name="name">Hr Applicants Calendar</field>
         <field name="model">hr.applicant</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
@@ -239,7 +232,6 @@
     </record>
 
     <record id="quick_create_applicant_form" model="ir.ui.view">
-        <field name="name">hr.applicant.form.quick_create</field>
         <field name="model">hr.applicant</field>
         <field name="priority">1000</field>
         <field name="arch" type="xml">
@@ -257,7 +249,6 @@
 
     <!-- Hr Applicant Kanban View -->
     <record model="ir.ui.view" id="hr_kanban_view_applicant">
-        <field name="name">Hr Applicants kanban</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
             <kanban default_group_by="stage_id" class="o_kanban_applicant" quick_create_view="hr_recruitment.quick_create_applicant_form">
@@ -345,7 +336,6 @@
     </record>
 
     <record id="hr_applicant_view_activity" model="ir.ui.view">
-        <field name="name">hr.applicant.activity</field>
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
             <activity string="Applicants">
@@ -398,7 +388,6 @@
 
     <!-- Jobs -->
     <record id="view_job_filter_recruitment" model="ir.ui.view">
-        <field name="name">Job</field>
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr.view_job_filter"/>
         <field name="arch" type="xml">
@@ -410,7 +399,6 @@
     </record>
 
     <record id="hr_job_simple_form" model="ir.ui.view">
-        <field name="name">hr.job.simple.form</field>
         <field name="model">hr.job</field>
         <field name="priority">200</field>
         <field name="arch" type="xml">
@@ -445,7 +433,6 @@
 
 
     <record id="hr_job_survey" model="ir.ui.view">
-        <field name="name">hr.job.form1</field>
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr.view_hr_job_form"/>
         <field name="arch" type="xml">
@@ -510,7 +497,6 @@
         hr.applicant.refuse.reason views
     -->
     <record id="hr_applicant_refuse_reason_view_form" model="ir.ui.view">
-        <field name="name">Applicant refuse reason form</field>
         <field name="model">hr.applicant.refuse.reason</field>
         <field name="arch" type="xml">
             <form string="Refuse Reason">
@@ -531,7 +517,6 @@
     </record>
 
     <record id="hr_applicant_refuse_reason_view_tree" model="ir.ui.view">
-        <field name="name">Applicant refuse reason tree</field>
         <field name="model">hr.applicant.refuse.reason</field>
         <field name="arch" type="xml">
             <tree string="Refuse Reason" editable="bottom">
@@ -634,7 +619,6 @@
 
     <!-- Resume and Letters -->
     <record id="ir_attachment_view_search_inherit_hr_recruitment" model="ir.ui.view">
-        <field name="name">ir.attachment.search.inherit.recruitment</field>
         <field name="model">ir.attachment</field>
         <field name="mode">primary</field>
         <field name="inherit_id" ref="base.view_attachment_search"/>
@@ -668,7 +652,6 @@ action = act
 
     <!-- Stage Tree View -->
     <record model="ir.ui.view" id="hr_recruitment_stage_tree">
-        <field name="name">hr.recruitment.stage.tree</field>
         <field name="model">hr.recruitment.stage</field>
         <field name="arch" type="xml">
             <tree string="Stages">
@@ -681,7 +664,6 @@ action = act
 
     <!-- Stage Kanban View -->
     <record id="view_hr_recruitment_stage_kanban" model="ir.ui.view">
-        <field name="name">hr.recruitment.stage.kanban</field>
         <field name="model">hr.recruitment.stage</field>
         <field name="arch" type="xml">
             <kanban>
@@ -706,7 +688,6 @@ action = act
 
     <!-- Stage Form View -->
     <record model="ir.ui.view" id="hr_recruitment_stage_form">
-        <field name="name">hr.recruitment.stage.form</field>
         <field name="model">hr.recruitment.stage</field>
         <field name="arch" type="xml">
             <form string="Stage">
@@ -767,7 +748,6 @@ action = act
 
     <!-- Tag Form View -->
     <record id="hr_applicant_category_view_form" model="ir.ui.view">
-        <field name="name">hr.applicant.category.form</field>
         <field name="model">hr.applicant.category</field>
         <field name="arch" type="xml">
             <form string="Tags">
@@ -782,7 +762,6 @@ action = act
     </record>
 
     <record id="hr_applicant_category_view_tree" model="ir.ui.view">
-        <field name="name">hr.applicant.category.tree</field>
         <field name="model">hr.applicant.category</field>
         <field name="arch" type="xml">
             <tree string="Tags" editable="bottom">
@@ -811,7 +790,6 @@ action = act
 
     <!-- Degree Tree View -->
     <record model="ir.ui.view" id="hr_recruitment_degree_tree">
-        <field name="name">hr.recruitment.degree.tree</field>
         <field name="model">hr.recruitment.degree</field>
         <field name="arch" type="xml">
             <tree string="Degree" editable="bottom">
@@ -823,7 +801,6 @@ action = act
 
     <!-- Degree Form View -->
     <record model="ir.ui.view" id="hr_recruitment_degree_form">
-        <field name="name">hr.recruitment.degree.form</field>
         <field name="model">hr.recruitment.degree</field>
         <field name="arch" type="xml">
             <form string="Degree">
@@ -853,7 +830,6 @@ action = act
 
     <!-- Source Tree View -->
     <record model="ir.ui.view" id="hr_recruitment_source_tree">
-        <field name="name">hr.recruitment.source.tree</field>
         <field name="model">hr.recruitment.source</field>
         <field name="arch" type="xml">
             <tree string="Sources of Applicants" editable="top" class="o_recruitment_list">
@@ -888,7 +864,6 @@ action = act
 
     <!--Hr Employee inherit search view-->
     <record id="hr_employee_view_search" model="ir.ui.view">
-        <field name="name">hr.employee.search.inherit</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_filter"/>
         <field name="arch" type="xml">
@@ -911,7 +886,6 @@ action = act
     </record>
 
     <record id="hr_applicant_view_pivot" model="ir.ui.view">
-         <field name="name">hr.applicant.pivot</field>
          <field name="model">hr.applicant</field>
          <field name="arch" type="xml">
              <pivot string="Recruitment Analysis">
@@ -922,7 +896,6 @@ action = act
     </record>
 
     <record id="hr_applicant_view_graph" model="ir.ui.view">
-         <field name="name">hr.applicant.graph</field>
          <field name="model">hr.applicant</field>
          <field name="arch" type="xml">
              <graph string="Recruitment Analysis">
@@ -933,7 +906,6 @@ action = act
     </record>
 
     <record id="hr_applicant_view_search" model="ir.ui.view">
-        <field name="name">hr.applicant.search</field>
         <field name="model">hr.applicant</field>
         <field name="priority">32</field>
         <field name="arch" type="xml">

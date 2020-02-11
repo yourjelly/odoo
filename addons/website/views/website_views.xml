@@ -20,7 +20,6 @@
 
         <!-- website views -->
         <record id="view_website_form" model="ir.ui.view">
-            <field name="name">website.form</field>
             <field name="model">website</field>
             <field name="arch" type="xml">
                 <form string="Website Settings">
@@ -48,7 +47,6 @@
         </record>
 
         <record id="view_arch_only" model="ir.ui.view">
-            <field name="name">website.ir_ui_view.arch_only</field>
             <field name="model">ir.ui.view</field>
             <field name="arch" type="xml">
                 <form>
@@ -60,7 +58,6 @@
         </record>
 
         <record id="view_website_form_view_themes_modal" model="ir.ui.view">
-            <field name="name">website.modal.form</field>
             <field name="model">website</field>
             <field name="inherit_id" ref="website.view_website_form"/>
             <field name="mode">primary</field>
@@ -75,7 +72,6 @@
         </record>
 
         <record id="view_website_tree" model="ir.ui.view">
-            <field name="name">website.tree</field>
             <field name="model">website</field>
             <field name="arch" type="xml">
                 <tree string="Websites">
@@ -100,14 +96,12 @@
 
         <!-- website.page views -->
         <record id="website_pages_form_view" model="ir.ui.view">
-            <field name="name">website.page.form</field>
             <field name="model">website.page</field>
             <field name="arch" type="xml">
                 <form string="Website Page Settings">
                     <sheet>
                         <group>
                             <group>
-                                <field name="name"/>
                                 <field name="url"/>
                                 <field name="view_id" context="{'display_website': True}"/>
                                 <field name="website_id" options="{'no_create': True}" groups="website.group_multi_website"/>
@@ -127,11 +121,9 @@
         </record>
 
         <record id="website_pages_tree_view" model="ir.ui.view">
-            <field name="name">website.page.list</field>
             <field name="model">website.page</field>
             <field name="arch" type="xml">
                 <tree string="Website Pages" default_order="name">
-                    <field name="name"/>
                     <field name="url"/>
                     <field name="website_id" groups="website.group_multi_website"/>
                     <field name="website_indexed"/>
@@ -145,7 +137,6 @@
         </record>
 
         <record id="website_pages_view_search" model="ir.ui.view">
-            <field name="name">website.page.view.search</field>
             <field name="model">website.page</field>
             <field name="arch" type="xml">
                 <search string="Website Pages" >
@@ -169,14 +160,12 @@
 
         <!-- website.menu views -->
         <record id="website_menus_form_view" model="ir.ui.view">
-            <field name="name">website.menu.form</field>
             <field name="model">website.menu</field>
             <field name="arch" type="xml">
                 <form string="Website Menus Settings">
                     <sheet>
                         <group>
                             <group>
-                                <field name="name"/>
                                 <field name="url"/>
                                 <field name="page_id"/>
                                 <field name="is_mega_menu"/>
@@ -205,7 +194,6 @@
         </record>
 
         <record id="menu_tree" model="ir.ui.view">
-            <field name="name">website.menu.tree</field>
             <field name="model">website.menu</field>
             <field name="field_parent">child_id</field>
             <field name="arch" type="xml">
@@ -223,7 +211,6 @@
         </record>
 
         <record id="menu_search" model="ir.ui.view">
-            <field name="name">website.menu.search</field>
             <field name="model">website.menu</field>
             <field name="arch" type="xml">
                 <search string="Search Menus">
@@ -310,7 +297,6 @@
         <!-- Custom module kanban : install button (even if already installed) which -->
         <!-- redirects to website after (fake or not) installation + live preview button -->
         <record model="ir.ui.view" id="theme_view_kanban">
-            <field name="name">Themes Kanban</field>
             <field name="model">ir.module.module</field>
             <field name="arch" type="xml">
                 <kanban create="false" class="o_theme_kanban" default_order="state,sequence,name" js_class="theme_preview_kanban">
@@ -360,7 +346,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="theme_view_search">
-            <field name="name">Themes Search</field>
             <field name="model">ir.module.module</field>
             <field name="priority">50</field>
             <field name="arch" type="xml">
@@ -382,7 +367,6 @@
 
         <!-- Actions to list themes with custom kanban (launched on module installation) -->
         <record id="theme_view_form_preview" model="ir.ui.view">
-            <field name="name">website.form</field>
             <field name="model">ir.module.module</field>
             <field name="mode">primary</field>
             <field name="arch" type="xml">

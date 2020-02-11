@@ -4,7 +4,6 @@
 
         <!--  FOLLOWERS !-->
         <record model="ir.ui.view" id="view_followers_tree">
-            <field name="name">mail.followers.tree</field>
             <field name="model">mail.followers</field>
             <field name="priority">10</field>
             <field name="arch" type="xml">
@@ -18,7 +17,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_mail_subscription_form">
-            <field name="name">mail.followers.form</field>
             <field name="model">mail.followers</field>
             <field name="arch" type="xml">
                 <form string="Followers Form">

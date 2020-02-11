@@ -2,7 +2,6 @@
 <odoo>
     <!--product history-->
     <record id="website_sale_visitor_page_view_tree" model="ir.ui.view">
-        <field name="name">website.track.view.tree</field>
         <field name="model">website.track</field>
         <field name="arch" type="xml">
             <tree string="Visitor Product Views History" create="0">
@@ -14,7 +13,6 @@
     </record>
 
     <record id="website_sale_visitor_page_view_graph" model="ir.ui.view">
-        <field name="name">website.track.view.graph</field>
         <field name="model">website.track</field>
         <field name="arch" type="xml">
             <graph string="Visitor Product Views">
@@ -40,7 +38,6 @@
     </record>
 
     <record id="website_sale_visitor_page_view_search" model="ir.ui.view">
-        <field name="name">website.track.view.search</field>
         <field name="model">website.track</field>
         <field name="inherit_id" ref="website.website_visitor_page_view_search"/>
         <field name="arch" type="xml">
@@ -58,7 +55,6 @@
 
     <!-- website visitor views -->
     <record id="website_sale_visitor_view_form" model="ir.ui.view">
-        <field name="name">website.visitor.view.form</field>
         <field name="model">website.visitor</field>
         <field name="inherit_id" ref="website.website_visitor_view_form"/>
         <field name="arch" type="xml">
@@ -76,7 +72,6 @@
     </record>
 
     <record id="website_sale_visitor_view_tree" model="ir.ui.view">
-        <field name="name">website.visitor.view.tree</field>
         <field name="model">website.visitor</field>
         <field name="inherit_id" ref="website.website_visitor_view_tree"/>
         <field name="arch" type="xml">
@@ -87,7 +82,6 @@
     </record>
 
     <record id="website_sale_visitor_view_kanban" model="ir.ui.view">
-        <field name="name">website.visitor.view.kanban</field>
         <field name="model">website.visitor</field>
         <field name="inherit_id" ref="website.website_visitor_view_kanban"/>
         <field name="arch" type="xml">
@@ -102,7 +96,6 @@
 
     <!-- website track views -->
     <record id="website_sale_visitor_track_view_tree" model="ir.ui.view">
-        <field name="name">website.track.view.tree</field>
         <field name="model">website.track</field>
         <field name="inherit_id" ref="website.website_visitor_track_view_tree"/>
         <field name="arch" type="xml">
@@ -113,7 +106,6 @@
     </record>
 
     <record id="website_sale_visitor_track_view_graph" model="ir.ui.view">
-        <field name="name">website.track.view.graph</field>
         <field name="model">website.track</field>
         <field name="inherit_id" ref="website.website_visitor_track_view_graph"/>
         <field name="arch" type="xml">

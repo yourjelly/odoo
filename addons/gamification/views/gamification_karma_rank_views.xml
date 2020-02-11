@@ -17,7 +17,6 @@
         </record>
 
         <record id="gamification_karma_ranks_view_search" model="ir.ui.view">
-            <field name="name">gamification.karma.ranks.view.search</field>
             <field name="model">gamification.karma.rank</field>
             <field name="arch" type="xml">
                 <search string="Search Ranks">
@@ -30,7 +29,6 @@
         </record>
 
         <record id="gamification_karma_ranks_view_tree" model="ir.ui.view">
-            <field name="name">gamification.karma.ranks.view.tree</field>
             <field name="model">gamification.karma.rank</field>
             <field name="arch" type="xml">
                 <tree string="Ranks List">
@@ -41,7 +39,6 @@
         </record>
 
         <record id="gamification_karma_rank_view_form" model="ir.ui.view">
-            <field name="name">gamification.karma.rank.view.form</field>
             <field name="model">gamification.karma.rank</field>
             <field name="arch" type="xml">
                 <form string="Rank">

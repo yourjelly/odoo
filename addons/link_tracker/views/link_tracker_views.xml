@@ -3,7 +3,6 @@
     <data>
         <!-- LINT.TRACKER -->
         <record id="link_tracker_view_search" model="ir.ui.view">
-            <field name="name">link.tracker.view.search</field>
             <field name="model">link.tracker</field>
             <field name="arch" type="xml">
                 <search string="Links">
@@ -22,7 +21,6 @@
         </record>
 
         <record id="link_tracker_view_form" model="ir.ui.view">
-            <field name="name">link.tracker.view.form</field>
             <field name="model">link.tracker</field>
             <field name="arch" type="xml">
                 <form string="Website Link">
@@ -53,7 +51,6 @@
         </record>
 
         <record id="link_tracker_view_tree" model="ir.ui.view">
-            <field name="name">link.tracker.view.tree</field>
             <field name="model">link.tracker</field>
             <field name="arch" type="xml">
                 <tree string="Links">
@@ -68,7 +65,6 @@
         </record>
 
         <record id="link_tracker_view_graph" model="ir.ui.view">
-            <field name="name">link.tracker.view.graph</field>
             <field name="model">link.tracker</field>
             <field name="arch" type="xml">
                 <graph string="Links" type="bar">
@@ -94,7 +90,6 @@
 
         <!-- LINK.TRACKER.CLICK -->
         <record id="link_tracker_click_view_search" model="ir.ui.view">
-            <field name="name">link.tracker.click.view.search</field>
             <field name="model">link.tracker.click</field>
             <field name="arch" type="xml">
                 <search string="Clicks">
@@ -109,7 +104,6 @@
         </record>
 
         <record id="link_tracker_click_view_form" model="ir.ui.view">
-            <field name="name">link.tracker.click.view.form</field>
             <field name="model">link.tracker.click</field>
             <field name="arch" type="xml">
                 <form string="Link Click">
@@ -125,7 +119,6 @@
         </record>
 
         <record id="link_tracker_click_view_tree" model="ir.ui.view">
-            <field name="name">link.tracker.click.view.tree</field>
             <field name="model">link.tracker.click</field>
             <field name="arch" type="xml">
                 <tree string="Links Clicks">
@@ -137,7 +130,6 @@
         </record>
 
         <record id="link_tracker_click_view_graph" model="ir.ui.view">
-            <field name="name">link.tracker.click.view.graph</field>
             <field name="model">link.tracker.click</field>
             <field name="arch" type="xml">
                 <graph string="Link Clicks" type="pie">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_res_partner_form_inherit_partner_autocomplete" model="ir.ui.view">
-        <field name="name">res.partner.form.inherit.partner.autocomplete</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
@@ -19,7 +18,6 @@
     </record>
 
     <record id="view_res_partner_short_form_inherit_partner_autocomplete" model="ir.ui.view">
-        <field name="name">res.partner.short.form.inherit.partner.autocomplete</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_short_form"/>
         <field name="arch" type="xml">
@@ -37,7 +35,6 @@
     </record>
 
     <record id="view_partner_simple_form_inherit_partner_autocomplete" model="ir.ui.view">
-        <field name="name">res.partner.simplified.form.inherit.partner.autocomplete</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_simple_form"/>
         <field name="arch" type="xml">

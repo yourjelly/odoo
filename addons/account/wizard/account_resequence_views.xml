@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="account_resequence_view" model="ir.ui.view">
-            <field name="name">Re-sequence Journal Entries</field>
             <field name="model">account.resequence.wizard</field>
             <field name="arch" type="xml">
             <form string="Re-Sequence">

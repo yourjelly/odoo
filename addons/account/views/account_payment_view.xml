@@ -3,7 +3,6 @@
     <data>
 
         <record id="view_account_payment_tree" model="ir.ui.view">
-            <field name="name">account.payment.tree</field>
             <field name="model">account.payment</field>
             <field name="arch" type="xml">
                 <tree decoration-info="state == 'draft'" decoration-muted="state in ['reconciled', 'cancelled']" edit="false">
@@ -22,7 +21,6 @@
         </record>
 
         <record id="view_account_supplier_payment_tree" model="ir.ui.view">
-            <field name="name">account.supplier.payment.tree</field>
             <field name="model">account.payment</field>
             <field name="inherit_id" ref="account.view_account_payment_tree"/>
             <field name="mode">primary</field>
@@ -34,7 +32,6 @@
         </record>
 
         <record id="view_account_payment_kanban" model="ir.ui.view">
-            <field name="name">account.payment.kanban</field>
             <field name="model">account.payment</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -76,7 +73,6 @@
         </record>
 
         <record id="view_account_payment_search" model="ir.ui.view">
-            <field name="name">account.payment.search</field>
             <field name="model">account.payment</field>
             <field name="arch" type="xml">
                 <search string="Payments">
@@ -118,7 +114,6 @@
         </record>
 
         <record id="view_account_payment_form" model="ir.ui.view">
-            <field name="name">account.payment.form</field>
             <field name="model">account.payment</field>
             <field name="arch" type="xml">
                 <form string="Register Payment">
@@ -213,7 +208,6 @@
         </record>
 
         <record id="view_account_payment_form_multi" model="ir.ui.view">
-            <field name="name">account.payment.form.multi</field>
             <field name="model">account.payment.register</field>
             <field name="arch" type="xml">
                 <form string="Register Payment">
@@ -238,7 +232,6 @@
         </record>
 
         <record id="view_account_payment_graph" model="ir.ui.view">
-            <field name="name">account.payment.graph</field>
             <field name="model">account.payment</field>
             <field name="arch" type="xml">
                 <graph string="Invoices" type="bar" stacked="1">
@@ -309,7 +302,6 @@
         <menuitem action="action_account_payments_payable" id="menu_action_account_payments_payable" parent="account.menu_finance_payables" sequence="20"/>
 
         <record id="view_account_payment_invoice_form" model="ir.ui.view">
-            <field name="name">account.payment.invoice.form</field>
             <field name="model">account.payment</field>
             <field name="inherit_id" ref="view_account_payment_form"/>
             <field name="mode">primary</field>

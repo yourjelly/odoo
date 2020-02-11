@@ -28,7 +28,6 @@
 
     <!-- website visitor views -->
     <record id="website_visitor_view_kanban" model="ir.ui.view">
-        <field name="name">website.visitor.view.kanban.inherit.website.livechat</field>
         <field name="model">website.visitor</field>
         <field name="inherit_id" ref="website.website_visitor_view_kanban"/>
         <field name="arch" type="xml">
@@ -70,7 +69,6 @@
     </record>
 
     <record id="website_visitor_view_form" model="ir.ui.view">
-        <field name="name">website.visitor.view.form.inherit.website.livechat</field>
         <field name="model">website.visitor</field>
         <field name="inherit_id" ref="website.website_visitor_view_form"/>
         <field name="arch" type="xml">
@@ -93,7 +91,6 @@
     </record>
 
     <record id="website_visitor_view_tree" model="ir.ui.view">
-        <field name="name">website.visitor.view.tree.inherit.website.livechat</field>
         <field name="model">website.visitor</field>
         <field name="inherit_id" ref="website.website_visitor_view_tree"/>
         <field name="arch" type="xml">
@@ -106,7 +103,6 @@
     </record>
 
     <record id="website_visitor_view_search" model="ir.ui.view">
-        <field name="name">website.visitor.view.search.website.livechat</field>
         <field name="model">website.visitor</field>
         <field name="inherit_id" ref="website.website_visitor_view_search"/>
         <field name="arch" type="xml">

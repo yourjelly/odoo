@@ -2,7 +2,6 @@
 <odoo>
 <data>
     <record id="view_account_invoice_report_pivot" model="ir.ui.view">
-         <field name="name">account.invoice.report.pivot</field>
          <field name="model">account.invoice.report</field>
          <field name="arch" type="xml">
              <pivot string="Invoices Analysis" disable_linking="True">
@@ -14,7 +13,6 @@
     </record>
 
     <record id="view_account_invoice_report_graph" model="ir.ui.view">
-         <field name="name">account.invoice.report.graph</field>
          <field name="model">account.invoice.report</field>
          <field name="arch" type="xml">
              <graph string="Invoices Analysis">
@@ -62,7 +60,6 @@
     </record>
 
     <record id="view_account_invoice_report_search" model="ir.ui.view">
-        <field name="name">account.invoice.report.search</field>
         <field name="model">account.invoice.report</field>
         <field name="arch" type="xml">
             <search string="Invoices Analysis">
@@ -97,7 +94,6 @@
     </record>
 
     <record id="view_account_invoice_report_search_analytic_accounting" model="ir.ui.view">
-        <field name="name">account.invoice.report.search_analytic_accounting</field>
         <field name="model">account.invoice.report</field>
         <field name="inherit_id" ref="account.view_account_invoice_report_search"/>
         <field name="groups_id" eval="[(4, ref('analytic.group_analytic_accounting'))]"/>

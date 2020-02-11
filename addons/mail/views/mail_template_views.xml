@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record model="ir.ui.view" id="email_template_form">
-            <field name="name">email.template.form</field>
             <field name="model">mail.template</field>
             <field name="arch" type="xml">
                 <form string="Templates">
@@ -91,7 +90,6 @@
         </record>
 
         <record model="ir.ui.view" id="email_template_tree">
-            <field name="name">email.template.tree</field>
             <field name="model">mail.template</field>
             <field name="arch" type="xml">
                 <tree string="Templates">
@@ -108,7 +106,6 @@
         </record>
 
         <record id="view_email_template_search" model="ir.ui.view">
-           <field name="name">email.template.search</field>
            <field name="model">mail.template</field>
            <field name="arch" type="xml">
                <search string="Templates">

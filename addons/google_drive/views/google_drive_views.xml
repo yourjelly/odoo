@@ -3,7 +3,6 @@
 
         <!-- add google drive config field in user form -->
         <record id="view_google_drive_config_tree" model="ir.ui.view">
-            <field name="name">google_drive.config.tree</field>
             <field name="model">google.drive.config</field>
             <field name="arch" type="xml">
                 <tree string="Google Drive Configuration">
@@ -14,7 +13,6 @@
         </record>
 
         <record id="view_google_drive_config_form" model="ir.ui.view">
-            <field name="name">google_drive.config.form</field>
             <field name="model">google.drive.config</field>
             <field name="arch" type="xml">
                 <form string="Google Drive Configuration">
@@ -53,7 +51,6 @@
         </record>
 
         <record id="view_google_drive_config_kanban" model="ir.ui.view">
-            <field name="name">google.drive.config.kanban</field>
             <field name="model">google.drive.config</field>
             <field name="arch" type="xml">
                 <kanban>
@@ -84,7 +81,6 @@
         </record>
 
         <record id="google_drive_config_view_search" model="ir.ui.view">
-            <field name="name">google.drive.config.view.search</field>
             <field name="model">google.drive.config</field>
             <field name="arch" type="xml">
                 <search string="Search Google Drive Config">

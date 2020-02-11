@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="gamification_badge_view_form" model="ir.ui.view">
-        <field name="name">gamification.badge.view.form.inherit.website</field>
         <field name="model">gamification.badge</field>
         <field name="inherit_id" ref="gamification.badge_form_view"/>
         <field name="arch" type="xml">

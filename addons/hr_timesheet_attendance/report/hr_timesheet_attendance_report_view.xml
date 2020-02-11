@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_hr_timesheet_attendance_report_search" model="ir.ui.view">
-            <field name="name">Search for HR timesheet attendance report</field>
             <field name="model">hr.timesheet.attendance.report</field>
             <field name="arch" type="xml">
                 <search string="timesheet attendance">
@@ -12,7 +11,6 @@
             </field>
         </record>
         <record id="view_hr_timesheet_attendance_report_pivot" model="ir.ui.view">
-            <field name="name">HR timesheet attendance report: Pivot</field>
             <field name="model">hr.timesheet.attendance.report</field>
             <field name="arch" type="xml">
                 <pivot string="timesheet attendance" disable_linking="True">

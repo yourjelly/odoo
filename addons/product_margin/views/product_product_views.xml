@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record model="ir.ui.view" id="view_product_margin_graph">
-            <field name="name">product.margin.graph</field>
             <field name="model">product.product</field>
             <field name="priority" eval="50"/>
             <field name="arch" type="xml">
@@ -13,7 +12,6 @@
     </record>
 
      <record id="view_product_margin_form" model="ir.ui.view">
-            <field name="name">product.margin.form.inherit</field>
             <field name="model">product.product</field>
             <field name="priority">50</field>
             <field name="arch" type="xml">
@@ -59,7 +57,6 @@
         </record>
 
         <record id="view_product_margin_tree" model="ir.ui.view">
-            <field name="name">product.margin.tree</field>
             <field name="model">product.product</field>
             <field name="priority" eval="50"/>
             <field name="arch" type="xml">

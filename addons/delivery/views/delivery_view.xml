@@ -15,7 +15,6 @@
         <menuitem id="menu_delivery_packagings" name="Delivery Packages" parent="menu_delivery" action="action_delivery_packaging_view" groups="stock.group_tracking_lot"/>
 
         <record id="view_delivery_carrier_tree" model="ir.ui.view">
-            <field name="name">delivery.carrier.tree</field>
             <field name="model">delivery.carrier</field>
             <field name="arch" type="xml">
                 <tree string="Carrier">
@@ -28,7 +27,6 @@
         </record>
 
         <record id="view_delivery_carrier_search" model="ir.ui.view">
-            <field name="name">delivery.carrier.search</field>
             <field name="model">delivery.carrier</field>
             <field name="arch" type="xml">
                 <search string="Delivery Carrier">
@@ -44,7 +42,6 @@
         </record>
 
         <record id="view_delivery_carrier_form" model="ir.ui.view">
-            <field name="name">delivery.carrier.form</field>
             <field name="model">delivery.carrier</field>
             <field name="arch" type="xml">
                 <form string="Carrier">
@@ -179,7 +176,6 @@
         <menuitem action="action_delivery_carrier_form" id="sale_menu_action_delivery_carrier_form" parent="sale.menu_sales_config" sequence="4"/>
 
         <record id="view_delivery_price_rule_form" model="ir.ui.view">
-            <field name="name">delivery.price.rule.form</field>
             <field name="model">delivery.price.rule</field>
             <field name="arch" type="xml">
                 <form string="Price Rules">
@@ -206,7 +202,6 @@
             </field>
         </record>
         <record id="view_delivery_price_rule_tree" model="ir.ui.view">
-            <field name="name">delivery.price.rule.tree</field>
             <field name="model">delivery.price.rule</field>
             <field name="arch" type="xml">
                 <tree string="Price Rules">
@@ -217,7 +212,6 @@
         </record>
 
         <record id="view_picking_withcarrier_out_form" model="ir.ui.view">
-            <field name="name">delivery.stock.picking_withcarrier.form.view</field>
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.view_picking_form"/>
             <field name="arch" type="xml">
@@ -262,7 +256,6 @@
         </record>
 
         <record id="view_picking_withweight_internal_move_form" model="ir.ui.view">
-            <field name="name">stock.picking_withweight.internal.move.form.view</field>
             <field name="model">stock.move</field>
             <field name="inherit_id" ref="stock.view_move_form"/>
             <field name="arch" type="xml">
@@ -273,7 +266,6 @@
         </record>
 
         <record id="view_quant_package_weight_form" model="ir.ui.view">
-            <field name="name">stock.quant.package.weight.form</field>
             <field name="model">stock.quant.package</field>
             <field name="inherit_id" ref="stock.view_quant_package_form"/>
             <field name="arch" type="xml">
@@ -290,7 +282,6 @@
         </record>
 
         <record id="view_quant_package_packaging_tree" model="ir.ui.view">
-            <field name="name">stock.quant.package.packaging.tree</field>
             <field name="model">stock.quant.package</field>
             <field name="inherit_id" ref="stock.view_quant_package_tree"/>
             <field name="arch" type="xml">
@@ -301,7 +292,6 @@
         </record>
 
         <record id="view_order_form_with_carrier" model="ir.ui.view">
-            <field name="name">delivery.sale.order.form.view.with_carrier</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
@@ -352,7 +342,6 @@
         </record>
 
         <record id="delivery_tracking_url_warning_form" model="ir.ui.view">
-            <field name="name">delivery.carrier.warning.url.form</field>
             <field name="model">stock.picking</field>
             <field name="arch" type="xml">
                 <form string="Trackers URL">
@@ -378,7 +367,6 @@
         </record>
 
         <record id="vpicktree_view_tree" model="ir.ui.view">
-            <field name="name">stock.picking.delivery.tree.inherit.delivery</field>
             <field name="model">stock.picking</field>
             <field name="inherit_id" ref="stock.vpicktree"/>
             <field name="arch" type="xml">

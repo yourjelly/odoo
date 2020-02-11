@@ -2,7 +2,6 @@
 <odoo>
 
         <record id="hr_employee_view_form_inherit_expense" model="ir.ui.view">
-            <field name="name">hr.employee.view.form.expense</field>
             <field name="model">hr.employee</field>
             <field name="inherit_id" ref="hr.view_employee_form"/>
             <field name="arch" type="xml">
@@ -13,7 +12,6 @@
         </record>
 
         <record id="view_employee_tree_inherit_expense" model="ir.ui.view">
-            <field name="name">hr.employee.tree.expense</field>
             <field name="model">hr.employee</field>
             <field name="inherit_id" ref="hr.view_employee_tree"/>
             <field name="arch" type="xml">
@@ -24,7 +22,6 @@
         </record>
 
         <record id="res_users_view_form_preferences" model="ir.ui.view">
-            <field name="name">hr.user.preferences.form.inherit.hr.expense</field>
             <field name="model">res.users</field>
             <field name="inherit_id" ref="hr.res_users_view_form_profile" />
             <field name="arch" type="xml">
@@ -35,7 +32,6 @@
         </record>
 
         <record id="view_expenses_tree" model="ir.ui.view">
-            <field name="name">hr.expense.tree</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <tree string="Expenses" decoration-bf="message_unread == True" class="o_expense_tree" js_class="hr_expense_tree" decoration-info="state == 'draft'" decoration-muted="state == 'cancel'" multi_edit="1">
@@ -64,7 +60,6 @@
         </record>
 
         <record id="hr_expense_view_form" model="ir.ui.view">
-            <field name="name">hr.expense.view.form</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <form string="Expenses" class="o_expense_form">
@@ -139,7 +134,6 @@
         </record>
 
         <record id="hr_expense_view_form_without_header" model="ir.ui.view">
-            <field name="name">hr.expense.view.form</field>
             <field name="model">hr.expense</field>
             <field name="inherit_id" ref="hr_expense.hr_expense_view_form"/>
             <field eval="35" name="priority"/>
@@ -155,7 +149,6 @@
         </record>
 
         <record id="hr_expense_kanban_view" model="ir.ui.view">
-            <field name="name">hr.expense.kanban</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile" js_class="hr_expense_kanban">
@@ -195,7 +188,6 @@
         </record>
 
         <record id="hr_expense_view_pivot" model="ir.ui.view">
-            <field name="name">hr.expense.pivot</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <pivot string="Expenses Analysis">
@@ -207,7 +199,6 @@
         </record>
 
         <record id="hr_expense_view_graph" model="ir.ui.view">
-            <field name="name">hr.expense.graph</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <graph string="Expenses Analysis">
@@ -219,7 +210,6 @@
         </record>
 
         <record id="hr_expense_view_search" model="ir.ui.view">
-            <field name="name">hr.expense.view.search</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <search string="Expense">
@@ -257,7 +247,6 @@
         </record>
 
         <record id="hr_expense_view_activity" model="ir.ui.view">
-            <field name="name">hr.expense.activity</field>
             <field name="model">hr.expense</field>
             <field name="arch" type="xml">
                 <activity string="Expenses">
@@ -302,7 +291,6 @@
         </record>
 
         <record id="view_product_hr_expense_form" model="ir.ui.view">
-            <field name="name">product.template.expense.form</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
@@ -316,7 +304,6 @@
         </record>
 
         <record id="product_product_expense_form_view" model="ir.ui.view">
-            <field name="name">product.product.expense.form</field>
             <field name="model">product.product</field>
             <field name="arch" type="xml">
                 <form string="Expense Products">
@@ -362,7 +349,6 @@
         </record>
 
         <record id="product_product_expense_tree_view" model="ir.ui.view">
-            <field name="name">product.product.expense.tree</field>
             <field name="model">product.product</field>
             <field eval="50" name="priority"/>
             <field name="arch" type="xml">
@@ -455,7 +441,6 @@
         </record>
 
         <record id="view_hr_expense_sheet_tree" model="ir.ui.view">
-            <field name="name">hr.expense.sheet.tree</field>
             <field name="model">hr.expense.sheet</field>
             <field name="arch" type="xml">
                 <tree string="Expense Reports" decoration-warning="state=='draft'" decoration-bf="message_unread == True" decoration-danger="state=='cancel'">
@@ -476,7 +461,6 @@
         </record>
 
         <record id="view_hr_expense_sheet_form" model="ir.ui.view">
-            <field name="name">hr.expense.sheet.form</field>
             <field name="model">hr.expense.sheet</field>
             <field eval="25" name="priority"/>
             <field name="arch" type="xml">
@@ -573,7 +557,6 @@
         </record>
 
         <record id="view_hr_expense_sheet_kanban" model="ir.ui.view">
-            <field name="name">hr.expense.sheet.kanban</field>
             <field name="model">hr.expense.sheet</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -611,7 +594,6 @@
         </record>
 
         <record id="view_hr_expense_sheet_pivot" model="ir.ui.view">
-            <field name="name">hr.expense.sheet.pivot</field>
             <field name="model">hr.expense.sheet</field>
             <field name="arch" type="xml">
                 <pivot string="Expenses Analysis">
@@ -623,7 +605,6 @@
         </record>
 
         <record id="view_hr_expense_sheet_graph" model="ir.ui.view">
-            <field name="name">hr.expense.sheet.graph</field>
             <field name="model">hr.expense.sheet</field>
             <field name="arch" type="xml">
                 <graph string="Expenses Analysis">
@@ -636,7 +617,6 @@
 
 
         <record id="hr_expense_sheet_view_search" model="ir.ui.view">
-            <field name="name">hr.expense.sheet.view.search</field>
             <field name="model">hr.expense.sheet</field>
             <field name="arch" type="xml">
                 <search string="Expense">
@@ -675,7 +655,6 @@
         </record>
 
         <record id="hr_expense_sheet_view_activity" model="ir.ui.view">
-            <field name="name">hr.expense.sheet.activity</field>
             <field name="model">hr.expense.sheet</field>
             <field name="arch" type="xml">
                 <activity string="Expenses">

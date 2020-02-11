@@ -3,7 +3,6 @@
     <data>
 
         <record id="acquirer_form" model="ir.ui.view">
-            <field name="name">payment.acquirer.form</field>
             <field name="model">payment.acquirer</field>
             <field name="arch" type="xml">
                 <form string="Payment Acquirer">
@@ -93,7 +92,6 @@
 
         <!-- Acquirer Kanban View -->
         <record id="acquirer_kanban" model="ir.ui.view">
-            <field name="name">payment.acquirer.kanban</field>
             <field name="model">payment.acquirer</field>
             <field name="arch" type="xml">
                 <kanban quick_create="false" create="true" class="o_kanban_payment_acquirer o_kanban_dashboard">
@@ -137,7 +135,6 @@
         </record>
 
         <record id="acquirer_list" model="ir.ui.view">
-            <field name="name">payment.acquirer.list</field>
             <field name="model">payment.acquirer</field>
             <field name="arch" type="xml">
                 <tree string="Payment Acquirers">
@@ -152,7 +149,6 @@
         </record>
 
         <record id="acquirer_search" model="ir.ui.view">
-            <field name="name">payment.acquirer.search</field>
             <field name="model">payment.acquirer</field>
             <field name="arch" type="xml">
                 <search>
@@ -186,7 +182,6 @@
 
         <!-- Payment transactions -->
         <record id="transaction_form" model="ir.ui.view">
-            <field name="name">payment.transaction.form</field>
             <field name="model">payment.transaction</field>
             <field name="arch" type="xml">
                 <form string="Payment Transactions" create="false" edit="false">
@@ -245,7 +240,6 @@
         </record>
 
         <record id="transaction_list" model="ir.ui.view">
-            <field name="name">payment.transaction.list</field>
             <field name="model">payment.transaction</field>
             <field name="arch" type="xml">
                 <tree string="Payment Transactions" create="false">
@@ -262,7 +256,6 @@
         </record>
 
         <record id="transaction_view_kanban" model="ir.ui.view">
-            <field name="name">payment.transaction.kanban</field>
             <field name="model">payment.transaction</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile" create="false">
@@ -290,7 +283,6 @@
         </record>
 
         <record id="transaction" model="ir.ui.view">
-            <field name="name">payment.transaction.search</field>
             <field name="model">payment.transaction</field>
             <field name="arch" type="xml">
                 <search>
@@ -322,7 +314,6 @@
 
         <!-- Payment Tokens -->
         <record model='ir.ui.view' id='payment_token_tree_view'>
-            <field name='name'>payment.token.tree</field>
             <field name='model'>payment.token</field>
             <field name='arch' type='xml'>
                 <tree string='Payment Tokens'>
@@ -336,7 +327,6 @@
         </record>
 
         <record id='payment_token_view_search' model='ir.ui.view'>
-            <field name='name'>payment.token.search</field>
             <field name='model'>payment.token</field>
             <field name='arch' type='xml'>
                 <search string='Payment Tokens'>
@@ -356,7 +346,6 @@
         </record>
 
         <record model='ir.ui.view' id='payment_token_form_view'>
-            <field name='name'>payment.token.form</field>
             <field name='model'>payment.token</field>
             <field name='arch' type='xml'>
                 <form string='Payment Tokens' create='false' editable='bottom'>
@@ -399,7 +388,6 @@
 
         <!-- Payment icons -->
         <record model="ir.ui.view" id="payment_icon_form_view">
-            <field name="name">payment.icon.form</field>
             <field name="model">payment.icon</field>
             <field name="arch" type="xml">
                 <form string="Payment Icon">

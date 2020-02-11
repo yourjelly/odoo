@@ -9,7 +9,6 @@
     </template>
 
     <record id="timesheet_plan" model="ir.ui.view">
-        <field name="name">Timesheet Plan</field>
         <field name="type">qweb</field>
         <field name="model">project.project</field>
         <field name="arch" type="xml">

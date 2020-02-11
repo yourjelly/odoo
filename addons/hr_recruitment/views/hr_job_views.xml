@@ -8,7 +8,6 @@
     </record>
 
     <record id="view_hr_job_kanban" model="ir.ui.view">
-        <field name="name">hr.job.kanban</field>
         <field name="model">hr.job</field>
         <field name="arch" type="xml">
             <kanban class="oe_background_grey o_kanban_dashboard o_hr_recruitment_kanban" on_create="hr_recruitment.create_job_simple">
@@ -95,7 +94,6 @@
     </record>
 
     <record id="hr_job_search_view" model="ir.ui.view">
-        <field name="name">hr.job.search</field>
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr.view_job_filter" />
         <field name="arch" type="xml">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_product_replenish" model="ir.ui.view">
-        <field name="name">Replenish</field>
         <field name="model">product.replenish</field>
         <field name="arch" type="xml">
             <form string="Replenish wizard">

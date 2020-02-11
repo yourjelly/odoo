@@ -2,7 +2,6 @@
 <odoo>
 <data>
     <record model="ir.ui.view" id="survey_form">
-        <field name="name">Form view for survey</field>
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
             <form string="Survey" class="o_survey_form">
@@ -143,7 +142,6 @@
         </field>
     </record>
     <record model="ir.ui.view" id= "survey_tree">
-        <field name="name">Tree view for survey</field>
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
             <tree string="Survey">
@@ -162,7 +160,6 @@
         </field>
     </record>
     <record model="ir.ui.view" id="survey_kanban">
-        <field name="name">Kanban view for survey</field>
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
             <kanban>
@@ -239,7 +236,6 @@
         </field>
     </record>
     <record id="survey_survey_view_search" model="ir.ui.view">
-        <field name="name">survey.survey.search</field>
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
             <search string="Survey">

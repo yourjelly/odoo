@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_assign_serial_numbers" model="ir.ui.view">
-        <field name="name">stock_assign_serial_numbers</field>
         <field name="model">stock.assign.serial</field>
         <field name="arch" type="xml">
             <form string="Assign Serial Numbers">

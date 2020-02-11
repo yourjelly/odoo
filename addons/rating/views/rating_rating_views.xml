@@ -2,7 +2,6 @@
 <odoo>
 
         <record id="rating_rating_view_tree" model="ir.ui.view">
-            <field name="name">rating.rating.tree</field>
             <field name="model">rating.rating</field>
             <field name="arch" type="xml">
                 <tree string="Rating" create="false" edit="false">
@@ -18,7 +17,6 @@
         </record>
 
         <record id="rating_rating_view_form" model="ir.ui.view">
-            <field name="name">rating.rating.form</field>
             <field name="model">rating.rating</field>
             <field name="arch" type="xml">
                 <form string="Rating" create="false">
@@ -56,7 +54,6 @@
         </record>
 
         <record id="rating_rating_view_kanban" model="ir.ui.view">
-            <field name="name">rating.rating.kanban</field>
             <field name="model">rating.rating</field>
             <field name="arch" type="xml">
                 <kanban create="false">
@@ -105,7 +102,6 @@
         </record>
 
         <record id="rating_rating_view_pivot" model="ir.ui.view">
-            <field name="name">rating.rating.pivot</field>
             <field name="model">rating.rating</field>
             <field name="arch" type="xml">
                 <pivot string="Rating Average" display_quantity="true">
@@ -117,7 +113,6 @@
         </record>
 
         <record id="rating_rating_view_graph" model="ir.ui.view">
-           <field name="name">rating.rating.graph</field>
            <field name="model">rating.rating</field>
            <field name="arch" type="xml">
                 <graph string="Rating Average" type="bar">
@@ -128,7 +123,6 @@
         </record>
 
         <record id="rating_rating_view_search" model="ir.ui.view">
-            <field name="name">rating.rating.search</field>
             <field name="model">rating.rating</field>
             <field name="arch" type="xml">
                 <search string="Ratings">

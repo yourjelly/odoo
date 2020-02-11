@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="mail_template_preview_view_form" model="ir.ui.view">
-            <field name="name">mail.template.preview.view.form</field>
             <field name="model">mail.template.preview</field>
             <field name="arch" type="xml">
                 <form string="Email Preview">

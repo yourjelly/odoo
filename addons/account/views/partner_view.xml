@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_account_position_form" model="ir.ui.view">
-            <field name="name">account.fiscal.position.form</field>
             <field name="model">account.fiscal.position</field>
             <field name="arch" type="xml">
                 <form string="Fiscal Position">
@@ -72,7 +71,6 @@
             </field>
         </record>
         <record id="view_account_position_filter" model="ir.ui.view">
-            <field name="name">account.fiscal.position.filter</field>
             <field name="model">account.fiscal.position</field>
             <field name="arch" type="xml">
                 <search string="Search Fiscal Positions">
@@ -82,7 +80,6 @@
             </field>
         </record>
         <record id="view_account_position_tree" model="ir.ui.view">
-            <field name="name">account.fiscal.position.tree</field>
             <field name="model">account.fiscal.position</field>
             <field name="arch" type="xml">
                 <tree string="Fiscal Position">
@@ -94,7 +91,6 @@
         </record>
 
         <record model="ir.ui.view" id="partner_view_short_extra">
-            <field name="name">partner.short.view.account</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_short_form" />
             <field name="priority" eval="20"/>
@@ -109,7 +105,6 @@
 
 
         <record model="ir.ui.view" id="partner_view_buttons">
-            <field name="name">partner.view.buttons</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form" />
             <field name="priority" eval="11"/>
@@ -160,7 +155,6 @@
         -->
 
         <record id="view_partner_property_form" model="ir.ui.view">
-            <field name="name">res.partner.property.form.inherit</field>
             <field name="model">res.partner</field>
             <field name="priority">2</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
@@ -213,7 +207,6 @@
         </record>
 
         <record id="res_partner_view_search" model="ir.ui.view">
-            <field name="name">res.partner.search.inherit</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_res_partner_filter"/>
             <field name="arch" type="xml">

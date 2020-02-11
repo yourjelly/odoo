@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="product_uom_tree_view" model="ir.ui.view">
-        <field name="name">uom.uom.tree</field>
         <field name="model">uom.uom</field>
         <field name="arch" type="xml">
             <tree string="Units of Measure">
@@ -13,7 +12,6 @@
     </record>
 
     <record id="product_uom_form_view" model="ir.ui.view">
-        <field name="name">uom.uom.form</field>
         <field name="model">uom.uom</field>
         <field name="arch" type="xml">
             <form string="Units of Measure">
@@ -55,7 +53,6 @@
     </record>
 
     <record id="uom_uom_view_search" model="ir.ui.view">
-        <field name="name">uom.uom.view.search</field>
         <field name="model">uom.uom</field>
         <field name="arch" type="xml">
             <search string="Search UOM">
@@ -83,7 +80,6 @@
     </record>
 
     <record id="product_uom_categ_form_view" model="ir.ui.view">
-        <field name="name">uom.category.form</field>
         <field name="model">uom.category</field>
         <field name="arch" type="xml">
             <form string="Units of Measure categories">
@@ -97,7 +93,6 @@
     </record>
 
     <record id="product_uom_categ_tree_view" model="ir.ui.view">
-        <field name="name">uom.category.tree</field>
         <field name="model">uom.category</field>
         <field name="arch" type="xml">
             <tree string="Units of Measure categories" editable="bottom">

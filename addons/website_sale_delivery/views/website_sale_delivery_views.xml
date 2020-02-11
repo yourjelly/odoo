@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="view_delivery_carrier_form_website_delivery" model="ir.ui.view">
-        <field name="name">delivery.carrier.website.form</field>
         <field name="model">delivery.carrier</field>
         <field name="inherit_id" ref="delivery.view_delivery_carrier_form"/>
         <field name="arch" type="xml">
@@ -23,7 +22,6 @@
     </record>
 
     <record id="view_delivery_carrier_tree_inherit_website_sale_delivery" model="ir.ui.view">
-        <field name="name">delivery.carrier.tree.inherit</field>
         <field name="model">delivery.carrier</field>
         <field name="inherit_id" ref="delivery.view_delivery_carrier_tree"/>
         <field name="arch" type="xml">
@@ -35,7 +33,6 @@
     </record>
 
     <record id="view_delivery_carrier_search_inherit_website_sale_delivery" model="ir.ui.view">
-        <field name="name">delivery.carrier.search.inherit</field>
         <field name="model">delivery.carrier</field>
         <field name="inherit_id" ref="delivery.view_delivery_carrier_search"/>
         <field name="arch" type="xml">

@@ -2,7 +2,6 @@
 <odoo>
 
         <record id="stock_scrap_search_view" model="ir.ui.view">
-            <field name="name">stock.scrap.search</field>
             <field name="model">stock.scrap</field>
             <field name="arch" type="xml">
                 <search string="Search Scrap">
@@ -21,7 +20,6 @@
         </record>
 
         <record id="stock_scrap_form_view" model="ir.ui.view">
-            <field name="name">stock.scrap.form</field>
             <field name="model">stock.scrap</field>
             <field name="arch" type="xml">
                 <form string="Scrap">
@@ -76,7 +74,6 @@
         </record>
 
         <record id="stock_scrap_view_kanban" model="ir.ui.view">
-            <field name="name">stock.scrap.kanban</field>
             <field name="model">stock.scrap</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -115,7 +112,6 @@
         </record>
 
         <record id="stock_scrap_tree_view" model="ir.ui.view">
-            <field name="name">stock.scrap.tree</field>
             <field name="model">stock.scrap</field>
             <field name="arch" type="xml">
                 <tree multi_edit="1" decoration-danger="state == 'draft'">
@@ -148,7 +144,6 @@
         </record>
 
         <record id="stock_scrap_form_view2" model="ir.ui.view">
-            <field name="name">stock.scrap.form2</field>
             <field name="model">stock.scrap</field>
             <field name="arch" type="xml">
                 <form string="Scrap">

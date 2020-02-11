@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
     <record id="mail_activity_type_view_form" model="ir.ui.view">
-        <field name="name">mail.activity.type.view.form</field>
         <field name="model">mail.activity.type</field>
         <field name="arch" type="xml">
             <form string="Activities">
@@ -52,7 +51,6 @@
     </record>
 
     <record id="mail_activity_type_view_search" model="ir.ui.view">
-        <field name="name">mail.activity.type.search</field>
         <field name="model">mail.activity.type</field>
         <field name="arch" type="xml">
             <search string="Activities">
@@ -63,7 +61,6 @@
     </record>
 
     <record id="mail_activity_type_view_tree" model="ir.ui.view">
-        <field name="name">mail.activity.type.view.tree</field>
         <field name="model">mail.activity.type</field>
         <field name="arch" type="xml">
             <tree string="Activities">
@@ -106,7 +103,6 @@
     />
 
     <record id="mail_activity_view_form_popup" model="ir.ui.view">
-        <field name="name">mail.activity.view.form.popup</field>
         <field name="model">mail.activity</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
@@ -163,7 +159,6 @@
     </record>
 
     <record id="mail_activity_view_search" model="ir.ui.view">
-        <field name="name">mail.activity.view.search</field>
         <field name="model">mail.activity</field>
         <field name="arch" type="xml">
             <search string="Activity">
@@ -188,7 +183,6 @@
     </record>
 
     <record id="mail_activity_view_tree" model="ir.ui.view">
-        <field name="name">mail.activity.view.tree</field>
         <field name="model">mail.activity</field>
         <field name="arch" type="xml">
             <tree string="Next Activities"
@@ -204,7 +198,6 @@
     </record>
 
     <record id="mail_activity_view_calendar" model="ir.ui.view">
-        <field name="name">mail.activity.view.calendar</field>
         <field name="model">mail.activity</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">

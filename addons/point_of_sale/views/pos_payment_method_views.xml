@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="pos_payment_method_view_form" model="ir.ui.view">
-        <field name="name">pos.payment.method.form</field>
         <field name="model">pos.payment.method</field>
         <field name="arch" type="xml">
             <form string="Payment Methods">
@@ -29,7 +28,6 @@
     </record>
 
     <record id="pos_payment_method_view_tree" model="ir.ui.view">
-        <field name="name">pos.payment.method.tree</field>
         <field name="model">pos.payment.method</field>
         <field name="arch" type="xml">
             <tree string="Payment Methods">
@@ -45,7 +43,6 @@
     </record>
 
     <record id="pos_payment_method_view_search" model="ir.ui.view">
-        <field name="name">pos.payment.search.view</field>
         <field name="model">pos.payment.method</field>
         <field name="arch" type="xml">
             <search string="Payment Methods">

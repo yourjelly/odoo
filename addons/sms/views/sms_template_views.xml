@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo><data>
     <record id="sms_template_view_form" model="ir.ui.view">
-        <field name="name">sms.template.view.form</field>
         <field name="model">sms.template</field>
         <field name="arch" type="xml">
             <form string="SMS Templates">
@@ -64,7 +63,6 @@
     </record>
 
     <record id="sms_template_view_tree" model="ir.ui.view">
-        <field name="name">sms.template.view.tree</field>
         <field name="model">sms.template</field>
         <field name="arch" type="xml">
             <tree string="SMS Templates">
@@ -75,7 +73,6 @@
     </record>
 
     <record id="sms_template_view_search" model="ir.ui.view">
-        <field name="name">sms.template.view.search</field>
         <field name="model">sms.template</field>
         <field name="arch" type="xml">
             <search string="Search SMS Templates">

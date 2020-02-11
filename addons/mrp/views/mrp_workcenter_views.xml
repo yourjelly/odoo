@@ -31,7 +31,6 @@
 
         <!-- Work Centers -->
         <record id="mrp_workcenter_tree_view" model="ir.ui.view">
-            <field name="name">mrp.workcenter.tree</field>
             <field name="model">mrp.workcenter</field>
             <field name="arch" type="xml">
                 <tree string="Work Center">
@@ -45,7 +44,6 @@
         </record>
 
         <record id="mrp_workcenter_view_kanban" model="ir.ui.view">
-            <field name="name">mrp.workcenter.kanban</field>
             <field name="model">mrp.workcenter</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -68,7 +66,6 @@
         </record>
 
         <record id="oee_pie_view" model="ir.ui.view">
-            <field name="name">mrp.workcenter.productivity.graph</field>
             <field name="model">mrp.workcenter.productivity</field>
             <field name="priority">20</field>
             <field name="arch" type="xml">
@@ -139,7 +136,6 @@
 
         <!-- Workcenter Kanban view-->
         <record model="ir.ui.view" id="mrp_workcenter_kanban">
-            <field name="name">mrp.workcenter.kanban</field>
             <field name="model">mrp.workcenter</field>
             <field name="arch" type="xml">
                 <kanban class="oe_background_grey o_kanban_dashboard o_workcenter_kanban" create="0">
@@ -285,7 +281,6 @@
         </record>
 
         <record id="mrp_workcenter_view" model="ir.ui.view">
-            <field name="name">mrp.workcenter.form</field>
             <field name="model">mrp.workcenter</field>
             <field name="arch" type="xml">
                 <form string="Work Center">
@@ -372,7 +367,6 @@
         </record>
 
         <record id="view_mrp_workcenter_search" model="ir.ui.view">
-            <field name="name">mrp.workcenter.search</field>
             <field name="model">mrp.workcenter</field>
             <field name="arch" type="xml">
                 <search string="Search for mrp workcenter">
@@ -440,7 +434,6 @@
 
 
     <record id="oee_loss_form_view" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.loss.form</field>
         <field name="model">mrp.workcenter.productivity.loss</field>
         <field name="arch" type="xml">
             <form string="Workcenter Productivity Loss">
@@ -455,7 +448,6 @@
     </record>
 
     <record id="oee_loss_tree_view" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.loss.tree</field>
         <field name="model">mrp.workcenter.productivity.loss</field>
         <field name="arch" type="xml">
             <tree string="Workcenter Productivity Loss" editable='bottom'>
@@ -467,7 +459,6 @@
     </record>
 
     <record id="view_mrp_workcenter_productivity_loss_kanban" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.loss.kanban</field>
         <field name="model">mrp.workcenter.productivity.loss</field>
         <field name="arch" type="xml">
             <kanban>
@@ -496,7 +487,6 @@
     </record>
 
     <record id="oee_loss_search_view" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.loss.search</field>
         <field name="model">mrp.workcenter.productivity.loss</field>
         <field name="arch" type="xml">
             <search string="Operations">
@@ -520,7 +510,6 @@
     </record>
 
     <record id="oee_search_view" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.search</field>
         <field name="model">mrp.workcenter.productivity</field>
         <field name="arch" type="xml">
             <search string="Operations">
@@ -543,7 +532,6 @@
     </record>
 
     <record id="oee_form_view" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.form</field>
         <field name="model">mrp.workcenter.productivity</field>
         <field name="priority">5</field>
         <field name="arch" type="xml">
@@ -568,7 +556,6 @@
     </record>
 
     <record id="oee_tree_view" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.tree</field>
         <field name="model">mrp.workcenter.productivity</field>
         <field name="arch" type="xml">
             <tree string="Workcenter Productivity">
@@ -584,7 +571,6 @@
     </record>
 
     <record id="oee_graph_view" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.graph</field>
         <field name="model">mrp.workcenter.productivity</field>
         <field name="arch" type="xml">
             <graph string="Workcenter Productivity">
@@ -596,7 +582,6 @@
     </record>
 
     <record id="oee_pivot_view" model="ir.ui.view">
-        <field name="name">mrp.workcenter.productivity.pivot</field>
         <field name="model">mrp.workcenter.productivity</field>
         <field name="arch" type="xml">
             <pivot string="Workcenter Productivity">

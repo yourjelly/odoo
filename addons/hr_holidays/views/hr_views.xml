@@ -15,7 +15,6 @@
 
     <!--Hr Department Inherit Kanban view-->
     <record id="hr_department_view_kanban" model="ir.ui.view">
-        <field name="name">hr.department.kanban.inherit</field>
         <field name="model">hr.department</field>
         <field name="inherit_id" ref="hr.hr_department_view_kanban"/>
         <field name="groups_id" eval="[(4,ref('hr_holidays.group_hr_holidays_user'))]"/>
@@ -98,7 +97,6 @@
 
     <!--Hr Employee inherit search view-->
     <record id="hr_employee_view_search" model="ir.ui.view">
-        <field name="name">hr.employee.search.view.inherit</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_filter"/>
         <field name="arch" type="xml">
@@ -109,7 +107,6 @@
     </record>
 
     <record id="hr_kanban_view_employees_kanban" model="ir.ui.view">
-        <field name="name">hr.employee.kanban.leaves.status</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
         <field name="arch" type="xml">
@@ -131,7 +128,6 @@
 
     <!-- Hr employee inherit Legal Leaves -->
     <record id="view_employee_form_leave_inherit" model="ir.ui.view">
-        <field name="name">hr.employee.leave.form.inherit</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
@@ -183,7 +179,6 @@
     </record>
 
     <record id="view_employee_tree_inherit_leave" model="ir.ui.view">
-        <field name="name">hr.employee.tree.leave</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_tree"/>
         <field name="arch" type="xml">
@@ -194,7 +189,6 @@
     </record>
 
     <record id="hr_employee_public_form_view_inherit" model="ir.ui.view">
-        <field name="name">hr.employee.public.leave.form.inherit</field>
         <field name="model">hr.employee.public</field>
         <field name="inherit_id" ref="hr.hr_employee_public_view_form"/>
         <field name="arch" type="xml">
@@ -223,7 +217,6 @@
     </record>
 
     <record id="res_users_view_form" model="ir.ui.view">
-        <field name="name">hr.user.preferences.view.form.leave.inherit</field>
         <field name="model">res.users</field>
         <field name="inherit_id" ref="hr.res_users_view_form_profile"/>
         <field name="arch" type="xml">

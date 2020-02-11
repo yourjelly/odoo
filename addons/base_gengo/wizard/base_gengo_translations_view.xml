@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record model="ir.ui.view" id="base_gengo_translation_wizard_from">
-            <field name="name">base.gengo.translation.form</field>
             <field name="model">base.gengo.translations</field>
             <field name="arch" type="xml">
                 <form string="Gengo Request Form">

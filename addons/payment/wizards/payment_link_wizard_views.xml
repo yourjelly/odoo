@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="payment_link_wizard_view_form" model="ir.ui.view">
-        <field name="name">payment.link.wizard.form</field>
         <field name="model">payment.link.wizard</field>
         <field name="arch" type="xml">
             <form string="Generate Payment Link">

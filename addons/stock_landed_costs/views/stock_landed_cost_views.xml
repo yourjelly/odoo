@@ -3,7 +3,6 @@
     <data>
         <!-- STOCK.LANDED.COST -->
         <record id='view_stock_landed_cost_form' model='ir.ui.view'>
-            <field name="name">stock.landed.cost.form</field>
             <field name="model">stock.landed.cost</field>
             <field name="arch" type="xml">
                 <form string="Landed Costs">
@@ -112,7 +111,6 @@
         </record>
 
         <record id='view_stock_landed_cost_tree' model='ir.ui.view'>
-            <field name="name">stock.landed.cost.tree</field>
             <field name="model">stock.landed.cost</field>
             <field name="arch" type="xml">
                 <tree string="Landed Costs">
@@ -126,7 +124,6 @@
         </record>
 
         <record id='view_stock_landed_cost_tree2' model='ir.ui.view'>
-            <field name="name">stock.landed.cost.tree</field>
             <field name="model">stock.landed.cost</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
@@ -142,7 +139,6 @@
         </record>
 
         <record id='stock_landed_cost_view_kanban' model='ir.ui.view'>
-            <field name="name">stock.landed.cost.kanban</field>
             <field name="model">stock.landed.cost</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -177,7 +173,6 @@
         </record>
 
         <record id="view_stock_landed_cost_search" model="ir.ui.view">
-            <field name="name">stock.landed.cost.search</field>
             <field name="model">stock.landed.cost</field>
             <field name="arch" type="xml">
                 <search string="Landed Costs">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="hr_expense_refuse_wizard_view_form" model="ir.ui.view">
-        <field name="name">hr.expense.refuse.wizard.form</field>
         <field name="model">hr.expense.refuse.wizard</field>
         <field name="arch" type="xml">
             <form string="Expense refuse reason">

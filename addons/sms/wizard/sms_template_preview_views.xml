@@ -3,7 +3,6 @@
     <data>
         <!-- SMS Template Preview -->
         <record model="ir.ui.view" id="sms_template_preview_form">
-            <field name="name">sms.template.preview.form</field>
             <field name="model">sms.template.preview</field>
             <field name="arch" type="xml">
                 <form string="SMS Preview">

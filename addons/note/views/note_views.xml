@@ -2,7 +2,6 @@
 <odoo>
     <!-- note Stage Form View -->
     <record id="view_note_stage_form" model="ir.ui.view">
-      <field name="name">note.stage.form</field>
       <field name="model">note.stage</field>
       <field name="arch" type="xml">
         <form string="Stage of Notes">
@@ -16,7 +15,6 @@
 
     <!-- note Stage Tree View -->
     <record id="view_note_stage_tree" model="ir.ui.view">
-      <field name="name">note.stage.tree</field>
       <field name="model">note.stage</field>
       <field name="field_parent"></field>
       <field name="arch" type="xml">
@@ -38,7 +36,6 @@
 
     <!-- note Tag Form View -->
     <record id="note_tag_view_form" model="ir.ui.view">
-      <field name="name">note.tag.form</field>
       <field name="model">note.tag</field>
       <field name="arch" type="xml">
         <form string="Tags">
@@ -51,7 +48,6 @@
 
     <!-- note Tag Tree View -->
     <record id="note_tag_view_tree" model="ir.ui.view">
-      <field name="name">note.tag.tree</field>
       <field name="model">note.tag</field>
       <field name="arch" type="xml">
         <tree string="Tags" editable="bottom">
@@ -74,7 +70,6 @@
 
     <!-- New note Kanban View -->
     <record id="view_note_note_kanban" model="ir.ui.view">
-      <field name="name">note.note.kanban</field>
       <field name="model">note.note</field>
       <field name="arch" type="xml">
         <kanban default_group_by="stage_id" class="oe_notes oe_kanban_quickcreate_textarea o_kanban_small_column">
@@ -135,7 +130,6 @@
 
     <!-- New note Tree View -->
     <record id="view_note_note_tree" model="ir.ui.view">
-      <field name="name">note.note.tree</field>
       <field name="model">note.note</field>
       <field name="arch" type="xml">
         <tree string="Stages">
@@ -150,7 +144,6 @@
 
     <!-- New note Form View -->
     <record id="view_note_note_form" model="ir.ui.view">
-        <field name="name">note.note.form</field>
         <field name="model">note.note</field>
         <field name="arch" type="xml">
             <form string="Note" class="oe_form_nomargin o_note_form_view">
@@ -172,7 +165,6 @@
 
     <!-- Search note  -->
     <record id="view_note_note_filter" model="ir.ui.view">
-      <field name="name">note.note.search</field>
       <field name="model">note.note</field>
       <field name="arch" type="xml">
         <search string="Notes">

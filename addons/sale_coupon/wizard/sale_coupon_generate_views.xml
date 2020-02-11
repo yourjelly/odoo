@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="sale_coupon_generate_view_form" model="ir.ui.view">
-        <field name="name">sale.coupon.generate.form</field>
         <field name="model">sale.coupon.generate</field>
         <field name="arch" type="xml">
             <form string="Generate Coupons">

@@ -2,7 +2,6 @@
 <odoo>
         <!-- REPORTING/MEMBERSHIP BY YEAR  -->
         <record model="ir.ui.view" id="view_report_membership_search">
-            <field name="name">report.membership.search</field>
             <field name="model">report.membership</field>
             <field name="arch" type="xml">
                 <search string="Membership">
@@ -30,7 +29,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_report_membership_pivot">
-            <field name="name">report.membership.pivot</field>
             <field name="model">report.membership</field>
             <field name="arch" type="xml">
                 <pivot string="Membership" disable_linking="True">
@@ -45,7 +43,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_report_membership_graph1">
-            <field name="name">report.membership.graph1</field>
             <field name="model">report.membership</field>
             <field name="arch" type="xml">
                 <graph string="Membership">

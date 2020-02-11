@@ -4,7 +4,6 @@
 
         <!-- RECORDS FOR RESET VIEWS TESTS -->
         <record id="test_view" model="ir.ui.view">
-            <field name="name">Test View</field>
             <field name="type">qweb</field>
             <field name="key">test_website.test_view</field>
             <field name="arch" type="xml">
@@ -17,7 +16,6 @@
             </field>
         </record>
         <record id="test_page_view" model="ir.ui.view">
-            <field name="name">Test Page View</field>
             <field name="type">qweb</field>
             <field name="key">test_website.test_page_view</field>
             <field name="arch" type="xml">
@@ -31,7 +29,6 @@
             </field>
         </record>
         <record id="test_error_view" model="ir.ui.view">
-            <field name="name">Test Error View</field>
             <field name="type">qweb</field>
             <field name="key">test_website.test_error_view</field>
             <field name="arch" type="xml">
@@ -73,7 +70,6 @@
             <field name="website_indexed" eval="False"/>
         </record>
         <record id="test_view_to_be_t_called" model="ir.ui.view">
-            <field name="name">Test View To Be t-called</field>
             <field name="type">qweb</field>
             <field name="key">test_website.test_view_to_be_t_called</field>
             <field name="arch" type="xml">

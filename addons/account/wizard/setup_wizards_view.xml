@@ -3,7 +3,6 @@
 <odoo>
     <data>
         <record id="setup_financial_year_opening_form" model="ir.ui.view">
-            <field name="name">account.financial.year.op.setup.wizard.form</field>
             <field name="model">account.financial.year.op</field>
             <field name="arch" type="xml">
                 <form>
@@ -31,7 +30,6 @@
         </record>
 
         <record id="setup_bank_account_wizard" model="ir.ui.view">
-            <field name="name">account.online.sync.res.partner.bank.setup.form</field>
             <field name="model">account.setup.bank.manual.config</field>
             <field name="arch" type="xml">
                 <form>
@@ -70,7 +68,6 @@
         </record>
 
         <record id="init_accounts_tree" model="ir.ui.view">
-            <field name="name">account.setup.opening.move.line.tree</field>
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <tree editable="top" create="1" delete="1" multi_edit="1" decoration-muted="opening_debit == 0 and opening_credit == 0">

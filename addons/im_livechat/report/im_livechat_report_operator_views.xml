@@ -3,7 +3,6 @@
     <data>
 
         <record id="im_livechat_report_operator_view_pivot" model="ir.ui.view">
-            <field name="name">im_livechat.report.operator.pivot</field>
             <field name="model">im_livechat.report.operator</field>
             <field name="arch" type="xml">
                 <pivot string="Livechat Support Statistics" disable_linking="True">
@@ -15,7 +14,6 @@
         </record>
 
         <record id="im_livechat_report_operator_view_graph" model="ir.ui.view">
-            <field name="name">im_livechat.report.operator.graph</field>
             <field name="model">im_livechat.report.operator</field>
             <field name="arch" type="xml">
                 <graph string="Livechat Support Statistics">
@@ -26,7 +24,6 @@
         </record>
 
         <record id="im_livechat_report_operator_view_search" model="ir.ui.view">
-            <field name="name">im_livechat.report.operator.search</field>
             <field name="model">im_livechat.report.operator</field>
             <field name="arch" type="xml">
                 <search string="Search report">

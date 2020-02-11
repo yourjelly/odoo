@@ -3,7 +3,6 @@
     <data>
         <!-- SLIDE.TAG -->
         <record id="view_slide_tag_form" model="ir.ui.view">
-            <field name="name">slide.tag.form</field>
             <field name="model">slide.tag</field>
             <field name="arch" type="xml">
                 <form string="Tag">
@@ -17,7 +16,6 @@
         </record>
 
         <record id="view_slide_tag_tree" model="ir.ui.view">
-            <field name="name">slide.tag.tree</field>
             <field name="model">slide.tag</field>
             <field name="arch" type="xml">
                 <tree string="Tags" editable="bottom">
@@ -35,7 +33,6 @@
 
         <!-- SLIDE.SLIDE -->
         <record id="view_slide_slide_form" model="ir.ui.view">
-            <field name="name">slide.slide.form</field>
             <field name="model">slide.slide</field>
             <field name="arch" type="xml">
                 <form string="Lesson">
@@ -152,7 +149,6 @@
         </record>
 
         <record id="slide_slide_view_kanban" model="ir.ui.view">
-            <field name="name">slide.slide.view.kanban</field>
             <field name="model">slide.slide</field>
             <field name="arch" type="xml">
                 <kanban edit="false" class="o_slide_kanban">
@@ -222,7 +218,6 @@
         </record>
 
         <record id="view_slide_slide_tree" model="ir.ui.view">
-            <field name="name">slide.slide.tree</field>
             <field name="model">slide.slide</field>
             <field name="arch" type="xml">
                 <tree string="Contents">
@@ -242,7 +237,6 @@
         </record>
 
         <record id="view_slide_slide_search" model="ir.ui.view">
-            <field name="name">slide.slide.filter</field>
             <field name="model">slide.slide</field>
             <field name="arch" type="xml">
                 <search string="Search Contents">
@@ -261,7 +255,6 @@
         </record>
 
         <record id="slide_slide_view_graph" model="ir.ui.view">
-            <field name="name">slide.slide.view.graph</field>
             <field name="model">slide.slide</field>
             <field name="arch" type="xml">
                 <graph string="Graph of Contents" stacked="False">
@@ -273,7 +266,6 @@
         </record>
 
         <record id="slide_slide_view_pivot" model="ir.ui.view">
-            <field name="name">slide.slide.view.pivot</field>
             <field name="model">slide.slide</field>
             <field name="arch" type="xml">
                 <pivot>

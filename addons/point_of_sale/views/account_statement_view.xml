@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_bank_statement_pos_session" model="ir.ui.view">
-        <field name="name">view.bank.statement.pos.session</field>
         <field name="model">account.bank.statement</field>
         <field name="mode">primary</field>
         <field name="priority">1000</field>
@@ -12,7 +11,6 @@
     </record>
 
     <record id="view_account_bnk_stmt_cashbox" model="ir.ui.view">
-        <field name="name">account.bnk_stmt_cashbox.form</field>
         <field name="model">account.bank.statement.cashbox</field>
         <field name="inherit_id" ref="account.view_account_bnk_stmt_cashbox"/>
         <field name="arch" type="xml">
@@ -23,7 +21,6 @@
     </record>
 
     <record id="view_account_bnk_stmt_cashbox_footer" model="ir.ui.view">
-      <field name="name">account.bnk_stmt_cashbox.form.close.modal</field>
       <field name="model">account.bank.statement.cashbox</field>
       <field name="inherit_id" ref="account.view_account_bnk_stmt_cashbox_footer"/>
       <field name="mode">primary</field>
@@ -36,7 +33,6 @@
     </record>
 
     <record id="view_account_journal_pos_user_form" model="ir.ui.view">
-        <field name="name">account.journal.pos.user.form.inherit</field>
         <field name="model">account.journal</field>
         <field name="inherit_id" ref="account.view_account_journal_form"/>
         <field name="arch" type="xml">

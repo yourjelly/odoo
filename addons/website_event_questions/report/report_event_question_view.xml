@@ -4,7 +4,6 @@
 
         <!-- Graph view for question analysis-->
         <record model="ir.ui.view" id="view_event_question_report_graph">
-            <field name="name">event.question.report.graph</field>
             <field name="model">event.question.report</field>
             <field name="arch" type="xml">
                 <graph string="Questions Analysis">
@@ -16,7 +15,6 @@
 
         <!-- Pivot view for question analysis -->
         <record model="ir.ui.view" id="view_event_question_report_pivot">
-            <field name="name">event.question.report.pivot</field>
             <field name="model">event.question.report</field>
             <field name="arch" type="xml">
                 <pivot string="Questions Analysis" disable_linking="True">
@@ -30,7 +28,6 @@
 
         <!-- Seach view for question analysis-->
         <record model="ir.ui.view" id="view_event_question_report_search">
-            <field name="name">event.question.report.search</field>
             <field name="model">event.question.report</field>
             <field name="arch" type="xml">
                 <search string="Questions Analysis">

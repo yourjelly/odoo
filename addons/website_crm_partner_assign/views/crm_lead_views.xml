@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="view_crm_lead_opportunity_geo_assign_form" model="ir.ui.view">
-            <field name="name">crm.lead.geo_assign.inherit</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.crm_lead_view_form"/>
             <field name="arch" type="xml">
@@ -33,7 +32,6 @@
         </record>
 
         <record id="view_crm_opportunity_geo_assign_tree" model="ir.ui.view">
-            <field name="name">crm.lead.geo_assign.tree.inherit</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
             <field name="arch" type="xml">
@@ -45,7 +43,6 @@
         </record>
 
         <record model="ir.ui.view" id="crm_opportunity_partner_filter">
-            <field name="name">crm.opportunity.partner.filter.assigned</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
             <field name="arch" type="xml">
@@ -62,7 +59,6 @@
         </record>
 
         <record id="view_crm_lead_geo_assign_tree" model="ir.ui.view">
-            <field name="name">crm.lead.lead.geo_assign.tree.inherit</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.crm_case_tree_view_leads"/>
             <field name="arch" type="xml">
@@ -73,7 +69,6 @@
         </record>
 
         <record model="ir.ui.view" id="crm_lead_partner_filter">
-            <field name="name">crm.lead.partner.filter.assigned</field>
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="crm.view_crm_case_leads_filter"/>
             <field name="arch" type="xml">

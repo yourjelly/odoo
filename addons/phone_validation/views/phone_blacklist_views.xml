@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="phone_blacklist_view_tree" model="ir.ui.view">
-        <field name="name">phone.blacklist.view.tree</field>
         <field name="model">phone.blacklist</field>
         <field name="arch" type="xml">
             <tree string="Phone Blacklist">
@@ -12,7 +11,6 @@
     </record>
 
     <record id="phone_blacklist_view_form" model="ir.ui.view">
-        <field name="name">phone.blacklist.view.form</field>
         <field name="model">phone.blacklist</field>
         <field name="arch" type="xml">
             <form string="Phone Blacklist" duplicate="false">
@@ -33,7 +31,6 @@
     </record>
 
     <record id="phone_blacklist_view_search" model="ir.ui.view">
-        <field name="name">phone.blacklist.view.search</field>
         <field name="model">phone.blacklist</field>
         <field name="arch" type="xml">
             <search>

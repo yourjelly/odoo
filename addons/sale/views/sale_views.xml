@@ -73,7 +73,6 @@
         </record>
 
         <record id="product_template_form_view" model="ir.ui.view">
-            <field name="name">product.template.product.website.form</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
@@ -94,7 +93,6 @@
         <menuitem id="menu_product_pricelist_main" name="Pricelists" parent="product_menu_catalog" action="product.product_pricelist_action2" groups="product.group_product_pricelist" sequence="3" active="False"/>
 
         <record id="sale_order_view_activity" model="ir.ui.view">
-            <field name="name">sale.order.activity</field>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">
                 <activity string="Sales Orders">
@@ -111,7 +109,6 @@
         </record>
 
         <record id="view_sale_order_calendar" model="ir.ui.view">
-            <field name="name">sale.order.calendar</field>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">
                 <calendar string="Sales Orders" date_start="date_order" color="state" hide_time="true" event_limit="5">
@@ -123,7 +120,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="view_sale_order_graph">
-            <field name="name">sale.order.graph</field>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">
                 <graph string="Sales Orders">
@@ -133,7 +129,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="view_sale_order_pivot">
-            <field name="name">sale.order.pivot</field>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">
                 <pivot string="Sales Orders">
@@ -145,7 +140,6 @@
 
         <!-- Sales Orders Kanban View  -->
         <record model="ir.ui.view" id="view_sale_order_kanban">
-            <field name="name">sale.order.kanban</field>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -183,7 +177,6 @@
         </record>
 
         <record id="view_order_tree" model="ir.ui.view">
-            <field name="name">sale.order.tree</field>
             <field name="model">sale.order</field>
             <field name="priority">2</field>
             <field name="arch" type="xml">
@@ -209,7 +202,6 @@
         </record>
 
         <record id="view_quotation_tree" model="ir.ui.view">
-            <field name="name">sale.order.tree</field>
             <field name="model">sale.order</field>
             <field name="priority">4</field>
             <field name="arch" type="xml">
@@ -234,7 +226,6 @@
             </field>
         </record>
         <record id="view_quotation_tree_with_onboarding" model="ir.ui.view">
-            <field name="name">sale.order.tree</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="view_quotation_tree"/>
             <field name="mode">primary</field>
@@ -246,7 +237,6 @@
         </record>
 
         <record id="view_order_form" model="ir.ui.view">
-            <field name="name">sale.order.form</field>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">
               <form string="Sales Order" class="o_sale_order">
@@ -696,7 +686,6 @@
         </record>
 
         <record id="view_sales_order_auto_done_setting" model="ir.ui.view">
-            <field name="name">sale.order.form</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="groups_id" eval="[(4, ref('sale.group_auto_done_setting'))]"/>
@@ -710,7 +699,6 @@
         </record>
 
         <record id="view_sales_order_filter" model="ir.ui.view">
-            <field name="name">sale.order.list.select</field>
             <field name="model">sale.order</field>
             <field name="priority" eval="15"/>
             <field name="arch" type="xml">
@@ -743,7 +731,6 @@
         </record>
 
         <record id="sale_order_view_search_inherit_quotation" model="ir.ui.view">
-            <field name="name">sale.order.search.inherit.quotation</field>
             <field name="model">sale.order</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="sale.view_sales_order_filter"/>
@@ -762,7 +749,6 @@
         </record>
 
         <record id="sale_order_view_search_inherit_sale" model="ir.ui.view">
-            <field name="name">sale.order.search.inherit.sale</field>
             <field name="model">sale.order</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="sale.view_sales_order_filter"/>
@@ -978,7 +964,6 @@
                 sequence="1" groups="sales_team.group_sale_salesman"/>
 
         <record id="view_order_line_tree" model="ir.ui.view">
-            <field name="name">sale.order.line.tree</field>
             <field name="model">sale.order.line</field>
             <field name="arch" type="xml">
                 <tree string="Sales Order Lines" create="false">
@@ -997,7 +982,6 @@
         </record>
 
         <record id="sale_order_line_view_form_readonly" model="ir.ui.view">
-            <field name="name">sale.order.line.form.readonly</field>
             <field name="model">sale.order.line</field>
             <field name="arch" type="xml">
                 <form string="Sales Order Item">
@@ -1037,7 +1021,6 @@
         </record>
 
         <record id="view_sales_order_line_filter" model="ir.ui.view">
-            <field name="name">sale.order.line.select</field>
             <field name="model">sale.order.line</field>
             <field name="arch" type="xml">
                 <search string="Search Sales Order">
@@ -1058,7 +1041,6 @@
         </record>
 
         <record model="ir.ui.view" id="product_form_view_sale_order_button">
-            <field name="name">product.product.sale.order</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="groups_id" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
@@ -1086,7 +1068,6 @@
         </record>
 
         <record model="ir.ui.view" id="product_template_form_view_sale_order_button">
-            <field name="name">product.template.sale.order.button</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="groups_id" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
@@ -1114,7 +1095,6 @@
         </record>
 
         <record model="ir.ui.view" id="product_template_form_view_invoice_policy">
-            <field name="name">product.template.invoice.policy</field>
             <field name="model">product.template</field>
             <field name="priority">15</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
@@ -1132,7 +1112,6 @@
 
         <!-- Update account invoice search view!-->
         <record id="account_invoice_groupby_inherit" model="ir.ui.view">
-            <field name="name">account.move.groupby</field>
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_account_invoice_filter"/>
             <field name="arch" type="xml">
@@ -1146,7 +1125,6 @@
         </record>
 
         <record id="account_invoice_view_tree" model="ir.ui.view">
-            <field name="name">account.move.tree.inherit.sale</field>
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_invoice_tree"/>
             <field name="arch" type="xml">
@@ -1158,7 +1136,6 @@
 
         <!-- Update account invoice !-->
         <record model="ir.ui.view" id="account_invoice_form">
-            <field name="name">Account Invoice</field>
             <field name="model">account.move</field>
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">

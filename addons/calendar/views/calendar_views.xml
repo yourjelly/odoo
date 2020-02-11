@@ -3,7 +3,6 @@
 
     <!-- Calendar Events Types : Views and Actions -->
     <record id="view_calendar_event_type_tree" model="ir.ui.view">
-        <field name="name">calendar.event.type</field>
         <field name="model">calendar.event.type</field>
         <field name="arch" type="xml">
             <tree string="Meeting Types" editable="bottom">
@@ -20,7 +19,6 @@
 
     <!-- Calendar Alarm : -->
     <record id="view_calendar_alarm_tree" model="ir.ui.view">
-        <field name="name">calendar.alarm.tree</field>
         <field name="model">calendar.alarm</field>
         <field name="arch" type="xml">
             <tree string="Calendar Alarm" editable="bottom">
@@ -33,7 +31,6 @@
     </record>
 
     <record id="calendar_alarm_view_form" model="ir.ui.view">
-            <field name="name">calendar.alarm.form</field>
             <field name="model">calendar.alarm</field>
             <field name="arch" type="xml">
                 <form string="Calendar Alarm">
@@ -62,7 +59,6 @@
 
     <!-- Calendar Events : Views and Actions  -->
     <record id="view_calendar_event_tree" model="ir.ui.view">
-        <field name="name">calendar.event.tree</field>
         <field name="model">calendar.event</field>
         <field name="arch" type="xml">
             <tree string="Meetings" decoration-bf="message_needaction==True" multi_edit="1">
@@ -80,7 +76,6 @@
     </record>
 
     <record id="view_calendar_event_form" model="ir.ui.view">
-        <field name="name">calendar.event.form</field>
         <field name="model">calendar.event</field>
         <field name="priority" eval="1"/>
         <field name="arch" type="xml">
@@ -254,7 +249,6 @@
     </record>
 
     <record id="view_calendar_event_calendar" model="ir.ui.view">
-        <field name="name">calendar.event.calendar</field>
         <field name="model">calendar.event</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
@@ -272,7 +266,6 @@
     </record>
 
     <record id="view_calendar_event_search" model="ir.ui.view">
-        <field name="name">calendar.event.search</field>
         <field name="model">calendar.event</field>
         <field name="arch" type="xml">
             <search string="Search Meetings">

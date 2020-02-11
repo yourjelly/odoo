@@ -2,7 +2,6 @@
 <odoo>
 
     <record  id="email_message_tree_view" model="ir.ui.view">
-        <field name="name">mail.mail.form.fetchmail</field>
         <field name="model">mail.mail</field>
         <field name="inherit_id" ref="mail.view_mail_form"/>
         <field name="arch" type="xml">

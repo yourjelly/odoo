@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="project_task_create_timesheet_view_form" model="ir.ui.view">
-        <field name="name">project.task.create.timesheet.wizard.form</field>
         <field name="model">project.task.create.timesheet</field>
         <field name="arch" type="xml">
             <form string="Save time">

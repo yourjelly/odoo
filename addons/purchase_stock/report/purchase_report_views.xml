@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="purchase_report_view_search" model="ir.ui.view">
-        <field name="name">purchase.report.search.stock</field>
         <field name="model">purchase.report</field>
         <field name="inherit_id" ref="purchase.view_purchase_order_search"/>
         <field name="arch" type="xml">

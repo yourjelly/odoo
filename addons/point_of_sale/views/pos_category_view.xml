@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="product_pos_category_form_view" model="ir.ui.view">
-        <field name="name">pos.category.form</field>
         <field name="model">pos.category</field>
         <field name="arch" type="xml">
             <form string="Pos Product Categories">
@@ -24,7 +23,6 @@
         </field>
     </record>
     <record id="product_pos_category_tree_view" model="ir.ui.view">
-        <field name="name">pos.category.tree</field>
         <field name="model">pos.category</field>
         <field name="field_parent" eval="False"/>
         <field name="arch" type="xml">
@@ -36,7 +34,6 @@
     </record>
 
     <record id="view_pos_category_kanban" model="ir.ui.view">
-        <field name="name">pos.category.kanban</field>
         <field name="model">pos.category</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">

@@ -3,7 +3,6 @@
 <data>
     <!-- USER INPUTS -->
     <record id="survey_user_input_view_search" model="ir.ui.view">
-        <field name="name">survey.user_input.view.search</field>
         <field name="model">survey.user_input</field>
         <field name="arch" type="xml">
             <search string="Search Survey">
@@ -28,7 +27,6 @@
     </record>
 
     <record id="survey_user_input_view_form" model="ir.ui.view">
-        <field name="name">survey.user_input.view.form</field>
         <field name="model">survey.user_input</field>
         <field name="arch" type="xml">
             <form string="Survey User inputs" create="false">
@@ -81,7 +79,6 @@
     </record>
 
     <record id="survey_user_input_view_tree" model="ir.ui.view">
-        <field name="name">survey.user_input.view.tree</field>
         <field name="model">survey.user_input</field>
         <field name="arch" type="xml">
             <tree string="Survey User inputs" decoration-muted="test_entry == True" create="false">
@@ -100,7 +97,6 @@
     </record>
 
     <record id="survey_user_input_viuew_kanban" model="ir.ui.view">
-        <field name="name">survey.user_input.view.kanban</field>
         <field name="model">survey.user_input</field>
         <field name="arch" type="xml">
             <kanban create="false">
@@ -149,7 +145,6 @@
     <!-- USER INPUT LINES
         .. note:: these views are useful mainly for technical users/administrators -->
     <record id="survey_user_input_line_view_form" model="ir.ui.view">
-        <field name="name">survey.user_input.line.view.form</field>
         <field name="model">survey.user_input.line</field>
         <field name="arch" type="xml">
             <form string="User input line details" create="false">
@@ -175,7 +170,6 @@
         </field>
     </record>
     <record id="survey_response_line_view_tree" model="ir.ui.view">
-        <field name="name">survey.user_input.line.view.tree</field>
         <field name="model">survey.user_input.line</field>
         <field name="arch" type="xml">
             <tree string="Survey Answer Line" create="false">
@@ -190,7 +184,6 @@
         </field>
     </record>
     <record id="survey_user_input_line_view_search" model="ir.ui.view">
-        <field name="name">survey.user_input.line.view.search</field>
         <field name="model">survey.user_input.line</field>
         <field name="arch" type="xml">
             <search string="Search User input lines">

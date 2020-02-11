@@ -28,7 +28,6 @@
     </record>
 
     <record id="hr_employee_view_form_inherit_timesheet" model="ir.ui.view">
-        <field name="name">hr.employee.form.timesheet</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
@@ -54,7 +53,6 @@
     </record>
 
     <record id="hr_department_view_kanban" model="ir.ui.view">
-        <field name="name">hr.department.kanban.inherit</field>
         <field name="model">hr.department</field>
         <field name="inherit_id" ref="hr.hr_department_view_kanban"/>
         <field name="groups_id" eval="[(4,ref('hr_timesheet.group_timesheet_manager'))]"/>

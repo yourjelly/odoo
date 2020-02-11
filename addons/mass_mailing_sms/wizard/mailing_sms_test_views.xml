@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
     <record id="mailing_sms_test_view_form" model="ir.ui.view">
-        <field name="name">mailing.sms.test.view.form</field>
         <field name="model">mailing.sms.test</field>
         <field name="arch" type="xml">
             <form string="Send a Sample SMS">

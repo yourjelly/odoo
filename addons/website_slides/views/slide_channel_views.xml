@@ -3,7 +3,6 @@
     <data>
         <!-- SLIDE.CHANNEL VIEWS -->
         <record model="ir.ui.view" id="view_slide_channel_form">
-            <field name="name">slide.channel.view.form</field>
             <field name="model">slide.channel</field>
             <field name="arch" type="xml">
                 <form string="Channels">
@@ -156,7 +155,6 @@
 
 
         <record id="slide_channel_view_tree" model="ir.ui.view">
-            <field name="name">slide.channel.view.tree</field>
             <field name="model">slide.channel</field>
             <field name="arch" type="xml">
                 <tree string="Courses">
@@ -173,7 +171,6 @@
         </record>
 
         <record id="slide_channel_view_tree_report" model="ir.ui.view">
-            <field name="name">slide.channel.view.tree.report</field>
             <field name="model">slide.channel</field>
             <field name="priority">20</field>
             <field name="arch" type="xml">
@@ -188,7 +185,6 @@
         </record>
 
         <record id="slide_channel_view_search" model="ir.ui.view">
-            <field name="name">slide.channel.view.search</field>
             <field name="model">slide.channel</field>
             <field name="arch" type="xml">
                 <search string="Courses">
@@ -199,7 +195,6 @@
         </record>
 
         <record id="slide_channel_view_graph" model="ir.ui.view">
-            <field name="name">slide.channel.view.graph</field>
             <field name="model">slide.channel</field>
             <field name="arch" type="xml">
                 <graph string="Courses" type="bar">
@@ -210,7 +205,6 @@
         </record>
 
         <record id="slide_channel_view_kanban" model="ir.ui.view">
-            <field name="name">slide.channel.view.kanban</field>
             <field name="model">slide.channel</field>
             <field name="arch" type="xml">
                 <kanban string="eLearning Overview" class="o_emphasize_colors o_kanban_dashboard o_slide_kanban breadcrumb_item active" edit="false">

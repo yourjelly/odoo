@@ -3,7 +3,6 @@
     <data>
 
         <record id="hr_employee_public_view_search" model="ir.ui.view">
-            <field name="name">hr.employee.search</field>
             <field name="model">hr.employee.public</field>
             <field name="arch" type="xml">
                 <search string="Employees">
@@ -27,7 +26,6 @@
         </record>
 
         <record id="hr_employee_public_view_form" model="ir.ui.view">
-            <field name="name">hr.employee.public.form</field>
             <field name="model">hr.employee.public</field>
             <field name="arch" type="xml">
                 <form string="Employee" create="0" write="0">
@@ -87,7 +85,6 @@
         </record>
 
         <record id="hr_employee_public_view_tree" model="ir.ui.view">
-            <field name="name">hr.employee.tree</field>
             <field name="model">hr.employee.public</field>
             <field name="arch" type="xml">
                 <tree string="Employees">
@@ -104,7 +101,6 @@
         </record>
 
         <record id="hr_employee_public_view_kanban" model="ir.ui.view">
-            <field name="name">hr.employee.kanban</field>
             <field name="model">hr.employee.public</field>
             <field name="priority">10</field>
             <field name="arch" type="xml">

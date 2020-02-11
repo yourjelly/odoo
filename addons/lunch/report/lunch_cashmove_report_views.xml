@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="lunch_cashmove_report_view_search" model="ir.ui.view">
-        <field name='name'>lunch.cashmove.report.search</field>
         <field name='model'>lunch.cashmove.report</field>
         <field name='arch' type='xml'>
             <search string="lunch employee payment">
@@ -16,7 +15,6 @@
     </record>
 
     <record id="lunch_cashmove_report_view_search_2" model="ir.ui.view">
-        <field name='name'>lunch.cashmove.report.search</field>
         <field name='model'>lunch.cashmove.report</field>
         <field name='arch' type='xml'>
             <search string="lunch cashmove">
@@ -30,7 +28,6 @@
     </record>
 
     <record id="lunch_cashmove_report_view_tree" model="ir.ui.view">
-        <field name="name">lunch.cashmove.report.tree</field>
         <field name="model">lunch.cashmove.report</field>
         <field name="arch" type="xml">
             <tree string="cashmove tree">
@@ -44,7 +41,6 @@
     </record>
 
     <record id="lunch_cashmove_report_view_tree_2" model="ir.ui.view">
-        <field name="name">lunch.cashmove.report.tree</field>
         <field name="model">lunch.cashmove.report</field>
         <field name="arch" type="xml">
             <tree string="cashmove tree" create='false'>
@@ -57,7 +53,6 @@
     </record>
 
     <record id="lunch_cashmove_report_view_form" model="ir.ui.view">
-        <field name="name">lunch.cashmove.report.form</field>
         <field name="model">lunch.cashmove.report</field>
         <field name="arch" type="xml">
             <form string="cashmove form">
@@ -76,7 +71,6 @@
     </record>
 
     <record id="view_lunch_cashmove_report_kanban" model="ir.ui.view">
-        <field name="name">lunch.cashmove.report.kanban</field>
         <field name="model">lunch.cashmove.report</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">

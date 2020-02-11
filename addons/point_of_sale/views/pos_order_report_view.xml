@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="view_report_pos_order_pivot" model="ir.ui.view">
-            <field name="name">report.pos.order.pivot</field>
             <field name="model">report.pos.order</field>
             <field name="arch" type="xml">
                 <pivot string="Point of Sale Analysis" disable_linking="True">
@@ -15,7 +14,6 @@
         </record>
 
         <record id="view_report_pos_order_graph" model="ir.ui.view">
-            <field name="name">report.pos.order.graph</field>
             <field name="model">report.pos.order</field>
             <field name="arch" type="xml">
                 <graph string="Point of Sale Analysis">
@@ -26,7 +24,6 @@
         </record>
 
         <record id="view_report_pos_order_search" model="ir.ui.view">
-            <field name="name">report.pos.order.search</field>
             <field name="model">report.pos.order</field>
             <field name="arch" type="xml">
                 <search string="Point of Sale Analysis">

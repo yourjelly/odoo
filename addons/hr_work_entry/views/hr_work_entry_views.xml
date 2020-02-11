@@ -17,7 +17,6 @@
     </record>
 
     <record id="hr_work_entry_view_calendar" model="ir.ui.view">
-        <field name="name">hr.work.entry.calendar</field>
         <field name="model">hr.work.entry</field>
         <field name="arch" type="xml">
             <calendar string="Work Entry"
@@ -35,7 +34,6 @@
     </record>
 
     <record id="hr_work_entry_view_form" model="ir.ui.view">
-        <field name="name">hr.work.entry.form</field>
         <field name="model">hr.work.entry</field>
         <field name="arch" type="xml">
             <form string="Work Entry" >
@@ -69,7 +67,6 @@
     </record>
 
     <record id="hr_work_entry_view_tree" model="ir.ui.view">
-        <field name="name">hr.work.entry.tree</field>
         <field name="model">hr.work.entry</field>
         <field name="arch" type="xml">
             <tree multi_edit="1">
@@ -83,7 +80,6 @@
     </record>
 
     <record id="hr_work_entry_view_search" model="ir.ui.view">
-        <field name="name">hr.work.entry.filter</field>
         <field name="model">hr.work.entry</field>
         <field name="arch" type="xml">
             <search string="Search Work Entry">
@@ -109,7 +105,6 @@
     <!-- HR WORK ENTRY TYPE -->
 
     <record id="hr_work_entry_type_view_search" model="ir.ui.view">
-        <field name="name">hr.work.entry.type.view.search</field>
         <field name="model">hr.work.entry.type</field>
         <field name="arch" type="xml">
             <search string="Search Work Entry Type">
@@ -128,7 +123,6 @@
     </record>
 
     <record id="hr_work_entry_type_view_tree" model="ir.ui.view">
-        <field name="name">hr.work.entry.type.tree</field>
         <field name="model">hr.work.entry.type</field>
         <field name="arch" type="xml">
             <tree>
@@ -139,7 +133,6 @@
     </record>
 
     <record id="hr_work_entry_type_view_form" model="ir.ui.view">
-        <field name="name">hr.work.entry.type.form</field>
         <field name="model">hr.work.entry.type</field>
         <field name="arch" type="xml">
             <form string="Work Entry Type" >
@@ -163,7 +156,6 @@
     </record>
 
     <record id="hr_work_entry_type_view_kanban" model="ir.ui.view">
-        <field name="name">hr.work.entry.type.kanban.view</field>
         <field name="model">hr.work.entry.type</field>
         <field name="arch" type="xml">
             <kanban>

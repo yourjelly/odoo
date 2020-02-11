@@ -3,7 +3,6 @@
     <data>
         <!-- split between ir_ui_view & website_page record to keep external_id on ir_ui_view -->
         <record id="homepage" model="ir.ui.view">
-            <field name="name">Home</field>
             <field name="type">qweb</field>
             <field name="key">website.homepage</field>
             <field name="arch" type="xml">
@@ -17,7 +16,6 @@
         </record>
 
         <record id="contactus" model="ir.ui.view">
-            <field name="name">Contact Us</field>
             <field name="type">qweb</field>
             <field name="key">website.contactus</field>
             <field name="arch" type="xml">
@@ -65,7 +63,6 @@
         </record>
 
         <record id="aboutus" model="ir.ui.view">
-            <field name="name">About us</field>
             <field name="type">qweb</field>
             <field name="key">website.aboutus</field>
             <field name="arch" type="xml">

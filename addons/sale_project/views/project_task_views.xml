@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="project_project_view_tree_inherit_sale_project" model="ir.ui.view">
-        <field name="name">project.project.tree.inherit.sale.project</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="project.view_project"/>
         <field name="arch" type="xml">
@@ -14,7 +13,6 @@
     </record>
 
     <record id="view_sale_project_inherit_form" model="ir.ui.view">
-        <field name="name">project.task.view.inherit</field>
         <field name="model">project.task</field>
         <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
         <field name="inherit_id" ref="project.view_task_form2"/>
@@ -36,7 +34,6 @@
     </record>
 
     <record id="project_task_view_form_inherit_sale_line_editable" model="ir.ui.view">
-        <field name="name">project.task.form.inherit.sale.line.editable.salesman</field>
         <field name="model">project.task</field>
         <field name="inherit_id" ref="view_sale_project_inherit_form"/>
         <field name="arch" type="xml">
@@ -49,7 +46,6 @@
     </record>
 
     <record id="project_task_view_search" model="ir.ui.view">
-        <field name="name">project.task.search.inherit</field>
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_search_form"/>
         <field name="arch" type="xml">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record model="ir.ui.view" id="view_purchase_order_pivot">
-            <field name="name">product.month.pivot</field>
             <field name="model">purchase.report</field>
             <field name="arch" type="xml">
                 <pivot string="Purchase Analysis" disable_linking="True" display_quantity="true">
@@ -13,7 +12,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="view_purchase_order_graph">
-            <field name="name">product.month.graph</field>
             <field name="model">purchase.report</field>
             <field name="arch" type="xml">
                 <graph string="Purchase Orders Statistics" type="line">
@@ -47,7 +45,6 @@
 
 
         <record id="view_purchase_order_search" model="ir.ui.view">
-        <field name="name">report.purchase.order.search</field>
         <field name="model">purchase.report</field>
         <field name="arch" type="xml">
             <search string="Purchase Orders">

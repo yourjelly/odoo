@@ -3,7 +3,6 @@
 <data>
     <!-- QUESTIONS -->
     <record model="ir.ui.view" id="survey_question_form">
-        <field name="name">Form view for survey question</field>
         <field name="model">survey.question</field>
         <field name="arch" type="xml">
             <form string="Survey Question" create="false">
@@ -182,7 +181,6 @@
         </field>
     </record>
     <record model="ir.ui.view" id="survey_question_tree">
-        <field name="name">Tree view for survey question</field>
         <field name="model">survey.question</field>
         <field name="arch" type="xml">
             <tree string="Survey Question" create="false">
@@ -194,7 +192,6 @@
         </field>
     </record>
     <record model="ir.ui.view" id="survey_question_search">
-        <field name="name">Search view for survey question</field>
         <field name="model">survey.question</field>
         <field name="arch" type="xml">
             <search string="Search Question">
@@ -224,7 +221,6 @@
 
     <!-- LABELS -->
     <record id="survey_question_answer_view_tree" model="ir.ui.view">
-        <field name="name">survey.question.answer.view.tree</field>
         <field name="model">survey.question.answer</field>
         <field name="arch" type="xml">
             <tree string="Survey Label" create="false">
@@ -237,7 +233,6 @@
         </field>
     </record>
     <record id="survey_question_answer_view_search" model="ir.ui.view">
-        <field name="name">survey.question.answer.view.search</field>
         <field name="model">survey.question.answer</field>
         <field name="arch" type="xml">
             <search string="Search Label">

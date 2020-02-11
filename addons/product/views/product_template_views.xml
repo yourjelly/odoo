@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="product_template_tree_view" model="ir.ui.view">
-        <field name="name">product.template.product.tree</field>
         <field name="model">product.template</field>
         <field name="arch" type="xml">
             <tree string="Product" multi_edit="1">
@@ -25,7 +24,6 @@
     </record>
 
     <record id="product_template_only_form_view" model="ir.ui.view">
-        <field name="name">product.template.product.form</field>
         <field name="model">product.template</field>
         <field name="mode">primary</field>
         <field name="priority" eval="8" />
@@ -67,7 +65,6 @@
     </record>
 
     <record id="product_template_kanban_view" model="ir.ui.view">
-        <field name="name">Product.template.product.kanban</field>
         <field name="model">product.template</field>
         <field name="arch" type="xml">
             <kanban>
@@ -106,7 +103,6 @@
     </record>
 
     <record id="product_template_view_activity" model="ir.ui.view">
-        <field name="name">product.template.activity</field>
         <field name="model">product.template</field>
         <field name="arch" type="xml">
             <activity string="Products">

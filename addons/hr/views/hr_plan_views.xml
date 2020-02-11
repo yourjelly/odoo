@@ -3,7 +3,6 @@
     <data>
 
         <record id="hr_plan_view_search" model="ir.ui.view">
-            <field name="name">hr.plan.view.search</field>
             <field name="model">hr.plan</field>
             <field name="arch" type="xml">
                 <search string="Plan">
@@ -15,7 +14,6 @@
         </record>
 
         <record id="hr_plan_view_tree" model="ir.ui.view">
-            <field name="name">hr.plan.view.tree</field>
             <field name="model">hr.plan</field>
             <field name="arch" type="xml">
                 <tree string="Planning">
@@ -25,7 +23,6 @@
         </record>
 
         <record id="hr_plan_view_form" model="ir.ui.view">
-            <field name="name">hr.plan.view.form</field>
             <field name="model">hr.plan</field>
             <field name="arch" type="xml">
                 <form string="Planning">
@@ -54,7 +51,6 @@
         </record>
 
         <record id="hr_plan_activity_type_view_tree" model="ir.ui.view">
-            <field name="name">hr.plan.activity.type.view.tree</field>
             <field name="model">hr.plan.activity.type</field>
             <field name="arch" type="xml">
                 <tree string="Activities">
@@ -66,7 +62,6 @@
         </record>
 
         <record id="hr_plan_activity_type_view_form" model="ir.ui.view">
-            <field name="name">hr.plan.activity.type.view.form</field>
             <field name="model">hr.plan.activity.type</field>
             <field name="arch" type="xml">
                 <form string="Activity">

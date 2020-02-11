@@ -16,7 +16,6 @@
     </record>
 
     <record id="goal_list_view" model="ir.ui.view">
-        <field name="name">Goal List</field>
         <field name="model">gamification.goal</field>
         <field name="arch" type="xml">
             <tree string="Goal List" decoration-danger="state == 'failed'" decoration-success="state == 'reached'" decoration-muted="state == 'canceled'" create="false">
@@ -34,7 +33,6 @@
     </record>
 
     <record id="goal_form_view" model="ir.ui.view">
-        <field name="name">Goal Form</field>
         <field name="model">gamification.goal</field>
         <field name="arch" type="xml">
             <form string="Goal" create="false">
@@ -87,7 +85,6 @@
     </record>
 
     <record id="goal_search_view" model="ir.ui.view">
-        <field name="name">Goal Search</field>
         <field name="model">gamification.goal</field>
         <field name="arch" type="xml">
             <search string="Search Goals">
@@ -125,7 +122,6 @@
     </record>
 
     <record id="goal_kanban_view" model="ir.ui.view" >
-        <field name="name">Goal Kanban View</field>
         <field name="model">gamification.goal</field>
         <field name="arch" type="xml">
             <kanban class="oe_background_grey" create="false">
@@ -211,7 +207,6 @@
     </record>
 
     <record id="goal_definition_list_view" model="ir.ui.view">
-        <field name="name">Goal Definitions List</field>
         <field name="model">gamification.goal.definition</field>
         <field name="arch" type="xml">
             <tree string="Goal Definitions">
@@ -223,7 +218,6 @@
 
 
     <record id="goal_definition_form_view" model="ir.ui.view">
-        <field name="name">Goal Definitions Form</field>
         <field name="model">gamification.goal.definition</field>
         <field name="arch" type="xml">
             <form string="Goal definitions">
@@ -276,7 +270,6 @@
     </record>
 
     <record id="goal_definition_search_view" model="ir.ui.view">
-        <field name="name">Goal Definition Search</field>
         <field name="model">gamification.goal.definition</field>
         <field name="arch" type="xml">
             <search string="Search Goal Definitions">

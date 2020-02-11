@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_pos_session_form" model="ir.ui.view">
-        <field name="name">pos.session.form.view</field>
         <field name="model">pos.session</field>
         <field name="arch" type="xml">
             <form string="Point of Sale Session" create="0">
@@ -132,7 +131,6 @@
     </record>
 
     <record id="view_pos_session_tree" model="ir.ui.view">
-        <field name="name">pos.session.tree.view</field>
         <field name="model">pos.session</field>
         <field name="arch" type="xml">
             <tree string="Point of Sale Session" create="0">
@@ -147,7 +145,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_pos_session_kanban">
-        <field name="name">pos.session.kanban</field>
         <field name="model">pos.session</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" create="0">
@@ -185,7 +182,6 @@
     </record>
 
     <record id="view_pos_session_search" model="ir.ui.view">
-        <field name="name">pos.session.search.view</field>
         <field name="model">pos.session</field>
         <field name="arch" type="xml">
             <search string="Point of Sale Session">
@@ -231,7 +227,6 @@
 
 
     <record model="ir.ui.view" id="closing_balance_confirm">
-        <field name="name">Confirming balance closing</field>
         <field name="model">closing.balance.confirm.wizard</field>
         <field name="type">form</field>
         <field name="arch" type="xml">

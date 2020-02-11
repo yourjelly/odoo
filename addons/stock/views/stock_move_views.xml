@@ -2,7 +2,6 @@
 <odoo>
 
         <record id="stock_move_tree" model="ir.ui.view">
-            <field name="name">Stock Moves</field>
             <field name="model">stock.move</field>
             <field name="arch" type="xml">
                 <tree decoration-muted="state == 'cancel'" string="Moves" create="false">
@@ -22,7 +21,6 @@
 
 
         <record id="view_move_pivot" model="ir.ui.view">
-            <field name="name">stock.move.pivot</field>
             <field name="model">stock.move</field>
             <field name="arch" type="xml">
                 <pivot string="Stock Moves Analysis">
@@ -34,7 +32,6 @@
         </record>
 
         <record id="view_move_graph" model="ir.ui.view">
-            <field name="name">stock.move.graph</field>
             <field name="model">stock.move</field>
             <field name="arch" type="xml">
                 <graph string="Stock Moves Analysis">
@@ -46,7 +43,6 @@
         </record>
 
         <record id="view_move_tree" model="ir.ui.view">
-            <field name="name">stock.move.tree</field>
             <field name="model">stock.move</field>
             <field eval="8" name="priority"/>
             <field name="arch" type="xml">
@@ -67,7 +63,6 @@
         </record>
 
         <record id="view_picking_move_tree" model="ir.ui.view">
-            <field name="name">stock.picking.move.tree</field>
             <field name="model">stock.move</field>
             <field eval="50" name="priority"/>
             <field name="arch" type="xml">
@@ -101,7 +96,6 @@
         </record>
 
         <record id="view_move_kandan" model="ir.ui.view">
-            <field name="name">stock.move.kanban</field>
             <field name="model">stock.move</field>
             <field name="priority">10</field>
             <field name="arch" type="xml">
@@ -145,7 +139,6 @@
         </record>
 
         <record id="view_move_picking_tree" model="ir.ui.view">
-            <field name="name">stock.move.tree</field>
             <field name="model">stock.move</field>
             <field eval="12" name="priority"/>
             <field name="arch" type="xml">
@@ -170,7 +163,6 @@
         </record>
 
         <record id="view_stock_move_operations" model="ir.ui.view">
-            <field name="name">stock.move.operations.form</field>
             <field name="model">stock.move</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
@@ -221,7 +213,6 @@
         </record>
 
         <record id="view_stock_move_nosuggest_operations" model="ir.ui.view">
-            <field name="name">stock.move.operations.nosuggest.form</field>
             <field name="model">stock.move</field>
             <field name="priority">1000</field>
             <field name="mode">primary</field>
@@ -234,7 +225,6 @@
         </record>
 
         <record id="view_stock_move_line_operation_tree" model="ir.ui.view">
-            <field name="name">stock.move.line.operations.tree</field>
             <field name="model">stock.move.line</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
@@ -277,7 +267,6 @@
         </record>
 
         <record id="view_stock_move_line_detailed_operation_tree" model="ir.ui.view">
-            <field name="name">stock.move.line.operations.tree</field>
             <field name="model">stock.move.line</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
@@ -306,7 +295,6 @@
         </record>
 
         <record id="view_move_form" model="ir.ui.view">
-            <field name="name">stock.move.form</field>
             <field name="model">stock.move</field>
             <field eval="1" name="priority"/>
             <field name="arch" type="xml">
@@ -370,7 +358,6 @@
         </record>
 
         <record id="view_move_search" model="ir.ui.view">
-            <field name="name">stock.move.search</field>
             <field name="model">stock.move</field>
             <field eval="3" name="priority"/>
             <field name="arch" type="xml">
@@ -467,7 +454,6 @@
             From stock_partial_move_view
         -->
         <record id="view_move_tree_receipt_picking" model="ir.ui.view">
-            <field name="name">stock.move.tree2</field>
             <field name="model">stock.move</field>
             <field name="priority" eval="6"/>
             <field name="arch" type="xml">
@@ -490,7 +476,6 @@
         </record>
 
         <record id="stock_move_view_kanban" model="ir.ui.view">
-            <field name="name">stock.move.kanban2</field>
             <field name="model">stock.move</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile" quick_create="false">
@@ -527,7 +512,6 @@
 
         <!-- test -->
         <record id="view_move_tree_receipt_picking_board" model="ir.ui.view">
-            <field name="name">stock.move.tree3</field>
             <field name="model">stock.move</field>
             <field eval="6" name="priority"/>
             <field name="arch" type="xml">
@@ -543,7 +527,6 @@
         </record>
 
         <record id="view_stock_move_kanban" model="ir.ui.view">
-            <field name="name">stock.move.kanban</field>
             <field name="model">stock.move</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">

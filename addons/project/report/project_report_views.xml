@@ -2,7 +2,6 @@
 <odoo>
 
         <record id="view_task_project_user_pivot" model="ir.ui.view">
-            <field name="name">report.project.task.user.pivot</field>
             <field name="model">report.project.task.user</field>
             <field name="arch" type="xml">
                 <pivot string="Tasks Analysis" display_quantity="true" disable_linking="True">
@@ -12,7 +11,6 @@
         </record>
 
         <record id="view_task_project_user_graph" model="ir.ui.view">
-            <field name="name">report.project.task.user.graph</field>
             <field name="model">report.project.task.user</field>
             <field name="arch" type="xml">
                 <graph string="Tasks Analysis" type="bar">
@@ -50,7 +48,6 @@
         </record>
 
         <record id="view_task_project_user_search" model="ir.ui.view">
-            <field name="name">report.project.task.user.search</field>
             <field name="model">report.project.task.user</field>
             <field name="arch" type="xml">
                 <search string="Tasks Analysis">

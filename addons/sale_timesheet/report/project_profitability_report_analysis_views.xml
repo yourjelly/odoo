@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="project_profitability_report_view_pivot" model="ir.ui.view">
-        <field name="name">project.profitability.report.pivot</field>
         <field name="model">project.profitability.report</field>
         <field name="arch" type="xml">
             <pivot string="Profitability Analysis" display_quantity="true" disable_linking="True">
@@ -15,7 +14,6 @@
     </record>
 
     <record id="project_profitability_report_view_graph" model="ir.ui.view">
-        <field name="name">project.profitability.report.graph</field>
         <field name="model">project.profitability.report</field>
         <field name="arch" type="xml">
             <graph string="Profitability Analysis" type="bar">
@@ -30,7 +28,6 @@
     </record>
 
     <record id="project_profitability_report_view_search" model="ir.ui.view">
-        <field name="name">project.profitability.report.search</field>
         <field name="model">project.profitability.report</field>
         <field name="arch" type="xml">
             <search string="Profitability Analysis">

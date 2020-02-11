@@ -3,7 +3,6 @@
     <data>
 
         <record model="ir.ui.view" id="view_mail_tracking_value_tree">
-            <field name="name">mail.tracking.value.tree</field>
             <field name="model">mail.tracking.value</field>
             <field name="priority">12</field>
             <field name="arch" type="xml">
@@ -25,7 +24,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_mail_tracking_value_form">
-            <field name="name">mail.tracking.value.form</field>
             <field name="model">mail.tracking.value</field>
             <field name="arch" type="xml">
                 <form string="Tracking Value">

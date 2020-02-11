@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="hr_employee_view_search" model="ir.ui.view">
-        <field name="name">hr.employee.skill.search</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_filter"/>
         <field name="arch" type="xml">
@@ -14,7 +13,6 @@
     </record>
 
     <record id="hr_employee_public_view_search" model="ir.ui.view">
-        <field name="name">hr.employee.public.skill.search</field>
         <field name="model">hr.employee.public</field>
         <field name="inherit_id" ref="hr.hr_employee_public_view_search"/>
         <field name="arch" type="xml">
@@ -26,7 +24,6 @@
     </record>
 
     <record id="resume_line_view_form" model="ir.ui.view">
-        <field name="name">hr.resume.line.form</field>
         <field name="model">hr.resume.line</field>
         <field name="arch" type="xml">
             <form string="Resumé">
@@ -52,7 +49,6 @@
     </record>
 
     <record id="hr_employee_view_form" model="ir.ui.view">
-        <field name="name">hr.employee.view.form.inherit.resume</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
@@ -93,7 +89,6 @@
 
 
     <record id="hr_employee_public_view_form_inherit" model="ir.ui.view">
-        <field name="name">hr.employee.public.view.form.inherit.resume</field>
         <field name="model">hr.employee.public</field>
         <field name="inherit_id" ref="hr.hr_employee_public_view_form"/>
         <field name="arch" type="xml">
@@ -133,7 +128,6 @@
     </record>
 
     <record id="res_users_view_form" model="ir.ui.view">
-        <field name="name">hr.user.preferences.form.inherit.hr.skills</field>
         <field name="model">res.users</field>
         <field name="inherit_id" ref="hr.res_users_view_form_profile" />
         <field name="arch" type="xml">
@@ -173,7 +167,6 @@
     </record>
 
     <record id="hr_resume_line_type_tree_view" model="ir.ui.view">
-        <field name="name">hr.resume.line.type.tree.view</field>
         <field name="model">hr.resume.line.type</field>
         <field name="arch" type="xml">
             <tree name="Resumé Line Types" editable="bottom">
@@ -207,7 +200,6 @@
     <!-- Skills -->
 
     <record id="employee_skill_level_view_tree" model="ir.ui.view">
-        <field name="name">hr.skill.level.tree</field>
         <field name="model">hr.skill.level</field>
         <field name="arch" type="xml">
             <tree string="Skill Levels">
@@ -218,7 +210,6 @@
     </record>
 
     <record id="employee_skill_view_tree" model="ir.ui.view">
-        <field name="name">hr.skill.tree</field>
         <field name="model">hr.skill</field>
         <field name="arch" type="xml">
             <tree string="Skill Levels">
@@ -228,7 +219,6 @@
     </record>
 
     <record id="employee_skill_level_view_form" model="ir.ui.view">
-        <field name="name">hr.skill.level.form</field>
         <field name="model">hr.skill.level</field>
         <field name="arch" type="xml">
             <form string="Skill Level">
@@ -243,7 +233,6 @@
     </record>
 
     <record id="employee_skill_view_form" model="ir.ui.view">
-        <field name="name">hr.employees.skill.form</field>
         <field name="model">hr.employee.skill</field>
         <field name="arch" type="xml">
             <form string="Skills">
@@ -267,7 +256,6 @@
     </record>
 
     <record id="hr_skill_view_form" model="ir.ui.view">
-        <field name="name">hr.skill.form</field>
         <field name="model">hr.skill</field>
         <field name="arch" type="xml">
             <form string="Skills">
@@ -279,7 +267,6 @@
     </record>
 
     <record id="hr_skill_type_view_tree" model="ir.ui.view">
-        <field name="name">hr.skill.type.tree</field>
         <field name="model">hr.skill.type</field>
         <field name="arch" type="xml">
             <tree string="Skill Types">
@@ -290,7 +277,6 @@
     </record>
 
     <record id="hr_employee_skill_type_view_form" model="ir.ui.view">
-        <field name="name">hr.skill.type.form</field>
         <field name="model">hr.skill.type</field>
         <field name="arch" type="xml">
             <form string="Skill Type">

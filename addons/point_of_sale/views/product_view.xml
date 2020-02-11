@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="product_template_search_view_pos" model="ir.ui.view">
-        <field name="name">product.template.search.pos.form</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_search_view"/>
         <field name="arch" type="xml">
@@ -45,7 +44,6 @@
     </record>
 
     <record id="product_template_form_view" model="ir.ui.view">
-        <field name="name">product.template.form.inherit</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
@@ -87,7 +85,6 @@
         sequence="20"/>
 
     <record id="product_uom_categ_form_view" model="ir.ui.view">
-        <field name="name">uom.category.form.inherit</field>
         <field name="model">uom.category</field>
         <field name="inherit_id" ref="uom.product_uom_categ_form_view"/>
         <field name="arch" type="xml">
@@ -98,7 +95,6 @@
     </record>
 
     <record id="product_uom_categ_tree_view" model="ir.ui.view">
-        <field name="name">uom.category.tree.inherit</field>
         <field name="model">uom.category</field>
         <field name="inherit_id" ref="uom.product_uom_categ_tree_view"/>
         <field name="arch" type="xml">

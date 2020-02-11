@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_pos_session_search_inherit_pos_sale" model="ir.ui.view">
-        <field name="name">pos.session.search.view</field>
         <field name="model">pos.session</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_session_search"/>
         <field name="arch" type="xml">
@@ -20,7 +19,6 @@
     </record>
 
     <record id="view_pos_config_search_inherit_pos_sale" model="ir.ui.view">
-        <field name="name">pos.config.search.view</field>
         <field name="model">pos.config</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_config_search"/>
         <field name="arch" type="xml">
@@ -31,7 +29,6 @@
     </record>
 
     <record id="crm_team_salesteams_view_kanban_inherit_pos_sale" model="ir.ui.view"> 
-        <field name="name">crm.team.kanban</field>
         <field name="model">crm.team</field>
         <field name="inherit_id" ref="sales_team.crm_team_salesteams_view_kanban"/>
         <field name="groups_id" eval="[(4, ref('point_of_sale.group_pos_user'))]"/>

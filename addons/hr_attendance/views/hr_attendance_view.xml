@@ -4,7 +4,6 @@
     <!-- views -->
 
     <record id="view_attendance_tree" model="ir.ui.view">
-        <field name="name">hr.attendance.tree</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <tree string="Employee attendances" editable="bottom">
@@ -17,7 +16,6 @@
     </record>
 
     <record id="view_hr_attendance_kanban" model="ir.ui.view">
-        <field name="name">hr.attendance.kanban</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -47,7 +45,6 @@
     </record>
 
     <record id="hr_attendance_view_form" model="ir.ui.view">
-        <field name="name">hr.attendance.form</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <form string="Employee attendances">
@@ -63,7 +60,6 @@
     </record>
 
     <record id="hr_attendance_view_filter" model="ir.ui.view">
-        <field name="name">hr_attendance_view_filter</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <search string="Hr Attendance Search">
@@ -83,7 +79,6 @@
     </record>
 
     <record id="hr_attendance_view_pivot" model="ir.ui.view">
-        <field name="name">hr.attendance.pivot</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <pivot string="Attendance">
@@ -95,7 +90,6 @@
     </record>
 
     <record id="hr_attendance_view_graph" model="ir.ui.view">
-        <field name="name">hr.attendance.graph</field>
         <field name="model">hr.attendance</field>
         <field name="arch" type="xml">
             <graph string="Attendance">

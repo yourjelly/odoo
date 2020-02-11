@@ -3,7 +3,6 @@
     <data>
         <!-- Routings Workcenter -->
         <record id="mrp_routing_workcenter_tree_view" model="ir.ui.view">
-            <field name="name">mrp.routing.workcenter.tree</field>
             <field name="model">mrp.routing.workcenter</field>
             <field name="arch" type="xml">
                 <tree string="Routing Work Centers">
@@ -16,7 +15,6 @@
         </record>
 
         <record id="mrp_routing_workcenter_form_view" model="ir.ui.view">
-            <field name="name">mrp.routing.workcenter.form</field>
             <field name="model">mrp.routing.workcenter</field>
             <field name="arch" type="xml">
                 <form string="Routing Work Centers">
@@ -67,7 +65,6 @@
 
         <!-- Routings -->
         <record id="mrp_routing_form_view" model="ir.ui.view">
-            <field name="name">mrp.routing.form</field>
             <field name="model">mrp.routing</field>
             <field name="arch" type="xml">
                 <form string="Routing">
@@ -108,7 +105,6 @@
         </record>
 
         <record id="mrp_routing_tree_view" model="ir.ui.view">
-            <field name="name">mrp.routing.tree</field>
             <field name="model">mrp.routing</field>
             <field name="arch" type="xml">
                 <tree string="Routing">
@@ -121,7 +117,6 @@
         </record>
 
         <record id="mrp_routing_kanban_view" model="ir.ui.view">
-            <field name="name">mrp.routing.kanban</field>
             <field name="model">mrp.routing</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -144,7 +139,6 @@
         </record>
 
         <record id="mrp_routing_search_view" model="ir.ui.view">
-            <field name="name">mrp.routing.search</field>
             <field name="model">mrp.routing</field>
             <field name="arch" type="xml">
                 <search string="Routing">

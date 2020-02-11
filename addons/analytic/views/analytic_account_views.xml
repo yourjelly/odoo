@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="account_analytic_tag_tree_view" model="ir.ui.view">
-            <field name="name">account.analytic.tag.tree</field>
             <field name="model">account.analytic.tag</field>
             <field name="arch" type="xml">
                 <tree string="Analytic Tags">
@@ -13,7 +12,6 @@
         </record>
 
         <record id="account_analytic_tag_form_view" model="ir.ui.view">
-            <field name="name">account.analytic.tag.form</field>
             <field name="model">account.analytic.tag</field>
             <field name="arch" type="xml">
                 <form string="Analytic Tags">
@@ -38,7 +36,6 @@
         </record>
 
         <record id="account_analytic_tag_view_search" model="ir.ui.view">
-            <field name="name">account.analytic.tag.view.search</field>
             <field name="model">account.analytic.tag</field>
             <field name="arch" type="xml">
                 <search string="Search Analytic Tags">
@@ -61,7 +58,6 @@
         </record>
 
         <record id="account_analytic_group_form_view" model="ir.ui.view">
-            <field name="name">account.analytic.group.form</field>
             <field name="model">account.analytic.group</field>
             <field name="arch" type="xml">
                 <form string="Analytic Account Groups">
@@ -80,7 +76,6 @@
         </record>
 
         <record id="account_analytic_group_tree_view" model="ir.ui.view">
-            <field name="name">account.analytic.group.tree</field>
             <field name="model">account.analytic.group</field>
             <field name="arch" type="xml">
                 <tree string="Analytic Account Groups">
@@ -106,7 +101,6 @@
 
 
         <record id="view_account_analytic_line_tree" model="ir.ui.view">
-            <field name="name">account.analytic.line.tree</field>
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <tree string="Analytic Entries">
@@ -151,7 +145,6 @@
         </record>
 
         <record id="view_account_analytic_account_form" model="ir.ui.view">
-            <field name="name">analytic.analytic.account.form</field>
             <field name="model">account.analytic.account</field>
             <field name="arch" type="xml">
                 <form string="Analytic Account">
@@ -190,7 +183,6 @@
         </record>
 
         <record id="view_account_analytic_account_list" model="ir.ui.view">
-            <field name="name">account.analytic.account.list</field>
             <field name="model">account.analytic.account</field>
             <field eval="8" name="priority"/>
             <field name="arch" type="xml">
@@ -208,7 +200,6 @@
         </record>
 
         <record id="view_account_analytic_account_kanban" model="ir.ui.view">
-            <field name="name">account.analytic.account.kanban</field>
             <field name="model">account.analytic.account</field>
             <field name="arch" type="xml">
                <kanban class="o_kanban_mobile">
@@ -237,7 +228,6 @@
         </record>
 
         <record id="view_account_analytic_account_search" model="ir.ui.view">
-            <field name="name">account.analytic.account.search</field>
             <field name="model">account.analytic.account</field>
             <field name="arch" type="xml">
                 <search string="Analytic Account">
@@ -281,7 +271,6 @@
         </record>
 
         <record id="view_account_analytic_line_form" model="ir.ui.view">
-            <field name="name">account.analytic.line.form</field>
             <field name="model">account.analytic.line</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -309,7 +298,6 @@
         </record>
 
         <record id="view_account_analytic_line_filter" model="ir.ui.view">
-            <field name="name">account.analytic.line.select</field>
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <search string="Search Analytic Lines">
@@ -327,7 +315,6 @@
         </record>
 
         <record id="view_account_analytic_line_graph" model="ir.ui.view">
-            <field name="name">account.analytic.line.graph</field>
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <graph string="Analytic Entries">
@@ -339,7 +326,6 @@
         </record>
 
         <record id="view_account_analytic_line_pivot" model="ir.ui.view">
-            <field name="name">account.analytic.line.pivot</field>
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <pivot string="Analytic Entries" >
@@ -351,7 +337,6 @@
         </record>
 
         <record id="view_account_analytic_line_kanban" model="ir.ui.view">
-            <field name="name">account.analytic.line.kanban</field>
             <field name="model">account.analytic.line</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">

@@ -3,7 +3,6 @@
         <!--     RESTAURANTS FLOORS  -->
 
         <record id="view_restaurant_floor_form" model="ir.ui.view">
-            <field name="name">Restaurant Floors</field>
             <field name="model">restaurant.floor</field>
             <field name="arch" type="xml">
                 <form string="Restaurant Floor">
@@ -26,7 +25,6 @@
         </record>
 
         <record id="view_restaurant_floor_tree" model="ir.ui.view">
-            <field name="name">Restaurant Floors</field>
             <field name="model">restaurant.floor</field>
             <field name="arch" type="xml">
                 <tree string="Restaurant Floors">
@@ -38,7 +36,6 @@
         </record>
 
         <record id="view_restaurant_floor_kanban" model="ir.ui.view">
-            <field name="name">restaurant.floor.kanban</field>
             <field name="model">restaurant.floor</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -72,7 +69,6 @@
         </record>
 
         <record id="view_restaurant_table_form" model="ir.ui.view">
-            <field name="name">Restaurant Table</field>
             <field name="model">restaurant.table</field>
             <field name="arch" type="xml">
                 <form string="Restaurant Table">
@@ -101,7 +97,6 @@
         <!--     RESTAURANT PRINTERS     -->
 
         <record id="view_restaurant_printer_form" model="ir.ui.view">
-            <field name="name">Order Printer</field>
             <field name="model">restaurant.printer</field>
             <field name="arch" type="xml">
                 <form string="POS Printer">
@@ -138,7 +133,6 @@
         </record>
 
         <record id="view_restaurant_printer" model="ir.ui.view">
-            <field name="name">Order Printers</field>
             <field name="model">restaurant.printer</field>
             <field name="arch" type="xml">
                 <tree string="Restaurant Order Printers">

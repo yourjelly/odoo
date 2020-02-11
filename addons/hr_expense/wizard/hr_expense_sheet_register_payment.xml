@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="hr_expense_sheet_register_payment_view_form" model="ir.ui.view">
-            <field name="name">hr.expense.sheet.register.payment.wizard.form</field>
             <field name="model">hr.expense.sheet.register.payment.wizard</field>
             <field name="arch" type="xml">
                 <form string="Register Payment">

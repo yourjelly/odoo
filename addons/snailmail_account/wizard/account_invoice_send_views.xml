@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record model="ir.ui.view" id="account_invoice_send_inherit_account_wizard_form">
-            <field name="name">account.invoice.send.form.inherited.snailmail</field>
             <field name="model">account.invoice.send</field>
             <field name="inherit_id" ref="account.account_invoice_send_wizard_form"/>
             <field name="arch" type="xml">

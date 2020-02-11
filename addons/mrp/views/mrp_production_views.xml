@@ -3,7 +3,6 @@
     <data>
         <!-- Manufacturing Order -->
         <record id="mrp_production_tree_view" model="ir.ui.view">
-            <field name="name">mrp.production.tree</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
                 <tree string="Manufacturing Orders" default_order="date_planned_start desc"
@@ -42,7 +41,6 @@
         </record>
 
         <record id="mrp_production_form_view" model="ir.ui.view">
-            <field name="name">mrp.production.form</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
                 <form string="Manufacturing Orders">
@@ -228,7 +226,6 @@
         </record>
 
         <record id="mrp_production_kanban_view" model="ir.ui.view">
-            <field name="name">mrp.production.kanban</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -268,7 +265,6 @@
         </record>
 
         <record id="view_production_calendar" model="ir.ui.view">
-            <field name="name">mrp.production.calendar</field>
             <field name="model">mrp.production</field>
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
@@ -283,7 +279,6 @@
         </record>
 
         <record id="view_production_gantt" model="ir.ui.view">
-            <field name="name">mrp.production.gantt</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
                 <gantt date_stop="date_finished" date_start="date_start" string="Productions" default_group_by="routing_id" create="0">
@@ -292,7 +287,6 @@
         </record>
 
         <record id="view_production_pivot" model="ir.ui.view">
-            <field name="name">mrp.production.pivot</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
                 <pivot string="Manufacturing Orders">
@@ -302,7 +296,6 @@
         </record>
 
         <record id="view_production_graph" model="ir.ui.view">
-            <field name="name">mrp.production.graph</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
                 <graph string="Manufacturing Orders" type="line">
@@ -312,7 +305,6 @@
         </record>
 
         <record id="view_mrp_production_filter" model="ir.ui.view">
-            <field name="name">mrp.production.select</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
                 <search string="Search Production">

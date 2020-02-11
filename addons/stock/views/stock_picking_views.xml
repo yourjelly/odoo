@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="view_pickingtype_filter" model="ir.ui.view">
-            <field name="name">stock.picking.type.filter</field>
             <field name="model">stock.picking.type</field>
             <field name="arch" type="xml">
                 <search string="Operation Type">
@@ -16,7 +15,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="view_picking_type_tree">
-            <field name="name">Operation types</field>
             <field name="model">stock.picking.type</field>
             <field name="arch" type="xml">
                 <tree string="Operation Types">
@@ -30,7 +28,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="view_picking_type_form">
-            <field name="name">Operation Types</field>
             <field name="model">stock.picking.type</field>
             <field name="arch" type="xml">
                 <form string="Operation Types">
@@ -91,7 +88,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_picking_type_list">
-            <field name="name">stock.picking.type.list</field>
             <field name="model">stock.picking.type</field>
             <field name="arch" type="xml">
                 <tree string="Operation Types">
@@ -131,7 +127,6 @@
         <menuitem id="menu_pickingtype" name="Operations Types" parent="stock.menu_warehouse_config" action="action_picking_type_list" sequence="4"/>
 
         <record model="ir.ui.view" id="stock_picking_calendar">
-            <field name="name">stock.picking.calendar</field>
             <field name="model">stock.picking</field>
             <field name="priority" eval="2"/>
             <field name="arch" type="xml">
@@ -145,7 +140,6 @@
         </record>
 
         <record model="ir.ui.view" id="stock_picking_kanban">
-            <field name="name">stock.picking.kanban</field>
             <field name="model">stock.picking</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -186,7 +180,6 @@
         </record>
 
         <record id="vpicktree" model="ir.ui.view">
-            <field name="name">stock.picking.tree</field>
             <field name="model">stock.picking</field>
             <field name="arch" type="xml">
                 <tree string="Picking list" multi_edit="1"
@@ -215,7 +208,6 @@
         </record>
 
         <record id="view_picking_form" model="ir.ui.view">
-            <field name="name">stock.picking.form</field>
             <field name="model">stock.picking</field>
             <field eval="12" name="priority"/>
             <field name="arch" type="xml">
@@ -425,7 +417,6 @@
         </record>
 
         <record id="view_picking_internal_search" model="ir.ui.view">
-            <field name="name">stock.picking.internal.search</field>
             <field name="model">stock.picking</field>
             <field name="arch" type="xml">
                 <search string="Picking Lists">
@@ -627,7 +618,6 @@
         </record>
 
         <record id="stock_picking_type_kanban" model="ir.ui.view">
-            <field name="name">stock.picking.type.kanban</field>
             <field name="model">stock.picking.type</field>
             <field name="arch" type="xml">
                 <kanban class="oe_background_grey o_kanban_dashboard o_emphasize_colors o_stock_kanban" create="0">

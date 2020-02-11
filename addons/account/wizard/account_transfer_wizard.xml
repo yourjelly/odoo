@@ -3,7 +3,6 @@
     <data>
 
         <record id="account_move_transfer_accounts_wizard" model="ir.ui.view">
-            <field name="name">account.transfer.wizard.form</field>
             <field name="model">account.transfer.wizard</field>
             <field name="arch" type="xml">
                 <form>

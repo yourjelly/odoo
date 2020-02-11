@@ -10,7 +10,6 @@
     </record>
 
     <record id="sale_view_inherit123" model="ir.ui.view">
-        <field name="name">sale.order.form.inherit.sale</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
@@ -21,7 +20,6 @@
     </record>
 
     <record id="view_quotation_tree" model="ir.ui.view">
-        <field name="name">sale.order.tree.inherit.sale.crm</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_quotation_tree"/>
         <field name="arch" type="xml">
@@ -32,7 +30,6 @@
     </record>
 
     <record id="view_order_tree" model="ir.ui.view">
-        <field name="name">sale.order.tree.inherit.sale.crm</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_tree"/>
         <field name="arch" type="xml">

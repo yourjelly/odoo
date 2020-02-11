@@ -97,7 +97,6 @@
         </record>
 
         <record id="sales_team_form_view_in_crm" model="ir.ui.view">
-            <field name="name">crm.team.form.inherit</field>
             <field name="model">crm.team</field>
             <field name="inherit_id" ref="sales_team.crm_team_view_form"/>
             <field name="priority">12</field>
@@ -177,7 +176,6 @@
         </record>
 
         <record id="crm_team_salesteams_view_kanban" model="ir.ui.view">
-            <field name="name">crm.team.kanban</field>
             <field name="model">crm.team</field>
             <field name="inherit_id" ref="sales_team.crm_team_salesteams_view_kanban"/>
             <field name="arch" type="xml">

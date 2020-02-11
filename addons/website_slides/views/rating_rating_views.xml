@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="rating_rating_view_kanban_slide_channel" model="ir.ui.view">
-        <field name="name">rating.rating.view.kanban.slides</field>
         <field name="model">rating.rating</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
@@ -58,7 +57,6 @@
     </record>
 
     <record id="rating_rating_view_search_slide_channel" model="ir.ui.view">
-        <field name="name">rating.rating.view.search.slides</field>
         <field name="model">rating.rating</field>
         <field name="priority">20</field>
         <field name="inherit_id" ref="rating.rating_rating_view_search"/>
@@ -75,7 +73,6 @@
     </record>
 
     <record id="rating_rating_view_graph_slide_channel" model="ir.ui.view">
-        <field name="name">rating.rating.view.graph.slides</field>
         <field name="model">rating.rating</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
@@ -87,7 +84,6 @@
     </record>
 
     <record id="rating_rating_view_pivot_slide_channel" model="ir.ui.view">
-        <field name="name">rating.rating.view.pivot.slides</field>
         <field name="model">rating.rating</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">

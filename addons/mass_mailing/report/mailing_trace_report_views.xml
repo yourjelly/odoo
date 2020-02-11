@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="mailing_trace_report_view_pivot" model="ir.ui.view">
-            <field name="name">mailing.trace.report.view.pivot</field>
             <field name="model">mailing.trace.report</field>
             <field name="arch" type="xml">
                 <pivot string="Mass Mailing Statistics" disable_linking="True">
@@ -17,7 +16,6 @@
         </record>
 
         <record id="mailing_trace_report_view_graph" model="ir.ui.view">
-            <field name="name">mailing.trace.report.view.graph</field>
             <field name="model">mailing.trace.report</field>
             <field name="arch" type="xml">
                 <graph string="Mass Mailing Statistics">
@@ -28,7 +26,6 @@
         </record>
 
         <record id="mailing_trace_report_view_search" model="ir.ui.view">
-            <field name="name">mailing.trace.report.view.search</field>
             <field name="model">mailing.trace.report</field>
             <field name="arch" type="xml">
                 <search string="Mass Mailing Statistics">

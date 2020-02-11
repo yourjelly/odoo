@@ -2,7 +2,6 @@
 <odoo>
         <!--     BARCODE NOMENCLATURES     -->
         <record model="ir.ui.view" id="view_barcode_nomenclature_form">
-            <field name="name">Barcode Nomenclatures</field>
             <field name="model">barcode.nomenclature</field>
             <field name="arch" type="xml">
                 <form string="Barcode Nomenclature">
@@ -41,7 +40,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_barcode_nomenclature_tree">
-            <field name="name">Barcode Nomenclatures</field>
             <field name="model">barcode.nomenclature</field>
             <field name="arch" type="xml">
                 <tree string="Barcode Nomenclatures">
@@ -65,7 +63,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_barcode_rule_form">
-            <field name="name">Barcode Rule</field>
             <field name="model">barcode.rule</field>
             <field name="arch" type="xml">
                 <form string="Barcode Rule">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="payment_acquirer_view_form_inherit_transfer" model="ir.ui.view">
-        <field name="name">payment.acquirer.view.form.inherit.transfer</field>
         <field name="model">payment.acquirer</field>
         <field name="inherit_id" ref="payment.acquirer_form"/>
         <field name="arch" type="xml">

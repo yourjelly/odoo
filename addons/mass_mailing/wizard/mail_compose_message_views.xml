@@ -3,7 +3,6 @@
 
         <!-- Add mass mail campaign to the mail.compose.message form view -->
         <record model="ir.ui.view" id="email_compose_form_mass_mailing">
-            <field name="name">mail.compose.message.form.mass_mailing</field>
             <field name="model">mail.compose.message</field>
             <field name="inherit_id" ref="mail.email_compose_message_wizard_form"/>
             <field name="arch" type="xml">

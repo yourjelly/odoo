@@ -22,7 +22,6 @@
     </template>
     <!--PAYMENT ACQUIRER-->
     <record model="ir.ui.view" id="payment_acquirer_onboarding_wizard_form">
-        <field name="name">payment.acquirer.onboarding.wizard.form</field>
         <field name="model">payment.acquirer.onboarding.wizard</field>
         <field name="arch" type="xml">
             <form string="Choose a payment method" class="o_onboarding_payment_acquirer_wizard">

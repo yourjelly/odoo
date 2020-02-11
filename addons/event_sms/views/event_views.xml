@@ -2,7 +2,6 @@
 <odoo><data>
 
     <record id="event_type_view_form" model="ir.ui.view">
-        <field name="name">event.type.view.form.inherit.sms</field>
         <field name="model">event.type</field>
         <field name="inherit_id" ref="event.view_event_type_form"/>
         <field name="arch" type="xml">
@@ -21,7 +20,6 @@
     </record>
 
     <record id="event_event_view_form_inherit_sms" model="ir.ui.view">
-        <field name="name">event.event.view.form</field>
         <field name="model">event.event</field>
         <field name="inherit_id" ref="event.view_event_form"/>
         <field name="arch" type="xml">

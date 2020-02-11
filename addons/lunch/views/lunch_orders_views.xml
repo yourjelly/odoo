@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="lunch_order_view_search" model="ir.ui.view">
-        <field name="name">lunch.order.search</field>
         <field name="model">lunch.order</field>
         <field name="arch" type="xml">
             <search string="Search">
@@ -27,7 +26,6 @@
     </record>
 
     <record id="lunch_order_view_tree" model="ir.ui.view">
-        <field name="name">lunch.order.tree</field>
         <field name="model">lunch.order</field>
         <field name="arch" type="xml">
             <tree string="Order lines Tree" create="false" edit="false" decoration-muted="state == 'cancelled'" class="o_lunch_list">
@@ -48,7 +46,6 @@
     </record>
 
     <record id='lunch_order_view_kanban' model='ir.ui.view'>
-        <field name="name">lunch.order.kanban</field>
         <field name="model">lunch.order</field>
         <field name="arch" type="xml">
             <kanban create="false" edit="false">
@@ -102,7 +99,6 @@
     </record>
 
     <record id="lunch_order_view_pivot" model="ir.ui.view">
-        <field name="name">lunch.order.pivot</field>
         <field name="model">lunch.order</field>
         <field name="arch" type="xml">
             <pivot>
@@ -113,7 +109,6 @@
     </record>
 
     <record id="lunch_order_view_graph" model="ir.ui.view">
-        <field name="name">lunch.order.graph</field>
         <field name="model">lunch.order</field>
         <field name="arch" type="xml">
             <graph>
@@ -176,7 +171,6 @@
     </record>
 
     <record id="lunch_order_view_form" model="ir.ui.view">
-        <field name="name">lunch.order.view.form</field>
         <field name="model">lunch.order</field>
         <field name="arch" type="xml">
             <form>

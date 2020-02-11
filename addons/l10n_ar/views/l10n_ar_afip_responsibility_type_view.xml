@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="view_afip_responsibility_type_form" model="ir.ui.view">
-        <field name="name">afip.responsibility.type.form</field>
         <field name="model">l10n_ar.afip.responsibility.type</field>
         <field name="arch" type="xml">
             <form string="AFIP Responsibility Type">
@@ -16,7 +15,6 @@
     </record>
 
     <record id="view_afip_responsibility_type_tree" model="ir.ui.view">
-        <field name="name">afip.responsibility.type.tree</field>
         <field name="model">l10n_ar.afip.responsibility.type</field>
         <field name="arch" type="xml">
             <tree string="AFIP Responsibility Type" decoration-muted="(not active)">

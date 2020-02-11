@@ -17,7 +17,6 @@
 
         <!-- Partner kanban view inherte -->
         <record model="ir.ui.view" id="crm_lead_partner_kanban_view">
-            <field name="name">res.partner.kanban.saleorder.inherit</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.res_partner_kanban_view"/>
             <field name="priority" eval="20"/>
@@ -33,7 +32,6 @@
         </record>
 
         <record id="res_partner_view_buttons" model="ir.ui.view">
-            <field name="name">res.partner.view.buttons</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form" />
             <field name="priority" eval="3"/>
@@ -58,7 +56,6 @@
         </record>
 
         <record id="res_partner_view_form_payment_defaultcreditcard" model="ir.ui.view">
-            <field name="name">res.partner.view.form.payment.defaultcreditcard</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="payment.view_partners_form_payment_defaultcreditcard"/>
             <field name="arch" type="xml">
@@ -69,7 +66,6 @@
         </record>
 
         <record id="res_partner_view_form_property_inherit" model="ir.ui.view">
-            <field name="name">res.partner.view.form.property.inherit</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="account.view_partner_property_form"/>
             <field name="arch" type="xml">

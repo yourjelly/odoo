@@ -11,7 +11,6 @@
     </record>
 
         <record id="mrp_unbuild_search_view" model="ir.ui.view">
-            <field name="name">mrp.unbuild.search</field>
             <field name="model">mrp.unbuild</field>
             <field name="arch" type="xml">
                 <search string="Search">
@@ -53,7 +52,6 @@
         </record>
 
         <record id="mrp_unbuild_kanban_view" model="ir.ui.view">
-            <field name="name">mrp.unbuild.kanban</field>
             <field name="model">mrp.unbuild</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -92,7 +90,6 @@
         </record>
 
         <record id="mrp_unbuild_form_view" model="ir.ui.view">
-            <field name="name">mrp.unbuild.form</field>
             <field name="model">mrp.unbuild</field>
             <field name="arch" type="xml">
                 <form string="Unbuild Orders">
@@ -139,7 +136,6 @@
         </record>
 
         <record id="mrp_unbuild_tree_view" model="ir.ui.view">
-            <field name="name">mrp.unbuild.tree</field>
             <field name="model">mrp.unbuild</field>
             <field name="arch" type="xml">
                 <tree>

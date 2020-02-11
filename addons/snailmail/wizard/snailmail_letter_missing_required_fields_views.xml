@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="snailmail_letter_missing_required_fields" model="ir.ui.view">
-        <field name="name">snailmail.letter.missing.required.fields.form</field>
         <field name="model">snailmail.letter.missing.required.fields</field>
         <field name="arch" type="xml">
             <form>

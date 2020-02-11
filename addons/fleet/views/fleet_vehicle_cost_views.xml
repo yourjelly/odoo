@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id='fleet_vehicle_log_contract_view_form' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.log_contract.form</field>
         <field name="model">fleet.vehicle.log.contract</field>
         <field name="arch" type="xml">
             <form string="Contract logs">
@@ -63,7 +62,6 @@
     </record>
 
     <record id='fleet_vehicle_log_contract_view_tree' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.log.contract.tree</field>
         <field name="model">fleet.vehicle.log.contract</field>
         <field name="arch" type="xml">
             <tree string="Contract logs" decoration-danger="days_left==0" decoration-muted="state=='closed'" default_order="expiration_date">
@@ -84,7 +82,6 @@
     </record>
 
     <record id='fleet_vehicle_log_contract_view_kanban' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.log.contract.kanban</field>
         <field name="model">fleet.vehicle.log.contract</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -115,7 +112,6 @@
     </record>
 
     <record id="fleet_vehicle_log_contract_view_graph" model="ir.ui.view">
-       <field name="name">fleet.vehicle.log.contract.graph</field>
        <field name="model">fleet.vehicle.log.contract</field>
        <field name="arch" type="xml">
             <graph string="Contract Costs Per Month" type="bar" stacked="True">
@@ -127,7 +123,6 @@
     </record>
 
     <record id="fleet_vehicle_log_contract_view_search" model="ir.ui.view">
-        <field name="name">fleet.vehicle.log.contract.search</field>
         <field name="model">fleet.vehicle.log.contract</field>
         <field name="arch" type="xml">
             <search string="Vehicles Contracts">
@@ -155,7 +150,6 @@
     </record>
 
     <record id="fleet_vehicle_log_contract_view_activity" model="ir.ui.view">
-        <field name="name">fleet.vehicle.log.contract.activity</field>
         <field name="model">fleet.vehicle.log.contract</field>
         <field name="arch" type="xml">
             <activity string="Vehicles Contracts">
@@ -194,7 +188,6 @@
     <menuitem action="fleet_vehicle_log_contract_action" parent="fleet_vehicles" id="fleet_vehicle_log_contract_menu" groups="fleet_group_user" sequence="2"/>
 
     <record id='fleet_vehicle_log_services_view_form' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.log.services.form</field>
         <field name="model">fleet.vehicle.log.services</field>
         <field name="arch" type="xml">
             <form string="Services Logs">
@@ -231,7 +224,6 @@
     </record>
 
     <record id='fleet_vehicle_log_services_view_tree' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.log.services.tree</field>
         <field name="model">fleet.vehicle.log.services</field>
         <field name="arch" type="xml">
             <tree string="Services Logs">
@@ -248,7 +240,6 @@
     </record>
 
     <record id='fleet_vehicle_log_services_view_kanban' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.log.services.kanban</field>
         <field name="model">fleet.vehicle.log.services</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -277,7 +268,6 @@
     </record>
 
     <record id="fleet_vehicle_log_services_view_graph" model="ir.ui.view">
-       <field name="name">fleet.vehicle.log.services.graph</field>
        <field name="model">fleet.vehicle.log.services</field>
        <field name="arch" type="xml">
             <graph string="Services Costs Per Month" stacked="True">
@@ -289,7 +279,6 @@
     </record>
 
     <record id='fleet_vehicle_log_services_view_search' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.log.services.search</field>
         <field name="model">fleet.vehicle.log.services</field>
         <field name="arch" type="xml">
             <search string="Services Logs" >

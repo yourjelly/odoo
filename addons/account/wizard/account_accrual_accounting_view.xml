@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="account_accrual_accounting_wizard_form_view" model="ir.ui.view">
-            <field name="name">account.accrual.accounting.wizard.form</field>
             <field name="model">account.accrual.accounting.wizard</field>
             <field name="arch" type="xml">
                 <form>

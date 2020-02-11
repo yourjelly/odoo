@@ -3,7 +3,6 @@
     <data>
 
         <record id="view_employee_category_form" model="ir.ui.view">
-             <field name="name">hr.employee.category.form</field>
              <field name="model">hr.employee.category</field>
              <field name="arch" type="xml">
                  <form string="Employee Tags">
@@ -17,7 +16,6 @@
          </record>
 
          <record id="view_employee_category_list" model="ir.ui.view">
-             <field name="name">hr.employee.category.list</field>
              <field name="model">hr.employee.category</field>
              <field eval="8" name="priority"/>
              <field name="arch" type="xml">

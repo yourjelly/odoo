@@ -10,7 +10,6 @@
 
         <!-- FORUM VIEWS -->
         <record id="view_forum_forum_list" model="ir.ui.view">
-            <field name="name">forum.forum.list</field>
             <field name="model">forum.forum</field>
             <field name="arch" type="xml">
                 <tree string="Forums">
@@ -27,7 +26,6 @@
         </record>
 
         <record id="view_forum_forum_form" model="ir.ui.view">
-            <field name="name">forum.forum.form</field>
             <field name="model">forum.forum</field>
             <field name="arch" type="xml">
                 <form string="Forum">
@@ -116,7 +114,6 @@
         </record>
 
         <record id="forum_view_search" model="ir.ui.view">
-            <field name="name">forum.forum.search</field>
             <field name="model">forum.forum</field>
             <field name="arch" type="xml">
                 <search string="Forum">
@@ -136,7 +133,6 @@
 
         <!-- POST VIEWS -->
         <record id="view_forum_post_list" model="ir.ui.view">
-            <field name="name">forum.post.list</field>
             <field name="model">forum.post</field>
             <field name="arch" type="xml">
                 <tree string="Forum Posts">
@@ -152,7 +148,6 @@
         </record>
 
         <record id="view_forum_post_form" model="ir.ui.view">
-            <field name="name">forum.post.form</field>
             <field name="model">forum.post</field>
             <field name="arch" type="xml">
                 <form string="Forum Post">
@@ -211,7 +206,6 @@
         </record>
 
         <record id="view_forum_post_search" model="ir.ui.view">
-            <field name="name">forum.post.search</field>
             <field name="model">forum.post</field>
             <field name="arch" type="xml">
                 <search string="Search in Post">
@@ -235,7 +229,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_forum_post_graph">
-            <field name="name">forum.post.graph</field>
             <field name="model">forum.post</field>
             <field name="arch" type="xml">
                 <graph string="Graph of Posts">
@@ -263,7 +256,6 @@
 
         <!-- TAG VIEWS -->
         <record id="forum_tag_view_list" model="ir.ui.view">
-            <field name="name">forum.tag.list</field>
             <field name="model">forum.tag</field>
             <field name="arch" type="xml">
                 <tree string="Tags">
@@ -274,7 +266,6 @@
         </record>
 
         <record id="forum_tag_view_form" model="ir.ui.view">
-            <field name="name">forum.tag.form</field>
             <field name="model">forum.tag</field>
             <field name="arch" type="xml">
                 <form string="Tag">

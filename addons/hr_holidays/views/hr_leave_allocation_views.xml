@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="view_hr_leave_allocation_filter" model="ir.ui.view">
-        <field name="name">hr.holidays.filter_allocations</field>
         <field name="model">hr.leave.allocation</field>
         <field name="arch" type="xml">
             <search string="Search allocations">
@@ -48,7 +47,6 @@
     </record>
 
     <record id="hr_leave_allocation_view_form" model="ir.ui.view">
-        <field name="name">hr.leave.allocation.view.form</field>
         <field name="model">hr.leave.allocation</field>
         <field name="priority">32</field>
         <field name="arch" type="xml">
@@ -119,7 +117,6 @@
     </record>
 
     <record id="hr_leave_allocation_view_form_manager" model="ir.ui.view">
-        <field name="name">hr.leave.allocation.view.form.manager</field>
         <field name="model">hr.leave.allocation</field>
         <field name="inherit_id" ref="hr_holidays.hr_leave_allocation_view_form"/>
         <field name="mode">primary</field>
@@ -181,7 +178,6 @@
     </record>
 
     <record id="hr_leave_allocation_view_tree" model="ir.ui.view">
-        <field name="name">hr.leave.allocation.view.tree</field>
         <field name="model">hr.leave.allocation</field>
         <field name="priority">16</field>
         <field name="arch" type="xml">
@@ -212,7 +208,6 @@
     </record>
 
     <record id="hr_leave_allocation_view_tree_my" model="ir.ui.view">
-        <field name="name">hr.leave.allocation.view.tree.my</field>
         <field name="model">hr.leave.allocation</field>
         <field name="inherit_id" ref="hr_leave_allocation_view_tree"/>
         <field name="mode">primary</field>
@@ -237,7 +232,6 @@
     </record>
 
     <record id="hr_leave_allocation_view_kanban" model="ir.ui.view">
-        <field name="name">hr.leave.allocation.view.kanban</field>
         <field name="model">hr.leave.allocation</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" create="0">
@@ -299,7 +293,6 @@
      </record>
 
     <record id="hr_leave_allocation_view_activity" model="ir.ui.view">
-        <field name="name">hr.leave.allocation.view.activity</field>
         <field name="model">hr.leave.allocation</field>
         <field name="arch" type="xml">
             <activity string="Allocation Requests">
@@ -390,7 +383,6 @@
     </record>
 
     <record id="hr_leave_allocation_view_form_dashboard" model="ir.ui.view">
-        <field name="name">hr.leave.view.form.dashboard</field>
         <field name="model">hr.leave.allocation</field>
         <field name="inherit_id" ref="hr_holidays.hr_leave_allocation_view_form"/>
         <field name="mode">primary</field>

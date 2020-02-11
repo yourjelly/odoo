@@ -18,7 +18,6 @@
         </record>
 
         <record id="im_livechat_channel_view_kanban" model="ir.ui.view">
-            <field name="name">im_livechat.channel.kanban</field>
             <field name="model">im_livechat.channel</field>
             <field name="arch" type="xml">
                 <kanban>
@@ -69,7 +68,6 @@
         </record>
 
         <record id="im_livechat_channel_view_form" model="ir.ui.view">
-            <field name="name">im_livechat.channel.form</field>
             <field name="model">im_livechat.channel</field>
             <field name="arch" type="xml">
                 <form js_class="im_livechat_channel_form_view_js">
@@ -181,7 +179,6 @@
         </record>
 
         <record id="im_livechat_channel_view_search" model="ir.ui.view">
-            <field name="name">im.livechat.channel.view.search</field>
             <field name="model">im_livechat.channel</field>
             <field name="arch" type="xml">
                 <search string="LiveChat Channel Search">
@@ -192,7 +189,6 @@
 
         <!-- im_livechat.channel.rule -->
         <record id="im_livechat_channel_rule_view_tree" model="ir.ui.view">
-            <field name="name">im.livechat.channel.rule.tree</field>
             <field name="model">im_livechat.channel.rule</field>
             <field name="arch" type="xml">
                 <tree string="Rules">
@@ -205,7 +201,6 @@
         </record>
 
         <record id="im_livechat_channel_rule_view_kanban" model="ir.ui.view">
-            <field name="name">im_livechat.channel.rule.kanban</field>
             <field name="model">im_livechat.channel.rule</field>
             <field name="arch" type="xml">
                 <kanban>
@@ -226,7 +221,6 @@
         </record>
 
         <record id="im_livechat_channel_rule_view_form" model="ir.ui.view">
-            <field name="name">im_livechat.channel.rule.form</field>
             <field name="model">im_livechat.channel.rule</field>
             <field name="type">form</field>
             <field name="arch" type="xml">
@@ -248,7 +242,6 @@
 
         <!-- Canned responses -->
         <record id="im_livechat_canned_response_view_tree" model="ir.ui.view">
-            <field name="name">im_livechat.canned_response.tree</field>
             <field name="model">mail.shortcode</field>
             <field name="arch" type="xml">
                 <tree editable="bottom">

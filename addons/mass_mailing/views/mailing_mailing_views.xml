@@ -2,7 +2,6 @@
 <odoo>
         <!--  MAILING !-->
         <record model="ir.ui.view" id="view_mail_mass_mailing_search">
-            <field name="name">mailing.mailing.search</field>
             <field name="model">mailing.mailing</field>
             <field name="arch" type="xml">
                <search string="Mailings">
@@ -24,7 +23,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_mail_mass_mailing_tree">
-            <field name="name">mailing.mailing.tree</field>
             <field name="model">mailing.mailing</field>
             <field name="priority">10</field>
             <field name="arch" type="xml">
@@ -43,7 +41,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_mail_mass_mailing_form">
-            <field name="name">mailing.mailing.form</field>
             <field name="model">mailing.mailing</field>
             <field name="arch" type="xml">
                 <form string="Mailing">
@@ -263,7 +260,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_mail_mass_mailing_kanban">
-            <field name="name">mailing.mailing.kanban</field>
             <field name="model">mailing.mailing</field>
             <field name="arch" type="xml">
                 <kanban default_group_by="state" quick_create="false">
@@ -362,7 +358,6 @@
         </record>
 
         <record id="view_mail_mass_mailing_graph" model="ir.ui.view">
-            <field name="name">mailing.mailing.graph</field>
             <field name="model">mailing.mailing</field>
             <field name="arch" type="xml">
                 <graph string="Mailing" type="bar">

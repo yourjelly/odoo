@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="sale_product_configurator_view_form" model="ir.ui.view">
-        <field name="name">sale_product_configurator.product.configurator.view.form</field>
         <field name="model">sale.product.configurator</field>
         <field name="arch" type="xml">
             <form js_class="product_configurator_form">

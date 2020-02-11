@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="stock_report_view_graph" model="ir.ui.view">
-        <field name="name">stock_report_view_graph</field>
         <field name="model">report.stock.quantity</field>
         <field name="arch" type="xml">
             <graph string="report_stock_quantity_graph" type="line">
@@ -13,7 +12,6 @@
     </record>
 
     <record id="stock_report_view_search" model="ir.ui.view">
-        <field name="name">report.stock.quantity.search</field>
         <field name="model">report.stock.quantity</field>
         <field name="arch" type="xml">
             <search string="Report Quantity">

@@ -35,7 +35,6 @@
               action="action_test_o2m_count"/>
 
     <record id="o2m_parent" model="ir.ui.view">
-        <field name="name">Parent External Form</field>
         <field name="priority">1</field>
         <field name="model">test_testing_utilities.parent</field>
         <field name="arch" type="xml">
@@ -64,7 +63,6 @@
         </field>
     </record>
     <record id="o2m_tree" model="ir.ui.view">
-        <field name="name">Sub regular</field>
         <field name="priority">1</field>
         <field name="model">test_testing_utilities.sub</field>
         <field name="arch" type="xml">

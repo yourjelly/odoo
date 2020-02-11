@@ -2,7 +2,6 @@
 <odoo>
 
         <record model="ir.ui.view" id="account_assert_tree">
-            <field name="name">accounting.assert.test.tree</field>
             <field name="model">accounting.assert.test</field>
             <field name="arch" type="xml">
                 <tree string="Tests">
@@ -14,7 +13,6 @@
         </record>
 
         <record model="ir.ui.view" id="account_assert_form">
-            <field name="name">accounting.assert.test.form</field>
             <field name="model">accounting.assert.test</field>
             <field name="arch" type="xml">
                 <form string="Tests">
@@ -68,7 +66,6 @@ Example:
         </record>
 
         <record id="accounting_assert_test_view_search" model="ir.ui.view">
-            <field name="name">accounting.assert.test.view.search</field>
             <field name="model">accounting.assert.test</field>
             <field name="arch" type="xml">
                 <search string="Search Account Test">

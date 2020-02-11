@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="l10n_in_port_code_form_view" model="ir.ui.view">
-        <field name="name">l10n_in.port.code.form</field>
         <field name="model">l10n_in.port.code</field>
         <field name="arch" type="xml">
             <form string="India Port Code">
@@ -20,7 +19,6 @@
     </record>
 
     <record id="l10n_in_port_code_tree_view" model="ir.ui.view">
-        <field name="name">l10n_in.port.code.tree</field>
         <field name="model">l10n_in.port.code</field>
         <field name="arch" type="xml">
             <tree string="India Port Code">
@@ -32,7 +30,6 @@
     </record>
 
     <record id="l10n_in_port_code_search_view" model="ir.ui.view">
-        <field name="name">l10n_in.port.code.search</field>
         <field name="model">l10n_in.port.code</field>
         <field name="arch" type="xml">
             <search string="India Port Code">

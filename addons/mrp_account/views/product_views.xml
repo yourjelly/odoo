@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
         <record id="product_product_ext_form_view2" model="ir.ui.view">
-            <field name="name">product_extended.product.form.view</field>
             <field name="model">product.template</field>
             <field name="priority">3</field>
             <field name="inherit_id" ref="product.product_template_only_form_view" />
@@ -20,7 +19,6 @@
         </record>
 
         <record id="product_product_view_form_normal_inherit_extended" model="ir.ui.view">
-            <field name="name">product.product.view.form.normal.inherit.extended</field>
             <field name="model">product.product</field>
             <field name="priority">4</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
@@ -40,7 +38,6 @@
         </record>
 
         <record id="product_variant_easy_edit_view_bom_inherit" model="ir.ui.view">
-            <field name="name">product.product.product.view.form.easy.bom.inherit</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_variant_easy_edit_view"/>
             <field name="arch" type="xml">

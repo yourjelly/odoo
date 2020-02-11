@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record model="ir.ui.view" id="survey_invite_view_form">
-            <field name="name">survey.invite.view.form</field>
             <field name="model">survey.invite</field>
             <field name="arch" type="xml">
                 <form string="Compose Email">

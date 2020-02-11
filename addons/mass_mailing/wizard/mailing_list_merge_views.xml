@@ -2,7 +2,6 @@
 <odoo>
 	<!-- Merge Mailing List  -->
     <record id="mailing_list_merge_view_form" model="ir.ui.view">
-        <field name="name">mailing.list.merge.form</field>
         <field name="model">mailing.list.merge</field>
         <field name="arch" type="xml">
             <form string="Merge Mass Mailing List">

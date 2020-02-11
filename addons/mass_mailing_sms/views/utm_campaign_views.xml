@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record model="ir.ui.view" id="utm_campaign_view_form">
-        <field name="name">utm.campaign.view.form</field>
         <field name="model">utm.campaign</field>
         <field name="inherit_id" ref="utm.utm_campaign_view_form"/>
         <field name="arch" type="xml">
@@ -37,7 +36,6 @@
     </record>
 
     <record model="ir.ui.view" id="utm_campaign_view_kanban">
-        <field name="name">utm.campaign.view.kanban</field>
         <field name="model">utm.campaign</field>
         <field name="inherit_id" ref="utm.utm_campaign_view_kanban"/>
         <field name="arch" type="xml">

@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_account_tax_form" model="ir.ui.view">
-            <field name="name">account.tax.form</field>
             <field name="model">account.tax</field>
             <field name="inherit_id" ref="account.view_tax_form"/>
             <field name="arch" type="xml">
@@ -13,7 +12,6 @@
         </record>
 
         <record id="view_tax_sii_code_tree" model="ir.ui.view">
-            <field name="name">account.tax.sii.code.tree</field>
             <field name="model">account.tax</field>
             <field name="inherit_id" ref="account.view_tax_tree" />
             <field name="arch" type="xml">
@@ -24,7 +22,6 @@
         </record>
 
         <record id="view_account_tax_template_form" model="ir.ui.view">
-            <field name="name">account.tax.template.form</field>
             <field name="model">account.tax.template</field>
             <field name="inherit_id" ref="account.view_account_tax_template_form"/>
             <field name="arch" type="xml">
@@ -35,7 +32,6 @@
         </record>
 
         <record id="view_account_tax_template_tree" model="ir.ui.view">
-            <field name="name">account.tax.template.sii.tree</field>
             <field name="model">account.tax.template</field>
             <field name="inherit_id" ref="account.view_account_tax_template_tree" />
             <field name="arch" type="xml">

@@ -1,6 +1,5 @@
 <odoo>
     <record id="list_view_account_sale_closing" model="ir.ui.view">
-        <field name="name">Sales Closings</field>
         <field name="model">account.sale.closing</field>
         <field name="arch" type="xml">
             <tree create="false" import="false">
@@ -17,7 +16,6 @@
     </record>
 
     <record id="form_view_account_sale_closing" model="ir.ui.view">
-        <field name="name">Sales Closings</field>
         <field name="model">account.sale.closing</field>
         <field name="arch" type="xml">
             <form create="false" edit="false" string="Account Closing">

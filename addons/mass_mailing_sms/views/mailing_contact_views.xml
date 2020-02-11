@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="mailing_contact_view_search" model="ir.ui.view">
-        <field name="name">mailing.contact.view.search.inherit.sms</field>
         <field name="model">mailing.contact</field>
         <field name="inherit_id" ref="mass_mailing.view_mail_mass_mailing_contact_search"/>
         <field name="arch" type="xml">
@@ -24,7 +23,6 @@
     </record>
 
     <record id="mailing_contact_view_tree_sms" model="ir.ui.view">
-        <field name="name">mailing.contact.view.tree.sms</field>
         <field name="model">mailing.contact</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
@@ -41,7 +39,6 @@
     </record>
 
     <record id="mailing_contact_view_form" model="ir.ui.view">
-        <field name="name">mailing.contact.view.form.inherit.sms</field>
         <field name="model">mailing.contact</field>
         <field name="inherit_id" ref="mass_mailing.view_mail_mass_mailing_contact_form"/>
         <field name="arch" type="xml">
@@ -59,7 +56,6 @@
     </record>
 
     <record id="mailing_contact_view_kanban" model="ir.ui.view">
-        <field name="name">mailing.contact.view.kanban.inherit.sms</field>
         <field name="model">mailing.contact</field>
         <field name="inherit_id" ref="mass_mailing.view_mail_mass_mailing_contact_kanban"/>
         <field name="arch" type="xml">

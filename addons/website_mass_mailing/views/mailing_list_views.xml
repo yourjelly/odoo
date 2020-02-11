@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="mailing_list_view_form" model="ir.ui.view">
-        <field name="name">mailing.list.view.form.inherit.website</field>
         <field name="model">mailing.list</field>
         <field name="inherit_id" ref="mass_mailing.mailing_list_view_form"/>
         <field name="arch" type="xml">

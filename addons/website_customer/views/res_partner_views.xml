@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <odoo>
         <record id="view_partners_form_website" model="ir.ui.view">
-            <field name="name">view.res.partner.form.website.tags</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="website_partner.view_partners_form_website" />
             <field name="arch" type="xml">
@@ -14,7 +13,6 @@
         </record>
 
         <record id="view_partner_tag_form" model="ir.ui.view">
-            <field name="name">Website Tags</field>
             <field name="model">res.partner.tag</field>
             <field name="arch" type="xml">
                 <form string="Partner Tag">
@@ -31,7 +29,6 @@
         </record>
 
         <record id="view_partner_tag_list" model="ir.ui.view">
-            <field name="name">Website Tags</field>
             <field name="model">res.partner.tag</field>
             <field eval="6" name="priority"/>
             <field name="arch" type="xml">
@@ -45,7 +42,6 @@
         </record>
 
         <record id="res_partner_tag_view_search" model="ir.ui.view">
-            <field name="name">res.partner.tag.view.search</field>
             <field name="model">res.partner.tag</field>
             <field name="arch" type="xml">
                 <search string="Search Partner Tag">

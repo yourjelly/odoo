@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record model="ir.ui.view" id="view_mail_form">
-            <field name="name">mail.mail.form</field>
             <field name="model">mail.mail</field>
             <field name="arch" type="xml">
                 <form string="Email message">
@@ -63,7 +62,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_mail_tree">
-            <field name="name">mail.mail.tree</field>
             <field name="model">mail.mail</field>
             <field name="arch" type="xml">
                 <tree string="Emails" decoration-muted="state in ('sent', 'cancel')" decoration-info="state=='outgoing'" decoration-danger="state=='exception'">
@@ -85,7 +83,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_mail_search">
-            <field name="name">mail.mail.search</field>
             <field name="model">mail.mail</field>
             <field name="arch" type="xml">
                 <search string="Email Search">

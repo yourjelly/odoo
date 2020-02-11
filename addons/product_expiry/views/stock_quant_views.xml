@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding='UTF-8'?>
 <odoo>
         <record id="view_quant_form_expiry" model="ir.ui.view">
-            <field name="name">stock.quant.inherit.form</field>
             <field name="model">stock.quant</field>
             <field name="inherit_id" ref="stock.view_stock_quant_form"/>
             <field name="arch" type="xml">
@@ -12,7 +11,6 @@
         </record>
 
     <record id="view_stock_quant_tree_expiry" model="ir.ui.view">
-        <field name="name">stock.quant.inherit.form</field>
         <field name="model">stock.quant</field>
         <field name="inherit_id" ref="stock.view_stock_quant_tree"/>
         <field name="arch" type="xml">
@@ -28,7 +26,6 @@
     </record>
 
     <record id="view_stock_quant_tree_editable_expiry" model="ir.ui.view">
-        <field name="name">stock.quant.inherit.form</field>
         <field name="model">stock.quant</field>
         <field name="inherit_id" ref="stock.view_stock_quant_tree_editable"/>
         <field name="arch" type="xml">
@@ -45,7 +42,6 @@
     </record>
 
     <record id="quant_search_view_inherit_product_expiry" model="ir.ui.view">
-        <field name="name">stock.quant.search.inherit</field>
         <field name="model">stock.quant</field>
         <field name="inherit_id" ref="stock.quant_search_view"/>
         <field name="arch" type="xml">

@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="crm_team_salesteams_view_kanban_inherit_website_sale" model="ir.ui.view"> 
-        <field name="name">crm.team.kanban</field>
         <field name="model">crm.team</field>
         <field name="inherit_id" ref="sales_team.crm_team_salesteams_view_kanban"/>
         <field name="arch" type="xml">

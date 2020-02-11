@@ -5,7 +5,6 @@
     <!-- Purchase Requisition Type -->
 
     <record model="ir.ui.view" id="view_purchase_requisition_type_tree">
-        <field name="name">purchase.requisition.type.tree</field>
         <field name="model">purchase.requisition.type</field>
         <field name="arch" type="xml">
             <tree string="Purchase Agreement Types">
@@ -17,7 +16,6 @@
     </record>
 
     <record id="view_purchase_requisition_type_kanban" model="ir.ui.view">
-        <field name="name">purchase.requisition.type.kanban</field>
         <field name="model">purchase.requisition.type</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -39,7 +37,6 @@
         </field>
     </record>
     <record model="ir.ui.view" id="view_purchase_requisition_type_form">
-        <field name="name">purchase.requisition.type.form</field>
         <field name="model">purchase.requisition.type</field>
         <field name="arch" type="xml">
             <form string="Purchase Agreement Types">
@@ -98,7 +95,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_purchase_requisition_form">
-        <field name="name">purchase.requisition.form</field>
         <field name="model">purchase.requisition</field>
         <field name="arch" type="xml">
             <form string="Purchase Agreements">
@@ -187,7 +183,6 @@
         </field>
     </record>
     <record model="ir.ui.view" id="view_purchase_requisition_tree">
-        <field name="name">purchase.requisition.tree</field>
         <field name="model">purchase.requisition</field>
         <field name="arch" type="xml">
             <tree decoration-bf="message_needaction==True" decoration-muted="state == 'cancel'" decoration-danger="date_end and date_end&lt;current_date" string="Purchase Agreements">
@@ -206,7 +201,6 @@
     </record>
 
     <record id="view_purchase_requisition_kanban" model="ir.ui.view">
-        <field name="name">purchase.requisition.kanban</field>
         <field name="model">purchase.requisition</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -243,7 +237,6 @@
     </record>
 
     <record id="view_purchase_requisition_filter" model="ir.ui.view">
-            <field name="name">purchase.requisition.list.select</field>
             <field name="model">purchase.requisition</field>
             <field name="arch" type="xml">
                 <search string="Search Purchase Agreements">

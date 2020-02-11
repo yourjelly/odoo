@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="rating_rating_view_search_project" model="ir.ui.view">
-        <field name="name">rating.rating.search.project</field>
         <field name="model">rating.rating</field>
         <field name="inherit_id" ref="rating.rating_rating_view_search"/>
         <field name="mode">primary</field>

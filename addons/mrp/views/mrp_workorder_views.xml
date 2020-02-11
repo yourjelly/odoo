@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_mrp_production_work_order_search" model="ir.ui.view">
-        <field name="name">mrp.production.work.order.search</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <search>
@@ -78,7 +77,6 @@
     </record>
 
     <record model="ir.ui.view" id="mrp_production_workorder_tree_view_inherit">
-        <field name="name">mrp.production.work.order.tree</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <tree string="Work Orders" delete="0" create="0" decoration-success="date_planned_start&gt;=current_date and state == 'ready'" decoration-muted="state in ('done','cancel')" decoration-danger="date_planned_start&lt;current_date and state in ('ready')">
@@ -99,7 +97,6 @@
     </record>
 
     <record model="ir.ui.view" id="mrp_production_workorder_form_view_inherit">
-        <field name="name">mrp.production.work.order.form</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <form string="Production Workcenter" delete="0" create="0">
@@ -263,7 +260,6 @@
     </record>
 
     <record model="ir.ui.view" id="mrp_production_workorder_form_view_inherit_gantt">
-        <field name="name">mrp.production.work.order.form.gantt</field>
         <field name="model">mrp.workorder</field>
         <field name="inherit_id" ref="mrp.mrp_production_workorder_form_view_inherit"/>
         <field name="mode">primary</field>
@@ -273,7 +269,6 @@
     </record>
 
     <record id="view_mrp_production_workorder_form_view_filter" model="ir.ui.view">
-        <field name="name">mrp.production.work.order.select</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <search string="Search Work Orders">
@@ -306,7 +301,6 @@
     </record>
 
     <record id="workcenter_line_calendar" model="ir.ui.view">
-        <field name="name">mrp.production.work.order.calendar</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <calendar date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" color="workcenter_id" event_limit="5" delete="0">
@@ -318,7 +312,6 @@
     </record>
 
     <record id="workcenter_line_graph" model="ir.ui.view">
-        <field name="name">mrp.production.work.order.graph</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <graph string="Operations">
@@ -329,7 +322,6 @@
     </record>
 
     <record id="workcenter_line_pivot" model="ir.ui.view">
-        <field name="name">mrp.production.work.order.pivot</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <pivot string="Operations">
@@ -342,7 +334,6 @@
     </record>
 
     <record id="workcenter_line_gantt_production" model="ir.ui.view">
-        <field name="name">mrp.production.work.order.gantt.production</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <gantt class="o_mrp_workorder_gantt" date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" default_group_by="production_id" create="0" delete="0"
@@ -377,7 +368,6 @@
     </record>
 
     <record id="mrp_workorder_view_gantt" model="ir.ui.view">
-        <field name="name">mrp.workorder.view.gantt</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <gantt class="o_mrp_workorder_gantt" date_stop="date_planned_finished" date_start="date_planned_start" string="Operations" default_group_by="workcenter_id" create="0"
@@ -412,7 +402,6 @@
     </record>
 
     <record model="ir.ui.view" id="workcenter_line_kanban">
-        <field name="name">mrp.production.work.order.kanban</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <kanban class="oe_background_grey o_kanban_dashboard o_mrp_workorder_kanban" create="0">
@@ -522,7 +511,6 @@
     </record>
 
     <record id="view_workcenter_load_pivot" model="ir.ui.view">
-        <field name="name">report.workcenter.load.pivot</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <pivot string="Work Center Loads">
@@ -534,7 +522,6 @@
     </record>
 
     <record id="view_work_center_load_graph" model="ir.ui.view">
-        <field name="name">report.workcenter.load.graph</field>
         <field name="model">mrp.workorder</field>
         <field name="arch" type="xml">
             <graph string="Work Center load" type="bar">

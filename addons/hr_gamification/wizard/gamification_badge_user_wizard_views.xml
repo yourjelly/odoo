@@ -2,7 +2,6 @@
 <odoo>
 
         <record id="view_badge_wizard_grant_employee" model="ir.ui.view">
-            <field name="name">gamification.badge.user.wizard.form.inherit</field>
             <field name="model">gamification.badge.user.wizard</field>
             <field name="inherit_id" ref="gamification.view_badge_wizard_grant" />
             <field name="arch" type="xml">
@@ -18,7 +17,6 @@
         </record>
 
         <record id="view_badge_wizard_reward" model="ir.ui.view">
-            <field name="name">gamification.badge.user.wizard.form</field>
             <field name="model">gamification.badge.user.wizard</field>
             <field name="arch" type="xml">
                 <form string="Reward Employee with">

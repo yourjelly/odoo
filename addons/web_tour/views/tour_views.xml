@@ -10,7 +10,6 @@
             </field>
         </record>
         <record id="edit_tour_search" model="ir.ui.view">
-            <field name="name">tour.search</field>
             <field name="model">web_tour.tour</field>
             <field name="arch" type="xml">
                 <search string="Tip">

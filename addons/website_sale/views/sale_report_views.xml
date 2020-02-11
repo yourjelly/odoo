@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="sale_report_view_search_website" model="ir.ui.view">
-        <field name="name">sale.report.search</field>
         <field name="model">sale.report</field>
         <field name="arch" type="xml">
             <search string="Sales">
@@ -27,7 +26,6 @@
     </record>
 
     <record id="sale_report_view_pivot_website" model="ir.ui.view">
-        <field name="name">sale.report.view.pivot.website</field>
         <field name="model">sale.report</field>
         <field name="arch" type="xml">
             <pivot string="Sales Report" disable_linking="True">
@@ -39,7 +37,6 @@
     </record>
 
     <record id="sale_report_view_graph_website" model="ir.ui.view">
-        <field name="name">sale.report.view.graph.website</field>
         <field name="model">sale.report</field>
         <field name="arch" type="xml">
             <graph string="Sale Report" type="bar">

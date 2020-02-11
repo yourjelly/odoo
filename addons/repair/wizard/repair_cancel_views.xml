@@ -5,7 +5,6 @@
         <!--  Cancel Repair -->
         
         <record id="view_cancel_repair" model="ir.ui.view">
-            <field name="name">Cancel Repair</field>
             <field name="model">repair.cancel</field>
             <field name="arch" type="xml">
                 <form string="Cancel Repair Order">

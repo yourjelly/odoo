@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="sale_coupon_apply_code_view_form" model="ir.ui.view">
-        <field name="name">sale.coupon.apply.code.form</field>
         <field name="model">sale.coupon.apply.code</field>
         <field name="arch" type="xml">
             <form string="Apply coupon">

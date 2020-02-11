@@ -5,7 +5,6 @@
         <!--  Make Invoice -->
         
         <record id="view_make_invoice" model="ir.ui.view">
-            <field name="name">Make Invoice</field>
             <field name="model">repair.order.make_invoice</field>
             <field name="arch" type="xml">
             <form string="Create invoices">

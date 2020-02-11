@@ -3,7 +3,6 @@
     <data>
 
         <record id="account_unreconcile_view" model="ir.ui.view">
-            <field name="name">Unreconcile Entries</field>
             <field name="model">account.unreconcile</field>
             <field name="arch" type="xml">
             <form string="Unreconcile">

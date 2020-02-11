@@ -2,7 +2,6 @@
 <odoo>
 
    <record id="view_purchase_bill_union_filter" model="ir.ui.view">
-        <field name="name">purchase.bill.union.select</field>
         <field name="model">purchase.bill.union</field>
         <field name="arch" type="xml">
             <search string="Search Reference Document">
@@ -18,7 +17,6 @@
     </record>
 
     <record id="view_purchase_bill_union_tree" model="ir.ui.view">
-        <field name="name">purchase.bill.union.tree</field>
         <field name="model">purchase.bill.union</field>
         <field name="arch" type="xml">
             <tree string="Reference Document">

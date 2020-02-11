@@ -9,7 +9,6 @@
         </record>
 
         <record id="view_stock_move_lots" model="ir.ui.view">
-            <field name="name">stock.move.lots.form</field>
             <field name="model">stock.move</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
@@ -77,7 +76,6 @@
         </record>
 
         <record id="view_stock_move_raw_tree" model="ir.ui.view">
-            <field name="name">stock.move.raw.tree</field>
             <field name="model">stock.move</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
@@ -109,7 +107,6 @@
         </record>
 
         <record id="view_finisehd_move_line" model="ir.ui.view">
-            <field name="name">mrp.finished.move.line.form</field>
             <field name="priority">1000</field>
             <field name="model">stock.move.line</field>
             <field name="arch" type="xml">

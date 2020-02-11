@@ -2,7 +2,6 @@
 <odoo>
 
         <record id="crm_activity_report_view_graph" model="ir.ui.view">
-            <field name="name">crm.activity.report.graph</field>
             <field name="model">crm.activity.report</field>
             <field name="arch" type="xml">
                 <graph string="Activities Analysis" stacked="True">
@@ -13,7 +12,6 @@
         </record>
 
         <record id="crm_activity_report_view_pivot" model="ir.ui.view">
-            <field name="name">crm.activity.report.pivot</field>
             <field name="model">crm.activity.report</field>
             <field name="arch" type="xml">
                 <pivot string="Activities Analysis" disable_linking="True">
@@ -24,7 +22,6 @@
         </record>
 
         <record id="crm_activity_report_view_tree" model="ir.ui.view">
-            <field name="name">crm.activity.report.tree</field>
             <field name="model">crm.activity.report</field>
             <field name="arch" type="xml">
                 <tree default_order="date desc">
@@ -38,7 +35,6 @@
         </record>
 
         <record id="crm_activity_report_view_search" model="ir.ui.view">
-            <field name="name">crm.activity.report.search</field>
             <field name="model">crm.activity.report</field>
             <field name="arch" type="xml">
                 <search string="Activities Analysis">

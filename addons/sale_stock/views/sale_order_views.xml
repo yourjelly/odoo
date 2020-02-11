@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_order_form_inherit_sale_stock" model="ir.ui.view">
-            <field name="name">sale.order.form.sale.stock</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
@@ -48,7 +47,6 @@
         </record>
 
         <record id="view_quotation_tree" model="ir.ui.view">
-            <field name="name">sale.order.tree.inherit.sale.stock</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_quotation_tree"/>
             <field name="arch" type="xml">
@@ -59,7 +57,6 @@
         </record>
 
         <record id="view_order_tree" model="ir.ui.view">
-            <field name="name">sale.order.tree.inherit.sale.stock</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_tree"/>
             <field name="arch" type="xml">
@@ -70,7 +67,6 @@
         </record>
 
         <record id="view_order_line_tree_inherit_sale_stock" model="ir.ui.view">
-            <field name="name">sale.order.line.tree.sale.stock.location</field>
             <field name="inherit_id" ref="sale.view_order_line_tree"/>
             <field name="model">sale.order.line</field>
             <field name="arch" type="xml">
@@ -81,7 +77,6 @@
         </record>
 
         <record id="view_order_form_inherit_sale_stock_qty" model="ir.ui.view">
-            <field name="name">sale.order.line.tree.sale.stock.qty</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">

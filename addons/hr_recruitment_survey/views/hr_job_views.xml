@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="hr_job_survey_inherit" model="ir.ui.view">
-        <field name="name">hr.job.form.inherit</field>
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr_recruitment.hr_job_survey"/>
         <field name="arch" type="xml">
@@ -16,7 +15,6 @@
         </field>
     </record>
     <record id="view_hr_job_kanban_inherit" model="ir.ui.view">
-        <field name="name">hr.job.kanban.inherit</field>
         <field name="model">hr.job</field>
         <field name="inherit_id" ref="hr_recruitment.view_hr_job_kanban"/>
         <field name="arch" type="xml">

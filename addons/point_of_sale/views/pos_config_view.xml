@@ -4,7 +4,6 @@
     <!--Account cashbox line-->
 
     <record id="account_cashbox_line_view_tree" model="ir.ui.view">
-        <field name="name">account.cashbox.line.tree</field>
         <field name="model">account.cashbox.line</field>
         <field name="arch" type="xml">
             <tree string="Cashbox balance" editable="top">
@@ -24,7 +23,6 @@
     </record>
 
     <record id="pos_config_view_form" model="ir.ui.view">
-        <field name="name">pos.config.form.view</field>
         <field name="model">pos.config</field>
         <field name="arch" type="xml">
             <form string="Point of Sale Configuration">
@@ -539,7 +537,6 @@
     </record>
 
     <record id="view_pos_config_tree" model="ir.ui.view">
-        <field name="name">pos.config.tree.view</field>
         <field name="model">pos.config</field>
         <field name="arch" type="xml">
             <tree string="Point of Sale Configuration">
@@ -551,7 +548,6 @@
     </record>
 
     <record id="view_pos_config_search" model="ir.ui.view">
-        <field name="name">pos.config.search.view</field>
         <field name="model">pos.config</field>
         <field name="arch" type="xml">
             <search string="Point of Sale Config">

@@ -2,7 +2,6 @@
 <odoo>
     <!--  MAILING CONTACT SUBSCRIPTION -->
     <record model="ir.ui.view" id="mailing_contact_subscription_view_form">
-        <field name="name">mailing.contact.subscription.view.form</field>
         <field name="model">mailing.contact.subscription</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">
@@ -27,7 +26,6 @@
     </record>
 
     <record model="ir.ui.view" id="mailing_contact_subscription_view_tree">
-        <field name="name">mailing.contact.subscription.view.tree</field>
         <field name="model">mailing.contact.subscription</field>
         <field name="arch" type="xml">
             <tree string="Mailing List Subscriptions">
@@ -41,7 +39,6 @@
     </record>
 
     <record model="ir.ui.view" id="mailing_contact_subscription_view_search">
-        <field name="name">mailing.contact.subscription.view.search</field>
         <field name="model">mailing.contact.subscription</field>
         <field name="arch" type="xml">
            <search string="Mailing List Subscriptions">
@@ -53,7 +50,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_mail_mass_mailing_contact_search">
-        <field name="name">mailing.contact.search</field>
         <field name="model">mailing.contact</field>
         <field name="arch" type="xml">
            <search string="Mailing List Contacts">
@@ -85,7 +81,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_mail_mass_mailing_contact_tree">
-        <field name="name">mailing.contact.tree</field>
         <field name="model">mailing.contact</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">
@@ -102,7 +97,6 @@
     </record>
 
     <record id="view_mail_mass_mailing_contact_kanban" model="ir.ui.view">
-        <field name="name">mailing.contact.kanban</field>
         <field name="model">mailing.contact</field>
         <field name="arch" type="xml">
             <kanban>
@@ -144,7 +138,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_mail_mass_mailing_contact_form">
-        <field name="name">mailing.contact.form</field>
         <field name="model">mailing.contact</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">
@@ -195,7 +188,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_mail_mass_mailing_contact_pivot">
-        <field name="name">mailing.contact.pivot</field>
         <field name="model">mailing.contact</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">
@@ -206,7 +198,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_mail_mass_mailing_contact_graph">
-        <field name="name">mailing.contact.graph</field>
         <field name="model">mailing.contact</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="pos_order_form_inherit" model="ir.ui.view">
-        <field name="name">pos.order.form.inherit</field>
         <field name="model">pos.order</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
         <field name="arch" type="xml">
@@ -13,7 +12,6 @@
     </record>
 
     <record id="pos_order_list_select_inherit" model="ir.ui.view">
-        <field name="name">pos.order.list.select.inherit</field>
         <field name="model">pos.order</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_order_filter"/>
         <field name="arch" type="xml">
@@ -27,7 +25,6 @@
     </record>
 
     <record id="view_pos_order_tree_inherit" model="ir.ui.view">
-        <field name="name">pos.order.tree.inherit</field>
         <field name="model">pos.order</field>
         <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
         <field name="arch" type="xml">

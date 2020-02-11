@@ -3,7 +3,6 @@
     <data>
 
         <record model="ir.ui.view" id="view_message_subtype_tree">
-            <field name="name">mail.message.subtype.tree</field>
             <field name="model">mail.message.subtype</field>
             <field name="priority">10</field>
             <field name="arch" type="xml">
@@ -17,7 +16,6 @@
         </record>
 
         <record model="ir.ui.view" id="view_mail_message_subtype_form">
-            <field name="name">mail.message.subtype.form</field>
             <field name="model">mail.message.subtype</field>
             <field name="arch" type="xml">
                 <form string="Email message">

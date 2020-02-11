@@ -1,7 +1,6 @@
 <odoo>
     <!-- Badge views -->
     <record id="gamification_badge_view_search" model="ir.ui.view">
-        <field name="name">gamification.badge.view.search</field>
         <field name="model">gamification.badge</field>
         <field name="arch" type="xml">
             <search string="Search Badge">
@@ -30,7 +29,6 @@
 
     
     <record id="badge_list_view" model="ir.ui.view">
-        <field name="name">Badge List</field>
         <field name="model">gamification.badge</field>
         <field name="arch" type="xml">
             <tree string="Badge List">
@@ -44,7 +42,6 @@
     </record>
 
     <record id="badge_form_view" model="ir.ui.view">
-        <field name="name">Badge Form</field>
         <field name="model">gamification.badge</field>
         <field name="arch" type="xml">
             <form string="Badge">
@@ -109,7 +106,6 @@
 
 
     <record id="badge_kanban_view" model="ir.ui.view" >
-        <field name="name">Badge Kanban View</field>
         <field name="model">gamification.badge</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_badge">
@@ -167,7 +163,6 @@
     <!-- Badge user viewss -->
 
     <record id="badge_user_kanban_view" model="ir.ui.view" >
-        <field name="name">Badge User Kanban View</field>
         <field name="model">gamification.badge.user</field>
         <field name="arch" type="xml">
             <kanban class="oe_background_grey">

@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="setup_bank_account_wizard_inherit" model="ir.ui.view">
-            <field name="name">account.setup.bank.manual.config.form.ch.inherit</field>
             <field name="model">account.setup.bank.manual.config</field>
             <field name="inherit_id" ref="account.setup_bank_account_wizard"/>
             <field name="arch" type="xml">

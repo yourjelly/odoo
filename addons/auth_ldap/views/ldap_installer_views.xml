@@ -3,7 +3,6 @@
 
         <!-- ldap installer Form View -->
         <record id="view_ldap_installer_form" model="ir.ui.view">
-            <field name="name">res.company.ldap.form</field>
             <field name="model">res.company.ldap</field>
             <field name="arch" type="xml">
                 <form string="LDAP Configuration">
@@ -34,7 +33,6 @@
         </record>
 
         <record id="res_company_ldap_view_tree" model="ir.ui.view">
-            <field name="name">res.company.ldap.tree</field>
             <field name="model">res.company.ldap</field>
             <field name="arch" type="xml">
                 <tree string="LDAP Configuration">

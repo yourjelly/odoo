@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="view_res_country_extended_form" model="ir.ui.view">
-        <field name="name">view_res_country_extended_form</field>
         <field name="model">res.country</field>
         <field name="inherit_id" ref="base.view_country_form"/>
         <field name="arch" type="xml">
@@ -14,7 +13,6 @@
     </record>
 
     <record id="view_partner_structured_form" model="ir.ui.view">
-        <field name="name">view_partner_structured_form</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
@@ -35,7 +33,6 @@
     </record>
 
     <record id="view_partner_address_structured_form" model="ir.ui.view">
-        <field name="name">view_partner_address_structured_form</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_address_form"/>
         <field name="arch" type="xml">
@@ -54,7 +51,6 @@
     </record>
 
     <record id="view_res_company_extended_form" model="ir.ui.view">
-        <field name="name">view_res_company_extended_form</field>
         <field name="model">res.company</field>
         <field name="inherit_id" ref="base.view_company_form"/>
         <field name="arch" type="xml">

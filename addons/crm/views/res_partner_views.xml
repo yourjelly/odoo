@@ -43,7 +43,6 @@
 
         <!-- Partner kanban view inherte -->
         <record id="crm_lead_partner_kanban_view" model="ir.ui.view">
-            <field name="name">res.partner.kanban.inherit</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.res_partner_kanban_view"/>
             <field name="priority" eval="10"/>
@@ -62,7 +61,6 @@
 
         <!-- Add contextual button on partner form view -->
         <record id="view_partners_form_crm1" model="ir.ui.view">
-            <field name="name">view.res.partner.form.crm.inherited1</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field eval="1" name="priority"/>

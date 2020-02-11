@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_change_product_quantity" model="ir.ui.view">
-            <field name="name">Change Product Quantity</field>
             <field name="model">stock.change.product.qty</field>
             <field name="arch" type="xml">
                 <form string="Update Product Quantity">

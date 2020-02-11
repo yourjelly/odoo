@@ -3,7 +3,6 @@
     <data>
         <!-- Product Template -->
         <record id="view_mrp_product_template_form_inherited" model="ir.ui.view">
-            <field name="name">product.form.mrp.inherited</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="stock.view_template_property_form"/>
             <field name="arch" type="xml">
@@ -17,7 +16,6 @@
         </record>
 
         <record id="mrp_product_template_search_view" model="ir.ui.view">
-            <field name="name">mrp.product.template.search</field>
             <field name="model">product.template</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="product.product_template_search_view"/>
@@ -31,7 +29,6 @@
         </record>
 
         <record id="mrp_product_product_search_view" model="ir.ui.view">
-            <field name="name">mrp.product.product.search</field>
             <field name="model">product.product</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="product.product_search_form_view"/>
@@ -70,7 +67,6 @@
 
 
         <record id="product_template_form_view_bom_button" model="ir.ui.view">
-            <field name="name">product.template.procurement</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="groups_id" eval="[(4, ref('mrp.group_mrp_user'))]"/>
@@ -99,7 +95,6 @@
         </record>
 
         <record id="product_product_form_view_bom_button" model="ir.ui.view">
-            <field name="name">product.product.procurement</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="groups_id" eval="[(4, ref('mrp.group_mrp_user'))]"/>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="view_sale_advance_payment_inv" model="ir.ui.view">
-            <field name="name">Invoice Orders</field>
             <field name="model">sale.advance.payment.inv</field>
             <field name="arch" type="xml">
                 <form string="Invoice Sales Order">

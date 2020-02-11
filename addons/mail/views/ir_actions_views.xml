@@ -3,7 +3,6 @@
     <data>
 
         <record model="ir.ui.view" id="view_server_action_form_template">
-            <field name="name">ir.actions.server.form</field>
             <field name="model">ir.actions.server</field>
             <field name="inherit_id" ref="base.view_server_action_form"/>
             <field name="arch" type="xml">

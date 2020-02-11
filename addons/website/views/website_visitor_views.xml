@@ -2,7 +2,6 @@
 <odoo><data>
     <!--page history-->
     <record id="website_visitor_page_view_tree" model="ir.ui.view">
-        <field name="name">website.track.view.tree</field>
         <field name="model">website.track</field>
         <field name="arch" type="xml">
             <tree string="Visitor Page Views History" create="0">
@@ -15,7 +14,6 @@
     </record>
 
     <record id="website_visitor_page_view_graph" model="ir.ui.view">
-        <field name="name">website.track.view.graph</field>
         <field name="model">website.track</field>
         <field name="arch" type="xml">
             <graph string="Visitor Page Views">
@@ -25,7 +23,6 @@
     </record>
 
     <record id="website_visitor_page_view_search" model="ir.ui.view">
-        <field name="name">website.track.view.search</field>
         <field name="model">website.track</field>
         <field name="arch" type="xml">
             <search string="Search Visitor">
@@ -76,7 +73,6 @@
 
     <!-- website visitor views -->
     <record id="website_visitor_view_kanban" model="ir.ui.view">
-        <field name="name">website.visitor.view.kanban</field>
         <field name="model">website.visitor</field>
         <field name="arch" type="xml">
             <kanban class="o_wvisitor_kanban">
@@ -169,7 +165,6 @@
     </record>
 
     <record id="website_visitor_view_form" model="ir.ui.view">
-        <field name="name">website.visitor.view.form</field>
         <field name="model">website.visitor</field>
         <field name="arch" type="xml">
             <form string="Website Visitor">
@@ -221,7 +216,6 @@
     </record>
 
     <record id="website_visitor_view_tree" model="ir.ui.view">
-        <field name="name">website.visitor.view.tree</field>
         <field name="model">website.visitor</field>
         <field name="arch" type="xml">
             <tree string="Web Visitors" decoration-success="is_connected" decoration-danger="not is_connected">
@@ -242,7 +236,6 @@
     </record>
 
     <record id="website_visitor_view_search" model="ir.ui.view">
-        <field name="name">website.visitor.view.search</field>
         <field name="model">website.visitor</field>
         <field name="arch" type="xml">
             <search string="Search Visitor">
@@ -267,7 +260,6 @@
     </record>
 
     <record id="website_visitor_view_graph" model="ir.ui.view">
-        <field name="name">website.visitor.view.graph</field>
         <field name="model">website.visitor</field>
         <field name="arch" type="xml">
             <graph string="Visitors">
@@ -290,7 +282,6 @@
     </record>
 
     <record id="website_visitor_track_view_tree" model="ir.ui.view">
-        <field name="name">website.track.view.tree</field>
         <field name="model">website.track</field>
         <field name="arch" type="xml">
             <tree string="Visitor Views History" create="0" edit="0">
@@ -303,7 +294,6 @@
     </record>
 
     <record id="website_visitor_track_view_graph" model="ir.ui.view">
-        <field name="name">website.track.view.graph</field>
         <field name="model">website.track</field>
         <field name="arch" type="xml">
             <graph string="Visitor Views">

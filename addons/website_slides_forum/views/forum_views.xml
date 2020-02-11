@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="forum_forum_view_form" model="ir.ui.view">
-        <field name="name">forum.forum.view.form.inherit.slides</field>
         <field name="model">forum.forum</field>
         <field name="inherit_id" ref="website_forum.view_forum_forum_form"/>
         <field name="arch" type="xml">
@@ -34,7 +33,6 @@
     </record>
 
     <record id="forum_post_view_graph_slides" model="ir.ui.view">
-        <field name="name">forum.post.view.graph.slides</field>
         <field name="model">forum.post</field>
         <field name="arch" type="xml">
             <graph string="eLearning Forum Posts">

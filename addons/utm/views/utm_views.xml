@@ -31,7 +31,6 @@
 
 	<!-- utm.medium -->
     <record id="utm_medium_view_tree" model="ir.ui.view">
-        <field name="name">utm.medium.view.tree</field>
         <field name="model">utm.medium</field>
         <field name="arch" type="xml">
             <tree string="Mediums" editable="bottom">
@@ -42,7 +41,6 @@
     </record>
 
     <record id="utm_medium_view_form" model="ir.ui.view">
-        <field name="name">utm.medium.view.form</field>
         <field name="model">utm.medium</field>
         <field name="arch" type="xml">
             <form string="Medium">
@@ -57,7 +55,6 @@
     </record>
 
     <record id="utm_medium_view_search" model="ir.ui.view">
-        <field name="name">utm.medium.view.search</field>
         <field name="model">utm.medium</field>
         <field name="arch" type="xml">
             <search string="Search UTM Medium">
@@ -88,7 +85,6 @@
 
     <!-- utm.source -->
     <record id="utm_source_view_tree" model="ir.ui.view">
-        <field name="name">utm.source.view.tree</field>
         <field name="model">utm.source</field>
         <field name="arch" type="xml">
             <tree string="Source" editable="bottom">
@@ -98,7 +94,6 @@
     </record>
 
     <record id="utm_source_view_form" model="ir.ui.view">
-        <field name="name">utm.source.view.form</field>
         <field name="model">utm.source</field>
         <field name="arch" type="xml">
             <form string="Source">

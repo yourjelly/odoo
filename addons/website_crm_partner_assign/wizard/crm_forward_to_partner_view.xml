@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
         <record model="ir.ui.view" id="crm_lead_forward_to_partner_form">
-            <field name="name">crm_lead_forward_to_partner</field>
             <field name="model">crm.lead.forward.to.partner</field>
             <field name="arch" type="xml">
                 <form string="Send Mail">

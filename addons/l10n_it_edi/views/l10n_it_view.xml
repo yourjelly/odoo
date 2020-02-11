@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="fetchmail_server_form_l10n_it" model="ir.ui.view">
-        <field name="name">fetchmail.server.form.l10n.it</field>
         <field name="model">fetchmail.server</field>
         <field name="priority">20</field>
         <field name="inherit_id" ref="fetchmail.view_email_server_form"/>
@@ -15,7 +14,6 @@
     </record>
 
     <record id="account_tax_form_l10n_it" model="ir.ui.view">
-        <field name="name">account.tax.form.l10n.it</field>
         <field name="model">account.tax</field>
         <field name="priority">20</field>
         <field name="inherit_id" ref="account.view_tax_form"/>
@@ -34,7 +32,6 @@
     </record>
 
     <record id="res_partner_form_l10n_it" model="ir.ui.view">
-        <field name="name">res.partner.form.l10n.it</field>
         <field name="model">res.partner</field>
         <field name="priority">20</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
@@ -50,7 +47,6 @@
     </record>
 
     <record id="res_company_form_l10n_it" model="ir.ui.view">
-        <field name="name">res.company.form.l10n.it</field>
         <field name="model">res.company</field>
         <field name="priority">20</field>
         <field name="inherit_id" ref="base.view_company_form"/>
@@ -105,7 +101,6 @@
     </record>
 
     <record id="invoice_supplier_tree_l10n_it" model="ir.ui.view">
-        <field name="name">account.invoice.supplier.tree.l10n.it</field>
         <field name="model">account.move</field>
         <field name="priority">20</field>
         <field name="inherit_id" ref="account.view_move_tree"/>
@@ -124,7 +119,6 @@
     </record>
 
     <record id="invoice_kanban_l10n_it" model="ir.ui.view">
-        <field name="name">account.invoice.kanban.l10n.it</field>
         <field name="model">account.move</field>
         <field name="priority">20</field>
         <field name="inherit_id" ref="account.view_account_move_kanban"/>
@@ -145,7 +139,6 @@
     </record>
 
     <record id="account_invoice_form_l10n_it" model="ir.ui.view">
-        <field name="name">account.move.form.l10n.it</field>
         <field name="model">account.move</field>
         <field name="priority">20</field>
         <field name="inherit_id" ref="account.view_move_form"/>
@@ -187,7 +180,6 @@
     </record>
 
     <record id="view_account_invoice_filter_l10n_it" model="ir.ui.view">
-        <field name="name">account.invoice.select.l10n.it</field>
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_account_invoice_filter"/>
         <field name="arch" type="xml">
@@ -205,7 +197,6 @@
     </record>
 
     <record id="l10n_it_ddt" model="ir.ui.view">
-        <field name="name">ddt.form.l10n.it</field>
         <field name="model">l10n_it.ddt</field>
         <field name="arch" type="xml">
             <form>
@@ -218,7 +209,6 @@
     </record>
 
     <record id="l10n_it_ddt_list_view" model="ir.ui.view">
-      <field name="name">l10n_it.ddt.list.view</field>
       <field name="model">l10n_it.ddt</field>
       <field name="arch" type="xml">
         <tree>

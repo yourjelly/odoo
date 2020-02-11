@@ -4,7 +4,6 @@
 
         <!-- Sales Teams Search view -->
         <record id="crm_team_salesteams_search" model="ir.ui.view">
-            <field name="name">Sales Teams - Search</field>
             <field name="model">crm.team</field>
             <field name="arch" type="xml">
                 <search string="Salesteams Search">
@@ -54,7 +53,6 @@
         <!-- Sales Teams Form View -->
 
          <record id="crm_team_view_form" model="ir.ui.view">
-            <field name="name">crm.team.form</field>
             <field name="model">crm.team</field>
             <field name="arch" type="xml">
                 <form string="Sales Team">
@@ -111,7 +109,6 @@
 
         <!-- Sales Teams Tree View -->
         <record id="crm_team_view_tree" model="ir.ui.view">
-            <field name="name">crm.team.tree</field>
             <field name="model">crm.team</field>
             <field name="field_parent">child_ids</field>
             <field name="arch" type="xml">
@@ -127,7 +124,6 @@
 
         <!-- Sales Teams Kanban View -->
         <record id="crm_team_view_kanban" model="ir.ui.view">
-            <field name="name">crm.team.kanban</field>
             <field name="model">crm.team</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">

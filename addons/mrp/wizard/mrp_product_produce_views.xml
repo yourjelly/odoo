@@ -2,7 +2,6 @@
 <odoo>
 
         <record id="view_mrp_product_produce_wizard" model="ir.ui.view">
-            <field name="name">MRP Product Produce</field>
             <field name="model">mrp.product.produce</field>
             <field name="arch" type="xml">
                 <form string="Produce">
@@ -68,7 +67,6 @@
         </record>
 
         <record id="mrp_product_produce_line_form" model="ir.ui.view">
-            <field name="name">MRP Product Produce Line</field>
             <field name="model">mrp.product.produce.line</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
@@ -91,7 +89,6 @@
         </record>
 
         <record id="mrp_product_produce_line_kanban" model="ir.ui.view">
-            <field name="name">MRP Product Produce Line</field>
             <field name="model">mrp.product.produce.line</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">

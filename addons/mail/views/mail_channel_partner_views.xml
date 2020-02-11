@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record model="ir.ui.view" id="res_partner_view_form_short">
-            <field name="name">res.partner.view.form.short.inherit.mail</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_short_form" />
             <field name="priority" eval="20"/>

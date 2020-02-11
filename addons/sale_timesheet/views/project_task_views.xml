@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="project_project_view_form" model="ir.ui.view">
-        <field name="name">project.project.form.inherit</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="hr_timesheet.project_invoice_form"/>
         <field name="arch" type="xml">
@@ -46,7 +45,6 @@
     </record>
 
     <record id="project_project_view_form_simplified_inherit" model="ir.ui.view">
-        <field name="name">project.project.view.form.simplified.inherit</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="hr_timesheet.project_project_view_form_simplified_inherit"/>
         <field name="arch" type="xml">
@@ -60,7 +58,6 @@
     </record>
 
     <record id="project_project_view_kanban_inherit_sale_timesheet" model="ir.ui.view">
-        <field name="name">project.project.kanban.inherit.sale.timesheet</field>
         <field name="model">project.project</field>
         <field name="inherit_id" ref="hr_timesheet.view_project_kanban_inherited"/>
         <field name="arch" type="xml">
@@ -75,7 +72,6 @@
     </record>
 
         <record id="view_sale_service_inherit_form2" model="ir.ui.view">
-            <field name="name">sale.service.form.view.inherit</field>
             <field name="model">project.task</field>
             <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
             <field name="inherit_id" ref="project.view_task_form2"/>
@@ -95,7 +91,6 @@
         </record>
 
         <record id="project_task_view_form_inherit_sale_timesheet" model="ir.ui.view">
-            <field name="name">project.task.form.inherit.timesheet</field>
             <field name="model">project.task</field>
             <field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited"/>
             <field name="arch" type="xml">

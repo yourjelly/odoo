@@ -6,7 +6,6 @@
         <!--Partner Activation -->
 
         <record model="ir.ui.view" id="res_partner_activation_form">
-            <field name="name">res.partner.activation.form</field>
             <field name="model">res.partner.activation</field>
             <field name="arch" type="xml">
                 <form string="Activation">
@@ -20,7 +19,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="res_partner_activation_tree">
-            <field name="name">res.partner.activation.tree</field>
             <field name="model">res.partner.activation</field>
             <field name="arch" type="xml">
                 <tree string="Activation" editable="bottom">
@@ -42,7 +40,6 @@
     <!--Partner Level -->
 
     <record id="view_partner_grade_tree" model="ir.ui.view">
-        <field name="name">res.partner.grade.tree</field>
         <field name="model">res.partner.grade</field>
         <field name="arch" type="xml">
             <tree string="Partner Level">
@@ -53,7 +50,6 @@
     </record>
 
     <record id="view_partner_grade_form" model="ir.ui.view">
-        <field name="name">res.partner.grade.form</field>
         <field name="model">res.partner.grade</field>
         <field name="arch" type="xml">
             <form string="Partner Level">
@@ -78,7 +74,6 @@
     </record>
 
     <record id="res_partner_grade_view_search" model="ir.ui.view">
-        <field name="name">res.partner.grade.view.search</field>
         <field name="model">res.partner.grade</field>
         <field name="arch" type="xml">
             <search string="Search Partner Grade">
@@ -101,7 +96,6 @@
 
     <!-- Partner form -->
     <record id="view_res_partner_filter_assign_tree" model="ir.ui.view">
-        <field name="name">res.partner.geo.inherit.tree</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_tree"/>
         <field name="arch" type="xml">
@@ -114,7 +108,6 @@
     </record>
 
     <record id="view_res_partner_filter_assign" model="ir.ui.view">
-        <field name="name">res.partner.geo.inherit.search</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_res_partner_filter"/>
         <field name="arch" type="xml">
@@ -125,7 +118,6 @@
     </record>
 
     <record id="view_crm_partner_assign_form" model="ir.ui.view">
-        <field name="name">res.partner.assign.inherit</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base_geolocalize.view_crm_partner_geo_form"/>
         <field name="arch" type="xml">

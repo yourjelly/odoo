@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="crm_reveal_rule_form" model="ir.ui.view">
-        <field name="name">crm.reveal.rule.form</field>
         <field name="model">crm.reveal.rule</field>
         <field name="arch" type="xml">
             <form>
@@ -89,7 +88,6 @@
     </record>
 
     <record id="crm_reveal_rule_tree" model="ir.ui.view">
-        <field name="name">crm.reveal.rule.tree</field>
         <field name="model">crm.reveal.rule</field>
         <field name="arch" type="xml">
             <tree>
@@ -101,7 +99,6 @@
     </record>
 
     <record id="crm_reveal_rule_view_search" model="ir.ui.view">
-        <field name="name">crm.reveal.rule.view.search</field>
         <field name="model">crm.reveal.rule</field>
         <field name="arch" type="xml">
             <search string="Search CRM Reveal Rule">
@@ -127,7 +124,6 @@
     </record>
 
     <record id="crm_reveal_view_form" model="ir.ui.view">
-        <field name="name">crm.reveal.view.form</field>
         <field name="model">crm.reveal.view</field>
         <field name="arch" type="xml">
             <form>
@@ -147,7 +143,6 @@
     </record>
 
     <record id="crm_reveal_view_tree" model="ir.ui.view">
-        <field name="name">crm.reveal.view.tree</field>
         <field name="model">crm.reveal.view</field>
         <field name="arch" type="xml">
             <tree>

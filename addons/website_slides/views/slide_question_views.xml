@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="slide_question_view_form" model="ir.ui.view">
-        <field name="name">slide.question.view.form</field>
         <field name="model">slide.question</field>
         <field name="arch" type="xml">
             <form string="Quiz">
@@ -25,7 +24,6 @@
     </record>
 
     <record id="slide_question_view_tree" model="ir.ui.view">
-        <field name="name">slide.question.view.tree</field>
         <field name="model">slide.question</field>
         <field name="arch" type="xml">
             <tree string="Quizzes">
@@ -37,7 +35,6 @@
     </record>
 
     <record id="slide_question_view_tree_report" model="ir.ui.view">
-        <field name="name">slide.question.view.tree.report</field>
         <field name="model">slide.question</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
@@ -53,7 +50,6 @@
     </record>
 
     <record id="slide_question_view_search" model="ir.ui.view">
-        <field name="name">slide.question.view.search</field>
         <field name="model">slide.question</field>
         <field name="arch" type="xml">
             <search string="Quizzes">

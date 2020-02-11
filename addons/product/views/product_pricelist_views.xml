@@ -3,7 +3,6 @@
     <data>
 
         <record model="ir.ui.view" id="product_pricelist_item_view_search">
-            <field name="name">product.pricelist.item.search</field>
             <field name="model">product.pricelist.item</field>
             <field name="arch" type="xml">
                 <search string="Products Price Rules Search">
@@ -32,7 +31,6 @@
         </record>
 
         <record id="product_pricelist_item_tree_view" model="ir.ui.view">
-          <field name="name">product.pricelist.item.tree</field>
           <field name="model">product.pricelist.item</field>
           <field name="priority">10</field>
           <field name="arch" type="xml">
@@ -50,7 +48,6 @@
 
         <record id="product_pricelist_item_tree_view_from_product" model="ir.ui.view">
             <!-- Access and edit price rules from a given product/product variant -->
-            <field name="name">product.pricelist.item.tree</field>
             <field name="model">product.pricelist.item</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
@@ -88,7 +85,6 @@
         </record>
 
         <record id="product_pricelist_item_form_view" model="ir.ui.view">
-            <field name="name">product.pricelist.item.form</field>
             <field name="model">product.pricelist.item</field>
             <field name="arch" type="xml">
                 <form string="Pricelist Items">
@@ -170,7 +166,6 @@
         </record>
 
         <record model="ir.ui.view" id="product_pricelist_view_search">
-            <field name="name">product.pricelist.search</field>
             <field name="model">product.pricelist</field>
             <field name="arch" type="xml">
                 <search string="Products Price Search">
@@ -183,7 +178,6 @@
 
 
         <record id="product_pricelist_view_tree" model="ir.ui.view">
-            <field name="name">product.pricelist.tree</field>
             <field name="model">product.pricelist</field>
             <field name="arch" type="xml">
                 <tree string="Products Price List">
@@ -197,7 +191,6 @@
         </record>
 
         <record id="product_pricelist_view_kanban" model="ir.ui.view">
-            <field name="name">product.pricelist.kanban</field>
             <field name="model">product.pricelist</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -219,7 +212,6 @@
         </record>
 
         <record id="product_pricelist_view" model="ir.ui.view">
-            <field name="name">product.pricelist.form</field>
             <field name="model">product.pricelist</field>
             <field name="arch" type="xml">
                 <form string="Products Price List">
@@ -274,7 +266,6 @@
         </record>
 
         <record id="product_pricelist_view_inherit" model="ir.ui.view">
-            <field name="name">product.pricelist.form.inherit</field>
             <field name="model">product.pricelist</field>
             <field name="inherit_id" ref="product.product_pricelist_view"/>
             <field name="groups_id" eval="[(4, ref('product.group_sale_pricelist'))]"/>
@@ -301,7 +292,6 @@
         </record>
 
         <record model="ir.ui.view" id="inherits_website_sale_country_group_form">
-            <field name="name">website_sale.country_group.form</field>
             <field name="model">res.country.group</field>
             <field name="inherit_id" ref="base.view_country_group_form"/>
             <field name="arch" type="xml">

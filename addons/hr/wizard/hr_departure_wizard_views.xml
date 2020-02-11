@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="hr_departure_wizard_view_form" model="ir.ui.view">
-            <field name="name">hr.departure.wizard.view.form</field>
             <field name="model">hr.departure.wizard</field>
             <field name="arch" type="xml">
                 <form>

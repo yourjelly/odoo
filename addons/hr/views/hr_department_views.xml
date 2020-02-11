@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_department_form" model="ir.ui.view">
-            <field name="name">hr.department.form</field>
             <field name="model">hr.department</field>
             <field name="arch" type="xml">
                 <form string="department">
@@ -25,7 +24,6 @@
         </record>
 
         <record id="view_department_tree" model="ir.ui.view">
-            <field name="name">hr.department.tree</field>
             <field name="model">hr.department</field>
             <field name="arch" type="xml">
                 <tree string="Companies">
@@ -38,7 +36,6 @@
         </record>
 
         <record id="view_department_filter" model="ir.ui.view">
-            <field name="name">hr.department.search</field>
             <field name="model">hr.department</field>
             <field name="arch" type="xml">
                 <search string="Departments">
@@ -52,7 +49,6 @@
         </record>
 
         <record id="hr_department_view_kanban" model="ir.ui.view" >
-            <field name="name">hr.department.kanban</field>
             <field name="model">hr.department</field>
             <field name="arch" type="xml">
                 <kanban class="oe_background_grey o_kanban_dashboard o_hr_kanban">

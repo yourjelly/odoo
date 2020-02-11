@@ -83,7 +83,6 @@
             parent="menu_purchase_products" sequence="21" groups="product.group_product_variant"/>
 
         <record model="ir.ui.view" id="purchase_order_calendar">
-            <field name="name">purchase.order.calendar</field>
             <field name="model">purchase.order</field>
             <field name="priority" eval="2"/>
             <field name="arch" type="xml">
@@ -96,7 +95,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="purchase_order_pivot">
-            <field name="name">purchase.order.pivot</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <pivot string="Purchase Order" display_quantity="True">
@@ -106,7 +104,6 @@
             </field>
         </record>
         <record model="ir.ui.view" id="purchase_order_graph">
-            <field name="name">purchase.order.graph</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <graph string="Purchase Order">
@@ -117,7 +114,6 @@
         </record>
 
         <record id="purchase_order_form" model="ir.ui.view">
-            <field name="name">purchase.order.form</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <form string="Purchase Order" class="o_purchase_order">
@@ -354,7 +350,6 @@
         </record>
 
        <record id="view_purchase_order_filter" model="ir.ui.view">
-            <field name="name">request.quotation.select</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <search string="Search Purchase Order">
@@ -391,7 +386,6 @@
         </record>
 
         <record id="purchase_order_view_search" model="ir.ui.view">
-            <field name="name">purchase.order.select</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <search string="Search Purchase Order">
@@ -429,7 +423,6 @@
 
         <!-- Purchase Orders Kanban View  -->
         <record model="ir.ui.view" id="view_purchase_order_kanban">
-            <field name="name">purchase.order.kanban</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -467,7 +460,6 @@
         </record>
 
         <record id="purchase_order_tree" model="ir.ui.view">
-            <field name="name">purchase.order.tree</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <tree string="Purchase Order" multi_edit="1" decoration-bf="message_unread==True"
@@ -494,7 +486,6 @@
         </record>
 
         <record id="purchase_order_view_tree" model="ir.ui.view">
-            <field name="name">purchase.order.view.tree</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <tree decoration-bf="message_unread==True" decoration-muted="state=='cancel'" decoration-info="state in ('wait','confirmed')" string="Purchase Order" class="o_purchase_order">
@@ -518,7 +509,6 @@
         </record>
 
         <record id="purchase_order_view_activity" model="ir.ui.view">
-            <field name="name">purchase.order.activity</field>
             <field name="model">purchase.order</field>
             <field name="arch" type="xml">
                 <activity string="Purchase Order">
@@ -584,7 +574,6 @@
         <menuitem action="purchase_form_action" id="menu_purchase_form_action" parent="menu_procurement_management" sequence="6"/>
 
         <record id="purchase_order_line_tree" model="ir.ui.view">
-            <field name="name">purchase.order.line.tree</field>
             <field name="model">purchase.order.line</field>
             <field name="arch" type="xml">
                 <tree string="Purchase Order Lines" create="false">
@@ -602,7 +591,6 @@
         </record>
 
         <record id="purchase_order_line_form2" model="ir.ui.view">
-            <field name="name">purchase.order.line.form2</field>
             <field name="model">purchase.order.line</field>
             <field name="priority" eval="20"/>
             <field name="arch" type="xml">
@@ -642,7 +630,6 @@
             </field>
         </record>
           <record id="purchase_order_line_search" model="ir.ui.view">
-            <field name="name">purchase.order.line.search</field>
             <field name="model">purchase.order.line</field>
             <field name="arch" type="xml">
                 <search string="Search Purchase Order">

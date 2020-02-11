@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
         <record id="stock_move_purchase" model="ir.ui.view">
-            <field name="name">stock.move.form</field>
             <field name="model">stock.move</field>
             <field name="inherit_id" ref="stock.view_move_form"/>
             <field name="arch" type="xml">
@@ -12,7 +11,6 @@
         </record>
 
         <record id="view_warehouse_inherited" model="ir.ui.view">
-            <field name="name">Stock Warehouse Inherited</field>
             <field name="model">stock.warehouse</field>
             <field name="inherit_id" ref="stock.view_warehouse"/>
             <field name="arch" type="xml">

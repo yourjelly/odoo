@@ -4,7 +4,6 @@
             crm.lead.tag views
         -->
         <record id="crm_lead_tag_form" model="ir.ui.view">
-            <field name="name">crm.lead.tag.form</field>
             <field name="model">crm.lead.tag</field>
             <field name="arch" type="xml">
                 <form string="Lead Tags">
@@ -28,7 +27,6 @@
         </record>
 
         <record id="crm_lead_tag_tree" model="ir.ui.view">
-            <field name="name">crm.lead.tag.tree</field>
             <field name="model">crm.lead.tag</field>
             <field name="arch" type="xml">
                 <tree string="Lead Tags" editable="bottom">
@@ -39,7 +37,6 @@
         </record>
 
         <record id="crm_lead_view_form" model="ir.ui.view">
-            <field name="name">crm.lead.form</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <form class="o_lead_opportunity_form">
@@ -308,7 +305,6 @@
                 context="{'default_duration': 4.0, 'default_opportunity_id': active_id}"/>
 
         <record id="crm_case_tree_view_leads" model="ir.ui.view">
-            <field name="name">crm.lead.tree.lead</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <tree string="Leads" decoration-bf="message_needaction==True" decoration-muted="probability == 100">
@@ -341,7 +337,6 @@
         </record>
 
         <record id="view_crm_lead_kanban" model="ir.ui.view">
-            <field name="name">crm.lead.kanban</field>
             <field name="model">crm.lead</field>
             <field name="priority" eval="100"/>
             <field name="arch" type="xml">
@@ -390,7 +385,6 @@
         </record>
 
         <record  id="crm_case_calendar_view_leads" model="ir.ui.view">
-            <field name="name">crm.lead.calendar.lead</field>
             <field name="model">crm.lead</field>
             <field name="priority" eval="2"/>
             <field name="arch" type="xml">
@@ -403,7 +397,6 @@
         </record>
 
         <record id="quick_create_opportunity_form" model="ir.ui.view">
-            <field name="name">crm.lead.form.quick_create</field>
             <field name="model">crm.lead</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
@@ -434,7 +427,6 @@
         </record>
 
         <record id="crm_lead_view_activity" model="ir.ui.view">
-            <field name="name">crm.lead.view.activity</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <activity string="Leads or Opportunities">
@@ -454,7 +446,6 @@
         </record>
 
         <record id="crm_case_kanban_view_leads" model="ir.ui.view">
-            <field name="name">crm.lead.kanban.lead</field>
             <field name="model">crm.lead</field>
             <field name="priority" eval="1"/>
             <field name="arch" type="xml">
@@ -525,7 +516,6 @@
         </record>
 
         <record id="view_crm_case_leads_filter" model="ir.ui.view">
-            <field name="name">crm.lead.search.lead</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <search string="Search Leads">
@@ -587,7 +577,6 @@
         -->
 
         <record id="crm_case_tree_view_oppor" model="ir.ui.view">
-            <field name="name">crm.lead.tree.opportunity</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <tree string="Opportunities" decoration-bf="message_needaction==True" decoration-muted="probability == 100" decoration-danger="activity_date_deadline and (activity_date_deadline &lt; current_date)">
@@ -623,7 +612,6 @@
         </record>
 
         <record id="crm_lead_view_graph" model="ir.ui.view">
-            <field name="name">crm.lead.view.graph</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <graph string="Opportunities">
@@ -634,7 +622,6 @@
         </record>
 
         <record id="crm_lead_view_pivot" model="ir.ui.view">
-            <field name="name">crm.lead.view.pivot</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <pivot string="Pipeline Analysis">
@@ -646,7 +633,6 @@
         </record>
 
         <record id="crm_lead_view_tree_activity" model="ir.ui.view">
-            <field name="name">crm.lead.tree.opportunity.next.activity</field>
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <tree string="Next Activities" decoration-danger="activity_date_deadline and (activity_date_deadline &lt; current_date)">
@@ -663,7 +649,6 @@
         </record>
 
         <record id="view_crm_case_opportunities_filter" model="ir.ui.view">
-            <field name="name">crm.lead.search.opportunity</field>
             <field name="model">crm.lead</field>
             <field name="priority">15</field>
             <field name="arch" type="xml">

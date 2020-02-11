@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="quant_search_view" model="ir.ui.view">
-        <field name="name">stock.quant.search</field>
         <field name="model">stock.quant</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
@@ -34,7 +33,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_stock_quant_form">
-        <field name="name">stock.quant.form</field>
         <field name="model">stock.quant</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
@@ -71,7 +69,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_stock_quant_tree_editable">
-        <field name="name">stock.quant.tree.editable</field>
         <field name="model">stock.quant</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
@@ -110,7 +107,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_stock_quant_tree">
-        <field name="name">stock.quant.tree</field>
         <field name="model">stock.quant</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
@@ -131,7 +127,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_stock_quant_pivot">
-        <field name="name">stock.quant.pivot</field>
         <field name="model">stock.quant</field>
         <field name="arch" type="xml">
             <pivot string="Inventory">
@@ -143,7 +138,6 @@
     </record>
 
     <record id="stock_quant_view_graph" model="ir.ui.view">
-        <field name="name">stock.quant.graph</field>
         <field name="model">stock.quant</field>
         <field name="arch" type="xml">
             <graph string="Stock Quant">
@@ -180,7 +174,6 @@
     </record>
 
     <record id="quant_package_search_view" model="ir.ui.view">
-        <field name="name">stock.quant.package.search</field>
         <field name="model">stock.quant.package</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
@@ -197,7 +190,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_quant_package_form">
-        <field name="name">stock.quant.package.form</field>
         <field name="model">stock.quant.package</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
@@ -237,7 +229,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_quant_package_tree">
-        <field name="name">stock.quant.package.tree</field>
         <field name="model">stock.quant.package</field>
         <field eval="10" name="priority"/>
         <field name="arch" type="xml">
@@ -250,7 +241,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_quant_package_kanban">
-        <field name="name">stock.quant.package.kanban</field>
         <field name="model">stock.quant.package</field>
         <field name="arch" type="xml">
             <kanban>

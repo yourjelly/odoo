@@ -34,7 +34,6 @@
     </record>
 
     <record id="view_evaluation_report_graph" model="ir.ui.view">
-        <field name="name">hr.holidays.graph</field>
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
             <graph string="Appraisal Analysis" stacked="True">
@@ -47,7 +46,6 @@
     </record>
 
     <record id="view_hr_holidays_filter" model="ir.ui.view">
-        <field name="name">hr.holidays.filter</field>
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
             <search string="Search Time Off">
@@ -90,7 +88,6 @@
     </record>
 
     <record id="hr_leave_view_kanban" model="ir.ui.view">
-        <field name="name">hr.leave.view.kanban</field>
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" create="0">
@@ -161,7 +158,6 @@
      </record>
 
     <record id="hr_leave_view_activity" model="ir.ui.view">
-        <field name="name">hr.leave.view.activity</field>
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
             <activity string="Time Off Request">
@@ -189,7 +185,6 @@
     </record>
 
     <record id="hr_leave_view_form" model="ir.ui.view">
-        <field name="name">hr.leave.view.form</field>
         <field name="model">hr.leave</field>
         <field name="priority">32</field>
         <field name="arch" type="xml">
@@ -340,7 +335,6 @@
     </record>
 
     <record id="hr_leave_view_form_dashboard" model="ir.ui.view">
-        <field name="name">hr.leave.view.form.dashboard</field>
         <field name="model">hr.leave</field>
         <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
         <field name="mode">primary</field>
@@ -353,7 +347,6 @@
     </record>
 
     <record id="hr_leave_view_dashboard" model="ir.ui.view">
-        <field name="name">hr.leave.view.dashboard</field>
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
             <calendar js_class="time_off_calendar" string="Time Off Request" form_view_id="%(hr_holidays.hr_leave_view_form_dashboard)d" event_open_popup="true" date_start="date_from" date_stop="date_to" mode="month" quick_add="False" show_unusual_days="True" color="employee_id" hide_time="True">
@@ -364,7 +357,6 @@
     </record>
 
     <record id="hr_leave_view_form_manager" model="ir.ui.view">
-        <field name="name">hr.leave.view.form.manager</field>
         <field name="model">hr.leave</field>
         <field name="inherit_id" ref="hr_leave_view_form"/>
         <field name="mode">primary</field>
@@ -414,7 +406,6 @@
     </record>
 
     <record id="hr_leave_view_calendar" model="ir.ui.view">
-        <field name="name">hr.leave.view.calendar</field>
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
             <calendar string="Time Off Request" event_open_popup="true" date_start="date_from" date_stop="date_to" mode="month" quick_add="False" color="employee_id">
@@ -425,7 +416,6 @@
     </record>
 
     <record id="hr_leave_view_form_manager_approve" model="ir.ui.view">
-        <field name="name">hr.leave.view.form.manager.approve</field>
         <field name="model">hr.leave</field>
         <field name="inherit_id" ref="hr_leave_view_form"/>
         <field name="mode">primary</field>
@@ -463,7 +453,6 @@
     </record>
 
     <record id="hr_leave_view_tree" model="ir.ui.view">
-        <field name="name">hr.holidays.view.tree</field>
         <field name="model">hr.leave</field>
         <field name="arch" type="xml">
             <tree decoration-danger="state == 'refuse'" decoration-info="state == 'draft'" string="Time Off Requests"
@@ -500,7 +489,6 @@
     </record>
 
     <record id="hr_leave_view_tree_my" model="ir.ui.view">
-        <field name="name">hr.holidays.view.tree</field>
         <field name="model">hr.leave</field>
         <field name="inherit_id" ref="hr_leave_view_tree"/>
         <field name="mode">primary</field>
@@ -699,7 +687,6 @@
     </record>
 
     <record id="view_holiday_pivot" model="ir.ui.view">
-        <field name="name">hr.holidays.report_pivot</field>
         <field name="model">hr.leave</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
@@ -712,7 +699,6 @@
     </record>
 
     <record id="view_holiday_graph" model="ir.ui.view">
-        <field name="name">hr.holidays.report_graph</field>
         <field name="model">hr.leave</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">

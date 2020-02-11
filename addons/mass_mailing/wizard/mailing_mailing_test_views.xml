@@ -2,7 +2,6 @@
 <odoo>
 
         <record model="ir.ui.view" id="view_mail_mass_mailing_test_form">
-            <field name="name">mailing.mailing.test.form</field>
             <field name="model">mailing.mailing.test</field>
             <field name="arch" type="xml">
                 <form string="Send a Sample Mail">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record model="ir.ui.view" id="view_utm_campaign_view_search">
-        <field name="name">utm.campaign.view.search</field>
         <field name="model">utm.campaign</field>
         <field name="arch" type="xml">
             <search string="UTM Campaigns">
@@ -19,7 +18,6 @@
     </record>
 
     <record model="ir.ui.view" id="utm_campaign_view_form">
-        <field name="name">utm.campaign.view.form</field>
         <field name="model">utm.campaign</field>
         <field name="arch" type="xml">
             <form string="UTM Campaign">
@@ -42,7 +40,6 @@
     </record>
 
     <record model="ir.ui.view" id="utm_campaign_view_tree">
-        <field name="name">utm.campaign.view.tree</field>
         <field name="model">utm.campaign</field>
         <field name="arch" type="xml">
             <tree string="UTM Campaigns" multi_edit="1">
@@ -55,7 +52,6 @@
     </record>
 
     <record model="ir.ui.view" id="utm_campaign_view_kanban">
-        <field name="name">utm.campaign.view.kanban</field>
         <field name="model">utm.campaign</field>
         <field name="arch" type="xml">
             <kanban default_group_by='stage_id' class="o_utm_kanban">
@@ -108,7 +104,6 @@
 
     <!--  CAMPAIGN TAGS !-->
     <record id="utm_tag_view_tree" model="ir.ui.view">
-        <field name="name">utm.tag.view.tree</field>
         <field name="model">utm.tag</field>
         <field name="arch" type="xml">
             <tree string="Campaign Tags" editable="top">
@@ -131,7 +126,6 @@
 
     <!--  CAMPAIGN STAGE !-->
     <record model="ir.ui.view" id="utm_stage_view_search">
-        <field name="name">utm.stage.view.search</field>
         <field name="model">utm.stage</field>
         <field name="arch" type="xml">
             <search string="Stages">
@@ -141,7 +135,6 @@
     </record>
 
     <record model="ir.ui.view" id="utm_stage_view_tree">
-        <field name="name">utm.stage.view.tree</field>
         <field name="model">utm.stage</field>
         <field name="priority">10</field>
         <field name="arch" type="xml">

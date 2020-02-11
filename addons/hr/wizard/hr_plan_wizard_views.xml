@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="plan_wizard" model="ir.ui.view">
-            <field name="name">plan wizard</field>
             <field name="model">hr.plan.wizard</field>
             <field name="arch" type="xml">
                 <form>

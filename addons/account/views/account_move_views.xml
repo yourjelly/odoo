@@ -6,7 +6,6 @@
 
         <!-- account.move.line (Journal items) -->
         <record id="view_move_line_form" model="ir.ui.view">
-            <field name="name">account.move.line.form</field>
             <field name="model">account.move.line</field>
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
@@ -87,7 +86,6 @@
         </record>
 
         <record id="account_move_line_view_kanban" model="ir.ui.view">
-            <field name="name">account.move.line.kanban</field>
             <field name="model">account.move.line</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -120,7 +118,6 @@
         </record>
 
         <record id="view_move_line_pivot" model="ir.ui.view">
-            <field name="name">account.move.line.pivot</field>
             <field name="model">account.move.line</field>
             <field name="arch" type="xml">
                 <pivot string="Journal Items">
@@ -132,7 +129,6 @@
         </record>
 
         <record id="view_move_line_tree" model="ir.ui.view">
-            <field name="name">account.move.line.tree</field>
             <field name="model">account.move.line</field>
             <field eval="100" name="priority"/>
             <field name="arch" type="xml">
@@ -165,7 +161,6 @@
         </record>
 
         <record id="view_move_line_tree_grouped" model="ir.ui.view">
-            <field name="name">account.move.line.tree.grouped</field>
             <field name="model">account.move.line</field>
             <field eval="1" name="priority"/>
             <field name="arch" type="xml">
@@ -207,7 +202,6 @@
         </record>
 
         <record id="view_move_line_tree_grouped_sales_purchases" model="ir.ui.view">
-            <field name="name">account.move.line.tree.grouped.sales.purchase</field>
             <field name="model">account.move.line</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
@@ -222,7 +216,6 @@
         </record>
 
         <record id="view_move_line_tree_grouped_bank_cash" model="ir.ui.view">
-            <field name="name">account.move.line.tree.grouped.bank.cash</field>
             <field name="model">account.move.line</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
@@ -235,7 +228,6 @@
         </record>
 
         <record id="view_move_line_tree_grouped_misc" model="ir.ui.view">
-            <field name="name">account.move.line.tree.grouped.misc</field>
             <field name="model">account.move.line</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
@@ -246,7 +238,6 @@
         </record>
 
         <record id="view_move_line_tree_grouped_general" model="ir.ui.view">
-            <field name="name">account.move.line.tree.grouped.misc</field>
             <field name="model">account.move.line</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
@@ -264,7 +255,6 @@
 
 
         <record id="view_move_line_tree_grouped_partner" model="ir.ui.view">
-            <field name="name">account.move.line.tree.grouped.partner</field>
             <field name="model">account.move.line</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
@@ -279,7 +269,6 @@
         </record>
 
         <record id="view_move_line_tax_audit_tree" model="ir.ui.view">
-            <field name="name">account.move.line.tax.audit.tree</field>
             <field name="model">account.move.line</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="account.view_move_line_tree"/>
@@ -299,7 +288,6 @@
         </record>
 
         <record id="account_move_line_graph_date" model="ir.ui.view">
-            <field name="name">account.move.line.graph</field>
             <field name="model">account.move.line</field>
             <field name="arch" type="xml">
                 <graph string="Account Statistics" type="bar">
@@ -310,7 +298,6 @@
         </record>
 
         <record id="view_account_move_line_filter" model="ir.ui.view">
-            <field name="name">account.move.line.search</field>
             <field name="model">account.move.line</field>
             <field name="arch" type="xml">
                 <search string="Search Journal Items">
@@ -358,7 +345,6 @@
             </field>
         </record>
         <record id="view_account_move_line_filter_with_root_selection" model="ir.ui.view">
-            <field name="name">account.move.line.search</field>
             <field name="model">account.move.line</field>
             <field name="mode">primary</field>
             <field name="priority">20</field>
@@ -375,7 +361,6 @@
         <!-- account.move (Journal Entry) -->
 
         <record id="view_move_tree" model="ir.ui.view">
-            <field name="name">account.move.tree</field>
             <field name="model">account.move</field>
             <field name="arch" type="xml">
                 <tree decoration-info="state == 'draft'" string="Journal Entries" decoration-muted="state == 'cancel'">
@@ -393,7 +378,6 @@
         </record>
 
         <record id="view_invoice_tree" model="ir.ui.view">
-            <field name="name">account.invoice.tree</field>
             <field name="model">account.move</field>
             <field name="arch" type="xml">
                 <tree string="Invoices"
@@ -427,7 +411,6 @@
         </record>
 
         <record id="view_account_move_kanban" model="ir.ui.view">
-            <field name="name">account.move.kanban</field>
             <field name="model">account.move</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -470,7 +453,6 @@
         </record>
 
         <record id="view_move_form" model="ir.ui.view">
-            <field name="name">account.move.form</field>
             <field name="model">account.move</field>
             <field name="arch" type="xml">
                 <form string="Account Entry">
@@ -1038,7 +1020,6 @@
         </record>
 
         <record id="view_account_move_filter" model="ir.ui.view">
-            <field name="name">account.move.select</field>
             <field name="model">account.move</field>
             <field name="arch" type="xml">
                 <search string="Search Move">
@@ -1073,7 +1054,6 @@
         </record>
 
         <record id="view_account_invoice_filter" model="ir.ui.view">
-            <field name="name">account.invoice.select</field>
             <field name="model">account.move</field>
             <field name="arch" type="xml">
                 <search string="Search Invoice">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="lunch_supplier_view_tree" model="ir.ui.view">
-        <field name="name">lunch.supplier.view.tree</field>
         <field name="model">lunch.supplier</field>
         <field name="arch" type="xml">
             <tree>
@@ -13,7 +12,6 @@
     </record>
 
     <record id="lunch_supplier_view_form" model="ir.ui.view">
-        <field name="name">lunch.supplier.view.form</field>
         <field name="model">lunch.supplier</field>
         <field name="arch" type="xml">
             <form>
@@ -75,7 +73,6 @@
     </record>
 
     <record id="lunch_supplier_view_kanban" model="ir.ui.view">
-        <field name="name">lunch.supplier.view.kanban</field>
         <field name="model">lunch.supplier</field>
         <field name="arch" type="xml">
             <kanban>
@@ -103,7 +100,6 @@
     </record>
 
     <record id="lunch_supplier_view_search" model="ir.ui.view">
-        <field name="name">lunch.supplier.view.search</field>
         <field name="model">lunch.supplier</field>
         <field name="arch" type="xml">
             <search>

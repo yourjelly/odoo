@@ -2,7 +2,6 @@
 <odoo><data>
 
     <record model="ir.ui.view" id="mailing_mailing_view_search_sms">
-        <field name="name">mailing.mailing.search</field>
         <field name="model">mailing.mailing</field>
         <field name="inherit_id" ref="mass_mailing.view_mail_mass_mailing_search"/>
         <field name="mode">primary</field>
@@ -14,7 +13,6 @@
     </record>
 
     <record id="mailing_mailing_view_form_sms" model="ir.ui.view">
-        <field name="name">mailing.mailing.view.form.inherit.sms</field>
         <field name="model">mailing.mailing</field>
         <field name="inherit_id" ref="mass_mailing.view_mail_mass_mailing_form"/>
         <field name="arch" type="xml">
@@ -150,7 +148,6 @@
         <!-- View allowign to display the mailing type and therefore choosing
         the way of mailing: not prioritized one, used in some specific cases
         like "contacting people" without predefining mail or sms -->
-        <field name="name">mailing.mailing.view.form.mixed</field>
         <field name="model">mailing.mailing</field>
         <field name="mode">primary</field>
         <field name="priority">30</field>
@@ -163,7 +160,6 @@
     </record>
 
     <record id="mailing_mailing_view_kanban_sms" model="ir.ui.view">
-        <field name="name">mailing.mailing.view.kanban.inherit.sms</field>
         <field name="model">mailing.mailing</field>
         <field name="inherit_id" ref="mass_mailing.view_mail_mass_mailing_kanban"/>
         <field name="arch" type="xml">
@@ -185,7 +181,6 @@
     </record>
 
     <record id="mailing_mailing_view_tree_sms" model="ir.ui.view">
-        <field name="name">mailing.mailing.view.tree.sms</field>
         <field name="model">mailing.mailing</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">

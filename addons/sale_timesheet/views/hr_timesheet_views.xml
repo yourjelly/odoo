@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="timesheet_view_search" model="ir.ui.view">
-            <field name="name">account.analytic.line.search</field>
             <field name="model">account.analytic.line</field>
             <field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
             <field name="arch" type="xml">
@@ -22,7 +21,6 @@
     </record>
 
     <record id="timesheet_view_pivot_revenue" model="ir.ui.view">
-        <field name="name">account.analytic.line.pivot.revenue</field>
         <field name="model">account.analytic.line</field>
         <field name="arch" type="xml">
             <pivot string="Timesheet">
@@ -72,7 +70,6 @@
     </record>
 
     <record id="view_hr_timesheet_line_pivot_billing_rate" model="ir.ui.view">
-        <field name="name">account.analytic.line.pivot.billing.rate</field>
         <field name="model">account.analytic.line</field>
         <field name="arch" type="xml">
             <pivot string="Timesheet">

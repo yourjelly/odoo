@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <odoo><data>
     <record id="mail_notification_view_tree" model="ir.ui.view">
-        <field name="name">mail.notification.view.tree</field>
         <field name="model">mail.notification</field>
         <field name="arch" type="xml">
             <tree string="Notifications">
@@ -15,7 +14,6 @@
     </record>
 
     <record id="mail_notification_view_form" model="ir.ui.view">
-        <field name="name">mail.notification.view.form</field>
         <field name="model">mail.notification</field>
         <field name="arch" type="xml">
             <form string="Notification">

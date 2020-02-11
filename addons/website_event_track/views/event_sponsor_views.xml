@@ -3,7 +3,6 @@
 <data>
     <!-- EVENTS/CONFIGURATION/EVENT Sponsor Types -->
     <record id="event_sponsor_type_view_form" model="ir.ui.view">
-        <field name="name">Sponsor Types</field>
         <field name="model">event.sponsor.type</field>
         <field name="arch" type="xml">
             <form string="Event Sponsor Types">
@@ -18,7 +17,6 @@
     </record>
 
     <record id="event_sponsor_type_view_tree" model="ir.ui.view">
-        <field name="name">Sponsor Types</field>
         <field name="model">event.sponsor.type</field>
         <field name="arch" type="xml">
             <tree editable="bottom" string="Event Sponsor Type">
@@ -36,7 +34,6 @@
     <menuitem action="event_sponsor_type_action" groups="base.group_no_one" id="menu_event_sponsor_type" parent="event.menu_event_configuration"/>
 
     <record id="event_sponsor_view_search" model="ir.ui.view">
-        <field name="name">event.sponsor.search</field>
         <field name="model">event.sponsor</field>
         <field name="arch" type="xml">
             <search string="Event Sponsors">
@@ -47,7 +44,6 @@
     </record>
 
     <record id="event_sponsor_view_form" model="ir.ui.view">
-        <field name="name">event.sponsor.view.form</field>
         <field name="model">event.sponsor</field>
         <field name="arch" type="xml">
             <form>
@@ -78,7 +74,6 @@
     </record>
 
     <record id="event_sponsor_view_tree" model="ir.ui.view">
-        <field name="name">event.sponsor.view.tree</field>
         <field name="model">event.sponsor</field>
         <field name="arch" type="xml">
             <tree>
@@ -91,7 +86,6 @@
     </record>
 
     <record id="event_sponsor_view_kanban" model="ir.ui.view">
-        <field name="name">event.sponsor.view.kanban</field>
         <field name="model">event.sponsor</field>
         <field name="arch" type="xml">
             <kanban>

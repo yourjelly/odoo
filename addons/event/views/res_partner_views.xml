@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="res_partner_view_tree" model="ir.ui.view">
-            <field name="name">view.res.partner.form.event.inherited</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="groups_id" eval="[(5,)]"/>

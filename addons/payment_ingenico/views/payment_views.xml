@@ -3,7 +3,6 @@
     <data>
 
         <record id="acquirer_form_ogone" model="ir.ui.view">
-            <field name="name">acquirer.form.ogone</field>
             <field name="model">payment.acquirer</field>
             <field name="inherit_id" ref="payment.acquirer_form"/>
             <field name="arch" type="xml">

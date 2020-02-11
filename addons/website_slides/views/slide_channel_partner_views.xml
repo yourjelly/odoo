@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="slide_channel_partner_view_search" model="ir.ui.view">
-            <field name="name">slide.channel.partner.search</field>
             <field name="model">slide.channel.partner</field>
             <field name="arch" type="xml">
                 <search string="Channel Member">
@@ -21,7 +20,6 @@
         </record>
 
         <record id="slide_channel_partner_view_tree" model="ir.ui.view">
-            <field name="name">slide.channel.partner.tree</field>
             <field name="model">slide.channel.partner</field>
             <field name="arch" type="xml">
                 <tree string="Attendees" editable="top">

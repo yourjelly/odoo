@@ -3,7 +3,6 @@
 
     <!-- equiment.request : views -->
     <record id="hr_equipment_request_view_search" model="ir.ui.view">
-        <field name="name">equipment.request.search</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
             <search string="Maintenance Request Search">
@@ -47,7 +46,6 @@
     </record>
 
     <record id="hr_equipment_request_view_form" model="ir.ui.view">
-        <field name="name">equipment.request.form</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
             <form string="Maintenance Request">
@@ -107,7 +105,6 @@
     </record>
 
     <record id="hr_equipment_request_view_kanban" model="ir.ui.view">
-        <field name="name">equipment.request.kanban</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
             <kanban default_group_by="stage_id">
@@ -178,7 +175,6 @@
     </record>
 
     <record id="hr_equipment_request_view_tree" model="ir.ui.view">
-        <field name="name">equipment.request.tree</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
             <tree string="maintenance Request" multi_edit="1" decoration-bf="message_needaction==True">
@@ -196,7 +192,6 @@
     </record>
 
     <record id="hr_equipment_request_view_graph" model="ir.ui.view">
-        <field name="name">equipment.request.graph</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
             <graph string="maintenance Request">
@@ -207,7 +202,6 @@
     </record>
 
     <record id="hr_equipment_request_view_pivot" model="ir.ui.view">
-        <field name="name">equipment.request.pivot</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
             <pivot string="maintenance Request">
@@ -219,7 +213,6 @@
 
 
     <record id="hr_equipment_view_calendar" model="ir.ui.view">
-        <field name="name">equipment.request.calendar</field>
         <field name="model">maintenance.request</field>
         <field name="arch" type="xml">
             <calendar date_start="schedule_date" date_delay="duration" color="user_id" event_limit="5">
@@ -329,7 +322,6 @@
 
     <!-- equiment : views -->
     <record id="hr_equipment_view_form" model="ir.ui.view">
-        <field name="name">equipment.form</field>
         <field name="model">maintenance.equipment</field>
         <field name="arch" type="xml">
             <form string="Equipments">
@@ -408,7 +400,6 @@
     </record>
 
     <record id="hr_equipment_view_kanban" model="ir.ui.view">
-        <field name="name">equipment.kanban</field>
         <field name="model">maintenance.equipment</field>
         <field name="arch" type="xml">
             <kanban>
@@ -481,7 +472,6 @@
     </record>
 
     <record id="hr_equipment_view_tree" model="ir.ui.view">
-        <field name="name">equipment.tree</field>
         <field name="model">maintenance.equipment</field>
         <field name="arch" type="xml">
             <tree string="Assign To User"  decoration-bf="message_needaction==True">
@@ -501,7 +491,6 @@
     </record>
 
     <record id="hr_equipment_view_search" model="ir.ui.view">
-        <field name="name">equipment.search</field>
         <field name="model">maintenance.equipment</field>
         <field name="arch" type="xml">
             <search string="Search">
@@ -575,7 +564,6 @@
 
     <!-- equipment.category : views -->
     <record id="hr_equipment_category_view_form" model="ir.ui.view">
-        <field name="name">equipment.category.form</field>
         <field name="model">maintenance.equipment.category</field>
         <field name="arch" type="xml">
             <form string="Equipment Categories">
@@ -624,7 +612,6 @@
     </record>
 
     <record id="hr_equipment_category_view_tree" model="ir.ui.view">
-        <field name="name">equipment.category.tree</field>
         <field name="model">maintenance.equipment.category</field>
         <field name="arch" type="xml">
             <tree string="Assign To User">
@@ -636,7 +623,6 @@
     </record>
 
     <record id="hr_equipment_category_view_search" model="ir.ui.view">
-        <field name="name">equipment.category.search</field>
         <field name="model">maintenance.equipment.category</field>
         <field name="arch" type="xml">
             <search string="Search">
@@ -649,7 +635,6 @@
     </record>
 
     <record id="view_maintenance_equipment_category_kanban" model="ir.ui.view">
-        <field name="name">maintenance.equipment.category.kanban</field>
         <field name="model">maintenance.equipment.category</field>
         <field name="arch" type="xml">
             <kanban>
@@ -696,7 +681,6 @@
 
     <!-- equipment.stage : views -->
     <record id="hr_equipment_stage_view_search" model="ir.ui.view">
-        <field name="name">equipment.stage.search</field>
         <field name="model">maintenance.stage</field>
         <field name="arch" type="xml">
             <search string="Maintenance Request Stages">
@@ -706,7 +690,6 @@
     </record>
 
     <record id="hr_equipment_stage_view_tree" model="ir.ui.view">
-        <field name="name">equipment.stage.tree</field>
         <field name="model">maintenance.stage</field>
         <field name="arch" type="xml">
             <tree string="Maintenance Request Stage" editable="top">
@@ -718,7 +701,6 @@
         </field>
     </record>
     <record id="hr_equipment_stage_view_kanban" model="ir.ui.view">
-        <field name="name">equipment.stage.kanban</field>
         <field name="model">maintenance.stage</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -749,7 +731,6 @@
 
     <!-- maintenance.team: views -->
     <record id="maintenance_team_view_form" model="ir.ui.view">
-        <field name="name">maintenance.team.form</field>
         <field name="model">maintenance.team</field>
         <field name="arch" type="xml">
             <form string="Maintenance Team">
@@ -776,7 +757,6 @@
     </record>
 
     <record id="maintenance_team_view_tree" model="ir.ui.view">
-        <field name="name">maintenance.team.tree</field>
         <field name="model">maintenance.team</field>
         <field name="arch" type="xml">
             <tree string="Maintenance Team" editable="bottom">
@@ -788,7 +768,6 @@
     </record>
 
     <record id="maintenance_team_view_kanban" model="ir.ui.view">
-        <field name="name">maintenance.team.kanban</field>
         <field name="model">maintenance.team</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -806,7 +785,6 @@
     </record>
 
     <record id="maintenance_team_kanban" model="ir.ui.view">
-        <field name="name">maintenance.team.kanban</field>
         <field name="model">maintenance.team</field>
         <field name="arch" type="xml">
             <kanban class="oe_background_grey o_kanban_dashboard o_maintenance_team_kanban" create="0">
@@ -931,7 +909,6 @@
     </record>
 
     <record id="maintenance_team_view_search" model="ir.ui.view">
-        <field name="name">maintenance.team.search</field>
         <field name="model">maintenance.team</field>
         <field name="arch" type="xml">
             <search string="Search">

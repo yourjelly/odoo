@@ -3,7 +3,6 @@
 
         <!-- Blog views -->
         <record id="view_blog_blog_list" model="ir.ui.view">
-            <field name="name">blog.blog.list</field>
             <field name="model">blog.blog</field>
             <field name="arch" type="xml">
                 <tree string="Blogs">
@@ -14,7 +13,6 @@
             </field>
         </record>
         <record id="view_blog_blog_form" model="ir.ui.view">
-            <field name="name">blog.blog.form</field>
             <field name="model">blog.blog</field>
             <field name="arch" type="xml">
                 <form string="Blog">
@@ -37,7 +35,6 @@
 
         <!-- page list view  -->
         <record id="view_blog_post_list" model="ir.ui.view">
-            <field name="name">blog.post.list</field>
             <field name="model">blog.post</field>
             <field name="arch" type="xml">
                 <tree string="Blog Posts">
@@ -54,7 +51,6 @@
         </record>
         <!-- page form view  -->
         <record id="view_blog_post_form" model="ir.ui.view">
-            <field name="name">blog.post.form</field>
             <field name="model">blog.post</field>
             <field name="arch" type="xml">
                 <form string="Blog Post">
@@ -97,7 +93,6 @@
         </record>
         <!-- page search view  -->
         <record id="view_blog_post_search" model="ir.ui.view">
-            <field name="name">blog.post.search</field>
             <field name="model">blog.post</field>
             <field name="arch" type="xml">
                 <search string="Blog Post">
@@ -115,7 +110,6 @@
         </record>
 
         <record id="blog_post_view_kanban" model="ir.ui.view">
-            <field name="name">blog.post.kanban</field>
             <field name="model">blog.post</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -162,7 +156,6 @@
         </record>
 
         <record id="blog_blog_view_search" model="ir.ui.view">
-            <field name="name">blog.blog.search</field>
             <field name="model">blog.blog</field>
             <field name="arch" type="xml">
                 <search string="Blog">
@@ -179,7 +172,6 @@
         </record>
 
         <record id="blog_tag_tree" model="ir.ui.view">
-            <field name="name">blog_tag_tree</field>
             <field name="model">blog.tag</field>
             <field name="arch" type="xml">
                 <tree string="Tag List">
@@ -191,7 +183,6 @@
         </record>
 
         <record id="blog_tag_form" model="ir.ui.view">
-            <field name="name">blog_tag_form</field>
             <field name="model">blog.tag</field>
             <field name="arch" type="xml">
                 <form string="Tag Form">
@@ -215,7 +206,6 @@
         </record>
 
         <record id="blog_tag_category_form" model="ir.ui.view">
-            <field name="name">blog_tag_category_form</field>
             <field name="model">blog.tag.category</field>
             <field name="arch" type="xml">
                 <form string="Tag Category Form">
@@ -229,7 +219,6 @@
         </record>
 
         <record id="blog_tag_category_tree" model="ir.ui.view">
-            <field name="name">blog_tag_category_tree</field>
             <field name="model">blog.tag.category</field>
             <field name="arch" type="xml">
                 <tree string="Tag Categories">

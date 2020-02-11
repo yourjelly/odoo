@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_pos_mercury_configuration_form" model="ir.ui.view" >
-            <field name="name">Vantiv Configurations</field>
             <field name="model">pos_mercury.configuration</field>
             <field name="arch" type="xml">
                 <form string="Card Reader">
@@ -45,7 +44,6 @@
         </record>
 
         <record id="view_pos_mercury_configuration_tree" model="ir.ui.view">
-            <field name="name">Vantiv Configurations</field>
             <field name="model">pos_mercury.configuration</field>
             <field name="arch" type="xml">
                 <tree string="Card Reader">
@@ -68,7 +66,6 @@
         </record>
 
         <record id="pos_payment_method_view_form" model="ir.ui.view">
-            <field name="name">Payment Method</field>
             <field name="model">pos.payment.method</field>
             <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"></field>
             <field name="arch" type="xml">
@@ -79,7 +76,6 @@
         </record>
 
         <record id="view_pos_order" model="ir.ui.view">
-          <field name="name">POS orders</field>
           <field name="model">pos.order</field>
           <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
           <field name="arch" type="xml">

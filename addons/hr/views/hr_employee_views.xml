@@ -3,7 +3,6 @@
     <data>
 
         <record id="view_employee_filter" model="ir.ui.view">
-            <field name="name">hr.employee.search</field>
             <field name="model">hr.employee</field>
             <field name="arch" type="xml">
                 <search string="Employees">
@@ -35,7 +34,6 @@
         </record>
 
         <record id="view_employee_form" model="ir.ui.view">
-            <field name="name">hr.employee.form</field>
             <field name="model">hr.employee</field>
             <field name="arch" type="xml">
                 <form string="Employee" js_class="hr_employee_form">
@@ -198,7 +196,6 @@
         </record>
 
         <record id="view_employee_tree" model="ir.ui.view">
-            <field name="name">hr.employee.tree</field>
             <field name="model">hr.employee</field>
             <field name="arch" type="xml">
                 <tree string="Employees" multi_edit="1">
@@ -216,7 +213,6 @@
         </record>
 
         <record id="hr_kanban_view_employees" model="ir.ui.view">
-           <field name="name">hr.employee.kanban</field>
            <field name="model">hr.employee</field>
            <field name="priority">10</field>
            <field name="arch" type="xml">
@@ -261,7 +257,6 @@
         </record>
 
         <record id="hr_employee_view_activity" model="ir.ui.view">
-            <field name="name">hr.employee.activity</field>
             <field name="model">hr.employee</field>
             <field name="arch" type="xml">
                 <activity string="Employees">
@@ -317,7 +312,6 @@
 
         <!-- Employee tree by manager -->
         <record id="view_partner_tree2" model="ir.ui.view">
-            <field name="name">hr.employee.tree</field>
             <field name="model">hr.employee</field>
             <field name="priority" eval="20"/>
             <field name="arch" type="xml">

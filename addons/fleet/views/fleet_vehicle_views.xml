@@ -2,7 +2,6 @@
 <odoo>
 
     <record id='fleet_vehicle_view_form' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.form</field>
         <field name="model">fleet.vehicle</field>
         <field name="arch" type="xml">
             <form string="Vehicle">
@@ -126,7 +125,6 @@
     </record>
 
     <record id='fleet_vehicle_view_tree' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.tree</field>
         <field name="model">fleet.vehicle</field>
         <field name="arch" type="xml">
             <tree string="Vehicle" decoration-warning="contract_renewal_due_soon and not contract_renewal_overdue" decoration-danger="contract_renewal_overdue">
@@ -150,7 +148,6 @@
     </record>
 
     <record id="fleet_vehicle_view_search" model="ir.ui.view">
-        <field name="name">fleet.vehicle.search</field>
         <field name="model">fleet.vehicle</field>
         <field name="arch" type="xml">
             <search string="All vehicles">
@@ -187,7 +184,6 @@
 
 
     <record id='fleet_vehicle_view_kanban' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.kanban</field>
         <field name="model">fleet.vehicle</field>
         <field name="arch" type="xml">
             <kanban default_group_by="state_id">
@@ -258,7 +254,6 @@
     </record>
 
     <record id="fleet_vehicle_view_activity" model="ir.ui.view">
-        <field name="name">fleet.vehicle.activity</field>
         <field name="model">fleet.vehicle</field>
         <field name="arch" type="xml">
             <activity string="Vehicles">
@@ -293,7 +288,6 @@
     <menuitem action="fleet_vehicle_action" parent="fleet_vehicles" id="fleet_vehicle_menu" groups="fleet_group_user" sequence="1"/>
 
    <record id='fleet_vehicle_odometer_view_form' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.odometer.form</field>
         <field name="model">fleet.vehicle.odometer</field>
         <field name="arch" type="xml">
             <form string="Odometer Logs">
@@ -310,7 +304,6 @@
     </record>
 
     <record id='fleet_vehicle_odometer_view_tree' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.odometer.tree</field>
         <field name="model">fleet.vehicle.odometer</field>
         <field name="arch" type="xml">
             <tree string="Odometer Logs" editable="top">
@@ -324,7 +317,6 @@
     </record>
 
     <record id='fleet_vehicle_odometer_view_kanban' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.odometer.kanban</field>
         <field name="model">fleet.vehicle.odometer</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -349,7 +341,6 @@
     </record>
 
     <record id='fleet_vehicle_odometer_view_search' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.odometer.search</field>
         <field name="model">fleet.vehicle.odometer</field>
         <field name="arch" type="xml">
             <search string="Vehicles odometers" >
@@ -365,7 +356,6 @@
     </record>
 
     <record id="fleet_vehicle_odometer_view_graph" model="ir.ui.view">
-       <field name="name">fleet.vehicle.odometer.graph</field>
        <field name="model">fleet.vehicle.odometer</field>
        <field name="arch" type="xml">
             <graph string="Odometer Values Per Vehicle">
@@ -392,7 +382,6 @@
     <menuitem action="fleet_vehicle_odometer_action" parent="fleet_vehicles" id="fleet_vehicle_odometer_menu" groups="fleet_group_user" sequence="10"/>
 
     <record id='fleet_vehicle_service_types_view_tree' model='ir.ui.view'>
-        <field name="name">fleet.service.type.tree</field>
         <field name="model">fleet.service.type</field>
         <field name="arch" type="xml">
             <tree string="Service Types" editable="top">
@@ -416,7 +405,6 @@
     <menuitem action="fleet_vehicle_service_types_action" parent="fleet_configuration" id="fleet_vehicle_service_types_menu" sequence="3" groups="base.group_no_one"/>
 
     <record id='fleet_vehicle_state_view_tree' model='ir.ui.view'>
-        <field name="name">fleet.vehicle.state.tree</field>
         <field name="model">fleet.vehicle.state</field>
         <field name="arch" type="xml">
             <tree string="State" editable="bottom">
@@ -443,7 +431,6 @@
     <menuitem action="fleet_vehicle_state_action" parent="fleet_configuration" id="fleet_vehicle_state_menu" groups="base.group_no_one"/>
 
     <record id="fleet_vehicle_tag_view_view_form" model="ir.ui.view">
-        <field name="name">fleet.vehicle.tag.form</field>
         <field name="model">fleet.vehicle.tag</field>
         <field name="arch" type="xml">
             <form string="Vehicle Tags">
@@ -457,7 +444,6 @@
     </record>
 
     <record id="fleet_vehicle_tag_view_view_tree" model="ir.ui.view">
-        <field name="name">fleet.vehicle.tag.tree</field>
         <field name="model">fleet.vehicle.tag</field>
         <field name="arch" type="xml">
             <tree string="Vehicle Tags" editable="bottom">
@@ -479,7 +465,6 @@
     <menuitem id="fleet_vehicle_tag_menu" parent="fleet_configuration" action="fleet_vehicle_tag_action" sequence="89" groups="base.group_no_one"/>
 
     <record id="fleet_vehicle_assignation_log_view_list" model="ir.ui.view">
-        <field name="name">fleet.vehicle.assignation.log.view.tree</field>
         <field name="model">fleet.vehicle.assignation.log</field>
         <field name="arch" type="xml">
             <tree string="Assignation Logs" editable="bottom">

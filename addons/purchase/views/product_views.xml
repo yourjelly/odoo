@@ -3,7 +3,6 @@
 
         <!-- Product Suppliers-->
         <record id="product_supplierinfo_tree_view2" model="ir.ui.view">
-            <field name="name">product.supplierinfo.tree.view2</field>
             <field name="model">product.supplierinfo</field>
             <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
             <field name="mode">primary</field>
@@ -29,7 +28,6 @@
         </record>
 
         <record id="view_product_supplier_inherit" model="ir.ui.view">
-            <field name="name">product.template.supplier.form.inherit</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
@@ -61,7 +59,6 @@
         </record>
 
         <record id="view_category_property_form" model="ir.ui.view">
-            <field name="name">product.category.property.form.inherit.stock</field>
             <field name="model">product.category</field>
             <field name="inherit_id" ref="account.view_category_property_form"/>
             <field name="arch" type="xml">
@@ -72,7 +69,6 @@
         </record>
 
         <record id="view_product_account_purchase_ok_form" model="ir.ui.view">
-            <field name="name">product.template.account.purchase.ok.form.inherit</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="account.product_template_form_view"/>
             <field name="arch" type="xml">
@@ -86,7 +82,6 @@
         </record>
 
         <record id="view_product_template_purchase_buttons_from" model="ir.ui.view">
-            <field name="name">product.template.purchase.button.inherit</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
             <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>
@@ -107,7 +102,6 @@
         </record>
 
         <record id="product_template_form_view" model="ir.ui.view">
-            <field name="name">product.normal.form.inherit.stock</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="account.product_template_form_view"/>
             <field name="arch" type="xml">
@@ -118,7 +112,6 @@
         </record>
 
         <record id="product_normal_form_view_inherit_purchase" model="ir.ui.view">
-            <field name="name">product.product.purchase.order</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
             <field name="groups_id" eval="[(4, ref('purchase.group_purchase_user'))]"/>

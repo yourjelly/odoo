@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_move_line_tree" model="ir.ui.view">
-        <field name="name">stock.move.line.tree</field>
         <field name="model">stock.move.line</field>
         <field name="arch" type="xml">
             <tree decoration-muted="state == 'cancel'" decoration-danger="(state not in ('cancel','done'))" string="Move Lines" create="0" default_order="date">
@@ -20,7 +19,6 @@
         </field>
     </record>
     <record id="view_move_line_form" model="ir.ui.view">
-        <field name="name">stock.move.line.form</field>
         <field name="model">stock.move.line</field>
         <field name="arch" type="xml">
             <form string="Move Lines" create="0" edit="0">
@@ -64,7 +62,6 @@
     </record>
 
     <record id="stock_move_line_view_search" model="ir.ui.view">
-        <field name="name">stock.move.line.search</field>
         <field name="model">stock.move.line</field>
         <field name="arch" type="xml">
             <search string="Stock Moves">
@@ -92,7 +89,6 @@
     </record>
 
     <record id="view_stock_move_line_kanban" model="ir.ui.view">
-        <field name="name">stock.move.line.kanban</field>
         <field name="model">stock.move.line</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">

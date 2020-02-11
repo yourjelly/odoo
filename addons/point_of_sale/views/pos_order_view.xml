@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_pos_pos_form" model="ir.ui.view">
-        <field name="name">pos.order.form</field>
         <field name="model">pos.order</field>
         <field name="arch" type="xml">
             <form string="Point of Sale Orders" create="0">
@@ -129,7 +128,6 @@
     </record>
 
     <record model="ir.ui.view" id="view_pos_order_kanban">
-        <field name="name">pos.order.kanban</field>
         <field name="model">pos.order</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" create="0">
@@ -176,7 +174,6 @@
         </field>
     </record>
     <record model="ir.ui.view" id="view_pos_order_pivot">
-        <field name="name">pos.order.pivot</field>
         <field name="model">pos.order</field>
         <field name="arch" type="xml">
             <pivot string="PoS Orders">
@@ -211,7 +208,6 @@
     </record>
 
     <record id="view_pos_order_tree" model="ir.ui.view">
-        <field name="name">pos.order.tree</field>
         <field name="model">pos.order</field>
         <field name="arch" type="xml">
             <tree string="POS Orders" decoration-info="state == 'draft'" decoration-muted="state in ('done','cancel')" create="0">
@@ -228,7 +224,6 @@
         </field>
     </record>
     <record id="view_pos_order_tree_no_session_id" model="ir.ui.view">
-        <field name="name">pos.order.tree_no_session_id</field>
         <field name="model">pos.order</field>
         <field name="mode">primary</field>
         <field name="priority">1000</field>
@@ -239,7 +234,6 @@
     </record>
 
     <record id="view_pos_order_search" model="ir.ui.view">
-        <field name="name">pos.order.search.view</field>
         <field name="model">pos.order</field>
         <field name="arch" type="xml">
             <search string="Point of Sale Orders">
@@ -252,7 +246,6 @@
     <menuitem id="menu_point_ofsale" parent="menu_point_of_sale" action="action_pos_pos_form" sequence="2" groups="group_pos_manager,group_pos_user"/>
 
     <record id="view_pos_order_line" model="ir.ui.view">
-        <field name="name">pos.order.line.tree</field>
         <field name="model">pos.order.line</field>
         <field name="arch" type="xml">
             <tree string="POS Order lines">
@@ -268,7 +261,6 @@
     </record>
 
     <record id="view_pos_order_line_form" model="ir.ui.view">
-        <field name="name">pos.order.line.form</field>
         <field name="model">pos.order.line</field>
         <field name="arch" type="xml">
             <form string="POS Order line">
@@ -309,7 +301,6 @@
     </record>
 
     <record id="view_pos_order_tree_all_sales_lines" model="ir.ui.view">
-        <field name="name">pos.order.line.all.sales.tree</field>
         <field name="model">pos.order.line</field>
         <field name="arch" type="xml">
             <tree string="POS Orders lines">
@@ -329,7 +320,6 @@
     </record>
 
     <record id="view_pos_order_filter" model="ir.ui.view">
-        <field name="name">pos.order.list.select</field>
         <field name="model">pos.order</field>
         <field name="arch" type="xml">
             <search string="Search Sales Order">
@@ -355,7 +345,6 @@
     </record>
 
     <record id="pos_rounding_form_view_inherited" model="ir.ui.view">
-        <field name="name">pos.cash.rounding.form.inherited</field>
         <field name="model">account.cash.rounding</field>
         <field name="inherit_id" ref="account.rounding_form_view"/>
         <field name="arch" type="xml">

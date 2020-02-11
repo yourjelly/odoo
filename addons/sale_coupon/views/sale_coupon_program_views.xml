@@ -3,7 +3,6 @@
 
     <!-- Common form view between the coupon programs and the promotion programs -->
     <record id="sale_coupon_program_view_form_common" model="ir.ui.view">
-        <field name="name">sale.coupon.program.common.form</field>
         <field name="model">sale.coupon.program</field>
         <field name="arch" type="xml">
             <form string="Coupon Program">
@@ -74,7 +73,6 @@
 
     <!-- Coupon Program -->
     <record id="sale_coupon_program_view_form" model="ir.ui.view">
-        <field name="name">sale.coupon.program.form</field>
         <field name="model">sale.coupon.program</field>
         <field name="inherit_id" ref="sale_coupon_program_view_form_common"/>
         <field name="mode">primary</field>
@@ -107,7 +105,6 @@
     </record>
 
     <record id="sale_coupon_program_view_tree" model="ir.ui.view">
-        <field name="name">sale.coupon.program.tree</field>
         <field name="model">sale.coupon.program</field>
         <field name="arch" type="xml">
             <tree>
@@ -120,7 +117,6 @@
     </record>
 
     <record id="sale_coupon_program_view_search" model="ir.ui.view">
-        <field name="name">sale.coupon.program.search</field>
         <field name="model">sale.coupon.program</field>
         <field name="arch" type="xml">
             <search>
@@ -134,7 +130,6 @@
     </record>
 
     <record id="view_sale_coupon_program_kanban" model="ir.ui.view">
-        <field name="name">sale.coupon.program.kanban</field>
         <field name="model">sale.coupon.program</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile">
@@ -194,7 +189,6 @@
     <!-- Promotion Program -->
 
     <record id="sale_coupon_program_view_promo_program_form" model="ir.ui.view">
-        <field name="name">sale.coupon.promotion.program.form</field>
         <field name="model">sale.coupon.program</field>
         <field name="inherit_id" ref="sale_coupon_program_view_form_common"/>
         <field name="mode">primary</field>
@@ -237,7 +231,6 @@
     </record>
 
     <record id="sale_coupon_program_view_promo_program_tree" model="ir.ui.view">
-        <field name="name">sale.coupon.promotion.program.tree</field>
         <field name="model">sale.coupon.program</field>
         <field name="arch" type="xml">
             <tree>
@@ -250,7 +243,6 @@
     </record>
 
     <record id="sale_coupon_program_view_promo_program_search" model="ir.ui.view">
-        <field name="name">sale.coupon.promotion.program.search</field>
         <field name="model">sale.coupon.program</field>
         <field name="arch" type="xml">
             <search>

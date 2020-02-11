@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="crm_iap_lead_mining_request_form" model="ir.ui.view">
-        <field name="name">crm.iap.lead.mining.request.form</field>
         <field name="model">crm.iap.lead.mining.request</field>
         <field name="arch" type="xml">
             <form>
@@ -112,7 +111,6 @@
     </record>
 
     <record id="crm_iap_lead_mining_request_tree" model="ir.ui.view">
-        <field name="name">crm.iap.lead.mining.request.tree</field>
         <field name="model">crm.iap.lead.mining.request</field>
         <field name="arch" type="xml">
             <tree>
@@ -130,7 +128,6 @@
     </record>
 
     <record id="crm_iap_lead_mining_request_search" model="ir.ui.view">
-        <field name="name">crm.iap.lead.mining.request.search</field>
         <field name="model">crm.iap.lead.mining.request</field>
         <field name="arch" type="xml">
             <search string="Lead Mining Request">

@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="project_create_invoice_view_form" model="ir.ui.view">
-        <field name="name">project.create.invoice.view.form</field>
         <field name="model">project.create.invoice</field>
         <field name="arch" type="xml">
             <form string="Create Sales Order from Project">

@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="view_document_type_form" model="ir.ui.view">
-        <field name="name">l10n_latam.document.type.form</field>
         <field name="model">l10n_latam.document.type</field>
         <field name="arch" type="xml">
             <form string="Document Type" create="0" edit="0">
@@ -19,7 +18,6 @@
     </record>
 
     <record id="view_document_type_tree" model="ir.ui.view">
-        <field name="name">l10n_latam.document.type.tree</field>
         <field name="model">l10n_latam.document.type</field>
         <field name="arch" type="xml">
             <tree string="Document Type" decoration-muted="(not active)" create="0" edit="0">
@@ -35,7 +33,6 @@
     </record>
 
     <record id="view_document_type_filter" model="ir.ui.view">
-        <field name="name">l10n_latam.document.type.filter</field>
         <field name="model">l10n_latam.document.type</field>
         <field name="arch" type="xml">
             <search string="Document Type">

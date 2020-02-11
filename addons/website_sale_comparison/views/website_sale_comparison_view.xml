@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="product_attribute_category_tree_view" model="ir.ui.view">
-        <field name="name">product.attribute.category.tree</field>
         <field name="model">product.attribute.category</field>
         <field name="arch" type="xml">
             <tree string="Product Attribute Category" editable="bottom">
@@ -25,7 +24,6 @@
         parent="website_sale.menu_product_settings" groups="product.group_product_variant" sequence="11"/>
 
     <record id="product_attribute_tree_view_inherit" model="ir.ui.view">
-        <field name="name">product.attribute.tree.inherit</field>
         <field name="model">product.attribute</field>
         <field name="inherit_id" ref="product.attribute_tree_view"/>
         <field name="arch" type="xml">
@@ -36,7 +34,6 @@
     </record>
 
     <record id="product_attribute_view_form" model="ir.ui.view">
-        <field name="name">product.attribute.form.inherit</field>
         <field name="model">product.attribute</field>
         <field name="inherit_id" ref="product.product_attribute_view_form"/>
         <field name="priority" eval="8"/>

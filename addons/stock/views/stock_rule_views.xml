@@ -6,7 +6,6 @@
         -->
 
         <record id="procurement_group_form_view" model="ir.ui.view">
-            <field name="name">procurement.group.form</field>
             <field name="model">procurement.group</field>
             <field name="arch" type="xml">
                 <form string="Procurement group">
@@ -26,7 +25,6 @@
         <!-- Stock Rules -->
 
         <record id="view_stock_rule_filter" model="ir.ui.view">
-            <field name="name">stock.rule.select</field>
             <field name="model">stock.rule</field>
             <field name="arch" type="xml">
                 <search string="Search Procurement">
@@ -42,7 +40,6 @@
 
         <!-- <Rules> -->
         <record id="view_stock_rule_tree" model="ir.ui.view">
-            <field name="name">stock.rule.tree</field>
             <field name="model">stock.rule</field>
             <field name="arch" type="xml">
                 <tree string="Rules">
@@ -56,7 +53,6 @@
         </record>
 
         <record id="view_stock_rule_form" model="ir.ui.view">
-            <field name="name">stock.rule.form</field>
             <field name="model">stock.rule</field>
             <field name="arch" type="xml">
                 <form string="Rules">
@@ -121,7 +117,6 @@
         <!-- Form view for route -->
 
         <record id="view_route_rule_form" model="ir.ui.view">
-            <field name="name">stock.rule.form</field>
             <field name="model">stock.rule</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="stock.view_stock_rule_form"/>

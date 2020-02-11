@@ -1,6 +1,5 @@
 <odoo>
     <record id="account_journal_dashboard_kanban_view" model="ir.ui.view">
-        <field name="name">account.journal.dashboard.kanban</field>
         <field name="model">account.journal</field>
         <field name="arch" type="xml">
             <kanban create="false" class="oe_background_grey o_kanban_dashboard o_account_kanban" banner_route="/account/account_dashboard_onboarding" js_class="account_dashboard_kanban">

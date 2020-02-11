@@ -5,7 +5,6 @@
         view_mode="form" target="new"/>
 
     <record id="view_stock_return_picking_form" model="ir.ui.view">
-        <field name="name">Return lines</field>
         <field name="model">stock.return.picking</field>
         <field name="arch" type="xml">
             <form>

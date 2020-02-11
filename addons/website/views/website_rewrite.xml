@@ -32,7 +32,6 @@
         </record>
 
         <record id="action_website_rewrite_tree" model="ir.ui.view">
-            <field name="name">website.rewrite.list</field>
             <field name="model">website.rewrite</field>
             <field name="arch" type="xml">
                 <tree string="Website rewrites">
@@ -63,7 +62,6 @@
             groups="base.group_no_one"/>
 
         <record id="view_rewrite_search" model="ir.ui.view">
-            <field name="name">website.rewrite.search</field>
             <field name="model">website.rewrite</field>
             <field name="arch" type="xml">
                 <search string="Search Redirect">

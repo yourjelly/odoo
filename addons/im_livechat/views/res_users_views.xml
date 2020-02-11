@@ -4,7 +4,6 @@
 
         <!-- Update Preferences form !-->
         <record id="res_users_form_view_simple_modif" model="ir.ui.view">
-            <field name="name">res.users.preferences.form.im_livechat</field>
             <field name="model">res.users</field>
             <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
             <field name="arch" type="xml">
@@ -16,7 +15,6 @@
 
         <!-- Update user form !-->
         <record id="res_users_form_view" model="ir.ui.view">
-            <field name="name">res.users.form.im_livechat</field>
             <field name="model">res.users</field>
             <field name="inherit_id" ref="base.view_users_form"/>
             <field name="arch" type="xml">

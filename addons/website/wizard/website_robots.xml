@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="view_edit_robots" model="ir.ui.view">
-        <field name="name">Edit Robots.txt</field>
         <field name="model">website.robots</field>
         <field name="arch" type="xml">
             <form>

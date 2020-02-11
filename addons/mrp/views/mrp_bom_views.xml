@@ -9,7 +9,6 @@
         </record>
 
         <record id="mrp_bom_byproduct_form_view" model="ir.ui.view">
-            <field name="name">mrp.bom.byproduct.form</field>
             <field name="model">mrp.bom.byproduct</field>
             <field name="arch" type="xml">
                 <form string="Byproduct">
@@ -29,7 +28,6 @@
         </record>
 
         <record id="mrp_bom_form_view" model="ir.ui.view">
-            <field name="name">mrp.bom.form</field>
             <field name="model">mrp.bom</field>
             <field name="priority">100</field>
             <field name="arch" type="xml">
@@ -129,7 +127,6 @@
         </record>
 
         <record id="mrp_bom_tree_view" model="ir.ui.view">
-            <field name="name">mrp.bom.tree</field>
             <field name="model">mrp.bom</field>
             <field name="arch" type="xml">
                 <tree string="Bill of Materials">
@@ -148,7 +145,6 @@
         </record>
 
         <record id="mrp_bom_kanban_view" model="ir.ui.view">
-            <field name="name">mrp.bom.kanban</field>
             <field name="model">mrp.bom</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -172,7 +168,6 @@
         </record>
 
         <record id="view_mrp_bom_filter" model="ir.ui.view">
-            <field name="name">mrp.bom.select</field>
             <field name="model">mrp.bom</field>
             <field name="arch" type="xml">
                 <search string="Search Bill Of Material">
@@ -219,7 +214,6 @@
 
         <!-- BOM Line -->
         <record id="mrp_bom_line_view_form" model="ir.ui.view">
-            <field name="name">mrp.bom.line.view.form</field>
             <field name="model">mrp.bom.line</field>
             <field name="arch" type="xml">
                 <form string="Bill of Material line" create="0" edit="0">

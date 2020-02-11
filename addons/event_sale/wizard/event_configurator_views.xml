@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="event_configurator_view_form" model="ir.ui.view">
-        <field name="name">event.configurator.view.form</field>
         <field name="model">event.event.configurator</field>
         <field name="arch" type="xml">
             <form js_class="event_configurator_form">

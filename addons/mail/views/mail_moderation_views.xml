@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="mail_moderation_view_tree" model="ir.ui.view">
-            <field name="name">mail.moderation.view.tree</field>
             <field name="model">mail.moderation</field>
             <field name="priority">20</field>
             <field name="arch" type="xml">
@@ -15,7 +14,6 @@
         </record>
 
         <record id="mail_moderation_view_search" model="ir.ui.view">
-            <field name="name">mail.moderation.view.search</field>
             <field name="model">mail.moderation</field>
             <field name="priority">25</field>
             <field name="arch" type="xml">

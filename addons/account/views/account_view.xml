@@ -2,7 +2,6 @@
 <odoo>
     <data>
         <record id="view_account_form" model="ir.ui.view">
-            <field name="name">account.account.form</field>
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <form string="Account">
@@ -47,7 +46,6 @@
         </record>
 
         <record id="view_account_list" model="ir.ui.view">
-            <field name="name">account.account.list</field>
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <tree editable="top" create="1" delete="1" multi_edit="1" string="Chart of accounts">
@@ -66,7 +64,6 @@
         </record>
 
         <record id="view_account_account_kanban" model="ir.ui.view">
-            <field name="name">account.account.kanban</field>
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -95,7 +92,6 @@
         </record>
 
         <record id="view_account_search" model="ir.ui.view">
-            <field name="name">account.account.search</field>
             <field name="model">account.account</field>
             <field name="arch" type="xml">
                 <search string="Accounts">
@@ -158,7 +154,6 @@
 
         <!-- Account Journal -->
         <record id="view_account_journal_tree" model="ir.ui.view">
-            <field name="name">account.journal.tree</field>
             <field name="model">account.journal</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -173,7 +168,6 @@
         </record>
 
         <record id="account_journal_view_kanban" model="ir.ui.view">
-            <field name="name">account.journal.kanban</field>
             <field name="model">account.journal</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -197,7 +191,6 @@
         </record>
 
         <record id="view_account_journal_search" model="ir.ui.view">
-            <field name="name">account.journal.search</field>
             <field name="model">account.journal</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -216,7 +209,6 @@
         </record>
 
         <record id="view_account_journal_group_tree" model="ir.ui.view">
-            <field name="name">account.journal.group.tree</field>
             <field name="model">account.journal.group</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -230,7 +222,6 @@
         </record>
 
         <record id="view_account_journal_group_form" model="ir.ui.view">
-            <field name="name">account.journal.group.form</field>
             <field name="model">account.journal.group</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -248,7 +239,6 @@
         </record>
 
         <record id="view_account_journal_form" model="ir.ui.view">
-            <field name="name">account.journal.form</field>
             <field name="model">account.journal</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -346,7 +336,6 @@
         </record>
 
         <record id="view_company_partner_bank_form" model="ir.ui.view">
-            <field name="name">company.res.partner.bank.form</field>
             <field name="model">res.partner.bank</field>
             <field name="inherit_id" ref="base.view_partner_bank_form"/>
             <field name="mode">primary</field>
@@ -403,7 +392,6 @@ action = model.setting_init_bank_account_action()
 
         <!-- Tags -->
         <record id="account_tag_view_form" model="ir.ui.view">
-            <field name="name">Tags</field>
             <field name="model">account.account.tag</field>
             <field name="arch" type="xml">
                 <form string="Tags">
@@ -423,7 +411,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="account_tag_view_tree" model="ir.ui.view">
-            <field name="name">Tags</field>
             <field name="model">account.account.tag</field>
             <field name="arch" type="xml">
                 <tree string="Tags">
@@ -434,7 +421,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="account_tag_view_search" model="ir.ui.view">
-            <field name="name">account.tag.view.search</field>
             <field name="model">account.account.tag</field>
             <field name="arch" type="xml">
                 <search>
@@ -459,7 +445,6 @@ action = model.setting_init_bank_account_action()
         <!-- Bank statement -->
 
         <record id="view_account_bnk_stmt_cashbox" model="ir.ui.view">
-            <field name="name">account.bnk_stmt_cashbox.form</field>
             <field name="model">account.bank.statement.cashbox</field>
             <field name="arch" type="xml">
                 <form>
@@ -490,7 +475,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_bnk_stmt_cashbox_footer" model="ir.ui.view">
-            <field name="name">account.bnk_stmt_cashbox.form</field>
             <field name="model">account.bank.statement.cashbox</field>
             <field name="priority">1000</field>
             <field name="mode">primary</field>
@@ -506,7 +490,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_bnk_stmt_check" model="ir.ui.view">
-            <field name="name">account.bnk_stmt_check.form</field>
             <field name="model">account.bank.statement.closebalance</field>
             <field name="arch" type="xml">
                 <form>
@@ -531,7 +514,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_bank_statement_tree" model="ir.ui.view">
-            <field name="name">account.bank.statement.tree</field>
             <field name="model">account.bank.statement</field>
             <field name="arch" type="xml">
                 <tree decoration-danger="not is_difference_zero and state=='open'" decoration-info="state=='open' and is_difference_zero" string="Statements">
@@ -550,7 +532,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_bank_statement_search" model="ir.ui.view">
-            <field name="name">account.bank.statement.search</field>
             <field name="model">account.bank.statement</field>
             <field name="arch" type="xml">
                 <search string="Search Bank Statements">
@@ -569,7 +550,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_bank_statement_form" model="ir.ui.view">
-            <field name="name">account.bank.statement.form</field>
             <field name="model">account.bank.statement</field>
             <field name="priority">1</field>
             <field name="arch" type="xml">
@@ -698,7 +678,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_bank_statement_line_search" model="ir.ui.view">
-            <field name="name">account.bank.statement.line.search</field>
             <field name="model">account.bank.statement.line</field>
             <field name="arch" type="xml">
                 <search string="Search Bank Statements Line">
@@ -714,7 +693,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_bank_statement_line_form" model="ir.ui.view">
-            <field name="name">bank.statement.line.form</field>
             <field name="model">account.bank.statement.line</field>
             <field name="priority">8</field>
             <field name="arch" type="xml">
@@ -735,7 +713,6 @@ action = model.setting_init_bank_account_action()
             </field>
         </record>
         <record id="view_bank_statement_line_tree" model="ir.ui.view">
-            <field name="name">account.bank.statement.line.tree</field>
             <field name="model">account.bank.statement.line</field>
             <field name="priority">8</field>
             <field name="arch" type="xml">
@@ -781,7 +758,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_reconcile_model_form" model="ir.ui.view">
-            <field name="name">account.reconcile.model.form</field>
             <field name="model">account.reconcile.model</field>
             <field name="arch" type="xml">
                 <form string="Operation Templates">
@@ -905,7 +881,6 @@ action = model.setting_init_bank_account_action()
             </field>
         </record>
         <record id="view_account_reconcile_model_line_form" model="ir.ui.view">
-            <field name="name">account.reconcile.model.line.form</field>
             <field name="model">account.reconcile.model.line</field>
             <field name="arch" type="xml">
                 <form>
@@ -943,7 +918,6 @@ action = model.setting_init_bank_account_action()
             </field>
         </record>
         <record id="view_account_reconcile_model_tree" model="ir.ui.view">
-            <field name="name">account.reconcile.model.tree</field>
             <field name="model">account.reconcile.model</field>
             <field name="arch" type="xml">
                 <tree string="Bank Reconciliation Move Presets">
@@ -955,7 +929,6 @@ action = model.setting_init_bank_account_action()
             </field>
         </record>
         <record id="view_account_reconcile_model_search" model="ir.ui.view">
-            <field name="name">account.reconcile.model.search</field>
             <field name="model">account.reconcile.model</field>
             <field name="arch" type="xml">
                 <search string="Bank Reconciliation Move preset">
@@ -991,7 +964,6 @@ action = model.setting_init_bank_account_action()
 
         <!-- Account Types -->
         <record id="view_account_type_search" model="ir.ui.view">
-            <field name="name">account.account.type.search</field>
             <field name="model">account.account.type</field>
             <field name="arch" type="xml">
                 <search string="Account Type">
@@ -1000,7 +972,6 @@ action = model.setting_init_bank_account_action()
             </field>
         </record>
         <record id="view_account_type_tree" model="ir.ui.view">
-            <field name="name">account.account.type.tree</field>
             <field name="model">account.account.type</field>
             <field name="arch" type="xml">
                 <tree string="Account Type">
@@ -1010,7 +981,6 @@ action = model.setting_init_bank_account_action()
             </field>
         </record>
         <record id="view_account_type_form" model="ir.ui.view">
-            <field name="name">account.account.type.form</field>
             <field name="model">account.account.type</field>
             <field name="arch" type="xml">
                 <form string="Account Type">
@@ -1049,7 +1019,6 @@ action = model.setting_init_bank_account_action()
         <!-- Tax -->
 
         <record id="view_tax_tree" model="ir.ui.view">
-            <field name="name">account.tax.tree</field>
             <field name="model">account.tax</field>
             <field name="arch" type="xml">
                 <tree string="Account Tax" decoration-muted="not active">
@@ -1064,7 +1033,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="tax_repartition_line_tree" model="ir.ui.view">
-            <field name="name">account.tax.repartition.line.tree</field>
             <field name="model">account.tax.repartition.line</field>
             <field name="arch" type="xml">
                 <tree editable="bottom" create="1" delete="1">
@@ -1080,7 +1048,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="account_tax_view_tree" model="ir.ui.view">
-            <field name="name">account.invoice.line.tax.search</field>
             <field name="model">account.tax</field>
             <field name="arch" type="xml">
                 <tree string="Account Tax">
@@ -1091,7 +1058,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_tax_kanban" model="ir.ui.view">
-            <field name="name">account.tax.kanban</field>
             <field name="model">account.tax</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -1116,7 +1082,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_tax_search" model="ir.ui.view">
-            <field name="name">account.tax.search</field>
             <field name="model">account.tax</field>
             <field name="arch" type="xml">
                 <search string="Search Taxes">
@@ -1136,7 +1101,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="account_tax_view_search" model="ir.ui.view">
-            <field name="name">account.tax.search.filters</field>
             <field name="model">account.tax</field>
             <field name="arch" type="xml">
                 <search string="Search Taxes">
@@ -1147,7 +1111,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_tax_form" model="ir.ui.view">
-            <field name="name">account.tax.form</field>
             <field name="model">account.tax</field>
             <field name="arch" type="xml">
                 <form string="Account Tax">
@@ -1227,7 +1190,6 @@ action = model.setting_init_bank_account_action()
 
         <!-- Tax group -->
         <record id="view_tax_group_tree" model="ir.ui.view">
-            <field name="name">account.tax.group.tree</field>
             <field name="model">account.tax.group</field>
             <field name="arch" type="xml">
                 <tree string="Account Tax Group" editable="bottom" create="false">
@@ -1249,7 +1211,6 @@ action = model.setting_init_bank_account_action()
 
         <!-- Full Reconcile -->
         <record id="view_full_reconcile_form" model="ir.ui.view">
-            <field name="name">account.full.reconcile.form</field>
             <field name="model">account.full.reconcile</field>
             <field name="arch" type="xml">
                 <form string="Matching">
@@ -1267,7 +1228,6 @@ action = model.setting_init_bank_account_action()
 
         <!--Payment Terms -->
         <record id="view_payment_term_line_tree" model="ir.ui.view">
-            <field name="name">account.payment.term.line.tree</field>
             <field name="model">account.payment.term.line</field>
             <field name="arch" type="xml">
                 <tree string="Payment Terms">
@@ -1282,7 +1242,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_payment_term_line_form" model="ir.ui.view">
-            <field name="name">account.payment.term.line.form</field>
             <field name="model">account.payment.term.line</field>
             <field name="arch" type="xml">
                 <form string="Payment Terms">
@@ -1321,7 +1280,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_payment_term_search" model="ir.ui.view">
-            <field name="name">account.payment.term.search</field>
             <field name="model">account.payment.term</field>
             <field name="arch" type="xml">
                 <search string="Payment Terms">
@@ -1334,7 +1292,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_payment_term_tree" model="ir.ui.view">
-            <field name="name">account.payment.term.tree</field>
             <field name="model">account.payment.term</field>
             <field name="arch" type="xml">
                 <tree string="Payment Terms">
@@ -1346,7 +1303,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_payment_term_form" model="ir.ui.view">
-            <field name="name">account.payment.term.form</field>
             <field name="model">account.payment.term</field>
             <field name="arch" type="xml">
                 <form string="Payment Terms">
@@ -1372,7 +1328,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_payment_term_kanban" model="ir.ui.view">
-            <field name="name">account.payment.term.kanban</field>
             <field name="model">account.payment.term</field>
             <field name="arch" type="xml">
                 <kanban class="o_kanban_mobile">
@@ -1403,7 +1358,6 @@ action = model.setting_init_bank_account_action()
         <!-- Account Templates -->
 
         <record id="view_account_template_form" model="ir.ui.view">
-            <field name="name">account.account.template.form</field>
             <field name="model">account.account.template</field>
             <field name="arch" type="xml">
                 <form string="Account Template">
@@ -1426,7 +1380,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_template_tree" model="ir.ui.view">
-            <field name="name">account.account.template.tree</field>
             <field name="model">account.account.template</field>
             <field name="arch" type="xml">
                 <tree string="Account Template">
@@ -1438,7 +1391,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_template_search" model="ir.ui.view">
-            <field name="name">account.account.template.search</field>
             <field name="model">account.account.template</field>
             <field name="arch" type="xml">
                 <search string="Search Account Templates">
@@ -1459,7 +1411,6 @@ action = model.setting_init_bank_account_action()
 
         <!-- Chart of Accounts Templates -->
         <record id="view_account_chart_template_form" model="ir.ui.view">
-            <field name="name">account.chart.template.form</field>
             <field name="model">account.chart.template</field>
             <field name="arch" type="xml">
                 <form string="Chart of Accounts Template">
@@ -1489,7 +1440,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_chart_template_seacrh" model="ir.ui.view">
-            <field name="name">account.chart.template.search</field>
             <field name="model">account.chart.template</field>
             <field name="arch" type="xml">
                 <search string="Search Chart of Account Templates">
@@ -1508,7 +1458,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_chart_template_tree" model="ir.ui.view">
-            <field name="name">account.chart.template.tree</field>
             <field name="model">account.chart.template</field>
             <field name="arch" type="xml">
                 <tree string="Chart of Accounts Template">
@@ -1528,7 +1477,6 @@ action = model.setting_init_bank_account_action()
 
         <!-- Account Tax Templates -->
         <record id="view_account_tax_template_form" model="ir.ui.view">
-            <field name="name">account.tax.template.form</field>
             <field name="model">account.tax.template</field>
             <field name="arch" type="xml">
                 <form string="Account Tax Template">
@@ -1589,7 +1537,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_tax_template_tree" model="ir.ui.view">
-            <field name="name">account.tax.template.tree</field>
             <field name="model">account.tax.template</field>
             <field name="arch" type="xml">
                 <tree string="Account Tax Template">
@@ -1600,7 +1547,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_tax_template_search" model="ir.ui.view">
-            <field name="name">account.tax.template.search</field>
             <field name="model">account.tax.template</field>
             <field name="arch" type="xml">
                 <search string="Search Tax Templates">
@@ -1624,7 +1570,6 @@ action = model.setting_init_bank_account_action()
          <!-- Fiscal Position Templates -->
 
         <record id="view_account_position_template_search" model="ir.ui.view">
-            <field name="name">account.fiscal.position.template.search</field>
             <field name="model">account.fiscal.position.template</field>
             <field name="arch" type="xml">
                 <search string="Fiscal Position">
@@ -1634,7 +1579,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_position_template_form" model="ir.ui.view">
-            <field name="name">account.fiscal.position.template.form</field>
             <field name="model">account.fiscal.position.template</field>
             <field name="arch" type="xml">
                 <form string="Fiscal Position Template">
@@ -1667,7 +1611,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_position_template_tree" model="ir.ui.view">
-            <field name="name">account.fiscal.position.template.tree</field>
             <field name="model">account.fiscal.position.template</field>
             <field name="arch" type="xml">
                 <tree string="Fiscal Position">
@@ -1689,7 +1632,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="account_bank_statement_pivot" model="ir.ui.view">
-            <field name="name">account.bank.statement.pivot</field>
             <field name="model">account.bank.statement</field>
             <field name="arch" type="xml">
                 <pivot string="Account Statistics" >
@@ -1701,7 +1643,6 @@ action = model.setting_init_bank_account_action()
          </record>
 
         <record id="account_bank_statement_graph" model="ir.ui.view">
-            <field name="name">account.bank.statement.graph</field>
             <field name="model">account.bank.statement</field>
             <field name="arch" type="xml">
                 <graph string="Account Statistics" type="bar">
@@ -1739,7 +1680,6 @@ action = model.setting_init_bank_account_action()
             action="res_partner_action_customer" sequence="110"/>
 
         <record id="product_template_view_tree" model="ir.ui.view">
-            <field name="name">product.template.tree</field>
             <field name="model">product.template</field>
             <field name="arch" type="xml">
                 <tree string="Products">
@@ -1790,7 +1730,6 @@ action = model.setting_init_bank_account_action()
             action="base.action_partner_supplier_form" sequence="200"/>
 
         <record id="view_account_group_form" model="ir.ui.view">
-            <field name="name">account.group.form</field>
             <field name="model">account.group</field>
             <field name="arch" type="xml">
                 <form string="Account Group">
@@ -1809,7 +1748,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_group_search" model="ir.ui.view">
-            <field name="name">account.group.search</field>
             <field name="model">account.group</field>
             <field name="arch" type="xml">
                 <search string="Account groups">
@@ -1821,7 +1759,6 @@ action = model.setting_init_bank_account_action()
         </record>
 
         <record id="view_account_group_tree" model="ir.ui.view">
-            <field name="name">account.group.tree</field>
             <field name="model">account.group</field>
             <field name="arch" type="xml">
                 <tree string="Account Group">

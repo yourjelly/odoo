@@ -2,7 +2,6 @@
 <odoo>
 
     <record id="view_hr_holidays_filter_report" model="ir.ui.view">
-        <field name="name">hr.holidays.filter</field>
         <field name="model">hr.leave.report</field>
         <field name="arch" type="xml">
             <search string="Search Time Off">
@@ -40,7 +39,6 @@
     </record>
 
     <record id="hr_leave_report_tree" model="ir.ui.view">
-        <field name="name">report.hr.holidays.report.leave_all.tree</field>
         <field name="model">hr.leave.report</field>
         <field name="arch" type="xml">
             <tree create="0" edit="0" delete="0">
@@ -57,7 +55,6 @@
 
     <!-- TODO: See if we need to keep this -->
     <record id="hr_leave_report_kanban" model="ir.ui.view">
-        <field name="name">report.hr.holidays.report.leave_all.kanban</field>
         <field name="model">hr.leave.report</field>
         <field name="arch" type="xml">
             <kanban class="o_kanban_mobile" create="0">

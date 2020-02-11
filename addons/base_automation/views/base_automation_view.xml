@@ -3,7 +3,6 @@
 
         <!-- Automation Form View -->
         <record id="view_base_automation_form" model="ir.ui.view">
-            <field name="name">Automations</field>
             <field name="model">base.automation</field>
             <field name="mode">primary</field>
             <field name="inherit_id" ref="base.view_server_action_form"/>
@@ -76,7 +75,6 @@
 
         <!-- automation Tree View -->
         <record id="view_base_automation_tree" model="ir.ui.view">
-            <field name="name">base.automation.tree</field>
             <field name="model">base.automation</field>
             <field name="arch" type="xml">
                 <tree string="Automation">
@@ -89,7 +87,6 @@
         </record>
 
         <record id="view_base_automation_search" model="ir.ui.view">
-            <field name="name">base.automation.search</field>
             <field name="model">base.automation</field>
             <field name="arch" type="xml">
                 <search>
