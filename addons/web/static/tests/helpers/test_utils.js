@@ -140,6 +140,7 @@ return Promise.all([
         makeTestPromiseWithAssert: testUtilsAsync.makeTestPromiseWithAssert,
         nextMicrotaskTick: testUtilsAsync.nextMicrotaskTick,
         nextTick: testUtilsAsync.nextTick,
+        owlCompatibilityExtraNextTick: testUtilsAsync.owlCompatibilityExtraNextTick,
         prepareTarget: testUtilsCreate.prepareTarget,
         returnAfterNextAnimationFrame: testUtilsDom.returnAfterNextAnimationFrame,
 
