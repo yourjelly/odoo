@@ -112,6 +112,10 @@ odoo.define('web.ActWindowActionManager', function (require) {
             if (action.controllers[viewType]) {
                 action.controller = action.controllers[viewType];
                 action.controller.viewOptions.breadcrumbs = this._getBreadcrumbs(options.virtualStack || this.currentStack.slice(0, action.controller.index));
+                if (action.controllerState && action.controllerState.currentId) {
+                   action.controller.viewOptions.currentId = action.controllerState.currentId;
+                }
+                delete action.controller.viewOptions.mode;
                 Object.assign(action.controller.viewOptions, viewOptions);
                 return;
             }

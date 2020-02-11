@@ -89,7 +89,8 @@ class Action extends ComponentAdapter {
         return super.shouldUpdate(nextProps);
     }
     _trigger_up(ev) {
-        if (ev.name === "switch_view" && this.legacy === 'view') {
+        const evType = ev.name;
+        if (this.legacy === 'view' && this.widget && (evType === "switch_view" || evType === "execute_action")) {
             const controllerState = this.widget.exportState();
             this.env.bus.trigger('legacy-reloaded', { controllerState });
         }
