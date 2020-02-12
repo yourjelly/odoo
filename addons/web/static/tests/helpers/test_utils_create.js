@@ -21,6 +21,7 @@ var testUtilsAsync = require('web.test_utils_async');
 var testUtilsMock = require('web.test_utils_mock');
 var Widget = require('web.Widget');
 var WebClient = require('web.WebClient');
+const makeTestEnvironment = require('web.test_env');
 
 
 const DebouncedField = basic_fields.DebouncedField;
@@ -163,6 +164,7 @@ async function createView(params) {
 
     // add mock environment: mock server, session, fieldviewget, ...
     var mockServer = testUtilsMock.addMockEnvironment(widget, params);
+    owl.Component.env = makeTestEnvironment({}, mockServer.performRpc.bind(mockServer));
     var viewInfo = testUtilsMock.fieldsViewGet(mockServer, params);
 
     // create the view

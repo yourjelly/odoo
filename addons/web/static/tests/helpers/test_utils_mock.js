@@ -440,9 +440,6 @@ function getMockedOwlEnv(params) {
             },
         },
         services: {
-            ajax: {
-                rpc: server.performRpc.bind(server), // for legacy sub widgets
-            },
             local_storage: new RamStorageService(),
             session_storage: new RamStorageService(),
         },

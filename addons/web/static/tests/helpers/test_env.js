@@ -24,6 +24,11 @@ odoo.define('web.test_env', async function (require) {
             }, env.device),
             qweb: new owl.QWeb({ templates: session.owlTemplates }),
             services: Object.assign({
+                ajax: {
+                    rpc(argument) {
+                      return env.session.rpc(...arguments); // Compatibility Legacy Widgets
+                    }
+                },
                 getCookie() { },
                 rpc(params, options) {
                     const query = buildQuery(params);

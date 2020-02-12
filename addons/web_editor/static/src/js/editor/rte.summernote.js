@@ -83,13 +83,13 @@ renderer.createPalette = function ($container, options) {
                 const colorResetHandler = ev => applyColor(ev.data.target, eventName, 'inherit');
                 let replaceFn;
                 let hookEl;
-                if (parent instanceof owl.Component) {
+                if (!parent || parent instanceof owl.Component) {
                     const colorPickerProps = {
                         Component: ColorPaletteWidget,
                         widgetArgs: colorPickerArgs,
                         handlers: { colorPickedHandler , colorResetHandler },
                     };
-                    colorpicker = new ColorPaletteAdapter(parent, colorPickerProps);
+                    colorpicker = new ColorPaletteAdapter(null, colorPickerProps);
                     replaceFn = colorpicker.mount.bind(colorpicker);
                     hookEl = elem;
                 } else {
