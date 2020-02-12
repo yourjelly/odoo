@@ -291,7 +291,6 @@ class Website(models.Model):
 
         view.with_context(lang=None).write({
             'arch': template_record.arch.replace(template, key),
-            'name': name,
         })
 
         if view.arch_fs:
@@ -383,7 +382,7 @@ class Website(models.Model):
             dependencies.setdefault(page_key, [])
             dependencies[page_key].append({
                 'text': _('Page <b>%s</b> contains a link to this page') % page.url,
-                'item': page.name,
+                'item': page.display_name,
                 'link': page.url,
             })
             page_view_ids.append(page.view_id.id)
@@ -399,7 +398,7 @@ class Website(models.Model):
             dependencies[view_key].append({
                 'text': _('Template <b>%s (id:%s)</b> contains a link to this page') % (view.key or view.name, view.id),
                 'link': '/web#id=%s&view_type=form&model=ir.ui.view' % view.id,
-                'item': _('%s (id:%s)') % (view.key or view.name, view.id),
+                'item': _('%s (id:%s)') % (view.key or view.display_name, view.id),
             })
         # search for menu with link
         menu_search_dom = [('url', 'ilike', '%s' % url)] + website.website_domain()

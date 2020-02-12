@@ -87,7 +87,7 @@ class Page(models.Model):
             url = self.env['website'].get_unique_path(url)
 
         # If name has changed, check for key uniqueness
-        if page.name != data['name']:
+        if page.display_name != data['name']:
             page_key = self.env['website'].get_unique_key(slugify(data['name']))
         else:
             page_key = page.key

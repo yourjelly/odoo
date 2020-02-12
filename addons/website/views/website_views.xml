@@ -265,7 +265,7 @@
             <field name="model">ir.ui.view</field>
             <field name="inherit_id" ref="base.view_view_tree"/>
             <field name="arch" type="xml">
-                <field name="name" position="after">
+                <field name="priority" position="after">
                     <field name="website_id" groups="website.group_multi_website"/>
                 </field>
                 <field name="xml_id" position="before">

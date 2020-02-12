@@ -838,7 +838,7 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
                 <i t-if='specific_page and prev_page and prev_page.url == page.url and not prev_page.website_id' class="fa fa-level-up fa-rotate-90 ml32 mr4"/>
                 <i t-else="1" class="fa fa-globe mr4" t-att-style="'visibility:hidden;' if specific_page else ''"/>
             </t>
-            <i t-if="page.is_homepage" class="fa fa-home" title="Home"/> <span t-esc="page.name"/>
+            <i t-if="page.is_homepage" class="fa fa-home" title="Home"/> <span t-esc="page.display_name"/>
         </td>
         <td>
             <a t-if='final_page' t-att-href="page.url"><t t-esc="page.url"/></a>

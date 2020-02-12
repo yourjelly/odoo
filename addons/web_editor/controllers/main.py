@@ -301,7 +301,7 @@ class Web_Editor(http.Controller):
         """
         # Related views must be fetched if the user wants the views and/or the style
         views = request.env["ir.ui.view"].get_related_views(key, bundles=bundles)
-        views = views.read(['name', 'id', 'key', 'xml_id', 'arch', 'active', 'inherit_id'])
+        views = views.read(['id', 'key', 'xml_id', 'arch', 'active', 'inherit_id'])
 
         scss_files_data_by_bundle = []
         js_files_data_by_bundle = []
@@ -365,7 +365,7 @@ class Web_Editor(http.Controller):
                 # names and xmlids
                 if len(files_data):
                     files_data_by_bundle.append([
-                        {'xmlid': asset_name, 'name': request.env.ref(asset_name).name},
+                        {'xmlid': asset_name},
                         files_data
                     ])
 

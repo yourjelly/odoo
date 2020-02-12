@@ -15,7 +15,6 @@
     </template>
 
     <record id="multi_url" model="website.page">
-        <field name="name">Multi URL test</field>
         <field name="url">/multi_url</field>
         <field name="website_published">False</field>
         <field name="type">qweb</field>
