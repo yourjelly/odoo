@@ -2499,7 +2499,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('check if the view destroys all widgets and instances', async function (assert) {
-        assert.expect(1);
+        assert.expect(2);
 
         var instanceNumber = 0;
         testUtils.mock.patch(mixins.ParentedMixin, {
@@ -2519,17 +2519,17 @@ QUnit.module('Views', {
             View: CalendarView,
             model: 'event',
             data: this.data,
-            arch:
-            '<calendar class="o_calendar_test" '+
-                'event_open_popup="true" '+
-                'date_start="start_date" '+
-                'all_day="allday" '+
-                'mode="week" '+
-                'attendee="partner_ids" '+
-                'color="partner_id">'+
-                    '<filter name="user_id" avatar_field="image"/>'+
-                    '<field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>'+
-            '</calendar>',
+            arch: `
+                <calendar class="o_calendar_test"
+                    event_open_popup="true"
+                    date_start="start_date"
+                    all_day="allday"
+                    mode="week"
+                    attendee="partner_ids"
+                    color="partner_id">
+                        <filter name="user_id" avatar_field="image"/>
+                        <field name="partner_ids" write_model="filter_partner" write_field="partner_id"/>
+                </calendar>`,
             archs: archs,
             viewOptions: {
                 initialDate: initialDate,
@@ -2537,21 +2537,10 @@ QUnit.module('Views', {
         };
 
         var calendar = await createCalendarView(params);
-        calendar.destroy();
-
-        var initialInstanceNumber = instanceNumber;
-        instanceNumber = 0;
-
-        calendar = await createCalendarView(params);
-
-        // call destroy function of controller to ensure that it correctly destroys everything
-        calendar.__destroy();
-
-        // + 1 (parent)
-        assert.strictEqual(instanceNumber, initialInstanceNumber + 1,
-            "every widget must be destroyed exept the parent");
+        assert.ok(instanceNumber > 0);
 
         calendar.destroy();
+        assert.strictEqual(instanceNumber, 0);
 
         testUtils.mock.unpatch(mixins.ParentedMixin);
     });
