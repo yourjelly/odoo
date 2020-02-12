@@ -9,3 +9,4 @@ from . import event_ticket
 from . import res_config_settings
 from . import res_partner
 from . import ir_autovacuum
+from . import mail_template
