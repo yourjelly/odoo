@@ -75,9 +75,11 @@ class AccountAnalyticLine(models.Model):
     @api.depends('project_id')
     def _compute_task_id(self):
         for record in self:
-            if record.project_id and record.task_id and \
+            if record.project_id and \
                record.project_id != record.task_id.project_id:
                 record.task_id = False
+            else:
+                record.task_id = record.task_id
 
     @api.depends('task_id')
     def _compute_project_id(self):
