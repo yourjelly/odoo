@@ -2,7 +2,6 @@ odoo.define('web_tour.TourManager', function(require) {
 "use strict";
 
 var core = require('web.core');
-var lazyloader = require('web.public.lazyloader');
 var local_storage = require('web.local_storage');
 var mixins = require('web.mixins');
 var utils = require('web_tour.utils');
@@ -93,9 +92,6 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     _waitBeforeTourStart: function () {
         return new Promise(resolve => {
             core.bus.on('web-client-mounted', null, resolve);
-            lazyloader.allScriptsLoaded.then(() => {
-                setTimeout(resolve);
-            });
         });
     },
     _register_all: function (do_update) {
