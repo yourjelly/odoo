@@ -78,6 +78,7 @@ class WebClient extends Component {
         super.mounted();
         this._wcUpdated();
         
+        odoo.isReady = true;
         this.env.bus.trigger('web-client-mounted');
     }
     willPatch() {
