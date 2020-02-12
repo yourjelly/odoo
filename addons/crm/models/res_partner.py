@@ -37,13 +37,23 @@ class Partner(models.Model):
         return rec
 
     def _compute_opportunity_count(self):
+        partners_group = self.env['crm.lead'].read_group([('partner_id.commercial_partner_id', 'in', self.ids)], ['partner_id'], ['partner_id'])
+        partners = {d['partner_id'][0]: d['partner_id_count'] for d in partners_group}
+        commercial_partners = {}
+        for partner in self.browse(partners.keys()):
+            commercial_partners.setdefault(partner.commercial_partner_id.id, 0)
+            commercial_partners[partner.commercial_partner_id.id] += partners[partner.id]
         for partner in self:
-            operator = 'child_of' if partner.is_company else '='  # the opportunity count should counts the opportunities of this company and all its contacts
-            partner.opportunity_count = self.env['crm.lead'].search_count([('partner_id', operator, partner.id), ('type', '=', 'opportunity')])
+            if partner.is_company:
+                partner.opportunity_count = commercial_partners.get(partner.id, 0)
+            else:
+                partner.opportunity_count = partners.get(partner.id, 0)
 
     def _compute_meeting_count(self):
+        self.env.cr.execute('select res_partner_id, count(1) from calendar_event_res_partner_rel where res_partner_id in ('+ ','.join(map(str, self.ids))+') group by res_partner_id')
+        results = {row[0]: row[1] for row in self.env.cr.fetchall()}
         for partner in self:
-            partner.meeting_count = len(partner.meeting_ids)
+            partner.meeting_count = results.get(partner.id, 0)
 
     def schedule_meeting(self):
         partner_ids = self.ids
