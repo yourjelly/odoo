@@ -16,29 +16,44 @@ class HolidaysType(models.Model):
         company = self.company_id if self.company_id else self.env.company
         return company.leave_timesheet_task_id.id
 
-    timesheet_generate = fields.Boolean('Generate Timesheet', default=True, help="If checked, when validating a time off, timesheet will be generated in the Vacation Project of the company.")
+    timesheet_generate = fields.Boolean(
+        'Generate Timesheet',
+        compute='_compute_timesheet_generate',
+        store=True,
+        readonly=False,
+        default=True,
+        help="If checked, when validating a time off, timesheet"
+             " will be generated in the Vacation Project of the company.")
     timesheet_project_id = fields.Many2one('project.project', string="Project", default=_default_project_id, domain="[('company_id', '=', company_id)]", help="The project will contain the timesheet generated when a time off is validated.")
-    timesheet_task_id = fields.Many2one('project.task', string="Task for timesheet", default=_default_task_id, domain="[('project_id', '=', timesheet_project_id), ('company_id', '=', company_id)]")
+    timesheet_task_id = fields.Many2one(
+        'project.task',
+        string="Task for timesheet",
+        compute='_compute_timesheet_task_id',
+        store=True,
+        readonly=False,
+        default=_default_task_id,
+        domain="[('project_id', '=', timesheet_project_id),"
+                "('company_id', '=', company_id)]")
 
-    @api.onchange('timesheet_task_id')
-    def _onchange_timesheet_generate(self):
-        if self.timesheet_task_id or self.timesheet_project_id:
-            self.timesheet_generate = True
-        else:
-            self.timesheet_generate = False
+    @api.depends('timesheet_task_id', 'timesheet_project_id')
+    def _compute_timesheet_generate(self):
+        for record in self:
+            if record.timesheet_task_id or record.timesheet_project_id:
+                record.timesheet_generate = True
+            else:
+                record.timesheet_generate = False
 
-    @api.onchange('timesheet_project_id')
-    def _onchange_timesheet_project(self):
-        company = self.company_id if self.company_id else self.env.company
-        default_task_id = company.leave_timesheet_task_id
-        if default_task_id and default_task_id.project_id == self.timesheet_project_id:
-            self.timesheet_task_id = default_task_id
-        else:
-            self.timesheet_task_id = False
-        if self.timesheet_project_id:
-            self.timesheet_generate = True
-        else:
-            self.timesheet_generate = False
+    @api.depends('timesheet_project_id')
+    def _compute_timesheet_task_id(self):
+        for record in self:
+            company = record.company_id if record.company_id else record.env.company
+            default_task_id = company.leave_timesheet_task_id
+
+            if default_task_id and \
+               default_task_id.project_id == record.timesheet_project_id:
+                record.timesheet_task_id = default_task_id
+            else:
+                record.timesheet_task_id = False
 
     @api.constrains('timesheet_generate', 'timesheet_project_id', 'timesheet_task_id')
     def _check_timesheet_generate(self):
