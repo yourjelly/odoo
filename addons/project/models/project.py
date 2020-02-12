@@ -552,7 +552,13 @@ class Task(models.Model):
     partner_phone = fields.Char(related='partner_id.phone')
     partner_city = fields.Char(related='partner_id.city', readonly=False)
     manager_id = fields.Many2one('res.users', string='Project Manager', related='project_id.user_id', readonly=True)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=_default_company_id)
+    company_id = fields.Many2one('res.company',
+                                 string='Company',
+                                 compute='_compute_company_id',
+                                 store=True,
+                                 readonly=False,
+                                 required=True,
+                                 default=_default_company_id)
     color = fields.Integer(string='Color Index')
     user_email = fields.Char(related='user_id.email', string='User Email', readonly=True, related_sudo=False)
     attachment_ids = fields.One2many('ir.attachment', compute='_compute_attachment_ids', string="Main Attachments",
@@ -680,12 +686,13 @@ class Task(models.Model):
 
     @api.onchange('project_id')
     def _onchange_project(self):
-        if self.project_id:
-            # find partner
-            if self.project_id.partner_id:
-                self.partner_id = self.project_id.partner_id
-            # keep multi company consistency
-            self.company_id = self.project_id.company_id
+        pass
+
+    @api.depends('project_id.company_id')
+    def _compute_company_id(self):
+        for task in self:
+            if task.project_id:
+                task.company_id = task.project_id.company_id
 
     @api.depends('project_id')
     def _compute_stage_id(self):
@@ -811,8 +818,11 @@ class Task(models.Model):
     @api.depends('parent_id.partner_id', 'project_id.partner_id')
     def _compute_partner_id(self):
         for task in self:
-            if not task.partner_id:
-                task.partner_id = task.parent_id.partner_id or task.project_id.partner_id
+            if task.parent_id.partner_id:
+                task.partner_id = task.parent_id.partner_id
+            else:
+                if task.project_id.partner_id:
+                    task.partner_id = task.project_id.partner_id
 
     @api.depends('partner_id.email', 'parent_id.email_from')
     def _compute_email_from(self):
