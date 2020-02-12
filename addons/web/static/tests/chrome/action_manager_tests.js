@@ -801,6 +801,58 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
+    QUnit.test('properly push state active_id', async function (assert) {
+        assert.expect(13);
+
+        Object.assign(this.archs, {
+            // kanban views
+            'partner,1,kanban': '<kanban><templates><t t-name="kanban-box">' +
+                    '<div class="oe_kanban_global_click"><a name="1" type="action"></a><field name="foo"/></div>' +
+                '</t></templates></kanban>',
+        });
+
+        let _hash = '#action=1';
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            debug:true,
+            mockRPC: function (route, args) {
+                assert.step(args.method || route);
+                return this._super.apply(this, arguments);
+            },
+            webClient: {
+                _getWindowHash() {
+                    return _hash;
+                },
+                _setWindowHash(newHash) {
+                    assert.step(newHash);
+                    _hash = newHash;
+                }
+            }
+        });
+        assert.verifySteps([
+            '/web/action/load',
+            'load_views',
+            '/web/dataset/search_read',
+            '#model=partner&view_type=kanban&action=1',
+        ]);
+        await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record a'));
+        assert.verifySteps([
+            '/web/action/load',
+            'load_views',
+            '/web/dataset/search_read',
+            '#model=partner&view_type=kanban&action=1&active_id=1',
+        ]);
+        await testUtils.dom.click(webClient.el.querySelector('.breadcrumb-item'));
+        assert.verifySteps([
+            '/web/dataset/search_read',
+            '#model=partner&view_type=kanban&action=1',
+        ]);
+        webClient.destroy();
+    });
+
     QUnit.test('properly load records', async function (assert) {
         assert.expect(5);
 
