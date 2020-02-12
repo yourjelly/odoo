@@ -317,7 +317,7 @@ function addMockEnvironment(widget, params) {
     const env = Object.assign({}, params.env);
     env.session = session;
     if (!env.bus) {
-        env.bus = new Bus();
+        env.bus = new Bus(widget);
     }
     var done = false;
     var servicesToDeploy = _.clone(params.services);

@@ -213,7 +213,6 @@ async function createView(params) {
     return view.getController(widget).then(function (view) {
         // override the view's 'destroy' so that it calls 'destroy' on the widget
         // instead, as the widget is the parent of the view and the mockServer.
-        view.__destroy = view.destroy;
         view.destroy = function () {
             // remove the override to properly destroy the view and its children
             // when it will be called the second time (by its parent)
@@ -337,7 +336,6 @@ function createControlPanel(params) {
         // override the controlPanel's 'destroy' so that it calls 'destroy' on
         // the widget instead, as the widget is the parent of the controlPanel
         // and the mockServer.
-        controlPanel.__destroy = controlPanel.destroy;
         controlPanel.destroy = function () {
             // remove the override to properly destroy the controlPanel and its
             // children when it will be called the second time (by its parent)
