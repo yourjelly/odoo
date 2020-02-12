@@ -212,7 +212,13 @@ class WebClient extends Component {
             delete state.title
         }
         this.state = state;
-        const hashParts = Object.keys(state).map(key => `${key}=${encodeURI(state[key])}`);
+        const hashParts = Object.keys(state).map(key => {
+            const value = state[key];
+            if (value !== null) {
+                return `${key}=${encodeURI(value)}`;
+            }
+            return '';
+        });
         const hash = "#" + hashParts.join("&");
         if (hash !== this._getWindowHash()) {
             this._setWindowHash(hash);
@@ -225,9 +231,27 @@ class WebClient extends Component {
             let mainComponent;
             let state = {};
             if (this.renderingInfo.main) {
+                const mainAction = this.renderingInfo.main.action;
                 mainComponent = this.currentControllerComponent.comp;
                 Object.assign(state, mainComponent.getState());
-                state.action = this.renderingInfo.main.action.id;
+                state.action = mainAction.id;
+                let active_id = null;
+                let active_ids = null;
+                if (mainAction.context) {
+                    active_id = mainAction.context.active_id || null;
+                    active_ids = mainAction.context.active_ids;
+                    if (active_ids && !(active_ids.length === 1 && active_ids[0] === active_id)) {
+                        active_ids = active_ids.join(',');
+                    } else {
+                        active_ids = null;
+                    }
+                }
+                if (active_id) {
+                    state.active_id = active_id;
+                }
+                if (active_ids) {
+                    state.active_ids = active_ids;
+                }
                 if (!('title' in state)) {
                     state.title = mainComponent.title;
                 }
@@ -247,7 +271,7 @@ class WebClient extends Component {
             }
         }
         this.renderingInfo = null;
-       }
+    }
     _computeTitle() {
         const parts = Object.keys(this.titleParts).sort();
         let tmp = "";
