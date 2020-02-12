@@ -502,9 +502,20 @@ class Task(models.Model):
     ], default='0', index=True, string="Priority")
     sequence = fields.Integer(string='Sequence', index=True, default=10,
         help="Gives the sequence order when displaying a list of tasks.")
-    stage_id = fields.Many2one('project.task.type', string='Stage', ondelete='restrict', tracking=True, index=True,
-        default=_get_default_stage_id, group_expand='_read_group_stage_ids',
-        domain="[('project_ids', '=', project_id)]", copy=False)
+    stage_id = fields.Many2one(
+        'project.task.type',
+        string='Stage',
+        compute='_compute_stage_id',
+        store=True,
+        readonly=False,
+        ondelete='restrict',
+        tracking=True,
+        index=True,
+        default=_get_default_stage_id,
+        group_expand='_read_group_stage_ids',
+        domain="[('project_ids', '=', project_id)]",
+        copy=False)
+
     tag_ids = fields.Many2many('project.tags', string='Tags')
     kanban_state = fields.Selection([
         ('normal', 'Grey'),
@@ -673,18 +684,17 @@ class Task(models.Model):
             # find partner
             if self.project_id.partner_id:
                 self.partner_id = self.project_id.partner_id
-            # find stage
-            if self.project_id not in self.stage_id.project_ids:
-                self.stage_id = self.stage_find(self.project_id.id, [('fold', '=', False)])
             # keep multi company consistency
             self.company_id = self.project_id.company_id
-        else:
-            self.stage_id = False
-    
-    @api.onchange('company_id')
-    def _onchange_task_company(self):
-        if self.project_id.company_id != self.company_id:
-            self.project_id = False
+
+    @api.depends('project_id')
+    def _compute_stage_id(self):
+        for task in self:
+            if task.project_id:
+                if task.project_id not in task.stage_id.project_ids:
+                    task.stage_id = task.stage_find(task.project_id.id, [('fold', '=', False)])
+            else:
+                task.stage_id = False
 
     @api.constrains('parent_id', 'child_ids')
     def _check_subtask_level(self):
