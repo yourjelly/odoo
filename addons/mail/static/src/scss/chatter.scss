@@ -11,7 +11,7 @@
         .btn {
             @extend .text-nowrap;
             margin-bottom: -$nav-tabs-border-width;
-            padding: $grid-gutter-width*0.25 - $nav-tabs-border-width $grid-gutter-width*0.3125 $grid-gutter-width*0.25;
+            padding: $grid-gutter-width*0.25 - $nav-tabs-border-width $grid-gutter-width*0.5 $grid-gutter-width*0.25;
             border-radius: $border-radius-sm $border-radius-sm 0 0;
         }
 
