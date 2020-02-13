@@ -684,10 +684,6 @@ class Task(models.Model):
         for task in self:
             task.subtask_count = len(self._get_all_subtasks())
 
-    @api.onchange('project_id')
-    def _onchange_project(self):
-        pass
-
     @api.depends('project_id.company_id')
     def _compute_company_id(self):
         for task in self:
