@@ -811,14 +811,14 @@ class Task(models.Model):
     # Subtasks
     # ---------------------------------------------------
 
-    @api.depends('parent_id.partner_id', 'project_id.partner_id')
+    @api.depends('parent_id', 'project_id')
     def _compute_partner_id(self):
         for task in self:
-            if task.parent_id.partner_id:
-                task.partner_id = task.parent_id.partner_id
-            else:
+            if task.partner_id:
                 if task.project_id.partner_id:
                     task.partner_id = task.project_id.partner_id
+            else:
+                task.partner_id = task.parent_id.partner_id or task.project_id.partner_id
 
     @api.depends('partner_id.email', 'parent_id.email_from')
     def _compute_email_from(self):
