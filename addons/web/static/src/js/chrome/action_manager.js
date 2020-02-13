@@ -697,7 +697,9 @@ class ActionManager extends core.EventBus {
                 const allActions = Object.keys(this.actions);
                 const actKey = allActions.sort()[allActions.length-1]; // LOOOL !
                 const action = this.actions[actKey];
-                action.options.on_close(action.infos);
+                if (action && action.options && action.options.on_close) {
+                    action.options.on_close(action.infos);
+                }
             }
             this.trigger('update', {
                 main: null,

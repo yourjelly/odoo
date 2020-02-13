@@ -92,7 +92,8 @@ class WebClient extends Component {
     }
 
     catchError(e) {
-        throw e;
+        console.warn(e);
+        this.actionManager.restoreController();
     }
     willUnmount() {
         window.removeEventListener('hashchange', this._onHashchange);
