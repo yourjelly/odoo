@@ -812,16 +812,16 @@ class Website(models.Model):
         pages = self.get_website_pages(domain)
 
         for page in pages:
-            record = {'loc': page['url'], 'id': page['id'], 'name': page['name']}
+            record = {'loc': page['url'], 'id': page['id'], 'customize_show': page['customize_show']}
             if page.view_id and page.view_id.priority != 16:
                 record['priority'] = min(round(page.view_id.priority / 32.0, 1), 1)
             if page['write_date']:
                 record['lastmod'] = page['write_date'].date()
             yield record
 
-    def get_website_pages(self, domain=[], order='name', limit=None):
+    def get_website_pages(self, domain=[], order='customize_show', limit=None):
         domain += self.get_current_website().website_domain()
-        pages = self.env['website.page'].search(domain, order='name', limit=limit)
+        pages = self.env['website.page'].search(domain, order='customize_show', limit=limit)
         return pages
 
     def search_pages(self, needle=None, limit=None):

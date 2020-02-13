@@ -339,7 +339,7 @@
             <ul t-as="view" t-foreach="views">
                 <li>
                     <a t-attf-href="/web#model=ir.ui.view&amp;id=#{view.id}">
-                        <t t-esc="view.name"/>
+                        <t t-esc="view.display_name"/>
                     </a>
                 </li>
             </ul>

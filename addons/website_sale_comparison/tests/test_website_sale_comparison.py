@@ -33,7 +33,6 @@ class TestWebsiteSaleComparison(odoo.tests.TransactionCase):
         product_add_to_compare = Website0.viewref('website_sale_comparison.product_add_to_compare')
         test_view_key = 'my_test.my_key'
         self.env['ir.ui.view'].with_context(website_id=None).create({
-            'name': 'test inherited view',
             'key': test_view_key,
             'inherit_id': product_add_to_compare.id,
             'arch': '<div/>',
@@ -42,7 +41,7 @@ class TestWebsiteSaleComparison(odoo.tests.TransactionCase):
         # Retrieve the generic view
         product = Website0.viewref('website_sale.product')
         # Trigger COW to create specific views of the whole tree
-        product.with_context(website_id=1).write({'name': 'Trigger COW'})
+        product.with_context(website_id=1).write({'display_name': 'Trigger COW'})
 
         # Verify initial state: the specific views exist
         self.assertEqual(Website1.viewref('website_sale.product').website_id.id, 1)

@@ -155,7 +155,7 @@ class Page(models.Model):
             :param page_id : website.page identifier
         """
         page = self.browse(int(page_id))
-        copy_param = dict(name=page_name or page.customize_show, website_id=self.env['website'].get_current_website().id)
+        copy_param = dict(display_name=page_name or page.customize_show, website_id=self.env['website'].get_current_website().id)
         if page_name:
             page_url = '/' + slugify(page_name, max_length=1024, path=True)
             copy_param['url'] = self.env['website'].get_unique_path(page_url)
@@ -167,7 +167,7 @@ class Page(models.Model):
             menu = self.env['website.menu'].search([('page_id', '=', page_id)], limit=1)
             if menu:
                 # If the page being cloned has a menu, clone it too
-                menu.copy({'url': new_page.url, 'name': new_page.name, 'page_id': new_page.id})
+                menu.copy({'url': new_page.url, 'name': new_page.display_name, 'page_id': new_page.id})
 
         return new_page.url + '?enable_editor=1'
 

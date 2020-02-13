@@ -42,6 +42,10 @@ tour.register('rte_translator', {
     content: "click on new page",
     trigger: 'a[data-action="new_page"]',
 }, {
+    content: "insert page name",
+    trigger: '#editor_new_page input[type="text"]',
+    run: 'text rte_translator',
+}, {
     content: "create page",
     trigger: 'button.btn-continue',
     extra_trigger: 'input[type="text"]:propValue(rte_translator)',

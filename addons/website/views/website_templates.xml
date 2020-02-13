@@ -678,7 +678,7 @@
                     <ul>
                         <li>
                             <label>
-                                <t t-esc="view.name"/>
+                                <t t-esc="view.display_name"/>
                             </label>
                         </li>
                     </ul>
