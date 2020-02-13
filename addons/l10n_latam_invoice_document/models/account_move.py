@@ -21,12 +21,25 @@ class AccountMove(models.Model):
     l10n_latam_country_code = fields.Char(
         related='company_id.country_id.code', help='Technical field used to hide/show fields regarding the localization')
 
+#    def _compute_name(self):
+#        normal_invoices = self.filtered(lambda m: not m.l10n_latam_use_documents or m.state != 'draft' or m.name not in [False, '', '/'] or m.is_purchase_document())
+#        super(AccountMove, normal_invoices)._compute_name()
+#        for rec in self - normal_invoices:
+#                rec.name = '/'
+
     @api.onchange('l10n_latam_document_type_id')
     def _onchange_document_type(self):
-        for rec in self:
-            rec.name = '/'
-            rec._compute_highest_name()
-            rec._compute_name()
+        for rec in self.filtered(lambda m: m.l10n_latam_use_documents):
+            if rec.is_sale_document():
+                rec.name = '/'
+
+                rec._compute_highest_name()
+                if rec.highest_name == "1":
+                    rec.highest_name = ""
+                rec._compute_name()
+            elif rec.is_purchase_document():
+                rec.name = '1-1'
+                rec.highest_name = ''
 
     @api.depends('journal_id', 'date', 'state')
     def _compute_highest_name(self):
@@ -43,7 +56,7 @@ class AccountMove(models.Model):
     def _get_last_sequence_domain(self, relaxed=False):
         where_string, param = super(AccountMove, self)._get_last_sequence_domain(relaxed)
         if self.l10n_latam_use_documents:
-            where_string += " AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s "
+            where_string += " AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s"
             param['l10n_latam_document_type_id'] = self.l10n_latam_document_type_id.id or 0
         return where_string, param
 
@@ -141,6 +154,7 @@ class AccountMove(models.Model):
             document_types = rec.l10n_latam_available_document_type_ids._origin
             document_types = internal_type and document_types.filtered(lambda x: x.internal_type == internal_type) or document_types
             rec.l10n_latam_document_type_id = document_types and document_types[0].id
+            rec._onchange_document_type()
 
     def _compute_invoice_taxes_by_group(self):
         report_or_portal_view = 'commit_assetsbundle' in self.env.context or \
