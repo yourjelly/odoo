@@ -18,7 +18,7 @@ odoo.define('web.test_env', async function (require) {
         const defaultEnv = {
             _t: env._t || (s => s),
             _lt: env._lt || (s => s),
-            bus: new Bus(),
+            bus: env.bus || new Bus(), // FIXME: never destroyed
             device: Object.assign({
                 isMobile: false,
             }, env.device),
@@ -55,6 +55,20 @@ odoo.define('web.test_env', async function (require) {
     QUnit.on('OdooBeforeTestHook', function () {
         owl.Component.env = makeTestEnvironment();
     });
+
+    // /**
+    //  * After each test, destroy services that have been instantiated.
+    //  */
+    // QUnit.on('OdooAfterTestHook', function () {
+    //     TODO: call cleanUp here?
+    //     const env = owl.Component.env;
+    //     for (const name in env.services) {
+    //         const service = env.services[name];
+    //         if (service && !service.isDestroyed()) {
+    //             service.destroy();
+    //         }
+    //     }
+    // });
 
     return makeTestEnvironment;
 });

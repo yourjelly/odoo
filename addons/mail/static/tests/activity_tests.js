@@ -2,6 +2,7 @@ odoo.define('mail.activity_view_tests', function (require) {
 'use strict';
 
 var ActivityView = require('mail.ActivityView');
+var Bus = require('web.Bus');
 var testUtils = require('web.test_utils');
 
 var createWebClient = testUtils.createWebClient;
@@ -264,6 +265,30 @@ QUnit.test('activity view: batch send mail on activity', async function (assert)
 QUnit.test('activity view: activity widget', async function (assert) {
     assert.expect(16);
 
+    const bus = new Bus();
+    bus.on('do-action', null, payload => {
+        var action = payload.action;
+        if (action.serverGeneratedAction) {
+            assert.step('serverGeneratedAction');
+        } else if (action.res_model === 'mail.compose.message') {
+            assert.deepEqual({
+                default_model: "task",
+                default_res_id: 30,
+                default_template_id: 8,
+                default_use_template: true,
+                force_email: true
+                }, action.context);
+            assert.step("do_action_compose");
+        } else if (action.res_model === 'mail.activity') {
+            assert.deepEqual({
+                default_res_id: 30,
+                default_res_model: "task"
+            }, action.context);
+            assert.step("do_action_activity");
+        } else {
+            assert.step("Unexpected action");
+        }
+    });
     const params = {
         View: ActivityView,
         model: 'task',
@@ -290,31 +315,8 @@ QUnit.test('activity view: activity widget', async function (assert) {
             }
             return this._super.apply(this, arguments);
         },
+        bus: bus,
     };
-    owl.Component.env = testUtils.mock.getMockedOwlEnv(params);
-    owl.Component.env.bus.on('do-action', null, payload => {
-        var action = payload.action;
-        if (action.serverGeneratedAction) {
-            assert.step('serverGeneratedAction');
-        } else if (action.res_model === 'mail.compose.message') {
-            assert.deepEqual({
-                default_model: "task",
-                default_res_id: 30,
-                default_template_id: 8,
-                default_use_template: true,
-                force_email: true
-                }, action.context);
-            assert.step("do_action_compose");
-        } else if (action.res_model === 'mail.activity') {
-            assert.deepEqual({
-                default_res_id: 30,
-                default_res_model: "task"
-            }, action.context);
-            assert.step("do_action_activity");
-        } else {
-            assert.step("Unexpected action");
-        }
-    });
     var activity = await createView(params);
     var today = activity.$('table tbody tr:first td:nth-child(2).today');
     var dropdown = today.find('.dropdown-menu.o_activity');
@@ -350,6 +352,7 @@ QUnit.test('activity view: activity widget', async function (assert) {
     ]);
 
     activity.destroy();
+    bus.destroy();
 });
 QUnit.test('activity view: no group_by_menu and no time_range_menu', async function (assert) {
     assert.expect(4);

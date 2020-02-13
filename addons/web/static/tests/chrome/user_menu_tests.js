@@ -13,7 +13,6 @@ QUnit.module('chrome', {}, function () {
         assert.expect(4);
 
         class Parent extends Component {}
-        Parent.env = testUtils.mock.getMockedOwlEnv();
         Parent.template = tags.xml`<UserMenu/>`;
         Parent.components = { UserMenu };
 

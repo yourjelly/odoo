@@ -136,7 +136,7 @@ QUnit.test('expand a document thread window', async function (assert) {
         services: this.services,
         data: this.data,
         session: this.session,
-        env: { bus },
+        bus: bus,
     });
     bus.on('do-action', null, payload => {
         assert.deepEqual(payload.action, {
@@ -163,6 +163,7 @@ QUnit.test('expand a document thread window', async function (assert) {
     await testUtils.dom.click($('.o_thread_window .o_thread_window_expand'));
 
     messagingMenu.destroy();
+    bus.destroy();
 });
 
 QUnit.test('post messages in a document thread window', async function (assert) {

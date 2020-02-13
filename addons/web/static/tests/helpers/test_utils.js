@@ -63,7 +63,7 @@ return Promise.all([
         },
         mock: {
             addMockEnvironment: testUtilsMock.addMockEnvironment,
-            getMockedOwlEnv: testUtilsMock.getMockedOwlEnv,
+            setMockedOwlEnv: testUtilsMock.setMockedOwlEnv,
             intercept: testUtilsMock.intercept,
             patch: testUtilsMock.patch,
             patchDate: testUtilsMock.patchDate,

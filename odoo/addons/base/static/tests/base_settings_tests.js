@@ -188,7 +188,6 @@ QUnit.module('base_settings_tests', {
             actions: actions,
             archs: archs,
             data: this.data,
-            debug: true,
             mockRPC: function (route, args) {
                 if (route === '/web/dataset/call_button') {
                     if (args.method === "execute") {
