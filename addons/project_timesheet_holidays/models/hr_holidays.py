@@ -38,10 +38,8 @@ class HolidaysType(models.Model):
     @api.depends('timesheet_task_id', 'timesheet_project_id')
     def _compute_timesheet_generate(self):
         for record in self:
-            if record.timesheet_task_id or record.timesheet_project_id:
-                record.timesheet_generate = True
-            else:
-                record.timesheet_generate = False
+            record.timesheet_generate = record.timesheet_task_id and \
+                record.timesheet_project_id
 
     @api.depends('timesheet_project_id')
     def _compute_timesheet_task_id(self):
