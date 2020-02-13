@@ -8,7 +8,14 @@ from odoo.exceptions import UserError, ValidationError
 class Project(models.Model):
     _inherit = "project.project"
 
-    allow_timesheets = fields.Boolean("Timesheets", default=True, help="Enable timesheeting on the project.")
+    allow_timesheets = fields.Boolean(
+        "Timesheets",
+        compute='_compute_allow_timesheets',
+        store=True,
+        readonly=False,
+        default=True,
+        help="Enable timesheeting on the project.")
+        
     analytic_account_id = fields.Many2one(
         # note: replaces ['|', ('company_id', '=', False), ('company_id', '=', company_id)]
         domain="""[
@@ -24,10 +31,11 @@ class Project(models.Model):
         ('timer_only_when_timesheet', "CHECK((allow_timesheets = 'f' AND allow_timesheet_timer = 'f') OR (allow_timesheets = 't'))", 'The timesheet timer can only be activated on project allowing timesheets.'),
     ]
 
-    @api.onchange('analytic_account_id')
-    def _onchange_analytic_account(self):
-        if not self.analytic_account_id and self._origin:
-            self.allow_timesheets = False
+    @api.depends('analytic_account_id')
+    def _compute_allow_timesheets(self):
+        for record in self:
+            if not record.analytic_account_id:
+                record.allow_timesheets = False
 
     @api.constrains('allow_timesheets', 'analytic_account_id')
     def _check_allow_timesheet(self):
