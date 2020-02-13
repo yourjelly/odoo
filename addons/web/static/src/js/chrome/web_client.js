@@ -92,6 +92,11 @@ class WebClient extends Component {
     }
 
     catchError(e) {
+        if (e.name) {
+            // Real runtime error
+            throw e;
+        }
+        // Errors that have been handled before
         console.warn(e);
         this.actionManager.restoreController();
     }
