@@ -10,10 +10,8 @@ odoo.define('web.test_utils_create', function (require) {
  * testUtils file.
  */
 
-const basic_fields = require('web.basic_fields');
 var ControlPanelView = require('web.ControlPanelView');
 var concurrency = require('web.concurrency');
-const core = require('web.core');
 var DebugManager = require('web.DebugManager.Backend');
 var dom = require('web.dom');
 const SystrayMenu = require('web.SystrayMenu');
@@ -21,12 +19,6 @@ var testUtilsAsync = require('web.test_utils_async');
 var testUtilsMock = require('web.test_utils_mock');
 var Widget = require('web.Widget');
 var WebClient = require('web.WebClient');
-const makeTestEnvironment = require('web.test_env');
-
-
-const DebouncedField = basic_fields.DebouncedField;
-
-const { Component } = owl;
 
 
 /**
@@ -48,46 +40,31 @@ async function createWebClient(params) {
     params = params || {};
 
     const target = prepareTarget(params.debug);
-    Component.env = testUtilsMock.getMockedOwlEnv(params);
-    const revertConfig = testUtilsMock.mockLegacyConfigFromEnv(Component.env);
-
-    // while we have a mix between Owl and legacy stuff, some of them triggering
-    // events on the env.bus (a new Bus instance especially created for the current
-    // test), the others using core.bus, we have to ensure that events triggered
-    // on env.bus are also triggered on core.bus (note that outside the testing
-    // environment, both are the exact same instance of Bus)
-    const envBusTrigger = Component.env.bus.trigger;
-    const busTrigger = function () {
-        core.bus.trigger(...arguments);
-        envBusTrigger.call(Component.env.bus, ...arguments);
-    };
-    Component.env.bus.trigger = busTrigger;
-
-    /*
-     * MISC STUFF: Alter some classes/object of the real world
-     * to fit our needs
-     */
-    // FIX Debounce to allow trigger input to work
-    const initialDebounceValue = DebouncedField.prototype.DEBOUNCE;
-    DebouncedField.prototype.DEBOUNCE = params.fieldDebounce || 0;
-    const initialDOMDebounceValue = dom.DEBOUNCE;
-    dom.DEBOUNCE = 0;
-    const initialUnderscoreDebounce = _.debounce;
-    // Defaulting to no debounce
-    if (params.debounce !== true) {
-        _.debounce = function (func) {
-            return func;
-        };
-    }
+    params.services = Object.assign({}, params.services);
+    const cleanUp = testUtilsMock.setMockedOwlEnv(WebClient, params);
 
     // FIX Systray Items
     const SystrayItems = SystrayMenu.Items;
     SystrayMenu.Items = [] || params.SystrayItems;
 
+    let menus = params.menus;
+    if (!menus) {
+        menus = {
+            all_menu_ids: [0],
+            children: [],
+        };
+    }
+    odoo.loadMenusPromise = new Promise(async resolve => {
+        await testUtilsAsync.nextTick();
+        resolve(menus);
+    });
+
     const webClient = new WebClient();
     const patchWC = {
         _determineCompanyIds() {},
-        _getWindowHash() {return ''},
+        _getWindowHash() {
+            return '';
+        },
         _setWindowHash() {},
         _setWindowTitle() {},
         $(selector) {
@@ -96,31 +73,18 @@ async function createWebClient(params) {
             }
             return $(this.el).find(selector);
         }
-    }
+    };
     if (params.webClient) {
         Object.assign(patchWC, params.webClient);
     }
     testUtilsMock.patch(webClient, patchWC);
 
-    let menus = params.menus;
-    if (!menus) {
-        menus = {
-            all_menu_ids: [0],
-            children: [],
-        }
-    }
-    odoo.loadMenusPromise = new Promise(async resolve => {
-        await testUtilsAsync.nextTick();
-        resolve(menus);
-    });
     const wcDestroy = webClient.destroy;
     webClient.destroy = function () {
         wcDestroy.call(webClient);
-        DebouncedField.prototype.DEBOUNCE = initialDebounceValue;
         SystrayMenu.Items = SystrayItems;
-        _.debounce = initialUnderscoreDebounce;
-        revertConfig();
         testUtilsMock.unpatch(webClient);
+        cleanUp();
     };
 
     await webClient.mount(target);
@@ -161,10 +125,8 @@ async function createView(params) {
     var $webClient = $('<div>').addClass('o_web_client').prependTo(target);
     var $actionManager = $('<div>').addClass('o_action_manager').appendTo($webClient);
 
-
     // add mock environment: mock server, session, fieldviewget, ...
     var mockServer = testUtilsMock.addMockEnvironment(widget, params);
-    owl.Component.env = makeTestEnvironment({}, mockServer.performRpc.bind(mockServer));
     var viewInfo = testUtilsMock.fieldsViewGet(mockServer, params);
 
     // create the view

@@ -574,6 +574,7 @@ QUnit.module('ActionManager', {
 
         await doAction(1); // target != 'new'
         assert.containsNone(document.body, '.modal');
+        debugger
 
         webClient.destroy();
     });
@@ -842,7 +843,6 @@ QUnit.module('ActionManager', {
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            debug:true,
             mockRPC: function (route, args) {
                 assert.step(args.method || route);
                 return this._super.apply(this, arguments);
@@ -1457,6 +1457,7 @@ QUnit.module('ActionManager', {
                 }
                 return result;
             },
+            debounce: false,
         });
         doAction(4);
         await nextTick();
