@@ -319,7 +319,7 @@ class Channel(models.Model):
 
     def _notify_email_recipient_values(self, recipient_ids):
         # Excluded Blacklisted
-        whitelist = self.env['res.partner'].sudo().browse(recipient_ids).filtered(lambda p: not p.is_blacklisted)
+        whitelist = self.env['res.partner'].sudo().browse(recipient_ids).filtered(lambda p: not p.is_blacklisted and p.user_ids.state == 'active')
         # real mailing list: multiple recipients (hidden by X-Forge-To)
         if self.alias_domain and self.alias_name:
             return {
