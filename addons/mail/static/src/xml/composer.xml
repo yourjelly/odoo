@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-     <div t-name="mail.Composer" t-attf-class="o_thread_composer #{widget.extended ? 'o_thread_composer_extended' : (widget.notInline ? '' : 'o_chat_inline_composer')} #{widget.isMini ? 'o_chat_mini_composer' : ''}">
+     <div t-name="mail.Composer" t-attf-class="o_thread_composer #{widget.extended ? 'o_thread_composer_extended' : (widget.notInline ? '' : 'o_chat_inline_composer')} #{widget.isMini ? 'o_chat_mini_composer' : ''} #{widget.options.isLog ? 'o_thread_composer_log_note' : ''}">
          <div t-if="widget.isMini || !widget.notInline" class="o_file_drop_zone_container d-none">
             <h4>Drag Files Here <span class="fa fa-download"/></h4>
          </div>
@@ -15,7 +15,7 @@
                     <h4>Drag Files Here <span class="fa fa-download"/></h4>
                 </div>
                 <div class="o_composer_input">
-                    <textarea class="o_input o_composer_text_field" tabindex="2" placeholder="Write something..."/>
+                    <textarea class="o_input o_composer_text_field" tabindex="2" t-attf-placeholder="#{widget.options.isLog ? 'Add a note...' : 'Send a message...'}"/>
                     <div class="o_chatter_composer_tools">
                         <button tabindex="4" class="btn btn-secondary fa fa-smile-o o_composer_button_emoji" type="button" data-toggle="popover" title="Emojis" aria-label="Emojis"/>
                         <button tabindex="5" class="btn btn-secondary fa fa-paperclip o_composer_button_add_attachment" type="button" aria-label="Add attachment" title="Add attachment"/>
@@ -27,7 +27,7 @@
              <div class="o_composer_thread_typing"/>
          </div>
          <div class="o_composer_send">
-             <button tabindex="3" class="btn btn-primary o_composer_button_send d-none d-md-inline-block" type="button"><t t-esc="widget.options.sendText"/></button>
+             <button tabindex="3" t-attf-class="btn btn-#{widget.options.isLog ? 'secondary' : 'primary'} o_composer_button_send d-none d-md-inline-block" type="button"><t t-esc="widget.options.sendText"/></button>
              <button tabindex="3" class="btn btn-secondary o_composer_button_discard d-none" type="button">Discard</button>
          </div>
          <span class="d-none">

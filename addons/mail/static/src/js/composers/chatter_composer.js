@@ -34,7 +34,7 @@ var ChatterComposer = BasicComposer.extend({
             isLog: false,
         });
         if (this.options.isLog) {
-            this.options.sendText = _t("Log");
+            this.options.sendText = _t("LOG NOTE");
         }
         this.notInline = true;
     },

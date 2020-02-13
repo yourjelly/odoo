@@ -273,6 +273,23 @@
         align-items: center;
         justify-content: center;
     }
+
+    &.o_thread_composer_log_note {
+        background: white;
+        .o_composer {
+            background: theme-color('light');
+            .o_input {
+                background: theme-color('light');
+                font-style: italic;
+            }
+            .o_chatter_composer_tools .btn {
+                background: theme-color('light');
+                &:hover {
+                    background: white;
+                }
+            }
+        }
+    }
 }
 
 .o_composer_attachments_list:not(:empty) {
