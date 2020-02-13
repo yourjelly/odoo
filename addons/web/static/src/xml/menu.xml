@@ -119,6 +119,9 @@
         <div class="dropdown-menu dropdown-menu-right" role="menu">
             <t t-call="web.UserMenuActions"/>
         </div>
+        <OwlDialog t-if='state.dialog' t-props="state.dialog.dialogProps" t-on-dialog-closed='state.dialog = null'>
+            <t t-component="state.dialog.Component" />
+        </OwlDialog>
     </li>
 </t>
 
@@ -132,7 +135,7 @@
     <a role="menuitem" href="#" data-menu="logout" class="dropdown-item">Log out</a>
 </t>
 
-<!--<div t-name="UserMenu.shortcuts">
+<div t-name="UserMenu.shortcuts" owl="1">
     <div class="container-fluid">
         <div class="row">
             <div class="offset-md-2 col-md-8">
@@ -225,6 +228,7 @@
     </div>
 </div>
 
+<!--
 <t t-extend="FormSelection">
     <t t-jquery=".dropdown-menu.state">$(this).addClass("dropdown-menu-right");</t>
 </t> -->
