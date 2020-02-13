@@ -142,6 +142,9 @@ class Action extends ComponentAdapter {
         return super.destroy();
     }
     patched() {
+        if (this.widget && this.widget._enableButtons) {
+            this.widget._enableButtons();
+        }
         if (this.legacy && this.legacyZombie) {
             if (this.widget && this.widget.on_attach_callback) {
                 this.widget.on_attach_callback();

@@ -113,6 +113,13 @@ QUnit.module('ActionManager', {
             report_type: 'qweb-pdf',
             type: 'ir.actions.report',
             close_on_report_download: true,
+        }, {
+            id: 24,
+            name: 'Partner',
+            res_id: 2,
+            res_model: 'partner',
+            type: 'ir.actions.act_window',
+            views: [[666, 'form']],
         }];
 
         this.archs = {
@@ -137,6 +144,19 @@ QUnit.module('ActionManager', {
                         '<field name="foo"/>' +
                     '</group>' +
                 '</form>',
+
+             'partner,666,form': `<form>
+                     <header></header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box" modifiers="{}">
+                            <button class="oe_stat_button" type="action" name="1" icon="fa-star" context="{'default_partner': active_id}">
+                                <field string="Partners" name="o2m" widget="statinfo"/>
+                            </button>
+                        </div>
+                        <field name="display_name"/>
+                    </sheet>
+                </form>`,
+
             'pony,false,form': '<form>' +
                     '<field name="name"/>' +
                 '</form>',
@@ -675,15 +695,20 @@ QUnit.module('ActionManager', {
     QUnit.test('do not push state when action fails', async function (assert) {
         assert.expect(4);
 
+        let _hash = '';
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
             webClient: {
-                _setWindowHash() {
+                _setWindowHash(newHash) {
                     assert.step('push_state');
+                    _hash = newHash;
                 },
+                _getWindowHash() {
+                    return _hash;
+                }
             },
             mockRPC: function (route, args) {
                 if (args.method === 'read') {
@@ -3638,6 +3663,82 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_save_favorite button'));
 
         testUtils.mock.unpatch(ListController);
+        webClient.destroy();
+    });
+
+    QUnit.test('execute smart button and back', async function (assert) {
+        assert.expect(8);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            webClient: {
+                _getWindowHash() {
+                    return '#action=24';
+                }
+            },
+            mockRPC(route, args) {
+                if (args.method === 'read') {
+                    assert.notOk('default_partner' in args.kwargs.context);
+                }
+                if (route === '/web/dataset/search_read') {
+                    assert.strictEqual(args.context.default_partner, 2);
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
+
+        await testUtils.dom.click(webClient.el.querySelector('.oe_stat_button'));
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        await testUtils.dom.click(webClient.el.querySelector('.breadcrumb-item'));
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
+        webClient.destroy();
+    });
+
+    QUnit.test('execute smart button and fails', async function (assert) {
+        assert.expect(12);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            webClient: {
+                _getWindowHash() {
+                    return '#action=24';
+                }
+            },
+            mockRPC(route, args) {
+                assert.step(route);
+                if (route === '/web/dataset/search_read') {
+                    return Promise.reject();
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+        assert.containsOnce(webClient, '.o_form_view');
+        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
+
+        await testUtils.dom.click(webClient.el.querySelector('.oe_stat_button'));
+        assert.containsOnce(webClient, '.o_form_view');
+
+        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
+
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/call_kw/partner/read',
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/search_read',
+            '/web/dataset/call_kw/partner/read',
+        ]);
         webClient.destroy();
     });
 
