@@ -21,22 +21,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-lg-6 o_setting_box" id="presence_control_setting" title="Presence of employees">
-
-                            <div class="o_setting_right_pane">
-                                <span class="o_form_label">Presence Control</span>
-                                <div class="content-group" name="hr_presence_options">
-                                    <div class="row">
-                                        <field name="module_hr_attendance" class="col-lg-1 ml16"/>
-                                        <label for="module_hr_attendance" class="o_light_label"/>
-                                    </div>
-                                    <div class="row">
-                                        <field name="hr_presence_control_login" class="col-lg-1 ml16"/>
-                                        <label for="hr_presence_control_login" class="o_light_label"/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="col-12 col-lg-6 o_setting_box"
                             id="presence_reporting_setting"
                             title="Tack the presence of workers by criteria's that fit to your company &#010;
@@ -44,10 +28,8 @@
 2. On attendances: Employe is considered as 'at work' if he's identified in the app attendances&#010;
 3. On number of emails sent: User is considered as 'at work' if he's logged in the DB and he sent at least X emails&#010;
 4. On IP address: User is considered as 'at work' if he's logged in the DB via a specific IP address">
-                            <!-- <div class="o_setting_left_pane">
-                                <field name="module_hr_presence"/>
-                            </div> -->
                             <div class="o_setting_right_pane">
+                                <field name="module_hr_presence" invisible="1"/>
                                 <label for="module_hr_presence"/>
                                 <p class="text-muted" name="hr_presence_options_advanced">
                                     Reporting "Employee Presence" is based on the selection below
@@ -115,7 +97,7 @@
                             </div>
                         </div>
                     </div>
-                    <h2>Employee Update Rights</h2>
+                    <h2>Employee Rights</h2>
                     <div class="row mt16 o_settings_container" name="employee_rights_setting_container">
                         <div class="col-12 col-lg-6 o_setting_box" title="Allow employees to update their own data.">
                             <div class="o_setting_left_pane">

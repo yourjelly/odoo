@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -19,3 +19,7 @@ class ResConfigSettings(models.TransientModel):
     hr_presence_control_email_amount = fields.Integer(related="company_id.hr_presence_control_email_amount", readonly=False)
     hr_presence_control_ip_list = fields.Char(related="company_id.hr_presence_control_ip_list", readonly=False)
     hr_employee_self_edit = fields.Boolean(string="Allow Updating Personal Data", config_parameter='hr.hr_employee_self_edit')
+
+    @api.onchange('hr_presence_control_email', 'hr_presence_control_ip')
+    def _onchange_extra_day(self):
+        self.module_hr_presence = self.hr_presence_control_email or self.hr_presence_control_ip
