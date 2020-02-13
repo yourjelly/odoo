@@ -574,7 +574,6 @@ QUnit.module('ActionManager', {
 
         await doAction(1); // target != 'new'
         assert.containsNone(document.body, '.modal');
-        debugger
 
         webClient.destroy();
     });
