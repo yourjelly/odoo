@@ -124,7 +124,11 @@ class StockWarehouse(models.Model):
                     'picking_type_id': self.in_type_id.id,
                     'group_propagation_option': 'none',
                     'company_id': self.company_id.id,
-                    'route_id': self._find_global_route('purchase_stock.route_warehouse0_buy', _('Buy')).id,
+                    'route_ids': [
+                        (4, self._find_global_route('purchase_stock.route_warehouse0_buy', _('Buy')).id),
+                        (4, self._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
+                    ],
+                    'procure_method': 'make_to_stock',
                     'propagate_cancel': self.reception_steps != 'one_step',
                 },
                 'update_values': {
@@ -133,13 +137,27 @@ class StockWarehouse(models.Model):
                     'location_id': location_id.id,
                     'propagate_cancel': self.reception_steps != 'one_step',
                 }
-            }
+            },
         })
+        delivery_rule_values = rules['wh_delivery_mto_pull_id'].get('update_values').get('route_ids', False)
+        if delivery_rule_values:
+            rules['wh_delivery_mto_pull_id']['update_values']['route_ids'].append(
+                (4, self._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id))
+        else:
+            rules['wh_delivery_mto_pull_id']['update_values']['route_ids'] = [
+                (4, self._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
+            ]
         return rules
 
     def _get_all_routes(self):
         routes = super(StockWarehouse, self)._get_all_routes()
-        routes |= self.filtered(lambda self: self.buy_to_resupply and self.buy_pull_id and self.buy_pull_id.route_id).mapped('buy_pull_id').mapped('route_id')
+        for wh in self:
+            if not wh.buy_to_resupply:
+                continue
+            if wh.buy_pull_id and wh.buy_pull_id.route_id:
+                routes |= wh.buy_pull_id.route_id
+            if wh.buy_pull_mto_id and wh.buy_pull_mto_id.route_id:
+                routes |= wh.buy_pull_mto_id.route_id
         return routes
 
     def _update_name_and_code(self, name=False, code=False):
@@ -148,6 +166,8 @@ class StockWarehouse(models.Model):
         #change the buy stock rule name
         if warehouse.buy_pull_id and name:
             warehouse.buy_pull_id.write({'name': warehouse.buy_pull_id.name.replace(warehouse.name, name, 1)})
+        if warehouse.buy_pull_mto_id and name:
+            warehouse.buy_pull_mto_id.write({'name': warehouse.buy_pull_mto_id.name.replace(warehouse.name, name, 1)})
         return res
 
 

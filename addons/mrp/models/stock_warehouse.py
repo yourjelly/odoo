@@ -114,13 +114,16 @@ class StockWarehouse(models.Model):
                     'procure_method': 'make_to_order',
                     'company_id': self.company_id.id,
                     'picking_type_id': self.manu_type_id.id,
-                    'route_id': self._find_global_route('mrp.route_warehouse0_manufacture', _('Manufacture')).id
+                    'route_ids': [
+                        (4, self._find_global_route('mrp.route_warehouse0_manufacture', _('Manufacture')).id),
+                        (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
+                    ],
                 },
                 'update_values': {
                     'active': self.manufacture_to_resupply,
                     'name': self._format_rulename(location_id, False, 'Production'),
                     'location_id': location_id.id,
-                    'propagate_cancel': self.manufacture_steps == 'pbm_sam'
+                    'propagate_cancel': self.manufacture_steps == 'pbm_sam',
                 },
             },
             'manufacture_mto_pull_id': {
@@ -130,7 +133,9 @@ class StockWarehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
-                    'route_id': self._find_global_route('stock.route_warehouse0_mto', _('Make To Order')).id,
+                    'route_ids': [
+                        (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
+                    ],
                     'location_id': production_location.id,
                     'location_src_id': location_src.id,
                     'picking_type_id': self.manu_type_id.id
@@ -147,7 +152,6 @@ class StockWarehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
-                    'route_id': self._find_global_route('stock.route_warehouse0_mto', _('Make To Order')).id,
                     'name': self._format_rulename(self.lot_stock_id, self.pbm_loc_id, 'MTO'),
                     'location_id': self.pbm_loc_id.id,
                     'location_src_id': self.lot_stock_id.id,
@@ -155,6 +159,9 @@ class StockWarehouse(models.Model):
                 },
                 'update_values': {
                     'active': self.manufacture_steps != 'mrp_one_step' and self.manufacture_to_resupply,
+                    'route_ids': [
+                        (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
+                    ],
                 }
             },
             # The purpose to move sam rule in the manufacture route instead of
@@ -170,18 +177,28 @@ class StockWarehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
-                    'route_id': self._find_global_route('mrp.route_warehouse0_manufacture', _('Manufacture')).id,
                     'name': self._format_rulename(self.sam_loc_id, self.lot_stock_id, False),
                     'location_id': self.lot_stock_id.id,
                     'location_src_id': self.sam_loc_id.id,
                     'picking_type_id': self.sam_type_id.id
                 },
                 'update_values': {
+                    'route_ids': [
+                        (4, self._find_global_route('mrp.route_warehouse0_manufacture', _('Manufacture')).id),
+                    ],
                     'active': self.manufacture_steps == 'pbm_sam' and self.manufacture_to_resupply,
                 }
             }
 
         })
+        delivery_rule_values = rules['wh_delivery_mto_pull_id'].get('update_values').get('route_ids', False)
+        if delivery_rule_values:
+            rules['wh_delivery_mto_pull_id']['update_values']['route_ids'].append(
+                (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id))
+        else:
+            rules['wh_delivery_mto_pull_id']['update_values']['route_ids'] = [
+                (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id)
+            ]
         return rules
 
     def _get_locations_values(self, vals, code=False):
@@ -274,7 +291,13 @@ class StockWarehouse(models.Model):
 
     def _get_all_routes(self):
         routes = super(StockWarehouse, self)._get_all_routes()
-        routes |= self.filtered(lambda self: self.manufacture_to_resupply and self.manufacture_pull_id and self.manufacture_pull_id.route_id).mapped('manufacture_pull_id').mapped('route_id')
+        for wh in self:
+            if not wh.manufacture_to_resupply:
+                continue
+            if wh.manufacture_pull_id and wh.manufacture_pull_id.route_id:
+                routes |= wh.manufacture_pull_id.route_id
+            if wh.manufacture_mto_pull_id and wh.manufacture_mto_pull_id.route_id:
+                routes |= wh.manufacture_mto_pull_id.route_id
         return routes
 
     def _update_location_manufacture(self, new_manufacture_step):
@@ -287,4 +310,6 @@ class StockWarehouse(models.Model):
         for warehouse in self:
             if warehouse.manufacture_pull_id and name:
                 warehouse.manufacture_pull_id.write({'name': warehouse.manufacture_pull_id.name.replace(warehouse.name, name, 1)})
+            if warehouse.manufacture_mto_pull_id and name:
+                warehouse.manufacture_mto_pull_id.write({'name': warehouse.manufacture_mto_pull_id.name.replace(warehouse.name, name, 1)})
         return res

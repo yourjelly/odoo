@@ -20,4 +20,5 @@ from purchase order.
     'depends': ['mrp', 'purchase_stock'],
     'installable': True,
     'auto_install': True,
+    'post_init_hook': '_set_manufacture_mto_pull_rules_on_buy_route',
 }

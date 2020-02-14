@@ -54,8 +54,8 @@ class StockRule(models.Model):
         domain=[('company_id', '?=', 'route_company_id')])
     location_id = fields.Many2one('stock.location', 'Destination Location', required=True, check_company=True)
     location_src_id = fields.Many2one('stock.location', 'Source Location', check_company=True)
-    route_id = fields.Many2one('stock.location.route', 'Route', required=True, ondelete='cascade')
-    route_company_id = fields.Many2one(related='route_id.company_id', string='Route Company')
+    route_ids = fields.Many2many('stock.location.route', 'stock_route_rule_rel', 'rule_id', 'route_id', string='Routes', copy=True)
+    route_company_id = fields.Many2one(related='route_ids.company_id', string='Route Company')
     procure_method = fields.Selection([
         ('make_to_stock', 'Take From Stock'),
         ('make_to_order', 'Trigger Another Rule'),
@@ -64,7 +64,7 @@ class StockRule(models.Model):
              "Trigger Another Rule: the system will try to find a stock rule to bring the products in the source location. The available stock will be ignored.\n"
              "Take From Stock, if Unavailable, Trigger Another Rule: the products will be taken from the available stock of the source location."
              "If there is no stock available, the system will try to find a  rule to bring the products in the source location.")
-    route_sequence = fields.Integer('Route Sequence', related='route_id.sequence', store=True, readonly=False, compute_sudo=True)
+    route_sequence = fields.Integer('Route Sequence', related='route_ids.sequence', store=True, readonly=False, compute_sudo=True)
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Operation Type',
         required=True, check_company=True,
@@ -109,12 +109,13 @@ class StockRule(models.Model):
         if self.picking_type_id.code == 'outgoing':
             self.delay_alert = True
 
-    @api.onchange('route_id', 'company_id')
+    @api.onchange('route_ids', 'company_id')
     def _onchange_route(self):
         """ Ensure that the rule's company is the same than the route's company. """
-        if self.route_id.company_id:
-            self.company_id = self.route_id.company_id
-        if self.picking_type_id.warehouse_id.company_id != self.route_id.company_id:
+        if self.route_ids.company_id:
+            # TODO do not allow 2 companies
+            self.company_id = self.route_ids.company_id
+        if self.picking_type_id.warehouse_id.company_id != self.route_ids.company_id:
             self.picking_type_id = False
 
     def _get_message_values(self):
@@ -443,15 +444,15 @@ class ProcurementGroup(models.Model):
         Rule = self.env['stock.rule']
         res = self.env['stock.rule']
         if route_ids:
-            res = Rule.search(expression.AND([[('route_id', 'in', route_ids.ids)], domain]), order='route_sequence, sequence', limit=1)
+            res = Rule.search(expression.AND([[('route_ids', 'in', route_ids.ids)], domain]), order='route_sequence, sequence', limit=1)
         if not res:
             product_routes = product_id.route_ids | product_id.categ_id.total_route_ids
             if product_routes:
-                res = Rule.search(expression.AND([[('route_id', 'in', product_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+                res = Rule.search(expression.AND([[('route_ids', 'in', product_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
         if not res and warehouse_id:
             warehouse_routes = warehouse_id.route_ids
             if warehouse_routes:
-                res = Rule.search(expression.AND([[('route_id', 'in', warehouse_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
+                res = Rule.search(expression.AND([[('route_ids', 'in', warehouse_routes.ids)], domain]), order='route_sequence, sequence', limit=1)
         return res
 
     @api.model

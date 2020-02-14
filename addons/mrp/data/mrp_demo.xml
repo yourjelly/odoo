@@ -108,7 +108,7 @@
         <!-- Resource: mrp.bom -->
 
         <record id="product.product_product_3_product_template" model="product.template">
-            <field name="route_ids" eval="[(6, 0, [ref('stock.route_warehouse0_mto'), ref('mrp.route_warehouse0_manufacture')])]"/>
+            <field name="route_ids" eval="[(6, 0, [ref('mrp.route_manufacture_mto')])]"/>
         </record>
         <record id="mrp_bom_manufacture" model="mrp.bom">
             <field name="product_tmpl_id" ref="product.product_product_3_product_template"/>
@@ -288,7 +288,7 @@
         </record>
 
         <record id="product_product_computer_desk_product_template" model="product.template">
-            <field name="route_ids" eval="[(6, 0, [ref('stock.route_warehouse0_mto'), ref('mrp.route_warehouse0_manufacture')])]"/>
+            <field name="route_ids" eval="[(6, 0, [ref('mrp.route_manufacture_mto')])]"/>
         </record>
 
         <record id="mrp_bom_desk" model="mrp.bom">

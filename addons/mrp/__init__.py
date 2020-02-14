@@ -7,6 +7,7 @@ from . import report
 
 from odoo import api, SUPERUSER_ID
 
+
 def _create_warehouse_data(cr, registry):
     """ This hook is used to add a default manufacture_pull_id, manufacture
     picking_type on every warehouse. It is necessary if the mrp module is
@@ -15,3 +16,15 @@ def _create_warehouse_data(cr, registry):
     env = api.Environment(cr, SUPERUSER_ID, {})
     warehouse_ids = env['stock.warehouse'].search([('manufacture_pull_id', '=', False)])
     warehouse_ids.write({'manufacture_to_resupply': True})
+    warehouse_ids = env['stock.warehouse'].search([])
+    location_ids = [
+        w.delivery_steps == 'ship_only' and w.lot_stock_id.id or w.wh_output_stock_loc_id.id
+        for w in warehouse_ids
+    ]
+    transit_location = warehouse_ids._get_transit_locations()
+    rules = env['stock.rule'].search([
+        ('location_src_id', 'in', location_ids),
+        ('location_id', 'in', transit_location[0].ids + transit_location[1].ids),
+        ('procure_method', 'in', ['make_to_order', 'mts_else_mto'])
+    ])
+    rules.write({'route_ids': [(4, env.ref('mrp.route_manufacture_mto').id)]})

@@ -33,7 +33,6 @@
                     <field name="name"/>
                     <filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
                     <group expand='0' string='Group by...'>
-                        <filter string='Route' name="groupby_route" context="{'group_by': 'route_id'}"/>
                         <filter string='Warehouse' name="groupby_warehouse" context="{'group_by': 'warehouse_id'}" groups="stock.group_stock_multi_warehouses"/>
                    </group>
                 </search>
@@ -49,7 +48,7 @@
                     <field name="action"/>
                     <field name="location_src_id" options="{'no_create': True}"/>
                     <field name="location_id" options="{'no_create': True}"/>
-                    <field name="route_id"/>
+                    <field name="route_ids" widget="many2many_tags"/>
                     <field name="company_id" groups="base.group_multi_company"/>
                 </tree>
             </field>
@@ -88,7 +87,7 @@
                         </group>
                         <group>
                             <group name="apply_on" string="Applicability">
-                                <field name="route_id"/>
+                              <field name="route_ids" widget="many2many_tags"/>
                                 <field name="warehouse_id" attrs="{'invisible': [('action', '=', 'push')]}" groups="base.group_no_one"/>
                                 <field name="route_company_id" invisible="1"/>
                                 <field name="company_id" attrs="{'required': [('action', '=', 'push')]}" groups="base.group_multi_company"/>
@@ -126,7 +125,9 @@
             <field name="mode">primary</field>
             <field name="inherit_id" ref="stock.view_stock_rule_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='route_id']" position="replace"></xpath>
+                <xpath expr="//field[@name='route_ids']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
                 <xpath expr="//group[@name='apply_on']" position="attributes">
                     <attribute name="groups">base.group_multi_company,base.group_no_one</attribute>
                 </xpath>
