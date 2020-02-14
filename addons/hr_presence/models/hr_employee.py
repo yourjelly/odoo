@@ -30,7 +30,7 @@ class Employee(models.AbstractModel):
         ('absent', 'Time Off'),
         ('to_define', 'To Be Checked')])
 
-    @api.depends('user_id.im_status', 'manually_set_present')
+    @api.depends('user_id.im_status', 'manually_set_present', 'email_sent', 'ip_connected')
     def _compute_presence_state(self):
         """
         This method is overritten in several other modules which add additional
