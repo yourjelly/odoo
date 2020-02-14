@@ -18,21 +18,46 @@ class Employee(models.AbstractModel):
     ip_connected = fields.Boolean(default=False)
     manually_set_present = fields.Boolean(default=False)
 
+    hr_presence_state = fields.Selection([
+        ('present', 'At Work'),
+        ('absent', 'Time Off'),
+        ('to_define', 'To Be Checked')], compute='_compute_presence_state', default='to_define')
+
     # Stored field used in the presence kanban reporting view
     # to allow group by state.
     hr_presence_state_display = fields.Selection([
-        ('present', 'Present'),
-        ('absent', 'Absent'),
-        ('to_define', 'To Define')])
+        ('present', 'At Work'),
+        ('absent', 'Time Off'),
+        ('to_define', 'To Be Checked')])
 
+    @api.depends('user_id.im_status', 'manually_set_present')
     def _compute_presence_state(self):
-        super()._compute_presence_state()
-        employees = self.filtered(lambda employee: employee.hr_presence_state != 'present' and not employee.is_absent)
+        """
+        This method is overritten in several other modules which add additional
+        presence criterions. e.g. hr_attendance, hr_holidays
+        """
+        # Check on login
+        print('on check')
+        check_login = literal_eval(self.env['ir.config_parameter'].sudo().get_param('hr.hr_presence_control_login', 'False'))
         company = self.env.company
-        for employee in employees:
-            if not employee.is_absent and company.hr_presence_last_compute_date and company.hr_presence_last_compute_date.day == Datetime.now().day and \
+        for employee in self:
+            state = 'to_define'
+            if check_login:
+                if employee.user_id.im_status == 'online':
+                    state = 'present'
+            if state == 'to_define' and company.hr_presence_last_compute_date and company.hr_presence_last_compute_date.day == Datetime.now().day and \
                     (employee.email_sent or employee.ip_connected or employee.manually_set_present):
-                employee.hr_presence_state = 'present'
+                state = 'present'
+            employee.hr_presence_state = state
+
+    # def _compute_presence_state(self):
+    #     super()._compute_presence_state()
+    #     employees = self.filtered(lambda employee: employee.hr_presence_state != 'present')
+    #     company = self.env.company
+    #     for employee in employees:
+    #         if company.hr_presence_last_compute_date and company.hr_presence_last_compute_date.day == Datetime.now().day and \
+    #                 (employee.email_sent or employee.ip_connected or employee.manually_set_present):
+    #             employee.hr_presence_state = 'present'
 
     @api.model
     def _check_presence(self):
@@ -49,7 +74,6 @@ class Employee(models.AbstractModel):
 
         employees = self.env['hr.employee'].search([('company_id', '=', company.id)])
         all_employees = employees
-
 
         # Check on IP
         if literal_eval(self.env['ir.config_parameter'].sudo().get_param('hr.hr_presence_control_ip', 'False')):
@@ -109,22 +133,12 @@ class Employee(models.AbstractModel):
     def action_set_present(self):
         if not self.env.user.has_group('hr.group_hr_manager'):
             raise UserError(_("You don't have the right to do this. Please contact an Administrator."))
-        self.write({'manually_set_present': True})
+        self.write({'manually_set_present': True, 'hr_presence_state_display': 'present'})
 
     def write(self, vals):
         if vals.get('hr_presence_state_display') == 'present':
             vals['manually_set_present'] = True
         return super().write(vals)
-
-    def action_open_leave_request(self):
-        self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "res_model": "hr.leave",
-            "views": [[False, "form"]],
-            "view_mode": 'form',
-            "context": {'default_employee_id': self.id},
-        }
 
     # --------------------------------------------------
     # Messaging

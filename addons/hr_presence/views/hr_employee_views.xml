@@ -12,10 +12,32 @@
         </field>
     </record>
 
+    <record id="hr_kanban_view_employees" model="ir.ui.view">
+        <field name="name">hr.employee.kanban</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='id']" position="before">
+                <field name="hr_presence_state"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="before">
+                <div class="float-right" t-if="record.hr_presence_state.raw_value == 'present'">
+                    <span class="fa fa-circle text-success" role="img" aria-label="Present" title="Present" name="presence_present"></span>
+                </div>
+                <div class="float-right" t-if="record.hr_presence_state.raw_value == 'absent'">
+                    <span class="fa fa-circle text-danger" role="img" aria-label="Time Off" title="Time Off" name="presence_absent"></span>
+                </div>
+                <div class="float-right" t-if="record.hr_presence_state.raw_value == 'to_define'">
+                    <span class="fa fa-circle text-warning" role="img" aria-label="To define" title="To define" name="presence_to_define"></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
     <record id="hr_employee_view_kanban" model="ir.ui.view">
         <field name="name">hr.employee.view.kanban</field>
         <field name="model">hr.employee</field>
-        <field name="inherit_id" ref="hr.hr_kanban_view_employees"/>
+        <field name="inherit_id" ref="hr_presence.hr_kanban_view_employees"/>
         <field name="groups_id" eval="[(4, ref('hr.group_hr_manager'))]"/>
         <field name="mode">primary</field>
         <field name="arch" type="xml">
@@ -23,12 +45,68 @@
                 <div class="o_kanban_record_bottom">
                     <div class="oe_kanban_bottom_left">
                         <field name="hr_presence_state" invisible="1"/>
-                        <button name="action_set_present" type="object" class="btn btn-primary btn-sm mt8 fa fa-check" title="Set as present" attrs="{'invisible': [('hr_presence_state', '=', 'present')]}"> </button>
-                        <button name="action_open_leave_request" type="object" class="btn btn-primary btn-sm mt8">Time Off</button>
+                        <button name="action_set_present" type="object" class="btn btn-primary btn-sm mt8 fa fa-check" title="Set as present" attrs="{'invisible': [('hr_presence_state', 'in', ['present', 'absent'])]}"> </button>
                         <button name="action_send_sms" type="object" class="btn btn-primary btn-sm mt8">SMS</button>
                         <button name="action_send_mail" type="object" class="btn btn-primary btn-sm mt8">Mail</button>
                     </div>
                 </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="hr_employee_public_view_kanban" model="ir.ui.view">
+        <field name="name">hr.employee.kanban</field>
+        <field name="model">hr.employee.public</field>
+        <field name="inherit_id" ref="hr.hr_employee_public_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='id']" position="before">
+                <field name="hr_presence_state"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="before">
+                <div class="float-right" t-if="record.hr_presence_state.raw_value == 'present'">
+                    <span class="fa fa-circle text-success" role="img" aria-label="Present" title="Present" name="presence_present"></span>
+                </div>
+                <div class="float-right" t-if="record.hr_presence_state.raw_value == 'absent'">
+                    <span class="fa fa-circle text-danger" role="img" aria-label="Time Off" title="Time Off" name="presence_absent"></span>
+                </div>
+                <div class="float-right" t-if="record.hr_presence_state.raw_value == 'to_define'">
+                    <span class="fa fa-circle text-warning" role="img" aria-label="To define" title="To define" name="presence_to_define"></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_employee_form" model="ir.ui.view">
+        <field name="name">hr.employee.form</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <field name="hr_presence_state" invisible="1"/>
+                <button
+                    id="hr_presence_button"
+                    class="oe_stat_button"
+                    disabled="1"
+                    attrs="{'invisible': ['|', ('last_activity', '=', False), ('user_id', '=', False)]}">
+                    <div role="img" class="fa fa-fw fa-circle text-success o_button_icon" attrs="{'invisible': [('hr_presence_state', '!=', 'present')]}" aria-label="Available" title="Available"/>
+                    <div role="img" class="fa fa-fw fa-circle text-warning o_button_icon" attrs="{'invisible': [('hr_presence_state', '!=', 'to_define')]}" aria-label="Away" title="Away"/>
+                    <div role="img" class="fa fa-fw fa-circle text-danger o_button_icon" attrs="{'invisible': [('hr_presence_state', '!=', 'absent')]}" aria-label="Not available" title="Not available"/>
+
+                    <div class="o_stat_info" attrs="{'invisible': [('hr_presence_state', '=', 'present')]}">
+                        <span class="o_stat_text">
+                            Not Connected
+                        </span>
+                    </div>
+                    <div class="o_stat_info" attrs="{'invisible': [('hr_presence_state', '!=', 'present')]}">
+                        <span class="o_stat_value" attrs="{'invisible': [('last_activity_time', '=', False)]}">
+                            <field name="last_activity_time"/>
+                        </span>
+                        <span class="o_stat_value" attrs="{'invisible': [('last_activity_time', '!=', False)]}">
+                            <field name="last_activity"/>
+                        </span>
+                        <span class="o_stat_text">Present Since</span>
+                    </div>
+                </button>
             </xpath>
         </field>
     </record>

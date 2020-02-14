@@ -16,7 +16,7 @@ Based on:
 
 Allows to contact directly the employee in case of unjustified absence.
     """,
-    'depends': ['hr', 'hr_holidays', 'sms'],
+    'depends': ['hr', 'sms'],
     'data': [
         'data/ir_actions_server.xml',
         'views/hr_employee_views.xml',
@@ -25,5 +25,5 @@ Allows to contact directly the employee in case of unjustified absence.
     ],
     'demo': [],
     'installable': True,
-    'auto_install': False,
+    'auto_install': True,
 }

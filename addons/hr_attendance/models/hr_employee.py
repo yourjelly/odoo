@@ -28,9 +28,6 @@ class HrEmployeeBase(models.AbstractModel):
         super()._compute_presence_state()
         employees = self.filtered(lambda employee: employee.hr_presence_state != 'present')
         for employee in employees:
-            if employee.attendance_state == 'checked_out' and employee.hr_presence_state == 'to_define':
-                employee.hr_presence_state = 'absent'
-        for employee in employees:
             if employee.attendance_state == 'checked_in':
                 employee.hr_presence_state = 'present'
 

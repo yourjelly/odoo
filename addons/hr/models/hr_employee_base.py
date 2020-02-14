@@ -37,29 +37,8 @@ class HrEmployeeBase(models.AbstractModel):
     tz = fields.Selection(
         string='Timezone', related='resource_id.tz', readonly=False,
         help="This field is used in order to define in which timezone the resources will work.")
-    hr_presence_state = fields.Selection([
-        ('present', 'Present'),
-        ('absent', 'Absent'),
-        ('to_define', 'To Define')], compute='_compute_presence_state', default='to_define')
     last_activity = fields.Date(compute="_compute_last_activity")
     last_activity_time = fields.Char(compute="_compute_last_activity")
-
-    @api.depends('user_id.im_status')
-    def _compute_presence_state(self):
-        """
-        This method is overritten in several other modules which add additional
-        presence criterions. e.g. hr_attendance, hr_holidays
-        """
-        # Check on login
-        check_login = literal_eval(self.env['ir.config_parameter'].sudo().get_param('hr.hr_presence_control_login', 'False'))
-        for employee in self:
-            state = 'to_define'
-            if check_login:
-                if employee.user_id.im_status == 'online':
-                    state = 'present'
-                elif employee.user_id.im_status == 'offline':
-                    state = 'absent'
-            employee.hr_presence_state = state
 
     @api.depends('user_id')
     def _compute_last_activity(self):

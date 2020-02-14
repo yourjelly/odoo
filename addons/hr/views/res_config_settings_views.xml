@@ -23,7 +23,7 @@
                         </div>
                         <div class="col-12 col-lg-6 o_setting_box"
                             id="presence_reporting_setting"
-                            title="Tack the presence of workers by criteria's that fit to your company &#010;
+                            title="Track the presence of workers by criteria's that fit to your company&#010;
 1. On user logged in your DB: User is considered as 'at work' if he's logged in the DB&#010;
 2. On attendances: Employe is considered as 'at work' if he's identified in the app attendances&#010;
 3. On number of emails sent: User is considered as 'at work' if he's logged in the DB and he sent at least X emails&#010;

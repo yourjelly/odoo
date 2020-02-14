@@ -20,6 +20,6 @@ class ResConfigSettings(models.TransientModel):
     hr_presence_control_ip_list = fields.Char(related="company_id.hr_presence_control_ip_list", readonly=False)
     hr_employee_self_edit = fields.Boolean(string="Allow Updating Personal Data", config_parameter='hr.hr_employee_self_edit')
 
-    @api.onchange('hr_presence_control_email', 'hr_presence_control_ip')
+    @api.onchange('hr_presence_control_email', 'hr_presence_control_ip', 'module_hr_attendance', 'hr_presence_control_login')
     def _onchange_extra_day(self):
-        self.module_hr_presence = self.hr_presence_control_email or self.hr_presence_control_ip
+        self.module_hr_presence = self.hr_presence_control_email or self.hr_presence_control_ip or self.module_hr_attendance or self.hr_presence_control_login

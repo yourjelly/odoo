@@ -93,11 +93,6 @@ class HrEmployeeBase(models.AbstractModel):
             employee.allocation_used_count = employee.allocation_count - employee.remaining_leaves
             employee.allocation_used_display = "%g" % employee.allocation_used_count
 
-    def _compute_presence_state(self):
-        super()._compute_presence_state()
-        employees = self.filtered(lambda employee: employee.hr_presence_state != 'present' and employee.is_absent)
-        employees.update({'hr_presence_state': 'absent'})
-
     def _compute_leave_status(self):
         # Used SUPERUSER_ID to forcefully get status of other user's leave, to bypass record rule
         holidays = self.env['hr.leave'].sudo().search([
