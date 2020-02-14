@@ -72,16 +72,14 @@ class AccountAnalyticLine(models.Model):
         for analytic_line in self:
             analytic_line.encoding_uom_id = self.env.company.timesheet_encode_uom_id
 
-    @api.depends('project_id')
+    @api.depends('project_id', 'task_id.project_id')
     def _compute_task_id(self):
         for record in self:
             if record.project_id and \
                record.project_id != record.task_id.project_id:
                 record.task_id = False
-            else:
-                record.task_id = record.task_id
 
-    @api.depends('task_id')
+    @api.depends('task_id.project_id')
     def _compute_project_id(self):
         for record in self:
             if not record.project_id:
