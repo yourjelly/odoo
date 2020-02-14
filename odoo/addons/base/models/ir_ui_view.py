@@ -38,6 +38,7 @@ from odoo.osv.expression import expression
 _logger = logging.getLogger(__name__)
 
 MOVABLE_BRANDING = ['data-oe-model', 'data-oe-id', 'data-oe-field', 'data-oe-xpath', 'data-oe-source-id']
+PUBLIC_ASSETS = []
 
 
 def transfer_field_to_modifiers(field, modifiers):
@@ -1469,6 +1470,9 @@ actual arch.
 
     @api.model
     def read_template(self, xml_id):
+        """ Return a template content based on external id
+        Read access on ir.ui.view required
+        """
         return self._read_template(self.get_view_id(xml_id))
 
     @api.model
@@ -1576,6 +1580,15 @@ actual arch.
         xmlid = self.env['ir.model.data'].sudo().search_read(domain, ['module', 'name'])[0]
         return '%s.%s' % (xmlid['module'], xmlid['name'])
 
+    @api.model
+    def render_public_asset(self, template, values=None):
+        if template not in PUBLIC_ASSETS:
+            _logger.warning("Add the external id %s in global variable PUBLC_ASSSETS to make the arch accessible in RPC", template)
+            raise ValidationError(_("Asset %s not accessible") % template)
+        template = self.browse(self.get_view_id(template)).sudo()
+        return template._render(values, engine="ir.qweb")
+
+    @api.model
     def render_template(self, template, values=None):
         _logger.warning("Call to public render_template for view %s", template)
         self.check_access_rights('read')

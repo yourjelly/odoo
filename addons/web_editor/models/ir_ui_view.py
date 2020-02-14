@@ -8,6 +8,8 @@ from lxml import etree, html
 
 from odoo.exceptions import AccessError
 from odoo import api, models
+from odoo.addons.base.models.ir_ui_view import PUBLIC_ASSETS
+PUBLIC_ASSETS.append('web_editor.compiled_assets_wysiwyg')
 
 _logger = logging.getLogger(__name__)
 

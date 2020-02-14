@@ -451,10 +451,10 @@ var loadAsset = (function () {
             kwargs: {
                 context: context,
             },
-            method: 'render_template',
+            method: 'render_public_asset',
             model: 'ir.ui.view',
         };
-        return rpc('/web/dataset/call_kw/ir.ui.view/render_template', params).then(function (xml) {
+        return rpc('/web/dataset/call_kw/ir.ui.view/render_public_asset', params).then(function (xml) {
             var $xml = $(xml);
             cache[xmlId] = {
                 cssLibs: $xml.filter('link[href]:not([type="image/x-icon"])').map(function () {
