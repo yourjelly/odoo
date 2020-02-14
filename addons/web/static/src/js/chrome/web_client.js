@@ -53,8 +53,7 @@ class WebClient extends Component {
 
         const state = this._getUrlState();
         this._determineCompanyIds(state);
-        // if (Object.keys(state).length === 1 && Object.keys(state)[0] === "cids") {
-        if (Object.keys(state).length === 0) {
+        if (Object.keys(state).length === 1 && Object.keys(state)[0] === "cids") {
             const menuID = this.menus && this.menus.root.children[0];
             if (!menuID) {
                 return Promise.resolve();
@@ -261,6 +260,8 @@ class WebClient extends Component {
                 if (!('title' in state)) {
                     state.title = mainComponent.title;
                 }
+                // keep cids in hash
+                this._determineCompanyIds(state);
                 const scrollPosition = this.renderingInfo.main.controller.scrollPosition;
                 if (scrollPosition) {
                     this._scrollTo(scrollPosition);
