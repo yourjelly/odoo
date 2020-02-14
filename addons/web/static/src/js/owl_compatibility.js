@@ -140,9 +140,26 @@ odoo.define('web.OwlCompatibility', function () {
                 if (this.__owl__.vnode) { // not at first rendering
                     this.renderWidget();
                 }
+                this._handleClassObj();
                 vnode.elm = this.widget.el;
             }
             return super.__patch(...arguments);
+        }
+        _handleClassObj() {
+            if (this.__owl__.classObj && !this._classObjHandeld) {
+                const _replaceElement = this.widget._replaceElement;
+                this.widget._replaceElement = ($el) => {
+                    const res =_replaceElement.apply(this.widget, $el);
+                    const classObj = this.__owl__.classObj;
+                    for (let cls in classObj) {
+                        if (classObj[cls]) {
+                            this.widget.el.classList.add(cls);
+                        }
+                    }
+                    return res;
+                };
+                this._classObjHandeld = true;
+            }
         }
 
         /**
