@@ -10,7 +10,20 @@
             <field name="name">Last In First Out (LIFO)</field>
             <field name="method">lifo</field>
         </record>
-        
+
+        <record id="orderpoint_trigger_manual" model="stock.warehouse.orderpoint.trigger">
+            <field name="name">Manual</field>
+            <field name="technical_name">manual</field>
+        </record>
+        <record id="orderpoint_trigger_auto" model="stock.warehouse.orderpoint.trigger">
+            <field name="name">Auto</field>
+            <field name="technical_name">auto</field>
+        </record>
+        <record id="orderpoint_trigger_manual" model="stock.warehouse.orderpoint.trigger">
+            <field name="name">On Order</field>
+            <field name="technical_name">on_order</field>
+        </record>
+
                 <!--
     Resource: stock.location
     -->
