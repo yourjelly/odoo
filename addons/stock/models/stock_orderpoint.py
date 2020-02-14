@@ -18,6 +18,14 @@ from odoo.tools import float_compare, frozendict, split_every
 _logger = logging.getLogger(__name__)
 
 
+class StockWarehouseOrderpointTrigger(models.Model):
+    _name = 'stock.warehouse.orderpoint.trigger'
+    _description = 'Trigger For Reordering Rules'
+
+    name = fields.Char('Name')
+    technical_name = fields.Char('Technical Name')
+
+
 class StockWarehouseOrderpoint(models.Model):
     """ Defines Minimum stock rules. """
     _name = "stock.warehouse.orderpoint"
@@ -39,11 +47,10 @@ class StockWarehouseOrderpoint(models.Model):
     name = fields.Char(
         'Name', copy=False, required=True, readonly=True,
         default=lambda self: self.env['ir.sequence'].next_by_code('stock.orderpoint'))
-    trigger = fields.Selection([
-        ('auto', 'Auto'),
-        ('manual', 'Manual'),
-        ('on_order', 'On Order'),
-    ], 'trigger', default='auto', required=1)
+    trigger = fields.Many2one(
+        'stock.warehouse.orderpoint.trigger', string='trigger',
+        default=lambda self: self.env.ref('stock.orderpoint_trigger_auto').id, required=1,
+        domain="[('technical_name', 'in', ['auto', 'manual'])]")
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the orderpoint without removing it.")

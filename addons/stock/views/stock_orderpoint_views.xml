@@ -7,7 +7,7 @@
             <kanban class="o_kanban_mobile">
                 <field name="name"/>
                 <field name="product_id"/>
-                <field name="trigger"/>
+                <field name="trigger" widget="selection"/>
                 <field name="product_min_qty"/>
                 <field name="product_max_qty"/>
                 <templates>
@@ -47,10 +47,10 @@
                 <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                 <field name="qty_on_hand" force_save="1"/>
                 <field name="qty_forecast" force_save="1"/>
-                <field name="json_lead_days_popover" string=" " widget="popover_widget" attrs="{'invisible': ['|', '|', ('id', '=', False), ('trigger', '=', 'on_order'), ('virtual', '=', True)]}"/>
+                <field name="json_lead_days_popover" string=" " widget="popover_widget" attrs="{'invisible': ['|', '|', ('id', '=', False), ('trigger', '=', ref('stock.orderpoint_trigger_manual')), ('virtual', '=', True)]}"/>
                 <field name="qty_to_order"/>
                 <field name="route_id"/>
-                <field name="trigger"/>
+                <field name="trigger" widget="selection"/>
                 <field name="product_min_qty"/>
                 <field name="product_max_qty"/>
                 <field name="company_id" readonly="1" groups="base.group_multi_company"/>
