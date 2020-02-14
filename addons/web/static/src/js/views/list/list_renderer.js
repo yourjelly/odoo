@@ -31,6 +31,8 @@ var FIELD_CLASSES = {
     monetary: 'o_list_number',
     text: 'o_list_text',
     many2one: 'o_list_many2one',
+    datetime: 'o_list_datetime',
+    date: 'o_list_date',
 };
 
 var ListRenderer = BasicRenderer.extend({
