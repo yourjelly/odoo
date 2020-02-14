@@ -242,7 +242,7 @@
             <field name="name">project.project.tree</field>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
-                <tree decoration-bf="message_needaction==True" decoration-muted="active == False" string="Projects">
+                <tree decoration-bf="message_needaction==True" decoration-muted="active == False" string="Projects" multi_edit="1">
                     <field name="sequence" optional="show" widget="handle"/>
                     <field name="message_needaction" invisible="1"/>
                     <field name="active" invisible="1"/>
@@ -725,7 +725,7 @@
             <field name="name">project.task.tree.activity</field>
             <field name="model">project.task</field>
             <field name="arch" type="xml">
-                <tree string="Next Activities" decoration-danger="activity_date_deadline &lt; current_date" default_order="activity_date_deadline">
+                <tree string="Next Activities" decoration-danger="activity_date_deadline &lt; current_date" default_order="activity_date_deadline" multi_edit="1">
                     <field name="name"/>
                     <field name="project_id"/>
                     <field name="activity_date_deadline"/>
@@ -926,7 +926,7 @@
             <field name="name">project.task.type.tree</field>
             <field name="model">project.task.type</field>
             <field name="arch" type="xml">
-                <tree string="Task Stage">
+                <tree string="Task Stage" multi_edit="1">
                     <field name="sequence" widget="handle" groups="base.group_no_one"/>
                     <field name="name"/>
                     <field name="fold"/>
