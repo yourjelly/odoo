@@ -11,6 +11,7 @@
             t-on-open-menu="_onOpenMenu"
             menus="menus"
             menuID="renderingInfo.menuID"/>
+        <ComponentAdapter Component="LoadingWidget" widgetArgs="[]"/>
         <div class="o_action_manager"
             t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"
             t-on-execute-action.stop="_onExecuteAction"

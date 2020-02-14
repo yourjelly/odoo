@@ -3,6 +3,8 @@ odoo.define('web.WebClient', function (require) {
 
 const ActionManager = require('web.ActionManager');
 const { Action, DialogAction } = require('web.Action');
+const { ComponentAdapter } = require('web.OwlCompatibility');
+const LoadingWidget = require('web.Loading');
 const Menu = require('web.Menu');
 
 const { Component, hooks } = owl;
@@ -11,6 +13,7 @@ const useRef = hooks.useRef;
 class WebClient extends Component {
     constructor() {
         super();
+        this.LoadingWidget = LoadingWidget;
         this.renderingInfo = null;
         this.currentControllerComponent = useRef('currentControllerComponent');
         this.actionManager = new ActionManager(this.env);
@@ -372,7 +375,7 @@ class WebClient extends Component {
         this._updateState(ev.detail.state);
     }
 }
-WebClient.components = { Action, Menu, DialogAction };
+WebClient.components = { Action, Menu, DialogAction, ComponentAdapter };
 WebClient.template = 'web.WebClient';
 
 return WebClient;
