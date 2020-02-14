@@ -387,7 +387,7 @@ class MailActivity(models.Model):
         body_template = self.env.ref('mail.message_activity_assigned')
         for activity in self:
             model_description = self.env['ir.model']._get(activity.res_model).display_name
-            body = body_template.render(
+            body = body_template._render(
                 dict(
                     activity=activity,
                     model_description=model_description,
@@ -788,7 +788,7 @@ class MailActivityMixin(models.AbstractModel):
         activities = self.env['mail.activity']
         for record in self:
             render_context['object'] = record
-            note = views.render(render_context, engine='ir.qweb', minimal_qcontext=True)
+            note = views._render(render_context, engine='ir.qweb', minimal_qcontext=True)
             activities |= record.activity_schedule(act_type_xmlid=act_type_xmlid, date_deadline=date_deadline, summary=summary, note=note, **act_values)
         return activities
 

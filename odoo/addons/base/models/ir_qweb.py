@@ -112,7 +112,7 @@ class IrQWeb(models.AbstractModel, QWeb):
             pass
         return super(IrQWeb, self).compile(id_or_xml_id, options=options)
 
-    def load(self, name, options):
+    def _load(self, name, options):
         lang = options.get('lang', get_lang(self.env).code)
         env = self.env
         if lang != env.context.get('lang'):

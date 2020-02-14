@@ -57,7 +57,7 @@ class CustomerPortal(CustomerPortal):
             'order_amount_undiscounted': format_price(order_sudo.amount_undiscounted),
         }
         try:
-            results['order_totals_table'] = request.env['ir.ui.view'].render_template('sale.sale_order_portal_content_totals_table', {'sale_order': order_sudo})
+            results['order_totals_table'] = request.env['ir.ui.view']._render_template('sale.sale_order_portal_content_totals_table', {'sale_order': order_sudo})
         except ValueError:
             pass
 

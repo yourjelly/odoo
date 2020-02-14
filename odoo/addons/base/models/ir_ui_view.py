@@ -1576,11 +1576,16 @@ actual arch.
         xmlid = self.env['ir.model.data'].sudo().search_read(domain, ['module', 'name'])[0]
         return '%s.%s' % (xmlid['module'], xmlid['name'])
 
-    @api.model
-    def render_template(self, template, values=None, engine='ir.qweb'):
-        return self.browse(self.get_view_id(template)).render(values, engine)
+    def render_template(self, template, values=None):
+        _logger.warning("Call to public render_template for view %s", template)
+        self.check_access_rights('read')
+        template = self.browse(self.get_view_id(template))
+        return template._render(values, engine="ir.qweb")
 
-    def render(self, values=None, engine='ir.qweb', minimal_qcontext=False):
+    def _render_template(self, template, values=None, engine='ir.qweb'):
+        return self.browse(self.get_view_id(template))._render(values, engine)
+
+    def _render(self, values=None, engine='ir.qweb', minimal_qcontext=False):
         assert isinstance(self.id, int)
 
         qcontext = dict() if minimal_qcontext else self._prepare_qcontext()

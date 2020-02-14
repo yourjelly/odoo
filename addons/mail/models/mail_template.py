@@ -445,7 +445,7 @@ class MailTemplate(models.Model):
                     'company': 'company_id' in record and record['company_id'] or self.env.company,
                     'record': record,
                 }
-                body = template.render(template_ctx, engine='ir.qweb', minimal_qcontext=True)
+                body = template._render(template_ctx, engine='ir.qweb', minimal_qcontext=True)
                 values['body_html'] = self.env['mail.thread']._replace_local_links(body)
         mail = self.env['mail.mail'].sudo().create(values)
 

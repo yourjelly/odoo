@@ -355,7 +355,7 @@ class QWeb(object):
             return (document, template)
         else:
             try:
-                document = options.get('load', self.load)(template, options)
+                document = options.get('load', self._load)(template, options)
             except QWebException as e:
                 raise e
             except Exception as e:
@@ -379,7 +379,7 @@ class QWeb(object):
                 return (node, document)
         return (element, document)
 
-    def load(self, template, options):
+    def _load(self, template, options):
         """ Load a given template. """
         return template
 
