@@ -76,7 +76,7 @@ class EventRegistration(models.Model):
             user_id = registration.event_id.user_id.id or \
                       registration.sale_order_id.user_id.id or \
                       fallback_user_id
-            registration.sale_order_id.activity_schedule_with_view('mail.mail_activity_data_warning',
+            registration.sale_order_id._activity_schedule_with_view('mail.mail_activity_data_warning',
                  user_id=user_id,
                  views_or_xmlid='event_sale.event_ticket_id_change_exception',
                  render_context=render_context)

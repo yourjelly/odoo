@@ -765,7 +765,7 @@ class MailActivityMixin(models.AbstractModel):
             activities |= self.env['mail.activity'].create(create_vals)
         return activities
 
-    def activity_schedule_with_view(self, act_type_xmlid='', date_deadline=None, summary='', views_or_xmlid='', render_context=None, **act_values):
+    def _activity_schedule_with_view(self, act_type_xmlid='', date_deadline=None, summary='', views_or_xmlid='', render_context=None, **act_values):
         """ Helper method: Schedule an activity on each record of the current record set.
         This method allow to the same mecanism as `activity_schedule`, but provide
         2 additionnal parameters:
