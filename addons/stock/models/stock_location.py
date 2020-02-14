@@ -187,6 +187,9 @@ class Route(models.Model):
     warehouse_ids = fields.Many2many(
         'stock.warehouse', 'stock_route_warehouse', 'route_id', 'warehouse_id',
         'Warehouses', copy=False, domain="[('id', 'in', warehouse_domain_ids)]")
+    replenish_on_order = fields.Boolean(
+        'Replenish on Order', help='Flag the rule as having a replenish on order purpose. When used\
+        in the reordering rule, it will apply on order trigger automatically.')
 
     @api.depends('company_id')
     def _compute_warehouses(self):

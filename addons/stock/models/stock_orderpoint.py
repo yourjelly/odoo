@@ -51,6 +51,7 @@ class StockWarehouseOrderpoint(models.Model):
         'stock.warehouse.orderpoint.trigger', string='trigger',
         default=lambda self: self.env.ref('stock.orderpoint_trigger_auto').id, required=1,
         domain="[('technical_name', 'in', ['auto', 'manual'])]")
+    trigger_technical_name = fields.Char(related='trigger.technical_name', readonly=True)
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the orderpoint without removing it.")
@@ -115,17 +116,10 @@ class StockWarehouseOrderpoint(models.Model):
 
     @api.depends('warehouse_id', 'location_id')
     def _commpute_allowed_route_ids(self):
-        if self.user_has_groups('stock.group_adv_location'):
-            for orderpoint in self:
-                orderpoint.allowed_route_ids = self.env['stock.location.route'].search([
-                    '|', '|',
-                    ('warehouse_ids', 'in', orderpoint.warehouse_id.id),
-                    ('product_selectable', '=', True),
-                    ('product_categ_selectable', '=', True)
-                ])
-        else:
-            for orderpoint in self:
-                orderpoint.allowed_route_ids = orderpoint.location_id.get_warehouse().delivery_route_id
+        for orderpoint in self:
+            orderpoint.allowed_route_ids = self.env['stock.location.route'].search([
+                ('product_selectable', '=', True),
+            ])
 
     @api.depends('product_id', 'location_id', 'company_id', 'warehouse_id',
                  'product_id.seller_ids', 'product_id.seller_ids.delay')
@@ -172,12 +166,32 @@ class StockWarehouseOrderpoint(models.Model):
                 ('company_id', '=', self.company_id.id)
             ], limit=1)
 
+    @api.onchange('route_id')
+    def _onchange_route_id(self):
+        if self.route_id.replenish_on_order:
+            self.trigger = self.env.ref('stock.orderpoint_trigger_on_order')
+            self.product_min_qty = 0.0
+            self.product_max_qty = 0.0
+            self.qty_to_order = 0.0
+        elif self.trigger_technical_name == 'on_order' and not self.route_id.replenish_on_order:
+            self.trigger = self.env.ref('stock.orderpoint_trigger_auto')
+
+    @api.model
+    def create(self, vals):
+        orderpoints = super().create(vals)
+        if (vals.get('trigger') == self.env.ref('stock.orderpoint_trigger_on_order')):
+            orderpoints._update_product_route_ids()
+        return orderpoints
+
     def write(self, vals):
         if 'company_id' in vals:
             for orderpoint in self:
                 if orderpoint.company_id.id != vals['company_id']:
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
-        return super().write(vals)
+        res = super().write(vals)
+        if 'route_id' in vals or 'product_id' in vals:
+            self._update_product_route_ids()
+        return res
 
     @api.model
     def action_view_orderpoints(self):
@@ -289,7 +303,7 @@ class StockWarehouseOrderpoint(models.Model):
             'location_id': location,
             'product_max_qty': 0.0,
             'product_min_qty': 0.0,
-            'trigger': 'manual',
+            'trigger': self.env.ref('stock.orderpoint_trigger_manual').id,
         }
 
     def _prepare_procurement_values(self, date=False, group=False):
@@ -380,3 +394,14 @@ class StockWarehouseOrderpoint(models.Model):
         """Return Quantities that are not yet in virtual stock but should be deduced from orderpoint rule
         (example: purchases created from orderpoints)"""
         return dict(self.mapped(lambda x: (x.id, 0.0)))
+
+    def _update_product_route_ids(self):
+        products = self.product_id
+        groups = self.env['stock.warehouse.orderpoint'].read_group([
+            ('product_id', 'in', products.ids),
+            ('trigger', '=', self.env.ref('stock.orderpoint_trigger_on_order').id)
+        ], ['product_id', 'route_id:array_agg'], ['product_id'])
+        for group in groups:
+            self.env['product.product'].browse(group['product_id'][0]).write({
+                'route_ids': [(6, 0, group['route_id'])]
+            })
