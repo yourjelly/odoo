@@ -89,6 +89,7 @@
         <script type="text/javascript" src="/web/static/lib/moment/moment.js"></script>
         <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
         <script type="text/javascript" src="/web/static/src/js/component_extension.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/owl_compatibility.js"></script>
 
         <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
         <script type="text/javascript" src="/web/static/lib/jquery.ui/jquery-ui.js"></script>
@@ -380,8 +381,6 @@
         <script type="text/javascript" src="/web/static/src/js/views/qweb/qweb_view.js"></script>
         <script type="text/javascript" src="/web/static/src/js/widgets/attach_document.js"></script>
         <script type="text/javascript" src="/web/static/src/js/fields/signature.js"></script>
-
-        <script type="text/javascript" src="/web/static/src/js/owl_compatibility.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/report/utils.js"/>
         <script type="text/javascript" src="/web/static/src/js/report/client_action.js"/>
