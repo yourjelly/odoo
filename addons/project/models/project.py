@@ -558,6 +558,7 @@ class Task(models.Model):
                                  store=True,
                                  readonly=False,
                                  required=True,
+                                 copy=True,
                                  default=_default_company_id)
     color = fields.Integer(string='Color Index')
     user_email = fields.Char(related='user_id.email', string='User Email', readonly=True, related_sudo=False)

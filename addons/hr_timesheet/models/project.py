@@ -14,6 +14,7 @@ class Project(models.Model):
         store=True,
         readonly=False,
         default=True,
+        copy=True,
         help="Enable timesheeting on the project.")
         
     analytic_account_id = fields.Many2one(
@@ -33,9 +34,9 @@ class Project(models.Model):
 
     @api.depends('analytic_account_id')
     def _compute_allow_timesheets(self):
-        for record in self:
-            if not record.analytic_account_id:
-                record.allow_timesheets = False
+        for project in self:
+            if not project.analytic_account_id:
+                project.allow_timesheets = False
 
     @api.constrains('allow_timesheets', 'analytic_account_id')
     def _check_allow_timesheet(self):
