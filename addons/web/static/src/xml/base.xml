@@ -30,6 +30,7 @@
             <t t-set='dialogRenderingInfo' t-value='renderingInfo.dialog' />
             <DialogAction t-if='dialogRenderingInfo'
                 contentClass="dialogRenderingInfo.controller.className"
+                target="'.o_dialogs'"
                 title="dialogRenderingInfo.action.name">
                 <Action class="o_action" t-key="dialogRenderingInfo.controller.jsID"
                     Component="dialogRenderingInfo.controller.Component"
@@ -38,6 +39,7 @@
                     inDialog=""/>
             </DialogAction>
         </div>
+        <div class="o_dialogs"/>
     </body>
 </t>
 
@@ -65,7 +67,7 @@
 </t>
 
 <t t-name="OwlDialog" owl="1">
-    <Portal target="'body'">
+    <Portal target="props.target">
         <div class="o_dialog" t-on-focus="_onFocus">
             <div t-if="props.backdrop" class="modal-backdrop show" t-on-click="_onBackdropClick"/>
             <div role="dialog" class="modal"

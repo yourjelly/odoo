@@ -32,6 +32,7 @@ odoo.define('web.OwlDialog', function () {
          * @param {string} [props.size='large'] 'extra-large', 'large', 'medium'
          *      or 'small'.
          * @param {string} [props.subtitle='']
+         * @param {string} [props.target='body']
          * @param {string} [props.title='Odoo']
          * @param {boolean} [props.technical=true] If set to false, the modal will have
          *      the standard frontend style (use this for non-editor frontend features).
@@ -236,6 +237,7 @@ odoo.define('web.OwlDialog', function () {
         renderHeader: true,
         size: 'large',
         technical: true,
+        target: "body",
         title: "Odoo",
     };
     Dialog.props = {
@@ -247,6 +249,7 @@ odoo.define('web.OwlDialog', function () {
         size: { validate: s => ['extra-large', 'large', 'medium', 'small'].includes(s), optional: 1 },
         subtitle: { type: String, optional: 1 },
         technical: { type: Boolean, optional: 1 },
+        target: { type: String, optional: 1 },
         title: { type: String, optional: 1 },
     };
     Dialog.template = 'OwlDialog';
