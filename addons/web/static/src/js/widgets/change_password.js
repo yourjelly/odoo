@@ -46,7 +46,7 @@ var ChangePassword = AbstractAction.extend({
     },
     getTitle: function () {
         return _t("Change Password");
-    }
+    },
 
     //--------------------------------------------------------------------------
     // Private
