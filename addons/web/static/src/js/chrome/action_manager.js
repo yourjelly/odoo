@@ -287,8 +287,13 @@ class ActionManager extends core.EventBus {
             on_reverse_breadcrumb: function () {},
             // pushState: true,
             replace_last_action: false,
+            shouldReload: !options || !options.on_close,
         };
         options = Object.assign(defaultOptions, options);
+
+        if (!options.shouldReload) {
+            console.warn('doAction: on_close callback is deprecated');
+        }
 
         // build or load an action descriptor for the given action
         // TODO maybe registry can do this
@@ -739,7 +744,8 @@ class ActionManager extends core.EventBus {
                 const newCt = newDialog.controller;
                 newCt.options.on_close = oldCt.options.on_close;
             } else {
-                oldCt.options.on_close(action.infos);
+                newMain.reload = oldCt.options.shouldReload;
+                oldCt.options.on_close(newMain.reload ? action.infos : undefined);
             }
         }
         const nextStack = this.currentStack.slice(0, newMain ? newMain.controller.index : 0);
