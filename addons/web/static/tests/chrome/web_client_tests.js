@@ -123,11 +123,11 @@ QUnit.module('WebClient', {
         assert.containsOnce(webClient, 'header .o_main_navbar .o_menu_systray');
         assert.containsOnce(webClient, '.o_action_manager');
 
-        assert.strictEqual(webClient.el.querySelector('.o_menu_brand').innerText, 'Partners');
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'Partners');
         assert.containsN(webClient, 'header .o_main_navbar .o_menu_sections li a', 2);
         assert.containsN(webClient, '.o_menu_sections li', 2);
 
-        assert.strictEqual(webClient.el.querySelector('.breadcrumb').innerText, 'Partners');
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'Partners');
         assert.containsOnce(webClient, '.o_list_view');
 
         webClient.destroy();
@@ -144,13 +144,13 @@ QUnit.module('WebClient', {
         });
 
         assert.containsOnce(webClient, '.o_list_view');
-        assert.strictEqual(webClient.el.querySelector('.o_menu_brand').innerText, 'Partners');
-        assert.strictEqual(webClient.el.querySelector('.breadcrumb').innerText, 'Partners');
+        assert.strictEqual($(webClient.el).find('.o_menu_brand').text(), 'Partners');
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'Partners');
 
         await testUtils.dom.click(webClient.el.querySelector('a[data-menu-id="3"]'));
         assert.containsOnce(webClient, '.o_form_view');
-        assert.strictEqual(webClient.el.querySelector('.o_menu_brand').innerText, 'Partners');
-        assert.strictEqual(webClient.el.querySelector('.breadcrumb').innerText, 'New');
+        assert.strictEqual($(webClient.el).find('.o_menu_brand').text(), 'Partners');
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'New');
 
         webClient.destroy();
     });
@@ -166,14 +166,14 @@ QUnit.module('WebClient', {
         });
 
         assert.containsOnce(webClient, '.o_list_view');
-        assert.strictEqual(webClient.el.querySelector('.o_menu_brand').innerText, 'Partners');
-        assert.strictEqual(webClient.el.querySelector('.breadcrumb').innerText, 'Partners');
+        assert.strictEqual($(webClient.el).find('.o_menu_brand').text(), 'Partners');
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'Partners');
 
         await testUtils.dom.click(webClient.el.querySelector('.o_menu_apps li a'));
         await testUtils.dom.click(webClient.el.querySelector('.o_menu_apps a[data-menu-id="5"]'));
         assert.containsOnce(webClient, '.o_kanban_view');
-        assert.strictEqual(webClient.el.querySelector('.o_menu_brand').innerText, 'Tasks');
-        assert.strictEqual(webClient.el.querySelector('.breadcrumb').innerText, 'Tasks');
+        assert.strictEqual($(webClient.el).find('.o_menu_brand').text(), 'Tasks');
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'Tasks');
 
         webClient.destroy();
     });
