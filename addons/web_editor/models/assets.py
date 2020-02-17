@@ -251,7 +251,7 @@ class Assets(models.AbstractModel):
             ir.ui.view()
         """
         assert op in ('='), 'Invalid operator'
-        return self.env["ir.ui.view"].search([("display_name", op, custom_url)])
+        return self.env["ir.ui.view"].search([("customize_show_name", op, custom_url)])
 
     def _save_asset_attachment_hook(self):
         """

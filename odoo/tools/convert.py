@@ -626,6 +626,8 @@ form: module.record_id""" % (xml_id,)
                 record.append(Field(name='active', eval=el.get('active')))
         if el.get('customize_show') in ("True", "False"):
             record.append(Field(name='customize_show', eval=el.get('customize_show')))
+        if el.get('customize_show_name'):
+            record.append(Field(el.get('customize_show_name'), name='customize_show_name'))
         groups = el.attrib.pop('groups', None)
         if groups:
             grp_lst = [("ref('%s')" % x) for x in groups.split(',')]

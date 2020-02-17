@@ -204,6 +204,7 @@
                 <rng:optional><rng:attribute name="groups"/></rng:optional>
                 <rng:optional><rng:attribute name="active"></rng:attribute></rng:optional>
                 <rng:optional><rng:attribute name="customize_show"></rng:attribute></rng:optional>
+                <rng:optional><rng:attribute name="customize_show_name"></rng:attribute></rng:optional>
             </rng:group>
             <rng:zeroOrMore>
                 <rng:choice>

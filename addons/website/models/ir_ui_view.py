@@ -41,7 +41,7 @@ class View(models.Model):
 
         res = []
         for view in self:
-            view_name = view.name
+            view_name = view.customize_show_name
             if view.website_id:
                 view_name += ' [%s]' % view.website_id.name
             res.append((view.id, view_name))

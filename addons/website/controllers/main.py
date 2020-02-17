@@ -288,7 +288,7 @@ class Website(Home):
     def get_switchable_related_views(self, key):
         views = request.env["ir.ui.view"].get_related_views(key, bundles=False).filtered(lambda v: v.customize_show)
         views = views.sorted(key=lambda v: (v.inherit_id.id, v.customize_show))
-        return views.with_context(display_website=False).read(['customize_show', 'id', 'key', 'xml_id', 'active', 'inherit_id'])
+        return views.with_context(display_website=True).read(['customize_show','customize_show_name', 'id', 'key', 'xml_id', 'active', 'inherit_id'])
 
     @http.route('/website/toggle_switchable_view', type='json', auth='user', website=True)
     def toggle_switchable_view(self, view_key):

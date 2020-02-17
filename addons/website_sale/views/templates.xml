@@ -116,13 +116,13 @@
         </t>
     </template>
 
-    <template id="search_count_box" inherit_id="website.website_search_box" active="False" customize_show="True" name="Show # found">
+    <template id="search_count_box" inherit_id="website.website_search_box" active="False" customize_show="True" customize_show_name="Show # found" name="Show # found">
         <xpath expr="//button[hasclass('oe_search_button')]" position="inside">
             <span t-if='search' class='oe_search_found'> <small>(<t t-esc="search_count"/> found)</small></span>
         </xpath>
     </template>
 
-    <template id="products_item" name="Products item">
+    <template id="products_item" name="Products item" customize_show_name="Products item">
         <t t-set="product_href" t-value="keep(product.website_url, page=(pager['page']['num'] if pager['page']['num']&gt;1 else None))" />
 
         <t t-set="combination_info" t-value="product._get_combination_info(only_template=True, add_qty=add_qty or 1, pricelist=pricelist)"/>
@@ -159,7 +159,7 @@
         </form>
     </template>
 
-    <template id="products_description" inherit_id="website_sale.products_item" active="False" customize_show="True" name="Product Description">
+    <template id="products_description" inherit_id="website_sale.products_item" active="False" customize_show="True" customize_show_name="Product Description" name="Product Description">
         <xpath expr="//*[hasclass('product_price')]" position="after">
             <div class="oe_subdescription" contenteditable="false">
                 <div itemprop="description" t-field="product.description_sale"/>
@@ -167,7 +167,7 @@
         </xpath>
     </template>
 
-    <template id="products_add_to_cart" inherit_id="website_sale.products_item" active="False" customize_show="True" name="Add to Cart">
+    <template id="products_add_to_cart" inherit_id="website_sale.products_item" active="False" customize_show="True" customize_show_name="Add to Cart" name="Add to Cart">
         <xpath expr="//div[hasclass('o_wsale_product_btn')]" position="inside">
             <t t-set="product_variant_id" t-value="product._get_first_possible_variant_id()"/>
             <input name="product_id" t-att-value="product_variant_id" type="hidden"/>
@@ -197,7 +197,7 @@
     </template>
 
     <!-- /shop product listing -->
-    <template id="products" name="Products">
+    <template id="products" name="Products" customize_show_name="Products">
         <t t-call="website.layout">
             <t t-set="additional_title">Shop</t>
             <div id="wrap" class="js_sale">
@@ -272,7 +272,7 @@
         </t>
     </template>
 
-    <template id="sort" inherit_id="website_sale.products" customize_show="True" name="Show Sort by">
+    <template id="sort" inherit_id="website_sale.products" customize_show="True" customize_show_name="Show Sort by" name="Show Sort by">
         <xpath expr="//div[hasclass('products_pager')]/t[@t-call][last()]" position="after">
             <t t-set="list_price_desc_label">Catalog price: High to Low</t>
             <t t-set="list_price_asc_label">Catalog price: Low to High</t>
@@ -308,7 +308,7 @@
         </xpath>
     </template>
 
-    <template id="add_grid_or_list_option" inherit_id="website_sale.products" active="True" customize_show="True" name="Grid or List button">
+    <template id="add_grid_or_list_option" inherit_id="website_sale.products" active="True" customize_show="True" customize_show_name="Grid or List button" name="Grid or List button">
         <xpath expr="//div[hasclass('products_pager')]/t[@t-call][last()]" position="after">
             <div class="btn-group btn-group-toggle mt-2 ml-md-2 d-none d-sm-inline-flex o_wsale_apply_layout" data-toggle="buttons">
                 <label t-attf-class="btn btn-secondary #{'active' if layout_mode != 'list' else None} fa fa-th-large o_wsale_apply_grid" title="Grid">
@@ -337,7 +337,7 @@
         </li>
     </template>
 
-    <template id="products_categories" inherit_id="website_sale.products" active="False" customize_show="True" name="eCommerce Categories">
+    <template id="products_categories" inherit_id="website_sale.products" active="False" customize_show="True" customize_show_name="eCommerce Categories" name="eCommerce Categories">
         <xpath expr="//div[@id='products_grid_before']" position="before">
             <t t-set="enable_left_column" t-value="True"/>
         </xpath>
@@ -374,7 +374,7 @@
         </li>
     </template>
 
-    <template id="option_collapse_products_categories" name="Collapsible Category List" inherit_id="website_sale.products_categories" active="False" customize_show="True">
+    <template id="option_collapse_products_categories" name="Collapsible Category List" inherit_id="website_sale.products_categories" active="False" customize_show="True" customize_show_name="Collapsible Category List">
         <xpath expr="//div[@id='wsale_products_categories_collapse']/ul" position="attributes">
             <attribute name="id">o_shop_collapse_category</attribute>
         </xpath>
@@ -383,7 +383,7 @@
         </xpath>
     </template>
 
-    <template id="products_attributes" inherit_id="website_sale.products" active="False" customize_show="True" name="Product Attribute's Filters">
+    <template id="products_attributes" inherit_id="website_sale.products" active="False" customize_show="True" customize_show_name="Product Attribute's Filters" name="Product Attribute's Filters">
         <xpath expr="//div[@id='products_grid_before']" position="before">
             <t t-set="enable_left_column" t-value="True"/>
         </xpath>
@@ -437,7 +437,7 @@
         </xpath>
     </template>
 
-    <template id="products_list_view" inherit_id="website_sale.products" active="False" customize_show="True" name="List View (by default)">
+    <template id="products_list_view" inherit_id="website_sale.products" active="False" customize_show="True" customize_show_name="List View (by default)" name="List View (by default)">
         <xpath expr="//div[@id='products_grid']" position="after">
             <!-- Nothing to do, this view is only meant to allow the server -->
             <!-- to know if the list view layout should be used -->
@@ -551,13 +551,13 @@
         </p>
     </template>
 
-    <template inherit_id='website_sale.product' id="product_picture_magnify" customize_show="True" name="Image Zoom">
+    <template inherit_id='website_sale.product' id="product_picture_magnify" customize_show="True" customize_show_name="Image Zoom" name="Image Zoom">
         <xpath expr='//div[hasclass("js_sale")]' position='attributes'>
             <attribute name="class" separator=" " add="ecom-zoomable zoomodoo-next" />
         </xpath>
     </template>
 
-    <template inherit_id='website_sale.product' id="product_picture_magnify_auto" active="False" customize_show="True" name="Automatic Image Zoom">
+    <template inherit_id='website_sale.product' id="product_picture_magnify_auto" active="False" customize_show="True" customize_show_name="Automatic Image Zoom" name="Automatic Image Zoom">
         <xpath expr='//div[hasclass("js_sale")]' position='attributes'>
             <attribute name="data-ecom-zoom-auto">1</attribute>
             <attribute name="class" separator=" " add="ecom-zoomable zoomodoo-next" />
@@ -565,7 +565,7 @@
         </xpath>
     </template>
 
-    <template id="recommended_products" inherit_id="website_sale.product" customize_show="True" name="Alternative Products">
+    <template id="recommended_products" inherit_id="website_sale.product" customize_show="True" customize_show_name="Alternative Products" name="Alternative Products">
         <xpath expr="//div[@id='product_full_description']" position="after">
             <div class="container mt32" t-if="product.alternative_product_ids">
                 <h3>Alternative Products:</h3>
@@ -590,14 +590,14 @@
         </xpath>
     </template>
 
-    <template id="recently_viewed_products_product" inherit_id="website_sale.product" active="True" customize_show="True" name="Recently Viewed Products" priority="16">
+    <template id="recently_viewed_products_product" inherit_id="website_sale.product" active="True" customize_show="True" customize_show_name="Recently Viewed Products" name="Recently Viewed Products" priority="16">
         <xpath expr="//div[@t-field='product.website_description']" position="after">
             <t t-call="website_sale.s_products_recently_viewed"/>
         </xpath>
     </template>
 
     <!-- Product options: OpenChatter -->
-    <template id="product_comment" inherit_id="website_sale.product" active="False" customize_show="True" name="Discussion and Rating" priority="15">
+    <template id="product_comment" inherit_id="website_sale.product" active="False" customize_show="True" customize_show_name="Discussion and Rating" name="Discussion and Rating" priority="15">
         <xpath expr="//div[@t-field='product.website_description']" position="after">
             <div class="o_shop_discussion_rating">
                 <section class="container mt16 mb16">
@@ -615,7 +615,7 @@
         </xpath>
     </template>
 
-    <template id="product_quantity" inherit_id="website_sale.product" customize_show="True" name="Select Quantity">
+    <template id="product_quantity" inherit_id="website_sale.product" customize_show="True" customize_show_name="Select Quantity" name="Select Quantity">
       <xpath expr="//a[@id='add_to_cart']" position="before">
         <div class="css_quantity input-group" contenteditable="false">
             <div class="input-group-prepend">
@@ -633,7 +633,7 @@
       </xpath>
     </template>
 
-    <template id="product_buy_now" inherit_id="website_sale.product" active="False" customize_show="True" name="Buy Now Button">
+    <template id="product_buy_now" inherit_id="website_sale.product" active="False" customize_show="True" customize_show_name="Buy Now Button" name="Buy Now Button">
         <xpath expr="//a[@id='add_to_cart']" position="after">
             <a role="button" id="buy_now" class="btn btn-outline-primary btn-lg mt16 d-block d-sm-inline-block" href="#"><i class="fa fa-bolt"/> Buy Now</a>
         </xpath>
@@ -659,7 +659,7 @@
       </div>
     </template>
 
-    <template id="product_variants" inherit_id="website_sale.product" active="False" customize_show="True" name="List View of Variants">
+    <template id="product_variants" inherit_id="website_sale.product" active="False" customize_show="True" customize_show_name="List View of Variants"  name="List View of Variants">
         <xpath expr="//t[@t-placeholder='select']" position="replace">
             <!--
                 Using this setting with dynamic variants is not supported.
@@ -791,7 +791,7 @@
         </t>
     </template>
 
-    <template id="extra_info_option" name="Extra Step Option" inherit_id="wizard_checkout" active="False" customize_show="True">
+    <template id="extra_info_option" name="Extra Step Option" inherit_id="wizard_checkout" active="False" customize_show="True" customize_show_name="Extra Step Option">
         <!-- Add a "flag element" to trigger style variation -->
         <xpath expr="//div[hasclass('wizard')]/div" position="before">
             <span class="o_wizard_has_extra_step d-none"/>
@@ -990,7 +990,7 @@
         </t>
     </template>
 
-    <template id="suggested_products_list" inherit_id="website_sale.cart_lines" customize_show="True" name="Alternative Products in my cart">
+    <template id="suggested_products_list" inherit_id="website_sale.cart_lines" customize_show="True" customize_show_name="Alternative Products in my cart" name="Alternative Products in my cart">
         <xpath expr="//table[@id='cart_products']" position="after">
             <h5 class='text-muted js_cart_lines' t-if="suggested_products">Suggested Accessories:</h5>
             <table t-if="suggested_products" id="suggested_products" class="js_cart_lines table table-striped table-sm">
@@ -1300,7 +1300,7 @@
         </t>
     </template>
 
-    <template id="address_b2b" inherit_id="address" name="Show b2b fields" customize_show="True">
+    <template id="address_b2b" inherit_id="address" name="Show b2b fields" customize_show="True" customize_show_name="Show b2b fields">
         <xpath expr="//div[@id='div_phone']" position="after">
             <div class="w-100"/>
             <t t-if="mode == ('new', 'billing') or (mode == ('edit', 'billing') and (can_edit_vat or 'vat' in checkout and checkout['vat']))">
@@ -1469,7 +1469,7 @@
         </div>
     </template>
 
-    <template id="payment_sale_note" inherit_id="payment" name="Accept Terms &amp; Conditions" customize_show="True" active="False">
+    <template id="payment_sale_note" inherit_id="payment" name="Accept Terms &amp; Conditions" customize_show="True" active="False" customize_show_name="Accept Terms &amp; Conditions">
         <xpath expr="//div[@id='payment_method'][hasclass('js_payment')]" position="after">
             <div class="custom-control custom-checkbox float-right mt-2 oe_accept_cgv_button">
                 <input type="checkbox" id="checkbox_cgv" class="custom-control-input"/>
@@ -1578,7 +1578,7 @@
         </div>
     </template>
 
-    <template id="reduction_code" inherit_id="website_sale.total" customize_show="True" name="Promo Code">
+    <template id="reduction_code" inherit_id="website_sale.total" customize_show="True" customize_show_name="Promo Code" name="Promo Code">
         <xpath expr="//div[@id='cart_total']//table/tr[last()]" position="after">
             <tr t-if="not hide_coupon">
                 <td colspan="3" class="text-center text-xl-right border-0">

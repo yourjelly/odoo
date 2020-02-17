@@ -7,13 +7,15 @@ import uuid
 from lxml import etree, html
 
 from odoo.exceptions import AccessError
-from odoo import api, models
+from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
 
 class IrUiView(models.Model):
     _inherit = 'ir.ui.view'
+
+    customize_show_name = fields.Char("Customize Template Name")
 
     def render(self, values=None, engine='ir.qweb', minimal_qcontext=False):
         if values and values.get('editable'):
@@ -75,6 +77,7 @@ class IrUiView(models.Model):
 
         vals = {
             'inherit_id': self.id,
+            'customize_show_name': '%s (%s)' % (self.customize_show_name, el.get('id')),
             'arch': self._pretty_arch(arch),
             'key': '%s_%s' % (self.key, el.get('id')),
             'type': 'qweb',
