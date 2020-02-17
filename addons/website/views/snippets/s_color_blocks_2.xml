@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template name="Big Boxes" id="s_color_blocks_2">
+<template name="Big Boxes" id="s_color_blocks_2" customize_show_name="Big Boxes">
     <section class="s_color_blocks_2">
         <div class="container-fluid">
             <div class="row">

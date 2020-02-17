@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_picture" name="Picture">
+<template id="s_picture" name="Picture" customize_show_name="Picture">
     <section class="s_picture bg-200 pt48 pb24">
         <div class="container">
             <h2 style="text-align: center;"><font style="font-size: 62px;">A punchy Headline</font></h2>

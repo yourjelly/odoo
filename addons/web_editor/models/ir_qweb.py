@@ -48,7 +48,7 @@ class QWeb(models.AbstractModel):
         el.set('t-call', el.attrib.pop('t-snippet'))
         View = self.env['ir.ui.view']
         view_id = View.get_view_id(el.attrib.get('t-call'))
-        name = View.browse(view_id).display_name
+        name = View.browse(view_id).customize_show_name
         thumbnail = el.attrib.pop('t-thumbnail', "oe-thumbnail")
         div = u'<div name="%s" data-oe-type="snippet" data-oe-thumbnail="%s" data-oe-snippet-id="%s">' % (
             escape(pycompat.to_text(name)),

@@ -4,7 +4,6 @@ odoo.define('website.test.html_editor', function (require) {
 var tour = require('web_tour.tour');
 
 tour.register('html_editor_multiple_templates', {
-    test: true,
     url: '/aboutus',
 },
     [

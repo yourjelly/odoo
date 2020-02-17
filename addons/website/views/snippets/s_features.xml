@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_features" name="Features">
+<template id="s_features" name="Features" customize_show_name="Features">
     <section class="s_features pt32 pb32">
         <div class="container">
             <div class="row">

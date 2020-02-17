@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template id="s_three_columns" name="Columns">
+<template id="s_three_columns" name="Columns" customize_show_name="Columns">
     <section class="s_three_columns bg-200 pt32 pb32" data-vcss="001">
         <div class="container">
             <div class="row d-flex align-items-stretch">

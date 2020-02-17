@@ -38,7 +38,6 @@ class View(models.Model):
         if (not self._context.get('display_website') and not self.env.user.has_group('website.group_multi_website')) or \
                 not self._context.get('display_website'):
             return super(View, self).name_get()
-
         res = []
         for view in self:
             view_name = view.customize_show_name

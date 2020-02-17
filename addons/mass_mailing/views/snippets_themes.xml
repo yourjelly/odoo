@@ -463,7 +463,7 @@
     </div>
 </template>
 
-<template id="s_mail_block_text_image" name="Text - Image">
+<template id="s_mail_block_text_image" name="Text - Image" customize_show_name="Text - Image">
     <div class="o_mail_block_text_image">
         <div class="o_mail_snippet_general">
             <table align="center" cellspacing="0" cellpadding="0" class="o_mail_table_styles">

@@ -7,7 +7,7 @@
             <field name="type">qweb</field>
             <field name="key">test_website.test_view</field>
             <field name="arch" type="xml">
-                <t name="Test View" priority="29" t-name="test_website.test_view">
+                <t name="Test View" priority="29" t-name="test_website.test_view" customize_show_name="Test View">
                     <t t-call="website.layout">
                         <p>Test View</p>
                         <p>placeholder</p>
@@ -19,7 +19,7 @@
             <field name="type">qweb</field>
             <field name="key">test_website.test_page_view</field>
             <field name="arch" type="xml">
-                <t name="Test Page View" priority="29" t-name="test_website.test_page_view">
+                <t name="Test Page View" priority="29" t-name="test_website.test_page_view" customize_show_name="Test Page View">
                     <t t-call="website.layout">
                         <div id="oe_structure_test_website_page" class="oe_structure oe_empty"/>
                         <p>Test Page View</p>
@@ -32,7 +32,7 @@
             <field name="type">qweb</field>
             <field name="key">test_website.test_error_view</field>
             <field name="arch" type="xml">
-                <t name="Test Error View" t-name="test_website.test_error_view">
+                <t name="Test Error View" t-name="test_website.test_error_view" customize_show_name="Test Error View">
                     <t t-call="website.layout">
                     <div class="container">
                         <h1>Test Error View</h1>
@@ -73,7 +73,7 @@
             <field name="type">qweb</field>
             <field name="key">test_website.test_view_to_be_t_called</field>
             <field name="arch" type="xml">
-                <t name="Test View To Be t-called" priority="29" t-name="test_website.test_view_to_be_t_called">
+                <t name="Test View To Be t-called" priority="29" customize_show_name="Test View To Be t-called" t-name="test_website.test_view_to_be_t_called">
                     <p>Test View To Be t-called</p>
                     <p>placeholder</p>
                 </t>

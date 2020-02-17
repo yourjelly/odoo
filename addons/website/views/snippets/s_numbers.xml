@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-<template name="Numbers" id="s_numbers">
+<template name="Numbers" id="s_numbers" customize_show_name="Numbers">
     <section class="s_numbers bg-200 pt24 pb24">
         <div class="container">
             <div class="row">
