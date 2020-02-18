@@ -429,7 +429,7 @@ class ActionManager extends core.EventBus {
                     type: 'ir.actions.act_window_close',
                 };
             }
-            const options = { on_close: params.on_closed };
+            const options = { on_close: params.on_closed, on_success: params.on_success };
             action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
             return this.doAction(action, options);
             // TODO need on_success, on_Fail?
@@ -780,6 +780,9 @@ class ActionManager extends core.EventBus {
                 this.env.services.session_storage.setItem('current_action', action._originalAction);
             } else {
                 this.currentDialogController = newDialog.controller;
+            }
+            if (controller && controller.options && controller.options.on_success) {
+                controller.options.on_success();
             }
             this.currentStack = nextStack;
             this._cleanActions();
