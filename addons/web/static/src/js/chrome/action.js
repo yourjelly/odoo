@@ -101,7 +101,9 @@ class Action extends ComponentAdapter {
                      controllerState
                 },
             );
-            await this.widget.willRestore();
+            if (this.legacyZombie) {
+                await this.widget.willRestore();
+            }
             return this.widget.reload(reloadParam);
         }
         return super.updateWidget(...arguments);
