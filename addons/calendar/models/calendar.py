@@ -1258,7 +1258,7 @@ class Meeting(models.Model):
             raise UserError(_('interval cannot be negative.'))
         # self.count is always an int
         if self.count <= 0:
-            raise UserError(_('Event recurrence interval cannot be negative.'))
+            return ''
 
         def get_week_string(freq):
             weekdays = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
@@ -1414,8 +1414,8 @@ class Meeting(models.Model):
         real_id = calendar_id2real_id(self.id)
         meeting_origin = self.browse(real_id)
 
-        data = self.read(['allday', 'start', 'stop', 'rrule', 'duration'])[0]
-        if data.get('rrule'):
+        data = self.read(['allday', 'start', 'stop', 'rrule', 'duration', 'recurrency', 'count'])[0]
+        if data.get('rrule') or (data.get('recurrency') and data.get('count') == 0):
             data.update(
                 values,
                 recurrent_id=real_id,
@@ -1434,7 +1434,7 @@ class Meeting(models.Model):
 
     @api.multi
     def action_detach_recurring_event(self):
-        meeting = self.detach_recurring_event()
+        meeting = self.detach_recurring_event() or self.id
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'calendar.event',
