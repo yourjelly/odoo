@@ -136,8 +136,8 @@ QUnit.module('WebClient', {
         assert.containsOnce(webClient, '.o_action_manager');
 
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'Partners');
-        assert.containsN(webClient, 'header .o_main_navbar .o_menu_sections li a', 2);
-        assert.containsN(webClient, '.o_menu_sections li', 2);
+        assert.containsN(webClient, 'header .o_main_navbar .o_menu_sections li a', 3);
+        assert.containsN(webClient, '.o_menu_sections li', 3);
 
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'Partners');
         assert.containsOnce(webClient, '.o_list_view');
