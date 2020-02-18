@@ -31,6 +31,7 @@ class WebClient extends Component {
                 });
                 this.renderingInfo.menuID = menu && menu.id;
             }
+            this._domCleaning();
             this.render();
         });
         this.menu = useRef('menu');
@@ -94,7 +95,7 @@ class WebClient extends Component {
     }
 
     catchError(e) {
-        if (e.name) {
+        if (e && e.name) {
             // Real runtime error
             throw e;
         }
@@ -282,6 +283,14 @@ class WebClient extends Component {
         }
         this.renderingInfo = null;
     }
+    _domCleaning() {
+        const body = document.body;
+        // multiple bodies in tests
+        const tooltips = body.querySelectorAll('body .tooltip');
+        for (let tt of tooltips) {
+            tt.parentNode.removeChild(tt);
+        }
+    }
     _computeTitle() {
         const parts = Object.keys(this.titleParts).sort();
         let tmp = "";
@@ -372,7 +381,12 @@ class WebClient extends Component {
      * @param {Object} ev.detail.state
      */
     _onPushState(ev) {
-        this._updateState(ev.detail.state);
+        if (!this.renderingInfo) {
+            // Deal with that event only if we are not in a rendering cycle
+            // i.e.: the rendering cycle will update the state at its end
+            // Any event hapening in the meantime would be irrelevant
+            this._updateState(ev.detail.state);
+        }
     }
 }
 WebClient.components = { Action, Menu, DialogAction, ComponentAdapter };

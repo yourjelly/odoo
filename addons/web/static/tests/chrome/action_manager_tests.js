@@ -146,7 +146,7 @@ QUnit.module('ActionManager', {
                 '</form>',
 
              'partner,666,form': `<form>
-                     <header></header>
+                    <header></header>
                     <sheet>
                         <div class="oe_button_box" name="button_box" modifiers="{}">
                             <button class="oe_stat_button" type="action" name="1" icon="fa-star" context="{'default_partner': active_id}">
@@ -3797,6 +3797,64 @@ QUnit.module('ActionManager', {
         ]);
         webClient.destroy();
     });
+
+    QUnit.test('execute action without modal', async function (assert) {
+        // TODO: I don't like those 2 tooltips
+        // Just because there are two bodies
+        assert.expect(11);
+
+        Object.assign(this.archs, {
+            'partner,666,form': `<form>
+                <header><button name="object" string="Call method" type="object" help="need somebody"/></header>
+                    <field name="display_name"/>
+                </form>`,
+        });
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            webClient: {
+                _getWindowHash() {
+                    return '#action=24';
+                }
+            },
+            mockRPC(route, args) {
+                assert.step(route);
+                if (route === '/web/dataset/call_button') {
+                    // Some business stuff server side, then return an implicit close action
+                    return Promise.resolve(false);
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/call_kw/partner/read',
+        ]);
+        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
+        const actionButton = webClient.el.querySelector('button[name=object]');
+        const tooltipProm = new Promise((resolve) => {
+            $(document.body).one("shown.bs.tooltip", () => {
+                $(actionButton).mouseleave();
+                resolve();
+            });
+        });
+        $(actionButton).mouseenter();
+        await tooltipProm;
+        assert.containsN(document.body, '.tooltip', 2);
+        await testUtils.dom.click(actionButton);
+        assert.verifySteps([
+            '/web/dataset/call_button',
+            '/web/dataset/call_kw/partner/read',
+        ]);
+        assert.containsNone(document.body, '.tooltip'); // body different from webClient in tests !
+        assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
+        webClient.destroy();
+    });
+
 
     QUnit.test('list with default_order and favorite filter with no orderedBy', async function (assert) {
         assert.expect(5);

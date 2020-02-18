@@ -56,6 +56,7 @@ class Action extends ComponentAdapter {
                 this.env.bus.trigger('legacy-action', this.widget);
             }
             this.legacy = 'view';
+            this._reHookControllerMethods();
             return this.widget._widgetRenderAndInsert(() => {});
         } else if (this.legacy) {
             this.legacy = 'action';
@@ -109,22 +110,17 @@ class Action extends ComponentAdapter {
         return super.updateWidget(...arguments);
     }
 
-/*    _reHookControllerMethods() {
-        if (!('inDialog' in this.props)) {
-            const self = this;
-            const widget = this.widget;
-            const controllerReload = widget.reload;
-            this.widget.reload = async function(params) {
-                await controllerReload.call(widget, ...arguments);
-                const controllerState = widget.exportState();
-                const commonState = {};
-                if (params) {
-                    if (params.context) {commonState.context = params.context;}
-                }
-                self.env.bus.trigger('legacy-reloaded', { commonState , controllerState });
+    _reHookControllerMethods() {
+        const self = this;
+        const widget = this.widget;
+        const controllerReload = widget.reload;
+        this.widget.reload = async function(params) {
+            await controllerReload.call(widget, ...arguments);
+            if (widget._enableButtons) {
+                widget._enableButtons();
             }
         }
-    }*/
+    }
 
     getState() {
         if (this.widget) {
@@ -144,9 +140,6 @@ class Action extends ComponentAdapter {
         return super.destroy();
     }
     patched() {
-        if (this.widget && this.widget._enableButtons) {
-            this.widget._enableButtons();
-        }
         if (this.legacy && this.legacyZombie) {
             if (this.widget && this.widget.on_attach_callback) {
                 this.widget.on_attach_callback();

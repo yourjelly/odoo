@@ -57,8 +57,11 @@ class ActionManagerPlugin {
         return this.actionManager.doAction(...arguments);
     }
     _getCurrentAction() {
-        const currentState = this.actionManager.getCurrentState();
+        const currentState = this.getCurrentState();
         return currentState.main || {};
+    }
+    getCurrentState() {
+        return this.actionManager.getCurrentState();
     }
 }
 ActionManagerPlugin.type = null;
@@ -181,8 +184,22 @@ ClientActionPlugin.type = 'ir.actions.client';
 
 class CloseActionPlugin extends ActionManagerPlugin {
     async executeAction(action, options) {
-        action.options = options;
-        return this.restoreController();
+        let owlReload = true;
+        const { main , dialog } = this.getCurrentState();
+        if (dialog) {
+            if (dialog.controller.options && dialog.controller.options.on_close) {
+                dialog.controller.options.on_close(action.infos);
+                owlReload = false;
+            }
+        } else if (options.on_close) {
+            options.on_close(action.infos);
+            owlReload = false;
+        }
+        const controller = main ? main.controller : null;
+        if (controller) {
+            controller.owlReload = owlReload;
+        }
+        return this._pushController(controller);
     }
 }
 CloseActionPlugin.type = 'ir.actions.act_window_close';
@@ -695,20 +712,6 @@ class ActionManager extends core.EventBus {
      */
     _pushController(controller, cb) {
         if (!controller) {
-            // TODO: maybe have a specific closeDialog function
-            if (this.currentDialogController) {
-                const {action,controller} = this.getStateFromController(this.currentDialogController.jsID);
-                this.currentDialogController.options.on_close(action.infos);
-            } else {
-                // At this point we are completely empty
-                // And safe to say we are closing a close_action
-                const allActions = Object.keys(this.actions);
-                const actKey = allActions.sort()[allActions.length-1]; // LOOOL !
-                const action = this.actions[actKey];
-                if (action && action.options && action.options.on_close) {
-                    action.options.on_close(action.infos);
-                }
-            }
             this.trigger('update', {
                 main: null,
                 dialog: null,
@@ -727,7 +730,8 @@ class ActionManager extends core.EventBus {
         let newMenuID;
         if (action.target !== 'new') {
             newMain = {};
-            newMain.reload = true;
+            newMain.reload = 'owlReload' in controller ? controller.owlReload : true;
+            delete controller.owlReload;
             newMain.action = action;
             newMain.controller = controller;
             newMenuID = controller.options && controller.options.menuID;
@@ -748,7 +752,6 @@ class ActionManager extends core.EventBus {
                 newCt.options.on_close = oldCt.options.on_close;
             } else {
                 newMain.reload = oldCt.options.shouldReload;
-                oldCt.options.on_close(newMain.reload ? action.infos : undefined);
             }
         }
         const nextStack = this.currentStack.slice(0, newMain ? newMain.controller.index : 0);
