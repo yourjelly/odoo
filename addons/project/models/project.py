@@ -812,14 +812,20 @@ class Task(models.Model):
     # Subtasks
     # ---------------------------------------------------
 
-    @api.depends('parent_id', 'project_id')
+    @api.depends('parent_id.partner_id', 'project_id.partner_id')
     def _compute_partner_id(self):
+        """
+        If a task has no partner_id, use the project partner_id if any, or else the parent task partner_id.
+        Once the task partner_id has been set:
+            1) if the project partner_id changes, the task partner_id is automatically changed also.
+            2) if the parent task partner_id changes, the task partner_id remains the same.
+        """
         for task in self:
             if task.partner_id:
                 if task.project_id.partner_id:
                     task.partner_id = task.project_id.partner_id
             else:
-                task.partner_id = task.parent_id.partner_id or task.project_id.partner_id
+                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id 
 
     @api.depends('partner_id.email', 'parent_id.email_from')
     def _compute_email_from(self):
