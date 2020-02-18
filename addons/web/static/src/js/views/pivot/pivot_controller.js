@@ -183,7 +183,21 @@ odoo.define('web.PivotController', function (require) {
             if ($target.hasClass('o_pivot_download')) {
                 this._downloadTable();
             }
+
+            this._addIncludedButtons(ev);
         },
+
+        /**
+         * Declared to be overwritten in include of pivot controller
+         *
+         * @param {MouseEvent} ev
+         * @return {Promise<void>}
+         * @private
+         */
+        _addIncludedButtons: async function(ev) {
+
+        },
+
         /**
          *
          * @private
