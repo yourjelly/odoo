@@ -41,6 +41,13 @@ QUnit.module('WebClient', {
             type: 'ir.actions.act_window',
             views: [[false, 'form']],
         }, {
+            id: 12,
+            name: 'Create a Partner (Dialog)',
+            res_model: 'partner',
+            type: 'ir.actions.act_window',
+            views: [[false, 'form']],
+            target: 'new',
+        }, {
             id: 20,
             name: 'Products',
             res_model: 'product',
@@ -77,7 +84,7 @@ QUnit.module('WebClient', {
         };
 
         this.menus = {
-            all_menu_ids: [1, 2, 3, 4, 5],
+            all_menu_ids: [1, 2, 3, 4, 5, 6],
             children: [{
                 id: 1,
                 action: false,
@@ -91,6 +98,11 @@ QUnit.module('WebClient', {
                     id: 3,
                     action: 'ir.actions.act_window,11',
                     name: "New partner",
+                    children: [],
+                }, {
+                    id: 6,
+                    action: 'ir.actions.act_window,12',
+                    name: "New partner (Dialog)",
                     children: [],
                 }],
             }, {
@@ -175,6 +187,28 @@ QUnit.module('WebClient', {
         assert.strictEqual($(webClient.el).find('.o_menu_brand').text(), 'Tasks');
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb').text(), 'Tasks');
 
+        webClient.destroy();
+    });
+
+    QUnit.only('do not call clearUncommittedChanges() when target=new && dialog is openned', async function (assert) {
+        assert.expect(2);
+
+        const webClient = await createWebClient({
+            data: this.data,
+            actions: this.actions,
+            archs: this.archs,
+            menus: this.menus,
+        });
+        
+        // Open Partner form view and enter some text
+        await testUtils.dom.click(webClient.el.querySelector('.o_menu_sections a[data-menu-id="3"]'));
+        await testUtils.fields.editInput(webClient.el.querySelector('.o_input[name=display_name]'), "TEST");
+
+        // Open dialog without saving should not ask to discard
+        await testUtils.dom.click(webClient.el.querySelector('.o_menu_sections a[data-menu-id="6"]'));
+        assert.containsOnce(webClient, '.o_dialog');
+        assert.containsOnce(webClient, '.o_dialog .o_act_window .o_view_controller');
+        
         webClient.destroy();
     });
 });

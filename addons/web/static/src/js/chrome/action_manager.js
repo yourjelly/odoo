@@ -276,7 +276,6 @@ class ActionManager extends core.EventBus {
      */
     async doAction(action, options) {
         // cancel potential current rendering
-        await this.clearUncommittedChanges();
         this.trigger('cancel');
         this.currentRequestID++;
 
@@ -309,7 +308,9 @@ class ActionManager extends core.EventBus {
             });
             action = await this._resolveLast(loadActionProm);
         }
-
+        if (!this.currentDialogController && action.target !== 'new') {
+            await this.clearUncommittedChanges();
+        }
         // action.target 'main' is equivalent to 'current' except that it
         // also clears the breadcrumbs
         options.clear_breadcrumbs = action.target === 'main' || options.clear_breadcrumbs;
@@ -499,7 +500,9 @@ class ActionManager extends core.EventBus {
         if (!controllerID) {
             controllerID = this.currentStack[this.currentStack.length - 1];
         }
-        await this.clearUncommittedChanges();
+        if (!this.currentDialogController) {
+            await this.clearUncommittedChanges();
+        }
         const { action, controller } = this.getStateFromController(controllerID);
         if (action) {
             if (controller.onReverseBreadcrumb) {
