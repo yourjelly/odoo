@@ -35,7 +35,7 @@ class WebClient extends Component {
         });
         this.menu = useRef('menu');
 
-        this.ignoreHashchange = 0;
+        this.ignoreHashchange = false;
 
         // the state of the webclient contains information like the current
         // menu id, action id, view type (for act_window actions)...
@@ -69,11 +69,11 @@ class WebClient extends Component {
     }
     mounted() {
         this._onHashchange = () => {
-            if (this.ignoreHashchange === 0) {
+            if (!this.ignoreHashchange) {
                 const state = this._getUrlState();
                 this.actionManager.loadState(state, { menuID: state.menu_id });
             }
-            this.ignoreHashchange--;
+            this.ignoreHashchange = false;
             // TODO: reset oldURL in case of failure?
         };
         window.addEventListener('hashchange', this._onHashchange);
@@ -113,7 +113,7 @@ class WebClient extends Component {
         return window.location.hash;
     }
     _setWindowHash(newHash) {
-        this.ignoreHashchange++;
+        this.ignoreHashchange = true;
         window.location.hash = newHash;
     }
     /**
