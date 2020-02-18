@@ -4,6 +4,7 @@
     'category': 'Inventory/Inventory',
     'depends': ['stock'],
     'demo': [],
+    'installable': False,
     'description': """
 Track different dates on products and production lots.
 ======================================================
