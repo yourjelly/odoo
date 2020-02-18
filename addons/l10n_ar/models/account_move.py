@@ -165,3 +165,9 @@ class AccountMove(models.Model):
                 'l10n_ar_afip_service_end': move.l10n_ar_afip_service_end,
             })
         return super()._reverse_moves(default_values_list=default_values_list, cancel=cancel)
+
+    def _get_highest_query(self):
+        if self.l10n_latam_use_documents and self.journal_id.l10n_ar_share_sequences:
+            return "SELECT {field} FROM {table} {where_string} ORDER BY SUBSTRING({field}, 5, 15) DESC LIMIT 1 FOR UPDATE"
+        super(AccountMove, self)._get_highest_query()
+
