@@ -171,3 +171,16 @@ class AccountMove(models.Model):
             return "SELECT {field} FROM {table} {where_string} ORDER BY SUBSTRING({field}, 5, 15) DESC LIMIT 1 FOR UPDATE"
         super(AccountMove, self)._get_highest_query()
 
+
+    def _get_last_sequence_domain(self, relaxed=False):
+
+        where_string, param = super(AccountMove, self)._get_last_sequence_domain(relaxed)
+        if self.l10n_latam_use_documents and self.journal_id.l10n_ar_share_sequences:
+            where_string += " AND document_letter"
+            param['document_letter'] = self.document_type_id.letter
+            # remove the latam_document_type_id
+            #where_string += " AND l10n_latam_document_type_id = %(l10n_latam_document_type_id)s"
+            #param['l10n_latam_document_type_id'] = self.l10n_latam_document_type_id.id or 0
+            #where_string += "AND l10n_latam_document_type_id = %()"
+        return where_string, param
+
