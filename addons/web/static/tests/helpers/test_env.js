@@ -1,8 +1,8 @@
 odoo.define('web.test_env', async function (require) {
     "use strict";
 
-    const Bus = require("web.Bus");
-    const { buildQuery } = require("web.rpc");
+    const Bus = require('web.Bus');
+    const { buildQuery } = require('web.rpc');
     const session = require('web.session');
 
     /**
