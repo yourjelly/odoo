@@ -190,7 +190,7 @@ QUnit.module('WebClient', {
         webClient.destroy();
     });
 
-    QUnit.only('do not call clearUncommittedChanges() when target=new && dialog is openned', async function (assert) {
+    QUnit.test('do not call clearUncommittedChanges() when target=new && dialog is openned', async function (assert) {
         assert.expect(2);
 
         const webClient = await createWebClient({
