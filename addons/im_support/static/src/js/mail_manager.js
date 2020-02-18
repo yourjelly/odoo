@@ -5,8 +5,8 @@ var MailManager = require('mail.Manager');
 
 var core = require('web.core');
 var session = require('web.session');
-var env = require('web.env');
 
+require('im_support.SupportBus');
 var SupportChannel = require('im_support.SupportChannel');
 var SupportMessage = require('im_support.SupportMessage');
 var supportSession = require('im_support.SupportSession');
@@ -250,8 +250,9 @@ MailManager.include({
     },
 });
 
-if (env.services.mail_service) {
-    // the mail_service as already been instantiated when this patch is applied,
+const env = owl.Component.env;
+if (env.services && env.services.mail_service) {
+    // the mail_service has already been instantiated when this patch is applied,
     // so we can initialize the Support feature directly
     env.services.mail_service.initSupport();
 } else {

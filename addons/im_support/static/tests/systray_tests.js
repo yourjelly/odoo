@@ -1,6 +1,7 @@
 odoo.define('im_support.systray_tests', function (require) {
 "use strict";
 
+require('im_support.MailManager');
 var imSupportTestUtils = require('im_support.test_utils');
 
 const AbstractStorageService = require('web.AbstractStorageService');
@@ -288,11 +289,7 @@ QUnit.test('restore Support channel if necessary', async function (assert) {
         }),
         session: this.supportParams,
     });
-
-    // manually call initSupport (which is supposed to be called at webclient startup)
-    messagingMenu.call('mail_service', 'initSupport');
     await testUtils.nextTick();
-
     await messagingMenu.appendTo($('#qunit-fixture'));
 
     assert.strictEqual($('.o_thread_window').length, 1,
@@ -341,11 +338,7 @@ QUnit.test('receive messages in the Support channel', async function (assert) {
         }),
         session: this.supportParams,
     });
-
-    // manually call initSupport (which is supposed to be called at webclient startup)
-    messagingMenu.call('mail_service', 'initSupport');
     await testUtils.nextTick();
-
     await messagingMenu.appendTo($('#qunit-fixture'));
 
     assert.strictEqual($('.o_thread_window').length, 1,
