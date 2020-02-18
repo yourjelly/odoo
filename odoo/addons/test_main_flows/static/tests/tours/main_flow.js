@@ -419,11 +419,12 @@ tour.register('main_flow_tour', {
     trigger: ".o_statusbar_buttons > button:enabled:contains('Confirm')",
     content: _t("<p>Confirm this quotation</p>"),
     position: "bottom"
-}, {
-    trigger: ".o_form_button_save",
-    extra_trigger: ".o_statusbar_status .btn-primary:contains('Sales Order')",
-    content: _t("<p>Save this quotation</p>"),
-    position: "bottom"
+// Confirm a quotation makes a save
+// }, {
+//     trigger: ".o_form_button_save",
+//     extra_trigger: ".o_statusbar_status .btn-primary:contains('Sales Order')",
+//     content: _t("<p>Save this quotation</p>"),
+//     position: "bottom"
 // Reordering rule
 }, {
     edition: "enterprise",
