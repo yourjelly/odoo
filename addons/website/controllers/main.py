@@ -410,6 +410,7 @@ class Website(Home):
     def multi_render(self, ids_or_xml_ids, values=None):
         View = request.env['ir.ui.view']
         res = {}
+        logger.warning("Call to multi_render with user %s on views %s", request.env.user.login, ids_or_xml_ids)
         for id_or_xml_id in ids_or_xml_ids:
             res[id_or_xml_id] = View._render_template(id_or_xml_id, values)
         return res
