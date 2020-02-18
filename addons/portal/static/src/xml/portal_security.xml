@@ -1,0 +1,46 @@
+<templates xml:space="preserve">
+    <t t-name="portal.api_key_success">
+        <div>
+            <p>
+                Here is your new API key, use it instead of a
+                password when doing RPC access. Your login is still
+                necessary.
+            </p>
+            <p><code><t t-esc="key"/></code></p>
+            <p class="bg-warning">
+                This key will not be re-issued, and <b>provides full
+                access to your user account</b>, it is very
+                important to <b>properly</b> note and store it.
+            </p>
+        </div>
+    </t>
+    <t t-name="portal.api_key_failure">
+        <p>Could not create the API key "<t t-esc="description"/>"</p>
+    </t>
+    <t t-name="portal.api_key">
+        <form>
+            <p>Enter a description of and purpose for the key.</p>
+            <p>
+                It is very important that this description be clear and complete,
+                <strong>it will be the only way to identify the key once created</strong>.
+            </p>
+            <input class="form-control" name="description"/>
+            <input type="submit" class="d-none"/>
+        </form>
+    </t>
+    <t t-name="portal.identitycheck">
+        <form>
+            <p>
+                You are trying to perform an action which impacts
+                the security of your or an other account. For
+                security reasons, we need to re-validate your
+                identity.
+            </p>
+            <p>
+                Confirm your password to enter the enhanced security
+                mode, it will remain active for a few minutes.
+            </p>
+            <input class="form-control" name="password" type="password" required="required"/>
+        </form>
+    </t>
+</templates>
