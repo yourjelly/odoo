@@ -13,9 +13,9 @@ class StockWarehouse(models.Model):
             mto_pull_rule_values = rules[rule_many2one_field].get('update_values').get('route_ids', False)
             if mto_pull_rule_values:
                 rules[rule_many2one_field]['update_values']['route_ids'].append(
-                    (4, self._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id))
+                    (4, self.sudo()._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id))
             else:
                 rules[rule_many2one_field]['update_values']['route_ids'] = [
-                    (4, self._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
+                    (4, self.sudo()._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
                 ]
         return rules

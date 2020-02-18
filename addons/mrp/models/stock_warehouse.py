@@ -116,7 +116,7 @@ class StockWarehouse(models.Model):
                     'picking_type_id': self.manu_type_id.id,
                     'route_ids': [
                         (4, self._find_global_route('mrp.route_warehouse0_manufacture', _('Manufacture')).id),
-                        (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
+                        (4, self.sudo()._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
                     ],
                 },
                 'update_values': {
@@ -134,7 +134,7 @@ class StockWarehouse(models.Model):
                     'action': 'pull',
                     'auto': 'manual',
                     'route_ids': [
-                        (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
+                        (4, self.sudo()._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
                     ],
                     'location_id': production_location.id,
                     'location_src_id': location_src.id,
@@ -160,7 +160,7 @@ class StockWarehouse(models.Model):
                 'update_values': {
                     'active': self.manufacture_steps != 'mrp_one_step' and self.manufacture_to_resupply,
                     'route_ids': [
-                        (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
+                        (4, self.sudo()._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id),
                     ],
                 }
             },
@@ -194,10 +194,10 @@ class StockWarehouse(models.Model):
         delivery_rule_values = rules['wh_delivery_mto_pull_id'].get('update_values').get('route_ids', False)
         if delivery_rule_values:
             rules['wh_delivery_mto_pull_id']['update_values']['route_ids'].append(
-                (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id))
+                (4, self.sudo()._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id))
         else:
             rules['wh_delivery_mto_pull_id']['update_values']['route_ids'] = [
-                (4, self._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id)
+                (4, self.sudo()._find_global_route('mrp.route_manufacture_mto', _('Manufacture + MTO')).id)
             ]
         return rules
 

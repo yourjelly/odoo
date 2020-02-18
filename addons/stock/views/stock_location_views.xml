@@ -194,6 +194,7 @@
                             <field name="warehouse_domain_ids" invisible="1"/>
                             <field name="warehouse_ids"  widget="many2many_tags" nolabel="1"
                                    attrs="{'invisible': [('warehouse_selectable', '=', False)]}"/>
+                            <field name="replenish_on_order" groups="stock.group_adv_location_mto"/>
                         </group>
                     </group>
                     <group string="Rules" colspan="4" >

@@ -536,7 +536,10 @@ class ProcurementGroup(models.Model):
 
     @api.model
     def _get_orderpoint_domain(self, company_id=False):
-        domain = [('trigger', '=', 'auto'), ('product_id.active', '=', True)]
+        domain = [
+            ('trigger', '=', self.env.ref('stock.orderpoint_trigger_auto').id),
+            ('product_id.active', '=', True)
+        ]
         if company_id:
             domain += [('company_id', '=', company_id)]
         return domain

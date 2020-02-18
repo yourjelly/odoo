@@ -313,13 +313,7 @@ class SaleOrderLine(models.Model):
             product_routes = line.route_id or (product.route_ids + product.categ_id.total_route_ids)
 
             # Check MTO
-            mto_route = line.order_id.warehouse_id.mto_pull_id.route_id
-            if not mto_route:
-                try:
-                    mto_route = self.env['stock.warehouse']._find_global_route('stock.route_warehouse0_mto', _('Make To Order'))
-                except UserError:
-                    # if route MTO not found in ir_model_data, we treat the product as in MTS
-                    pass
+            mto_route = line.order_id.warehouse_id.wh_delivery_mto_pull_id.route_ids
 
             if mto_route and mto_route in product_routes:
                 line.is_mto = True

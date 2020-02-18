@@ -407,7 +407,6 @@ class PurchaseOrderLine(models.Model):
             'route_ids': self.order_id.picking_type_id.warehouse_id and [(6, 0, [x.id for x in self.order_id.picking_type_id.warehouse_id.route_ids])] or [],
             'warehouse_id': self.order_id.picking_type_id.warehouse_id.id,
             'product_uom_qty': product_uom_qty,
-            'product_uom': product_uom.id,
         }
 
     @api.model

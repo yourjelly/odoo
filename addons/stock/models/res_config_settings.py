@@ -42,6 +42,7 @@ class ResConfigSettings(models.TransientModel):
     group_stock_multi_locations = fields.Boolean('Storage Locations', implied_group='stock.group_stock_multi_locations',
         help="Store products in specific locations of your warehouse (e.g. bins, racks) and to track inventory accordingly.")
     group_stock_multi_warehouses = fields.Boolean('Multi-Warehouses', implied_group='stock.group_stock_multi_warehouses')
+    group_stock_adv_location_mto = fields.Boolean('Manage Repelnish on Order Flow', implied_group='stock.group_adv_location_mto')
 
     @api.onchange('group_stock_multi_locations')
     def _onchange_group_stock_multi_locations(self):
@@ -63,6 +64,11 @@ class ResConfigSettings(models.TransientModel):
     def onchange_adv_location(self):
         if self.group_stock_adv_location and not self.group_stock_multi_locations:
             self.group_stock_multi_locations = True
+
+    @api.onchange('group_stock_adv_location_mto')
+    def onchange_adv_location_mto(self):
+        if self.group_stock_adv_location_mto and not self.group_stock_adv_location:
+            self.group_stock_adv_location = True
 
     def set_values(self):
         super(ResConfigSettings, self).set_values()

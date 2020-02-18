@@ -126,7 +126,7 @@ class StockWarehouse(models.Model):
                     'company_id': self.company_id.id,
                     'route_ids': [
                         (4, self._find_global_route('purchase_stock.route_warehouse0_buy', _('Buy')).id),
-                        (4, self._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
+                        (4, self.sudo()._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
                     ],
                     'procure_method': 'make_to_stock',
                     'propagate_cancel': self.reception_steps != 'one_step',
@@ -142,10 +142,10 @@ class StockWarehouse(models.Model):
         delivery_rule_values = rules['wh_delivery_mto_pull_id'].get('update_values').get('route_ids', False)
         if delivery_rule_values:
             rules['wh_delivery_mto_pull_id']['update_values']['route_ids'].append(
-                (4, self._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id))
+                (4, self.sudo()._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id))
         else:
             rules['wh_delivery_mto_pull_id']['update_values']['route_ids'] = [
-                (4, self._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
+                (4, self.sudo()._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
             ]
         return rules
 
@@ -183,10 +183,43 @@ class ReturnPicking(models.TransientModel):
 class Orderpoint(models.Model):
     _inherit = "stock.warehouse.orderpoint"
 
+    def _get_default_route_id(self):
+        if self.product_id._prepare_sellers():
+            route_id = self.env['stock.rule'].search([
+                ('action', '=', 'buy')
+            ]).route_ids.filtered(lambda r: not r.replenish_on_order)
+            if route_id:
+                return route_id[0]
+        return super()._get_default_route_id()
+
+    @api.model
+    def _get_quantity_in_progress(self, product_ids, location_ids):
+        # TODO maybe it should be an extension of product _compute_quantities
+        qty_by_product_location = super()._get_quantity_in_progress(product_ids, location_ids)
+        groups = self.env['purchase.order.line'].read_group([
+            ('state', 'in', ('draft', 'sent', 'to approve')),
+            ('move_dest_ids', '=', False),
+            ('product_id', 'in', product_ids),
+            ('order_id.picking_type_id.default_location_dest_id', 'in', location_ids)
+        ],
+            ['product_id', 'product_qty', 'order_id', 'product_uom'],
+            ['order_id', 'product_id', 'product_uom'], lazy=False)
+        for group in groups:
+            order = self.env['purchase.order'].browse(group['order_id'][0])
+            product = self.env['product.product'].browse(group['product_id'][0])
+            location_id = order.picking_type_id.default_location_dest_id.id
+            uom = self.env['uom.uom'].browse(group['product_uom'][0])
+            product_qty = uom._compute_quantity(group['product_qty'], product.uom_id, round=False)
+            qty_by_product_location[(product.id, location_id)] += product_qty
+        return qty_by_product_location
+
     def _quantity_in_progress(self):
         res = super(Orderpoint, self)._quantity_in_progress()
-        for poline in self.env['purchase.order.line'].search([('state', 'in', ('draft', 'sent', 'to approve')), ('orderpoint_id', 'in', self.ids), ('move_dest_ids', '=', False)]):
-            res[poline.orderpoint_id.id] += poline.product_uom._compute_quantity(poline.product_qty, poline.orderpoint_id.product_uom, round=False)
+        qty_by_product_location = self.env['stock.warehouse.orderpoint']._get_quantity_in_progress(self.product_id.ids, self.location_id.ids)
+        for orderpoint in self:
+            product_qty = qty_by_product_location.get((orderpoint.product_id.id, orderpoint.location_id.id), 0.0)
+            product_uom_qty = orderpoint.product_id.uom_id._compute_quantity(product_qty, orderpoint.product_uom, round=False)
+            res[orderpoint.id] += product_uom_qty
         return res
 
     def action_view_purchase(self):
