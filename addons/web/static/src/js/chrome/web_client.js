@@ -58,16 +58,7 @@ class WebClient extends Component {
 
         const state = this._getUrlState();
         this._determineCompanyIds(state);
-        if (Object.keys(state).filter(key => key !== 'cids').length === 0) {
-            const menuID = this.menus && this.menus.root.children[0];
-            if (!menuID) {
-                return Promise.resolve();
-            }
-            const initialAction = this.menus[menuID].actionID;
-            return this.actionManager.doAction(initialAction, { menuID });
-        } else {
-            return this.actionManager.loadState(state, { menuID: state.menu_id });
-        }
+        return this.actionManager.loadState(state, { menuID: state.menu_id });
     }
     mounted() {
         this._onHashchange = () => {
@@ -131,9 +122,15 @@ class WebClient extends Component {
         const state = {};
         for (const part of hashParts) {
             const [ key, val ] = part.split('=');
-            const decodedVal = decodeURI(val);
+            let decodedVal;
+            if (val === undefined) {
+                decodedVal = '1';
+            } else {
+                decodedVal = decodeURI(val);
+            }
             state[key] = isNaN(decodedVal) ? decodedVal : parseInt(decodedVal, 10);
         }
+
         return state;
     }
     _determineCompanyIds(state) {

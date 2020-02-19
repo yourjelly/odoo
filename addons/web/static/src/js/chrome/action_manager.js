@@ -504,7 +504,18 @@ class ActionManager extends core.EventBus {
             const action = this.menus[state.menu_id].actionID;
             return this.doAction(action, state);
         }
+        if (!result && ('home' in state || Object.keys(state).filter(key => key !== 'cids').length === 0)) {
+            const { menuID , actionID } = this._getHomeAction();
+            if (actionID) {
+                return this.doAction(actionID, {menuID, clear_breadcrumbs: true});
+            }
+        }
         return result;
+    }
+    _getHomeAction() {
+        const menuID = this.menus ? this.menus.root.children[0] : null;
+        const actionID =  menuID ? this.menus[menuID].actionID : null;
+        return { menuID, actionID };
     }
     /**
      * Restores a controller from the controllerStack and removes all

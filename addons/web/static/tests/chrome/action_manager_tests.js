@@ -1436,6 +1436,96 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
+    QUnit.test('load state supports #home', async function (assert) {
+        assert.expect(12);
+
+        const menus = {
+            all_menu_ids: [666],
+            children: [{
+                id: 666,
+                action: 'ir.actions.act_window,1',
+                children: [],
+            }]
+        };
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: menus,
+            mockRPC(route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            },
+            webClient: {
+                _getWindowHash() {
+                    return '#action=3';
+                }
+            }
+        });
+        assert.containsOnce(webClient, '.o_list_view',
+            "should display a list view");
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners',
+            "breadcrumbs should display the display_name of the action");
+
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/search_read',
+        ]);
+
+        await testUtils.actionManager.loadState(webClient, {
+            home: true,
+        });
+        assert.containsOnce(webClient, '.o_kanban_view',
+            "should display a kanban view");
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 1',
+            "breadcrumbs should display the display_name of the action");
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/search_read',
+        ]);
+        webClient.destroy();
+    });
+
+    QUnit.test('load state supports #home as initial state', async function (assert) {
+        assert.expect(6);
+
+        const menus = {
+            all_menu_ids: [666],
+            children: [{
+                id: 666,
+                action: 'ir.actions.act_window,1',
+                children: [],
+            }]
+        };
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: menus,
+            mockRPC(route, args) {
+                assert.step(route);
+                return this._super.apply(this, arguments);
+            },
+            webClient: {
+                _getWindowHash() {
+                    return '#home';
+                }
+            }
+        });
+        assert.containsOnce(webClient, '.o_kanban_view',
+            "should display a kanban view");
+        assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners Action 1',
+            "breadcrumbs should display the display_name of the action");
+        assert.verifySteps([
+            '/web/action/load',
+            '/web/dataset/call_kw/partner',
+            '/web/dataset/search_read',
+        ]);
+        webClient.destroy();
+    });
+
     QUnit.module('Concurrency management');
 
     QUnit.test('drop previous actions if possible', async function (assert) {
