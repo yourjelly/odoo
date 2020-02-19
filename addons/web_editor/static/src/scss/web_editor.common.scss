@@ -517,3 +517,150 @@ blockquote {
     border-left: 5px solid $gray-300;
     font-style: italic
 }
+
+// Bg/text color classes generation
+@function has-related-color-classes($color-name, $component-type) {
+    @if type-of($color-name) != 'string' {
+        @return false;
+    }
+
+    $maps: ();
+    @if index($component-type, ('bg', 'text', 'btn')) {
+        $maps: append($maps, $theme-colors);
+    }
+    @if index($component-type, ('bg', 'text')) {
+        $maps: append($maps, $grays);
+    }
+    @each $map in $maps {
+        @if map-has-key($map, $color-name) {
+            @return true;
+        }
+    }
+
+    @return false;
+}
+@for $index from 1 through length($o-color-combinations) {
+    $config: nth($o-color-combinations, $index);
+    $-bg: map-get($config, 'bg');
+    $-text: map-get($config, 'text');
+    $-headings: map-get($config, 'headings');
+    $-h2: map-get($config, 'h2');
+    $-h3: map-get($config, 'h3');
+    $-h4: map-get($config, 'h4');
+    $-h5: map-get($config, 'h5');
+    $-h6: map-get($config, 'h6');
+    $-link: map-get($config, 'link');
+    $-btn-primary: map-get($config, 'btn-primary');
+    $-btn-outline-primary: map-get($config, 'btn-outline-primary');
+    $-btn-secondary: map-get($config, 'btn-secondary');
+    $-btn-outline-secondary: map-get($config, 'btn-outline-secondary');
+
+    // Those color classes color multiple elements when applied on a snippet.
+    // Those rules are not important so that they can be overridden through
+    // bg and text utility classes. **
+    .o_cc#{$index} {
+        // Background & Text
+        @include o-bg-color(o-get-color($-bg), o-get-color($-text), $important: false);
+
+        // Headings
+        h1, h2, h3, h4, h5, h6 {
+            // 'inherit' so that the default color is the same as the text one
+            // of this preset (otherwise it would be the headings color when
+            // there is no preset, which can be chosen by the users).
+            color: o-get-color($-headings) or inherit;
+        }
+        h2, h3, h4, h5, h6 {
+            color: o-get-color($-h2);
+        }
+        h3, h4, h5, h6 {
+            color: o-get-color($-h3);
+        }
+        h4, h5, h6 {
+            color: o-get-color($-h4);
+        }
+        h5, h6 {
+            color: o-get-color($-h5);
+        }
+        h6 {
+            color: o-get-color($-h6);
+        }
+
+        // Links
+        $-link-extend-selector: null;
+        @if has-related-color-classes($-link, 'text') {
+            $-link-extend-selector: '.text-#{$-link}';
+        } @else if $-link {
+            $-link-extend-selector: '%cc#{$index}-link';
+            @include text-emphasis-variant($-link-extend-selector, o-get-color($-link));
+        }
+        @if $-link-extend-selector {
+            a:not(.btn), .btn-link {
+                @extend #{$-link-extend-selector};
+            }
+        }
+
+        // Buttons (** for buttons, we can extend an other button class
+        // if possible as those rules are not important in bootstrap and it
+        // would not make sense to combine multiple btn classes anyway).
+
+        // Primary
+        @if has-related-color-classes($-btn-primary, 'btn') {
+            .btn-fill-primary {
+                @extend .btn-fill-#{$-btn-primary};
+            }
+        } @else if $-btn-primary {
+            $-btn-primary-color: o-get-color($-btn-primary);
+            .btn-fill-primary {
+                @include button-variant($-btn-primary-color, $-btn-primary-color);
+            }
+        }
+
+        @if has-related-color-classes($-btn-outline-primary, 'btn') {
+            .btn-outline-primary {
+                @extend .btn-outline-#{$-btn-outline-primary};
+            }
+        } @else {
+            $-btn-outline-primary-color: null;
+            @if $-btn-outline-primary {
+                $-btn-outline-primary-color: o-get-color($-btn-outline-primary);
+            } @else if $-btn-primary {
+                $-btn-outline-primary-color: o-get-color($-btn-primary);
+            }
+            @if $-btn-outline-primary-color {
+                .btn-outline-primary {
+                    @include button-outline-variant($-btn-outline-primary-color);
+                }
+            }
+        }
+
+        // Secondary
+        @if has-related-color-classes($-btn-secondary, 'btn') {
+            .btn-fill-secondary {
+                @extend .btn-fill-#{$-btn-secondary};
+            }
+        } @else if $-btn-secondary {
+            $-btn-secondary-color: o-get-color($-btn-secondary);
+            .btn-fill-secondary {
+                @include button-variant($-btn-secondary-color, $-btn-secondary-color);
+            }
+        }
+
+        @if has-related-color-classes($-btn-outline-secondary, 'btn') {
+            .btn-outline-secondary {
+                @extend .btn-outline-#{$-btn-outline-secondary};
+            }
+        } @else {
+            $-btn-outline-secondary-color: null;
+            @if $-btn-outline-secondary {
+                $-btn-outline-secondary-color: o-get-color($-btn-outline-secondary);
+            } @else if $-btn-secondary {
+                $-btn-outline-secondary-color: o-get-color($-btn-secondary);
+            }
+            @if $-btn-outline-secondary-color {
+                .btn-outline-secondary {
+                    @include button-outline-variant($-btn-outline-secondary-color);
+                }
+            }
+        }
+    }
+}

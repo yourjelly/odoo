@@ -40,3 +40,6 @@ $o-gray-color-palette: map-merge($o-base-gray-color-palette, o-map-omit($o-gray-
 @function palette-gray($key) {
     @return map-get($o-gray-color-palette, $key);
 }
+
+// Color combinations
+$o-color-combinations: nth($o-color-combinations-presets, $o-color-combinations-preset-number) !default;
