@@ -14,6 +14,7 @@ QUnit.module('WebClient', {
                     {id: 1, display_name: "First partner"},
                     {id: 2, display_name: "Second partner"},
                 ],
+                do_something() {}
             },
             product: {
                 fields: {},
@@ -33,7 +34,7 @@ QUnit.module('WebClient', {
             name: 'Partners',
             res_model: 'partner',
             type: 'ir.actions.act_window',
-            views: [[false, 'list']],
+            views: [[false, 'list'], [false, 'form']],
         }, {
             id: 11,
             name: 'Create a Partner',
@@ -75,7 +76,11 @@ QUnit.module('WebClient', {
                 </kanban>`,
 
             // form views
-            'partner,false,form': '<form><sheet><field name="display_name"/></sheet></form>',
+            'partner,false,form': `
+                <form>
+                    <header><button name="do_something" string="Call button" type="object"/></header>
+                    <sheet><field name="display_name"/></sheet>
+                </form>`,
 
             // search views
             'partner,false,search': '<search/>',
@@ -209,6 +214,35 @@ QUnit.module('WebClient', {
         assert.containsOnce(webClient, '.o_dialog');
         assert.containsOnce(webClient, '.o_dialog .o_act_window .o_view_controller');
         
+        webClient.destroy();
+    });
+
+    QUnit.test('do not restore when reloading', async function (assert) {
+        assert.expect(5);
+
+        const webClient = await createWebClient({
+            data: this.data,
+            actions: this.actions,
+            archs: this.archs,
+            menus: this.menus,
+        });
+
+        await testUtils.dom.click(webClient.el.querySelector('.o_data_row'));
+        assert.containsOnce(webClient, '.o_form_buttons_view .o_form_button_edit');
+
+        await testUtils.dom.click(webClient.el.querySelector('.o_form_buttons_view .o_form_button_edit'));
+
+        assert.containsOnce(webClient, '.o_form_buttons_edit .o_form_button_save');
+        assert.containsOnce(webClient, '.o_statusbar_buttons button[name=do_something]');
+
+        await testUtils.dom.click(webClient.el.querySelector('.o_statusbar_buttons button[name=do_something]'));
+
+        assert.containsOnce(webClient, '.o_form_buttons_edit .o_form_button_save');
+
+        await testUtils.dom.click(webClient.el.querySelector('.o_form_buttons_edit .o_form_button_save'));
+
+        assert.containsOnce(webClient, '.o_form_buttons_view .o_form_button_edit');
+
         webClient.destroy();
     });
 });
