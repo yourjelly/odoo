@@ -198,6 +198,8 @@ class CloseActionPlugin extends ActionManagerPlugin {
         const controller = main ? main.controller : null;
         if (controller) {
             controller.owlReload = owlReload;
+            controller.options = controller.options || {};
+            controller.options.on_success = options.on_success;
         }
         return this._pushController(controller);
     }
@@ -446,14 +448,10 @@ class ActionManager extends core.EventBus {
                     type: 'ir.actions.act_window_close',
                 };
             }
-            const options = { on_close: params.on_closed, on_success: params.on_success };
+            const options = { on_close: params.on_closed, on_success: params.on_success, on_fail: params.on_fail };
             action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
             return this.doAction(action, options);
-            // TODO need on_fail (on_success done)?
-            //.then(params.on_success, params.on_fail);
         });
-            // TODO need on_fail??
-            // .guardedCatch(params.on_fail);
     }
     getStateFromController(controllerID) {
         const controller = this.controllers[controllerID];
@@ -718,6 +716,7 @@ class ActionManager extends core.EventBus {
                 onSuccess: () => {
                     this.currentDialogController = null;
                 },
+                onFail: () => {},
             });
             return;
         }
@@ -758,6 +757,17 @@ class ActionManager extends core.EventBus {
         if (newMain) {
             nextStack.push(newMain.controller.jsID);
         }
+        const onFail = () => {
+            if (action.target !== 'new') {
+                if (newMain.controller.options && newMain.controller.options.on_fail) {
+                    newMain.controller.options.on_fail();
+                }
+            } else {
+                if (newDialog.controller.options && newDialog.controller.options.on_fail) {
+                    newDialog.controller.options.on_fail();
+                }
+            }
+        };
         const onSuccess = (mainComponent, dialogComponent) => {
             if (action.target !== 'new') {
                 newMain.controller.component = mainComponent;
@@ -806,6 +816,7 @@ class ActionManager extends core.EventBus {
             fullscreen: fullscreen,
             menuID: newMenuID,
             onSuccess: onSuccess,
+            onFail: onFail,
         };
         this.trigger('update', payload);
     }

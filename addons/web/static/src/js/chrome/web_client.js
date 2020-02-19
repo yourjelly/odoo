@@ -101,6 +101,9 @@ class WebClient extends Component {
         }
         // Errors that have been handled before
         console.warn(e);
+        if (this.renderingInfo) {
+            this.renderingInfo.onFail();
+        }
         this.actionManager.restoreController();
     }
     willUnmount() {

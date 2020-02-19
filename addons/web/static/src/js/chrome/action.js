@@ -19,6 +19,7 @@ class Action extends ComponentAdapter {
         super(...arguments);
         if (!(props.Component.prototype instanceof owl.Component)) {
             this.legacy = true;
+            this.widgetReloadProm = null;
         }
         this.boundController = this.props.action.controller;
         this.inDialog = 'inDialog' in this.props;
@@ -69,9 +70,6 @@ class Action extends ComponentAdapter {
     }
 
     shouldUpdate(nextProps) {
-        if (nextProps.shouldUpdate === false) {
-            return false;
-        }
         if (this.legacy) {
             const activatingViewType = nextProps.action.controller.viewType;
             let zombie = this.legacyZombie;
@@ -91,6 +89,9 @@ class Action extends ComponentAdapter {
         return super._trigger_up(...arguments);
     }
     async updateWidget(nextProps) {
+        if (nextProps.shouldUpdate === false) {
+            return this.widgetReloadProm;
+        }
         if (this.legacy === 'view') {
             const action = nextProps.action;
             const controllerState = action.controllerState || {};
@@ -114,12 +115,18 @@ class Action extends ComponentAdapter {
         const self = this;
         const widget = this.widget;
         const controllerReload = widget.reload;
-        this.widget.reload = async function(params) {
-            await controllerReload.call(widget, ...arguments);
-            if (widget._enableButtons) {
-                widget._enableButtons();
+        this.widget.reload = function() {
+            self.widgetReloadProm = controllerReload.call(widget, ...arguments);
+            return self.widgetReloadProm;
+        };
+        const controllerUpdate = widget.update;
+        this.widget.update = function() {
+            const updateProm = controllerUpdate.call(widget, ...arguments);
+            if (!self.widgetReloadProm) {
+                self.widgetReloadProm = updateProm;
             }
-        }
+            return updateProm;
+        };
     }
 
     getState() {
@@ -145,6 +152,7 @@ class Action extends ComponentAdapter {
                 this.widget.on_attach_callback();
             }
             this.legacyZombie = false;
+            this.widgetReloadProm = null;
         }
     }
 }
