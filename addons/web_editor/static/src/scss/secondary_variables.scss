@@ -37,3 +37,6 @@ $o-gray-color-palette: map-merge($o-transparent-grays, $o-gray-color-palette);
 @function palette-gray($key) {
     @return map-get($o-gray-color-palette, $key);
 }
+
+// Color combinations
+$o-color-combinations: nth($o-color-combinations-presets, $o-color-combinations-preset-number) !default;

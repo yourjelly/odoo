@@ -517,3 +517,65 @@ blockquote {
     border-left: 5px solid $gray-300;
     font-style: italic
 }
+
+// Bg/text color classes generation
+@function has-related-color-classes($color-name, $component-type) {
+    @if type-of($color-name) != 'string' {
+        @return false;
+    }
+
+    $maps: ();
+    @if index($component-type, ('bg', 'text', 'btn')) {
+        $maps: append($maps, $theme-colors);
+    }
+    @if index($component-type, ('bg', 'text')) {
+        $maps: append($maps, $grays);
+    }
+    @each $map in $maps {
+        @if map-has-key($map, $color-name) {
+            @return true;
+        }
+    }
+
+    @return false;
+}
+@for $index from 1 through length($o-color-combinations) {
+    $config: nth($o-color-combinations, $index);
+    $-bg: map-get($config, 'bg');
+    $-text: map-get($config, 'text');
+    $-headings: map-get($config, 'headings');
+    $-btn-primary: map-get($config, 'btn-primary');
+
+    // Those color classes color multiple elements when applied on a snippet.
+    // Those rules are not important so that they can be overridden through
+    // bg and text utility classes. **
+    .o_color_#{$index} {
+        // Background & Text
+        @include o-bg-color(o-get-color($-bg), o-get-color($-text), $important: false);
+
+        // Headings
+        h1, h2, h3, h4, h5, h6 {
+            color: o-get-color($-headings);
+        }
+
+        // Primary buttons (** for buttons, we can extend an other button class
+        // if possible as those rules are not important in bootstrap and it
+        // would not make sense to combine multiple btn classes anyway).
+        @if has-related-color-classes($-btn-primary, 'btn') {
+            .btn-primary {
+                @extend .btn-#{$-btn-primary};
+            }
+            .btn-outline-primary {
+                @extend .btn-outline-#{$-btn-primary};
+            }
+        } @else {
+            $-btn-primary-color: o-get-color($-btn-primary);
+            .btn-primary {
+                @include button-variant($-btn-primary-color, $-btn-primary-color);
+            }
+            .btn-outline-primary {
+                @include button-outline-variant($-btn-primary-color);
+            }
+        }
+    }
+}

@@ -320,6 +320,63 @@ $o-gray-color-palettes: (
 ) !default;
 $o-gray-color-palette-number: 1;
 
+// Color combinations
+$o-color-combinations-presets: (
+    (
+        (
+            'bg': 'alpha',
+            'text': null,
+            'headings': 'gamma',
+            'btn-primary': 'gamma',
+        ),
+        (
+            'bg': 'beta',
+            'text': 'alpha',
+            'headings': 'black',
+            'btn-primary': 'gamma',
+        ),
+        (
+            'bg': 'gamma',
+            'text': null,
+            'headings': 'white',
+            'btn-primary': 'black',
+        ),
+        (
+            'bg': 'white',
+            'text': null,
+            'headings': 'gamma',
+            'btn-primary': 'gamma',
+        ),
+        (
+            'bg': 'black',
+            'text': null,
+            'headings': 'gamma',
+            'btn-primary': 'gamma',
+        ),
+    ),
+) !default;
+$o-color-combinations-preset-number: 1;
+
 // Translations
 $o-we-content-to-translate-color: rgb(255, 255, 90) !default;
 $o-we-translated-content-color: rgb(120, 215, 110) !default;
+
+// Function which allows to retrieve a color value from a name, the color being
+// either in $theme-colors, $grays or $colors maps. If the color is not
+// available in any, the function returns its argument.
+@function o-get-color($name) {
+    @if type-of($name) != 'string' {
+        @return $name;
+    }
+
+    @if map-has-key($theme-colors, $name) {
+        @return theme-color($name);
+    }
+    @if map-has-key($grays, $name) {
+        @return gray($name);
+    }
+    @if map-has-key($colors, $name) {
+        @return color($name);
+    }
+    @return $name;
+}
