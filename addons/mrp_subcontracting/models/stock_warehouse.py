@@ -62,8 +62,6 @@ class StockWarehouse(models.Model):
         rules = super(StockWarehouse, self)._get_global_route_rules_values()
         subcontract_location_id = self._get_subcontracting_location()
         production_location_id = self._get_production_location()
-        wh_delivery_mto_pull_values = self._get_global_route_rules_values().get('wh_delivery_mto_pull_id')
-        route_ids = wh_delivery_mto_pull_values.get('update_values', {}).get('route_ids')
         rules.update({
             'subcontracting_mto_pull_id': {
                 'depends': ['subcontracting_to_resupply'],
@@ -72,7 +70,10 @@ class StockWarehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
-                    'route_ids': route_ids,
+                    'route_ids': [
+                        (4, route.id)
+                        for route in self.env['stock.location.route'].sudo().search([('replenish_on_order', '=', True)])
+                    ],
                     'name': self._format_rulename(self.lot_stock_id, subcontract_location_id, 'MTO'),
                     'location_id': subcontract_location_id.id,
                     'location_src_id': self.lot_stock_id.id,

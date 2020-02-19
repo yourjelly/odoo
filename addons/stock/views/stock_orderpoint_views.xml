@@ -45,7 +45,7 @@
                 <field name="virtual" invisible="1"/>
                 <field name="warehouse_id" invisible="1"/>
                 <field name="product_id"/>
-                <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
+                <field name="location_id" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                 <field name="qty_on_hand" force_save="1"/>
                 <field name="qty_forecast" force_save="1"/>
                 <field name="json_lead_days_popover" string=" " widget="popover_widget" attrs="{'invisible': ['|', '|', ('id', '=', False), ('trigger_technical_name', '=', 'on_order'), ('virtual', '=', True)]}"/>

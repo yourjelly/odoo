@@ -88,7 +88,7 @@ class ResCompany(models.Model):
                 'location_id': customer_location.id,
                 'location_src_id': supplier_location.id,
                 'procure_method': 'make_to_stock',
-                'route_id': dropship_route.id,
+                'route_ids': [(4, dropship_route.id)],
                 'picking_type_id': dropship_picking_type.id,
                 'company_id': company.id,
             })
@@ -99,8 +99,8 @@ class ResCompany(models.Model):
     def create_missing_dropship_rule(self):
         dropship_route = self.env.ref('stock_dropshipping.route_drop_shipping')
 
-        company_ids  = self.env['res.company'].search([])
-        company_has_dropship_rule = self.env['stock.rule'].search([('route_id', '=', dropship_route.id)]).mapped('company_id')
+        company_ids = self.env['res.company'].search([])
+        company_has_dropship_rule = self.env['stock.rule'].search([('route_ids', 'in', dropship_route.id)]).mapped('company_id')
         company_todo_rule = company_ids - company_has_dropship_rule
         company_todo_rule._create_dropship_rule()
 

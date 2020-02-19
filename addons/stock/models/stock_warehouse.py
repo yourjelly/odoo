@@ -244,24 +244,6 @@ class Warehouse(models.Model):
                         ('active', '=', True)
                     ])
                     to_disable_route_ids.toggle_active()
-                    internal_transit_location, external_transit_location = warehouse._get_transit_locations()
-                    for removed_wh in to_remove:
-                        supplied_wh_count = self.env['stock.warehouse'].search_count([
-                            ('resupply_wh_ids', 'in', removed_wh.id)
-                        ])
-                        if supplied_wh_count:
-                            continue
-                        transit_location = internal_transit_location
-                        location = removed_wh.lot_stock_id
-                        if removed_wh.delivery_steps != 'ship_only':
-                            location = removed_wh.wh_output_stock_loc_id
-                        if removed_wh.company_id != warehouse.company_id:
-                            transit_location = external_transit_location
-                        self.env['stock.rule'].search([
-                            ('location_id', '=', transit_location.id),
-                            ('location_src_id', '=', location.id),
-                            ('procure_method', 'in', ['make_to_order', 'mts_else_mto']),
-                        ]).unlink()
         return res
 
     @api.model
@@ -377,6 +359,10 @@ class Warehouse(models.Model):
                     'location_id': location_dest_id.id,
                     'location_src_id': location_id.id,
                     'picking_type_id': picking_type_id.id,
+                    'route_ids': [
+                        (4, route.id)
+                        for route in self.env['stock.location.route'].sudo().search([('replenish_on_order', '=', True)])
+                    ],
                 }
             }
         }
@@ -602,24 +588,31 @@ class Warehouse(models.Model):
                 continue
             transit_location.active = True
             output_location = supplier_wh.lot_stock_id if supplier_wh.delivery_steps == 'ship_only' else supplier_wh.wh_output_stock_loc_id
-            # Create extra MTO rule (only for 'ship only' because in the other cases MTO rules already exists)
-            if supplier_wh.delivery_steps == 'ship_only':
-                routing = [self.Routing(output_location, transit_location, supplier_wh.out_type_id, 'pull')]
-                mto_vals = supplier_wh._get_global_route_rules_values().get('wh_delivery_mto_pull_id')
-                values = mto_vals['create_values']
-                values['route_ids'] = mto_vals.get('update_values', {}).get('route_ids', [])
-                mto_rule_val = supplier_wh._get_rule_values(routing, values, name_suffix='MTO')
-                self.env['stock.warehouse']._find_existing_rule_or_create([mto_rule_val[0]])
 
-            inter_wh_route = Route.create(self._get_inter_warehouse_route_values(supplier_wh))
+            inter_wh_route, inter_wh_route_mto = Route.create(self._get_inter_warehouse_route_values(supplier_wh))
 
             pull_rules_list = supplier_wh._get_supply_pull_rules_values(
                 [self.Routing(output_location, transit_location, supplier_wh.out_type_id, 'pull')],
                 values={'route_ids': [(4, inter_wh_route.id)]})
             pull_rules_list += self._get_supply_pull_rules_values(
                 [self.Routing(transit_location, input_location, self.in_type_id, 'pull')],
-                values={'route_ids': [(4, inter_wh_route.id)], 'propagate_warehouse_id': supplier_wh.id})
+                values={'route_ids': [(4, inter_wh_route.id), (4, inter_wh_route_mto.id)], 'propagate_warehouse_id': supplier_wh.id})
             self.env['stock.warehouse']._find_existing_rule_or_create(pull_rules_list)
+
+            routing = [self.Routing(output_location, transit_location, supplier_wh.out_type_id, 'pull')]
+            mto_vals = {
+                'active': True,
+                'procure_method': 'mts_else_mto',
+                'company_id': self.company_id.id,
+                'action': 'pull',
+                'auto': 'manual',
+                'delay_alert': True,
+                'route_ids': [
+                    (4, inter_wh_route_mto.id)
+                ],
+            }
+            mto_rule_val = supplier_wh._get_rule_values(routing, mto_vals, name_suffix='MTO')
+            self.env['stock.warehouse']._find_existing_rule_or_create([mto_rule_val[0]])
 
     # Routing tools
     # ------------------------------------------------------------
@@ -680,7 +673,7 @@ class Warehouse(models.Model):
         }
 
     def _get_inter_warehouse_route_values(self, supplier_warehouse):
-        return {
+        return [{
             'name': _('%s: Supply Product from %s') % (self.name, supplier_warehouse.name),
             'warehouse_selectable': True,
             'product_selectable': True,
@@ -688,7 +681,15 @@ class Warehouse(models.Model):
             'supplied_wh_id': self.id,
             'supplier_wh_id': supplier_warehouse.id,
             'company_id': self.company_id.id,
-        }
+        }, {
+            'name': _('%s: Supply Product from %s + MTO') % (self.name, supplier_warehouse.name),
+            'product_selectable': True,
+            'product_categ_selectable': True,
+            'supplied_wh_id': self.id,
+            'supplier_wh_id': supplier_warehouse.id,
+            'company_id': self.company_id.id,
+            'replenish_on_order': True,
+        }]
 
     # Pull / Push tools
     # ------------------------------------------------------------

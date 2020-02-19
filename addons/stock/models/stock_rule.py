@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import _, api, fields, models, registry
 from odoo.exceptions import UserError
 from odoo.osv import expression
-from odoo.tools import float_compare, html_escape
+from odoo.tools import float_compare, float_is_zero, html_escape
 from odoo.tools.misc import split_every
 
 _logger = logging.getLogger(__name__)

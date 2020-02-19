@@ -62,7 +62,7 @@ class StockWarehouseOrderpoint(models.Model):
         check_company=True, ondelete="cascade", required=True)
     location_id = fields.Many2one(
         'stock.location', 'Location',
-        ondelete="cascade", required=True, check_company=True)
+        ondelete="cascade", check_company=True)
     product_id = fields.Many2one(
         'product.product', 'Product',
         domain="[('type', '=', 'product'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]", ondelete='cascade', required=True, check_company=True)
@@ -176,6 +176,7 @@ class StockWarehouseOrderpoint(models.Model):
             self.product_min_qty = 0.0
             self.product_max_qty = 0.0
             self.qty_to_order = 0.0
+            self.location_id = False
         elif self.trigger_technical_name == 'on_order' and not self.route_id.replenish_on_order:
             self.trigger = self.env.ref('stock.orderpoint_trigger_auto')
 

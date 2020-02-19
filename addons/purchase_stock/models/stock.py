@@ -139,14 +139,6 @@ class StockWarehouse(models.Model):
                 }
             },
         })
-        delivery_rule_values = rules['wh_delivery_mto_pull_id'].get('update_values').get('route_ids', False)
-        if delivery_rule_values:
-            rules['wh_delivery_mto_pull_id']['update_values']['route_ids'].append(
-                (4, self.sudo()._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id))
-        else:
-            rules['wh_delivery_mto_pull_id']['update_values']['route_ids'] = [
-                (4, self.sudo()._find_global_route('purchase_stock.route_mto_buy', _('Buy + MTO')).id)
-            ]
         return rules
 
     def _get_all_routes(self):
