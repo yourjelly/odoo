@@ -54,6 +54,7 @@ class WebClient extends Component {
 
     async willStart() {
         this.menus = await this._loadMenus();
+        this.actionManager.menus = this.menus;
 
         const state = this._getUrlState();
         this._determineCompanyIds(state);

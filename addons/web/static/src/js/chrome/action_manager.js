@@ -246,6 +246,7 @@ class ActionManager extends core.EventBus {
         this.currentDialogController = null;
 
         this.currentRequestID = 0;
+        this.menus = null;
     }
     //--------------------------------------------------------------------------
     // Public
@@ -498,6 +499,10 @@ class ActionManager extends core.EventBus {
             if (result) {
                 break;
             }
+        }
+        if (!result && 'menu_id' in state) {
+            const action = this.menus[state.menu_id].actionID;
+            return this.doAction(action, state);
         }
         return result;
     }
