@@ -49,26 +49,51 @@ class AccountMove(models.Model):
         return self.journal_id.sequence_override_regex or super()._sequence_fixed_regex
 
     @api.model
+    def _search_default_journal(self, journal_types):
+        company_id = self._context.get('force_company', self._context.get('default_company_id', self.env.company.id))
+        domain = [('company_id', '=', company_id), ('type', 'in', journal_types)]
+
+        journal = None
+        if self._context.get('default_currency_id'):
+            currency_domain = domain + [('currency_id', '=', self._context['default_currency_id'])]
+            journal = self.env['account.journal'].search(currency_domain, limit=1)
+
+        if not journal:
+            journal = self.env['account.journal'].search(domain, limit=1)
+
+        if not journal:
+            error_msg = _('Please define an accounting miscellaneous journal in your company')
+            if 'sale' in journal_types:
+                error_msg = _('Please define an accounting sale journal in your company')
+            elif 'purchase' in journal_types:
+                error_msg = _('Please define an accounting purchase journal in your company')
+            elif 'bank' in journal_types or 'cash' in journal_types:
+                error_msg = _('Please define an accounting bank or cash journal in your company')
+            raise UserError(error_msg)
+        return journal
+
+    @api.model
     def _get_default_journal(self):
         ''' Get the default journal.
         It could either be passed through the context using the 'default_journal_id' key containing its id,
         either be determined by the default type.
         '''
         move_type = self._context.get('default_move_type', 'entry')
-        journal_type = 'general'
         if move_type in self.get_sale_types(include_receipts=True):
-            journal_type = 'sale'
+            journal_types = ['sale']
         elif move_type in self.get_purchase_types(include_receipts=True):
-            journal_type = 'purchase'
+            journal_types = ['purchase']
+        else:
+            journal_types = self._context.get('default_move_journal_types', ['general'])
 
         if self._context.get('default_journal_id'):
             journal = self.env['account.journal'].browse(self._context['default_journal_id'])
 
-            if move_type != 'entry' and journal.type != journal_type:
+            if move_type != 'entry' and journal.type not in journal_types:
                 raise UserError(_("Cannot create an invoice of type %s with a journal having %s as type.") % (move_type, journal.type))
         else:
             company_id = self._context.get('force_company', self._context.get('default_company_id', self.env.company.id))
-            domain = [('company_id', '=', company_id), ('type', '=', journal_type)]
+            domain = [('company_id', '=', company_id), ('type', 'in', journal_types)]
 
             journal = None
             if self._context.get('default_currency_id'):
@@ -80,10 +105,12 @@ class AccountMove(models.Model):
 
             if not journal:
                 error_msg = _('Please define an accounting miscellaneous journal in your company')
-                if journal_type == 'sale':
+                if 'sale' in journal_types:
                     error_msg = _('Please define an accounting sale journal in your company')
-                elif journal_type == 'purchase':
+                elif 'purchase' in journal_types:
                     error_msg = _('Please define an accounting purchase journal in your company')
+                elif 'bank' in journal_types or 'cash' in journal_types:
+                    error_msg = _('Please define an accounting bank or cash journal in your company')
                 raise UserError(error_msg)
         return journal
 
@@ -152,6 +179,17 @@ class AccountMove(models.Model):
     commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity', store=True, readonly=True,
         compute='_compute_commercial_partner_id')
     country_code = fields.Char(related='company_id.country_id.code', readonly=True)
+    user_id = fields.Many2one(string='User', related='invoice_user_id',
+        help='Technical field used to fit the generic behavior in mail templates.')
+    is_move_sent = fields.Boolean(readonly=True, default=False, copy=False,
+        help="It indicates that the invoice/payment has been sent.")
+    partner_bank_id = fields.Many2one('res.partner.bank', string='Bank Account',
+        help='Bank Account Number to which the invoice will be paid. A Company bank account if this is a Customer Invoice or Vendor Credit Note, otherwise a Partner bank account number.',
+        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    payment_reference = fields.Char(string='Payment Reference', index=True, copy=False,
+        help="The payment reference to set on journal items.")
+    payment_id = fields.Many2one('account.payment', string="Payment", copy=False)
+    statement_line_id = fields.Many2one('account.bank.statement.line', string="Statement Line", copy=False)
 
     # === Amount fields ===
     amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, tracking=True,
@@ -181,7 +219,7 @@ class AccountMove(models.Model):
         ('partial', 'Partially Paid'),
         ('reversed', 'Reversed'),
         ('invoicing_legacy', 'Invoicing App Legacy')],
-        string='Payment', store=True, readonly=True, copy=False, tracking=True,
+        string="Payment State", store=True, readonly=True, copy=False, tracking=True,
         compute='_compute_amount')
 
     # ==== Cash basis feature fields ====
@@ -211,17 +249,11 @@ class AccountMove(models.Model):
     invoice_user_id = fields.Many2one('res.users', copy=False, tracking=True,
         string='Salesperson',
         default=lambda self: self.env.user)
-    user_id = fields.Many2one(string='User', related='invoice_user_id',
-        help='Technical field used to fit the generic behavior in mail templates.')
     invoice_date = fields.Date(string='Invoice/Bill Date', readonly=True, index=True, copy=False,
         states={'draft': [('readonly', False)]},
         default=_get_default_invoice_date)
     invoice_date_due = fields.Date(string='Due Date', readonly=True, index=True, copy=False,
         states={'draft': [('readonly', False)]})
-    invoice_payment_ref = fields.Char(string='Payment Reference', index=True, copy=False,
-        help="The payment reference to set on journal items.")
-    invoice_sent = fields.Boolean(readonly=True, default=False, copy=False,
-        help="It indicates that the invoice has been sent.")
     invoice_origin = fields.Char(string='Origin', readonly=True, tracking=True,
         help="The document(s) that generated the invoice.")
     invoice_payment_term_id = fields.Many2one('account.payment.term', string='Payment Terms',
@@ -232,9 +264,6 @@ class AccountMove(models.Model):
         copy=False, readonly=True,
         domain=[('exclude_from_invoice_tab', '=', False)],
         states={'draft': [('readonly', False)]})
-    partner_bank_id = fields.Many2one('res.partner.bank', string='Bank Account',
-        help='Bank Account Number to which the invoice will be paid. A Company bank account if this is a Customer Invoice or Vendor Credit Note, otherwise a Partner bank account number.',
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     invoice_incoterm_id = fields.Many2one('account.incoterms', string='Incoterm',
         default=_get_default_invoice_incoterm,
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
@@ -272,11 +301,37 @@ class AccountMove(models.Model):
         help="Technical field used to display a message when the invoice's accounting date is prior of the tax lock date.")
     # Technical field to hide Reconciled Entries stat button
     has_reconciled_entries = fields.Boolean(compute="_compute_has_reconciled_entries")
+
     # ==== Hash Fields ====
     restrict_mode_hash_table = fields.Boolean(related='journal_id.restrict_mode_hash_table')
     secure_sequence_number = fields.Integer(string="Inalteralbility No Gap Sequence #", readonly=True, copy=False)
     inalterable_hash = fields.Char(string="Inalterability Hash", readonly=True, copy=False)
     string_to_hash = fields.Char(compute='_compute_string_to_hash', readonly=True)
+
+    @api.model
+    def _field_will_change(self, record, vals, field_name):
+        if field_name not in vals:
+            return False
+        field = record._fields[field_name]
+        if field.type == 'many2one':
+            return record[field_name].id != vals[field_name]
+        if field.type == 'many2many':
+            current_ids = set(record[field_name].ids)
+            after_write_ids = set(r['id'] for r in record.resolve_2many_commands(field_name, vals[field_name], fields=['id']))
+            return current_ids != after_write_ids
+        if field.type == 'one2many':
+            return True
+        if field.type == 'monetary' and record[field.currency_field]:
+            return not record[field.currency_field].is_zero(record[field_name] - vals[field_name])
+        return record[field_name] != vals[field_name]
+
+    @api.model
+    def _cleanup_write_orm_values(self, record, vals):
+        cleaned_vals = dict(vals)
+        for field_name, value in vals.items():
+            if not self._field_will_change(record, vals, field_name):
+                del cleaned_vals[field_name]
+        return cleaned_vals
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -356,10 +411,10 @@ class AccountMove(models.Model):
 
         self._recompute_dynamic_lines(recompute_tax_base_amount=True)
 
-    @api.onchange('invoice_payment_ref')
-    def _onchange_invoice_payment_ref(self):
+    @api.onchange('payment_reference')
+    def _onchange_payment_reference(self):
         for line in self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable')):
-            line.name = self.invoice_payment_ref
+            line.name = self.payment_reference
 
     @api.onchange('invoice_vendor_bill_id')
     def _onchange_invoice_vendor_bill(self):
@@ -834,7 +889,7 @@ class AccountMove(models.Model):
                     # Create new line.
                     create_method = in_draft_mode and self.env['account.move.line'].new or self.env['account.move.line'].create
                     candidate = create_method({
-                        'name': self.invoice_payment_ref or '',
+                        'name': self.payment_reference or '',
                         'debit': balance < 0.0 and -balance or 0.0,
                         'credit': balance > 0.0 and balance or 0.0,
                         'quantity': 1.0,
@@ -870,7 +925,7 @@ class AccountMove(models.Model):
         self.line_ids -= existing_terms_lines - new_terms_lines
 
         if new_terms_lines:
-            self.invoice_payment_ref = new_terms_lines[-1].name or ''
+            self.payment_reference = new_terms_lines[-1].name or ''
             self.invoice_date_due = new_terms_lines[-1].date_maturity
 
     def _recompute_dynamic_lines(self, recompute_all_taxes=False, recompute_tax_base_amount=False):
@@ -1038,6 +1093,10 @@ class AccountMove(models.Model):
         return 'paid'
 
     @api.depends(
+        'line_ids.matched_debit_ids.debit_move_id.move_id.line_ids.amount_residual',
+        'line_ids.matched_debit_ids.debit_move_id.move_id.line_ids.amount_residual_currency',
+        'line_ids.matched_credit_ids.credit_move_id.move_id.line_ids.amount_residual',
+        'line_ids.matched_credit_ids.credit_move_id.move_id.line_ids.amount_residual_currency',
         'line_ids.debit',
         'line_ids.credit',
         'line_ids.currency_id',
@@ -1047,32 +1106,6 @@ class AccountMove(models.Model):
         'line_ids.payment_id.state',
         'line_ids.full_reconcile_id')
     def _compute_amount(self):
-        invoice_ids = [move.id for move in self if move.id and move.is_invoice(include_receipts=True)]
-        self.env['account.payment'].flush(['state'])
-        if invoice_ids:
-            self._cr.execute(
-                '''
-                    SELECT move.id
-                    FROM account_move move
-                    JOIN account_move_line line ON line.move_id = move.id
-                    JOIN account_partial_reconcile part ON part.debit_move_id = line.id OR part.credit_move_id = line.id
-                    JOIN account_move_line rec_line ON
-                        (rec_line.id = part.credit_move_id AND line.id = part.debit_move_id)
-                        OR
-                        (rec_line.id = part.debit_move_id AND line.id = part.credit_move_id)
-                    JOIN account_move rec_move ON rec_move.id = rec_line.move_id
-                    JOIN account_move_line counterpart_rec_line ON counterpart_rec_line.move_id = rec_move.id
-                    JOIN account_account account ON account.id = counterpart_rec_line.account_id
-                    WHERE counterpart_rec_line.payment_id IS NOT NULL
-                    AND NOT counterpart_rec_line.reconciled
-                    AND account.internal_type NOT IN ('liquidity', 'receivable', 'payable')
-                    AND move.id IN %s
-                ''', [tuple(invoice_ids)]
-            )
-            in_payment_set = set(res[0] for res in self._cr.fetchall())
-        else:
-            in_payment_set = {}
-
         for move in self:
 
             if move.payment_state == 'invoicing_legacy':
@@ -1145,10 +1178,10 @@ class AccountMove(models.Model):
             if move.is_invoice(include_receipts=True) and move.state == 'posted':
 
                 if currency.is_zero(move.amount_residual):
-                    if move.id in in_payment_set:
-                        new_pmt_state = move._get_invoice_paid_state()
-                    else:
+                    if all(payment.is_matched for payment in move._get_reconciled_payments()):
                         new_pmt_state = 'paid'
+                    else:
+                        new_pmt_state = move._get_invoice_paid_state()
                 elif currency.compare_amounts(total_to_pay, total_residual) != 0:
                     new_pmt_state = 'partial'
 
@@ -1303,7 +1336,7 @@ class AccountMove(models.Model):
                 'currency': self.currency_id.symbol,
                 'digits': [69, self.currency_id.decimal_places],
                 'position': self.currency_id.position,
-                'date': counterpart_line.payment_id.payment_date or counterpart_line.date,
+                'date': counterpart_line.payment_id.date or counterpart_line.date,
                 'payment_id': counterpart_line.id,
                 'account_payment_id': counterpart_line.payment_id.id,
                 'payment_method_name': counterpart_line.payment_id.payment_method_id.name if counterpart_line.journal_id.type == 'bank' else None,
@@ -1391,13 +1424,30 @@ class AccountMove(models.Model):
                 move.tax_lock_date_message = False
 
     # -------------------------------------------------------------------------
-    # CONSTRAINS METHODS
+    # BUSINESS MODELS SYNCHRONIZATION
     # -------------------------------------------------------------------------
 
-    @api.constrains('line_ids', 'journal_id')
-    def _validate_move_modification(self):
-        if 'posted' in self.mapped('line_ids.payment_id.state'):
-            raise ValidationError(_("You cannot modify a journal entry linked to a posted payment."))
+    def _synchronize_business_models(self, changed_fields):
+        ''' Ensure the consistency between:
+        account.payment & account.move
+        account.bank.statement.line & account.move
+
+        The idea is to call the method performing the synchronization of the business
+        models regarding their related journal entries. To avoid cycling, the
+        'skip_account_move_synchronization' key is used through the context.
+
+        :param changed_fields: A set containing all modified fields on account.move.
+        '''
+        if self._context.get('skip_account_move_synchronization'):
+            return
+
+        self_sudo = self.sudo()
+        self_sudo.payment_id._synchronize_from_moves(changed_fields)
+        self_sudo.statement_line_id._synchronize_from_moves(changed_fields)
+
+    # -------------------------------------------------------------------------
+    # CONSTRAINS METHODS
+    # -------------------------------------------------------------------------
 
     @api.constrains('name', 'journal_id', 'state')
     def _check_unique_sequence_number(self):
@@ -1498,15 +1548,6 @@ class AccountMove(models.Model):
                     message = _("You cannot add/modify entries prior to and inclusive of the lock date %s. Check the company settings or ask someone with the 'Adviser' role") % format_date(self.env, lock_date)
                 raise UserError(message)
         return True
-
-    def _check_statement_lines_consistency(self):
-        ''' Constraint triggered manually when writing on the journal entries to prevent
-        unconsistent modifications regarding the linked statement lines.
-        '''
-        # Make the search in sudo mode since you could not have the access rights on the statement lines.
-        statement_lines = self.env['account.bank.statement.line'].sudo().search([('move_id', 'in', self.ids)])
-        if not statement_lines._is_account_move_valid():
-            raise UserError(_("You can't perform such modifications on journal entry linked to a statement line."))
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -1668,7 +1709,7 @@ class AccountMove(models.Model):
             res = True
         else:
             vals.pop('invoice_line_ids', None)
-            res = super(AccountMove, self.with_context(check_move_validity=False)).write(vals)
+            res = super(AccountMove, self.with_context(check_move_validity=False, skip_account_move_synchronization=True)).write(vals)
 
         # You can't change the date of a not-locked move to a locked period.
         # You can't post a new journal entry inside a locked period.
@@ -1687,9 +1728,7 @@ class AccountMove(models.Model):
         if 'line_ids' in vals and self._context.get('check_move_validity', True):
             self._check_balanced()
 
-        # Ensure the move is still valid regarding the linked statement lines.
-        if self._context.get('check_move_validity', True):
-            self._check_statement_lines_consistency()
+        self._synchronize_business_models(set(vals.keys()))
 
         return res
 
@@ -1918,10 +1957,54 @@ class AccountMove(models.Model):
 
     def _get_reconciled_payments(self):
         """Helper used to retrieve the reconciled payments on this journal entry"""
-        pay_term_line_ids = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
-        reconciled_amls = pay_term_line_ids.mapped('matched_debit_ids.debit_move_id') + \
-                          pay_term_line_ids.mapped('matched_credit_ids.credit_move_id')
-        return reconciled_amls.mapped('payment_id')
+        reconciled_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
+        reconciled_amls = reconciled_lines.mapped('matched_debit_ids.debit_move_id') + \
+                          reconciled_lines.mapped('matched_credit_ids.credit_move_id')
+        return reconciled_amls.move_id.payment_id
+
+    def _get_reconciled_statement_lines(self):
+        """Helper used to retrieve the reconciled payments on this journal entry"""
+        reconciled_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
+        reconciled_amls = reconciled_lines.mapped('matched_debit_ids.debit_move_id') + \
+                          reconciled_lines.mapped('matched_credit_ids.credit_move_id')
+        return reconciled_amls.move_id.statement_line_id
+
+    def _get_reconciled_invoices(self):
+        """Helper used to retrieve the reconciled payments on this journal entry"""
+        reconciled_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
+        reconciled_amls = reconciled_lines.mapped('matched_debit_ids.debit_move_id') + \
+                          reconciled_lines.mapped('matched_credit_ids.credit_move_id')
+        return reconciled_amls.move_id.filtered(lambda move: move.is_invoice(include_receipts=True))
+
+    def _get_reconciled_invoices_partials(self):
+        ''' Helper to retrieve the details about reconciled invoices.
+        :return A list of tuple (amount, rate, invoice_line).
+        '''
+        self.ensure_one()
+
+        def compute_tuple(partial, payment_line, invoice_line):
+            if payment_line.currency_id == invoice_line.currency_id:
+                # Same currency.
+                exchange_rate = None
+                amount_paid = partial.amount_currency
+            elif invoice_line.currency_id:
+                # Different currency on the payment.
+                exchange_rate = payment_line.amount_currency / payment_line.balance
+                amount_paid = partial.company_currency_id._convert(partial.amount, invoice_line.currency_id, invoice_line.company_id, invoice_line.date)
+            else:
+                # No foreign currency on the payment, don't care about the invoice's currency.
+                exchange_rate = None
+                amount_paid = partial.amount
+            return (amount_paid, exchange_rate, invoice_line)
+
+        receivable_lines = self.line_ids.filtered(lambda line: line.account_internal_type == 'receivable')
+        invoice_partials = []
+
+        for partial in receivable_lines.matched_debit_ids:
+            invoice_partials.append(compute_tuple(partial, partial.credit_move_id, partial.debit_move_id))
+        for partial in receivable_lines.matched_credit_ids:
+            invoice_partials.append(compute_tuple(partial, partial.debit_move_id, partial.credit_move_id))
+        return invoice_partials
 
     def _reverse_move_vals(self, default_values, cancel=True):
         ''' Reverse values passed as parameter being the copied values of the original journal entry.
@@ -2175,11 +2258,11 @@ class AccountMove(models.Model):
             # Compute 'ref' for 'out_invoice'.
             if move._auto_compute_invoice_reference():
                 to_write = {
-                    'invoice_payment_ref': move._get_invoice_computed_reference(),
+                    'payment_reference': move._get_invoice_computed_reference(),
                     'line_ids': []
                 }
                 for line in move.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable')):
-                    to_write['line_ids'].append((1, line.id, {'name': to_write['invoice_payment_ref']}))
+                    to_write['line_ids'].append((1, line.id, {'name': to_write['payment_reference']}))
                 move.write(to_write)
 
         for move in self:
@@ -2210,7 +2293,7 @@ class AccountMove(models.Model):
             :rtype bool
         '''
         self.ensure_one()
-        return self.move_type == 'out_invoice' and not self.invoice_payment_ref
+        return self.move_type == 'out_invoice' and not self.payment_reference
 
     def action_reverse(self):
         action = self.env.ref('account.action_view_account_move_reversal').read()[0]
@@ -2339,7 +2422,7 @@ class AccountMove(models.Model):
         if any(not move.is_invoice(include_receipts=True) for move in self):
             raise UserError(_("Only invoices could be printed."))
 
-        self.filtered(lambda inv: not inv.invoice_sent).write({'invoice_sent': True})
+        self.filtered(lambda inv: not inv.is_move_sent).write({'is_move_sent': True})
         if self.user_has_groups('account.group_account_invoice'):
             return self.env.ref('account.account_invoices').report_action(self)
         else:
@@ -2349,10 +2432,21 @@ class AccountMove(models.Model):
         ''' Hook to be overrided called when the invoice moves to the paid state. '''
         pass
 
-    def action_invoice_register_payment(self):
-        return self.env['account.payment']\
-            .with_context(active_ids=self.ids, active_model='account.move', active_id=self.id)\
-            .action_register_payment()
+    def action_register_payment(self):
+        ''' Open the account.payment.register wizard to pay the selected journal entries.
+        :return: An action opening the account.payment.register wizard.
+        '''
+        return {
+            'name': _('Register Payment'),
+            'res_model': 'account.payment.register',
+            'view_mode': 'form',
+            'context': {
+                'active_model': 'account.move',
+                'active_ids': self.ids,
+            },
+            'target': 'new',
+            'type': 'ir.actions.act_window',
+        }
 
     def action_switch_invoice_into_refund_credit_note(self):
         if any(move.move_type not in ('in_invoice', 'out_invoice') for move in self):
@@ -2512,11 +2606,14 @@ class AccountMoveLine(models.Model):
 
     # ==== Origin fields ====
     reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False, readonly=True)
-    payment_id = fields.Many2one('account.payment', string="Originator Payment", copy=False,
-        help="Payment that created this entry")
-    statement_line_id = fields.Many2one('account.bank.statement.line',
-        string='Bank statement line reconciled with this entry',
-        index=True, copy=False, readonly=True)
+    payment_id = fields.Many2one('account.payment', index=True, store=True,
+        string="Originator Payment",
+        related='move_id.payment_id',
+        help="The payment that created this entry")
+    statement_line_id = fields.Many2one('account.bank.statement.line', index=True, store=True,
+        string="Originator Statement Line",
+        related='move_id.statement_line_id',
+        help="The statement line that created this entry")
     statement_id = fields.Many2one(related='statement_line_id.statement_id', store=True, index=True, copy=False,
         help="The bank statement used for bank reconciliation")
 
@@ -2748,12 +2845,12 @@ class AccountMoveLine(models.Model):
         res = {}
 
         # Compute 'price_subtotal'.
-        price_unit_wo_discount = price_unit * (1 - (discount / 100.0))
-        subtotal = quantity * price_unit_wo_discount
+        line_discount_price_unit = price_unit * (1 - (discount / 100.0))
+        subtotal = quantity * line_discount_price_unit
 
         # Compute 'price_total'.
         if taxes:
-            taxes_res = taxes._origin.compute_all(price_unit_wo_discount,
+            taxes_res = taxes._origin.compute_all(line_discount_price_unit,
                 quantity=quantity, currency=currency, product=product, partner=partner, is_refund=move_type in ('out_refund', 'in_refund'))
             res['price_subtotal'] = taxes_res['total_excluded']
             res['price_total'] = taxes_res['total_included']
@@ -3344,28 +3441,14 @@ class AccountMoveLine(models.Model):
         moves = lines.mapped('move_id')
         if self._context.get('check_move_validity', True):
             moves._check_balanced()
-            moves._check_statement_lines_consistency()
         moves._check_fiscalyear_lock_date()
         lines._check_tax_lock_date()
+        moves._synchronize_business_models({'line_ids'})
 
         return lines
 
     def write(self, vals):
         # OVERRIDE
-        def field_will_change(line, field_name):
-            if field_name not in vals:
-                return False
-            field = line._fields[field_name]
-            if field.type == 'many2one':
-                return line[field_name].id != vals[field_name]
-            if field.type in ('one2many', 'many2many'):
-                current_ids = set(line[field_name].ids)
-                after_write_ids = set(r['id'] for r in line.resolve_2many_commands(field_name, vals[field_name], fields=['id']))
-                return current_ids != after_write_ids
-            if field.type == 'monetary' and line[field.currency_field]:
-                return not line[field.currency_field].is_zero(line[field_name] - vals[field_name])
-            return line[field_name] != vals[field_name]
-
         ACCOUNTING_FIELDS = ('debit', 'credit', 'amount_currency')
         BUSINESS_FIELDS = ('price_unit', 'quantity', 'discount', 'tax_ids')
         PROTECTED_FIELDS_TAX_LOCK_DATE = ['debit', 'credit', 'tax_line_id', 'tax_ids', 'tax_tag_ids']
@@ -3386,15 +3469,15 @@ class AccountMoveLine(models.Model):
                     raise UserError(_('You cannot modify the taxes related to a posted journal item, you should reset the journal entry to draft to do so.'))
 
             # Check the lock date.
-            if any(field_will_change(line, field_name) for field_name in PROTECTED_FIELDS_LOCK_DATE):
+            if any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_LOCK_DATE):
                 line.move_id._check_fiscalyear_lock_date()
 
             # Check the tax lock date.
-            if any(field_will_change(line, field_name) for field_name in PROTECTED_FIELDS_TAX_LOCK_DATE):
+            if any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_TAX_LOCK_DATE):
                 line._check_tax_lock_date()
 
             # Check the reconciliation.
-            if any(field_will_change(line, field_name) for field_name in PROTECTED_FIELDS_RECONCILIATION):
+            if any(self.env['account.move']._field_will_change(line, vals, field_name) for field_name in PROTECTED_FIELDS_RECONCILIATION):
                 line._check_reconciliation()
 
             # Check switching receivable / payable accounts.
@@ -3493,7 +3576,8 @@ class AccountMoveLine(models.Model):
         # Check total_debit == total_credit in the related moves.
         if self._context.get('check_move_validity', True):
             self.mapped('move_id')._check_balanced()
-            self.mapped('move_id')._check_statement_lines_consistency()
+
+        self.mapped('move_id')._synchronize_business_models({'line_ids'})
 
         return result
 
@@ -3712,26 +3796,6 @@ class AccountMoveLine(models.Model):
                     'exchange_move_id': exchange_move_id,
                 })
 
-        # This compute is used by the invoice to compute the 'payment_state' and must be triggered manually
-        # when reconciling a statement line with an existing payment.
-        # This is not done on account.bank.statement.line.reconcile method because the point of sale
-        # is using directly this method for performance reason.
-        involved_payments = amls.mapped('payment_id')
-        if involved_payments:
-            # Update invoices state in_payment -> paid.
-            involved_invoices_lines = involved_payments.mapped('move_line_ids.matched_debit_ids.debit_move_id') \
-                                      + involved_payments.mapped('move_line_ids.matched_credit_ids.credit_move_id')
-            involved_invoices = involved_invoices_lines.mapped('move_id').filtered(lambda move: move.is_invoice(include_receipts=True))
-            involved_invoices._compute_amount()
-
-            # Update payments state posted -> reconciled.
-            to_mark_as_reconciled = self.env['account.payment']
-            for payment in involved_payments:
-                if all(line.reconciled for line in payment.move_line_ids
-                       if line.account_id.reconcile and line.account_id.user_type_id.type not in ('receivable', 'payable')):
-                    to_mark_as_reconciled += payment
-            to_mark_as_reconciled.write({'state': 'reconciled'})
-
     def _reconcile_lines(self, debit_moves, credit_moves, field):
         """ This function loops on the 2 recordsets given as parameter as long as it
             can find a debit and a credit to reconcile together. It returns the recordset of the
@@ -3860,11 +3924,6 @@ class AccountMoveLine(models.Model):
         if not self:
             return
 
-        # List unpaid invoices
-        not_paid_invoices = self.mapped('move_id').filtered(
-            lambda m: m.is_invoice(include_receipts=True) and m.payment_state not in ('paid', 'in_payment')
-        )
-
         self._check_reconcile_validity()
         #reconcile everything that can be
         remaining_moves = self.auto_reconcile_lines()
@@ -3884,11 +3943,6 @@ class AccountMoveLine(models.Model):
             remaining_moves = (remaining_moves + writeoff_to_reconcile).auto_reconcile_lines()
         # Check if reconciliation is total or needs an exchange rate entry to be created
         (self + writeoff_to_reconcile).check_full_reconcile()
-
-        # Trigger action for paid invoices
-        not_paid_invoices.filtered(
-            lambda m: m.payment_state in ('paid', 'in_payment')
-        ).action_invoice_paid()
 
         return True
 
@@ -3985,29 +4039,11 @@ class AccountMoveLine(models.Model):
 
     def remove_move_reconcile(self):
         """ Undo a reconciliation """
-        # Update the involved business models (invoices/payments) manually that have a state dependent of the
-        # reconciliation.
-        # Even the payment_state of invoices is a computed field, we need to handle that
-        # manually because this is a limitation of the ORM: The computed fields are not triggered
-        # when deleting a record (account.partial.reconcile here).
-        if any(line.statement_line_id for line in self):
+        all_lines = self + self.matched_debit_ids.debit_move_id + self.matched_credit_ids.credit_move_id
 
-            # Update payments state reconciled -> posted.
-            involved_payments = self.mapped('matched_debit_ids.debit_move_id.payment_id') \
-                                + self.mapped('matched_credit_ids.credit_move_id.payment_id')
-            involved_payments.filtered(lambda pay: pay.state == 'reconciled').write({'state': 'posted'})
+        (self.matched_debit_ids + self.matched_credit_ids).unlink()
 
-            # Update invoices state in_payment -> paid.
-            involved_invoices_lines = involved_payments.mapped('move_line_ids.matched_debit_ids.debit_move_id') \
-                                      + involved_payments.mapped('move_line_ids.matched_credit_ids.credit_move_id')
-            involved_invoices = involved_invoices_lines.mapped('move_id').filtered(lambda move: move.is_invoice(include_receipts=True))
-        else:
-            involved_invoices = False
-
-        (self.mapped('matched_debit_ids') + self.mapped('matched_credit_ids')).unlink()
-
-        if involved_invoices:
-            involved_invoices._compute_amount()
+        all_lines.statement_line_id._reset_journal_entry()
 
     def _copy_data_extend_business_fields(self, values):
         ''' Hook allowing copying business fields under certain conditions.
@@ -4534,9 +4570,13 @@ class AccountPartialReconcile(models.Model):
                 move._reverse_moves([{'ref': _('Reversal of %s') % move.name}], cancel=True)
             else:
                 move._reverse_moves([{'date': fields.Date.today(), 'ref': _('Reversal of %s') % move.name}], cancel=True)
+
+        # Unlink partials then the full in this order to avoid a recursive call to the same partials.
         res = super(AccountPartialReconcile, self).unlink()
+
         if full_to_unlink:
             full_to_unlink.unlink()
+
         return res
 
 
@@ -4556,17 +4596,19 @@ class AccountFullReconcile(models.Model):
             cancel the currency difference entry on the partner account (otherwise it will still appear on the aged balance
             for example).
         """
-        for rec in self:
-            if rec.exists() and rec.exchange_move_id:
-                # reverse the exchange rate entry after de-referencing it to avoid looping
-                # (reversing will cause a nested attempt to drop the full reconciliation)
-                to_reverse = rec.exchange_move_id
-                rec.exchange_move_id = False
-                to_reverse._reverse_moves([{
-                    'date': fields.Date.today(),
-                    'ref': _('Reversal of: %s') % to_reverse.name,
-                }], cancel=True)
-        return super(AccountFullReconcile, self).unlink()
+        moves_to_reverse = self.exchange_move_id
+
+        res = super(AccountFullReconcile, self).unlink()
+
+        # Reverse all exchange moves at once.
+        today = fields.Date.today()
+        default_values_list = [{
+            'date': today,
+            'ref': _('Reversal of: %s') % move.name,
+        } for move in moves_to_reverse]
+        moves_to_reverse._reverse_moves(default_values_list, cancel=True)
+
+        return res
 
     @api.model
     def _prepare_exchange_diff_move(self, move_date, company):

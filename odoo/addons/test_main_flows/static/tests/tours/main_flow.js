@@ -1019,13 +1019,9 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     trigger: '.o_form_button_save',
     content: _t('Save.'),
     position: 'bottom',
-}, {
-    edition: "enterprise",
-    trigger: ".o_statusbar_buttons > button:enabled:contains('Post')",
-    content: _t('<p><b>Post</p>'),
-    position: "bottom",
 },
-...tour.stepUtils.statusbarButtonsSteps('Reconcile', _t('<p><b>Reconcile</p>'), ".breadcrumb-item.active:contains('the_flow.statement')").map(tour.stepUtils.editionEnterpriseModifier),
+...tour.stepUtils.statusbarButtonsSteps('Post', _t('<p><b>Post</p>'), ".o_form_readonly"),
+...tour.stepUtils.statusbarButtonsSteps('Reconcile', _t('<p><b>Reconcile</p>'), ".o_statusbar_status .btn.dropdown-toggle:contains(Processing)").map(tour.stepUtils.editionEnterpriseModifier),
 {
     edition: "enterprise",
     trigger: "button.o_reconcile, button.o_validate",

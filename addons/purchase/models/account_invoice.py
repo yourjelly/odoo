@@ -61,9 +61,9 @@ class AccountMove(models.Model):
         refs = [ref for ref in refs if ref]
         self.ref = ','.join(refs)
 
-        # Compute _invoice_payment_ref.
+        # Compute payment_reference.
         if len(refs) == 1:
-            self._invoice_payment_ref = refs[0]
+            self.payment_reference = refs[0]
 
         self.purchase_id = False
         self._onchange_currency()

@@ -169,8 +169,8 @@ class AccountBankStatement(models.Model):
 
     @api.depends('move_line_ids')
     def _get_move_line_count(self):
-        for payment in self:
-            payment.move_line_count = len(payment.move_line_ids)
+        for statement in self:
+            statement.move_line_count = len(statement.move_line_ids)
 
     @api.model
     def _default_journal(self):
@@ -325,17 +325,7 @@ class AccountBankStatement(models.Model):
                         'payment_ref': _("Cash difference observed during the counting (%s)") % name,
                         'date': stmt.date,
                     }
-
-                    # Override the suspense account with the profit/loss account.
-                    default_aml_values = self.env['account.bank.statement.line']._prepare_move_line_default_vals(st_line_vals)
-                    for vals in default_aml_values:
-                        if vals['account_id'] == stmt.journal_id.suspense_account_id.id:
-                            vals['account_id'] = account.id
-                            break
-
-                    st_line_vals['line_ids'] = [(0, 0, vals) for vals in default_aml_values]
-
-                    self.env['account.bank.statement.line'].create(st_line_vals)
+                    self.env['account.bank.statement.line'].with_context(counterpart_account_id=account.id).create(st_line_vals)
                 else:
                     balance_end_real = formatLang(self.env, stmt.balance_end_real, currency_obj=stmt.currency_id)
                     balance_end = formatLang(self.env, stmt.balance_end, currency_obj=stmt.currency_id)
@@ -407,7 +397,7 @@ class AccountBankStatement(models.Model):
                 statement._set_next_sequence()
 
         self.write({'state': 'posted'})
-        self.mapped('line_ids.move_id').post()
+        self.line_ids.move_id.post()
 
     def button_validate(self):
         if any(statement.state != 'posted' or not statement.all_lines_reconciled for statement in self):
@@ -446,7 +436,7 @@ class AccountBankStatement(models.Model):
             raise UserError(_("Only validated statements can be reset to new."))
 
         self.write({'state': 'open'})
-        self.mapped('line_ids.move_id').button_draft()
+        self.line_ids.move_id.button_draft()
 
     def button_journal_entries(self):
         return {
@@ -512,23 +502,14 @@ class AccountBankStatementLine(models.Model):
     account_number = fields.Char(string='Bank Account Number', help="Technical field used to store the bank account number before its creation, upon the line's processing")
     partner_name = fields.Char(help="This field is used to record the third party name when importing bank statement in electronic format, when the partner doesn't exist yet in the database (or cannot be found).")
     transaction_type = fields.Char(string='Transaction Type')
-    payment_ref = fields.Char(string='Label', store=True, required=True,
-        compute='_compute_from_move_lines',
-        inverse='_inverse_payment_ref')
-    amount = fields.Monetary(currency_field='currency_id', store=True,
-        compute='_compute_from_move_lines',
-        inverse='_inverse_amounts')
-    amount_currency = fields.Monetary(currency_field='foreign_currency_id', store=True,
-        compute='_compute_from_move_lines',
-        inverse='_inverse_amounts',
+    payment_ref = fields.Char(string='Label', required=True)
+    amount = fields.Monetary(currency_field='currency_id')
+    amount_currency = fields.Monetary(currency_field='foreign_currency_id',
         help="The amount expressed in an optional other currency if it is a multi-currency entry.")
-    foreign_currency_id = fields.Many2one('res.currency', string='Foreign Currency', store=True,
-        compute='_compute_from_move_lines',
-        inverse='_inverse_amounts',
+    foreign_currency_id = fields.Many2one('res.currency', string='Foreign Currency',
         help="The optional other currency if it is a multi-currency entry.")
-    partner_id = fields.Many2one('res.partner', string='Partner', ondelete='restrict', store=True,
-        compute='_compute_from_move_lines',
-        inverse='_inverse_partner_id',
+    currency_id = fields.Many2one('res.currency', string='Journal Currency')
+    partner_id = fields.Many2one('res.partner', string='Partner', ondelete='restrict',
         domain="['|', ('parent_id','=', False), ('is_company','=',True)]")
 
     # == Display purpose fields ==
@@ -541,12 +522,6 @@ class AccountBankStatementLine(models.Model):
     # HELPERS
     # -------------------------------------------------------------------------
 
-    @api.model
-    def _assert_suspense_account(self, journal):
-        if not journal.suspense_account_id:
-            raise UserError(_("You can't create a new statement line without a suspense account set on the %s journal.")
-                            % journal.display_name)
-
     def _seek_for_lines(self):
         ''' Helper used to dispatch the journal items between:
         - The lines using the liquidity account.
@@ -554,8 +529,6 @@ class AccountBankStatementLine(models.Model):
         - The lines being not in one of the two previous categories.
         :return: (liquidity_lines, suspense_lines, other_lines)
         '''
-        self._assert_suspense_account(self.journal_id)
-
         liquidity_lines = self.env['account.move.line']
         suspense_lines = self.env['account.move.line']
         other_lines = self.env['account.move.line']
@@ -570,61 +543,58 @@ class AccountBankStatementLine(models.Model):
         return liquidity_lines, suspense_lines, other_lines
 
     @api.model
-    def _prepare_liquidity_move_line_vals(self, vals):
+    def _prepare_liquidity_move_line_vals(self):
         ''' Prepare values to create a new account.move.line record corresponding to the
         liquidity line (having the bank/cash account).
-        :param vals:    The values used to create the account.bank.statement.line record.
         :return:        The values to create a new account.move.line record.
         '''
-        statement = self.env['account.bank.statement'].browse(vals['statement_id'])
+        self.ensure_one()
+
+        statement = self.statement_id
         journal = statement.journal_id
         company_currency = journal.company_id.currency_id
         journal_currency = journal.currency_id if journal.currency_id != company_currency else False
-        foreign_currency_id = vals.get('foreign_currency_id')
-        date = vals.get('date', statement.date)
 
-        if foreign_currency_id and journal_currency:
+        if self.foreign_currency_id and journal_currency:
             currency_id = journal_currency.id
-            if foreign_currency_id == company_currency.id:
-                amount_currency = vals.get('amount', 0.0)
-                balance = vals.get('amount_currency', 0.0)
+            if self.foreign_currency_id == company_currency:
+                amount_currency = self.amount
+                balance = self.amount_currency
             else:
-                amount_currency = vals.get('amount', 0.0)
-                balance = journal_currency._convert(amount_currency, journal.company_id.currency_id, journal.company_id, date)
-        elif foreign_currency_id and not journal_currency:
-            if foreign_currency_id == company_currency.id:
+                amount_currency = self.amount
+                balance = journal_currency._convert(amount_currency, journal.company_id.currency_id, journal.company_id, self.date)
+        elif self.foreign_currency_id and not journal_currency:
+            if self.foreign_currency_id == company_currency:
                 amount_currency = 0.0
-                balance = vals.get('amount', 0.0)
+                balance = self.amount
                 currency_id = False
             else:
-                amount_currency = vals.get('amount_currency', 0.0)
-                balance = vals.get('amount', 0.0)
-                currency_id = foreign_currency_id
-        elif not foreign_currency_id and journal_currency:
+                amount_currency = self.amount_currency
+                balance = self.amount
+                currency_id = self.foreign_currency_id.id
+        elif not self.foreign_currency_id and journal_currency:
             currency_id = journal_currency.id
-            amount_currency = vals.get('amount', 0.0)
-            balance = journal_currency._convert(amount_currency, journal.company_id.currency_id, journal.company_id, date)
+            amount_currency = self.amount
+            balance = journal_currency._convert(amount_currency, journal.company_id.currency_id, journal.company_id, self.date)
         else:
             currency_id = False
             amount_currency = 0.0
-            balance = vals.get('amount', 0.0)
+            balance = self.amount
 
         return {
-            'name': vals.get('payment_ref'),
-            'partner_id': vals.get('partner_id'),
+            'name': self.payment_ref,
+            'partner_id': self.partner_id.id,
             'currency_id': currency_id if amount_currency else False,
             'account_id': journal.default_debit_account_id.id if balance >= 0 else journal.default_credit_account_id.id,
             'debit': balance > 0 and balance or 0.0,
             'credit': balance < 0 and -balance or 0.0,
             'amount_currency': amount_currency if currency_id else False,
-            'statement_line_id': vals.get('id'),
         }
 
     @api.model
-    def _prepare_counterpart_move_line_vals(self, vals, counterpart_vals, record=None):
+    def _prepare_counterpart_move_line_vals(self, counterpart_vals, record=None):
         ''' Prepare values to create a new account.move.line record corresponding to the
         counterpart line (having the transfer liquidity account).
-        :param vals:                The values used to create the account.bank.statement.line record.
         :param counterpart_vals:    A python dictionary containing:
             'balance':              Optional amount to consider during the reconciliation. If a foreign currency is set on the
                                     counterpart line in the same foreign currency as the statement line, then this amount is
@@ -634,14 +604,13 @@ class AccountBankStatementLine(models.Model):
         :param record:              An optional account.move.line record representing the counterpart line to reconcile.
         :return:                    The values to create a new account.move.line record.
         '''
-        statement = self.env['account.bank.statement'].browse(vals['statement_id'])
-        journal = self.env['account.journal'].browse(vals['journal_id'])
+        self.ensure_one()
+
+        statement = self.statement_id
+        journal = statement.journal_id
         company_currency = journal.company_id.currency_id
         journal_currency = journal.currency_id if journal.currency_id != company_currency else False
-        foreign_currency_id = vals.get('foreign_currency_id')
-        statement_line_rate = vals.get('amount_currency', 0.0) / (vals.get('amount', 0.0) or 1.0)
-        date = vals.get('date', statement.date)
-        partner_id = vals.get('partner_id')
+        statement_line_rate = self.amount_currency / (self.amount or 1.0)
 
         if record and not record.account_id.reconcile:
             raise UserError(_("You can't involve a journal item that uses a not reconcilable account during the reconciliation."))
@@ -651,50 +620,50 @@ class AccountBankStatementLine(models.Model):
         elif record:
             currency_id = record.currency_id.id
         else:
-            currency_id = foreign_currency_id
+            currency_id = self.foreign_currency_id.id
 
         if currency_id:
-            if foreign_currency_id and journal_currency:
+            if self.foreign_currency_id and journal_currency:
 
                 # company_currency = currency_1
                 # journal_currency = currency_2
                 # foreign_currency = currency_3 (could be equals to currency_1)
                 # counterpart_currency = currency_4 (could be equals to currency_2 or currency_3)
 
-                if currency_id == foreign_currency_id:
+                if currency_id == self.foreign_currency_id.id:
                     amount_currency = counterpart_vals.pop('balance', -record.amount_residual_currency if record else 0.0)
-                    balance = journal_currency._convert(amount_currency / statement_line_rate, company_currency, journal.company_id, date)
-                elif currency_id == journal_currency.id and foreign_currency_id == company_currency.id:
+                    balance = journal_currency._convert(amount_currency / statement_line_rate, company_currency, journal.company_id, self.date)
+                elif currency_id == journal_currency.id and self.foreign_currency_id == company_currency:
                     amount_currency = counterpart_vals.pop('balance', -record.amount_residual_currency if record else 0.0)
                     balance = amount_currency * statement_line_rate
                     currency_id = False
                     amount_currency = 0.0
-                elif currency_id == journal_currency.id and foreign_currency_id != company_currency.id:
+                elif currency_id == journal_currency.id and self.foreign_currency_id != company_currency:
                     amount_currency = counterpart_vals.pop('balance', -record.amount_residual_currency if record else 0.0)
-                    balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, date)
+                    balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, self.date)
                     amount_currency *= statement_line_rate
-                    currency_id = foreign_currency_id
+                    currency_id = self.foreign_currency_id.id
                 else:
                     balance = counterpart_vals.pop('balance', -record.amount_residual if record else 0.0)
-                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, date)
+                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
                     amount_currency *= statement_line_rate
-                    currency_id = foreign_currency_id
+                    currency_id = self.foreign_currency_id.id
 
-            elif foreign_currency_id and not journal_currency:
+            elif self.foreign_currency_id and not journal_currency:
 
                 # company_currency = currency_1
                 # foreign_currency = currency_2
                 # counterpart_currency = currency_3 (could be equals to currency_2)
 
-                if currency_id == foreign_currency_id:
+                if currency_id == self.foreign_currency_id.id:
                     amount_currency = counterpart_vals.pop('balance', -record.amount_residual_currency if record else 0.0)
                     balance = amount_currency / statement_line_rate
                 else:
                     balance = counterpart_vals.pop('balance', -record.amount_residual if record else 0.0)
                     amount_currency = balance * statement_line_rate
-                    currency_id = foreign_currency_id
+                    currency_id = self.foreign_currency_id.id
 
-            elif not foreign_currency_id and journal_currency:
+            elif not self.foreign_currency_id and journal_currency:
 
                 # company_currency = currency_1
                 # journal_currency = currency_2
@@ -702,10 +671,10 @@ class AccountBankStatementLine(models.Model):
 
                 if currency_id == journal_currency.id:
                     amount_currency = counterpart_vals.pop('balance', -record.amount_residual_currency if record else 0.0)
-                    balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, date)
+                    balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, self.date)
                 else:
                     balance = counterpart_vals.pop('balance', -record.amount_residual if record else 0.0)
-                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, date)
+                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
                     currency_id = journal_currency.id
 
             else:
@@ -720,33 +689,33 @@ class AccountBankStatementLine(models.Model):
         else:
             balance = counterpart_vals.pop('balance', -record.amount_residual if record else 0.0)
 
-            if foreign_currency_id and journal_currency:
+            if self.foreign_currency_id and journal_currency:
 
                 # company_currency = currency_1
                 # journal_currency = currency_2
                 # foreign_currency = currency_3 (could be equals to currency_1)
 
-                if foreign_currency_id == company_currency.id:
+                if self.foreign_currency_id == company_currency:
                     amount_currency = 0.0
                 else:
-                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, date)
+                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
                     amount_currency *= statement_line_rate
-                    currency_id = foreign_currency_id
+                    currency_id = self.foreign_currency_id.id
 
-            elif foreign_currency_id and not journal_currency:
+            elif self.foreign_currency_id and not journal_currency:
 
                 # company_currency = currency_1
                 # foreign_currency = currency_2
 
                 amount_currency = balance * statement_line_rate
-                currency_id = foreign_currency_id
+                currency_id = self.foreign_currency_id.id
 
-            elif not foreign_currency_id and journal_currency:
+            elif not self.foreign_currency_id and journal_currency:
 
                 # company_currency = currency_1
                 # journal_currency = currency_2
 
-                amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, date)
+                amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
                 currency_id = journal_currency.id
 
             else:
@@ -758,29 +727,32 @@ class AccountBankStatementLine(models.Model):
         return {
             **counterpart_vals,
             'name': counterpart_vals.get('name', record.name if record else ''),
-            'partner_id': partner_id,
+            'partner_id': self.partner_id.id,
             'currency_id': currency_id if amount_currency else False,
             'account_id': counterpart_vals.get('account_id', record.account_id.id if record else False),
             'debit': balance if balance > 0 else 0.0,
             'credit': -balance if balance < 0 else 0.0,
             'amount_currency': amount_currency,
-            'statement_line_id': vals.get('id'),
         }
 
     @api.model
-    def _prepare_move_line_default_vals(self, vals):
+    def _prepare_move_line_default_vals(self, counterpart_account_id=None):
         ''' Prepare the dictionary to create the default account.move.lines for the current account.bank.statement.line
         record.
         :return: A list of python dictionary to be passed to the account.move.line's 'create' method.
         '''
-        journal = self.env['account.journal'].browse(vals['journal_id'])
-        self._assert_suspense_account(journal)
+        self.ensure_one()
 
-        liquidity_line_vals = self._prepare_liquidity_move_line_vals(vals)
+        if not self.journal_id.suspense_account_id:
+            raise UserError(_(
+                "You can't create a new statement line without a suspense account set on the %s journal."
+            ) % self.journal_id.display_name)
+
+        liquidity_line_vals = self._prepare_liquidity_move_line_vals()
 
         counterpart_vals = {
-            'name': vals.get('payment_ref'),
-            'account_id': journal.suspense_account_id.id,
+            'name': self.payment_ref,
+            'account_id': counterpart_account_id or self.journal_id.suspense_account_id.id,
         }
 
         if liquidity_line_vals['currency_id']:
@@ -797,33 +769,15 @@ class AccountBankStatementLine(models.Model):
         else:
             counterpart_vals['balance'] = liquidity_line_vals['credit'] - liquidity_line_vals['debit']
 
-        counterpart_line_vals = self._prepare_counterpart_move_line_vals(vals, counterpart_vals)
+        counterpart_line_vals = self._prepare_counterpart_move_line_vals(counterpart_vals)
         return [liquidity_line_vals, counterpart_line_vals]
-
-    def _convert_to_dict(self):
-        ''' As some method are working both in api.model / api.multi, this helper is used
-        to turn the current statement line into a python dictionary and then, to be able
-        to call such api.model methods easily.
-        :return: a python dictionary representing the current account.bank.statement.line record.
-        '''
-        self.ensure_one()
-        return {
-            'id': self.id,
-            'statement_id': self.statement_id.id,
-            'journal_id': self.journal_id.id,
-            'partner_id': self.partner_id.id,
-            'amount': self.amount,
-            'amount_currency': self.amount_currency,
-            'payment_ref': self.payment_ref,
-            'date': self.date,
-            'foreign_currency_id': self.foreign_currency_id.id,
-        }
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('move_id.line_ids')
+    @api.depends('currency_id', 'amount',
+                 'move_id.line_ids', 'move_id.line_ids.matched_debit_ids', 'move_id.line_ids.matched_credit_ids')
     def _compute_is_reconciled(self):
         ''' Compute the field indicating if the statement lines are already reconciled with something.
         This field is used for display purpose (e.g. display the 'cancel' button on the statement lines).
@@ -831,145 +785,14 @@ class AccountBankStatementLine(models.Model):
         for st_line in self:
             liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
 
-            if st_line.currency_id.is_zero(st_line.amount):
-                st_line.is_reconciled = True
-            elif not st_line.id or suspense_lines:
+            if not st_line.id or suspense_lines:
                 # New record: The journal items are not yet there.
                 st_line.is_reconciled = False
+            elif st_line.currency_id.is_zero(st_line.amount):
+                st_line.is_reconciled = True
             else:
                 # The journal entry seems reconciled.
                 st_line.is_reconciled = True
-
-    @api.depends('journal_id',
-                 'move_id.line_ids.name', 'move_id.line_ids.balance', 'move_id.line_ids.amount_currency',
-                 'move_id.line_ids.currency_id', 'move_id.line_ids.partner_id',
-                 'move_id.line_ids.account_id.internal_type')
-    def _compute_from_move_lines(self):
-        ''' Since the user is free to edit the statement line or the journal entry like he want, the statement line
-        fields are compute/inverse from the journal items and then, we need to synchronize both models to stay in a
-        consistent state.
-        This method is the compute updating the statement line regarding its journal entry.
-        '''
-        for st_line in self:
-            liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
-            counterpart_lines = suspense_lines + other_lines
-            company_currency = st_line.journal_id.company_id.currency_id
-            journal_currency = st_line.journal_id.currency_id if st_line.journal_id.currency_id != company_currency else False
-
-            if len(liquidity_lines) == 1:
-                st_line.payment_ref = liquidity_lines.name
-                st_line.partner_id = liquidity_lines.partner_id
-            else:
-                st_line.payment_ref = st_line.payment_ref
-                st_line.partner_id = st_line.partner_id
-                st_line.amount = st_line.amount
-
-            if len(counterpart_lines) == 1:
-                if counterpart_lines.currency_id:
-                    if st_line.foreign_currency_id and journal_currency:
-
-                        # company_currency = currency_1
-                        # journal_currency = currency_2
-                        # foreign_currency = currency_3 (could be equals to currency_1)
-
-                        st_line.amount = liquidity_lines.amount_currency if len(liquidity_lines) == 1 else 0.0
-                        if counterpart_lines.currency_id == st_line.foreign_currency_id and st_line.foreign_currency_id == company_currency:
-                            st_line.amount_currency = -counterpart_lines.balance
-                            st_line.foreign_currency_id = company_currency
-                        elif counterpart_lines.currency_id == st_line.foreign_currency_id and st_line.foreign_currency_id != company_currency:
-                            st_line.amount_currency = -counterpart_lines.amount_currency
-                            st_line.foreign_currency_id = counterpart_lines.currency_id
-                        elif counterpart_lines.currency_id == journal_currency:
-                            st_line.amount_currency = st_line.amount_currency
-                            st_line.foreign_currency_id = st_line.foreign_currency_id
-                        else:
-                            st_line.amount_currency = counterpart_lines.amount_currency
-                            st_line.foreign_currency_id = counterpart_lines.foreign_currency_id
-
-                    elif not st_line.foreign_currency_id and journal_currency:
-
-                        # company_currency = currency_1
-                        # journal_currency = currency_2
-
-                        st_line.amount = liquidity_lines.amount_currency if len(liquidity_lines) == 1 else 0.0
-                        st_line.amount_currency = 0.0
-                        st_line.foreign_currency_id = False
-
-                    else:
-
-                        # company_currency = currency_1
-                        # foreign_currency = currency_2 (could be equals to currency_1)
-
-                        st_line.amount_currency = -counterpart_lines.amount_currency
-                        st_line.foreign_currency_id = counterpart_lines.currency_id
-                        st_line.amount = liquidity_lines.balance if len(liquidity_lines) == 1 else 0.0
-
-                else:
-
-                    # The counterpart line doesn't have a foreign currency.
-
-                    if st_line.foreign_currency_id and journal_currency and st_line.foreign_currency_id == company_currency:
-
-                        # company_currency = currency_1
-                        # journal_currency = currency_2
-                        # foreign_currency = currency_1
-
-                        st_line.amount = liquidity_lines.amount_currency if len(liquidity_lines) == 1 else 0.0
-                        st_line.amount_currency = -counterpart_lines.balance
-                        st_line.foreign_currency_id = st_line.foreign_currency_id
-
-                    elif journal_currency:
-
-                        # company_currency = currency_1
-                        # journal_currency = currency_2
-
-                        st_line.amount = liquidity_lines.amount_currency if len(liquidity_lines) == 1 else 0.0
-                        st_line.amount_currency = 0.0
-                        st_line.foreign_currency_id = False
-
-                    else:
-
-                        # Single currency.
-
-                        st_line.amount = liquidity_lines.balance if len(liquidity_lines) == 1 else 0.0
-                        st_line.amount_currency = 0.0
-                        st_line.foreign_currency_id = False
-            else:
-
-                # The statement line seems to be already reconciled. Then, don't override the foreign currency data.
-
-                st_line.amount_currency = st_line.amount_currency
-                st_line.foreign_currency_id = st_line.foreign_currency_id
-
-    def _inverse_amounts(self):
-        ''' Triggered when writing the 'amount' field.
-        This field correspond to the 'balance' field in the journal items in case of missing foreign currency on the
-        journal. Otherwise, 'amount' is took as the foreign currency and then, is written on the 'amount_currency'
-        field on the journal items.
-        '''
-        for st_line in self:
-            liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
-            counter_part_lines = suspense_lines + other_lines
-
-            if len(liquidity_lines) != 1 or len(counter_part_lines) != 1:
-                raise UserError(_("The journal entry has been manually edited and then, isn't longer recognized as a valid statement line."))
-
-            line_vals_list = self._prepare_move_line_default_vals(st_line._convert_to_dict())
-            line_ids_commands = [
-                (1, liquidity_lines.id, {k: v for k, v in line_vals_list[0].items() if k in ('debit', 'credit', 'currency_id', 'amount_currency')}),
-                (1, counter_part_lines.id, {k: v for k, v in line_vals_list[1].items() if k in ('debit', 'credit', 'currency_id', 'amount_currency')}),
-            ]
-
-            st_line.move_id.write({'line_ids': line_ids_commands})
-
-    def _inverse_payment_ref(self):
-        for st_line in self:
-            liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
-            (liquidity_lines + suspense_lines).write({'name': st_line.payment_ref})
-
-    def _inverse_partner_id(self):
-        for st_line in self:
-            st_line.line_ids.write({'partner_id': st_line.partner_id.id})
 
     # -------------------------------------------------------------------------
     # CONSTRAINS METHODS
@@ -990,24 +813,6 @@ class AccountBankStatementLine(models.Model):
             if not st_line.foreign_currency_id and st_line.amount_currency:
                 raise ValidationError(_("You can't provide an amount in foreign currency without specifying a foreign currency."))
 
-    def _is_account_move_valid(self):
-        ''' Method triggered manually when writing on journal entries linked to
-        the statement lines through the _inherits to detect some unconsistencies
-        between both models.
-        :return True if the modifications are valid, False otherwise.
-        '''
-        for st_line in self:
-            move = st_line.move_id
-            liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
-
-            if st_line.state == 'open' and move.state != 'draft':
-                return False
-            if st_line.state == 'posted' and move.state != 'posted':
-                return False
-            if len(liquidity_lines) != 1:
-                return False
-        return True
-
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
@@ -1015,10 +820,15 @@ class AccountBankStatementLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
+        counterpart_account_ids = []
+
         for vals in vals_list:
             statement = self.env['account.bank.statement'].browse(vals['statement_id'])
             if statement.state != 'open' and self._context.get('check_move_validity', True):
                 raise UserError(_("You can only create statement line in open bank statements."))
+
+            # Force the move_type to avoid unconsistency with residual 'default_move_type' inside the context.
+            vals['move_type'] = 'entry'
 
             journal = statement.journal_id
             # Ensure the journal is the same as the statement one.
@@ -1026,16 +836,28 @@ class AccountBankStatementLine(models.Model):
             vals['currency_id'] = (journal.currency_id or journal.company_id.currency_id).id
             if 'date' not in vals:
                 vals['date'] = statement.date
-            # Create two default account.move.lines for each statement line.
-            if 'line_ids' not in vals:
-                vals['line_ids'] = [(0, 0, line_vals) for line_vals in self._prepare_move_line_default_vals(vals)]
+
+            # Hack to force different account instead of the suspense account.
+            counterpart_account_ids.append(vals.pop('counterpart_account_id', None))
+
         st_lines = super().create(vals_list)
-        for st_line in st_lines:
-            st_line.line_ids.write({'statement_line_id': st_line.id})
-        # Call the compute explicitly. This is required because '_compute_from_move_lines' is called by the orm before
-        # creating the account.move.lines.
-        st_lines._compute_from_move_lines()
+
+        for i, st_line in enumerate(st_lines):
+            counterpart_account_id = counterpart_account_ids[i]
+
+            to_write = {'statement_line_id': st_line.id}
+            if 'line_ids' not in vals_list[i]:
+                to_write['line_ids'] = [(0, 0, line_vals) for line_vals in st_line._prepare_move_line_default_vals(counterpart_account_id=counterpart_account_id)]
+
+            st_line.move_id.write(to_write)
+
         return st_lines
+
+    def write(self, vals):
+        # OVERRIDE
+        res = super().write(vals)
+        self._synchronize_to_moves(set(vals.keys()))
+        return res
 
     def unlink(self):
         # OVERRIDE to unlink the inherited account.move (move_id field) as well.
@@ -1043,6 +865,175 @@ class AccountBankStatementLine(models.Model):
         res = super().unlink()
         moves.unlink()
         return res
+
+    # -------------------------------------------------------------------------
+    # SYNCHRONIZATION account.bank.statement.line <-> account.move
+    # -------------------------------------------------------------------------
+
+    def _synchronize_from_moves(self, changed_fields):
+        ''' Update the account.bank.statement.line regarding its related account.move.
+        Also, check both models are still consistent.
+        :param changed_fields: A set containing all modified fields on account.move.
+        '''
+        if self._context.get('skip_account_move_synchronization'):
+            return
+
+        for st_line in self.with_context(skip_account_move_synchronization=True):
+            move = st_line.move_id
+            move_vals_to_write = {}
+            st_line_vals_to_write = {}
+
+            if 'state' in changed_fields:
+                if (st_line.state == 'open' and move.state != 'draft') or (st_line.state == 'posted' and move.state != 'posted'):
+                    raise UserError(_(
+                        "You can't change manually the state of the journal entry %s because this one has been "
+                        "created by the %s bank statement."
+                    ) % (st_line.move_id.display_name, st_line.statement_id.display_name))
+
+            if 'line_ids' in changed_fields:
+                liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
+                company_currency = st_line.journal_id.company_id.currency_id
+                journal_currency = st_line.journal_id.currency_id if st_line.journal_id.currency_id != company_currency else False
+
+                if len(liquidity_lines) != 1:
+                    raise UserError(_(
+                        "The journal entry %s reached an invalid state regarding its related statement line.\n"
+                        "To be consistent, the journal entry must always contains:\n"
+                        "- one journal item involving the bank/cash account.\n"
+                        "- optional journal items involving or not the suspense account."
+                    ) % st_line.move_id.display_name)
+
+                st_line_vals_to_write.update({
+                    'payment_ref': liquidity_lines.name,
+                    'partner_id': liquidity_lines.partner_id.id,
+                })
+
+                if len(suspense_lines) == 1:
+                    if suspense_lines.currency_id:
+                        if st_line.foreign_currency_id and journal_currency:
+
+                            # company_currency = currency_1
+                            # journal_currency = currency_2
+                            # foreign_currency = currency_3 (could be equals to currency_1)
+
+                            st_line.amount = liquidity_lines.amount_currency if len(liquidity_lines) == 1 else 0.0
+                            if suspense_lines.currency_id == st_line.foreign_currency_id and st_line.foreign_currency_id == company_currency:
+                                st_line_vals_to_write.update({
+                                    'amount_currency': -suspense_lines.balance,
+                                    'foreign_currency_id': company_currency.id,
+                                })
+                            elif suspense_lines.currency_id == st_line.foreign_currency_id and st_line.foreign_currency_id != company_currency:
+                                st_line_vals_to_write.update({
+                                    'amount_currency': -suspense_lines.amount_currency,
+                                    'foreign_currency_id': suspense_lines.currency_id.id,
+                                })
+                            elif suspense_lines.currency_id == journal_currency:
+                                st_line_vals_to_write.update({
+                                    'amount_currency': st_line.amount_currency,
+                                    'foreign_currency_id': st_line.foreign_currency_id.id,
+                                })
+                            else:
+                                st_line_vals_to_write.update({
+                                    'amount_currency': suspense_lines.amount_currency,
+                                    'foreign_currency_id': suspense_lines.foreign_currency_id.id,
+                                })
+
+                        elif not st_line.foreign_currency_id and journal_currency:
+
+                            # company_currency = currency_1
+                            # journal_currency = currency_2
+
+                            st_line_vals_to_write.update({
+                                'amount': liquidity_lines.amount_currency if len(liquidity_lines) == 1 else 0.0,
+                                'amount_currency': 0.0,
+                                'foreign_currency_id': False,
+                            })
+
+                        else:
+
+                            # company_currency = currency_1
+                            # foreign_currency = currency_2 (could be equals to currency_1)
+
+                            st_line_vals_to_write.update({
+                                'amount': liquidity_lines.balance if len(liquidity_lines) == 1 else 0.0,
+                                'amount_currency': -suspense_lines.amount_currency,
+                                'foreign_currency_id': suspense_lines.currency_id.id,
+                            })
+
+                    else:
+
+                        # The counterpart line doesn't have a foreign currency.
+
+                        if st_line.foreign_currency_id and journal_currency and st_line.foreign_currency_id == company_currency:
+
+                            # company_currency = currency_1
+                            # journal_currency = currency_2
+                            # foreign_currency = currency_1
+
+                            st_line_vals_to_write.update({
+                                'amount': liquidity_lines.amount_currency if len(liquidity_lines) == 1 else 0.0,
+                                'amount_currency': -suspense_lines.balance,
+                                'foreign_currency_id': st_line.foreign_currency_id.id,
+                            })
+
+                        elif journal_currency:
+
+                            # company_currency = currency_1
+                            # journal_currency = currency_2
+
+                            st_line_vals_to_write.update({
+                                'amount': liquidity_lines.amount_currency if len(liquidity_lines) == 1 else 0.0,
+                                'amount_currency': 0.0,
+                                'foreign_currency_id': False,
+                            })
+
+                        else:
+
+                            # Single currency.
+
+                            st_line_vals_to_write.update({
+                                'amount': liquidity_lines.balance if len(liquidity_lines) == 1 else 0.0,
+                                'amount_currency': 0.0,
+                                'foreign_currency_id': False,
+                            })
+
+                move_vals_to_write.update({
+                    'currency_id': (st_line.foreign_currency_id or journal_currency or company_currency).id,
+                    'partner_id': st_line.partner_id.id,
+                })
+
+            move.write(move._cleanup_write_orm_values(move, move_vals_to_write))
+            st_line.write(move._cleanup_write_orm_values(st_line, st_line_vals_to_write))
+
+    def _synchronize_to_moves(self, changed_fields):
+        ''' Update the account.move regarding the modified account.bank.statement.line.
+        :param changed_fields: A list containing all modified fields on account.bank.statement.line.
+        '''
+        if self._context.get('skip_account_move_synchronization'):
+            return
+
+        if all(field_name not in changed_fields for field_name in (
+            'payment_ref', 'amount', 'amount_currency',
+            'foreign_currency_id', 'currency_id', 'partner_id',
+        )):
+            return
+
+        for st_line in self.with_context(skip_account_move_synchronization=True):
+            liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
+            company_currency = st_line.journal_id.company_id.currency_id
+            journal_currency = st_line.journal_id.currency_id if st_line.journal_id.currency_id != company_currency else False
+
+            line_vals_list = self._prepare_move_line_default_vals()
+            line_ids_commands = [
+                (1, liquidity_lines.id, line_vals_list[0]),
+                (1, suspense_lines.id, line_vals_list[1]),
+            ]
+
+            st_line.move_id.write({
+                'partner_id': st_line.partner_id.id,
+                'currency_id': (st_line.foreign_currency_id or journal_currency or company_currency).id,
+                'line_ids': line_ids_commands,
+            })
 
     # -------------------------------------------------------------------------
     # RECONCILIATION METHODS
@@ -1067,7 +1058,6 @@ class AccountBankStatementLine(models.Model):
         if not self.move_id.to_check and other_lines:
             raise UserError(_("The statement line has already been reconciled."))
 
-        st_line_vals = self._convert_to_dict()
         to_create = []
         total_balance = liquidity_lines.balance
         sequence = 10
@@ -1093,7 +1083,7 @@ class AccountBankStatementLine(models.Model):
                 # Newly created account.move.line from scratch.
                 sequence += 1
                 vals['sequence'] = sequence
-                line_vals = self._prepare_counterpart_move_line_vals(st_line_vals, vals)
+                line_vals = self._prepare_counterpart_move_line_vals(vals)
                 total_balance += line_vals['debit'] - line_vals['credit']
                 to_create.append(line_vals)
 
@@ -1103,7 +1093,7 @@ class AccountBankStatementLine(models.Model):
         for line, vals in zip(existing_lines, to_process_vals):
             sequence += 1
             vals['sequence'] = sequence
-            line_vals = self._prepare_counterpart_move_line_vals(st_line_vals, vals, record=line)
+            line_vals = self._prepare_counterpart_move_line_vals(vals, record=line)
             total_balance += line_vals['debit'] - line_vals['credit']
             to_create.append(line_vals)
 
@@ -1115,7 +1105,7 @@ class AccountBankStatementLine(models.Model):
             else:
                 open_balance_account = self.partner_id.property_account_payable_id
 
-            open_balance_vals = self._prepare_counterpart_move_line_vals(st_line_vals, {
+            open_balance_vals = self._prepare_counterpart_move_line_vals({
                 'name': '%s: %s' % (self.payment_ref, _('Open Balance')),
                 'account_id': open_balance_account.id,
                 'balance': -total_balance,
@@ -1195,29 +1185,15 @@ class AccountBankStatementLine(models.Model):
             })
         return bank_account
 
+    def _reset_journal_entry(self):
+        for st_line in self:
+            st_line.write({
+                'to_check': False,
+                'line_ids': [(5, 0)] + [(0, 0, line_vals) for line_vals in st_line._prepare_move_line_default_vals()],
+            })
+
     def button_undo_reconciliation(self):
         ''' Undo the reconciliation mades on the statement line and reset their journal items
         to their original states.
         '''
-        for st_line in self:
-            move = st_line.move_id
-            move_state = move.state
-
-            # Use 'check_move_validity' to avoid the check on consistency between the journal entries and
-            # the statement lines.
-
-            # Process only posted & draft moves.
-            if move_state == 'posted':
-                move.with_context(check_move_validity=False).button_draft()
-            elif move_state != 'draft':
-                continue
-
-            st_line.move_id.with_context(check_move_validity=False).write({
-                'to_check': False,
-                'line_ids': [(5, 0)] + [(0, 0, line_vals) for line_vals in self._prepare_move_line_default_vals(st_line._convert_to_dict())],
-            })
-
-            if move_state == 'posted':
-                move.post()
-
-            move._check_balanced()
+        self.line_ids.remove_move_reconcile()

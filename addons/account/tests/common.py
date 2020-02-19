@@ -373,6 +373,12 @@ class AccountTestNoChartCommon(SavepointCaseWithUserDemo):
             'code': 'SJT0',
         })
 
+        cls.general_journal0 = cls.env['account.journal'].create({
+            'name': 'General Journal',
+            'type': 'general',
+            'code': 'GJT0',
+        })
+
     @classmethod
     def setUpAdditionalAccounts(cls):
         """ Set up some addionnal accounts: expenses, revenue, ... """
@@ -598,10 +604,24 @@ class AccountTestNoChartCommonMultiCompany(AccountTestNoChartCommon):
 class AccountTestInvoicingCommon(SavepointCase):
 
     @classmethod
-    def setUpClass(cls):
+    def copy_account(cls, account):
+        suffix_nb = 1
+        while True:
+            new_code = '%s (%s)' % (account.code, suffix_nb)
+            if account.search_count([('company_id', '=', account.company_id.id), ('code', '=', new_code)]):
+                suffix_nb += 1
+            else:
+                return account.copy(default={'code': new_code})
+
+    @classmethod
+    def setUpClass(cls, chart_template_ref=None):
         super(AccountTestInvoicingCommon, cls).setUpClass()
 
-        chart_template = cls.env.user.company_id.chart_template_id
+        chart_template = None
+        if chart_template_ref:
+            chart_template = cls.env.ref(chart_template_ref)
+        if not chart_template:
+            chart_template = cls.env.user.company_id.chart_template_id
         if not chart_template:
             chart_template = cls.env.ref('l10n_generic_coa.configurable_chart_template', raise_if_not_found=False)
         if not chart_template:
@@ -646,8 +666,8 @@ class AccountTestInvoicingCommon(SavepointCase):
             'uom_id': cls.env.ref('uom.product_uom_dozen').id,
             'lst_price': 200.0,
             'standard_price': 160.0,
-            'property_account_income_id': cls.company_data['default_account_revenue'].copy().id,
-            'property_account_expense_id': cls.company_data['default_account_expense'].copy().id,
+            'property_account_income_id': cls.copy_account(cls.company_data['default_account_revenue']).id,
+            'property_account_expense_id': cls.copy_account(cls.company_data['default_account_expense']).id,
             'taxes_id': [(6, 0, (cls.tax_sale_a + cls.tax_sale_b).ids)],
             'supplier_taxes_id': [(6, 0, (cls.tax_purchase_a + cls.tax_purchase_b).ids)],
         })

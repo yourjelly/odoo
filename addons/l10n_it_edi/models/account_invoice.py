@@ -384,7 +384,7 @@ class AccountMove(models.Model):
                 # Numbering attributed by the transmitter. <1.1.2>
                 elements = tree.xpath('//ProgressivoInvio')
                 if elements:
-                    invoice_form.invoice_payment_ref = elements[0].text
+                    invoice_form.payment_reference = elements[0].text
 
                 elements = body_tree.xpath('.//DatiGeneraliDocumento//Numero')
                 if elements:

@@ -166,7 +166,7 @@
 
                         <!-- Reference. -->
                         <ram:BuyerOrderReferencedDocument>
-                            <ram:IssuerAssignedID t-esc="'%s: %s' % (record.name, record.invoice_payment_ref) if record.invoice_payment_ref else record.name"/>
+                            <ram:IssuerAssignedID t-esc="'%s: %s' % (record.name, record.payment_reference) if record.payment_reference else record.name"/>
                         </ram:BuyerOrderReferencedDocument>
                     </ram:ApplicableHeaderTradeAgreement>
 

@@ -770,21 +770,13 @@ class PosSession(models.Model):
         return self._credit_amounts(partial_args, amount, amount_converted, force_company_currency=True)
 
     def _get_statement_line_vals(self, statement, receivable_account, amount):
-        vals = {
+        return {
             'amount': amount,
             'payment_ref': self.name,
             'statement_id': statement.id,
             'journal_id': statement.journal_id.id,
+            'counterpart_account_id': receivable_account.id,
         }
-
-        # Override the temporary account to set directly the receivable one in order to perform the reconciliation
-        # faster without using the statement reconciliation.
-        line_ids_vals = self.env['account.bank.statement.line']._prepare_move_line_default_vals(vals)
-        for line_vals in line_ids_vals:
-            if line_vals['account_id'] == statement.journal_id.suspense_account_id.id:
-                line_vals['account_id'] = receivable_account.id
-        vals['line_ids'] = [(0, 0, line_vals) for line_vals in line_ids_vals]
-        return vals
 
     def _update_amounts(self, old_amounts, amounts_to_add, date, round=True, force_company_currency=False):
         """Responsible for adding `amounts_to_add` to `old_amounts` considering the currency of the session.

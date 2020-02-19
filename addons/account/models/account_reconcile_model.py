@@ -468,11 +468,11 @@ class AccountReconcileModel(models.Model):
                         regexp_split_to_array(substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'),'\s+')
                         && regexp_split_to_array(substring(REGEXP_REPLACE(st_line.payment_ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                 )                                   AS communication_flag,
-                -- Determine a matching or not with the statement line communication using the move.invoice_payment_ref.
+                -- Determine a matching or not with the statement line communication using the move.payment_reference.
                 (
-                    move.invoice_payment_ref IS NOT NULL
+                    move.payment_reference IS NOT NULL
                     AND
-                    regexp_replace(move.invoice_payment_ref, '\s+', '', 'g') = regexp_replace(st_line.payment_ref, '\s+', '', 'g')
+                    regexp_replace(move.payment_reference, '\s+', '', 'g') = regexp_replace(st_line.payment_ref, '\s+', '', 'g')
                 )                                   AS payment_reference_flag
             FROM account_bank_statement_line st_line
             JOIN account_move st_line_move          ON st_line_move.id = st_line.move_id
@@ -536,9 +536,9 @@ class AccountReconcileModel(models.Model):
                             )
                             OR
                             (
-                                move.invoice_payment_ref IS NOT NULL
+                                move.payment_reference IS NOT NULL
                                 AND
-                                regexp_replace(move.invoice_payment_ref, '\s+', '', 'g') = regexp_replace(st_line.payment_ref, '\s+', '', 'g')
+                                regexp_replace(move.payment_reference, '\s+', '', 'g') = regexp_replace(st_line.payment_ref, '\s+', '', 'g')
                             )
                         )
                     )

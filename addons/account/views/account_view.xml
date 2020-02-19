@@ -664,6 +664,7 @@ action = model.setting_init_bank_account_action()
                                     <field name="state" invisible="1"/>
                                     <field name="is_reconciled" invisible="1"/>
                                     <field name="currency_id" invisible="1"/>
+                                    <field name="partner_bank_id" invisible="1"/>
 
                                     <!-- Visible fields -->
                                     <field name="sequence" widget="handle"/>

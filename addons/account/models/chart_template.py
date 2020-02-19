@@ -159,7 +159,7 @@ class AccountChartTemplate(models.Model):
     def _create_journal_suspense_account(self, company, code_digits):
         return self.env['account.account'].create({
             'name': _("Bank Suspense Account"),
-            'code': self.env['account.account']._search_new_account_code(company, code_digits, company.transfer_account_code_prefix),
+            'code': self.env['account.account']._search_new_account_code(company, code_digits, company.transfer_account_code_prefix or ''),
             'user_type_id': self.env.ref('account.data_account_type_current_assets').id,
             'company_id': company.id,
         })

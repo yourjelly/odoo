@@ -123,7 +123,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             'journal_id': cls.company_data['default_journal_sale'].id,
             'date': fields.Date.from_string('2019-01-01'),
             'fiscal_position_id': False,
-            'invoice_payment_ref': '',
+            'payment_reference': '',
             'invoice_payment_term_id': cls.pay_terms_a.id,
             'amount_untaxed': 1200.0,
             'amount_tax': 210.0,
@@ -603,7 +603,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
     def test_out_invoice_line_onchange_partner_1(self):
         move_form = Form(self.invoice)
         move_form.partner_id = self.partner_b
-        move_form.invoice_payment_ref = 'turlututu'
+        move_form.payment_reference = 'turlututu'
         move_form.save()
 
         self.assertInvoiceValues(self.invoice, [
@@ -645,7 +645,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         ], {
             **self.move_vals,
             'partner_id': self.partner_b.id,
-            'invoice_payment_ref': 'turlututu',
+            'payment_reference': 'turlututu',
             'fiscal_position_id': self.fiscal_pos_a.id,
             'invoice_payment_term_id': self.pay_terms_b.id,
             'amount_untaxed': 1200.0,
@@ -706,7 +706,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         ], {
             **self.move_vals,
             'partner_id': self.partner_b.id,
-            'invoice_payment_ref': 'turlututu',
+            'payment_reference': 'turlututu',
             'fiscal_position_id': self.fiscal_pos_a.id,
             'invoice_payment_term_id': self.pay_terms_b.id,
             'amount_untaxed': 1200.0,
@@ -1930,7 +1930,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
                 },
             ], {
                 **self.move_vals,
-                'invoice_payment_ref': move.name,
+                'payment_reference': move.name,
                 'currency_id': self.currency_data['currency'].id,
                 'date': frozen_today,
                 'invoice_date': frozen_today,
@@ -2036,7 +2036,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             },
         ], {
             **self.move_vals,
-            'invoice_payment_ref': move.name,
+            'payment_reference': move.name,
             'currency_id': self.currency_data['currency'].id,
             'date': fields.Date.from_string('2017-01-01'),
             'amount_untaxed': 1200.0,
@@ -2318,7 +2318,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             **self.move_vals,
             'currency_id': self.currency_data['currency'].id,
             'date': fields.Date.from_string('2017-01-01'),
-            'invoice_payment_ref': 'INV/2017/01/0001',
+            'payment_reference': 'INV/2017/01/0001',
         })
 
         accrual_lines = move.invoice_line_ids.mapped('matched_debit_ids.debit_move_id.move_id.line_ids').sorted('date')

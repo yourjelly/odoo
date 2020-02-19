@@ -450,7 +450,7 @@ class ResCompany(models.Model):
                 raise RedirectWarning(msg, action.id, _("Go to the journal configuration"))
 
             sample_invoice = self.env['account.move'].with_context(default_move_type='out_invoice', default_journal_id=journal.id).create({
-                'invoice_payment_ref': _('Sample invoice'),
+                'payment_reference': _('Sample invoice'),
                 'partner_id': partner.id,
                 'invoice_line_ids': [
                     (0, 0, {

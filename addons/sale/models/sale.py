@@ -556,7 +556,7 @@ class SaleOrder(models.Model):
             'journal_id': journal.id,  # company comes from the journal
             'invoice_origin': self.name,
             'invoice_payment_term_id': self.payment_term_id.id,
-            'invoice_payment_ref': self.reference,
+            'payment_reference': self.reference,
             'transaction_ids': [(6, 0, self.transaction_ids.ids)],
             'invoice_line_ids': [],
             'company_id': self.company_id.id,
@@ -673,12 +673,12 @@ Reason(s) of this behavior could be:
                     else:
                         ref_invoice_vals['invoice_line_ids'] += invoice_vals['invoice_line_ids']
                     origins.add(invoice_vals['invoice_origin'])
-                    payment_refs.add(invoice_vals['invoice_payment_ref'])
+                    payment_refs.add(invoice_vals['payment_reference'])
                     refs.add(invoice_vals['ref'])
                 ref_invoice_vals.update({
                     'ref': ', '.join(refs)[:2000],
                     'invoice_origin': ', '.join(origins),
-                    'invoice_payment_ref': len(payment_refs) == 1 and payment_refs.pop() or False,
+                    'payment_reference': len(payment_refs) == 1 and payment_refs.pop() or False,
                 })
                 new_invoice_vals_list.append(ref_invoice_vals)
             invoice_vals_list = new_invoice_vals_list

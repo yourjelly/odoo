@@ -272,16 +272,6 @@ class TestAccountBankStatementCommon(AccountTestInvoicingCommon):
         cls.bank_journal_1 = cls.company_data['default_journal_bank']
         cls.bank_journal_2 = cls.bank_journal_1.copy()
         cls.bank_journal_3 = cls.bank_journal_2.copy()
-        cls.bank_journal_2.default_debit_account_id = cls.bank_journal_1.default_debit_account_id.copy()
-        cls.bank_journal_2.default_credit_account_id = cls.bank_journal_1.default_credit_account_id.copy()
-        cls.bank_journal_2.payment_debit_account_id = cls.bank_journal_1.payment_debit_account_id.copy()
-        cls.bank_journal_2.payment_credit_account_id = cls.bank_journal_2.payment_debit_account_id
-        cls.bank_journal_2.suspense_account_id = cls.bank_journal_1.suspense_account_id.copy()
-        cls.bank_journal_3.default_debit_account_id = cls.bank_journal_2.default_debit_account_id.copy()
-        cls.bank_journal_3.default_credit_account_id = cls.bank_journal_2.default_credit_account_id.copy()
-        cls.bank_journal_3.payment_debit_account_id = cls.bank_journal_2.payment_debit_account_id.copy()
-        cls.bank_journal_3.payment_credit_account_id = cls.bank_journal_3.payment_debit_account_id
-        cls.bank_journal_3.suspense_account_id = cls.bank_journal_2.suspense_account_id.copy()
         cls.currency_1 = cls.company_data['currency']
         cls.currency_2 = cls.currency_data['currency']
         cls.currency_3 = cls.currency_data_2['currency']
@@ -390,6 +380,10 @@ class TestAccountBankStatement(TestAccountBankStatementCommon):
         self.assertRecordValues(statement_line, [{
             'amount': amount,
             'amount_currency': amount_currency,
+        }])
+        self.assertRecordValues(statement_line.move_id, [{
+            'partner_id': self.partner_a.id,
+            'currency_id': (statement_line.foreign_currency_id or statement_line.currency_id).id,
         }])
 
         # ==== Test the edition of statement line amounts ====
@@ -1003,10 +997,10 @@ class TestAccountBankStatement(TestAccountBankStatementCommon):
         self.statement.button_post()
 
         receivable_acc_1 = self.company_data['default_account_receivable']
-        receivable_acc_2 = self.company_data['default_account_receivable'].copy()
+        receivable_acc_2 = self.copy_account(self.company_data['default_account_receivable'])
         payment_account = self.bank_journal_1.payment_debit_account_id
         random_acc_1 = self.company_data['default_account_revenue']
-        random_acc_2 = self.company_data['default_account_revenue'].copy()
+        random_acc_2 = self.copy_account(self.company_data['default_account_revenue'])
         test_move = self.env['account.move'].create({
             'move_type': 'entry',
             'date': fields.Date.from_string('2016-01-01'),
