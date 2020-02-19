@@ -287,6 +287,7 @@ ZoomOdoo.prototype._move = function (e) {
     var offset  = this.$target.offset();
     var pt = ly - offset.top;
     var pl = lx - offset.left;
+    var lx = lx - offset.right;
     var xt = Math.ceil(pt * rh);
     var xl = Math.ceil(pl * rw);
 
