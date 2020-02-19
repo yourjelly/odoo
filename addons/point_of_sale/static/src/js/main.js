@@ -17,7 +17,13 @@ odoo.define('point_of_sale.main', function (require) {
     owl.config.mode = env.isDebug() ? "dev" : "prod";
     owl.Component.env = env;
 
-    class PosRoot extends owl.Component {};
+    class PosRoot extends owl.Component {
+        mounted() {
+            odoo.isReady = true;
+            this.env.bus.trigger('web-client-mounted');
+            super.mounted();
+        }
+    };
     PosRoot.template = owl.tags.xml`
         <t t-component="ComponentAdapter" Component="props.Component" t-att-class="'o_action_manager'"/>
     `;
