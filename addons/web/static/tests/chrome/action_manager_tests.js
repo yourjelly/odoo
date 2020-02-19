@@ -3167,7 +3167,63 @@ QUnit.module('ActionManager', {
         // Buttons should be enabled after the reload
         assert.strictEqual(
             $(webClient.el).find('.o_form_view button:contains(Call method)').attr('disabled'),
-            undefined, 'buttons should be disabled')
+            undefined, 'buttons should be disabled');
+
+        webClient.destroy();
+    });
+
+    QUnit.test('requests for execute_action of type object: disable buttons (2)', async function (assert) {
+        assert.expect(6);
+
+        this.archs['pony,44,form'] = `
+            <form>
+                <field name="name"/>
+                <button string="Cancel" class="cancel-btn" special="cancel"/>
+            </form>`;
+        this.actions[3] = {
+            id: 4,
+            name: 'Create a Partner',
+            res_model: 'pony',
+            target: 'new',
+            type: 'ir.actions.act_window',
+            views: [[44, 'form']],
+        };
+        var def = testUtils.makeTestPromise();
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            mockRPC: function (route, args) {
+                const result = this._super.apply(this, arguments);
+                if (args.method === 'default_get') {
+                    // delay the opening of the dialog
+                    return Promise.resolve(def).then(() => result);
+                }
+                return result;
+            },
+        });
+        await doAction(3);
+        assert.containsOnce(webClient, '.o_list_view');
+
+        // open first record in form view
+        await testUtils.dom.click(webClient.el.querySelector('.o_list_view .o_data_row'));
+        assert.containsOnce(webClient, '.o_form_view');
+
+        // click on 'Execute action', to execute action 4 in a dialog
+        await testUtils.dom.click(webClient.el.querySelector('.o_form_view button[name="4"]'));
+        assert.ok(webClient.el.querySelector('.o_cp_buttons .o_form_button_edit').disabled,
+            'control panel buttons should be disabled');
+
+        def.resolve();
+        await testUtils.nextTick();
+        assert.containsOnce(webClient, '.modal .o_form_view');
+        assert.notOk(webClient.el.querySelector('.o_cp_buttons .o_form_button_edit').disabled,
+            'control panel buttons should have been re-enabled');
+
+        await testUtils.dom.click(webClient.el.querySelector('.modal .cancel-btn'));
+        assert.notOk(webClient.el.querySelector('.o_cp_buttons .o_form_button_edit').disabled,
+            'control panel buttons should still be enabled');
 
         webClient.destroy();
     });

@@ -8453,7 +8453,7 @@ QUnit.module('Views', {
         await testUtils.nextTick();
 
         assert.containsNone(webClient, '.o_kanban_view',
-            "should not display the kanban view anymoe");
+            "should not display the kanban view anymore");
         assert.containsOnce(webClient, '.o_list_view',
             "should display the list view");
 

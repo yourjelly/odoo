@@ -432,7 +432,7 @@ class ActionManager extends core.EventBus {
             const options = { on_close: params.on_closed, on_success: params.on_success };
             action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
             return this.doAction(action, options);
-            // TODO need on_success, on_Fail?
+            // TODO need on_fail (on_success done)?
             //.then(params.on_success, params.on_fail);
         });
             // TODO need on_fail??
