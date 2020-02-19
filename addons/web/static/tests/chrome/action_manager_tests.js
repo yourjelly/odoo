@@ -4971,6 +4971,16 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('on_close should be called only once', async function (assert) {
+        /**
+         * TODO: Improve this test
+         * 
+         * When clicking on dialog button it should trigger act_window_close and
+         * then execute_action (that will be redirected to an act_window_close)
+         * 
+         * The execute_action comes from BasicController._callButtonAction
+         * 
+         * A real case: event_configurator_widget.js
+         */
         assert.expect(2);
 
         const webClient = await createWebClient({
