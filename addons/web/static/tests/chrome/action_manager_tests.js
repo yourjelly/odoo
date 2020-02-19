@@ -120,6 +120,13 @@ QUnit.module('ActionManager', {
             res_model: 'partner',
             type: 'ir.actions.act_window',
             views: [[666, 'form']],
+        }, {
+            id: 25,
+            name: 'Create a Partner',
+            res_model: 'partner',
+            target: 'new',
+            type: 'ir.actions.act_window',
+            views: [[1, 'form']],
         }];
 
         this.archs = {
@@ -144,6 +151,13 @@ QUnit.module('ActionManager', {
                         '<field name="foo"/>' +
                     '</group>' +
                 '</form>',
+            
+            'partner,1,form': `
+                <form>
+                    <footer>
+                        <button class="btn-primary" string="Save" special="save"/>
+                    </footer>
+                </form>`,
 
              'partner,666,form': `<form>
                     <header></header>
@@ -4952,6 +4966,36 @@ QUnit.module('ActionManager', {
         await nextTick();
 
         assert.containsNone(document.body, '.modal');
+
+        webClient.destroy();
+    });
+
+    QUnit.test('on_close should be called only once', async function (assert) {
+        assert.expect(2);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+        });
+
+        await doAction(3);
+        await testUtils.dom.click(webClient.el.querySelector('.o_list_view .o_data_row'));
+        await testUtils.dom.click(webClient.el.querySelector('.o_form_buttons_view .o_form_button_edit'));
+
+        await doAction(25, {
+            on_close() {
+                assert.step('on_close');
+            },
+        });
+
+        // Close dialog by clicking on save button
+        testUtils.dom.click(webClient.el.querySelector('.o_dialog .modal-footer button[special=save]'));
+        // Directly do act_window_close
+        await doAction(10);
+
+        assert.verifySteps(['on_close']);
 
         webClient.destroy();
     });

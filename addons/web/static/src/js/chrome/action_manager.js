@@ -186,10 +186,11 @@ class CloseActionPlugin extends ActionManagerPlugin {
     async executeAction(action, options) {
         let owlReload = true;
         const { main , dialog } = this.getCurrentState();
-        if (dialog) {
+        if (dialog && !dialog.controller.isClosing) {
             if (dialog.controller.options && dialog.controller.options.on_close) {
                 dialog.controller.options.on_close(action.infos);
                 owlReload = false;
+                dialog.controller.isClosing = true;
             }
         } else if (options.on_close) {
             options.on_close(action.infos);
