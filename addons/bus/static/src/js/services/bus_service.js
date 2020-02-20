@@ -42,6 +42,9 @@ var BusService = CrossTab.extend(ServicesMixin, {
             const result = service[payload.method].apply(service, args);
             payload.callback(result);
         }
+        else if (ev.name === 'get_session') {
+            ev.data.callback(this.env.session);
+        }
     },
     /**
      * This method is necessary in order for this Class to be used to instantiate services
