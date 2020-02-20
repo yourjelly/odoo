@@ -25,8 +25,3 @@ odoo.define('web.web_client', function (require) {
 
     return webClient;
 });
-
-odoo.define('root.widget', function (require) {
-    "use strict";
-    return null;
-});
