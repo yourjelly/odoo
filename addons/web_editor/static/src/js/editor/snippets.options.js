@@ -1048,10 +1048,14 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
      * @returns {Promise}
      */
     _renderColorPalette: function () {
-        const options = {};
-        options.selectedColor = this._value;
+        const options = {
+            selectedColor: this._value,
+        };
         if (this.options.dataAttributes.excluded) {
             options.excluded = this.options.dataAttributes.excluded.replace(/ /g, '').split(',');
+        }
+        if (this.options.dataAttributes.withCombinations) {
+            options.withCombinations = !!this.options.dataAttributes.withCombinations;
         }
         const oldColorPalette = this.colorPalette;
         this.colorPalette = new ColorPaletteWidget(this, options);
@@ -1577,9 +1581,17 @@ const SnippetOptionWidget = Widget.extend({
         // other potential color names (to remove) and if we know about a prefix
         // (otherwise we suppose that we should use the actual related color).
         if (params.colorNames && params.colorPrefix) {
-            const classes = params.colorNames.map(c => params.colorPrefix + c);
+            const classes = params.colorNames.map(c => params.colorPrefix + c)
+                .concat(params.colorNames.map(c => `o_cc${c}`));
             this.$target[0].classList.remove(...classes);
 
+            if (!isNaN(widgetValue)) {
+                // We got a color name which is a number, those are the special
+                // color combinations classes. Just have to add it (and adding
+                // the potential extra class) then leave.
+                this.$target[0].classList.add(`o_cc${widgetValue}`, params.extraClass);
+                return;
+            }
             if (params.colorNames.includes(widgetValue)) {
                 const originalCSSValue = window.getComputedStyle(this.$target[0])[cssProps[0]];
                 const className = params.colorPrefix + widgetValue;
@@ -1869,7 +1881,8 @@ const SnippetOptionWidget = Widget.extend({
             case 'selectStyle': {
                 if (params.colorPrefix && params.colorNames) {
                     for (const c of params.colorNames) {
-                        if (this.$target[0].classList.contains(params.colorPrefix + c)) {
+                        const className = isNaN(c) ? (params.colorPrefix + c) : `o_cc${c}`;
+                        if (this.$target[0].classList.contains(className)) {
                             return c;
                         }
                     }
