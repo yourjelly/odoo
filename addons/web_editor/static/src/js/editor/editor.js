@@ -144,7 +144,10 @@ var EditorMenuBar = Widget.extend({
                 resolve();
             } else {
                 var confirm = Dialog.confirm(this, _t("If you discard the current edition, all unsaved changes will be lost. You can cancel to return to the edition mode."), {
-                    confirm_callback: resolve,
+                    confirm_callback: async () => {
+                        await this._removeAutoOptimizedImages();
+                        resolve();
+                    },
                 });
                 confirm.on('closed', self, reject);
             }
@@ -173,6 +176,8 @@ var EditorMenuBar = Widget.extend({
         }
 
         await this._saveCroppedImages();
+        this._removeCacheBusters();
+        await this._removeAutoOptimizedImages(true);
         await this.rte.save();
 
         if (reload !== false) {
@@ -230,6 +235,39 @@ var EditorMenuBar = Widget.extend({
      */
     _saveCroppedImages: function () {
         return this.rte.saveCroppedImages(this.rte.editable());
+    },
+    /**
+     * @private
+     */
+    _removeCacheBusters: function () {
+        return this.rte.editable().find('[data-remove-cache-buster=true]').each((index, img) => {
+            const url = new URL(img.src);
+            url.searchParams.delete('cachebuster');
+            img.src = window.location.host === url.host ? url.pathname : url.href;
+            delete img.dataset.removeCacheBuster;
+        });
+    },
+    /**
+     * @private
+     */
+    async _removeAutoOptimizedImages(onlyUnused) {
+        const toRemove = this.rte.editable().find('[data-remove-if-unused]')
+            .map((index, img) => {
+                const toRemove = JSON.parse(img.dataset.removeIfUnused);
+                delete img.dataset.removeIfUnused;
+                return toRemove;
+            }).toArray().flat();
+        const toKeep = onlyUnused ? this.rte.editable().find('[data-currently-used]')
+            .map((index, img) => {
+                const toKeep = parseInt(img.dataset.currentlyUsed);
+                delete img.dataset.currentlyUsed;
+                return toKeep;
+            }).toArray() : [];
+        return this._rpc({
+            method: 'unlink',
+            model: 'ir.attachment',
+            args: [toRemove.filter(id => !toKeep.includes(id))],
+        });
     },
 
     //--------------------------------------------------------------------------
