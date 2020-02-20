@@ -78,6 +78,9 @@
             &:first-child {
                 text-align: left;
             }
+            &.o_price_total {
+                @extend .text-nowrap;
+            }
         }
     }
     .footer {
@@ -152,11 +155,5 @@
 @media (max-width: 620px) {
     .o_document_layout .o_group {
         flex-direction: column;
-    }
-}
-
-@media (max-width: 992px) {
-    .clearfix td {
-        display: flex;
     }
 }

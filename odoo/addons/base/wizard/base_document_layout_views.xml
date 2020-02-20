@@ -84,7 +84,7 @@
                     </div>
                 </div>
             </div>
-            <div class="article">
+            <div class="table-responsive article">
                 <table class="table table-sm" t-attf-style="border-color: {{table_border_color}}">
                     <thead>
                         <tr t-attf-style="color: {{company.secondary_color}}">
@@ -115,9 +115,9 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="clearfix">
+                <div>
                     <div class="row">
-                        <div t-attf-class="col-5 ml-auto">
+                        <div t-attf-class="col-auto ml-auto">
                             <table class="table table-sm"  t-attf-style="border-color: {{table_border_color}}">
                                 <tr class="o_subtotal">
                                     <td>
