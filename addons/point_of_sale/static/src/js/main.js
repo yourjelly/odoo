@@ -41,3 +41,8 @@ odoo.define('point_of_sale.main', function (require) {
     }
     startPOS();
 });
+
+odoo.define('root.widget', function (require) {
+    "use strict";
+    return null;
+});

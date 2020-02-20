@@ -7,7 +7,6 @@ var mixins = require('web.mixins');
 var utils = require('web_tour.utils');
 var RainbowMan = require('web.RainbowMan');
 var RunningTourActionHelper = require('web_tour.RunningTourActionHelper');
-var ServicesMixin = require('web.ServicesMixin');
 var session = require('web.session');
 var Tip = require('web_tour.Tip');
 

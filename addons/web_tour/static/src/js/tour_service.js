@@ -6,8 +6,14 @@ var rpc = require('web.rpc');
 var session = require('web.session');
 var TourManager = require('web_tour.TourManager');
 const { ComponentAdapter } = require('web.OwlCompatibility');
+const rootWidget = require('root.widget');
 
-const serviceProvider = new ComponentAdapter(null, { Component: owl.Component} ); // dummy component as props
+let serviceProvider;
+if (!rootWidget || rootWidget instanceof owl.Component) {
+    serviceProvider = new ComponentAdapter(null, { Component: owl.Component} ); // dummy component as props
+} else {
+    serviceProvider = rootWidget;
+}
 
 if (config.device.isMobile) {
     return Promise.reject();
