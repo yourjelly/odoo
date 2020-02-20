@@ -118,9 +118,10 @@ class IrQWeb(models.AbstractModel, QWeb):
         if lang != env.context.get('lang'):
             env = env(context=dict(env.context, lang=lang))
 
-        template = env['ir.ui.view'].sudo().read_template(name)
+        view_id = self.env['ir.ui.view'].get_view_id(name)
+        template = env['ir.ui.view'].sudo()._read_template(view_id)
 
-        # QWeb's `read_template` will check if one of the first children of
+        # QWeb's `_read_template` will check if one of the first children of
         # what we send to it has a "t-name" attribute having `name` as value
         # to consider it has found it. As it'll never be the case when working
         # with view ids or children view or children primary views, force it here.
