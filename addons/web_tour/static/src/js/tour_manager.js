@@ -22,7 +22,7 @@ var get_first_visible_element = utils.get_first_visible_element;
 var do_before_unload = utils.do_before_unload;
 var get_jquery_element_from_selector = utils.get_jquery_element_from_selector;
 
-return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
+return core.Class.extend(mixins.EventDispatcherMixin, {
     init: function(parent, consumed_tours) {
         mixins.EventDispatcherMixin.init.call(this);
         this.setParent(parent);
