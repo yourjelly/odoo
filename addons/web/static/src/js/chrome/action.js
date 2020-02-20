@@ -147,12 +147,14 @@ class Action extends ComponentAdapter {
         return super.destroy();
     }
     patched() {
-        if (this.legacy && this.legacyZombie) {
-            if (this.widget && this.widget.on_attach_callback) {
-                this.widget.on_attach_callback();
-            }
-            this.legacyZombie = false;
+        if (this.legacy) {
             this.widgetReloadProm = null;
+            if (this.legacyZombie) {
+                if (this.widget && this.widget.on_attach_callback) {
+                    this.widget.on_attach_callback();
+                }
+                this.legacyZombie = false;
+            }
         }
     }
 }
