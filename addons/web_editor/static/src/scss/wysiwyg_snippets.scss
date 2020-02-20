@@ -618,10 +618,17 @@ body.editor_enable.editor_has_snippets {
 
 // SNIPPET OPTIONS
 .colorpicker {
+    .o_we_colorpicker_switch_pane_btn {
+        font-size: 0.8em !important;
+
+        &:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
     .o_colorpicker_sections {
         font-size: 14px;
 
-        button {
+        .o_we_color_btn, .o_we_color_combination_btn {
             float: left;
             width: percentage(1 / 8);
             padding-top: percentage(1 / 8);
@@ -630,12 +637,34 @@ body.editor_enable.editor_has_snippets {
             box-shadow: inset 0 0 0 1px var(--o-we-bg-color-dark);
         }
 
+        .o_we_color_combination_btn {
+            float: none;
+            width: 92%;
+            padding: 8px;
+            margin: 0 4%;
+            background-clip: padding-box;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+
+            > * {
+                line-height: 1.6;
+            }
+
+            + .o_we_color_combination_btn {
+                margin-top: -4px;
+            }
+
+            &.o_colorpicker_reset {
+                background-color: white;
+            }
+        }
+
         .o_colorpicker_section {
 
             > :first-child {
                 margin: 4px 0;
             }
-            button {
+            .o_we_color_btn {
                 position: relative;
 
                 &.selected::before {
@@ -654,7 +683,7 @@ body.editor_enable.editor_has_snippets {
             }
 
             &[data-name="transparent_grayscale"], &[data-name="theme"] {
-                button {
+                .o_we_color_btn {
                     @include o-alpha-button-preview;
 
                     &::before, &::after {
