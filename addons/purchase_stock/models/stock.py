@@ -146,20 +146,16 @@ class StockWarehouse(models.Model):
         for wh in self:
             if not wh.buy_to_resupply:
                 continue
-            if wh.buy_pull_id and wh.buy_pull_id.route_id:
-                routes |= wh.buy_pull_id.route_id
-            if wh.buy_pull_mto_id and wh.buy_pull_mto_id.route_id:
-                routes |= wh.buy_pull_mto_id.route_id
+            if wh.buy_pull_id and wh.buy_pull_id.route_ids:
+                routes |= wh.buy_pull_id.route_ids
         return routes
 
     def _update_name_and_code(self, name=False, code=False):
         res = super(StockWarehouse, self)._update_name_and_code(name, code)
         warehouse = self[0]
-        #change the buy stock rule name
+        # change the buy stock rule name
         if warehouse.buy_pull_id and name:
             warehouse.buy_pull_id.write({'name': warehouse.buy_pull_id.name.replace(warehouse.name, name, 1)})
-        if warehouse.buy_pull_mto_id and name:
-            warehouse.buy_pull_mto_id.write({'name': warehouse.buy_pull_mto_id.name.replace(warehouse.name, name, 1)})
         return res
 
 
@@ -184,7 +180,6 @@ class Orderpoint(models.Model):
                 return route_id[0]
         return super()._get_default_route_id()
 
-    @api.model
     def _get_quantity_in_progress(self, product_ids, location_ids):
         # TODO maybe it should be an extension of product _compute_quantities
         qty_by_product_location = super()._get_quantity_in_progress(product_ids, location_ids)
@@ -192,14 +187,19 @@ class Orderpoint(models.Model):
             ('state', 'in', ('draft', 'sent', 'to approve')),
             ('move_dest_ids', '=', False),
             ('product_id', 'in', product_ids),
-            ('order_id.picking_type_id.default_location_dest_id', 'in', location_ids)
+            '|',
+            ('order_id.picking_type_id.default_location_dest_id', 'in', location_ids),
+            ('orderpoint_id', 'in', self.ids),
         ],
-            ['product_id', 'product_qty', 'order_id', 'product_uom'],
-            ['order_id', 'product_id', 'product_uom'], lazy=False)
+            ['product_id', 'product_qty', 'order_id', 'product_uom', 'orderpoint_id'],
+            ['order_id', 'product_id', 'product_uom', 'orderpoint_id'], lazy=False)
         for group in groups:
-            order = self.env['purchase.order'].browse(group['order_id'][0])
+            if group.get('orderpoint_id'):
+                location_id = self.env['stock.warehouse.orderpoint'].browse(group['orderpoint_id'][:1]).location_id.id
+            else:
+                order = self.env['purchase.order'].browse(group['order_id'][0])
+                location_id = order.picking_type_id.default_location_dest_id.id
             product = self.env['product.product'].browse(group['product_id'][0])
-            location_id = order.picking_type_id.default_location_dest_id.id
             uom = self.env['uom.uom'].browse(group['product_uom'][0])
             product_qty = uom._compute_quantity(group['product_qty'], product.uom_id, round=False)
             qty_by_product_location[(product.id, location_id)] += product_qty
@@ -207,7 +207,7 @@ class Orderpoint(models.Model):
 
     def _quantity_in_progress(self):
         res = super(Orderpoint, self)._quantity_in_progress()
-        qty_by_product_location = self.env['stock.warehouse.orderpoint']._get_quantity_in_progress(self.product_id.ids, self.location_id.ids)
+        qty_by_product_location = self._get_quantity_in_progress(self.product_id.ids, self.location_id.ids)
         for orderpoint in self:
             product_qty = qty_by_product_location.get((orderpoint.product_id.id, orderpoint.location_id.id), 0.0)
             product_uom_qty = orderpoint.product_id.uom_id._compute_quantity(product_qty, orderpoint.product_uom, round=False)

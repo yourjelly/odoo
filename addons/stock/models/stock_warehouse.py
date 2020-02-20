@@ -308,7 +308,7 @@ class Warehouse(models.Model):
         for rule_field, rule_details in self._get_global_route_rules_values().items():
             values = rule_details.get('update_values', {})
             if self[rule_field]:
-                self[rule_field].write(values)
+                self[rule_field].sudo().write(values)
             else:
                 values.update(rule_details['create_values'])
                 values.update({'warehouse_id': self.id})
@@ -589,7 +589,7 @@ class Warehouse(models.Model):
             transit_location.active = True
             output_location = supplier_wh.lot_stock_id if supplier_wh.delivery_steps == 'ship_only' else supplier_wh.wh_output_stock_loc_id
 
-            inter_wh_route, inter_wh_route_mto = Route.create(self._get_inter_warehouse_route_values(supplier_wh))
+            inter_wh_route, inter_wh_route_mto = Route.sudo().create(self._get_inter_warehouse_route_values(supplier_wh))
 
             pull_rules_list = supplier_wh._get_supply_pull_rules_values(
                 [self.Routing(output_location, transit_location, supplier_wh.out_type_id, 'pull')],

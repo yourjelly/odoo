@@ -288,10 +288,10 @@ class StockWarehouse(models.Model):
         for wh in self:
             if not wh.manufacture_to_resupply:
                 continue
-            if wh.manufacture_pull_id and wh.manufacture_pull_id.route_id:
-                routes |= wh.manufacture_pull_id.route_id
-            if wh.manufacture_mto_pull_id and wh.manufacture_mto_pull_id.route_id:
-                routes |= wh.manufacture_mto_pull_id.route_id
+            if wh.manufacture_pull_id and wh.manufacture_pull_id.route_ids:
+                routes |= wh.manufacture_pull_id.route_ids
+            if wh.manufacture_mto_pull_id and wh.manufacture_mto_pull_id.route_ids:
+                routes |= wh.manufacture_mto_pull_id.route_ids
         return routes
 
     def _update_location_manufacture(self, new_manufacture_step):

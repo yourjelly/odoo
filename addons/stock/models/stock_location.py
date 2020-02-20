@@ -208,6 +208,11 @@ class Route(models.Model):
             self.warehouse_ids = [(5, 0, 0)]
 
     def toggle_active(self):
+        rules_to_toggle = self.env['stock.rule']
         for route in self:
-            route.with_context(active_test=False).rule_ids.filtered(lambda ru: ru.active == route.active).toggle_active()
+            rules = route.with_context(active_test=False).rule_ids
+            for rule in rules:
+                if all(r.active != rule.active or r in self for r in rule.route_ids):
+                    rules_to_toggle |= rule
+        rules_to_toggle.toggle_active()
         super(Route, self).toggle_active()

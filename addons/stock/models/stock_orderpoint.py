@@ -157,7 +157,7 @@ class StockWarehouseOrderpoint(models.Model):
             self.product_uom = self.product_id.uom_id.id
         self.route_id = self._get_default_route_id()
 
-    @api.onchange('product_id', 'location_id')
+    @api.onchange('product_id', 'location_id', 'product_min_qty', 'product_max_qty')
     def _onchange_product_location_id(self):
         if self.product_id and self.location_id:
             self._compute_qty()
