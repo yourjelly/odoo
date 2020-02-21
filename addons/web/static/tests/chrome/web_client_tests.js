@@ -245,6 +245,80 @@ QUnit.module('WebClient', {
 
         webClient.destroy();
     });
+
+    QUnit.test('Menus keep dropdown when mouseover', async function (assert) {
+        assert.expect(13);
+
+        const menus = {
+            all_menu_ids: [999, 1, 2, 11, 21],
+            children: [{
+                id: 999,
+                action: 'ir.actions.act_window,10',
+                name: 'MAIN APP',
+                children: [{
+                    id: 1,
+                    name: 'P1',
+                    children: [{
+                        id: 11,
+                        name: 'C11',
+                        children: [],
+                    }],
+                }, {
+                    id: 2,
+                    name: 'P2',
+                    children: [{
+                        id: 21,
+                        name: 'C21',
+                        children: [],
+                    }],
+                }]
+            }],
+        };
+
+        const webClient = await createWebClient({
+            data: this.data,
+            actions: this.actions,
+            archs: this.archs,
+            menus: menus,
+            debug: true, // Needed because we are going to use the real DOM, because of mouseover
+        });
+
+        const menuItems = webClient.el.querySelectorAll('nav ul.o_menu_sections li');
+        assert.strictEqual(menuItems.length, 2);
+
+        assert.containsNone(webClient, '.dropdown-menu.show');
+        await testUtils.dom.click(menuItems[0].querySelector('a'));
+        assert.containsOnce(webClient, '.dropdown-menu.show');
+        assert.strictEqual(webClient.el.querySelector('.dropdown-menu.show').textContent, 'C11');
+
+        // mouseover is tricky
+        // https://www.w3.org/TR/DOM-Level-3-Events/#trusted-events
+        let rect = menuItems[1].getBoundingClientRect();
+        await testUtils.dom.triggerPositionalMouseEvent(rect.x, rect.y + 1, 'mouseover');
+        assert.containsOnce(webClient, '.dropdown-menu.show');
+        assert.strictEqual(webClient.el.querySelector('.dropdown-menu.show').textContent, 'C21');
+
+        rect = menuItems[0].getBoundingClientRect();
+        await testUtils.dom.triggerPositionalMouseEvent(rect.x, rect.y + 1, 'mouseover');
+        assert.containsOnce(webClient, '.dropdown-menu.show');
+        assert.strictEqual(webClient.el.querySelector('.dropdown-menu.show').textContent, 'C11');
+
+        rect = menuItems[0].getBoundingClientRect();
+        await testUtils.dom.triggerPositionalMouseEvent(rect.x, rect.y + 1, 'mouseover');
+        assert.containsOnce(webClient, '.dropdown-menu.show');
+        assert.strictEqual(webClient.el.querySelector('.dropdown-menu.show').textContent, 'C11');
+
+        // Case where the el receiving the el is a child of the handler
+        rect = webClient.el.querySelector('nav .o_menu_apps i').getBoundingClientRect();
+        await testUtils.dom.triggerPositionalMouseEvent(rect.x, rect.y + 1, 'mouseover');
+        assert.containsOnce(webClient, '.dropdown-menu.show');
+        assert.strictEqual(webClient.el.querySelector('.dropdown-menu.show').textContent, 'MAIN APP');
+
+        await testUtils.dom.click(webClient.el.querySelector('nav'));
+        assert.containsNone(webClient, '.dropdown-menu.show');
+
+        webClient.destroy();
+    });
 });
 
 });

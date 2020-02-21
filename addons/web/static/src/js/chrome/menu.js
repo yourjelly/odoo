@@ -3,7 +3,7 @@ odoo.define('web.Menu', function (require) {
 
 const SystrayMenu = require('web.SystrayMenu');
 
-const { Component, useState } = owl;
+const { Component } = owl;
 
 class Menu extends Component {
     constructor() {
@@ -31,19 +31,18 @@ class Menu extends Component {
      */
     _onMouseOverMenu(ev) {
         // TODO: check if necessary
-        // if (config.device.isMobile) {
-        //     return;
-        // }
-
-        // TODO: open sibling dropdowns on mouseover
-        // var $target = $(ev.currentTarget);
-        // var $opened = $target.siblings('.show');
-        // if ($opened.length) {
-        //     $opened.find('[data-toggle="dropdown"]').dropdown('toggle');
-        //     $opened.removeClass('show');
-        //     $target.find('[data-toggle="dropdown"]').dropdown('toggle');
-        //     $target.addClass('show');
-        // }
+        if (this.env.device.isMobile) {
+            return;
+        }
+        const menuShown = this.el.querySelector('.dropdown-menu.show');
+        if (menuShown) {
+            const toggleMenuShown = menuShown.parentNode.querySelector('[data-toggle="dropdown"]');
+            const target = ev.currentTarget;
+            if (toggleMenuShown !== target) {
+                $(toggleMenuShown).dropdown('toggle');
+                $(target).dropdown('toggle');
+            }
+        }
     }
 }
 Menu.components = { SystrayMenu };
