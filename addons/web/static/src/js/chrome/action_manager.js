@@ -750,7 +750,7 @@ class ActionManager extends core.EventBus {
             delete controller.owlReload;
             newMain.action = action;
             newMain.controller = controller;
-            newMenuID = controller.options && controller.options.menuID;
+            newMenuID = controller.options && controller.options.menuID || this.menuID;
         } else {
             if (main) {
                 newMain = main;

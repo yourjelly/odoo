@@ -4542,7 +4542,21 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('fullscreen on action change: back to a "current" action', async function (assert) {
-        assert.expect(3);
+        assert.expect(7);
+
+        const menus = {
+            all_menu_ids: [999, 1],
+            children: [{
+                id: 999,
+                action: 'ir.actions.act_window,6',
+                name: 'MAIN APP',
+                children: [{
+                    id: 1,
+                    name: 'P1',
+                    children: [],
+                }]
+            }],
+        };
 
         this.actions[0].target = 'fullscreen';
         this.archs['partner,false,form'] = `
@@ -4554,10 +4568,12 @@ QUnit.module('ActionManager', {
             actions: this.actions,
             archs: this.archs,
             data: this.data,
-            menus: this.menus,
+            menus: menus,
         });
 
-        await doAction(6);
+        assert.containsOnce(webClient, 'nav .o_menu_brand');
+        assert.strictEqual(webClient.el.querySelector('nav .o_menu_brand').textContent, 'MAIN APP');
+
         assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
 
         await testUtils.dom.click($(webClient.el).find('button[name=1]'));
@@ -4565,6 +4581,58 @@ QUnit.module('ActionManager', {
 
         await testUtils.dom.click($(webClient.el).find('.breadcrumb li a:first'));
         assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+
+        assert.containsOnce(webClient, 'nav .o_menu_brand');
+        assert.strictEqual(webClient.el.querySelector('nav .o_menu_brand').textContent, 'MAIN APP');
+
+        webClient.destroy();
+    });
+
+    QUnit.test('fullscreen on action change: back to another "current" action', async function (assert) {
+        assert.expect(8);
+
+        const menus = {
+            all_menu_ids: [999, 1],
+            children: [{
+                id: 999,
+                action: 'ir.actions.act_window,6',
+                name: 'MAIN APP',
+                children: [{
+                    id: 1,
+                    name: 'P1',
+                    children: [],
+                }]
+            }],
+        };
+
+        this.actions[0].target = 'fullscreen';
+        this.archs['partner,false,form'] = `
+            <form>
+                <button name="24" type="action" class="oe_stat_button"/>
+            </form>`;
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: menus,
+        });
+
+        assert.containsOnce(webClient, 'nav .o_menu_brand');
+        assert.strictEqual(webClient.el.querySelector('nav .o_menu_brand').textContent, 'MAIN APP');
+        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+
+        await testUtils.dom.click(webClient.el.querySelector('button[name="24"]'));
+        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+
+        await testUtils.dom.click(webClient.el.querySelector('button[name="1"]'));
+        assert.hasClass(webClient.el, 'o_fullscreen');
+
+        await testUtils.dom.click(webClient.el.querySelectorAll('.breadcrumb li a')[1]);
+        assert.doesNotHaveClass(webClient.el, 'o_fullscreen');
+
+        assert.containsOnce(webClient, 'nav .o_menu_brand');
+        assert.strictEqual(webClient.el.querySelector('nav .o_menu_brand').textContent, 'MAIN APP');
 
         webClient.destroy();
     });
