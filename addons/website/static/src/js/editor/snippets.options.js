@@ -717,7 +717,7 @@ options.registry.Theme = options.Class.extend({
      */
     _computeWidgetVisibility: async function (widgetName, params) {
         if (widgetName === 'theme_color_suggestions') {
-            return false;
+            return true;
         }
         if (widgetName === 'primary_color_opt' || widgetName === 'alpha_as_extra_color_opt') {
             return !this._alphaEqualsPrimary;
