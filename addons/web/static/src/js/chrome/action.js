@@ -168,13 +168,14 @@ class DialogAction extends owl.Component {
             this.legacyActionWigdet = legacyWidget;
         });
     }
-    mounted() {
+    __patch() {
+        const patched = super.__patch(...arguments);
         if (this.legacyActionWigdet) {
             const footer = this.dialog.comp.footerRef.el;
             footer.innerHTML = "";
             this.legacyActionWigdet.renderButtons($(footer));
         }
-        return super.mounted();
+        return patched;
     }
 }
 DialogAction.template = owl.tags.xml`

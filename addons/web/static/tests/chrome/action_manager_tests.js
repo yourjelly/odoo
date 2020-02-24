@@ -4447,6 +4447,38 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
+    QUnit.test('footer buttons are updated when having another action in target "new"', async function (assert) {
+        assert.expect(9);
+
+        this.archs['partner,false,form'] = '<form>' +
+                '<field name="display_name"/>' +
+                '<footer>' +
+                    '<button string="Create" type="object" class="infooter"/>' +
+                '</footer>' +
+            '</form>';
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+        });
+        await doAction(5);
+        assert.containsNone(webClient, '.o_technical_modal .modal-body button[special="save"]');
+        assert.containsNone(webClient, '.o_technical_modal .modal-body button.infooter');
+        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button.infooter');
+        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button');
+
+        await doAction(25);
+        assert.containsNone(webClient, '.o_technical_modal .modal-body button.infooter');
+        assert.containsNone(webClient, '.o_technical_modal .modal-footer button.infooter');
+        assert.containsNone(webClient, '.o_technical_modal .modal-body button[special="save"]');
+        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button[special="save"]');
+        assert.containsOnce(webClient, '.o_technical_modal .modal-footer button');
+
+        webClient.destroy();
+    });
+
     QUnit.test('on_attach_callback is called for actions in target="new"', async function (assert) {
         assert.expect(3);
 
