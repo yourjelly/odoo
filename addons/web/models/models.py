@@ -180,7 +180,7 @@ class Base(models.AbstractModel):
     @api.model
     def qweb_render_view(self, view_id, domain):
         assert view_id
-        return self.env['ir.qweb'].render(
+        return self.env['ir.qweb']._render(
             view_id, {
             **self.env['ir.ui.view']._prepare_qcontext(),
             **self._qweb_prepare_qcontext(view_id, domain),

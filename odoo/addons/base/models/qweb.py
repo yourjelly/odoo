@@ -244,7 +244,7 @@ class QWeb(object):
         'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr'])
     _name_gen = count()
 
-    def render(self, template, values=None, **options):
+    def _render(self, template, values=None, **options):
         """ render(template, values, **options)
 
         Render the template specified by the given name.

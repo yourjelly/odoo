@@ -1604,7 +1604,7 @@ actual arch.
         qcontext = dict() if minimal_qcontext else self._prepare_qcontext()
         qcontext.update(values or {})
 
-        return self.env[engine].render(self.id, qcontext)
+        return self.env[engine]._render(self.id, qcontext)
 
     @api.model
     def _prepare_qcontext(self):

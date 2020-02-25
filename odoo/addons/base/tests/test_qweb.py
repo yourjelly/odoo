@@ -25,7 +25,7 @@ class TestQWebTField(TransactionCase):
         field = etree.Element('span', {'t-field': u'company.name'})
         company = self.env['res.company'].create({'name': "My Test Company"})
 
-        result = self.engine.render(field, {'company': company})
+        result = self.engine._render(field, {'company': company})
         self.assertEqual(
             etree.fromstring(result),
             etree.fromstring(u'<span data-oe-model="res.company" data-oe-id="%d" '
@@ -41,7 +41,7 @@ class TestQWebTField(TransactionCase):
         s = u"Testing «ταБЬℓσ»: 1<2 & 4+1>3, now 20% off!"
         company = self.env['res.company'].create({'name': s})
 
-        result = self.engine.render(field, {'company': company})
+        result = self.engine._render(field, {'company': company})
         self.assertEqual(
             etree.fromstring(result),
             etree.fromstring(u'<span data-oe-model="res.company" data-oe-id="%d" '
@@ -56,13 +56,13 @@ class TestQWebTField(TransactionCase):
         field = etree.Element('td', {'t-field': u'company.name'})
 
         with self.assertRaisesRegex(QWebException, r'^RTE widgets do not work correctly'):
-            self.engine.render(field, {'company': None})
+            self.engine._render(field, {'company': None})
 
     def test_reject_t_tag(self):
         field = etree.Element('t', {'t-field': u'company.name'})
 
         with self.assertRaisesRegex(QWebException, r'^t-field can not be used on a t element'):
-            self.engine.render(field, {'company': None})
+            self.engine._render(field, {'company': None})
 
     def test_render_t_options(self):
         view1 = self.env['ir.ui.view'].create({
@@ -622,7 +622,7 @@ class TestQWeb(TransactionCase):
 
             result = doc.find('result[@id="{}"]'.format(template)).text
             self.assertEqual(
-                qweb.render(template, values=params, load=loader).strip(),
+                qweb._render(template, values=params, load=loader).strip(),
                 (result or u'').strip().encode('utf-8'),
                 template
             )
@@ -646,7 +646,7 @@ class TestPageSplit(TransactionCase):
             </t>
             '''
         })
-        rendered = html.fromstring(self.env['ir.qweb'].render(t.id))
+        rendered = html.fromstring(self.env['ir.qweb']._render(t.id))
         ref = E.div(
             E.table(E.tr()),
             E.div({'style': 'page-break-after: always'}),
@@ -669,7 +669,7 @@ class TestPageSplit(TransactionCase):
             </t>
             '''
         })
-        rendered = html.fromstring(self.env['ir.qweb'].render(t.id))
+        rendered = html.fromstring(self.env['ir.qweb']._render(t.id))
         self.assertTreesEqual(
             rendered,
             E.div(
@@ -694,7 +694,7 @@ class TestPageSplit(TransactionCase):
             </t>
             '''
         })
-        rendered = html.fromstring(self.env['ir.qweb'].render(t.id))
+        rendered = html.fromstring(self.env['ir.qweb']._render(t.id))
         self.assertTreesEqual(
             rendered,
             E.div(E.table(E.tr(), E.tr(), E.tr()))

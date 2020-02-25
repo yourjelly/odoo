@@ -622,7 +622,7 @@ class Survey(http.Controller):
         return request.render('survey.survey_page_statistics', template_values)
 
     def _generate_report(self, user_input, download=True):
-        report = request.env.ref('survey.certification_report').sudo().render_qweb_pdf([user_input.id], data={'report_type': 'pdf'})[0]
+        report = request.env.ref('survey.certification_report').sudo()._render_qweb_pdf([user_input.id], data={'report_type': 'pdf'})[0]
 
         report_content_disposition = content_disposition('Certification.pdf')
         if not download:

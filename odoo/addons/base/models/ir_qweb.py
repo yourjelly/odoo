@@ -36,7 +36,7 @@ class IrQWeb(models.AbstractModel, QWeb):
     _description = 'Qweb'
 
     @api.model
-    def render(self, id_or_xml_id, values=None, **options):
+    def _render(self, id_or_xml_id, values=None, **options):
         """ render(id_or_xml_id, values, **options)
 
         Render the template specified by the given name.
@@ -55,7 +55,7 @@ class IrQWeb(models.AbstractModel, QWeb):
         context = dict(self.env.context, dev_mode='qweb' in tools.config['dev_mode'])
         context.update(options)
 
-        result = super(IrQWeb, self).render(id_or_xml_id, values=values, **context)
+        result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
 
         if b'data-pagebreak=' not in result:
             return result
@@ -324,7 +324,7 @@ class IrQWeb(models.AbstractModel, QWeb):
                 from odoo.addons.web.controllers.main import module_boot
                 return json.dumps(module_boot())
             return '[]'
-        template = IrQweb.render(xmlid, {"get_modules_order": get_modules_order})
+        template = IrQweb._render(xmlid, {"get_modules_order": get_modules_order})
 
         files = []
         remains = []
