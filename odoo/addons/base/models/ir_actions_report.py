@@ -510,7 +510,7 @@ class IrActionsReport(models.Model):
                 return self.barcode('Code128', value, width=width, height=height,
                     humanreadable=humanreadable, quiet=quiet)
 
-    def render_template(self, template, values=None):
+    def _render_template(self, template, values=None):
         """Allow to render a QWeb template python-side. This function returns the 'ir.ui.view'
         render but embellish it with some variables/methods used in reports.
         :param values: additionnal methods/variables used in the rendering
@@ -745,7 +745,7 @@ class IrActionsReport(models.Model):
             data = {}
         data.setdefault('report_type', 'text')
         data = self._get_rendering_context(docids, data)
-        return self.render_template(self.report_name, data), 'text'
+        return self._render_template(self.report_name, data), 'text'
 
     @api.model
     def render_qweb_html(self, docids, data=None):
@@ -755,7 +755,7 @@ class IrActionsReport(models.Model):
             data = {}
         data.setdefault('report_type', 'html')
         data = self._get_rendering_context(docids, data)
-        return self.render_template(self.report_name, data), 'html'
+        return self._render_template(self.report_name, data), 'html'
 
     @api.model
     def _get_rendering_context_model(self):
