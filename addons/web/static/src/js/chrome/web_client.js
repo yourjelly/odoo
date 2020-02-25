@@ -6,6 +6,7 @@ const { Action, DialogAction } = require('web.Action');
 const { ComponentAdapter } = require('web.OwlCompatibility');
 const LoadingWidget = require('web.Loading');
 const Menu = require('web.Menu');
+const RainbowMan = require('web.RainbowMan');
 
 const { Component, hooks } = owl;
 const useRef = hooks.useRef;
@@ -23,6 +24,9 @@ class WebClient extends Component {
             }
         });
         this.actionManager.on('update', this, payload => {
+            if (this.rainbowMan) {
+                this.rainbowMan.destroy();
+            }
             this.renderingInfo = payload;
             if (!this.renderingInfo.menuID && !this.state.menu_id && payload.main) {
                 // retrieve menu_id from action
@@ -41,6 +45,7 @@ class WebClient extends Component {
         // the state of the webclient contains information like the current
         // menu id, action id, view type (for act_window actions)...
         this.state = {};
+        this.rainbowMan = null;
     }
 
     get titleParts() {
@@ -388,6 +393,37 @@ class WebClient extends Component {
             // Any event hapening in the meantime would be irrelevant
             this._updateState(ev.detail.state);
         }
+    }
+    /**
+     * Displays a visual effect (for example, a rainbowMan0
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {Object} [ev.data] - key-value options to decide rainbowMan
+     *   behavior / appearance
+     */
+    async _onShowEffect(ev) {
+        if (!this.renderingInfo) {
+            const data = ev.data || {};
+            const type = data.type || 'rainbow_man';
+            if (type === 'rainbow_man') {
+                if (this.env.session.show_effect) {
+                    this.rainbowMan = await RainbowMan.display(data, {target: this.el, parent: this});
+                } else {
+                    // For instance keep title blank, as we don't have title in data
+                    this.call('notification', 'notify', {
+                        title: "",
+                        message: data.message,
+                        sticky: false
+                    });
+                }
+            } else {
+                throw new Error('Unknown effect type: ' + type);
+            }
+        }
+    }
+    _onCloseRainbowMan() {
+        this.rainbowMan = null;
     }
 }
 WebClient.components = { Action, Menu, DialogAction, ComponentAdapter };

@@ -469,6 +469,7 @@ class ActionManager extends core.EventBus {
         const res = {
             main: null,
             dialog: null,
+            menuID: this.menuID,
         };
         const currentControllerID = this.currentStack[this.currentStack.length - 1];
         if (currentControllerID) {
@@ -822,20 +823,21 @@ class ActionManager extends core.EventBus {
                 cb();
             }
         };
-
-        const fullscreen = nextStack.find(controllerID => {
-            const controller = this.controllers[controllerID];
-            return this.actions[controller.actionID].target === 'fullscreen';
-        });
         const payload = {
             main: newMain,
             dialog: newDialog,
-            fullscreen: fullscreen,
+            fullscreen: this.getFullScreen(nextStack),
             menuID: newMenuID,
             onSuccess: onSuccess,
             onFail: onFail,
         };
         this.trigger('update', payload);
+    }
+    getFullScreen(nextStack) {
+        return nextStack.find(controllerID => {
+            const controller = this.controllers[controllerID];
+            return this.actions[controller.actionID].target === 'fullscreen';
+        });
     }
     /**
      * Wraps a promise to resolve/reject it when it is resolved/rejected: iff

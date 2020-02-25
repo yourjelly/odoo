@@ -624,6 +624,48 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
+    QUnit.test("rainbowman integrated to webClient", async function (assert) {
+        assert.expect(12);
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            session: {
+                show_effect: true,
+            },
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(webClient, '.o_reward');
+        webClient.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
+        // the webClient doesn't wait for rainbow man
+        // Besides, rainbowMan needs to load its template asyncly
+        await testUtils.nextTick();
+        await testUtils.nextTick();
+        assert.containsOnce(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_kanban_view');
+        await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record'));
+        assert.containsNone(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        webClient.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
+        await testUtils.nextTick();
+        assert.containsOnce(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        await doAction(3);
+        assert.containsNone(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_list_view');
+
+        // same as before, but don't wait
+        webClient.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
+        await doAction(1);
+        assert.containsNone(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_kanban_view');
+        webClient.destroy();
+    });
+
     QUnit.module('Push State');
 
     QUnit.test('properly push state', async function (assert) {
