@@ -545,6 +545,7 @@ blockquote {
     $-text: map-get($config, 'text');
     $-headings: map-get($config, 'headings');
     $-btn-primary: map-get($config, 'btn-primary');
+    $-btn-secondary: map-get($config, 'btn-secondary');
 
     // Those color classes color multiple elements when applied on a snippet.
     // Those rules are not important so that they can be overridden through
@@ -575,6 +576,23 @@ blockquote {
             }
             .btn-outline-primary {
                 @include button-outline-variant($-btn-primary-color);
+            }
+        }
+
+        @if has-related-color-classes($-btn-secondary, 'btn') {
+            .btn-secondary {
+                @extend .btn-#{$-btn-secondary};
+            }
+            .btn-outline-secondary {
+                @extend .btn-outline-#{$-btn-secondary};
+            }
+        } @else {
+            $-btn-secondary-color: o-get-color($-btn-secondary);
+            .btn-secondary {
+                @include button-variant($-btn-secondary-color, $-btn-secondary-color);
+            }
+            .btn-outline-secondary {
+                @include button-outline-variant($-btn-secondary-color);
             }
         }
     }
