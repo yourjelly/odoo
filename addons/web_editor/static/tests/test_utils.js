@@ -45,7 +45,7 @@ MockServer.include({
                         '</t></templates>';
                 return Promise.resolve(template);
             }
-            if (args.method === 'render_template' && args.args[0] === "web_editor.snippets") {
+            if (args.method === 'render_public_asset' && args.args[0] === "web_editor.snippets") {
                 var template = '<h2 id="snippets_menu">Add blocks</h2>' +
                         '<div id="o_scroll">' +
                         '    <div id="snippet_structure" class="o_panel">' +

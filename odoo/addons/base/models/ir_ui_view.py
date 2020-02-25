@@ -1585,15 +1585,8 @@ actual arch.
         if template not in PUBLIC_ASSETS:
             _logger.warning("Add the external id %s in global variable PUBLC_ASSSETS to make the arch accessible in RPC", template)
             raise ValidationError(_("Asset %s not accessible") % template)
-        template = self.browse(self.get_view_id(template)).sudo()
-        return template._render(values, engine="ir.qweb")
-
-    @api.model
-    def render_template(self, template, values=None):
-        _logger.warning("Call to public render_template for view %s", template)
-        self.check_access_rights('read')
         template = self.browse(self.get_view_id(template))
-        return template._render(values, engine="ir.qweb")
+        return template.sudo()._render(values, engine="ir.qweb")
 
     def _render_template(self, template, values=None, engine='ir.qweb'):
         return self.browse(self.get_view_id(template))._render(values, engine)
