@@ -19,7 +19,7 @@
     }
 
     .breadcrumb {
-        font-size: 18px;
+        font-size: 17px;
 
         > li {
             @include o-text-overflow($max-width: 90%);
