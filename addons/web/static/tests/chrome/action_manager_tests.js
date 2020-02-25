@@ -3903,8 +3903,7 @@ QUnit.module('ActionManager', {
             data: this.data,
             menus: this.menus,
             dataManager: {
-                create_filter: function (payload) {
-                    var filter = payload.filter;
+                create_filter: function (filter) {
                     assert.deepEqual(filter.domain, `[("bar", "=", 1)]`,
                         "should save the correct domain");
                     assert.deepEqual(filter.context, {shouldBeInFilterContext: true},
