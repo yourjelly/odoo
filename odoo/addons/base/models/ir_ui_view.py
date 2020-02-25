@@ -399,11 +399,11 @@ actual arch.
 
         return True
 
-    @api.constrains('type', 'groups_id')
+    @api.constrains('type', 'groups_id', 'inherit_id')
     def _check_groups(self):
         for view in self:
-            if view.type == 'qweb' and view.groups_id:
-                raise ValidationError(_("Qweb view cannot have 'Groups' define on the record. Use 'groups' attributes inside the view definition"))
+            if view.type == 'qweb' and view.groups_id and view.inherit_id:
+                raise ValidationError(_("Inherited Qweb view cannot have 'Groups' define on the record. Use 'groups' attributes inside the view definition"))
 
     @api.constrains('inherit_id')
     def _check_000_inheritance(self):
@@ -584,6 +584,23 @@ actual arch.
             return not view.groups_id or (view.groups_id & self.env.user.groups_id)
 
         return self.browse(view_ids).sudo().filtered(accessible)
+
+    def _accessible(self, raise_error=False):
+        """ Verify is a view is accessible by the current user based on the
+        groups attibute. No group specified is considered as private view.
+        """
+        if self.inherit_id:
+            return self.inherit_id._accessible(raise_error=raise_error)
+        if self.groups_id & self.env.user.groups_id:
+            return True
+        if raise_error:
+            if self.groups_id:
+                error = _("View '%s' accessible only to groups %s ") % \
+                         (self.key, ", ".join([g.name for g in self.groups_id]))
+            else:
+                error = _("View '%s' is private") % self.key
+            raise AccessError(error)
+        return False
 
     def handle_view_error(self, message, *, raise_exception=True, from_exception=None, from_traceback=None):
         """ Handle a view error by raising an exception or logging a warning,
@@ -1473,7 +1490,9 @@ actual arch.
         """ Return a template content based on external id
         Read access on ir.ui.view required
         """
-        return self._read_template(self.get_view_id(xml_id))
+        template_id = self.get_view_id(xml_id)
+        self.browse(template_id)._accessible(raise_error=True)
+        return self._read_template(template_id)
 
     @api.model
     def get_view_id(self, template):
@@ -1582,10 +1601,8 @@ actual arch.
 
     @api.model
     def render_public_asset(self, template, values=None):
-        if template not in PUBLIC_ASSETS:
-            _logger.warning("Add the external id %s in global variable PUBLC_ASSSETS to make the arch accessible in RPC", template)
-            raise ValidationError(_("Asset %s not accessible") % template)
-        template = self.browse(self.get_view_id(template))
+        template = self.sudo().browse(self.get_view_id(template))
+        template._accessible(raise_error=True)
         return template.sudo()._render(values, engine="ir.qweb")
 
     def _render_template(self, template, values=None, engine='ir.qweb'):
