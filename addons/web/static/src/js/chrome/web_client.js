@@ -404,14 +404,15 @@ class WebClient extends Component {
      */
     async _onShowEffect(ev) {
         if (!this.renderingInfo) {
-            const data = ev.data || {};
+            const data = ev.detail || {};
             const type = data.type || 'rainbow_man';
             if (type === 'rainbow_man') {
                 if (this.env.session.show_effect) {
                     this.rainbowMan = await RainbowMan.display(data, {target: this.el, parent: this});
                 } else {
                     // For instance keep title blank, as we don't have title in data
-                    this.call('notification', 'notify', {
+                    const notifService = this.env.services['notification'];
+                    notifService.notify({
                         title: "",
                         message: data.message,
                         sticky: false

@@ -666,6 +666,33 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
+    QUnit.test('show effect notification', async function (assert) {
+        assert.expect(6);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            session: {
+                show_effect: false,
+            },
+            services: {
+                notification: NotificationService
+            }
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(webClient, '.o_reward');
+        assert.containsNone(document.querySelector('body'), '.o_notification');
+        webClient.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
+        await testUtils.nextTick();
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(webClient, '.o_reward');
+        assert.containsOnce(document.querySelector('body'), '.o_notification');
+        webClient.destroy();
+    });
+
     QUnit.module('Push State');
 
     QUnit.test('properly push state', async function (assert) {
