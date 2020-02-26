@@ -691,6 +691,41 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
+    QUnit.test('deconnection and reconnection notifications', async function (assert) {
+        assert.expect(8);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            services: {
+                notification: NotificationService
+            }
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(document.querySelector('body'), '.o_notification');
+        webClient.env.bus.trigger('connection_lost');
+        await testUtils.nextTick();
+        assert.containsOnce(document.querySelector('body'), '.o_notification');
+        assert.strictEqual(
+            document.querySelector('body .o_notification .o_notification_title').innerHTML,
+            'Connection lost'
+        );
+        assert.containsOnce(webClient, '.o_kanban_view');
+
+        webClient.env.bus.trigger('connection_restored');
+        await testUtils.nextTick();
+        assert.containsN(document.querySelector('body'), '.o_notification', 2);
+        assert.strictEqual(
+            document.querySelectorAll('body .o_notification .o_notification_title')[1].innerHTML,
+            'Connection restored'
+        );
+        assert.containsOnce(webClient, '.o_kanban_view');
+        webClient.destroy();
+    });
+
     QUnit.module('Push State');
 
     QUnit.test('properly push state', async function (assert) {

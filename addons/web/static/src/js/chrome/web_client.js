@@ -46,6 +46,8 @@ class WebClient extends Component {
         // menu id, action id, view type (for act_window actions)...
         this.state = {};
         this.rainbowMan = null;
+        this.env.bus.on('connection_lost', this, this._onConnectionLost);
+        this.env.bus.on('connection_restored', this, this._onConnectionRestored);
     }
 
     get titleParts() {
@@ -152,6 +154,10 @@ class WebClient extends Component {
             stateCompanyIds = [currentCompanyId];
         }
         this.env.session.user_context.allowed_company_ids = stateCompanyIds;
+    }
+    _displayNotification(params) {
+        const notifService = this.env.services.notification;
+        return notifService.notify(params);
     }
     /**
      * FIXME: consider moving this to menu.js
@@ -369,6 +375,35 @@ class WebClient extends Component {
      */
     _onBreadcrumbClicked(ev) {
         this.actionManager.restoreController(ev.detail.controllerID);
+    }
+    /**
+     * Whenever the connection is lost, we need to notify the user.
+     *
+     * @private
+     */
+    _onConnectionLost() {
+        this.connectionNotificationID = this._displayNotification({
+            title: this.env._t('Connection lost'),
+            message: this.env._t('Trying to reconnect...'),
+            sticky: true
+        });
+    }
+    /**
+     * Whenever the connection is restored, we need to notify the user.
+     *
+     * @private
+     */
+    _onConnectionRestored() {
+        if (this.connectionNotificationID) {
+            this.env.services.notification.close(this.connectionNotificationID);
+            this._displayNotification({
+                type: 'info',
+                title: this.env._t('Connection restored'),
+                message: this.env._t('You are back online'),
+                sticky: false
+            });
+            this.connectionNotificationID = false;
+        }
     }
     _onDialogClosed() {
         this.actionManager.doAction({type: 'ir.actions.act_window_close'});
