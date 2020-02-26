@@ -233,7 +233,7 @@ var FileWidget = SearchableMediaWidget.extend({
             args: [],
             kwargs: {
                 domain: this._getAttachmentsDomain(this.needle),
-                fields: ['name', 'mimetype', 'checksum', 'url', 'type', 'res_id', 'res_model', 'public', 'access_token', 'image_src', 'image_width', 'image_height', 'original_id'],
+                fields: ['name', 'mimetype', 'description', 'checksum', 'url', 'type', 'res_id', 'res_model', 'public', 'access_token', 'image_src', 'image_width', 'image_height', 'original_id'],
                 order: [{name: 'id', asc: false}],
                 context: this.options.context,
                 // Try to fetch first record of next page just to know whether there is a next page.
@@ -508,7 +508,7 @@ var FileWidget = SearchableMediaWidget.extend({
         }
         media.dataset.currentlyUsed = img.id;
 
-        this.$media.attr('alt', img.alt);
+        this.$media.attr('alt', img.alt || img.description || '');
         var style = this.style;
         if (style) {
             this.$media.css(style);
