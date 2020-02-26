@@ -224,7 +224,7 @@ widgetsMedia.ImageWidget.include({
             // already saved, probably a double click. Ignore.
             return;
         }
-        const {imgid, url, downloadUrl} = ev.currentTarget.dataset;
+        const {imgid, url, downloadUrl, description} = ev.currentTarget.dataset;
         if (!this.options.multiImages) {
             this._unsplash.selectedImages = {};
             this.selectedAttachments = [];
@@ -232,7 +232,7 @@ widgetsMedia.ImageWidget.include({
         if (imgid in this._unsplash.selectedImages) {
             delete this._unsplash.selectedImages[imgid];
         } else {
-            this._unsplash.selectedImages[imgid] = {url: url, download_url: downloadUrl};
+            this._unsplash.selectedImages[imgid] = {url: url, download_url: downloadUrl, description: description};
         }
         this._highlightSelected();
         if (!this.options.multiImages) {
