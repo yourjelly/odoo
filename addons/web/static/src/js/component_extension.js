@@ -54,7 +54,7 @@
                 });
                 proms.push(prom);
             }
-        await Promise.all(proms);
+            await Promise.all(proms);
         }
         return originalWillStart.apply(this, ...arguments);
     }

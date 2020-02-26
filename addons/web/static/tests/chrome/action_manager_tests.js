@@ -639,10 +639,8 @@ QUnit.module('ActionManager', {
         assert.containsOnce(webClient, '.o_kanban_view');
         assert.containsNone(webClient, '.o_reward');
         webClient.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
-        // the webClient doesn't wait for rainbow man
-        // Besides, rainbowMan needs to load its template asyncly
         await testUtils.nextTick();
-        await testUtils.nextTick();
+
         assert.containsOnce(webClient, '.o_reward');
         assert.containsOnce(webClient, '.o_kanban_view');
         await testUtils.dom.click(webClient.el.querySelector('.o_kanban_record'));

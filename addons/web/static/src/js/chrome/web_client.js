@@ -411,8 +411,7 @@ class WebClient extends Component {
                     this.rainbowMan = await RainbowMan.display(data, {target: this.el, parent: this});
                 } else {
                     // For instance keep title blank, as we don't have title in data
-                    const notifService = this.env.services['notification'];
-                    notifService.notify({
+                    this._displayNotification({
                         title: "",
                         message: data.message,
                         sticky: false
