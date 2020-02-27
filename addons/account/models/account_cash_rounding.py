@@ -20,7 +20,7 @@ class AccountCashRounding(models.Model):
     strategy = fields.Selection([('biggest_tax', 'Modify tax amount'), ('add_invoice_line', 'Add a rounding line')],
         string='Rounding Strategy', default='add_invoice_line', required=True,
         help='Specify which way will be used to round the invoice amount to the rounding precision')
-    account_id = fields.Many2one('account.account', string='Account')
+    account_id = fields.Many2one('account.account', string='Account')  # TODO: should be company dependant
     rounding_method = fields.Selection(string='Rounding Method', required=True,
         selection=[('UP', 'UP'), ('DOWN', 'DOWN'), ('HALF-UP', 'HALF-UP')],
         default='HALF-UP', help='The tie-breaking rule used for float rounding operations')

@@ -34,6 +34,7 @@ class AccountMove(models.Model):
     _description = "Journal Entries"
     _order = 'date desc, name desc, id desc'
     _mail_post_access = 'read'
+    _check_company_auto = True
 
     @api.model
     def _get_default_journal(self):
@@ -118,6 +119,7 @@ class AccountMove(models.Model):
     journal_id = fields.Many2one('account.journal', string='Journal', required=True, readonly=True,
         states={'draft': [('readonly', False)]},
         domain="[('company_id', '=', company_id)]",
+        check_company=True,
         default=_get_default_journal)
     user_id = fields.Many2one(related='invoice_user_id', string='User')
     company_id = fields.Many2one(string='Company', store=True, readonly=True,
@@ -132,6 +134,7 @@ class AccountMove(models.Model):
         states={'draft': [('readonly', False)]})
     partner_id = fields.Many2one('res.partner', readonly=True, tracking=True,
         states={'draft': [('readonly', False)]},
+        check_company=True,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         string='Partner', change_default=True)
     commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity', store=True, readonly=True,
@@ -170,7 +173,8 @@ class AccountMove(models.Model):
         help='If this checkbox is ticked, this entry will be automatically posted at its date.')
 
     # ==== Reverse feature fields ====
-    reversed_entry_id = fields.Many2one('account.move', string="Reversal of", readonly=True, copy=False)
+    reversed_entry_id = fields.Many2one('account.move', string="Reversal of", readonly=True, copy=False,
+        check_company=True)
 
     # =========================================================
     # Invoice related fields
@@ -179,6 +183,7 @@ class AccountMove(models.Model):
     # ==== Business fields ====
     fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True,
         states={'draft': [('readonly', False)]},
+        check_company=True,
         domain="[('company_id', '=', company_id)]",
         help="Fiscal positions are used to adapt taxes and accounts for particular customers or sales orders/invoices. "
              "The default value comes from the customer.")
@@ -205,7 +210,7 @@ class AccountMove(models.Model):
     invoice_origin = fields.Char(string='Origin', readonly=True, tracking=True,
         help="The document(s) that generated the invoice.")
     invoice_payment_term_id = fields.Many2one('account.payment.term', string='Payment Terms',
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        check_company=True,
         readonly=True, states={'draft': [('readonly', False)]})
     # /!\ invoice_line_ids is just a subset of line_ids.
     invoice_line_ids = fields.One2many('account.move.line', 'move_id', string='Invoice lines',
@@ -214,7 +219,7 @@ class AccountMove(models.Model):
         states={'draft': [('readonly', False)]})
     invoice_partner_bank_id = fields.Many2one('res.partner.bank', string='Bank Account',
         help='Bank Account Number to which the invoice will be paid. A Company bank account if this is a Customer Invoice or Vendor Credit Note, otherwise a Partner bank account number.',
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+        check_company=True)
     invoice_incoterm_id = fields.Many2one('account.incoterms', string='Incoterm',
         default=_get_default_invoice_incoterm,
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
@@ -229,7 +234,7 @@ class AccountMove(models.Model):
 
     # ==== Vendor bill fields ====
     invoice_vendor_bill_id = fields.Many2one('account.move', store=False,
-        domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        check_company=True,
         string='Vendor Bill',
         help="Auto-complete from a past bill.")
     invoice_source_email = fields.Char(string='Source Email', tracking=True)
@@ -2404,10 +2409,12 @@ class AccountMoveLine(models.Model):
     _name = "account.move.line"
     _description = "Journal Item"
     _order = "date desc, move_name desc, id"
+    _check_company_auto = True
 
     # ==== Business fields ====
     move_id = fields.Many2one('account.move', string='Journal Entry',
         index=True, required=True, readonly=True, auto_join=True, ondelete="cascade",
+        check_company=True,
         help="The move of this entry line.")
     move_name = fields.Char(string='Number', related='move_id.name', store=True, index=True)
     date = fields.Date(related='move_id.date', store=True, readonly=True, index=True, copy=False, group_operator='min')
@@ -2421,7 +2428,8 @@ class AccountMoveLine(models.Model):
     country_id = fields.Many2one(comodel_name='res.country', related='move_id.company_id.country_id')
     account_id = fields.Many2one('account.account', string='Account',
         index=True, ondelete="cascade",
-        domain=[('deprecated', '=', False)])
+        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
+        check_company=True)
     account_internal_type = fields.Selection(related='account_id.user_type_id.type', string="Internal Type", store=True, readonly=True)
     account_root_id = fields.Many2one(related='account_id.root_id', string="Account Root", store=True, readonly=True)
     sequence = fields.Integer(default=10)
@@ -2455,18 +2463,19 @@ class AccountMoveLine(models.Model):
     product_id = fields.Many2one('product.product', string='Product')
 
     # ==== Origin fields ====
-    reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False, readonly=True)
-    payment_id = fields.Many2one('account.payment', string="Originator Payment", copy=False,
+    reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False, readonly=True, check_company=True)
+    payment_id = fields.Many2one('account.payment', string="Originator Payment", copy=False, check_company=True,
         help="Payment that created this entry")
     statement_line_id = fields.Many2one('account.bank.statement.line',
         string='Bank statement line reconciled with this entry',
-        index=True, copy=False, readonly=True)
+        index=True, copy=False, readonly=True, check_company=True)
     statement_id = fields.Many2one(related='statement_line_id.statement_id', store=True, index=True, copy=False,
         help="The bank statement used for bank reconciliation")
 
     # ==== Tax fields ====
-    tax_ids = fields.Many2many('account.tax', string='Taxes', help="Taxes that apply on the base amount")
+    tax_ids = fields.Many2many('account.tax', string='Taxes', help="Taxes that apply on the base amount", check_company=True)
     tax_line_id = fields.Many2one('account.tax', string='Originator Tax', ondelete='restrict', store=True,
+        check_company=True,
         compute='_compute_tax_line_id', help="Indicates that this journal item is a tax line")
     tax_group_id = fields.Many2one(related='tax_line_id.tax_group_id', string='Originator tax group',
         readonly=True, store=True,
@@ -2501,8 +2510,8 @@ class AccountMoveLine(models.Model):
 
     # ==== Analytic fields ====
     analytic_line_ids = fields.One2many('account.analytic.line', 'move_id', string='Analytic lines')
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
+    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True, check_company=True)
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags', check_company=True)
 
     # ==== Onchange / display purpose fields ====
     recompute_tax_line = fields.Boolean(store=False, readonly=True,

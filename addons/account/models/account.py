@@ -1304,13 +1304,13 @@ class AccountTax(models.Model):
         "Based on Payment: the tax is due as soon as the payment of the invoice is received.")
     cash_basis_transition_account_id = fields.Many2one(string="Cash Basis Transition Account",
         check_company=True,
-        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]"),
+        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
         comodel_name='account.account',
         help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled ; at reconciliation, this amount cancelled on this account and put on the regular tax account.")
     cash_basis_base_account_id = fields.Many2one(
         'account.account',
         check_company=True,
-        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]"),
+        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
         string='Base Tax Received Account',
         help='Account that will be set on lines created in cash basis journal entry and used to keep track of the tax base amount.')
     invoice_repartition_line_ids = fields.One2many(string="Repartition for Invoices", comodel_name="account.tax.repartition.line", inverse_name="invoice_tax_id", copy=True, help="Repartition when the tax is used on an invoice")
@@ -1798,7 +1798,7 @@ class AccountTaxRepartitionLine(models.Model):
         check_company=True,
         help="The tax set to apply this repartition on refund invoices. Mutually exclusive with invoice_tax_id")
     tax_id = fields.Many2one(comodel_name='account.tax', compute='_compute_tax_id')
-    country_id = fields.Many2one(string="Country", comodel_name='res.country', related='company_id.country_id',  help="Technical field used to restrict tags domain in form view.")
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', related='company_id.country_id', help="Technical field used to restrict tags domain in form view.")
     company_id = fields.Many2one(string="Company", comodel_name='res.company', required=True, default=lambda x: x.env.company, help="The company this repartition line belongs to.")
     sequence = fields.Integer(string="Sequence", default=1, help="The order in which display and match repartition lines. For refunds to work properly, invoice repartition lines should be arranged in the same order as the credit note repartition lines they correspond to.")
 
