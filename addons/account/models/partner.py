@@ -194,6 +194,7 @@ class AccountFiscalPositionTax(models.Model):
     _description = 'Tax Mapping of Fiscal Position'
     _rec_name = 'position_id'
 
+    #TODO add company_id field + check_company
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position',
         required=True, ondelete='cascade')
     tax_src_id = fields.Many2one('account.tax', string='Tax on Product', required=True)
@@ -211,6 +212,7 @@ class AccountFiscalPositionAccount(models.Model):
     _description = 'Accounts Mapping of Fiscal Position'
     _rec_name = 'position_id'
 
+    #TODO add company_id field + check_company
     position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position',
         required=True, ondelete='cascade')
     account_src_id = fields.Many2one('account.account', string='Account on Product',
