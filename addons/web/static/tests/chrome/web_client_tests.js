@@ -66,6 +66,8 @@ QUnit.module('WebClient', {
             // list views
             'partner,false,list': '<tree><field name="id"/><field name="display_name"/></tree>',
             'product,false,list': '<tree><field name="id"/><field name="display_name"/></tree>',
+
+            // kanban views
             'task,false,kanban': `
                 <kanban>
                     <templates>

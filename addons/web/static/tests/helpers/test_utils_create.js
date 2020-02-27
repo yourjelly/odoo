@@ -12,7 +12,6 @@ odoo.define('web.test_utils_create', function (require) {
 
 var ControlPanelView = require('web.ControlPanelView');
 var concurrency = require('web.concurrency');
-var DebugManager = require('web.DebugManager.Backend');
 var dom = require('web.dom');
 const SystrayMenu = require('web.SystrayMenu');
 var testUtilsAsync = require('web.test_utils_async');
@@ -31,7 +30,7 @@ var WebClient = require('web.WebClient');
  * @param {Object} [params.archs] this archs given to the mock server
  * @param {Object} [params.data] the business data given to the mock server
  * @param {Object} [params.menus] TODO
- * @param {Object} [params.SystrayItems] TODO
+ * @param {Object} [params.SystrayItems] the systray items to instantiate
  * @param {boolean} [params.debug]
  * @param {function} [params.mockRPC]
  * @returns {WebClient}
@@ -43,9 +42,8 @@ async function createWebClient(params) {
     params.services = Object.assign({}, params.services);
     const cleanUp = testUtilsMock.setMockedOwlEnv(WebClient, params);
 
-    // FIX Systray Items
     const SystrayItems = SystrayMenu.Items;
-    SystrayMenu.Items = [] || params.SystrayItems;
+    SystrayMenu.Items = params.SystrayItems || [];
 
     let menus = params.menus;
     if (!menus) {
@@ -320,41 +318,6 @@ function createControlPanel(params) {
         });
     });
 }
-/**
- * Create and return an instance of DebugManager with all rpcs going through a
- * mock method, assuming that the user has access rights, and is an admin.
- *
- * @param {Object} [params={}]
- */
-var createDebugManager = function (params) {
-    params = params || {};
-    var mockRPC = params.mockRPC;
-    _.extend(params, {
-        mockRPC: function (route, args) {
-            if (args.method === 'check_access_rights') {
-                return Promise.resolve(true);
-            }
-            if (args.method === 'xmlid_to_res_id') {
-                return Promise.resolve(true);
-            }
-            if (mockRPC) {
-                return mockRPC.apply(this, arguments);
-            }
-            return this._super.apply(this, arguments);
-        },
-        session: {
-            user_has_group: function (group) {
-                if (group === 'base.group_no_one') {
-                    return Promise.resolve(true);
-                }
-                return this._super.apply(this, arguments);
-            },
-        },
-    });
-    var debugManager = new DebugManager();
-    testUtilsMock.addMockEnvironment(debugManager, params);
-    return debugManager;
-};
 
 /**
  * create a model from given parameters.
@@ -412,7 +375,6 @@ function prepareTarget(debug=false) {
 return {
     createCalendarView: createCalendarView,
     createControlPanel: createControlPanel,
-    createDebugManager: createDebugManager,
     createModel: createModel,
     createParent: createParent,
     createView: createView,

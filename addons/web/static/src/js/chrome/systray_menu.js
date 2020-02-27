@@ -6,7 +6,7 @@ const UserMenu = require('web.UserMenu');
 
 class ItemAdapter extends ComponentAdapter {
     get widgetArgs() {
-        return [];
+        return [this.env];
     }
 }
 

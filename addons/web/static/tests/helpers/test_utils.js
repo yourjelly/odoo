@@ -129,7 +129,6 @@ return Promise.all([
             dropFiles: testUtilsFile.dropFiles,
         },
 
-        createDebugManager: testUtilsCreate.createDebugManager,
         createAsyncView: testUtilsCreate.createView,
         createCalendarView: testUtilsCreate.createCalendarView,
         createControlPanel: testUtilsCreate.createControlPanel,

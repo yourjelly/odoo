@@ -35,6 +35,7 @@
                 target="'.o_dialogs'"
                 title="dialogRenderingInfo.action.name">
                 <Action class="o_action" t-key="dialogRenderingInfo.controller.jsID"
+                    t-ref="currentDialogComponent"
                     Component="dialogRenderingInfo.controller.Component"
                     action="dialogRenderingInfo.action"
                     options="dialogRenderingInfo.controller.options"

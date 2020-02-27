@@ -17,6 +17,7 @@ class WebClient extends Component {
         this.LoadingWidget = LoadingWidget;
         this.renderingInfo = null;
         this.currentControllerComponent = useRef('currentControllerComponent');
+        this.currentDialogComponent = useRef('currentDialogComponent');
         this.actionManager = new ActionManager(this.env);
         this.actionManager.on('cancel', this, () => {
             if (this.renderingInfo) {
@@ -79,7 +80,6 @@ class WebClient extends Component {
         window.addEventListener('hashchange', this._onHashchange);
         super.mounted();
         this._wcUpdated();
-        
         odoo.isReady = true;
         this.env.bus.trigger('web-client-mounted');
     }
@@ -284,7 +284,8 @@ class WebClient extends Component {
                 }
             }
             if (this.renderingInfo.onSuccess) {
-                this.renderingInfo.onSuccess(mainComponent); // FIXME: onSuccess not called if no background controller
+                const dialogComponent = this.currentDialogComponent.comp;
+                this.renderingInfo.onSuccess(mainComponent, dialogComponent); // FIXME: onSuccess not called if no background controller
             }
             if (this.renderingInfo.menuID) {
                 state.menu_id = this.renderingInfo.menuID;
@@ -294,6 +295,7 @@ class WebClient extends Component {
             }
         }
         this.renderingInfo = null;
+        this.env.bus.trigger('web-client-updated', this);
     }
     _domCleaning() {
         const body = document.body;

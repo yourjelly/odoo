@@ -810,6 +810,7 @@ class ActionManager extends core.EventBus {
                 // store the action into the sessionStorage so that it can be fully restored on F5
                 this.env.services.session_storage.setItem('current_action', action._originalAction);
             } else {
+                newDialog.controller.component = dialogComponent;
                 this.currentDialogController = newDialog.controller;
             }
             if (controller && controller.options && controller.options.on_success) {

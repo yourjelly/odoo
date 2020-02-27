@@ -151,7 +151,7 @@ QUnit.module('ActionManager', {
                         '<field name="foo"/>' +
                     '</group>' +
                 '</form>',
-            
+
             'partner,1,form': `
                 <form>
                     <footer>

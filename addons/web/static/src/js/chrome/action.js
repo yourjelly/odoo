@@ -129,6 +129,13 @@ class Action extends ComponentAdapter {
         };
     }
 
+    /**
+     * @returns {Widget | Component | null} the legacy widget or owl Component
+     *   instance, or null if this function is called too soon
+     */
+    getController() {
+        return this.widget || (this.componentRef && this.componentRef.comp) || null;
+    }
     getState() {
         if (this.widget) {
             return this.widget.getState();
@@ -181,7 +188,7 @@ class DialogAction extends owl.Component {
 DialogAction.template = owl.tags.xml`
     <OwlDialog t-props="props" t-ref="dialog">
         <t t-slot="default"/>
-    </OwlDialog>`
+    </OwlDialog>`;
 DialogAction.components = { OwlDialog };
 
 return { Action, DialogAction };
