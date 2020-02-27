@@ -5569,38 +5569,33 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             return news
         assert len(fields_values) == len({key for (key, value) in fields_values}) # all key unique
         scale_limit = {'low':low, 'medium':medium, 'high':high}[scale]
+
+        def root_generator():
+            yield {}, False
+            while True:
+                yield {}, True
+
+        def _generate(fields_values, values, record_count):
+            generator = root_generator()
+            for (fname, field_generator) in fields_values:
+                generator = field_generator(values_list=generator, generation=record_count, counter=record_count, field_name=fname)
+            return generator
+
         record_count = 0
-        generation = 0
         create_values = []
-        randoms = {}
-        def pseudo_random(field_name, seed=False):
-            nonlocal randoms
-            if not field_name in randoms:
-                randoms[field_name] = random.Random()
-                randoms[field_name].seed(seed or field_name)
-            return randoms[field_name]
 
-        def _generate(fields_values, values, counter=0):
-            nonlocal record_count
-            nonlocal create_values
-            nonlocal news
-            if len(values) == len(fields_values):
-                record_count += 1
-                create_values.append(values)
-                print(values)
-                if batch_size and len(create_values) >= batch_size:
-                    _logger.info('Batch: %s/%s', record_count, scale_limit)
-                    news |= self.create(create_values)
-                    create_values = []
-            else:
-                (fname, dats) = fields_values[len(values)]
-                for result in dats(values_list=[values], generation=generation, counter=counter, field_name=fname):
-                    _generate(fields_values, result, counter)
-                    counter += 1
+        generator = _generate(fields_values, {}, record_count)
+        complete = False
 
-        while record_count <= scale_limit:
-            _generate(fields_values, {})
-            generation += 1
+        while record_count <= scale_limit or not complete:
+            values, complete = next(generator)
+            create_values.append(values)
+            print(values)
+            if len(create_values) >= batch_size:
+                _logger.info('Batch: %s/%s', record_count, scale_limit)
+                news |= self.create(create_values)
+                create_values = []
+            record_count += 1
 
         if create_values:
             news |= self.create(create_values)

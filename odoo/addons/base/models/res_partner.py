@@ -1084,4 +1084,4 @@ class ResPartnerIndustry(models.Model):
                     [0.08, 0.01, 0.01, 0.9])),
             ('full_name', populate.iterate([False, '1', '2', '3', '4', '5', '6', 'Industry full name %s'])),
         ]
-        return (fields_values, 10, 20, 1000) # values, low, medium, high, batch_size
+        return (fields_values, 15, 20, 1000) # values, low, medium, high, batch_size

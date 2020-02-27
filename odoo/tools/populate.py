@@ -17,10 +17,10 @@ def randomize(vals, weights=None, seed=False, formater=_format_str):
     def generator(values_list=None, field_name=None, counter=0, **kwargs):
         nonlocal r
         r = r or _randomizer(seed or field_name)
-        for values in values_list:
+        for values, complete in values_list:
             val = random.choices(vals, weights)[0]
             values[field_name] = formater(val, counter, values)
-            yield values
+            yield values, complete
     return generator
 
 
@@ -29,53 +29,52 @@ def cartesian(vals, weights=None, seed=False, formater=_format_str):
     def generator(values_list=None, generation=0, counter=0, field_name=None, **kwargs):
         nonlocal r
         r = r or _randomizer(seed or field_name)
-        for values in values_list:
-            if generation == 0:
+        for values, complete in values_list:
+            if not complete:
                 for val in vals:
-                    yield {**values, field_name: formater(val, counter, values)}
+                    yield {**values, field_name: formater(val, counter, values)}, False
             else:
                 val = random.choices(vals, weights)[0]
                 values[field_name] = formater(val, counter, values)
-                yield values
+                yield values, True
     return generator
 
 
 def iterate(vals, weights=None, seed=False, formater=_format_str):
     r = None
-    last_index = 0
     def generator(values_list=None, field_name=None, counter=0, **kwargs):
         nonlocal r
-        nonlocal last_index
         r = r or _randomizer(seed or field_name)
-        for values in values_list:
-            if last_index < len(vals):
-                val = vals[last_index]
-                last_index += 1
-                yield {**values, field_name: formater(val, counter, values)} # no guarantie that all vals are used at first generations
+        i = 0
+        for values, complete in values_list:
+            if i < len(vals):
+                val = vals[i]
+                i += 1
+                yield {**values, field_name: formater(val, counter, values)}, False
             else:
                 val = random.choices(vals, weights)[0]
                 values[field_name] = formater(val, counter, values)
-                yield values
+                yield values, complete
     return generator
 
 
 def set_value(val, formater=_format_str):
     def generator(values_list=None, field_name=None, counter=0, **kwargs):
-        for values in values_list:
+        for values, complete in values_list:
             values[field_name] = formater(val, counter, values)
-            yield values
+            yield values, complete
 
     return generator
 
 
 def call(function, seed=None):
     r = None
-    def generator(**kwargs):
+    def generator(values_list=None, **kwargs):
         nonlocal r
         field_name = kwargs['field_name']
         r = r or _randomizer(seed or kwargs['field_name'])
-        for values in kwargs['values_list']:
+        for values, complete in values_list:
             for val in function(values=values, pseudo_random=r, **kwargs):
-                yield {**values, field_name:val}
+                yield {**values, field_name:val}, complete
 
     return generator
