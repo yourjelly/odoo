@@ -18,7 +18,7 @@ from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.modules import get_module_resource
 from odoo.osv.expression import get_unaccent_wrapper
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import pycompat
+from odoo.tools import pycompat, populate
 
 # Global variables used for the warning fields declared on the res.partner
 # in the following modules : sale, purchase, account, stock
@@ -978,10 +978,14 @@ class Partner(models.Model):
         self.ensure_one()
         return self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
-    def _populate_database_parameters(self):
-        def name_callable(values=None, record_count=0, **kwargs):
-            is_company = values['is_company']
-            return ['%s_%s' % ('company' if is_company else 'partner', record_count)]
+    def __populate_database_parameters(self):
+
+        def name_callable(values_list=None, generation=0, counter=0, **kwargs): # todo fix total counter
+            for values in values_list:
+                is_company = values['is_company']
+                name = '%s_%s_%s' % ('company' if is_company else 'partner', generation, counter)
+                values['name'] = name
+                yield values
 
         def ref_callable(record_count=0, pseudo_random=None, **kwargs):
             return [pseudo_random.choice([False, '', record_count, 'p%s'%record_count])]
@@ -999,7 +1003,6 @@ class Partner(models.Model):
 
         # Something like: self.env['res.partner.industry']._populate_database() but how to make this call unique?
         industry_ids = self.env['res.partner.industry'].search([]).ids
-
         # lang: unfortunately only en_us is installed by default, making it pointless
         # user_id, user_ids: False, user should be create elsewhere,
         # employee: ? TODO
@@ -1015,59 +1018,39 @@ class Partner(models.Model):
         #   -> give image 95% of the time in a pregenerated random set, sometimes not to tests generation
 
         fields_values = [
-            ('supplier', {'cartesian': [True, False]}), # coulds actually be pick, 'comprehensive': 'cartesian'"
-            ('customer', {'cartesian': [True, False]}),
-            ('active', {
-                'pick': [True, False],
-                'weights': [0.9, 0.1],
-                'comprehensive': 'cartesian',
-            }),
-            ('email', {
-                'pick': [False, 'email%s@example.com', '<contact 万> contact%s@anotherexample.com', 'invalid_email', ''],
-                'format': True,
-                'comprehensive': 'iter',
-            }),
-            ('type', {'cartesian': ['contact']}), # todo add more logic, manage 'invoice', 'delivery', 'other', 'private'
-            ('is_company', {
-                'pick': [True, False],
-                'weights':[0.05, 0.95],
-                'comprehensive': 'iter', # we want at least one company, but not to much, keep at the end, could be a func to be more explicit
-                }),
-            ('street', {
-                'pick': [False, '', 'Main street %s', '3th street %s', 'Boulevard Tintin %s', 'Random Street %s', 'North Street %s', '万泉寺村', 'საბჭოს სკვერი %s', '10th Street %s'],
-                'format': True,
-                'comprehensive': 'iter',
-                }),
-            ('street2', {'pick': [False, '', 'Behind the tree'], 'weights': [90, 5, 5]}),
-            ('city', {
-                'pick': [False, '', 'Sans Fransisco', 'Los Angeles', 'Brussels', 'ગાંધીનગર (Gandhinagar)', 'Toronto', '北京市', 'თბილისი', 'دبي'],
-                'comprehensive': 'iter'}),
-            ('zip', {'pick': [False, '', '50231', '1020', 'UF47', '0', '10201']}),
-            ('country_id', {'pick': [False] + self.env['res.country'].search([]).ids}),
-            ('state_id', {'callable': state_callable}),
-            ('phone', {'pick': [False, '', '+3212345678', '003212345678', '12345678']}),
-            ('mobile', {'pick': [False, '', '+32412345678', '0032412345678', '412345678']}),
+            ('supplier', populate.cartesian([True, False])),
+            ('customer', populate.cartesian([True, False])),
+            ('active', populate.cartesian([True, False], [0.9, 0.1])),
+            ('email', populate.iterate([False, '', 'email%s@example.com', '<contact 万> contact%s@anotherexample.com', 'invalid_email'])),
+            ('type', populate.set_value('contact')), # todo add more logic, manage 'invoice', 'delivery', 'other', 'private'
+            ('is_company', populate.iterate([True, False], [0.05, 0.95])),
+            ('street', populate.iterate(
+                [False, '', 'Main street %s', '3th street %s', 'Boulevard Tintin %s', 'Random Street %s', 'North Street %s', '万泉寺村', 'საბჭოს სკვერი %s', '10th Street %s'])),
+            ('street2', populate.randomize([False, '', 'Behind the tree'], [90, 5, 5])),
+            ('city', populate.iterate([False, '', 'Sans Fransisco', 'Los Angeles', 'Brussels', 'ગાંધીનગર (Gandhinagar)', 'Toronto', '北京市', 'თბილისი', 'دبي'])),
+            ('zip', populate.randomize([False, '', '50231', '1020', 'UF47', '0', '10201'])),
+            ('country_id', populate.randomize([False] + self.env['res.country'].search([]).ids)),
+            ('state_id', populate.call(state_callable)),
+            ('phone', populate.randomize([False, '', '+3212345678', '003212345678', '12345678'])),
+            ('mobile', populate.randomize([False, '', '+32412345678', '0032412345678', '412345678'])),
             # todo: allows to seed random? assign multiple fields with one func? one func per field? (using values or non_local) 
-            ('title', {'pick': self.env['res.partner.title'].search([]).ids}),
-            ('function', {
-                'pick': [False, '', 'President of Sales', 'Senior Consultant', 'Product owner', 'Functional Consultant', 'Chief Executive Officer'],
-                'weights': [50, 10, 2, 20, 5, 10, 1],
-                }),
-            ('tz', {'pick': [tz[0] for tz in _tz_get(self)]}),
-            ('website', {'pick': [False, '', 'http://www.example.com']}),
-            ('credit_limit', {
-                'pick': [False, 0, 500, 2500, 5000, 10000],
-                'weights': [0.50, 0.30, 0.5, 0.5, 0.5, 0.5],
-                }),
-            ('name', {'callable': name_callable}), # keep after is_company
-            ('ref', {'callable': ref_callable}),
-            ('industry_id', {
-                'pick': [False] + industry_ids,
-                'weights': [0.5] + ([0.5/(len(industry_ids) or 1)] * len(industry_ids)),
-                })
+            ('title', populate.randomize(self.env['res.partner.title'].search([]).ids)),
+            ('function', populate.randomize(
+                [False, '', 'President of Sales', 'Senior Consultant', 'Product owner', 'Functional Consultant', 'Chief Executive Officer'],
+                [50, 10, 2, 20, 5, 10, 1])),
+            ('tz', populate.randomize([tz[0] for tz in _tz_get(self)])),
+            ('website', populate.randomize([False, '', 'http://www.example.com'])),
+            ('credit_limit', populate.randomize(
+                [False, 0, 500, 2500, 5000, 10000],
+                [0.50, 0.30, 0.5, 0.5, 0.5, 0.5])),
+            ('name', name_callable), # keep after is_company
+            ('ref', populate.call(ref_callable)),
+            ('industry_id', populate.randomize(
+                [False] + industry_ids,
+                [0.5] + ([0.5/(len(industry_ids) or 1)] * len(industry_ids))))
 
         ]
-        return (fields_values, 10, 300, 100000, 1000) # values, low, medium, high, batch_size
+        return (fields_values, 1, 300, 100000) # values, low, medium, high
 
     def _populate_database(self, scale):
         new = super()._populate_database(scale)
@@ -1080,7 +1063,6 @@ class Partner(models.Model):
         for partner in partners:
             if bool(random.getrandbits(1)): # 50% change to have a company
                 partner.parent_id = random.choice(companies)
-
         return new
 
 
@@ -1096,21 +1078,10 @@ class ResPartnerIndustry(models.Model):
 
     def _populate_database_parameters(self):
         fields_values = [
-            ('active', {
-                'pick': [False, True],
-                'weights': [0.1, 0.9],
-                'comprehensive': 'cartesian', # cartesian must be before iter. looks complicated
-            }),
-            ('name', {
-                'pick': [False, 'Industry name', 'Industry name', 'Industry name %s'],
-                'weights': [0.08, 0.01, 0.01, 0.9],
-                'comprehensive': 'cartesian',
-                'format': True
-            }),
-            ('full_name', {
-                'pick': [False, 'Industry full name %s'],
-                'comprehensive': 'iter',
-                'format': True
-            }),
+            ('active', populate.cartesian([False, True], [0.1, 0.9])),
+            ('name', populate.cartesian(
+                    [False, 'Industry name', 'Industry name', 'Industry name %s'],
+                    [0.08, 0.01, 0.01, 0.9])),
+            ('full_name', populate.iterate([False, '1', '2', '3', '4', '5', '6', 'Industry full name %s'])),
         ]
-        return (fields_values, 1, 20, 1000, 1000) # values, low, medium, high, batch_size
+        return (fields_values, 10, 20, 1000) # values, low, medium, high, batch_size

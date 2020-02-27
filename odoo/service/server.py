@@ -1184,7 +1184,7 @@ def preload_registries(dbnames):
                             continue
                         if all(module.startswith('test_') for module in ir_model.modules.split(',')):
                             continue
-                        if not model.search([]):
+                        if False and not model.search([]):
                             _logger.warning('%s is empty', model._name)
                         if not 'res.partner' in model._name:
                             continue
