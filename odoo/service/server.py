@@ -1179,7 +1179,14 @@ def preload_registries(dbnames):
                     env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
                     _logger.log(25, 'Populating database')
                     for model in env.values(): # todo, order models ? or manualy _populate_database on needed model and skip
-                        if model._transient or model._abstract or not 'res.partner' in model._name:
+                        ir_model = env['ir.model'].search([('model', '=', model._name)])
+                        if model._transient or model._abstract:
+                            continue
+                        if all(module.startswith('test_') for module in ir_model.modules.split(',')):
+                            continue
+                        if not model.search([]):
+                            _logger.warning('%s is empty', model._name)
+                        if not 'res.partner' in model._name:
                             continue
                         _logger.info('Populating database for model %s', model._name)
                         t0 = time.time()
