@@ -5553,38 +5553,36 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return result
 
     def _populate_database_parameters(self):
-        fields_values = None
-        low = 10
-        medium = 100
-        high = 1000
-        return (fields_values, low, medium, high)
+        return dict(
+            fields_generators=None,
+            scales=dict(
+                low=10,  # minimal representative set
+                medium=100,  # average database load
+                high=1000 # maxi database load
+            )
+        )
 
     def _populate_database(self, scale):
-        assert scale in ['low', 'medium', 'high']
         # todo add info that model is populated somewhere
-        (fields_values, low, medium, high) = self._populate_database_parameters()
+        params = self._populate_database_parameters()
+        fields_generators = params['fields_generators']
         batch_size = 1000
         news = self.browse()
-        if fields_values is None:
+        if fields_generators is None:
             return news
-        assert len(fields_values) == len({key for (key, value) in fields_values}) # all key unique
-        scale_limit = {'low':low, 'medium':medium, 'high':high}[scale]
+        scale_limit = params['scales'][scale]
 
         def root_generator():
             yield {}, False
             while True:
                 yield {}, True
 
-        def _generate(fields_values, values, record_count):
-            generator = root_generator()
-            for (fname, field_generator) in fields_values:
-                generator = field_generator(values_list=generator, generation=record_count, counter=record_count, field_name=fname)
-            return generator
-
         record_count = 0
         create_values = []
 
-        generator = _generate(fields_values, {}, record_count)
+        generator = root_generator()
+        for (fname, field_generator) in fields_generators.items():
+            generator = field_generator(generator, fname)
         complete = False
 
         while record_count <= scale_limit or not complete:
