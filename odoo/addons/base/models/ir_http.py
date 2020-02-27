@@ -28,6 +28,8 @@ from odoo.modules.module import get_resource_path, get_module_path
 from odoo.http import ALLOWED_DEBUG_MODES
 from odoo.tools.misc import str2bool
 
+COUNT=1
+
 _logger = logging.getLogger(__name__)
 
 
@@ -211,9 +213,19 @@ class IrHttp(models.AbstractModel):
             return werkzeug.exceptions.Forbidden()
 
     @classmethod
+    def _postprocess_args(cls, arguments, rule):
+        """ post process arg to set uid on browse records """
+        for key, val in list(arguments.items()):
+            # Replace uid placeholder by the current request.uid
+            if isinstance(val, models.BaseModel) and isinstance(val._uid, RequestUID):
+                arguments[key] = val.with_user(request.uid)
+# TODO check
+#                if not val.exists():
+#                    return cls._handle_exception(werkzeug.exceptions.NotFound())
+
+    @classmethod
     def _dispatch(cls):
         cls._handle_debug()
-
         # locate the controller method
         try:
             rule, arguments = cls._match(request.httprequest.path)
@@ -231,24 +243,20 @@ class IrHttp(models.AbstractModel):
         if processing:
             return processing
 
-        # set and execute handler
         try:
-            request.set_handler(func, arguments, auth_method)
-            result = request.dispatch()
+            print( '_dispatch', request, func, arguments, auth_method)
+            result = request.dispatch(func, arguments, auth_method)
             if isinstance(result, Exception):
                 raise result
+
         except Exception as e:
+            import traceback
+            print('-'*40)
+            traceback.print_exc()
             return cls._handle_exception(e)
 
         return result
 
-    @classmethod
-    def _postprocess_args(cls, arguments, rule):
-        """ post process arg to set uid on browse records """
-        for key, val in list(arguments.items()):
-            # Replace uid placeholder by the current request.uid
-            if isinstance(val, models.BaseModel) and isinstance(val._uid, RequestUID):
-                arguments[key] = val.with_user(request.uid)
 
     @classmethod
     def _generate_routing_rules(cls, modules, converters):
