@@ -291,7 +291,7 @@ ZoomOdoo.prototype._move = function (e) {
     var xl = Math.ceil(pl * rw);
 
     // Close if outside
-    if (xl < 0 || xt < 0 || xl > dw || xt > dh || lx > (offset.left + this.$target.width())) {
+    if (xl < 0 || xt < 0 || xl > dw || xt > dh || pl  > (offset.left + this.$target.width())) {
         this.hide();
     } else {
         var top = xt * -1;
