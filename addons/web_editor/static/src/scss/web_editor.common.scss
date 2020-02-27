@@ -556,7 +556,11 @@ blockquote {
 
         // Headings
         h1, h2, h3, h4, h5, h6 {
-            color: o-get-color($-headings);
+            @if type-of(o-get-color($-headings)) == color {
+                color: o-get-color($-headings);
+            } @else {
+                color: inherit;
+            }
         }
 
         // Primary buttons (** for buttons, we can extend an other button class
