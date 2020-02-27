@@ -8,6 +8,7 @@ import hashlib
 import pytz
 import threading
 import re
+import random
 
 import requests
 from lxml import etree
@@ -977,6 +978,111 @@ class Partner(models.Model):
         self.ensure_one()
         return self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
+    def _populate_database_parameters(self):
+        def name_callable(values=None, record_count=0, **kwargs):
+            is_company = values['is_company']
+            return ['%s_%s' % ('company' if is_company else 'partner', record_count)]
+
+        def ref_callable(record_count=0, pseudo_random=None, **kwargs):
+            return [pseudo_random.choice([False, '', record_count, 'p%s'%record_count])]
+
+        states = self.env['res.country.state'].search([])
+        states_per_country = collections.defaultdict(list)
+        for state in states:
+            states_per_country[state.country_id.id].append(state.id)
+
+        def state_callable(values=None, pseudo_random=None, **kwargs):
+            country_id = values['country_id']
+            if not country_id:
+                return [False]
+            return [pseudo_random.choice([False] + states_per_country[country_id])]
+
+        # Something like: self.env['res.partner.industry']._populate_database() but how to make this call unique?
+        industry_ids = self.env['res.partner.industry'].search([]).ids
+
+        # lang: unfortunately only en_us is installed by default, making it pointless
+        # user_id, user_ids: False, user should be create elsewhere,
+        # employee: ? TODO
+        # color: todo
+        # comment: not so usefull
+        # category_id : TODO
+        # bank_ids: todo
+        # active: TODO
+        # barcode TODO
+        # vat TODO
+        # company_id TODO (should company match parent_id company?)
+        # image, image_medium, image_small -> TODO could be a good performance imp to give values (50% of create in base, 20% with all ent modules)
+        #   -> give image 95% of the time in a pregenerated random set, sometimes not to tests generation
+
+        fields_values = [
+            ('supplier', {'cartesian': [True, False]}), # coulds actually be pick, 'comprehensive': 'cartesian'"
+            ('customer', {'cartesian': [True, False]}),
+            ('active', {
+                'pick': [True, False],
+                'weights': [0.9, 0.1],
+                'comprehensive': 'cartesian',
+            }),
+            ('email', {
+                'pick': [False, 'email%s@example.com', '<contact 万> contact%s@anotherexample.com', 'invalid_email', ''],
+                'format': True,
+                'comprehensive': 'iter',
+            }),
+            ('type', {'cartesian': ['contact']}), # todo add more logic, manage 'invoice', 'delivery', 'other', 'private'
+            ('is_company', {
+                'pick': [True, False],
+                'weights':[0.05, 0.95],
+                'comprehensive': 'iter', # we want at least one company, but not to much, keep at the end, could be a func to be more explicit
+                }),
+            ('street', {
+                'pick': [False, '', 'Main street %s', '3th street %s', 'Boulevard Tintin %s', 'Random Street %s', 'North Street %s', '万泉寺村', 'საბჭოს სკვერი %s', '10th Street %s'],
+                'format': True,
+                'comprehensive': 'iter',
+                }),
+            ('street2', {'pick': [False, '', 'Behind the tree'], 'weights': [90, 5, 5]}),
+            ('city', {
+                'pick': [False, '', 'Sans Fransisco', 'Los Angeles', 'Brussels', 'ગાંધીનગર (Gandhinagar)', 'Toronto', '北京市', 'თბილისი', 'دبي'],
+                'comprehensive': 'iter'}),
+            ('zip', {'pick': [False, '', '50231', '1020', 'UF47', '0', '10201']}),
+            ('country_id', {'pick': [False] + self.env['res.country'].search([]).ids}),
+            ('state_id', {'callable': state_callable}),
+            ('phone', {'pick': [False, '', '+3212345678', '003212345678', '12345678']}),
+            ('mobile', {'pick': [False, '', '+32412345678', '0032412345678', '412345678']}),
+            # todo: allows to seed random? assign multiple fields with one func? one func per field? (using values or non_local) 
+            ('title', {'pick': self.env['res.partner.title'].search([]).ids}),
+            ('function', {
+                'pick': [False, '', 'President of Sales', 'Senior Consultant', 'Product owner', 'Functional Consultant', 'Chief Executive Officer'],
+                'weights': [50, 10, 2, 20, 5, 10, 1],
+                }),
+            ('tz', {'pick': [tz[0] for tz in _tz_get(self)]}),
+            ('website', {'pick': [False, '', 'http://www.example.com']}),
+            ('credit_limit', {
+                'pick': [False, 0, 500, 2500, 5000, 10000],
+                'weights': [0.50, 0.30, 0.5, 0.5, 0.5, 0.5],
+                }),
+            ('name', {'callable': name_callable}), # keep after is_company
+            ('ref', {'callable': ref_callable}),
+            ('industry_id', {
+                'pick': [False] + industry_ids,
+                'weights': [0.5] + ([0.5/(len(industry_ids) or 1)] * len(industry_ids)),
+                })
+
+        ]
+        return (fields_values, 10, 300, 100000, 1000) # values, low, medium, high, batch_size
+
+    def _populate_database(self, scale):
+        new = super()._populate_database(scale)
+
+        # set parent_ids
+        companies = new.filtered('is_company')
+        partners = new - companies
+        # make some company with one contact, other with no contact, other with tons of contact
+        random.seed('partner_companies')
+        for partner in partners:
+            if bool(random.getrandbits(1)): # 50% change to have a company
+                partner.parent_id = random.choice(companies)
+
+        return new
+
 
 class ResPartnerIndustry(models.Model):
     _description = 'Industry'
@@ -986,3 +1092,25 @@ class ResPartnerIndustry(models.Model):
     name = fields.Char('Name', translate=True)
     full_name = fields.Char('Full Name', translate=True)
     active = fields.Boolean('Active', default=True)
+
+
+    def _populate_database_parameters(self):
+        fields_values = [
+            ('active', {
+                'pick': [False, True],
+                'weights': [0.1, 0.9],
+                'comprehensive': 'cartesian', # cartesian must be before iter. looks complicated
+            }),
+            ('name', {
+                'pick': [False, 'Industry name', 'Industry name', 'Industry name %s'],
+                'weights': [0.08, 0.01, 0.01, 0.9],
+                'comprehensive': 'cartesian',
+                'format': True
+            }),
+            ('full_name', {
+                'pick': [False, 'Industry full name %s'],
+                'comprehensive': 'iter',
+                'format': True
+            }),
+        ]
+        return (fields_values, 1, 20, 1000, 1000) # values, low, medium, high, batch_size

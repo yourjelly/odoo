@@ -33,6 +33,7 @@ import operator
 import pytz
 import re
 import uuid
+import random
 from collections import defaultdict, MutableMapping, OrderedDict
 from contextlib import closing
 from inspect import getmembers, currentframe
@@ -5551,6 +5552,85 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         return result
 
+    def _populate_database_parameters(self):
+        fields_values = None
+        low = 10
+        medium = 100
+        high = 1000
+        batch_size = 1000
+        return (fields_values, low, medium, high, batch_size)
+
+    def _populate_database(self, scale):
+        assert scale in ['low', 'medium', 'high']
+        # todo add info that model is populated somewhere
+        (fields_values, low, medium, high, batch_size) = self._populate_database_parameters()
+        news = self.browse()
+        if fields_values is None:
+            return news
+        assert len(fields_values) == len({key for (key, value) in fields_values}) # all key unique
+        scale_limit = {'low':low, 'medium':medium, 'high':high}[scale]
+        record_count = 0
+        generation = 0
+        create_values = []
+        randoms = {}
+
+        def pseudo_random(field_name, seed=False):
+            nonlocal randoms
+            if not field_name in randoms:
+                randoms[field_name] = random.Random()
+                randoms[field_name].seed(seed or field_name)
+            return randoms[field_name]
+
+        def _generate(fields_values, values):
+            nonlocal record_count
+            nonlocal create_values
+            nonlocal news
+            if generation > 1 and record_count > scale_limit:
+                return
+            if len(values) == len(fields_values):
+                record_count += 1
+                create_values.append(values)
+                if batch_size and len(create_values) >= batch_size:
+                    _logger.info('Batch: %s/%s', record_count, scale_limit)
+                    news |= self.create(create_values)
+                    create_values = []
+            else:
+                (fname, dats) = fields_values[len(values)]
+                if 'cartesian' in dats:
+                    vals = dats['cartesian']
+                elif 'callable' in dats:
+                    vals = dats['callable'](values=values, record_count=record_count, pseudo_random=pseudo_random(fname, dats.get('seed')))
+                elif 'pick' in dats:
+                    if dats.get('comprehensive', False) not in (False, 'cartesian', 'iter'):
+                        raise ValueError('Comprehensive value should be iter or cartesian, not %s' % dats)
+                    pick = dats['pick']
+                    if record_count == 0 and dats.get('comprehensive') == 'cartesian':
+                        vals = dats['pick']
+                    elif dats.get('comprehensive') == 'iter' and record_count < len(pick):
+                        vals = [pick[record_count]] # use pick
+                    elif 'weights' in dats:
+                        vals = pseudo_random(fname, dats.get('seed')).choices(pick, dats['weights'])
+                    else:
+                        vals = [pseudo_random(fname, dats.get('seed')).choice(pick)]
+                else:
+                    raise ValueError('No valid method found in %s' % dats)
+                assert vals
+                #todo else play with generation and weight
+                str_format = dats.get('format', False)
+                for val in vals:
+                    if str_format and val and '%' in val:
+                        val = val % record_count # todo replace by values?
+                    _generate(fields_values, {**values, fname: val})
+
+        while record_count <= scale_limit:
+            generation += 1
+            _generate(fields_values, {})
+
+        if create_values:
+            news |= self.create(create_values)
+        return news
+
+
 collections.Set.register(BaseModel)
 # not exactly true as BaseModel doesn't have __reversed__, index or count
 collections.Sequence.register(BaseModel)
@@ -5747,12 +5827,10 @@ def _normalize_ids(arg, atoms=set(IdType)):
 
     return tuple(arg)
 
-
 def lazy_name_get(self):
     """ Evaluate self.name_get() lazily. """
     names = tools.lazy(lambda: dict(self.name_get()))
     return [(rid, tools.lazy(operator.getitem, names, rid)) for rid in self.ids]
-
 
 # keep those imports here to avoid dependency cycle errors
 from .osv import expression
