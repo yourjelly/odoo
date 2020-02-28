@@ -33,6 +33,7 @@
             <script type="text/javascript" src="/website_sale/static/src/js/website_sale_validate.js"></script>
             <script type="text/javascript" src="/website_sale/static/src/js/website_sale_recently_viewed.js"></script>
             <script type="text/javascript" src="/website_sale/static/src/js/website_sale_tracking.js"></script>
+            <script type="text/javascript" src="/website_sale/static/src/js/website_sale_media_upload.js"></script>
         </xpath>
     </template>
 
@@ -1734,13 +1735,16 @@
                     </a>
                 </t>
             </div>
-            <div t-ignore="True" class="d-none d-md-block text-center">
+            <div t-ignore="True" class="d-none d-md-block text-center" id="o-carousel-product-media">
                 <ol t-if="len(product_images) > 1" class="carousel-indicators d-inline-block position-static mx-auto my-0 p-1 text-left">
                     <t t-foreach="product_images" t-as="product_image"><li t-attf-class="d-inline-block m-1 align-top {{'active' if product_image_first else ''}}" data-target="#o-carousel-product" t-att-data-slide-to="str(product_image_index)">
                         <div t-field="product_image.image_128" t-options='{"widget": "image", "qweb_img_responsive": False, "class": "o_image_64_contain", "alt-field": "name"}'/>
                         <i t-if="product_image._name == 'product.image' and product_image.embed_code" class="fa fa-2x fa-play-circle-o o_product_video_thumb"/>
                     </li></t>
                 </ol>
+                <t t-name="o_product_media_add">
+                    <button class="btn btn-sm btn-primary  float-left" id="product_media_upload">Add media</button>
+                </t>
             </div>
         </div>
     </template>
