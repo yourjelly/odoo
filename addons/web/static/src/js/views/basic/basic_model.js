@@ -1470,18 +1470,16 @@ var BasicModel = AbstractModel.extend({
         for (var fieldName in changes) {
             field = record.fields[fieldName];
             if (field && (field.type === 'one2many' || field.type === 'many2many')) {
-                defs.push(this._applyX2ManyChange(record, fieldName, changes[fieldName], options));
+                await this._applyX2ManyChange(record, fieldName, changes[fieldName], options);
             } else if (field && (field.type === 'many2one' || field.type === 'reference')) {
                 defs.push(this._applyX2OneChange(record, fieldName, changes[fieldName], options));
             } else {
                 record._changes[fieldName] = changes[fieldName];
             }
         }
-
         if (options.notifyChange === false) {
             return Promise.resolve(_.keys(changes));
         }
-
         return Promise.all(defs).then(function () {
             var onChangeFields = []; // the fields that have changed and that have an on_change
             for (var fieldName in changes) {
@@ -1872,16 +1870,14 @@ var BasicModel = AbstractModel.extend({
                 // is 1)
                 for (const r of data) {
                     if (!r.id && r.display_name) {
-                        const prom = this._rpc({
+                        const prom = await this._rpc({
                             model: field.relation,
                             method: 'name_create',
                             args: [r.display_name],
                             context: this._getContext(record, {fieldName: fieldName, viewType: options.viewType}),
-                        }).then(result => {
-                            r.id = result[0];
-                            r.display_name = result[1];
-                        });
-                        defs.push(prom);
+                        })
+                        r.id = result[0];
+                        r.display_name = result[1];
                     }
                 }
                 await Promise.all(defs);
