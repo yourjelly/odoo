@@ -42,7 +42,7 @@ function dragNDrop(snippet, position = "bottom") {
 function clickOnText(snippet, element, position = "bottom") {
     return {
         trigger: `#wrapwrap .${snippet.id} ${element}`,
-        content: _t("<b>Click on a text</b> to start editing it."),
+        content: _t("<b>Click on a text</b> to start editing it. <i>It's that easy to edit your content!</i>"),
         position: position,
         run: "text",
         consumeEvent: "input",
@@ -68,7 +68,7 @@ function changeIcon(snippet, index = 0, position = "bottom") {
     };
 }
 
-function chooseImage(index = 0, position = "top") {
+function choseImage(index = 0, position = "top") {
     return {
         trigger: `#editor-media-image .o_we_images .o_existing_attachment_cell:eq(${index})`,
         content: _t("<b>Select the image</b> you want."),
@@ -77,7 +77,7 @@ function chooseImage(index = 0, position = "top") {
     };
 }
 
-function chooseIcon(icon, position = "top") {
+function choseIcon(icon, position = "top") {
     return {
         trigger: `#editor-media-icon .font-icons-icons span.${icon}`,
         content: _t("<b>Select the image</b> you want."),
@@ -103,7 +103,7 @@ function addMedia(position = "right") {
 function clickOnSnippet(snippet, position = "bottom") {
     return {
         trigger: `#wrapwrap .${snippet.id}`,
-        content: _t("<b>Click on a snippet</b> to access its options menu."),
+        content: _t("<b>Click on a snippet</b> to access its options menu. <i>It's that easy to edit your content!</i>"),
         position: position,
         run: "click",
     };
@@ -132,9 +132,9 @@ function changeBackgroundColor(position = "bottom") {
     };
 }
 
-function chooseBackgroundColor(position = "bottom") {
+function choseBackgroundColor(position = "bottom") {
     return {
-        trigger: ".o_we_customize_panel .o_we_so_color_palette button[data-color='3']",
+        trigger: ".o_we_customize_panel .o_we_so_color_palette button[data-color='beta']",
         content: _t("Now, <b>click</b> on this color to change the background color."),
         position: position,
         run: "click",
@@ -201,7 +201,7 @@ function deleteColumn(position = "left") {
 
 function goToOptions(position = "bottom") {
     return {
-        trigger: '.o_we_customize_theme_btn',
+        trigger: '.o_we_customize_theme_btnn',
         content: _t("Go to the Options tab"),
         position: position,
         run: "click",
@@ -243,11 +243,11 @@ return {
     clickOnSnippet,
     changeImage,
     changeIcon,
-    chooseImage,
-    chooseIcon,
+    choseImage,
+    choseIcon,
     addMedia,
     changeBackgroundColor,
-    chooseBackgroundColor,
+    choseBackgroundColor,
     clickOnAnOption,
     changeAnOption,
     changePaddingSize,
