@@ -33,6 +33,32 @@
             res_model="change.password.wizard"
             view_mode="form" target="new"/>
 
+        <record id="identity_check_wizard" model="ir.ui.view">
+            <field name="name">Identity Check Wizard</field>
+            <field name="model">res.users.identitycheck</field>
+            <field name="arch" type="xml">
+                <form string="Check Identity">
+                    <sheet>
+                        <p>
+                            You are trying to perform an action which impacts
+                            the security of your or an other account. For
+                            security reasons, we need to re-validate your
+                            identity.
+                        </p>
+                        <p>
+                            Confirm your password to enter the enhanced security
+                            mode, it will remain active for a few minutes.
+                        </p>
+                        <field name="password" password="True" required="True"/>
+                    </sheet>
+                    <footer>
+                        <button string="Confirm Password" type="object" name="run_check" class="btn btn-primary"/>
+                        <button string="Cancel" special="cancel" class="btn btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
         <!-- res.groups -->
         <record id="view_groups_search" model="ir.ui.view">
             <field name="name">res.groups.search</field>
