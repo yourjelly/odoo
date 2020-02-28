@@ -48,7 +48,7 @@ class StockWarehouseOrderpoint(models.Model):
         'Name', copy=False, required=True, readonly=True,
         default=lambda self: self.env['ir.sequence'].next_by_code('stock.orderpoint'))
     trigger = fields.Many2one(
-        'stock.warehouse.orderpoint.trigger', string='trigger',
+        'stock.warehouse.orderpoint.trigger', string='Trigger',
         default=lambda self: self.env.ref('stock.orderpoint_trigger_auto').id, required=1,
         domain="[('technical_name', 'in', ['auto', 'manual'])]")
     trigger_technical_name = fields.Char(related='trigger.technical_name')
@@ -91,7 +91,7 @@ class StockWarehouseOrderpoint(models.Model):
     lead_days_date = fields.Date(compute='_compute_lead_days')
     allowed_route_ids = fields.One2many('stock.location.route', compute='_commpute_allowed_route_ids')
     route_id = fields.Many2one(
-        'stock.location.route', string='Route', domain="[('id', 'in', allowed_route_ids)]")
+        'stock.location.route', string='Prefered Replenishment Method', domain="[('id', 'in', allowed_route_ids)]")
     qty_on_hand = fields.Float('On Hand', readonly=True)
     qty_forecast = fields.Float('Forecast', readonly=True)
     qty_to_order = fields.Float('To Order')
@@ -116,17 +116,13 @@ class StockWarehouseOrderpoint(models.Model):
 
     @api.depends('warehouse_id', 'location_id')
     def _commpute_allowed_route_ids(self):
-        if self.user_has_groups('stock.group_adv_location'):
-            for orderpoint in self:
-                orderpoint.allowed_route_ids = self.env['stock.location.route'].search([
-                    '|', '|',
-                    ('warehouse_ids', 'in', orderpoint.warehouse_id.id),
-                    ('product_selectable', '=', True),
-                    ('product_categ_selectable', '=', True)
-                ])
-        else:
-            for orderpoint in self:
-                orderpoint.allowed_route_ids = orderpoint.location_id.get_warehouse().delivery_route_id
+        for orderpoint in self:
+            orderpoint.allowed_route_ids = self.env['stock.location.route'].search([
+                '|', '|',
+                ('warehouse_ids', 'in', orderpoint.warehouse_id.id),
+                ('product_selectable', '=', True),
+                ('product_categ_selectable', '=', True)
+            ])
 
     @api.depends('product_id', 'location_id', 'company_id', 'warehouse_id',
                  'product_id.seller_ids', 'product_id.seller_ids.delay')

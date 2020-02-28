@@ -82,14 +82,15 @@ class Product(models.Model):
              "Otherwise, this includes goods leaving any Stock "
              "Location with 'internal' type.")
 
-    orderpoint_ids = fields.One2many('stock.warehouse.orderpoint', 'product_id', 'Minimum Stock Rules')
-    nbr_reordering_rules = fields.Integer('Reordering Rules',
-        compute='_compute_nbr_reordering_rules', compute_sudo=False)
-    reordering_min_qty = fields.Float(
-        compute='_compute_nbr_reordering_rules', compute_sudo=False)
-    reordering_max_qty = fields.Float(
-        compute='_compute_nbr_reordering_rules', compute_sudo=False)
+    orderpoint_ids = fields.One2many('stock.warehouse.orderpoint', 'product_id', string='Minimum Stock Rules')
+    orderpoint_with_mto_ids = fields.One2many(
+        'stock.warehouse.orderpoint', string="Replenishment", compute='_compute_orderpoints',
+        inverse='_set_orderpoints')
     putaway_rule_ids = fields.One2many('stock.putaway.rule', 'product_id', 'Putaway Rules')
+
+    @api.depends('route_ids', 'orderpoint_ids')
+    def _compute_orderpoints(self):
+        self.orderpoint_with_mto_ids = self.orderpoint_ids
 
     @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state')
     @api.depends_context(
@@ -112,6 +113,9 @@ class Product(models.Model):
         services.outgoing_qty = 0.0
         services.virtual_available = 0.0
         services.free_qty = 0.0
+
+    def _set_orderpoints(self):
+        self.orderpoint_ids = self.orderpoint_with_mto_ids.filtered(lambda o: o.trigger_technical_name in ['auto', 'manual'])
 
     def _product_available(self, field_names=None, arg=False):
         """ Compatibility method """
@@ -358,22 +362,6 @@ class Product(models.Model):
                 product_ids.add(quant['product_id'][0])
         return list(product_ids)
 
-    def _compute_nbr_reordering_rules(self):
-        read_group_res = self.env['stock.warehouse.orderpoint'].read_group(
-            [('product_id', 'in', self.ids)],
-            ['product_id', 'product_min_qty', 'product_max_qty'],
-            ['product_id'])
-        res = {i: {} for i in self.ids}
-        for data in read_group_res:
-            res[data['product_id'][0]]['nbr_reordering_rules'] = int(data['product_id_count'])
-            res[data['product_id'][0]]['reordering_min_qty'] = data['product_min_qty']
-            res[data['product_id'][0]]['reordering_max_qty'] = data['product_max_qty']
-        for product in self:
-            product_res = res.get(product.id) or {}
-            product.nbr_reordering_rules = product_res.get('nbr_reordering_rules', 0)
-            product.reordering_min_qty = product_res.get('reordering_min_qty', 0)
-            product.reordering_max_qty = product_res.get('reordering_max_qty', 0)
-
     @api.onchange('tracking')
     def onchange_tracking(self):
         products = self.filtered(lambda self: self.tracking and self.tracking != 'none')
@@ -584,16 +572,16 @@ class ProductTemplate(models.Model):
         'stock.location.route', 'stock_route_product', 'product_id', 'route_id', 'Routes',
         domain=[('product_selectable', '=', True)],
         help="Depending on the modules installed, this will allow you to define the route of the product: whether it will be bought, manufactured, replenished on order, etc.")
-    nbr_reordering_rules = fields.Integer('Reordering Rules',
-        compute='_compute_nbr_reordering_rules', compute_sudo=False)
-    reordering_min_qty = fields.Float(
-        compute='_compute_nbr_reordering_rules', compute_sudo=False)
-    reordering_max_qty = fields.Float(
-        compute='_compute_nbr_reordering_rules', compute_sudo=False)
     # TDE FIXME: seems only visible in a view - remove me ?
     route_from_categ_ids = fields.Many2many(
         relation="stock.location.route", string="Category Routes",
         related='categ_id.total_route_ids', readonly=False)
+    orderpoint_ids = fields.One2many(
+        'stock.warehouse.orderpoint', string='Replenishment',
+        compute='_compute_orderpoints', inverse='_set_orderpoints')
+
+    def _compute_orderpoints(self):
+        self.orderpoint_ids = self.product_variant_ids.orderpoint_with_mto_ids
 
     @api.depends(
         'product_variant_ids',
@@ -608,6 +596,12 @@ class ProductTemplate(models.Model):
             template.virtual_available = res[template.id]['virtual_available']
             template.incoming_qty = res[template.id]['incoming_qty']
             template.outgoing_qty = res[template.id]['outgoing_qty']
+
+    def _set_orderpoints(self):
+        for product_variant in self.product_variant_ids:
+            product_variant.orderpoint_with_mto_ids = self.orderpoint_ids.filtered(
+                lambda o: o.product_id == product_variant
+            )
 
     def _product_available(self, name, arg):
         return self._compute_quantities_dict()
@@ -663,25 +657,6 @@ class ProductTemplate(models.Model):
         domain = [('outgoing_qty', operator, value)]
         product_variant_ids = self.env['product.product'].search(domain)
         return [('product_variant_ids', 'in', product_variant_ids.ids)]
-
-    def _compute_nbr_reordering_rules(self):
-        res = {k: {'nbr_reordering_rules': 0, 'reordering_min_qty': 0, 'reordering_max_qty': 0} for k in self.ids}
-        product_data = self.env['stock.warehouse.orderpoint'].read_group([('product_id.product_tmpl_id', 'in', self.ids)], ['product_id', 'product_min_qty', 'product_max_qty'], ['product_id'])
-        for data in product_data:
-            product = self.env['product.product'].browse([data['product_id'][0]])
-            product_tmpl_id = product.product_tmpl_id.id
-            res[product_tmpl_id]['nbr_reordering_rules'] += int(data['product_id_count'])
-            res[product_tmpl_id]['reordering_min_qty'] = data['product_min_qty']
-            res[product_tmpl_id]['reordering_max_qty'] = data['product_max_qty']
-        for template in self:
-            if not template.id:
-                template.nbr_reordering_rules = 0
-                template.reordering_min_qty = 0
-                template.reordering_max_qty = 0
-                continue
-            template.nbr_reordering_rules = res[template.id]['nbr_reordering_rules']
-            template.reordering_min_qty = res[template.id]['reordering_min_qty']
-            template.reordering_max_qty = res[template.id]['reordering_max_qty']
 
     @api.onchange('tracking')
     def onchange_tracking(self):

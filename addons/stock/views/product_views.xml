@@ -23,12 +23,6 @@
             </field>
         </record>
 
-        <record model="ir.actions.act_window" id="product_open_orderpoint">
-            <field name="context">{'default_product_id': active_id, 'search_default_product_id': active_id}</field>
-            <field name="name">Reordering Rules</field>
-            <field name="res_model">stock.warehouse.orderpoint</field>
-        </record>
-
         <record id="view_stock_product_tree" model="ir.ui.view">
             <field name="name">product.stock.tree.inherit</field>
             <field name="model">product.product</field>
@@ -101,6 +95,22 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='group_lots_and_weight']" position="before">
+                    <field name="orderpoint_ids" context="{'default_product_id': product_variant_id}">
+                        <tree string="Reordering Rules" editable="bottom">
+                            <field name="active" invisible="1"/>
+                            <field name="allowed_route_ids" invisible="1"/>
+                            <field name="trigger_technical_name" invisible="1"/>
+                            <field name="warehouse_id" invisible="1"/>
+                            <field name="product_id" attrs="{'column_invisible': [('parent.product_variant_count', '=', 1)]}" domain="[('product_tmpl_id', '=', parent.id)]" force_save="1"/>
+                            <field name="location_id" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
+                            <field name="trigger" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
+                            <field name="route_id"/>
+                            <field name="json_lead_days_popover" width="0.1" string=" " widget="popover_widget" attrs="{'invisible': ['|', ('id', '=', False), ('trigger_technical_name', '=', 'on_order')]}"/>
+                            <field name="product_min_qty" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
+                            <field name="product_max_qty" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </tree>
+                    </field>
                     <group string="Operations" name="operations">
                         <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible': [('type', 'in', ['service', 'digital'])]}"/>
                         <field name="route_from_categ_ids" widget="many2many_tags" readonly="1" attrs="{'invisible': [('route_from_categ_ids', '=', [])]}"/>
@@ -242,24 +252,6 @@
                             attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}"
                             class="oe_stat_button" icon="fa-exchange"
                             groups="stock.group_stock_user"/>
-                        <button name="%(product_open_orderpoint)d" type="action"
-                            attrs="{'invisible':['|',('type', 'not in', ['product', 'consu']),('nbr_reordering_rules', '!=', 1)]}"
-                            class="oe_stat_button" icon="fa-refresh">
-                            <div class="o_field_widget o_stat_info mr4">
-                                <span class="o_stat_text">Min :</span>
-                                <span class="o_stat_text">Max:</span>
-                            </div>
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value"><field name="reordering_min_qty"/></span>
-                                <span class="o_stat_value"><field name="reordering_max_qty"/></span>
-                            </div>
-                        </button>
-                        <button type="action"
-                            name="%(product_open_orderpoint)d"
-                            attrs="{'invisible':['|',('type', '!=', 'product'),('nbr_reordering_rules', '==', 1)]}"
-                            class="oe_stat_button" icon="fa-refresh">
-                            <field name="nbr_reordering_rules" widget="statinfo"/>
-                        </button>
                         <button string="Lot/Serial Numbers" type="object"
                             name="action_open_product_lot"
                             attrs="{'invisible': [('tracking', '=', 'none')]}"
@@ -330,26 +322,6 @@
                             attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}"
                             class="oe_stat_button" icon="fa-exchange"
                             groups="stock.group_stock_user"/>
-                        <button type="object"
-                            name="action_view_orderpoints"
-                            attrs="{'invisible':['|',('type', '!=', 'product'),('nbr_reordering_rules', '!=', 1)]}"
-                            class="oe_stat_button" icon="fa-refresh">
-                            <div class="o_field_widget o_stat_info mr4">
-                                <span class="o_stat_text">Min:</span>
-                                <span class="o_stat_text">Max:</span>
-                            </div>
-                            <div class="o_field_widget o_stat_info">
-                                <span class="o_stat_value"><field name="reordering_min_qty"/></span>
-                                <span class="o_stat_value"><field name="reordering_max_qty"/></span>
-                            </div>
-                        </button>
-                        <button type="object"
-                            name="action_view_orderpoints"
-                            attrs="{'invisible':['|',('type', '!=', 'product'),('nbr_reordering_rules', '==', 1)]}"
-                            class="oe_stat_button"
-                            icon="fa-refresh">
-                            <field name="nbr_reordering_rules" widget="statinfo"/>
-                         </button>
                         <button string="Lot/Serial Numbers" type="object"
                             name="action_open_product_lot"
                             attrs="{'invisible': [('tracking', '=', 'none')]}"
