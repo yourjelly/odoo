@@ -462,7 +462,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.test('on_reverse_breadcrumb handler is correctly called', async function (assert) {
+    QUnit.skip('on_reverse_breadcrumb handler is correctly called', async function (assert) {
         assert.expect(3);
 
         const webClient = await createWebClient({
