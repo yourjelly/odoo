@@ -5588,12 +5588,12 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         while record_count <= scale_limit or not complete:
             values, complete = next(generator)
             create_values.append(values)
-            print(values)
+            record_count += 1
             if len(create_values) >= batch_size:
                 _logger.info('Batch: %s/%s', record_count, scale_limit)
                 news |= self.create(create_values)
                 create_values = []
-            record_count += 1
+                self.env.cr.commit()
 
         if create_values:
             news |= self.create(create_values)

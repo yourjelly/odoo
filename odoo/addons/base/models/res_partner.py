@@ -979,7 +979,7 @@ class Partner(models.Model):
         return self.env['ir.config_parameter'].sudo().get_param('web.base.url')
 
     def _populate_database_parameters(self):
-
+        # TODO move to other file
         def name_callable(iterator, field_name): # todo fix total counter
             generation=0
             counter=0
@@ -1024,7 +1024,7 @@ class Partner(models.Model):
             'customer': populate.cartesian([True, False]),
             'active': populate.cartesian([True, False], [0.9, 0.1]),
             'email': populate.iterate([False, '', 'email%s@example.com', '<contact 万> contact%s@anotherexample.com', 'invalid_email']),
-            'type': populate.set_value( 'contact'), # todo add more logic, manage 'invoice', 'delivery', 'other', 'private'
+            'type': populate.set_value('contact'), # todo add more logic, manage 'invoice', 'delivery', 'other', 'private'
             'is_company': populate.iterate([True, False], [0.05, 0.95]),
             'street': populate.iterate(
                 [False, '', 'Main street %s', '3th street %s', 'Boulevard Tintin %s', 'Random Street %s', 'North Street %s', '万泉寺村', 'საბჭოს სკვერი %s', '10th Street %s']),
@@ -1052,14 +1052,14 @@ class Partner(models.Model):
                 [0.5] + ([0.5/(len(industry_ids) or 1)] * len(industry_ids)))
         }
 
-        return dict(
-            fields_generators=fields_generators,
-            scales = dict(
-                low=10,
-                medium=300,
-                high=100000
-            )
-        )
+        return {
+            'fields_generators': fields_generators,
+            'scales':{
+                'low': 10,
+                'medium': 300,
+                'high': 100000,
+            },
+        }
 
     def _populate_database(self, scale):
         new = super()._populate_database(scale)
@@ -1093,11 +1093,11 @@ class ResPartnerIndustry(models.Model):
                     [0.08, 0.01, 0.01, 0.9]),
             'full_name': populate.iterate([False, '1', '2', '3', '4', '5', '6', 'Industry full name %s']),
         }
-        return dict(
-            fields_generators=fields_generators,
-            scales=dict(
-                low=10,
-                medium=30,
-                high=200
-            )
-        )
+        return {
+            'fields_generators':fields_generators,
+            'scales': {
+                'low': 10,
+                'medium': 30,
+                'high': 200,
+            },
+        }

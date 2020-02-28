@@ -62,9 +62,9 @@ def iterate(vals, weights=None, seed=False, formater=_format_str):
 
 
 def set_value(val, formater=_format_str):
-    def generator(values_list, field_name):
+    def generator(iterator, field_name):
         counter = 0
-        for values, complete in values_list:
+        for values, complete in iterator:
             values[field_name] = formater(val, counter, values)
             yield values, complete
 
@@ -73,11 +73,11 @@ def set_value(val, formater=_format_str):
 
 def call(function, seed=None):
     r = None
-    def generator(values_list, field_name):
+    def generator(iterator, field_name):
         nonlocal r
         counter = 0
         r = r or _randomizer(seed or field_name)
-        for values, complete in values_list:
+        for values, complete in iterator:
             for val in function(values=values, counter=counter, pseudo_random=r):
                 yield {**values, field_name:val}, complete
 

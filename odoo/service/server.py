@@ -1173,30 +1173,6 @@ def preload_registries(dbnames):
                 _logger.info("All post-tested in %.2fs, %s queries",
                              time.time() - t0, odoo.sql_db.sql_counter - t0_sql)
 
-            if config['populate_database']:
-                with odoo.api.Environment.manage():
-                    cr = registry.cursor()
-                    env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
-                    _logger.log(25, 'Populating database')
-                    for model in env.values(): # todo, order models ? or manualy _populate_database on needed model and skip
-                        ir_model = env['ir.model'].search([('model', '=', model._name)])
-                        if model._transient or model._abstract:
-                            continue
-                        if all(module.startswith('test_') for module in ir_model.modules.split(',')):
-                            continue
-                        if False and not model.search([]):
-                            _logger.warning('%s is empty', model._name)
-                        if not 'res.partner' in model._name:
-                            continue
-                        _logger.info('Populating database for model %s', model._name)
-                        t0 = time.time()
-                        model._populate_database(config['populate_database'])
-                        cr.commit() # todo indicate somewhere that model is populated
-                        model_time = time.time() - t0
-                        if model_time > 1:
-                            _logger.info('Populated database for model %s in %ss', model._name, model_time)
-                    cr.close()
-
             if registry._assertion_report.failures:
                 rc += 1
         except Exception:
