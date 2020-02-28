@@ -47,9 +47,8 @@ var PortalComposer = publicWidget.Widget.extend({
         this.$attachmentButton = this.$('.o_portal_chatter_attachment_btn');
         this.$fileInput = this.$('.o_portal_chatter_file_input');
         this.$sendButton = this.$('.o_portal_chatter_composer_btn');
-        this.$attachments = this.$('.o_portal_chatter_composer_form .o_portal_chatter_attachments');
-        this.$attachmentIds = this.$('.o_portal_chatter_attachment_ids');
-        this.$attachmentTokens = this.$('.o_portal_chatter_attachment_tokens');
+        this.$attachments = this.$('.o_portal_chatter_composer_input .o_portal_chatter_attachments');
+        this.$input = this.$('.o_portal_chatter_composer_input textarea')
 
         return this._super.apply(this, arguments).then(function () {
             if (self.options.default_attachment_ids) {
@@ -137,6 +136,18 @@ var PortalComposer = publicWidget.Widget.extend({
             self.$sendButton.prop('disabled', false);
         });
     },
+    _prepareParams: function () {
+        return _.extend(this.options, {
+            'message': this.$input.val(),
+            'attachment_ids': _.pluck(this.attachments, 'id'),
+            'attachment_tokens': _.pluck(this.attachments, 'access_token')
+       });
+    },
+    _clearPortalComposer: function () {
+        this.$input.val('');
+        this.attachments = [];
+        this._updateAttachments();
+    },
     /**
      * Returns a Promise that is never resolved to prevent sending the form
      * twice when clicking twice on the button, in combination with the `async`
@@ -146,7 +157,17 @@ var PortalComposer = publicWidget.Widget.extend({
      * @returns {Promise}
      */
     _onSubmitButtonClick: function () {
-        return new Promise(function (resolve, reject) {});
+        if(!this.$input.val() && !this.attachments.length) {
+            return;
+        }
+        const self = this;
+        return self._rpc({
+            route: '/mail/chatter_post',
+            params: self._prepareParams()
+        }).then(function () {
+            self._clearPortalComposer();
+
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -157,8 +178,6 @@ var PortalComposer = publicWidget.Widget.extend({
      * @private
      */
     _updateAttachments: function () {
-        this.$attachmentIds.val(_.pluck(this.attachments, 'id'));
-        this.$attachmentTokens.val(_.pluck(this.attachments, 'access_token'));
         this.$attachments.html(qweb.render('portal.Chatter.Attachments', {
             attachments: this.attachments,
             showDelete: true,

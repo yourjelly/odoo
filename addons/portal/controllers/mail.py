@@ -113,8 +113,8 @@ class PortalChatter(http.Controller):
             except (AccessError, MissingError):
                 raise UserError(_("The attachment %s does not exist or you do not have the rights to access it.") % attachment_id)
 
-    @http.route(['/mail/chatter_post'], type='http', methods=['POST'], auth='public', website=True)
-    def portal_chatter_post(self, res_model, res_id, message, redirect=None, attachment_ids='', attachment_tokens='', **kw):
+    @http.route(['/mail/chatter_post'], type='json', methods=['POST'], auth='public', website=True)
+    def portal_chatter_post(self, res_model, res_id, message, attachment_ids=[], attachment_tokens=[], **kw):
         """Create a new `mail.message` with the given `message` and/or
         `attachment_ids` and redirect the user to the newly created message.
 
@@ -122,12 +122,8 @@ class PortalChatter(http.Controller):
         `res_model`. The user must have access rights on this target document or
         must provide valid identifiers through `kw`. See `_message_post_helper`.
         """
-        url = redirect or (request.httprequest.referrer and request.httprequest.referrer + "#discussion") or '/my'
 
         res_id = int(res_id)
-
-        attachment_ids = [int(attachment_id) for attachment_id in attachment_ids.split(',') if attachment_id]
-        attachment_tokens = [attachment_token for attachment_token in attachment_tokens.split(',') if attachment_token]
         self._portal_post_check_attachments(attachment_ids, attachment_tokens)
 
         if message or attachment_ids:
@@ -143,8 +139,6 @@ class PortalChatter(http.Controller):
             }
             post_values.update((fname, kw.get(fname)) for fname in self._portal_post_filter_params())
             message = _message_post_helper(**post_values)
-
-        return request.redirect(url)
 
     @http.route('/mail/chatter_init', type='json', auth='public', website=True)
     def portal_chatter_init(self, res_model, res_id, domain=False, limit=False, **kwargs):
