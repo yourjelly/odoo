@@ -12,6 +12,7 @@ class WebsiteRoute(models.Model):
     _order = 'path'
 
     path = fields.Char('Route')
+    access_password = fields.Char(groups="website.group_website_publisher")
 
     @api.model
     def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):

@@ -246,7 +246,7 @@ class Http(models.AbstractModel):
 
         mypage = pages[0] if pages else False
         _, ext = os.path.splitext(req_page)
-        if mypage:
+        if mypage and mypage._accessible(raise_error=False):
             return request.render(mypage.get_view_identifier(), {
                 # 'path': req_page[1:],
                 'deletable': True,

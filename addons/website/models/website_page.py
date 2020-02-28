@@ -125,7 +125,22 @@ class Page(models.Model):
             'visibility_password': data['visibility'] == "password" and data['visibility_password'] or '',
             'visibility_group': data['visibility'] == "restricted_group" and data['visibility_group'],
         }
+
+        # visiblity options
+        connected_groups = self.env.ref('base.group_user') | self.env.ref('base.group_portal')
+        if data['visibility'] in ("", "password") and page.groups_id:
+            w_vals['groups_id'] = [(5,)]
+        if data['visibility'] == "connected" and connected_groups != page.groups_id:
+            w_vals['groups_id'] = [(6, 0, connected_groups.ids)]
+        if data['visibility'] == "restricted_group" and page.groups_id != data['visibility_group']:
+            w_vals['groups_id'] = [(6, 0, [data['visibility_group']])]
         page.with_context(no_cow=True).write(w_vals)
+        if data['visibility'] == "password":
+            route = self.env['website.route'].search([('path', '=', url)])
+            if route:
+                route.access_password = data['visibility_password']
+            else:
+                route.create({'path': url, 'access_password': data['visibility_password']})
 
         # Create redirect if needed
         if data['create_redirect']:
