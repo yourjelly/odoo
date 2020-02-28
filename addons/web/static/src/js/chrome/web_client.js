@@ -7,6 +7,8 @@ const { ComponentAdapter } = require('web.OwlCompatibility');
 const LoadingWidget = require('web.Loading');
 const Menu = require('web.Menu');
 const RainbowMan = require('web.RainbowMan');
+const LegacyDialog = require('web.Dialog');
+const WarningDialog = require('web.CrashManager').WarningDialog;
 
 const { Component, hooks } = owl;
 const useRef = hooks.useRef;
@@ -461,6 +463,35 @@ class WebClient extends Component {
     }
     _onCloseRainbowMan() {
         this.rainbowMan = null;
+    }
+    /**
+     * Displays a warning in a dialog or with the notification service
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {string} ev.data.message the warning's message
+     * @param {string} ev.data.title the warning's title
+     * @param {string} [ev.data.type] 'dialog' to display in a dialog
+     * @param {boolean} [ev.data.sticky] whether or not the warning should be
+     *   sticky (if displayed with the Notification)
+     */
+    _onDisplayWarning(ev) {
+        var data = ev.detail;
+        if (data.type === 'dialog') {
+            const warningDialog = new LegacyDialog.DialogAdapter(this,
+                {
+                    Component: WarningDialog,
+                    widgetArgs: {
+                        options: {title: data.title},
+                        error: data
+                    },
+                }
+            );
+            warningDialog.mount(this.el.querySelector('.o_dialogs'));
+        } else {
+            data.type = 'warning';
+            this._displayNotification(data);
+        }
     }
 }
 WebClient.components = { Action, Menu, DialogAction, ComponentAdapter };

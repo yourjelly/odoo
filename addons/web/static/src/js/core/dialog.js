@@ -5,6 +5,7 @@ var core = require('web.core');
 var dom = require('web.dom');
 var Widget = require('web.Widget');
 const OwlDialog = require('web.OwlDialog');
+const { ComponentAdapter } = require('web.OwlCompatibility');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -481,6 +482,28 @@ Dialog.safeConfirm = function (owner, message, options) {
     return dialog.open();
 };
 
+class DialogAdapter extends ComponentAdapter {
+    get widgetArgs() {
+        return [super.widgetArgs.options, super.widgetArgs.error];
+    }
+    async willStart() {
+        await super.willStart(...arguments);
+        var self = this;
+        const widgetDestroy = this.widget.destroy;
+        this.widget.destroy = function () {
+            widgetDestroy.apply(self.widget, ...arguments);
+            self.destroy();
+        }
+        this.widget.open();
+        return this.widget.opened();
+    }
+    __patch(target, vnode) {
+        vnode.elm = this.widget.$modal[0];
+        return owl.Component.prototype.__patch.apply(this, arguments);
+    }
+}
+
+Dialog.DialogAdapter = DialogAdapter;
 return Dialog;
 
 });

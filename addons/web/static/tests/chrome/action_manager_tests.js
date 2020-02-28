@@ -726,6 +726,71 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
+    QUnit.test('display warning as notification', async function (assert) {
+        assert.expect(6);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            services: {
+                notification: NotificationService
+            }
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(document.querySelector('body'), '.o_notification');
+        webClient.trigger('warning', {title: 'gloria', message: 'Like to tell ya about my baby'});
+        await testUtils.nextTick();
+        assert.containsOnce(document.querySelector('body'), '.o_notification');
+        assert.strictEqual(
+            document.querySelector('body .o_notification .o_notification_title').innerHTML,
+            'gloria'
+        );
+        assert.strictEqual(
+            document.querySelector('body .o_notification .o_notification_content').innerHTML,
+            'Like to tell ya about my baby'
+        );
+        assert.containsOnce(webClient, '.o_kanban_view');
+        webClient.destroy();
+    });
+
+    QUnit.test('display warning as modal', async function (assert) {
+        assert.expect(8);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            services: {
+                notification: NotificationService
+            }
+        });
+        await doAction(1);
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(document.querySelector('body'), '.modal');
+        webClient.trigger('warning', {title: 'gloria', type: 'dialog', message: 'Like to tell ya about my baby'});
+        await testUtils.nextTick();
+        // In this case the bootstrap modal may take one more tick to be here
+        await testUtils.nextTick();
+        assert.containsOnce(document.querySelector('body'), '.modal');
+        assert.strictEqual(
+            document.querySelector('body .modal .modal-title').textContent,
+            'gloria'
+        );
+        assert.strictEqual(
+            document.querySelector('body .modal .modal-body').textContent.trim(),
+            'Like to tell ya about my baby'
+        );
+        assert.containsOnce(webClient, '.o_kanban_view');
+        await testUtils.dom.click(document.querySelector('body .modal .modal-footer button'));
+        assert.containsOnce(webClient, '.o_kanban_view');
+        assert.containsNone(document.querySelector('body'), '.modal');
+        webClient.destroy();
+    });
+
     QUnit.module('Push State');
 
     QUnit.test('properly push state', async function (assert) {
