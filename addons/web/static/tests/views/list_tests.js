@@ -6952,7 +6952,7 @@ QUnit.module('Views', {
     QUnit.test('add filter in a grouped list with a pager', async function (assert) {
         assert.expect(11);
 
-        const actionManager = await createActionManager({
+        const webClient = await createWebClient({
             data: this.data,
             actions: [{
                 id: 11,
@@ -6980,23 +6980,23 @@ QUnit.module('Views', {
             },
         });
 
-        await actionManager.doAction(11);
+        await testUtils.actionManager.doAction(11);
 
-        assert.containsOnce(actionManager, '.o_list_view');
-        assert.strictEqual(actionManager.$('.o_pager_counter').text().trim(), '1-3 / 4');
-        assert.containsN(actionManager, '.o_group_header', 3); // page 1
+        assert.containsOnce(webClient, '.o_list_view');
+        assert.strictEqual(webClient.$('.o_pager_counter').text().trim(), '1-3 / 4');
+        assert.containsN(webClient, '.o_group_header', 3); // page 1
 
-        await testUtils.dom.click(actionManager.$('.o_pager_next')); // switch to page 2
+        await testUtils.dom.click(webClient.$('.o_pager_next')); // switch to page 2
 
-        assert.strictEqual(actionManager.$('.o_pager_counter').text().trim(), '4-4 / 4');
-        assert.containsN(actionManager, '.o_group_header', 1); // page 2
+        assert.strictEqual(webClient.$('.o_pager_counter').text().trim(), '4-4 / 4');
+        assert.containsN(webClient, '.o_group_header', 1); // page 2
 
         // toggle a filter -> there should be only one group left (on page 1)
-        await testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options .o_filters_menu_button'));
-        await testUtils.dom.click(actionManager.$('.o_control_panel .o_search_options .o_filters_menu .o_menu_item:first'));
+        await testUtils.dom.click(webClient.$('.o_control_panel .o_search_options .o_filters_menu_button'));
+        await testUtils.dom.click(webClient.$('.o_control_panel .o_search_options .o_filters_menu .o_menu_item:first'));
 
-        assert.strictEqual(actionManager.$('.o_pager_counter').text().trim(), '1-1 / 1');
-        assert.containsN(actionManager, '.o_group_header', 1); // page 1
+        assert.strictEqual(webClient.$('.o_pager_counter').text().trim(), '1-1 / 1');
+        assert.containsN(webClient, '.o_group_header', 1); // page 1
 
         assert.verifySteps([
             '[], undefined',
@@ -7004,7 +7004,7 @@ QUnit.module('Views', {
             '[["bar","=",false]], undefined',
         ]);
 
-        actionManager.destroy();
+        webClient.destroy();
     });
 
     QUnit.test('editable grouped lists', async function (assert) {
