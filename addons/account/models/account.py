@@ -1800,7 +1800,7 @@ class AccountTaxRepartitionLine(models.Model):
         help="The tax set to apply this repartition on refund invoices. Mutually exclusive with invoice_tax_id")
     tax_id = fields.Many2one(comodel_name='account.tax', compute='_compute_tax_id')
     country_id = fields.Many2one(string="Country", comodel_name='res.country', related='company_id.country_id', help="Technical field used to restrict tags domain in form view.")
-    company_id = fields.Many2one(string="Company", comodel_name='res.company', required=True, default=lambda x: x.env.company, help="The company this repartition line belongs to.")
+    company_id = fields.Many2one(string="Company", comodel_name='res.company', compute="_compute_company", help="The company this repartition line belongs to.")
     sequence = fields.Integer(string="Sequence", default=1, help="The order in which display and match repartition lines. For refunds to work properly, invoice repartition lines should be arranged in the same order as the credit note repartition lines they correspond to.")
 
     @api.constrains('invoice_tax_id', 'refund_tax_id')
@@ -1813,6 +1813,11 @@ class AccountTaxRepartitionLine(models.Model):
     def _compute_factor(self):
         for record in self:
             record.factor = record.factor_percent / 100.0
+
+    @api.depends('invoice_tax_id', 'refund_tax_id')
+    def _compute_company(self):
+        for record in self:
+            record.company_id = record.invoice_tax_id and record.invoice_tax_id.company_id.id or record.refund_tax_id.company_id.id
 
     @api.depends('invoice_tax_id', 'refund_tax_id')
     def _compute_tax_id(self):
