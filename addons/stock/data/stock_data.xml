@@ -19,7 +19,7 @@
             <field name="name">Auto</field>
             <field name="technical_name">auto</field>
         </record>
-        <record id="orderpoint_trigger_manual" model="stock.warehouse.orderpoint.trigger">
+        <record id="orderpoint_trigger_on_order" model="stock.warehouse.orderpoint.trigger">
             <field name="name">On Order</field>
             <field name="technical_name">on_order</field>
         </record>

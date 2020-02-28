@@ -51,6 +51,7 @@ class StockWarehouseOrderpoint(models.Model):
         'stock.warehouse.orderpoint.trigger', string='trigger',
         default=lambda self: self.env.ref('stock.orderpoint_trigger_auto').id, required=1,
         domain="[('technical_name', 'in', ['auto', 'manual'])]")
+    trigger_technical_name = fields.Char(related='trigger.technical_name')
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the orderpoint without removing it.")
@@ -237,15 +238,23 @@ class StockWarehouseOrderpoint(models.Model):
             """
         }
         self._compute_qty()
+        # Remove previous automatically created orderpoint that has been refilled.
+        to_remove = self.env['stock.warehouse.orderpoint'].search([
+            ('virtual', '=', True),
+            ('qty_to_order', '<=', 0.0)
+        ])
+        to_remove.unlink()
+        self = self - to_remove
         to_refill = defaultdict(float)
         qty_by_product_warehouse = self.env['report.stock.quantity'].read_group(
             [('date', '=', fields.date.today())],
             ['product_id', 'product_qty', 'warehouse_id'],
             ['product_id', 'warehouse_id'], lazy=False)
         for group in qty_by_product_warehouse:
-            if group['product_qty'] >= 0.0:
+            warehouse_id = group.get('warehouse_id') and group['warehouse_id'][0]
+            if group['product_qty'] >= 0.0 or not warehouse_id:
                 continue
-            to_refill[(group['product_id'][0], group['warehouse_id'][0])] = group['product_qty']
+            to_refill[(group['product_id'][0], warehouse_id)] = group['product_qty']
         if not to_refill:
             return action
         lot_stock_id_by_warehouse = self.env['stock.warehouse'].search_read([
@@ -254,7 +263,24 @@ class StockWarehouseOrderpoint(models.Model):
         lot_stock_id_by_warehouse = {w['id']: w['lot_stock_id'][0] for w in lot_stock_id_by_warehouse}
         orderpoints_locations = [(o.product_id.id, o.location_id.id) for o in self]
         to_refill = {(p, w): q for (p, w), q in to_refill.items() if (p, lot_stock_id_by_warehouse[w]) not in orderpoints_locations}
-
+        if not to_refill:
+            return action
+        # Remove incoming quantity from other otigin than moves (e.g RFQ)
+        product_ids, warehouse_ids = zip(*to_refill)
+        lot_stock_ids = [lot_stock_id_by_warehouse[w] for w in warehouse_ids]
+        qty_by_product_location = self.env['stock.warehouse.orderpoint']._get_quantity_in_progress(product_ids, lot_stock_ids)
+        key_to_remove = []
+        for (product, warehouse), product_qty in to_refill.items():
+            qty_in_progress = qty_by_product_location.get((product, lot_stock_id_by_warehouse[warehouse]))
+            if not qty_in_progress:
+                continue
+            # TODO float_compare
+            if qty_in_progress >= abs(product_qty):
+                key_to_remove.append((product, warehouse))
+            else:
+                to_refill[(product, warehouse)] = product_qty + qty_in_progress
+        for key in key_to_remove:
+            del to_refill[key]
         # optimize qty_available in order to do only one compute by warehouse
         product_qty_available = {}
         for warehouse, group in groupby(sorted(to_refill, key=lambda p_w: p_w[1]), key=lambda p_w: p_w[1]):
@@ -267,6 +293,7 @@ class StockWarehouseOrderpoint(models.Model):
             lot_stock_id = lot_stock_id_by_warehouse[warehouse]
             orderpoint_values = self.env['stock.warehouse.orderpoint']._get_orderpoint_values(product, lot_stock_id)
             orderpoint_values.update({
+                'warehouse_id': warehouse,
                 'virtual': True,
                 'qty_on_hand': product_qty_available[(product, warehouse)],
                 'qty_forecast': product_qty,
@@ -274,12 +301,9 @@ class StockWarehouseOrderpoint(models.Model):
             })
             orderpoint_values_list.append(orderpoint_values)
 
-        # Remove previous automatically created orderpoint that has been refilled.
-        self.env['stock.warehouse.orderpoint'].search([
-            ('virtual', '=', True),
-            ('qty_to_order', '<=', 0.0)
-        ]).unlink()
-        self.env['stock.warehouse.orderpoint'].create(orderpoint_values_list)
+        orderpoints = self.env['stock.warehouse.orderpoint'].create(orderpoint_values_list)
+        for orderpoint in orderpoints:
+            orderpoint.route_id = orderpoint._get_default_route_id()
         return action
 
     @api.model
@@ -289,7 +313,7 @@ class StockWarehouseOrderpoint(models.Model):
             'location_id': location,
             'product_max_qty': 0.0,
             'product_min_qty': 0.0,
-            'trigger': 'manual',
+            'trigger': self.env.ref('stock.orderpoint_trigger_manual').id,
         }
 
     def _prepare_procurement_values(self, date=False, group=False):
@@ -299,6 +323,7 @@ class StockWarehouseOrderpoint(models.Model):
         """
         date_planned = date or fields.Date.today()
         return {
+            'route_ids': self.route_id,
             'date_planned': date_planned,
             'warehouse_id': self.warehouse_id,
             'orderpoint_id': self,

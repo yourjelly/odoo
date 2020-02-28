@@ -41,18 +41,19 @@
             <tree string="Reordering Rules" editable="bottom" js_class="stock_orderpoint_list">
                 <field name="active" invisible="1"/>
                 <field name="allowed_route_ids" invisible="1"/>
+                <field name="trigger_technical_name" invisible="1"/>
                 <field name="virtual" invisible="1"/>
                 <field name="warehouse_id" invisible="1"/>
                 <field name="product_id"/>
-                <field name="location_id" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
+                <field name="location_id" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
                 <field name="qty_on_hand" force_save="1"/>
                 <field name="qty_forecast" force_save="1"/>
-                <field name="json_lead_days_popover" string=" " widget="popover_widget" attrs="{'invisible': ['|', '|', ('id', '=', False), ('trigger', '=', ref('stock.orderpoint_trigger_manual')), ('virtual', '=', True)]}"/>
-                <field name="qty_to_order"/>
+                <field name="json_lead_days_popover" string=" " widget="popover_widget" attrs="{'invisible': ['|', '|', ('id', '=', False), ('trigger_technical_name', '=', 'on_order'), ('virtual', '=', True)]}"/>
+                <field name="qty_to_order" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}"/>
                 <field name="route_id"/>
-                <field name="trigger" widget="selection"/>
-                <field name="product_min_qty"/>
-                <field name="product_max_qty"/>
+                <field name="trigger" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
+                <field name="product_min_qty" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
+                <field name="product_max_qty" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
                 <field name="company_id" readonly="1" groups="base.group_multi_company"/>
             </tree>
         </field>
