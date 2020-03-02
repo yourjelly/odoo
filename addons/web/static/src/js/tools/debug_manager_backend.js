@@ -725,7 +725,7 @@ class DebugManagerAdapter extends ComponentAdapter {
     destroy() {}
 }
 
-DebugManager.deployDebugManager = function () {
+DebugManager.deploy = function () {
     // main (deployed in the navbar)
     SystrayMenu.Items.push(DebugManager);
 
@@ -744,7 +744,7 @@ DebugManager.deployDebugManager = function () {
         },
     });
 };
-DebugManager.undeployDebugManager = function () {
+DebugManager.undeploy = function () {
     // main
     const index = SystrayMenu.Items.indexOf(DebugManager);
     if (index > -1) {
@@ -756,7 +756,7 @@ DebugManager.undeployDebugManager = function () {
 };
 
 if (config.isDebug()) {
-    DebugManager.deployDebugManager();
+    DebugManager.deploy();
 }
 
 return DebugManager;

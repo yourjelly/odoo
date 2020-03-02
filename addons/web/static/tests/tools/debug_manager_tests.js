@@ -285,7 +285,7 @@ QUnit.module('DebugManager', {
 
         if (!config.isDebug()) {
             // in debug mode, the debug manager is already deployed
-            DebugManager.deployDebugManager();
+            DebugManager.deploy();
         }
 
         const webClient = await createWebClient({
@@ -322,7 +322,7 @@ QUnit.module('DebugManager', {
 
         webClient.destroy();
         if (!config.isDebug()) {
-            DebugManager.undeployDebugManager();
+            DebugManager.undeploy();
         }
     });
 });

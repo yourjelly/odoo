@@ -2,6 +2,7 @@ odoo.define('web.test_env', async function (require) {
     "use strict";
 
     const Bus = require('web.Bus');
+    const DebugManager = require('web.DebugManager');
     const { buildQuery } = require('web.rpc');
     const session = require('web.session');
 
@@ -54,21 +55,12 @@ odoo.define('web.test_env', async function (require) {
      */
     QUnit.on('OdooBeforeTestHook', function () {
         owl.Component.env = makeTestEnvironment();
-    });
 
-    // /**
-    //  * After each test, destroy services that have been instantiated.
-    //  */
-    // QUnit.on('OdooAfterTestHook', function () {
-    //     TODO: call cleanUp here?
-    //     const env = owl.Component.env;
-    //     for (const name in env.services) {
-    //         const service = env.services[name];
-    //         if (service && !service.isDestroyed()) {
-    //             service.destroy();
-    //         }
-    //     }
-    // });
+        // In debug mode, the DebugManager is automatically deployed, but we
+        // don't want to have it in tests (mainly because it does an RPC).
+        // DebugManager tests have to manually deploy it themselves.
+        DebugManager.undeploy();
+    });
 
     return makeTestEnvironment;
 });
