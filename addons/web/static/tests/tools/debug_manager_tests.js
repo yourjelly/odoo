@@ -1,7 +1,6 @@
 odoo.define('web.debugManagerTests', function (require) {
 "use strict";
 
-const config = require('web.config');
 const DebugManager = require('web.DebugManager');
 const testUtils = require('web.test_utils');
 
@@ -283,10 +282,7 @@ QUnit.module('DebugManager', {
     QUnit.test("dialog: debug manager on a form view", async function (assert) {
         assert.expect(17);
 
-        if (!config.isDebug()) {
-            // in debug mode, the debug manager is already deployed
-            DebugManager.deploy();
-        }
+        DebugManager.deploy();
 
         const webClient = await createWebClient({
             actions: this.actions,
@@ -321,9 +317,7 @@ QUnit.module('DebugManager', {
         assert.containsNone(dialogDebugDropdown, 'a[data-action="edit"][data-model="ir.ui.view"][data-id="99"]'); // control panel view
 
         webClient.destroy();
-        if (!config.isDebug()) {
-            DebugManager.undeploy();
-        }
+        DebugManager.undeploy();
     });
 });
 });
