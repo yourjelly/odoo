@@ -18,7 +18,6 @@ access_product_packaging_manager,product.packaging.manager,model_product_packagi
 access_product_supplierinfo_manager,product.supplierinfo.manager,model_product_supplierinfo,base.group_system,1,1,1,1
 access_product_pricelist_manager,product.pricelist.manager,model_product_pricelist,base.group_system,1,1,1,1
 access_product_pricelist_item_manager,product.pricelist.item.manager,model_product_pricelist_item,base.group_system,1,1,1,1
-access_product_product_manager,product.product manager,model_product_product,base.group_system,1,1,1,1
 access_product_attribute_manager,product.attribute manager,model_product_attribute,base.group_system,1,1,1,1
 access_product_attribute_value_manager,product.attribute value manager,model_product_attribute_value,base.group_system,1,1,1,1
 access_product_product_attribute_manager,product.template.attribute value manager,model_product_template_attribute_value,base.group_system,1,1,1,1
