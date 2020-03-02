@@ -27,9 +27,6 @@ class WebClient extends Component {
             }
         });
         this.actionManager.on('update', this, payload => {
-            if (this.rainbowMan) {
-                this.rainbowMan.destroy();
-            }
             this.renderingInfo = payload;
             if (!this.renderingInfo.menuID && !this.state.menu_id && payload.main) {
                 // retrieve menu_id from action
@@ -48,7 +45,7 @@ class WebClient extends Component {
         // the state of the webclient contains information like the current
         // menu id, action id, view type (for act_window actions)...
         this.state = {};
-        this.rainbowMan = null;
+        this.env.bus.on('show-effect', this, this._showEffect);
         this.env.bus.on('connection_lost', this, this._onConnectionLost);
         this.env.bus.on('connection_restored', this, this._onConnectionRestored);
     }
@@ -433,6 +430,24 @@ class WebClient extends Component {
             this._updateState(ev.detail.state);
         }
     }
+    _showEffect(params) {
+        params = params || {};
+        const type = params.type || 'rainbow_man';
+        if (type === 'rainbow_man') {
+            if (this.env.session.show_effect) {
+                RainbowMan.display(params, {target: this.el, parent: this});
+            } else {
+                // For instance keep title blank, as we don't have title in data
+                this._displayNotification({
+                    title: "",
+                    message: params.message,
+                    sticky: false
+                });
+            }
+        } else {
+            throw new Error('Unknown effect type: ' + type);
+        }
+    }
     /**
      * Displays a visual effect (for example, a rainbowMan0
      *
@@ -441,28 +456,11 @@ class WebClient extends Component {
      * @param {Object} [ev.data] - key-value options to decide rainbowMan
      *   behavior / appearance
      */
-    async _onShowEffect(ev) {
+    _onShowEffect(ev) {
         if (!this.renderingInfo) {
-            const data = ev.detail || {};
-            const type = data.type || 'rainbow_man';
-            if (type === 'rainbow_man') {
-                if (this.env.session.show_effect) {
-                    this.rainbowMan = await RainbowMan.display(data, {target: this.el, parent: this});
-                } else {
-                    // For instance keep title blank, as we don't have title in data
-                    this._displayNotification({
-                        title: "",
-                        message: data.message,
-                        sticky: false
-                    });
-                }
-            } else {
-                throw new Error('Unknown effect type: ' + type);
-            }
+            const params = ev.detail;
+            this._showEffect(params);
         }
-    }
-    _onCloseRainbowMan() {
-        this.rainbowMan = null;
     }
     /**
      * Displays a warning in a dialog or with the notification service

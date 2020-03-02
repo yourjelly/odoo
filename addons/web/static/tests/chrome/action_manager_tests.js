@@ -720,7 +720,7 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test("rainbowman integrated to webClient", async function (assert) {
-        assert.expect(12);
+        assert.expect(10);
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
@@ -747,15 +747,12 @@ QUnit.module('ActionManager', {
         assert.containsOnce(webClient, '.o_reward');
         assert.containsOnce(webClient, '.o_kanban_view');
 
+        // Do not force rainbow man to destroy on doAction
+        // we let it die either after its animation or on user click
         await doAction(3);
-        assert.containsNone(webClient, '.o_reward');
+        assert.containsOnce(webClient, '.o_reward');
         assert.containsOnce(webClient, '.o_list_view');
 
-        // same as before, but don't wait
-        webClient.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
-        await doAction(1);
-        assert.containsNone(webClient, '.o_reward');
-        assert.containsOnce(webClient, '.o_kanban_view');
         webClient.destroy();
     });
 
@@ -5069,6 +5066,77 @@ QUnit.module('ActionManager', {
             type: 'ir.actions.act_window_close',
             infos: 'just for testing',
         }, options);
+
+        webClient.destroy();
+    });
+
+    QUnit.test('on close with effect from server', async function (assert) {
+        assert.expect(1);
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            session: {
+                show_effect: true,
+            },
+            mockRPC(route, args) {
+                if (route === '/web/dataset/call_button') {
+                    return Promise.resolve({
+                        type: 'ir.actions.act_window_close',
+                        effect: {
+                            type: 'rainbow_man',
+                            message: 'button called',
+                        }
+                    });
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        await doAction(6);
+        await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
+        assert.containsOnce(webClient, '.o_reward');
+
+        webClient.destroy();
+    });
+
+    QUnit.test('on close with effect in xml', async function (assert) {
+        assert.expect(2);
+
+        this.archs['partner,false,form'] = `
+            <form>
+                <header>
+                    <button string="Call method"
+                        name="object"
+                        type="object"
+                        effect="{'type': 'rainbow_man', 'message': 'rainBowInXML'}"/>
+                </header>
+                    <field name="display_name"/>
+            </form>`;
+
+        const webClient = await createWebClient({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            menus: this.menus,
+            session: {
+                show_effect: true,
+            },
+            mockRPC(route, args) {
+                if (route === '/web/dataset/call_button') {
+                    return Promise.resolve();
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        await doAction(6);
+        await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
+        assert.containsOnce(webClient, '.o_reward');
+        assert.strictEqual(
+            webClient.el.querySelector('.o_reward .o_reward_msg_content').textContent,
+            'rainBowInXML'
+        );
 
         webClient.destroy();
     });

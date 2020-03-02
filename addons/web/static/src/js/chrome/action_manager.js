@@ -196,13 +196,19 @@ class CloseActionPlugin extends ActionManagerPlugin {
             options.on_close(action.infos);
             owlReload = false;
         }
+        let pushCallBack = null;
+        if (action.effect) {
+            pushCallBack = () => {
+                this.env.bus.trigger('show-effect', action.effect);
+            }
+        }
         const controller = main ? main.controller : null;
         if (controller) {
             controller.owlReload = owlReload;
             controller.options = controller.options || {};
             controller.options.on_success = options.on_success;
         }
-        return this._pushController(controller);
+        return this._pushController(controller, pushCallBack);
     }
 }
 CloseActionPlugin.type = 'ir.actions.act_window_close';
