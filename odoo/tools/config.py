@@ -111,9 +111,6 @@ class configmanager(object):
         group.add_option("--without-demo", dest="without_demo",
                           help="disable loading demo data for modules to be installed (comma-separated, use \"all\" for all modules). Requires -d and -i. Default is %default",
                           my_default=False)
-        group.add_option("--populate-database", dest="populate_database",
-                          help="Populate database with auto-generated data. Value should be the population size: low, medium or high",
-                          my_default=False)
         group.add_option("-P", "--import-partial", dest="import_partial", my_default='',
                         help="Use this for big data importation, if it crashes you will be able to continue at the current state. Provide a filename to store intermediate importation states.")
         group.add_option("--pidfile", dest="pidfile", help="file where the server pid will be stored")
@@ -343,9 +340,10 @@ class configmanager(object):
 
             odoo.tools.config.parse_config(sys.argv[1:])
         """
-        self._parse_config(args)
+        opt = self._parse_config(args)
         odoo.netsvc.init_logger()
         odoo.modules.module.initialize_sys_path()
+        return opt
 
     def _parse_config(self, args=None):
         if args is None:
@@ -417,7 +415,7 @@ class configmanager(object):
                 'db_port', 'db_template', 'logfile', 'pidfile', 'smtp_port',
                 'email_from', 'smtp_server', 'smtp_user', 'smtp_password',
                 'db_maxconn', 'import_partial', 'addons_path',
-                'syslog', 'without_demo', 'populate_database',
+                'syslog', 'without_demo',
                 'dbfilter', 'log_level', 'log_db',
                 'log_db_level', 'geoip_database', 'dev_mode', 'shell_interface'
         ]
@@ -510,6 +508,8 @@ class configmanager(object):
         conf.server_wide_modules = [
             m.strip() for m in self.options['server_wide_modules'].split(',') if m.strip()
         ]
+
+        return opt
 
     def _is_addons_path(self, path):
         from odoo.modules.module import MANIFEST_NAMES
