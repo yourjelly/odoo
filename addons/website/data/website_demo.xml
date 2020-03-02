@@ -259,6 +259,96 @@
             </field>
         </record>
 
+        <record id="presets_debug_view" model="ir.ui.view">
+            <field name="name">Presets Debug</field>
+            <field name="type">qweb</field>
+            <field name="key">website.presets_debug_page_view</field>
+            <field name="arch" type="xml">
+                <t name="Debug" t-name="website.presets_debug_page_view">
+                    <t t-set="odoo_theme_colors" t-value="[['alpha', 'Alpha'], ['beta', 'Beta'], ['gamma', 'Gamma'], ['delta', 'Delta'], ['epsilon', 'Epsilon']]"/>
+
+                    <t t-call="website.layout">
+                        <div class="container py-5">
+                            <h2>Colours</h2>
+                            <div class="d-flex mb-5">
+                                <div class="mt-3 flex-grow-1" t-foreach="odoo_theme_colors" t-as="i">
+                                    <div class="media">
+                                        <span t-attf-class="border p-3 mr-1 bg-#{i[0]}"></span>
+                                        <div class="media-body align-self-center">
+                                            <h5 class="m-0" t-esc="i[1]"></h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <h2>Presets</h2>
+                            <div class="row">
+                                <div class="col-6 mt-3" t-foreach="[0, 1, 2, 3, 4, 5]" t-as="i">
+                                    <t t-if="i>0">Preset <t t-esc="i"/></t>
+                                    <t t-else="">No preset</t>
+                                    <div t-attf-class="o_color_#{i} p-3 border">
+                                        <div class="row">
+                                            <div class="col">
+                                                <h2>Heading title</h2>
+                                                <p>Paragraph text. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. <i>Integer posuere erat a ante</i>. <a href="#">Link text</a></p>
+                                                <p class="text-muted">Text muted. Lorem <b>ipsum dolor sit amet</b>, consectetur.</p>
+                                                <p class="small">Small text. Lorem <b>ipsum dolor sit amet</b>, consectetur adipiscing elit. <i>Integer posuere erat a ante</i>.</p>
+                                                <div class="form-group row">
+                                                    <label class="col-2 col-form-label">Label</label>
+                                                    <div class="col-10">
+                                                        <input type="email" class="form-control"/>
+                                                        <small id="emailHelp" class="form-text text-muted">Form field help text</small>
+                                                    </div>
+                                                </div>
+                                                <div class="card w-100 mb-3">
+                                                  <div class="card-body">
+                                                        <h5 class="card-title">Card title</h5>
+                                                        <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+                                                        <p class="card-text">Paragraph. <a href="#">text link</a></p>
+
+                                                        <t t-foreach="['primary','secondary', 'info', 'warning', 'danger', 'success']" t-as="btn">
+                                                            <a href="#" t-attf-class="mb-2 btn-sm btn btn-#{btn}" t-esc="'btn-' + btn"/>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                                <nav aria-label="breadcrumb">
+                                                    <ol class="breadcrumb">
+                                                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                                                        <li class="breadcrumb-item"><a href="#">Library</a></li>
+                                                        <li class="breadcrumb-item active">Data</li>
+                                                    </ol>
+                                                </nav>
+                                                <ul class="nav nav-tabs mb-3">
+                                                    <li class="nav-item">
+                                                        <a class="nav-link active" href="#">Active</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" href="#">Link</a>
+                                                    </li>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link disabled" href="#">Disabled</a>
+                                                    </li>
+                                                </ul>
+                                                <div class="progress">
+                                                    <div class="progress-bar" style="width: 25%;">25%</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto border-left">
+                                                <div t-foreach="['primary','secondary', 'info', 'warning', 'danger', 'success']" t-as="btn">
+                                                    <a href="#" t-attf-class="mb-2 btn-block btn btn-#{btn}" t-esc="'btn-' + btn"/>
+                                                    <a href="#" t-attf-class="mb-3 btn-block btn btn-outline-#{btn}" t-esc="'btn-outline-' + btn"/>
+                                                    <hr/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </field>
+        </record>
+
         <record id="snippets_debug_view" model="ir.ui.view">
             <field name="name">Snippet Debug</field>
             <field name="type">qweb</field>
@@ -305,6 +395,13 @@
             <field name="url">/website/demo/bootstrap</field>
             <field name="is_published">False</field>
             <field name="view_id" ref="bs_debug_view"/>
+        </record>
+
+        <!-- Presets Debug Page -->
+        <record id="bs_debug_page" model="website.page">
+            <field name="url">/website/demo/presets</field>
+            <field name="is_published">False</field>
+            <field name="view_id" ref="presets_debug_view"/>
         </record>
 
         <!-- Snippet Debug Page -->
