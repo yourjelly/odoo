@@ -1068,9 +1068,14 @@ class Partner(models.Model):
     def _populate_database(self, scale):
         new = super()._populate_database(scale)
         # set parent_ids
+
+        self.populate_set_companies(new)
+
+    def populate_set_companies(self, new):
+        # make some company with one contact, other with no contact, other with tons of contact
+        _logger.info('Filtering')
         companies = new.filtered('is_company')
         partners = new - companies
-        # make some company with one contact, other with no contact, other with tons of contact
         r = populate._randomizer('res.partner')
         _logger.info('Setting companies')
         count = 0
