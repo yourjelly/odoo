@@ -568,6 +568,10 @@ class ProductTemplate(models.Model):
     # to influence computed field.
     location_id = fields.Many2one('stock.location', 'Location', store=False)
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse', store=False)
+    use_default_route_ids = fields.Boolean(
+        'Allow to definie default route on product template',
+        compute='_compute_use_default_route_ids')
+    replenish_on_order = fields.Boolean('Replenish on Order')
     route_ids = fields.Many2many(
         'stock.location.route', 'stock_route_product', 'product_id', 'route_id', 'Routes',
         domain=[('product_selectable', '=', True)],
@@ -598,9 +602,17 @@ class ProductTemplate(models.Model):
             template.outgoing_qty = res[template.id]['outgoing_qty']
 
     def _set_orderpoints(self):
-        for product_variant in self.product_variant_ids:
-            product_variant.orderpoint_with_mto_ids = self.orderpoint_ids.filtered(
-                lambda o: o.product_id == product_variant
+        for template in self:
+            for product_variant in template.product_variant_ids:
+                product_variant.orderpoint_with_mto_ids = template.orderpoint_ids.filtered(
+                    lambda o: o.product_id == product_variant
+                )
+
+    def _compute_use_default_route_ids(self):
+        for template in self:
+            template.use_default_route_ids = template.type in ['digital', 'service'] or (
+                self.user_has_groups('stock.group_stock_multi_locations') and
+                self.user_has_groups('stock.group_adv_location_mto')
             )
 
     def _product_available(self, name, arg):

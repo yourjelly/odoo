@@ -351,8 +351,9 @@ class Warehouse(models.Model):
                     'company_id': self.company_id.id,
                     'action': 'pull',
                     'auto': 'manual',
+                    'is_replenish_on_order': True,
                     'delay_alert': True,
-                    'route_id': self._find_global_route('stock.route_warehouse0_mto', _('Make To Order')).id
+                    'route_id': self.delivery_route_id.id
                 },
                 'update_values': {
                     'name': self._format_rulename(location_id, location_dest_id, 'MTO'),
@@ -499,7 +500,6 @@ class Warehouse(models.Model):
                 ('location_id', '=', rule_vals['location_id']),
                 ('route_id', '=', rule_vals['route_id']),
                 ('action', '=', rule_vals['action']),
-                ('active', '=', False),
             ])
             if not existing_rule:
                 self.env['stock.rule'].create(rule_vals)
@@ -586,13 +586,6 @@ class Warehouse(models.Model):
                 continue
             transit_location.active = True
             output_location = supplier_wh.lot_stock_id if supplier_wh.delivery_steps == 'ship_only' else supplier_wh.wh_output_stock_loc_id
-            # Create extra MTO rule (only for 'ship only' because in the other cases MTO rules already exists)
-            if supplier_wh.delivery_steps == 'ship_only':
-                routing = [self.Routing(output_location, transit_location, supplier_wh.out_type_id, 'pull')]
-                mto_vals = supplier_wh._get_global_route_rules_values().get('mto_pull_id')
-                values = mto_vals['create_values']
-                mto_rule_val = supplier_wh._get_rule_values(routing, values, name_suffix='MTO')
-                Rule.create(mto_rule_val[0])
 
             inter_wh_route = Route.create(self._get_inter_warehouse_route_values(supplier_wh))
 
@@ -604,6 +597,19 @@ class Warehouse(models.Model):
                 values={'route_id': inter_wh_route.id, 'propagate_warehouse_id': supplier_wh.id})
             for pull_rule_vals in pull_rules_list:
                 Rule.create(pull_rule_vals)
+
+            routing = [self.Routing(output_location, transit_location, supplier_wh.out_type_id, 'pull')]
+            mto_vals = {
+                'active': True,
+                'procure_method': 'mts_else_mto',
+                'company_id': self.company_id.id,
+                'action': 'pull',
+                'auto': 'manual',
+                'delay_alert': True,
+                'route_id': [(4, inter_wh_route.id)],
+            }
+            mto_rule_val = supplier_wh._get_rule_values(routing, mto_vals, name_suffix='MTO')
+            self.env['stock.warehouse']._find_existing_rule_or_create([mto_rule_val[0]])
 
     # Routing tools
     # ------------------------------------------------------------
@@ -749,7 +755,7 @@ class Warehouse(models.Model):
         else:
             # We need to delete all the MTO stock rules, otherwise they risk to be used in the system
             Rule.search([
-                '&', ('route_id', '=', self._find_global_route('stock.route_warehouse0_mto', _('Make To Order')).id),
+                '&', ('route_id', '=', self.delivery_route_id.id),
                 ('location_id.usage', '=', 'transit'),
                 ('action', '!=', 'push'),
                 ('location_src_id', '=', self.lot_stock_id.id)]).write({'active': False})
@@ -928,7 +934,7 @@ class Warehouse(models.Model):
 
     @api.returns('self')
     def _get_all_routes(self):
-        routes = self.mapped('route_ids') | self.mapped('mto_pull_id').mapped('route_id')
+        routes = self.mapped('route_ids')
         routes |= self.env["stock.location.route"].search([('supplied_wh_id', 'in', self.ids)])
         return routes
 

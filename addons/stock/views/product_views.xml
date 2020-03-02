@@ -95,6 +95,7 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='group_lots_and_weight']" position="before">
+                    <field name="use_default_route_ids" invisible="1"/>
                     <field name="orderpoint_ids" context="{'default_product_id': product_variant_id}">
                         <tree string="Reordering Rules" editable="bottom">
                             <field name="active" invisible="1"/>
@@ -112,7 +113,8 @@
                         </tree>
                     </field>
                     <group string="Operations" name="operations">
-                        <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible': [('type', 'in', ['service', 'digital'])]}"/>
+                        <field name="replenish_on_order" attrs="{'invisible': [('use_default_route_ids', '!=', True)]}"/>
+                        <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible': ['|', ('replenish_on_order', '=', False), ('use_default_route_ids', '!=', True)]}"/>
                         <field name="route_from_categ_ids" widget="many2many_tags" readonly="1" attrs="{'invisible': [('route_from_categ_ids', '=', [])]}"/>
                         <label for="sale_delay" attrs="{'invisible': [('sale_ok', '=', False)]}"/>
                         <div attrs="{'invisible': [('sale_ok', '=', False)]}">

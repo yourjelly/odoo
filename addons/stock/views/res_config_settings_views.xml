@@ -379,6 +379,19 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12 col-lg-6 o_setting_box"
+                                id="use_mto_routes"
+                                title="Define route operations in order to have a replenish on order process.">
+                                <div class="o_setting_left_pane">
+                                    <field name="group_stock_adv_location_mto"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="group_stock_adv_location_mto"/>
+                                    <div class="text-muted">
+                                        Replenish your products on order
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <h2 id="schedule_info" invisible="1">Advanced Scheduling</h2>
                         <div class="row mt16 o_settings_container">

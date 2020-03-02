@@ -118,10 +118,9 @@ class StockWarehouseOrderpoint(models.Model):
     def _commpute_allowed_route_ids(self):
         for orderpoint in self:
             orderpoint.allowed_route_ids = self.env['stock.location.route'].search([
-                '|', '|',
+                '|',
                 ('warehouse_ids', 'in', orderpoint.warehouse_id.id),
                 ('product_selectable', '=', True),
-                ('product_categ_selectable', '=', True)
             ])
 
     @api.depends('product_id', 'location_id', 'company_id', 'warehouse_id',
