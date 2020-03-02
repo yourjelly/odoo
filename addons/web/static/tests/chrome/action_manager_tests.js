@@ -213,7 +213,21 @@ QUnit.module('ActionManager', {
     });
 
     QUnit.test('no widget memory leaks when doing some action stuff', async function (assert) {
-        assert.expect(1);
+        assert.expect(2);
+
+        const components = new Set();
+        const originalMethods = {
+            __patch: owl.Component.prototype.__patch,
+            __destroy: owl.Component.prototype.__destroy,
+        };
+        owl.Component.prototype.__patch = function() {
+            components.add(this);
+            return originalMethods.__patch.call(this, ...arguments);
+        };
+        owl.Component.prototype.__destroy = function() {
+            components.delete(this);
+            return originalMethods.__destroy.call(this, ...arguments);
+        };
 
         var delta = 0;
         testUtils.mock.patch(Widget, {
@@ -249,10 +263,29 @@ QUnit.module('ActionManager', {
             "should have properly destroyed all other widgets");
         webClient.destroy();
         testUtils.mock.unpatch(Widget);
+        for (const key in originalMethods) {
+            owl.Component.prototype[key] = originalMethods[key];
+        }
+
+        assert.strictEqual(components.size, 0);
     });
 
     QUnit.test('no widget memory leaks when executing actions in dialog', async function (assert) {
-        assert.expect(1);
+        assert.expect(2);
+
+        const components = new Set();
+        const originalMethods = {
+            __patch: owl.Component.prototype.__patch,
+            __destroy: owl.Component.prototype.__destroy,
+        };
+        owl.Component.prototype.__patch = function() {
+            components.add(this);
+            return originalMethods.__patch.call(this, ...arguments);
+        };
+        owl.Component.prototype.__destroy = function() {
+            components.delete(this);
+            return originalMethods.__destroy.call(this, ...arguments);
+        };
 
         var delta = 0;
         testUtils.mock.patch(Widget, {
@@ -285,10 +318,29 @@ QUnit.module('ActionManager', {
 
         webClient.destroy();
         testUtils.mock.unpatch(Widget);
+        for (const key in originalMethods) {
+            owl.Component.prototype[key] = originalMethods[key];
+        }
+
+        assert.strictEqual(components.size, 0);
     });
 
     QUnit.test('no memory leaks when executing an action while switching view', async function (assert) {
-        assert.expect(1);
+        assert.expect(2);
+
+        const components = new Set();
+        const originalMethods = {
+            __patch: owl.Component.prototype.__patch,
+            __destroy: owl.Component.prototype.__destroy,
+        };
+        owl.Component.prototype.__patch = function() {
+            components.add(this);
+            return originalMethods.__patch.call(this, ...arguments);
+        };
+        owl.Component.prototype.__destroy = function() {
+            components.delete(this);
+            return originalMethods.__destroy.call(this, ...arguments);
+        };
 
         let def;
         let delta = 0;
@@ -337,10 +389,29 @@ QUnit.module('ActionManager', {
 
         webClient.destroy();
         testUtils.mock.unpatch(Widget);
+        for (const key in originalMethods) {
+            owl.Component.prototype[key] = originalMethods[key];
+        }
+
+        assert.strictEqual(components.size, 0);
     });
 
     QUnit.test('no memory leaks when executing an action while loading views', async function (assert) {
-        assert.expect(1);
+        assert.expect(2);
+
+        const components = new Set();
+        const originalMethods = {
+            __patch: owl.Component.prototype.__patch,
+            __destroy: owl.Component.prototype.__destroy,
+        };
+        owl.Component.prototype.__patch = function() {
+            components.add(this);
+            return originalMethods.__patch.call(this, ...arguments);
+        };
+        owl.Component.prototype.__destroy = function() {
+            components.delete(this);
+            return originalMethods.__destroy.call(this, ...arguments);
+        };
 
         var def;
         var delta = 0;
@@ -387,10 +458,29 @@ QUnit.module('ActionManager', {
 
         webClient.destroy();
         testUtils.mock.unpatch(Widget);
+        for (const key in originalMethods) {
+            owl.Component.prototype[key] = originalMethods[key];
+        }
+
+        assert.strictEqual(components.size, 0);
     });
 
     QUnit.test('no memory leaks when executing an action while loading data of default view', async function (assert) {
-        assert.expect(1);
+        assert.expect(2);
+
+        const components = new Set();
+        const originalMethods = {
+            __patch: owl.Component.prototype.__patch,
+            __destroy: owl.Component.prototype.__destroy,
+        };
+        owl.Component.prototype.__patch = function() {
+            components.add(this);
+            return originalMethods.__patch.call(this, ...arguments);
+        };
+        owl.Component.prototype.__destroy = function() {
+            components.delete(this);
+            return originalMethods.__destroy.call(this, ...arguments);
+        };
 
         var def;
         var delta = 0;
@@ -437,6 +527,11 @@ QUnit.module('ActionManager', {
 
         webClient.destroy();
         testUtils.mock.unpatch(Widget);
+        for (const key in originalMethods) {
+            owl.Component.prototype[key] = originalMethods[key];
+        }
+
+        assert.strictEqual(components.size, 0);
     });
 
     QUnit.test('action with "no_breadcrumbs" set to true', async function (assert) {
