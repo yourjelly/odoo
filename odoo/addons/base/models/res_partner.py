@@ -9,6 +9,7 @@ import pytz
 import threading
 import re
 import random
+import logging
 
 import requests
 from lxml import etree
@@ -19,6 +20,8 @@ from odoo.modules import get_module_resource
 from odoo.osv.expression import get_unaccent_wrapper
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import pycompat, populate
+
+_logger = logging.getLogger(__name__)
 
 # Global variables used for the warning fields declared on the res.partner
 # in the following modules : sale, purchase, account, stock
@@ -31,6 +34,7 @@ WARNING_HELP = _('Selecting the "Warning" option will notify user with the messa
 
 
 ADDRESS_FIELDS = ('street', 'street2', 'zip', 'city', 'state_id', 'country_id')
+
 @api.model
 def _lang_get(self):
     return self.env['res.lang'].get_installed()
@@ -1063,15 +1067,19 @@ class Partner(models.Model):
 
     def _populate_database(self, scale):
         new = super()._populate_database(scale)
-
         # set parent_ids
         companies = new.filtered('is_company')
         partners = new - companies
         # make some company with one contact, other with no contact, other with tons of contact
-        random.seed('partner_companies')
+        r = populate._randomizer('res.partner')
+        _logger.info('Setting companies')
+        count = 0
         for partner in partners:
-            if bool(random.getrandbits(1)): # 50% change to have a company
-                partner.parent_id = random.choice(companies)
+            count += 1
+            if count % 1000 == 0:
+                _logger.info('Progress: %s/%s', count, len(partners))
+            if bool(r.getrandbits(1)): # 50% change to have a company
+                partner.parent_id = r.choice(companies)
         return new
 
 

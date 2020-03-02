@@ -3,7 +3,7 @@ import random
 
 def _randomizer(seed):
     r = random.Random()
-    r.seed(seed)
+    r.seed(seed, version=2)
     return r
 
 def _format_str(val, counter, _): # todo format

@@ -5593,7 +5593,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 _logger.info('Batch: %s/%s', record_count, scale_limit)
                 news |= self.create(create_values)
                 create_values = []
-                self.env.cr.commit()
+                #self.env.cr.commit()
 
         if create_values:
             news |= self.create(create_values)
