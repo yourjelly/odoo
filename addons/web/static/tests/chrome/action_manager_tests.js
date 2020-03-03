@@ -5096,6 +5096,7 @@ QUnit.module('ActionManager', {
         });
         await doAction(6);
         await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
+        await testUtils.nextTick();
         assert.containsOnce(webClient, '.o_reward');
 
         webClient.destroy();
@@ -5132,6 +5133,7 @@ QUnit.module('ActionManager', {
         });
         await doAction(6);
         await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
+        await testUtils.nextTick();
         assert.containsOnce(webClient, '.o_reward');
         assert.strictEqual(
             webClient.el.querySelector('.o_reward .o_reward_msg_content').textContent,
