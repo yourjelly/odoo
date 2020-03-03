@@ -564,6 +564,13 @@ blockquote {
             }
         }
 
+        // Muted text
+        @if type-of(o-get-color($-text)) == color {
+            .text-muted {
+                color: rgba(o-get-color($-text), .6) !important;
+            }
+        }
+
         // Primary buttons (** for buttons, we can extend an other button class
         // if possible as those rules are not important in bootstrap and it
         // would not make sense to combine multiple btn classes anyway).
