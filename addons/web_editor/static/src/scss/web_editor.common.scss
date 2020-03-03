@@ -543,7 +543,8 @@ blockquote {
     $config: nth($o-color-combinations, $index);
     $-bg: map-get($config, 'bg');
     $-text: map-get($config, 'text');
-    $-headings: map-get($config, 'headings');
+    $-default-headings: map-get($config, 'default-headings');
+    $-custom-headings: map-get($config, 'custom-headings');
     $-btn-primary: map-get($config, 'btn-primary');
     $-btn-secondary: map-get($config, 'btn-secondary');
 
@@ -556,10 +557,10 @@ blockquote {
 
         // Headings
         h1, h2, h3, h4, h5, h6 {
-            @if type-of(o-get-color($-headings)) == color {
-                color: o-get-color($-headings);
+            @if type-of(o-get-color($-custom-headings)) == color {
+                color: o-get-color($-custom-headings);
             } @else {
-                color: inherit;
+                color: o-get-color($-default-headings);
             }
         }
 
