@@ -398,7 +398,7 @@
         </record>
 
         <!-- Presets Debug Page -->
-        <record id="bs_debug_page" model="website.page">
+        <record id="presets_debug_page" model="website.page">
             <field name="url">/website/demo/presets</field>
             <field name="is_published">False</field>
             <field name="view_id" ref="presets_debug_view"/>
