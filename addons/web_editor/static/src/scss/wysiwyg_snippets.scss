@@ -631,6 +631,10 @@ body.editor_enable.editor_has_snippets {
             width: 92%;
             padding: 8px;
             margin: 4px 4%;
+
+            > * {
+                line-height: 1.6;
+            }
         }
 
         .o_colorpicker_section {
