@@ -1023,8 +1023,13 @@ class Field(MetaField('DummyField', (object,), {})):
                     value = env.cache.get(record, self)
 
             elif (not record.id) and record._origin:
-                value = self.convert_to_cache(record._origin[self.name], record)
-                env.cache.set(record, self, value)
+                # retrieve value from origin record, and do it in batch to
+                # improve subfield prefetching
+                for rec in record._in_cache_without(self):
+                    origin = rec._origin
+                    if origin:
+                        value = self.convert_to_cache(origin[self.name], rec)
+                        env.cache.set(rec, self, value)
 
             elif (not record.id) and self.type == 'many2one' and self.delegate:
                 # special case: parent records are new as well
