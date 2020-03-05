@@ -590,11 +590,21 @@ blockquote {
         $-text: null;
     }
 
-    $-default-headings: map-get($config, 'default-headings');
-    $-custom-headings: map-get($config, 'custom-headings');
+    $-headings: map-get($config, 'headings');
+
+    @if type-of(o-get-color($-custom-headings)) == color {
+        $-headings: map-get($config, 'custom-headings');
+    }
 
     $-btn-primary: map-get($config, 'btn-primary');
     $-btn-secondary: map-get($config, 'btn-secondary');
+
+    @if type-of(o-get-color(map-get($config, 'custom-btn-primary'))) == color {
+        $-btn-primary: map-get($config, 'custom-btn-primary');
+    }
+    @if type-of(o-get-color(map-get($config, 'custom-btn-secondary'))) == color {
+        $-btn-secondary: map-get($config, 'custom-btn-secondary');
+    }
 
     // Adapted versions to increase readability on thin elements
     $-adapted-primary: adapted-color(o-get-color($-btn-primary), o-get-color($-bg));
@@ -614,11 +624,7 @@ blockquote {
 
         // Headings
         h1, h2, h3, h4, h5, h6 {
-            @if type-of(o-get-color($-custom-headings)) == color {
-                color: o-get-color($-custom-headings);
-            } @else {
-                color: o-get-color($-default-headings);
-            }
+            color: o-get-color($-headings);
         }
 
         // Headings
