@@ -539,14 +539,71 @@ blockquote {
 
     @return false;
 }
+
+// Check if a color is readable over another one.
+// Return:
+// - boolean: readability check
+// - boolean: bg is more prominent than text
+@function colour-difference($-color, $-bg) {
+    $r: (max(red($-color), red($-bg))) - (min(red($-color), red($-bg)));
+    $g: (max(green($-color), green($-bg))) - (min(green($-color), green($-bg)));
+    $b: (max(blue($-color), blue($-bg))) - (min(blue($-color), blue($-bg)));
+
+    // Sum colours's RGB values to determine the contrast-ratio
+    $sum-rgb: $r + $g + $b;
+
+    // Detect the 'most prominent' color.
+    $-color-val: red($-color) + green($-color) + blue($-color);
+    $-bg-val: red($-bg) + green($-bg) + blue($-bg);
+
+    @return ($sum-rgb > 300, $-color-val > $-bg-val);
+}
+
+// Return an adapted color with increased readability (range ± 30% lightness)
+// Useful to increase contrast for thin elements, like small text or borders,
+// keeping a similar color;
+@function adapted-color($-color, $-bg) {
+    $i: 0;
+    $-bg-is-darker: nth(colour-difference($-color, $-bg), 2);
+
+    @while (nth(colour-difference($-color, $-bg), 1) == false and $i < 31) {
+        // Decrease or increase color luminosity to increase contrast.
+        @if $-bg-is-darker {
+            $-color: lighten($-color, 1%);
+        } @else {
+            $-color: darken($-color, 1%);
+        }
+
+        $i: $i + 1;
+    }
+
+    @return $-color;
+}
+
+
 @for $index from 1 through length($o-color-combinations) {
     $config: nth($o-color-combinations, $index);
     $-bg: map-get($config, 'bg');
     $-text: map-get($config, 'text');
+
+    @if type-of(o-get-color($-text)) != color {
+        $-text: null;
+    }
+
     $-default-headings: map-get($config, 'default-headings');
     $-custom-headings: map-get($config, 'custom-headings');
+
     $-btn-primary: map-get($config, 'btn-primary');
     $-btn-secondary: map-get($config, 'btn-secondary');
+
+    // Adapted versions to increase readability on thin elements
+    $-adapted-primary: adapted-color(o-get-color($-btn-primary), o-get-color($-bg));
+    $-adapted-secondary: adapted-color(o-get-color($-btn-secondary), o-get-color($-bg));
+
+    $-adapted-success: adapted-color(o-get-color('success'), o-get-color($-bg));
+    $-adapted-warning: adapted-color(o-get-color('warning'), o-get-color($-bg));
+    $-adapted-info: adapted-color(o-get-color('info'), o-get-color($-bg));
+    $-adapted-danger: adapted-color(o-get-color('danger'), o-get-color($-bg));
 
     // Those color classes color multiple elements when applied on a snippet.
     // Those rules are not important so that they can be overridden through
@@ -564,10 +621,16 @@ blockquote {
             }
         }
 
-        // Muted text
-        @if type-of(o-get-color($-text)) == color {
-            .text-muted {
-                color: rgba(o-get-color($-text), .6) !important;
+        // Headings
+        .btn-link, [href]:not(.btn) {
+            color: $-adapted-primary;
+        }
+
+        .text-muted {
+            @if $-text {
+                color: rgba(o-get-color($-text), .7) !important;
+            } @else {
+                color: rgba(color-yiq(o-get-color($-bg)), .7) !important;
             }
         }
 
@@ -579,7 +642,7 @@ blockquote {
                 @extend .btn-#{$-btn-primary};
             }
             .btn-outline-primary {
-                @extend .btn-outline-#{$-btn-primary};
+                @extend .btn-outline-#{$-adapted-primary};
             }
         } @else {
             $-btn-primary-color: o-get-color($-btn-primary);
@@ -587,7 +650,7 @@ blockquote {
                 @include button-variant($-btn-primary-color, $-btn-primary-color);
             }
             .btn-outline-primary {
-                @include button-outline-variant($-btn-primary-color);
+                @include button-outline-variant($-adapted-primary);
             }
         }
 
@@ -596,7 +659,7 @@ blockquote {
                 @extend .btn-#{$-btn-secondary};
             }
             .btn-outline-secondary {
-                @extend .btn-outline-#{$-btn-secondary};
+                @extend .btn-outline-#{$-adapted-secondary};
             }
         } @else {
             $-btn-secondary-color: o-get-color($-btn-secondary);
@@ -604,8 +667,21 @@ blockquote {
                 @include button-variant($-btn-secondary-color, $-btn-secondary-color);
             }
             .btn-outline-secondary {
-                @include button-outline-variant($-btn-secondary-color);
+                @include button-outline-variant($-adapted-secondary);
             }
+        }
+
+        .btn-outline-success {
+            @include button-outline-variant($-adapted-success);
+        }
+        .btn-outline-warning {
+            @include button-outline-variant($-adapted-warning);
+        }
+        .btn-outline-info {
+            @include button-outline-variant($-adapted-info);
+        }
+        .btn-outline-danger {
+            @include button-outline-variant($-adapted-danger);
         }
     }
 }
