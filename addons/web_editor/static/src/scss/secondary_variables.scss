@@ -9,6 +9,20 @@ $o-color-palette: map-merge($o-base-color-palette, o-map-omit($o-color-palette))
 @function palette-color($key) {
     @return map-get($o-color-palette, $key);
 }
+// Color combinations
+$o-color-combinations: nth($o-color-combinations-presets, $o-color-combinations-preset-number) !default;
+@for $index from 1 through length($o-color-combinations) {
+    $combination: map-merge($o-base-color-combination, nth($o-color-combinations, $index));
+    $-combination-additions: ();
+    @each $element, $color in $combination {
+        $-combination-additions: map-merge($-combination-additions, (
+            'o-cc#{$index}-#{$element}': $color,
+        ));
+    }
+
+    // Original color palette can contain override of the default combinations
+    $o-color-palette: map-merge($-combination-additions, $o-color-palette);
+}
 
 // Theme colors
 $o-theme-color-palette: nth($o-theme-color-palettes, $o-theme-color-palette-number) !default;
@@ -40,6 +54,3 @@ $o-gray-color-palette: map-merge($o-base-gray-color-palette, o-map-omit($o-gray-
 @function palette-gray($key) {
     @return map-get($o-gray-color-palette, $key);
 }
-
-// Color combinations
-$o-color-combinations: nth($o-color-combinations-presets, $o-color-combinations-preset-number) !default;

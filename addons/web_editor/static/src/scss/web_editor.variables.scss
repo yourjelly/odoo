@@ -371,6 +371,21 @@ $o-gray-color-palettes: (
 $o-gray-color-palette-number: 1 !default;
 
 // Color combinations
+$o-base-color-combination: (
+    'bg': null,
+    'text': null,
+    'headings': null,
+    'h2': null,
+    'h3': null,
+    'h4': null,
+    'h5': null,
+    'h6': null,
+    'link': null,
+    'btn-primary': null,
+    'btn-primary-border': null,
+    'btn-secondary': null,
+    'btn-secondary-border': null,
+);
 $o-color-combinations-presets: (
     (
         (
