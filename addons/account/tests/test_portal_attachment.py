@@ -14,6 +14,8 @@ class TestUi(tests.HttpCase):
     def test_01_portal_attachment(self):
         """Test the portal chatter attachment route."""
 
+        self.authenticate(None, None)
+
         miscellaneous_journal = self.env['account.journal'].create({
             'name': 'Miscellaneous - Test',
             'code': 'TMISC',
