@@ -540,13 +540,12 @@ blockquote {
     @return false;
 }
 @for $index from 1 through length($o-color-combinations) {
-    $config: nth($o-color-combinations, $index);
-    $-bg: map-get($config, 'bg');
-    $-text: map-get($config, 'text');
-    $-headings: map-get($config, 'headings');
-    $-link: map-get($config, 'link');
-    $-btn-primary: map-get($config, 'btn-primary');
-    $-btn-secondary: map-get($config, 'btn-secondary');
+    $-bg: color('o-cc#{$index}-bg');
+    $-text: color('o-cc#{$index}-text');
+    $-headings: color('o-cc#{$index}-headings');
+    $-link: color('o-cc#{$index}-link');
+    $-btn-primary: color('o-cc#{$index}-btn-primary');
+    $-btn-secondary: color('o-cc#{$index}-btn-secondary');
 
     // Those color classes color multiple elements when applied on a snippet.
     // Those rules are not important so that they can be overridden through
