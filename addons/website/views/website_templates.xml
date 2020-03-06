@@ -272,6 +272,7 @@
         <attribute name="t-if">website.user_id != user_id</attribute>
     </xpath>
     <xpath expr="//header//ul[@id='top_menu']/li[hasclass('divider')]" position="before">
+        <t t-set="_prefetch" t-value="request.env['website.menu'].search(website.website_domain()).mapped('website_id')"/>
         <t t-foreach="website.menu_id.child_id" t-as="submenu">
             <t t-call="website.submenu">
                 <t t-set="item_class" t-value="'nav-item'"/>
