@@ -14,6 +14,8 @@ class TestUi(tests.HttpCase):
     def test_01_portal_attachment(self):
         """Test the portal chatter attachment route."""
 
+        self.authenticate(None, None)
+
         partner = self.env['res.partner'].create({'name': 'Test partner'})
 
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
@@ -140,7 +142,7 @@ class TestUi(tests.HttpCase):
         post_data['attachment_tokens'] = attachment.access_token
         res = self.url_open(url=post_url, data=post_data)
         self.assertEqual(res.status_code, 403)
-        self.assertIn("Sorry, you are not allowed to access documents of type 'Journal Entry' (account.move).", res.text)
+        self.assertIn("Sorry, you are not allowed to access documents of type 'Journal Entries' (account.move).", res.text)
 
         # Test attachment can't be associated if not "pending" state
         post_data['token'] = invoice._portal_ensure_token()
