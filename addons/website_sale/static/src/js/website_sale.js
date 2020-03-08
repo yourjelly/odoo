@@ -200,11 +200,28 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
         var self = this;
         var def = this._super.apply(this, arguments);
 
+
+        var params = $.deparam(location.search.slice(1));
+        if (params.attrib) {
+            var default_val = [];
+            var attribs = typeof params.attrib == "string" ? [params.attrib] : params.attrib;
+            attribs.forEach(function (att_comb) {
+                var att_comb_split = att_comb.split('-');
+                var att = att_comb_split[0];
+                var val = att_comb_split[1];
+                var value = self.$('.js_variant_change[name="ptal-' + att + '"][value="' + val + '"]').data('value_id')
+                value && default_val.push(value);
+            });
+            if (default_val.length) {
+                history.replaceState(undefined, undefined, '#attr=' + default_val.join(','));
+            }
+        }
         this._applyHash();
 
         _.each(this.$('div.js_product'), function (product) {
             $('input.js_product_change', product).first().trigger('change');
         });
+
 
         // This has to be triggered to compute the "out of stock" feature and the hash variant changes
         this.triggerVariantChange(this.$el);
