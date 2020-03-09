@@ -200,9 +200,9 @@ class StockMoveLine(models.Model):
             if ml.move_id and \
                     ml.move_id.picking_id and \
                     ml.move_id.picking_id.immediate_transfer and \
-                    ml.move_id.state != 'done' and \
-                    'qty_done' in vals:
-                ml.move_id.product_uom_qty = ml.move_id.quantity_done
+                    ml.move_id.state not in 'done' and \
+                    ('qty_done' in vals or 'demand_qty' in vals):
+                ml.move_id.product_uom_qty = ml.demand_qty or ml.move_id.quantity_done
             if ml.state == 'done':
                 if 'qty_done' in vals:
                     ml.move_id.product_uom_qty = ml.move_id.quantity_done

@@ -342,6 +342,19 @@ class TestMoveLineDemand(SavepointCase):
             ['done', 'done', 'done', 'cancel']
         )
 
+    def test_internal_notracking_6(self):
+        """Create an immediate transer using only stock move lines."""
+        # demand qty should be invisible?
+        internal = Form(self.env['stock.picking'].with_context(default_immediate_transfer=True))
+        internal.partner_id = self.partner
+        internal.picking_type_id = self.env.ref('stock.picking_type_internal')
+        with internal.move_line_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+            move_line.demand_qty = 2
+        internal = internal.save()
+        self.assertTrue(internal.immediate_transfer)
+        self.assertEqual(len(internal.move_line_ids_without_package), 1)
+
     def test_internal_tracking_serial_1(self):
         shelf1_location = self.env['stock.location'].create({
             'name': 'shelf1',

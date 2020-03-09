@@ -906,6 +906,7 @@ class StockMove(models.Model):
             if not move.picking_id:
                 continue
             if sum(move.move_line_ids.mapped('demand_qty')) == move.product_qty:
+                # shortcut for "immediate move line"
                 continue
             if move.product_id.tracking != 'serial':
                 uom_quantity = move.product_uom._compute_quantity(move.product_uom_qty, move.product_id.uom_id, rounding_method='HALF-UP')
