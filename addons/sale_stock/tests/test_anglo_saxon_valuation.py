@@ -948,7 +948,7 @@ class TestAngloSaxonValuation(SavepointCase):
             'price_unit': 8,
         })
         in_move_1._action_confirm()
-        in_move_1.quantity_done = 5
+        in_move_1._set_quantity_done(5)
         in_move_1._action_done()
 
         # +8@12
@@ -962,7 +962,7 @@ class TestAngloSaxonValuation(SavepointCase):
             'price_unit': 12,
         })
         in_move_2._action_confirm()
-        in_move_2.quantity_done = 8
+        in_move_2._set_quantity_done(8)
         in_move_2._action_done()
 
         # sale 1@20, deliver, invoice
@@ -979,7 +979,7 @@ class TestAngloSaxonValuation(SavepointCase):
                 })],
         })
         sale_order.action_confirm()
-        sale_order.picking_ids.move_lines.quantity_done = 1
+        sale_order.picking_ids.move_lines._set_quantity_done(1)
         sale_order.picking_ids.button_validate()
         invoice = sale_order.with_context(default_journal_id=self.journal_sale.id)._create_invoices()
         invoice.post()
