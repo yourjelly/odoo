@@ -355,52 +355,6 @@ odoo.define('web.ActWindowActionManager', function (require) {
 
             this._createViewController(action, viewType, viewOptions, { index });
             this._pushController(action.controller);
-
-            // var newController = function (controllerID) {
-            //     var options = {
-            //         controllerID: controllerID,
-            //         index: index,
-            //     };
-            //     return self
-            //         ._createViewController(action, viewType, viewOptions, options)
-            //         .then(function (controller) {
-            //             return self._startController(controller);
-            //         });
-            // };
-
-            // var controllerDef = action.controllers[viewType];
-            // if (controllerDef) {
-            //     controllerDef = controllerDef.then(function (controller) {
-            //         if (!controller.widget) {
-            //             // lazy loaded -> load it now (with same jsID)
-            //             return newController(controller.jsID);
-            //         } else {
-            //             return Promise.resolve(controller.widget.willRestore()).then(function () {
-            //                 viewOptions = _.extend({}, viewOptions, {
-            //                     breadcrumbs: self._getBreadcrumbs(self.controllerStack.slice(0, index)),
-            //                 });
-            //                 return controller.widget.reload(viewOptions).then(function () {
-            //                     return controller;
-            //                 });
-            //             });
-            //         }
-            //     }, function () {
-            //         // if the controllerDef is rejected, it probably means that the js
-            //         // code or the requests made to the server crashed.  In that case,
-            //         // if we reuse the same promise, then the switch to the view is
-            //         // definitely blocked.  We want to use a new controller, even though
-            //         // it is very likely that it will recrash again.  At least, it will
-            //         // give more feedback to the user, and it could happen that one
-            //         // record crashes, but not another.
-            //         return newController();
-            //     });
-            // } else {
-            //     controllerDef = newController();
-            // }
-
-            // return this.dp.add(controllerDef).then(function (controller) {
-            //     return self._pushController(controller);
-            // });
         }
 
         //--------------------------------------------------------------------------
@@ -421,12 +375,7 @@ odoo.define('web.ActWindowActionManager', function (require) {
         _onSwitchView(payload) {
             const viewType = payload.view_type;
             const { action } = this._getCurrentAction();
-            // TODO: find a way to save/restore state
-            // const currentController = action.controller;
-            // var currentControllerState = currentController.widget.exportState();
-            // action.controllerState = _.extend({}, action.controllerState, currentControllerState);
             const options = {
-                // controllerState: action.controllerState,
                 currentId: payload.res_id,
             };
             if (payload.mode) {
