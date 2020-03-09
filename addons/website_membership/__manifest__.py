@@ -14,7 +14,6 @@ Publish your members/association directory publicly.
         'data/membership_data.xml',
         'views/product_template_views.xml',
         'views/website_membership_templates.xml',
-        'security/ir.model.access.csv',
         'security/website_membership.xml',
     ],
     'demo': ['data/membership_demo.xml'],
