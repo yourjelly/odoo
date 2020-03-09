@@ -161,7 +161,6 @@ class ClientActionPlugin extends ActionManagerPlugin {
             index: index,
             jsID: controllerID,
             options: options,
-            // title: widget.getTitle(),
         };
         action.id = action.id || action.tag;
         this._pushController(action.controller);
@@ -415,51 +414,54 @@ class ActionManager extends core.EventBus {
             prom = Promise.reject();
         }
 
-        return this._resolveLast(prom).then(action => {
-            // show effect if button have effect attribute
-            // rainbowman can be displayed from two places: from attribute on a button or from python
-            // code below handles the first case i.e 'effect' attribute on button.
-            let effect = false;
-            if (actionData.effect) {
-                effect = pyUtils.py_eval(actionData.effect);
-            }
+        let action = await this._resolveLast(prom);
+        // show effect if button have effect attribute
+        // rainbowman can be displayed from two places: from attribute on a button or from python
+        // code below handles the first case i.e 'effect' attribute on button.
+        let effect = false;
+        if (actionData.effect) {
+            effect = pyUtils.py_eval(actionData.effect);
+        }
 
-            if (action && action.constructor === Object) {
-                // filter out context keys that are specific to the current action, because:
-                //  - wrong default_* and search_default_* values won't give the expected result
-                //  - wrong group_by values will fail and forbid rendering of the destination view
-                const ctx = new Context(
-                    _.object(_.reject(_.pairs(env.context), function (pair) {
-                        return pair[0].match('^(?:(?:default_|search_default_|show_).+|' +
-                                             '.+_view_ref|group_by|group_by_no_leaf|active_id|' +
-                                             'active_ids|orderedBy)$') !== null;
-                    }))
-                );
-                ctx.add(actionData.context || {});
-                ctx.add({active_model: env.model});
-                if (recordID) {
-                    ctx.add({
-                        active_id: recordID,
-                        active_ids: [recordID],
-                    });
+        if (action && action.constructor === Object) {
+            // filter out context keys that are specific to the current action, because:
+            //  - wrong default_* and search_default_* values won't give the expected result
+            //  - wrong group_by values will fail and forbid rendering of the destination view
+            const rejectKeysRegex = new RegExp(`\
+                ^(?:(?:default_|search_default_|show_).+|\
+                .+_view_ref|group_by|group_by_no_leaf|active_id|\
+                active_ids|orderedBy)$`);
+            const oldCtx = {};
+            for (const key in env.context) {
+                if (!key.match(rejectKeysRegex)) {
+                    oldCtx[key] = env.context[key];
                 }
-                ctx.add(action.context || {});
-                action.context = ctx;
-                // in case an effect is returned from python and there is already an effect
-                // attribute on the button, the priority is given to the button attribute
-                action.effect = effect || action.effect;
-            } else {
-                // if action doesn't return anything, but there is an effect
-                // attribute on the button, display rainbowman
-                action = {
-                    effect: effect,
-                    type: 'ir.actions.act_window_close',
-                };
             }
-            const options = { on_close: params.on_closed, on_success: params.on_success, on_fail: params.on_fail };
-            action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
-            return this.doAction(action, options);
-        });
+            const ctx = new Context(oldCtx);
+            ctx.add(actionData.context || {});
+            ctx.add({active_model: env.model});
+            if (recordID) {
+                ctx.add({
+                    active_id: recordID,
+                    active_ids: [recordID],
+                });
+            }
+            ctx.add(action.context || {});
+            action.context = ctx;
+            // in case an effect is returned from python and there is already an effect
+            // attribute on the button, the priority is given to the button attribute
+            action.effect = effect || action.effect;
+        } else {
+            // if action doesn't return anything, but there is an effect
+            // attribute on the button, display rainbowman
+            action = {
+                effect: effect,
+                type: 'ir.actions.act_window_close',
+            };
+        }
+        const options = { on_close: params.on_closed, on_success: params.on_success, on_fail: params.on_fail };
+        action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
+        return this.doAction(action, options);
     }
     getStateFromController(controllerID) {
         const controller = this.controllers[controllerID];
@@ -554,19 +556,6 @@ class ActionManager extends core.EventBus {
             }
         }
         this._pushController(this.controllers[controllerID]);
-
-        // AAB: AbstractAction should define a proper hook to execute code when
-        // it is restored (other than do_show), and it should return a promise
-        // var def;
-        // if (action.on_reverse_breadcrumb) {
-        //     def = action.on_reverse_breadcrumb();
-        // }
-        // return Promise.resolve(def).then(function () {
-        //     return Promise.resolve(controller.widget.do_show()).then(function () {
-        //         var index = _.indexOf(self.controllerStack, controllerID);
-        //         self._pushController(controller, index);
-        //     });
-        // });
     }
     storeScrollPosition(scrollPosition) {
         const currentState = this.getCurrentState();
