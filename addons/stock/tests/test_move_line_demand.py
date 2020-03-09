@@ -268,6 +268,8 @@ class TestMoveLineDemand(SavepointCase):
         """Create an internal transfer using only the stock move lines.
         Change the destination location on the picking, see it changes the default destination
         location on all move lines.
+        Add a product tracked by serial number (which is not available in stock) and confirm
+        then reserve everything. Valiate without process the last product.
         """
         self.env['stock.quant'].with_context(inventory_mode=True).create({
             'product_id': self.product.id,
@@ -301,17 +303,44 @@ class TestMoveLineDemand(SavepointCase):
         self.assertEqual(len(internal.move_line_ids_without_package), 3)
         self.assertEqual(internal.move_line_ids_without_package.location_dest_id, self.stock_location)
 
+        # Change the destination location on the picking, it should change it on all the move lines.
         shelf1_location = self.env['stock.location'].create({
             'name': 'shelf1',
             'usage': 'internal',
             'location_id': self.stock_location.id,
         })
-        internal = internal
         internal = Form(internal)
         internal.location_dest_id = shelf1_location
         internal = internal.save()
-
         self.assertEqual(internal.move_line_ids_without_package.location_dest_id, shelf1_location)
+
+        # Add an unavailable tracked product.
+        internal = Form(internal)
+        with internal.move_line_ids_without_package.new() as move_line:
+            move_line.product_id = self.product_serial
+            move_line.demand_qty = 1
+        internal = internal.save()
+
+        internal.action_confirm()
+        self.assertEqual(len(internal.move_line_ids_without_package), 4)
+        internal.action_assign()
+        self.assertEqual(len(internal.move_line_ids_without_package), 4)
+
+        self.assertEqual(internal.state, 'assigned')
+        self.assertEqual(
+            [m.state for m in internal.move_lines],
+            ['assigned', 'assigned', 'assigned', 'confirmed']
+        )
+        res = internal.button_validate()
+        immediate_transfer = Form(self.env['stock.immediate.transfer'].with_context(res['context'])).save()
+        res = immediate_transfer.process()
+        create_backorder = Form(self.env['stock.backorder.confirmation'].with_context(res['context'])).save()
+        res = create_backorder.process_cancel_backorder()
+        self.assertEqual(internal.state, 'done')
+        self.assertEqual(
+            [m.state for m in internal.move_lines],
+            ['done', 'done', 'done', 'cancel']
+        )
 
     def test_internal_tracking_serial_1(self):
         shelf1_location = self.env['stock.location'].create({

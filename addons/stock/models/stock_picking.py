@@ -838,7 +838,11 @@ class Picking(models.Model):
                 pickings_without_quantities |= picking
 
             if picking_type.use_create_lots or picking_type.use_existing_lots:
-                lines_to_check = picking.move_line_ids
+                # If the user added a stock move for a tracked product but didn't reserve it nor
+                # manually encoded quantity, it was ignore, to the same if the same flow is done
+                # with the stock move lines.
+                lines_to_ignore = picking.move_line_ids.filtered(lambda ml: ml.demand_qty and (not ml.qty_done and not ml.product_uom_qty))
+                lines_to_check = picking.move_line_ids - lines_to_ignore
                 if not no_quantities_done:
                     lines_to_check = lines_to_check.filtered(lambda line: float_compare(line.qty_done, 0, precision_rounding=line.product_uom_id.rounding))
                 for line in lines_to_check:
