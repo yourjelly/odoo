@@ -100,7 +100,7 @@ class WebClient extends Component {
         // Errors that have been handled before
         console.warn(e);
         if (this.renderingInfo) {
-            this.renderingInfo.onFail();
+            this.actionManager.revert();
         }
         this.actionManager.restoreController();
     }
@@ -282,10 +282,8 @@ class WebClient extends Component {
                     this._scrollTo(scrollPosition);
                 }
             }
-            if (this.renderingInfo.onSuccess) {
-                const dialogComponent = this.currentDialogComponent.comp;
-                this.renderingInfo.onSuccess(mainComponent, dialogComponent); // FIXME: onSuccess not called if no background controller
-            }
+            const dialogComponent = this.currentDialogComponent.comp;
+            this.actionManager.commit(mainComponent, dialogComponent); // FIXME: onSuccess not called if no background controller
             if (this.renderingInfo.menuID) {
                 state.menu_id = this.renderingInfo.menuID;
             }

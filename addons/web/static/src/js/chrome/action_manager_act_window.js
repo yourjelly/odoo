@@ -190,6 +190,7 @@ odoo.define('web.ActWindowActionManager', function (require) {
             const virtualStack = this.currentStack.slice(0, index);
 
             let lazyControllerID;
+            const newControllers = [];
             if (lazyView) {
                 this._createViewController(action, lazyView.type, {controllerState: options.controllerState}, {
                     index,
@@ -200,6 +201,7 @@ odoo.define('web.ActWindowActionManager', function (require) {
                 virtualStack.push(action.controller.jsID);
                 index += 1;
                 lazyControllerID = action.controller.jsID;
+                newControllers.push(action.controller);
             }
 
             const viewOptions = {
@@ -208,6 +210,8 @@ odoo.define('web.ActWindowActionManager', function (require) {
             };
             this._createViewController(action, curView.type, viewOptions, { index, virtualStack });
             action.controller.options = options;
+            newControllers.push(action.controller);
+            return { action , newControllers};
             this._pushController(action.controller, () => {
                 // FIXME: can we find a better way?
                 if (lazyControllerID) {
