@@ -1824,7 +1824,6 @@ class IrModelData(models.Model):
         """
         if not data_list:
             return
-
         # rows to insert
         rowf = "(%s, %s, %s, %s, %s, now() at time zone 'UTC', now() at time zone 'UTC')"
         rows = tools.OrderedSet()
@@ -2005,12 +2004,16 @@ class IrModelData(models.Model):
         self = self.with_context({MODULE_UNINSTALL_FLAG: True})
         loaded_xmlids = self.pool.loaded_xmlids
 
-        query = """ SELECT id, module || '.' || name, model, res_id FROM ir_model_data
-                    WHERE module IN %s AND res_id IS NOT NULL AND COALESCE(noupdate, false) != %s ORDER BY id DESC
+        query = """ SELECT id, module || '.' || name, model, res_id, noupdate FROM ir_model_data
+                    WHERE module IN %s AND res_id IS NOT NULL ORDER BY id DESC
                 """
-        self._cr.execute(query, (tuple(modules), True))
-        for (id, xmlid, model, res_id) in self._cr.fetchall():
+        self._cr.execute(query, [tuple(modules)])
+        for (id, xmlid, model, res_id, noupdate) in self._cr.fetchall():
             if xmlid not in loaded_xmlids:
+                if noupdate:
+                    if model not in ('ir.module.module', 'ir.module.category'):
+                        _logger.warning('xmlid %s (%s(%s)) was removed from code but is noupdate. Manually remove xmlid or record.', xmlid, model, res_id)
+                    continue
                 if model in self.env:
                     if self.search_count([
                         ("model", "=", model),
