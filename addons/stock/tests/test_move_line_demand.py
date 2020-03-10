@@ -343,8 +343,8 @@ class TestMoveLineDemand(SavepointCase):
         )
 
     def test_internal_notracking_6(self):
-        """Create an immediate transer using only stock move lines."""
-        # demand qty should be invisible?
+        """Create two immediate transfers using only stock move lines. On the first one, set
+        the initial demand before saving, on the second one after an unlock."""
         internal = Form(self.env['stock.picking'].with_context(default_immediate_transfer=True))
         internal.partner_id = self.partner
         internal.picking_type_id = self.env.ref('stock.picking_type_internal')
@@ -354,6 +354,39 @@ class TestMoveLineDemand(SavepointCase):
         internal = internal.save()
         self.assertTrue(internal.immediate_transfer)
         self.assertEqual(len(internal.move_line_ids_without_package), 1)
+        move = internal.move_lines
+        self.assertEqual(move.state, 'assigned')
+        self.assertEqual(len(move.move_line_ids), 1)
+        self.assertEqual(move.move_line_ids.product_uom_qty, 0)
+        self.assertEqual(move.product_uom_qty, 2)
+        internal.action_cancel()
+
+        internal = Form(self.env['stock.picking'].with_context(default_immediate_transfer=True))
+        internal.partner_id = self.partner
+        internal.picking_type_id = self.env.ref('stock.picking_type_internal')
+        with internal.move_line_ids_without_package.new() as move_line:
+            move_line.product_id = self.product
+        internal = internal.save()
+
+        self.assertEqual(internal.state, 'assigned')
+        self.assertEqual(len(internal.move_line_ids_without_package), 1)
+        move = internal.move_lines
+        self.assertEqual(move.state, 'assigned')
+        self.assertEqual(move.product_uom_qty, 0)
+
+        internal.action_toggle_is_locked()
+        self.assertFalse(internal.is_locked)
+        internal = Form(internal)
+        with internal.move_line_ids_without_package.edit(0) as move_line:
+            move_line.demand_qty = 2
+        internal = internal.save()
+
+        self.assertEqual(len(internal.move_line_ids_without_package), 1)
+
+        move = internal.move_lines
+        self.assertEqual(move.state, 'assigned')
+        #self.assertEqual(move.product_uom_qty, 2)
+
 
     def test_internal_tracking_serial_1(self):
         shelf1_location = self.env['stock.location'].create({

@@ -190,7 +190,7 @@
                         context="{'default_product_id': product_id}"/>
                     <field name="demand_qty"
                         force_save="1"
-                        attrs="{'column_invisible': [('parent.state', 'in', ('done', 'cancel'))], 'readonly': [('move_id', '!=', False)]}"/>
+                        attrs="{'column_invisible': [('parent.state', 'in', ('done', 'cancel'))], 'readonly': [('move_id', '!=', False), ('is_locked', '=', True)]}"/>
                     <field name="product_uom_qty" readonly="1" attrs="{'column_invisible': ['|','|',('parent.immediate_transfer', '=', True),('parent.picking_type_code','=','incoming'),('parent.state', 'in', ('done', 'cancel'))]}" optional="show"/>
                     <field name="is_locked" invisible="1"/>
                     <field name="qty_done" attrs="{'readonly': [('state', 'in', ('done', 'cancel')), ('is_locked', '=', True)]}" force_save="1"/>
