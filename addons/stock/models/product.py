@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import operator as py_operator
+from collections import defaultdict
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -83,14 +84,7 @@ class Product(models.Model):
              "Location with 'internal' type.")
 
     orderpoint_ids = fields.One2many('stock.warehouse.orderpoint', 'product_id', string='Minimum Stock Rules')
-    orderpoint_with_mto_ids = fields.One2many(
-        'stock.warehouse.orderpoint', string="Replenishment", compute='_compute_orderpoints',
-        inverse='_set_orderpoints')
     putaway_rule_ids = fields.One2many('stock.putaway.rule', 'product_id', 'Putaway Rules')
-
-    @api.depends('route_ids', 'orderpoint_ids')
-    def _compute_orderpoints(self):
-        self.orderpoint_with_mto_ids = self.orderpoint_ids
 
     @api.depends('stock_move_ids.product_qty', 'stock_move_ids.state')
     @api.depends_context(
@@ -114,8 +108,18 @@ class Product(models.Model):
         services.virtual_available = 0.0
         services.free_qty = 0.0
 
-    def _set_orderpoints(self):
-        self.orderpoint_ids = self.orderpoint_with_mto_ids.filtered(lambda o: o.trigger_technical_name in ['auto', 'manual'])
+    def _onchange_orderpoints(self):
+        if not self.replenish_on_order:
+            return
+        orderpoint_values = {
+            'trigger': self.env.ref('stock.orderpoint_trigger_on_order').id,
+            'product_id': self.id,
+            'location_id': self.env['stock.warehouse'].search([], limit=1).lot_stock_id.id,
+        }
+        for route in self.route_ids:
+            self.env['stock.warehouse.orderpoint'].new(dict(**orderpoint_values, **{'route_id': route.id}))
+        if not self.route_ids:
+            self.env['stock.warehouse.orderpoint'].new(orderpoint_values)
 
     def _product_available(self, field_names=None, arg=False):
         """ Compatibility method """
@@ -380,6 +384,13 @@ class Product(models.Model):
             res = '%s%s' % (_('Products: '), self.env['stock.location'].browse(self._context['active_id']).name)
         return res
 
+    def read(self, fields=None, load='_classic_read'):
+        res = super().read(fields=fields, load=load)
+        if 'orderpoint_ids' in fields:
+            import pudb; pudb.set_trace()
+            self._onchange_orderpoints()
+        return res
+
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         res = super(Product, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
@@ -580,12 +591,12 @@ class ProductTemplate(models.Model):
     route_from_categ_ids = fields.Many2many(
         relation="stock.location.route", string="Category Routes",
         related='categ_id.total_route_ids', readonly=False)
-    orderpoint_ids = fields.One2many(
+    orderpoint_ids = fields.Many2many(
         'stock.warehouse.orderpoint', string='Replenishment',
         compute='_compute_orderpoints', inverse='_set_orderpoints')
 
     def _compute_orderpoints(self):
-        self.orderpoint_ids = self.product_variant_ids.orderpoint_with_mto_ids
+        self.orderpoint_ids = self.product_variant_ids.orderpoint_ids
 
     @api.depends(
         'product_variant_ids',
@@ -670,6 +681,10 @@ class ProductTemplate(models.Model):
         product_variant_ids = self.env['product.product'].search(domain)
         return [('product_variant_ids', 'in', product_variant_ids.ids)]
 
+    @api.onchange('orderpoint_ids_trigger', 'orderpoint_ids')
+    def _onchange_orderpoints(self):
+        self.product_variant_ids._onchange_orderpoints()
+
     @api.onchange('tracking')
     def onchange_tracking(self):
         return self.mapped('product_variant_ids').onchange_tracking()
@@ -679,6 +694,12 @@ class ProductTemplate(models.Model):
         res = super(ProductTemplate, self)._onchange_type()
         if self.type == 'consu' and self.tracking != 'none':
             self.tracking = 'none'
+        return res
+
+    def read(self, fields=None, load='_classic_read'):
+        res = super().read(fields=fields, load=load)
+        if 'orderpoint_ids' in fields:
+            self._onchange_orderpoints()
         return res
 
     def write(self, vals):

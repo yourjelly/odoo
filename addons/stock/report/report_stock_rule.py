@@ -20,6 +20,8 @@ class ReportStockRule(models.AbstractModel):
         # we filter here the ones we want to display and build for each one a dict containing the rule,
         # their source and destination location.
         relevant_rules = routes.mapped('rule_ids').filtered(lambda r: not r.warehouse_id or r.warehouse_id in warehouses)
+        if not product.replenish_on_order:
+            relevant_rules = relevant_rules.filtered(lambda r: not r.is_replenish_on_order)
         rules_and_loc = []
         for rule in relevant_rules:
             rules_and_loc.append(self._get_rule_loc(rule, product))

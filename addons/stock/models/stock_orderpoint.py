@@ -48,10 +48,11 @@ class StockWarehouseOrderpoint(models.Model):
         'Name', copy=False, required=True, readonly=True,
         default=lambda self: self.env['ir.sequence'].next_by_code('stock.orderpoint'))
     trigger = fields.Many2one(
-        'stock.warehouse.orderpoint.trigger', string='Trigger',
+        'stock.warehouse.orderpoint.trigger', string='Trigger Selection',
         default=lambda self: self.env.ref('stock.orderpoint_trigger_auto').id, required=1,
-        domain="[('technical_name', 'in', ['auto', 'manual'])]")
-    trigger_technical_name = fields.Char(related='trigger.technical_name')
+        domain="[('id', 'in', allowed_trigger_ids)]")
+    trigger_technical_name = fields.Char(related='trigger.technical_name', string="Trigger")
+    allowed_trigger_ids = fields.One2many('stock.warehouse.orderpoint.trigger', compute='_compute_allowed_trigger')
     active = fields.Boolean(
         'Active', default=True,
         help="If the active field is set to False, it will allow you to hide the orderpoint without removing it.")
@@ -68,11 +69,11 @@ class StockWarehouseOrderpoint(models.Model):
         'uom.uom', 'Unit of Measure', related='product_id.uom_id')
     product_uom_name = fields.Char(string='Product unit of measure label', related='product_uom.display_name', readonly=True)
     product_min_qty = fields.Float(
-        'Minimum Quantity', digits='Product Unit of Measure', required=True,
+        'Minimum Quantity', digits='Product Unit of Measure', required=True, default=0.0,
         help="When the virtual stock equals to or goes below the Min Quantity specified for this field, Odoo generates "
              "a procurement to bring the forecasted quantity to the Max Quantity.")
     product_max_qty = fields.Float(
-        'Maximum Quantity', digits='Product Unit of Measure', required=True,
+        'Maximum Quantity', digits='Product Unit of Measure', required=True, default=0.0,
         help="When the virtual stock goes below the Min Quantity, Odoo generates "
              "a procurement to bring the forecasted quantity to the Quantity specified as Max Quantity.")
     qty_multiple = fields.Float(
@@ -118,10 +119,15 @@ class StockWarehouseOrderpoint(models.Model):
     def _commpute_allowed_route_ids(self):
         for orderpoint in self:
             orderpoint.allowed_route_ids = self.env['stock.location.route'].search([
-                '|',
-                ('warehouse_ids', 'in', orderpoint.warehouse_id.id),
                 ('product_selectable', '=', True),
             ])
+
+    @api.depends('trigger')
+    def _compute_allowed_trigger(self):
+        domain = [('technical_name', 'in', ['auto', 'manual'])]
+        if self.user_has_groups('stock.group_adv_location_mto') and not self.user_has_groups('stock.group_stock_multi_locations'):
+            domain = expression.OR([domain, [('technical_name', '=', 'on_order')]])
+        self.allowed_trigger_ids = [r['id'] for r in self.env['stock.warehouse.orderpoint.trigger'].search_read(domain, ['id'])]
 
     @api.depends('product_id', 'location_id', 'company_id', 'warehouse_id',
                  'product_id.seller_ids', 'product_id.seller_ids.delay')
@@ -206,6 +212,18 @@ class StockWarehouseOrderpoint(models.Model):
                         qty_to_order += orderpoint.qty_multiple - remainder
                 orderpoint.qty_to_order = qty_to_order
 
+    def _get_default_route_id(self):
+        if not self.location_id or not self.product_id:
+            return False
+        rules = self.env['stock.rule'].search([
+            ('location_id', '=', self.location_id.id),
+            ('action', 'in', ['pull_push', 'pull'])
+        ])
+        routes = rules.route_id.filtered(lambda r: r.product_selectable)
+        if routes:
+            return routes[0]
+        return False
+
     def _get_product_context(self):
         """Used to call `virtual_available` when running an orderpoint."""
         self.ensure_one()
@@ -215,6 +233,10 @@ class StockWarehouseOrderpoint(models.Model):
         }
 
     def _get_orderpoint_action(self, domain=False):
+        context = dict(self.env.context or {})
+        context.update({
+            'search_default_trigger_technical_name': 'manual',
+        })
         action = {
             'name': _('Reordering Rules'),
             'view_type': 'tree',
@@ -222,7 +244,7 @@ class StockWarehouseOrderpoint(models.Model):
             'view_id': self.env.ref('stock.view_warehouse_orderpoint_tree_editable').id,
             'res_model': 'stock.warehouse.orderpoint',
             'type': 'ir.actions.act_window',
-            'context': dict(self.env.context or {}),
+            'context': context,
             'domain': domain or [],
             'help': """
                 <p class="o_view_nocontent_smiling_face">
@@ -310,6 +332,9 @@ class StockWarehouseOrderpoint(models.Model):
             'product_min_qty': 0.0,
             'trigger': self.env.ref('stock.orderpoint_trigger_manual').id,
         }
+
+    def _get_quantity_in_progress(self, product_ids, location_ids):
+        return defaultdict(float)
 
     def _prepare_procurement_values(self, date=False, group=False):
         """ Prepare specific key for moves or other components that will be created from a stock rule

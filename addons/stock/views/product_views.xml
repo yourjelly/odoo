@@ -96,16 +96,17 @@
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='group_lots_and_weight']" position="before">
                     <field name="use_default_route_ids" invisible="1"/>
-                    <field name="orderpoint_ids" context="{'default_product_id': product_variant_id}">
+                    <field name="orderpoint_ids" widget="one2many" context="{'default_product_id': product_variant_id}">
                         <tree string="Reordering Rules" editable="bottom">
                             <field name="active" invisible="1"/>
                             <field name="allowed_route_ids" invisible="1"/>
+                            <field name="allowed_trigger_ids" invisible="1"/>
                             <field name="trigger_technical_name" invisible="1"/>
                             <field name="warehouse_id" invisible="1"/>
                             <field name="product_id" attrs="{'column_invisible': [('parent.product_variant_count', '=', 1)]}" domain="[('product_tmpl_id', '=', parent.id)]" force_save="1"/>
                             <field name="location_id" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1" options="{'no_create': True}" groups="stock.group_stock_multi_locations"/>
-                            <field name="trigger" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
-                            <field name="route_id"/>
+                            <field name="trigger" force_save="1"/>
+                            <field name="route_id" options="{'no_create': True}"/>
                             <field name="json_lead_days_popover" width="0.1" string=" " widget="popover_widget" attrs="{'invisible': ['|', ('id', '=', False), ('trigger_technical_name', '=', 'on_order')]}"/>
                             <field name="product_min_qty" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
                             <field name="product_max_qty" attrs="{'readonly': [('trigger_technical_name', '=', 'on_order')]}" force_save="1"/>
@@ -113,6 +114,9 @@
                         </tree>
                     </field>
                     <group string="Operations" name="operations">
+                        <button type="action" string="See routes diagram" name="%(action_stock_rules_report)d" attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}"
+                            class="btn btn-link" context="{'default_product_tmpl_id': id}" icon="fa-arrow-right"
+                            groups="stock.group_stock_multi_locations"/>
                         <field name="replenish_on_order" attrs="{'invisible': [('use_default_route_ids', '!=', True)]}"/>
                         <field name="route_ids" widget="many2many_checkboxes" attrs="{'invisible': ['|', ('replenish_on_order', '=', False), ('use_default_route_ids', '!=', True)]}"/>
                         <field name="route_from_categ_ids" widget="many2many_tags" readonly="1" attrs="{'invisible': [('route_from_categ_ids', '=', [])]}"/>
@@ -328,12 +332,6 @@
                             name="action_open_product_lot"
                             attrs="{'invisible': [('tracking', '=', 'none')]}"
                             class="oe_stat_button" icon="fa-bars" groups="stock.group_production_lot"/>
-                        <button string="Routes" type="action"
-                            name="%(action_stock_rules_report)d"
-                            attrs="{'invisible':[('type', 'not in', ['product', 'consu'])]}"
-                            class="oe_stat_button" icon="fa-cogs"
-                            context="{'default_product_tmpl_id': id}"
-                            groups="stock.group_stock_multi_locations"/>
                         <button string="Putaway Rules" type="object"
                             name="action_view_related_putaway_rules"
                             class="oe_stat_button" icon="fa-random" groups="stock.group_stock_multi_locations"

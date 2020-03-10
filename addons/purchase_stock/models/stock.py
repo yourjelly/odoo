@@ -163,6 +163,15 @@ class ReturnPicking(models.TransientModel):
 class Orderpoint(models.Model):
     _inherit = "stock.warehouse.orderpoint"
 
+    def _get_default_route_id(self):
+        if self.product_id._prepare_sellers():
+            route_id = self.env['stock.rule'].search([
+                ('action', '=', 'buy')
+            ]).route_id
+            if route_id:
+                return route_id[0]
+        return super()._get_default_route_id()
+
     def _commpute_allowed_route_ids(self):
         super()._commpute_allowed_route_ids()
         if not self.user_has_groups('stock.group_adv_location'):
@@ -170,10 +179,38 @@ class Orderpoint(models.Model):
             for orderpoint in self:
                 orderpoint.allowed_route_ids |= route_buy
 
+    def _get_quantity_in_progress(self, product_ids, location_ids):
+        # TODO maybe it should be an extension of product _compute_quantities
+        qty_by_product_location = super()._get_quantity_in_progress(product_ids, location_ids)
+        groups = self.env['purchase.order.line'].read_group([
+            ('state', 'in', ('draft', 'sent', 'to approve')),
+            ('move_dest_ids', '=', False),
+            ('product_id', 'in', product_ids),
+            '|',
+            ('order_id.picking_type_id.default_location_dest_id', 'in', location_ids),
+            ('orderpoint_id', 'in', self.ids),
+        ],
+            ['product_id', 'product_qty', 'order_id', 'product_uom', 'orderpoint_id'],
+            ['order_id', 'product_id', 'product_uom', 'orderpoint_id'], lazy=False)
+        for group in groups:
+            if group.get('orderpoint_id'):
+                location_id = self.env['stock.warehouse.orderpoint'].browse(group['orderpoint_id'][:1]).location_id.id
+            else:
+                order = self.env['purchase.order'].browse(group['order_id'][0])
+                location_id = order.picking_type_id.default_location_dest_id.id
+            product = self.env['product.product'].browse(group['product_id'][0])
+            uom = self.env['uom.uom'].browse(group['product_uom'][0])
+            product_qty = uom._compute_quantity(group['product_qty'], product.uom_id, round=False)
+            qty_by_product_location[(product.id, location_id)] += product_qty
+        return qty_by_product_location
+
     def _quantity_in_progress(self):
         res = super(Orderpoint, self)._quantity_in_progress()
-        for poline in self.env['purchase.order.line'].search([('state', 'in', ('draft', 'sent', 'to approve')), ('orderpoint_id', 'in', self.ids), ('move_dest_ids', '=', False)]):
-            res[poline.orderpoint_id.id] += poline.product_uom._compute_quantity(poline.product_qty, poline.orderpoint_id.product_uom, round=False)
+        qty_by_product_location = self._get_quantity_in_progress(self.product_id.ids, self.location_id.ids)
+        for orderpoint in self:
+            product_qty = qty_by_product_location.get((orderpoint.product_id.id, orderpoint.location_id.id), 0.0)
+            product_uom_qty = orderpoint.product_id.uom_id._compute_quantity(product_qty, orderpoint.product_uom, round=False)
+            res[orderpoint.id] += product_uom_qty
         return res
 
     def action_view_purchase(self):
