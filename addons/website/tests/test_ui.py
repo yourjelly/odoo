@@ -4,6 +4,7 @@
 import odoo
 import odoo.tests
 import logging
+import threading
 
 @odoo.tests.tagged('-at_install', 'post_install')
 class TestUiCustomizeTheme(odoo.tests.HttpCase):
@@ -87,12 +88,12 @@ class TestUiHtmlEditor(odoo.tests.HttpCase):
 class TestUiTranslate(odoo.tests.HttpCase):
 
     def setUp(self):
-     logging.getLogger('odoo.sql_db').setLevel(logging.DEBUG)
-     super(TestUiTranslate, self).setUp()
+        logging.getLogger('odoo.sql_db').setLevel(logging.DEBUG)
+        super(TestUiTranslate, self).setUp()
 
     def tearDown(self):
-     logging.getLogger('odoo.sql_db').setLevel(logging.INFO)
-     super(TestUiTranslate, self).tearDown()
+        logging.getLogger('odoo.sql_db').setLevel(logging.INFO)
+        super(TestUiTranslate, self).tearDown()
 
     def test_admin_tour_rte_translator(self):
 
