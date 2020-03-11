@@ -917,6 +917,10 @@ var SnippetsMenu = Widget.extend({
             });
 
             var $target = $(srcElement);
+            //  close dropdown and colorpicker by click outside
+            if (!$target.is('we-button, we-toggler, .o_we_color_preview')) {
+                this._closeWidgets();
+            }
             if (!$target.closest('body > *').length) {
                 return;
             }
