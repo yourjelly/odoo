@@ -3,7 +3,7 @@
 
 import odoo
 import odoo.tests
-
+import logging
 
 @odoo.tests.tagged('-at_install', 'post_install')
 class TestUiCustomizeTheme(odoo.tests.HttpCase):
@@ -85,9 +85,18 @@ class TestUiHtmlEditor(odoo.tests.HttpCase):
 
 @odoo.tests.tagged('-at_install', 'post_install')
 class TestUiTranslate(odoo.tests.HttpCase):
-    def test_admin_tour_rte_translator(self):
-        self.start_tour("/", 'rte_translator', login='admin', timeout=120)
 
+    def setUp(self):
+     logging.getLogger('odoo.sql_db').setLevel(logging.DEBUG)
+     super(TestUiTranslate, self).setUp()
+
+    def tearDown(self):
+     logging.getLogger('odoo.sql_db').setLevel(logging.INFO)
+     super(TestUiTranslate, self).tearDown()
+
+    def test_admin_tour_rte_translator(self):
+
+        self.start_tour("/", 'rte_translator', login='admin', timeout=120)
 
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestUi(odoo.tests.HttpCase):
