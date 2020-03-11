@@ -187,6 +187,12 @@ class Lang(models.Model):
     def _lang_get_code(self, url_code):
         return self.with_context(active_test=True).search([('url_code', '=', url_code)]).code or url_code
 
+    # @tools.ormcache('code', 'id', 'active_test')
+    # def _lang_get_values(self, code=False, id=False, active_test=False):
+    #     """ Return the language using this code if it is active """
+    #     lang = self.with_context(active_test=active_test).browse(id or self._lang_get_id(code))
+    #     return lang.read(['id', 'code', 'url_code', 'direction', 'decimal_point', 'thousands_sep'])[0]
+
     def _lang_get(self, code):
         """ Return the language using this code if it is active """
         return self.browse(self._lang_get_id(code))

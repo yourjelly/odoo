@@ -10,6 +10,7 @@ from odoo import tools
 from odoo.addons.http_routing.models.ir_http import url_for
 from odoo.osv import expression
 from odoo.http import request
+from odoo.tools.func import lazy_property
 
 _logger = logging.getLogger(__name__)
 
@@ -323,8 +324,9 @@ class View(models.Model):
                 elif request.env.user.has_group('website.group_website_publisher'):
                     new_context = dict(self._context, inherit_branding_auto=True)
             if values and 'main_object' in values:
-                func = getattr(values['main_object'], 'get_backend_menu_id', False)
-                values['backend_menu_id'] = func and func() or self.env.ref('website.menu_website_configuration').id
+                if request.env.user.has_group('website.group_website_publisher'):
+                    func = getattr(values['main_object'], 'get_backend_menu_id', False)
+                    values['backend_menu_id'] = func and func() or self.env.ref('website.menu_website_configuration').id
 
                 # Fallback incase main_object dont't inherit 'website.seo.metadata'
                 if not hasattr(values['main_object'], 'get_website_meta'):
@@ -368,14 +370,13 @@ class View(models.Model):
                 website=request.website,
                 url_for=url_for,
                 res_company=request.website.company_id.sudo(),
-                default_lang_code=request.env['ir.http']._get_default_lang().code,
+                default_lang_code='oups',  # 'oups', #;request.env['ir.http']._get_default_lang().code,   # REMOVE ME IN MASTER
                 languages=request.env['res.lang'].get_available(),
                 translatable=translatable,
                 editable=editable,
                 # retrocompatibility, remove me in master
                 menu_data={'children': []} if request.website.is_user() else None,
             ))
-
         return qcontext
 
     @api.model

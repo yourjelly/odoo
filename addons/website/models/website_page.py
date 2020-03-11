@@ -64,7 +64,7 @@ class Page(models.Model):
             ['id', 'name', 'url', 'website_published', 'website_indexed', 'date_publish', 'menu_ids', 'is_homepage', 'website_id'],
         )
 
-    def get_view_identifier(self):
+    def get_view_identifier(self):  # delete in master
         """ Get identifier of this page view that may be used to render it """
         return self.view_id.id
 

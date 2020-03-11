@@ -1168,6 +1168,7 @@ actual arch.
         """
         qcontext = dict(
             env=self.env,
+
             user_id=self.env["res.users"].browse(self.env.user.id),
             res_company=self.env.company.sudo(),
             keep_query=keep_query,
@@ -1179,7 +1180,7 @@ actual arch.
             time=time,
             datetime=datetime,
             relativedelta=relativedelta,
-            xmlid=self.key,
+            #xmlid=self.key,
             viewid=self.id,
             to_text=pycompat.to_text,
             image_data_uri=image_data_uri,

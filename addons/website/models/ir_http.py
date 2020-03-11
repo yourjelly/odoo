@@ -199,11 +199,12 @@ class Http(models.AbstractModel):
         # context (eg: /shop), and it's not going to propagate to the global context of the tab
         # If the company of the website is not in the allowed companies of the user, set the main
         # company of the user.
+
+        # could be conditionned on multicompany group but request will be done btw in qcontext for res_company
         if request.website.company_id in request.env.user.company_ids:
             context['allowed_company_ids'] = request.website.company_id.ids
         else:
             context['allowed_company_ids'] = request.env.user.company_id.ids
-
         # modify bound context
         request.context = dict(request.context, **context)
 
@@ -238,15 +239,17 @@ class Http(models.AbstractModel):
         published_domain = page_domain
         # need to bypass website_published, to apply is_most_specific
         # filter later if not publisher
-        pages = request.env['website.page'].sudo().search(published_domain, order='website_id')
-        pages = pages.filtered(pages._is_most_specific_page)
+        pages = request.env['website.page'].sudo().search(published_domain, order='website_id asc')
+        if pages:
+            mypage = pages[0]
 
-        if not request.website.is_publisher():
-            pages = pages.filtered('is_visible')
+            if not request.website.is_publisher():
+                for p in pages.with_context(prefetch_fields=False):  # don't browse generic view if not needed
+                    if p.is_visible:
+                        mypage = p
+                        break
 
-        mypage = pages[0] if pages else False
-        _, ext = os.path.splitext(req_page)
-        if mypage:
+            _, ext = os.path.splitext(req_page)
             return request.render(mypage.get_view_identifier(), {
                 # 'path': req_page[1:],
                 'deletable': True,

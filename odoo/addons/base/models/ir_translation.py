@@ -872,12 +872,21 @@ class IrTranslation(models.Model):
                 [('state', '=', 'installed')], ['name'])]
         if not lang:
             lang = self._context["lang"]
+
         langs = self.env['res.lang']._lang_get(lang)
         lang_params = None
         if langs:
-            lang_params = langs.read([
-                "name", "direction", "date_format", "time_format",
-                "grouping", "decimal_point", "thousands_sep", "week_start"])[0]
+
+            lang_params = {
+                "name": langs.name,
+                "direction": langs.direction,
+                "date_format": langs.date_format,
+                "time_format": langs.time_format,
+                "grouping": langs.grouping,
+                "decimal_point": langs.decimal_point,
+                "thousands_sep": langs.thousands_sep,
+                "week_start": langs.week_start,
+            }
             lang_params['week_start'] = int(lang_params['week_start'])
             lang_params['code'] = lang
 

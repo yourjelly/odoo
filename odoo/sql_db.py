@@ -227,13 +227,35 @@ class Cursor(object):
 
     @check
     def execute(self, query, params=None, log_exceptions=None):
+        # JKEEEEEEEE
+        HEADER = '\033[95m'
+        OKBLUE = '\033[94m'
+        OKGREEN = '\033[92m'
+        WARNING = '\033[93m'
+        FAIL = '\033[91m'
+        ENDC = '\033[0m'
+        BOLD = '\033[1m'
+        UNDERLINE = '\033[4m'
+
         if params and not isinstance(params, (tuple, list, dict)):
             # psycopg2's TypeError is not clear if you mess up the params
             raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
 
         if self.sql_log:
             encoding = psycopg2.extensions.encodings[self.connection.encoding]
-            _logger.debug("query: %s", self._obj.mogrify(query, params).decode(encoding, 'replace'))
+            import traceback
+            for filename, lineno, name, line in traceback.extract_stack()[:-3]:
+                #continue
+                if '/src/odoo' in filename:
+                    print('File: "%s", line %d, in %s  --> %s' % (filename, lineno, WARNING + name + ENDC, HEADER + line + ENDC))
+
+            querystr = self._obj.mogrify(query, params).decode(encoding, 'replace')
+            print(OKBLUE + querystr + ENDC)
+            print("")
+
+            if 'ir_ui_view__website_meta_title' in querystr:
+                print(WARNING + querystr + ENDC)
+            _logger.debug("query: %s", querystr)
         now = time.time()
         try:
             params = params or None
@@ -315,7 +337,7 @@ class Cursor(object):
         sql_counter += self.sql_log_count
 
         # advanced stats only if sql_log is enabled
-        self.print_log()
+        #self.print_log()
 
         self._obj.close()
 
