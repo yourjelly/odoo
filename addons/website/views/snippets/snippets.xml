@@ -500,7 +500,7 @@
     <!-- Theme options -->
     <div data-js="Theme" data-selector="theme" data-no-check="true">
         <we-button class="o_we_primary_btn" data-switch-theme="" data-no-preview="true">Switch Theme</we-button>
-        <we-row string="Main Colors">
+        <we-row string="Main Colors"><!-- FIXME -->
             <we-colorpicker data-name="primary_color_opt" title="Primary" data-customize-website="" data-color-type="theme" data-color="primary"/>
             <we-colorpicker data-name="secondary_color_opt" title="Secondary" data-customize-website="" data-color-type="theme" data-color="secondary"/>
             <we-colorpicker data-name="alpha_as_primary_color_opt" title="Primary" data-customize-website="" data-color-type="theme" data-color="alpha"/>

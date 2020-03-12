@@ -27,7 +27,7 @@ MockServer.include({
                         '    <div class="o_colorpicker_section" data-name="theme" data-display="Theme Colors" data-icon-class="fa fa-flask">' +
                         '        <button data-color="alpha"></button>' +
                         '        <button data-color="beta"></button>' +
-                        '        <button data-color="gamma"></button>' +
+                        '        <button data-color="gamma"></button>' + // FIXME
                         '        <button data-color="delta"></button>' +
                         '        <button data-color="epsilon"></button>' +
                         '    </div>' +

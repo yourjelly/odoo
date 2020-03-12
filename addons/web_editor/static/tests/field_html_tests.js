@@ -227,7 +227,7 @@ QUnit.module('web_editor', {}, function () {
             // text is selected
 
             await openColorpicker('.note-toolbar .note-back-color-preview');
-            await testUtils.dom.click($field.find('.note-toolbar .note-back-color-preview button.bg-gamma'));
+            await testUtils.dom.click($field.find('.note-toolbar .note-back-color-preview button.bg-gamma')); // FIXME
 
             assert.strictEqual($field.find('.note-editable').html(),
                 '<p>t<font style="background-color: rgb(0, 255, 255);">oto t</font><font style="" class="bg-gamma">oto&nbsp;</font><font class="bg-gamma" style="">to</font>to</p><p>tata</p>',

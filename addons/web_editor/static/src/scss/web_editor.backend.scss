@@ -52,6 +52,7 @@
     .colorpicker .o_colorpicker_section > button {
         display: none;
 
+        // FIXME to fix first ?
         &[data-color="alpha"], &[data-color="beta"], &[data-color="gamma"], &[data-color="delta"], &[data-color="epsilon"],
         &[data-color="white"], &[data-color="gray-lighter"], &[data-color="gray-light"], &[data-color="gray"], &[data-color="gray-dark"], &[data-color="gray-darker"], &[data-color="black"],
         &[data-color="primary"], &[data-color="success"], &[data-color="info"], &[data-color="warning"], &[data-color="danger"] {

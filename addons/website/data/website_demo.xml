@@ -7,7 +7,7 @@
             <field name="key">website.bs_debug_page_view</field>
             <field name="arch" type="xml">
                 <t name="Debug" t-name="website.bs_debug_page_view">
-                    <t t-call="website.layout">
+                    <t t-call="website.layout"><!-- FIXME -->
                         <t t-set="odoo_theme_colors" t-value="[['alpha', 'Alpha'], ['beta', 'Beta'], ['gamma', 'Gamma'], ['delta', 'Delta'], ['epsilon', 'Epsilon']]"/>
                         <t t-set="bs_theme_colors" t-value="[['primary', 'Primary'], ['secondary', 'Secondary'], ['success', 'Success'], ['info', 'Info'], ['warning', 'Warning'], ['danger', 'Danger'], ['light', 'Light'], ['dark', 'Dark']]"/>
                         <t t-set="bs_gray_colors" t-value="[['white', 'White'], ['100', '100'], ['200', '200'], ['300', '300'], ['400', '400'], ['500', '500'], ['600', '600'], ['700', '700'], ['800', '800'], ['900', '900'], ['black', 'Black']]"/>
@@ -264,7 +264,7 @@
             <field name="type">qweb</field>
             <field name="key">website.color_combinations_debug_page_view</field>
             <field name="arch" type="xml">
-                <t name="Debug" t-name="website.color_combinations_debug_page_view">
+                <t name="Debug" t-name="website.color_combinations_debug_page_view"><!-- FIXME -->
                     <t t-set="odoo_theme_colors" t-value="[['alpha', 'Alpha'], ['beta', 'Beta'], ['gamma', 'Gamma'], ['delta', 'Delta'], ['epsilon', 'Epsilon']]"/>
 
                     <t t-call="website.layout">

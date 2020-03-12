@@ -212,11 +212,7 @@
 <template id="web_editor.colorpicker" name="Color-Picker">
     <colorpicker>
         <div class="o_colorpicker_section" data-name="theme">
-            <button data-color="alpha"></button>
-            <button data-color="beta"></button>
-            <button data-color="gamma"></button>
-            <button data-color="delta"></button>
-            <button data-color="epsilon"></button>
+            <button t-foreach="5" t-as="i" t-attf-data-color="o-color-#{i}"></button>
         </div>
         <div class="o_colorpicker_section" data-name="common">
             <button data-color="black"></button>

@@ -16,7 +16,8 @@ $o-color-palettes: append($o-color-palettes, $-actual-user-color-palette);
 // Theme color palette
 // -------------------
 
-// Generate default theme color scheme if alpha is set
+// alpha -> epsilon colors are from the old color system, this is kept for
+// compatibility: Generate default theme color scheme if alpha is set
 $-alpha: map-get($o-user-theme-color-palette, 'alpha');
 @if ($-alpha) {
     $o-user-theme-color-palette: map-merge((
