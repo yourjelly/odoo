@@ -39,20 +39,33 @@ class TestIrModelAccess(TransactionCase):
         """
         models = self.env['ir.model'].sudo().search([])
         for model in models:
-            probably_useless_rules = self.env['ir.model.access']
-            public_rules = model.access_ids.filtered(lambda a: not a.group_id)
+            useless_rules = self.env['ir.model.access']
+            main_public_rules = public_rules = model.access_ids.filtered(lambda a: not a.group_id)
             if len(public_rules) > 1:
-                # VFE TODO inheritance filter ?
-                _logger.error("Multiple public rules for Model %s, %s" % (model.model, public_rules.mapped('name')))
-            public_rule = public_rules[:1]
-            for rule in public_rules:
-                if value(rule) > value(public_rule):
-                    public_rule = rule
-                if value(public_rule) == 4:
-                    continue
+                for public_rule in public_rules:
+                    for r in (public_rules - public_rule):
+                        if value(public_rule) <= value(r) and public_rule._is_loaded_after(r):
+                            _logger.warning(
+                                "Public rule %s giving %i has no impact because loaded after %s giving %s",
+                                public_rule.name,
+                                value(public_rule),
+                                r.name,
+                                value(r)
+                            )
+                            main_public_rules -= public_rule
+
+            def is_implied_by_public_rules(rule):
+                if any(
+                    value(rule) <= value(public_rule)
+                    and rule._is_loaded_after(public_rule)
+                    for public_rule in main_public_rules
+                ):
+                    return True
+                return False
+
             for rule in (model.access_ids - public_rules):
-                if public_rule and value(rule) <= value(public_rule) and rule._is_loaded_after(public_rule):
-                    probably_useless_rules += rule
+                if is_implied_by_public_rules(rule):
+                    useless_rules += rule
                 elif rule.group_id:
                     implied_accesses = rule.group_id.trans_implied_ids.model_access.filtered(lambda r: r.model_id == model)
                     for implied_rule in implied_accesses:
@@ -68,8 +81,8 @@ class TestIrModelAccess(TransactionCase):
                                 rule.group_id.name,
                             )
 
-            if probably_useless_rules:
+            if useless_rules:
                 _logger.warning(
-                    "Model %s has public rule %s, making following rules useless: %s",
-                    model.model, public_rule.name, probably_useless_rules.mapped('name'),
+                    "Model %s has public rules giving more or as much rights as rules: %s",
+                    model.model, useless_rules.mapped('name'),
                 )
