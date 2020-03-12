@@ -160,7 +160,7 @@ const ColorPaletteWidget = Widget.extend({
         // Add those at the very end so that we don't mark hidden colors as
         // selected. We want those colors to appear as selected custom colors if
         // they are chosen somehow.
-        this._addCompatibilityColors(['primary', 'secondary', 'success', 'info', 'warning', 'danger']);
+        this._addCompatibilityColors(['primary', 'secondary', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'success', 'info', 'warning', 'danger']);
 
         return res;
     },
@@ -179,9 +179,7 @@ const ColorPaletteWidget = Widget.extend({
      * Hardcode some existing colors (but make them hidden in the colorpicker)
      * so they can be removed from snippets when selecting another color.
      * Normally, the chosable colors do not contain them, which prevents them to
-     * be removed. For example, normally, the 'alpha' and 'beta' color (which
-     * are the same as primary and secondary) are displayed instead of their
-     * duplicates... but not for all themes.
+     * be removed.
      *
      * @private
      * @param {string[]} colorNames
