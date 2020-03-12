@@ -40,6 +40,7 @@ class IrTranslationImport(object):
         self._debug = False
         self._rows = []
 
+        t0 = time.time()
         # Note that Postgres will NOT inherit the constraints or indexes
         # of ir_translation, so this copy will be much faster.
         query = """ CREATE TEMP TABLE %s (
@@ -48,6 +49,8 @@ class IrTranslationImport(object):
                         noupdate BOOLEAN
                     ) INHERITS (%s) """ % (self._table, self._model_table)
         self._cr.execute(query)
+        duration = time.time() - t0
+        _logger.log(25, 'Create took : %s', duration)
 
     def push(self, trans_dict):
         """ Feed a translation, as a dictionary, into the cursor """
