@@ -3,6 +3,7 @@
 import itertools
 import logging
 import operator
+import time
 from collections import defaultdict
 from difflib import get_close_matches
 
@@ -57,11 +58,21 @@ class IrTranslationImport(object):
                            params['module'], params['imd_name'], params['value'],
                            params['state'], params['comments']))
 
+    def start_timer(self):
+        self.t0 = time.time()
+
+    def stop_timer(self, step):
+        t1 = time.time() - self.t0
+        _logger.debug("step %s took %s", step, t1)
+        self.start_timer()
+
     def finish(self):
         """ Transfer the data from the temp table to ir.translation """
         cr = self._cr
+        _logger.setLevel(logging.DEBUG)
 
         # Step 0: insert rows in batch
+        self.start_timer()
         query = """ INSERT INTO %s (name, lang, res_id, src, type, imd_model,
                                     module, imd_name, value, state, comments)
                     VALUES """ % self._table
@@ -69,7 +80,7 @@ class IrTranslationImport(object):
             cr.execute(query + ", ".join(["%s"] * len(rows)), rows)
 
         _logger.debug("ir.translation.cursor: We have %d entries to process", len(self._rows))
-
+        self.stop_timer('0')
         # Step 1: resolve ir.model.data references to res_ids
         cr.execute(""" UPDATE %s AS ti
                           SET res_id = imd.res_id,
@@ -99,6 +110,7 @@ class IrTranslationImport(object):
                     src_relevant_fields.append("%s,%s" % (model, field_name))
 
         count = 0
+        self.stop_timer('1')
         # Step 2: insert new or upsert non-noupdate translations
         if self._overwrite:
             cr.execute(""" INSERT INTO %s(name, lang, res_id, src, type, value, module, state, comments)
@@ -144,10 +156,11 @@ class IrTranslationImport(object):
             cr.execute("SELECT COUNT(*) FROM ONLY %s" % self._model_table)
             total = cr.fetchone()[0]
             _logger.debug("ir.translation.cursor: %d entries now in ir.translation, %d common entries with tmp", total, count)
-
+        self.stop_timer('2')
         # Step 3: cleanup
         cr.execute("DROP TABLE %s" % self._table)
         self._rows.clear()
+        self.stop_timer('3')
         return True
 
 
