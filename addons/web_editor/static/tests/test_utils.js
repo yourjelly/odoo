@@ -14,7 +14,7 @@ const COLOR_PICKER_TEMPLATE = `
             <div class="o_colorpicker_section" data-name="theme" data-display="Theme Colors" data-icon-class="fa fa-flask">
                 <button data-color="alpha"/>
                 <button data-color="beta"/>
-                <button data-color="gamma"/>
+                <button data-color="gamma"/> // FIXME
                 <button data-color="delta"/>
                 <button data-color="epsilon"/>
             </div>

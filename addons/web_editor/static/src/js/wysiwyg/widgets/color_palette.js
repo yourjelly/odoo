@@ -121,7 +121,7 @@ const ColorPaletteWidget = Widget.extend({
         // Render custom colors
         this._buildCustomColors();
 
-        this._addCompatibilityColors(['primary', 'secondary', 'success', 'info', 'warning', 'danger']);
+        this._addCompatibilityColors(['primary', 'secondary', 'alpha', 'beta', 'gamma', 'delta', 'epsilon', 'success', 'info', 'warning', 'danger']);
 
         // Compute class colors
         this.colorNames = [];
