@@ -1393,6 +1393,7 @@ class Binary(http.Controller):
         else:
             content_base64 = base64.b64decode(content)
             headers.append(('Content-Length', len(content_base64)))
+            headers.append(('Content-Security-Policy', "default-src 'self'"))
             response = request.make_response(content_base64, headers)
         if token:
             response.set_cookie('fileToken', token)

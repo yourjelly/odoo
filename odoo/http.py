@@ -1621,6 +1621,8 @@ def set_safe_image_headers(headers, content):
     safe_types = ['image/jpeg', 'image/png', 'image/gif', 'image/x-icon']
     if content_type in safe_types:
         headers = set_header_field(headers, 'Content-Type', content_type)
+    else:
+        headers.append(('Content-Security-Policy', "default-src 'self'"))
     set_header_field(headers, 'Content-Length', len(content))
     return headers
 
