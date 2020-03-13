@@ -43,3 +43,40 @@
     }
 }
 
+
+@media only screen and (min-width: 1200px) and (max-width: 1600px) {
+    .o_mail_body 
+    {
+        width: 106%;
+        margin-top: -15px;
+        margin-left: -32px;
+    }
+
+
+    .mailing_form_view
+    {
+    .o_notebook_body
+        {
+            margin-bottom: -45px;
+        }
+    }
+}
+
+@media only screen and (min-width: 1601px) and (max-width: 2800px)
+{
+    .o_mail_body
+    {
+       width: 102.83%;
+        margin-top: -15px;
+        margin-left: -14px;
+    }
+
+    .mailing_form_view
+    {
+    .o_notebook_body
+        {
+            margin-bottom: -45px;
+        }
+    }
+
+}
