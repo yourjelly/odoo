@@ -40,6 +40,7 @@ class IrTranslationImport(object):
         self._debug = False
         self._rows = []
 
+        self._cr.execute('ANALYZE ir_translation')
         t0 = time.time()
         # Note that Postgres will NOT inherit the constraints or indexes
         # of ir_translation, so this copy will be much faster.
