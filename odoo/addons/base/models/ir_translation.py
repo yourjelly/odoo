@@ -40,7 +40,6 @@ class IrTranslationImport(object):
         self._debug = False
         self._rows = []
 
-        self._cr.execute('ANALYZE ir_translation')
         t0 = time.time()
         # Note that Postgres will NOT inherit the constraints or indexes
         # of ir_translation, so this copy will be much faster.
@@ -156,10 +155,10 @@ class IrTranslationImport(object):
                    """ % (self._model_table, self._table, 'noupdate IS TRUE' if self._overwrite else 'TRUE'))
         count += cr.rowcount
 
-        if self._debug:
-            cr.execute("SELECT COUNT(*) FROM ONLY %s" % self._model_table)
-            total = cr.fetchone()[0]
-            _logger.debug("ir.translation.cursor: %d entries now in ir.translation, %d common entries with tmp", total, count)
+        #if self._debug:
+        cr.execute("SELECT COUNT(*) FROM ONLY %s" % self._model_table)
+        total = cr.fetchone()[0]
+        _logger.debug("ir.translation.cursor: %d entries now in ir.translation, %d common entries with tmp", total, count)
         self.stop_timer('2')
         # Step 3: cleanup
         cr.execute("DROP TABLE %s" % self._table)
