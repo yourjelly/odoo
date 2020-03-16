@@ -44,11 +44,22 @@ class IrTranslationImport(object):
         # Note that Postgres will NOT inherit the constraints or indexes
         # of ir_translation, so this copy will be much faster.
         query = """ CREATE TEMP TABLE %s (
+                        name VARCHAR,
+                        res_id INTEGER,
+                        lang VARCHAR,
+                        type VARCHAR,
+                        src TEXT,
+                        value TEXT,
+                        module VARCHAR,
+                        state VARCHAR,
+                        comments TEXT,
                         imd_model VARCHAR(64),
                         imd_name VARCHAR(128),
                         noupdate BOOLEAN
-                    ) INHERITS (%s) """ % (self._table, self._model_table)
+                    ) """ % (self._table)
         self._cr.execute(query)
+        if not tools.index_exists(self._cr, 'tmp_ir_translation_import_index'):
+            self._cr.execute("CREATE INDEX tmp_ir_translation_import_index ON %s (lang, module, type)" % self._table)
         duration = time.time() - t0
         _logger.log(25, 'Create took : %s', duration)
 
@@ -155,10 +166,10 @@ class IrTranslationImport(object):
                    """ % (self._model_table, self._table, 'noupdate IS TRUE' if self._overwrite else 'TRUE'))
         count += cr.rowcount
 
-        #if self._debug:
-        cr.execute("SELECT COUNT(*) FROM ONLY %s" % self._model_table)
-        total = cr.fetchone()[0]
-        _logger.debug("ir.translation.cursor: %d entries now in ir.translation, %d common entries with tmp", total, count)
+        if self._debug:
+            cr.execute("SELECT COUNT(*) FROM ONLY %s" % self._model_table)
+            total = cr.fetchone()[0]
+            _logger.debug("ir.translation.cursor: %d entries now in ir.translation, %d common entries with tmp", total, count)
         self.stop_timer('2')
         # Step 3: cleanup
         cr.execute("DROP TABLE %s" % self._table)
