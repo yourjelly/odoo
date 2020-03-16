@@ -57,7 +57,8 @@ odoo.define('web.test_env', async function (require) {
                 url: session.url,
             }, env.session),
         };
-        return Object.assign(env, defaultEnv);
+        const r= Object.assign(env, defaultEnv);
+        return r;
     }
 
     /**

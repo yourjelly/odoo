@@ -165,8 +165,8 @@ QUnit.module('WebClient', {
         assert.containsOnce(webClient, '.o_list_view');
         assert.strictEqual(webClient.el.querySelector('.o_menu_brand').innerText, 'Partners');
         assert.strictEqual(webClient.el.querySelector('.breadcrumb').innerText, 'Partners');
-
         await testUtils.dom.click(webClient.el.querySelector('a[data-menu-id="3"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_form_view');
         assert.strictEqual(webClient.el.querySelector('.o_menu_brand').innerText, 'Partners');
         assert.strictEqual(webClient.el.querySelector('.breadcrumb').innerText, 'New');
@@ -206,7 +206,7 @@ QUnit.module('WebClient', {
             archs: this.archs,
             menus: this.menus,
         });
-        
+
         // Open Partner form view and enter some text
         await testUtils.dom.click(webClient.el.querySelector('.o_menu_sections a[data-menu-id="3"]'));
         await testUtils.fields.editInput(webClient.el.querySelector('.o_input[name=display_name]'), "TEST");
@@ -215,7 +215,7 @@ QUnit.module('WebClient', {
         await testUtils.dom.click(webClient.el.querySelector('.o_menu_sections a[data-menu-id="6"]'));
         assert.containsOnce(webClient, '.o_dialog');
         assert.containsOnce(webClient, '.o_dialog .o_act_window .o_view_controller');
-        
+
         webClient.destroy();
     });
 
