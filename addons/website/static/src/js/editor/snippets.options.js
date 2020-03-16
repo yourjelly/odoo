@@ -617,6 +617,9 @@ options.registry.Theme = options.Class.extend({
         '/web/static/lib/ace/ace.js',
         '/web/static/lib/ace/mode-xml.js',
     ],
+    events: {
+        'click .o_color_combinations_edition we-toggler': '_onCCTogglerClick',
+    },
 
     /**
      * @override
@@ -784,7 +787,7 @@ options.registry.Theme = options.Class.extend({
     _renderAceEditor(node, content) {
         const aceEditor = window.ace.edit(node);
         aceEditor.setTheme('ace/theme/monokai');
-        aceEditor.setValue(content, 1)
+        aceEditor.setValue(content, 1);
         aceEditor.setOptions({
             minLines: 20,
             maxLines: Infinity,
@@ -802,6 +805,37 @@ options.registry.Theme = options.Class.extend({
             useWorker: false,
         });
         return aceEditor;
+    },
+    /**
+     * @override
+     */
+    async _renderCustomXML(uiFragment) {
+        const ccEl = uiFragment.querySelector('.o_color_combinations_edition');
+        for (let i = 1; i <= 5; i++) {
+            const togglerEl = document.createElement('we-toggler');
+            togglerEl.classList.add('pt-0', 'pb-0', 'pl-0');
+            const ccPreviewEl = $(qweb.render('web_editor.color.combination.preview'))[0];
+            ccPreviewEl.classList.add(`o_cc${i}`, 'p-1', 'text-center');
+            togglerEl.appendChild(ccPreviewEl);
+            ccEl.appendChild(togglerEl);
+
+            const collapseEl = document.createElement('we-collapse');
+            collapseEl.classList.add('p-1');
+            const ccEditionEl = $(qweb.render('website.color_combination_edition', {number: i}))[0];
+            collapseEl.appendChild(ccEditionEl);
+            ccEl.appendChild(collapseEl);
+        }
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _onCCTogglerClick(ev) {
+        ev.currentTarget.classList.toggle('active');
     },
 });
 

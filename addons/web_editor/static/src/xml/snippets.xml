@@ -66,13 +66,18 @@
         </div>
     </div>
     <t t-name="web_editor.colorpalette.combination.btn">
-        <button type="button" t-attf-class="#{number and 'o_we_color_btn' or 'o_colorpicker_reset'} o_we_color_combination_btn d-flex justify-content-between align-items-center"
+        <button type="button" t-attf-class="#{number and 'o_we_color_btn' or 'o_colorpicker_reset'} o_we_color_combination_btn"
                 t-att-data-color="number" t-att-title="number and 'Preset ' + number or 'Default'">
-            <h5 class="m-0 font-weight-bold">Title</h5>
-            <p class="small m-0 flex-grow-1">Text</p>
-            <span class="btn btn-sm btn-primary o_btn_preview m-0 mr-1"><small>Button</small></span>
-            <span class="btn btn-sm btn-secondary o_btn_preview m-0"><small>Button</small></span>
+            <t t-call="web_editor.color.combination.preview"/>
         </button>
+    </t>
+    <t t-name="web_editor.color.combination.preview">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="m-0 font-weight-bold" style="font-size: 1em;">Title</h5>
+            <p class="m-0 flex-grow-1" style="font-size: 0.8em;">Text</p>
+            <span class="btn btn-sm btn-primary o_btn_preview m-0 mr-1 py-0" style="font-size: 0.8em;"><small>Button</small></span>
+            <span class="btn btn-sm btn-secondary o_btn_preview m-0 py-0" style="font-size: 0.8em;"><small>Button</small></span>
+        </div>
     </t>
 
     <!-- t-field options -->

@@ -6,6 +6,21 @@
     @each $color, $value in $grays {
         --#{$color}: #{$value};
     }
+
+    @each $key, $value in $colors {
+        @if $value == null and str-index($key, 'o-cc') == 1 {
+            $-pos: str-length('o-ccx-') + 1;
+            @if str-index($key, 'text') == $-pos or str-index($key, 'headings') == $-pos {
+                --#{$key}: #{color-yiq(o-get-color(color('#{str-slice($key, 1, $-pos - 1)}bg')))};
+            } @else if str-index($key, 'link') == $-pos {
+                --#{$key}: #{$link-color};
+            } @else if str-index($key, 'btn-primary') == $-pos {
+                --#{$key}: #{theme-color('primary')};
+            } @else if str-index($key, 'btn-secondary') == $-pos {
+                --#{$key}: #{theme-color('secondary')};
+            }
+        }
+    }
 }
 
 html, body {

@@ -644,6 +644,7 @@
             <we-colorpicker data-customize-website-color="" data-color="o-color-4"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-5"/>
         </we-row>
+        <div class="o_color_combinations_edition"/>
         <we-row string="Status Colors">
             <we-colorpicker title="Success" data-customize-website-color="" data-color-type="theme" data-color="success"/>
             <we-colorpicker title="Info" data-customize-website-color="" data-color-type="theme" data-color="info"/>
