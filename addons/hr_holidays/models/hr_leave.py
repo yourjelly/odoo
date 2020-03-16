@@ -701,6 +701,7 @@ class HolidaysRequest(models.Model):
             if leave_type.leave_validation_type == 'no_validation':
                 values.update({'state': 'confirm'})
 
+
             # Handle double validation
             if leave_type.leave_validation_type == 'both':
                 self._check_double_validation_rules(employee_id, values.get('state', False))
@@ -892,6 +893,8 @@ class HolidaysRequest(models.Model):
             raise UserError(_('Time off request must be in Draft state ("To Submit") in order to confirm it.'))
         self.write({'state': 'confirm'})
         self.activity_update()
+        if self.validation_type == 'no_validation':
+            self.action_validate()
         return True
 
     def action_approve(self):
