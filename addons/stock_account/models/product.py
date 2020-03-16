@@ -3,7 +3,7 @@
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
-from odoo.tools import float_is_zero
+from odoo.tools import float_compare, float_is_zero
 from odoo.exceptions import ValidationError
 
 
@@ -158,6 +158,19 @@ class ProductProduct(models.Model):
             'unit_cost': self.standard_price,
             'quantity': quantity,
         }
+        if self.cost_method == 'average' and not float_is_zero(self.quantity_svl, precision_rounding=self.uom_id.rounding):
+            avco_full_precision = self.value_svl / self.quantity_svl
+            vals2 = {
+                'value': quantity * avco_full_precision,
+                'unit_cost': avco_full_precision,
+            }
+            vals.update(vals2)
+
+            # Fix the AVCO if needed.
+            currency = company.currency_id
+            avco = self.standard_price
+            if float_compare(avco, currency.round(avco_full_precision), precision_rounding=currency.rounding):
+                self._change_standard_price(currency.round(avco_full_precision))
         if self.cost_method in ('average', 'fifo'):
             fifo_vals = self._run_fifo(abs(quantity), company)
             vals['remaining_qty'] = fifo_vals.get('remaining_qty')

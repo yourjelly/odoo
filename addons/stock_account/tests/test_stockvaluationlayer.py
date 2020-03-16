@@ -283,6 +283,18 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         self.assertEqual(self.product1.value_svl, 75)
         self.assertEqual(self.product1.quantity_svl, 5)
 
+    def test_normal_2(self):
+        move1 = self._make_in_move(self.product1, 1, unit_cost=1.00)
+        move2 = self._make_in_move(self.product1, 1, unit_cost=1.00)
+        move3 = self._make_in_move(self.product1, 1, unit_cost=1.01)
+        self.assertAlmostEqual(self.product1.value_svl, 3.01)
+        move4 = self._make_out_move(self.product1, 3, create_picking=True)
+        self.assertAlmostEqual(move4.stock_valuation_layer_ids.value, -3.01)
+
+        self.assertEqual(self.product1.value_svl, 0)
+        self.assertEqual(self.product1.quantity_svl, 0)
+        self.assertEqual(self.product1.standard_price, 1.00)
+
     def test_change_in_past_increase_in_1(self):
         move1 = self._make_in_move(self.product1, 10, unit_cost=10)
         move2 = self._make_in_move(self.product1, 10, unit_cost=20)
