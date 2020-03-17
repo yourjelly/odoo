@@ -1,17 +1,23 @@
 # -*- coding: utf-8 -*-
 import time
 
-from odoo import fields
-from odoo.tests.common import TransactionCase, Form
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.tests import tagged, Form
 
-class TestItalianElectronicInvoice(TransactionCase):
+
+@tagged('post_install', '-at_install')
+class TestItalianElectronicInvoice(AccountTestInvoicingCommon):
     def test_state(self):
-        f = Form(self.env['account.move'].with_context(default_type='out_invoice'))
-        f.partner_id = self.env.ref('base.res_partner_12')
-        with f.invoice_line_ids.new() as l:
-            l.product_id = self.env.ref('product.product_product_3')
-        invoice = f.save()
-
+        self.env.company.write({
+            'chart_template_id': self.env.ref('l10n_it.l10n_it_chart_template_generic').id
+        })
+        self.company_data = self.setup_company_data('Italy Company', country_id=self.env.ref('base.EUR').id)
+        self.company = self.company_data['company']
+        partner_form = Form(self.env['res.partner'])
+        partner_form.name = 'Partner A'
+        self.partner_id = partner_form.save()
+        self.product_a = self.env.ref('product.product_product_3')
+        invoice = self.init_invoice('out_invoice')
         # I check that Initially customer invoice state is "Draft"
         self.assertEqual(invoice.state, 'draft')
 
