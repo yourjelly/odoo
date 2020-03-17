@@ -7,7 +7,7 @@ import odoo.tests
 RE_ONLY = re.compile('QUnit\.only\(')
 
 
-@odoo.tests.tagged('post_install', '-at_install', 'aab')
+@odoo.tests.tagged('post_install', '-at_install')
 class WebSuite(odoo.tests.HttpCase):
 
     def test_js(self):
