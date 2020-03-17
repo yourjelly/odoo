@@ -62,7 +62,7 @@ odoo.define('web.test_utils_create', function (require) {
 
         const target = prepareTarget(params.debug);
         params.services = Object.assign({}, params.services);
-        const cleanUp = await testUtilsMock.setMockedOwlEnv(WebClient, params);
+        const cleanUp = await testUtilsMock.setMockedOwlEnv(Component, params);
 
         const SystrayItems = SystrayMenu.Items;
         SystrayMenu.Items = params.SystrayItems || [];

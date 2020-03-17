@@ -4131,7 +4131,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.skip('save current search', async function (assert) {
+    QUnit.test('save current search', async function (assert) {
         assert.expect(4);
 
         testUtils.mock.patch(ListController, {
