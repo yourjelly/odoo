@@ -58,8 +58,8 @@ class IrTranslationImport(object):
                         noupdate BOOLEAN
                     ) """ % (self._table)
         self._cr.execute(query)
-        if not tools.index_exists(self._cr, 'tmp_ir_translation_import_index'):
-            self._cr.execute("CREATE INDEX tmp_ir_translation_import_index ON %s (lang, module, type)" % self._table)
+        #if not tools.index_exists(self._cr, 'tmp_ir_translation_import_index'):
+        #    self._cr.execute("CREATE INDEX tmp_ir_translation_import_index ON %s (lang, module, type)" % self._table)
         duration = time.time() - t0
         _logger.log(25, 'Create took : %s', duration)
 
