@@ -11,7 +11,6 @@ odoo.define('web.test_utils_create', function (require) {
      */
 
     const ActionMenus = require('web.ActionMenus');
-    const concurrency = require('web.concurrency');
     const ControlPanel = require('web.ControlPanel');
     const ControlPanelModel = require('web.ControlPanelModel');
     const customHooks = require('web.custom_hooks');
@@ -161,7 +160,7 @@ odoo.define('web.test_utils_create', function (require) {
         if (!(constructor.prototype instanceof Component)) {
             throw new Error(`Argument "constructor" must be an Owl Component.`);
         }
-        const cleanUp = await testUtilsMock.setMockedOwlEnv(params);
+        const cleanUp = await testUtilsMock.setMockedOwlEnv(Component, params);
         class Parent extends Component {
             constructor() {
                 super(...arguments);
@@ -205,7 +204,6 @@ odoo.define('web.test_utils_create', function (require) {
     async function createControlPanel(params = {}) {
         const config = params.cpStoreConfig || {};
         const debug = params.debug || false;
-        const env = params.env || {};
         const props = Object.assign({
             action: {},
             fields: {},
@@ -233,7 +231,7 @@ odoo.define('web.test_utils_create', function (require) {
             }
         }
         Parent.components = { ControlPanel };
-        Parent.env = makeTestEnvironment(env);
+        const cleanUp = await testUtilsMock.setMockedOwlEnv(Parent, params);
         Parent.template = xml`
             <ControlPanel
                 t-ref="controlPanel"
@@ -248,6 +246,7 @@ odoo.define('web.test_utils_create', function (require) {
         const destroy = controlPanel.destroy;
         controlPanel.destroy = function () {
             controlPanel.destroy = destroy;
+            cleanUp();
             parent.destroy();
         };
         controlPanel.getQuery = () => parent._controlPanelModel.getQuery();

@@ -2785,7 +2785,7 @@ QUnit.module('ActionManager', {
         webClient.destroy();
     });
 
-    QUnit.test('should open the report client action if wkhtmltopdf is broken', async function (assert) {
+    QUnit.skip('should open the report client action if wkhtmltopdf is broken', async function (assert) {
         assert.expect(6);
 
         // patch the report client action to override its iframe's url so that
