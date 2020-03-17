@@ -127,6 +127,7 @@ odoo.define('web.test_utils_create', function (require) {
      */
     async function createCalendarView(params, options) {
         const calendar = await createView(params);
+        await testUtilsAsync.nextTick();
         if (!options || !options.positionalClicks) {
             return calendar;
         }
@@ -138,7 +139,6 @@ odoo.define('web.test_utils_create', function (require) {
             viewElements.forEach(el => el.remove());
             destroy();
         };
-        await concurrency.delay(0);
         return calendar;
     }
 
