@@ -288,9 +288,9 @@ odoo.define('web.test_utils_create', function (require) {
      *   any parameters from that method applies
      * @returns {Widget}
      */
-    function createParent(params) {
+    async function createParent(params) {
         const widget = new Widget();
-        testUtilsMock.addMockEnvironment(widget, params);
+        await testUtilsMock.addMockEnvironment(widget, params);
         return widget;
     }
 

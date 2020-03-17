@@ -59,7 +59,7 @@ QUnit.module('ModelFieldSelector', {
             readonly: false,
             debugMode: true,
         });
-        testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
+        await testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
         await fieldSelector.appendTo($target);
         var $value = fieldSelector.$("> .o_field_selector_value");
 
@@ -183,7 +183,7 @@ QUnit.module('ModelFieldSelector', {
                 return field.type === 'many2one';
             },
         });
-        testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
+        await testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
         await fieldSelector.appendTo($target);
 
         fieldSelector.$el.trigger('focusin');
@@ -205,7 +205,7 @@ QUnit.module('ModelFieldSelector', {
         var fieldSelector = new ModelFieldSelector(null, "partner", [], {
             readonly: false,
         });
-        testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
+        await testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
         await fieldSelector.appendTo($target);
 
         fieldSelector.$el.trigger('focusin');
@@ -237,7 +237,7 @@ QUnit.module('ModelFieldSelector', {
             readonly: false,
             showSearchInput: false,
         });
-        testUtils.mock.addMockEnvironment(fieldSelector, { data: this.data });
+        await testUtils.mock.addMockEnvironment(fieldSelector, { data: this.data });
         await fieldSelector.appendTo($target);
 
         fieldSelector.$el.trigger('focusin');
@@ -259,7 +259,7 @@ QUnit.module('ModelFieldSelector', {
             readonly: false,
             showSearchInput: false,
         });
-        testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
+        await testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
         await fieldSelector.appendTo($target);
 
         var $fieldName = fieldSelector.$('.o_field_selector_chain_part');
@@ -279,7 +279,7 @@ QUnit.module('ModelFieldSelector', {
             readonly: false,
             showSearchInput: false,
         });
-        testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
+        await testUtils.mock.addMockEnvironment(fieldSelector, {data: this.data});
         await fieldSelector.appendTo($target);
 
         var $fieldName = fieldSelector.$('.o_field_selector_chain_part');
