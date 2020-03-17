@@ -72,7 +72,11 @@ class HolidaysRequest(models.Model):
         defaults = super(HolidaysRequest, self).default_get(fields_list)
         defaults = self._default_get_request_parameters(defaults)
 
-        LeaveType = self.env['hr.leave.type'].with_context(employee_id=defaults.get('employee_id'), default_date_from=defaults.get('date_from', fields.Datetime.now()))
+        LeaveType = self.env['hr.leave.type'].with_context(
+            employee_id=defaults.get('employee_id', self._context.get('employee_id')),
+            default_date_from=defaults.get('date_from', fields.Datetime.now())
+        )
+
         lt = LeaveType.search([('valid', '=', True)], limit=1)
 
         defaults['holiday_status_id'] = lt.id if lt else defaults.get('holiday_status_id')
