@@ -257,7 +257,6 @@ QUnit.module('ActionManager', {
         await doAction(4);
         // kanban view is loaded, switch to list view
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
         // open a record in form view
         await testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
         await testUtils.owlCompatibilityExtraNextTick();
@@ -383,6 +382,7 @@ QUnit.module('ActionManager', {
         // switch to the form view (this request is blocked)
         def = testUtils.makeTestPromise();
         await testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
+        await testUtils.owlCompatibilityExtraNextTick();
 
         // execute another action meanwhile (don't block this request)
         await doAction(4, {clear_breadcrumbs: true});
@@ -390,6 +390,7 @@ QUnit.module('ActionManager', {
         // unblock the switch to the form view in action 3
         def.resolve();
         await nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.strictEqual(delta, n, "all widgets of action 3 should have been destroyed");
 
@@ -577,7 +578,7 @@ QUnit.module('ActionManager', {
 
         // execute action 3 and open a record in form view
         await doAction(3);
-        testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
+        await testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
         await testUtils.owlCompatibilityExtraNextTick();
 
         // execute action 4 without 'on_reverse_breadcrumb' handler, then go back
@@ -797,6 +798,7 @@ QUnit.module('ActionManager', {
         assert.containsNone(document.querySelector('body'), '.o_notification');
         webClient.trigger('show-effect', {type: 'rainbow_man', fadeout: 'no'});
         await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_kanban_view');
         assert.containsNone(webClient, '.o_reward');
         assert.containsOnce(document.querySelector('body'), '.o_notification');
@@ -1015,6 +1017,7 @@ QUnit.module('ActionManager', {
         await doAction(8);
         assert.verifySteps(['push_state']);
         await testUtils.dom.click($(webClient.el).find('tr.o_data_row:first'));
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.verifySteps([]);
         // we make sure here that the list view is still in the dom
         assert.containsOnce(webClient, '.o_list_view',
@@ -1526,6 +1529,7 @@ QUnit.module('ActionManager', {
         ], "should load the action only once");
 
         await testUtils.dom.click($(webClient.el).find('tr.o_data_row:first'));
+        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.verifySteps(['read'], "should correctly load the subsequent view");
 
@@ -1577,6 +1581,7 @@ QUnit.module('ActionManager', {
         assert.verifySteps([], "should not push the loaded state");
 
         await testUtils.dom.click($(webClient.el).find('button'));
+        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.verifySteps(['push_state'],
             "should push the state of it changes afterwards");
@@ -1891,12 +1896,10 @@ QUnit.module('ActionManager', {
 
         // kanban view is loaded, switch to list view
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
 
         // here, list view is not ready yet, because def is not resolved
         // switch back to kanban view
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
 
         // here, we want the kanban view to reload itself, regardless of list view
         assert.verifySteps([
@@ -2027,8 +2030,8 @@ QUnit.module('ActionManager', {
 
         // click to go back to Kanban (this request is blocked)
         def = testUtils.makeTestPromise();
-        await nextTick();
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .breadcrumb a'));
+        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.containsOnce(webClient, '.o_form_view',
         "should still display the form view of action 4");
@@ -2054,6 +2057,7 @@ QUnit.module('ActionManager', {
         // unblock the switch to Kanban in action 4
         def.resolve();
         await nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.containsOnce(webClient, '.o_list_view',
             "should still display action 8");
@@ -2158,7 +2162,6 @@ QUnit.module('ActionManager', {
 
         // switch to the form view (this request is blocked)
         def = testUtils.makeTestPromise();
-        await nextTick();
         await testUtils.dom.click($(webClient.el).find('.o_list_view .o_data_row:first'));
         await testUtils.owlCompatibilityExtraNextTick();
 
@@ -2331,9 +2334,7 @@ QUnit.module('ActionManager', {
 
         // reload (the search_read RPC will be blocked)
         def = testUtils.makeTestPromise();
-        await nextTick();
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.containsN(webClient, '.o_list_view .o_data_row', 5,
             "list view should still contain 5 records");
@@ -2387,8 +2388,7 @@ QUnit.module('ActionManager', {
                 return this._super.apply(this, arguments);
             },
         });
-        doAction('HelloWorldTest');
-        await nextTick();
+        await doAction('HelloWorldTest');
 
         assert.strictEqual(webClient.el.querySelector('.o_action_manager').innerHTML,
             '<div class="o_action o_client_action_test">Hello World</div>');
@@ -2605,15 +2605,13 @@ QUnit.module('ActionManager', {
         });
 
         // execute an action in target="new"
-        doAction(5, {
+        await doAction(5, {
             on_close: assert.step.bind(assert, 'close handler'),
         });
-        await nextTick();
         assert.containsOnce(document.body, '.o_technical_modal .o_form_view');
 
         // execute a server action that returns false
-        doAction(2);
-        await nextTick();
+        await doAction(2);
         assert.containsNone(document.body, '.o_technical_modal');
         assert.verifySteps([
             '/web/action/load', // action 5
@@ -2663,7 +2661,6 @@ QUnit.module('ActionManager', {
                 assert.step('on_close');
             },
         });
-        await nextTick();
         assert.verifySteps([
             '/web/action/load',
             '/report/check_wkhtmltopdf',
@@ -2689,7 +2686,7 @@ QUnit.module('ActionManager', {
                 report: ReportService,
                 unblockUI: () => assert.step('unblockUI'),
             },
-            mockRPC: function (route, args) {
+            mockRPC: function (route) {
                 if (route === '/report/check_wkhtmltopdf') {
                     return Promise.resolve('ok');
                 }
@@ -2835,7 +2832,6 @@ QUnit.module('ActionManager', {
             },
         });
         await doAction(7);
-        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.containsOnce(webClient, '.o_report_iframe',
             "should have opened the report client action");
@@ -2984,7 +2980,6 @@ QUnit.module('ActionManager', {
 
         // switch to kanban view
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsNone(webClient, '.o_list_view',
             "should no longer display the list view");
         assert.containsOnce(webClient, '.o_kanban_view',
@@ -2992,7 +2987,6 @@ QUnit.module('ActionManager', {
 
         // switch back to list view
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_list_view',
             "should display the list view");
         assert.containsNone(webClient, '.o_kanban_view',
@@ -3108,7 +3102,6 @@ QUnit.module('ActionManager', {
 
         // switch to kanban view
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').length, 1,
             "there should still be one controller in the breadcrumbs");
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners',
@@ -3133,7 +3126,6 @@ QUnit.module('ActionManager', {
 
         // switch back to list view
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').length, 1,
             "there should still be one controller in the breadcrumbs");
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').text(), 'Partners',
@@ -3181,7 +3173,6 @@ QUnit.module('ActionManager', {
 
         // switch to kanban view
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsN(webClient, '.o_control_panel .o_switch_view', 2,
             "should still have two switch buttons (list and kanban)");
         assert.containsOnce(webClient, '.o_control_panel .o_switch_view.active',
@@ -3193,7 +3184,6 @@ QUnit.module('ActionManager', {
 
         // switch back to list view
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsN(webClient, '.o_control_panel .o_switch_view', 2,
             "should still have two switch buttons (list and kanban)");
         assert.hasClass($(webClient.el).find('.o_control_panel .o_switch_view.o_list'), 'active',
@@ -3234,7 +3224,6 @@ QUnit.module('ActionManager', {
 
         // switch to list view
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.strictEqual($(webClient.el).find('.o_control_panel .o_pager_value').text(), '1-3',
             "value should be correct for list");
         assert.strictEqual($(webClient.el).find('.o_control_panel .o_pager_limit').text(), '5',
@@ -3258,7 +3247,6 @@ QUnit.module('ActionManager', {
 
         // switch back to kanban view
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.strictEqual($(webClient.el).find('.o_control_panel .o_pager_value').text(), '1-5',
             "value should be correct for kanban");
         assert.strictEqual($(webClient.el).find('.o_control_panel .o_pager_limit').text(), '5',
@@ -3289,7 +3277,6 @@ QUnit.module('ActionManager', {
 
         // switch to kanban
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsN(webClient, '.o_kanban_record:not(.o_kanban_ghost)', 2);
 
         // remove the domain
@@ -3299,7 +3286,6 @@ QUnit.module('ActionManager', {
 
         // switch back to list
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsN(webClient, '.o_data_row', 5);
 
         webClient.destroy();
@@ -3324,7 +3310,6 @@ QUnit.module('ActionManager', {
         // switch to kanban view
         def = testUtils.makeTestPromise();
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_list_view',
             "should still display the list view");
         assert.containsNone(webClient, '.o_kanban_view',
@@ -3340,7 +3325,6 @@ QUnit.module('ActionManager', {
         // switch back to list view
         def = testUtils.makeTestPromise();
         await testUtils.controlPanel.switchView(webClient, 'list');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_kanban_view',
             "should still display the kanban view");
         assert.containsNone(webClient, '.o_list_view',
@@ -3417,11 +3401,8 @@ QUnit.module('ActionManager', {
 
         // switch to edit mode and change the display_name
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_form_button_edit'));
-        await testUtils.owlCompatibilityExtraNextTick();
         await testUtils.fields.editInput($(webClient.el).find('.o_field_widget[name=display_name]'), 'New name');
-        await testUtils.owlCompatibilityExtraNextTick();
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_form_button_save'));
-        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.strictEqual($(webClient.el).find('.o_control_panel .breadcrumb-item').length, 2,
             "there should still be two controllers in the breadcrumbs");
@@ -3782,14 +3763,13 @@ QUnit.module('ActionManager', {
 
         // switch to kanban and back to graph view
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.strictEqual($(webClient.el).find('.o_control_panel  .fa-area-chart').length, 0,
             "graph buttons are no longer in control panel");
 
         await testUtils.controlPanel.switchView(webClient, 'graph');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.hasClass($(webClient.el).find('.o_control_panel  .fa-area-chart'), 'active',
             "line chart button is still active");
+
         webClient.destroy();
     });
 
@@ -3816,30 +3796,30 @@ QUnit.module('ActionManager', {
 
         // switch to graph view
         await testUtils.controlPanel.switchView(webClient, 'graph');
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.doesNotHaveClass($(webClient.el).find('.o_control_panel .o_switch_view.o_list'), 'active',
             "list button in control panel is not active");
         assert.hasClass($(webClient.el).find('.o_control_panel .o_switch_view.o_graph'), 'active',
             "graph button in control panel is active");
+
         webClient.destroy();
     });
 
     QUnit.test('can interact with search view', async function (assert) {
         assert.expect(2);
 
-        this.archs['partner,false,search'] = '<search>'+
-                '<group>'+
-                    '<filter name="foo" string="foo" context="{\'group_by\': \'foo\'}"/>' +
-                '</group>'+
-            '</search>';
+        this.archs['partner,false,search'] = `
+            <search>
+                <group>
+                    <filter name="foo" string="foo" context="{'group_by': 'foo'}"/>
+                </group>
+            </search>`;
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
         });
-        doAction(3);
-        await nextTick();
+        await doAction(3);
 
         assert.doesNotHaveClass($(webClient.el).find('.o_list_table'), 'o_list_table_grouped',
             "list view is not grouped");
@@ -3850,7 +3830,7 @@ QUnit.module('ActionManager', {
         // click on first link
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_group_by_menu a:first'));
 
-        assert.hasClass($(webClient.el).find('.o_list_table'),'o_list_table_grouped',
+        assert.hasClass($(webClient.el).find('.o_list_table'), 'o_list_table_grouped',
             'list view is now grouped');
 
         webClient.destroy();
@@ -3861,17 +3841,19 @@ QUnit.module('ActionManager', {
         assert.expect(8);
 
         this.data.partner.records[0].bar = 2;
-        this.archs['partner,false,search'] = '<search>'+
-                '<group>'+
-                    '<filter name="foo" string="foo" context="{\'group_by\': \'foo\'}"/>' +
-                '</group>'+
-            '</search>';
-        this.archs['partner,false,form'] = '<form>' +
-            '<group>' +
-                '<field name="foo"/>' +
-                '<field name="bar"/>' +
-            '</group>' +
-        '</form>';
+        this.archs['partner,false,search'] = `
+            <search>
+                <group>
+                    <filter name="foo" string="foo" context="{'group_by': 'foo'}"/>
+                </group>
+            </search>`;
+        this.archs['partner,false,form'] = `
+            <form>
+                <group>
+                    <field name="foo"/>
+                    <field name="bar"/>
+                </group>
+            </form>`;
 
         const webClient = await createWebClient({
             actions: this.actions,
@@ -3894,11 +3876,9 @@ QUnit.module('ActionManager', {
 
         // click on edit
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_form_button_edit'));
-        await testUtils.owlCompatibilityExtraNextTick();
 
         // click on external button for m2o
         await testUtils.dom.click($(webClient.el).find('.o_external_button'));
-        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.verifySteps([
             '/web/action/load',             // initial load action
@@ -3929,9 +3909,7 @@ QUnit.module('ActionManager', {
 
         // edit record
         await testUtils.dom.click($(webClient.el).find('.o_control_panel button.o_form_button_edit'));
-        await testUtils.owlCompatibilityExtraNextTick();
         await testUtils.fields.editInput($(webClient.el).find('input[name="foo"]'), 'pinkypie');
-        await testUtils.owlCompatibilityExtraNextTick();
 
         // go back to kanban view
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .breadcrumb-item:first a'));
@@ -3981,7 +3959,6 @@ QUnit.module('ActionManager', {
 
         // switch to kanban view
         await testUtils.controlPanel.switchView(webClient, 'kanban');
-        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.strictEqual($(webClient.el).find('.o_kanban_record:not(.o_kanban_ghost)').length, 2,
             "should only display 2 record");
@@ -4057,7 +4034,6 @@ QUnit.module('ActionManager', {
         await testUtils.owlCompatibilityExtraNextTick();
         // switch to edit mode
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_form_button_edit'));
-        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.hasClass($(webClient.el).find('.o_form_view'), 'o_form_editable');
         // do some other action
@@ -4096,16 +4072,13 @@ QUnit.module('ActionManager', {
 
         // groupby 'bar' using the searchview
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_cp_right button:contains(Group By)'));
-        await testUtils.owlCompatibilityExtraNextTick();
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_group_by_menu a:first'));
-        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.containsN(webClient, '.o_group_header', 5,
             "should be grouped by 'foo' (five groups)");
 
         // remove the groupby in the searchview
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_searchview .o_facet_remove'));
-        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.containsOnce(webClient, '.o_list_table_grouped',
             "should still be grouped");
@@ -4132,7 +4105,6 @@ QUnit.module('ActionManager', {
             data: this.data,
             menus: this.menus,
             mockRPC: function (route, args) {
-                debugger
                 assert.step(args.method || route);
                 return this._super.apply(this, arguments);
             },
@@ -4273,7 +4245,7 @@ QUnit.module('ActionManager', {
                     return '#action=24';
                 }
             },
-            mockRPC(route, args) {
+            mockRPC(route) {
                 assert.step(route);
                 if (route === '/web/dataset/search_read') {
                     return Promise.reject();
@@ -4285,6 +4257,7 @@ QUnit.module('ActionManager', {
         assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
 
         await testUtils.dom.click(webClient.el.querySelector('.oe_stat_button'));
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_form_view');
 
         assert.containsN(webClient, '.o_form_buttons_view button:not([disabled])', 2);
@@ -4323,7 +4296,7 @@ QUnit.module('ActionManager', {
                     return '#action=24';
                 }
             },
-            mockRPC(route, args) {
+            mockRPC(route) {
                 assert.step(route);
                 if (route === '/web/dataset/call_button') {
                     // Some business stuff server side, then return an implicit close action
@@ -4349,6 +4322,7 @@ QUnit.module('ActionManager', {
         await tooltipProm;
         assert.containsN(document.body, '.tooltip', 2);
         await testUtils.dom.click(actionButton);
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.verifySteps([
             '/web/dataset/call_button',
             '/web/dataset/call_kw/partner/read',
@@ -4433,6 +4407,7 @@ QUnit.module('ActionManager', {
 
         // go back using the breadcrumbs
         await testUtils.dom.click($('.o_control_panel .breadcrumb a:first'));
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.isVisible(webClient.el.querySelector('.o_search_options .o_dropdown.o_filter_menu'),
             "the search options should be available");
 
@@ -4636,7 +4611,6 @@ QUnit.module('ActionManager', {
 
         // switch to second record
         await testUtils.dom.click($(webClient.el).find('.o_pager_next'));
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.strictEqual($(webClient.el).find('.o_field_widget[name=display_name]').text(), 'Second record');
 
         // execute an action from the second record
@@ -4672,7 +4646,6 @@ QUnit.module('ActionManager', {
         assert.hasClass($(webClient.el).find('.o_form_view'), 'o_form_editable');
         await testUtils.fields.editInput($(webClient.el).find('.o_field_widget[name=display_name]'), 'another record');
         await testUtils.dom.click($(webClient.el).find('.o_form_button_save'));
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.hasClass($(webClient.el).find('.o_form_view'), 'o_form_readonly');
 
         // execute an action from the second record
@@ -5208,7 +5181,7 @@ QUnit.module('ActionManager', {
         });
         await doAction(6);
         await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
-        await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_reward');
 
         webClient.destroy();
@@ -5245,7 +5218,7 @@ QUnit.module('ActionManager', {
         });
         await doAction(6);
         await testUtils.dom.click(webClient.el.querySelector('button[name="object"]'));
-        await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_reward');
         assert.strictEqual(
             webClient.el.querySelector('.o_reward .o_reward_msg_content').textContent,
@@ -5274,6 +5247,7 @@ QUnit.module('ActionManager', {
 
         webClient.env.bus.trigger('history-back');
         await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.verifySteps(['on_close'], "should have called the on_close handler");
 
         webClient.destroy();
@@ -5322,7 +5296,9 @@ QUnit.module('ActionManager', {
             menus: this.menus,
         });
         await doAction('ClientAction');
-        webClient.trigger('navigation_move', {direction:'down'});
+        webClient.trigger('navigation_move', {direction: 'down'});
+        await nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.ok(true); // no error so it's good
         webClient.destroy();
@@ -5468,6 +5444,7 @@ QUnit.module('ActionManager', {
 
         await doAction(100, {});
         await testUtils.dom.click(webClient.$('button[data-mobile]:first'));
+        await testUtils.owlCompatibilityExtraNextTick();
 
         webClient.destroy();
         utils.unpatch(ActionManager, 'ActionManagerTestPatch');
@@ -5542,7 +5519,6 @@ QUnit.module('ActionManager', {
         assert.containsOnce(webClient, '.o_form_view.o_form_readonly');
 
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_form_button_edit'));
-        await testUtils.owlCompatibilityExtraNextTick();
         assert.containsOnce(webClient, '.o_form_view.o_form_editable');
 
         await testUtils.fields.editInput($(webClient.el).find('input[name=foo]'), 'val');
@@ -5588,7 +5564,6 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click(webClient.el.querySelector('.o_list_view .o_data_row'));
         await testUtils.owlCompatibilityExtraNextTick();
         await testUtils.dom.click(webClient.el.querySelector('.o_form_buttons_view .o_form_button_edit'));
-        await testUtils.owlCompatibilityExtraNextTick();
 
         await doAction(25, {
             on_close() {
