@@ -127,18 +127,17 @@ odoo.define('web.test_utils_create', function (require) {
      */
     async function createCalendarView(params, options) {
         const calendar = await createView(params);
-        await testUtilsAsync.nextTick();
-        if (!options || !options.positionalClicks) {
-            return calendar;
-        }
-        const viewElements = [...document.getElementById('qunit-fixture').children];
-        viewElements.forEach(el => document.body.prepend(el));
+        if (options && options.positionalClicks) {
+            const viewElements = [...document.getElementById('qunit-fixture').children];
+            viewElements.forEach(el => document.body.prepend(el));
 
-        const destroy = calendar.destroy;
-        calendar.destroy = () => {
-            viewElements.forEach(el => el.remove());
-            destroy();
-        };
+            const destroy = calendar.destroy;
+            calendar.destroy = () => {
+                viewElements.forEach(el => el.remove());
+                destroy();
+            };
+        }
+        await testUtilsAsync.nextTick();
         return calendar;
     }
 
