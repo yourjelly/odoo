@@ -15,7 +15,6 @@ odoo.define('web.test_utils_create', function (require) {
     const ControlPanelModel = require('web.ControlPanelModel');
     const customHooks = require('web.custom_hooks');
     const dom = require('web.dom');
-    const makeTestEnvironment = require('web.test_env');
     const Registry = require('web.Registry');
     const SystrayMenu = require('web.SystrayMenu');
     const testUtilsAsync = require('web.test_utils_async');

@@ -37,10 +37,7 @@ async function createDiscuss(params) {
     params.archs = params.archs || {
         'mail.message,false,search': '<search/>',
     };
-    testUtils.mock.addMockEnvironment(parent, params);
-
-    const env = params.env || {};
-    owl.Component.env = makeTestEnvironment(env);
+    await testUtils.mock.addMockEnvironment(parent, params);
 
     var discuss = new Discuss(parent, params);
 
