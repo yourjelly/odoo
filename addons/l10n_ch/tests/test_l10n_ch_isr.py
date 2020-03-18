@@ -3,38 +3,43 @@
 
 import time
 
-from odoo.addons.account.tests.common import AccountTestCommon
+import odoo
+from odoo import api
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.exceptions import ValidationError
-from odoo.tests import tagged
+from odoo.tests import tagged, Form
 
 
 @tagged('post_install', '-at_install')
-class ISRTest(AccountTestCommon):
+class ISRTest(AccountTestInvoicingCommon):
 
-    def create_invoice(self, currency_to_use='base.CHF'):
-        """ Generates a test invoice """
-        invoice = self.env['account.move'].with_context(default_move_type='out_invoice').create({
-            'move_type': 'out_invoice',
-            'partner_id': self.env.ref("base.res_partner_2").id,
-            'currency_id': self.env.ref(currency_to_use).id,
-            'invoice_date': time.strftime('%Y') + '-12-22',
-            'invoice_line_ids': [
-                (0, 0, {
-                    'product_id': self.env.ref("product.product_product_4").id,
-                    'quantity': 1,
-                    'price_unit': 42,
-                }),
-            ],
+    @classmethod
+    def setUpClass(cls):
+        super(ISRTest, cls).setUpClass()
+        cls.env.company.write({
+            'chart_template_id': cls.env.ref('l10n_ch.l10nch_chart_template').id
         })
-        invoice.post()
+        cls.company_data = cls.setup_company_data('company_Ch_data', country_id=cls.env.ref('base.ch').id)
+        cls.company = cls.company_data['company']
 
-        return invoice
+        # ==== Partner ====
+        cls.partner_a = cls.env['res.partner'].create({
+            'name': 'Partner A'
+        })
+        # ==== Products ====
+        cls.product_a = cls.env['product.product'].create({
+            'name': 'product_a',
+        })
+        cls.product_b = cls.env['product.product'].create({
+            'name': 'product_b',
+        })
 
     def create_account(self, number):
         """ Generates a test res.partner.bank. """
-        return self.env['res.partner.bank'].create({
-            'acc_number': number,
-        })
+        partner_form = Form(self.env['res.partner.bank'])
+        partner_form.acc_number = number
+        partner_form.partner_id = self.partner_a
+        return partner_form.save()
 
     def print_isr(self, invoice):
         try:
@@ -76,24 +81,35 @@ class ISRTest(AccountTestCommon):
     def test_isr(self):
         #Let us test the generation of an ISR for an invoice, first by showing an
         #ISR report is only generated when Odoo has all the data it needs.
-        invoice_1 = self.create_invoice('base.CHF')
+        invoice_1 = self.init_invoice('out_invoice')
+        invoice_1.write({
+            'currency_id': self.env.ref('base.CHF').id,
+            'invoice_date': time.strftime('%Y') + '-12-22',
+        })
         self.isr_not_generated(invoice_1)
 
         #Now we add an account for payment to our invoice, but still cannot generate the ISR
         test_account = self.create_account('250097798')
-        invoice_1.partner_bank_id = test_account
+        invoice_1.invoice_partner_bank_id = test_account
         self.isr_not_generated(invoice_1)
+        invoice_1.invoice_partner_bank_id.write({
+            'l10n_ch_postal': '010391391',
+            'l10n_ch_isr_subscription_chf': 'CHF'
+        })
 
         #Finally, we add bank coordinates to our account. The ISR should now be available to generate
         test_bank = self.env['res.bank'].create({
                 'name':'Money Drop',
-                'l10n_ch_postal_chf':'010391391'
         })
 
         test_account.bank_id = test_bank
         self.isr_generated(invoice_1)
 
         #Now, let us show that, with the same data, an invoice in euros does not generate any ISR (because the bank does not have any EUR postal reference)
-        invoice_2 = self.create_invoice('base.EUR')
+        invoice_2 = self.init_invoice('out_invoice')
+        invoice_2.write({
+            'currency_id': self.env.ref('base.EUR').id,
+            'invoice_date': time.strftime('%Y') + '-12-22',
+        })
         invoice_2.partner_bank_id = test_account
         self.isr_not_generated(invoice_2)
