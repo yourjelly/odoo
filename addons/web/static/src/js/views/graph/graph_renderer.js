@@ -73,6 +73,8 @@ return AbstractRenderer.extend({
         this.chartId = _.uniqueId('chart');
         this.$legendTooltip = null;
         this.$tooltip = null;
+
+        this.showLegendTitle = state.showLegendTitle || '';
     },
     /**
      * @override
@@ -399,7 +401,7 @@ return AbstractRenderer.extend({
             legendOptions.labels = {
                 generateLabels: function (chart) {
                     var data = chart.data;
-                    return data.datasets.map(function (dataset, i) {
+                    var legends = data.datasets.map(function (dataset, i) {
                         return {
                             text: self._shortenLabel(dataset.label),
                             fullText: dataset.label,
@@ -415,6 +417,19 @@ return AbstractRenderer.extend({
                             datasetIndex: i,
                         };
                     });
+                    // get field used for legend
+                    if (self.state.showLegendTitle) {
+                        var legendFieldIndex = self.state.processedGroupBy.length-1;
+                        var legendField = self.state.processedGroupBy[legendFieldIndex].split(':')[0];
+                        var title = {
+                            text: self.fields[legendField].string + ":",
+                            strokeStyle: 'transparent',
+                            fillStyle: 'transparent',
+                            lineWidth: 0
+                        };
+                        legends.unshift(title);
+                    }
+                    return legends;
                 },
             };
         } else {
