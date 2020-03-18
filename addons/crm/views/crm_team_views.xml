@@ -126,7 +126,7 @@
                             <button  icon="fa-arrow-right" type="action" name="%(base_setup.action_general_configuration)d" string="Configure domain name" class="btn-link" attrs="{'invisible': [('alias_domain', '!=', False)]}"/>
                         </div>
                     </div>
-                    <field name="alias_contact" class="oe_inline"
+                    <field name="alias_contact"
                         string="Accept Emails From"
                         attrs="{'invisible': [('use_leads', '=', False), ('use_opportunities', '=', False)]}"/>
                     <field name="alias_user_id" string="Assign to"/>

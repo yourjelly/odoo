@@ -64,10 +64,10 @@ class Alias(models.Model):
         ('partners', 'Authenticated Partners'),
         ('followers', 'Followers only')], default='everyone',
         string='Alias Contact Security', required=True,
-        help="Policy to post a message on the document using the mailgateway.\n"
-             "- everyone: everyone can post\n"
-             "- partners: only authenticated partners\n"
-             "- followers: only followers of the related document or members of following channels\n")
+        help="Filters who can send emails this to email alias to create leads/opportunities : \n"
+             "- Everyone: All emails will be accepted, whichever the source.\n"
+             "- Authenticated Partners : Only emails from Partners that already exist in your database will be accepted.\n"
+             "- Followers Only : Only emails from Followers of this Sales Team will be accepted\n")
     alias_bounced_content = fields.Html(
         "Custom Bounced Message", translate=True,
         help="If set, this content will automatically be sent out to unauthorized users instead of the default message.")
