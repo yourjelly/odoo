@@ -40,6 +40,7 @@ class IrTranslationImport(object):
         self._debug = False
         self._rows = []
 
+    def create_table(self):
         t0 = time.time()
         # Note that Postgres will NOT inherit the constraints or indexes
         # of ir_translation, so this copy will be much faster.
@@ -82,6 +83,7 @@ class IrTranslationImport(object):
 
     def finish(self):
         """ Transfer the data from the temp table to ir.translation """
+        self.create_table()
         cr = self._cr
         _logger.setLevel(logging.DEBUG)
 
