@@ -4068,11 +4068,15 @@ Record ids: %(records)s
         # determine which records to create and update
         to_create = []                  # list of data
         to_update = []                  # list of data
+        translated_term_fields = []
 
         for data in data_list:
             xml_id = data.get('xml_id')
             if not xml_id:
                 vals = data['values']
+                for val in list(data['values']):
+                    if len(val.split(':')) > 1:
+                        translated_term_fields.append({val: data['values'].pop(val)})
                 if vals.get('id'):
                     data['record'] = self.browse(vals['id'])
                     to_update.append(data)
@@ -4122,29 +4126,31 @@ Record ids: %(records)s
                 if data.get('xml_id') and not data['xml_id'].startswith(prefix):
                     _logger.warning("Creating record %s in module %s.", data['xml_id'], module)
 
-        translated_term_fields = []
-        for data in to_create:
-            for key in data['values'].keys():
-                if len(key.split(':')) > 1:
-                    translated_term_fields.append({key: data['values'][key]})
-
         # create records
         records = self._load_records_create([data['values'] for data in to_create])
+        for data, record in zip(to_create, records):
+            data['record'] = record
 
         Translations = self.env['ir.translation']
         for term in translated_term_fields:
             for name in term:
                 splitted_name = name.split(':')
-                for data in data_list:
-                    if splitted_name[0] in data['values'] and name in data['values']:
+                for data in to_create:
+                    if splitted_name[0] in data['values']:
                         tname = '%s,%s' % (self._name, splitted_name[0])
-                        val = data['values'][name]
-                        Translations._set_ids(tname, 'model', splitted_name[1], records.ids, val)
+                        record = data['record']
+                        val = term[name]
+                        Translations._set_ids(tname, 'model', splitted_name[1], record.ids, val)
                     else:
                         raise UserError(_('Missing source value for the field %s') % splitted_name[0])
-
-        for data, record in zip(to_create, records):
-            data['record'] = record
+                for data in to_update:
+                    if splitted_name[0] in data['values']:
+                        tname = '%s,%s' % (self._name, splitted_name[0])
+                        val = term[name]
+                        record = data['record']
+                        Translations._set_ids(tname, 'model', splitted_name[1], record.ids, val)
+                    else:
+                        raise UserError(_('Missing source value for the field %s') % splitted_name[0])
 
         # create or update XMLIDs
         imd_data_list = [data for data in data_list if data.get('xml_id')]
