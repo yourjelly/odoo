@@ -62,7 +62,7 @@ class IrTranslationImport(object):
         #if not tools.index_exists(self._cr, 'tmp_ir_translation_import_index'):
         #    self._cr.execute("CREATE INDEX tmp_ir_translation_import_index ON %s (lang, module, type)" % self._table)
         duration = time.time() - t0
-        _logger.log(25, 'Create took : %s', duration)
+        _logger.info('Create took : %s', duration)
 
     def push(self, trans_dict):
         """ Feed a translation, as a dictionary, into the cursor """
