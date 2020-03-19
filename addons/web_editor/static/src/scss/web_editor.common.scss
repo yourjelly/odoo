@@ -561,6 +561,7 @@ blockquote {
     $-link: color('o-cc#{$index}-link');
     $-btn-primary: color('o-cc#{$index}-btn-primary');
     $-btn-secondary: color('o-cc#{$index}-btn-secondary');
+    $-btn-outline-primary: color('o-cc#{$index}-btn-outline-primary');
 
     // Those color classes color multiple elements when applied on a snippet.
     // Those rules are not important so that they can be overridden through
@@ -597,16 +598,26 @@ blockquote {
             .btn-primary {
                 @extend .btn-#{$-btn-primary};
             }
-            .btn-outline-primary {
-                @extend .btn-outline-#{$-btn-primary};
-            }
         } @else if $-btn-primary {
             $-btn-primary-color: o-get-color($-btn-primary);
             .btn-primary {
                 @include button-variant($-btn-primary-color, $-btn-primary-color);
             }
+        }
+
+        @if has-related-color-classes($-btn-outline-primary, 'btn') and $-btn-outline-primary {
             .btn-outline-primary {
-                @include button-outline-variant($-btn-primary-color);
+                @extend .btn-outline-#{$-btn-primary};
+            }
+        } @else if $-btn-outline-primary {
+            $-btn-outline-primary-color: o-get-color($-btn-outline-primary);
+            .btn-outline-primary {
+                @include button-outline-variant($-btn-outline-primary-color);
+            }
+        } @else {
+            $-btn-outline-primary-color: darken(o-get-color($-btn-primary), 20%);
+            .btn-outline-primary {
+                @include button-outline-variant($-btn-outline-primary-color);
             }
         }
 
