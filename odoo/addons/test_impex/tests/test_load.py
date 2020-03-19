@@ -419,6 +419,7 @@ class test_translate_string_field(ImporterCase):
     model_name = 'export.string.translate'
 
     def test_imported(self):
+        self.env['res.lang']._activate_lang('fr_BE')
         result = self.import_(['value', 'value:fr_BE'], [
             ['chhagan', 'lagan'],
             ['magan', 'bhagan']
@@ -427,6 +428,7 @@ class test_translate_string_field(ImporterCase):
         self.assertFalse(result['messages'])
 
     def test_imported_translation(self):
+        self.env['res.lang']._activate_lang('fr_BE')
         result = self.import_(['value', 'value:fr_BE'], [
             ['shaktiman', 'gangadhar'],
         ])
