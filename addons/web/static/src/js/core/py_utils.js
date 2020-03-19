@@ -6,6 +6,9 @@ var core = require('web.core');
 var _t = core._t;
 var py = window.py; // to silence linters
 
+const formatDomainString = string => `%(${string})s`;
+const formatDomainRegex = /^%\([a-zA-Z_]\w*\)s$/;
+
 // recursively wraps JS objects passed into the context to attributedicts
 // which jsonify back to JS objects
 function wrap(value) {
@@ -541,13 +544,13 @@ function _normalizeDomainAST(domain) {
 }
 
 return {
+    assembleDomains: assembleDomains,
     context: pycontext,
     ensure_evaluated: ensure_evaluated,
     eval: pyeval,
     eval_domains_and_contexts: eval_domains_and_contexts,
-    py_eval: py_eval,
     normalizeDomain: normalizeDomain,
-    assembleDomains: assembleDomains,
+    py_eval: py_eval,
     _getPyJSAST: _getPyJSAST,
     _formatAST: _formatAST,
     _normalizeDomainAST: _normalizeDomainAST,

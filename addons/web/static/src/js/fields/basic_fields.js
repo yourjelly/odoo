@@ -23,6 +23,7 @@ var view_dialogs = require('web.view_dialogs');
 var field_utils = require('web.field_utils');
 var time = require('web.time');
 var ColorpickerDialog = require('web.ColorpickerDialog');
+const { ComponentWrapper, WidgetAdapterMixin } = require('web.OwlCompatibility');
 
 require("web.zoomodoo");
 
@@ -1336,7 +1337,7 @@ var FieldPercentage = FieldFloat.extend({
         if (this.mode === 'edit') {
             this.tagName = 'div';
             this.className += ' o_input';
-            
+
             // do not display % in the input in edit
             this.formatOptions.noSymbol = true;
         }
@@ -3008,32 +3009,30 @@ var JournalDashboardGraph = AbstractField.extend({
  * domain directly (or to build advanced domains the tree-like interface does
  * not allow to).
  */
-var FieldDomain = AbstractField.extend({
+var FieldDomain = AbstractField.extend(WidgetAdapterMixin, {
     /**
      * Fetches the number of records which are matched by the domain (if the
      * domain is not server-valid, the value is false) and the model the
      * field must work with.
      */
-    specialData: "_fetchSpecialDomain",
+    specialData: '_fetchSpecialDomain',
 
     events: _.extend({}, AbstractField.prototype.events, {
-        "click .o_domain_show_selection_button": "_onShowSelectionButtonClick",
-        "click .o_field_domain_dialog_button": "_onDialogEditButtonClick",
+        'click .o_domain_show_selection_button': '_onShowSelectionButtonClick',
+        'click .o_field_domain_dialog_button': '_onDialogEditButtonClick',
     }),
     custom_events: _.extend({}, AbstractField.prototype.custom_events, {
-        domain_changed: "_onDomainSelectorValueChange",
-        domain_selected: "_onDomainSelectorDialogValueChange",
-        open_record: "_onOpenRecord",
+        domain_change: '_onDomainChange',
+        open_record: '_onOpenRecord',
     }),
+
     /**
      * @constructor
-     * @override init from AbstractField
      */
-    init: function () {
-        this._super.apply(this, arguments);
+    init() {
+        this._super(...arguments);
 
         this.inDialog = !!this.nodeOptions.in_dialog;
-        this.fsFilters = this.nodeOptions.fs_filters || {};
 
         this.className = "o_field_domain";
         if (this.mode === "edit") {
@@ -3043,184 +3042,162 @@ var FieldDomain = AbstractField.extend({
             this.className += " o_inline_mode";
         }
 
-        this._setState();
+        const specialData = this.record.specialData[this.name];
+        this.domainModel = specialData.model;
+        this.isValidForModel = specialData.nbRecords !== false;
+        this.validDomain = true;
+
+        const domain = this.value || '[]';
+        let valid;
+        try {
+            py_utils.normalizeDomain(domain);
+            valid = true;
+        } catch (err) {
+            valid = false;
+        }
+        this.domainSelectorProps = {
+            domain,
+            model: this.domainModel,
+            readonly: this.mode === 'readonly' || this.inDialog,
+            valid,
+        };
+        this.domainSelector = new ComponentWrapper(this, DomainSelector, this.domainSelectorProps);
     },
 
-    //--------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     // Public
-    //--------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /**
      * A domain field is always set since the false value is considered to be
      * equal to "[]" (match all records).
-     *
      * @override
      */
-    isSet: function () {
+    isSet() {
         return true;
     },
+
     /**
-     * @override isValid from AbstractField.isValid
      * Parsing the char value is not enough for this field. It is considered
      * valid if the internal domain selector was built correctly and that the
      * query to the model to test the domain did not fail.
-     *
-     * @returns {boolean}
+     * @override
      */
-    isValid: function () {
+    isValid() {
         return (
-            this._super.apply(this, arguments)
-            && (!this.domainSelector || this.domainSelector.isValid())
-            && this._isValidForModel
+            this._super.apply(this, arguments) &&
+            (!this.domainSelector || this.validDomain) &&
+            this.isValidForModel
         );
     },
 
-    //--------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
     // Private
-    //--------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /**
-     * @private
-     * @override _render from AbstractField
-     * @returns {Promise}
+     * @override
      */
-    _render: function () {
+    async _render() {
         // If there is no model, only change the non-domain-selector content
-        if (!this._domainModel) {
-            this._replaceContent();
-            return Promise.resolve();
-        }
-
-        // Convert char value to array value
-        var value = this.value || "[]";
-
-        // Create the domain selector or change the value of the current one...
-        var def;
-        if (!this.domainSelector) {
-            this.domainSelector = new DomainSelector(this, this._domainModel, value, {
-                readonly: this.mode === "readonly" || this.inDialog,
-                filters: this.fsFilters,
-                debugMode: config.isDebug(),
-            });
-            def = this.domainSelector.prependTo(this.$el);
-        } else {
-            def = this.domainSelector.setDomain(value);
+        if (this.domainModel) {
+            if (this.el.contains(this.domainSelector.el)) {
+                console.warn("UPDATE");
+                await this.domainSelector.update(this.domainSelectorProps);
+            } else {
+                console.warn("MOUNT");
+                await this.domainSelector.mount(this.el);
+            }
         }
         // ... then replace the other content (matched records, etc)
-        return def.then(this._replaceContent.bind(this));
-    },
-    /**
-     * Render the field DOM except for the domain selector part. The full field
-     * DOM is composed of a DIV which contains the domain selector widget,
-     * followed by other content. This other content is handled by this method.
-     *
-     * @private
-     */
-    _replaceContent: function () {
-        if (this._$content) {
-            this._$content.remove();
+        if (this.$content) {
+            this.$content.remove();
         }
-        this._$content = $(qweb.render("FieldDomain.content", {
-            hasModel: !!this._domainModel,
-            isValid: !!this._isValidForModel,
+        this.$content = $(qweb.render('FieldDomain.content', {
+            hasModel: this.domainModel,
+            inDialogEdit: this.inDialog && this.mode === 'edit',
+            isValid: this.isValidForModel,
             nbRecords: this.record.specialData[this.name].nbRecords || 0,
-            inDialogEdit: this.inDialog && this.mode === "edit",
         }));
-        this._$content.appendTo(this.$el);
-    },
-    /**
-     * @override _reset from AbstractField
-     * Check if the model the field works with has (to be) changed.
-     *
-     * @private
-     */
-    _reset: function () {
-        this._super.apply(this, arguments);
-        var oldDomainModel = this._domainModel;
-        this._setState();
-        if (this.domainSelector && this._domainModel !== oldDomainModel) {
-            // If the model has changed, destroy the current domain selector
-            this.domainSelector.destroy();
-            this.domainSelector = null;
-        }
-    },
-    /**
-     * Sets the model the field must work with and whether or not the current
-     * domain value is valid for this particular model. This is inferred from
-     * the received special data.
-     *
-     * @private
-     */
-    _setState: function () {
-        var specialData = this.record.specialData[this.name];
-        this._domainModel = specialData.model;
-        this._isValidForModel = (specialData.nbRecords !== false);
+        this.$content.appendTo(this.el);
     },
 
-    //--------------------------------------------------------------------------
+    /**
+     * Check if the model the field works with has (to be) changed.
+     * @override
+     */
+    _reset() {
+        this._super(...arguments);
+        const specialData = this.record.specialData[this.name];
+        this.domainModel = specialData.model;
+        this.isValidForModel = specialData.nbRecords !== false;
+        this.domainSelectorProps.model = this.domainModel;
+    },
+
+    _setValue(value) {
+        this._super(...arguments);
+        this.domainSelectorProps.domain = value;
+    },
+
+    //-------------------------------------------------------------------------
     // Handlers
-    //--------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
 
     /**
      * Called when the "Show selection" button is clicked
-     * -> Open a modal to see the matched records
-     *
-     * @param {Event} e
+     * -> Open a modal to see the matched records.
+     * @private
+     * @param {MouseEvent} ev
      */
-    _onShowSelectionButtonClick: function (e) {
-        e.preventDefault();
-        new view_dialogs.SelectCreateDialog(this, {
+    _onShowSelectionButtonClick(ev) {
+        ev.preventDefault();
+        const dialog = new view_dialogs.SelectCreateDialog(this, {
             title: _t("Selected records"),
-            res_model: this._domainModel,
+            res_model: this.domainModel,
             context: this.record.getContext({fieldName: this.name, viewType: this.viewType}),
-            domain: this.value || "[]",
+            domain: this.value || '[]',
             no_create: true,
             readonly: true,
             disable_multiple_selection: true,
-        }).open();
+        });
+        dialog.open();
     },
+
     /**
      * Called when the "Edit domain" button is clicked (when using the in_dialog
-     * option) -> Open a DomainSelectorDialog to edit the value
-     *
-     * @param {Event} e
+     * option) -> Open a DomainSelectorDialog to edit the value.
+     * @private
+     * @param {MouseEvent} ev
      */
-    _onDialogEditButtonClick: function (e) {
-        e.preventDefault();
-        new DomainSelectorDialog(this, this._domainModel, this.value || "[]", {
-            readonly: this.mode === "readonly",
-            filters: this.fsFilters,
-            debugMode: config.isDebug(),
-        }).open();
+    _onDialogEditButtonClick(ev) {
+        ev.preventDefault();
+        const dialog = new DomainSelectorDialog(this, {
+            domain: this.value || '[]',
+            model: this.domainModel,
+            readonly: this.mode === 'readonly',
+        });
+        dialog.open();
     },
+
     /**
-     * Called when the domain selector value is changed (do nothing if it is the
-     * one which is in a dialog (@see _onDomainSelectorDialogValueChange))
-     * -> Adapt the internal value state
-     *
-     * @param {OdooEvent} e
+     * @private
+     * @param {OdooEvent} ev
      */
-    _onDomainSelectorValueChange: function (e) {
-        if (this.inDialog) return;
-        this._setValue(Domain.prototype.arrayToString(this.domainSelector.getDomain()));
+    _onDomainChange(ev) {
+        const detail = ev.data;
+        console.log({ detail });
+        this.domainSelectorProps.valid = detail.valid;
+        this._setValue(detail.domain);
     },
+
     /**
-     * Called when the in-dialog domain selector value is confirmed
-     * -> Adapt the internal value state
-     *
-     * @param {OdooEvent} e
-     */
-    _onDomainSelectorDialogValueChange: function (e) {
-        this._setValue(Domain.prototype.arrayToString(e.data.domain));
-    },
-    /**
-     * Stops the propagation of the 'open_record' event, as we don't want the
+     * Stop the propagation of the 'open_record' event, as we don't want the
      * user to be able to open records from the list opened in a dialog.
-     *
-     * @param {OdooEvent} event
+     * @private
+     * @param {OdooEvent} ev
      */
-    _onOpenRecord: function (event) {
-        event.stopPropagation();
+    _onOpenRecord(ev) {
+        ev.stopPropagation();
     },
 });
 

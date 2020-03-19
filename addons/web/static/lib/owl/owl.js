@@ -5140,3 +5140,115 @@
     exports.__info__.url = 'https://github.com/odoo/owl';
 
 }(this.owl = this.owl || {}));
+
+
+let currentColor = [255, 0, 0];
+let colorIndex = 1;
+let ascending = true;
+const colorStep = 64;
+function nextColor() {
+    if (ascending) {
+        const index = colorIndex % 3;
+        currentColor[index] = Math.min(255, currentColor[index] + colorStep);
+        if (currentColor[index] === 255) {
+            ascending = false;
+        }
+    } else {
+        const index = (colorIndex - 1) % 3;
+        currentColor[index] = Math.max(0, currentColor[index] - colorStep);
+        if (currentColor[index] === 0) {
+            ascending = true;
+            colorIndex++;
+        }
+    }
+    return '#' + currentColor.map(c => c.toString(16).padStart(2, '0')).join('');
+}
+
+window.top.useDebug = function () {
+    let current, params;
+    switch (arguments.length) {
+        case 0:
+            current = owl.Component.current;
+            params = {};
+            break;
+        case 1:
+            current = owl.Component.current;
+            params = arguments[0];
+            break;
+        case 2:
+            current = arguments[0];
+            params = arguments[1];
+            break;
+    }
+    const color = nextColor();
+    // Helper: get the parent component matching a constructor name.
+    current.getParent = (name = "", comp = current) => {
+        if (new RegExp(name, 'i').test(comp.constructor.name)) {
+            return comp;
+        }
+        return current.getChild(name, comp.__owl__.parent) || false;
+    };
+    // Helper: get the first child component matching a given constructor name.
+    current.getChild = (name = "", comp = current) => {
+        if (new RegExp(name, 'i').test(comp.constructor.name)) {
+            return comp;
+        }
+        for (const child of Object.values(comp.__owl__.children)) {
+            const found = current.getChild(name, child);
+            if (found) {
+                return found;
+            }
+        }
+        return false;
+    };
+    // Helper: get a list of child components matching a given constructor name.
+    current.getChildren = (name = "", comp = current, children = []) => {
+        if (new RegExp(name, 'i').test(comp.constructor.name)) {
+            children.push(comp);
+        }
+        for (const child of Object.values(comp.__owl__.children)) {
+            current.getChildren(name, child, children);
+        }
+        return children;
+    };
+    const logFns = { error: 'error', log: params.debug === false ? 'log' : 'debug', trace: 'trace', warn: 'warn' };
+    for (const key in logFns) {
+        // Helper: bind useful console methods to the component (helps to identify it).
+        current[key] = console[logFns[key]].bind(console, `%c<${current.constructor.name}(id:${current.__owl__.id})>`, `color:${color};`);
+    }
+    // Global access property
+    let accessKey = false;
+    if (params.accessKey) {
+        accessKey = (typeof params.accessKey === 'string' ? params.accessKey : 'comp') + current.__owl__.id;
+        window.top[accessKey] = current;
+    }
+    // Hooks logs
+    const allowedHooks = params.whiteList ?
+        params.whiteList.slice() :
+        ['constructor', 'willStart', 'mounted', 'willUnmount', 'willPatch', 'patched', 'willUpdateProps'].filter(h => !(params.blackList || []).includes(h));
+    if (allowedHooks.includes('constructor')) {
+        current.log(`created${accessKey ? ` (access key: window.${accessKey})` : ""}`, current.props);
+    }
+    if (allowedHooks.includes('willStart')) {
+        owl.hooks.onWillStart(() => current.log(`will start`));
+    }
+    if (allowedHooks.includes('mounted')) {
+        owl.hooks.onMounted(() => current.log(`mounted`));
+    }
+    if (allowedHooks.includes('willUnmount')) {
+        owl.hooks.onWillUnmount(() => current.log(`will unmount`));
+    }
+    if (allowedHooks.includes('willPatch')) {
+        owl.hooks.onWillPatch(() => current.log(`will patch`));
+    }
+    if (allowedHooks.includes('patched')) {
+        owl.hooks.onPatched(() => current.log(`patched`));
+    }
+    if (allowedHooks.includes('willUpdateProps')) {
+        owl.hooks.onWillUpdateProps(nextProps => {
+            const oldProps = Object.assign({}, current.props);
+            const newProps = Object.assign({}, nextProps);
+            current.log(`will update props from`, { oldProps }, `to`, { newProps });
+        });
+    }
+};
