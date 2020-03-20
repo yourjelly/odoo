@@ -1,7 +1,35 @@
 
 //------------------------------------------------------------------------------
+// Website customizations
+//------------------------------------------------------------------------------
+
+// By default, most website palette values are null. Each null value is
+// automatically replaced with corresponsing values in chosen default values
+// palette.
+$-website-values-default: nth($o-website-values-palettes, $o-website-values-palette-number);
+$-actual-user-website-values-palette: map-merge($-website-values-default, o-map-omit($o-user-website-values));
+$o-website-values-palettes: append($o-website-values-palettes, $-actual-user-website-values-palette);
+
+// Enable last website values palette, which is now the user customized one
+$o-website-values-palette-number: length($o-website-values-palettes);
+
+$o-website-values: nth($o-website-values-palettes, $o-website-values-palette-number) !default;
+$o-website-values: map-merge($o-base-website-values-palette, o-map-omit($o-website-values));
+@function o-website-value($key) {
+    @return map-get($o-website-values, $key);
+}
+
+//------------------------------------------------------------------------------
 // Colors
 //------------------------------------------------------------------------------
+
+// First change the palette number to the actual user choice if any.
+$-color-palettes-number: o-website-value('color-palettes-number');
+@if $-color-palettes-number {
+    $o-color-palette-number: $-color-palettes-number;
+    $o-theme-color-palette-number: $-color-palettes-number;
+    $o-gray-color-palette-number: $-color-palettes-number;
+}
 
 $o-has-customized-13-0-color-system:
     not not (map-get($o-user-theme-color-palette, 'primary')
@@ -55,28 +83,13 @@ $o-theme-color-palettes: append($o-theme-color-palettes, $-actual-user-theme-col
 
 // Enable last color and theme color palettes, which are now the user customized
 // color palettes.
+$o-original-color-palette-number: $o-color-palette-number;
 $o-color-palette-number: length($o-color-palettes);
 $o-theme-color-palette-number: length($o-theme-color-palettes);
 
 //------------------------------------------------------------------------------
-// Website customizations
+// Fonts
 //------------------------------------------------------------------------------
-
-// By default, most website palette values are null. Each null value is
-// automatically replaced with corresponsing values in chosen default values
-// palette.
-$-website-values-default: nth($o-website-values-palettes, $o-website-values-palette-number);
-$-actual-user-website-values-palette: map-merge($-website-values-default, o-map-omit($o-user-website-values));
-$o-website-values-palettes: append($o-website-values-palettes, $-actual-user-website-values-palette);
-
-// Enable last website values palette, which is now the user customized one
-$o-website-values-palette-number: length($o-website-values-palettes);
-
-$o-website-values: nth($o-website-values-palettes, $o-website-values-palette-number) !default;
-$o-website-values: map-merge($o-base-website-values-palette, o-map-omit($o-website-values));
-@function o-website-value($key) {
-    @return map-get($o-website-values, $key);
-}
 
 @if o-website-value('google-fonts') {
     $o-theme-font-names: join($o-theme-font-names, o-website-value('google-fonts'));

@@ -327,6 +327,7 @@ $o-theme-color-palettes: (
         'delta': #5B899E,
         'epsilon': #E46F78,
     ),
+    (),
 ) !default;
 $o-theme-color-palette-number: 1 !default;
 
@@ -346,7 +347,7 @@ $o-transparent-grays: (
     'white-85': rgba(white, 0.85),
 ) !default;
 $o-gray-color-palettes: (
-    (),
+    (), (),
 ) !default;
 $o-gray-color-palette-number: 1 !default;
 

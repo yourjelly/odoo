@@ -770,15 +770,6 @@ options.registry.Theme = options.Class.extend({
         return this._super(...arguments);
     },
     /**
-     * @override
-     */
-    _computeWidgetVisibility: async function (widgetName, params) {
-        if (widgetName === 'theme_color_suggestions') {
-            return false;
-        }
-        return this._super(...arguments);
-    },
-    /**
      * @private
      * @param {DOMElement} node
      * @param {String} content text of the editor
@@ -810,6 +801,16 @@ options.registry.Theme = options.Class.extend({
      * @override
      */
     async _renderCustomXML(uiFragment) {
+        const paletteSelectorEl = uiFragment.querySelector('[data-variable="color-palettes-number"]');
+        const style = window.getComputedStyle(document.documentElement);
+        const nbPalettes = parseInt(style.getPropertyValue('--number-of-color-palettes'));
+        for (let i = 1; i <= nbPalettes; i++) {
+            const btnEl = document.createElement('we-button');
+            btnEl.dataset.customizeWebsiteVariable = i;
+            btnEl.textContent = _.str.sprintf(_t("Palette n°%s"), i);
+            paletteSelectorEl.appendChild(btnEl);
+        }
+
         const ccEl = uiFragment.querySelector('.o_color_combinations_edition');
         for (let i = 1; i <= 5; i++) {
             const togglerEl = document.createElement('we-toggler');
