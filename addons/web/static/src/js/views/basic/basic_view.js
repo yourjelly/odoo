@@ -302,8 +302,8 @@ var BasicView = AbstractView.extend({
                         mode = 'list,kanban';
                     }
                 }
-                if (mode.indexOf(',') !== -1) {
-                    mode = config.device.isMobile ? 'kanban' : 'list';
+                if (config.device.isMobile) {
+                    mode = 'kanban';
                 }
                 attrs.mode = mode;
                 if (mode in attrs.views) {
