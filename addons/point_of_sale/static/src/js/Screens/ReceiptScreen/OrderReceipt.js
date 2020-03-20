@@ -9,7 +9,10 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
         static template = 'OrderReceipt';
         constructor() {
             super(...arguments);
-            this.receiptEnv = this.props.order.getOrderReceiptEnv();
+            this._receiptEnv = this.props.order.getOrderReceiptEnv();
+        }
+        willUpdateProps(nextProps) {
+            this._receiptEnv = nextProps.order.getOrderReceiptEnv();
         }
         get receipt() {
             return this.receiptEnv.receipt;
@@ -23,8 +26,8 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
         get isTaxIncluded() {
             return Math.abs(this.receipt.subtotal - this.receipt.total_with_tax) <= 0.000001;
         }
-        willUpdateProps(nextProps) {
-            this.receiptEnv = nextProps.order.getOrderReceiptEnv();
+        get receiptEnv () {
+          return this._receiptEnv;
         }
         isSimple(line) {
             return (
