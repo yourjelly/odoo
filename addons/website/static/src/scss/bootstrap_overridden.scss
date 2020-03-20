@@ -7,12 +7,12 @@
 // depending on its contrast. Themes should be careful if they decide to
 // override those values. This would be simplified by giving the user the choice
 // for its dark *and* light text colors.
-$-light: if(palette-gray('white') != null, palette-gray('white'), #FFFFFF);
-$-dark: if(palette-gray('900') != null, palette-gray('900'), #212529);
-$-text: if(palette-color('text') != null, palette-color('text'), $-dark);
-$-is-light: (o-get-most-contrast($-text, $-light, $-dark, palette-color('body'), $cross-mix: false) == $-dark);
-$yiq-text-light: if($-is-light, palette-color('text'), null) !default;
-$yiq-text-dark: if($-is-light, null, palette-color('text')) !default;
+$c1: palette-color('text');
+$c2: palette-color('text-contrast');
+$luma-c1: luma($c1);
+$luma-c2: luma($c2);
+$yiq-text-light: if($luma-c1 > $luma-c2, $c1, $c2) !default;
+$yiq-text-dark: if($luma-c1 <= $luma-c2, $c1, $c2) !default;
 
 // Body
 //

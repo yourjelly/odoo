@@ -8,7 +8,8 @@ $o-base-color-palette: map-merge($o-base-color-palette, (
     'body': $o-portal-default-body-bg,
     'menu': #F9F9F9,
     'footer': #F9F9F9,
-    'text': null, // Default to bootstrap
+    'text': #212529, // Need to have a value (used BS default here)
+    'text-contrast': #FFFFFF,
     'h1': null, // Default to text
     'h2': null, // Default to h1
     'h3': null, // Default to h2
