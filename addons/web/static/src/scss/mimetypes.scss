@@ -41,6 +41,9 @@
     &[data-mimetype$='csv'], &[data-mimetype*='vc'], &[data-mimetype*='excel'], &[data-mimetype$='numbers'], &[data-mimetype$='calc'], &[data-mimetype*='mods'], &[data-mimetype*='spreadsheet'] {
         background-image: url('/web/static/src/img/mimetypes/spreadsheet.svg');
     }
+    &[data-mimetype='application/o-spreadsheet'] {
+        background-image: url('/web/static/src/img/mimetypes/o-spreadsheet.svg');
+    }
     &[data-mimetype^='key'] {
         background-image: url('/web/static/src/img/mimetypes/certificate.svg');
     }
