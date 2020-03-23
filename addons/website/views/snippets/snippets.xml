@@ -187,6 +187,19 @@
             <we-button data-select-class="w-100">100%</we-button>
         </we-select>
     </div>
+    
+    <div id="so_shape_bg" data-selector="section">
+        <we-select string="BG Shape">
+            <we-button data-select-class="">None</we-button>
+            <we-divider/>
+            <we-button data-select-class="o_shape_bg o_shape_bg_1">Shape 1</we-button>
+            <we-button data-select-class="o_shape_bg o_shape_bg_2">Shape 2</we-button>
+            <we-button data-select-class="o_shape_bg o_shape_bg_3">Shape 3</we-button>
+            <we-button data-select-class="o_shape_bg o_shape_bg_4">Shape 4</we-button>
+            <we-button data-select-class="o_shape_bg o_shape_bg_5">Shape 5</we-button>
+            <we-button data-select-class="o_shape_bg o_shape_bg_6">Shape 6</we-button>
+        </we-select>
+    </div>
 
     <!-- Carousel | .s_carousel | .s_quotes_carousel -->
     <div data-js="Carousel"

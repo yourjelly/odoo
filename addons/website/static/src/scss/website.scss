@@ -289,6 +289,49 @@ font[class*='bg-'] {
     @include o-position-absolute(0, 0 ,0 ,0);
 }
 
+// Background Shapes
+.o_shape_bg {
+    background-repeat: no-repeat;
+
+    $-o-shape-bgs: (
+        ( 
+            'size': 100% auto,
+            'position': bottom right,
+        ),
+        ( 
+            'size': 100% auto,
+            'position': top right,
+        ),
+        ( 
+            'size': 100% auto,
+            'position': bottom right,
+        ),
+        ( 
+            'size': 100% auto,
+            'position': top right,
+        ),
+        ( 
+            'size': auto 100%,
+            'position': center right,
+        ),
+        ( 
+            'size': auto 100%,
+            'position': center left,
+        ),
+    );
+
+    @for $index from 1 through length($-o-shape-bgs) {
+        $shape: nth($-o-shape-bgs, $index);
+
+        &.o_shape_bg_#{$index} {
+            background-image: url('../img/shapes_bg/shape_bg_#{$index}.svg')!important;
+            background-size: map-get($shape, 'size');
+            background-position: map-get($shape, 'position');
+        }
+    }
+}
+
+
 // Probably outdated
 // Lists
 .o_ul_toggle {
