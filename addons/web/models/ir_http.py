@@ -41,6 +41,7 @@ class Http(models.AbstractModel):
             "company_id": user.company_id.id if request.session.uid else None,  # YTI TODO: Remove this from the user context
             "partner_id": user.partner_id.id if request.session.uid and user.partner_id else None,
             "web.base.url": self.env['ir.config_parameter'].sudo().get_param('web.base.url', default=''),
+            "home_action_id": user.action_id.id,
         }
         if self.env.user.has_group('base.group_user'):
             # the following is only useful in the context of a webclient bootstrapping
