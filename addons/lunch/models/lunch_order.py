@@ -86,6 +86,7 @@ class LunchOrder(models.Model):
             topping_2 = values.pop('topping_ids_2')[0][2] if 'topping_ids_2' in values else self[:1].topping_ids_2.ids
             topping_3 = values.pop('topping_ids_3')[0][2] if 'topping_ids_3' in values else self[:1].topping_ids_3.ids
         else:
+            print(values)
             topping_1 = values['topping_ids_1'][0][2] if 'topping_ids_1' in values else []
             topping_2 = values['topping_ids_2'][0][2] if 'topping_ids_2' in values else []
             topping_3 = values['topping_ids_3'][0][2] if 'topping_ids_3' in values else []
