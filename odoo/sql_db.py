@@ -284,6 +284,8 @@ class Cursor(BaseCursor):
         if self.sql_log:
             encoding = psycopg2.extensions.encodings[self.connection.encoding]
             _logger.debug("query: %s", self._obj.mogrify(query, params).decode(encoding, 'replace'))
+            import traceback; _logger.debug("stack: " + "".join(['File: %r | line %d | %s | %s\n' % (filename, lineno, name, line) for filename, lineno, name, line in traceback.extract_stack()[:-3] if '/odoo/src/' in filename]))
+
         now = time.time()
         try:
             params = params or None
