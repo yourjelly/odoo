@@ -1,4 +1,5 @@
 import random
+from datetime import datetime, timedelta
 from odoo.tools import pycompat
 
 
@@ -90,4 +91,15 @@ def compute(function, seed=None):
             val = function(values=values, counter=counter, random=r)
             values[field_name] = val
             yield values
+    return generate
+
+
+def datetime_from_days_ago(max_days_ago=50, seed=False):
+    """ generate datetimes before 2020-01-01"""
+    def generate(iterator, field_name, model_name):
+        r = Random(seed or '%s+field+%s' % (model_name, field_name))
+        for counter, (values, complete) in enumerate(iterator):
+            days_ago = r.randint(0, max_days_ago)
+            values[field_name] = datetime(2020,1,1) - timedelta(days=days_ago)
+            yield values, complete
     return generate
