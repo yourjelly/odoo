@@ -74,8 +74,8 @@
 
             <t t-call="portal.portal_record_layout">
                 <t t-set="card_header">
-                    <h5 class="mb-0">
-                        <small class="text-muted">Project - </small><span t-field="project.name"/>
+                    <h5 class="mb-0 d-flex">
+                        <small class="text-muted">Project - </small><span t-field="project.name" class="text-truncate col-lg-10"/>
                         <span class="float-right">
                             <a role="button" t-attf-href="/my/tasks?filterby=#{project.id}" class="btn btn-sm btn-secondary">
                                 <span class="fa fa-tasks" role="img" aria-label="Tasks" title="Tasks"/>
@@ -175,14 +175,14 @@
                 <t t-set="card_header">
                     <div class="row no-gutters">
                         <div class="col-md">
-                            <h5 class="mb-1 mb-md-0">
-                                <span t-field="task.name"/>
+                            <h5 class="d-flex mb-1 mb-md-0">
+                                <span t-field="task.name" class="col-lg-10 text-truncate"/>
                                 <small class="text-muted"> (#<span t-field="task.id"/>)</small>
+                                <div class="col-lg-auto text-md-right">
+                                    <small class="text-right">Status:</small>
+                                    <span t-field="task.stage_id.name" class=" badge badge-pill badge-info" title="Current stage of this task"/>
+                                </div>
                             </h5>
-                        </div>
-                        <div class="col-md text-md-right">
-                            <small class="text-right">Status:</small>
-                            <span t-field="task.stage_id.name" class=" badge badge-pill badge-info" title="Current stage of this task"/>
                         </div>
                     </div>
                 </t>
