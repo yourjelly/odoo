@@ -152,8 +152,6 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
         }
     }
 
-    OrderWidget.components = { Orderline, OrderSummary };
-
     Registry.add('OrderWidget', OrderWidget);
 
     return { OrderWidget };
