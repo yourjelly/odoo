@@ -93,10 +93,10 @@
 
             <div t-if="not no_breadcrumbs and not my_details and not breadcrumbs_searchbar" class="o_portal container mt-3">
                 <div class="row align-items-center bg-white no-gutters border rounded">
-                    <div class="col">
+                    <div class="col-lg-10">
                         <t t-call="portal.portal_breadcrumbs"></t>
                     </div>
-                    <div t-if="prev_record or next_record" class="col flex-grow-0">
+                    <div t-if="prev_record or next_record" class="col-lg-auto flex-grow-0 ml-5">
                         <t t-call='portal.record_pager'/>
                     </div>
                 </div>

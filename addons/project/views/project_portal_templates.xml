@@ -2,11 +2,11 @@
 <odoo>
     <template id="portal_layout" name="Portal layout: project menu entry" inherit_id="portal.portal_breadcrumbs" priority="40">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-            <li t-if="page_name == 'project' or project" t-attf-class="breadcrumb-item #{'active ' if not project else ''}">
+            <li t-if="page_name == 'project' or project" class="col-lg-2" t-attf-class="breadcrumb-item #{'active ' if not project else ''}">
                 <a t-if="project" t-attf-href="/my/projects?{{ keep_query() }}">Projects</a>
                 <t t-else="">Projects</t>
             </li>
-            <li t-if="project" class="breadcrumb-item active">
+            <li t-if="project" class="breadcrumb-item active text-truncate col-lg-9">
                 <t t-esc="project.name"/>
             </li>
             <li t-if="page_name == 'task' or task" t-attf-class="breadcrumb-item #{'active ' if not task else ''}">
@@ -76,7 +76,7 @@
                 <t t-set="card_header">
                     <h5 class="mb-0 d-flex">
                         <small class="text-muted">Project - </small><span t-field="project.name" class="text-truncate col-lg-10"/>
-                        <span class="float-right">
+                        <span class="ml-5">
                             <a role="button" t-attf-href="/my/tasks?filterby=#{project.id}" class="btn btn-sm btn-secondary">
                                 <span class="fa fa-tasks" role="img" aria-label="Tasks" title="Tasks"/>
                                 <span t-esc="project.task_count" />
@@ -137,7 +137,7 @@
                                 <th t-if="groupby == 'none'">Name</th>
                                 <th t-else="">
                                     <em class="font-weight-normal text-muted"><span t-field="tasks[0].sudo().project_id.label_tasks"/> for project:</em>
-                                    <span t-field="tasks[0].sudo().project_id.name"/></th>
+                                    <span class="text-truncate" t-field="tasks[0].sudo().project_id.name"/></th>
                                 <th class="text-center">Stage</th>
                                 <th class="text-left">Ref</th>
                             </tr>
