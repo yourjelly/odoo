@@ -8,7 +8,7 @@ var assetsLoaded = false;
 var WysiwygRoot = Widget.extend({
     assetLibs: ['web_editor.compiled_assets_wysiwyg'],
 
-    publicMethods: ['isDirty', 'save', 'getValue', 'setValue', 'getEditable', 'on', 'trigger', 'focus', 'saveCroppedImages'],
+    publicMethods: ['isDirty', 'save', 'getValue', 'setValue', 'getEditable', 'on', 'trigger', 'focus', 'saveCroppedImages', 'removeAutoOptimizedImages'],
 
     /**
      *   @see 'web_editor.wysiwyg' module

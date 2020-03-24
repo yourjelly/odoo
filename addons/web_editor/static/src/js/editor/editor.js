@@ -171,8 +171,10 @@ var EditorMenuBar = Widget.extend({
         if (this.snippetsMenu) {
             await this.snippetsMenu.cleanForSave();
         }
-
-        await this.getParent().saveCroppedImages(this.rte.editable());
+        const wysiwyg = this.getParent();
+        await wysiwyg.saveCroppedImages(this.rte.editable());
+        await wysiwyg.removeAutoOptimizedImages(true);
+        this._removeCacheBusters();
         await this.rte.save();
 
         if (reload !== false) {
@@ -224,6 +226,17 @@ var EditorMenuBar = Widget.extend({
             window.location.reload(true);
         }
         return new Promise(function(){});
+    },
+    /**
+     * @private
+     */
+    _removeCacheBusters: function () {
+        return this.rte.editable().find('[data-remove-cache-buster=true]').each((index, img) => {
+            const url = new URL(img.src);
+            url.searchParams.delete('cachebuster');
+            img.src = window.location.host === url.host ? url.pathname : url.href;
+            delete img.dataset.removeCacheBuster;
+        });
     },
 
     //--------------------------------------------------------------------------

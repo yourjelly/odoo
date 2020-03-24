@@ -162,6 +162,12 @@ var Wysiwyg = Widget.extend({
         return this._summernoteManager.saveCroppedImages($editable);
     },
     /**
+     * @returns {Promise}
+     */
+    removeAutoOptimizedImages: function () {
+        return this._summernoteManager.removeAutoOptimizedImages(true);
+    },
+    /**
      * @param {String} value
      * @param {Object} options
      * @param {Boolean} [options.notifyChange]

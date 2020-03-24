@@ -1052,10 +1052,14 @@ $.summernote.lang.odoo = {
  * simple HTML fields and forum textarea.
  */
 var SummernoteManager = Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
+    custom_events: {
+        remove_unused_images_on_save: '_onRemoveUnusedImagesOnSave',
+    },
     /**
      * @constructor
      */
     init: function (parent) {
+        this.watchedImages = new Map();
         mixins.EventDispatcherMixin.init.call(this);
         this.setParent(parent);
 
@@ -1230,6 +1234,36 @@ var SummernoteManager = Class.extend(mixins.EventDispatcherMixin, ServicesMixin,
             mediaDialog.on('cancel', this, data.onCancel);
         }
         mediaDialog.open();
+    },
+    /**
+     * @private
+     */
+    async removeAutoOptimizedImages(onlyUnused) {
+        const toRemove = [...this.watchedImages.entries()].map(([img, imageData]) => {
+            if (!document.body.contains(img) || !onlyUnused) {
+                // Image got removed from the DOM, remove everything
+                return imageData.used;
+            }
+            return imageData.used.filter(id => id !== imageData.currentlyUsed);
+        }).flat();
+        return this._rpc({
+            method: 'unlink',
+            model: 'ir.attachment',
+            args: [toRemove],
+        });
+    },
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onRemoveUnusedImagesOnSave(ev) {
+        const {img, currentlyUsed} = ev.data;
+        if (!this.watchedImages.has(img)) {
+            this.watchedImages.set(img, {used: []});
+        }
+        const imageData = this.watchedImages.get(img);
+        imageData.currentlyUsed = currentlyUsed;
+        imageData.used.push(currentlyUsed);
     },
 });
 return SummernoteManager;
