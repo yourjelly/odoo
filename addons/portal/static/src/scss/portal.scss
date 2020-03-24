@@ -360,7 +360,9 @@ img.o_we_custom_image {
         td {
             padding-top: $o-portal-table-td-pt;
             padding-bottom: $o-portal-table-td-pb;
-
+            max-width: 10rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         tr:last-child td {
