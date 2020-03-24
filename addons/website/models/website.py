@@ -946,6 +946,11 @@ class Website(models.Model):
         # if the current URL is indeed canonical or not.
         return current_url == canonical_url
 
+    @tools.ormcache('self.id')
+    @api.model
+    def _get_public_user_id(self):
+        return self.user_id.id
+
 
 class BaseModel(models.AbstractModel):
     _inherit = 'base'
