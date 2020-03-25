@@ -103,3 +103,12 @@ def datetime_from_days_ago(max_days_ago=50, seed=False):
             values[field_name] = datetime(2020,1,1) - timedelta(days=days_ago)
             yield values, complete
     return generate
+
+def get_string(string_base=''):
+    """ generate a string based on string_base and counter """
+    def generate(iterator, field_name, model_name):
+        for counter, values in enumerate(iterator):
+            val = "%s_%s_%s" % (string_base, values['__complete'], counter)
+            values[field_name] = val
+            yield values
+    return generate
