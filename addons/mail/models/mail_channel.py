@@ -105,6 +105,7 @@ class Channel(models.Model):
     image_128 = fields.Image("Image", max_width=128, max_height=128, default=_get_default_image)
     is_subscribed = fields.Boolean(
         'Is Subscribed', compute='_compute_is_subscribed')
+    anonymous_name = fields.Char('Anonymous Name')
     # moderation
     moderation = fields.Boolean(string='Moderate this channel')
     moderator_ids = fields.Many2many('res.users', 'mail_channel_moderator_rel', string='Moderators')
