@@ -355,6 +355,9 @@ img.o_we_custom_image {
         th {
             padding-top: $o-portal-table-th-pt;
             padding-bottom: $o-portal-table-th-pb;
+            max-width: 500px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         td {
