@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record model="ir.config_parameter" id="adyen_platforms_proxy_url">
+            <field name="key">adyen_platforms.proxy_url</field>
+            <field name="value">X/adyen_proxy/</field>
+        </record>
+
+        <record model="ir.config_parameter" id="adyen_platforms_onboarding_url">
+            <field name="key">adyen_platforms.onboarding_url</field>
+            <field name="value">X/adyen_onboarding/</field>
+        </record>
+
+        <record id="adyen_transaction_sync_cron" model="ir.cron">
+            <field name="name">Adyen: Transaction Sync</field>
+            <field name="model_id" ref="model_adyen_transaction"/>
+            <field name="state">code</field>
+            <field name="code">model.sync_adyen_transactions()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <record id="adyen_kyc_status_sync_cron" model="ir.cron">
+            <field name="name">Adyen: KYC Status Sync</field>
+            <field name="model_id" ref="model_adyen_account"/>
+            <field name="state">code</field>
+            <field name="code">model._sync_adyen_kyc_status()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+        </record>
+
+        <record id="adyen_payout_requests_cron" model="ir.cron">
+            <field name="name">Adyen: Payout requests</field>
+            <field name="model_id" ref="model_adyen_payout"/>
+            <field name="state">code</field>
+            <field name="code">model._process_payouts()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+        </record>
+    </data>
+</odoo>
