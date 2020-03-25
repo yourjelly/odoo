@@ -61,7 +61,7 @@ VariantMixin._onChangeCombinationStock = function (ev, $parent, combination) {
             || combination.virtual_available < 1 || qty < 1) {
             $parent.find('#add_to_cart').addClass('disabled out_of_stock');
             $parent.find('#buy_now').addClass('disabled out_of_stock');
-            $('.o_wsale_product_grid_wrapper').find('#cart_json').addClass('disabled out_of_stock');
+            $(ev.currentTarget).find('#cart_json').closest('.o_wsale_product_grid_wrapper').addClass('disabled out_of_stock');
         }
     }
 
