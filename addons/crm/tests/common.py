@@ -202,7 +202,6 @@ class TestCrmCommon(SavepointCase, MailCase):
             'type': 'lead',
             'team_id': lead.team_id.id,
             'partner_id': self.customer.id,
-            'email_from': 'another.email@test.example.com',
         })
         if create_opp:
             self.opp_lost = self.env['crm.lead'].create({

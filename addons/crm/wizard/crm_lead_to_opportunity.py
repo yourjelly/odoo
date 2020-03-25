@@ -74,7 +74,7 @@ class Lead2OpportunityPartner(models.TransientModel):
                 continue
             convert.duplicated_lead_ids = self.env['crm.lead']._get_lead_duplicates(
                 convert.partner_id,
-                convert.lead_id.partner_id.email if convert.lead_id.partner_id.email else convert.lead_id.email_from,
+                convert.lead_id.email_from,
                 include_lost=True).ids
 
     @api.depends('action')

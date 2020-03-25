@@ -64,7 +64,7 @@ class Lead2OpportunityMassConvert(models.TransientModel):
             for lead in convert.lead_tomerge_ids:
                 duplicated_leads = self.env['crm.lead']._get_lead_duplicates(
                     partner=lead.partner_id,
-                    email=lead.partner_id and lead.partner_id.email or lead.email_from,
+                    email=lead.email_from,
                     include_lost=False)
                 if len(duplicated_leads) > 1:
                     duplicated += lead
@@ -90,7 +90,7 @@ class Lead2OpportunityMassConvert(models.TransientModel):
                 if lead not in merged_lead_ids:
                     duplicated_leads = self.env['crm.lead']._get_lead_duplicates(
                         partner=lead.partner_id,
-                        email=lead.partner_id.email or lead.email_from,
+                        email=lead.email_from,
                         include_lost=False
                     )
                     if len(duplicated_leads) > 1:
