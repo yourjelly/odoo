@@ -31,25 +31,13 @@
 
 <t t-name="web.DomainTree.OperatorSelector" owl="1">
     <div t-if="!props.readonly" class="btn-group o_domain_tree_operator_selector" aria-atomic="true">
-        <button class="btn btn-sm btn-primary o_domain_tree_operator_caret" data-toggle="dropdown">
-            <t t-if="operator === '&amp;'">All</t>
-            <t t-elif="operator === '|'">Any</t>
-            <t t-elif="operator === '!'">None</t>
-        </button>
-        <div class="dropdown-menu" role="menu">
-            <a role="menuitem" href="#" class="dropdown-item" t-on-click.stop.prevent="_onOperatorChange('&amp;')">
-                <t>All</t>
-            </a>
-            <a role="menuitem" href="#" class="dropdown-item" t-on-click.stop.prevent="_onOperatorChange('|')">
-                <t>Any</t>
-            </a>
-        </div>
+        <DropdownMenu buttonClass="'btn-primary btn-sm'"
+            title="_getOperatorTitle()"
+            items="[{ description: env._t('All'), value: '&amp;' }, { description: env._t('Any'), value: '|' }]"
+            t-on-item-selected.stop="_onOperatorChange"
+        />
     </div>
-    <strong t-else="">
-        <t t-if="operator === '&amp;'">ALL</t>
-        <t t-elif="operator === '|'">ANY</t>
-        <t t-elif="operator === '!'">NONE</t>
-    </strong>
+    <strong t-else="" t-esc="_getOperatorTitle().toUpperCase()"/>
 </t>
 
 <t t-name="web.DomainLeaf" owl="1">
@@ -61,25 +49,25 @@
             <t t-if="!props.readonly">
                 <div> <!-- used for flex stretching -->
                     <select class="o_domain_leaf_operator_select o_input" t-on-change="_onOperatorChange">
-                        <option t-foreach="operators" t-as="key" t-key="key"
-                            t-att-value="key"
-                            t-att-selected="displayOperator === key"
-                            t-esc="key_value"
+                        <option t-foreach="operators" t-as="op" t-key="op"
+                            t-att-value="op"
+                            t-att-selected="operatorValue === op"
+                            t-esc="OPERATOR_MAPPING[op]"
                         />
                     </select>
                 </div>
-                <div t-if="!['set', 'not set'].includes(displayOperator)" class="o_ds_value_cell">
-                    <select t-if="selectionChoices !== null" class="o_domain_leaf_value_input o_input" t-on-change="_onValueChange">
+                <div t-if="!['is true', 'is false', 'set', 'not set'].includes(operatorValue)">
+                    <select t-if="selectionChoices" class="o_domain_leaf_value_input o_input" t-on-change="_onValueChange">
                         <option t-foreach="selectionChoices" t-as="val" t-key="val[0]"
                             t-att-value="val[0]"
-                            t-att-selected="val.includes(displayValue)"
+                            t-att-selected="val.includes(formattedValue)"
                             t-esc="val[1]"
                         />
                     </select>
                     <t t-else="">
                         <t t-if="['in', 'not in'].includes(operator)">
                             <div class="o_domain_leaf_value_input">
-                                <span t-foreach="displayValue" t-as="tag" t-key="tag_index"
+                                <span t-foreach="formattedValue" t-as="tag" t-key="tag_index"
                                     class="badge badge-pill"
                                     >
                                     <t t-esc="tag"/>
@@ -105,39 +93,35 @@
                             </div>
                         </t>
                         <t t-elif="selectedField and selectedField.type === 'date'">
-                            <DatePicker date="displayValue" t-on-datetime-changed="_onValueChange"/>
+                            <DatePicker date="formattedValue" t-on-datetime-changed="_onValueChange"/>
                         </t>
                         <t t-elif="selectedField and selectedField.type === 'datetime'">
-                            <DateTimePicker date="displayValue" t-on-datetime-changed="_onValueChange"/>
+                            <DateTimePicker date="formattedValue" t-on-datetime-changed="_onValueChange"/>
                         </t>
                         <input t-else="" class="o_domain_leaf_value_input o_input" type="text"
-                            t-att-value="displayValue"
+                            t-att-value="formattedValue"
                             t-on-change="_onValueChange"
                         />
                     </t>
                 </div>
             </t>
+            <t t-elif="Array.isArray(value)">
+                <span class="o_domain_leaf_operator" t-esc="OPERATOR_MAPPING[operatorValue]"/>
+                <t t-foreach="value" t-as="val" t-key="val">
+                    <span class="o_domain_leaf_value text-primary">"<t t-esc="val"/>"</span>
+                    <t t-if="!val_last"> or </t>
+                </t>
+            </t>
+            <span t-elif="operatorValue === 'is true'">is true</span>
+            <span t-elif="operatorValue === 'is false'">is false</span>
+            <span t-elif="operatorValue === 'set'">is set</span>
+            <span t-elif="operatorValue === 'not set'">is not set</span>
             <t t-else="">
-                <t t-if="typeof value === 'string'">
-                    <span class="o_domain_leaf_operator" t-esc="OPERATOR_MAPPING[operator]"/>
-                    <span class="o_domain_leaf_value text-primary">"<t t-esc="value"/>"</span>
-                </t>
-                <t t-if="Array.isArray(value)">
-                    <span class="o_domain_leaf_operator" t-esc="OPERATOR_MAPPING[operator]"/>
-                    <t t-foreach="value" t-as="val" t-key="val">
-                        <span class="o_domain_leaf_value text-primary">"<t t-esc="val"/>"</span>
-                        <t t-if="!val_last"> or </t>
-                    </t>
-                </t>
-                <t t-if="!window.isNaN(value)">
-                    <span class="o_domain_leaf_operator" t-esc="OPERATOR_MAPPING[operator]"/>
-                    <span class="o_domain_leaf_value text-primary" t-esc="value"/>
-                </t>
-                <t t-if="typeof value === 'boolean'">
-                    <t>is</t>
-                    <t t-if="operator === '=' and value === false or operator === '!=' and value === true">not</t>
-                    <t>set</t>
-                </t>
+                <span class="o_domain_leaf_operator" t-esc="OPERATOR_MAPPING[operatorValue]"/>
+                <span class="o_domain_leaf_value text-primary">
+                    <t t-if="typeof value === 'string'">"<t t-esc="value"/>"</t>
+                    <t t-else="" t-esc="value"/>
+                </span>
             </t>
         </div>
     </div>
@@ -189,8 +173,8 @@
     <div aria-atomic="true" t-attf-class="o_domain_node o_domain_tree o_domain_selector {{ props.readonly ? 'o_read_mode' : 'o_edit_mode' }}">
         <t t-if="childNodes.length === 0">
             <span>Match <strong>all records</strong></span>
-            <button t-if="!props.readonly" class="btn btn-sm btn-primary o_domain_add_first_node_button" t-on-click="_onAddNode(0)">
-                <i class="fa fa-plus"/> Add filter
+            <button t-if="!props.readonly" class="btn btn-sm btn-primary o_domain_add_filter" t-on-click="_onAddNode(0)">
+                <t><i class="fa fa-plus"/> Add filter</t>
             </button>
         </t>
         <t t-else="">
@@ -427,8 +411,8 @@
 
 <t t-name="web.DropdownMenu" owl="1">
     <div class="btn-group o_dropdown" t-att-class="{ show: state.open }">
-        <button type="button"
-            class="o_dropdown_toggler_btn btn btn-secondary"
+        <button type="button" class="btn"
+            t-att-class="props.buttonClass"
             t-att-aria-expanded="state.open ? 'true' : 'false'"
             tabindex="-1"
             t-on-click="state.open = !state.open"

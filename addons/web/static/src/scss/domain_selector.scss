@@ -61,8 +61,17 @@
             padding-left: $o-domain-selector-indent;
         }
 
+        .o_dropdown > button {
+            padding: 0.3rem;
+        }
+
         // Rules specific to domain root
         &.o_domain_selector {
+
+            > .o_domain_add_filter {
+                margin-left: 4px;
+            }
+
             > .o_domain_tree_header {
                 min-height: 22px; // prevents "records button" to overflow 1-row domain
             }

@@ -117,8 +117,12 @@ odoo.define('web.DropdownMenu', function (require) {
     }
 
     DropdownMenu.components = { DropdownMenuItem };
-    DropdownMenu.defaultProps = { items: [] };
+    DropdownMenu.defaultProps = {
+        buttonClass: 'btn-secondary o_dropdown_toggler_btn',
+        items: [],
+    };
     DropdownMenu.props = {
+        buttonClass: String,
         icon: { type: String, optional: 1 },
         items: {
             type: Array,

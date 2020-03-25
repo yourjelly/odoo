@@ -3045,21 +3045,13 @@ var FieldDomain = AbstractField.extend(WidgetAdapterMixin, {
         const specialData = this.record.specialData[this.name];
         this.domainModel = specialData.model;
         this.isValidForModel = specialData.nbRecords !== false;
-        this.validDomain = true;
 
         const domain = this.value || '[]';
-        let valid;
-        try {
-            py_utils.normalizeDomain(domain);
-            valid = true;
-        } catch (err) {
-            valid = false;
-        }
         this.domainSelectorProps = {
             domain,
             model: this.domainModel,
             readonly: this.mode === 'readonly' || this.inDialog,
-            valid,
+            valid: true,
         };
         this.domainSelector = new ComponentWrapper(this, DomainSelector, this.domainSelectorProps);
     },
@@ -3086,7 +3078,7 @@ var FieldDomain = AbstractField.extend(WidgetAdapterMixin, {
     isValid() {
         return (
             this._super.apply(this, arguments) &&
-            (!this.domainSelector || this.validDomain) &&
+            this.domainSelectorProps.valid &&
             this.isValidForModel
         );
     },
@@ -3184,10 +3176,14 @@ var FieldDomain = AbstractField.extend(WidgetAdapterMixin, {
      * @param {OdooEvent} ev
      */
     _onDomainChange(ev) {
+        ev.stopPropagation();
         const detail = ev.data;
-        console.log({ detail });
-        this.domainSelectorProps.valid = detail.valid;
-        this._setValue(detail.domain);
+        if ('valid' in detail) {
+            this.domainSelectorProps.valid = detail.valid;
+        }
+        if ('domain' in detail) {
+            this._setValue(detail.domain);
+        }
     },
 
     /**

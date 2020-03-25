@@ -89,6 +89,14 @@ odoo.define("web.ModelFieldSelector", function (require) {
             }
         }
 
+        async willUpdateProps(newProps) {
+            const props = Object.assign({}, this.props, newProps);
+            this.state.chain = props.chain;
+            if (this.state.chain.length) {
+                await this._processChain(this.state.chain.slice().reverse());
+            }
+        }
+
         //---------------------------------------------------------------------
         // Getters
         //---------------------------------------------------------------------
@@ -130,8 +138,14 @@ odoo.define("web.ModelFieldSelector", function (require) {
             if (['0', '1'].includes(name)) {
                 return name;
             }
-            const fieldInfo = this.state.pages[index].find(f => f.name === name);
-            return (fieldInfo && fieldInfo.string) || "?";
+            const page = this.state.pages[index];
+            if (page) {
+                const fieldInfo = page.find(f => f.name === name);
+                if (fieldInfo && fieldInfo.string) {
+                    return fieldInfo.string;
+                }
+            }
+            return "?";
         }
 
         /**
@@ -182,9 +196,10 @@ odoo.define("web.ModelFieldSelector", function (require) {
          */
         async _goToNextPage(field) {
             this.state.lineFocus = 0;
-            this._setValid(true);
+            this.state.valid = true;
             this._addChainNode(field.name);
             await this._pushPageData(field.relation);
+            console.log({ chain: this.state.chain, pages: this.state.pages });
         }
 
         /**
@@ -197,11 +212,12 @@ odoo.define("web.ModelFieldSelector", function (require) {
                 return;
             }
             this.state.lineFocus = 0;
-            this._setValid(true);
+            this.state.valid = true;
             this._removeChainNode();
             if (this.state.pages.length > 1) {
                 this.state.pages.pop();
             }
+            console.log({ chain: this.state.chain, pages: this.state.pages });
         }
 
         /**
@@ -215,14 +231,14 @@ odoo.define("web.ModelFieldSelector", function (require) {
             }
             this.state.open = false;
             this.state.lineFocus = 0;
+            console.log({ chain: this.state.chain, pages: this.state.pages });
             if (this.dirty) {
                 this.dirty = false;
-                const fieldName = this.state.chain[this.state.chain.length - 1];
-                this.trigger('field-chain-changed', {
-                    chain: this.state.chain,
-                    field: this.lines.find(l => l.name === fieldName),
-                    valid: this.state.valid,
-                });
+                const index = this.state.chain.length - 1;
+                const fieldName = this.state.chain[index];
+                const field = this.lines.find(l => l.name === fieldName);
+                this.state.valid = Boolean(field);
+                this.trigger('field-chain-changed', { chain: this.state.chain, field });
             }
         }
 
@@ -241,9 +257,9 @@ odoo.define("web.ModelFieldSelector", function (require) {
             } else if (field && chain.length === 0) { // Last node fetched
                 return;
             } else if (!field && ['0', '1'].includes(fieldName)) { // TRUE_LEAF or FALSE_LEAF
-                this._setValid(true);
+                this.state.valid = true;
             } else { // Wrong node chain
-                this._setValid(false);
+                this.state.valid = false;
             }
         }
 
@@ -287,27 +303,8 @@ odoo.define("web.ModelFieldSelector", function (require) {
          * @param {Object} field - the field to select
          */
         _selectField(field) {
-            this._setValid(true);
             this._addChainNode(field.name);
             this._closePopover();
-        }
-
-        /**
-         * Toggle the valid status of the widget and display the error message if
-         * it is not valid.
-         * @private
-         * @param {boolean} valid true if the widget is valid, false otherwise
-         */
-        _setValid(isValid) {
-            this.state.valid = isValid;
-            if (!this.state.valid) {
-                this.env.services.notification.notify(
-                    this.env._t("Invalid field chain"),
-                    this.env._t(
-                        "The field chain is not valid. Did you maybe use a non-existing field name or followed a non-relational field?"
-                    )
-                );
-            }
         }
 
         //---------------------------------------------------------------------
@@ -335,7 +332,7 @@ odoo.define("web.ModelFieldSelector", function (require) {
         async _onDebugInputChange(ev) {
             this.state.chain = ev.target.value.split(".");
             this.dirty = true;
-            if (!this.props.followRelations && chain.length > 1) {
+            if (!this.props.followRelations && this.state.chain.length > 1) {
                 this.do_warn(
                     this.env._t("Relation not allowed"),
                     this.env._t("You cannot follow relations for this field chain construction")
@@ -468,14 +465,15 @@ odoo.define("web.ModelFieldSelector", function (require) {
          * @param {Function} rpc
          */
         static async getField(initialChain, model, rpc) {
+
             const chain = initialChain.slice();
             const fieldName = chain.shift();
             const fields = await this.getModelFields(model, rpc);
             const field = fields.find(f => f.name === fieldName);
-            if (!field || (Boolean(field.relation) !== Boolean(chain.length))) {
+            if (!field || (chain.length && !field.relation)) {
                 throw new Error("Invalid chain/model combination");
             }
-            return field.relation ? this.getField(chain, field.relation, rpc) : field;
+            return chain.length ? this.getField(chain, field.relation, rpc) : field;
         }
     }
 

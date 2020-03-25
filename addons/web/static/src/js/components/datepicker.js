@@ -107,8 +107,10 @@ odoo.define('web.DatePickerOwl', function (require) {
          */
         _onDateTimePickerHide() {
             const date = this._parseInput(this.inputRef.el.value);
-            this.state.warning = date.format('YYYY-MM-DD') > moment().format('YYYY-MM-DD');
-            this.trigger('datetime-changed', { date });
+            if (date) {
+                this.state.warning = date.format('YYYY-MM-DD') > moment().format('YYYY-MM-DD');
+                this.trigger('datetime-changed', { date });
+            }
         }
 
         /**
@@ -173,7 +175,7 @@ odoo.define('web.DatePickerOwl', function (require) {
     };
     DatePicker.props = {
         // Actual date value
-        date: moment,
+        date: [moment, String],
         // Other props
         buttons: {
             type: Object,

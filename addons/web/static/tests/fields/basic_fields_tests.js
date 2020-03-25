@@ -6126,7 +6126,7 @@ QUnit.module('basic_fields', {
         // As the domain is empty, there should be a button to add the first
         // domain part
         var $domain = form.$(".o_field_domain");
-        var $domainAddFirstNodeButton = $domain.find(".o_domain_add_first_node_button");
+        var $domainAddFirstNodeButton = $domain.find(".o_domain_add_filter");
         assert.equal($domainAddFirstNodeButton.length, 1,
             "there should be a button to create first domain element");
 
