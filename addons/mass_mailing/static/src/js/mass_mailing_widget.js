@@ -59,7 +59,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         var $editable = this.wysiwyg.getEditable();
 
         return this.wysiwyg.saveCroppedImages(this.$content).then(function () {
-            return this.wysiwyg.removeAutoOptimizedImages(true);
+            return self.wysiwyg.removeAutoOptimizedImages(true);
         }).then(function () {
             return self.wysiwyg.save();
         }).then(function (result) {
