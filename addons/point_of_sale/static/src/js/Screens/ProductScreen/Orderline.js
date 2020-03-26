@@ -12,6 +12,11 @@ odoo.define('point_of_sale.Orderline', function(require) {
         lotIconClicked() {
             this.trigger('edit-pack-lot-lines', { orderline: this.props.line });
         }
+        get addedClasses() {
+            return {
+                selected: this.props.line.selected,
+            };
+        }
     }
 
     Registry.add('Orderline', Orderline);
