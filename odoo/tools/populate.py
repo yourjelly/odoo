@@ -36,7 +36,7 @@ def randomize(vals, weights=None, seed=False, formater=format_str):
     chosen values (among ``vals``) for a field.
     """
     def generate(iterator, field_name, model_name, counter_offset=0):
-        r = Random(seed or '%s+field+%s' % (model_name, field_name))
+        r = Random('%s+field+%s' % (model_name, seed or field_name))
         for counter, values in enumerate(iterator):
             val = r.choices(vals, weights)[0]
             values[field_name] = formater(val, counter+counter_offset, values)
@@ -85,9 +85,15 @@ def constant(val, formater=format_str):
 
 def compute(function, seed=None):
     def generate(iterator, field_name, model_name):
-        r = Random(seed or '%s+%s' % (model_name, field_name))
+        r = Random('%s+field+%s' % (model_name, seed or field_name))
         for counter, values in enumerate(iterator):
             val = function(values=values, counter=counter, random=r)
             values[field_name] = val
             yield values
     return generate
+
+
+def randint(a, b, seed=None):
+    def get_rand_int(random=None, **kwargs):
+        random.randint(a, b)
+    return compute(get_rand_int, seed=seed)

@@ -48,7 +48,8 @@ class Populate(Command):
                 _logger.info('Populating database for model %s', model._name)
                 t0 = time.time()
                 registry.populated_models[model._name] = model._populate(size).ids
-                env.cr.commit()  # todo indicate somewhere that model is populated
+                # todo indicate somewhere that model is populated
+                env.cr.commit()
                 model_time = time.time() - t0
                 if model_time > 1:
                     _logger.info('Populated database for model %s in %ss', model._name, model_time)

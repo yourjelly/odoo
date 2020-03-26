@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import collections
-
+import logging
 from odoo.tests import common
 from odoo.cli.populate import Populate
-from odoo.tools import mute_logger
+from odoo.tools import mute_logger, populate
 try:
     from unittest.mock import patch
 except ImportError:
     from mock import patch
+
+
+_logger = logging.getLogger(__name__)
 
 # todo patch cursor commit
 class TestPopulate(common.TransactionCase):
@@ -112,11 +115,43 @@ class TestPopulateValidation(common.TransactionCase):
         self.env.registry.populated_models = collections.defaultdict(list)
         self.addCleanup(delattr, self.env.registry, 'populated_models')
 
-    def test_generators(self):
+    def test_populate_factories(self):
         for model in self.env.values():
-            generators = model._populate_factories() or []
-            for generator in generators:
-                field_name = generator[0]
-                if not field_name.startswith('_'):
-                    self.assertIn(field_name, model._fields,
-                        'Field %s used in generator %s not found in model %s' % (field_name, generator, model._name))
+            factories = model._populate_factories() or []
+            factories_fields = set([field_name for field_name, factory in factories if not field_name.startswith('_')])
+            missing = factories_fields - model._fields.keys()
+            self.assertFalse(missing, 'Fields %s not found in model %s' % (missing, model._name))
+
+
+@common.tagged('-standard', '-at_install', 'post_install', 'missing_populate')
+class TestPopulateMissing(common.TransactionCase):
+    """ check that all fields in _populate_factories exists """
+    def setUp(self):
+        super(TestPopulateMissing, self).setUp()
+        self.env.registry.populated_models = collections.defaultdict(list)
+        self.addCleanup(delattr, self.env.registry, 'populated_models')
+
+    def test_populate_missing_factories(self):
+        no_factory_models = []
+        for model in self.env.values():
+            factories = model._populate_factories()
+            if not factories:
+                if model._transient or model._abstract:
+                    continue
+                ir_model = self.env['ir.model'].search([('model', '=', model._name)])
+                if all(module.startswith('test_') for module in ir_model.modules.split(',')):
+                    continue
+                no_factory_models.append(model._name)
+            else:
+                factories_fields = next(populate.chain_factories(factories, model._name)).keys()
+                def is_electable(field):
+                    return not field.compute \
+                        and field.store \
+                        and field.name not in ('create_uid', 'write_uid', 'write_date', 'create_date', 'id') \
+                        and field.type not in ('many2many', 'one2many')
+                electable_fields = set([key for key, field in model._fields.items() if is_electable(field)])
+                no_factory_fields = set(electable_fields - factories_fields)
+                if no_factory_fields:
+                    _logger.info('Model %s has some undefined field: %s', model._name, no_factory_fields)
+
+        _logger.info('No populate factories defiend for %s', no_factory_models)

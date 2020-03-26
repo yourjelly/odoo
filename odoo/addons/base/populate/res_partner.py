@@ -87,15 +87,14 @@ class Partner(models.Model):
             return  '%s_%s_%s' % ('company' if is_company else 'partner', int(complete), counter)
 
         industry_ids = self.env.registry.populated_models['res.partner.industry']
+        company_ids = self.env.registry.populated_models['res.company']
 
-        # Not initialized fields (yet): lang user_id, user_ids, employee color category_id bank_ids barcode vat company_id
-
+        # not defined fields: vat, partner_longitude, date, partner_latitude, color, company_name, employee, lang, user_id
         return [
-            ('supplier', populate.cartesian([True, False])),
-            ('customer', populate.cartesian([True, False])),
-            ('active', populate.cartesian([True, False], [0.9, 0.1]))
-        ]+ super()._populate_factories() + [  # super() fields generator list is empty, this is an example of overide
-            ('email', populate.iterate([False, '', 'email{counter}@example.com', '<contact 万> contact{counter}@anotherexample.com', 'invalid_email'])),
+            ('active', populate.cartesian([True, False], [0.9, 0.1])),
+            ('employee', populate.cartesian([True, False], [0.1, 0.9])),
+            ('email', populate.iterate(
+                [False, '', 'email{counter}@example.com', '<contact 万> contact{counter}@anotherexample.com', 'invalid_email'])),
             ('type', populate.constant('contact')), # todo add more logic, manage 'invoice', 'delivery', 'other', 'private'
             ('is_company', populate.iterate([True, False], [0.05, 0.95])),
             ('_address', generate_address),
@@ -110,12 +109,17 @@ class Partner(models.Model):
             ('website', populate.randomize([False, '', 'http://www.example.com'])),
             ('credit_limit', populate.randomize(
                 [False, 0, 500, 2500, 5000, 10000],
-                [0.50, 0.30, 0.5, 0.5, 0.5, 0.5])),
+                [50, 30, 5, 5, 5, 5])),
             ('name', populate.compute(get_name)), # keep after is_company
             ('ref', populate.randomize([False, '', '{counter}', 'p-{counter}'], [10, 10, 30, 50])),
             ('industry_id', populate.randomize(
                 [False] + industry_ids,
-                [0.5] + ([0.5/(len(industry_ids) or 1)] * len(industry_ids))))
+                [0.5] + ([0.5/(len(industry_ids) or 1)] * len(industry_ids)))),
+            ('comment', populate.iterate([False, '', 'This is a partner {counter}'])),
+            ('company_id', populate.iterate(
+                [False, self.env.ref('base.main_company').id] + company_ids,
+                [1, 1] + [1/(len(company_ids) or 1)]*len(company_ids))),
+            ('parent_id', populate.constant(False)), # will be setted in _populate override
         ]
 
     def _populate(self, size):
@@ -159,3 +163,6 @@ class ResPartnerIndustry(models.Model):
                 [0.08, 0.01, 0.01, 0.9])),
             ('full_name', populate.iterate([False, '1', '2', '3', '4', '5', '6', 'Industry full name %s']))
         ]
+
+
+

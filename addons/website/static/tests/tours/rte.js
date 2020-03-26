@@ -29,7 +29,7 @@ tour.register('rte_translator', {
 }, {
     content : "click language dropdown",
     trigger : '.js_language_selector .dropdown-toggle',
-    timeout: 40000,
+    timeout: 60000,
 }, {
     content: "go to english version",
     trigger: '.js_language_selector a[data-url_code="en"]',
