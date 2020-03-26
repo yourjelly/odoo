@@ -36,6 +36,10 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
         mounted() {
             this.env.pos.set_table(null);
             this.floorMapRef.el.style.background = this.state.floorBackground;
+            this.tableLongpolling = setInterval(this._tableLongpolling.bind(this), 5000);
+        }
+        willUnmount() {
+            clearInterval(this.tableLongpolling);
         }
         get activeFloor() {
             return this.env.pos.floors_by_id[this.state.selectedFloorId];
@@ -243,6 +247,39 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
         async _onSaveTable(event) {
             const table = event.detail;
             await this._save(table);
+        }
+        async _tableLongpolling() {
+            if (this.state.isEditMode) {
+                return;
+            }
+            try {
+                const result = await this.rpc({
+                    model: 'pos.config',
+                    method: 'get_tables_order_count',
+                    args: [this.env.pos.config.id],
+                });
+                result.forEach(table => {
+                    const table_obj = this.env.pos.tables_by_id[table.id];
+                    const unsynced_orders = this.env.pos
+                        .get_table_orders(table_obj)
+                        .filter(
+                            o =>
+                                o.server_id === undefined &&
+                                (o.orderlines.length !== 0 || o.paymentlines.length !== 0)
+                        ).length;
+                    table_obj.order_count = table.orders + unsynced_orders;
+                });
+                this.render();
+            } catch (error) {
+                if (error.message.code < 0) {
+                    await this.showPopup('OfflineErrorPopup', {
+                        title: 'Offline',
+                        body: 'Unable to get orders count',
+                    });
+                } else {
+                    throw error;
+                }
+            }
         }
     }
 

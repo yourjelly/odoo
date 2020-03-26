@@ -205,8 +205,6 @@ models.PosModel = models.PosModel.extend({
         var self = this;
         var ids_to_remove = this.db.get_ids_to_remove_from_server();
 
-        clearInterval(this.table_longpolling);
-
         this.set_synch('connecting', 1);
         this._get_from_server(table.id).then(function (server_orders) {
             var orders = self.get_order_list();
