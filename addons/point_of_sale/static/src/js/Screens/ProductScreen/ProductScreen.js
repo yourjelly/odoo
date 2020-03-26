@@ -129,10 +129,21 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             this.numpadMode = mode;
             NumberBuffer.reset();
         }
+        disallowLineQuantityChange() {
+            //This function will check if we should check or not the way we handle the line deletion.
+            //If the localisation prevent the line deletion, this function will return true, following the override in the multiple modules.
+            //By default, we'll always set the quantity according to the buffer input.
+            return false;
+        }
         async _updateSelectedOrderline(event) {
-            let { buffer } = event.detail;
-            let val = buffer === null ? 'remove' : buffer;
-            this._setValue(val);
+            if(this.disallowLineQuantityChange()) {
+                this._showDecreaseQuantityPopup();
+            }
+            else {
+                let { buffer } = event.detail;
+                let val = buffer === null ? 'remove' : buffer;
+                this._setValue(val);
+            }
         }
         async _newOrderlineSelected() {
             NumberBuffer.reset();
@@ -203,6 +214,34 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
          * To be overridden by modules that checks availa
          */
         async _onScaleNotAvailable() {}
+        async _showDecreaseQuantityPopup() {
+            const { confirmed, payload: inputNumber } = await this.showPopup('NumberPopup', {
+                startingValue: 0,
+                title: 'Decrease the quantity by',
+            });
+            if (confirmed && inputNumber) {
+                let order = this.env.pos.get_order();
+                let selectedLine = this.env.pos.get_order().get_selected_orderline();
+
+                let quantity = 0;
+                order.get_orderlines().forEach(orderLine => {
+                    if(orderLine.get_product().id === selectedLine.get_product().id && orderLine.get_discount() === selectedLine.get_discount())
+                        quantity += orderLine.get_quantity();
+                });
+
+                if(inputNumber > quantity) {
+                    await this.showPopup('ErrorPopup', {
+                        title: this.env._t('Order error'),
+                        body: this.env._t('Not allowed to take back more than was ordered.'),
+                    });
+                } else {
+                    let decrease_line = selectedLine.clone();
+                    decrease_line.order = order;
+                    decrease_line.set_quantity(-inputNumber);
+                    order.add_orderline(decrease_line);
+                }
+            }
+        }
     }
     ProductScreen.controlButtons = [];
 
