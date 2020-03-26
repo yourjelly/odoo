@@ -2,10 +2,15 @@ odoo.define('pos_restaurant.chrome', function(require) {
     'use strict';
 
     const { Chrome } = require('point_of_sale.chrome');
+    const { useListener } = require('web.custom_hooks');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     const PosResChrome = Chrome =>
         class extends Chrome {
+            constructor() {
+                super(...arguments);
+                this._setActivityListeners();
+            }
             /**
              * @override
              * Do not set `FloorScreen` to the order.
@@ -37,6 +42,26 @@ odoo.define('pos_restaurant.chrome', function(require) {
                 } else {
                     super._showSavedScreen(pos, newSelectedOrder);
                 }
+            }
+            _setActivityListeners() {
+                const events = 'mousemove mousedown touchstart click scroll keypress'.split(' ');
+                for (let event of events) {
+                    useListener(event, this._setIdleTimer);
+                }
+            }
+            _setIdleTimer() {
+                if (this._shouldResetIdleTimer()) {
+                    clearTimeout(this.idleTimer);
+                    this.idleTimer = setTimeout(() => {
+                        this._actionAfterIdle();
+                    }, 60000);
+                }
+            }
+            _actionAfterIdle() {
+                this.showScreen('FloorScreen', { floor: this.env.pos.table.floor });
+            }
+            _shouldResetIdleTimer() {
+                return this.mainScreen.name !== 'FloorScreen' && !this.tempScreen.isShown;
             }
         };
 
