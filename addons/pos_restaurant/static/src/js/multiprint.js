@@ -268,13 +268,18 @@ models.Order = models.Order.extend({
     },
     printChanges: async function(){
         var printers = this.pos.printers;
+        let isPrintSuccessful = true;
         for(var i = 0; i < printers.length; i++){
             var changes = this.computeChanges(printers[i].config.product_categories_ids);
             if ( changes['new'].length > 0 || changes['cancelled'].length > 0){
                 var receipt = QWeb.render('OrderChangeReceipt',{changes:changes, widget:this});
-                await printers[i].print_receipt(receipt);
+                const result = await printers[i].print_receipt(receipt);
+                if (!result.successful) {
+                    isPrintSuccessful = false;
+                }
             }
         }
+        return isPrintSuccessful;
     },
     hasChangesToPrint: function(){
         var printers = this.pos.printers;

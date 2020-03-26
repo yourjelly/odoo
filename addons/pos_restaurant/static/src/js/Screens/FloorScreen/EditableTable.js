@@ -12,8 +12,8 @@ odoo.define('pos_restaurant.EditableTable', function(require) {
             super(...arguments);
             useListener('resize-end', this._onResizeEnd);
             useListener('drag-end', this._onDragEnd);
-            onPatched(this._setElementStyle);
-            onMounted(this._setElementStyle);
+            onPatched(this._setElementStyle.bind(this));
+            onMounted(this._setElementStyle.bind(this));
         }
         _setElementStyle() {
             const table = this.props.table;
