@@ -237,7 +237,6 @@ class AccountReconcileModel(models.Model):
                 'tax_repartition_line_id': tax_res['tax_repartition_line_id'],
                 'tax_ids': [(6, 0, tax_res['tax_ids'])],
                 'tax_tag_ids': [(6, 0, tax_res['tag_ids'])],
-                'tax_tag_ids': [(6, 0, tax_res['tag_ids'])],
                 'currency_id': False,
                 'reconcile_model_id': self.id,
             })
@@ -320,23 +319,29 @@ class AccountReconcileModel(models.Model):
         :return: A list of dictionary to be passed to the account.bank.statement.line's 'reconcile' method.
         '''
         self.ensure_one()
+        liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
+
+        if st_line.to_check:
+            residual_balance = -liquidity_lines.balance
+        elif suspense_lines.account_id.reconcile:
+            residual_balance = sum(suspense_lines.mapped('amount_residual'))
+        else:
+            residual_balance = sum(suspense_lines.mapped('balance'))
 
         partner = partner or st_line.partner_id
         lines_vals_list = [{'id': aml_id} for aml_id in aml_ids]
         reconciliation_overview, open_balance_vals = st_line._prepare_reconciliation(lines_vals_list)
 
-        if not open_balance_vals:
-            return lines_vals_list
+        for reconciliation_vals in reconciliation_overview:
+            residual_balance -= reconciliation_vals['line_vals']['debit'] - reconciliation_vals['line_vals']['credit']
 
-        residual_balance = open_balance_vals['debit'] - open_balance_vals['credit']
         writeoff_vals_list = self._get_write_off_move_lines_dict(st_line, residual_balance)
 
-        balance = st_line.company_currency_id.round(open_balance_vals['debit'] - open_balance_vals['credit'])
         for line_vals in writeoff_vals_list:
-            balance += st_line.company_currency_id.round(line_vals['balance'])
+            residual_balance -= st_line.company_currency_id.round(line_vals['balance'])
 
         # Check we have enough information to create an open balance.
-        if not st_line.company_currency_id.is_zero(balance):
+        if not st_line.company_currency_id.is_zero(residual_balance):
             if st_line.amount > 0:
                 open_balance_account = partner.property_account_receivable_id
             else:

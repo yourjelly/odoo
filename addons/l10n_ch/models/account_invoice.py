@@ -171,7 +171,7 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         return self.display_qr_code and \
-               self.invoice_partner_bank_id._eligible_for_qr_code('ch_qr', self.partner_id, self.currency_id)
+               self.partner_bank_id._eligible_for_qr_code('ch_qr', self.partner_id, self.currency_id)
 
     def isr_print(self):
         """ Triggered by the 'Print ISR' button.

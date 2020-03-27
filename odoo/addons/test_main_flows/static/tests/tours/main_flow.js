@@ -1019,10 +1019,9 @@ tour.stepUtils.mobileModifier(tour.stepUtils.autoExpandMoreButtons('.o_control_p
     trigger: '.o_form_button_save',
     content: _t('Save.'),
     position: 'bottom',
-    run: function () {},
 },
-...tour.stepUtils.statusbarButtonsSteps('Post', _t('Processing')),
-...tour.stepUtils.statusbarButtonsSteps('Reconcile', _t('Reconcile'), ".breadcrumb-item.active:contains('the_flow.statement')").map(tour.stepUtils.editionEnterpriseModifier),
+...tour.stepUtils.statusbarButtonsSteps('Post', _t('Processing'), ".breadcrumb-item.active:contains('the_flow.statement')").map(tour.stepUtils.editionEnterpriseModifier),
+...tour.stepUtils.statusbarButtonsSteps('Reconcile', _t('Reconcile'), ".o_statusbar_status .btn.dropdown-toggle:contains(Processing)").map(tour.stepUtils.editionEnterpriseModifier),
 {
     edition: "enterprise",
     trigger: "button.o_reconcile, button.o_validate",

@@ -486,7 +486,10 @@ class account_journal(models.Model):
         [action] = self.env.ref(action_ref).read()
         action['context'] = dict(ast.literal_eval(action.get('context')), default_journal_id=self.id, search_default_journal_id=self.id)
         if payment_type == 'transfer':
-            action['context']['default_partner_id'] = self.company_id.partner_id.id
+            action['context'].update({
+                'default_partner_id': self.company_id.partner_id.id,
+                'default_is_internal_transfer': True,
+            })
         if mode == 'form':
             action['views'] = [[False, 'form']]
         return action

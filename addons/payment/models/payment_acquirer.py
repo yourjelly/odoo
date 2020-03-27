@@ -636,22 +636,6 @@ class PaymentTransaction(models.Model):
         for trans in self:
             trans.invoice_ids_nbr = len(trans.invoice_ids)
 
-    def _prepare_account_payment_vals(self):
-        self.ensure_one()
-        return {
-            'amount': self.amount,
-            'payment_type': 'inbound' if self.amount > 0 else 'outbound',
-            'currency_id': self.currency_id.id,
-            'partner_id': self.partner_id.id,
-            'partner_type': 'customer',
-            'journal_id': self.acquirer_id.journal_id.id,
-            'company_id': self.acquirer_id.company_id.id,
-            'payment_method_id': self.env.ref('payment.account_payment_method_electronic_in').id,
-            'payment_token_id': self.payment_token_id and self.payment_token_id.id or None,
-            'payment_transaction_id': self.id,
-            'ref': self.reference,
-        }
-
     def _create_payment(self, add_payment_vals={}):
         ''' Create an account.payment record for the current payment.transaction.
         If the transaction is linked to some invoices, the reconciliation will be done automatically.

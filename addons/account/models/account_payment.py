@@ -3,15 +3,6 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
-MAP_INVOICE_TYPE_PARTNER_TYPE = {
-    'out_invoice': 'customer',
-    'out_refund': 'customer',
-    'out_receipt': 'customer',
-    'in_invoice': 'supplier',
-    'in_refund': 'supplier',
-    'in_receipt': 'supplier',
-}
-
 
 class AccountPaymentMethod(models.Model):
     _name = "account.payment.method"
@@ -200,13 +191,16 @@ class AccountPayment(models.Model):
         if self.currency_id == self.company_id.currency_id:
             # Single-currency.
             balance = counterpart_amount
+            counterpart_amount_currency = 0.0
             write_off_balance = write_off_amount
-            counterpart_amount = write_off_amount = 0.0
+            write_off_amount_currency = 0.0
             currency_id = False
         else:
             # Multi-currencies.
             balance = self.currency_id._convert(counterpart_amount, self.company_id.currency_id, self.company_id, self.date)
+            counterpart_amount_currency = counterpart_amount
             write_off_balance = self.currency_id._convert(write_off_amount, self.company_id.currency_id, self.company_id, self.date)
+            write_off_amount_currency = write_off_amount
             currency_id = self.currency_id.id
 
         if self.is_internal_transfer:
@@ -222,7 +216,7 @@ class AccountPayment(models.Model):
             {
                 'name': liquidity_line_name,
                 'date_maturity': self.date,
-                'amount_currency': -counterpart_amount,
+                'amount_currency': -counterpart_amount_currency,
                 'currency_id': currency_id,
                 'debit': balance < 0.0 and -balance or 0.0,
                 'credit': balance > 0.0 and balance or 0.0,
@@ -233,7 +227,7 @@ class AccountPayment(models.Model):
             {
                 'name': self.payment_reference,
                 'date_maturity': self.date,
-                'amount_currency': counterpart_amount + write_off_amount if currency_id else 0.0,
+                'amount_currency': counterpart_amount_currency + write_off_amount_currency if currency_id else 0.0,
                 'currency_id': currency_id,
                 'debit': balance + write_off_balance > 0.0 and balance + write_off_balance or 0.0,
                 'credit': balance + write_off_balance < 0.0 and -balance - write_off_balance or 0.0,
@@ -245,7 +239,7 @@ class AccountPayment(models.Model):
             # Write-off line.
             line_vals_list.append({
                 'name': write_off_line_vals.get('name'),
-                'amount_currency': -write_off_amount,
+                'amount_currency': -write_off_amount_currency,
                 'currency_id': currency_id,
                 'debit': write_off_balance < 0.0 and -write_off_balance or 0.0,
                 'credit': write_off_balance > 0.0 and write_off_balance or 0.0,
@@ -267,16 +261,12 @@ class AccountPayment(models.Model):
         for pay in self:
             liquidity_lines, counterpart_lines, writeoff_lines = pay._seek_for_lines()
 
-            if not pay.currency_id:
+            if not pay.currency_id or not pay.id:
                 pay.is_reconciled = False
                 pay.is_matched = False
             elif pay.currency_id.is_zero(pay.amount):
                 pay.is_reconciled = True
                 pay.is_matched = True
-            elif not pay.id:
-                # New record: The journal items are not yet there.
-                pay.is_reconciled = False
-                pay.is_matched = False
             else:
                 # The journal entry seems reconciled.
                 residual_field = 'amount_residual' if pay.currency_id == pay.company_id.currency_id else 'amount_residual_currency'
@@ -320,7 +310,7 @@ class AccountPayment(models.Model):
     @api.depends('payment_type', 'journal_id')
     def _compute_payment_method_id(self):
         ''' Compute the 'payment_method_id' field.
-        This field is not computed in '_compute_payment_method_fields' because it's a stored one.
+        This field is not computed in '_compute_payment_method_fields' because it's a stored editable one.
         '''
         for pay in self:
             if pay.payment_type == 'inbound':
@@ -385,7 +375,7 @@ class AccountPayment(models.Model):
                         ('internal_type', '=', 'payable'),
                     ], limit=1)
 
-    @api.depends('partner_bank_id', 'amount', 'communication', 'currency_id', 'journal_id', 'move_id.state',
+    @api.depends('partner_bank_id', 'amount', 'ref', 'currency_id', 'journal_id', 'move_id.state',
                  'payment_method_id', 'payment_type')
     def _compute_qr_code(self):
         for pay in self:
@@ -480,7 +470,7 @@ class AccountPayment(models.Model):
             pay.reconciled_statements_count = len(statement_ids)
 
     # -------------------------------------------------------------------------
-    # CONSTRAINS METHODS
+    # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
     @api.constrains('payment_method_id')
@@ -506,7 +496,7 @@ class AccountPayment(models.Model):
             # Hack to add a custom write-off line.
             write_off_line_vals_list.append(vals.pop('write_off_line_vals', None))
 
-            # Force the move_type to avoid unconsistency with residual 'default_move_type' inside the context.
+            # Force the move_type to avoid inconsistency with residual 'default_move_type' inside the context.
             vals['move_type'] = 'entry'
 
             # Force the computation of 'journal_id' since this field is set on account.move but must have the
@@ -578,7 +568,7 @@ class AccountPayment(models.Model):
 
                 if len(liquidity_lines) != 1 or len(counterpart_lines) != 1:
                     raise UserError(_(
-                        "The journal entry %s reached an invalid state regarding its related payment.\n"
+                        "The journal entry %s reached an invalid state relative to its payment.\n"
                         "To be consistent, the journal entry must always contains:\n"
                         "- one journal item involving the outstanding payment/receipts account.\n"
                         "- one journal item involving a receivable/payable account.\n"
@@ -587,19 +577,19 @@ class AccountPayment(models.Model):
 
                 if writeoff_lines and len(writeoff_lines.account_id) != 1:
                     raise UserError(_(
-                        "The journal entry %s reached an invalid state regarding its related payment.\n"
+                        "The journal entry %s reached an invalid state relative to its payment.\n"
                         "To be consistent, all the write-off journal items must share the same account."
                     ) % move.display_name)
 
                 if any(line.currency_id != all_lines[0].currency_id for line in all_lines):
                     raise UserError(_(
-                        "The journal entry %s reached an invalid state regarding its related payment.\n"
+                        "The journal entry %s reached an invalid state relative to its payment.\n"
                         "To be consistent, the journal items must share the same currency."
                     ) % move.display_name)
 
                 if any(line.partner_id != all_lines[0].partner_id for line in all_lines):
                     raise UserError(_(
-                        "The journal entry %s reached an invalid state regarding its related payment.\n"
+                        "The journal entry %s reached an invalid state relative to its payment.\n"
                         "To be consistent, the journal items must share the same partner."
                     ) % move.display_name)
 
@@ -634,7 +624,7 @@ class AccountPayment(models.Model):
         if self._context.get('skip_account_move_synchronization'):
             return
 
-        if all(field_name not in changed_fields for field_name in (
+        if not any(field_name in changed_fields for field_name in (
             'amount', 'payment_type', 'partner_type', 'payment_reference', 'is_internal_transfer',
             'currency_id', 'partner_id', 'destination_account_id',
         )):
@@ -649,7 +639,7 @@ class AccountPayment(models.Model):
             if writeoff_lines:
                 writeoff_amount_field = 'balance' if pay.currency_id == pay.company_id.currency_id else 'amount_currency'
                 writeoff_amount = sum(writeoff_lines.mapped(writeoff_amount_field))
-                counterpart_amount = sum(counterpart_lines.mapped(writeoff_amount_field))
+                counterpart_amount = counterpart_lines[writeoff_amount_field]
                 if writeoff_amount > 0.0 and counterpart_amount > 0.0:
                     sign = 1
                 else:
@@ -665,9 +655,6 @@ class AccountPayment(models.Model):
 
             line_vals_list = pay._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)
 
-            # Update the existing journal items.
-            # If dealing with multiple write-off lines, they are dropped and a new one is generated.
-
             line_ids_commands = [
                 (1, liquidity_lines.id, line_vals_list[0]),
                 (1, counterpart_lines.id, line_vals_list[1]),
@@ -678,6 +665,9 @@ class AccountPayment(models.Model):
 
             if writeoff_lines:
                 line_ids_commands.append((0, 0, line_vals_list[2]))
+
+            # Update the existing journal items.
+            # If dealing with multiple write-off lines, they are dropped and a new one is generated.
 
             pay.move_id.write({
                 'partner_id': pay.partner_id.id,
@@ -697,15 +687,15 @@ class AccountPayment(models.Model):
 
     def action_post(self):
         ''' draft -> posted '''
-        self.mapped('move_id').post()
+        self.move_id.post()
 
     def action_cancel(self):
         ''' draft -> cancelled '''
-        self.mapped('move_id').button_cancel()
+        self.move_id.button_cancel()
 
     def action_draft(self):
         ''' posted -> draft '''
-        self.mapped('move_id').button_draft()
+        self.move_id.button_draft()
 
     def button_open_invoices(self):
         ''' Redirect the user to the invoice(s) paid by this payment.

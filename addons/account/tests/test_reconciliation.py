@@ -1453,7 +1453,7 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         self.assertTrue(move_caba0.exists())
         self.assertEqual(move_caba0.journal_id, self.env.user.company_id.tax_cash_basis_journal_id)
 
-        pay_receivable_line0 = payment0.line_ids.line_ids.matched_debit_ids.debit_move_id.payment_id.line_ids.filtered(lambda l: l.account_id == self.account_rcv)
+        pay_receivable_line0 = payment0.move_line_ids.filtered(lambda l: l.account_id == self.account_rcv)
         self.assertTrue(pay_receivable_line0.reconciled)
         self.assertEqual(pay_receivable_line0.matched_debit_ids, move_caba0.tax_cash_basis_rec_id)
 
@@ -1467,7 +1467,7 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         self.assertEqual(len(move_caba1.exists()), 1)
         self.assertEqual(move_caba1.journal_id, self.env.user.company_id.tax_cash_basis_journal_id)
 
-        pay_receivable_line1 = payment1.line_ids.line_ids.matched_debit_ids.debit_move_id.payment_id.line_ids.filtered(lambda l: l.account_id == self.account_rcv)
+        pay_receivable_line1 = payment1.move_line_ids.filtered(lambda l: l.account_id == self.account_rcv)
         self.assertTrue(pay_receivable_line1.reconciled)
         self.assertEqual(pay_receivable_line1.matched_debit_ids, move_caba1.tax_cash_basis_rec_id)
 

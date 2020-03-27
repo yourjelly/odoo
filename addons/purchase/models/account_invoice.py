@@ -59,7 +59,7 @@ class AccountMove(models.Model):
         refs = [ref for ref in refs if ref]
         self.ref = ','.join(refs)
 
-        # Compute invoice_payment_ref.
+        # Compute payment_reference.
         if len(refs) == 1:
             self.payment_reference = refs[0]
 

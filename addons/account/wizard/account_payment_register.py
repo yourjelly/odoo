@@ -2,9 +2,6 @@
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
-from odoo.addons.account.models.account_payment import MAP_INVOICE_TYPE_PARTNER_TYPE
-
-from collections import defaultdict
 
 
 class AccountPaymentRegister(models.TransientModel):
@@ -59,18 +56,12 @@ class AccountPaymentRegister(models.TransientModel):
         string='Source Currency', store=True, copy=False,
         compute='_compute_from_lines',
         help="The payment's currency.")
-    wizard_mode = fields.Selection(selection=[
-        ('single_line', 'Single Journal Item'),
-        ('single_batch', 'Single Batch'),
-        ('one_per_batch', 'One by Batch'),
-        ('multi_batches', 'Multiple Batches'),
-    ], store=True, copy=False,
+    can_edit_wizard = fields.Boolean(store=True, copy=False,
         compute='_compute_from_lines',
-        help="Indicate if the user is free to edit the amount, the currency or create a write-off:"
-             "* single Journal Entry:   Only one journal entry to pay"
-             "* single batch:           Multiple journal entries belonging to the same batch"
-             "* one by batch:           Multiple batches, one journal entry per batch"
-             "* multiple batches:       Multiple batches")
+        help="Technical field used to indicate the user can edit the wizard content such as the amount.")
+    can_group_payments = fields.Boolean(store=True, copy=False,
+        compute='_compute_from_lines',
+        help="Technical field used to indicate the user can see the 'group_payments' box.")
     company_id = fields.Many2one('res.company', store=True, copy=False,
         compute='_compute_from_lines')
     partner_id = fields.Many2one('res.partner',
@@ -117,11 +108,33 @@ class AccountPaymentRegister(models.TransientModel):
     # HELPERS
     # -------------------------------------------------------------------------
 
+    @api.model
+    def _get_batch_communication(self, batch_result):
+        ''' Helper to compute the communication based on the batch.
+        :param batch_result:    A batch returned by '_get_batches'.
+        :return:                A string representing a communication to be set on payment.
+        '''
+        return ' '.join(label for label in batch_result['lines'].mapped('name') if label)
+
+    @api.model
+    def _get_line_batch_key(self, line):
+        ''' Turn the line passed as parameter to a dictionary defining on which way the lines
+        will be grouped together.
+        :return: A python dictionary.
+        '''
+        return {
+            'partner_id': line.partner_id.id,
+            'account_id': line.account_id.id,
+            'currency_id': (line.currency_id or line.company_currency_id).id,
+            'partner_bank_id': line.move_id.partner_bank_id.id,
+            'partner_type': 'customer' if line.account_internal_type == 'receivable' else 'supplier',
+            'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
+        }
+
     def _get_batches(self):
-        ''' Retrieve the account.move to pay from the context and group them into batches using
-        the '_get_move_batch_key' method.
+        ''' Group the account.move.line linked to the wizard together.
         :return: A list of batches, each one containing:
-            * key_values:   The key as a dictionary returned by '_get_move_batch_key'.
+            * key_values:   The key as a dictionary used to group the journal items together.
             * moves:        An account.move recordset.
         '''
         self.ensure_one()
@@ -135,14 +148,8 @@ class AccountPaymentRegister(models.TransientModel):
 
         batches = {}
         for line in lines:
-            batch_key = {
-                'partner_id': line.partner_id.id,
-                'account_id': line.account_id.id,
-                'currency_id': (line.currency_id or line.company_currency_id).id,
-                'partner_bank_id': line.move_id.partner_bank_id.id,
-                'partner_type': 'customer' if line.account_internal_type == 'receivable' else 'supplier',
-                'payment_type': 'inbound' if line.balance > 0.0 else 'outbound',
-            }
+            batch_key = self._get_line_batch_key(line)
+
             serialized_key = '-'.join(str(v) for v in batch_key.values())
             batches.setdefault(serialized_key, {
                 'key_values': batch_key,
@@ -171,21 +178,12 @@ class AccountPaymentRegister(models.TransientModel):
         return {
             'company_id': company.id,
             'partner_id': key_values['partner_id'],
-            'partner_bank_id': key_values['partner_bank_id'],
             'partner_type': key_values['partner_type'],
             'payment_type': key_values['payment_type'],
             'source_currency_id': key_values['currency_id'],
             'source_amount': source_amount,
             'source_amount_currency': source_amount_currency,
         }
-
-    @api.model
-    def _get_batch_communication(self, batch_result):
-        ''' Helper to compute the communication based on the batch.
-        :param batch_result:    A batch returned by '_get_batches'.
-        :return:                A string representing a communication to be set on payment.
-        '''
-        return ' '.join(label for label in batch_result['lines'].mapped('name') if label)
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -194,164 +192,160 @@ class AccountPaymentRegister(models.TransientModel):
     @api.depends('line_ids')
     def _compute_from_lines(self):
         ''' Load initial values from the account.moves passed through the context. '''
-        for pay in self:
-            batches = pay._get_batches()
+        for wizard in self:
+            batches = wizard._get_batches()
 
             if len(batches) == 1:
                 # == Single batch to be mounted on the view ==
                 batch_result = batches[0]
-                pay.update(pay._get_wizard_values_from_batch(batch_result))
+                wizard.update(wizard._get_wizard_values_from_batch(batch_result))
 
-                if len(batch_result['lines']) == 1:
-                    pay.wizard_mode = 'single_line'
-                else:
-                    pay.wizard_mode = 'single_batch'
+                wizard.can_edit_wizard = True
+                wizard.can_group_payments = len(batch_result['lines']) != 1
             else:
                 # == Multiple batches: The wizard is not editable  ==
-                pay.update({
+                wizard.update({
                     'company_id': batches[0]['lines'][0].company_id.id,
                     'partner_id': False,
-                    'partner_bank_id': False,
                     'partner_type': False,
                     'payment_type': False,
                     'source_currency_id': False,
                     'source_amount': False,
                     'source_amount_currency': False,
-                    'communication': False,
                 })
 
-                if all(len(batch_result['lines']) == 1 for batch_result in batches):
-                    pay.wizard_mode = 'one_per_batch'
-                else:
-                    pay.wizard_mode = 'multi_batches'
+                wizard.can_edit_wizard = False
+                wizard.can_group_payments = any(len(batch_result['lines']) != 1 for batch_result in batches)
 
-    @api.depends('wizard_mode')
+    @api.depends('can_edit_wizard')
     def _compute_communication(self):
-        for pay in self:
-            if pay.wizard_mode in ('single_line', 'single_batch'):
+        # The communication can't be computed in '_compute_from_lines' because
+        # it's a compute editable field and then, should be computed in a separated method.
+        for wizard in self:
+            if wizard.can_edit_wizard:
                 batches = self._get_batches()
-                pay.communication = pay._get_batch_communication(batches[0])
+                wizard.communication = wizard._get_batch_communication(batches[0])
             else:
-                pay.communication = False
+                wizard.communication = False
 
-    @api.depends('wizard_mode')
+    @api.depends('can_edit_wizard')
     def _compute_group_payment(self):
-        for pay in self:
-            if pay.wizard_mode == 'single_batch':
-                batches = self._get_batches()
-                pay.group_payment = len(batches[0]['lines'].move_id) == 1
+        for wizard in self:
+            if wizard.can_edit_wizard:
+                batches = wizard._get_batches()
+                wizard.group_payment = len(batches[0]['lines'].move_id) == 1
             else:
-                pay.group_payment = False
+                wizard.group_payment = False
 
     @api.depends('company_id', 'source_currency_id')
     def _compute_journal_id(self):
-        for pay in self:
+        for wizard in self:
             domain = [
                 ('type', 'in', ('bank', 'cash')),
-                ('company_id', '=', pay.company_id.id),
+                ('company_id', '=', wizard.company_id.id),
             ]
             journal = None
-            if pay.source_currency_id:
-                journal = self.env['account.journal'].search(domain + [('currency_id', '=', pay.source_currency_id.id)], limit=1)
+            if wizard.source_currency_id:
+                journal = self.env['account.journal'].search(domain + [('currency_id', '=', wizard.source_currency_id.id)], limit=1)
             if not journal:
                 journal = self.env['account.journal'].search(domain, limit=1)
-            pay.journal_id = journal
+            wizard.journal_id = journal
 
     @api.depends('journal_id')
     def _compute_currency_id(self):
-        for pay in self:
-            pay.currency_id = pay.journal_id.currency_id or pay.source_currency_id or pay.company_id.currency_id
+        for wizard in self:
+            wizard.currency_id = wizard.journal_id.currency_id or wizard.source_currency_id or wizard.company_id.currency_id
 
     @api.depends('partner_id')
     def _compute_partner_bank_id(self):
         ''' The default partner_bank_id will be the first available on the partner. '''
-        for pay in self:
-            available_partner_bank_accounts = pay.partner_id.bank_ids
+        for wizard in self:
+            available_partner_bank_accounts = wizard.partner_id.bank_ids
             if available_partner_bank_accounts:
-                pay.partner_bank_id = available_partner_bank_accounts[0]._origin
+                wizard.partner_bank_id = available_partner_bank_accounts[0]._origin
             else:
-                pay.partner_bank_id = False
+                wizard.partner_bank_id = False
 
-    @api.depends('wizard_mode', 'journal_id')
+    @api.depends('journal_id')
     def _compute_payment_method_id(self):
-        for pay in self:
-            batches = self._get_batches()
+        for wizard in self:
+            batches = wizard._get_batches()
             payment_type = batches[0]['key_values']['payment_type']
 
             if payment_type == 'inbound':
-                available_payment_methods = pay.journal_id.inbound_payment_method_ids
+                available_payment_methods = wizard.journal_id.inbound_payment_method_ids
             else:
-                available_payment_methods = pay.journal_id.outbound_payment_method_ids
+                available_payment_methods = wizard.journal_id.outbound_payment_method_ids
 
             # Select the first available one by default.
             if available_payment_methods:
-                pay.payment_method_id = available_payment_methods[0]._origin
+                wizard.payment_method_id = available_payment_methods[0]._origin
             else:
-                pay.payment_method_id = False
+                wizard.payment_method_id = False
 
     @api.depends('payment_type',
                  'journal_id.inbound_payment_method_ids',
                  'journal_id.outbound_payment_method_ids')
     def _compute_payment_method_fields(self):
-        for pay in self:
-            if pay.payment_type == 'inbound':
-                pay.available_payment_method_ids = pay.journal_id.inbound_payment_method_ids
+        for wizard in self:
+            if wizard.payment_type == 'inbound':
+                wizard.available_payment_method_ids = wizard.journal_id.inbound_payment_method_ids
             else:
-                pay.available_payment_method_ids = pay.journal_id.outbound_payment_method_ids
+                wizard.available_payment_method_ids = wizard.journal_id.outbound_payment_method_ids
 
-            pay.hide_payment_method = len(pay.available_payment_method_ids) == 1 and pay.available_payment_method_ids.code == 'manual'
+            wizard.hide_payment_method = len(wizard.available_payment_method_ids) == 1 and wizard.available_payment_method_ids.code == 'manual'
 
     @api.depends('payment_type',
                  'journal_id.inbound_payment_method_ids',
                  'journal_id.outbound_payment_method_ids')
     def _compute_payment_method_id(self):
-        for pay in self:
-            if pay.payment_type == 'inbound':
-                available_payment_methods = pay.journal_id.inbound_payment_method_ids
+        for wizard in self:
+            if wizard.payment_type == 'inbound':
+                available_payment_methods = wizard.journal_id.inbound_payment_method_ids
             else:
-                available_payment_methods = pay.journal_id.outbound_payment_method_ids
+                available_payment_methods = wizard.journal_id.outbound_payment_method_ids
 
             # Select the first available one by default.
             if available_payment_methods:
-                pay.payment_method_id = available_payment_methods[0]._origin
+                wizard.payment_method_id = available_payment_methods[0]._origin
             else:
-                pay.payment_method_id = False
+                wizard.payment_method_id = False
 
     @api.depends('payment_method_id')
     def _compute_show_require_partner_bank(self):
         """ Computes if the destination bank account must be displayed in the payment form view. By default, it
         won't be displayed but some modules might change that, depending on the payment type."""
-        for pay in self:
-            pay.show_partner_bank_account = pay.payment_method_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
-            pay.require_partner_bank_account = pay.payment_method_id.code in self.env['account.payment']._get_method_codes_needing_bank_account()
+        for wizard in self:
+            wizard.show_partner_bank_account = wizard.payment_method_id.code in self.env['account.payment']._get_method_codes_using_bank_account()
+            wizard.require_partner_bank_account = wizard.payment_method_id.code in self.env['account.payment']._get_method_codes_needing_bank_account()
 
     @api.depends('source_amount', 'source_amount_currency', 'source_currency_id', 'company_id', 'currency_id', 'payment_date')
     def _compute_amount(self):
-        for pay in self:
-            if pay.source_currency_id == pay.currency_id:
+        for wizard in self:
+            if wizard.source_currency_id == wizard.currency_id:
                 # Same currency.
-                pay.amount = pay.source_amount_currency
-            elif pay.currency_id == pay.company_id.currency_id:
+                wizard.amount = wizard.source_amount_currency
+            elif wizard.currency_id == wizard.company_id.currency_id:
                 # Payment expressed on the company's currency.
-                pay.amount = pay.source_amount
+                wizard.amount = wizard.source_amount
             else:
                 # Foreign currency on payment different than the one set on the journal entries.
-                amount_payment_currency = pay.company_id.currency_id._convert(pay.source_amount, pay.currency_id, pay.company_id, pay.payment_date)
-                pay.amount = amount_payment_currency
+                amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount, wizard.currency_id, wizard.company_id, wizard.payment_date)
+                wizard.amount = amount_payment_currency
 
     @api.depends('amount')
     def _compute_payment_difference(self):
-        for pay in self:
-            if pay.source_currency_id == pay.currency_id:
+        for wizard in self:
+            if wizard.source_currency_id == wizard.currency_id:
                 # Same currency.
-                pay.payment_difference = pay.source_amount_currency - pay.amount
-            elif pay.currency_id == pay.company_id.currency_id:
+                wizard.payment_difference = wizard.source_amount_currency - wizard.amount
+            elif wizard.currency_id == wizard.company_id.currency_id:
                 # Payment expressed on the company's currency.
-                pay.payment_difference = pay.source_amount - pay.amount
+                wizard.payment_difference = wizard.source_amount - wizard.amount
             else:
                 # Foreign currency on payment different than the one set on the journal entries.
-                amount_payment_currency = pay.company_id.currency_id._convert(pay.source_amount, pay.currency_id, pay.company_id, pay.payment_date)
-                pay.payment_difference = amount_payment_currency - pay.amount
+                amount_payment_currency = wizard.company_id.currency_id._convert(wizard.source_amount, wizard.currency_id, wizard.company_id, wizard.payment_date)
+                wizard.payment_difference = amount_payment_currency - wizard.amount
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -393,14 +387,11 @@ class AccountPaymentRegister(models.TransientModel):
 
             # Check.
             if not available_lines:
-                raise UserError(_(
-                    "You can't register a payment because there is not residual amount to pay landing on a "
-                    "receivable/payable account."
-                ))
+                raise UserError(_("You can't register a payment because there is nothing left to pay on the selected journal items."))
             if len(lines.company_id) > 1:
                 raise UserError(_("You can't create payments for entries belonging to different companies."))
             if len(set(available_lines.mapped('account_internal_type'))) > 1:
-                raise UserError(_("You can only register at the same time for payment that are all inbound or all outbound"))
+                raise UserError(_("You can't register payments for journal items being either all inbound, either all outbound."))
 
             res['line_ids'] = [(6, 0, available_lines.ids)]
         
@@ -422,6 +413,7 @@ class AccountPaymentRegister(models.TransientModel):
             'partner_id': self.partner_id.id,
             'partner_bank_id': self.partner_bank_id.id,
             'payment_method_id': self.payment_method_id.id,
+            'destination_account_id': self.line_ids[0].account_id.id
         }
 
         if self.payment_difference and self.payment_difference_handling == 'reconcile':
@@ -443,7 +435,9 @@ class AccountPaymentRegister(models.TransientModel):
             'journal_id': self.journal_id.id,
             'currency_id': batch_values['source_currency_id'],
             'partner_id': batch_values['partner_id'],
-            'partner_bank_id': batch_values['partner_bank_id'],
+            'partner_bank_id': batch_result['key_values']['partner_bank_id'],
+            'payment_method_id': self.payment_method_id.id,
+            'destination_account_id': batch_result['lines'][0].account_id.id
         }
 
     def _create_payments(self):
@@ -451,7 +445,7 @@ class AccountPaymentRegister(models.TransientModel):
         batches = self._get_batches()
 
         to_reconcile = []
-        if self.wizard_mode == 'single_line' or (self.wizard_mode == 'single_batch' and self.group_payment):
+        if self.can_edit_wizard and (len(batches[0]['lines']) == 1 or self.group_payment):
             payment_vals = self._create_payment_vals_from_wizard()
             payment_vals_list = [payment_vals]
             to_reconcile.append(batches[0]['lines'])

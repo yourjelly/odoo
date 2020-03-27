@@ -207,7 +207,6 @@ class PosSession(models.Model):
                 'journal_id': cash_journal.id,
                 'user_id': self.env.user.id,
                 'name': pos_name,
-                'balance_start': self.env["account.bank.statement"]._get_opening_balance(cash_journal.id) if cash_journal.type == 'cash' else 0
             }
             statement_ids |= statement_ids.with_context(ctx).create(st_values)
 

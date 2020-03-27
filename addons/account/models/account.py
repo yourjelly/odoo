@@ -1492,7 +1492,8 @@ class AccountJournal(models.Model):
         if not accounts:
             return 0.0
 
-        domain = (domain or []) + [('account_id', 'in', tuple(accounts.ids))] + [
+        domain = (domain or []) + [
+            ('account_id', 'in', tuple(accounts.ids)),
             ('display_type', 'not in', ('line_section', 'line_note')),
             ('move_id.state', '!=', 'cancel'),
         ]
@@ -1521,7 +1522,8 @@ class AccountJournal(models.Model):
         '''
         self.ensure_one()
         last_statement_domain = (domain or []) + [('journal_id', '=', self.id)]
-        return self.env['account.bank.statement'].search(last_statement_domain, order="date desc, id desc", limit=1)
+        last_st_line = self.env['account.bank.statement.line'].search(last_statement_domain, order='date desc, id desc', limit=1)
+        return last_st_line.statement_id
 
 
 class ResPartnerBank(models.Model):

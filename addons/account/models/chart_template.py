@@ -156,7 +156,7 @@ class AccountChartTemplate(models.Model):
         }
 
     @api.model
-    def _create_journal_suspense_account(self, company, code_digits):
+    def _create_liquidity_journal_suspense_account(self, company, code_digits):
         return self.env['account.account'].create({
             'name': _("Bank Suspense Account"),
             'code': self.env['account.account']._search_new_account_code(company, code_digits, company.transfer_account_code_prefix or ''),
@@ -253,7 +253,7 @@ class AccountChartTemplate(models.Model):
         })
 
         if not company.account_journal_suspense_account_id:
-            company.account_journal_suspense_account_id = self._create_journal_suspense_account(company, self.code_digits)
+            company.account_journal_suspense_account_id = self._create_liquidity_journal_suspense_account(company, self.code_digits)
 
         # Set default PoS receivable account in company
         default_pos_receivable = self.default_pos_receivable_account_id.id

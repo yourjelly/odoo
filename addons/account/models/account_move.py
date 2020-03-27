@@ -51,7 +51,7 @@ class AccountMove(models.Model):
 
     @api.model
     def _search_default_journal(self, journal_types):
-        company_id = self._context.get('force_company', self._context.get('default_company_id', self.env.company.id))
+        company_id = self._context.get('default_company_id', self.env.company.id)
         domain = [('company_id', '=', company_id), ('type', 'in', journal_types)]
 
         journal = None
@@ -63,14 +63,14 @@ class AccountMove(models.Model):
             journal = self.env['account.journal'].search(domain, limit=1)
 
         if not journal:
-            error_msg = _('Please define an accounting miscellaneous journal in your company')
-            if 'sale' in journal_types:
-                error_msg = _('Please define an accounting sale journal in your company')
-            elif 'purchase' in journal_types:
-                error_msg = _('Please define an accounting purchase journal in your company')
-            elif 'bank' in journal_types or 'cash' in journal_types:
-                error_msg = _('Please define an accounting bank or cash journal in your company')
+            company = self.env['res.company'].browse(company_id)
+
+            error_msg = _("No journal could be found in company %s for any of those types: %s") % (
+                company.display_name,
+                ', '.join(journal_types),
+            )
             raise UserError(error_msg)
+
         return journal
 
     @api.model
@@ -93,26 +93,8 @@ class AccountMove(models.Model):
             if move_type != 'entry' and journal.type not in journal_types:
                 raise UserError(_("Cannot create an invoice of type %s with a journal having %s as type.") % (move_type, journal.type))
         else:
-            company_id = self._context.get('force_company', self._context.get('default_company_id', self.env.company.id))
-            domain = [('company_id', '=', company_id), ('type', 'in', journal_types)]
+            journal = self._search_default_journal(journal_types)
 
-            journal = None
-            if self._context.get('default_currency_id'):
-                currency_domain = domain + [('currency_id', '=', self._context['default_currency_id'])]
-                journal = self.env['account.journal'].search(currency_domain, limit=1)
-
-            if not journal:
-                journal = self.env['account.journal'].search(domain, limit=1)
-
-            if not journal:
-                error_msg = _('Please define an accounting miscellaneous journal in your company')
-                if 'sale' in journal_types:
-                    error_msg = _('Please define an accounting sale journal in your company')
-                elif 'purchase' in journal_types:
-                    error_msg = _('Please define an accounting purchase journal in your company')
-                elif 'bank' in journal_types or 'cash' in journal_types:
-                    error_msg = _('Please define an accounting bank or cash journal in your company')
-                raise UserError(error_msg)
         return journal
 
     @api.model
@@ -1116,7 +1098,7 @@ class AccountMove(models.Model):
                 move.bank_partner_id = move.company_id.partner_id
 
     @api.model
-    def _get_invoice_paid_state(self):
+    def _get_invoice_in_payment_state(self):
         ''' Hook to give the state when the invoice becomes fully paid. This is necessary because the users working
         with only invoicing don't want to see the 'in_payment' state. Then, this method will be overridden in the
         accountant module to enable the 'in_payment' state. '''
@@ -1211,7 +1193,7 @@ class AccountMove(models.Model):
                     if all(payment.is_matched for payment in move._get_reconciled_payments()):
                         new_pmt_state = 'paid'
                     else:
-                        new_pmt_state = move._get_invoice_paid_state()
+                        new_pmt_state = move._get_invoice_in_payment_state()
                 elif currency.compare_amounts(total_to_pay, total_residual) != 0:
                     new_pmt_state = 'partial'
 
@@ -1476,7 +1458,7 @@ class AccountMove(models.Model):
         self_sudo.statement_line_id._synchronize_from_moves(changed_fields)
 
     # -------------------------------------------------------------------------
-    # CONSTRAINS METHODS
+    # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
 
     @api.constrains('name', 'journal_id', 'state')
@@ -2612,12 +2594,12 @@ class AccountMove(models.Model):
         qr_code_method = self.qr_code_method
         if qr_code_method:
             # If the user set a qr code generator manually, we check that we can use it
-            if not self.invoice_partner_bank_id._eligible_for_qr_code(self.qr_code_method, self.partner_id, self.currency_id):
+            if not self.partner_bank_id._eligible_for_qr_code(self.qr_code_method, self.partner_id, self.currency_id):
                 raise UserError(_("The chosen QR-code type is not eligible for this invoice."))
         else:
             # Else we find one that's eligible and assign it to the invoice
             for candidate_method, candidate_name in self.env['res.partner.bank'].get_available_qr_methods_in_sequence():
-                if self.invoice_partner_bank_id._eligible_for_qr_code(candidate_method, self.partner_id, self.currency_id):
+                if self.partner_bank_id._eligible_for_qr_code(candidate_method, self.partner_id, self.currency_id):
                     qr_code_method = candidate_method
                     break
 
@@ -2626,7 +2608,7 @@ class AccountMove(models.Model):
             return None
 
         unstruct_ref = self.ref if self.ref else self.name
-        rslt = self.invoice_partner_bank_id.build_qr_code_url(self.amount_residual, unstruct_ref, self.invoice_payment_ref, self.currency_id, self.partner_id, qr_code_method, silent_errors=False)
+        rslt = self.partner_bank_id.build_qr_code_url(self.amount_residual, unstruct_ref, self.payment_reference, self.currency_id, self.partner_id, qr_code_method, silent_errors=False)
 
         # We only set qr_code_method after generating the url; otherwise, it
         # could be set even in case of a failure in the QR code generation
