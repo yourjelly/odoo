@@ -24,7 +24,7 @@
         </record>
         <record id="website_sale.image_promo_sold" model="product.style">
             <field name="name">Sold Ribbon</field>
-            <field name="html_class">oe_ribbon_promo</field>
+            <field name="html_class">oe_ribbon_sold</field>
         </record>
         <record id="website_sale.image_full" model="product.style">
             <field name="name">Image Full</field>

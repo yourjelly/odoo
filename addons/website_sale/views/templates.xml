@@ -135,7 +135,7 @@
                 <div class="ribbon-wrapper">
                     <a href="#" role="button" class="ribbon btn btn-danger">Sale</a>
                 </div>
-                <div class="ribbon-wrapper">
+                <div class="ribbon-wrapper ribbon-wrapper-sold-out">
                     <a href="#" role="button" class="ribbon btn" style="background-color: #6C757C; color: #FAFAFB;">Sold out</a>
                 </div>
                 <a t-att-href="product_href" class="d-block h-100" itemprop="url">
