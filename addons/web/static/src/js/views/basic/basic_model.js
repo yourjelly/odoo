@@ -302,6 +302,7 @@ var BasicModel = AbstractModel.extend({
         var field;
         var fieldName;
         record._changes = record._changes || {};
+        record._to_send = Object.keys(values);
 
         // ignore values for non requested fields (for instance, fields that are
         // not in the view)
@@ -4184,6 +4185,16 @@ var BasicModel = AbstractModel.extend({
         }
         var context = this._getContext(record, options);
         var currentData = this._generateOnChangeData(record, {changesOnly: false});
+
+        if(record._to_send != undefined){
+            var fieldNames = Array.from(Object.keys(currentData));
+            for(var index = 0; index < fieldNames.length; index++){
+                var fieldName = fieldNames[index];
+                if(!record._to_send.includes(fieldName) && fieldName !== "move_id")
+                    delete currentData[fieldName];
+            }
+            delete record["_to_send"];
+        }
 
         return self._rpc({
                 model: record.model,

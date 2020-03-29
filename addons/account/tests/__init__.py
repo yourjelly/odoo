@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from . import test_account_move_out_invoice
-from . import test_account_move_out_refund
-from . import test_account_move_in_invoice
-from . import test_account_move_in_refund
-from . import test_account_move_entry
+from . import test_account_move_invoice_line
+from . import test_account_move_fiscal_position
+from . import test_account_move_payment_terms
+from . import test_account_move_analytic
+from . import test_account_move_cash_rounding
+from . import test_account_move_multi_currency
+from . import test_account_move_multi_company
+from . import test_account_move_taxes
+from . import test_account_move_journal_sequencing
+from . import test_account_move_misc
+from . import test_account_move_reversal_wizard
 from . import test_account_journal
 from . import test_account_account
 from . import test_account_tax
@@ -12,7 +18,6 @@ from . import test_account_analytic
 from . import test_account_payment
 from . import test_account_bank_statement
 from . import test_account_move_partner_count
-from . import test_account_move_rounding
 from . import test_account_invoice_report
 from . import test_account_journal_dashboard
 from . import test_control_journal_account

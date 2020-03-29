@@ -5908,6 +5908,12 @@ Record ids: %(records)s
                 process(method_res)
             return
 
+    def pre_onchange(self, changed_fields):
+        self.ensure_one()
+
+    def post_onchange(self, changed_fields):
+        self.ensure_one()
+
     def onchange(self, values, field_name, field_onchange):
         """ Perform an onchange on the given field.
 
@@ -5956,11 +5962,18 @@ Record ids: %(records)s
             """ A dict with the values of a record, following a prefix tree. """
             __slots__ = ()
 
-            def __init__(self, record, tree):
+            def __init__(self, record, tree, fields=None):
                 # put record in dict to include it when comparing snapshots
                 super(Snapshot, self).__init__({'<record>': record, '<tree>': tree})
                 for name in tree:
-                    self.fetch(name)
+                    if fields and name not in fields:
+                        if record._fields[name].type in ('one2many', 'many2many'):
+                            # x2many fields are serialized as a list of line snapshots
+                            self[name] = []
+                        else:
+                            self[name] = False
+                    else:
+                        self.fetch(name)
 
             def fetch(self, name):
                 """ Set the value of field ``name`` from the record's value. """
@@ -6065,7 +6078,7 @@ Record ids: %(records)s
         # values of the move, among which the one2many that contains the line
         # itself, with old values!
         #
-        changed_values = {name: values[name] for name in names}
+        changed_values = {name: values[name] for name in names if name in values}
         # set changed values to null in initial_values; not setting them
         # triggers default_get() on the new record when creating snapshot0
         initial_values = dict(values, **dict.fromkeys(names, False))
@@ -6074,7 +6087,7 @@ Record ids: %(records)s
         record = self.new(initial_values, origin=self)
 
         # make a snapshot based on the initial values of record
-        snapshot0 = Snapshot(record, nametree)
+        snapshot0 = Snapshot(record, nametree, fields=list(values.keys()))
 
         # store changed values in cache; also trigger recomputations based on
         # subfields (e.g., line.a has been modified, line.b is computed stored
@@ -6102,6 +6115,8 @@ Record ids: %(records)s
 
         result = {'warnings': OrderedSet()}
 
+        record.pre_onchange(names)
+
         # process names in order
         while todo:
             # apply field-specific onchange methods
@@ -6117,8 +6132,7 @@ Record ids: %(records)s
                 if name not in done and snapshot0.has_changed(name)
             ]
 
-            if not env.context.get('recursive_onchanges', True):
-                todo = []
+        record.post_onchange(done)
 
         # make the snapshot with the final values of record
         snapshot1 = Snapshot(record, nametree)

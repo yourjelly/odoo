@@ -97,7 +97,7 @@ class AccountInvoiceReport(models.Model):
                 -line.balance                                               AS price_subtotal,
                 -line.balance / NULLIF(COALESCE(uom_line.factor, 1) / COALESCE(uom_template.factor, 1), 0.0)
                                                                             AS price_average,
-                COALESCE(partner.country_id, commercial_partner.country_id) AS country_id
+                COALESCE(partner.country_id, partner.country_id) AS country_id
         '''
 
     @api.model
@@ -112,7 +112,6 @@ class AccountInvoiceReport(models.Model):
                 LEFT JOIN uom_uom uom_line ON uom_line.id = line.product_uom_id
                 LEFT JOIN uom_uom uom_template ON uom_template.id = template.uom_id
                 INNER JOIN account_move move ON move.id = line.move_id
-                LEFT JOIN res_partner commercial_partner ON commercial_partner.id = move.commercial_partner_id
         '''
 
     @api.model

@@ -23,17 +23,16 @@ class AccountMove(models.Model):
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Delivery address for current invoice.")
 
-    @api.onchange('partner_shipping_id')
-    def _onchange_partner_shipping_id(self):
-        """
-        Trigger the change of fiscal position when the shipping address is modified.
-        """
-        delivery_partner_id = self._get_invoice_delivery_partner_id()
-        fiscal_position = self.env['account.fiscal.position'].with_company(self.company_id).get_fiscal_position(
-            self.partner_id.id, delivery_id=delivery_partner_id)
+    def _get_invoice_delivery_partner_id(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.partner_shipping_id.id or super()._get_invoice_delivery_partner_id()
 
-        if fiscal_position:
-            self.fiscal_position_id = fiscal_position
+    @api.depends('partner_shipping_id')
+    def _compute_fiscal_position_id(self):
+        # OVERRIDE to add the dependency to 'partner_shipping_id' that is used in
+        # the overridden '_get_invoice_delivery_partner_id' method.
+        return super()._compute_fiscal_position_id()
 
     def unlink(self):
         downpayment_lines = self.mapped('line_ids.sale_line_ids').filtered(lambda line: line.is_downpayment)
@@ -98,8 +97,3 @@ class AccountMove(models.Model):
         for (order, name) in todo:
             order.message_post(body=_("Invoice %s paid") % name)
         return res
-
-    def _get_invoice_delivery_partner_id(self):
-        # OVERRIDE
-        self.ensure_one()
-        return self.partner_shipping_id.id or super(AccountMove, self)._get_invoice_delivery_partner_id()

@@ -489,15 +489,11 @@ class PurchaseOrder(models.Model):
         """
         self.ensure_one()
         self = self.with_company(self.company_id)
-        move_type = self._context.get('default_move_type', 'in_invoice')
-        journal = self.env['account.move'].with_context(default_move_type=move_type)._get_default_journal()
-        if not journal:
-            raise UserError(_('Please define an accounting purchase journal for the company %s (%s).') % (self.company_id.name, self.company_id.id))
 
         partner_invoice_id = self.partner_id.address_get(['invoice'])['invoice']
-        invoice_vals = {
+        return {
             'ref': self.partner_ref or '',
-            'move_type': move_type,
+            'move_type': 'in_invoice',
             'narration': self.notes,
             'currency_id': self.currency_id.id,
             'invoice_user_id': self.user_id and self.user_id.id,
@@ -510,7 +506,6 @@ class PurchaseOrder(models.Model):
             'invoice_line_ids': [],
             'company_id': self.company_id
         }
-        return invoice_vals
 
     def action_view_invoice(self, invoices=False):
         """This function returns an action that display existing vendor bills of

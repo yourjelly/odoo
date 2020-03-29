@@ -1673,7 +1673,10 @@ class Form(object):
         # on creation, every field is considered changed by the client
         # apparently
         # and fields should be sent in view order, not whatever fields_view_get['fields'].keys() is
-        self._perform_onchange(self._view['fields_ordered'])
+        default_values = {
+            k: v for k, v in self._onchange_values().items() if k in defaults or k == 'move_id'
+        }
+        self._perform_onchange(list(defaults.keys()), default_values=default_values)
 
     def _init_from_values(self, values):
         self._values.update(
@@ -1906,7 +1909,7 @@ class Form(object):
             values[f] = v
         return values
 
-    def _perform_onchange(self, fields):
+    def _perform_onchange(self, fields, default_values=None):
         assert isinstance(fields, list)
         # marks any onchange source as changed
         self._changed.update(fields)
@@ -1918,7 +1921,7 @@ class Form(object):
             return
 
         record = self._model.browse(self._values.get('id'))
-        result = record.onchange(self._onchange_values(), fields, spec)
+        result = record.onchange(default_values or self._onchange_values(), fields, spec)
         self._model.flush()
         self._model.env.clear()  # discard cache and pending recomputations
         if result.get('warning'):
