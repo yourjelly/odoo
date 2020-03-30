@@ -414,10 +414,25 @@
     }
 
     // Kanban Grouped Layout - Column default
+    .o_kanban_group:not(.o_column_folded) {
+        .o_kanban_header_sticky {
+            width: $o-kanban-small-record-width;
+            z-index: 2;
+            background-color: desaturate($gray-100, 100%);
+        }
+    }
     .o_kanban_group {
         flex: 0 0 auto;
         padding: 0 $o-kanban-group-padding $o-kanban-group-padding $o-kanban-group-padding;
 
+        .o_kanban_header_sticky {
+            position: fixed;
+            // &:not(.o_column_folded) {
+            //     width: $o-kanban-small-record-width;
+            //     z-index: 2;
+            //     background-color: desaturate($gray-100, 100%);
+            // }
+        }
         .o_kanban_header > .o_kanban_header_title {
             @include o-kanban-header-title;
 

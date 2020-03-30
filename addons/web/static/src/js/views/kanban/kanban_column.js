@@ -180,6 +180,15 @@ var KanbanColumn = Widget.extend({
         if (this.quickCreateWidget) {
             this.quickCreateWidget.on_attach_callback();
         }
+        const $headerClone = this.$header.clone(true, true);
+        $headerClone.insertBefore(this.$header);
+        $headerClone.addClass('o_kanban_header_sticky');
+        this.$header.children().css({display: 'none'});
+        if (!this.folded) {
+            this.$header.css({ 'margin-bottom': $headerClone.height() });
+        } else {
+            this.$el.css({ width: $headerClone.height() });
+        }
     },
 
     //--------------------------------------------------------------------------
