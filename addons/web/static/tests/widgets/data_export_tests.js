@@ -62,7 +62,7 @@ QUnit.module('widgets', {
             View: ListView,
             model: 'partner',
             data: this.data,
-            arch: '<tree><field name="foo"/></tree>',
+            arch: '<tree export="1"><field name="foo"/></tree>',
             viewOptions: {
                 hasActionMenus: true,
             },
@@ -145,7 +145,7 @@ QUnit.module('widgets', {
             View: ListView,
             model: 'partner',
             data: this.data,
-            arch: '<tree><field name="foo"/></tree>',
+            arch: '<tree export="1"><field name="foo"/></tree>',
             viewOptions: {
                 hasActionMenus: true,
             },
@@ -217,7 +217,7 @@ QUnit.module('widgets', {
             View: ListView,
             model: 'partner',
             data: this.data,
-            arch: '<tree><field name="foo"/></tree>',
+            arch: '<tree export="1"><field name="foo"/></tree>',
             viewOptions: {
                 hasActionMenus: true,
             },

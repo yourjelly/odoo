@@ -177,7 +177,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('list with delete="0"', async function (assert) {
-        assert.expect(4);
+        assert.expect(3);
 
         const list = await createView({
             View: ListView,
@@ -192,13 +192,7 @@ QUnit.module('Views', {
         assert.ok(list.$('tbody td.o_list_record_selector').length, 'should have at least one record');
 
         await testUtils.dom.click(list.$('tbody td.o_list_record_selector:first input'));
-        assert.containsOnce(list.el, 'div.o_control_panel .o_cp_action_menus');
-        await cpHelpers.toggleActionMenu(list);
-        assert.deepEqual(
-            cpHelpers.getMenuItemTexts(list),
-            ['Export'],
-            'action menu should not have Delete button'
-        );
+        assert.containsNone(list.el, 'div.o_control_panel .o_cp_action_menus .o_dropdown_menu');
 
         list.destroy();
     });
@@ -221,6 +215,28 @@ QUnit.module('Views', {
 
         list.destroy();
     });
+
+    // QUnit.test('list with export button', async function (assert) {
+    //     assert.expect(4);
+
+    //     var list = await createView({
+    //         View: ListView,
+    //         model: 'foo',
+    //         data: this.data,
+    //         viewOptions: {hasSidebar: true},
+    //         arch: '<tree export="1"><field name="foo"/></tree>',
+    //     });
+
+    //     assert.isNotVisible(list.sidebar.$el, 'sidebar should be invisible');
+    //     assert.ok(list.$('tbody td.o_list_record_selector').length, 'should have at least one record');
+
+    //     await testUtils.dom.click(list.$('tbody td.o_list_record_selector:first input'));
+    //     assert.isVisible(list.sidebar.$el, 'sidebar should be visible');
+    //     assert.ok(list.sidebar.$('a:contains(Export)').length, 'sidebar should have Export button');
+
+    //     list.destroy();
+    // });
+
 
     QUnit.test('simple editable rendering', async function (assert) {
         assert.expect(15);
@@ -4255,7 +4271,7 @@ QUnit.module('Views', {
         await testUtils.dom.click(list.$('.o_list_record_selector:first input'));
 
         await cpHelpers.toggleActionMenu(list);
-        assert.deepEqual(cpHelpers.getMenuItemTexts(list), ['Export', 'Delete', 'Action event']);
+        assert.deepEqual(cpHelpers.getMenuItemTexts(list), ['Delete', 'Action event']);
 
         list.destroy();
     });

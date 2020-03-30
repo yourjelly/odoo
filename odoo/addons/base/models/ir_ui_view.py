@@ -874,6 +874,10 @@ actual arch.
                         not self._context.get(action, True) and is_base_model):
                     node.set(action, 'false')
 
+        if node.tag == 'tree':
+            can_see = self.user_has_groups('base.group_allow_export')
+            node.set('export', 'true' if can_see else 'false')
+
         if node.tag == 'kanban':
             group_by_name = node.get('default_group_by')
             group_by_field = Model._fields.get(group_by_name)

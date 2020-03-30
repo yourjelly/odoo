@@ -57,6 +57,7 @@ var ListView = BasicView.extend({
         }
 
         this.controllerParams.activeActions.export_xlsx = this.arch.attrs.export_xlsx ? !!JSON.parse(this.arch.attrs.export_xlsx): true;
+        this.controllerParams.isExportEnable = this.arch.attrs.export ? !!JSON.parse(this.arch.attrs.export): false;
         this.controllerParams.editable = editable;
         this.controllerParams.hasActionMenus = params.hasActionMenus;
         this.controllerParams.toolbarActions = viewInfo.toolbar;
