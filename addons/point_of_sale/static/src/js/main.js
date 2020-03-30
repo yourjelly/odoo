@@ -4,6 +4,7 @@ odoo.define('point_of_sale.main', function(require) {
     const env = require('web.env');
     const { Chrome } = require('point_of_sale.chrome');
     const Registry = require('point_of_sale.ComponentsRegistry');
+    const { configureGui } = require('point_of_sale.Gui');
 
     owl.config.mode = env.isDebug() ? 'dev' : 'prod';
     owl.Component.env = env;
@@ -18,6 +19,7 @@ odoo.define('point_of_sale.main', function(require) {
         const chrome = new (Registry.get(Chrome.name))(null, { webClient });
         await chrome.mount(document.querySelector('.o_action_manager'));
         await chrome.start();
+        configureGui({ component: chrome });
     }
 
     return { startPosApp };
