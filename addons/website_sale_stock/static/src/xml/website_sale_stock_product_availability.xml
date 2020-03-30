@@ -26,4 +26,14 @@
         </div>
     </t>
 
+    <template id="products_add_to_card_inherited" inherit_id="website_sale.products_add_to_cart">
+        <t t-if="product_type == 'product' and _.contains(['always', 'threshold'], inventory_availability)">
+            <t t-if="!cart_qty and virtual_available lte 0">
+                <xpath expr="//a[@id='cart_json']" position="attributes">
+                    <attribute name="class">disabled</attribute>
+                </xpath>
+            </t>
+        </t>
+    </template>
+
 </templates>
