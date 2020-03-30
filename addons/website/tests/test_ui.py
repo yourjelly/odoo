@@ -98,13 +98,16 @@ class TestUiTranslate(odoo.tests.HttpCase):
 
     def test_admin_tour_rte_translator(self):
 
-        with mute_logger('odoo.addons.base.models.ir_translation'):
-            language_install = self.env["base.language.install"].create({
-                'lang': 'fr_BE',
-                'overwrite': True,
-                'website_ids': [(6, False, [self.env.ref('website.default_website').id])]
-            })
-            language_install.lang_install()
+        # with mute_logger('odoo.addons.base.models.ir_translation'):
+        #     language_install = self.env["base.language.install"].create({
+        #         'lang': 'fr_BE',
+        #         'overwrite': True,
+        #         'website_ids': [(6, False, [self.env.ref('website.default_website').id])]
+        #     })
+        #     language_install.lang_install()
+        fr_BE = self.env.ref('base.lang_fr_BE')
+        fr_BE.active = True
+        self.env.ref('website.default_website').language_ids |= fr_BE
         self.start_tour("/", 'rte_translator', login='admin', timeout=120)
 
 @odoo.tests.common.tagged('post_install', '-at_install')
