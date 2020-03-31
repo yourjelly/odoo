@@ -1,8 +1,8 @@
 odoo.define('point_of_sale.SaleDetailsButton', function(require) {
     'use strict';
 
-    const { Chrome } = require('point_of_sale.Chrome');
-    const { PosComponent } = require('point_of_sale.PosComponent');
+    const Chrome = require('point_of_sale.Chrome');
+    const PosComponent = require('point_of_sale.PosComponent');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class SaleDetailsButton extends PosComponent {
@@ -31,5 +31,5 @@ odoo.define('point_of_sale.SaleDetailsButton', function(require) {
     Chrome.addComponents([SaleDetailsButton]);
     Registry.add('SaleDetailsButton', SaleDetailsButton);
 
-    return { SaleDetailsButton };
+    return SaleDetailsButton;
 });

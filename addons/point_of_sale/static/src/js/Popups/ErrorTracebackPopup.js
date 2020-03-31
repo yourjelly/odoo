@@ -1,8 +1,8 @@
 odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
     'use strict';
 
-    const { Chrome } = require('point_of_sale.Chrome');
-    const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
+    const Chrome = require('point_of_sale.Chrome');
+    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     // formerly ErrorTracebackPopupWidget
@@ -42,5 +42,5 @@ odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
     Chrome.addComponents([ErrorTracebackPopup]);
     Registry.add('ErrorTracebackPopup', ErrorTracebackPopup);
 
-    return { ErrorTracebackPopup };
+    return ErrorTracebackPopup;
 });

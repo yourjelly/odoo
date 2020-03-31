@@ -2,7 +2,7 @@ odoo.define('point_of_sale.main', function(require) {
     'use strict';
 
     const env = require('web.env');
-    const { Chrome } = require('point_of_sale.Chrome');
+    const Chrome = require('point_of_sale.Chrome');
     const Registry = require('point_of_sale.ComponentsRegistry');
     const { configureGui } = require('point_of_sale.Gui');
 

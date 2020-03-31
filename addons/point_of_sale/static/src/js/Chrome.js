@@ -3,11 +3,11 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
     const { useState, useRef } = owl.hooks;
     const { debounce } = owl.utils;
-    const { PosComponent } = require('point_of_sale.PosComponent');
+    const PosComponent = require('point_of_sale.PosComponent');
     const { useListener } = require('web.custom_hooks');
     const { CrashManager } = require('web.CrashManager');
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
-    const { NumberBuffer } = require('point_of_sale.NumberBuffer');
+    const NumberBuffer = require('point_of_sale.NumberBuffer');
     const { loadCSS } = require('web.ajax');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -417,5 +417,5 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
     Registry.add(Chrome.name, Chrome);
 
-    return { Chrome };
+    return Chrome;
 });

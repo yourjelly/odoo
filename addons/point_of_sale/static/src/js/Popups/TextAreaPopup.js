@@ -2,8 +2,8 @@ odoo.define('point_of_sale.TextAreaPopup', function(require) {
     'use strict';
 
     const { useState, useRef } = owl.hooks;
-    const { Chrome } = require('point_of_sale.Chrome');
-    const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
+    const Chrome = require('point_of_sale.Chrome');
+    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     // formerly TextAreaPopupWidget
@@ -37,5 +37,5 @@ odoo.define('point_of_sale.TextAreaPopup', function(require) {
     Chrome.addComponents([TextAreaPopup]);
     Registry.add('TextAreaPopup', TextAreaPopup);
 
-    return { TextAreaPopup };
+    return TextAreaPopup;
 });

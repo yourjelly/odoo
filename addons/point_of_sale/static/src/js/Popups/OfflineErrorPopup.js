@@ -1,8 +1,8 @@
 odoo.define('point_of_sale.OfflineErrorPopup', function(require) {
     'use strict';
 
-    const { Chrome } = require('point_of_sale.Chrome');
-    const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
+    const Chrome = require('point_of_sale.Chrome');
+    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     /**
@@ -27,5 +27,5 @@ odoo.define('point_of_sale.OfflineErrorPopup', function(require) {
     Chrome.addComponents([OfflineErrorPopup]);
     Registry.add('OfflineErrorPopup', OfflineErrorPopup);
 
-    return { OfflineErrorPopup };
+    return OfflineErrorPopup;
 });

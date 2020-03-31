@@ -264,5 +264,5 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
         }
     }
 
-    return { NumberBuffer: new NumberBuffer() };
+    return new NumberBuffer();
 });

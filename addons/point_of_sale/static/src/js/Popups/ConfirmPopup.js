@@ -1,8 +1,8 @@
 odoo.define('point_of_sale.ConfirmPopup', function(require) {
     'use strict';
 
-    const { Chrome } = require('point_of_sale.Chrome');
-    const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
+    const Chrome = require('point_of_sale.Chrome');
+    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     // formerly ConfirmPopupWidget
@@ -19,5 +19,5 @@ odoo.define('point_of_sale.ConfirmPopup', function(require) {
     Chrome.addComponents([ConfirmPopup]);
     Registry.add('ConfirmPopup', ConfirmPopup);
 
-    return { ConfirmPopup };
+    return ConfirmPopup;
 });

@@ -1,8 +1,8 @@
 odoo.define('point_of_sale.OrderImportPopup', function(require) {
     'use strict';
 
-    const { Chrome } = require('point_of_sale.Chrome');
-    const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
+    const Chrome = require('point_of_sale.Chrome');
+    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     // formerly OrderImportPopupWidget
@@ -25,5 +25,5 @@ odoo.define('point_of_sale.OrderImportPopup', function(require) {
     Chrome.addComponents([OrderImportPopup]);
     Registry.add('OrderImportPopup', OrderImportPopup);
 
-    return { OrderImportPopup };
+    return OrderImportPopup;
 });

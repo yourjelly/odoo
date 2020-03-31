@@ -1,8 +1,8 @@
 odoo.define('point_of_sale.ErrorBarcodePopup', function(require) {
     'use strict';
 
-    const { Chrome } = require('point_of_sale.Chrome');
-    const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
+    const Chrome = require('point_of_sale.Chrome');
+    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     // formerly ErrorBarcodePopupWidget
@@ -24,5 +24,5 @@ odoo.define('point_of_sale.ErrorBarcodePopup', function(require) {
     Chrome.addComponents([ErrorBarcodePopup]);
     Registry.add('ErrorBarcodePopup', ErrorBarcodePopup);
 
-    return { ErrorBarcodePopup };
+    return ErrorBarcodePopup;
 });

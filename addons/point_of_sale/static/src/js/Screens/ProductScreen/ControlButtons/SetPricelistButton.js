@@ -1,8 +1,8 @@
 odoo.define('point_of_sale.SetPricelistButton', function(require) {
     'use strict';
 
-    const { PosComponent } = require('point_of_sale.PosComponent');
-    const { ProductScreen } = require('point_of_sale.ProductScreen');
+    const PosComponent = require('point_of_sale.PosComponent');
+    const ProductScreen = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -63,5 +63,5 @@ odoo.define('point_of_sale.SetPricelistButton', function(require) {
 
     Registry.add('SetPricelistButton', SetPricelistButton);
 
-    return { SetPricelistButton };
+    return SetPricelistButton;
 });
