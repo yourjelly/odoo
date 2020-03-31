@@ -84,12 +84,15 @@ PaymentForm.include({
         };
 
         if (this.$button === undefined) {
+            var show_credit_card = formData.payment_type === 'credit_card' || formData.payment_type === 'both';
+            var show_bank_account = formData.payment_type === 'bank_account' || formData.payment_type === 'both';
             var params = {
                 'class': 'AcceptUI d-none',
                 'data-apiLoginID': formData.login_id,
                 'data-clientKey': formData.client_key,
                 'data-billingAddressOptions': '{"show": false, "required": false}',
-                'data-responseHandler': 'responseHandler'
+                'data-responseHandler': 'responseHandler',
+                'data-paymentOptions': `{"showCreditCard": ${show_credit_card}, "showBankAccount": ${show_bank_account}}`,
             };
             this.$button = $('<button>', params);
             this.$button.appendTo('body');

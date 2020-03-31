@@ -26,6 +26,11 @@ class PaymentAcquirerAuthorize(models.Model):
     authorize_transaction_key = fields.Char(string='API Transaction Key', required_if_provider='authorize', groups='base.group_user')
     authorize_signature_key = fields.Char(string='API Signature Key', required_if_provider='authorize', groups='base.group_user')
     authorize_client_key = fields.Char(string='API Client Key', groups='base.group_user')
+    authorize_payment_type = fields.Selection([
+        ('credit_card', 'Credit Card'),
+        ('bank_account', 'Bank Account (USA Only)'),
+        ('both', 'Credit Card and Bank Account (USA Only)')],
+        default='credit_card', required_if_provider='authorize', string='Allow Payments From', groups='base.group_user')
 
     @api.onchange('provider', 'check_validity')
     def onchange_check_validity(self):
@@ -143,6 +148,14 @@ class PaymentAcquirerAuthorize(models.Model):
 
     def authorize_s2s_form_validate(self, data):
         error = dict()
+
+        # When paying via a bank account, we'll use the bank account
+        # number as the card number.
+        if data.get("encryptedBankData"):
+            data["encryptedCardData"] = {
+                "cardNumber": data["encryptedBankData"]["accountNumber"]
+            }
+
         mandatory_fields = ["opaqueData", "encryptedCardData"]
         # Validation
         for field_name in mandatory_fields:

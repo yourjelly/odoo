@@ -56,6 +56,7 @@
             <input type="hidden" name="acquirer_state" t-att-value="acq.state"/>
             <input type="hidden" name="login_id" t-att-value="acq.sudo().authorize_login"/>
             <input type="hidden" name="client_key" t-att-value="acq.sudo().authorize_client_key"/>
+            <input type="hidden" name="payment_type" t-att-value="acq.sudo().authorize_payment_type"/>
             <input class="d-none" name="csrf_token" t-att-value="request.csrf_token()"/>
             <input t-if="return_url" type="hidden" name="return_url" t-att-value="return_url"/>
             <input t-if="partner_id" type="hidden" name="partner_id" t-att-value="partner_id"/>
