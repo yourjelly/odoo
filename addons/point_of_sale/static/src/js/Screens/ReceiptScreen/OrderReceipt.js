@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.OrderReceipt', function(require) {
     'use strict';
 
-    const { PosComponent } = require('point_of_sale.PosComponent');
+    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
     const { WrappedProductNameLines } = require('point_of_sale.WrappedProductNameLines');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -38,8 +38,8 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
             );
         }
     }
-    OrderReceipt.components = { WrappedProductNameLines };
 
+    addComponents(OrderReceipt, [WrappedProductNameLines])
     Registry.add('OrderReceipt', OrderReceipt);
 
     return { OrderReceipt };

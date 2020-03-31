@@ -3,10 +3,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
 
     const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
     const { Chrome } = require('point_of_sale.chrome');
-    const { ProductsWidget } = require('point_of_sale.ProductsWidget');
-    const { OrderWidget } = require('point_of_sale.OrderWidget');
-    const { NumpadWidget } = require('point_of_sale.NumpadWidget');
-    const { ActionpadWidget } = require('point_of_sale.ActionpadWidget');
     const { NumberBuffer } = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
     const Registry = require('point_of_sale.ComponentsRegistry');
@@ -193,7 +189,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             }
         }
     }
-    ProductScreen.components = { ProductsWidget, OrderWidget, NumpadWidget, ActionpadWidget };
     ProductScreen.controlButtons = [];
 
     /**
@@ -254,7 +249,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     };
 
     addComponents(Chrome, [ProductScreen]);
-
     Registry.add('ProductScreen', ProductScreen);
 
     return { ProductScreen };

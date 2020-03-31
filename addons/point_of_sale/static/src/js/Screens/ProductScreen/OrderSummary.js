@@ -1,7 +1,8 @@
 odoo.define('point_of_sale.OrderSummary', function(require) {
     'use strict';
 
-    const { PosComponent } = require('point_of_sale.PosComponent');
+    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { OrderWidget } = require('point_of_sale.OrderWidget');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class OrderSummary extends PosComponent {
@@ -24,6 +25,7 @@ odoo.define('point_of_sale.OrderSummary', function(require) {
         }
     }
 
+    addComponents(OrderWidget, [OrderSummary]);
     Registry.add('OrderSummary', OrderSummary);
 
     return { OrderSummary };

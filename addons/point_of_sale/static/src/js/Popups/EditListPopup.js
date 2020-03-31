@@ -5,7 +5,6 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
     const { Chrome } = require('point_of_sale.chrome');
     const { addComponents } = require('point_of_sale.PosComponent');
     const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
-    const { EditListInput } = require('point_of_sale.EditListInput');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     /**
@@ -93,7 +92,6 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
             };
         }
     }
-    EditListPopup.components = { EditListInput };
     EditListPopup.defaultProps = {
         confirmText: 'Ok',
         cancelText: 'Cancel',
@@ -102,7 +100,6 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
     };
 
     addComponents(Chrome, [EditListPopup]);
-
     Registry.add('EditListPopup', EditListPopup);
 
     return { EditListPopup };

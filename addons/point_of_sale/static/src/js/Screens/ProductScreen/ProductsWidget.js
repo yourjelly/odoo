@@ -2,9 +2,8 @@ odoo.define('point_of_sale.ProductsWidget', function(require) {
     'use strict';
 
     const { useState } = owl.hooks;
-    const { PosComponent } = require('point_of_sale.PosComponent');
-    const { ProductsWidgetControlPanel } = require('point_of_sale.ProductsWidgetControlPanel');
-    const { ProductsList } = require('point_of_sale.ProductsList');
+    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { ProductScreen } = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -60,8 +59,8 @@ odoo.define('point_of_sale.ProductsWidget', function(require) {
             this.state.searchWord = '';
         }
     }
-    ProductsWidget.components = { ProductsWidgetControlPanel, ProductsList };
 
+    addComponents(ProductScreen, [ProductsWidget]);
     Registry.add('ProductsWidget', ProductsWidget);
 
     return { ProductsWidget };

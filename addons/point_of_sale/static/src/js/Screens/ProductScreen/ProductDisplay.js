@@ -1,7 +1,8 @@
 odoo.define('point_of_sale.ProductDisplay', function(require) {
     'use strict';
 
-    const { PosComponent } = require('point_of_sale.PosComponent');
+    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { ProductsList } = require('point_of_sale.ProductsList');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class ProductDisplay extends PosComponent {
@@ -42,6 +43,7 @@ odoo.define('point_of_sale.ProductDisplay', function(require) {
         }
     }
 
+    addComponents(ProductsList, [ProductDisplay]);
     Registry.add('ProductDisplay', ProductDisplay);
 
     return { ProductDisplay };

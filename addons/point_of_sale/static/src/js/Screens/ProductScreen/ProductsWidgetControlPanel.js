@@ -2,11 +2,8 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
     'use strict';
 
     const { useRef } = owl.hooks;
-    const { PosComponent } = require('point_of_sale.PosComponent');
-    const { HomeCategoryBreadcrumb } = require('point_of_sale.HomeCategoryBreadcrumb');
-    const { CategoryBreadcrumb } = require('point_of_sale.CategoryBreadcrumb');
-    const { CategorySimpleButton } = require('point_of_sale.CategorySimpleButton');
-    const { CategoryButton } = require('point_of_sale.CategoryButton');
+    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { ProductsWidget } = require('point_of_sale.ProductsWidget');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class ProductsWidgetControlPanel extends PosComponent {
@@ -27,13 +24,8 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
             }, 70);
         }
     }
-    ProductsWidgetControlPanel.components = {
-        HomeCategoryBreadcrumb,
-        CategoryBreadcrumb,
-        CategorySimpleButton,
-        CategoryButton,
-    };
 
+    addComponents(ProductsWidget, [ProductsWidgetControlPanel]);
     Registry.add('ProductsWidgetControlPanel', ProductsWidgetControlPanel);
 
     return { ProductsWidgetControlPanel };

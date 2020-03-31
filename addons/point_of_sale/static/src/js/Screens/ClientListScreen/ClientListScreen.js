@@ -5,9 +5,6 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
     const { useRef } = owl.hooks;
     const { Chrome } = require('point_of_sale.chrome');
     const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
-    const { ClientLine } = require('point_of_sale.ClientLine');
-    const { ClientDetails } = require('point_of_sale.ClientDetails');
-    const { ClientDetailsEdit } = require('point_of_sale.ClientDetailsEdit');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class ClientListScreen extends PosComponent {
@@ -210,9 +207,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
         }
     }
 
-    addComponents(ClientListScreen, [ClientLine, ClientDetails, ClientDetailsEdit]);
     addComponents(Chrome, [ClientListScreen]);
-
     Registry.add('ClientListScreen', ClientListScreen);
 
     return { ClientListScreen };

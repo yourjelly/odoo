@@ -61,14 +61,34 @@ odoo.define('point_of_sale.PosComponent', function(require) {
             return this.__owl__.observer.weakMap.get(state).value;
         }
     }
-    PosComponent.components = new Proxy(
-        {},
-        {
-            get(target, key) {
-                return Registry.get(key) ? Registry.get(key) : target[key];
-            },
+
+    class ComponentsProxyHandler {
+        constructor(parent, children) {
+            this._parent = parent;
+            this._children = children;
+            this._childrenNames = new Set([...children.map(comp => comp.name)]);
         }
-    );
+        get(target, key) {
+            if (!this._childrenNames.has(key)) return;
+            return Registry.get(key) ? Registry.get(key) : target[key];
+        }
+        set(target, key, value) {
+            if (key !== value.name) {
+                console.warn(
+                    `Setting '${value.name}' Component to '${key}' key is not recommended.`
+                );
+            }
+            if (this._childrenNames.has(key)) {
+                console.warn(
+                    `'${key}' is already declared as one of child components of '${this._parent}'`
+                );
+            } else {
+                this._childrenNames.add(key);
+                target[key] = value;
+            }
+            return true;
+        }
+    }
 
     /**
      * Extends the static `components` of parentComponent with the given components array.
@@ -77,11 +97,18 @@ odoo.define('point_of_sale.PosComponent', function(require) {
      * @param {Array<Component>} components
      */
     function addComponents(parentComponent, components) {
-        if (!(parentComponent && parentComponent.prototype instanceof Component)) {
-            return;
-        }
-        for (let component of components) {
-            parentComponent.components[component.name] = component;
+        if (!(parentComponent && parentComponent.prototype instanceof Component)) return;
+        // We add only those that are `owl.Component`s.
+        components = components.filter(comp => comp.prototype instanceof Component);
+        if (!parentComponent.hasOwnProperty('components')) {
+            parentComponent.components = new Proxy(
+                {},
+                new ComponentsProxyHandler(parentComponent, components)
+            );
+        } else {
+            for (let component of components) {
+                parentComponent.components[component.name] = component;
+            }
         }
     }
 
