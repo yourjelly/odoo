@@ -1,7 +1,6 @@
 odoo.define('pos_restaurant.BillScreen', function(require) {
     'use strict';
 
-    const { addComponents } = require('point_of_sale.PosComponent');
     const { Chrome } = require('point_of_sale.chrome');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -14,6 +13,9 @@ odoo.define('pos_restaurant.BillScreen', function(require) {
             }
         };
 
-    addComponents(Chrome, ['BillScreen']);
+    // we pass string array to addComponents because 'BillScreen' is
+    // a Class inside the Registry. The concrete class of 'BillScreen'
+    // is yet to be available.
+    Chrome.addComponents(['BillScreen']);
     Registry.addByExtending('BillScreen', 'ReceiptScreen', BillScreen);
 });
