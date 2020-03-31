@@ -2,14 +2,19 @@ odoo.define('pos_restaurant.chrome', function(require) {
     'use strict';
 
     const { Chrome } = require('point_of_sale.chrome');
-    const { useListener } = require('web.custom_hooks');
+    const { onWillUnmount } = owl.hooks;
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     const PosResChrome = Chrome =>
         class extends Chrome {
-            constructor() {
-                super(...arguments);
-                this._setActivityListeners();
+            /**
+             * @override
+             */
+            async start() {
+                await super.start();
+                if (this.env.pos.config.iface_floorplan) {
+                    this._setActivityListeners();
+                }
             }
             /**
              * @override
@@ -45,8 +50,12 @@ odoo.define('pos_restaurant.chrome', function(require) {
             }
             _setActivityListeners() {
                 const events = 'mousemove mousedown touchstart click scroll keypress'.split(' ');
-                for (let event of events) {
-                    useListener(event, this._setIdleTimer);
+                const boundHandler = this._setIdleTimer.bind(this);
+                for (let eventName of events) {
+                    this.el.addEventListener(eventName, boundHandler);
+                    onWillUnmount(() => {
+                        this.el.removeEventListener(eventName, boundHandler);
+                    });
                 }
             }
             _setIdleTimer() {
