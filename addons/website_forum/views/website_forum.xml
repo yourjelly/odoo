@@ -266,7 +266,7 @@
 
             <a t-att-href="click_action"
                 t-attf-class="badge #{tag and tag.name == question_tag.name and 'badge-secondary' or 'border text-600 badge-light'} #{ not question_tag_first and 'ml-lg-1 mt-lg-1'}"
-                t-field="question_tag.name"/>
+                t-field="question_tag.name or question.id"/>
         </t>
     </div>
 
