@@ -1,7 +1,7 @@
 odoo.define('pos_hr.chrome', function(require) {
     'use strict';
 
-    const { Chrome } = require('point_of_sale.chrome');
+    const Chrome = require('point_of_sale.chrome');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     const PosHrChrome = Chrome =>
@@ -17,4 +17,6 @@ odoo.define('pos_hr.chrome', function(require) {
         };
 
     Registry.extend(Chrome.name, PosHrChrome);
+
+    return Chrome;
 });
