@@ -1,7 +1,7 @@
 odoo.define('pos_restaurant.chrome', function(require) {
     'use strict';
 
-    const Chrome = require('point_of_sale.chrome');
+    const Chrome = require('point_of_sale.Chrome');
     const { onWillUnmount } = owl.hooks;
     const Registry = require('point_of_sale.ComponentsRegistry');
 

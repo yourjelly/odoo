@@ -3,7 +3,7 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
 
     const { debounce } = owl.utils;
     const PosComponent = require('point_of_sale.PosComponent');
-    const Chrome = require('point_of_sale.chrome');
+    const Chrome = require('point_of_sale.Chrome');
     const TableWidget = require('pos_restaurant.TableWidget');
     const EditableTable = require('pos_restaurant.EditableTable');
     const { useState, useRef } = owl.hooks;
