@@ -2,7 +2,7 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
     'use strict';
 
     const { useState, useExternalListener } = owl.hooks;
-    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { PosComponent } = require('point_of_sale.PosComponent');
     const { Chrome } = require('point_of_sale.chrome');
     const { round_precision: round_pr } = require('web.utils');
     const Registry = require('point_of_sale.ComponentsRegistry');
@@ -94,7 +94,7 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
         }
     }
 
-    addComponents(Chrome, [ScaleScreen]);
+    Chrome.addComponents([ScaleScreen]);
     Registry.add('ScaleScreen', ScaleScreen);
 
     return { ScaleScreen };

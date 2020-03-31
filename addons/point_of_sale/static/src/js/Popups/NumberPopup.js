@@ -3,7 +3,6 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
 
     const { useState } = owl;
     const { Chrome } = require('point_of_sale.chrome');
-    const { addComponents } = require('point_of_sale.PosComponent');
     const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
     const { NumberBuffer } = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
@@ -67,8 +66,7 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
         isPassword: false,
     };
 
-    addComponents(Chrome, [NumberPopup]);
-
+    Chrome.addComponents([NumberPopup]);
     Registry.add('NumberPopup', NumberPopup);
 
     return { NumberPopup };

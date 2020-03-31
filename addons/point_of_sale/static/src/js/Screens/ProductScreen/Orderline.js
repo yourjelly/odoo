@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.Orderline', function(require) {
     'use strict';
 
-    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { PosComponent } = require('point_of_sale.PosComponent');
     const { OrderWidget } = require('point_of_sale.OrderWidget');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -20,7 +20,7 @@ odoo.define('point_of_sale.Orderline', function(require) {
         }
     }
 
-    addComponents(OrderWidget, [Orderline]);
+    OrderWidget.addComponents([Orderline]);
     Registry.add('Orderline', Orderline);
 
     return { Orderline };

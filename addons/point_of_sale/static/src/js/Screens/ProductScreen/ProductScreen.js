@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.ProductScreen', function(require) {
     'use strict';
 
-    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { PosComponent } = require('point_of_sale.PosComponent');
     const { Chrome } = require('point_of_sale.chrome');
     const { NumberBuffer } = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
@@ -245,10 +245,10 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         }
 
         // We then add to the components object.
-        addComponents(this, [controlButton.component]);
+        this.addComponents([controlButton.component]);
     };
 
-    addComponents(Chrome, [ProductScreen]);
+    Chrome.addComponents([ProductScreen]);
     Registry.add('ProductScreen', ProductScreen);
 
     return { ProductScreen };

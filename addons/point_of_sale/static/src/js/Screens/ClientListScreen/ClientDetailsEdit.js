@@ -2,7 +2,7 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
     'use strict';
 
     const { getDataURLFromFile } = require('web.utils');
-    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { PosComponent } = require('point_of_sale.PosComponent');
     const { ClientListScreen } = require('point_of_sale.ClientListScreen');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -119,7 +119,7 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
         }
     }
 
-    addComponents(ClientListScreen, [ClientDetailsEdit]);
+    ClientListScreen.addComponents([ClientDetailsEdit]);
     Registry.add('ClientDetailsEdit', ClientDetailsEdit);
 
     return { ClientDetailsEdit };

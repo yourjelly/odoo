@@ -3,7 +3,7 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
 
     const { parse } = require('web.field_utils');
     const { is_email } = require('web.utils');
-    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { PosComponent } = require('point_of_sale.PosComponent');
     const { Chrome } = require('point_of_sale.chrome');
     const { useErrorHandlers } = require('point_of_sale.custom_hooks');
     const { NumberBuffer } = require('point_of_sale.NumberBuffer');
@@ -373,7 +373,7 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
         }
     }
 
-    addComponents(Chrome, [PaymentScreen]);
+    Chrome.addComponents([PaymentScreen]);
     Registry.add('PaymentScreen', PaymentScreen);
 
     return { PaymentScreen };

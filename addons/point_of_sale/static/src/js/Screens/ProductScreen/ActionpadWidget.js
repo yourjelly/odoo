@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.ActionpadWidget', function(require) {
     'use strict';
 
-    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { PosComponent } = require('point_of_sale.PosComponent');
     const { ProductScreen } = require('point_of_sale.ProductScreen');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -58,7 +58,7 @@ odoo.define('point_of_sale.ActionpadWidget', function(require) {
         }
     }
 
-    addComponents(ProductScreen, [ActionpadWidget]);
+    ProductScreen.addComponents([ActionpadWidget]);
     Registry.add('ActionpadWidget', ActionpadWidget);
 
     return { ActionpadWidget };

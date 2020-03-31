@@ -62,55 +62,50 @@ odoo.define('point_of_sale.PosComponent', function(require) {
         }
     }
 
+    const repr = component => {
+        if (typeof component === 'string') {
+            return component;
+        } else if (component.prototype instanceof Component) {
+            return component.name;
+        } else {
+            throw new Error('Only owl.Component or string is allowed.');
+        }
+    };
+
     class ComponentsProxyHandler {
         constructor(parent, children) {
             this._parent = parent;
-            this._children = children;
-            this._childrenNames = new Set([...children.map(comp => comp.name)]);
+            this._childrenNames = new Set([...children.map(repr).filter(Boolean)]);
         }
         get(target, key) {
-            if (!this._childrenNames.has(key)) return;
-            return Registry.get(key) ? Registry.get(key) : target[key];
+            return this._childrenNames.has(key) ? Registry.get(key) : null;
         }
         set(target, key, value) {
-            if (key !== value.name) {
-                console.warn(
-                    `Setting '${value.name}' Component to '${key}' key is not recommended.`
-                );
-            }
             if (this._childrenNames.has(key)) {
                 console.warn(
                     `'${key}' is already declared as one of child components of '${this._parent}'`
                 );
             } else {
                 this._childrenNames.add(key);
-                target[key] = value;
             }
             return true;
         }
     }
 
     /**
-     * Extends the static `components` of parentComponent with the given components array.
+     * Extends the static `components` of this Component with the given components array.
      *
-     * @param {Component} parentComponent
-     * @param {Array<Component>} components
+     * @param {Array<Component|String>} components array of Components or Component names.
      */
-    function addComponents(parentComponent, components) {
-        if (!(parentComponent && parentComponent.prototype instanceof Component)) return;
-        // We add only those that are `owl.Component`s.
-        components = components.filter(comp => comp.prototype instanceof Component);
-        if (!parentComponent.hasOwnProperty('components')) {
-            parentComponent.components = new Proxy(
-                {},
-                new ComponentsProxyHandler(parentComponent, components)
-            );
+    PosComponent.addComponents = function(components) {
+        if (!this.hasOwnProperty('components')) {
+            this.components = new Proxy({}, new ComponentsProxyHandler(this, components));
         } else {
             for (let component of components) {
-                parentComponent.components[component.name] = component;
+                this.components[repr(component)] = component;
             }
         }
-    }
+    };
 
-    return { PosComponent, addComponents };
+    return { PosComponent };
 });

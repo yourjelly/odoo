@@ -2,7 +2,7 @@ odoo.define('point_of_sale.CashierName', function(require) {
     'use strict';
 
     const { Chrome } = require('point_of_sale.chrome');
-    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { PosComponent } = require('point_of_sale.PosComponent');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     // Previously UsernameWidget
@@ -18,8 +18,7 @@ odoo.define('point_of_sale.CashierName', function(require) {
         }
     }
 
-    addComponents(Chrome, [CashierName]);
-
+    Chrome.addComponents([CashierName]);
     Registry.add('CashierName', CashierName);
 
     return { CashierName };

@@ -3,7 +3,6 @@ odoo.define('point_of_sale.TextAreaPopup', function(require) {
 
     const { useState, useRef } = owl.hooks;
     const { Chrome } = require('point_of_sale.chrome');
-    const { addComponents } = require('point_of_sale.PosComponent');
     const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -35,8 +34,7 @@ odoo.define('point_of_sale.TextAreaPopup', function(require) {
         body: '',
     };
 
-    addComponents(Chrome, [TextAreaPopup]);
-
+    Chrome.addComponents([TextAreaPopup]);
     Registry.add('TextAreaPopup', TextAreaPopup);
 
     return { TextAreaPopup };
