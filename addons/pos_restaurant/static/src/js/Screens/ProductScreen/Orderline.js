@@ -1,7 +1,7 @@
 odoo.define('pos_restaurant.Orderline', function(require) {
     'use strict';
 
-    const { Orderline } = require('point_of_sale.Orderline');
+    const Orderline = require('point_of_sale.Orderline');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     const PosResOrderline = Orderline =>
@@ -41,4 +41,6 @@ odoo.define('pos_restaurant.Orderline', function(require) {
         };
 
     Registry.extend(Orderline.name, PosResOrderline);
+
+    return Orderline;
 });

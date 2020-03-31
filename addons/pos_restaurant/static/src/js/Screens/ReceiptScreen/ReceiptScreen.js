@@ -1,7 +1,7 @@
 odoo.define('pos_restaurant.ReceiptScreen', function(require) {
     'use strict';
 
-    const { ReceiptScreen } = require('point_of_sale.ReceiptScreen');
+    const ReceiptScreen = require('point_of_sale.ReceiptScreen');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     const PosResReceiptScreen = ReceiptScreen =>
@@ -23,4 +23,6 @@ odoo.define('pos_restaurant.ReceiptScreen', function(require) {
         };
 
     Registry.extend(ReceiptScreen.name, PosResReceiptScreen);
+
+    return ReceiptScreen;
 });

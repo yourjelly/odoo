@@ -1,7 +1,7 @@
 odoo.define('pos_restaurant.BillScreen', function(require) {
     'use strict';
 
-    const { Chrome } = require('point_of_sale.chrome');
+    const Chrome = require('point_of_sale.chrome');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     const BillScreen = ReceiptScreen =>

@@ -1,8 +1,8 @@
 odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
     'use strict';
 
-    const { PosComponent } = require('point_of_sale.PosComponent');
-    const { ProductScreen } = require('point_of_sale.ProductScreen');
+    const PosComponent = require('point_of_sale.PosComponent');
+    const ProductScreen = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -66,5 +66,5 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
 
     Registry.add('SubmitOrderButton', SubmitOrderButton);
 
-    return { SubmitOrderButton };
+    return SubmitOrderButton;
 });

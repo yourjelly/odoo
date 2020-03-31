@@ -1,7 +1,7 @@
 odoo.define('pos_restaurant.TableWidget', function(require) {
     'use strict';
 
-    const { PosComponent } = require('point_of_sale.PosComponent');
+    const PosComponent = require('point_of_sale.PosComponent');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class TableWidget extends PosComponent {
@@ -69,5 +69,5 @@ odoo.define('pos_restaurant.TableWidget', function(require) {
 
     Registry.add('TableWidget', TableWidget);
 
-    return { TableWidget };
+    return TableWidget;
 });
