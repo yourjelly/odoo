@@ -1,4 +1,4 @@
-odoo.define('point_of_sale.chrome', function(require) {
+odoo.define('point_of_sale.Chrome', function(require) {
     'use strict';
 
     const { useState, useRef } = owl.hooks;

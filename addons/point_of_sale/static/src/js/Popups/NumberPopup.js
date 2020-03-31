@@ -2,7 +2,7 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
     'use strict';
 
     const { useState } = owl;
-    const { Chrome } = require('point_of_sale.chrome');
+    const { Chrome } = require('point_of_sale.Chrome');
     const { AbstractAwaitablePopup } = require('point_of_sale.AbstractAwaitablePopup');
     const { NumberBuffer } = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
