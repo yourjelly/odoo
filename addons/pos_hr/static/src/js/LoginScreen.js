@@ -3,6 +3,7 @@ odoo.define('point_of_sale.LoginScreen', function(require) {
 
     const { Chrome } = require('point_of_sale.chrome');
     const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const Registry = require('point_of_sale.ComponentsRegistry');
 
     class LoginScreen extends PosComponent {
         mounted() {
@@ -118,6 +119,7 @@ odoo.define('point_of_sale.LoginScreen', function(require) {
 
     // register screen component
     addComponents(Chrome, [LoginScreen]);
+    Registry.add(LoginScreen.name, LoginScreen);
 
     return { LoginScreen };
 });

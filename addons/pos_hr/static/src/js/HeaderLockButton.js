@@ -3,6 +3,7 @@ odoo.define('point_of_sale.HeaderLockButton', function(require) {
 
     const { Chrome } = require('point_of_sale.chrome');
     const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const Registry = require('point_of_sale.ComponentsRegistry');
     const { useState } = owl;
 
     class HeaderLockButton extends PosComponent {
@@ -17,6 +18,7 @@ odoo.define('point_of_sale.HeaderLockButton', function(require) {
     }
 
     addComponents(Chrome, [HeaderLockButton]);
+    Registry.add(HeaderLockButton.name, HeaderLockButton);
 
     return { HeaderLockButton };
 });
