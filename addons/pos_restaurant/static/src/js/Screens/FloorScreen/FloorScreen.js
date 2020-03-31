@@ -2,7 +2,10 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
     'use strict';
 
     const { debounce } = owl.utils;
-    const { PosComponent } = require('point_of_sale.PosComponent');
+    const { PosComponent, addComponents } = require('point_of_sale.PosComponent');
+    const { Chrome } = require('point_of_sale.chrome');
+    const { TableWidget } = require('pos_restaurant.TableWidget');
+    const { EditableTable } = require('pos_restaurant.EditableTable');
     const { useState, useRef } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
     const Registry = require('point_of_sale.ComponentsRegistry');
@@ -283,6 +286,8 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
         }
     }
 
+    addComponents(FloorScreen, [TableWidget, EditableTable]);
+    addComponents(Chrome, [FloorScreen]);
     Registry.add('FloorScreen', FloorScreen);
 
     return { FloorScreen };
