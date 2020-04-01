@@ -57,4 +57,12 @@
     </xpath>
   </template>
 
+  <template id="website_sale_stock_products_add_to_cart" inherit_id="website_sale.products_add_to_cart">
+    <xpath expr="//a[hasclass('a-submit')]" position="attributes">
+        <t t-if="producttype == 'product' and .contains(['always', 'threshold'], inventory_availability) and !cart_qty and virtual_available&lt;0">
+            <attribute name="class">disabled</attribute>
+        </t>
+    </xpath>
+  </template>
+
 </odoo>

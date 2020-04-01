@@ -26,13 +26,4 @@
         </div>
     </t>
 
-    <template id="website_sale_stock_products_add_to_cart" inherit_id="website_sale.products_add_to_cart">
-        <xpath expr="//div[hasclass('o_wsale_product_btn')]" position="inside">
-            <span style="color:red;" t-esc="product.virtual_available"/>
-        </xpath>
-        <xpath expr="//a[hasclass('a-submit')]" position="attributes">
-            <attribute name="t-if">product.virtual_available</attribute>
-        </xpath>
-    </template>
-
 </templates>
