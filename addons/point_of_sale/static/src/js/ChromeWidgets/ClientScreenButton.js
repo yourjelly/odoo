@@ -12,7 +12,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
         constructor() {
             super(...arguments);
             this.state = useState({ status: 'failure' });
-            this._status_loop();
+            this._start();
         }
         get message() {
             return {
@@ -38,7 +38,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                 }
                 if (!this.env.pos.proxy.posbox_supports_display) {
                     this.env.pos.proxy.posbox_supports_display = true;
-                    this._status_loop();
+                    this._start();
                 }
             } catch (error) {
                 if (typeof error == 'undefined') {
@@ -48,7 +48,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                 }
             }
         }
-        _status_loop() {
+        _start() {
             const self = this;
             async function loop() {
                 if (self.env.pos.proxy.posbox_supports_display) {

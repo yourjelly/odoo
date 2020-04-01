@@ -39,6 +39,13 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 this.env.pos.barcode_reader.reset_action_callbacks();
             }
         }
+        /**
+         * To be overridden by modules that checks availability of
+         * connected scale.
+         */
+        get isScaleAvailable() {
+            return true;
+        }
         get currentOrder() {
             return this.env.pos.get_order();
         }
@@ -94,14 +101,18 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             // Take the weight if necessary.
             if (product.to_weight && this.env.pos.config.iface_electronic_scale) {
                 // Show the ScaleScreen to weigh the product.
-                const { confirmed, payload } = await this.showTempScreen('ScaleScreen', {
-                    product,
-                });
-                if (confirmed) {
-                    weight = payload.weight;
+                if (this.isScaleAvailable) {
+                    const { confirmed, payload } = await this.showTempScreen('ScaleScreen', {
+                        product,
+                    });
+                    if (confirmed) {
+                        weight = payload.weight;
+                    } else {
+                        // do not add the product;
+                        return;
+                    }
                 } else {
-                    // do not add the product;
-                    return;
+                    await this._onScaleNotAvailable();
                 }
             }
 
@@ -188,6 +199,10 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 await this.render();
             }
         }
+        /**
+         * To be overridden by modules that checks availa
+         */
+        async _onScaleNotAvailable() {}
     }
     ProductScreen.controlButtons = [];
 

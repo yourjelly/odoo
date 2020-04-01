@@ -104,6 +104,24 @@ var PrinterMixin = {
         });
         return promise;
     },
+
+    _onIoTActionResult: function (data){
+        if (this.pos && (data === false || data.result === false)) {
+            Gui.showPopup('ErrorPopup',{
+                'title': _t('Connection to the printer failed'),
+                'body':  _t('Please check if the printer is still connected.'),
+            });
+        }
+    },
+
+    _onIoTActionFail: function () {
+        if (this.pos) {
+            Gui.showPopup('ErrorPopup',{
+                'title': _t('Connection to IoT Box failed'),
+                'body':  _t('Please check if the IoT Box is still connected.'),
+            });
+        }
+    },
 }
 
 var Printer = core.Class.extend(PrinterMixin, {
