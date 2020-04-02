@@ -43,7 +43,7 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
     }
 
     OrderReceipt.addComponents([WrappedProductNameLines]);
-    Registry.add('OrderReceipt', OrderReceipt);
+    Registry.add(OrderReceipt);
 
     return OrderReceipt;
 });

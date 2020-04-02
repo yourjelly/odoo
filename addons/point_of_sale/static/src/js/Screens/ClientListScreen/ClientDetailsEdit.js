@@ -120,7 +120,7 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
     }
 
     ClientListScreen.addComponents([ClientDetailsEdit]);
-    Registry.add('ClientDetailsEdit', ClientDetailsEdit);
+    Registry.add(ClientDetailsEdit);
 
     return ClientDetailsEdit;
 });

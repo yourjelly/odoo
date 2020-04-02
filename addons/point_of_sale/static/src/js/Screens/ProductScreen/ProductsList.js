@@ -10,7 +10,7 @@ odoo.define('point_of_sale.ProductsList', function(require) {
     }
 
     ProductsWidget.addComponents([ProductsList]);
-    Registry.add('ProductsList', ProductsList);
+    Registry.add(ProductsList);
 
     return ProductsList;
 });

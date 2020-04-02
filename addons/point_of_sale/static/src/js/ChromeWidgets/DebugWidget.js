@@ -145,7 +145,7 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
 
     DebugWidget.addComponents([Draggable]);
     Chrome.addComponents([DebugWidget]);
-    Registry.add('DebugWidget', DebugWidget);
+    Registry.add(DebugWidget);
 
     return DebugWidget;
 });

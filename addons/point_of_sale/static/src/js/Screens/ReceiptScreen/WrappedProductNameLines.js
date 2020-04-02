@@ -12,7 +12,7 @@ odoo.define('point_of_sale.WrappedProductNameLines', function(require) {
         }
     }
 
-    Registry.add('WrappedProductNameLines', WrappedProductNameLines);
+    Registry.add(WrappedProductNameLines);
 
     return WrappedProductNameLines;
 });

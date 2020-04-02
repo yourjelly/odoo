@@ -21,7 +21,7 @@ odoo.define('point_of_sale.Orderline', function(require) {
     }
 
     OrderWidget.addComponents([Orderline]);
-    Registry.add('Orderline', Orderline);
+    Registry.add(Orderline);
 
     return Orderline;
 });

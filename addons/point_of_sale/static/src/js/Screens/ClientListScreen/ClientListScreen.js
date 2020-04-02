@@ -208,7 +208,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
     }
 
     Chrome.addComponents([ClientListScreen]);
-    Registry.add('ClientListScreen', ClientListScreen);
+    Registry.add(ClientListScreen);
 
     return ClientListScreen;
 });

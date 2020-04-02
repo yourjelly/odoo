@@ -84,7 +84,7 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
     }
 
     Chrome.addComponents([ProxyStatus]);
-    Registry.add('ProxyStatus', ProxyStatus);
+    Registry.add(ProxyStatus);
 
     return ProxyStatus;
 });

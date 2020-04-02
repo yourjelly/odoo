@@ -83,7 +83,7 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
     }
 
     Chrome.addComponents([ClientScreenButton]);
-    Registry.add('ClientScreenButton', ClientScreenButton);
+    Registry.add(ClientScreenButton);
 
     return ClientScreenButton;
 });

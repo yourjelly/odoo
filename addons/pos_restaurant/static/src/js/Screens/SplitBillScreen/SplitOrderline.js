@@ -21,7 +21,7 @@ odoo.define('pos_restaurant.SplitOrderline', function(require) {
     }
 
     SplitBillScreen.addComponents([SplitOrderline]);
-    Registry.add('SplitOrderline', SplitOrderline);
+    Registry.add(SplitOrderline);
 
     return SplitOrderline;
 });

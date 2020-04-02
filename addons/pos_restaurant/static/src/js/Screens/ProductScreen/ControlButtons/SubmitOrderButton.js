@@ -64,7 +64,7 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
         },
     });
 
-    Registry.add('SubmitOrderButton', SubmitOrderButton);
+    Registry.add(SubmitOrderButton);
 
     return SubmitOrderButton;
 });

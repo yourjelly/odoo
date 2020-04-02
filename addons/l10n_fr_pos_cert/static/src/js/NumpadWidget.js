@@ -18,7 +18,7 @@ odoo.define('l10n_fr_pos_cert.NumpadWidget', function(require) {
         }
     };
 
-    Registry.extend(NumpadWidget.name, PosFrNumpadWidget);
+    Registry.extend(NumpadWidget, PosFrNumpadWidget);
 
     return NumpadWidget;
  });

@@ -38,7 +38,7 @@ odoo.define('pos_restaurant.TableGuestsButton', function(require) {
         },
     });
 
-    Registry.add('TableGuestsButton', TableGuestsButton);
+    Registry.add(TableGuestsButton);
 
     return TableGuestsButton;
 });

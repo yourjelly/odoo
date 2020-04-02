@@ -45,7 +45,7 @@ odoo.define('point_of_sale.OrderSelector', function(require) {
     }
 
     Chrome.addComponents([OrderSelector]);
-    Registry.add('OrderSelector', OrderSelector);
+    Registry.add(OrderSelector);
 
     return OrderSelector;
 });

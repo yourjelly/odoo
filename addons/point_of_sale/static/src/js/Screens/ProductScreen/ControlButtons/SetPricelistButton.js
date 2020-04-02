@@ -61,7 +61,7 @@ odoo.define('point_of_sale.SetPricelistButton', function(require) {
         },
     });
 
-    Registry.add('SetPricelistButton', SetPricelistButton);
+    Registry.add(SetPricelistButton);
 
     return SetPricelistButton;
 });

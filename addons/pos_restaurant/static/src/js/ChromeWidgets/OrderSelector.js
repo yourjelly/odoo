@@ -14,7 +14,7 @@ odoo.define('pos_restaurant.OrderSelector', function(require) {
             }
         };
 
-    Registry.extend(OrderSelector.name, PosResOrderSelector);
+    Registry.extend(OrderSelector, PosResOrderSelector);
 
     return OrderSelector;
 });

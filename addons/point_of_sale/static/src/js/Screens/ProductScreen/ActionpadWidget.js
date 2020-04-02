@@ -59,7 +59,7 @@ odoo.define('point_of_sale.ActionpadWidget', function(require) {
     }
 
     ProductScreen.addComponents([ActionpadWidget]);
-    Registry.add('ActionpadWidget', ActionpadWidget);
+    Registry.add(ActionpadWidget);
 
     return ActionpadWidget;
 });

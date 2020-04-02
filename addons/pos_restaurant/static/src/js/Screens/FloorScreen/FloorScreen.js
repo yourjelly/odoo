@@ -288,7 +288,7 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
 
     FloorScreen.addComponents([TableWidget, EditableTable]);
     Chrome.addComponents([FloorScreen]);
-    Registry.add('FloorScreen', FloorScreen);
+    Registry.add(FloorScreen);
 
     return FloorScreen;
 });

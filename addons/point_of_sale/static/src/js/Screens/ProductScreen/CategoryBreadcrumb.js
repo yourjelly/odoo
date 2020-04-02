@@ -10,7 +10,7 @@ odoo.define('point_of_sale.CategoryBreadcrumb', function(require) {
     }
 
     ProductsWidgetControlPanel.addComponents([CategoryBreadcrumb]);
-    Registry.add('CategoryBreadcrumb', CategoryBreadcrumb);
+    Registry.add(CategoryBreadcrumb);
 
     return CategoryBreadcrumb;
 });

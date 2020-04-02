@@ -296,7 +296,7 @@ odoo.define('pos_restaurant.Resizeable', function(require) {
         }
     }
 
-    Registry.add('Resizeable', Resizeable);
+    Registry.add(Resizeable);
 
     return Resizeable;
 });

@@ -10,7 +10,7 @@ odoo.define('point_of_sale.PaymentScreenElectronicPayment', function(require) {
     }
 
     PaymentScreenPaymentLines.addComponents([PaymentScreenElectronicPayment]);
-    Registry.add('PaymentScreenElectronicPayment', PaymentScreenElectronicPayment);
+    Registry.add(PaymentScreenElectronicPayment);
 
     return PaymentScreenElectronicPayment;
 });

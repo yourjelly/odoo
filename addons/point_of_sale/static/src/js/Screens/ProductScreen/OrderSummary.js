@@ -26,7 +26,7 @@ odoo.define('point_of_sale.OrderSummary', function(require) {
     }
 
     OrderWidget.addComponents([OrderSummary]);
-    Registry.add('OrderSummary', OrderSummary);
+    Registry.add(OrderSummary);
 
     return OrderSummary;
 });

@@ -98,7 +98,7 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
     }
 
     Chrome.addComponents([ScaleScreen]);
-    Registry.add('ScaleScreen', ScaleScreen);
+    Registry.add(ScaleScreen);
 
     return ScaleScreen;
 });

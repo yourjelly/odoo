@@ -59,7 +59,7 @@ odoo.define('point_of_sale.SelectionPopup', function(require) {
     };
 
     Chrome.addComponents([SelectionPopup]);
-    Registry.add('SelectionPopup', SelectionPopup);
+    Registry.add(SelectionPopup);
 
     return SelectionPopup;
 });

@@ -1,37 +1,39 @@
 odoo.define('point_of_sale.ComponentsRegistry', function(require) {
     'use strict';
 
-    // Object that maps `name` to the class implementation extended in-place.
-    const includedMap = {};
-    // Object that maps `name` to the array of callbacks to generate the extended class.
-    const extendedCBMap = {};
-    // Object that maps `name` extended class to the `name` of its super in the includedMap.
-    const extendedSuperNameMap = {};
+    // Object that maps `baseClass` to the class implementation extended in-place.
+    const includedMap = new Map();
+    // Object that maps `baseClassCB` to the array of callbacks to generate the extended class.
+    const extendedCBMap = new Map();
+    // Object that maps `baseClassCB` extended class to the `baseClass` of its super in the includedMap.
+    const extendedSuperMap = new Map();
     // For faster access, we can `freeze` the registry so that instead of dynamically generating
     // the extended classes, it is taken from the cache instead.
-    const cache = {};
+    const cache = new Map();
+    // mapping of baseName to base
+    const baseNameMap = {};
 
     /**
      * **Usage:**
      * ```
      * class A {}
-     * Registry.add('A', A);
+     * Registry.add(A);
      *
      * const AExt1 = A => class extends A {}
-     * Registry.extend('A', AExt1)
+     * Registry.extend(A, AExt1)
      *
      * const B = A => class extends A {}
-     * Registry.addByExtending('B', 'A', B)
+     * Registry.addByExtending(B, A)
      *
      * const AExt2 = A => class extends A {}
-     * Registry.extend('A', AExt2)
+     * Registry.extend(A, AExt2)
      *
-     * Registry.get('A')
+     * Registry.get(A)
      * // above returns: AExt2 -> AExt1 -> A
      * // Basically, 'A' in the registry points to
      * // the inheritance chain above.
      *
-     * Registry.get('B')
+     * Registry.get(B)
      * // above returns: B -> AExt2 -> AExt1 -> A
      * // Even though B extends A before applying all
      * // the extensions of A, when getting it from the
@@ -48,43 +50,46 @@ odoo.define('point_of_sale.ComponentsRegistry', function(require) {
      * ```
      */
     const Registry = {
-        add(newClassName, Class) {
-            includedMap[newClassName] = Class;
+        add(baseClass) {
+            includedMap.set(baseClass, baseClass);
+            baseNameMap[baseClass.name] = baseClass;
         },
-        addByExtending(newClassName, classNameToExtend, using) {
-            extendedCBMap[newClassName] = [using];
-            extendedSuperNameMap[newClassName] = classNameToExtend;
+        addByExtending(baseClassCB, baseClass) {
+            extendedCBMap.set(baseClassCB, [baseClassCB]);
+            extendedSuperMap.set(baseClassCB, baseClass);
+            baseNameMap[baseClassCB.name] = baseClassCB;
         },
-        extend(name, using) {
-            if (includedMap[name]) {
-                const toExtend = includedMap[name];
-                const extended = using(toExtend);
-                includedMap[name] = extended;
-            } else if (extendedCBMap[name]) {
-                extendedCBMap[name].push(using);
-            } else if (using instanceof Function) {
-                extendedCBMap[name] = [using];
+        extend(base, extensionCB) {
+            if (includedMap.get(base)) {
+                const toExtend = includedMap.get(base);
+                const extended = extensionCB(toExtend);
+                includedMap.set(base, extended);
+            } else if (extendedCBMap.get(base)) {
+                extendedCBMap.get(base).push(extensionCB);
+            } else {
+                console.warn(`'${base.name}' is not in the Registry.`);
             }
         },
-        get(name) {
-            if (this.isFrozen) return cache[name];
-            if (!(includedMap[name] || extendedCBMap[name])) return undefined;
-            return includedMap[name]
-                ? includedMap[name]
-                : extendedCBMap[name].reduce(
-                      (acc, a) => a(acc),
-                      includedMap[extendedSuperNameMap[name]]
-                  );
+        get(base) {
+            base = typeof base === 'string' ? baseNameMap[base] : base;
+            if (this.isFrozen) cache.get(base);
+            if (!(includedMap.get(base) || extendedCBMap.get(base))) return undefined;
+            return includedMap.get(base)
+                ? includedMap.get(base)
+                : extendedCBMap
+                      .get(base)
+                      .reduce((acc, a) => a(acc), includedMap.get(extendedSuperMap.get(base)));
         },
         freeze() {
-            for (let [name, Class] of Object.entries(includedMap)) {
-                cache[name] = Class;
+            for (let [baseClass, extendedClass] of includedMap.entries()) {
+                cache.set(baseClass, extendedClass);
             }
-            for (let [name, extenders] of Object.entries(extendedCBMap)) {
-                cache[name] = extenders.reduce(
-                    (acc, extender) => extender(acc),
-                    includedMap[extendedSuperNameMap[name]]
+            for (let [baseExtensionCB, extensionCBArray] of extendedCBMap.entries()) {
+                const extendedClass = extensionCBArray.reduce(
+                    (acc, extensionCB) => extensionCB(acc),
+                    includedMap.get(extendedSuperMap.get(baseExtensionCB))
                 );
+                cache.set(baseExtensionCB, extendedClass);
             }
             this.isFrozen = true;
         },

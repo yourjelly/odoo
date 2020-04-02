@@ -141,7 +141,7 @@ odoo.define('point_of_sale.ReceiptScreen', function(require) {
 
     ReceiptScreen.addComponents([OrderReceipt]);
     Chrome.addComponents([ReceiptScreen]);
-    Registry.add('ReceiptScreen', ReceiptScreen);
+    Registry.add( ReceiptScreen);
 
     return ReceiptScreen;
 });

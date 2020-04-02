@@ -29,7 +29,7 @@ odoo.define('point_of_sale.SaleDetailsButton', function(require) {
     }
 
     Chrome.addComponents([SaleDetailsButton]);
-    Registry.add('SaleDetailsButton', SaleDetailsButton);
+    Registry.add(SaleDetailsButton);
 
     return SaleDetailsButton;
 });

@@ -1,6 +1,7 @@
 odoo.define('pos_reprint.ReprintScreen', function(require) {
     'use strict';
 
+    const ReceiptScreen = require('point_of_sale.ReceiptScreen');
     const Chrome = require('point_of_sale.Chrome');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -14,5 +15,7 @@ odoo.define('pos_reprint.ReprintScreen', function(require) {
         };
 
     Chrome.addComponents(['ReprintScreen']);
-    Registry.addByExtending('ReprintScreen', 'ReceiptScreen', ReprintScreen);
+    Registry.addByExtending(ReprintScreen, ReceiptScreen);
+
+    return ReprintScreen;
 });

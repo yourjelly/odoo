@@ -18,7 +18,7 @@ odoo.define('pos_reprint.OrderReceipt', function(require) {
             }
         };
 
-    Registry.extend(OrderReceipt.name, PosReprintOrderReceipt);
+    Registry.extend(OrderReceipt, PosReprintOrderReceipt);
 
     return OrderReceipt;
 });

@@ -17,7 +17,7 @@ odoo.define('point_of_sale.ErrorPopup', function(require) {
     };
 
     Chrome.addComponents([ErrorPopup]);
-    Registry.add('ErrorPopup', ErrorPopup);
+    Registry.add(ErrorPopup);
 
     return ErrorPopup;
 });

@@ -26,7 +26,7 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
     }
 
     ProductsWidget.addComponents([ProductsWidgetControlPanel]);
-    Registry.add('ProductsWidgetControlPanel', ProductsWidgetControlPanel);
+    Registry.add(ProductsWidgetControlPanel);
 
     return ProductsWidgetControlPanel;
 });

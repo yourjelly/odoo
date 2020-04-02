@@ -18,7 +18,7 @@ odoo.define('point_of_sale.HeaderLockButton', function(require) {
     }
 
     Chrome.addComponents([HeaderLockButton]);
-    Registry.add(HeaderLockButton.name, HeaderLockButton);
+    Registry.add(HeaderLockButton);
 
     return HeaderLockButton;
 });

@@ -30,7 +30,7 @@ odoo.define('point_of_sale.TextInputPopup', function(require) {
     };
 
     Chrome.addComponents([TextInputPopup]);
-    Registry.add('TextInputPopup', TextInputPopup);
+    Registry.add(TextInputPopup);
 
     return TextInputPopup;
 });

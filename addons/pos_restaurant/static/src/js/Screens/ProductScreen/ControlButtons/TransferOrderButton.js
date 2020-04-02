@@ -24,7 +24,7 @@ odoo.define('pos_restaurant.TransferOrderButton', function(require) {
         },
     });
 
-    Registry.add('TransferOrderButton', TransferOrderButton);
+    Registry.add(TransferOrderButton);
 
     return TransferOrderButton;
 });

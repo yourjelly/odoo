@@ -74,7 +74,7 @@ odoo.define('point_of_sale.SetFiscalPositionButton', function(require) {
         position: ['before', 'SetPricelistButton'],
     });
 
-    Registry.add('SetFiscalPositionButton', SetFiscalPositionButton);
+    Registry.add(SetFiscalPositionButton);
 
     return SetFiscalPositionButton;
 });

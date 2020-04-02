@@ -32,7 +32,7 @@ odoo.define('pos_restaurant.PrintBillButton', function(require) {
         },
     });
 
-    Registry.add('PrintBillButton', PrintBillButton);
+    Registry.add(PrintBillButton);
 
     return PrintBillButton;
 });

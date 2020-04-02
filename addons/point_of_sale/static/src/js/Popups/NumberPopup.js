@@ -67,7 +67,7 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
     };
 
     Chrome.addComponents([NumberPopup]);
-    Registry.add('NumberPopup', NumberPopup);
+    Registry.add(NumberPopup);
 
     return NumberPopup;
 });

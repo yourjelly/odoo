@@ -65,7 +65,7 @@ odoo.define('point_of_sale.PosComponent', function(require) {
     const repr = component => {
         if (typeof component === 'string') {
             return component;
-        } else if (component.prototype instanceof Component) {
+        } else if (component instanceof Function) {
             return component.name;
         } else {
             throw new Error('Only owl.Component or string is allowed.');

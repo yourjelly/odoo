@@ -374,7 +374,7 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
     }
 
     Chrome.addComponents([PaymentScreen]);
-    Registry.add('PaymentScreen', PaymentScreen);
+    Registry.add(PaymentScreen);
 
     return PaymentScreen;
 });

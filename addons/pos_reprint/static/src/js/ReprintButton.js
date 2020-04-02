@@ -31,7 +31,7 @@ odoo.define('pos_reprint.ReprintButton', function(require) {
         },
     });
 
-    Registry.add('ReprintButton', ReprintButton);
+    Registry.add(ReprintButton);
 
     return ReprintButton;
 });

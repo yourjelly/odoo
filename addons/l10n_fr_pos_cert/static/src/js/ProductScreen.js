@@ -15,7 +15,7 @@ odoo.define('l10n_fr_pos_cert.ProductScreen', function(require) {
         }
     };
 
-    Registry.extend(ProductScreen.name, PosFrProductScreen);
+    Registry.extend(ProductScreen, PosFrProductScreen);
 
     return ProductScreen;
 });

@@ -33,7 +33,7 @@ odoo.define('point_of_sale.SyncNotification', function(require) {
     }
 
     Chrome.addComponents([SyncNotification]);
-    Registry.add('SyncNotification', SyncNotification);
+    Registry.add(SyncNotification);
 
     return SyncNotification;
 });

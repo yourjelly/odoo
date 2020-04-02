@@ -13,7 +13,7 @@ odoo.define('point_of_sale.PSNumpadInputButton', function(require) {
     }
 
     PaymentScreenNumpad.addComponents([PSNumpadInputButton]);
-    Registry.add('PSNumpadInputButton', PSNumpadInputButton);
+    Registry.add(PSNumpadInputButton);
 
     return PSNumpadInputButton;
 });

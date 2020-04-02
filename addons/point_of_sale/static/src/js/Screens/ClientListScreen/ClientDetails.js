@@ -17,7 +17,7 @@ odoo.define('point_of_sale.ClientDetails', function(require) {
     }
 
     ClientListScreen.addComponents([ClientDetails]);
-    Registry.add('ClientDetails', ClientDetails);
+    Registry.add(ClientDetails);
 
     return ClientDetails;
 });

@@ -13,7 +13,7 @@ odoo.define('point_of_sale.CategoryButton', function(require) {
     }
 
     ProductsWidgetControlPanel.addComponents([CategoryButton]);
-    Registry.add('CategoryButton', CategoryButton);
+    Registry.add(CategoryButton);
 
     return CategoryButton;
 });

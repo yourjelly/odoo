@@ -44,7 +44,7 @@ odoo.define('point_of_sale.ProductDisplay', function(require) {
     }
 
     ProductsList.addComponents([ProductDisplay]);
-    Registry.add('ProductDisplay', ProductDisplay);
+    Registry.add(ProductDisplay);
 
     return ProductDisplay;
 });

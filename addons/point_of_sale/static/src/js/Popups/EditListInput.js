@@ -20,7 +20,7 @@ odoo.define('point_of_sale.EditListInput', function(require) {
     }
 
     EditListPopup.addComponents([EditListInput]);
-    Registry.add('EditListInput', EditListInput);
+    Registry.add(EditListInput);
 
     return EditListInput;
 });

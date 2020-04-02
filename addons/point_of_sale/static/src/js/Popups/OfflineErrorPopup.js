@@ -25,7 +25,7 @@ odoo.define('point_of_sale.OfflineErrorPopup', function(require) {
     };
 
     Chrome.addComponents([OfflineErrorPopup]);
-    Registry.add('OfflineErrorPopup', OfflineErrorPopup);
+    Registry.add(OfflineErrorPopup);
 
     return OfflineErrorPopup;
 });

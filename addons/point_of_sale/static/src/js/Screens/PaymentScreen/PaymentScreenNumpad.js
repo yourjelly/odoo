@@ -14,7 +14,7 @@ odoo.define('point_of_sale.PaymentScreenNumpad', function(require) {
     }
 
     PaymentScreen.addComponents([PaymentScreenNumpad]);
-    Registry.add('PaymentScreenNumpad', PaymentScreenNumpad);
+    Registry.add(PaymentScreenNumpad);
 
     return PaymentScreenNumpad;
 });

@@ -19,7 +19,7 @@ odoo.define('point_of_sale.CashierName', function(require) {
     }
 
     Chrome.addComponents([CashierName]);
-    Registry.add('CashierName', CashierName);
+    Registry.add(CashierName);
 
     return CashierName;
 });

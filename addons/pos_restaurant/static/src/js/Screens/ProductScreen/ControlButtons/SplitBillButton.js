@@ -27,7 +27,7 @@ odoo.define('pos_restaurant.SplitBillButton', function(require) {
         },
     });
 
-    Registry.add('SplitBillButton', SplitBillButton);
+    Registry.add(SplitBillButton);
 
     return SplitBillButton;
 });

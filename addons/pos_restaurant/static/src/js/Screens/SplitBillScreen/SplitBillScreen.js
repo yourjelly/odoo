@@ -160,7 +160,7 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
     }
 
     Chrome.addComponents([SplitBillScreen]);
-    Registry.add('SplitBillScreen', SplitBillScreen);
+    Registry.add(SplitBillScreen);
 
     return SplitBillScreen;
 });

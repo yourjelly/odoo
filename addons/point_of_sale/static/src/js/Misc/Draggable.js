@@ -137,7 +137,7 @@ odoo.define('point_of_sale.Draggable', function(require) {
         }
     }
 
-    Registry.add('Draggable', Draggable);
+    Registry.add(Draggable);
 
     return Draggable;
 });

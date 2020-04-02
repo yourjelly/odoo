@@ -10,7 +10,7 @@ odoo.define('point_of_sale.PaymentMethodButton', function(require) {
     }
 
     PaymentScreen.addComponents([PaymentMethodButton]);
-    Registry.add('PaymentMethodButton', PaymentMethodButton);
+    Registry.add(PaymentMethodButton);
 
     return PaymentMethodButton;
 });

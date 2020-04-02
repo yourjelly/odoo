@@ -106,7 +106,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
     }
 
     ProductScreen.addComponents([OrderWidget]);
-    Registry.add('OrderWidget', OrderWidget);
+    Registry.add(OrderWidget);
 
     return OrderWidget;
 });

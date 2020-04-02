@@ -16,7 +16,7 @@ odoo.define('pos_hr.chrome', function(require) {
             }
         };
 
-    Registry.extend(Chrome.name, PosHrChrome);
+    Registry.extend(Chrome, PosHrChrome);
 
     return Chrome;
 });

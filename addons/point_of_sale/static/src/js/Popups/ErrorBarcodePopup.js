@@ -22,7 +22,7 @@ odoo.define('point_of_sale.ErrorBarcodePopup', function(require) {
     };
 
     Chrome.addComponents([ErrorBarcodePopup]);
-    Registry.add('ErrorBarcodePopup', ErrorBarcodePopup);
+    Registry.add(ErrorBarcodePopup);
 
     return ErrorBarcodePopup;
 });

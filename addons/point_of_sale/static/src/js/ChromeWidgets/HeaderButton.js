@@ -32,7 +32,7 @@ odoo.define('point_of_sale.HeaderButton', function(require) {
     }
 
     Chrome.addComponents([HeaderButton]);
-    Registry.add('HeaderButton', HeaderButton);
+    Registry.add(HeaderButton);
 
     return HeaderButton;
 });

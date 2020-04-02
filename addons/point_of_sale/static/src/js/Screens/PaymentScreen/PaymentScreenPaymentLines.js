@@ -29,7 +29,7 @@ odoo.define('point_of_sale.PaymentScreenPaymentLines', function(require) {
     }
 
     PaymentScreen.addComponents([PaymentScreenPaymentLines]);
-    Registry.add('PaymentScreenPaymentLines', PaymentScreenPaymentLines);
+    Registry.add(PaymentScreenPaymentLines);
 
     return PaymentScreenPaymentLines;
 });

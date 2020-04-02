@@ -303,7 +303,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     };
 
     Chrome.addComponents([ProductScreen]);
-    Registry.add('ProductScreen', ProductScreen);
+    Registry.add(ProductScreen);
 
     return ProductScreen;
 });

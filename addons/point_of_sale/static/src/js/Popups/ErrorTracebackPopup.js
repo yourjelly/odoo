@@ -40,7 +40,7 @@ odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
     };
 
     Chrome.addComponents([ErrorTracebackPopup]);
-    Registry.add('ErrorTracebackPopup', ErrorTracebackPopup);
+    Registry.add(ErrorTracebackPopup);
 
     return ErrorTracebackPopup;
 });

@@ -36,7 +36,7 @@ odoo.define('point_of_sale.NumpadWidget', function(require) {
     }
 
     ProductScreen.addComponents([NumpadWidget]);
-    Registry.add('NumpadWidget', NumpadWidget);
+    Registry.add(NumpadWidget);
 
     return NumpadWidget;
 });

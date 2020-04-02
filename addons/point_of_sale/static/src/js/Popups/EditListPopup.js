@@ -99,7 +99,7 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
     };
 
     Chrome.addComponents([EditListPopup]);
-    Registry.add('EditListPopup', EditListPopup);
+    Registry.add(EditListPopup);
 
     return EditListPopup;
 });
