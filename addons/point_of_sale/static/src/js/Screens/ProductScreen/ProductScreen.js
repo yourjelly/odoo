@@ -2,7 +2,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Chrome = require('point_of_sale.Chrome');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
     const Registry = require('point_of_sale.ComponentsRegistry');
@@ -50,9 +49,11 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             return this.env.pos.get_order();
         }
         get controlButtons() {
-            return this.constructor.controlButtons.filter(cb => {
-                return cb.condition.bind(this)();
-            });
+            return ProductScreen.controlButtons
+                .filter(cb => {
+                    return cb.condition.bind(this)();
+                })
+                .map(cb => ({ ...cb, component: Registry.get(cb.component) }));
         }
         async clickProduct(event) {
             if (!this.currentOrder) {
@@ -243,11 +244,13 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             }
         }
     }
+
     ProductScreen.controlButtons = [];
 
     /**
      * @param {Object} controlButton
-     * @param {Component} controlButton.component
+     * @param {Function} controlButton.component
+     *      Can be any base class or base class callback that is added in the Registry.
      * @param {Function} controlButton.condition zero argument function that is bound
      *      to the instance of ProductScreen, such that `this.env.pos` can be used
      *      inside the function.
@@ -297,12 +300,8 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 this.controlButtons.push(controlButton);
             }
         }
-
-        // We then add to the components object.
-        this.addComponents([controlButton.component]);
     };
 
-    Chrome.addComponents([ProductScreen]);
     Registry.add(ProductScreen);
 
     return ProductScreen;

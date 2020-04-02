@@ -3,7 +3,6 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
 
     const { debounce } = owl.utils;
     const { useRef } = owl.hooks;
-    const Chrome = require('point_of_sale.Chrome');
     const PosComponent = require('point_of_sale.PosComponent');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -207,7 +206,6 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
         }
     }
 
-    Chrome.addComponents([ClientListScreen]);
     Registry.add(ClientListScreen);
 
     return ClientListScreen;

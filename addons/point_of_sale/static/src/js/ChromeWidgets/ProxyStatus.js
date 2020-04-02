@@ -2,7 +2,6 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
     'use strict';
 
     const { useState } = owl;
-    const Chrome = require('point_of_sale.Chrome');
     const PosComponent = require('point_of_sale.PosComponent');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -83,7 +82,6 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
         }
     }
 
-    Chrome.addComponents([ProxyStatus]);
     Registry.add(ProxyStatus);
 
     return ProxyStatus;

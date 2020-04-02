@@ -1,7 +1,6 @@
 odoo.define('point_of_sale.ErrorBarcodePopup', function(require) {
     'use strict';
 
-    const Chrome = require('point_of_sale.Chrome');
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -21,7 +20,6 @@ odoo.define('point_of_sale.ErrorBarcodePopup', function(require) {
             'The Point of Sale could not find any product, client, employee or action associated with the scanned barcode.',
     };
 
-    Chrome.addComponents([ErrorBarcodePopup]);
     Registry.add(ErrorBarcodePopup);
 
     return ErrorBarcodePopup;

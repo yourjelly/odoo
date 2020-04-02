@@ -5,9 +5,7 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
     const { useRef } = owl.hooks;
     const { getFileAsText } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
-    const Chrome = require('point_of_sale.Chrome');
     const PosComponent = require('point_of_sale.PosComponent');
-    const Draggable = require('point_of_sale.Draggable');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class DebugWidget extends PosComponent {
@@ -143,8 +141,6 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
         }
     }
 
-    DebugWidget.addComponents([Draggable]);
-    Chrome.addComponents([DebugWidget]);
     Registry.add(DebugWidget);
 
     return DebugWidget;

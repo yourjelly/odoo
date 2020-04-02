@@ -2,7 +2,6 @@ odoo.define('point_of_sale.PosComponent', function(require) {
     'use strict';
 
     const { Component } = owl;
-    const Registry = require('point_of_sale.ComponentsRegistry');
 
     class PosComponent extends Component {
         /**
@@ -61,51 +60,6 @@ odoo.define('point_of_sale.PosComponent', function(require) {
             return this.__owl__.observer.weakMap.get(state).value;
         }
     }
-
-    const repr = component => {
-        if (typeof component === 'string') {
-            return component;
-        } else if (component instanceof Function) {
-            return component.name;
-        } else {
-            throw new Error('Only owl.Component or string is allowed.');
-        }
-    };
-
-    class ComponentsProxyHandler {
-        constructor(parent, children) {
-            this._parent = parent;
-            this._childrenNames = new Set([...children.map(repr).filter(Boolean)]);
-        }
-        get(target, key) {
-            return this._childrenNames.has(key) ? Registry.get(key) : null;
-        }
-        set(target, key, value) {
-            if (this._childrenNames.has(key)) {
-                console.warn(
-                    `'${key}' is already declared as one of child components of '${this._parent}'`
-                );
-            } else {
-                this._childrenNames.add(key);
-            }
-            return true;
-        }
-    }
-
-    /**
-     * Extends the static `components` of this Component with the given components array.
-     *
-     * @param {Array<Component|String>} components array of Components or Component names.
-     */
-    PosComponent.addComponents = function(components) {
-        if (!this.hasOwnProperty('components')) {
-            this.components = new Proxy({}, new ComponentsProxyHandler(this, components));
-        } else {
-            for (let component of components) {
-                this.components[repr(component)] = component;
-            }
-        }
-    };
 
     return PosComponent;
 });

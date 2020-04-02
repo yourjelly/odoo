@@ -2,7 +2,6 @@ odoo.define('point_of_sale.PaymentScreenPaymentLines', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const PaymentScreen = require('point_of_sale.PaymentScreen');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class PaymentScreenPaymentLines extends PosComponent {
@@ -28,7 +27,6 @@ odoo.define('point_of_sale.PaymentScreenPaymentLines', function(require) {
         }
     }
 
-    PaymentScreen.addComponents([PaymentScreenPaymentLines]);
     Registry.add(PaymentScreenPaymentLines);
 
     return PaymentScreenPaymentLines;

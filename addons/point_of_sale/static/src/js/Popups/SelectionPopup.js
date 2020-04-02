@@ -2,7 +2,6 @@ odoo.define('point_of_sale.SelectionPopup', function(require) {
     'use strict';
 
     const { useState } = owl.hooks;
-    const Chrome = require('point_of_sale.Chrome');
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -58,7 +57,6 @@ odoo.define('point_of_sale.SelectionPopup', function(require) {
         list: [],
     };
 
-    Chrome.addComponents([SelectionPopup]);
     Registry.add(SelectionPopup);
 
     return SelectionPopup;

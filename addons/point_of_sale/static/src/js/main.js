@@ -16,7 +16,7 @@ odoo.define('point_of_sale.main', function(require) {
         await owl.utils.whenReady();
         await webClient.setElement(document.body);
         await webClient.start();
-        const chrome = new (Registry.get(Chrome.name))(null, { webClient });
+        const chrome = new (Registry.get(Chrome))(null, { webClient });
         await chrome.mount(document.querySelector('.o_action_manager'));
         await chrome.start();
         configureGui({ component: chrome });

@@ -3,7 +3,6 @@ odoo.define('point_of_sale.EditListInput', function(require) {
 
     const { useRef } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
-    const EditListPopup = require('point_of_sale.EditListPopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class EditListInput extends PosComponent {
@@ -19,7 +18,6 @@ odoo.define('point_of_sale.EditListInput', function(require) {
         }
     }
 
-    EditListPopup.addComponents([EditListInput]);
     Registry.add(EditListInput);
 
     return EditListInput;

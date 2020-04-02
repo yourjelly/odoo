@@ -1,7 +1,6 @@
 odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
     'use strict';
 
-    const Chrome = require('point_of_sale.Chrome');
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -39,7 +38,6 @@ odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
         exitButtonTrigger: 'close-pos'
     };
 
-    Chrome.addComponents([ErrorTracebackPopup]);
     Registry.add(ErrorTracebackPopup);
 
     return ErrorTracebackPopup;

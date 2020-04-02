@@ -1,31 +1,52 @@
 odoo.define('point_of_sale.test_popups', async function(require) {
     'use strict';
 
+    const Registry = require('point_of_sale.ComponentsRegistry');
     const makeTestEnvironment = require('web.test_env');
     const testUtils = require('web.test_utils');
-    const ConfirmPopup = require('point_of_sale.ConfirmPopup');
     const PosComponent = require('point_of_sale.PosComponent');
+    const { useListener } = require('web.custom_hooks');
     const { useState } = owl;
     const { xml } = owl.tags;
 
     QUnit.module('Test Pos Popups', {
         before() {
             class Root extends PosComponent {
-                popup = useState({ isShown: false, name: null, component: null, props: {} });
+                popup = useState({ isShown: false, name: null, component: null });
+                constructor() {
+                    super(...arguments);
+                    useListener('show-popup', this.__showPopup);
+                    useListener('close-popup', this.__closePopup);
+                }
+                __showPopup(event) {
+                    const { name, props, resolve } = event.detail;
+                    const popupConstructor = this.constructor.components[name];
+                    if (popupConstructor.dontShow) {
+                        resolve();
+                        return;
+                    }
+                    this.popup.isShown = true;
+                    this.popup.name = name;
+                    this.popup.component = popupConstructor;
+                    this.popupProps = { ...props, resolve };
+                }
+                __closePopup() {
+                    this.popup.isShown = false;
+                }
                 static template = xml`
-                    <div t-on-show-popup="__showPopup">
-                        <t t-if="popup.isShown" t-component="popup.component" t-props="popup.props" t-key="popup.name" />
+                    <div>
+                        <t t-if="popup.isShown" t-component="popup.component" t-props="popupProps" t-key="popup.name" />
                     </div>
                 `;
             }
             Root.env = makeTestEnvironment();
             this.Root = Root;
+            Registry.freeze();
         },
     });
 
     QUnit.test('ConfirmPopup', async function(assert) {
         assert.expect(6);
-        this.Root.addComponents([ConfirmPopup]);
 
         const root = new this.Root();
         await root.mount(testUtils.prepareTarget());

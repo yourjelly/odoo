@@ -3,7 +3,6 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
 
     const { useRef } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
-    const ProductsWidget = require('point_of_sale.ProductsWidget');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class ProductsWidgetControlPanel extends PosComponent {
@@ -25,7 +24,6 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
         }
     }
 
-    ProductsWidget.addComponents([ProductsWidgetControlPanel]);
     Registry.add(ProductsWidgetControlPanel);
 
     return ProductsWidgetControlPanel;

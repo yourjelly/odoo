@@ -2,7 +2,6 @@ odoo.define('point_of_sale.TextInputPopup', function(require) {
     'use strict';
 
     const { useState, useRef } = owl.hooks;
-    const Chrome = require('point_of_sale.Chrome');
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -29,7 +28,6 @@ odoo.define('point_of_sale.TextInputPopup', function(require) {
         startingValue: '',
     };
 
-    Chrome.addComponents([TextInputPopup]);
     Registry.add(TextInputPopup);
 
     return TextInputPopup;

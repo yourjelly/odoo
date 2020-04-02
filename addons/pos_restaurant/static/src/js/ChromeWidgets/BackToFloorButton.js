@@ -2,7 +2,6 @@ odoo.define('pos_restaurant.BackToFloorButton', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const OrderSelector = require('point_of_sale.OrderSelector');
     const { useListener } = require('web.custom_hooks');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -23,7 +22,6 @@ odoo.define('pos_restaurant.BackToFloorButton', function(require) {
         }
     }
 
-    OrderSelector.addComponents([BackToFloorButton]);
     Registry.add(BackToFloorButton);
 
     return BackToFloorButton;

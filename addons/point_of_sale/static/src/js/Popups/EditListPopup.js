@@ -2,7 +2,6 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
     'use strict';
 
     const { useState } = owl.hooks;
-    const Chrome = require('point_of_sale.Chrome');
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
@@ -98,7 +97,6 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
         isSingleItem: false,
     };
 
-    Chrome.addComponents([EditListPopup]);
     Registry.add(EditListPopup);
 
     return EditListPopup;

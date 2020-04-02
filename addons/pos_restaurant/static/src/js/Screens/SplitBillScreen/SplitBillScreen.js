@@ -1,7 +1,6 @@
 odoo.define('pos_restaurant.SplitBillScreen', function(require) {
     'use strict';
 
-    const Chrome = require('point_of_sale.Chrome');
     const PosComponent = require('point_of_sale.PosComponent');
     const { useState } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
@@ -159,7 +158,6 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
         }
     }
 
-    Chrome.addComponents([SplitBillScreen]);
     Registry.add(SplitBillScreen);
 
     return SplitBillScreen;

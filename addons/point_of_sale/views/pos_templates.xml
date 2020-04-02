@@ -97,8 +97,8 @@
         }
     </style>
 
-    <script type="text/javascript" src="/web/static/tests/helpers/test_env.js"></script>
     <script type="text/javascript" src="/web/static/tests/helpers/test_utils_create.js"></script>
+    <script type="text/javascript" src="/web/static/tests/helpers/test_utils_control_panel.js"></script>
     <script type="text/javascript" src="/web/static/tests/helpers/test_utils_dom.js"></script>
     <script type="text/javascript" src="/web/static/tests/helpers/test_utils_fields.js"></script>
     <script type="text/javascript" src="/web/static/tests/helpers/test_utils_file.js"></script>
@@ -110,6 +110,9 @@
     <script type="text/javascript" src="/web/static/tests/helpers/test_utils_pivot.js"></script>
     <script type="text/javascript" src="/web/static/tests/helpers/test_utils.js"></script>
     <script type="text/javascript" src="/web/static/tests/helpers/mock_server.js"></script>
+    <script type="text/javascript" src="/web/static/tests/helpers/test_env.js"></script>
+
+    <script type="text/javascript" src="/web/static/tests/component_extension_tests.js"></script>
     <script type="text/javascript" src="/web/static/tests/boot_tests.js"></script>
 </template>
 
@@ -121,6 +124,7 @@
             <t t-call="point_of_sale.js_tests_assets" />
             <script type="text/javascript" src="/point_of_sale/static/tests/helpers/test_setup_pos.js"></script>
             <script type="text/javascript" src="/point_of_sale/static/tests/test_popups.js"></script>
+            <script type="text/javascript" src="/point_of_sale/static/tests/ComponentsRegistry.js"></script>
         </t>
 
         <div id="qunit"/>

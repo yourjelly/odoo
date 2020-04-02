@@ -3,7 +3,6 @@ odoo.define('point_of_sale.NumpadWidget', function(require) {
 
     const { useState } = owl;
     const PosComponent = require('point_of_sale.PosComponent');
-    const ProductScreen = require('point_of_sale.ProductScreen');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     class NumpadWidget extends PosComponent {
@@ -35,7 +34,6 @@ odoo.define('point_of_sale.NumpadWidget', function(require) {
         }
     }
 
-    ProductScreen.addComponents([NumpadWidget]);
     Registry.add(NumpadWidget);
 
     return NumpadWidget;
