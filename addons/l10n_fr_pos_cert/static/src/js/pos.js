@@ -65,11 +65,15 @@ models.Order = models.Order.extend({
 var orderline_super = models.Orderline.prototype;
 models.Orderline = models.Orderline.extend({
     can_be_merged_with: function(orderline) {
-        var res = orderline_super.can_be_merged_with.apply(this, arguments);
-        if(this.pos.is_french_country() && this.quantity < 0)
+        var order = this.pos.get_order();
+        var last_id = Object.keys(order.orderlines._byId)[Object.keys(order.orderlines._byId).length-1];
+
+        if(this.pos.is_french_country() && (order.orderlines._byId[last_id].product.id !== orderline.product.id || order.orderlines._byId[last_id].quantity < 0)) {
             return false;
-        return res;
-    },
+        } else {
+            return orderline_super.can_be_merged_with.apply(this, arguments);
+        }
+    }
 });
 
 });

@@ -138,9 +138,20 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         }
         async _updateSelectedOrderline(event) {
             if(this.disallowLineQuantityChange()) {
-                this._showDecreaseQuantityPopup();
-            }
-            else {
+                let order = this.env.pos.get_order();
+                let selectedLine = order.get_selected_orderline();
+                let last_id = Object.keys(order.orderlines._byId)[Object.keys(order.orderlines._byId).length-1];
+                let currentQuantity = this.env.pos.get_order().get_selected_orderline().get_quantity();
+
+                if(last_id != selectedLine.cid)
+                    this._showDecreaseQuantityPopup();
+                else if(currentQuantity === 1 && event.detail.buffer < 1)    // Allow to put a value below 1 for the last product entry.
+                    this._setValue(event.detail.buffer);
+                else if(currentQuantity < event.detail.buffer)
+                    this._setValue(event.detail.buffer);
+                else if(event.detail.buffer < currentQuantity)
+                    this._showDecreaseQuantityPopup();
+            } else {
                 let { buffer } = event.detail;
                 let val = buffer === null ? 'remove' : buffer;
                 this._setValue(val);
@@ -218,9 +229,10 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         async _showDecreaseQuantityPopup() {
             const { confirmed, payload: inputNumber } = await this.showPopup('NumberPopup', {
                 startingValue: 0,
-                title: 'Decrease the quantity by',
+                title: this.env._t('Decrease the quantity by'),
             });
-            if (confirmed && inputNumber) {
+            let decreaseQuantity = Math.abs(inputNumber);
+            if (confirmed && decreaseQuantity) {
                 let order = this.env.pos.get_order();
                 let selectedLine = this.env.pos.get_order().get_selected_orderline();
 
@@ -230,16 +242,16 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                         quantity += orderLine.get_quantity();
                 });
 
-                if(inputNumber > quantity) {
+                if(decreaseQuantity > quantity) {
                     await this.showPopup('ErrorPopup', {
                         title: this.env._t('Order error'),
                         body: this.env._t('Not allowed to take back more than was ordered.'),
                     });
                 } else {
-                    let decrease_line = selectedLine.clone();
-                    decrease_line.order = order;
-                    decrease_line.set_quantity(-inputNumber);
-                    order.add_orderline(decrease_line);
+                    let decreaseLine = selectedLine.clone();
+                    decreaseLine.order = order;
+                    decreaseLine.set_quantity(-decreaseQuantity);
+                    order.add_orderline(decreaseLine);
                 }
             }
         }
