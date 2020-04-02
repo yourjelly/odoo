@@ -135,10 +135,10 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             if(this.disallowLineQuantityChange()) {
                 let order = this.env.pos.get_order();
                 let selectedLine = order.get_selected_orderline();
-                let last_id = Object.keys(order.orderlines._byId)[Object.keys(order.orderlines._byId).length-1];
+                let lastId = order.orderlines.last().cid;
                 let currentQuantity = this.env.pos.get_order().get_selected_orderline().get_quantity();
 
-                if(last_id != selectedLine.cid)
+                if(lastId != selectedLine.cid)
                     this._showDecreaseQuantityPopup();
                 else if(currentQuantity === 1 && event.detail.buffer < 1)    // Allow to put a value below 1 for the last product entry.
                     this._setValue(event.detail.buffer);
