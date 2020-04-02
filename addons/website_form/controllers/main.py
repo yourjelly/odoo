@@ -21,6 +21,14 @@ class WebsiteForm(http.Controller):
     # Check and insert values from the form on the model <model>
     @http.route('/website_form/<string:model_name>', type='http', auth="public", methods=['POST'], website=True)
     def website_form(self, model_name, **kwargs):
+        ip_addr = request.httprequest.remote_addr
+        token = request.params.pop('recaptcha_token_response', False)
+        is_token_valid = request.env['ir.http']._verify_recaptcha_token(ip_addr, token)
+        if not is_token_valid:
+            return json.dumps(False)
+        return self._handle_website_form(model_name, **kwargs)
+
+    def _handle_website_form(self, model_name, **kwargs):
         model_record = request.env['ir.model'].sudo().search([('model', '=', model_name), ('website_form_access', '=', True)])
         if not model_record:
             return json.dumps(False)

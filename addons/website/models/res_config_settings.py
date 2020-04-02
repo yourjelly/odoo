@@ -68,6 +68,10 @@ class ResConfigSettings(models.TransientModel):
     google_maps_api_key = fields.Char(related='website_id.google_maps_api_key', readonly=False)
     group_multi_website = fields.Boolean("Multi-website", implied_group="website.group_multi_website")
 
+    recaptcha_public_key = fields.Char(related='website_id.recaptcha_public_key', readonly=False)
+    recaptcha_private_key = fields.Char(related='website_id.recaptcha_private_key', readonly=False)
+    recaptcha_min_score = fields.Float(related='website_id.recaptcha_min_score', readonly=False)
+
     @api.depends('website_id.auth_signup_uninvited')
     def _compute_auth_signup(self):
         for config in self:
@@ -97,6 +101,10 @@ class ResConfigSettings(models.TransientModel):
     def has_google_search_console(self):
         self.has_google_search_console = bool(self.google_search_console)
 
+    @api.depends('website_id')
+    def has_recaptchav3(self):
+        self.has_recaptchav3 = bool(self.recaptcha_public_key and self.recaptcha_private_key and self.recaptcha_min_score)
+
     def inverse_has_google_analytics(self):
         if not self.has_google_analytics:
             self.has_google_analytics_dashboard = False
@@ -119,11 +127,18 @@ class ResConfigSettings(models.TransientModel):
         if not self.has_default_share_image:
             self.social_default_image = False
 
+    def inverse_has_recaptchav3(self):
+        if not self.has_recaptchav3:
+            self.recaptcha_public_key = False
+            self.recaptcha_private_key = False
+            self.recaptcha_min_score = self.website_id.default_get(['recaptcha_min_score'])['recaptcha_min_score']
+
     has_google_analytics = fields.Boolean("Google Analytics", compute=has_google_analytics, inverse=inverse_has_google_analytics)
     has_google_analytics_dashboard = fields.Boolean("Google Analytics Dashboard", compute=has_google_analytics_dashboard, inverse=inverse_has_google_analytics_dashboard)
     has_google_maps = fields.Boolean("Google Maps", compute=has_google_maps, inverse=inverse_has_google_maps)
     has_google_search_console = fields.Boolean("Console Google Search", compute=has_google_search_console, inverse=inverse_has_google_search_console)
     has_default_share_image = fields.Boolean("Use a image by default for sharing", compute=has_default_share_image, inverse=inverse_has_default_share_image)
+    has_recaptchav3 = fields.Boolean("RecaptchaV3", compute=has_recaptchav3, inverse=inverse_has_recaptchav3)
 
     @api.onchange('language_ids')
     def _onchange_language_ids(self):

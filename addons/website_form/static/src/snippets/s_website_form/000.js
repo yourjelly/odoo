@@ -4,6 +4,7 @@ odoo.define('website_form.s_website_form', function (require) {
     var core = require('web.core');
     var time = require('web.time');
     var ajax = require('web.ajax');
+    var ReCaptcha = require('website.ReCaptchaV3').ReCaptcha;
     var publicWidget = require('web.public.widget');
 
     var _t = core._t;
@@ -21,11 +22,21 @@ odoo.define('website_form.s_website_form', function (require) {
          */
         init: function () {
             this._super(...arguments);
+            this._recaptcha = new ReCaptcha(this);
             this.__started = new Promise(resolve => this.__startResolve = resolve);
         },
-
+        willStart: async function () {
+            const res = this._super(...arguments);
+            if (!this.$target[0].classList.contains('s_website_form_no_recaptcha')) {
+                this._reCaptchaActive = await this._recaptcha.waitForLibs();
+            }
+            return res;
+        },
         start: function () {
             var self = this;
+            if (this._reCaptchaActive) {
+                this._recaptcha.addLegalTerms(this.$target[0]);
+            }
             // Initialize datetimepickers
             var datepickers_options = {
                 minDate: moment({y: 1900}),
@@ -84,9 +95,13 @@ odoo.define('website_form.s_website_form', function (require) {
             // Remove the success message and display the form
             this.$target.removeClass('d-none');
             this.$target.parent().find('.s_website_form_end_message').addClass('d-none');
+
+            if (this._reCaptchaActive) {
+                this._recaptcha.removeLegalTerms();
+            }
         },
 
-        send: function (e) {
+        send: async function (e) {
             e.preventDefault(); // Prevent the default submit behavior
              // Prevent users from crazy clicking
             this.$target.find('.s_website_form_send, .o_website_form_send').addClass('disabled'); // !compatibility
@@ -131,7 +146,9 @@ odoo.define('website_form.s_website_form', function (require) {
                     }
                 }
             });
-
+            if (this._reCaptchaActive) {
+                form_values['recaptcha_token_response'] = await this._recaptcha.getToken('website_form');
+            }
             // Post form and handle result
             ajax.post(this.$target.attr('action') + (this.$target.data('force_action') || this.$target.data('model_name')), form_values)
             .then(function (result_data) {

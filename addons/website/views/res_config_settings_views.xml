@@ -268,6 +268,39 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12 col-lg-6 o_setting_box" id="recaptcha">
+                                <div class="o_setting_left_pane">
+                                    <field name="has_recaptchav3"/>
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <label for="has_recaptchav3"/>
+                                    <span class="fa fa-lg fa-globe" title="Values set here are website-specific." groups="website.group_multi_website"/>
+                                    <div class="text-muted">
+                                        reCAPTCHA is a free service that protects your website from spam and abuse.
+                                    </div>
+                                    <div class="content-group" attrs="{'invisible': [('has_recaptchav3', '=', False)]}">
+                                        <div class="row mt16">
+                                            <label class="col-lg-3 o_light_label" for="recaptcha_public_key"/>
+                                            <field name="recaptcha_public_key" attrs="{'required': [('has_recaptchav3', '=', True)]}" />
+                                        </div>
+                                        <div class="row">
+                                            <label class="col-lg-3 o_light_label" for="recaptcha_private_key"/>
+                                            <field name="recaptcha_private_key" attrs="{'required': [('has_recaptchav3', '=', True)]}" />
+                                        </div>
+                                        <div class="row">
+                                            <label class="col-lg-3 o_light_label" for="recaptcha_min_score"/>
+                                            <field name="recaptcha_min_score" attrs="{'required': [('has_recaptchav3', '=', True)]}" />
+                                        </div>
+                                    </div>
+                                    <div class="mt8" attrs="{'invisible': [('has_recaptchav3', '=', False)]}">
+                                        <a role="button" class="btn-link" target="_blank"
+                                            href="https://www.google.com/recaptcha/intro/v3.html">
+                                            <i class="fa fa-arrow-right"/>
+                                            Create a Google Account and Get a Key
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <h2>SEO</h2>

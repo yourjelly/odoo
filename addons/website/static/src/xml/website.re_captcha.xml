@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+<t t-name="website.recaptcha_legal_terms">
+    <small class="o_recaptcha_legal_terms">
+        This site is protected by reCAPTCHA and the Google
+        <a href="https://policies.google.com/privacy">Privacy Policy</a>
+        and
+        <a href="https://policies.google.com/terms">Terms of Service</a>
+        apply.
+    </small>
+</t>
+</templates>

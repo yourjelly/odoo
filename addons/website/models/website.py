@@ -113,6 +113,10 @@ class Website(models.Model):
 
     robots_txt = fields.Text('Robots.txt', translate=False, groups='website.group_website_designer')
 
+    recaptcha_public_key = fields.Char("Site Key", groups='website.group_website_designer')
+    recaptcha_private_key = fields.Char("Secret Key", groups='website.group_website_designer')
+    recaptcha_min_score = fields.Float("Minimum score", default="0.5")
+
     def _default_favicon(self):
         img_path = get_resource_path('web', 'static/src/img/favicon.ico')
         with tools.file_open(img_path, 'rb') as f:
