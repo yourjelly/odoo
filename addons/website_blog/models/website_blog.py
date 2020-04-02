@@ -163,13 +163,18 @@ class BlogPost(models.Model):
     post_date = fields.Datetime('Publishing date', compute='_compute_post_date', inverse='_set_post_date', store=True,
                                 help="The blog post will be visible for your visitors as of this date on the website if it is set as published.")
     create_uid = fields.Many2one('res.users', 'Created by', index=True, readonly=True)
-    last_update_on = fields.Datetime('Last Updated on', index=True, readonly=True)
+    last_update_on = fields.Datetime('Last Updated on', compute='_compute_last_update', index=True, readonly=True)
     write_uid = fields.Many2one('res.users', 'Last Contributor', index=True, readonly=True)
     author_avatar = fields.Binary(related='author_id.image_small', string="Avatar", readonly=False)
     visits = fields.Integer('No of Views', copy=False)
     ranking = fields.Float(compute='_compute_ranking', string='Ranking')
 
     website_id = fields.Many2one(related='blog_id.website_id', readonly=True)
+
+    @api.depends('write_date')
+    def _compute_last_update(self):
+        for blog_post in self:
+            blog_post.last_update_on = blog_post.write_date
 
     @api.multi
     @api.depends('content', 'teaser_manual')

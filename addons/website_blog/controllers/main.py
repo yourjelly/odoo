@@ -279,10 +279,13 @@ class WebsiteBlog(http.Controller):
         if not (blog_post.id in request.session[request.session.sid]):
             request.session[request.session.sid].append(blog_post.id)
             # Increase counter
+            import pdb;pdb.set_trace()
+            print("\n\n\nbefore last update", blog_post.__last_update)
             blog_post.sudo().write({
                 'visits': blog_post.visits+1,
-                'last_update_on': blog_post.write_date,
+                'last_update_on': blog_post.last_update_on,
             })
+            print("\n\n\nbefore last update", blog_post.__last_update)
         return response
 
     @http.route('/blog/<int:blog_id>/post/new', type='http', auth="public", website=True)
