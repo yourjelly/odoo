@@ -3,12 +3,13 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
     const { useState, useRef } = owl.hooks;
     const { debounce } = owl.utils;
-    const PosComponent = require('point_of_sale.PosComponent');
+    const { loadCSS } = require('web.ajax');
     const { useListener } = require('web.custom_hooks');
     const { CrashManager } = require('web.CrashManager');
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
+    const PosComponent = require('point_of_sale.PosComponent');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
-    const { loadCSS } = require('web.ajax');
+    const PopupControllerMixin = require('point_of_sale.PopupControllerMixin');
     const Registry = require('point_of_sale.ComponentsRegistry');
 
     // This is kind of a trick.
@@ -20,15 +21,13 @@ odoo.define('point_of_sale.Chrome', function(require) {
     /**
      * Chrome is the root component of the PoS App.
      */
-    class Chrome extends PosComponent {
+    class Chrome extends PopupControllerMixin(PosComponent) {
         static template = 'Chrome';
         constructor() {
             super(...arguments);
             useListener('show-main-screen', this.__showScreen);
             useListener('pos-error', this.onPosError);
             useListener('toggle-debug-widget', debounce(this._toggleDebugWidget, 100));
-            useListener('show-popup', this.__showPopup);
-            useListener('close-popup', this.__closePopup);
             useListener('show-temp-screen', this.__showTempScreen);
             useListener('close-temp-screen', this.__closeTempScreen);
             useListener('close-pos', this._closePos);
@@ -50,9 +49,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
 
             this.mainScreen = useState({ name: null, component: null });
             this.mainScreenProps = {};
-
-            this.popup = useState({ isShown: false, name: null, component: null });
-            this.popupProps = {}; // We want to avoid making the props to become Proxy!
 
             this.tempScreen = useState({ isShown: false, name: null, component: null });
             this.tempScreenProps = {};
@@ -189,21 +185,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
         _setSelectedCategoryId(event) {
             this.state.selectedCategoryId.value = event.detail;
-        }
-        __showPopup(event) {
-            const { name, props, resolve } = event.detail;
-            const popupConstructor = this.constructor.components[name];
-            if (popupConstructor.dontShow) {
-                resolve();
-                return;
-            }
-            this.popup.isShown = true;
-            this.popup.name = name;
-            this.popup.component = popupConstructor;
-            this.popupProps = { ...props, resolve };
-        }
-        __closePopup() {
-            this.popup.isShown = false;
         }
         __showTempScreen(event) {
             const { name, props, resolve } = event.detail;

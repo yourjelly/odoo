@@ -5,34 +5,12 @@ odoo.define('point_of_sale.test_popups', async function(require) {
     const makeTestEnvironment = require('web.test_env');
     const testUtils = require('web.test_utils');
     const PosComponent = require('point_of_sale.PosComponent');
-    const { useListener } = require('web.custom_hooks');
-    const { useState } = owl;
+    const PopupControllerMixin = require('point_of_sale.PopupControllerMixin');
     const { xml } = owl.tags;
 
     QUnit.module('Test Pos Popups', {
         before() {
-            class Root extends PosComponent {
-                popup = useState({ isShown: false, name: null, component: null });
-                constructor() {
-                    super(...arguments);
-                    useListener('show-popup', this.__showPopup);
-                    useListener('close-popup', this.__closePopup);
-                }
-                __showPopup(event) {
-                    const { name, props, resolve } = event.detail;
-                    const popupConstructor = this.constructor.components[name];
-                    if (popupConstructor.dontShow) {
-                        resolve();
-                        return;
-                    }
-                    this.popup.isShown = true;
-                    this.popup.name = name;
-                    this.popup.component = popupConstructor;
-                    this.popupProps = { ...props, resolve };
-                }
-                __closePopup() {
-                    this.popup.isShown = false;
-                }
+            class Root extends PopupControllerMixin(PosComponent) {
                 static template = xml`
                     <div>
                         <t t-if="popup.isShown" t-component="popup.component" t-props="popupProps" t-key="popup.name" />
