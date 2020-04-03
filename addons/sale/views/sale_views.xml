@@ -284,7 +284,7 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Order Lines" name="order_lines">
+                        <page string="Order Lines for testing" name="order_lines">
                             <field
                                 name="order_line"
                                 widget="section_and_note_one2many"
@@ -307,7 +307,7 @@
                                                     'readonly': [('product_updatable', '=', False)],
                                                     'required': [('display_type', '=', False)],
                                                 }"
-                                                force_save="1"
+                                                
                                                />
                                             <field name="invoice_status" invisible="1"/>
                                             <field name="qty_to_invoice" invisible="1"/>
