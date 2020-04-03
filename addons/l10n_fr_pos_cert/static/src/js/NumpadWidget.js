@@ -2,7 +2,7 @@ odoo.define('l10n_fr_pos_cert.NumpadWidget', function(require) {
     'use strict';
 
     const NumpadWidget = require('point_of_sale.NumpadWidget');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     const PosFrNumpadWidget = NumpadWidget => class extends NumpadWidget {
         async changeMode(mode) {
@@ -18,7 +18,7 @@ odoo.define('l10n_fr_pos_cert.NumpadWidget', function(require) {
         }
     };
 
-    Registry.extend(NumpadWidget, PosFrNumpadWidget);
+    Registries.Component.extend(NumpadWidget, PosFrNumpadWidget);
 
     return NumpadWidget;
  });

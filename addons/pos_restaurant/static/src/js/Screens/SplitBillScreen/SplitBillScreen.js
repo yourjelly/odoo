@@ -5,7 +5,7 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
     const { useState } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
     const models = require('point_of_sale.models');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class SplitBillScreen extends PosComponent {
         static template = 'SplitBillScreen';
@@ -158,7 +158,7 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
         }
     }
 
-    Registry.add(SplitBillScreen);
+    Registries.Component.add(SplitBillScreen);
 
     return SplitBillScreen;
 });

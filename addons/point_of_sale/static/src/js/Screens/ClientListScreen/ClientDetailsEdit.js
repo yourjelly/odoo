@@ -3,7 +3,7 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
 
     const { getDataURLFromFile } = require('web.utils');
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class ClientDetailsEdit extends PosComponent {
         static template = 'ClientDetailsEdit';
@@ -118,7 +118,7 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
         }
     }
 
-    Registry.add(ClientDetailsEdit);
+    Registries.Component.add(ClientDetailsEdit);
 
     return ClientDetailsEdit;
 });

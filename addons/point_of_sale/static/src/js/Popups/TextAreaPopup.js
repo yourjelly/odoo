@@ -3,7 +3,7 @@ odoo.define('point_of_sale.TextAreaPopup', function(require) {
 
     const { useState, useRef } = owl.hooks;
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     // formerly TextAreaPopupWidget
     // IMPROVEMENT: This code is very similar to TextInputPopup.
@@ -33,7 +33,7 @@ odoo.define('point_of_sale.TextAreaPopup', function(require) {
         body: '',
     };
 
-    Registry.add(TextAreaPopup);
+    Registries.Component.add(TextAreaPopup);
 
     return TextAreaPopup;
 });

@@ -5,7 +5,7 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     // formerly NumberPopupWidget
     class NumberPopup extends AbstractAwaitablePopup {
@@ -65,7 +65,7 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
         isPassword: false,
     };
 
-    Registry.add(NumberPopup);
+    Registries.Component.add(NumberPopup);
 
     return NumberPopup;
 });

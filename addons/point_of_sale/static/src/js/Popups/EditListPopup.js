@@ -3,7 +3,7 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
 
     const { useState } = owl.hooks;
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     /**
      * Given a array of { id, text }, we show the user this popup to be able to modify this given array.
@@ -97,7 +97,7 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
         isSingleItem: false,
     };
 
-    Registry.add(EditListPopup);
+    Registries.Component.add(EditListPopup);
 
     return EditListPopup;
 });

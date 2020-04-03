@@ -1,21 +1,11 @@
-odoo.define('point_of_sale.ComponentsRegistry', function(require) {
+odoo.define('point_of_sale.ClassRegistry', function(require) {
     'use strict';
-
-    const PosComponent = require('point_of_sale.PosComponent');
-
-    // Object that maps `baseClass` to the class implementation extended in-place.
-    const includedMap = new Map();
-    // Object that maps `baseClassCB` to the array of callbacks to generate the extended class.
-    const extendedCBMap = new Map();
-    // Object that maps `baseClassCB` extended class to the `baseClass` of its super in the includedMap.
-    const extendedSuperMap = new Map();
-    // For faster access, we can `freeze` the registry so that instead of dynamically generating
-    // the extended classes, it is taken from the cache instead.
-    const cache = new Map();
 
     /**
      * **Usage:**
      * ```
+     * const Registry = new ClassRegistry();
+     *
      * class A {}
      * Registry.add(A);
      *
@@ -58,6 +48,9 @@ odoo.define('point_of_sale.ComponentsRegistry', function(require) {
      *  class A {}
      *  Registry.add(A)
      *  const Mixin = x => class extends x {}
+     *  //                          apply mixin
+     *  //                              |
+     *  //                              v
      *  const B = x => class extends Mixin(x) {}
      *  Registry.addByExtending(B, A)
      *  ```
@@ -83,14 +76,23 @@ odoo.define('point_of_sale.ComponentsRegistry', function(require) {
      *  In the above, after `Registry.freeze()`,
      *  `|B| => B -> OtherMixin -> ExtendMixin -> Mixin -> A`
      */
-    const Registry = {
+    class ClassRegistry {
+        // Object that maps `baseClass` to the class implementation extended in-place.
+        includedMap = new Map();
+        // Object that maps `baseClassCB` to the array of callbacks to generate the extended class.
+        extendedCBMap = new Map();
+        // Object that maps `baseClassCB` extended class to the `baseClass` of its super in the includedMap.
+        extendedSuperMap = new Map();
+        // For faster access, we can `freeze` the registry so that instead of dynamically generating
+        // the extended classes, it is taken from the cache instead.
+        cache = new Map();
         /**
          * Add a new class in the Registry.
          * @param {Function} baseClass `class`
          */
         add(baseClass) {
-            includedMap.set(baseClass, baseClass);
-        },
+            this.includedMap.set(baseClass, baseClass);
+        }
         /**
          * Add a new class in the Registry based on other class
          * in the registry.
@@ -98,9 +100,9 @@ odoo.define('point_of_sale.ComponentsRegistry', function(require) {
          * @param {Function} base `class | class -> class`
          */
         addByExtending(baseClassCB, base) {
-            extendedCBMap.set(baseClassCB, [baseClassCB]);
-            extendedSuperMap.set(baseClassCB, base);
-        },
+            this.extendedCBMap.set(baseClassCB, [baseClassCB]);
+            this.extendedSuperMap.set(baseClassCB, base);
+        }
         /**
          * Extend in-place a class in the registry. E.g.
          * ```
@@ -146,20 +148,20 @@ odoo.define('point_of_sale.ComponentsRegistry', function(require) {
          * @param {Function} extensionCB `class -> class`
          */
         extend(base, extensionCB) {
-            if (includedMap.get(base)) {
-                const toExtend = includedMap.get(base);
+            if (this.includedMap.get(base)) {
+                const toExtend = this.includedMap.get(base);
                 const extended = extensionCB(toExtend);
-                includedMap.set(base, extended);
-            } else if (extendedCBMap.get(base)) {
-                extendedCBMap.get(base).push(extensionCB);
+                this.includedMap.set(base, extended);
+            } else if (this.extendedCBMap.get(base)) {
+                this.extendedCBMap.get(base).push(extensionCB);
             } else {
                 throw new Error(
                     `'${base.name}' is not in the Registry. Add it to Registry before extending`
                 );
             }
-        },
+        }
         /**
-         * Return the compiled class from the base class.
+         * Return the compiled class (containing all the extensions) of the base class.
          * @param {Function} base `class | class -> class` function used in adding the class
          */
         get(base) {
@@ -167,22 +169,22 @@ odoo.define('point_of_sale.ComponentsRegistry', function(require) {
                 throw new Error(
                     'Getting a class from Registry is not allowed if not Registry is not frozen.'
                 );
-            return cache.get(base);
-        },
+            return this.cache.get(base);
+        }
         /**
-         * Uses the callbacks registered in the Registry to generate the compiled classes.
+         * Uses the callbacks registered in the registry to compile the classes.
          */
         freeze() {
             // Step: Compile the `included classes`.
-            for (let [baseClass, extendedClass] of includedMap.entries()) {
-                cache.set(baseClass, extendedClass);
+            for (let [baseClass, extendedClass] of this.includedMap.entries()) {
+                this.cache.set(baseClass, extendedClass);
             }
 
             // Step: Compile the `extended classes` based on `included classes`.
             // Also gather those the are based on `extended classes`.
             const remaining = [];
-            for (let [baseClassCB, extensionCBArray] of extendedCBMap.entries()) {
-                const compiled = cache.get(extendedSuperMap.get(baseClassCB));
+            for (let [baseClassCB, extensionCBArray] of this.extendedCBMap.entries()) {
+                const compiled = this.cache.get(this.extendedSuperMap.get(baseClassCB));
                 if (!compiled) {
                     remaining.push([baseClassCB, extensionCBArray]);
                     continue;
@@ -191,31 +193,28 @@ odoo.define('point_of_sale.ComponentsRegistry', function(require) {
                     (acc, extensionCB) => extensionCB(acc),
                     compiled
                 );
-                cache.set(baseClassCB, extendedClass);
+                this.cache.set(baseClassCB, extendedClass);
             }
 
             // Step: Compile the `extended classes` based on `extended classes`.
             for (let [baseClassCB, extensionCBArray] of remaining) {
-                const compiled = cache.get(extendedSuperMap.get(baseClassCB));
+                const compiled = this.cache.get(this.extendedSuperMap.get(baseClassCB));
                 const extendedClass = extensionCBArray.reduce(
                     (acc, extensionCB) => extensionCB(acc),
                     compiled
                 );
-                cache.set(baseClassCB, extendedClass);
+                this.cache.set(baseClassCB, extendedClass);
             }
 
-            // Step: Put all the compiled classes to the static field
-            // `components` of `PosComponent`.
-            PosComponent.components = {};
-            for (let [base, compiledClass] of cache.entries()) {
+            // Step: Set the name of the compiled classess
+            for (let [base, compiledClass] of this.cache.entries()) {
                 Object.defineProperty(compiledClass, 'name', { value: base.name });
-                PosComponent.components[base.name] = compiledClass;
             }
 
             // Step: Set the flag to true;
             this.isFrozen = true;
-        },
-    };
+        }
+    }
 
-    return Registry;
+    return ClassRegistry;
 });

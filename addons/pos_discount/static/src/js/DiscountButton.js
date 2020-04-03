@@ -4,7 +4,7 @@ odoo.define('pos_discount.DiscountButton', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const ProductScreen = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class DiscountButton extends PosComponent {
         static template = 'DiscountButton';
@@ -76,7 +76,7 @@ odoo.define('pos_discount.DiscountButton', function(require) {
         },
     });
 
-    Registry.add(DiscountButton);
+    Registries.Component.add(DiscountButton);
 
     return DiscountButton;
 });

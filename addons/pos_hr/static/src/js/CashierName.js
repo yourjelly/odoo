@@ -2,7 +2,7 @@ odoo.define('pos_hr.CashierName', function(require) {
     'use strict';
 
     const CashierName = require('point_of_sale.CashierName');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     const PosHrCashierName = CashierName =>
         class extends CashierName {
@@ -64,7 +64,7 @@ odoo.define('pos_hr.CashierName', function(require) {
             }
         };
 
-    Registry.extend(CashierName, PosHrCashierName);
+    Registries.Component.extend(CashierName, PosHrCashierName);
 
     return CashierName;
 });

@@ -2,7 +2,7 @@ odoo.define('pos_reprint.OrderReceipt', function(require) {
     'use strict';
 
     const OrderReceipt = require('point_of_sale.OrderReceipt');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     const PosReprintOrderReceipt = OrderReceipt =>
         class extends OrderReceipt {
@@ -18,7 +18,7 @@ odoo.define('pos_reprint.OrderReceipt', function(require) {
             }
         };
 
-    Registry.extend(OrderReceipt, PosReprintOrderReceipt);
+    Registries.Component.extend(OrderReceipt, PosReprintOrderReceipt);
 
     return OrderReceipt;
 });

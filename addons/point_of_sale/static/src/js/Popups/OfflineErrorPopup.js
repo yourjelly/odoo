@@ -2,7 +2,7 @@ odoo.define('point_of_sale.OfflineErrorPopup', function(require) {
     'use strict';
 
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     /**
      * This is a special kind of error popup as it introduces
@@ -23,7 +23,7 @@ odoo.define('point_of_sale.OfflineErrorPopup', function(require) {
         body: 'Either the server is inaccessible or browser is not connected online.',
     };
 
-    Registry.add(OfflineErrorPopup);
+    Registries.Component.add(OfflineErrorPopup);
 
     return OfflineErrorPopup;
 });

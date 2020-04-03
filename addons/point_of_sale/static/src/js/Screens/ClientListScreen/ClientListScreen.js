@@ -4,7 +4,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
     const { debounce } = owl.utils;
     const { useRef } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class ClientListScreen extends PosComponent {
         static template = 'ClientListScreen';
@@ -206,7 +206,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
         }
     }
 
-    Registry.add(ClientListScreen);
+    Registries.Component.add(ClientListScreen);
 
     return ClientListScreen;
 });

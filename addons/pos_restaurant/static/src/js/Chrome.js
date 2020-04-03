@@ -3,7 +3,7 @@ odoo.define('pos_restaurant.chrome', function(require) {
 
     const Chrome = require('point_of_sale.Chrome');
     const { onWillUnmount } = owl.hooks;
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     const PosResChrome = Chrome =>
         class extends Chrome {
@@ -78,7 +78,7 @@ odoo.define('pos_restaurant.chrome', function(require) {
             }
         };
 
-    Registry.extend(Chrome, PosResChrome);
+    Registries.Component.extend(Chrome, PosResChrome);
 
     return Chrome;
 });

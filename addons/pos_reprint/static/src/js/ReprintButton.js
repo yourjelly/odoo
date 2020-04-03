@@ -4,7 +4,7 @@ odoo.define('pos_reprint.ReprintButton', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const ProductScreen = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class ReprintButton extends PosComponent {
         static template = 'ReprintButton';
@@ -31,7 +31,7 @@ odoo.define('pos_reprint.ReprintButton', function(require) {
         },
     });
 
-    Registry.add(ReprintButton);
+    Registries.Component.add(ReprintButton);
 
     return ReprintButton;
 });

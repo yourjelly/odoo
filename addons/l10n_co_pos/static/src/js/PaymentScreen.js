@@ -2,7 +2,7 @@ odoo.define('l10n_co_pos.PaymentScreen', function(require) {
     'use strict';
 
     const PaymentScreen = require('point_of_sale.PaymentScreen');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
     const session = require('web.session');
 
     const L10nCoPosPaymentScreen = PaymentScreen =>
@@ -25,7 +25,7 @@ odoo.define('l10n_co_pos.PaymentScreen', function(require) {
             }
         };
 
-    Registry.extend(PaymentScreen, L10nCoPosPaymentScreen);
+    Registries.Component.extend(PaymentScreen, L10nCoPosPaymentScreen);
 
     return PaymentScreen;
 });

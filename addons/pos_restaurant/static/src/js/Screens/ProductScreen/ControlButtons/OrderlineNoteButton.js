@@ -4,7 +4,7 @@ odoo.define('pos_restaurant.OrderlineNoteButton', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const ProductScreen = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class OrderlineNoteButton extends PosComponent {
         static template = 'OrderlineNoteButton';
@@ -36,7 +36,7 @@ odoo.define('pos_restaurant.OrderlineNoteButton', function(require) {
         },
     });
 
-    Registry.add(OrderlineNoteButton);
+    Registries.Component.add(OrderlineNoteButton);
 
     return OrderlineNoteButton;
 });

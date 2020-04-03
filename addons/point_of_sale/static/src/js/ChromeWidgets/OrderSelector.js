@@ -2,7 +2,7 @@ odoo.define('point_of_sale.OrderSelector', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     // Previously OrderSelectorWidget
     class OrderSelector extends PosComponent {
@@ -43,7 +43,7 @@ odoo.define('point_of_sale.OrderSelector', function(require) {
         }
     }
 
-    Registry.add(OrderSelector);
+    Registries.Component.add(OrderSelector);
 
     return OrderSelector;
 });

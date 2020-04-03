@@ -2,7 +2,7 @@ odoo.define('point_of_sale.SaleDetailsButton', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class SaleDetailsButton extends PosComponent {
         static template = 'SaleDetailsButton';
@@ -27,7 +27,7 @@ odoo.define('point_of_sale.SaleDetailsButton', function(require) {
         }
     }
 
-    Registry.add(SaleDetailsButton);
+    Registries.Component.add(SaleDetailsButton);
 
     return SaleDetailsButton;
 });

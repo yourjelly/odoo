@@ -2,7 +2,7 @@ odoo.define('pos_restaurant.OrderSelector', function(require) {
     'use strict';
 
     const OrderSelector = require('point_of_sale.OrderSelector');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     const PosResOrderSelector = OrderSelector =>
         class extends OrderSelector {
@@ -14,7 +14,7 @@ odoo.define('pos_restaurant.OrderSelector', function(require) {
             }
         };
 
-    Registry.extend(OrderSelector, PosResOrderSelector);
+    Registries.Component.extend(OrderSelector, PosResOrderSelector);
 
     return OrderSelector;
 });

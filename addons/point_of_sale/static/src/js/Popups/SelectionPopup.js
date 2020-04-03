@@ -3,7 +3,7 @@ odoo.define('point_of_sale.SelectionPopup', function(require) {
 
     const { useState } = owl.hooks;
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     // formerly SelectionPopupWidget
     class SelectionPopup extends AbstractAwaitablePopup {
@@ -57,7 +57,7 @@ odoo.define('point_of_sale.SelectionPopup', function(require) {
         list: [],
     };
 
-    Registry.add(SelectionPopup);
+    Registries.Component.add(SelectionPopup);
 
     return SelectionPopup;
 });

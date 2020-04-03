@@ -2,7 +2,7 @@ odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
     'use strict';
 
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     // formerly ErrorTracebackPopupWidget
     class ErrorTracebackPopup extends AbstractAwaitablePopup {
@@ -38,7 +38,7 @@ odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
         exitButtonTrigger: 'close-pos'
     };
 
-    Registry.add(ErrorTracebackPopup);
+    Registries.Component.add(ErrorTracebackPopup);
 
     return ErrorTracebackPopup;
 });

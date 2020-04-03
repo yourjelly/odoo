@@ -4,7 +4,7 @@ odoo.define('pos_restaurant.PrintBillButton', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const ProductScreen = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class PrintBillButton extends PosComponent {
         static template = 'PrintBillButton';
@@ -32,7 +32,7 @@ odoo.define('pos_restaurant.PrintBillButton', function(require) {
         },
     });
 
-    Registry.add(PrintBillButton);
+    Registries.Component.add(PrintBillButton);
 
     return PrintBillButton;
 });

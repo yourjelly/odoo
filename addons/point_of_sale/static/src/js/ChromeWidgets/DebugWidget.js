@@ -6,7 +6,7 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
     const { getFileAsText } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class DebugWidget extends PosComponent {
         static template = 'DebugWidget';
@@ -141,7 +141,7 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
         }
     }
 
-    Registry.add(DebugWidget);
+    Registries.Component.add(DebugWidget);
 
     return DebugWidget;
 });

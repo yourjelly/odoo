@@ -9,7 +9,7 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
     const { useListener } = require('web.custom_hooks');
     const OrderReceipt = require('point_of_sale.OrderReceipt');
     const { Printer } = require('point_of_sale.Printer');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class PaymentScreen extends PosComponent {
         static template = 'PaymentScreen';
@@ -372,7 +372,7 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
         }
     }
 
-    Registry.add(PaymentScreen);
+    Registries.Component.add(PaymentScreen);
 
     return PaymentScreen;
 });

@@ -2,7 +2,7 @@ odoo.define('point_of_sale.ErrorPopup', function(require) {
     'use strict';
 
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     // formerly ErrorPopupWidget
     class ErrorPopup extends AbstractAwaitablePopup {
@@ -15,7 +15,7 @@ odoo.define('point_of_sale.ErrorPopup', function(require) {
         body: '',
     };
 
-    Registry.add(ErrorPopup);
+    Registries.Component.add(ErrorPopup);
 
     return ErrorPopup;
 });

@@ -2,7 +2,7 @@ odoo.define('point_of_sale.LoginScreen', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class LoginScreen extends PosComponent {
         mounted() {
@@ -116,7 +116,7 @@ odoo.define('point_of_sale.LoginScreen', function(require) {
         }
     }
 
-    Registry.add(LoginScreen);
+    Registries.Component.add(LoginScreen);
 
     return LoginScreen;
 });

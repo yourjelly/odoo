@@ -10,7 +10,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const PopupControllerMixin = require('point_of_sale.PopupControllerMixin');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     // This is kind of a trick.
     // We get a reference to the whole exports so that
@@ -396,7 +396,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
     }
 
-    Registry.add(Chrome);
+    Registries.Component.add(Chrome);
 
     return Chrome;
 });

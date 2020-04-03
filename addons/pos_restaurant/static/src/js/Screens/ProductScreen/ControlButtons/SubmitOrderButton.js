@@ -4,7 +4,7 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const ProductScreen = require('point_of_sale.ProductScreen');
     const { useListener } = require('web.custom_hooks');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     /**
      * IMPROVEMENT: Perhaps this class is quite complicated for its worth.
@@ -64,7 +64,7 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
         },
     });
 
-    Registry.add(SubmitOrderButton);
+    Registries.Component.add(SubmitOrderButton);
 
     return SubmitOrderButton;
 });

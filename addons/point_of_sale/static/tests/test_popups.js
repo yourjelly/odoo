@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.test_popups', async function(require) {
     'use strict';
 
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
     const makeTestEnvironment = require('web.test_env');
     const testUtils = require('web.test_utils');
     const PosComponent = require('point_of_sale.PosComponent');
@@ -19,7 +19,7 @@ odoo.define('point_of_sale.test_popups', async function(require) {
             }
             Root.env = makeTestEnvironment();
             this.Root = Root;
-            Registry.freeze();
+            Registries.Component.freeze();
         },
     });
 

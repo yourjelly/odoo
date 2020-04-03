@@ -1,7 +1,7 @@
 odoo.define('l10n_fr_pos_cert.ProductScreen', function(require) {
 
     const ProductScreen = require('point_of_sale.ProductScreen');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     const PosFrProductScreen = ProductScreen => class extends ProductScreen {
         disallowLineQuantityChange() {
@@ -15,7 +15,7 @@ odoo.define('l10n_fr_pos_cert.ProductScreen', function(require) {
         }
     };
 
-    Registry.extend(ProductScreen, PosFrProductScreen);
+    Registries.Component.extend(ProductScreen, PosFrProductScreen);
 
     return ProductScreen;
 });

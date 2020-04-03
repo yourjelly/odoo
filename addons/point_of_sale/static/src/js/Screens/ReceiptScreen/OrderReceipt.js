@@ -2,7 +2,7 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class OrderReceipt extends PosComponent {
         static template = 'OrderReceipt';
@@ -41,7 +41,7 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
         }
     }
 
-    Registry.add(OrderReceipt);
+    Registries.Component.add(OrderReceipt);
 
     return OrderReceipt;
 });

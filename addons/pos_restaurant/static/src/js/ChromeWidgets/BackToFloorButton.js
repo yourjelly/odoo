@@ -3,7 +3,7 @@ odoo.define('pos_restaurant.BackToFloorButton', function(require) {
 
     const PosComponent = require('point_of_sale.PosComponent');
     const { useListener } = require('web.custom_hooks');
-    const Registry = require('point_of_sale.ComponentsRegistry');
+    const Registries = require('point_of_sale.Registries');
 
     class BackToFloorButton extends PosComponent {
         static template = 'BackToFloorButton';
@@ -22,7 +22,7 @@ odoo.define('pos_restaurant.BackToFloorButton', function(require) {
         }
     }
 
-    Registry.add(BackToFloorButton);
+    Registries.Component.add(BackToFloorButton);
 
     return BackToFloorButton;
 });
