@@ -99,9 +99,9 @@ function _loadScripts(scripts, index) {
         return;
     }
     var script = scripts[index];
-    script.addEventListener('load', _loadScripts.bind(this, scripts, index + 1));
     script.src = script.dataset.src;
     script.removeAttribute('data-src');
+    setTimeout(_loadScripts.bind(this, scripts, index + 1), 0);
 }
 
 return {
