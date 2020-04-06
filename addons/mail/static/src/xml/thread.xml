@@ -309,9 +309,10 @@
                         <t t-esc="message.getDisplayedAuthor()"/>
                     </strong>
                     <strong t-elif="message.hasEmailFrom()">
-                        <a class="text-muted" t-attf-href="mailto:#{message.getEmailFrom()}?subject=Re: #{message.hasSubject() ? message.getSubject() : ''}">
+                        <a t-if="message.shouldRedirectToAuthor()" class="text-muted" t-attf-href="mailto:#{message.getEmailFrom()}?subject=Re: #{message.hasSubject() ? message.getSubject() : ''}">
                             <t t-esc="message.getEmailFrom()"/>
                         </a>
+                        <t t-else="" t-esc="message.getEmailFrom()"/>
                     </strong>
                     <strong t-else="" class="o_thread_author">
                         <t t-esc="message.getDisplayedAuthor()"/>

@@ -1100,6 +1100,7 @@ class Message(models.Model):
                 'is_discussion': message_sudo.subtype_id.id == com_id,
                 'subtype_description': message_sudo.subtype_id.description,
                 'is_notification': vals['message_type'] == 'user_notification',
+                'channel_types': list(message_sudo.mapped('channel_ids.channel_type')),
             })
             if vals['model'] and self.env[vals['model']]._original_module:
                 vals['module_icon'] = modules.module.get_module_icon(self.env[vals['model']]._original_module)

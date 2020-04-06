@@ -768,6 +768,7 @@ var Message =  AbstractMessage.extend(Mixins.EventDispatcherMixin, ServicesMixin
         this._subtypeDescription = data.subtype_description;
         this._threadIDs = data.channel_ids || [];
         this._trackingValueIDs = data.tracking_value_ids;
+        this._channelTypes = data.channel_types;
 
         this._moderationStatus = data.moderation_status || 'accepted';
     },
