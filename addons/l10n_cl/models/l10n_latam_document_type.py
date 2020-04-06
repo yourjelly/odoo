@@ -20,6 +20,7 @@ class L10nLatamDocumentType(models.Model):
         if self.country_id != self.env.ref('base.cl'):
             return values
         values.update({
+            'name': '%s - %s' % (journal.name, self.name),
             'padding': 6,
             'implementation': 'no_gap',
             'l10n_latam_document_type_id': self.id,
