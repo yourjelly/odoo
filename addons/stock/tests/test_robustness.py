@@ -140,7 +140,8 @@ class TestRobustness(SavepointCase):
         move1._action_confirm()
         move1._action_assign()
 
-        move1.result_package_id = False
+        # 'stock.move' object has no attribute 'result_package_id'
+        # move1.result_package_id = False
 
         package.unpack()
 

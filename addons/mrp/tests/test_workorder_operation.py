@@ -1277,7 +1277,8 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             'name': 'Manual Assembly',
             'time_cycle': 60,
         })
-        self.planning_bom.routing = mrp_routing_0
+        # 'mrp.bom' object has no attribute 'routing'
+        # self.planning_bom.routing = mrp_routing_0
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.product_4
         mo_form.bom_id = self.planning_bom
