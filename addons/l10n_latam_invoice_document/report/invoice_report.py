@@ -11,3 +11,6 @@ class AccountInvoiceReport(models.Model):
 
     def _select(self):
         return super()._select() + ", move.l10n_latam_document_type_id as l10n_latam_document_type_id"
+
+    def _group_by(self):
+        return super()._group_by() + ", move.l10n_latam_document_type_id"
