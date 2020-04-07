@@ -20,6 +20,20 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-12 col-lg-6 o_setting_box" id="l10n_in_einvoice_setting" attrs="{'invisible': [('country_code', '!=', 'IN')]}">
+                    <div class="o_setting_left_pane">
+                        <field name="module_l10n_in_einvoice" widget="upgrade_boolean"/>
+                    </div>
+                    <div class="o_setting_right_pane">
+                        <label for="module_l10n_in_einvoice"/>
+                        <div class="text-muted">
+                            Upload invoice to government server
+                        </div>
+                        <div class="content-group">
+                            <div id="setup_l10n_in_einvoice"/>
+                        </div>
+                    </div>
+                </div>
             </div>
         </field>
     </record>
