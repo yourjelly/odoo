@@ -25,6 +25,12 @@ odoo.define('point_of_sale.PaymentScreenPaymentLines', function(require) {
         get currentOrder() {
             return this.env.pos.get_order();
         }
+        selectedLineClass(line) {
+            return { 'payment-terminal': line.get_payment_status() };
+        }
+        unselectedLineClass(line) {
+            return {};
+        }
     }
 
     Registries.Component.add(PaymentScreenPaymentLines);
