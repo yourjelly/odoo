@@ -892,12 +892,17 @@ var FormRenderer = BasicRenderer.extend({
                 callback: function (element, modifiers) {
                     // if the active tab is invisible, activate the first visible tab instead
                     var $link = element.$el.find('.nav-link');
+                    if (!modifiers.invisible && !$link.hasClass('active')) {
+                        var $firstVisibleTab = renderedTabs[Math.max(1, autofocusTab)];
+                        $firstVisibleTab.$header.find('.nav-link').addClass('active');
+                        $firstVisibleTab.$page.addClass('active');
+                    }
                     if (modifiers.invisible && $link.hasClass('active')) {
                         $link.removeClass('active');
                         tab.$page.removeClass('active');
-                        var $firstVisibleTab = $headers.find('li:not(.o_invisible_modifier):first() > a');
-                        $firstVisibleTab.addClass('active');
-                        $pages.find($firstVisibleTab.attr('href')).addClass('active');
+                        // var $firstVisibleTab = $headers.find('li:not(.o_invisible_modifier):first() > a');
+                        // $firstVisibleTab.addClass('active');
+                        // $pages.find($firstVisibleTab.attr('href')).addClass('active');
                     }
                 },
             });
