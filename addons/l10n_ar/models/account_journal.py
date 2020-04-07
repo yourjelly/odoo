@@ -17,6 +17,7 @@ class AccountJournal(models.Model):
         'res.partner', 'AFIP POS Address', help='This is the address used for invoice reports of this POS',
         domain="['|', ('id', '=', company_partner), '&', ('id', 'child_of', company_partner), ('type', '!=', 'contact')]"
     )
+    l10n_ar_sequence_ids = fields.One2many('ir.sequence', 'l10n_latam_journal_id', string="Sequences")
     l10n_ar_share_sequences = fields.Boolean(
         'Unified Book', help='Use same sequence for documents with the same letter')
 
