@@ -1163,6 +1163,41 @@ class AccountJournal(models.Model):
         if self._cr.fetchone():
             raise UserError(_("You can't change the company of your journal since there are some journal entries linked to it."))
 
+    @api.constrains('default_debit_account_id', 'default_credit_account_id', 'payment_debit_account_id', 'payment_credit_account_id')
+    def _check_journal_not_shared_accounts(self):
+        accounts = self.default_debit_account_id \
+                   + self.default_credit_account_id \
+                   + self.payment_debit_account_id \
+                   + self.payment_credit_account_id
+
+        if not accounts:
+            return
+
+        self.env['account.journal'].flush([
+            'default_debit_account_id',
+            'default_credit_account_id',
+            'payment_debit_account_id',
+            'payment_credit_account_id',
+        ])
+        self._cr.execute('''
+            SELECT account.name
+            FROM account_account account
+            LEFT JOIN account_journal journal ON
+                journal.default_debit_account_id = account.id
+                OR
+                journal.default_credit_account_id = account.id
+                OR
+                journal.payment_debit_account_id = account.id
+                OR
+                journal.payment_credit_account_id = account.id
+            WHERE account.id IN %s
+            GROUP BY account.name
+            HAVING COUNT(DISTINCT journal.id) > 1
+        ''', [tuple(accounts.ids)])
+        res = self._cr.fetchone()
+        if res:
+            raise ValidationError(_("The account %s can't be shared between multiple journals") % res[0])
+
     @api.constrains('type', 'default_credit_account_id', 'default_debit_account_id')
     def _check_type_default_credit_account_id_type(self):
         journals_to_check = self.filtered(lambda journal: journal.type in ('sale', 'purchase'))
@@ -1476,8 +1511,8 @@ class AccountJournal(models.Model):
     # REPORTING METHODS
     # -------------------------------------------------------------------------
 
-    def _get_journal_balance(self, domain=None):
-        ''' Get the balance of the current journal by filtering the journal items using the journal's accounts.
+    def _get_journal_bank_account_balance(self, domain=None):
+        ''' Get the bank balance of the current journal by filtering the journal items using the journal's accounts.
 
         /!\ The current journal is not part of the applied domain. This is the expected behavior since we only want
         a logic based on accounts.
@@ -1514,6 +1549,64 @@ class AccountJournal(models.Model):
 
         balance, amount_currency = self._cr.fetchone()
         return amount_currency if journal_currency else balance
+
+    def _get_journal_outstanding_payments_account_balance(self, domain=None, date=None):
+        ''' Get the outstanding payments balance of the current journal by filtering the journal items using the
+        journal's accounts.
+
+        /!\ The current journal is not part of the applied domain. This is the expected behavior since we only want
+        a logic based on accounts.
+
+        :param domain:  An additional domain to be applied on the account.move.line model.
+        :param date:    The date to be used when performing the currency conversions.
+        :return:        The balance expressed in the journal's currency.
+        '''
+        self.ensure_one()
+        self.env['account.move.line'].check_access_rights('read')
+        conversion_date = date or fields.Date.context_today(self)
+
+        accounts = self.payment_debit_account_id + self.payment_credit_account_id
+        if not accounts:
+            return 0.0
+
+        domain = (domain or []) + [
+            ('account_id', 'in', tuple(accounts.ids)),
+            ('display_type', 'not in', ('line_section', 'line_note')),
+            ('move_id.state', '!=', 'cancel'),
+        ]
+        query = self.env['account.move.line']._where_calc(domain)
+        tables, where_clause, where_params = query.get_sql()
+
+        self._cr.execute('''
+            SELECT
+                account_move_line.currency_id,
+                account.reconcile AS is_account_reconcile,
+                SUM(account_move_line.amount_residual) AS amount_residual,
+                SUM(account_move_line.balance) AS balance,
+                SUM(account_move_line.amount_residual_currency) AS amount_residual_currency,
+                SUM(account_move_line.amount_currency) AS amount_currency
+            FROM ''' + tables + '''
+            JOIN account_account account ON account.id = account_move_line.account_id
+            WHERE ''' + where_clause + '''
+            GROUP BY account_move_line.currency_id, account.reconcile
+        ''', where_params)
+
+        company_currency = self.company_id.currency_id
+        journal_currency = self.currency_id if self.currency_id and self.currency_id != company_currency else False
+        balance_currency = journal_currency or company_currency
+
+        total_balance = 0.0
+        for res in self._cr.dictfetchall():
+            amount_currency = res['amount_residual_currency'] if res['is_account_reconcile'] else res['amount_currency']
+            balance = res['amount_residual'] if res['is_account_reconcile'] else res['balance']
+
+            if res['currency_id'] and journal_currency and res['currency_id'] == journal_currency.id:
+                total_balance += amount_currency
+            elif journal_currency:
+                total_balance += company_currency._convert(balance, balance_currency, self.company_id, conversion_date)
+            else:
+                total_balance += balance
+        return total_balance
 
     def _get_last_bank_statement(self, domain=None):
         ''' Retrieve the last bank statement created using this journal.

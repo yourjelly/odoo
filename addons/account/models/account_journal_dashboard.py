@@ -219,13 +219,17 @@ class account_journal(models.Model):
 
     def get_journal_dashboard_datas(self):
         currency = self.currency_id or self.company_id.currency_id
-        number_to_reconcile = number_to_check = last_balance = account_sum = 0
+        number_to_reconcile = number_to_check = last_balance = bank_account_balance = outstanding_pay_account_balance = 0
         title = ''
         number_draft = number_waiting = number_late = to_check_balance = 0
         sum_draft = sum_waiting = sum_late = 0.0
         if self.type in ('bank', 'cash'):
-            last_balance = self._get_last_bank_statement(domain=[('state', '=', 'posted')]).balance_end
-            account_sum = self._get_journal_balance(domain=[('move_id.state', '=', 'posted')])
+            last_balance = self._get_last_bank_statement(
+                domain=[('state', '=', 'posted')]).balance_end
+            bank_account_balance = self._get_journal_bank_account_balance(
+                domain=[('move_id.state', '=', 'posted')])
+            outstanding_pay_account_balance = self._get_journal_outstanding_payments_account_balance(
+                domain=[('move_id.state', '=', 'posted')])
 
             self._cr.execute('''
                 SELECT COUNT(st_line.id)
@@ -285,17 +289,15 @@ class account_journal(models.Model):
                 number_to_check = read[0]['__count']
                 to_check_balance = read[0]['amount_total']
 
-        difference = currency.round(account_sum - last_balance)
-
         is_sample_data = self.kanban_dashboard_graph and any(data.get('is_sample_data', False) for data in json.loads(self.kanban_dashboard_graph))
 
         return {
             'number_to_check': number_to_check,
             'to_check_balance': formatLang(self.env, to_check_balance, currency_obj=currency),
             'number_to_reconcile': number_to_reconcile,
-            'account_balance': formatLang(self.env, currency.round(account_sum) + 0.0, currency_obj=currency),
+            'account_balance': formatLang(self.env, currency.round(bank_account_balance), currency_obj=currency),
+            'outstanding_pay_account_balance': formatLang(self.env, currency.round(outstanding_pay_account_balance), currency_obj=currency),
             'last_balance': formatLang(self.env, currency.round(last_balance) + 0.0, currency_obj=currency),
-            'difference': formatLang(self.env, difference, currency_obj=currency) if difference else False,
             'number_draft': number_draft,
             'number_waiting': number_waiting,
             'number_late': number_late,
