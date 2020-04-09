@@ -1499,7 +1499,7 @@ class IrModelConstraint(models.Model):
         for data in self.sorted(key='id', reverse=True):
             name = tools.ustr(data.name)
             if data.model.model in self.env:
-                table = self.env[data.model.model]._table    
+                table = self.env[data.model.model]._table
             else:
                 table = data.model.model.replace('.', '_')
             typ = data.type
@@ -1584,30 +1584,28 @@ class IrModelConstraint(models.Model):
 
     def _reflect_constraints(self, model_names):
         """ Reflect the SQL constraints of the given models. """
-        for model_name in model_names:
-            self._reflect_model(self.env[model_name])
-
-    def _reflect_model(self, model):
-        """ Reflect the _sql_constraints of the given model. """
         def cons_text(txt):
             return txt.lower().replace(', ',',').replace(' (','(')
 
-        # map each constraint on the name of the module where it is defined
-        constraint_module = {
-            constraint[0]: cls._module
-            for cls in reversed(type(model).mro())
-            if models.is_definition_class(cls)
-            for constraint in getattr(cls, '_local_sql_constraints', ())
-        }
-
         data_list = []
-        for (key, definition, message) in model._sql_constraints:
-            conname = '%s_%s' % (model._table, key)
-            module = constraint_module.get(key)
-            record = self._reflect_constraint(model, conname, 'u', cons_text(definition), module, message)
-            if record:
-                xml_id = '%s.constraint_%s' % (module, conname)
-                data_list.append(dict(xml_id=xml_id, record=record))
+
+        for model_name in model_names:
+            model = self.env[model_name]
+
+            # map each constraint on the name of the module where it is defined
+            constraint_module = {
+                constraint[0]: cls._module
+                for cls in reversed(type(model).mro())
+                if models.is_definition_class(cls)
+                for constraint in getattr(cls, '_local_sql_constraints', ())
+            }
+            for (key, definition, message) in model._sql_constraints:
+                conname = '%s_%s' % (model._table, key)
+                module = constraint_module.get(key)
+                record = self._reflect_constraint(model, conname, 'u', cons_text(definition), module, message)
+                if record:
+                    xml_id = '%s.constraint_%s' % (module, conname)
+                    data_list.append(dict(xml_id=xml_id, record=record))
 
         self.env['ir.model.data']._update_xmlids(data_list)
 
