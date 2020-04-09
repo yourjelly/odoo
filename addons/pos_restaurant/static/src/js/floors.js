@@ -341,9 +341,6 @@ models.PosModel = models.PosModel.extend({
             }
             if( (reason === 'abandon' || removed_order.temporary) && order_list.length > 0){
                 this.set_order(order_list[index] || order_list[order_list.length -1]);
-            }else{
-                // back to the floor plan
-                this.set_table(null);
             }
         } else {
             _super_posmodel.on_removed_order.apply(this,arguments);
