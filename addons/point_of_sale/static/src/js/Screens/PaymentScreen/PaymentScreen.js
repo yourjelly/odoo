@@ -1,4 +1,4 @@
-odoo.define('point_of_sale.PaymentScreen', function(require) {
+odoo.define('point_of_sale.PaymentScreen', function (require) {
     'use strict';
 
     const { parse } = require('web.field_utils');
@@ -19,6 +19,10 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
             useListener('select-payment-line', this.selectPaymentLine);
             useListener('new-payment-line', this.addNewPaymentLine);
             useListener('update-selected-paymentline', this._updateSelectedPaymentline);
+            useListener('send-payment-request', this._sendPaymentRequest);
+            useListener('send-payment-cancel', this._sendPaymentCancel);
+            useListener('send-payment-reverse', this._sendPaymentReverse);
+            useListener('send-force-done', this._sendForceDone);
             useErrorHandlers();
             NumberBuffer.use({
                 // The numberBuffer listens to this event to update its state.
@@ -57,6 +61,9 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
             this.env.pos.off('change:selectedOrder', null, this);
             this.currentOrder.off('change', null, this);
             this.currentOrder.paymentlines.off('change', null, this);
+            if (this.currentOrder) {
+                this.currentOrder.stop_electronic_payment();
+            }
         }
         get currentOrder() {
             return this.env.pos.get_order();
@@ -81,14 +88,15 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
             } else {
                 this.currentOrder.add_paymentline(paymentMethod);
                 NumberBuffer.reset();
-                if (paymentMethod.payment_terminal) {
+                this.payment_interface = paymentMethod.payment_terminal;
+                if (this.payment_interface) {
                     this.currentOrder.selected_paymentline.set_payment_status('pending');
                 }
                 return true;
             }
         }
         _updateSelectedPaymentline() {
-            if (this.paymentLines.every(line => line.paid)) {
+            if (this.paymentLines.every((line) => line.paid)) {
                 this.currentOrder.add_paymentline(this.env.pos.payment_methods[0]);
             }
             if (!this.selectedPaymentLine) return; // do nothing if no selected payment line
@@ -139,7 +147,7 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
         }
         deletePaymentLine(event) {
             const { cid } = event.detail;
-            const line = this.paymentLines.find(line => line.cid === cid);
+            const line = this.paymentLines.find((line) => line.cid === cid);
 
             // If a paymentline with a payment terminal linked to
             // it is removed, the terminal should get a cancel
@@ -154,7 +162,7 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
         }
         selectPaymentLine(event) {
             const { cid } = event.detail;
-            const line = this.paymentLines.find(line => line.cid === cid);
+            const line = this.paymentLines.find((line) => line.cid === cid);
             this.currentOrder.select_paymentline(line);
             NumberBuffer.reset();
             this.render();
@@ -369,6 +377,48 @@ odoo.define('point_of_sale.PaymentScreen', function(require) {
                 return false;
             }
             return true;
+        }
+        async _sendPaymentRequest({ detail: line }) {
+            // Other payment lines can not be reversed anymore
+            this.paymentLines.forEach(function (line) {
+                line.can_be_reversed = false;
+            });
+
+            const payment_terminal = line.payment_method.payment_terminal;
+            line.set_payment_status('waiting');
+
+            const isPaymentSuccessful = await payment_terminal.send_payment_request(line.cid);
+            if (isPaymentSuccessful) {
+                line.set_payment_status('done');
+                line.can_be_reversed = this.payment_interface.supports_reversals;
+            } else {
+                line.set_payment_status('retry');
+            }
+        }
+        async _sendPaymentCancel({ detail: line }) {
+            const payment_terminal = line.payment_method.payment_terminal;
+            line.set_payment_status('waitingCancel');
+            try {
+                payment_terminal.send_payment_cancel(this.currentOrder, line.cid);
+            } finally {
+                line.set_payment_status('retry');
+            }
+        }
+        async _sendPaymentReverse({ detail: line }) {
+            const payment_terminal = line.payment_method.payment_terminal;
+            line.set_payment_status('reversing');
+
+            const isReversalSuccessful = await payment_terminal.send_payment_reversal(line.cid);
+            if (isReversalSuccessful) {
+                line.set_amount(0);
+                line.set_payment_status('reversed');
+            } else {
+                line.can_be_reversed = false;
+                line.set_payment_status('done');
+            }
+        }
+        async _sendForceDone({ detail: line }) {
+            line.set_payment_status('done');
         }
     }
 
