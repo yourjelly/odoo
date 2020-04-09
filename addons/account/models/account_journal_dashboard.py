@@ -219,16 +219,21 @@ class account_journal(models.Model):
 
     def get_journal_dashboard_datas(self):
         currency = self.currency_id or self.company_id.currency_id
-        number_to_reconcile = number_to_check = last_balance = bank_account_balance = outstanding_pay_account_balance = 0
+        number_to_reconcile = number_to_check = last_balance = 0
+        has_at_least_one_statement = False
+        bank_account_balance = nb_lines_bank_account_balance = 0
+        outstanding_pay_account_balance = nb_lines_outstanding_pay_account_balance = 0
         title = ''
         number_draft = number_waiting = number_late = to_check_balance = 0
         sum_draft = sum_waiting = sum_late = 0.0
         if self.type in ('bank', 'cash'):
-            last_balance = self._get_last_bank_statement(
-                domain=[('state', '=', 'posted')]).balance_end
-            bank_account_balance = self._get_journal_bank_account_balance(
+            last_statement = self._get_last_bank_statement(
+                domain=[('state', '=', 'posted')])
+            last_balance = last_statement.balance_end
+            has_at_least_one_statement = bool(last_statement)
+            bank_account_balance, nb_lines_bank_account_balance = self._get_journal_bank_account_balance(
                 domain=[('move_id.state', '=', 'posted')])
-            outstanding_pay_account_balance = self._get_journal_outstanding_payments_account_balance(
+            outstanding_pay_account_balance, nb_lines_outstanding_pay_account_balance = self._get_journal_outstanding_payments_account_balance(
                 domain=[('move_id.state', '=', 'posted')])
 
             self._cr.execute('''
@@ -296,7 +301,10 @@ class account_journal(models.Model):
             'to_check_balance': formatLang(self.env, to_check_balance, currency_obj=currency),
             'number_to_reconcile': number_to_reconcile,
             'account_balance': formatLang(self.env, currency.round(bank_account_balance), currency_obj=currency),
+            'has_at_least_one_statement': has_at_least_one_statement,
+            'nb_lines_bank_account_balance': nb_lines_bank_account_balance,
             'outstanding_pay_account_balance': formatLang(self.env, currency.round(outstanding_pay_account_balance), currency_obj=currency),
+            'nb_lines_outstanding_pay_account_balance': nb_lines_outstanding_pay_account_balance,
             'last_balance': formatLang(self.env, currency.round(last_balance) + 0.0, currency_obj=currency),
             'number_draft': number_draft,
             'number_waiting': number_waiting,

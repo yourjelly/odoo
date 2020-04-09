@@ -1537,6 +1537,7 @@ class AccountJournal(models.Model):
 
         query = '''
             SELECT
+                COUNT(account_move_line.id) AS nb_lines,
                 COALESCE(SUM(account_move_line.balance), 0.0),
                 COALESCE(SUM(account_move_line.amount_currency), 0.0)
             FROM ''' + tables + '''
@@ -1547,8 +1548,8 @@ class AccountJournal(models.Model):
         company_currency = self.company_id.currency_id
         journal_currency = self.currency_id if self.currency_id and self.currency_id != company_currency else False
 
-        balance, amount_currency = self._cr.fetchone()
-        return amount_currency if journal_currency else balance
+        nb_lines, balance, amount_currency = self._cr.fetchone()
+        return amount_currency if journal_currency else balance, nb_lines
 
     def _get_journal_outstanding_payments_account_balance(self, domain=None, date=None):
         ''' Get the outstanding payments balance of the current journal by filtering the journal items using the
@@ -1579,6 +1580,7 @@ class AccountJournal(models.Model):
 
         self._cr.execute('''
             SELECT
+                COUNT(account_move_line.id) AS nb_lines,
                 account_move_line.currency_id,
                 account.reconcile AS is_account_reconcile,
                 SUM(account_move_line.amount_residual) AS amount_residual,
@@ -1596,7 +1598,10 @@ class AccountJournal(models.Model):
         balance_currency = journal_currency or company_currency
 
         total_balance = 0.0
+        nb_lines = 0
         for res in self._cr.dictfetchall():
+            nb_lines += res['nb_lines']
+
             amount_currency = res['amount_residual_currency'] if res['is_account_reconcile'] else res['amount_currency']
             balance = res['amount_residual'] if res['is_account_reconcile'] else res['balance']
 
@@ -1606,7 +1611,7 @@ class AccountJournal(models.Model):
                 total_balance += company_currency._convert(balance, balance_currency, self.company_id, conversion_date)
             else:
                 total_balance += balance
-        return total_balance
+        return total_balance, nb_lines
 
     def _get_last_bank_statement(self, domain=None):
         ''' Retrieve the last bank statement created using this journal.
