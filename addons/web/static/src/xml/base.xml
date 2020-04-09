@@ -19,8 +19,6 @@
             menuID="renderingInfo.menuID"/>
         <ComponentAdapter Component="LoadingWidget" widgetArgs="[]"/>
 
-        <t t-set='dialog' t-value='renderingInfo.dialog' />
-        <t t-set="main" t-value="renderingInfo.main"/>
         <div class="o_action_manager">
             <!-- fixme: class below totally ignored -->
             <ActionAdapter t-if="main" class="o_action" t-ref="currentMainComponent"
@@ -1543,6 +1541,24 @@
             <t t-raw="0"/>
         </form>
         <iframe t-att-id="fileupload_id" t-att-name="fileupload_id" style="display: none"/>
+    </div>
+</t>
+
+<t t-name="web.OwlHiddenInputFile" owl="1">
+    <div class="o_hidden_input_file" t-att-style="props.fileUploadStyle" aria-atomic="true">
+        <form class="o_form_binary_form" t-att-target="targetID"
+              method="post" enctype="multipart/form-data" t-att-action="props.fileUploadAction || '/web/binary/upload'"
+              t-ref="formRef">
+            <input type="hidden" name="csrf_token" t-att-value="csrfToken"/>
+            <input type="hidden" name="callback"/>
+            <input type="file" class="o_input_file" name="ufile"
+                   t-att="{'multiple': props.multiUpload ? 'multiple' : null, 'accept': props.acceptedFileExtensions || '*'}"
+                   t-ref="fileInputRef"
+                   t-on-change.stop="_onChangedFile"
+                />
+            <t t-slot="default"/>
+        </form>
+        <iframe t-att-id="targetID" t-att-name="targetID" style="display: none" t-on-load.stop="_onFileLoaded"/>
     </div>
 </t>
 
