@@ -37,15 +37,46 @@ return session.is_bound.then(function () {
         var untracked_classnames = ["o_tooltip", "o_tooltip_content", "o_tooltip_overlay"];
         var check_tooltip = _.debounce(function (records) {
             var update = _.some(records, function (record) {
-                return !(is_untracked(record.target) ||
-                    _.some(record.addedNodes, is_untracked) ||
-                    _.some(record.removedNodes, is_untracked));
-
-                function is_untracked(node) {
-                    var record_class = node.className;
-                    return (_.isString(record_class) &&
-                        _.intersection(record_class.split(' '), untracked_classnames).length !== 0);
+                // First check if the mutation applied on an element we do not
+                // track (like the tour tips themself).
+                const isTracked = node => {
+                    if (node.classList) {
+                        for (const className of untracked_classnames) {
+                            if (node.classList.contains(className)) {
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                };
+                if (!isTracked(record.target)
+                        || _.some(record.addedNodes, node => !isTracked(node))
+                        || _.some(record.removedNodes, node => !isTracked(node))) {
+                    return false;
                 }
+
+                if (record.type === 'attributes') {
+                    // Check if this is not an ID change. Those can be
+                    // safely ignored since we normally do not change ids by
+                    // ourself (at least no alongside other changes). We need
+                    // to ignore them though as jQuery is triggering many of
+                    // those for performance reasons.
+                    if (record.attributeName === 'id') {
+                        console.log(`HERE IS AN ID CHANGE ${record.oldValue} -> ${record.target.id}`);
+                        return false;
+                    }
+
+                    // Check if the change is about receiving or losing the
+                    // 'o_tooltip_parent' class, which is linked to the tour
+                    // service system.
+                    if (record.attributeName === 'class') {
+                        const hadClass = record.oldValue ? record.oldValue.includes('o_tooltip_parent') : false;
+                        const hasClass = record.target.classList.contains('o_tooltip_parent');
+                        return hadClass === hasClass;
+                    }
+                }
+
+                return true;
             });
             if (update) { // ignore mutations which concern the tooltips
                 tour_manager.update();
@@ -61,6 +92,7 @@ return session.is_bound.then(function () {
                                 attributes: true,
                                 childList: true,
                                 subtree: true,
+                                attributeOldValue: true,
                             });
                         }
                         resolve();
