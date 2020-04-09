@@ -7,7 +7,6 @@ odoo.define('point_of_sale.SetFiscalPositionButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class SetFiscalPositionButton extends PosComponent {
-        static template = 'SetFiscalPositionButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -65,6 +64,7 @@ odoo.define('point_of_sale.SetFiscalPositionButton', function(require) {
             }
         }
     }
+    SetFiscalPositionButton.template = 'SetFiscalPositionButton';
 
     ProductScreen.addControlButton({
         component: SetFiscalPositionButton,

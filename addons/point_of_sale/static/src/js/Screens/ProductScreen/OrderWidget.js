@@ -6,7 +6,6 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class OrderWidget extends PosComponent {
-        static template = 'OrderWidget';
         constructor() {
             super(...arguments);
             this.scrollableRef = useRef('scrollable');
@@ -103,6 +102,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
             }
         }
     }
+    OrderWidget.template = 'OrderWidget';
 
     Registries.Component.add(OrderWidget);
 

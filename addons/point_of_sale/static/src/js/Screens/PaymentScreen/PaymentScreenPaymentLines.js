@@ -5,7 +5,6 @@ odoo.define('point_of_sale.PaymentScreenPaymentLines', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class PaymentScreenPaymentLines extends PosComponent {
-        static template = 'PaymentScreenPaymentLines';
         formatLineAmount(paymentline) {
             return this.env.pos.format_currency_no_symbol(paymentline.get_amount());
         }
@@ -32,6 +31,7 @@ odoo.define('point_of_sale.PaymentScreenPaymentLines', function(require) {
             return {};
         }
     }
+    PaymentScreenPaymentLines.template = 'PaymentScreenPaymentLines';
 
     Registries.Component.add(PaymentScreenPaymentLines);
 

@@ -5,7 +5,6 @@ odoo.define('pos_restaurant.TableWidget', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class TableWidget extends PosComponent {
-        static template = 'TableWidget';
         mounted() {
             const table = this.props.table;
             function unit(val) {
@@ -66,6 +65,7 @@ odoo.define('pos_restaurant.TableWidget', function(require) {
             return hasChangesCount ? { printing: true } : hasSkippedCount ? { skipped: true } : {};
         }
     }
+    TableWidget.template = 'TableWidget';
 
     Registries.Component.add(TableWidget);
 

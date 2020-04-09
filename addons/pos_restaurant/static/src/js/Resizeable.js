@@ -7,7 +7,6 @@ odoo.define('pos_restaurant.Resizeable', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class Resizeable extends PosComponent {
-        static template = 'Resizeable';
         constructor() {
             super(...arguments);
 
@@ -295,6 +294,7 @@ odoo.define('pos_restaurant.Resizeable', function(require) {
             this.trigger('resize-end', { size, loc });
         }
     }
+    Resizeable.template = 'Resizeable';
 
     Registries.Component.add(Resizeable);
 

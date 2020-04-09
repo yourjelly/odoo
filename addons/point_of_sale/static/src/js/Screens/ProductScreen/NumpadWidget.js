@@ -6,7 +6,6 @@ odoo.define('point_of_sale.NumpadWidget', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class NumpadWidget extends PosComponent {
-        static template = 'NumpadWidget';
         constructor() {
             super(...arguments);
             this.state = useState({ mode: 'quantity' });
@@ -33,6 +32,7 @@ odoo.define('point_of_sale.NumpadWidget', function(require) {
             this.trigger('numpad-click-input', { key });
         }
     }
+    NumpadWidget.template = 'NumpadWidget';
 
     Registries.Component.add(NumpadWidget);
 

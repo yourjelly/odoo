@@ -6,7 +6,6 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ProductsWidgetControlPanel extends PosComponent {
-        static template = 'ProductsWidgetControlPanel';
         constructor() {
             super(...arguments);
             this.searchTimeout = null;
@@ -23,6 +22,7 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
             }, 70);
         }
     }
+    ProductsWidgetControlPanel.template = 'ProductsWidgetControlPanel';
 
     Registries.Component.add(ProductsWidgetControlPanel);
 

@@ -7,7 +7,6 @@ odoo.define('pos_reprint.ReprintButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ReprintButton extends PosComponent {
-        static template = 'ReprintButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -23,6 +22,7 @@ odoo.define('pos_reprint.ReprintButton', function(require) {
             }
         }
     }
+    ReprintButton.template = 'ReprintButton';
 
     ProductScreen.addControlButton({
         component: ReprintButton,

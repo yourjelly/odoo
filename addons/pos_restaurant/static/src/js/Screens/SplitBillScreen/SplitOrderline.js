@@ -6,7 +6,6 @@ odoo.define('pos_restaurant.SplitOrderline', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class SplitOrderline extends PosComponent {
-        static template = 'SplitOrderline';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -18,6 +17,7 @@ odoo.define('pos_restaurant.SplitOrderline', function(require) {
             this.trigger('click-line', this.props.line);
         }
     }
+    SplitOrderline.template = 'SplitOrderline';
 
     Registries.Component.add(SplitOrderline);
 

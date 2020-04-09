@@ -9,7 +9,6 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class DebugWidget extends PosComponent {
-        static template = 'DebugWidget';
         constructor() {
             super(...arguments);
             this.state = useState({
@@ -140,6 +139,7 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
             this.env.pos.proxy.message('display_refresh', {});
         }
     }
+    DebugWidget.template = 'DebugWidget';
 
     Registries.Component.add(DebugWidget);
 

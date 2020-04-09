@@ -7,7 +7,6 @@ odoo.define('pos_restaurant.TableGuestsButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class TableGuestsButton extends PosComponent {
-        static template = 'TableGuestsButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -30,6 +29,7 @@ odoo.define('pos_restaurant.TableGuestsButton', function(require) {
             }
         }
     }
+    TableGuestsButton.template = 'TableGuestsButton';
 
     ProductScreen.addControlButton({
         component: TableGuestsButton,

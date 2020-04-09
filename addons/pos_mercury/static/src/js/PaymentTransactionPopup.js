@@ -6,7 +6,6 @@ odoo.define('pos_mercury.PaymentTransactionPopup', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class PaymentTransactionPopup extends AbstractAwaitablePopup {
-        static template = 'PaymentTransactionPopup';
         constructor() {
             super(...arguments);
             this.state = useState({ message: '', confirmButtonIsShown: false });
@@ -24,6 +23,7 @@ odoo.define('pos_mercury.PaymentTransactionPopup', function(require) {
             })
         }
     }
+    PaymentTransactionPopup.template = 'PaymentTransactionPopup';
     PaymentTransactionPopup.defaultProps = {
         confirmText: 'Ok',
         cancelText: 'Cancel',

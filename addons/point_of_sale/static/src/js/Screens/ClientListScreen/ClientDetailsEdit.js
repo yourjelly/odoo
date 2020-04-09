@@ -6,7 +6,6 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ClientDetailsEdit extends PosComponent {
-        static template = 'ClientDetailsEdit';
         constructor() {
             super(...arguments);
             this.intFields = ['country_id', 'state_id', 'property_product_pricelist'];
@@ -117,6 +116,7 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
             });
         }
     }
+    ClientDetailsEdit.template = 'ClientDetailsEdit';
 
     Registries.Component.add(ClientDetailsEdit);
 

@@ -4,9 +4,8 @@ odoo.define('point_of_sale.ProductsList', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
-    class ProductsList extends PosComponent {
-        static template = 'ProductsList';
-    }
+    class ProductsList extends PosComponent {}
+    ProductsList.template = 'ProductsList';
 
     Registries.Component.add(ProductsList);
 

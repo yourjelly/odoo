@@ -5,7 +5,6 @@ odoo.define('point_of_sale.ClientDetails', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ClientDetails extends PosComponent {
-        static template = 'ClientDetails';
         get partnerImageUrl() {
             if (this.props.partner) {
                 return `/web/image?model=res.partner&id=${this.props.partner.id}&field=image_128`;
@@ -14,6 +13,7 @@ odoo.define('point_of_sale.ClientDetails', function(require) {
             }
         }
     }
+    ClientDetails.template = 'ClientDetails';
 
     Registries.Component.add(ClientDetails);
 

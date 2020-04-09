@@ -22,7 +22,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
      * Chrome is the root component of the PoS App.
      */
     class Chrome extends PopupControllerMixin(PosComponent) {
-        static template = 'Chrome';
         constructor() {
             super(...arguments);
             useListener('show-main-screen', this.__showScreen);
@@ -191,7 +190,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             this.tempScreen.isShown = true;
             this.tempScreen.name = name;
             this.tempScreen.component = this.constructor.components[name];
-            this.tempScreenProps = { ...props, resolve };
+            this.tempScreenProps = Object.assign({}, props, { resolve });
         }
         __closeTempScreen() {
             this.tempScreen.isShown = false;
@@ -200,10 +199,12 @@ odoo.define('point_of_sale.Chrome', function(require) {
             // 1. Set the information of the screen to display.
             this.mainScreen.name = name;
             this.mainScreen.component = this.constructor.components[name];
-            this.mainScreenProps = {
-                selectedCategoryId: this.state.selectedCategoryId,
-                ...(props || {}),
-            };
+            this.mainScreenProps = Object.assign(
+                {
+                    selectedCategoryId: this.state.selectedCategoryId,
+                },
+                props || {}
+            );
             // 2. Save the screen to the order.
             //  - This screen is shown when the order is selected.
             this._setScreenData(name, props);
@@ -395,6 +396,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             return scrollable;
         }
     }
+    Chrome.template = 'Chrome';
 
     Registries.Component.add(Chrome);
 

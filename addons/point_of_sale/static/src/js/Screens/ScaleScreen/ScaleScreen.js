@@ -7,7 +7,6 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ScaleScreen extends PosComponent {
-        static template = 'ScaleScreen';
         /**
          * @param {Object} props
          * @param {Object} props.product The product to weight.
@@ -95,6 +94,7 @@ odoo.define('point_of_sale.ScaleScreen', function(require) {
                 : '';
         }
     }
+    ScaleScreen.template = 'ScaleScreen';
 
     Registries.Component.add(ScaleScreen);
 

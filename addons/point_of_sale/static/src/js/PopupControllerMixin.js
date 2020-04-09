@@ -33,7 +33,7 @@ odoo.define('point_of_sale.PopupControllerMixin', function(require) {
                 this.popup.isShown = true;
                 this.popup.name = name;
                 this.popup.component = popupConstructor;
-                this.popupProps = { ...props, resolve };
+                this.popupProps = Object.assign({}, props, { resolve });
             }
             __closePopup() {
                 this.popup.isShown = false;

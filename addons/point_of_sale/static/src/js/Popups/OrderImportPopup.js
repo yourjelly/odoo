@@ -6,7 +6,6 @@ odoo.define('point_of_sale.OrderImportPopup', function(require) {
 
     // formerly OrderImportPopupWidget
     class OrderImportPopup extends AbstractAwaitablePopup {
-        static template = 'OrderImportPopup';
         get unpaidSkipped() {
             return (
                 (this.props.report.unpaid_skipped_existing || 0) +
@@ -15,6 +14,7 @@ odoo.define('point_of_sale.OrderImportPopup', function(require) {
         }
         getPayload() {}
     }
+    OrderImportPopup.template = 'OrderImportPopup';
     OrderImportPopup.defaultProps = {
         confirmText: 'Ok',
         cancelText: 'Cancel',

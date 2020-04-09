@@ -1,4 +1,4 @@
-odoo.define('point_of_sale.ClassRegistry', function(require) {
+odoo.define('point_of_sale.ClassRegistry', function (require) {
     'use strict';
 
     /**
@@ -77,15 +77,17 @@ odoo.define('point_of_sale.ClassRegistry', function(require) {
      *  `|B| => B -> OtherMixin -> ExtendMixin -> Mixin -> A`
      */
     class ClassRegistry {
-        // Object that maps `baseClass` to the class implementation extended in-place.
-        includedMap = new Map();
-        // Object that maps `baseClassCB` to the array of callbacks to generate the extended class.
-        extendedCBMap = new Map();
-        // Object that maps `baseClassCB` extended class to the `baseClass` of its super in the includedMap.
-        extendedSuperMap = new Map();
-        // For faster access, we can `freeze` the registry so that instead of dynamically generating
-        // the extended classes, it is taken from the cache instead.
-        cache = new Map();
+        constructor() {
+            // Object that maps `baseClass` to the class implementation extended in-place.
+            this.includedMap = new Map();
+            // Object that maps `baseClassCB` to the array of callbacks to generate the extended class.
+            this.extendedCBMap = new Map();
+            // Object that maps `baseClassCB` extended class to the `baseClass` of its super in the includedMap.
+            this.extendedSuperMap = new Map();
+            // For faster access, we can `freeze` the registry so that instead of dynamically generating
+            // the extended classes, it is taken from the cache instead.
+            this.cache = new Map();
+        }
         /**
          * Add a new class in the Registry.
          * @param {Function} baseClass `class`

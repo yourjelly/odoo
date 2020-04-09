@@ -7,7 +7,6 @@ odoo.define('pos_restaurant.SplitBillButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class SplitBillButton extends PosComponent {
-        static template = 'SplitBillButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -19,6 +18,7 @@ odoo.define('pos_restaurant.SplitBillButton', function(require) {
             }
         }
     }
+    SplitBillButton.template = 'SplitBillButton';
 
     ProductScreen.addControlButton({
         component: SplitBillButton,

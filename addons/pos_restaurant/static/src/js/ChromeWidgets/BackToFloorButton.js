@@ -6,7 +6,6 @@ odoo.define('pos_restaurant.BackToFloorButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class BackToFloorButton extends PosComponent {
-        static template = 'BackToFloorButton';
         constructor() {
             super(...arguments);
             useListener('click', this._backToFloorScreen);
@@ -21,6 +20,7 @@ odoo.define('pos_restaurant.BackToFloorButton', function(require) {
             this.showScreen('FloorScreen', { floor: this.floor });
         }
     }
+    BackToFloorButton.template = 'BackToFloorButton';
 
     Registries.Component.add(BackToFloorButton);
 

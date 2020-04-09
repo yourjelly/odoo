@@ -7,7 +7,6 @@ odoo.define('pos_restaurant.PrintBillButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class PrintBillButton extends PosComponent {
-        static template = 'PrintBillButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -24,6 +23,7 @@ odoo.define('pos_restaurant.PrintBillButton', function(require) {
             }
         }
     }
+    PrintBillButton.template = 'PrintBillButton';
 
     ProductScreen.addControlButton({
         component: PrintBillButton,

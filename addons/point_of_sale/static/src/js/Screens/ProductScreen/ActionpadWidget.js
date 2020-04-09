@@ -5,7 +5,6 @@ odoo.define('point_of_sale.ActionpadWidget', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ActionpadWidget extends PosComponent {
-        static template = 'ActionpadWidget';
         mounted() {
             this.env.pos.on(
                 'change:selectedClient',
@@ -56,6 +55,7 @@ odoo.define('point_of_sale.ActionpadWidget', function(require) {
             await this.showTempScreen('ClientListScreen');
         }
     }
+    ActionpadWidget.template = 'ActionpadWidget';
 
     Registries.Component.add(ActionpadWidget);
 

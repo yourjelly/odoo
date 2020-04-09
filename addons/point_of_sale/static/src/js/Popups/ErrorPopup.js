@@ -5,9 +5,8 @@ odoo.define('point_of_sale.ErrorPopup', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     // formerly ErrorPopupWidget
-    class ErrorPopup extends AbstractAwaitablePopup {
-        static template = 'ErrorPopup';
-    }
+    class ErrorPopup extends AbstractAwaitablePopup {}
+    ErrorPopup.template = 'ErrorPopup';
     ErrorPopup.defaultProps = {
         confirmText: 'Ok',
         cancelText: 'Cancel',

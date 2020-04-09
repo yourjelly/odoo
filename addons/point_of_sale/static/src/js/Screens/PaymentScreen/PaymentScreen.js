@@ -12,7 +12,6 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
     const Registries = require('point_of_sale.Registries');
 
     class PaymentScreen extends PosComponent {
-        static template = 'PaymentScreen';
         constructor() {
             super(...arguments);
             useListener('delete-payment-line', this.deletePaymentLine);
@@ -421,6 +420,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             line.set_payment_status('done');
         }
     }
+    PaymentScreen.template = 'PaymentScreen';
 
     Registries.Component.add(PaymentScreen);
 

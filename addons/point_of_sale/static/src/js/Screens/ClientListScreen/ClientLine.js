@@ -5,7 +5,6 @@ odoo.define('point_of_sale.ClientLine', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ClientLine extends PosComponent {
-        static template = 'ClientLine';
         get highlight() {
             if (this.props.partner !== this.props.selectedClient) {
                 return '';
@@ -14,6 +13,7 @@ odoo.define('point_of_sale.ClientLine', function(require) {
             }
         }
     }
+    ClientLine.template = 'ClientLine';
 
     Registries.Component.add(ClientLine);
 

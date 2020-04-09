@@ -8,7 +8,6 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class FloorScreen extends PosComponent {
-        static template = 'FloorScreen';
         /**
          * @param {Object} props
          * @param {Object} props.floor
@@ -282,6 +281,7 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
             }
         }
     }
+    FloorScreen.template = 'FloorScreen';
 
     Registries.Component.add(FloorScreen);
 

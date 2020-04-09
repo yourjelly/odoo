@@ -8,7 +8,6 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class SplitBillScreen extends PosComponent {
-        static template = 'SplitBillScreen';
         constructor() {
             super(...arguments);
             useListener('click-line', this.onClickLine);
@@ -157,6 +156,7 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
             this.newOrder.orderlines.reset();
         }
     }
+    SplitBillScreen.template = 'SplitBillScreen';
 
     Registries.Component.add(SplitBillScreen);
 

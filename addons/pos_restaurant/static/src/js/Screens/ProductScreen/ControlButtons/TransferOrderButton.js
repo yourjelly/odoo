@@ -7,7 +7,6 @@ odoo.define('pos_restaurant.TransferOrderButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class TransferOrderButton extends PosComponent {
-        static template = 'TransferOrderButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -16,6 +15,7 @@ odoo.define('pos_restaurant.TransferOrderButton', function(require) {
             this.env.pos.transfer_order_to_different_table();
         }
     }
+    TransferOrderButton.template = 'TransferOrderButton';
 
     ProductScreen.addControlButton({
         component: TransferOrderButton,

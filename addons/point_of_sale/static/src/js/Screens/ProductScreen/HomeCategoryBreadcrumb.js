@@ -4,9 +4,8 @@ odoo.define('point_of_sale.HomeCategoryBreadcrumb', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
-    class HomeCategoryBreadcrumb extends PosComponent {
-        static template = 'HomeCategoryBreadcrumb';
-    }
+    class HomeCategoryBreadcrumb extends PosComponent {}
+    HomeCategoryBreadcrumb.template = 'HomeCategoryBreadcrumb';
 
     Registries.Component.add(HomeCategoryBreadcrumb);
 

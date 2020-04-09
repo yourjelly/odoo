@@ -13,7 +13,6 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
      * After setting new current order, we update the listeners.
      */
     class SubmitOrderButton extends PosComponent {
-        static template = 'SubmitOrderButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -56,6 +55,7 @@ odoo.define('pos_restaurant.SubmitOrderButton', function(require) {
             }
         }
     }
+    SubmitOrderButton.template = 'SubmitOrderButton';
 
     ProductScreen.addControlButton({
         component: SubmitOrderButton,

@@ -5,11 +5,11 @@ odoo.define('point_of_sale.PSNumpadInputButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class PSNumpadInputButton extends PosComponent {
-        static template = 'PSNumpadInputButton';
         get _class() {
             return this.props.changeClassTo || 'input-button number-char';
         }
     }
+    PSNumpadInputButton.template = 'PSNumpadInputButton';
 
     Registries.Component.add(PSNumpadInputButton);
 

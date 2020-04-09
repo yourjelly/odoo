@@ -6,8 +6,10 @@ odoo.define('point_of_sale.EditListInput', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class EditListInput extends PosComponent {
-        static template = 'EditListInput';
-        inputRef = useRef('input');
+        constructor() {
+            super(...arguments);
+            this.inputRef = useRef('input');
+        }
         mounted() {
             this.inputRef.el.focus();
         }
@@ -17,6 +19,7 @@ odoo.define('point_of_sale.EditListInput', function(require) {
             }
         }
     }
+    EditListInput.template = 'EditListInput';
 
     Registries.Component.add(EditListInput);
 

@@ -7,7 +7,6 @@ odoo.define('point_of_sale.TextInputPopup', function(require) {
 
     // formerly TextInputPopupWidget
     class TextInputPopup extends AbstractAwaitablePopup {
-        static template = 'TextInputPopup';
         constructor() {
             super(...arguments);
             this.state = useState({ inputValue: this.props.startingValue });
@@ -20,6 +19,7 @@ odoo.define('point_of_sale.TextInputPopup', function(require) {
             return this.state.inputValue;
         }
     }
+    TextInputPopup.template = 'TextInputPopup';
     TextInputPopup.defaultProps = {
         confirmText: 'Ok',
         cancelText: 'Cancel',

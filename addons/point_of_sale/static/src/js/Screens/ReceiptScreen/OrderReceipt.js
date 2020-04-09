@@ -5,7 +5,6 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class OrderReceipt extends PosComponent {
-        static template = 'OrderReceipt';
         constructor() {
             super(...arguments);
             this._receiptEnv = this.props.order.getOrderReceiptEnv();
@@ -40,6 +39,7 @@ odoo.define('point_of_sale.OrderReceipt', function(require) {
             );
         }
     }
+    OrderReceipt.template = 'OrderReceipt';
 
     Registries.Component.add(OrderReceipt);
 

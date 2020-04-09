@@ -7,7 +7,6 @@ odoo.define('pos_restaurant.EditableTable', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class EditableTable extends PosComponent {
-        static template = 'EditableTable';
         constructor() {
             super(...arguments);
             useListener('resize-end', this._onResizeEnd);
@@ -53,6 +52,7 @@ odoo.define('pos_restaurant.EditableTable', function(require) {
             this.trigger('save-table', this.props.table);
         }
     }
+    EditableTable.template = 'EditableTable';
 
     Registries.Component.add(EditableTable);
 

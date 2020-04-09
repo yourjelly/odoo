@@ -38,7 +38,6 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
      * ```
      */
     class EditListPopup extends AbstractAwaitablePopup {
-        static template = 'EditListPopup';
         /**
          * @param {String} title required title of popup
          * @param {Array} [props.array=[]] the array of { id, text } to be edited
@@ -62,7 +61,7 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
             // If no array is provided, we initialize with one empty item.
             if (array.length === 0) return [this._emptyItem()];
             // Put _id for each item. It will serve as unique identifier of each item.
-            return array.map(item => ({ _id: this._nextId(), ...item }));
+            return array.map((item) => Object.assign({}, { _id: this._nextId() }, item));
         }
         removeItem(event) {
             const itemToRemove = event.detail;
@@ -90,6 +89,7 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
             };
         }
     }
+    EditListPopup.template = 'EditListPopup';
     EditListPopup.defaultProps = {
         confirmText: 'Ok',
         cancelText: 'Cancel',

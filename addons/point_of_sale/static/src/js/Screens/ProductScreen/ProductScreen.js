@@ -7,7 +7,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ProductScreen extends PosComponent {
-        static template = 'ProductScreen';
         constructor() {
             super(...arguments);
             useListener('update-selected-orderline', this._updateSelectedOrderline);
@@ -50,10 +49,12 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         }
         get controlButtons() {
             return ProductScreen.controlButtons
-                .filter(cb => {
+                .filter((cb) => {
                     return cb.condition.bind(this)();
                 })
-                .map(cb => ({ ...cb, component: Registries.Component.get(cb.component) }));
+                .map((cb) =>
+                    Object.assign({}, cb, { component: Registries.Component.get(cb.component) })
+                );
         }
         async clickProduct(event) {
             if (!this.currentOrder) {
@@ -256,6 +257,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             }
         }
     }
+    ProductScreen.template = 'ProductScreen';
 
     ProductScreen.controlButtons = [];
 

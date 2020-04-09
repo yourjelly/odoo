@@ -7,7 +7,6 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ClientListScreen extends PosComponent {
-        static template = 'ClientListScreen';
         constructor() {
             super(...arguments);
             this.state = {
@@ -205,6 +204,7 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
             this.render();
         }
     }
+    ClientListScreen.template = 'ClientListScreen';
 
     Registries.Component.add(ClientListScreen);
 

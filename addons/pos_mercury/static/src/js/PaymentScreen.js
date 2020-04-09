@@ -1,4 +1,4 @@
-odoo.define('pos_mercury.PaymentScreen', function(require) {
+odoo.define('pos_mercury.PaymentScreen', function (require) {
     'use strict';
 
     const { _t } = require('web.core');
@@ -91,15 +91,18 @@ odoo.define('pos_mercury.PaymentScreen', function(require) {
         },
     };
 
-    const PosMercuryPaymentScreen = PaymentScreen =>
+    const PosMercuryPaymentScreen = (PaymentScreen) =>
         class extends PaymentScreen {
-            // How long we wait for the odoo server to deliver the response of
-            // a Vantiv transaction
-            server_timeout_in_ms = 95000;
+            constructor() {
+                super(...arguments);
+                // How long we wait for the odoo server to deliver the response of
+                // a Vantiv transaction
+                this.server_timeout_in_ms = 95000;
 
-            // How many Vantiv transactions we send without receiving a
-            // response
-            server_retries = 3;
+                // How many Vantiv transactions we send without receiving a
+                // response
+                this.server_retries = 3;
+            }
 
             _get_swipe_pending_line() {
                 var i = 0;
@@ -153,7 +156,7 @@ odoo.define('pos_mercury.PaymentScreen', function(require) {
                         message: message,
                     });
 
-                    setTimeout(function() {
+                    setTimeout(function () {
                         callback.apply(self, args);
                     }, 1000);
                 } else {
@@ -255,7 +258,7 @@ odoo.define('pos_mercury.PaymentScreen', function(require) {
                         timeout: self.server_timeout_in_ms,
                     }
                 )
-                    .then(function(data) {
+                    .then(function (data) {
                         // if not receiving a response from Vantiv, we should retry
                         if (data === 'timeout') {
                             self.retry_mercury_transaction(
@@ -369,7 +372,7 @@ odoo.define('pos_mercury.PaymentScreen', function(require) {
                             }
                         }
                     })
-                    .catch(function() {
+                    .catch(function () {
                         self.retry_mercury_transaction(
                             def,
                             null,
@@ -393,7 +396,7 @@ odoo.define('pos_mercury.PaymentScreen', function(require) {
                     this.credit_code_transaction(parsed_result);
                 } else {
                     // this is for supporting another payment system like mercury
-                    const selectionList = online_payment_methods.map(paymentMethod => ({
+                    const selectionList = online_payment_methods.map((paymentMethod) => ({
                         id: paymentMethod.item,
                         label: paymentMethod.label,
                         isSelected: false,
@@ -465,7 +468,7 @@ odoo.define('pos_mercury.PaymentScreen', function(require) {
                         timeout: self.server_timeout_in_ms,
                     }
                 )
-                    .then(function(data) {
+                    .then(function (data) {
                         if (data === 'timeout') {
                             self.retry_mercury_transaction(
                                 def,
@@ -515,7 +518,7 @@ odoo.define('pos_mercury.PaymentScreen', function(require) {
                             }
                         }
                     })
-                    .catch(function() {
+                    .catch(function () {
                         self.retry_mercury_transaction(
                             def,
                             null,
@@ -532,7 +535,7 @@ odoo.define('pos_mercury.PaymentScreen', function(require) {
              */
             deletePaymentLine(event) {
                 const { cid } = event.detail;
-                const line = this.paymentLines.find(line => line.cid === cid);
+                const line = this.paymentLines.find((line) => line.cid === cid);
                 if (line.mercury_data) {
                     this.do_reversal(line, false);
                 } else {

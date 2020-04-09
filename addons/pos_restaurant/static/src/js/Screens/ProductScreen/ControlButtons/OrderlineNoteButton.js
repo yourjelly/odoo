@@ -7,7 +7,6 @@ odoo.define('pos_restaurant.OrderlineNoteButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class OrderlineNoteButton extends PosComponent {
-        static template = 'OrderlineNoteButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -28,6 +27,7 @@ odoo.define('pos_restaurant.OrderlineNoteButton', function(require) {
             }
         }
     }
+    OrderlineNoteButton.template = 'OrderlineNoteButton';
 
     ProductScreen.addControlButton({
         component: OrderlineNoteButton,

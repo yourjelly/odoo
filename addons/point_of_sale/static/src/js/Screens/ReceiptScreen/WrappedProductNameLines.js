@@ -5,12 +5,12 @@ odoo.define('point_of_sale.WrappedProductNameLines', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class WrappedProductNameLines extends PosComponent {
-        static template = 'WrappedProductNameLines';
         constructor() {
             super(...arguments);
             this.line = this.props.line;
         }
     }
+    WrappedProductNameLines.template = 'WrappedProductNameLines';
 
     Registries.Component.add(WrappedProductNameLines);
 

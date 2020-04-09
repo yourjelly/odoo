@@ -7,7 +7,6 @@ odoo.define('point_of_sale.SetPricelistButton', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class SetPricelistButton extends PosComponent {
-        static template = 'SetPricelistButton';
         constructor() {
             super(...arguments);
             useListener('click', this.onClick);
@@ -53,6 +52,7 @@ odoo.define('point_of_sale.SetPricelistButton', function(require) {
             }
         }
     }
+    SetPricelistButton.template = 'SetPricelistButton';
 
     ProductScreen.addControlButton({
         component: SetPricelistButton,

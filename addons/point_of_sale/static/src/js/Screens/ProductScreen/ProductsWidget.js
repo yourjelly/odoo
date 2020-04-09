@@ -7,7 +7,6 @@ odoo.define('point_of_sale.ProductsWidget', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ProductsWidget extends PosComponent {
-        static template = 'ProductsWidget';
         /**
          * @param {Object} props
          * @param {number?} props.startCategoryId
@@ -58,6 +57,7 @@ odoo.define('point_of_sale.ProductsWidget', function(require) {
             this.state.searchWord = '';
         }
     }
+    ProductsWidget.template = 'ProductsWidget';
 
     Registries.Component.add(ProductsWidget);
 

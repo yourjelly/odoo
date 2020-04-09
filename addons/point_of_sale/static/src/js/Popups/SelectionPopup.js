@@ -7,7 +7,6 @@ odoo.define('point_of_sale.SelectionPopup', function(require) {
 
     // formerly SelectionPopupWidget
     class SelectionPopup extends AbstractAwaitablePopup {
-        static template = 'SelectionPopup';
         /**
          * Value of the `item` key of the selected element in the Selection
          * Array is the payload of this popup.
@@ -49,6 +48,7 @@ odoo.define('point_of_sale.SelectionPopup', function(require) {
             return selected && selected.item;
         }
     }
+    SelectionPopup.template = 'SelectionPopup';
     SelectionPopup.defaultProps = {
         confirmText: 'Confirm',
         cancelText: 'Cancel',

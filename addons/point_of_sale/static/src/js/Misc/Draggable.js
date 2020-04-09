@@ -29,7 +29,6 @@ odoo.define('point_of_sale.Draggable', function(require) {
      * @trigger 'drag-end' when dragging ended with payload `{ loc: { top, left } }`
      */
     class Draggable extends PosComponent {
-        static template = 'Draggable';
         constructor() {
             super(...arguments);
             this.isDragging = false;
@@ -136,6 +135,7 @@ odoo.define('point_of_sale.Draggable', function(require) {
             return posTop;
         }
     }
+    Draggable.template = 'Draggable';
 
     Registries.Component.add(Draggable);
 

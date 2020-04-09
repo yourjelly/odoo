@@ -5,9 +5,8 @@ odoo.define('point_of_sale.ConfirmPopup', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     // formerly ConfirmPopupWidget
-    class ConfirmPopup extends AbstractAwaitablePopup {
-        static template = 'ConfirmPopup';
-    }
+    class ConfirmPopup extends AbstractAwaitablePopup {}
+    ConfirmPopup.template = 'ConfirmPopup';
     ConfirmPopup.defaultProps = {
         confirmText: 'Ok',
         cancelText: 'Cancel',

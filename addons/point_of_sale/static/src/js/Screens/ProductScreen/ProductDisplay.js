@@ -5,7 +5,6 @@ odoo.define('point_of_sale.ProductDisplay', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ProductDisplay extends PosComponent {
-        static template = 'ProductDisplay';
         /**
          * For accessibility, pressing <space> should be like clicking the product.
          * <enter> is not considered because it conflicts with the barcode.
@@ -41,6 +40,7 @@ odoo.define('point_of_sale.ProductDisplay', function(require) {
             }
         }
     }
+    ProductDisplay.template = 'ProductDisplay';
 
     Registries.Component.add(ProductDisplay);
 
