@@ -992,14 +992,14 @@ class AccountJournal(models.Model):
     default_debit_account_id = fields.Many2one('account.account', string='Default Debit Account', copy=False,
         check_company=True,
         domain="[('deprecated', '=', False), ('company_id', '=', company_id)]", help="It acts as a default account for debit amount", ondelete='restrict')
-    payment_debit_account_id = fields.Many2one('account.account', string='Outstanding Receipts Account',
+    payment_debit_account_id = fields.Many2one('account.account', string='Outstanding Receipts Account', copy=False,
         ondelete='restrict',
         domain=[('deprecated', '=', False)],
         help="Incoming payments entries triggered by invoices/refunds will be posted on the Outstanding Receipts Account "
              "and displayed as blue lines in the bank reconciliation widget. During the reconciliation process, concerned "
              "transactions will be reconciled with entries on the Outstanding Receipts Account instead of the "
              "receivable account.")
-    payment_credit_account_id = fields.Many2one('account.account', string='Outstanding Payments Account',
+    payment_credit_account_id = fields.Many2one('account.account', string='Outstanding Payments Account', copy=False,
         ondelete='restrict',
         domain=[('deprecated', '=', False)],
         help="Outgoing payments entries triggered by bills/credit notes will be posted on the Outstanding Payments Account "
