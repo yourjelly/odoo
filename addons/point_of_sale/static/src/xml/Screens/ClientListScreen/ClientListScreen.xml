@@ -26,7 +26,7 @@
                     </span>
                 </section>
                 <section class="full-content">
-                    <div class="window">
+                    <div class="client-window">
                         <section class="subwindow collapsed">
                             <div class="subwindow-container collapsed">
                                 <div t-if="state.detailIsShown" class="client-details-contents subwindow-container-fix">
@@ -41,7 +41,7 @@
                                 </div>
                             </div>
                         </section>
-                        <section class="subwindow">
+                        <section class="subwindow list">
                             <div class="subwindow-container">
                                 <div class="subwindow-container-fix touch-scrollable scrollable-y">
                                     <table class="client-list">

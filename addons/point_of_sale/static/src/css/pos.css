@@ -1772,6 +1772,21 @@ td {
     margin-left: 120px;
 }
 
+/* These css declarations is to make sure that the list of clients
+ * always occupies the remaining space regardless when the client
+ * details is displayed or not.
+ */
+ .clientlist-screen .client-window {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+}
+
+.clientlist-screen .client-window section.list {
+    flex: 1;
+    overflow: auto;
+}
+
 
 /*  ********* The OrderWidget  ********* */
 
