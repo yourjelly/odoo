@@ -860,6 +860,7 @@ var FormRenderer = BasicRenderer.extend({
         var self = this;
         var $headers = $('<ul class="nav nav-tabs">');
         var $pages = $('<div class="tab-content">');
+        var $notebook = $('<div class="o_notebook">');
         var autofocusTab = -1;
         // renderedTabs is used to aggregate the generated $headers and $pages
         // alongside their node, so that their modifiers can be registered once
@@ -890,20 +891,19 @@ var FormRenderer = BasicRenderer.extend({
         _.each(renderedTabs, function (tab) {
             self._registerModifiers(tab.node, self.state, tab.$header, {
                 callback: function (element, modifiers) {
-                    // remove active class from all other pages
-                    // TO FIX: drawback always first page get visible while active page is not invisible
-                    $headers.find('li:not(.o_invisible_modifier) > a').removeClass('active');
-                    $pages.find('.tab-pane.active').removeClass('active');
-                    var $firstVisibleTab = $headers.find('li:not(.o_invisible_modifier):first() > a');
-                    $firstVisibleTab.addClass('active');
-                    $pages.find($firstVisibleTab.attr('href')).addClass('active');
+                    // if the active tab is invisible, activate the first visible tab instead
+                    var $link = element.$el.find('.nav-link');
+                    if (modifiers.invisible && $link.hasClass('active')) {
+                        $link.removeClass('active');
+                        tab.$page.removeClass('active');
+                        $notebook.attr('data-no_active_tab', true);
+                    }
                 },
             });
         });
         var $notebookHeaders = $('<div class="o_notebook_headers">').append($headers);
-        var $notebook = $('<div class="o_notebook">')
-                .data('name', node.attrs.name || '_default_')
-                .append($notebookHeaders, $pages);
+        $notebook.data('name', node.attrs.name || '_default_')
+            .append($notebookHeaders, $pages);
         this._registerModifiers(node, this.state, $notebook);
         this._handleAttributes($notebook, node);
         return $notebook;
@@ -974,6 +974,24 @@ var FormRenderer = BasicRenderer.extend({
             }
         }).guardedCatch(function () {
             $form.remove();
+        });
+    },
+    /**
+     * override this method to make first notebook page active
+     * if active page is invisible due to modifiers
+     * this is done after all modifiers applied on all page elements
+     *
+     * @override
+     * @private
+     */
+    _updateAllModifiers() {
+        return this._super(...arguments).then(() => {
+            _.each(this.$(".o_notebook[data-no_active_tab]"), (notebook) => {
+                var $firstVisibleTab = $(notebook).find('.o_notebook_headers li:not(.o_invisible_modifier):first() > a');
+                $firstVisibleTab.addClass('active');
+                $(notebook).find(`.tab-content ${$firstVisibleTab.attr('href')}`).addClass('active');
+                $(notebook).removeAttr('data-no_active_tab');
+            });
         });
     },
     /**
