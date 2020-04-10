@@ -318,8 +318,7 @@ odoo.define('point_of_sale.tour.acceptance', function (require) {
             content: "deactivate email",
             trigger: '.button.js_email',
         }, {
-            // sending email should be checked in different test
-            content: "deactivate email",
+            content: "email button should not be highlighted after deactivating",
             trigger: '.button.js_email:not(.highlight)',
             run: function() {},
         }];
@@ -328,18 +327,18 @@ odoo.define('point_of_sale.tour.acceptance', function (require) {
     function finish_order() {
         return [{
             content: "validate the order",
-            trigger: '.button.next:visible',
+            trigger: '.payment-screen .button.next.highlight:visible',
         }, {
             content: "verify that the order has been successfully sent to the backend",
             trigger: ".js_connected:visible",
             run: function () {}, // it's a check
         }, {
-            content: "check if next order is highlighted",
-            trigger: '.button.next.highlight:visible',
-            run: function () {},
+            content: "click Next Order",
+            trigger: '.receipt-screen .button.next.highlight:visible',
         }, {
-            content: "click next order",
-            trigger: '.button.next.highlight',
+            content: "check if we left the receipt screen",
+            trigger: '.pos-content .screen:not(:has(.receipt-screen))',
+            run: function () {},
         }];
     }
 
@@ -425,7 +424,7 @@ odoo.define('point_of_sale.tour.acceptance', function (require) {
         trigger: ".header-button",
     }, {
         content: "confirm closing the frontend",
-        trigger: ".header-button",
+        trigger: ".header-button.confirm",
         run: function() {}, //it's a check,
     }]);
 
