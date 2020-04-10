@@ -743,6 +743,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('first notebook page invisible', async function (assert) {
+        debugger;
         assert.expect(2);
 
         var form = await createView({
@@ -767,9 +768,9 @@ QUnit.module('Views', {
 
         assert.notOk(form.$('.o_notebook .nav .nav-item:first()').is(':visible'),
             'first tab should be invisible');
-        assert.hasClass(form.$('.o_notebook .nav .nav-link:nth(1)'), 'active');
+        assert.doesNotHaveClass(form.$('.o_notebook .nav .nav-link:nth(1)'), 'active');
 
-        form.destroy();
+        // form.destroy();
     });
 
     QUnit.test('autofocus on second notebook page', async function (assert) {

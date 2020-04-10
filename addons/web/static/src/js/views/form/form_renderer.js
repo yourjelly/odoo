@@ -857,6 +857,7 @@ var FormRenderer = BasicRenderer.extend({
      * @returns {jQueryElement}
      */
     _renderTagNotebook: function (node) {
+        debugger;
         var self = this;
         var $headers = $('<ul class="nav nav-tabs">');
         var $pages = $('<div class="tab-content">');
@@ -985,6 +986,7 @@ var FormRenderer = BasicRenderer.extend({
      * @private
      */
     _updateAllModifiers() {
+        debugger;
         return this._super(...arguments).then(() => {
             _.each(this.$(".o_notebook[data-no_active_tab]"), (notebook) => {
                 var $firstVisibleTab = $(notebook).find('.o_notebook_headers li:not(.o_invisible_modifier):first() > a');
