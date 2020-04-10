@@ -35,6 +35,8 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
         mounted() {
             this.env.pos.set_table(null);
             this.floorMapRef.el.style.background = this.state.floorBackground;
+            // call _tableLongpolling once then set interval of 5sec.
+            this._tableLongpolling();
             this.tableLongpolling = setInterval(this._tableLongpolling.bind(this), 5000);
         }
         willUnmount() {
@@ -118,7 +120,7 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
         }
         async setFloorColor(color) {
             this.state.floorBackground = color;
-            this.activeFloor.background = color;
+            this.activeFloor.background_color = color;
             try {
                 await this.rpc({
                     model: 'restaurant.floor',

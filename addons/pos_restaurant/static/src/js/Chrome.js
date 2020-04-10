@@ -76,6 +76,10 @@ odoo.define('pos_restaurant.chrome', function(require) {
                     !this.tempScreen.isShown
                 );
             }
+            __showScreen() {
+                super.__showScreen(...arguments);
+                this._setIdleTimer();
+            }
         };
 
     Registries.Component.extend(Chrome, PosResChrome);
