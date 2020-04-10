@@ -238,7 +238,11 @@ odoo.define('pos_reataurant.tour.synchronized_table_management', function (requi
         trigger: '.floor-button',
         run: 'click',
     }, {
-        content: 'back to floor',
+        content: 'check if in floor screen',
+        trigger: '.pos-content .floor-screen',
+        run: function() {},
+    }, {
+        content: 'wait for sync to finish',
         trigger: '.oe_status .js_connected',
         run: function() {},
     }]);
