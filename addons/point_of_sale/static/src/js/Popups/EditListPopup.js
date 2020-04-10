@@ -4,6 +4,7 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
     const { useState } = owl.hooks;
     const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const Registries = require('point_of_sale.Registries');
+    const { useAutoFocusToLast } = require('point_of_sale.custom_hooks');
 
     /**
      * Given a array of { id, text }, we show the user this popup to be able to modify this given array.
@@ -47,6 +48,7 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
             super(...arguments);
             this._id = 0;
             this.state = useState({ array: this._initialize(this.props.array) });
+            useAutoFocusToLast();
         }
         _nextId() {
             return this._id++;
@@ -83,9 +85,9 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
          */
         getPayload() {
             return {
-                newArray: this.getStateTarget(this.state).array.filter(
-                    item => item.text.trim() !== ''
-                ),
+                newArray: this.state.array
+                    .filter((item) => item.text.trim() !== '')
+                    .map((item) => Object.assign({}, item)),
             };
         }
     }

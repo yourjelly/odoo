@@ -1,7 +1,8 @@
-odoo.define('point_of_sale.custom_hooks', function(require) {
+odoo.define('point_of_sale.custom_hooks', function (require) {
     'use strict';
 
     const { Component } = owl;
+    const { onMounted, onPatched } = owl.hooks;
 
     /**
      * Introduce error handlers in the component.
@@ -9,7 +10,7 @@ odoo.define('point_of_sale.custom_hooks', function(require) {
     function useErrorHandlers() {
         const component = Component.current;
 
-        component._handlePushOrderError = async function(error) {
+        component._handlePushOrderError = async function (error) {
             // This error handler receives `error` equivalent to `error.message` of the rpc error.
             if (error.message === 'Backend Invoice') {
                 await this.showPopup('ConfirmPopup', {
@@ -46,5 +47,21 @@ odoo.define('point_of_sale.custom_hooks', function(require) {
         };
     }
 
-    return { useErrorHandlers };
+    function useAutoFocusToLast() {
+        const current = Component.current;
+        let target = null;
+        function autofocus() {
+            const prevTarget = target;
+            const allInputs = current.el.querySelectorAll('input');
+            target = allInputs[allInputs.length - 1];
+            if (target && target !== prevTarget) {
+                target.focus();
+                target.selectionStart = target.selectionEnd = target.value.length;
+            }
+        }
+        onMounted(autofocus);
+        onPatched(autofocus);
+    }
+
+    return { useErrorHandlers, useAutoFocusToLast };
 });

@@ -37,28 +37,6 @@ odoo.define('point_of_sale.PosComponent', function(require) {
         showScreen(name, props) {
             this.trigger('show-main-screen', { name, props });
         }
-        /**
-         * TODO jcb: This is useless! It doesn't correctly return the target.
-         *      The target is still Proxy.
-         *
-         * Returns the target object of the proxy instance created by the
-         * useState hook. (This is kinda hack.)
-         *
-         * e.g.
-         *
-         * -- in the constructor --
-         * this.state = useState({ val: 1 })
-         * // this.state is a Proxy instance of the Observer
-         *
-         * -- in other methods --
-         * const stateTarget = this.getStateTarget(this.state)
-         * // stateTarget is now { val: <latestVal> } and is not Proxy.
-         *
-         * @param {Proxy} state state or Observer proxy object.
-         */
-        getStateTarget(state) {
-            return this.__owl__.observer.weakMap.get(state).value;
-        }
     }
 
     return PosComponent;
