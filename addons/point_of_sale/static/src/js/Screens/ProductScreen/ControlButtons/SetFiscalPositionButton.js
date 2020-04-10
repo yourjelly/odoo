@@ -55,7 +55,7 @@ odoo.define('point_of_sale.SetFiscalPositionButton', function(require) {
             );
             if (confirmed) {
                 this.currentOrder.fiscal_position = selectedFiscalPosition;
-                // TODO jcb: The following is the old implementation and I believe
+                // IMPROVEMENT: The following is the old implementation and I believe
                 // there could be a better way of doing it.
                 for (let line of this.currentOrder.orderlines.models) {
                     line.set_quantity(line.quantity);

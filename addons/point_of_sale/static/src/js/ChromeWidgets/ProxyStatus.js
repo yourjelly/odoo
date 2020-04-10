@@ -27,8 +27,11 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
             try {
                 await this.env.pos.connect_to_proxy();
             } catch (error) {
-                // TODO jcb: handle the error properly
-                console.error(error);
+                if (error instanceof Error) {
+                    throw error;
+                } else {
+                    this.showPopup('ErrorPopup', error);
+                }
             }
         }
         _onChangeStatus(posProxy, statusChange) {

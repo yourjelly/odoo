@@ -96,7 +96,7 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
             }
             return new Blob([contents]);
         }
-        // TODO jcb: Duplicated codes for downloading paid and unpaid orders.
+        // IMPROVEMENT: Duplicated codes for downloading paid and unpaid orders.
         // The implementation can be better.
         preparePaidOrders() {
             try {

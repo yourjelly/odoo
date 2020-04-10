@@ -29,9 +29,7 @@
                     <div class="window">
                         <section class="subwindow collapsed">
                             <div class="subwindow-container collapsed">
-                                <div t-if="state.detailIsShown"
-                                     class="client-details-contents subwindow-container-fix"
-                                     t-ref="client-details-ref">
+                                <div t-if="state.detailIsShown" class="client-details-contents subwindow-container-fix">
                                     <t t-if="state.isEditMode">
                                         <ClientDetailsEdit t-props="state.editModeProps"
                                                            t-on-cancel-edit="cancelEdit"
@@ -45,8 +43,7 @@
                         </section>
                         <section class="subwindow">
                             <div class="subwindow-container">
-                                <div class="subwindow-container-fix touch-scrollable scrollable-y"
-                                     t-ref="client-list-ref">
+                                <div class="subwindow-container-fix touch-scrollable scrollable-y">
                                     <table class="client-list">
                                         <thead>
                                             <tr>

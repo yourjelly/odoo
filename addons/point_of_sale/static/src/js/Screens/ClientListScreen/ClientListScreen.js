@@ -2,13 +2,17 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
     'use strict';
 
     const { debounce } = owl.utils;
-    const { useRef } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
     class ClientListScreen extends PosComponent {
         constructor() {
             super(...arguments);
+            // We are not using useState here because the object
+            // passed to useState converts the object and its contents
+            // to Observer proxy. Not sure of the side-effects of making
+            // a persistent object, such as pos, into owl.Observer. But it
+            // is better to be safe.
             this.state = {
                 query: null,
                 selectedClient: this.currentOrderClient,
@@ -18,15 +22,9 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
                     partner: {
                         country_id: this.env.pos.company.country_id,
                         state_id: this.env.pos.company.state_id,
-                    },
-                    pos: this.env.pos,
+                    }
                 },
             };
-            // TODO jcb: to remove
-            // These refs are attempts to fix the problem on unshown list
-            // items when the customer details are shown.
-            this.clientListRef = useRef('client-list-ref');
-            this.clientDetailsRef = useRef('client-details-ref');
             this.updateClientList = debounce(this.updateClientList, 70);
         }
 
@@ -132,7 +130,6 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
             if (!isNewClient) {
                 this.state.editModeProps = {
                     partner: this.state.selectedClient,
-                    pos: this.env.pos,
                 };
             }
             this.render();
@@ -145,7 +142,6 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
                     country_id: this.env.pos.company.country_id,
                     state_id: this.env.pos.company.state_id,
                 },
-                pos: this.env.pos,
             };
             this.render();
         }
@@ -165,9 +161,15 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
                     this.currentOrder.set_client(this.state.selectedClient);
                 }
                 this.deactivateEditMode();
-            } catch (err) {
-                // TODO jcb: what is the proper error message?
-                console.error(err);
+            } catch (error) {
+                if (error.message.code < 0) {
+                    await this.showPopup('OfflineErrorPopup', {
+                        title: this.env._t('Offline'),
+                        body: this.env._t('Unable to save changes.'),
+                    });
+                } else {
+                    throw error;
+                }
             }
         }
         cancelEdit() {

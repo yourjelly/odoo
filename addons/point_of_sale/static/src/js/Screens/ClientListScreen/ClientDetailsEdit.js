@@ -42,35 +42,21 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
         }
         async uploadImage(event) {
             const file = event.target.files[0];
-            try {
-                if (!file.type.match(/image.*/)) {
-                    throw {
-                        name: 'UnsupportedFileFormat',
-                        message: {
-                            title: _t('Unsupported File Format'),
-                            body: _t(
-                                'Only web-compatible Image formats such as .png or .jpeg are supported.'
-                            ),
-                        },
-                    };
-                }
+            if (!file.type.match(/image.*/)) {
+                await this.showPopup('ErrorPopup', {
+                    title: this.env._t('Unsupported File Format'),
+                    body: this.env._t(
+                        'Only web-compatible Image formats such as .png or .jpeg are supported.'
+                    ),
+                });
+            } else {
                 const imageUrl = await getDataURLFromFile(file);
                 const loadedImage = await this._loadImage(imageUrl);
-                const resizedImage = await this._resizeImage(loadedImage, 800, 600);
-                this.changes.image_1920 = resizedImage.toDataURL();
-                // Rerender to reflect the changes in the screen
-                this.render();
-            } catch (err) {
-                // TODO jcb: show popup instead of console error
-                switch (err.name) {
-                    // can be error from FileReader abort or error
-                    case 'UnsupportedFileFormat':
-                    case 'LoadingImageError':
-                        // ErrorPopup.show(err.message);
-                        break;
-                    default:
-                        console.error(['Unhandled Error', err]);
-                        break;
+                if (loadedImage) {
+                    const resizedImage = await this._resizeImage(loadedImage, 800, 600);
+                    this.changes.image_1920 = resizedImage.toDataURL();
+                    // Rerender to reflect the changes in the screen
+                    this.render();
                 }
             }
         }
@@ -95,23 +81,24 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
         }
         /**
          * Loading image is converted to a Promise to allow await when
-         * loading an image. It resolves to the loaded image.
+         * loading an image. It resolves to the loaded image if succesful,
+         * else, resolves to false.
          *
          * [Source](https://stackoverflow.com/questions/45788934/how-to-turn-this-callback-into-a-promise-using-async-await)
          */
         _loadImage(url) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 const img = new Image();
                 img.addEventListener('load', () => resolve(img));
-                img.addEventListener('error', () =>
-                    reject({
-                        name: 'LoadingImageError',
-                        message: {
-                            title: 'Loading Image Error',
-                            body: 'We encountered error when loading image. Please try again.',
-                        },
-                    })
-                );
+                img.addEventListener('error', () => {
+                    this.showPopup('ErrorPopup', {
+                        title: this.env._t('Loading Image Error'),
+                        body: this.env._t(
+                            'Encountered error when loading image. Please try again.'
+                        ),
+                    });
+                    resolve(false);
+                });
                 img.src = url;
             });
         }
