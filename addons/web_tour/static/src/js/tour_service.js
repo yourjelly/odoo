@@ -1,11 +1,12 @@
 odoo.define('web_tour.tour', function (require) {
 "use strict";
 
-var config = require('web.config');
 var rootWidget = require('root.widget');
 var rpc = require('web.rpc');
 var session = require('web.session');
 var TourManager = require('web_tour.TourManager');
+
+const untrackedClassnames = ["o_tooltip", "o_tooltip_content", "o_tooltip_overlay"];
 
 /**
  * @namespace
@@ -33,56 +34,98 @@ return session.is_bound.then(function () {
         var consumed_tours = session.is_frontend ? results[0] : session.web_tours;
         var tour_manager = new TourManager(rootWidget, consumed_tours);
 
-        // Use a MutationObserver to detect DOM changes
-        var untracked_classnames = ["o_tooltip", "o_tooltip_content", "o_tooltip_overlay"];
-        var check_tooltip = _.debounce(function (records) {
-            var update = _.some(records, function (record) {
+        // Use a MutationObserver to detect DOM changes, when a mutation occurs,
+        // only add it to the list of mutation to process and delay the
+        // mutation processing. We have to record them all so that a change that
+        // is undo only a moment later is detected correctly. Most of them
+        // will trigger a tip check anyway so, most of the time, processing the
+        // first one will be enough to be sure that a tip update has to be done.
+        let mutationTimer = undefined;
+        let currentMutations = [];
+        const observer = new MutationObserver(records => {
+            clearTimeout(mutationTimer);
+            for (const record of records) {
+                const newValue = record.type === 'attributes'
+                    ? record.target.getAttribute(record.attributeName)
+                    : null;
+                currentMutations.push({
+                    record: record,
+                    oldValue: record.oldValue || '',
+                    newValue: newValue || '',
+                });
+            }
+            mutationTimer = setTimeout(() => _processMutations(), 500);
+        });
+        const tooltipParentRegex = /\bo_tooltip_parent\b/;
+        function _processMutations() {
+            nextMutation:for (const mutation of currentMutations) {
                 // First check if the mutation applied on an element we do not
                 // track (like the tour tips themself).
-                const isTracked = node => {
-                    if (node.classList) {
-                        for (const className of untracked_classnames) {
-                            if (node.classList.contains(className)) {
-                                return false;
+                if (!_isTracked(mutation.record.target)) {
+                    continue nextMutation;
+                }
+
+                if (mutation.record.type === 'childList') {
+                    // If it is a modification to the DOM hierarchy, only
+                    // consider the addition/removal of tracked nodes.
+                    for (const nodes of [mutation.record.addedNodes, mutation.record.removedNodes]) {
+                        for (const node of nodes) {
+                            if (!_isTracked(node)) {
+                                continue nextMutation;
                             }
                         }
                     }
-                    return true;
-                };
-                if (!isTracked(record.target)
-                        || _.some(record.addedNodes, node => !isTracked(node))
-                        || _.some(record.removedNodes, node => !isTracked(node))) {
-                    return false;
+                } else if (mutation.record.type === 'attributes') {
+                    const oldV = mutation.oldValue.trim();
+                    const newV = mutation.newValue.trim();
+
+                    // Not sure why but this occurs, especially on ID change
+                    // (probably some strange jQuery behavior, see below).
+                    // Also sometimes, a class is just considered changed while
+                    // it just loses the spaces around the class names.
+                    if (oldV === newV) {
+                        continue nextMutation;
+                    }
+
+                    if (mutation.record.attributeName === 'id') {
+                        // Check if this is not an ID change done by jQuery for
+                        // performance reasons.
+                        if (oldV.includes('sizzle') || newV.includes('sizzle')) {
+                            continue nextMutation;
+                        }
+                    } else if (mutation.record.attributeName === 'class') {
+                        // Check if the change is about receiving or losing the
+                        // 'o_tooltip_parent' class, which is linked to the tour
+                        // service system.
+                        const hadClass = tooltipParentRegex.test(oldV);
+                        const hasClass = tooltipParentRegex.test(newV);
+                        if (hadClass !== hasClass) {
+                            continue nextMutation;
+                        }
+                    }
                 }
 
-                if (record.type === 'attributes') {
-                    // Check if this is not an ID change. Those can be
-                    // safely ignored since we normally do not change ids by
-                    // ourself (at least no alongside other changes). We need
-                    // to ignore them though as jQuery is triggering many of
-                    // those for performance reasons.
-                    if (record.attributeName === 'id') {
-                        console.log(`HERE IS AN ID CHANGE ${record.oldValue} -> ${record.target.id}`);
+                // The mutation is a tracked one, update the tour manager and
+                // stop here, no need to check the other mutations.
+                tour_manager.update();
+                break;
+            }
+            // Either all the mutations have been ignored or one triggered a
+            // tour manager update.
+            currentMutations = [];
+        }
+        function _isTracked(node) {
+            if (node.classList) {
+                for (const className of untrackedClassnames) {
+                    if (node.classList.contains(className)) {
                         return false;
                     }
-
-                    // Check if the change is about receiving or losing the
-                    // 'o_tooltip_parent' class, which is linked to the tour
-                    // service system.
-                    if (record.attributeName === 'class') {
-                        const hadClass = record.oldValue ? record.oldValue.includes('o_tooltip_parent') : false;
-                        const hasClass = record.target.classList.contains('o_tooltip_parent');
-                        return hadClass === hasClass;
-                    }
                 }
-
-                return true;
-            });
-            if (update) { // ignore mutations which concern the tooltips
-                tour_manager.update();
             }
-        }, 500);
-        var observer = new MutationObserver(check_tooltip);
+            return true;
+        }
+
+        // Now that the observer is configured, we have to start it when needed.
         var start_service = (function () {
             return function (observe) {
                 return new Promise(function (resolve, reject) {
