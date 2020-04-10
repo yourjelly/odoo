@@ -1550,7 +1550,6 @@
               method="post" enctype="multipart/form-data" t-att-action="props.fileUploadAction || '/web/binary/upload'"
               t-ref="formRef">
             <input type="hidden" name="csrf_token" t-att-value="csrfToken"/>
-            <input type="hidden" name="callback"/>
             <input type="file" class="o_input_file" name="ufile"
                    t-att="{'multiple': props.multiUpload ? 'multiple' : null, 'accept': props.acceptedFileExtensions || '*'}"
                    t-ref="fileInputRef"
