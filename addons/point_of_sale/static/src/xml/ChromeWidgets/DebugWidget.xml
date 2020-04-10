@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="DebugWidget" owl="1">
-        <Draggable>
+        <Draggable limitArea="'.pos'">
             <div class="debug-widget">
                 <header class="drag-handle">
                     <h1>Debug Window</h1>
