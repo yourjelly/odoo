@@ -384,7 +384,7 @@ class WebClient extends KeyboardNavigation {
                 this._updateState(state);
             }
         }
-        this.rState = this.renderingInfo;
+        this.rState = this.renderingInfo || this.rState;
         if (this.rState && this.rState.main) {
             this.rState.main.reload = false;
         }
