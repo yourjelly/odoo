@@ -285,7 +285,6 @@ class WebClient extends KeyboardNavigation {
         this._titleParts[part] = title;
     }
     _setWindowHash(newHash) {
-        this.ignoreHashchange = true;
         window.location.hash = newHash;
     }
     _setWindowTitle(title) {
@@ -323,6 +322,7 @@ class WebClient extends KeyboardNavigation {
         });
         const hash = "#" + hashParts.join("&");
         if (hash !== this._getWindowHash()) {
+            this.ignoreHashchange = true;
             this._setWindowHash(hash);
             // whether or not the Pound character is in the URL
             // an empty hash will return an empty string
