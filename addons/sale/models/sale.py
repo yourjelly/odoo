@@ -426,10 +426,10 @@ class SaleOrder(models.Model):
     def copy_data(self, default=None):
         if default is None:
             default = {}
-        if 'order_line' not in default and is_reward_line == False:
-            default['order_line'] = [(0, 0, line.copy_data()[0]) for line in self.order_line.filtered(lambda l: not l.is_downpayment)]
-            print("++++++++++++++++++++++++",default['order_line'])
-            print("++++++++++++++++++++++++",self.order_line)
+        if 'order_line' not in default :
+            default['order_line'] = [(0, 0, line.copy_data()[0]) for line in self.order_line.filtered(lambda l: not l.is_downpayment and l.coupon_program_id == True)]
+            print("++++++++++++++++++++",default['order_line'])
+            print("+++++++++++++++++++",self.order_line)
         return super(SaleOrder, self).copy_data(default)
 
     @api.multi
