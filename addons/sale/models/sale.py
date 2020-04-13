@@ -387,6 +387,8 @@ class SaleOrder(models.Model):
 
     @api.onchange('partner_id')
     def onchange_partner_id_warning(self):
+        import pdb;pdb.set_trace()
+        print('sale')
         if not self.partner_id:
             return
         warning = {}

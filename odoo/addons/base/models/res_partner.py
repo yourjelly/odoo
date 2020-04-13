@@ -317,6 +317,8 @@ class Partner(models.Model):
 
     @api.onchange('parent_id')
     def onchange_parent_id(self):
+        import pdb;pdb.set_trace()
+        print('base')
         # return values in result, as this method is used by _fields_sync()
         if not self.parent_id:
             return
