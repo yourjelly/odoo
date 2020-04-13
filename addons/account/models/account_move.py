@@ -350,6 +350,8 @@ class AccountMove(models.Model):
 
     @api.onchange('partner_id')
     def _onchange_partner_id(self):
+        import pdb;pdb.set_trace()
+        print('account')
         self = self.with_company(self.company_id)
         warning = {}
         if self.partner_id:
