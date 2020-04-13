@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <!-- below cron will mostly be used by localization modules which wants to load XSD files from their government portals. -->
     <record id="ir_cron_load_xsd_file" model="ir.cron">
         <field name="name">Load XSD File</field>
@@ -9,8 +8,16 @@
         <field name="priority" eval="0"/>
         <field name="state">code</field>
         <!-- Modules which wants to load XSD will activate this cron with appropriate function parameters. -->
-        <field name="code">model._load_xsd_files(urls=[], module_name=None, file_name=None)</field>
+        <field name="code">model._load_xsd_files()</field>
         <field name="active" eval="0"/>
     </record>
-
+    <!-- This configuration parameter will maintain URLs information(dictionary) which will be added by various localization modules
+         to load XSD files. This is done with the help of _get_updated_urls() defined for ir.attachment model in this module. This
+         function will read previous value set for this parameter and passes new value as its parameter. The function will merge both
+         previous and the new value passed and return the new value which will eventually become current value of this parameter.
+    -->
+    <record id="account_xsd_url_data" model="ir.config_parameter">
+        <field name="key">account.xsd_urls</field>
+        <field name="value" eval='{}'/>
+    </record>
 </odoo>
