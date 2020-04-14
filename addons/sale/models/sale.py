@@ -427,9 +427,7 @@ class SaleOrder(models.Model):
         if default is None:
             default = {}
         if 'order_line' not in default :
-            default['order_line'] = [(0, 0, line.copy_data()[0]) for line in self.order_line.filtered(lambda l: not l.is_downpayment and l.coupon_program_id == True)]
-            print("++++++++++++++++++++",default['order_line'])
-            print("+++++++++++++++++++",self.order_line)
+            default['order_line'] = [(0, 0, line.copy_data()[0]) for line in self.order_line.filtered(lambda l: not l.is_downpayment )]
         return super(SaleOrder, self).copy_data(default)
 
     @api.multi
