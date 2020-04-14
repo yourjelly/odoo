@@ -12,9 +12,9 @@
           t-on-set-title-part="_onSetTitlePart"
           t-on-warning="_onDisplayWarning"
           t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"
-          t-on-execute-action.stop="_onExecuteAction">
+          t-on-execute-action.stop="_onExecuteAction"
+          t-on-open-menu="_onOpenMenu">
         <Menu t-if="!renderingInfo.fullscreen" t-ref="menu"
-            t-on-open-menu="_onOpenMenu"
             menus="menus"
             menuID="renderingInfo.menuID"/>
         <ComponentAdapter Component="LoadingWidget" widgetArgs="[]"/>
