@@ -2,6 +2,7 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
     'use strict';
 
     const { useRef } = owl.hooks;
+    const { debounce } = owl.utils;
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
@@ -10,16 +11,14 @@ odoo.define('point_of_sale.ProductsWidgetControlPanel', function(require) {
             super(...arguments);
             this.searchTimeout = null;
             this.searchWordInput = useRef('search-word-input');
+            this.updateSearch = debounce(this.updateSearch, 100);
         }
         clearSearch() {
             this.searchWordInput.el.value = '';
             this.trigger('clear-search');
         }
         updateSearch(event) {
-            clearTimeout(this.searchTimeout);
-            this.searchTimeout = setTimeout(() => {
-                this.trigger('update-search', event.target.value);
-            }, 70);
+            this.trigger('update-search', event.target.value);
         }
     }
     ProductsWidgetControlPanel.template = 'ProductsWidgetControlPanel';
