@@ -132,6 +132,9 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 this.env.pos.on('change:selectedOrder', this._showSavedScreen, this);
                 this._showStartScreen();
                 this.env.pos.push_orders(); // push order in the background, no need to await
+                // Allow using the app even if not all the images are loaded.
+                // Basically, preload the images in the background.
+                setTimeout(() => this._preloadImages());
             } catch (error) {
                 let title = 'Unknown Error',
                     body;
@@ -301,6 +304,19 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
 
         // MISC METHODS //
+
+        _preloadImages() {
+            const products = this.env.pos.db.get_product_by_category(0);
+            for (let product of products) {
+                const image = new Image();
+                image.src = `/web/image?model=product.product&field=image_128&id=${product.id}`;
+            }
+            const staticImages = ['backspace.png', 'bc-arrow-big.png'];
+            for (let imageName of staticImages) {
+                const image = new Image();
+                image.src = `/point_of_sale/static/src/img/${imageName}`;
+            }
+        }
 
         _buildChrome() {
             if ($.browser.chrome) {
