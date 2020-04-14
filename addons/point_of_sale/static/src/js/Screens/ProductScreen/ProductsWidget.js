@@ -48,7 +48,6 @@ odoo.define('point_of_sale.ProductsWidget', function(require) {
         _switchCategory(event) {
             // event detail is the id of the selected category
             this.props.selectedCategoryId.value = event.detail;
-            this.trigger('set-selected-category-id', event.detail);
         }
         _updateSearch(event) {
             this.state.searchWord = event.detail;

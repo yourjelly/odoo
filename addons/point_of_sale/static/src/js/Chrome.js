@@ -31,7 +31,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('close-temp-screen', this.__closeTempScreen);
             useListener('close-pos', this._closePos);
             useListener('loading-skip-callback', () => this._loadingSkipCallback());
-            useListener('set-selected-category-id', this._setSelectedCategoryId);
             NumberBuffer.activate();
 
             this.state = useState({
@@ -184,9 +183,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
         _getSavedScreen(order) {
             return order.get_screen_data('screen') || { name: 'ProductScreen' };
-        }
-        _setSelectedCategoryId(event) {
-            this.state.selectedCategoryId.value = event.detail;
         }
         __showTempScreen(event) {
             const { name, props, resolve } = event.detail;
