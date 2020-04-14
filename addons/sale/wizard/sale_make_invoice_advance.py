@@ -144,8 +144,9 @@ class SaleAdvancePaymentInv(models.TransientModel):
             'sequence': order.order_line and order.order_line[-1].sequence + 1 or 10,
         }
         return so_values
-
+        
     def create_invoices(self):
+        import pdb;pdb.set_trace()
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
 
         if self.advance_payment_method == 'delivered':

@@ -826,6 +826,7 @@ class Picking(models.Model):
             picking.move_lines._do_unreserve()
             picking.package_level_ids.filtered(lambda p: not p.move_ids).unlink()
 
+    @api.depends('partner_id')
     def button_validate(self):
         # Clean-up the context key at validation to avoid forcing the creation of immediate
         # transfers.
@@ -838,6 +839,21 @@ class Picking(models.Model):
         pickings_without_quantities = self.browse()
         pickings_without_lots = self.browse()
         products_without_lots = self.env['product.product']
+        import pdb;pdb.set_trace()
+        if self.partner_id and self.partner_id.picking_warn:
+            if self.partner_id.picking_warn == 'no-message' and self.partner_id.parent_id:
+                partner = self.partner_id.parent_id
+            elif self.partner_id.picking_warn not in ('no-message', 'block') and self.partner_id.parent_id.picking_warn == 'block':
+                partner = self.partner_id.parent_id
+            else:
+                partner = self.partner_id
+            if partner.picking_warn != 'no-message':
+                if partner.picking_warn == 'block':
+                    self.partner_id = False
+                return {'warning': {
+                    'title': ("Warning for %s") % partner.name,
+                    'message': partner.picking_warn_msg
+                }}
         for picking in self:
             if not picking.move_lines and not picking.move_line_ids:
                 pickings_without_moves |= picking
