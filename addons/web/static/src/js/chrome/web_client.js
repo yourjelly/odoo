@@ -391,6 +391,13 @@ class WebClient extends KeyboardNavigation {
         this.renderingInfo = null;
         this.env.bus.trigger('web-client-updated', this);
     }
+    _getBreadcrumb({action, controller}) {
+        const component = this.controllerComponentMap.get(controller.jsID);
+        return {
+            controllerID: controller.jsID,
+            title: component && component.title || action.name,
+        };
+    }
 
     //--------------------------------------------------------------------------
     // Handlers
@@ -408,10 +415,7 @@ class WebClient extends KeyboardNavigation {
                 fullscreen = true;
             }
             const component = this.controllerComponentMap.get(controller.jsID);
-            breadcrumbs.push({
-                controllerID: controller.jsID,
-                title: component && component.title || elm.action.name,
-            });
+            breadcrumbs.push(this._getBreadcrumb(elm));
             controller.viewOptions = controller.viewOptions || {};
             controller.viewOptions.breadcrumbs = breadcrumbs.slice(0, index);
         });
