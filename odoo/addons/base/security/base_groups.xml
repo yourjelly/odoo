@@ -86,5 +86,9 @@
             <field name="value" ref="template_portal_user_id"/>
         </record>
 
+        <!-- Security groups for the localizations-->
+        <record id="l10n_il" model="res.groups">
+            <field name="name">Israel stuff</field>
+        </record>
     </data>
 </odoo>
