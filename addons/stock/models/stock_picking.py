@@ -562,7 +562,9 @@ class Picking(models.Model):
             if self.state == 'draft':
                 self.location_id = location_id
                 self.location_dest_id = location_dest_id
-
+        warning = {}
+        title = False
+        message = False
         # TDE CLEANME move into onchange_partner_id
         if self.partner_id and self.partner_id.picking_warn:
             if self.partner_id.picking_warn == 'no-message' and self.partner_id.parent_id:
@@ -574,10 +576,14 @@ class Picking(models.Model):
             if partner.picking_warn != 'no-message':
                 if partner.picking_warn == 'block':
                     self.partner_id = False
-                return {'warning': {
-                    'title': ("Warning for %s") % partner.name,
-                    'message': partner.picking_warn_msg
-                }}
+                import pdb;pdb.set_trace()
+                title = ("Warning for %s") % partner.name
+                message = partner.picking_warn_msg
+                warning.update: {
+                    'title': title,
+                    'message': message,
+                }
+                print(warning,'\n\n\n')
 
     @api.model
     def create(self, vals):
@@ -839,21 +845,8 @@ class Picking(models.Model):
         pickings_without_quantities = self.browse()
         pickings_without_lots = self.browse()
         products_without_lots = self.env['product.product']
-        import pdb;pdb.set_trace()
-        if self.partner_id and self.partner_id.picking_warn:
-            if self.partner_id.picking_warn == 'no-message' and self.partner_id.parent_id:
-                partner = self.partner_id.parent_id
-            elif self.partner_id.picking_warn not in ('no-message', 'block') and self.partner_id.parent_id.picking_warn == 'block':
-                partner = self.partner_id.parent_id
-            else:
-                partner = self.partner_id
-            if partner.picking_warn != 'no-message':
-                if partner.picking_warn == 'block':
-                    self.partner_id = False
-                return {'warning': {
-                    'title': ("Warning for %s") % partner.name,
-                    'message': partner.picking_warn_msg
-                }}
+        # import pdb;pdb.set_trace()
+
         for picking in self:
             if not picking.move_lines and not picking.move_line_ids:
                 pickings_without_moves |= picking
@@ -902,7 +895,29 @@ class Picking(models.Model):
         res = self._pre_action_done_hook()
         if res is not True:
             return res
-
+        warning = {}
+        title = False
+        message = False
+        if self.partner_id and self.partner_id.picking_warn:
+            if self.partner_id.picking_warn == 'no-message' and self.partner_id.parent_id:
+                partner = self.partner_id.parent_id
+            elif self.partner_id.picking_warn not in ('no-message', 'block') and self.partner_id.parent_id.picking_warn == 'block':
+                partner = self.partner_id.parent_id
+            else:
+                partner = self.partner_id
+            if partner.picking_warn != 'no-message':
+                # import pdb;pdb.set_trace()
+                if partner.picking_warn == 'block':
+                    self.partner_id = False
+                import pdb;pdb.set_trace()
+                title = ("Warning for %s") % partner.name
+                message = partner.picking_warn_msg
+                warning: {
+                    'title': title,
+                    'message': message,
+                }
+                print(warning,'\n\n\n')
+        print(warning,'\n\n\n')
         # Call `_action_done`.
         if self.env.context.get('picking_ids_not_to_backorder'):
             pickings_not_to_backorder = self.browse(self.env.context['picking_ids_not_to_backorder'])
