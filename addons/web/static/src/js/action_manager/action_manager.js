@@ -310,6 +310,16 @@ class ActionManager extends core.EventBus {
         }
         return result;
     }
+    resetPlugin(actionType) {
+        const OldPlugin = this.constructor.Plugins[actionType];
+        // FIX ME: make sure old instance is unbound from everything
+        const plugin = this.plugins.get(OldPlugin);
+        if (plugin) {
+            plugin.destroy();
+        }
+        this.plugins.delete(OldPlugin);
+        return this._getPlugin(actionType);
+    }
     /**
      * Restores a controller from the controllerStack and removes all
      * controllers stacked over the given controller (called when coming back

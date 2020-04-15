@@ -15,6 +15,10 @@ odoo.define('web.WindowActionPlugin', function (require) {
             super(...arguments);
             this.env.bus.on('switch-view', this, this._onSwitchView);
         }
+        destroy() {
+            super.destroy(...arguments);
+            this.env.bus.off('switch-view', this, this._onSwitchView);
+        }
 
         //--------------------------------------------------------------------------
         // Public
