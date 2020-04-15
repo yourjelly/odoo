@@ -460,6 +460,7 @@ class ActionManager extends core.EventBus {
             dialog,
             onCommit: options && options.onCommit,
             doOwlReload: options && 'doOwlReload' in options ? options.doOwlReload : true,
+            options,
         });
     }
     //--------------------------------------------------------------------------
