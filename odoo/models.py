@@ -1270,6 +1270,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         """
         from odoo.http import request
         user = self.env.user
+        allowed_countries = self.env.companies.mapped('country_id.code')
 
         has_groups = []
         not_has_groups = []
@@ -1279,11 +1280,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 not_has_groups.append(group_ext_id[1:])
             else:
                 has_groups.append(group_ext_id)
-
         for group_ext_id in not_has_groups:
             if group_ext_id == 'base.group_no_one':
                 # check: the group_no_one is effective in debug mode only
                 if user.has_group(group_ext_id) and request and request.session.debug:
+                    return False
+            elif group_ext_id.startswith("base.l10n_"):
+                if group_ext_id[-2:].upper() in allowed_countries:
                     return False
             else:
                 if user.has_group(group_ext_id):
@@ -1293,6 +1296,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if group_ext_id == 'base.group_no_one':
                 # check: the group_no_one is effective in debug mode only
                 if user.has_group(group_ext_id) and request and request.session.debug:
+                    return True
+            elif group_ext_id.startswith("base.l10n_"):
+                if group_ext_id[-2:].upper() in allowed_countries:
                     return True
             else:
                 if user.has_group(group_ext_id):
