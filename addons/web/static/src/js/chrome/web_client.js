@@ -516,23 +516,26 @@ class WebClient extends KeyboardNavigation {
     _onGenericClick(ev) {
         this._domCleaning();
         const target = ev.target;
-        if (!target.tagName === 'a') {
+        if (target.tagName.toUpperCase() !== 'A') {
             return;
         }
-        var disable_anchor = target.attributes.disable_anchor;
+        const disable_anchor = target.attributes.disable_anchor;
         if (disable_anchor && disable_anchor.value === "true") {
             return;
         }
 
         var href = target.attributes.href;
         if (href) {
-            if (href.value[0] === '#' && href.value.length > 1) {
+            if (href.value[0] === '#') {
+                ev.preventDefault();
+                if (href.value.length === 1) {
+                    return;
+                }
                 let matchingEl = null;
                 try {
                     matchingEl = this.el.querySelector(`.o_content #${href.value.substr(1)}`);
                 } catch (e) {} // Inavlid selector: not an anchor anyway
                 if (matchingEl) {
-                    ev.preventDefault();
                     const {top, left} = matchingEl.getBoundingClientRect();
                     this._scrollTo({top, left});
                 }
