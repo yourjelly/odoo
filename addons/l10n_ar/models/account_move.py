@@ -172,10 +172,10 @@ class AccountMove(models.Model):
     def _inverse_l10n_latam_document_number(self):
         super()._inverse_l10n_latam_document_number()
 
-        # Avoid that user change the POS number (x.l10n_latam_document_number), Rhe POS number configure in journal it
+        # Avoid that user change the POS number (x.l10n_latam_document_number), The POS number configure in journal it
         # will always be used
         to_review = self.filtered(
-            lambda x: x.journal_id.type == 'sale' and x.l10n_latam_document_type_id and x.l10n_latam_document_number and
+            lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.journal_id.type == 'sale' and x.l10n_latam_document_type_id and x.l10n_latam_document_number and
             (x.l10n_latam_manual_document_number or not x.highest_name))
         for rec in to_review:
             number = rec.l10n_latam_document_type_id._format_document_number(rec.l10n_latam_document_number)
