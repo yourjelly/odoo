@@ -414,7 +414,7 @@ class SaleOrder(models.Model):
                 self.update({'partner_id': False, 'partner_invoice_id': False, 'partner_shipping_id': False, 'pricelist_id': False})
                 return {'warning': warning}
 
-        # import pdb;pdb.set_trace()
+        import pdb;pdb.set_trace()
         if warning:
             return {'warning': warning}
 
