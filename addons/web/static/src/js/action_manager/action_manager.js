@@ -160,7 +160,6 @@ class ActionManager extends core.EventBus {
         options.clear_breadcrumbs = action.target === 'main' || options.clear_breadcrumbs;
 
         action = this._preprocessAction(action, options);
-        this.actions[action.jsID] = action;
         return this._handleAction(action, options);
     }
     /**
@@ -606,7 +605,8 @@ class ActionManager extends core.EventBus {
             action.domain = pyUtils.eval('domain', action.domain, action.context);
         }
         action._originalAction = JSON.stringify(action);
-        action.jsID = this._nextID('action');
+        action.jsID = options && options.actionID || this._nextID('action');
+        this.actions[action.jsID] = action;
         return action;
     }
     //--------------------------------------------------------------------------

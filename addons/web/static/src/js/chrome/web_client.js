@@ -197,8 +197,8 @@ class WebClient extends KeyboardNavigation {
      * @private
      * @returns {Promise<Object>}
      */
-    _loadMenus() {
-        if (!odoo.loadMenusPromise) {
+    _loadMenus(force) {
+        if (!odoo.loadMenusPromise && !force) {
             throw new Error('can we get here? tell aab if so');
         }
         const loadMenusPromise = odoo.loadMenusPromise || odoo.reloadMenus();
@@ -211,6 +211,7 @@ class WebClient extends KeyboardNavigation {
                     app.action = child.action;
                 }
             }
+            this.menus = null;
             this._processMenu(menuData);
             odoo.loadMenusPromise = null;
         });
