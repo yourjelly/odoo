@@ -1,5 +1,8 @@
 # coding: utf-8
 
+from hashlib import sha256
+import hmac
+import json
 import logging
 import requests
 import pprint
@@ -7,7 +10,9 @@ from requests.exceptions import HTTPError
 from werkzeug import urls
 
 from odoo import api, fields, models, _
+from odoo.http import request
 from odoo.tools.float_utils import float_round
+from odoo.tools import consteq
 
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.addons.payment_stripe.controllers.main import StripeController
@@ -29,6 +34,11 @@ class PaymentAcquirerStripe(models.Model):
     ], ondelete={'stripe': 'set default'})
     stripe_secret_key = fields.Char(required_if_provider='stripe', groups='base.group_user')
     stripe_publishable_key = fields.Char(required_if_provider='stripe', groups='base.group_user')
+    stripe_webhook_secret = fields.Char(
+        string='Stripe Webhook Secret', groups='base.group_user',
+        help="If you enable webhooks, this secret is used to verify the electronic "
+        "signature of events sent by Stripe to Odoo. Failing to set this field in Odoo "
+        "will disable the webhook system for this acquirer entirely.")
     stripe_image_url = fields.Char(
         "Checkout Image URL", groups='base.group_user',
         help="A relative or absolute URL pointing to a square image of your "
@@ -133,6 +143,52 @@ class PaymentAcquirerStripe(models.Model):
         res = super(PaymentAcquirerStripe, self)._get_feature_support()
         res['tokenize'].append('stripe')
         return res
+
+    def _handle_stripe_webhook(self, data):
+        """Process a webhook payload from Stripe.
+
+        Post-process a webhook payload to act upon the matching payment.transaction
+        record in Odoo.
+        """
+        SUPPORTED_WEBHOOKS = ['checkout.session.completed']
+        wh_type = data.get('type')
+        if wh_type not in SUPPORTED_WEBHOOKS:
+            _logger.info('unsupported webhook type %s, ignored', wh_type)
+            return False
+        else:
+            _logger.info('handling %s webhook event from stripe',  wh_type)
+        stripe_object = data.get('data', {}).get('object')
+        if not stripe_object:
+            raise ValidationError(_('Stripe Webhook data does not conform to the expected API.'))
+        if wh_type == 'checkout.session.completed':
+            return self._handle_checkout_webhook(stripe_object)
+        return False
+
+    def _check_webhook_signature(self):
+        self.ensure_one()
+        wh_secret = self.stripe_webhook_secret
+        signature = request.httprequest.headers.get('Stripe-Signature')
+        sign_data = {k: v for (k,v) in [s.split('=') for s in signature.split(',')]}
+        payload = '%s.%s' % (sign_data['t'], request.httprequest.data.decode())
+        payload_hash = hmac.new(wh_secret.encode('utf-8'), payload.encode('utf-8'), sha256).hexdigest()
+        if not consteq(payload_hash, sign_data.get('v1')):
+            _logger.error(
+                'incorrect webhook signature from Stripe, check if the webhook signature '
+                'in Odoo matches to one in the Stripe dashboard')
+            raise ValidationError('incorrect webhook signature')
+        return True
+
+    def _handle_checkout_webhook(self, checkout_object):
+        tx_reference = checkout_object.get('client_reference_id')
+        data = {'reference': tx_reference}
+        tx = self.env['payment.transaction']._stripe_form_get_tx_from_data(data)
+        tx.acquirer_id._check_webhook_signature()
+        url = 'payment_intents/%s' % tx.stripe_payment_intent
+        resp = tx.acquirer_id._stripe_request(url)
+        if resp.get('charges') and resp.get('charges').get('total_count'):
+            resp = resp.get('charges').get('data')[0]
+        data.update(resp)
+        return tx.form_feedback(data, 'stripe')
 
 
 class PaymentTransactionStripe(models.Model):
@@ -252,10 +308,11 @@ class PaymentTransactionStripe(models.Model):
         status = tree.get('status')
         tx_id = tree.get('id')
         tx_secret = tree.get("client_secret")
+        pi_id = tree.get('payment_intent')
         vals = {
             "date": fields.datetime.now(),
             "acquirer_reference": tx_id,
-            "stripe_payment_intent": tx_id,
+            "stripe_payment_intent": pi_id or tx_id,
             "stripe_payment_intent_secret": tx_secret
         }
         if status == 'succeeded':
