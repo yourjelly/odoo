@@ -90,7 +90,7 @@
         <!-- Custom empty file for user javascript -->
         <script type="text/javascript" src="/website/static/src/js/user_custom_javascript.js"/>
         <!-- RecaptchaV3 public key-->
-        <t t-set="recaptcha_public_key" t-value="request.website.sudo().recaptcha_public_key"/>
+        <t t-set="recaptcha_public_key" t-value="request.is_frontend and request.website.sudo().recaptcha_public_key"/>
         <script t-if="recaptcha_public_key" type="text/javascript">
             odoo.reCaptchaPublicKey = '<t t-raw="recaptcha_public_key"/>';
         </script>
