@@ -100,6 +100,11 @@ class WebClient extends KeyboardNavigation {
         }
         this.renderingInfo = null;
     }
+    async _clearUncommitedChanges() {
+        if (!this.currentDialogComponent.comp && this.currentMainComponent.comp) {
+            await this.currentMainComponent.comp.canBeRemoved();
+        }
+    }
     _computeTitle() {
         const parts = Object.keys(this._titleParts).sort();
         let tmp = "";
@@ -267,9 +272,7 @@ class WebClient extends KeyboardNavigation {
         this.actionManager.on('cancel', this, this._cancel);
         this.actionManager.on('update', this, this._onActionManagerUpdated);
         this.actionManager.on('clear-uncommitted-changes', this, async (callBack) => {
-            if (!this.currentDialogComponent.comp && this.currentMainComponent.comp) {
-                await this.currentMainComponent.comp.canBeRemoved();
-            }
+            await this._clearUncommitedChanges();
             callBack();
         });
         this.actionManager.on('controller-cleaned', this, (controllerIds) => {
