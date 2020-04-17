@@ -375,6 +375,24 @@ class AccountTestNoChartCommon(SavepointCaseWithUserDemo):
             'code': 'GJT0',
         })
 
+        # Exchange journal.
+        cls.exchange_journal0 = cls.env['account.journal'].create({
+            'name': 'Exchange Difference - (test)',
+            'type': 'general',
+            'code': 'EXCH',
+            'default_debit_account_id': cls.env['account.account'].create({
+                'name': 'Foreign Exchange Gain - (test)',
+                'code': 'NC4410',
+                'user_type_id': cls.env.ref('account.data_account_type_revenue').id,
+            }).id,
+            'default_credit_account_id': cls.env['account.account'].create({
+                'name': 'Foreign Exchange Loss - (test)',
+                'code': 'NC6410',
+                'user_type_id': cls.env.ref('account.data_account_type_expenses').id,
+            }).id,
+        })
+        cls.env.user.company_id.currency_exchange_journal_id = cls.exchange_journal0
+
     @classmethod
     def setUpAdditionalAccounts(cls):
         """ Set up some addionnal accounts: expenses, revenue, ... """
@@ -504,6 +522,27 @@ class AccountTestNoChartCommonMultiCompany(AccountTestNoChartCommon):
             'property_account_receivable_id': cls.account_receivable_company_B.id,
             'company_id': cls.company_B.id
         })
+
+        # Exchange journal.
+        cls.exchange_journal0 = cls.env['account.journal'].create({
+            'name': 'Exchange Difference - (test)',
+            'type': 'general',
+            'code': 'EXCH',
+            'company_id': cls.company_B.id,
+            'default_debit_account_id': cls.env['account.account'].create({
+                'name': 'Foreign Exchange Gain - (test)',
+                'code': 'NC4410',
+                'user_type_id': cls.env.ref('account.data_account_type_revenue').id,
+                'company_id': cls.company_B.id
+            }).id,
+            'default_credit_account_id': cls.env['account.account'].create({
+                'name': 'Foreign Exchange Loss - (test)',
+                'code': 'NC6410',
+                'user_type_id': cls.env.ref('account.data_account_type_expenses').id,
+                'company_id': cls.company_B.id
+            }).id,
+        })
+        cls.company_B.currency_exchange_journal_id = cls.exchange_journal0
 
     @classmethod
     def setUpAdditionalAccounts(cls):
@@ -982,6 +1021,7 @@ class TestAccountReconciliationCommon(AccountTestCommon):
         cls.company = cls.env['res.company'].create({
             'name': 'A test company',
             'currency_id': cls.env.ref('base.EUR').id,
+            'account_cash_basis_base_account_id': cls.tax_base_amount_account.id,
         })
 
         cls.env.user.company_id = cls.company
@@ -1086,7 +1126,6 @@ class TestAccountReconciliationCommon(AccountTestCommon):
             'amount': 20,
             'tax_exigibility': 'on_payment',
             'cash_basis_transition_account_id': cls.tax_waiting_account.id,
-            'cash_basis_base_account_id': cls.tax_base_amount_account.id,
             'invoice_repartition_line_ids': [
                     (0,0, {
                         'factor_percent': 100,
