@@ -375,6 +375,24 @@ class AccountTestNoChartCommon(SavepointCaseWithUserDemo):
             'code': 'GJT0',
         })
 
+        # Exchange journal.
+        cls.exchange_journal0 = cls.env['account.journal'].create({
+            'name': 'Exchange Difference - (test)',
+            'type': 'general',
+            'code': 'EXCH',
+            'default_debit_account_id': cls.env['account.account'].create({
+                'name': 'Foreign Exchange Gain - (test)',
+                'code': 'NC4410',
+                'user_type_id': cls.env.ref('account.data_account_type_revenue').id,
+            }).id,
+            'default_credit_account_id': cls.env['account.account'].create({
+                'name': 'Foreign Exchange Loss - (test)',
+                'code': 'NC6410',
+                'user_type_id': cls.env.ref('account.data_account_type_expenses').id,
+            }).id,
+        })
+        cls.env.user.company_id.currency_exchange_journal_id = cls.exchange_journal0
+
     @classmethod
     def setUpAdditionalAccounts(cls):
         """ Set up some addionnal accounts: expenses, revenue, ... """
