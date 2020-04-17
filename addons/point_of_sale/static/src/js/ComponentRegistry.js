@@ -15,6 +15,14 @@ odoo.define('point_of_sale.ComponentRegistry', function(require) {
                 PosComponent.components[base.name] = compiledClass;
             }
         }
+        _recompute(base, old) {
+            const res = super._recompute(base, old);
+            if (typeof base === 'string') {
+                base = this.baseNameMap[base];
+            }
+            PosComponent.components[base.name] = res;
+            return res;
+        }
     }
 
     return ComponentRegistry;

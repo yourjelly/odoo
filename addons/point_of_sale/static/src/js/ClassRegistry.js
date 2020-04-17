@@ -78,6 +78,8 @@ odoo.define('point_of_sale.ClassRegistry', function (require) {
      */
     class ClassRegistry {
         constructor() {
+            // base name map
+            this.baseNameMap = {};
             // Object that maps `baseClass` to the class implementation extended in-place.
             this.includedMap = new Map();
             // Object that maps `baseClassCB` to the array of callbacks to generate the extended class.
@@ -93,7 +95,8 @@ odoo.define('point_of_sale.ClassRegistry', function (require) {
          * @param {Function} baseClass `class`
          */
         add(baseClass) {
-            this.includedMap.set(baseClass, baseClass);
+            this.includedMap.set(baseClass, []);
+            this.baseNameMap[baseClass.name] = baseClass;
         }
         /**
          * Add a new class in the Registry based on other class
@@ -104,6 +107,7 @@ odoo.define('point_of_sale.ClassRegistry', function (require) {
         addByExtending(baseClassCB, base) {
             this.extendedCBMap.set(baseClassCB, [baseClassCB]);
             this.extendedSuperMap.set(baseClassCB, base);
+            this.baseNameMap[baseClassCB.name] = baseClassCB;
         }
         /**
          * Extend in-place a class in the registry. E.g.
@@ -150,36 +154,66 @@ odoo.define('point_of_sale.ClassRegistry', function (require) {
          * @param {Function} extensionCB `class -> class`
          */
         extend(base, extensionCB) {
+            if (typeof base === 'string') {
+                base = this.baseNameMap[base];
+            }
+            let extensionArray;
             if (this.includedMap.get(base)) {
-                const toExtend = this.includedMap.get(base);
-                const extended = extensionCB(toExtend);
-                this.includedMap.set(base, extended);
+                extensionArray = this.includedMap.get(base);
             } else if (this.extendedCBMap.get(base)) {
-                this.extendedCBMap.get(base).push(extensionCB);
+                extensionArray = this.extendedCBMap.get(base);
             } else {
                 throw new Error(
-                    `'${base.name}' is not in the Registry. Add it to Registry before extending`
+                    `'${base.name}' is not in the Registry. Add it to Registry before extending.`
                 );
             }
+            extensionArray.push(extensionCB);
+            const locOfNewExtension = extensionArray.length - 1;
+            const self = this;
+            const oldCompiled = this.isFrozen ? this.cache.get(base) : null;
+            return {
+                remove() {
+                    extensionArray.splice(locOfNewExtension, 1);
+                    self._recompute(base, oldCompiled);
+                },
+                compile() {
+                    self._recompute(base);
+                }
+            };
+        }
+        _compile(base) {
+            let res;
+            if (this.includedMap.has(base)) {
+                res = this.includedMap.get(base).reduce((acc, ext) => ext(acc), base);
+            } else {
+                const superClass = this.extendedSuperMap.get(base);
+                const extensionCBs = this.extendedCBMap.get(base);
+                res = extensionCBs.reduce((acc, ext) => ext(acc), this._compile(superClass));
+            }
+            Object.defineProperty(res, 'name', { value: base.name });
+            return res;
         }
         /**
          * Return the compiled class (containing all the extensions) of the base class.
          * @param {Function} base `class | class -> class` function used in adding the class
          */
         get(base) {
-            if (!this.isFrozen)
-                throw new Error(
-                    'Getting a class from Registry is not allowed if not Registry is not frozen.'
-                );
-            return this.cache.get(base);
+            if (typeof base === 'string') {
+                base = this.baseNameMap[base];
+            }
+            if (this.isFrozen) {
+                return this.cache.get(base);
+            }
+            return this._compile(base);
         }
         /**
          * Uses the callbacks registered in the registry to compile the classes.
          */
         freeze() {
             // Step: Compile the `included classes`.
-            for (let [baseClass, extendedClass] of this.includedMap.entries()) {
-                this.cache.set(baseClass, extendedClass);
+            for (let [baseClass, extensionCBs] of this.includedMap.entries()) {
+                const compiled = extensionCBs.reduce((acc, ext) => ext(acc), baseClass);
+                this.cache.set(baseClass, compiled);
             }
 
             // Step: Compile the `extended classes` based on `included classes`.
@@ -215,6 +249,12 @@ odoo.define('point_of_sale.ClassRegistry', function (require) {
 
             // Step: Set the flag to true;
             this.isFrozen = true;
+        }
+        _recompute(base, old) {
+            if (typeof base === 'string') {
+                base = this.baseNameMap[base];
+            }
+            return old ? old : this._compile(base);
         }
     }
 
