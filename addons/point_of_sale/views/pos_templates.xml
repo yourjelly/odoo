@@ -126,6 +126,7 @@
             <script type="text/javascript" src="/point_of_sale/static/tests/test_ComponentRegistry.js"></script>
             <script type="text/javascript" src="/point_of_sale/static/tests/test_popups.js"></script>
             <script type="text/javascript" src="/point_of_sale/static/tests/test_ChromeWidgets.js"></script>
+            <script type="text/javascript" src="/point_of_sale/static/tests/test_ProductScreen.js"></script>
         </t>
 
         <div id="qunit"/>
