@@ -54,9 +54,9 @@ class Menu extends Component {
         return (
             this.el.offsetWidth -
             (
-                $(this.menuAppsEl).outerWidth(true) || 0 +
-                $(this.menuBrand.el).outerWidth(true) || 0 +
-                $(this.systrayMenu.el).outerWidth(true) || 0
+                ($(this.menuAppsEl).outerWidth(true) || 0) +
+                ($(this.menuBrand.el).outerWidth(true) || 0) +
+                ($(this.systrayMenu.el).outerWidth(true) || 0)
             )
         );
     }
