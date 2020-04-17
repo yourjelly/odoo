@@ -3,6 +3,8 @@
 
 from odoo.addons.crm.tests.common import TestCrmCommon, INCOMING_EMAIL
 from odoo.tests.common import users
+from odoo.tools import mute_logger
+from odoo.tests import Form
 
 
 class TestCRMLead(TestCrmCommon):
@@ -81,3 +83,33 @@ class TestCRMLead(TestCrmCommon):
         new_lead.handle_partner_assignment(create_missing=True)
         self.assertEqual(new_lead.partner_id.email, 'unknown.sender@test.example.com')
         self.assertEqual(new_lead.partner_id.team_id, self.sales_team_1)
+
+    @mute_logger('odoo.addons.phone_validation.tools.phone_validation')
+    def test_field_email_and_phone(self):
+        lead, partner = self.lead_1, self.contact_2
+        lead.partner_id = partner
+
+        # email & phone must be automatically set on the lead
+        lead_form = Form(lead)
+        lead_form.partner_id = partner
+        lead = lead_form.save()
+        self.assertEqual(lead.email_from, partner.email)
+        self.assertEqual(lead.phone, partner.phone)
+
+        # writing on the lead field must change the partner field
+        lead_form = Form(lead)
+        lead_form.email_from = 'new@email.com'
+        lead_form.phone = '+32499999999'
+        lead = lead_form.save()
+        self.assertEqual(lead.email_from, partner.email)
+        self.assertEqual(lead.phone, partner.phone)
+        self.assertEqual(lead.phone, '+32 499 99 99 99')
+
+        # writing on the partner must change the lead values
+        partner_form = Form(partner)
+        partner_form.email = 'new_super@email.com'
+        partner_form.phone = '+32488888888'
+        partner = partner_form.save()
+
+        self.assertEqual('new_super@email.com', lead.email_from)
+        self.assertEqual('+32 488 88 88 88', lead.phone)

@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, tools, SUPERUSER_ID
 from odoo.tools.translate import _
-from odoo.tools import email_re, email_split
+from odoo.tools import email_re, email_split, mute_logger
 from odoo.exceptions import UserError, AccessError
 from odoo.addons.phone_validation.tools import phone_validation
 from collections import OrderedDict
@@ -114,7 +114,6 @@ class Lead(models.Model):
         'res.partner', string='Customer', index=True, tracking=10,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         help="Linked partner (optional). Usually created when converting the lead. You can find a partner by its Name, TIN, Email or Internal Reference.")
-    partner_address_email = fields.Char('Partner Contact Email', related='partner_id.email', readonly=True)
     partner_is_blacklisted = fields.Boolean('Partner is blacklisted', related='partner_id.is_blacklisted', readonly=True)
     contact_name = fields.Char(
         'Contact Name', tracking=30,
@@ -127,10 +126,10 @@ class Lead(models.Model):
     title = fields.Many2one('res.partner.title', string='Title',compute='_compute_partner_id_values', readonly=False, store=True)
     email_from = fields.Char(
         'Email', tracking=40, index=True,
-        compute='_compute_partner_id_values', readonly=False, store=True)
+        compute='_compute_email_from', inverse='_inverse_email_from', readonly=False, store=True)
     phone = fields.Char(
         'Phone', tracking=50,
-        compute='_compute_partner_id_values', readonly=False, store=True)
+        compute='_compute_phone', inverse='_inverse_phone', readonly=False, store=True)
     mobile = fields.Char('Mobile', compute='_compute_partner_id_values', readonly=False, store=True)
     phone_mobile_search = fields.Char('Phone/Mobile', store=False, search='_search_phone_mobile_search')
     phone_state = fields.Selection([
@@ -164,6 +163,7 @@ class Lead(models.Model):
     lost_reason = fields.Many2one(
         'crm.lost.reason', string='Lost Reason',
         index=True, ondelete='restrict', tracking=True)
+    ribbon_message = fields.Char('Ribbon message', compute='_compute_ribbon_message')
 
     _sql_constraints = [
         ('check_probability', 'check(probability >= 0 and probability <= 100)', 'The probability of closing the deal should be between 0% and 100%!')
@@ -240,6 +240,28 @@ class Lead(models.Model):
         for lead in self:
             lead.update(lead._preare_values_from_partner(lead.partner_id))
 
+    @api.depends('partner_id.email')
+    def _compute_email_from(self):
+        for lead in self:
+            if lead.partner_id and lead.partner_id.email != lead.email_from:
+                lead.email_from = lead.partner_id.email
+
+    def _inverse_email_from(self):
+        for lead in self:
+            if lead.partner_id and lead.email_from != lead.partner_id.email:
+                lead.partner_id.email = lead.email_from
+
+    @api.depends('partner_id.phone')
+    def _compute_phone(self):
+        for lead in self:
+            if lead.partner_id and lead.phone != lead.partner_id.phone:
+                lead.phone = lead.partner_id.phone
+
+    def _inverse_phone(self):
+        for lead in self:
+            if lead.partner_id and lead.phone != lead.partner_id.phone:
+                lead.partner_id.phone = lead.phone
+
     @api.depends('phone', 'country_id.code')
     def _compute_phone_state(self):
         for lead in self:
@@ -303,6 +325,21 @@ class Lead(models.Model):
         for lead in self:
             lead.meeting_count = mapped_data.get(lead.id, 0)
 
+    @api.depends('email_from', 'phone', 'partner_id')
+    def _compute_ribbon_message(self):
+        for lead in self:
+            will_write_email = lead.partner_id and lead.email_from != lead.partner_id.email
+            will_write_phone = lead.partner_id and lead.phone != lead.partner_id.phone
+
+            if will_write_email and will_write_phone:
+                lead.ribbon_message = _('By saving this change, the customer email and phone number will also be updated.')
+            elif will_write_email:
+                lead.ribbon_message = _('By saving this change, the customer email will also be updated.')
+            elif will_write_phone:
+                lead.ribbon_message = _('By saving this change, the customer phone number will also be updated.')
+            else:
+                lead.ribbon_message = False
+
     def _search_phone_mobile_search(self, operator, value):
         if len(value) <= 2:
             raise UserError(_('Please enter at least 3 digits when searching on phone / mobile.'))
@@ -354,8 +391,6 @@ class Lead(models.Model):
             'city': partner.city,
             'state_id': partner.state_id.id,
             'country_id': partner.country_id.id,
-            'email_from': partner.email or self.email_from,
-            'phone': partner.phone or self.phone,
             'mobile': partner.mobile,
             'zip': partner.zip,
             'function': partner.function,
