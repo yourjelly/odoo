@@ -5,6 +5,7 @@
         <div class="oe_status" t-on-click="onClick">
             <span t-if="state.msg" class="js_msg">
                 <t t-esc="state.msg" />
+                <span> </span>
             </span>
             <div t-if="state.status === 'connected'" class="js_connected oe_icon oe_green">
                 <i class="fa fa-fw fa-wifi" role="img" aria-label="Synchronisation Connected"

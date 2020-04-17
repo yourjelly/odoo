@@ -6,6 +6,9 @@ odoo.define('point_of_sale.SaleDetailsButton', function(require) {
 
     class SaleDetailsButton extends PosComponent {
         async onClick() {
+            // IMPROVEMENT: Perhaps put this logic in a parent component
+            // so that for unit testing, we can check if this simple
+            // component correctly triggers an event.
             const saleDetails = await this.rpc({
                 model: 'report.point_of_sale.report_saledetails',
                 method: 'get_sale_details',

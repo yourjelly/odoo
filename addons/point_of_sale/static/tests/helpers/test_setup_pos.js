@@ -1,4 +1,4 @@
-odoo.define('point_of_sale.test_setup_pos', async function(require) {
+odoo.define('point_of_sale.test_setup_pos', async function (require) {
     'use strict';
 
     /**
@@ -6,6 +6,7 @@ odoo.define('point_of_sale.test_setup_pos', async function(require) {
      * It might be needed in different parts of testing.
      */
 
+    const makeTestEnvironment = require('web.test_env');
     const env = require('web.env');
     const { PosModel } = require('point_of_sale.models');
 
@@ -32,15 +33,20 @@ odoo.define('point_of_sale.test_setup_pos', async function(require) {
             });
             await posContainer.pos.ready;
             this.pos = posContainer.pos;
-            console.log('PosModel instance successfully created.')
+            console.log('PosModel instance successfully created.');
             // TODO jcb: setup the mock after loading the PosModel instance.
         },
     });
 
-    QUnit.test('check if PosModel is instantiated', async function(assert) {
+    QUnit.test('check if PosModel is instantiated', async function (assert) {
         assert.expect(1);
         assert.strictEqual(this.pos === posContainer.pos, true);
     });
 
-    return posContainer;
+    const makePosTestEnv = (env = {}) => {
+        env = Object.assign(env, { pos: posContainer.pos })
+        return makeTestEnvironment(env);
+    };
+
+    return { posContainer, makePosTestEnv };
 });
