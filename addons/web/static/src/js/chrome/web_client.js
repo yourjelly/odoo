@@ -172,9 +172,12 @@ class WebClient extends KeyboardNavigation {
      */
     _getUrlState() {
         const hash = this._getWindowHash();
-        const hashParts = hash ? hash.substr(1).split("&") : [];
+        return this._getPartUrlStringToObj(hash);
+    }
+    _getPartUrlStringToObj(urlPart) {
+        const parts = urlPart ? urlPart.substr(1).split("&") : [];
         const state = {};
-        for (const part of hashParts) {
+        for (const part of parts) {
             const [ key, val ] = part.split('=');
             let decodedVal;
             if (val === undefined) {
@@ -186,8 +189,17 @@ class WebClient extends KeyboardNavigation {
                 state[key] = isNaN(decodedVal) ? decodedVal : parseInt(decodedVal, 10);
             }
         }
-
         return state;
+    }
+    _getPartUrlObjToString(obj) {
+        const parts = Object.keys(obj).map(key => {
+            const value = obj[key];
+            if (value !== null) {
+                return `${key}=${encodeURI(value)}`;
+            }
+            return '';
+        });
+        return parts.join('&');
     }
     _getWindowHash() {
         return window.location.hash;
@@ -317,14 +329,7 @@ class WebClient extends KeyboardNavigation {
             delete state.title
         }
         this.state = state;
-        const hashParts = Object.keys(state).map(key => {
-            const value = state[key];
-            if (value !== null) {
-                return `${key}=${encodeURI(value)}`;
-            }
-            return '';
-        });
-        const hash = "#" + hashParts.join("&");
+        const hash = "#" + this._getPartUrlObjToString(state);
         if (hash !== this._getWindowHash()) {
             this.ignoreHashchange = true;
             this._setWindowHash(hash);
