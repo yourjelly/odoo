@@ -171,35 +171,14 @@ class WebClient extends KeyboardNavigation {
      * @returns {Object}
      */
     _getUrlState() {
-        const hash = this._getWindowHash();
-        return this._getPartUrlStringToObj(hash);
-    }
-    _getPartUrlStringToObj(urlPart) {
-        const parts = urlPart ? urlPart.substr(1).split("&") : [];
+        let hash = this._getWindowHash();
+        hash = hash.startsWith('#') ? hash.substring(1) : hash;
+        const hashParams = new URLSearchParams(hash);
         const state = {};
-        for (const part of parts) {
-            const [ key, val ] = part.split('=');
-            let decodedVal;
-            if (val === undefined) {
-                decodedVal = '1';
-            } else if (val) {
-                decodedVal = decodeURI(val);
-            }
-            if (decodedVal) {
-                state[key] = isNaN(decodedVal) ? decodedVal : parseInt(decodedVal, 10);
-            }
+        for (let [key, val] of hashParams.entries()) {
+            state[key] = isNaN(val) ? val : parseInt(val, 10);
         }
         return state;
-    }
-    _getPartUrlObjToString(obj) {
-        const parts = Object.keys(obj).map(key => {
-            const value = obj[key];
-            if (value !== null) {
-                return `${key}=${encodeURI(value)}`;
-            }
-            return '';
-        });
-        return parts.join('&');
     }
     _getWindowHash() {
         return window.location.hash;
@@ -301,7 +280,10 @@ class WebClient extends KeyboardNavigation {
         this._titleParts[part] = title;
     }
     _setWindowHash(newHash) {
-        window.location.hash = newHash;
+        let url = new URL(window.location);
+        url.hash = newHash;
+        url = url.toString();
+        window.history.pushState({ path: url }, '', url);
     }
     _setWindowTitle(title) {
         document.title = title;
@@ -329,17 +311,15 @@ class WebClient extends KeyboardNavigation {
             delete state.title
         }
         this.state = state;
-        const hash = "#" + this._getPartUrlObjToString(state);
-        if (hash !== this._getWindowHash()) {
-            this.ignoreHashchange = true;
-            this._setWindowHash(hash);
-            // whether or not the Pound character is in the URL
-            // an empty hash will return an empty string
-            // i.e. window hash of '/web' === window hash of '/web#' === [empty string]
-            // but won't trigger the event hashchange !
-            if (hash === '#') {
-                this.ignoreHashchange = false;
+        const hashParams = new URLSearchParams();
+        for (const key in state) {
+            if (state[key] !== null) {
+                hashParams.append(key, state[key]);
             }
+        }
+        const hash = "#" + hashParams.toString();
+        if (hash !== this._getWindowHash()) {
+            this._setWindowHash(hash);
         }
         this._setWindowTitle(this._computeTitle());
     }
@@ -556,14 +536,11 @@ class WebClient extends KeyboardNavigation {
         }
     }
     async _onHashchange() {
-        if (!this.ignoreHashchange) {
-            const state = this._getUrlState();
-            const loaded = await this._loadState(state);
-            if (loaded === 'render') {
-                this.render();
-            }
+        const state = this._getUrlState();
+        const loaded = await this._loadState(state);
+        if (loaded === 'render') {
+            this.render();
         }
-        this.ignoreHashchange = false;
         // TODO: reset oldURL in case of failure?
      }
     /**
