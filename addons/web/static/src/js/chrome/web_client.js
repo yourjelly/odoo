@@ -218,7 +218,7 @@ class WebClient extends KeyboardNavigation {
             if ('menu_id' in state) {
                 const action = this.menus[state.menu_id].actionID;
                 return this.actionManager.doAction(action, state);
-            } else if (('home' in state || Object.keys(state).filter(key => key !== 'cids').length === 0)) {
+            } else {//if (('home' in state || Object.keys(state).filter(key => key !== 'cids').length === 0)) {
                 const {actionID , menuID} = this._getHomeAction();
                 if (actionID) {
                     return this.actionManager.doAction(actionID, {menuID, clear_breadcrumbs: true});
