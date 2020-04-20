@@ -78,8 +78,7 @@ class StockWarehouseOrderpoint(models.Model):
         default=lambda self: self.env.company)
     allowed_location_ids = fields.One2many(comodel_name='stock.location', compute='_compute_allowed_location_ids')
 
-    rule_ids = fields.Many2many('stock.rule', string='Rules used', compute='_compute_rules')
-    json_lead_days_popover = fields.Char(compute='_compute_json_popover')
+    json_lead_days_popover = fields.Char(compute='_compute_lead_days')
     lead_days_date = fields.Date(compute='_compute_lead_days')
     allowed_route_ids = fields.Many2many('stock.location.route', compute='_compute_allowed_route_ids')
     route_id = fields.Many2one(
@@ -113,13 +112,15 @@ class StockWarehouseOrderpoint(models.Model):
         ])
         self.allowed_route_ids = route_by_product.ids
 
-    @api.depends('rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
-    def _compute_json_popover(self):
+    @api.depends('product_id', 'location_id', 'route_id', 'product_id.seller_ids', 'product_id.seller_ids.delay')
+    def _compute_lead_days(self):
         for orderpoint in self:
             if not orderpoint.product_id or not orderpoint.location_id:
                 orderpoint.json_lead_days_popover = False
                 continue
-            dummy, lead_days_description = orderpoint.rule_ids._get_lead_days(orderpoint.product_id)
+            rules = orderpoint.product_id._get_rules_from_location(orderpoint.location_id, route_ids=orderpoint.route_id)
+            lead_days, lead_days_description = rules._get_lead_days(orderpoint.product_id)
+            orderpoint.lead_days_date = fields.Date.today() + relativedelta.relativedelta(days=lead_days)
             orderpoint.json_lead_days_popover = dumps({
                 'title': _('Replenishment'),
                 'popoverTemplate': 'stock.leadDaysPopOver',
@@ -134,24 +135,6 @@ class StockWarehouseOrderpoint(models.Model):
                 'product_uom_name': orderpoint.product_uom_name,
                 'virtual': orderpoint.trigger == 'manual' and orderpoint.create_uid.id == SUPERUSER_ID,
             })
-
-    @api.depends('rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
-    def _compute_lead_days(self):
-        for orderpoint in self:
-            if not orderpoint.product_id or not orderpoint.location_id:
-                orderpoint.lead_days_date = False
-                continue
-            lead_days, dummy = orderpoint.rule_ids._get_lead_days(orderpoint.product_id)
-            lead_days_date = fields.Date.today() + relativedelta.relativedelta(days=lead_days)
-            orderpoint.lead_days_date = lead_days_date
-
-    @api.depends('route_id', 'product_id', 'location_id', 'company_id', 'warehouse_id', 'product_id.route_ids')
-    def _compute_rules(self):
-        for orderpoint in self:
-            if not orderpoint.product_id or not orderpoint.location_id:
-                orderpoint.rule_ids = False
-                continue
-            orderpoint.rule_ids = orderpoint.product_id._get_rules_from_location(orderpoint.location_id, route_ids=orderpoint.route_id)
 
     @api.constrains('product_id')
     def _check_product_uom(self):
