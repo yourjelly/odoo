@@ -104,7 +104,11 @@ class TestMrpOrder(TestMrpCommon):
         produce_wizard.do_produce()
 
         man_order.button_mark_done()
-        self.assertEqual(man_order.state, 'done', "Production order should be in done state.")
+        self.assertEqual(man_order.state, 'progress', "Production order should be open a backorder wizard, then not done yet.")
+
+        backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[man_order.id]))
+        backorder.save().action_close_mo()
+        self.assertEqual(man_order.state, 'done', "Production order should be done.")
 
     def test_production_avialability(self):
         """ Checks the availability of a production order through mutliple calls to `action_assign`.
