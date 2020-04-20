@@ -7,11 +7,16 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const Registries = require('point_of_sale.Registries');
 
     class ProductScreen extends PosComponent {
+        /**
+         * @param {Object} props
+         * @param {Object} props.selectedCategoryId the selected category id for the app.
+         */
         constructor() {
             super(...arguments);
             useListener('update-selected-orderline', this._updateSelectedOrderline);
             useListener('new-orderline-selected', this._newOrderlineSelected);
             useListener('set-numpad-mode', this._setNumpadMode);
+            useListener('click-product', this._clickProduct);
             NumberBuffer.use({
                 nonKeyboardInputEvent: 'numpad-click-input',
                 triggerAtInput: 'update-selected-orderline',
@@ -56,7 +61,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                     Object.assign({}, cb, { component: Registries.Component.get(cb.component) })
                 );
         }
-        async clickProduct(event) {
+        async _clickProduct(event) {
             if (!this.currentOrder) {
                 this.env.pos.add_new_order();
             }

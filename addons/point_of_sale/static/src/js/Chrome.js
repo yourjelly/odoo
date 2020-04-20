@@ -37,6 +37,12 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 uiState: 'LOADING', // 'LOADING' | 'READY' | 'CLOSING'
                 debugWidgetIsShown: true,
                 hasBigScrollBars: false,
+                // Used a property to the ProductScreen.
+                // This is to make sure that any change in selected
+                // category from one order, is also reflected to other
+                // orders.
+                // IMPROVEMENT: Perhaps we put this in a global context
+                // such as the pos in env.
                 selectedCategoryId: { value: 0 },
             });
 
