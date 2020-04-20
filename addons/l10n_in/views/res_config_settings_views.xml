@@ -27,7 +27,7 @@
                     <div class="o_setting_right_pane">
                         <label for="module_l10n_in_einvoice"/>
                         <div class="text-muted">
-                            Upload invoice to government server
+                            Upload Invoices to Invoice Registration Portal (IRP) 
                         </div>
                         <div class="content-group">
                             <div id="setup_l10n_in_einvoice"/>
