@@ -89,6 +89,27 @@ odoo.define('web.ListModel', function (require) {
             });
         },
 
+        /**
+         * Determine this.data.domains and this.data.origins from
+         * this.data.domain and this.data.timeRanges;
+         *
+         * @private
+         */
+        _computeDerivedParams: function () {
+            const { range, rangeDescription, comparisonRange, comparisonRangeDescription } = this.data.timeRanges;
+            if (range) {
+                this.data.domains = [this.data.domain.concat(range)];
+                this.data.origins = [rangeDescription];
+                if (comparisonRange) {
+                    this.data.domains.push(this.data.domain.concat(comparisonRange));
+                    this.data.origins.push(comparisonRangeDescription);
+                }
+            } else {
+                this.data.domains = [this.data.domain];
+                this.data.origins = [""];
+            }
+        },
+
         //--------------------------------------------------------------------------
         // Private
         //--------------------------------------------------------------------------
