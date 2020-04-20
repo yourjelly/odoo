@@ -20,7 +20,8 @@ class WebClient extends KeyboardNavigation {
     constructor() {
         super();
         this.LoadingWidget = LoadingWidget;
-        useExternalListener(window, 'hashchange', this._onHashchange);
+        //useExternalListener(window, 'hashchange', this._onHashchange);
+        useExternalListener(window, 'popstate', this._onHashchange);
         useListener('click', this._onGenericClick);
 
         this.currentMainComponent = useRef('currentMainComponent');
@@ -170,8 +171,8 @@ class WebClient extends KeyboardNavigation {
      * @private
      * @returns {Object}
      */
-    _getUrlState() {
-        let hash = this._getWindowHash();
+    _getUrlState(hash) {
+        hash = hash || this._getWindowHash();
         hash = hash.startsWith('#') ? hash.substring(1) : hash;
         const hashParams = new URLSearchParams(hash);
         const state = {};
@@ -535,8 +536,12 @@ class WebClient extends KeyboardNavigation {
             }
         }
     }
-    async _onHashchange() {
-        const state = this._getUrlState();
+    async _onHashchange(ev) {
+        let popped;
+        if ((ev.state && ev.state.path)) {
+            popped = new URL(ev.state.path).hash;
+        }
+        const state = this._getUrlState(popped);
         const loaded = await this._loadState(state);
         if (loaded === 'render') {
             this.render();
