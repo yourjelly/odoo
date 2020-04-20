@@ -311,7 +311,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             const products = this.env.pos.db.get_product_by_category(0);
             for (let product of products) {
                 const image = new Image();
-                image.src = `/web/image?model=product.product&field=image_128&id=${product.id}`;
+                image.src = `/web/image?model=product.product&field=image_128&id=${product.id}&unique=1`;
             }
             const staticImages = ['backspace.png', 'bc-arrow-big.png'];
             for (let imageName of staticImages) {
