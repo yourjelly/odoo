@@ -21,20 +21,16 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
             });
         }
         get order() {
-            return this.props.order;
+            return this.env.pos.get_order();
         }
         get orderlinesArray() {
             return this.order ? this.order.get_orderlines() : [];
         }
         mounted() {
-            this._startListeners(this.props.order);
-        }
-        willUpdateProps(nextProps) {
-            this._stopListeners(this.props.order);
-            this._startListeners(nextProps.order);
+            this._startListeners(this.order);
         }
         willUnmount() {
-            this._stopListeners(this.props.order);
+            this._stopListeners(this._prevOrder);
         }
         selectLine(event) {
             this.order.select_orderline(event.detail.orderline);
@@ -69,9 +65,12 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
             this.order.select_orderline(event.detail.orderline);
         }
         _startListeners(order) {
+            // set _prevOrder so that when order is changed,
+            // we can stop the listeners on it.
+            this._prevOrder = order;
             this.env.pos.on(
                 'change:selectedOrder',
-                () => this.trigger('new-orderline-selected'),
+                this._onChangeSelectedOrder,
                 this
             );
             if (order) {
@@ -93,13 +92,18 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
             }
         }
         _stopListeners(order) {
-            this.env.pos.off('change:selectedOrderline', null, this);
+            this.env.pos.off('change:selectedOrder', null, this);
             if (order) {
                 order.orderlines.off('new-orderline-selected', null, this);
                 order.orderlines.off('change', null, this);
                 order.orderlines.off('add remove', null, this);
                 order.off('change', null, this);
             }
+        }
+        _onChangeSelectedOrder(pos, newSelectedOrder) {
+            this._stopListeners(this._prevOrder);
+            this._startListeners(newSelectedOrder);
+            this.trigger('new-orderline-selected');
         }
     }
     OrderWidget.template = 'OrderWidget';
