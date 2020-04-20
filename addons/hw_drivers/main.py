@@ -25,7 +25,7 @@ class Manager(Thread):
         """
         server = helpers.get_odoo_server_url()
         if server:
-            subject = helpers.read_file_first_line('odoo-subject.conf')
+            subject = helpers.read_iot_config('iot_box_network').get('odoo-subject', False)
             if subject:
                 domain = helpers.get_ip().replace('.', '-') + subject.strip('*')
             else:

@@ -65,15 +65,9 @@ class DriverController(http.Controller):
         image = get_resource_path('hw_drivers', 'static/img', 'False.jpg')
         if not server:
             credential = b64decode(token).decode('utf-8').split('|')
-            url = credential[0]
-            token = credential[1]
-            if len(credential) > 2:
-                # IoT Box send token with db_uuid and enterprise_code only since V13
-                db_uuid = credential[2]
-                enterprise_code = credential[3]
-                helpers.add_credential(db_uuid, enterprise_code)
+            helpers.add_server_config(credential)
             try:
-                subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
+                helpers.check_certificate()
                 manager.send_alldevices()
                 image = get_resource_path('hw_drivers', 'static/img', 'True.jpg')
                 helpers.odoo_restart(3)
