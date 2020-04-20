@@ -56,6 +56,7 @@ class MrpProduction(models.Model):
 
     name = fields.Char(
         'Reference', copy=False, readonly=True, default=lambda x: _('New'))
+    backorder_sequence = fields.Integer("Backorder Sequence", default=0, help="Backorder sequence, if equals to 0 means there is not related backorder")
     origin = fields.Char(
         'Source', copy=False,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
@@ -233,6 +234,7 @@ class MrpProduction(models.Model):
 
     mrp_production_child_count = fields.Integer("Number of generated MO", compute='_compute_mrp_production_child_count')
     mrp_production_source_count = fields.Integer("Number of source MO", compute='_compute_mrp_production_source_count')
+    mrp_production_backorder_count = fields.Integer("Count of linked backorder", compute='_compute_mrp_production_backorder')
 
     @api.depends('product_id', 'bom_id', 'company_id')
     def _compute_allowed_product_ids(self):
@@ -250,15 +252,20 @@ class MrpProduction(models.Model):
                     product_domain += [('id', 'in', production.bom_id.product_tmpl_id.product_variant_ids.ids)]
             production.allowed_product_ids = self.env['product.product'].search(product_domain)
 
-    @api.depends('procurement_group_id.stock_move_ids.created_production_id')
+    @api.depends('procurement_group_id.stock_move_ids.created_production_id.procurement_group_id.mrp_production_ids')
     def _compute_mrp_production_child_count(self):
         for production in self:
-            production.mrp_production_child_count = len(production.procurement_group_id.stock_move_ids.created_production_id)
+            production.mrp_production_child_count = len(production.procurement_group_id.stock_move_ids.created_production_id.procurement_group_id.mrp_production_ids)
 
-    @api.depends('move_dest_ids.group_id.mrp_production_id')
+    @api.depends('move_dest_ids.group_id.mrp_production_ids')
     def _compute_mrp_production_source_count(self):
         for production in self:
-            production.mrp_production_source_count = len(production.move_dest_ids.group_id.mrp_production_id)
+            production.mrp_production_source_count = len(production.move_dest_ids.group_id.mrp_production_ids)
+
+    @api.depends('procurement_group_id.mrp_production_ids')
+    def _compute_mrp_production_backorder(self):
+        for production in self:
+            production.mrp_production_backorder_count = len(production.procurement_group_id.mrp_production_ids)
 
     @api.depends('move_raw_ids.date_expected', 'move_finished_ids.date_expected')
     def _compute_dates_planned(self):
@@ -609,6 +616,10 @@ class MrpProduction(models.Model):
         return True
 
     def _get_finished_move_value(self, product_id, product_uom_qty, product_uom, operation_id=False, byproduct_id=False):
+        group_orders = self.procurement_group_id.mrp_production_ids
+        move_dest_ids = self.move_dest_ids
+        if len(group_orders) > 1:
+            move_dest_ids |= group_orders[0].move_finished_ids.filtered(lambda m: m.product_id == self.product_id).move_dest_ids
         date_planned_finished = self.date_planned_start + relativedelta(days=self.product_id.produce_delay)
         date_planned_finished = date_planned_finished + relativedelta(days=self.company_id.manufacturing_lead)
         if date_planned_finished == self.date_planned_start:
@@ -634,7 +645,7 @@ class MrpProduction(models.Model):
             'propagate_date': self.propagate_date,
             'delay_alert': self.delay_alert,
             'propagate_date_minimum_delta': self.propagate_date_minimum_delta,
-            'move_dest_ids': [(4, x.id) for x in self.move_dest_ids],
+            'move_dest_ids': [(4, x.id) for x in move_dest_ids],
         }
 
     def _generate_finished_moves(self):
@@ -777,7 +788,7 @@ class MrpProduction(models.Model):
 
     def action_view_mrp_production_childs(self):
         self.ensure_one()
-        mrp_production_ids = self.procurement_group_id.stock_move_ids.created_production_id.ids
+        mrp_production_ids = self.procurement_group_id.stock_move_ids.created_production_id.procurement_group_id.mrp_production_ids
         action = {
             'res_model': 'mrp.production',
             'type': 'ir.actions.act_window',
@@ -797,7 +808,7 @@ class MrpProduction(models.Model):
 
     def action_view_mrp_production_sources(self):
         self.ensure_one()
-        mrp_production_ids = self.move_dest_ids.group_id.mrp_production_id.ids
+        mrp_production_ids = self.move_dest_ids.group_id.mrp_production_ids.ids
         action = {
             'res_model': 'mrp.production',
             'type': 'ir.actions.act_window',
@@ -814,6 +825,16 @@ class MrpProduction(models.Model):
                 'view_mode': 'tree,form',
             })
         return action
+
+    def action_view_mrp_production_backorders(self):
+        backorder_ids = self.procurement_group_id.mrp_production_ids.ids
+        return {
+            'res_model': 'mrp.production',
+            'type': 'ir.actions.act_window',
+            'name': _("backorder MO's"),
+            'domain': [('id', 'in', backorder_ids)],
+            'view_mode': 'tree,form',
+        }
 
     def action_confirm(self):
         self._check_company()
@@ -1102,15 +1123,27 @@ class MrpProduction(models.Model):
                     moveline.write({'consume_line_ids': [(6, 0, [x for x in consume_move_lines.ids])]})
         return True
 
+    def _open_backorder(self):
+        ctx = self.env.context.copy().update({'default_production_ids': self.ids})
+        action = self.env.ref('mrp.action_mrp_production_backorder').read()[0]
+        action['context'] = ctx
+        return action
+
     def button_mark_done(self):
         self.ensure_one()
         self._check_company()
-        for wo in self.workorder_ids:
-            if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
-                raise UserError(_('Work order %s is still running') % wo.name)
         self._check_lots()
 
-        self.post_inventory()
+        if float_is_zero(self._get_quantity_to_backorder(), precision_digits=self.product_uom_id.rounding):
+            self.post_inventory()
+            for wo in self.workorder_ids:
+                if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
+                    raise UserError(_('Work order %s is still running') % wo.name)
+            return self._button_mark_done()
+
+        return self._open_backorder()
+
+    def _button_mark_done(self):
         # Moves without quantity done are not posted => set them as done instead of canceling. In
         # case the user edits the MO later on and sets some consumed quantity on those, we do not
         # want the move lines to be canceled.
@@ -1118,7 +1151,9 @@ class MrpProduction(models.Model):
             'state': 'done',
             'product_uom_qty': 0.0,
         })
-        return self.write({'date_finished': fields.Datetime.now()})
+        for production in self:
+            production.write({'date_finished': fields.Datetime.now(), 'product_qty': production.qty_produced})
+        return True
 
     def do_unreserve(self):
         for production in self:
@@ -1225,3 +1260,7 @@ class MrpProduction(models.Model):
                         'create': False, 'edit': False},
             'target': 'new',
         }
+
+    def _get_quantity_to_backorder(self):
+        self.ensure_one()
+        return max(self.product_qty - self.qty_produced, 0)
