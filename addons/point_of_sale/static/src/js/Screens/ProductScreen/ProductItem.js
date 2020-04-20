@@ -1,10 +1,10 @@
-odoo.define('point_of_sale.ProductDisplay', function(require) {
+odoo.define('point_of_sale.ProductItem', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
-    class ProductDisplay extends PosComponent {
+    class ProductItem extends PosComponent {
         /**
          * For accessibility, pressing <space> should be like clicking the product.
          * <enter> is not considered because it conflicts with the barcode.
@@ -40,9 +40,9 @@ odoo.define('point_of_sale.ProductDisplay', function(require) {
             }
         }
     }
-    ProductDisplay.template = 'ProductDisplay';
+    ProductItem.template = 'ProductItem';
 
-    Registries.Component.add(ProductDisplay);
+    Registries.Component.add(ProductItem);
 
-    return ProductDisplay;
+    return ProductItem;
 });

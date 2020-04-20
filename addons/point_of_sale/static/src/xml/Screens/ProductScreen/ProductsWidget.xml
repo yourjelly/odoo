@@ -14,7 +14,7 @@
                 <tr class="content-row">
                     <td class="content-cell">
                         <div class="content-container">
-                            <ProductsList products="productsToDisplay" searchWord="searchWord" />
+                            <ProductList products="productsToDisplay" searchWord="searchWord" />
                         </div>
                     </td>
                 </tr>
