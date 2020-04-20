@@ -24,6 +24,8 @@
         'base_vat',
     ],
     "data": [
+        "data/res_partner_operator_einvoice_data.xml",
+        "security/ir.model.access.csv",
         'data/account_account_tag_data.xml',
         'data/account_chart_template_data.xml',
         'data/account.account.template.csv',
@@ -31,7 +33,12 @@
         'data/account_tax_template_data.xml',
         'data/l10n_fi_chart_post_data.xml',
         'data/account_fiscal_position_template_data.xml',
-        'data/account_chart_template_configuration_data.xml'
+        'data/account_chart_template_configuration_data.xml',
+        "views/menuitems.xml",
+        "views/res_company_views.xml",
+        "views/res_config_settings_views.xml",
+        "views/res_partner_operator_einvoice_views.xml",
+        "views/res_partner_views.xml",
     ],
     "active": True,
     "installable": True,
