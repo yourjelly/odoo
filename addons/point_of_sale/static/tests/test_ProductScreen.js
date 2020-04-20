@@ -387,7 +387,7 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
     QUnit.test('ProductList, ProductItem', async function (assert) {
         assert.expect(10);
 
-        // Extension that will be used to patch showScreen and showTempScreen methods
+        // patch imageUrl and price of ProductItem component
         const MockProductItemExt = (X) =>
             class extends X {
                 get imageUrl() {
@@ -435,7 +435,9 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
         );
 
         // Check contents of product item and click
-        const product1el = parent.el.querySelector('article.product[aria-labelledby="article_product_1"]')
+        const product1el = parent.el.querySelector(
+            'article.product[aria-labelledby="article_product_1"]'
+        );
         assert.ok(product1el.querySelector('.product-img img[alt="Water"]'));
         assert.ok(product1el.querySelector('.product-img .price-tag').textContent.includes('$2'));
         await testUtils.dom.click(product1el);
@@ -478,6 +480,125 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
         );
 
         extension.remove();
+
+        parent.unmount();
+        parent.destroy();
+    });
+
+    QUnit.test('Orderline', async function (assert) {
+        assert.expect(10);
+
+        class Parent extends PosComponent {
+            constructor(product) {
+                super();
+                useListener('select-line', this._selectLine);
+                useListener('edit-pack-lot-lines', this._editPackLotLines);
+                this.order.add_product(product);
+            }
+            get order() {
+                return this.env.pos.get_order();
+            }
+            get line() {
+                return this.env.pos.get_order().get_orderlines()[0];
+            }
+            _selectLine() {
+                assert.step('select-line');
+            }
+            _editPackLotLines() {
+                assert.step('edit-pack-lot-lines');
+            }
+            willUnmount() {
+                this.order.remove_orderline(this.line);
+            }
+        }
+        Parent.env = makePosTestEnv();
+        Parent.template = xml/* html */ `
+            <div>
+                <Orderline line="line" />
+            </div>
+        `;
+
+        const [chair1, chair2] = Parent.env.pos.db.search_product_in_category(0, 'Office Chair');
+        // patch chair2 to have tracking
+        chair2.tracking = 'serial';
+
+        // 1. Test orderline without lot icon
+
+        let parent = new Parent(chair1);
+        await parent.mount(testUtils.prepareTarget());
+
+        let line = parent.el.querySelector('li.orderline');
+        assert.ok(line);
+        assert.notOk(line.querySelector('.line-lot-icon'), 'there should be no lot icon');
+        await testUtils.dom.click(line);
+        assert.verifySteps(['select-line']);
+
+        parent.unmount();
+        parent.destroy();
+
+        // 2. Test orderline with lot icon
+        parent = new Parent(chair2);
+        await parent.mount(testUtils.prepareTarget());
+
+        line = parent.el.querySelector('li.orderline');
+        const lotIcon = line.querySelector('.line-lot-icon');
+        assert.ok(line);
+        assert.ok(lotIcon, 'there should be lot icon');
+        await testUtils.dom.click(line);
+        assert.verifySteps(['select-line']);
+        await testUtils.dom.click(lotIcon);
+        assert.verifySteps(['edit-pack-lot-lines']);
+
+        parent.unmount();
+        parent.destroy();
+    });
+
+    QUnit.test('OrderWidget', async function (assert) {
+        assert.expect(8);
+
+        // OrderWidget is dependent on its parent's rerendering
+        class Parent extends PosComponent {
+            mounted() {
+                this.env.pos.on('change:selectedOrder', this.render, this);
+            }
+            willUnmount() {
+                this.env.pos.off('change:selectedOrder', null, this);
+            }
+        }
+        Parent.env = makePosTestEnv();
+        Parent.template = xml/* html */ `
+            <div>
+                <OrderWidget />
+            </div>
+        `;
+
+        const [chair1, chair2] = Parent.env.pos.db.search_product_in_category(0, 'Office Chair');
+
+        let parent = new Parent();
+        await parent.mount(testUtils.prepareTarget());
+
+        // current order is empty
+        assert.notOk(parent.el.querySelector('.summary'));
+        assert.ok(parent.el.querySelector('.order-empty'));
+
+        // add line to the current order
+        const order1 = parent.env.pos.get_order();
+        order1.add_product(chair1);
+        await testUtils.nextTick();
+        assert.ok(parent.el.querySelector('.summary'));
+        assert.notOk(parent.el.querySelector('.order-empty'));
+
+        // selected new order, new order is empty
+        const order2 = parent.env.pos.add_new_order();
+        await testUtils.nextTick();
+        assert.notOk(parent.el.querySelector('.summary'));
+        assert.ok(parent.el.querySelector('.order-empty'));
+
+        // add line to the current order
+        order2.add_product(chair2);
+        await testUtils.nextTick();
+        assert.ok(parent.el.querySelector('.summary'));
+        assert.notOk(parent.el.querySelector('.order-empty'));
 
         parent.unmount();
         parent.destroy();
