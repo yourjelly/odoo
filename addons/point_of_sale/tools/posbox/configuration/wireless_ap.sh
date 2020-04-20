@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 FORCE_HOST_AP="${1}"
-WIRED_IP=$(python3 -c "import netifaces as ni; print(ni.ifaddresses('eth0').get(ni.AF_INET) and ni.ifaddresses('eth0')[ni.AF_INET][0]['addr'] or '')")
-WIFI_NETWORK_FILE="/home/pi/wifi_network.txt"
+WIRED_IP=$(python3 -c "import netifaces as ni; print(ni.ifaddresses('eth0').get(ni.AF_INET) and ni.ifaddresses('eth0')[ni.AF_INET][0]['addr'] or '')")	
+ESSID=$(cat /home/pi/iot_config | jq -r '.iot_box_network.ssid')
 
 
 ifconfig wlan0 down
@@ -15,7 +15,7 @@ sleep 5
 if [ -z "${WIRED_IP}" ] ; then
 	logger -t posbox_wireless_ap "No wired IP"
 
-	if [ -f "${WIFI_NETWORK_FILE}" ] && [ -z "${FORCE_HOST_AP}" ] ; then
+	if [ "${ESSID}" != null ] && [ -z "${FORCE_HOST_AP}" ] ; then
 		logger -t posbox_wireless_ap "Loading persistently saved setting"
 		/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh &
 	else

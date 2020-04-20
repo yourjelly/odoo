@@ -5,36 +5,18 @@
 # to reconnect to a previously chosen network
 function connect () {
 	WPA_PASS_FILE="/tmp/wpa_pass.txt"
-	PERSISTENT_WIFI_NETWORK_FILE="/home/pi/wifi_network.txt"
-	CURRENT_WIFI_NETWORK_FILE="/tmp/current_wifi_network.txt" # used to repair connection when we lose it
+	IOT_CONFIG_FILE="/home/pi/iot_config"
 	LOST_WIFI_FILE="/tmp/lost_wifi.txt"
-	ESSID="${1}"
-	PASSWORD="${2}"
-	PERSIST="${3}"
-	NO_AP="${4}"
+	NO_AP="${1}"
 
 	sleep 3
 
 	sudo pkill -f keep_wifi_alive.sh
 	WIFI_WAS_LOST=$?
 
-	# make network choice persistent
-	if [ -n "${ESSID}" ] ; then
-		if [ -n "${PERSIST}" ] ; then
-			logger -t posbox_connect_to_wifi "Making network selection permanent"
-			sudo mount -o remount,rw /
-			echo "${ESSID}" > ${PERSISTENT_WIFI_NETWORK_FILE}
-			echo "${PASSWORD}" >> ${PERSISTENT_WIFI_NETWORK_FILE}
-			sudo mount -o remount,ro /
-		fi
-	else
-		logger -t posbox_connect_to_wifi "Reading configuration from ${PERSISTENT_WIFI_NETWORK_FILE}"
-		ESSID=$(head -n 1 "${PERSISTENT_WIFI_NETWORK_FILE}" | tr -d '\n')
-		PASSWORD=$(tail -n 1 "${PERSISTENT_WIFI_NETWORK_FILE}" | tr -d '\n')
-	fi
-
-	echo "${ESSID}" > ${CURRENT_WIFI_NETWORK_FILE}
-	echo "${PASSWORD}" >> ${CURRENT_WIFI_NETWORK_FILE}
+	logger -t posbox_connect_to_wifi "Reading configuration from ${IOT_CONFIG_FILE}"
+	ESSID=$(cat ${IOT_CONFIG_FILE} | jq -r '.iot_box_network.ssid')
+	PASSWORD=$(cat ${IOT_CONFIG_FILE} | jq -r '.iot_box_network.password')
 
 	logger -t posbox_connect_to_wifi "Connecting to ${ESSID}"
 	sudo service hostapd stop
@@ -87,4 +69,4 @@ function connect () {
 	fi
 }
 
-connect "${1}" "${2}" "${3}" "${4}" &
+connect "${1}" &

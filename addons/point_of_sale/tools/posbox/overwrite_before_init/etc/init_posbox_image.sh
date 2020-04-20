@@ -36,6 +36,7 @@ PKGS_TO_INSTALL="
     git \
     hostapd \
     iw \
+    jq \
     kpartx \
     libcups2-dev \
     libpq-dev \

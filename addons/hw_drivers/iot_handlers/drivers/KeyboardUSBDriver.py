@@ -190,13 +190,10 @@ class KeyboardUSBDriver(Driver):
                 - variant (str): An optional key to represent the variant of the
                                  selected layout
         """
-        file_path = Path.home() / 'odoo-keyboard-layouts.conf'
-        if file_path.exists():
-            data = json.loads(file_path.read_text())
-        else:
-            data = {}
-        data[self.device_identifier] = layout
-        helpers.write_file('odoo-keyboard-layouts.conf', json.dumps(data))
+        data = helpers.read_iot_config('iot_box_driver').get('keyboard_layouts', {})
+        data.update({ self.device_identifier : layout})
+        iot_box_config = {'iot_box_driver': {'keyboard_layouts': data}}
+        helpers.write_iot_config(iot_box_config)
 
     def save_is_scanner(self, is_scanner):
         """Save the type of device.
@@ -215,12 +212,8 @@ class KeyboardUSBDriver(Driver):
         """Read the layout from the saved filed and set it as current layout.
         If no file or no layout is found we use 'us' by default.
         """
-        file_path = Path.home() / 'odoo-keyboard-layouts.conf'
-        if file_path.exists():
-            data = json.loads(file_path.read_text())
-            layout = data.get(self.device_identifier, {'layout': 'us'})
-        else:
-            layout = {'layout': 'us'}
+        data = helpers.read_iot_config('iot_box_driver').get('keyboard_layouts', {})
+        layout = data.get(self.device_identifier, {'layout': 'us'})
         self._change_keyboard_layout(layout)
 
     def _is_scanner(self):

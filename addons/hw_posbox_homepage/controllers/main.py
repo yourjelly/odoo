@@ -55,8 +55,7 @@ class IoTboxHomepage(web.Home):
         subprocess.check_call(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/upgrade.sh; cleanup'])
 
     def get_six_terminal(self):
-        terminal_id = helpers.read_file_first_line('odoo-six-payment-terminal.conf')
-        return terminal_id or 'Not Configured'
+        return helpers.read_iot_config('iot_box_driver').get('six_terminal_id', 'Not Configured')
 
     def get_homepage_data(self):
         hostname = str(socket.gethostname())
@@ -93,9 +92,9 @@ class IoTboxHomepage(web.Home):
 
     @http.route('/', type='http', auth='none')
     def index(self):
-        wifi = Path.home() / 'wifi_network.txt'
-        remote_server = Path.home() / 'odoo-remote-server.conf'
-        if (wifi.exists() == False or remote_server.exists() == False) and helpers.access_point():
+        wifi = helpers.read_iot_config('iot_box_network').get('ssid', False)
+        remote_server = helpers.read_iot_config('iot_box_config').get('url_odoo_server', False)
+        if ( not wifi or not remote_server ) and helpers.access_point():
             return "<meta http-equiv='refresh' content='0; url=http://" + helpers.get_ip() + ":8069/steps'>"
         else:
             return homepage_template.render(self.get_homepage_data())
@@ -129,20 +128,20 @@ class IoTboxHomepage(web.Home):
         return list_credential_template.render({
             'title': "Odoo's IoT Box - List credential",
             'breadcrumb': 'List credential',
-            'db_uuid': helpers.read_file_first_line('odoo-db-uuid.conf'),
-            'enterprise_code': helpers.read_file_first_line('odoo-enterprise-code.conf'),
+            'db_uuid': helpers.read_iot_config('iot_box_config').get('db_uuid', None),
+            'enterprise_code': helpers.read_iot_config('iot_box_config').get('enterprise_code', None)
         })
 
     @http.route('/save_credential', type='http', auth='none', cors='*', csrf=False)
     def save_credential(self, db_uuid, enterprise_code):
-        helpers.add_credential(db_uuid, enterprise_code)
+        helpers.add_cert_config({'db_uuid': db_uuid, 'enterprise_code': enterprise_code})
         subprocess.check_call(["sudo", "service", "odoo", "restart"])
         return "<meta http-equiv='refresh' content='20; url=http://" + helpers.get_ip() + ":8069'>"
 
     @http.route('/clear_credential', type='http', auth='none', cors='*', csrf=False)
     def clear_credential(self):
-        helpers.unlink_file('odoo-db-uuid.conf')
-        helpers.unlink_file('odoo-enterprise-code.conf')
+        helpers.delete_iot_config('iot_box_config', 'db_uuid')
+        helpers.delete_iot_config('iot_box_config', 'enterprise_code')
         subprocess.check_call(["sudo", "service", "odoo", "restart"])
         return "<meta http-equiv='refresh' content='20; url=http://" + helpers.get_ip() + ":8069'>"
 
@@ -156,13 +155,11 @@ class IoTboxHomepage(web.Home):
         })
 
     @http.route('/wifi_connect', type='http', auth='none', cors='*', csrf=False)
-    def connect_to_wifi(self, essid, password, persistent=False):
-        if persistent:
-                persistent = "1"
-        else:
-                persistent = ""
+    def connect_to_wifi(self, essid, password):
+        credential = {'ssid': essid, 'password': password}
+        helpers.add_wifi_config(credential)
 
-        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_wifi.sh'), essid, password, persistent])
+        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_wifi.sh')])
         server = helpers.get_odoo_server_url()
         res_payload = {
             'message': 'Connecting to ' + essid,
@@ -182,38 +179,26 @@ class IoTboxHomepage(web.Home):
 
     @http.route('/wifi_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_wifi_configuration(self):
-        helpers.unlink_file('wifi_network.txt')
+        helpers.delete_iot_config('iot_box_network', 'ssid')
+        helpers.delete_iot_config('iot_box_network', 'password')
         return "<meta http-equiv='refresh' content='0; url=http://" + helpers.get_ip() + ":8069'>"
 
     @http.route('/server_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_server_configuration(self):
-        helpers.unlink_file('odoo-remote-server.conf')
+        helpers.delete_iot_config('iot_box_config', 'url_odoo_server')
         return "<meta http-equiv='refresh' content='0; url=http://" + helpers.get_ip() + ":8069'>"
 
     @http.route('/handlers_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_handlers_list(self):
-        for directory in ['drivers', 'interfaces']:
-            for file in os.listdir(get_resource_path('hw_drivers', 'iot_handlers', directory)):
-                if file != '__pycache__':
-                    helpers.unlink_file(get_resource_path('hw_drivers', 'iot_handlers', directory, file))
+        helpers.delete_iot_handlers()
         return "<meta http-equiv='refresh' content='0; url=http://" + helpers.get_ip() + ":8069/list_handlers'>"
 
     @http.route('/server_connect', type='http', auth='none', cors='*', csrf=False)
     def connect_to_server(self, token, iotname):
         if token:
             credential = token.split('|')
-            url = credential[0]
-            token = credential[1]
-            if len(credential) > 2:
-                # IoT Box send token with db_uuid and enterprise_code only since V13
-                db_uuid = credential[2]
-                enterprise_code = credential[3]
-                helpers.add_credential(db_uuid, enterprise_code)
-        else:
-            url = helpers.get_odoo_server_url()
-            token = helpers.get_token()
-        reboot = 'reboot'
-        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, iotname, token, reboot])
+            helpers.add_server_config(credential)
+        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/change_hostname.sh'), iotname])
         return 'http://' + helpers.get_ip() + ':8069'
 
     @http.route('/steps', type='http', auth='none', cors='*', csrf=False)
@@ -228,14 +213,18 @@ class IoTboxHomepage(web.Home):
         })
 
     @http.route('/step_configure', type='http', auth='none', cors='*', csrf=False)
-    def step_by_step_configure(self, token, iotname, essid, password, persistent=False):
+    def step_by_step_configure(self, token, iotname, essid, password):
         if token:
-            url = token.split('|')[0]
-            token = token.split('|')[1]
+            credential = token.split('|')
+            helpers.add_server_config(credential)
         else:
-            url = ''
-        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server_wifi.sh'), url, iotname, token, essid, password, persistent])
-        return url
+            credential = ['']
+
+        helpers.add_wifi_config({'ssid': essid, 'password': password})
+        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_wifi.sh')])
+        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/change_hostname.sh'), iotname])
+        helpers.odoo_restart(3)
+        return credential[0]
 
     # Set server address
     @http.route('/server', type='http', auth='none', website=True)
@@ -280,13 +269,17 @@ class IoTboxHomepage(web.Home):
 
     @http.route('/six_payment_terminal_add', type='http', auth='none', cors='*', csrf=False)
     def add_six_payment_terminal(self, terminal_id):
-        helpers.write_file('odoo-six-payment-terminal.conf', terminal_id)
+        iot_box_config = {'iot_box_driver': {
+            'six_terminal_id': terminal_id
+            }
+        }
+        helpers.write_iot_config(iot_box_config)
         subprocess.check_call(["sudo", "service", "odoo", "restart"])
         return 'http://' + helpers.get_ip() + ':8069'
 
     @http.route('/six_payment_terminal_clear', type='http', auth='none', cors='*', csrf=False)
     def clear_six_payment_terminal(self):
-        helpers.unlink_file('odoo-six-payment-terminal.conf')
+        helpers.delete_iot_config('iot_box_driver', 'six_terminal_id')
         subprocess.check_call(["sudo", "service", "odoo", "restart"])
         return "<meta http-equiv='refresh' content='0; url=http://" + helpers.get_ip() + ":8069'>"
 
