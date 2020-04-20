@@ -383,4 +383,103 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
         parent.unmount();
         parent.destroy();
     });
+
+    QUnit.test('ProductList, ProductItem', async function (assert) {
+        assert.expect(10);
+
+        // Extension that will be used to patch showScreen and showTempScreen methods
+        const MockProductItemExt = (X) =>
+            class extends X {
+                get imageUrl() {
+                    return 'data:,';
+                }
+                get price() {
+                    return this.props.product.price;
+                }
+            };
+
+        const extension = Registries.Component.extend('ProductItem', MockProductItemExt);
+        extension.compile();
+
+        const dummyProducts = [
+            { id: 0, display_name: 'Burger', price: '$10' },
+            { id: 1, display_name: 'Water', price: '$2' },
+            { id: 2, display_name: 'Chair', price: '$25' },
+        ];
+
+        class Parent extends PosComponent {
+            constructor() {
+                super(...arguments);
+                this.state = useState({ searchWord: '', products: dummyProducts });
+                useListener('click-product', this._clickProduct);
+            }
+            _clickProduct({ detail: product }) {
+                assert.step(product.display_name);
+            }
+        }
+        Parent.env = makePosTestEnv();
+        Parent.template = xml/* html */ `
+            <div>
+                <ProductList products="state.products" searchWord="state.searchWord" />
+            </div>
+        `;
+
+        const parent = new Parent();
+        await parent.mount(testUtils.prepareTarget());
+
+        // Check if there are 3 products listed
+        assert.strictEqual(
+            parent.el.querySelectorAll('article.product').length,
+            3,
+            'There should be 3 products listed'
+        );
+
+        // Check contents of product item and click
+        const product1el = parent.el.querySelector('article.product[aria-labelledby="article_product_1"]')
+        assert.ok(product1el.querySelector('.product-img img[alt="Water"]'));
+        assert.ok(product1el.querySelector('.product-img .price-tag').textContent.includes('$2'));
+        await testUtils.dom.click(product1el);
+        await testUtils.nextTick();
+        assert.verifySteps(['Water']);
+
+        // Remove one product, check if only two is listed
+        parent.state.products.splice(0, 1);
+        await testUtils.nextTick();
+        assert.strictEqual(
+            parent.el.querySelectorAll('article.product').length,
+            2,
+            'There should be 2 products listed after removing the first item'
+        );
+
+        // Remove all products, check if empty message is There are no products in this category
+        parent.state.products.splice(0, parent.state.products.length);
+        await testUtils.nextTick();
+        assert.strictEqual(
+            parent.el.querySelectorAll('article.product').length,
+            0,
+            'There should be 0 products listed after removing everything'
+        );
+        assert.ok(
+            parent.el
+                .querySelector('.product-list-empty p')
+                .textContent.includes('There are no products in this category.')
+        );
+
+        // change the searchWord to 'something', check if empty message is No results found
+        parent.state.searchWord = 'something';
+        await testUtils.nextTick();
+        assert.ok(
+            parent.el
+                .querySelector('.product-list-empty p')
+                .textContent.includes('No results found for')
+        );
+        assert.ok(
+            parent.el.querySelector('.product-list-empty p b').textContent.includes('something')
+        );
+
+        extension.remove();
+
+        parent.unmount();
+        parent.destroy();
+    });
 });
