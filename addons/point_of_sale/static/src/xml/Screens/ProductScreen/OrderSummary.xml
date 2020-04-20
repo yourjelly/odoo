@@ -7,12 +7,12 @@
                 <div class="entry total">
                     <span class="badge">Total: </span>
                     <span class="value">
-                        <t t-esc="total" />
+                        <t t-esc="props.total" />
                     </span>
                     <div class="subentry">
                         Taxes:
                         <span class="value">
-                            <t t-esc="tax" />
+                            <t t-esc="props.tax" />
                         </span>
                     </div>
                 </div>

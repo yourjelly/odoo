@@ -1,13 +1,16 @@
 odoo.define('point_of_sale.OrderWidget', function(require) {
     'use strict';
 
-    const { useRef, onPatched } = owl.hooks;
+    const { useState, useRef, onPatched } = owl.hooks;
+    const { useListener } = require('web.custom_hooks');
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
     class OrderWidget extends PosComponent {
         constructor() {
             super(...arguments);
+            useListener('select-line', this._selectLine);
+            useListener('edit-pack-lot-lines', this._editPackLotLines);
             this.scrollableRef = useRef('scrollable');
             this.scrollToBottom = false;
             onPatched(() => {
@@ -19,6 +22,8 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
                     this.scrollToBottom = false;
                 }
             });
+            this.state = useState({ total: 0, tax: 0 });
+            this._updateSummary();
         }
         get order() {
             return this.env.pos.get_order();
@@ -32,7 +37,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
         willUnmount() {
             this._stopListeners(this._prevOrder);
         }
-        selectLine(event) {
+        _selectLine(event) {
             this.order.select_orderline(event.detail.orderline);
         }
         // TODO jcb: Might be better to lift this to ProductScreen
@@ -42,7 +47,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
         // to an orderline that has product tracked by lot. Lot tracking (based
         // on the current implementation) requires that 1 item per orderline is
         // allowed.
-        async editPackLotLines(event) {
+        async _editPackLotLines(event) {
             const orderline = event.detail.orderline;
             const isAllowOnlyOneLot = orderline.product.isAllowOnlyOneLot();
             const packLotLinesToEdit = orderline.getPackLotLinesToEdit(isAllowOnlyOneLot);
@@ -79,11 +84,12 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
                     () => this.trigger('new-orderline-selected'),
                     this
                 );
-                order.orderlines.on('change', this.render, this);
+                order.orderlines.on('change', this._updateSummary, this);
                 order.orderlines.on(
                     'add remove',
                     async () => {
                         this.scrollToBottom = true;
+                        this._updateSummary();
                         await this.render();
                     },
                     this
@@ -103,7 +109,14 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
         _onChangeSelectedOrder(pos, newSelectedOrder) {
             this._stopListeners(this._prevOrder);
             this._startListeners(newSelectedOrder);
+            this._updateSummary();
             this.trigger('new-orderline-selected');
+        }
+        _updateSummary() {
+            const total = this.order ? this.order.get_total_with_tax() : 0;
+            const tax = this.order ? total - this.order.get_total_without_tax() : 0;
+            this.state.total = this.env.pos.format_currency(total);
+            this.state.tax = this.env.pos.format_currency(tax);
         }
     }
     OrderWidget.template = 'OrderWidget';

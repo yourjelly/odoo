@@ -15,11 +15,10 @@
                     <t t-else="">
                         <ul class="orderlines">
                             <t t-foreach="orderlinesArray" t-as="orderline" t-key="orderline.id">
-                                <Orderline line="orderline" t-on-select-line="selectLine"
-                                           t-on-edit-pack-lot-lines="editPackLotLines" />
+                                <Orderline line="orderline" />
                             </t>
                         </ul>
-                        <OrderSummary order="order" />
+                        <OrderSummary total="state.total" tax="state.tax" />
                     </t>
                 </div>
             </div>
