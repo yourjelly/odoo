@@ -85,8 +85,22 @@ class StatusController(http.Controller):
                 # IoT Box send token with db_uuid and enterprise_code only since V13
                 db_uuid = credential[2]
                 enterprise_code = credential[3]
-                helpers.add_credential(db_uuid, enterprise_code)
+                
+                iot_box_config = {'iot_box_config': {
+                    'db_uuid': db_uuid,
+                    'enterprise_code': enterprise_code,
+                    }
+                }
+                helpers.write_iot_config(iot_box_config)
             try:
+
+                iot_box_config = {'iot_box_config': {
+                    'url_odoo_server': url,
+                    'token_odoo_server': token,
+                    }
+                }
+                helpers.write_iot_config(iot_box_config)
+
                 subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
                 helpers.check_certificate()
                 m.send_alldevices()
@@ -416,7 +430,7 @@ class Manager(Thread):
         """
         Thread that will check connected/disconnected device, load drivers if needed and contact the odoo server with the updates
         """
-        helpers.check_git_branch()
+        #helpers.check_git_branch()
         helpers.check_certificate()
         updated_devices = {}
         self.send_alldevices()

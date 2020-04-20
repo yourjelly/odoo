@@ -25,10 +25,6 @@ _logger = logging.getLogger(__name__)
 def access_point():
     return get_ip() == '10.11.12.1'
 
-def add_credential(db_uuid, enterprise_code):
-    write_file('odoo-db-uuid.conf', db_uuid)
-    write_file('odoo-enterprise-code.conf', enterprise_code)
-
 def check_certificate():
     """
     Check if the current certificate is up to date or not authenticated
@@ -224,11 +220,38 @@ def read_file_first_line(filename):
             return f.readline().strip('\n')
     return ''
 
+def read_iot_config(key=False):
+    path = Path.home() / 'iot_config'
+    if path.exists():
+        with path.open('r') as iot_config_file:
+            iot_config_text = iot_config_file.read()
+            if iot_config_text:
+                iot_config = json.loads(iot_config_text)
+                return iot_config.get(key, iot_config)
+    return False
+
 def unlink_file(filename):
     subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/"])
     path = Path.home() / filename
     if path.exists():
         path.unlink()
+    subprocess.check_call(["sudo", "mount", "-o", "remount,ro", "/"])
+    subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/root_bypass_ramdisks/etc/cups"])
+
+def write_iot_config(new_config):
+    subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/"])
+    path = Path.home() / 'iot_config'
+    iot_config = read_iot_config()
+    if iot_config:
+        for iot_config_key in iot_config.keys():
+            for new_config_key in new_config.keys():
+                if iot_config_key == new_config_key:
+                    ic = iot_config.get(iot_config_key)
+                    ic.update(new_config.get(new_config_key))
+    else:
+        iot_config = new_config
+    with path.open('w') as iot_config_file:
+        json.dump(iot_config, iot_config_file)
     subprocess.check_call(["sudo", "mount", "-o", "remount,ro", "/"])
     subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/root_bypass_ramdisks/etc/cups"])
 
