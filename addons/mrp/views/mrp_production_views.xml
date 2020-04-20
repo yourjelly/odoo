@@ -48,6 +48,7 @@
                 <header>
                     <field name="bom_has_operations" invisible="1"/>
                     <field name="confirm_cancel" invisible="1"/>
+                    <button name="button_mark_done" attrs="{'invisible': [('state', '!=', 'progress')]}" string="Backorder" type="object" class="oe_highlight"/>
                     <button name="button_mark_done" attrs="{'invisible': [('state', '!=', 'to_close')]}" string="Mark as Done" type="object" class="oe_highlight"/>
                     <button name="action_confirm" attrs="{'invisible': ['|', ('state', '!=', 'draft'), ('is_locked', '=', False)]}" string="Mark as Todo" type="object" class="oe_highlight"/>
                     <button name="action_assign" attrs="{'invisible': ['|', '|', ('is_locked', '=', False), ('state', 'in', ('draft', 'done', 'cancel')), ('reserve_visible', '=', False)]}" string="Check availability" type="object" class="oe_highlight"/>
@@ -103,6 +104,12 @@
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value"><field name="mrp_production_source_count"/></span>
                                 <span class="o_stat_text">Source MO's</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" name="action_view_mrp_production_backorders" type="object" icon="fa-wrench" attrs="{'invisible': [('mrp_production_backorder_count', '&lt;', 2)]}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="mrp_production_backorder_count"/></span>
+                                <span class="o_stat_text">Backorder MO's</span>
                             </div>
                         </button>
                         <field name="workorder_ids" invisible="1"/>
