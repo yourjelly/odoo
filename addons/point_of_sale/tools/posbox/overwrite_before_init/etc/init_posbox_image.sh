@@ -46,6 +46,7 @@ PKGS_TO_INSTALL="
     hostapd \
     git \
     rsync \
+    jq \
     kpartx \
     swig \
     console-data \
