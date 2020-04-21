@@ -210,7 +210,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 last_orderline.set_discount(code.value);
             }
         }
-        // TODO jcb: The following two methods should be in PosScreenComponent?
+        // IMPROVEMENT: The following two methods should be in PosScreenComponent?
         // Why? Because once we start declaring barcode actions in different
         // screens, these methods will also be declared over and over.
         _barcodeErrorAction(code) {

@@ -600,6 +600,9 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
         assert.ok(parent.el.querySelector('.summary'));
         assert.notOk(parent.el.querySelector('.order-empty'));
 
+        parent.env.pos.delete_current_order();
+        parent.env.pos.delete_current_order();
+
         parent.unmount();
         parent.destroy();
     });

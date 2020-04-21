@@ -2845,7 +2845,7 @@ exports.Order = Backbone.Model.extend({
         };
         this.paymentlines.add(newPaymentline);
         this.select_paymentline(newPaymentline);
-
+        return newPaymentline;
     },
     get_paymentlines: function(){
         return this.paymentlines.models;
