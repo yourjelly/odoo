@@ -5,6 +5,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
     const Registries = require('point_of_sale.Registries');
+    const { onChangeOrder } = require('point_of_sale.custom_hooks');
 
     class ProductScreen extends PosComponent {
         /**
@@ -17,6 +18,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             useListener('new-orderline-selected', this._newOrderlineSelected);
             useListener('set-numpad-mode', this._setNumpadMode);
             useListener('click-product', this._clickProduct);
+            onChangeOrder(null, (newOrder) => newOrder && this.render());
             NumberBuffer.use({
                 nonKeyboardInputEvent: 'numpad-click-input',
                 triggerAtInput: 'update-selected-orderline',
@@ -25,8 +27,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             this.numpadMode = 'quantity';
         }
         mounted() {
-            this.env.pos.on('change:selectedOrder', this._onChangeSelectedOrder, this);
-
             this.env.pos.barcode_reader.set_action_callback({
                 product: this._barcodeProductAction.bind(this),
                 weight: this._barcodeProductAction.bind(this),
@@ -37,7 +37,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             });
         }
         willUnmount() {
-            this.env.pos.off('change:selectedOrder', null, this);
             if (this.env.pos.barcode_reader) {
                 this.env.pos.barcode_reader.reset_action_callbacks();
             }
@@ -221,11 +220,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 return code.code.substring(0, 29) + '...';
             } else {
                 return code.code;
-            }
-        }
-        async _onChangeSelectedOrder(pos, newSelectedOrder) {
-            if (newSelectedOrder) {
-                await this.render();
             }
         }
         /**

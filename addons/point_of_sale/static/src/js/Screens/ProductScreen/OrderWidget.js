@@ -3,6 +3,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
 
     const { useState, useRef, onPatched } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
+    const { onChangeOrder } = require('point_of_sale.custom_hooks');
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
@@ -11,6 +12,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
             super(...arguments);
             useListener('select-line', this._selectLine);
             useListener('edit-pack-lot-lines', this._editPackLotLines);
+            onChangeOrder(this._onPrevOrder, this._onNewOrder);
             this.scrollableRef = useRef('scrollable');
             this.scrollToBottom = false;
             onPatched(() => {
@@ -30,12 +32,6 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
         }
         get orderlinesArray() {
             return this.order ? this.order.get_orderlines() : [];
-        }
-        mounted() {
-            this._startListeners(this.order);
-        }
-        willUnmount() {
-            this._stopListeners(this._prevOrder);
         }
         _selectLine(event) {
             this.order.select_orderline(event.detail.orderline);
@@ -69,15 +65,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
             }
             this.order.select_orderline(event.detail.orderline);
         }
-        _startListeners(order) {
-            // set _prevOrder so that when order is changed,
-            // we can stop the listeners on it.
-            this._prevOrder = order;
-            this.env.pos.on(
-                'change:selectedOrder',
-                this._onChangeSelectedOrder,
-                this
-            );
+        _onNewOrder(order) {
             if (order) {
                 order.orderlines.on(
                     'new-orderline-selected',
@@ -96,21 +84,16 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
                 );
                 order.on('change', this.render, this);
             }
+            this._updateSummary();
+            this.trigger('new-orderline-selected');
         }
-        _stopListeners(order) {
-            this.env.pos.off('change:selectedOrder', null, this);
+        _onPrevOrder(order) {
             if (order) {
                 order.orderlines.off('new-orderline-selected', null, this);
                 order.orderlines.off('change', null, this);
                 order.orderlines.off('add remove', null, this);
                 order.off('change', null, this);
             }
-        }
-        _onChangeSelectedOrder(pos, newSelectedOrder) {
-            this._stopListeners(this._prevOrder);
-            this._startListeners(newSelectedOrder);
-            this._updateSummary();
-            this.trigger('new-orderline-selected');
         }
         _updateSummary() {
             const total = this.order ? this.order.get_total_with_tax() : 0;

@@ -78,25 +78,21 @@ odoo.define('point_of_sale.custom_hooks', function (require) {
      * 2. listen to order changes and perform the following sequence:
      *    - call prevOrderCB(prevOrder)
      *    - call newOrderCB(newOrder)
-     *    - call postCB()
      * 3. call prevOrderCB on willUnmount
      *
      * @param {Function} prevOrderCB apply this callback on the previous order
      * @param {Function} newOrderCB apply this callback on the new order
-     * @param {Function} [postCB=null] optional callback after calling prevOrderCB and newOrderCB
      */
-    function onChangeOrder({ prevOrderCB, newOrderCB, postCB }) {
+    function onChangeOrder(prevOrderCB, newOrderCB) {
         const current = Component.current;
         prevOrderCB = prevOrderCB ? prevOrderCB.bind(current) : () => {};
         newOrderCB = newOrderCB ? newOrderCB.bind(current) : () => {};
-        postCB = postCB ? postCB.bind(current) : () => {};
         onMounted(() => {
             current.env.pos.on(
                 'change:selectedOrder',
                 async (pos, newOrder) => {
                     await prevOrderCB(pos.previous('selectedOrder'));
                     await newOrderCB(newOrder);
-                    await postCB();
                 },
                 current
             );

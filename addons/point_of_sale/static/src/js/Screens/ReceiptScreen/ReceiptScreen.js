@@ -4,7 +4,7 @@ odoo.define('point_of_sale.ReceiptScreen', function(require) {
     const core = require('web.core');
     const { useRef, useState } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
-    const { useErrorHandlers } = require('point_of_sale.custom_hooks');
+    const { useErrorHandlers, onChangeOrder } = require('point_of_sale.custom_hooks');
     const Registries = require('point_of_sale.Registries');
 
     const _t = core._t;
@@ -17,28 +17,17 @@ odoo.define('point_of_sale.ReceiptScreen', function(require) {
         constructor() {
             super(...arguments);
             useErrorHandlers();
+            onChangeOrder(null, (newOrder) => newOrder && this.render());
             this.state = useState({ printInvoiceIsShown: this.props.printInvoiceIsShown });
             this.orderReceipt = useRef('order-receipt');
         }
         mounted() {
-            this.env.pos.on(
-                'change:selectedOrder',
-                (pos, newSelectedOrder) => {
-                    if (newSelectedOrder) {
-                        this.render();
-                    }
-                },
-                this
-            );
             // Here, we send a task to the event loop that handles
             // the printing of the receipt when the component is mounted.
             // We are doing this because we want the receipt screen to be
             // displayed regardless of what happen to the handleAutoPrint
             // call.
             setTimeout(async () => await this.handleAutoPrint(), 0);
-        }
-        willUnmount() {
-            this.env.pos.off('change:selectedOrder', null, this);
         }
         get change() {
             return this.env.pos.format_currency(this.currentOrder.get_change());

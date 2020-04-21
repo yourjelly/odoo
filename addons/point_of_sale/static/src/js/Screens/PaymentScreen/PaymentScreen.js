@@ -23,11 +23,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             useListener('send-payment-cancel', this._sendPaymentCancel);
             useListener('send-payment-reverse', this._sendPaymentReverse);
             useListener('send-force-done', this._sendForceDone);
-            onChangeOrder({
-                prevOrderCB: this._stopListeners,
-                newOrderCB: this._startListeners,
-                postCB: this.render,
-            });
+            onChangeOrder(this._onPrevOrder, this._onNewOrder);
             useErrorHandlers();
             NumberBuffer.use({
                 // The numberBuffer listens to this event to update its state.
@@ -394,17 +390,18 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
         async _sendForceDone({ detail: line }) {
             line.set_payment_status('done');
         }
-        _stopListeners(prevOrder) {
+        _onPrevOrder(prevOrder) {
             prevOrder.off('change', null, this);
             prevOrder.paymentlines.off('change', null, this);
             if (prevOrder) {
                 prevOrder.stop_electronic_payment();
             }
         }
-        _startListeners(newOrder) {
+        async _onNewOrder(newOrder) {
             newOrder.on('change', this.render, this);
             newOrder.paymentlines.on('change', this.render, this);
             NumberBuffer.reset();
+            await this.render();
         }
     }
     PaymentScreen.template = 'PaymentScreen';
