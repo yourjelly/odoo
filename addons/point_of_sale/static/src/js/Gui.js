@@ -27,7 +27,7 @@ odoo.define('point_of_sale.Gui', function(require) {
      */
     const configureGui = ({ component }) => {
         config.component = component;
-        config.availableMethods = new Set(['showPopup', 'showTempScreen']);
+        config.availableMethods = new Set(['showPopup', 'showTempScreen', 'playSound']);
     };
 
     /**

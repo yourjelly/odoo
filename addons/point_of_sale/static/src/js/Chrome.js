@@ -31,6 +31,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('close-temp-screen', this.__closeTempScreen);
             useListener('close-pos', this._closePos);
             useListener('loading-skip-callback', () => this._loadingSkipCallback());
+            useListener('play-sound', this._onPlaySound);
             NumberBuffer.activate();
 
             this.state = useState({
@@ -44,6 +45,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 // IMPROVEMENT: Perhaps we put this in a global context
                 // such as the pos in env.
                 selectedCategoryId: { value: 0 },
+                sound: { src: null },
             });
 
             this.loading = useState({
@@ -274,6 +276,15 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
         _toggleDebugWidget() {
             this.state.debugWidgetIsShown = !this.state.debugWidgetIsShown;
+        }
+        _onPlaySound({ detail: name }) {
+            let src;
+            if (name === 'error') {
+                src = "/point_of_sale/static/src/sounds/error.wav";
+            } else if (name === 'bell') {
+                src = "/point_of_sale/static/src/sounds/bell.wav";
+            }
+            this.state.sound.src = src;
         }
         onPosError(event) {
             console.warn(event.detail.error);

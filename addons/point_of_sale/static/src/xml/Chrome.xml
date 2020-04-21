@@ -58,6 +58,8 @@
                 <t t-component="popup.component" t-props="popupProps"
                    t-key="popup.name" />
             </div>
+
+            <NotificationSound t-if="state.sound.src" sound="state.sound" />
         </div>
     </t>
 

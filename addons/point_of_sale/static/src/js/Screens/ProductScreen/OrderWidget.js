@@ -36,7 +36,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
         _selectLine(event) {
             this.order.select_orderline(event.detail.orderline);
         }
-        // TODO jcb: Might be better to lift this to ProductScreen
+        // IMPROVEMENT: Might be better to lift this to ProductScreen
         // because there is similar operation when clicking a product.
         //
         // Furthermore, what if a number different from 1 (or -1) is specified

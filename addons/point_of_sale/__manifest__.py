@@ -85,7 +85,7 @@
         'static/src/xml/ChromeWidgets/SaleDetailsButton.xml',
         'static/src/xml/SaleDetailsReport.xml',
         'static/src/xml/Misc/Draggable.xml',
-        'static/src/xml/Misc/DraggableHandle.xml',
+        'static/src/xml/Misc/NotificationSound.xml',
         'static/src/xml/ChromeWidgets/DebugWidget.xml',
         'static/src/xml/Popups/ErrorPopup.xml',
         'static/src/xml/Popups/ErrorBarcodePopup.xml',

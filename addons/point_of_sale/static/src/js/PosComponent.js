@@ -37,6 +37,12 @@ odoo.define('point_of_sale.PosComponent', function(require) {
         showScreen(name, props) {
             this.trigger('show-main-screen', { name, props });
         }
+        /**
+         * @param {String} name 'bell' | 'error'
+         */
+        playSound(name) {
+            this.trigger('play-sound', name);
+        }
     }
 
     return PosComponent;

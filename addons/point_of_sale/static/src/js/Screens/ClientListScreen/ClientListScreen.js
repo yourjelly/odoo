@@ -136,7 +136,6 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
         }
         deactivateEditMode() {
             this.state.isEditMode = false;
-            // TODO jcb: set default values here?
             this.state.editModeProps = {
                 partner: {
                     country_id: this.env.pos.company.country_id,

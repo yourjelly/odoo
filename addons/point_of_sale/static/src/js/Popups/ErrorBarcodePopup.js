@@ -1,11 +1,11 @@
 odoo.define('point_of_sale.ErrorBarcodePopup', function(require) {
     'use strict';
 
-    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
+    const ErrorPopup = require('point_of_sale.ErrorPopup');
     const Registries = require('point_of_sale.Registries');
 
     // formerly ErrorBarcodePopupWidget
-    class ErrorBarcodePopup extends AbstractAwaitablePopup {
+    class ErrorBarcodePopup extends ErrorPopup {
         get translatedMessage() {
             return this.env._t(this.props.message);
         }

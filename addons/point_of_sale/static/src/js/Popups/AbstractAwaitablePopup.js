@@ -1,21 +1,41 @@
-odoo.define('point_of_sale.AbstractAwaitablePopup', function(require) {
+odoo.define('point_of_sale.AbstractAwaitablePopup', function (require) {
     'use strict';
-
-    /**
-     * TODO jcb: document this
-     * See `showPopup` in `point_of_sale.PosComponent` for further information.
-     */
 
     const { useExternalListener } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
 
+    /**
+     * Implement this abstract class by extending it like so:
+     * ```js
+     * class ConcretePopup extends AbstractAwaitablePopup {
+     *   async getPayload() {
+     *     return 'result';
+     *   }
+     * }
+     * ConcretePopup.template = owl.tags.xml`
+     *   <div>
+     *     <button t-on-click="confirm">Okay</button>
+     *     <button t-on-click="cancel">Cancel</button>
+     *   </div>
+     * `
+     * ```
+     *
+     * The concrete popup can now be instantiated and be awaited for
+     * the user's response like so:
+     * ```js
+     * const { confirmed, payload } = await this.showPopup('ConcretePopup');
+     * // based on the implementation above,
+     * // if confirmed, payload = 'result'
+     * //    otherwise, payload = null
+     * ```
+     */
     class AbstractAwaitablePopup extends PosComponent {
         constructor() {
             super(...arguments);
             useExternalListener(window, 'keyup', this._cancelAtEscape);
         }
-        confirm() {
-            this.props.resolve({ confirmed: true, payload: this.getPayload() });
+        async confirm() {
+            this.props.resolve({ confirmed: true, payload: await this.getPayload() });
             this.trigger('close-popup');
         }
         cancel() {
@@ -28,15 +48,10 @@ odoo.define('point_of_sale.AbstractAwaitablePopup', function(require) {
             }
         }
         /**
-        * TODO jcb: Establish in this docs that it is very important to override
-        * this in the concrete implementation.
-        *
-        * This is the function that provides value to the `payload`
-        * field of the result of showing this popup. It can be anything.
-        * You can be creative here. Perhaps you want to send a function
-        * that returns a value based on the state of this popup component.
-        */
-        getPayload() {
+         * Override this in the concrete popup implementation to set the
+         * payload when the popup is confirmed.
+         */
+        async getPayload() {
             return null;
         }
     }

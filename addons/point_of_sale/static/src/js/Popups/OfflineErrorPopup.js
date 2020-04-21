@@ -1,14 +1,14 @@
 odoo.define('point_of_sale.OfflineErrorPopup', function(require) {
     'use strict';
 
-    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
+    const ErrorPopup = require('point_of_sale.ErrorPopup');
     const Registries = require('point_of_sale.Registries');
 
     /**
      * This is a special kind of error popup as it introduces
      * an option to not show it again.
      */
-    class OfflineErrorPopup extends AbstractAwaitablePopup {
+    class OfflineErrorPopup extends ErrorPopup {
         dontShowAgain() {
             this.constructor.dontShow = true;
             this.cancel();

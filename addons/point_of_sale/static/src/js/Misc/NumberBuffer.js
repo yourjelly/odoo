@@ -7,6 +7,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
     const { parse } = require('web.field_utils');
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
     const { _t } = require('web.core');
+    const { Gui } = require('point_of_sale.Gui');
 
     const INPUT_KEYS = new Set(
         ['Delete', 'Backspace', '+1', '+2', '+5', '+10', '+20', '+50'].concat('0123456789+-.,'.split(''))
@@ -251,6 +252,8 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
             } else if (!isNaN(parseInt(input, 10))) {
                 if (isFirstInput) {
                     this.state.buffer = '' + input;
+                } else if (this.state.buffer.length > 12) {
+                    Gui.playSound('bell');
                 } else {
                     this.state.buffer += input;
                 }
