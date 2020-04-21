@@ -10,6 +10,7 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
     const OrderReceipt = require('point_of_sale.OrderReceipt');
     const { Printer } = require('point_of_sale.Printer');
     const Registries = require('point_of_sale.Registries');
+    const { onChangeOrder } = require('point_of_sale.custom_hooks');
 
     class PaymentScreen extends PosComponent {
         constructor() {
@@ -22,6 +23,11 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
             useListener('send-payment-cancel', this._sendPaymentCancel);
             useListener('send-payment-reverse', this._sendPaymentReverse);
             useListener('send-force-done', this._sendForceDone);
+            onChangeOrder({
+                prevOrderCB: this._stopListeners,
+                newOrderCB: this._startListeners,
+                postCB: this.render,
+            });
             useErrorHandlers();
             NumberBuffer.use({
                 // The numberBuffer listens to this event to update its state.
@@ -32,37 +38,6 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
                 triggerAtInput: 'update-selected-paymentline',
             });
             this.payment_interface = null;
-        }
-        mounted() {
-            this.env.pos.on(
-                'change:selectedOrder',
-                () => {
-                    this.render();
-                },
-                this
-            );
-            this.currentOrder.on(
-                'change',
-                () => {
-                    this.render();
-                },
-                this
-            );
-            this.currentOrder.paymentlines.on(
-                'change',
-                () => {
-                    this.render();
-                },
-                this
-            );
-        }
-        willUnmount() {
-            this.env.pos.off('change:selectedOrder', null, this);
-            this.currentOrder.off('change', null, this);
-            this.currentOrder.paymentlines.off('change', null, this);
-            if (this.currentOrder) {
-                this.currentOrder.stop_electronic_payment();
-            }
         }
         get currentOrder() {
             return this.env.pos.get_order();
@@ -418,6 +393,18 @@ odoo.define('point_of_sale.PaymentScreen', function (require) {
         }
         async _sendForceDone({ detail: line }) {
             line.set_payment_status('done');
+        }
+        _stopListeners(prevOrder) {
+            prevOrder.off('change', null, this);
+            prevOrder.paymentlines.off('change', null, this);
+            if (prevOrder) {
+                prevOrder.stop_electronic_payment();
+            }
+        }
+        _startListeners(newOrder) {
+            newOrder.on('change', this.render, this);
+            newOrder.paymentlines.on('change', this.render, this);
+            NumberBuffer.reset();
         }
     }
     PaymentScreen.template = 'PaymentScreen';
