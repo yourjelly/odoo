@@ -75,10 +75,9 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
                 order.orderlines.on('change', this._updateSummary, this);
                 order.orderlines.on(
                     'add remove',
-                    async () => {
+                    () => {
                         this.scrollToBottom = true;
                         this._updateSummary();
-                        await this.render();
                     },
                     this
                 );
@@ -100,6 +99,7 @@ odoo.define('point_of_sale.OrderWidget', function(require) {
             const tax = this.order ? total - this.order.get_total_without_tax() : 0;
             this.state.total = this.env.pos.format_currency(total);
             this.state.tax = this.env.pos.format_currency(tax);
+            this.render();
         }
     }
     OrderWidget.template = 'OrderWidget';
