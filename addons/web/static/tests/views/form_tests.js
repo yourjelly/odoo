@@ -6031,7 +6031,7 @@ QUnit.module('Views', {
         var $group1 = form.$('.group_1');
         var $group2 = form.$('.group_2');
 
-        assert.containsN(form, 'table.o_inner_group', 2,
+        assert.containsN(form, 'table.o_inner_group', 6,
             "should contain two inner groups");
         assert.strictEqual($group1.find('.o_horizontal_separator').length, 1,
             "inner group should contain one string separator");
