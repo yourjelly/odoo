@@ -1439,6 +1439,26 @@ class StockMove(models.Model):
         self.with_context(prefetch_fields=False).mapped('move_line_ids').unlink()
         return super(StockMove, self).unlink()
 
+    def _get_consuming_document(self):
+        """ TODO WIP """
+        self.ensure_one()
+        return self.picking_id or False
+
+    def _get_replenishment_document(self):
+        """ TODO WIP """
+        self.ensure_one()
+        return self.picking_id or False
+
+    def _is_consuming(self):
+        """ TODO WIP """
+        self.ensure_one()
+        return self.picking_type_id.code == 'outgoing'
+
+    def _is_replenishing(self):
+        """ TODO WIP """
+        self.ensure_one()
+        return self.picking_type_id.code == 'incoming' and not self.move_dest_ids
+
     def _prepare_move_split_vals(self, qty):
         vals = {
             'product_uom_qty': qty,
