@@ -2,11 +2,9 @@ odoo.define('point_of_sale.tests.PaymentScreen', async function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
     const { useListener } = require('web.custom_hooks');
-    const PopupControllerMixin = require('point_of_sale.PopupControllerMixin');
     const testUtils = require('web.test_utils');
-    const { makePosTestEnv } = require('point_of_sale.test_setup_pos');
+    const makePosTestEnv = require('point_of_sale.test_env');
     const { xml } = owl.tags;
     const { useState } = owl;
 
