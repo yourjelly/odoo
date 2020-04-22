@@ -554,10 +554,13 @@ class IrActionsServer(models.Model):
 
             elif hasattr(self, 'run_action_%s' % action.state):
                 active_id = self._context.get('active_id')
-                if not active_id and self._context.get('onchange_self'):
-                    active_id = self._context['onchange_self']._origin.id
-                    if not active_id:  # onchange on new record
-                        func = getattr(self, 'run_action_%s' % action.state)
+                if not active_id:
+                    func = getattr(self, 'run_action_%s' % action.state)
+                    if self._context.get('onchange_self'):
+                        active_id = self._context['onchange_self']._origin.id
+                        if not active_id:  # onchange on new record
+                            res = func(action, eval_context=eval_context)
+                    else:
                         res = func(action, eval_context=eval_context)
                 active_ids = self._context.get('active_ids', [active_id] if active_id else [])
                 for active_id in active_ids:
