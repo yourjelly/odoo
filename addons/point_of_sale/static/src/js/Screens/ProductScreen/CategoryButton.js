@@ -6,7 +6,8 @@ odoo.define('point_of_sale.CategoryButton', function(require) {
 
     class CategoryButton extends PosComponent {
         get imageUrl() {
-            return `${window.location.origin}/web/image?model=pos.category&field=image_128&id=${this.props.category.id}`;
+            const category = this.props.category
+            return `/web/image?model=pos.category&field=image_128&id=${category.id}&write_date=${category.write_date}&unique=1`;
         }
     }
     CategoryButton.template = 'CategoryButton';

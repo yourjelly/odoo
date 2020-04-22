@@ -319,10 +319,14 @@ odoo.define('point_of_sale.Chrome', function(require) {
         // MISC METHODS //
 
         _preloadImages() {
-            const products = this.env.pos.db.get_product_by_category(0);
-            for (let product of products) {
+            for (let product of this.env.pos.db.get_product_by_category(0)) {
                 const image = new Image();
-                image.src = `/web/image?model=product.product&field=image_128&id=${product.id}&unique=1`;
+                image.src = `/web/image?model=product.product&field=image_128&id=${product.id}&write_date=${product.write_date}&unique=1`;
+            }
+            for (let category of Object.values(this.env.pos.db.category_by_id)) {
+                if (category.id == 0) continue;
+                const image = new Image();
+                image.src = `/web/image?model=pos.category&field=image_128&id=${category.id}&write_date=${category.write_date}&unique=1`;
             }
             const staticImages = ['backspace.png', 'bc-arrow-big.png'];
             for (let imageName of staticImages) {

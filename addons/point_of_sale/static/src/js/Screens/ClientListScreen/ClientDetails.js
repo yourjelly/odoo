@@ -6,8 +6,9 @@ odoo.define('point_of_sale.ClientDetails', function(require) {
 
     class ClientDetails extends PosComponent {
         get partnerImageUrl() {
-            if (this.props.partner) {
-                return `/web/image?model=res.partner&id=${this.props.partner.id}&field=image_128`;
+            const partner = this.props.partner;
+            if (partner) {
+                return `/web/image?model=res.partner&id=${partner.id}&field=image_128&write_date=${partner.write_date}&unique=1`;
             } else {
                 return false;
             }

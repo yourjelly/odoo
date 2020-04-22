@@ -14,10 +14,11 @@ odoo.define('point_of_sale.ClientDetailsEdit', function(require) {
         get partnerImageUrl() {
             // We prioritize image_1920 in the `changes` field because we want
             // to show the uploaded image without fetching new data from the server.
+            const partner = this.props.partner;
             if (this.changes.image_1920) {
                 return this.changes.image_1920;
-            } else if (this.props.partner.id) {
-                return `/web/image?model=res.partner&id=${this.props.partner.id}&field=image_128`;
+            } else if (partner.id) {
+                return `/web/image?model=res.partner&id=${partner.id}&field=image_128&write_date=${partner.write_date}&unique=1`;
             } else {
                 return false;
             }
