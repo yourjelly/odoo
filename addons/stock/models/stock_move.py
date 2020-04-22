@@ -1534,6 +1534,7 @@ class StockMove(models.Model):
         @param qty: quantity in the UoM of move.product_uom
         """
         for ml in self.move_line_ids:
+            ml.qty_done = 0
             ml_qty = ml.product_uom_qty - ml.qty_done
             if float_compare(ml_qty, 0, precision_rounding=ml.product_uom_id.rounding) <= 0:
                 continue
