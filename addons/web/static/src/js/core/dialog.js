@@ -111,6 +111,7 @@ var Dialog = Widget.extend({
      */
     willStart: function () {
         var self = this;
+        debugger;
         return this._super.apply(this, arguments).then(function () {
             // Render modal once xml dependencies are loaded
             self.$modal = $(QWeb.render('Dialog', {
@@ -133,6 +134,7 @@ var Dialog = Widget.extend({
                     break;
             }
             if (self.renderFooter) {
+                debugger;
                 self.$footer = self.$modal.find(".modal-footer");
                 self.set_buttons(self.buttons);
             }
@@ -159,6 +161,7 @@ var Dialog = Widget.extend({
      * @param {Object[]} buttons - @see init
      */
     set_buttons: function (buttons) {
+        debugger;
         this._setButtonsTo(this.$footer, buttons);
     },
 
@@ -297,6 +300,7 @@ var Dialog = Widget.extend({
      */
     _setButtonsTo($target, buttons) {
         var self = this;
+        debugger;
         $target.empty();
         _.each(buttons, function (buttonData) {
             var $button = dom.renderButton({
