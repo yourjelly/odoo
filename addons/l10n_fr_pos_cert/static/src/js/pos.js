@@ -34,6 +34,11 @@ models.PosModel = models.PosModel.extend({
             _super_posmodel.delete_current_order.apply(this, arguments);
         }
     },
+
+    disallowLineQuantityChange() {
+        let result = _super_posmodel.disallowLineQuantityChange();
+        return this.is_french_country() || result;
+    }
 });
 
 
