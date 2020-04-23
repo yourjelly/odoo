@@ -5,6 +5,10 @@ odoo.define('point_of_sale.NumpadWidget', function(require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
+    /**
+     * IMPROVEMENT: Whenever new-orderline-selected is triggered,
+     * numpad mode should be set to 'quantity'.
+     */
     class NumpadWidget extends PosComponent {
         constructor() {
             super(...arguments);
@@ -16,6 +20,9 @@ odoo.define('point_of_sale.NumpadWidget', function(require) {
                     this.state.mode = 'quantity';
                 }
             });
+        }
+        willUnmount() {
+            this.env.pos.on('change:cashier', null, this);
         }
         get hasPriceControlRights() {
             const cashier = this.env.pos.get('cashier') || this.env.pos.get_cashier();
