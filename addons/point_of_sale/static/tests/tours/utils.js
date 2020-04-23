@@ -359,6 +359,41 @@ odoo.define('point_of_sale.tour.utils', function (require) {
         }
     }
 
+    class ChromeMethods {
+        newOrder() {
+            return [
+                {
+                    content: 'new order',
+                    trigger: '.order-selector .neworder-button',
+                },
+            ];
+        }
+        deleteOrder() {
+            return [
+                {
+                    content: 'delete current order',
+                    trigger: '.order-selector .deleteorder-button',
+                },
+            ];
+        }
+        selectOrder(orderSequence) {
+            return [
+                {
+                    content: `select order '${orderSequence}'`,
+                    trigger: `.order-selector .order-sequence:contains("${orderSequence}")`,
+                },
+            ];
+        }
+        confirmPopup() {
+            return [
+                {
+                    content: 'confirm popup',
+                    trigger: '.popups .modal-dialog .button.confirm',
+                }
+            ]
+        }
+    }
+
     // this is the method decorator
     // when the method is called, the generated steps are added
     // to steps
@@ -396,6 +431,7 @@ odoo.define('point_of_sale.tour.utils', function (require) {
         ProductScreenMethods: new Proxy(new ProductScreenMethods(), proxyHandler),
         PaymentScreenMethods: new Proxy(new PaymentScreenMethods(), proxyHandler),
         ReceiptScreenMethods: new Proxy(new ReceiptScreenMethods(), proxyHandler),
+        ChromeMethods: new Proxy(new ChromeMethods(), proxyHandler),
         startSteps,
         getSteps,
     };
