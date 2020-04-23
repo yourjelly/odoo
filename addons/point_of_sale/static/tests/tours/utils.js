@@ -1,10 +1,18 @@
 odoo.define('point_of_sale.tour.utils', function (require) {
     'use strict';
 
+    const config = require('web.config');
     let steps = [];
 
     function startSteps() {
-        steps = [];
+        // always start by waiting for loading to finish
+        steps = [
+            {
+                content: 'wait for loading to finish',
+                trigger: 'body:not(:has(.loader))',
+                run: function () {},
+            },
+        ];
     }
 
     function getSteps() {
@@ -154,6 +162,173 @@ odoo.define('point_of_sale.tour.utils', function (require) {
                 },
             ];
         }
+
+        order(productName, quantity) {
+            const res = this.clickDisplayedProduct(productName);
+            for (let char of quantity.toString()) {
+                if ('.0123456789'.includes(char)) {
+                    res.push(...this.pressNumpadDigit(char));
+                } else if ('-'.includes(char)) {
+                    res.push(...this.pressNumpadMinus());
+                }
+            }
+            return res;
+        }
+    }
+
+    class PaymentScreenMethods {
+        clickPaymentMethod(name) {
+            return [
+                {
+                    content: `click '${name}' payment method`,
+                    trigger: `.paymentmethods .button.paymentmethod:contains("${name}")`,
+                },
+            ];
+        }
+
+        /**
+         * Check if the paymentlines are empty. Also provide the amount to pay.
+         * @param {String} amountToPay
+         */
+        checkEmptyPaymentlines(amountToPay) {
+            return [
+                {
+                    content: `there are no paymentlines`,
+                    trigger: `.paymentlines-empty`,
+                    run: () => {},
+                },
+                {
+                    content: `amount to pay is '${amountToPay}'`,
+                    trigger: `.paymentlines-empty .total:contains("${amountToPay}")`,
+                    run: () => {},
+                },
+            ];
+        }
+
+        /**
+         * Check if the selected paymentline has the given payment method and amount.
+         * @param {String} paymentMethodName
+         * @param {String} amount
+         */
+        checkSelectedPaymentline(paymentMethodName, amount) {
+            return [
+                {
+                    content: `line paid via '${paymentMethodName}' is selected`,
+                    trigger: `.paymentlines .paymentline.selected .col-name:contains("${paymentMethodName}")`,
+                    run: () => {},
+                },
+                {
+                    content: `amount tendered in the line is '${amount}'`,
+                    trigger: `.paymentlines .paymentline.selected .col-tendered:contains("${amount}")`,
+                    run: () => {},
+                },
+            ];
+        }
+
+        /**
+         * Check if the remaining is the provided amount.
+         * @param {String} amount
+         */
+        checkRemaining(amount) {
+            return [
+                {
+                    content: `remaining amount is ${amount}`,
+                    trigger: `.payment-status-remaining .amount:contains("${amount}")`,
+                    run: () => {},
+                },
+            ];
+        }
+
+        /**
+         * Check if change is the provided amount.
+         * @param {String} amount
+         */
+        checkChange(amount) {
+            return [
+                {
+                    content: `change is ${amount}`,
+                    trigger: `.payment-status-change .amount:contains("${amount}")`,
+                    run: () => {},
+                },
+            ];
+        }
+
+        /**
+         * Check if validate button is highlighted.
+         * @param {Boolean} isHighlighted
+         */
+        checkValidate(isHighlighted = true) {
+            return [
+                {
+                    content: `validate button is ${
+                        isHighlighted ? 'highlighted' : 'not highligted'
+                    }`,
+                    trigger: isHighlighted
+                        ? `.payment-screen .button.next.highlight`
+                        : `.payment-screen .button.next:not(:has(.highlight))`,
+                    run: () => {},
+                },
+            ];
+        }
+
+        /**
+         * Delete the paymentline having the given payment method name and amount.
+         * @param {String} name payment method
+         * @param {String} amount
+         */
+        deletePaymentline(name, amount) {
+            return [
+                {
+                    content: `delete ${name} paymentline with ${amount} amount`,
+                    trigger: `.paymentlines .paymentline .col-name:contains("${name}") ~ .delete-button`,
+                },
+            ];
+        }
+
+        /**
+         * Press the numpad in sequence based on the given space-separated keys.
+         * @param {String} keys space-separated numpad keys
+         */
+        pressNumpad(keys) {
+            const numberChars = '. +/- 0 1 2 3 4 5 6 7 8 9'.split(' ');
+            const modeButtons = '+10 +20 +50'.split(' ');
+            function generateStep(key) {
+                let trigger;
+                if (numberChars.includes(key)) {
+                    trigger = `.payment-numpad .number-char:contains("${key}")`;
+                } else if (modeButtons.includes(key)) {
+                    trigger = `.payment-numpad .mode-button:contains("${key}")`;
+                } else if (key === 'Backspace') {
+                    trigger = `.payment-numpad .number-char img[alt="Backspace"]`;
+                }
+                return {
+                    content: `'${key}' pressed in payment numpad`,
+                    trigger,
+                };
+            }
+            return keys.split(' ').map(generateStep);
+        }
+
+        toggleEmail() {
+            return [
+                {
+                    content: `click email button`,
+                    trigger: `.payment-buttons .js_email`,
+                },
+            ];
+        }
+
+        checkEmailButton(isHighlighted) {
+            return [
+                {
+                    content: `check email button`,
+                    trigger: isHighlighted
+                        ? `.payment-buttons .js_email.highlight`
+                        : `.payment-buttons .js_email:not(:has(.highlight))`,
+                    run: () => {},
+                },
+            ];
+        }
     }
 
     // this is the method decorator
@@ -162,14 +337,21 @@ odoo.define('point_of_sale.tour.utils', function (require) {
     const methodProxyHandler = {
         apply(target, thisArg, args) {
             const res = target.call(thisArg, ...args);
-            // This step is added before the real steps.
-            // Very useful when debugging because we know which
-            // method call failed and what were the parameters.
-            steps.push({
-                content: `DOING "${target.name}(${args.map(a => `'${a}'`).join(", ")})"`,
-                trigger: '.pos',
-                run: () => {},
-            });
+            if (config.isDebug()) {
+                // This step is added before the real steps.
+                // Very useful when debugging because we know which
+                // method call failed and what were the parameters.
+                const constructor = thisArg.constructor.name.split(' ')[1];
+                const methodName = target.name.split(' ')[1];
+                const argList = args
+                    .map((a) => (typeof a === 'string' ? `'${a}'` : `${a}`))
+                    .join(', ');
+                steps.push({
+                    content: `DOING "${constructor}.${methodName}(${argList})"`,
+                    trigger: '.pos',
+                    run: () => {},
+                });
+            }
             steps.push(...res);
             return res;
         },
@@ -178,12 +360,13 @@ odoo.define('point_of_sale.tour.utils', function (require) {
     // we proxy get of the method to decorate the method call
     const proxyHandler = {
         get(target, key) {
-            return new Proxy(target[key], methodProxyHandler);
+            return new Proxy(target[key].bind(target), methodProxyHandler);
         },
     };
 
     return {
         ProductScreenMethods: new Proxy(new ProductScreenMethods(), proxyHandler),
+        PaymentScreenMethods: new Proxy(new PaymentScreenMethods(), proxyHandler),
         startSteps,
         getSteps,
     };

@@ -16,6 +16,7 @@
             <script type="text/javascript" src="/point_of_sale/static/tests/tours/utils.js"></script>
             <script type="text/javascript" src="/point_of_sale/static/tests/tours/point_of_sale.js"></script>
             <script type="text/javascript" src="/point_of_sale/static/tests/tours/tour_ProductScreen.js"></script>
+            <script type="text/javascript" src="/point_of_sale/static/tests/tours/tour_PaymentScreen.js"></script>
         </xpath>
     </template>
 </odoo>
