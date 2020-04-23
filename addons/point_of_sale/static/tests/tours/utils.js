@@ -68,45 +68,30 @@ odoo.define('point_of_sale.tour.utils', function (require) {
             ];
         }
 
-        pressNumpadDigit(key) {
-            return [
-                {
-                    content: `'${key}' pressed in numpad`,
-                    trigger: `.numpad .number-char:contains("${key}")`,
-                },
-            ];
-        }
-
-        pressNumpadMode(mode) {
-            return [
-                {
-                    content: `'${mode}' mode pressed in numpad`,
-                    trigger: `.numpad .mode-button:contains("${mode}")`,
-                },
-                {
-                    content: `'${mode}' mode is selected`,
-                    trigger: `.numpad .mode-button.selected-mode:contains("${mode}")`,
-                    run: () => {},
-                },
-            ];
-        }
-
-        pressNumpadBackspace() {
-            return [
-                {
-                    content: `'Backspace' pressed in numpad`,
-                    trigger: `.numpad .input-button.numpad-backspace`,
-                },
-            ];
-        }
-
-        pressNumpadMinus() {
-            return [
-                {
-                    content: `'+/-' pressed in numpad`,
-                    trigger: `.numpad .input-button.numpad-minus`,
-                },
-            ];
+        /**
+         * Press the numpad in sequence based on the given space-separated keys.
+         * @param {String} keys space-separated numpad keys
+         */
+        pressNumpad(keys) {
+            const numberChars = '. 0 1 2 3 4 5 6 7 8 9'.split(' ');
+            const modeButtons = 'Qty Price Disc'.split(' ');
+            function generateStep(key) {
+                let trigger;
+                if (numberChars.includes(key)) {
+                    trigger = `.numpad .number-char:contains("${key}")`;
+                } else if (modeButtons.includes(key)) {
+                    trigger = `.numpad .mode-button:contains("${key}")`;
+                } else if (key === 'Backspace') {
+                    trigger = `.numpad .numpad-backspace`;
+                } else if (key === '+/-') {
+                    trigger = `.numpad .numpad-minus`;
+                }
+                return {
+                    content: `'${key}' pressed in product screen numpad`,
+                    trigger,
+                };
+            }
+            return keys.split(' ').map(generateStep);
         }
 
         checkOrderIsEmpty() {
@@ -163,13 +148,18 @@ odoo.define('point_of_sale.tour.utils', function (require) {
             ];
         }
 
-        order(productName, quantity) {
+        order(productName, quantity, price) {
             const res = this.clickDisplayedProduct(productName);
+            if (price) {
+                res.push(...this.pressNumpad('Price'));
+                res.push(...this.pressNumpad(price.toString().split('').join(' ')));
+                res.push(...this.pressNumpad('Qty'));
+            }
             for (let char of quantity.toString()) {
                 if ('.0123456789'.includes(char)) {
-                    res.push(...this.pressNumpadDigit(char));
+                    res.push(...this.pressNumpad(char));
                 } else if ('-'.includes(char)) {
-                    res.push(...this.pressNumpadMinus());
+                    res.push(...this.pressNumpad('+/-'));
                 }
             }
             return res;
@@ -329,6 +319,44 @@ odoo.define('point_of_sale.tour.utils', function (require) {
                 },
             ];
         }
+
+        validatePayment() {
+            return [
+                {
+                    content: 'validate payment',
+                    trigger: `.payment-screen .button.next.highlight`,
+                },
+            ];
+        }
+    }
+
+    class ReceiptScreenMethods {
+        checkReceipt() {
+            return [
+                {
+                    content: 'there should be the receipt',
+                    trigger: '.receipt-screen .pos-receipt',
+                    run: () => {},
+                },
+            ];
+        }
+        checkChange(amount) {
+            return [
+                {
+                    content: `change amount should be ${amount}`,
+                    trigger: `.receipt-screen .change-value:contains("${amount}")`,
+                    run: () => {},
+                },
+            ];
+        }
+        nextScreen() {
+            return [
+                {
+                    content: 'go to next screen',
+                    trigger: '.receipt-screen .button.next.highlight',
+                },
+            ];
+        }
     }
 
     // this is the method decorator
@@ -367,6 +395,7 @@ odoo.define('point_of_sale.tour.utils', function (require) {
     return {
         ProductScreenMethods: new Proxy(new ProductScreenMethods(), proxyHandler),
         PaymentScreenMethods: new Proxy(new PaymentScreenMethods(), proxyHandler),
+        ReceiptScreenMethods: new Proxy(new ReceiptScreenMethods(), proxyHandler),
         startSteps,
         getSteps,
     };
