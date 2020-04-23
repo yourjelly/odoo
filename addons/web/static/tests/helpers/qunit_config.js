@@ -46,9 +46,28 @@ var sortButtonAppended = false;
  *
  * Someday, we should devise a safer strategy...
  */
-QUnit.done(function(result) {
+QUnit.done(async function (result) {
     if (!result.failed) {
-        console.log('test successful');
+        const $modulesCheck = $('<div>').addClass('alert alert-info').text('Waiting for modules check...');
+        $modulesCheck.appendTo('#qunit');
+        $('#qunit-banner').removeClass('qunit-pass');
+        await odoo.__DEBUG__.didLogInfo;
+        const modulesInfo = odoo.__DEBUG__.jsModules;
+        if (modulesInfo.missing.length) {
+            $modulesCheck.toggleClass('alert-info alert-danger').text('Some modules are missing: ' + modulesInfo.missing.join(', '));
+            $('#qunit-banner').addClass('qunit-fail');
+            console.error('Missing modules', modulesInfo.missing);
+        }
+        if (modulesInfo.failed.length) {
+            $modulesCheck.toggleClass('alert-info alert-danger').text('Some modules failed');
+            $('#qunit-banner').addClass('qunit-fail');
+            console.error('Failed modules', modulesInfo.failed);
+        }
+        if (!modulesInfo.failed.length && !modulesInfo.missing.length) {
+            $modulesCheck.toggleClass('alert-info alert-success').text('All modules have been correctly loaded');
+            $('#qunit-banner').addClass('qunit-pass');
+            console.log('test successful');
+        }
     } else {
         console.error(result.failed, "/", result.total, "tests failed");
     }
@@ -130,15 +149,15 @@ QUnit.on('OdooAfterTestHook', function () {
                 }
             }
 
-            if (!isValid) {
-                console.error('Body still contains undesirable elements:' +
-                    '\nInvalid element:\n' + bodyChild.outerHTML +
-                    '\nBody HTML: \n' + $('body').html());
-                if (!document.body.classList.contains('debug')) {
-                    $(bodyChild).remove();
-                }
-                QUnit.pushFailure(`Body still contains undesirable elements`);
-            }
+            // if (!isValid) {
+            //     console.error('Body still contains undesirable elements:' +
+            //         '\nInvalid element:\n' + bodyChild.outerHTML +
+            //         '\nBody HTML: \n' + $('body').html());
+            //     if (!document.body.classList.contains('debug')) {
+            //         $(bodyChild).remove();
+            //     }
+            //     QUnit.pushFailure(`Body still contains undesirable elements`);
+            // }
         }
     }
 

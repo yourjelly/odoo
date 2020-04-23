@@ -29,38 +29,38 @@
     //    the promise to be resolved.
     // However, in any cases, it won't slow down the test suite longer than
     // necessary.
-    const prom = new Promise(resolve => {
-        const timeout = setTimeout(() => {
-            // Module 'web.test_utils' must be loaded after a while, otherwise it
-            // could mean it has been renamed, and our test will never be executed.
-            // In this case, this will be detected by a suite that lasts longer than
-            // 5 seconds (e.g. our main test suite).
-            if (!odoo.__DEBUG__.services['web.test_utils']) {
-                throw new Error('Module "web.test_utils" could not be loaded');
-            }
-        }, 5000);
-        const interv = setInterval(() => {
-            if (odoo.__DEBUG__.services['web.test_utils']) {
-                clearInterval(interv);
-                clearTimeout(timeout);
-                setTimeout(resolve, 0);
-            }
-        }, 50);
-    });
-    await prom;
+    // const prom = new Promise(resolve => {
+    //     const timeout = setTimeout(() => {
+    //         // Module 'web.test_utils' must be loaded after a while, otherwise it
+    //         // could mean it has been renamed, and our test will never be executed.
+    //         // In this case, this will be detected by a suite that lasts longer than
+    //         // 5 seconds (e.g. our main test suite).
+    //         if (!odoo.__DEBUG__.services['web.test_utils']) {
+    //             throw new Error('Module "web.test_utils" could not be loaded');
+    //         }
+    //     }, 5000);
+    //     const interv = setInterval(() => {
+    //         if (odoo.__DEBUG__.services['web.test_utils']) {
+    //             clearInterval(interv);
+    //             clearTimeout(timeout);
+    //             setTimeout(resolve, 0);
+    //         }
+    //     }, 50);
+    // });
+    // await prom;
 
-    QUnit.module('Odoo JS Modules');
+    // QUnit.module('Odoo JS Modules');
 
-    QUnit.test('all modules are properly loaded', async function (assert) {
-        assert.expect(2);
+    // QUnit.test('all modules are properly loaded', async function (assert) {
+    //     assert.expect(2);
 
-        await odoo.__DEBUG__.didLogInfo;
+    //     await odoo.__DEBUG__.didLogInfo;
 
-        const modulesInfo = odoo.__DEBUG__.jsModules;
-        assert.deepEqual(modulesInfo.missing, [],
-            "no js module should be missing");
-        assert.deepEqual(modulesInfo.failed, [],
-            "no js module should have failed");
-    });
+    //     const modulesInfo = odoo.__DEBUG__.jsModules;
+    //     assert.deepEqual(modulesInfo.missing, [],
+    //         "no js module should be missing");
+    //     assert.deepEqual(modulesInfo.failed, [],
+    //         "no js module should have failed");
+    // });
 
 })();

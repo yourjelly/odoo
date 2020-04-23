@@ -1,7 +1,7 @@
 odoo.define('web.basic_fields_mobile_tests', function (require) {
 "use strict";
 
-var FormView = require('web.FormView');
+var FormView = require('web.FormView2');
 var ListView = require('web.ListView');
 var testUtils = require('web.test_utils');
 

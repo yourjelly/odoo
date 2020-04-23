@@ -1,7 +1,7 @@
 odoo.define('web.form_tests', function (require) {
 "use strict";
 
-var AbstractStorageService = require('web.AbstractStorageService');
+var AbstractStorageService = require('web.AbstractStorageService2');
 var BasicModel = require('web.BasicModel');
 var concurrency = require('web.concurrency');
 var core = require('web.core');
