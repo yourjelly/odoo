@@ -58,6 +58,7 @@ var Followers = AbstractField.extend({
         // has fetched the required data, so this function doesn't return a promise
         // as we don't want to wait to the data to be loaded to display the widget
         var self = this;
+        debugger;
         var fetch_def = this.dp.add(this._readFollowers());
 
         concurrency.rejectAfter(concurrency.delay(0), fetch_def).then(this._displayGeneric.bind(this));

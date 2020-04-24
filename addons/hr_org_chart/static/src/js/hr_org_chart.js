@@ -83,7 +83,13 @@ var FieldOrgChart = AbstractField.extend({
         }
 
         var self = this;
-        return this._getOrgData().then(function (orgData) {
+        return this._rpc({
+            route: '/hr/get_org_chart',
+            params: {
+                employee_id: this.employee,
+                context: session.user_context,
+            },
+        }).then(function (orgData) {
             if (_.isEmpty(orgData)) {
                 orgData = {
                     managers: [],
@@ -126,6 +132,49 @@ var FieldOrgChart = AbstractField.extend({
                 });
             });
         });
+        // return this._getOrgData().then(function (orgData) {
+        //     if (_.isEmpty(orgData)) {
+        //         orgData = {
+        //             managers: [],
+        //             children: [],
+        //         }
+        //     }
+        //     orgData.view_employee_id = self.recordData.id;
+        //     self.$el.html(QWeb.render("hr_org_chart", orgData));
+        //     self.$('[data-toggle="popover"]').each(function () {
+        //         $(this).popover({
+        //             html: true,
+        //             title: function () {
+        //                 var $title = $(QWeb.render('hr_orgchart_emp_popover_title', {
+        //                     employee: {
+        //                         name: $(this).data('emp-name'),
+        //                         id: $(this).data('emp-id'),
+        //                     },
+        //                 }));
+        //                 $title.on('click',
+        //                     '.o_employee_redirect', _.bind(self._onEmployeeRedirect, self));
+        //                 return $title;
+        //             },
+        //             container: this,
+        //             placement: 'left',
+        //             trigger: 'focus',
+        //             content: function () {
+        //                 var $content = $(QWeb.render('hr_orgchart_emp_popover_content', {
+        //                     employee: {
+        //                         id: $(this).data('emp-id'),
+        //                         name: $(this).data('emp-name'),
+        //                         direct_sub_count: parseInt($(this).data('emp-dir-subs')),
+        //                         indirect_sub_count: parseInt($(this).data('emp-ind-subs')),
+        //                     },
+        //                 }));
+        //                 $content.on('click',
+        //                     '.o_employee_sub_redirect', _.bind(self._onEmployeeSubRedirect, self));
+        //                 return $content;
+        //             },
+        //             template: QWeb.render('hr_orgchart_emp_popover', {}),
+        //         });
+        //     });
+        // });
     },
 
     //--------------------------------------------------------------------------

@@ -58,6 +58,9 @@ FormRenderer.include({
                     viewType: 'form',
                 });
 
+                console.log(">>>>>>>>>>>>>>>");
+                debugger;
+
                 var $temporaryParentDiv = $('<div>');
                 this.defs.push(this.chatter.appendTo($temporaryParentDiv).then(function () {
                     self.chatter.$el.unwrap();
