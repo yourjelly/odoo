@@ -423,10 +423,10 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'pos_pricelist', login="admin", step_delay=50)
         self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'pos_basic_order', login="admin", step_delay=50)
-        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'tour_ProductScreen', login="admin", step_delay=50)
-        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'tour_PaymentScreen', login="admin", step_delay=50)
-        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'tour_ReceiptScreen', login="admin", step_delay=50)
-        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'tour_Chrome', login="admin", step_delay=50)
+        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'ProductScreenTour', login="admin", step_delay=50)
+        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'PaymentScreenTour', login="admin", step_delay=50)
+        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'ReceiptScreenTour', login="admin", step_delay=50)
+        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'ChromeTour', login="admin", step_delay=50)
 
         for order in self.env['pos.order'].search([]):
             self.assertEqual(order.state, 'paid', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))
