@@ -132,6 +132,13 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 let lastId = order.orderlines.last().cid;
                 let currentQuantity = this.env.pos.get_order().get_selected_orderline().get_quantity();
 
+                if(selectedLine.noDecrease) {
+                    this.showPopup('ErrorPopup', {
+                        title: this.env._t('Invalid action'),
+                        body: this.env._t('You are not allowed to change this quantity'),
+                    });
+                    return;
+                }
                 if(lastId != selectedLine.cid)
                     this._showDecreaseQuantityPopup();
                 else if(currentQuantity < event.detail.buffer)
