@@ -502,6 +502,7 @@ class Registry(Mapping):
         return LRU(8192)
 
     def _clear_cache(self):
+        import traceback;_logger.debug("stack: " + "".join(['File: %r | line %d | %s | %s\n' % (filename, lineno, name, line) for filename, lineno, name, line in traceback.extract_stack()[:-3] if '/odoo/' in filename]))
         """ Clear the cache and mark it as invalidated. """
         self.cache.clear()
         self.cache_invalidated = True

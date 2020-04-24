@@ -698,14 +698,55 @@ class Website(models.Model):
             raise ValueError('No record found for unique ID %s. It may have been deleted.' % (view_id))
         return view
 
+    @tools.ormcache_context(keys=('website_id',))
+    def _cache_customize_show_views_python(self):
+        views = self.env['ir.ui.view'].search([('customize_show', '=', True)])
+        views = views.filter_duplicate()
+        return {v.key: v.active for v in views}
+
     @tools.ormcache_context('key', keys=('website_id',))
-    def is_view_active(self, key):
+    def is_view_active_python(self, key, raise_if_not_found=False):
         """
             Return True if active, False if not active, None if not found
         """
-        view = self.viewref(key, raise_if_not_found=False)
-        return view.active if view else None
+        views = self._cache_customize_show_views_python()
+        view = key in views and views[key]
+        if view is None and raise_if_not_found:
+            raise ValueError('No view of type customize_show found for key %s' % key)
+        return view
 
+    @tools.ormcache_context(keys=('website_id',))
+    def _cache_customize_show_views(self):
+        req = """
+            SELECT distinct on (key) key, id, active
+            FROM ir_ui_view
+            WHERE customize_show and (website_id = %s or website_id IS NULL)
+            ORDER BY key, website_id DESC NULLS LAST
+        """
+        self.env.cr.execute(req, (self._context.get('website_id', 0), ))
+        return {key: active for key, _, active in self.env.cr.fetchall()}
+
+    @tools.ormcache_context('key', keys=('website_id',))
+    def is_view_active(self, key, raise_if_not_found=False):
+        """
+            Return True if active, False if not active, None if not found
+        """
+        views = self._cache_customize_show_views()
+        view = key in views and views[key]
+        if view is None and raise_if_not_found:
+            raise ValueError('No view of type customize_show found for key %s' % key)
+        return view
+
+    #@tools.ormcache_context('key', keys=('website_id',))
+    def old_is_view_active(self, key, raise_if_not_found=False):
+        """
+            Return True if active, False if not active, None if not found
+        """
+        views = self.viewref(key)
+        view = key in views and views[key]
+        if view is None and raise_if_not_found:
+            raise ValueError('No view of type customize_show found for key %s' % key)
+        return view
 
     @api.model
     def get_template(self, template):
