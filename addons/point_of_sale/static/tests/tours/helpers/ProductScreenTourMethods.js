@@ -89,6 +89,15 @@ odoo.define('point_of_sale.tour.ProductScreenTourMethods', function (require) {
     }
 
     class Check {
+        isShown() {
+            return [
+                {
+                    content: 'product screen is shown',
+                    trigger: '.product-screen:not(:has(.oe_hidden))',
+                    run: () => {},
+                },
+            ];
+        }
         selectedOrderlineHas(name, quantity, price) {
             const res = [
                 {
@@ -137,17 +146,17 @@ odoo.define('point_of_sale.tour.ProductScreenTourMethods', function (require) {
 
     class Execute {
         order(productName, quantity, price) {
-            const res = this.do.clickDisplayedProduct(productName);
+            const res = this._do.clickDisplayedProduct(productName);
             if (price) {
-                res.push(...this.do.pressNumpad('Price'));
-                res.push(...this.do.pressNumpad(price.toString().split('').join(' ')));
-                res.push(...this.do.pressNumpad('Qty'));
+                res.push(...this._do.pressNumpad('Price'));
+                res.push(...this._do.pressNumpad(price.toString().split('').join(' ')));
+                res.push(...this._do.pressNumpad('Qty'));
             }
             for (let char of quantity.toString()) {
                 if ('.0123456789'.includes(char)) {
-                    res.push(...this.do.pressNumpad(char));
+                    res.push(...this._do.pressNumpad(char));
                 } else if ('-'.includes(char)) {
-                    res.push(...this.do.pressNumpad('+/-'));
+                    res.push(...this._do.pressNumpad('+/-'));
                 }
             }
             return res;

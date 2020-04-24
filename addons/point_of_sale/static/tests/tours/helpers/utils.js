@@ -9,6 +9,7 @@ odoo.define('point_of_sale.tour.utils', function (require) {
      *
      * ```
      * const { startSteps, getSteps, createTourMethods } = require('point_of_sale.utils');
+     * const { Other } = require('point_of_sale.tour.OtherMethods');
      *
      * // 1. Define classes Do, Check and Execute having methods that
      * //    each return array of tour steps.
@@ -23,9 +24,10 @@ odoo.define('point_of_sale.tour.utils', function (require) {
      *   }
      * }
      * // Notice that Execute has access to methods defined in Do and Check classes
+     * // Also, we can compose steps from other module.
      * class Execute {
-     *   clickThenCheck() {
-     *      return [...this.do.click(), ...this.check.isHighlighted()];
+     *   complexSteps() {
+     *      return [...this._do.click(), ...this._check.isHighlighted(), ...Other._exec.complicatedSteps()];
      *   }
      * }
      *
@@ -43,7 +45,7 @@ odoo.define('point_of_sale.tour.utils', function (require) {
      * // 4. Call the tour methods to populate the steps created by `startSteps`.
      * Screen.do.click();               // return of this method call is added to steps created by startSteps
      * Screen.check.isHighlighted()     // same as above
-     * Screen.exec.clickThenCheck()     // same as above
+     * Screen.exec.complexSteps()     // same as above
      *
      * // 5. Call `getSteps` which returns the generated tour steps.
      * const steps = getSteps();
@@ -100,8 +102,14 @@ odoo.define('point_of_sale.tour.utils', function (require) {
     };
 
     /**
-     * Creates an object with do, check and exec properties which are instances of
-     * the given Do, Check and Execute classes, respectively.
+     * Creates an object with `do`, `check` and `exec` properties which are instances of
+     * the given `Do`, `Check` and `Execute` classes, respectively. Calling methods
+     * automatically adds the returned steps to the steps created by `startSteps`.
+     *
+     * There are however underscored version (_do, _check, _exec).
+     * Calling methods thru the underscored version does not automatically
+     * add the returned steps to the current steps array. Useful when composing
+     * steps from other methods.
      *
      * @param {String} name
      * @param {Function} Do class containing methods which return array of tour steps
@@ -120,12 +128,15 @@ odoo.define('point_of_sale.tour.utils', function (require) {
         const methods = { do: new Do(), check: new Check(), exec: new Execute() };
         // Allow Execute to have access to methods defined in Do and Check
         // via do and exec, respectively.
-        methods.exec.do = methods.do;
-        methods.exec.check = methods.check;
+        methods.exec._do = methods.do;
+        methods.exec._check = methods.check;
         return {
             do: new Proxy(methods.do, proxyHandler),
             check: new Proxy(methods.check, proxyHandler),
             exec: new Proxy(methods.exec, proxyHandler),
+            _do: methods.do,
+            _check: methods.check,
+            _exec: methods.exec,
         };
     }
 
