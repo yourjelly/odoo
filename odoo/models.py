@@ -3897,14 +3897,16 @@ Record ids: %(records)s
 
         # add translations
         if self.env.lang and self.env.lang != 'en_US':
-            Translations = self.env['ir.translation']
-            for field in translated_fields:
-                tname = "%s,%s" % (field.model_name, field.name)
-                for data in data_list:
-                    if field.name in data['stored']:
-                        record = data['record']
-                        val = data['stored'][field.name]
-                        Translations._set_ids(tname, 'model', self.env.lang, record.ids, val, val)
+            languages = [code for code, _ in  self.env['res.lang'].get_installed()]
+            if self.env.lang in languages:
+                Translations = self.env['ir.translation']
+                for field in translated_fields:
+                    tname = "%s,%s" % (field.model_name, field.name)
+                    for data in data_list:
+                        if field.name in data['stored']:
+                            record = data['record']
+                            val = data['stored'][field.name]
+                            Translations._set_ids(tname, 'model', self.env.lang, record.ids, val, val)
 
         return records
 
