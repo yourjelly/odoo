@@ -1152,7 +1152,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             qty_invoiced = 0.0
             for invoice_line in line.invoice_lines:
-                if invoice_line.move_id.state != 'cancel':
+                if invoice_line.move_id.state not in ('in_cancel', 'cancel'):
                     if invoice_line.move_id.move_type == 'out_invoice':
                         qty_invoiced += invoice_line.product_uom_id._compute_quantity(invoice_line.quantity, line.product_uom)
                     elif invoice_line.move_id.move_type == 'out_refund':
@@ -1450,7 +1450,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             amount_invoiced = 0.0
             for invoice_line in line.invoice_lines:
-                if invoice_line.move_id.state == 'posted':
+                if invoice_line.move_id.state in ('in_post', 'posted'):
                     invoice_date = invoice_line.move_id.invoice_date or fields.Date.today()
                     if invoice_line.move_id.move_type == 'out_invoice':
                         amount_invoiced += invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)

@@ -123,7 +123,9 @@ class AccountMove(models.Model):
     narration = fields.Text(string='Terms and Conditions')
     state = fields.Selection(selection=[
             ('draft', 'Draft'),
+            ('in_post', 'In post'),
             ('posted', 'Posted'),
+            ('in_cancel', 'In cancel'),
             ('cancel', 'Cancelled'),
         ], string='Status', required=True, readonly=True, copy=False, tracking=True,
         default='draft')
@@ -1009,7 +1011,7 @@ class AccountMove(models.Model):
                 if record.state == 'draft' and not record.posted_before and not record.highest_name:
                     # First name of the period for the journal, no name yet
                     record._set_next_sequence()
-                elif record.state == 'posted':
+                elif record.state in ('in_post', 'posted'):
                     # No name yet but has been posted
                     record._set_next_sequence()
             if record.name and record.state == 'draft' and not record.posted_before and record.highest_name:
@@ -1476,7 +1478,7 @@ class AccountMove(models.Model):
 
     @api.constrains('name', 'journal_id', 'state')
     def _check_unique_sequence_number(self):
-        moves = self.filtered(lambda move: move.state == 'posted')
+        moves = self.filtered(lambda move: move.state in ('in_post', 'posted'))
         if not moves:
             return
 
@@ -1491,7 +1493,7 @@ class AccountMove(models.Model):
                 AND move2.journal_id = move.journal_id
                 AND move2.move_type = move.move_type
                 AND move2.id != move.id
-            WHERE move.id IN %s AND move2.state = 'posted'
+            WHERE move.id IN %s AND move2.state IN ('in_post', 'posted')
         ''', [tuple(moves.ids)])
         res = self._cr.fetchall()
         if res:
@@ -1707,7 +1709,7 @@ class AccountMove(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
-        if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
+        if any('state' in vals and vals.get('state') in ('in_post', 'posted') for vals in vals_list):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
 
         vals_list = self._move_autocomplete_invoice_lines_create(vals_list)
@@ -1715,7 +1717,7 @@ class AccountMove(models.Model):
 
     def write(self, vals):
         for move in self:
-            if (move.restrict_mode_hash_table and move.state == "posted" and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
+            if (move.restrict_mode_hash_table and move.state in ('in_post', 'posted') and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
                 raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_MOVE_FIELDS))
             if (move.restrict_mode_hash_table and move.inalterable_hash and 'inalterable_hash' in vals) or (move.secure_sequence_number and 'secure_sequence_number' in vals):
                 raise UserError(_('You cannot overwrite the values ensuring the inalterability of the accounting.'))
@@ -1728,7 +1730,7 @@ class AccountMove(models.Model):
                 move.line_ids._check_tax_lock_date()
 
             # You can't post subtract a move to a locked period.
-            if 'state' in vals and move.state == 'posted' and vals['state'] != 'posted':
+            if 'state' in vals and move.state in ('in_post', 'posted') and vals['state'] not in ('in_post', 'posted'):
                 move._check_fiscalyear_lock_date()
                 move.line_ids._check_tax_lock_date()
 
@@ -1749,7 +1751,7 @@ class AccountMove(models.Model):
             self._check_fiscalyear_lock_date()
             self.mapped('line_ids')._check_tax_lock_date()
 
-        if ('state' in vals and vals.get('state') == 'posted'):
+        if ('state' in vals and vals.get('state') in ('in_post', 'posted')):
             for move in self.filtered(lambda m: m.restrict_mode_hash_table and not(m.secure_sequence_number or m.inalterable_hash)):
                 new_number = move.journal_id.secure_sequence_id.next_by_id()
                 vals_hashing = {'secure_sequence_number': new_number,
@@ -1802,7 +1804,7 @@ class AccountMove(models.Model):
 
         if 'payment_state' in init_values and self.payment_state == 'paid':
             return self.env.ref('account.mt_invoice_paid')
-        elif 'state' in init_values and self.state == 'posted' and self.is_sale_document(include_receipts=True):
+        elif 'state' in init_values and self.state in ('in_post', 'posted') and self.is_sale_document(include_receipts=True):
             return self.env.ref('account.mt_invoice_validated')
         return super(AccountMove, self)._track_subtype(init_values)
 
@@ -2361,7 +2363,7 @@ class AccountMove(models.Model):
                 raise UserError(_('You cannot reset to draft an exchange difference journal entry.'))
             if move.tax_cash_basis_rec_id:
                 raise UserError(_('You cannot reset to draft a tax cash basis journal entry.'))
-            if move.restrict_mode_hash_table and move.state == 'posted' and move.id not in excluded_move_ids:
+            if move.restrict_mode_hash_table and move.state in ('in_post', 'posted') and move.id not in excluded_move_ids:
                 raise UserError(_('You cannot modify a posted entry of this journal because it is in strict mode.'))
             # We remove all the analytics entries for this journal
             move.mapped('line_ids.analytic_line_ids').unlink()
@@ -3454,7 +3456,7 @@ class AccountMoveLine(models.Model):
         return self.tax_ids or self.tax_line_id or self.tax_tag_ids.filtered(lambda x: x.applicability == "taxes")
 
     def _check_tax_lock_date(self):
-        for line in self.filtered(lambda l: l.move_id.state == 'posted'):
+        for line in self.filtered(lambda l: l.move_id.state in ('in_post', 'posted')):
             move = line.move_id
             if move.company_id.tax_lock_date and move.date <= move.company_id.tax_lock_date and line._affect_tax_report():
                 raise UserError(_("The operation is refused as it would impact an already issued tax statement. "
@@ -3594,7 +3596,7 @@ class AccountMoveLine(models.Model):
             raise UserError(_('You cannot use a deprecated account.'))
 
         for line in self:
-            if line.parent_state == 'posted':
+            if line.parent_state in ('in_post', 'posted'):
                 if line.move_id.restrict_mode_hash_table and set(vals).intersection(INTEGRITY_HASH_LINE_FIELDS):
                     raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_LINE_FIELDS))
                 if any(key in vals for key in ('tax_ids', 'tax_line_ids')):
@@ -4052,7 +4054,7 @@ class AccountMoveLine(models.Model):
             all_accounts.append(line.account_id)
             if line.reconciled:
                 raise UserError(_('You are trying to reconcile some entries that are already reconciled.'))
-            if line.move_id.state != 'posted':
+            if line.move_id.state not in ('in_post', 'posted'):
                 raise UserError(_('You can only reconcile posted entries.'))
         if len(company_ids) > 1:
             raise UserError(_('To reconcile the entries company should be the same for all entries.'))
@@ -4392,7 +4394,7 @@ class AccountMoveLine(models.Model):
         tables = ''
         if domain:
             domain.append(('display_type', 'not in', ('line_section', 'line_note')))
-            domain.append(('move_id.state', '!=', 'cancel'))
+            domain.append(('move_id.state', 'not in', ('in_cancel', 'cancel')))
 
             query = self._where_calc(domain)
 

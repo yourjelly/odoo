@@ -26,7 +26,7 @@ class UtmCampaign(models.Model):
         query = """SELECT move.campaign_id, -SUM(line.balance) as price_subtotal
                     FROM account_move_line line
                     INNER JOIN account_move move ON line.move_id = move.id
-                    WHERE move.state not in ('draft', 'cancel')
+                    WHERE move.state not in ('draft', 'in_cancel', 'cancel')
                         AND move.campaign_id IN %s
                         AND move.move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
                         AND line.account_id IS NOT NULL
@@ -62,6 +62,6 @@ class UtmCampaign(models.Model):
         action['domain'] = [
             ('id', 'in', invoices.ids),
             ('move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')),
-            ('state', 'not in', ['draft', 'cancel'])
+            ('state', 'not in', ['draft', 'in_cancel', 'cancel'])
         ]
         return action

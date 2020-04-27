@@ -16,19 +16,19 @@
         <xpath expr="//t[@t-foreach='invoices']/tr/td[hasclass('tx_status')]" position="replace">
             <t t-set="last_tx" t-value="invoice.get_portal_last_transaction()"/>
             <td class="tx_status text-center">
-                <t t-if="invoice.state == 'posted' and invoice.payment_state in ('not_paid', 'partial') and (last_tx.state not in ['pending', 'authorized', 'done', 'cancel'] or (last_tx.state == 'pending' and last_tx.acquirer_id.provider in ('transfer', 'manual')))">
+                <t t-if="invoice.state in ('in_post', 'posted') and invoice.payment_state in ('not_paid', 'partial') and (last_tx.state not in ['pending', 'authorized', 'done', 'cancel'] or (last_tx.state == 'pending' and last_tx.acquirer_id.provider in ('transfer', 'manual')))">
                     <span class="badge badge-pill badge-info"><i class="fa fa-fw fa-clock-o"></i><span class="d-none d-md-inline"> Waiting for Payment</span></span>
                 </t>
-                <t t-if="invoice.state == 'posted' and last_tx.state == 'authorized'">
+                <t t-if="invoice.state in ('in_post', 'posted') and last_tx.state == 'authorized'">
                     <span class="badge badge-pill badge-primary"><i class="fa fa-fw fa-check"/><span class="d-none d-md-inline"> Authorized</span></span>
                 </t>
-                <t t-if="invoice.state == 'posted' and last_tx.state == 'pending' and last_tx.acquirer_id.provider not in ('transfer', 'manual')">
+                <t t-if="invoice.state in ('in_post', 'posted') and last_tx.state == 'pending' and last_tx.acquirer_id.provider not in ('transfer', 'manual')">
                   <span class="badge badge-pill badge-warning"><span class="d-none d-md-inline"> Pending</span></span>
                 </t>
-                <t t-if="invoice.state == 'posted' and invoice.payment_state == 'paid' or last_tx.state == 'done'">
+                <t t-if="invoice.state in ('in_post', 'posted') and invoice.payment_state == 'paid' or last_tx.state == 'done'">
                     <span class="badge badge-pill badge-success"><i class="fa fa-fw fa-check"></i><span class="d-none d-md-inline"> Paid</span></span>
                 </t>
-                <t t-if="invoice.state == 'cancel'">
+                <t t-if="invoice.state in ('in_cancel', 'cancel')">
                     <span class="badge badge-pill badge-danger"><i class="fa fa-fw fa-remove"></i><span class="d-none d-md-inline"> Cancelled</span></span>
                 </t>
             </td>

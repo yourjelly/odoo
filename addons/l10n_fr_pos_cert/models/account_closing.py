@@ -44,7 +44,7 @@ class AccountClosing(models.Model):
             JOIN account_move m ON m.id = aml.move_id
             WHERE j.type = 'sale'
                 AND aml.company_id = %(company_id)s
-                AND m.state = 'posted' '''
+                AND m.state IN ('in_post', 'posted') '''
 
         if first_move_sequence_number is not False and first_move_sequence_number is not None:
             params['first_move_sequence_number'] = first_move_sequence_number

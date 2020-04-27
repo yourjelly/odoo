@@ -97,7 +97,7 @@
                     <filter string="Transfers" name="transfers_filter" domain="[('is_internal_transfer', '=', True)]"/>
                     <separator/>
                     <filter string="Draft" name="state_draft" domain="[('state', '=', 'draft')]"/>
-                    <filter string="Posted" name="state_posted" domain="[('state', '=', 'posted')]"/>
+                    <filter string="Posted" name="state_posted" domain="[('state', 'in', ('in_post', 'posted'))]"/>
                     <separator/>
                     <filter string="Sent" name="state_sent" domain="[('is_move_sent', '=', True)]"/>
                     <filter string="Bank Matched" name="matched" domain="[('is_matched', '=', True)]"/>
@@ -134,14 +134,14 @@
                         <button name="action_post" string="Confirm" type="object" class="oe_highlight"
                                 attrs="{'invisible': [('state', '!=', 'draft')]}"/>
                         <button name="action_draft" string="Reset To Draft" type="object" class="btn btn-secondary"
-                                attrs="{'invisible': [('state', 'not in', ('posted', 'cancel'))]}"
+                                attrs="{'invisible': [('state', 'not in', ('in_post', 'posted', 'in_cancel', 'cancel'))]}"
                                 groups="account.group_account_invoice"/>
                         <button name="action_cancel" string="Cancel" type="object"
                                 attrs="{'invisible': [('state', '!=', 'draft')]}"/>
                         <button name="mark_as_sent" string="Mark as Sent" type="object"
-                                attrs="{'invisible': ['|', '|', ('state', '!=', 'posted'), ('is_move_sent', '=', True), ('payment_method_code', '!=', 'manual')]}"/>
+                                attrs="{'invisible': ['|', '|', ('state', 'not in', ('in_post', 'posted')), ('is_move_sent', '=', True), ('payment_method_code', '!=', 'manual')]}"/>
                         <button name="unmark_as_sent"  string="Unmark as Sent" type="object"
-                                attrs="{'invisible': ['|', '|', ('state', '!=', 'posted'), ('is_move_sent', '=', False), ('payment_method_code', '!=', 'manual')]}"/>
+                                attrs="{'invisible': ['|', '|', ('state', 'not in', ('in_post', 'posted')), ('is_move_sent', '=', False), ('payment_method_code', '!=', 'manual')]}"/>
                         <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
                     </header>
 

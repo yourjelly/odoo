@@ -71,7 +71,7 @@
                 <field name="invoice_date"/>
                 <separator/>
                 <filter string="To Invoice" name="toinvoice" domain="[('state','=','draft')]" help = "Draft Invoices"/>
-                <filter string="Invoiced" name="current" domain="[('state','not in', ('draft','cancel'))]"/>
+                <filter string="Invoiced" name="current" domain="[('state','not in', ('draft', 'in_cancel', 'cancel'))]"/>
                 <separator/>
                 <filter string="Customers" name="customer" domain="['|', ('move_type','=','out_invoice'),('move_type','=','out_refund')]"/>
                 <filter string="Vendors" name="supplier" domain="['|', ('move_type','=','in_invoice'),('move_type','=','in_refund')]"/>

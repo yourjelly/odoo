@@ -62,7 +62,7 @@ class AccountAnalyticLine(models.Model):
         return result
 
     def _check_can_write(self, values):
-        if self.sudo().filtered(lambda aal: aal.so_line.product_id.invoice_policy == "delivery") and self.filtered(lambda t: t.timesheet_invoice_id and t.timesheet_invoice_id.state != 'cancel'):
+        if self.sudo().filtered(lambda aal: aal.so_line.product_id.invoice_policy == "delivery") and self.filtered(lambda t: t.timesheet_invoice_id and t.timesheet_invoice_id.state not in ('in_cancel', 'cancel')):
             if any([field_name in values for field_name in ['unit_amount', 'employee_id', 'project_id', 'task_id', 'so_line', 'amount', 'date']]):
                 raise UserError(_('You can not modify already invoiced timesheets (linked to a Sales order items invoiced on Time and material).'))
 
@@ -122,6 +122,6 @@ class AccountAnalyticLine(models.Model):
         return expression.AND([domain, [('timesheet_invoice_type', 'in', ['billable_time', 'non_billable'])]])
 
     def unlink(self):
-        if any(line.timesheet_invoice_id and line.timesheet_invoice_id.state == 'posted' for line in self):
+        if any(line.timesheet_invoice_id and line.timesheet_invoice_id.state in ('in_post', 'posted') for line in self):
             raise UserError(_('You cannot remove a timesheet that has already been invoiced.'))
         return super(AccountAnalyticLine, self).unlink()

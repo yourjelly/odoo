@@ -126,7 +126,7 @@ class SaleOrderLine(models.Model):
             ('date', '<=', date),
             '|',
             ('timesheet_invoice_id', '=', False),
-            ('timesheet_invoice_id.state', '=', 'cancel')]])
+            ('timesheet_invoice_id.state', 'in', ('in_cancel', 'cancel'))]])
         mapping = lines_by_timesheet.sudo()._get_delivered_quantity_by_analytic(domain)
 
         for line in lines_by_timesheet:

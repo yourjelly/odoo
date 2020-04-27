@@ -19,7 +19,7 @@
                             <div attrs="{'invisible':[('refund_method', '!=', 'refund')]}" class="oe_grey" colspan="4">
                                The credit note is created in draft and can be edited before being issued.
                             </div>
-                            <div attrs="{'invisible':[('refund_method', '!=', 'cancel')]}" class="oe_grey" colspan="4">
+                            <div attrs="{'invisible':[('refund_method', 'not in', ('in_cancel', 'cancel'))]}" class="oe_grey" colspan="4">
                                The credit note is auto-validated and reconciled with the invoice.
                             </div>
                             <div attrs="{'invisible':[('refund_method', '!=', 'modify')]}" class="oe_grey" colspan="4">

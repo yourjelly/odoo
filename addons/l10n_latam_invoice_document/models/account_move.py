@@ -137,7 +137,7 @@ class AccountMove(models.Model):
         an error. This only applies to invoices related to journals that has the "Use Documents" set as True.
         And if the document type is set then check if the invoice number has been set, because a posted invoice
         without a document number is not valid in the case that the related journals has "Use Docuemnts" set as True """
-        validated_invoices = self.filtered(lambda x: x.l10n_latam_use_documents and x.state == 'posted')
+        validated_invoices = self.filtered(lambda x: x.l10n_latam_use_documents and x.state in ('in_post', 'posted'))
         without_doc_type = validated_invoices.filtered(lambda x: not x.l10n_latam_document_type_id)
         if without_doc_type:
             raise ValidationError(_(
@@ -229,7 +229,7 @@ class AccountMove(models.Model):
                 ('id', '!=', rec.id),
                 ('commercial_partner_id', '=', rec.commercial_partner_id.id),
                 # allow to have to equal if they are cancelled
-                ('state', '!=', 'cancel'),
+                ('state', 'not in', ('in_cancel', 'cancel')),
             ]
             if rec.search(domain):
                 raise ValidationError(_('Vendor bill number must be unique per vendor and company.'))

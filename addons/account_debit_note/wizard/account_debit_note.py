@@ -14,7 +14,7 @@ class AccountDebitNote(models.TransientModel):
     _description = 'Add Debit Note wizard'
 
     move_ids = fields.Many2many('account.move', 'account_move_debit_move', 'debit_id', 'move_id',
-                                domain=[('state', '=', 'posted')])
+                                domain=[('state', 'in', ('in_post', 'posted'))])
     date = fields.Date(string='Debit Note Date', default=fields.Date.context_today, required=True)
     reason = fields.Char(string='Reason')
     journal_id = fields.Many2one('account.journal', string='Use Specific Journal',
@@ -30,7 +30,7 @@ class AccountDebitNote(models.TransientModel):
     def default_get(self, fields):
         res = super(AccountDebitNote, self).default_get(fields)
         move_ids = self.env['account.move'].browse(self.env.context['active_ids']) if self.env.context.get('active_model') == 'account.move' else self.env['account.move']
-        if any(move.state != "posted" for move in move_ids):
+        if any(move.state not in ('in_post', 'posted') for move in move_ids):
             raise UserError(_('You can only debit posted moves.'))
         res['move_ids'] = [(6, 0, move_ids.ids)]
         return res

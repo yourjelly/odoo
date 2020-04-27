@@ -362,7 +362,7 @@ class AccountJournal(models.Model):
             if 'alias_name' in vals:
                 journal._update_mail_alias(vals)
             if 'restrict_mode_hash_table' in vals and not vals.get('restrict_mode_hash_table'):
-                journal_entry = self.env['account.move'].search([('journal_id', '=', self.id), ('state', '=', 'posted'), ('secure_sequence_number', '!=', 0)], limit=1)
+                journal_entry = self.env['account.move'].search([('journal_id', '=', self.id), ('state', 'in', ('in_post', 'posted')), ('secure_sequence_number', '!=', 0)], limit=1)
                 if len(journal_entry) > 0:
                     field_string = self._fields['restrict_mode_hash_table'].get_description(self.env)['string']
                     raise UserError(_("You cannot modify the field %s of a journal that already has accounting entries.") % field_string)
@@ -610,7 +610,7 @@ class AccountJournal(models.Model):
         domain = (domain or []) + [
             ('account_id', 'in', tuple(accounts.ids)),
             ('display_type', 'not in', ('line_section', 'line_note')),
-            ('move_id.state', '!=', 'cancel'),
+            ('move_id.state', 'not in', ('in_cancel', 'cancel')),
         ]
         query = self.env['account.move.line']._where_calc(domain)
         tables, where_clause, where_params = query.get_sql()
@@ -653,7 +653,7 @@ class AccountJournal(models.Model):
         domain = (domain or []) + [
             ('account_id', 'in', tuple(accounts.ids)),
             ('display_type', 'not in', ('line_section', 'line_note')),
-            ('move_id.state', '!=', 'cancel'),
+            ('move_id.state', 'not in', ('in_cancel', 'cancel')),
             ('reconciled', '=', False),
         ]
         query = self.env['account.move.line']._where_calc(domain)

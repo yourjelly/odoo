@@ -32,7 +32,7 @@ class AccountMove(models.Model):
 
         # Get the other customer invoices and refunds.
         ordered_invoice_ids = sale_orders.mapped('invoice_ids')\
-            .filtered(lambda i: i.state not in ['draft', 'cancel'])\
+            .filtered(lambda i: i.state not in ['draft', 'in_cancel', 'cancel'])\
             .sorted(lambda i: (i.invoice_date, i.id))
 
         # Get the position of self in other customer invoices and refunds.
@@ -106,7 +106,7 @@ class AccountMoveLine(models.Model):
         so_line = self.sale_line_ids and self.sale_line_ids[-1] or False
         if so_line:
             qty_to_invoice = self.product_uom_id._compute_quantity(self.quantity, self.product_id.uom_id)
-            qty_invoiced = sum([x.product_uom_id._compute_quantity(x.quantity, x.product_id.uom_id) for x in so_line.invoice_lines if x.move_id.state == 'posted'])
+            qty_invoiced = sum([x.product_uom_id._compute_quantity(x.quantity, x.product_id.uom_id) for x in so_line.invoice_lines if x.move_id.state in ('in_post', 'posted')])
             average_price_unit = self.product_id._compute_average_price(qty_invoiced, qty_to_invoice, so_line.move_ids)
 
             price_unit = average_price_unit or price_unit

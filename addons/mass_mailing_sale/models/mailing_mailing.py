@@ -22,7 +22,7 @@ class MassMailing(models.Model):
     def _compute_sale_invoiced_amount(self):
         for mass_mailing in self:
             if self.user_has_groups('sales_team.group_sale_salesman') and self.user_has_groups('account.group_account_invoice'):
-                domain = self._get_sale_utm_domain() + [('state', 'not in', ['draft', 'cancel'])]
+                domain = self._get_sale_utm_domain() + [('state', 'not in', ['draft', 'in_cancel', 'cancel'])]
                 moves = self.env['account.move'].search_read(domain, ['amount_untaxed'])
                 mass_mailing.sale_invoiced_amount = sum(i['amount_untaxed'] for i in moves)
             else:
@@ -45,7 +45,7 @@ class MassMailing(models.Model):
         action['domain'] = [
             ('id', 'in', moves.ids),
             ('move_type', 'in', ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')),
-            ('state', 'not in', ['draft', 'cancel'])
+            ('state', 'not in', ['draft', 'in_cancel', 'cancel'])
         ]
         action['context'] = {'create': False}
         return action

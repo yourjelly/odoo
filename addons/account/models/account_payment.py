@@ -396,7 +396,7 @@ class AccountPayment(models.Model):
                  'payment_method_id', 'payment_type')
     def _compute_qr_code(self):
         for pay in self:
-            if pay.state in ('draft', 'posted') \
+            if pay.state in ('draft', 'in_post', 'posted') \
                 and pay.partner_bank_id \
                 and pay.payment_method_id.code == 'manual' \
                 and pay.payment_type == 'outbound' \

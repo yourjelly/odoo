@@ -264,7 +264,7 @@ class L10nInAccountInvoiceReport(models.Model):
 
     def _where(self):
         return """
-                WHERE am.state = 'posted'
+                WHERE am.state IN ('in_post', 'posted')
                     AND tag_rep_ln.account_tax_report_line_id in (SELECT res_id FROM ir_model_data WHERE module='l10n_in' AND name in ('tax_report_line_igst', 'tax_report_line_cgst', 'tax_report_line_sgst', 'tax_report_line_zero_rated', 'tax_report_line_igst_rc', 'tax_report_line_cgst_rc', 'tax_report_line_sgst_rc'))
         """
 

@@ -180,7 +180,7 @@ class StockLandedCost(models.Model):
             cost.write({'state': 'done', 'account_move_id': move.id})
             move.post()
 
-            if cost.vendor_bill_id and cost.vendor_bill_id.state == 'posted' and cost.company_id.anglo_saxon_accounting:
+            if cost.vendor_bill_id and cost.vendor_bill_id.state in ('in_post', 'posted') and cost.company_id.anglo_saxon_accounting:
                 all_amls = cost.vendor_bill_id.line_ids | cost.account_move_id.line_ids
                 for product in cost.cost_lines.product_id:
                     accounts = product.product_tmpl_id.get_product_accounts()

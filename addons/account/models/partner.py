@@ -285,7 +285,7 @@ class ResPartner(models.Model):
             RIGHT JOIN account_account acc ON aml.account_id = acc.id
             WHERE acc.internal_type = %s
               AND NOT acc.deprecated AND acc.company_id = %s
-              AND move.state = 'posted'
+              AND move.state in ('in_post', 'posted')
             GROUP BY partner.id
             HAVING %s * COALESCE(SUM(aml.amount_residual), 0) ''' + operator + ''' %s''', (account_type, self.env.user.company_id.id, sign, operand))
         res = self._cr.fetchall()
@@ -321,7 +321,7 @@ class ResPartner(models.Model):
 
         # generate where clause to include multicompany rules
         where_query = account_invoice_report._where_calc([
-            ('partner_id', 'in', all_partner_ids), ('state', 'not in', ['draft', 'cancel']),
+            ('partner_id', 'in', all_partner_ids), ('state', 'not in', ['draft', 'in_cancel', 'cancel']),
             ('move_type', 'in', ('out_invoice', 'out_refund'))
         ])
         account_invoice_report._apply_ir_rules(where_query, 'read')
@@ -492,7 +492,7 @@ class ResPartner(models.Model):
         has_invoice = self.env['account.move'].search([
             ('move_type', 'in', ['out_invoice', 'out_refund']),
             ('partner_id', 'child_of', self.commercial_partner_id.id),
-            ('state', '=', 'posted')
+            ('state', 'in', ('in_post', 'posted'))
         ], limit=1)
         return can_edit_vat and not (bool(has_invoice))
 

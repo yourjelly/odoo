@@ -100,7 +100,7 @@ class account_journal(models.Model):
         locale = get_lang(self.env).code
 
         #starting point of the graph is the last statement
-        last_stmt = self._get_last_bank_statement(domain=[('move_id.state', '=', 'posted')])
+        last_stmt = self._get_last_bank_statement(domain=[('move_id.state', 'in', ('in_post', 'posted'))])
 
         last_balance = last_stmt and last_stmt.balance_end_real or 0
         data.append(build_graph_data(today, last_balance))
@@ -209,7 +209,7 @@ class account_journal(models.Model):
                 MIN(invoice_date_due) AS aggr_date
             FROM account_move move
             WHERE move.journal_id = %(journal_id)s
-            AND move.state = 'posted'
+            AND move.state in ('in_post', 'posted')
             AND move.payment_state in ('not_paid', 'partial')
             AND move.move_type IN %(invoice_types)s
         ''', {
@@ -228,13 +228,13 @@ class account_journal(models.Model):
         sum_draft = sum_waiting = sum_late = 0.0
         if self.type in ('bank', 'cash'):
             last_statement = self._get_last_bank_statement(
-                domain=[('move_id.state', '=', 'posted')])
+                domain=[('move_id.state', 'in', ('in_post', 'posted'))])
             last_balance = last_statement.balance_end
             has_at_least_one_statement = bool(last_statement)
             bank_account_balance, nb_lines_bank_account_balance = self._get_journal_bank_account_balance(
-                domain=[('move_id.state', '=', 'posted')])
+                domain=[('move_id.state', 'in', ('in_post', 'posted'))])
             outstanding_pay_account_balance, nb_lines_outstanding_pay_account_balance = self._get_journal_outstanding_payments_account_balance(
-                domain=[('move_id.state', '=', 'posted')])
+                domain=[('move_id.state', 'in', ('in_post', 'posted'))])
 
             self._cr.execute('''
                 SELECT COUNT(st_line.id)
@@ -274,7 +274,7 @@ class account_journal(models.Model):
                 FROM account_move move
                 WHERE journal_id = %s
                 AND date <= %s
-                AND state = 'posted'
+                AND state in ('in_post', 'posted')
                 AND payment_state in ('not_paid', 'partial')
                 AND move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt');
             '''
@@ -333,7 +333,7 @@ class account_journal(models.Model):
                 move.company_id
             FROM account_move move
             WHERE move.journal_id = %(journal_id)s
-            AND move.state = 'posted'
+            AND move.state in ('in_post', 'posted')
             AND move.payment_state in ('not_paid', 'partial')
             AND move.move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt');
         ''', {'journal_id': self.id})
