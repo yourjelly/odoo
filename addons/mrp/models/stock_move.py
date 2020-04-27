@@ -54,10 +54,10 @@ class StockMoveLine(models.Model):
 
     def write(self, vals):
         for move_line in self:
-            if move_line.move_id.production_id and 'lot_id' in vals:
-                move_line.production_id.move_raw_ids.mapped('move_line_ids')\
-                    .filtered(lambda r: not r.done_move and move_line.lot_id in r.lot_produced_ids)\
-                    .write({'lot_produced_ids': [(4, vals['lot_id'])]})
+#            if move_line.move_id.production_id and 'lot_id' in vals:
+#                move_line.production_id.move_raw_ids.mapped('move_line_ids')\
+#                    .filtered(lambda r: not r.done_move and move_line.lot_id in in move_line.produce_line_ids.lot_id)\
+#                    .write({'lot_produced_ids': [(4, vals['lot_id'])]})
             production = move_line.move_id.production_id or move_line.move_id.raw_material_production_id
             if production and move_line.state == 'done' and any(field in vals for field in ('lot_id', 'location_id', 'qty_done')):
                 move_line._log_message(production, move_line, 'mrp.track_production_move_template', vals)

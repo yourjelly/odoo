@@ -63,19 +63,22 @@ class TestTraceability(TestMrpCommon):
             mo.action_assign()
 
             # Start MO production
-            produce_form = Form(self.env['mrp.product.produce'].with_context({
-                'active_id': mo.id,
-                'active_ids': [mo.id],
-            }))
-
-            if finished_product.tracking != 'serial':
-                produce_form.qty_producing = 1
-
+            mo_form = Form(mo)
+            mo_form.qty_producing = 1
             if finished_product.tracking != 'none':
-                produce_form.finished_lot_id = self.env['stock.production.lot'].create({'name': 'Serial or Lot finished', 'product_id': finished_product.id, 'company_id': self.env.company.id})
-            produce_wizard = produce_form.save()
+                mo_form.lot_producing_id = self.env['stock.production.lot'].create({'name': 'Serial or Lot finished', 'product_id': finished_product.id, 'company_id': self.env.company.id})
+            mo = mo_form.save()
 
-            produce_wizard.do_produce()
+            details_operation_form = Form(mo.move_raw_ids[1], view=self.env.ref('stock.view_stock_move_operations'))
+            with details_operation_form.move_line_ids.edit(0) as ml:
+                ml.qty_done = 1
+            details_operation_form.save()
+            details_operation_form = Form(mo.move_raw_ids[2], view=self.env.ref('stock.view_stock_move_operations'))
+            with details_operation_form.move_line_ids.edit(0) as ml:
+                ml.qty_done = 1
+            details_operation_form.save()
+
+
             mo.button_mark_done()
 
             self.assertEqual(mo.state, 'done', "Production order should be in done state.")

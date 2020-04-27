@@ -67,6 +67,7 @@ class MrpProduction(models.Model):
         domain="[('id', 'in', allowed_product_ids)]",
         readonly=True, required=True, check_company=True,
         states={'draft': [('readonly', False)]})
+    product_tracking = fields.Selection(related='product_id.tracking')
     allowed_product_ids = fields.Many2many('product.product', compute='_compute_allowed_product_ids')
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id')
     product_qty = fields.Float(
@@ -78,6 +79,10 @@ class MrpProduction(models.Model):
         'uom.uom', 'Product Unit of Measure',
         readonly=True, required=True,
         states={'draft': [('readonly', False)]}, domain="[('category_id', '=', product_uom_category_id)]")
+    lot_producing_id = fields.Many2one(
+        'stock.production.lot', string='Lot/Serial Number of the finished product',
+        domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
+    qty_producing = fields.Float(string="Quantity Producing")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     picking_type_id = fields.Many2one(
@@ -449,6 +454,7 @@ class MrpProduction(models.Model):
         for order in self:
             already_reserved = order.is_locked and order.state not in ('done', 'cancel') and order.mapped('move_raw_ids.move_line_ids')
             any_quantity_done = any([m.quantity_done > 0 for m in order.move_raw_ids])
+
             order.unreserve_visible = not any_quantity_done and already_reserved
             order.reserve_visible = order.state in ('confirmed', 'planned') and any(move.state in ['confirmed', 'partially_available'] for move in order.move_raw_ids)
 
@@ -557,6 +563,35 @@ class MrpProduction(models.Model):
         self.move_raw_ids.update({'picking_type_id': self.picking_type_id})
         self.location_src_id = self.picking_type_id.default_location_src_id.id or location.id
         self.location_dest_id = self.picking_type_id.default_location_dest_id.id or location.id
+
+    @api.onchange('qty_producing', 'lot_producing_id')
+    def _onchange_producing(self):
+        production_move = self.move_finished_ids.filtered(
+            lambda move: move.product_id == self.product_id and
+            move.state not in ('done', 'cancel')
+        )
+        if not production_move:
+            # Happens when opening the mo?
+            return
+        production_move.move_line_ids.qty_done = 0
+        vals = production_move._set_quantity_done_prepare_vals(self.qty_producing)  # FIXME sle: uom mismatch
+        if vals['to_create']:
+            production_move.move_line_ids.new(dict(vals['to_create'], lot_id=self.lot_producing_id.id))
+        if vals['to_write']:
+            for move_line, vals in vals['to_write']:
+                move_line.update(dict(vals, lot_id=self.lot_producing_id.id))
+
+        for move in self.move_raw_ids:
+            if move.has_tracking != 'none':
+                continue
+            new_qty = move.product_uom._compute_quantity(self.qty_producing, self.product_uom_id) * move.unit_factor
+            move.move_line_ids.filtered(lambda ml: ml.state not in ('done', 'cancel')).qty_done = 0
+            vals = move._set_quantity_done_prepare_vals(new_qty)
+            if vals['to_create']:
+                move.move_line_ids.new(vals['to_create'])
+            if vals['to_write']:
+                for move_line, vals in vals['to_write']:
+                    move_line.update(vals)
 
     def write(self, vals):
         res = super(MrpProduction, self).write(vals)
@@ -856,13 +891,6 @@ class MrpProduction(models.Model):
             production.workorder_ids._refresh_wo_lines()
         return True
 
-    def open_produce_product(self):
-        self.ensure_one()
-        if self.bom_id.type == 'phantom':
-            raise UserError(_('You cannot produce a MO with a bom kit product.'))
-        action = self.env.ref('mrp.act_mrp_product_produce').read()[0]
-        return action
-
     def button_plan(self):
         """ Create work orders. And probably do stuff, like things. """
         orders_to_plan = self.filtered(lambda order: order.bom_id.operation_ids and order.state == 'confirmed')
@@ -1111,16 +1139,7 @@ class MrpProduction(models.Model):
             order.workorder_ids.mapped('finished_workorder_line_ids').unlink()
             order.action_assign()
             consume_move_lines = moves_to_do.mapped('move_line_ids')
-            for moveline in moves_to_finish.mapped('move_line_ids'):
-                if moveline.move_id.has_tracking != 'none' and moveline.product_id == order.product_id or moveline.lot_id in consume_move_lines.mapped('lot_produced_ids'):
-                    if any([not ml.lot_produced_ids for ml in consume_move_lines]):
-                        raise UserError(_('You can not consume without telling for which lot you consumed it'))
-                    # Link all movelines in the consumed with same lot_produced_ids false or the correct lot_produced_ids
-                    filtered_lines = consume_move_lines.filtered(lambda ml: moveline.lot_id in ml.lot_produced_ids)
-                    moveline.write({'consume_line_ids': [(6, 0, [x for x in filtered_lines.ids])]})
-                else:
-                    # Link with everything
-                    moveline.write({'consume_line_ids': [(6, 0, [x for x in consume_move_lines.ids])]})
+            order.move_finished_ids.move_line_ids.consume_line_ids = [(6, 0, consume_move_lines.ids)]
         return True
 
     def _open_backorder(self):
@@ -1253,7 +1272,7 @@ class MrpProduction(models.Model):
             'res_model': 'mrp.unbuild',
             'view_id': self.env.ref('mrp.mrp_unbuild_form_view_simplified').id,
             'type': 'ir.actions.act_window',
-            'context': {'default_mo_id': self.id, 
+            'context': {'default_mo_id': self.id,
                         'default_company_id': self.company_id.id,
                         'default_location_id': self.location_dest_id.id,
                         'default_location_dest_id': self.location_src_id.id,

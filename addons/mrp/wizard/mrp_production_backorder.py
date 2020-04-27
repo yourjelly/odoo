@@ -65,6 +65,7 @@ class MrpProductionBackorder(models.TransientModel):
             'move_raw_ids': None,
             'move_finished_ids': None,
             'product_qty': mo_source._get_quantity_to_backorder(),
+            'lot_producing_id': False,
         }
 
     def _do_backorder_mos(self):
