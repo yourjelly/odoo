@@ -68,6 +68,15 @@ odoo.define('point_of_sale.tour.PaymentScreenTourMethods', function (require) {
             }
             return keys.split(' ').map(generateStep);
         }
+
+        clickBack() {
+            return [
+                {
+                    content: 'click back button',
+                    trigger: '.payment-screen .button.back',
+                },
+            ];
+        }
     }
 
     class Check {
