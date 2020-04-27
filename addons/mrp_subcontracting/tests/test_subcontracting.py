@@ -496,19 +496,19 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         for i in range(len(details_subcontract_moves_form._values['move_line_ids'])):
             with details_subcontract_moves_form.move_line_ids.edit(i) as sc:
                 if sc._values['qty_done']:
-                    sc.lot_produced_ids.remove(index=0)
-                    sc.lot_produced_ids.add(corrected_final_lot)
+                    sc.produce_line_ids.lot_id.remove(index=0)
+                    sc.produce_line_ids.lot_id.add(corrected_final_lot)
         details_subcontract_moves_form.save()
         details_subcontract_moves_form = Form(move_raw_comp_2, view=self.env.ref('mrp_subcontracting.mrp_subcontracting_move_form_view'))
         for i in range(len(details_subcontract_moves_form._values['move_line_ids'])):
             with details_subcontract_moves_form.move_line_ids.edit(i) as sc:
                 if sc._values['qty_done']:
-                    sc.lot_produced_ids.remove(index=0)
-                    sc.lot_produced_ids.add(corrected_final_lot)
+                    sc.produce_line_ids.lot_id.remove(index=0)
+                    sc.produce_line_ids.lot_id.add(corrected_final_lot)
         details_subcontract_moves_form.save()
 
-        self.assertEqual(move_comp1.move_line_ids.filtered(lambda ml: not ml.product_uom_qty).lot_produced_ids.name, 'LOT F2')
-        self.assertEqual(move_comp2.move_line_ids.filtered(lambda ml: not ml.product_uom_qty).lot_produced_ids.name, 'LOT F2')
+        self.assertEqual(move_comp1.move_line_ids.filtered(lambda ml: not ml.product_uom_qty).produce_line_ids.lot_id.name, 'LOT F2')
+        self.assertEqual(move_comp2.move_line_ids.filtered(lambda ml: not ml.product_uom_qty).produce_line_ids.lot_id.name, 'LOT F2')
 
     def test_flow_8(self):
         resupply_sub_on_order_route = self.env['stock.location.route'].search([('name', '=', 'Resupply Subcontractor on Order')])

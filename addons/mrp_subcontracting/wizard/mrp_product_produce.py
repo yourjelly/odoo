@@ -17,7 +17,7 @@ class MrpProductProduce(models.TransientModel):
     def _generate_produce_lines(self):
         """ When the wizard is called in backend, the onchange that create the
         produce lines is not trigger. This method generate them and is used with
-        _record_production to appropriately set the lot_produced_id and
+        _record_production to appropriately set the produce_line_ids and
         appropriately create raw stock move lines.
         """
         self.ensure_one()
