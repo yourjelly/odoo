@@ -35,6 +35,9 @@ function _addTitleAndAllowedAttributes(el, title, options) {
         const titleEl = _buildTitleElement(title);
         tooltipEl = titleEl;
         el.appendChild(titleEl);
+    } else if (options && options.dataAttributes.img) {
+        const imgEl = _buildImgElement(options.dataAttributes.img);
+        el.appendChild(imgEl);
     }
 
     if (options && options.classes) {
@@ -72,6 +75,15 @@ function _buildTitleElement(title) {
     const titleEl = document.createElement('we-title');
     titleEl.textContent = title;
     return titleEl;
+}
+/**
+ * @param {string} src
+ * @returns {HTMLElement}
+ */
+function _buildImgElement(src) {
+    const imgEl = document.createElement('img');
+    imgEl.src = src;
+    return imgEl;
 }
 /**
  * Build the correct DOM for a we-row element.
@@ -730,10 +742,21 @@ const SelectUserValueWidget = UserValueWidget.extend({
 
         const activeWidget = this._userValueWidgets.find(widget => !widget.isPreviewed() && widget.isActive());
         let value = "/";
+        let imgSrc = "";
         if (activeWidget) {
             value = activeWidget.el.dataset.selectLabel || activeWidget.el.textContent;
+            imgSrc = activeWidget.el.dataset.img;
         }
-        this.menuTogglerEl.textContent = value;
+
+        if (!imgSrc) {
+            this.menuTogglerEl.textContent = value;
+        } else {
+            // If the we-select contains a data-img attribute
+            // we fill the we-toogler with an image instead of a text
+            const imgEl = document.createElement('img');
+            imgEl.src = imgSrc;
+            this.menuTogglerEl.appendChild(imgEl);
+        }
     },
 
     //--------------------------------------------------------------------------
