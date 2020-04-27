@@ -54,10 +54,10 @@ class StockMoveLine(models.Model):
 
     def write(self, vals):
         for move_line in self:
-            if move_line.move_id.production_id and 'lot_id' in vals:
-                move_line.production_id.move_raw_ids.mapped('move_line_ids')\
-                    .filtered(lambda r: not r.done_move and move_line.lot_id in r.lot_produced_ids)\
-                    .write({'lot_produced_ids': [(4, vals['lot_id'])]})
+#            if move_line.move_id.production_id and 'lot_id' in vals:
+#                move_line.production_id.move_raw_ids.mapped('move_line_ids')\
+#                    .filtered(lambda r: not r.done_move and move_line.lot_id in in move_line.produce_line_ids.lot_id)\
+#                    .write({'lot_produced_ids': [(4, vals['lot_id'])]})
             production = move_line.move_id.production_id or move_line.move_id.raw_material_production_id
             if production and move_line.state == 'done' and any(field in vals for field in ('lot_id', 'location_id', 'qty_done')):
                 move_line._log_message(production, move_line, 'mrp.track_production_move_template', vals)
@@ -165,16 +165,31 @@ class StockMove(models.Model):
     @api.model
     def default_get(self, fields_list):
         defaults = super(StockMove, self).default_get(fields_list)
-        if self.env.context.get('default_raw_material_production_id'):
-            production_id = self.env['mrp.production'].browse(self.env.context['default_raw_material_production_id'])
-            if production_id.state in ('confirmed', 'done'):
-                if production_id.state == 'confirmed':
+        if self.env.context.get('default_raw_material_production_id') or self.env.context.get('default_production_id'):
+            production_id = self.env['mrp.production'].browse(self.env.context.get('default_raw_material_production_id') or self.env.context.get('default_production_id'))
+            if production_id.state in ('confirmed', 'done', 'progress', 'planned'):
+                if production_id.state != 'done':
                     defaults['state'] = 'draft'
                 else:
                     defaults['state'] = 'done'
                 defaults['product_uom_qty'] = 0.0
                 defaults['additional'] = True
         return defaults
+
+    def update(self, values):
+        """ The server-side form cannot deal with 2 levels of one2many inside the main form view.
+        The field 'id' is added to the values to save and not remove properly like the main form one
+        or any other level 1 one2many object. It's saw as a field to be modify in database.
+        This leads to an error in fields.py, __setattr__() of class Id.
+        We remove manually the added 'id' key of the values to save dict. This hack is done waiting
+        for a fix in the served-side Form engine.
+
+        This override was needed for test_product_produce_9 and test_product_produce_11."""
+        if self.env.context.get('debug'):
+            if 'move_line_ids' in values:
+                if 'id' in values['move_line_ids'][0][2]:
+                    values['move_line_ids'][0][2].pop('id')
+        return super().update(values)
 
     def _action_assign(self):
         res = super(StockMove, self)._action_assign()
@@ -224,6 +239,17 @@ class StockMove(models.Model):
             phantom_moves._adjust_procure_method()
             moves_to_return |= phantom_moves.action_explode()
         return moves_to_return
+
+    def action_show_details(self):
+        self.ensure_one()
+        action = super().action_show_details()
+        if self.raw_material_production_id:
+            action['views'] = [(self.env.ref('mrp.view_stock_move_operations_raw').id, 'form')]
+            action['context']['show_destination_location'] = False
+        elif self.production_id:
+            action['views'] = [(self.env.ref('mrp.view_stock_move_operations_finished').id, 'form')]
+            action['context']['show_source_location'] = False
+        return action
 
     def _action_cancel(self):
         res = super(StockMove, self)._action_cancel()
@@ -322,3 +348,9 @@ class StockMove(models.Model):
             return min(qty_ratios) // 1
         else:
             return 0.0
+
+    def _prepare_move_split_vals(self, qty):
+        vals = super()._prepare_move_split_vals(qty)
+        if self.raw_material_production_id and self.reference:
+            vals['reference'] = self.reference
+        return vals
