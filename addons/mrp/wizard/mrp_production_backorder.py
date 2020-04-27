@@ -53,6 +53,7 @@ class MrpProductionBackorder(models.TransientModel):
             'move_raw_ids': None,
             'move_finished_ids': None,
             'product_qty': mo_source._get_quantity_to_backorder(),
+            'lot_producing_id': False,
         }
 
     def _generate_backorder_productions(self):
@@ -70,8 +71,6 @@ class MrpProductionBackorder(models.TransientModel):
                 'raw_material_production_id': backorder_mo.id,
                 'reference': backorder_mo.name,
             })
-            backorder_mo.action_confirm()
-            backorder_mo.move_raw_ids._recompute_state()
             backorders |= backorder_mo
 
             production.name = self._get_name_backorder(production.name, production.backorder_sequence)
