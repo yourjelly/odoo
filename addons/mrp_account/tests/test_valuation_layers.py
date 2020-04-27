@@ -39,14 +39,11 @@ class TestMrpValuationCommon(TestStockValuationCommon):
         return mo
 
     def _produce(self, mo, quantity=0):
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        if quantity:
-            produce_form.qty_producing = quantity
-        product_produce = produce_form.save()
-        product_produce.do_produce()
+        mo_form = Form(mo)
+        if not quantity:
+            quantity = mo.product_qty - mo.qty_produced
+        mo_form.qty_producing += quantity
+        mo = mo_form.save()
 
 
 class TestMrpValuationStandard(TestMrpValuationCommon):

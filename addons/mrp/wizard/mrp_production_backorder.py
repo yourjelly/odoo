@@ -66,6 +66,7 @@ class MrpProductionBackorder(models.TransientModel):
             'move_raw_ids': None,
             'move_finished_ids': None,
             'product_qty': mo_source._get_quantity_to_backorder(),
+            'lot_producing_id': False,
         }
 
     def _do_backorder_mos(self):
@@ -83,8 +84,6 @@ class MrpProductionBackorder(models.TransientModel):
                 'raw_material_production_id': backorder_mo.id,
                 'reference': backorder_mo.name,
             })
-            backorder_mo.action_confirm()
-            backorder_mo.move_raw_ids._recompute_state()
             backorders |= backorder_mo
 
             production.name = self._get_name_backorder(production.name, production.backorder_sequence)
@@ -92,6 +91,11 @@ class MrpProductionBackorder(models.TransientModel):
             (production.move_raw_ids | production.move_finished_ids).reference = production.name
             production._button_mark_done()
 
+        backorders.action_confirm()
+        # Remove the serial move line without reserved quantity. Post inventory will assigned all the non done moves
+        # So those move lines are duplicated.
+        backorders.move_raw_ids.move_line_ids.filtered(lambda ml: ml.product_id.tracking == 'serial' and ml.product_qty == 0).unlink()
+        backorders.move_raw_ids._recompute_state()
         return backorders
 
     def action_close_mo(self):

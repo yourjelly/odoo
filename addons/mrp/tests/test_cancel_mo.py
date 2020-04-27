@@ -33,10 +33,9 @@ class TestMrpCancelMO(TestMrpCommon):
         # Create MO
         manufacturing_order = self.generate_mo()[0]
         # Produce some quantity
-        produce_form = Form(self.env['mrp.product.produce'].with_context(active_id=manufacturing_order.id))
-        produce_form.qty_producing = 2
-        produce = produce_form.save()
-        produce.do_produce()
+        mo_form = Form(manufacturing_order)
+        mo_form.qty_producing = 2
+        manufacturing_order = mo_form.save()
         # Cancel it
         manufacturing_order.action_cancel()
         # Check it's cancelled
@@ -53,12 +52,11 @@ class TestMrpCancelMO(TestMrpCommon):
         after post inventory.
         """
         # Create MO
-        manufacturing_order = self.generate_mo()[0]
+        manufacturing_order = self.generate_mo(consumption='strict')[0]
         # Produce some quantity (not all to avoid to done the MO when post inventory)
-        produce_form = Form(self.env['mrp.product.produce'].with_context(active_id=manufacturing_order.id))
-        produce_form.qty_producing = 2
-        produce = produce_form.save()
-        produce.do_produce()
+        mo_form = Form(manufacturing_order)
+        mo_form.qty_producing = 2
+        manufacturing_order = mo_form.save()
         # Post Inventory
         manufacturing_order.post_inventory()
         # Cancel the MO
@@ -84,7 +82,7 @@ class TestMrpCancelMO(TestMrpCommon):
         done and the WO must be cancelled.
         """
         # Create MO
-        mo_data = self.generate_mo()
+        mo_data = self.generate_mo(consumption='strict')
         manufacturing_order = mo_data[0]
         bom = mo_data[1]
         bom.write({
@@ -136,10 +134,9 @@ class TestMrpCancelMO(TestMrpCommon):
         # it (cannot be deleted)
         manufacturing_order = self.generate_mo()[0]
         # Produce some quantity (not all to avoid to done the MO when post inventory)
-        produce_form = Form(self.env['mrp.product.produce'].with_context(active_id=manufacturing_order.id))
-        produce_form.qty_producing = 2
-        produce = produce_form.save()
-        produce.do_produce()
+        mo_form = Form(manufacturing_order)
+        mo_form.qty_producing = 2
+        manufacturing_order = mo_form.save()
         # Post Inventory
         manufacturing_order.post_inventory()
         # Unlink the MO must raises an UserError since it cannot be really cancelled
