@@ -25,7 +25,7 @@ def _check_special_access(res_model, res_id, token='', _hash='', pid=False):
         raise Forbidden()
 
 
-def _message_post_helper(res_model, res_id, message, token='', _hash=False, pid=False, nosubscribe=True, **kw):
+def _message_post_helper(res_model, res_id, message, token='', _hash=False, pid=False, nosubscribe=True, attachment_tokens=[], **kw):
     """ Generic chatter function, allowing to write on *any* object that inherits mail.thread. We
         distinguish 2 cases:
             1/ If a token is specified, all logged in users will be able to write a message regardless
@@ -47,6 +47,7 @@ def _message_post_helper(res_model, res_id, message, token='', _hash=False, pid=
         :param string hash: signed token by a partner if model uses some token field to bypass access right
                             post messages.
         :param string pid: identifier of the res.partner used to sign the hash
+        :param attachment_tokens list: list of attachment access tokens
         :param bool nosubscribe: set False if you want the partner to be set as follower of the object when posting (default to True)
 
         The rest of the kwargs are passed on to message_post()
@@ -96,7 +97,7 @@ def _message_post_helper(res_model, res_id, message, token='', _hash=False, pid=
     if email_from:
         message_post_args['email_from'] = email_from
 
-    return record.with_context(mail_create_nosubscribe=nosubscribe).message_post(**message_post_args)
+    return record.with_context(mail_create_nosubscribe=nosubscribe, attachment_tokens=attachment_tokens).message_post(**message_post_args)
 
 
 class PortalChatter(http.Controller):
@@ -142,7 +143,7 @@ class PortalChatter(http.Controller):
                 'attachment_ids': attachment_ids,
             }
             post_values.update((fname, kw.get(fname)) for fname in self._portal_post_filter_params())
-            message = _message_post_helper(**post_values)
+            message = _message_post_helper(**post_values, attachment_tokens=attachment_tokens)
 
         return request.redirect(url)
 

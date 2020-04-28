@@ -638,10 +638,14 @@ class Message(models.Model):
                         check_attachment_access += command[2]
                     else:  # command[0] == 4:
                         check_attachment_access += [command[1]]
+
         else:
             check_attachment_access = messages.mapped('attachment_ids').ids  # fallback on read if any unknow command
         if check_attachment_access:
-            self.env['ir.attachment'].browse(check_attachment_access).check(mode='read')
+            attachments = self.env['ir.attachment'].browse(check_attachment_access)
+            attachments = attachments.filtered(lambda attachment: attachment.access_token not in self.env.context.get('attachment_tokens', []))
+            if attachments:
+                attachments.check(mode='read')
 
         for message, values, tracking_values_cmd in zip(messages, values_list, tracking_values_list):
             if tracking_values_cmd:
