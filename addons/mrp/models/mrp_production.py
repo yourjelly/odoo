@@ -176,7 +176,7 @@ class MrpProduction(models.Model):
         copy=False, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         domain=[('scrapped', '=', False)])
     move_byproduct_ids = fields.One2many(
-        'stock.move', string='Finished Products', compute='_compute_byproduct_ids')
+        'stock.move', string='By-products', compute='_compute_byproduct_ids')
     finished_move_line_ids = fields.One2many(
         'stock.move.line', compute='_compute_lines', inverse='_inverse_lines', string="Finished Product"
         )
@@ -579,22 +579,26 @@ class MrpProduction(models.Model):
         if not production_move:
             # Happens when opening the mo?
             return
-        vals = production_move._set_quantity_done_prepare_vals(self.qty_producing - production_move.quantity_done)  # FIXME sle: uom mismatch
+        vals = production_move._set_quantity_done_prepare_vals(self.qty_producing - production_move.quantity_done, in_place=True)  # FIXME sle: uom mismatch
         if vals['to_create']:
-            self.env['stock.move.line'].new(dict(vals['to_create'], lot_id=self.lot_producing_id.id))
+            print('created a finished line')
+            production_move.move_line_ids.new(dict(vals['to_create'], lot_id=self.lot_producing_id.id))
         if vals['to_write']:
             for move_line, vals in vals['to_write']:
+                print('updated a finished line')
                 move_line.update(dict(vals, lot_id=self.lot_producing_id.id))
 
         for move in (self.move_raw_ids | self.move_byproduct_ids):
             if move.has_tracking != 'none':
                 continue
             new_qty = move.product_uom._compute_quantity(self.qty_producing, self.product_uom_id) * move.unit_factor
-            vals = move._set_quantity_done_prepare_vals(new_qty - move.quantity_done)
+            vals = move._set_quantity_done_prepare_vals(new_qty - move.quantity_done, in_place=True)
             if vals['to_create']:
-                self.env['stock.move.line'].new(vals['to_create'])
+                print('created a consumed line')
+                move.move_line_ids.new(vals['to_create'])
             if vals['to_write']:
                 for move_line, vals in vals['to_write']:
+                    print('updated a consumed line')
                     move_line.update(vals)
 
     def write(self, vals):
