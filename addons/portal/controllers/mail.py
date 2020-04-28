@@ -96,7 +96,11 @@ def _message_post_helper(res_model, res_id, message, token='', _hash=False, pid=
     if email_from:
         message_post_args['email_from'] = email_from
 
-    return record.with_context(mail_create_nosubscribe=nosubscribe).message_post(**message_post_args)
+    attachment_ids = message_post_args.pop('attachment_ids')
+    mail_message = record.with_context(mail_create_nosubscribe=nosubscribe).message_post(**message_post_args)
+    mail_message.sudo().write({'attachment_ids': attachment_ids})
+
+    return mail_message
 
 
 class PortalChatter(http.Controller):
