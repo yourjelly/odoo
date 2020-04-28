@@ -28,6 +28,7 @@ odoo.define('point_of_sale.tour.Chrome', function (require) {
 
     // Select order 1, should be at Product Screen
     Chrome.do.selectOrder('1');
+    ProductScreen.check.productIsDisplayed('Desk Pad');
     ProductScreen.check.selectedOrderlineHas('Desk Pad', '1.0', '2.0');
 
     // Select order 2, should be at Payment Screen

@@ -101,6 +101,12 @@ odoo.define('point_of_sale.tour.ProductScreenTourMethods', function (require) {
         selectedOrderlineHas(name, quantity, price) {
             const res = [
                 {
+                    // check first if the order widget is there and has orderlines
+                    content: 'order widget has orderlines',
+                    trigger: '.order .orderlines',
+                    run: () => {},
+                },
+                {
                     content: `'${name}' is selected`,
                     trigger: `.order .orderline.selected .product-name:contains("${name}")`,
                     run: function () {}, // it's a check
@@ -132,7 +138,6 @@ odoo.define('point_of_sale.tour.ProductScreenTourMethods', function (require) {
             ];
         }
 
-        // check.productIsDisplayed
         productIsDisplayed(name) {
             return [
                 {
