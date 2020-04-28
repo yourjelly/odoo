@@ -82,6 +82,7 @@ odoo.define('pos_restaurant.tour.FloorScreen', function (require) {
 
     // Opening product screen in main floor should go back to main floor
     FloorScreen.do.clickEdit();
+    FloorScreen.check.hasTable('T4');
     FloorScreen.do.clickTable('T4');
     ProductScreen.check.isShown();
     Chrome.check.backToFloorTextIs('Main Floor', 'T4');
@@ -89,6 +90,7 @@ odoo.define('pos_restaurant.tour.FloorScreen', function (require) {
 
     // Opening product screen in second floor should go back to second floor
     FloorScreen.do.clickFloor('Second Floor');
+    FloorScreen.check.hasTable('T1');
     FloorScreen.do.clickTable('T1');
     Chrome.check.backToFloorTextIs('Second Floor', 'T1');
 
