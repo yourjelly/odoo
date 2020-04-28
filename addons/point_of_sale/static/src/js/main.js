@@ -1,7 +1,8 @@
-odoo.define('point_of_sale.main', function(require) {
+odoo.define('web.web_client', function (require) {
     'use strict';
 
     const env = require('web.env');
+    const WebClient = require('web.AbstractWebClient');
     const Chrome = require('point_of_sale.Chrome');
     const Registries = require('point_of_sale.Registries');
     const { configureGui } = require('point_of_sale.Gui');
@@ -22,5 +23,7 @@ odoo.define('point_of_sale.main', function(require) {
         configureGui({ component: chrome });
     }
 
-    return { startPosApp };
+    const webClient = new WebClient();
+    startPosApp(webClient);
+    return webClient;
 });

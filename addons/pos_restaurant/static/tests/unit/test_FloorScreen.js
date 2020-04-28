@@ -1,4 +1,4 @@
-odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
+odoo.define('pos_restaurant.tests.FloorScreen', async function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
