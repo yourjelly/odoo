@@ -513,6 +513,13 @@ class Users(models.Model):
                 # safe fields only, so we write as super-user to bypass access rights
                 self = self.sudo().with_context(binary_field_real_user=self.env.user)
 
+        # naive optimization to avoid invalidation in case of first password reset
+        pwd_was_null = False
+        if 'password' in values and len(self.ids) == 1:
+            self.env.cr.execute('select password is null from res_users where id = %s', (self.id, ))
+            res = self.env.cr.fetchone()
+            pwd_was_null = res and res[0]
+
         res = super(Users, self).write(values)
         if 'company_id' in values:
             for user in self:
@@ -542,7 +549,7 @@ class Users(models.Model):
             db = self._cr.dbname
             for id in self.ids:
                 self.__uid_cache[db].pop(id, None)
-        if any(key in values for key in self._get_session_token_fields()):
+        if any(key in values for key in self._get_session_token_fields() if key != 'password' or (key == 'password' and not pwd_was_null)):
             self._invalidate_session_cache()
 
         return res

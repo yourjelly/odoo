@@ -217,6 +217,7 @@ class CompanyLDAP(models.Model):
             conn.simple_bind_s(dn, to_text(old_passwd))
             conn.passwd_s(dn, old_passwd, new_passwd)
             changed = True
+            self._invalidate_session_cache()
             conn.unbind()
         except ldap.INVALID_CREDENTIALS:
             pass
