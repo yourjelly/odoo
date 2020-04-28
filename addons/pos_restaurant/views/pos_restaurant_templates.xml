@@ -54,4 +54,10 @@
         </xpath>
     </template>
 
+    <template id="pos_restaurant.qunit_tests" inherit_id="point_of_sale.qunit_tests">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/pos_restaurant/static/tests/unit/test_FloorScreen.js"></script>
+        </xpath>
+    </template>
+
 </odoo>
