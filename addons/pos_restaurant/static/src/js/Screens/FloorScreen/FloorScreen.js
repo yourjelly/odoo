@@ -1,4 +1,4 @@
-odoo.define('pos_restaurant.FloorScreen', function(require) {
+odoo.define('pos_restaurant.FloorScreen', function (require) {
     'use strict';
 
     const { debounce } = owl.utils;
@@ -14,20 +14,27 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
          */
         constructor() {
             super(...arguments);
+            this._setTableColor = debounce(this._setTableColor, 70);
+            this._setFloorColor = debounce(this._setFloorColor, 70);
             useListener('select-table', this._onSelectTable);
             useListener('deselect-table', this._onDeselectTable);
             useListener('save-table', this._onSaveTable);
+            useListener('create-table', this._createTable);
+            useListener('duplicate-table', this._duplicateTable);
+            useListener('rename-table', this._renameTable);
+            useListener('change-seats-num', this._changeSeatsNum);
+            useListener('change-shape', this._changeShape);
+            useListener('set-table-color', this._setTableColor);
+            useListener('set-floor-color', this._setFloorColor);
+            useListener('delete-table', this._deleteTable);
             const floor = this.props.floor ? this.props.floor : this.env.pos.floors[0];
             this.state = useState({
                 selectedFloorId: floor.id,
                 selectedTableId: null,
                 isEditMode: false,
-                isColorPicker: false,
                 floorBackground: floor.background_color,
             });
             this.floorMapRef = useRef('floor-map-ref');
-            this.setTableColor = debounce(this.setTableColor, 70);
-            this.setFloorColor = debounce(this.setFloorColor, 70);
         }
         patched() {
             this.floorMapRef.el.style.background = this.state.floorBackground;
@@ -60,28 +67,26 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
             this.state.selectedFloorId = floor.id;
             this.state.floorBackground = this.activeFloor.background_color;
             this.state.isEditMode = false;
+            this.state.selectedTableId = null;
         }
         toggleEditMode() {
             this.state.isEditMode = !this.state.isEditMode;
             this.state.selectedTableId = null;
         }
-        toggleColorPicker() {
-            this.state.isColorPicker = !this.state.isColorPicker;
-        }
-        async createTable() {
-            const newTable = await this._createTable();
+        async _createTable() {
+            const newTable = await this._createTableHelper();
             if (newTable) {
                 this.state.selectedTableId = newTable.id;
             }
         }
-        async duplicateTable() {
+        async _duplicateTable() {
             if (!this.selectedTable) return;
-            const newTable = await this._createTable(this.selectedTable);
+            const newTable = await this._createTableHelper(this.selectedTable);
             if (newTable) {
                 this.state.selectedTableId = newTable.id;
             }
         }
-        async changeSeatsNum() {
+        async _changeSeatsNum() {
             if (!this.selectedTable) return;
             const { confirmed, payload: inputNumber } = await this.showPopup('NumberPopup', {
                 startingValue: this.selectedTable.seats,
@@ -95,13 +100,13 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
                 await this._save(this.selectedTable);
             }
         }
-        async changeShape() {
+        async _changeShape() {
             if (!this.selectedTable) return;
             this.selectedTable.shape = this.selectedTable.shape === 'square' ? 'round' : 'square';
             this.render();
             await this._save(this.selectedTable);
         }
-        async renameTable() {
+        async _renameTable() {
             if (!this.selectedTable) return;
             const { confirmed, payload: newName } = await this.showPopup('TextInputPopup', {
                 startingValue: this.selectedTable.name,
@@ -113,12 +118,12 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
                 await this._save(this.selectedTable);
             }
         }
-        async setTableColor(color) {
+        async _setTableColor({ detail: color }) {
             this.selectedTable.color = color;
             this.render();
             await this._save(this.selectedTable);
         }
-        async setFloorColor(color) {
+        async _setFloorColor({ detail: color }) {
             this.state.floorBackground = color;
             this.activeFloor.background_color = color;
             try {
@@ -138,7 +143,7 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
                 }
             }
         }
-        async deleteTable() {
+        async _deleteTable() {
             if (!this.selectedTable) return;
             const { confirmed } = await this.showPopup('ConfirmPopup', {
                 title: this.env._t('Are you sure ?'),
@@ -152,7 +157,7 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
                     args: [{ active: false, id: this.state.selectedTableId }],
                 });
                 this.activeFloor.tables = this.activeTables.filter(
-                    table => table.id !== this.state.selectedTableId
+                    (table) => table.id !== this.state.selectedTableId
                 );
                 this.state.selectedTableId = null;
             } catch (error) {
@@ -177,7 +182,7 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
         _onDeselectTable() {
             this.state.selectedTableId = null;
         }
-        async _createTable(copyTable) {
+        async _createTableHelper(copyTable) {
             let newTable;
             if (copyTable) {
                 newTable = Object.assign({}, copyTable);
@@ -228,7 +233,7 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
             return '' + this._lastName.str + this._lastName.num;
         }
         async _save(table) {
-            const fields = this.env.pos.models.find(model => model.model === 'restaurant.table')
+            const fields = this.env.pos.models.find((model) => model.model === 'restaurant.table')
                 .fields;
             const serializeTable = {};
             for (let field of fields) {
@@ -259,12 +264,12 @@ odoo.define('pos_restaurant.FloorScreen', function(require) {
                     method: 'get_tables_order_count',
                     args: [this.env.pos.config.id],
                 });
-                result.forEach(table => {
+                result.forEach((table) => {
                     const table_obj = this.env.pos.tables_by_id[table.id];
                     const unsynced_orders = this.env.pos
                         .get_table_orders(table_obj)
                         .filter(
-                            o =>
+                            (o) =>
                                 o.server_id === undefined &&
                                 (o.orderlines.length !== 0 || o.paymentlines.length !== 0)
                         ).length;

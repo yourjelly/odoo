@@ -39,6 +39,7 @@ This module adds several features to the Point of Sale that are specific to rest
         'static/src/xml/Screens/ReceiptScreen/OrderReceipt.xml',
         'static/src/xml/Screens/ProductScreen/Orderline.xml',
         'static/src/xml/Screens/FloorScreen/FloorScreen.xml',
+        'static/src/xml/Screens/FloorScreen/EditBar.xml',
         'static/src/xml/Screens/FloorScreen/TableWidget.xml',
         'static/src/xml/Screens/FloorScreen/EditableTable.xml',
         'static/src/xml/ChromeWidgets/OrderSelector.xml',

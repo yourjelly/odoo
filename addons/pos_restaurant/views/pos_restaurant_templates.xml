@@ -19,6 +19,7 @@
               <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/SplitBillScreen/SplitBillScreen.js"></script>
               <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/SplitBillScreen/SplitOrderline.js"></script>
               <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/FloorScreen.js"></script>
+              <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/EditBar.js"></script>
               <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/TableWidget.js"></script>
               <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/EditableTable.js"></script>
               <script type="text/javascript" src="/pos_restaurant/static/src/js/ChromeWidgets/OrderSelector.js"></script>
