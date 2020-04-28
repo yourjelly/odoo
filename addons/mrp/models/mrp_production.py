@@ -176,7 +176,7 @@ class MrpProduction(models.Model):
         copy=False, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         domain=[('scrapped', '=', False)])
     move_byproduct_ids = fields.One2many(
-        'stock.move', 'Finished Products', compute='_compute_byproduct_ids')
+        'stock.move', string='Finished Products', compute='_compute_byproduct_ids')
     finished_move_line_ids = fields.One2many(
         'stock.move.line', compute='_compute_lines', inverse='_inverse_lines', string="Finished Product"
         )
@@ -478,6 +478,7 @@ class MrpProduction(models.Model):
         for production in self:
             production.scrap_count = count_data.get(production.id, 0)
 
+    @api.depends('move_finished_ids')
     def _compute_byproduct_ids(self):
         for order in self:
             order.move_byproduct_ids = order.move_finished_ids.filtered(lambda m: m.product_id != order.product_id)
@@ -575,33 +576,26 @@ class MrpProduction(models.Model):
             lambda move: move.product_id == self.product_id and
             move.state not in ('done', 'cancel')
         )
-
-        move_line = production_move.move_line_ids
-        if move_line:
-            production_move.move_line.update({
-                'lot_id': self.lot_producing_id.id,
-                'qty_done': self.qty_producing,
-            })
-        elif self.qty_producing != 0:
-            location_dest_id = production_move.location_dest_id._get_putaway_strategy(self.product_id).id or production_move.location_dest_id.id
-            move_line.new({
-                'move_id': production_move.id,
-                'product_id': production_move.product_id.id,
-                'lot_id': self.lot_producing_id.id,
-                'product_uom_qty': self.qty_producing,
-                'product_uom_id': self.product_uom_id.id,
-                'qty_done': self.qty_producing,
-                'location_id': production_move.location_id.id,
-                'location_dest_id': location_dest_id,
-            })
+        if not production_move:
+            # Happens when opening the mo?
+            return
+        vals = production_move._set_quantity_done_prepare_vals(self.qty_producing - production_move.quantity_done)  # FIXME sle: uom mismatch
+        if vals['to_create']:
+            self.env['stock.move.line'].new(dict(vals['to_create'], lot_id=self.lot_producing_id.id))
+        if vals['to_write']:
+            for move_line, vals in vals['to_write']:
+                move_line.update(dict(vals, lot_id=self.lot_producing_id.id))
 
         for move in (self.move_raw_ids | self.move_byproduct_ids):
             if move.has_tracking != 'none':
                 continue
             new_qty = move.product_uom._compute_quantity(self.qty_producing, self.product_uom_id) * move.unit_factor
             vals = move._set_quantity_done_prepare_vals(new_qty - move.quantity_done)
-            if vals:
-                self.env['stock.move.line'].new(vals)
+            if vals['to_create']:
+                self.env['stock.move.line'].new(vals['to_create'])
+            if vals['to_write']:
+                for move_line, vals in vals['to_write']:
+                    move_line.update(vals)
 
     def write(self, vals):
         res = super(MrpProduction, self).write(vals)
