@@ -179,11 +179,16 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
         load_openerp_module(package.name)
 
         new_install = package.state == 'to install'
+        upgrade = package.state == 'to upgrade'
+        py_module = sys.modules['odoo.addons.%s' % (module_name,)]
         if new_install:
-            py_module = sys.modules['odoo.addons.%s' % (module_name,)]
             pre_init = package.info.get('pre_init_hook')
             if pre_init:
                 getattr(py_module, pre_init)(cr)
+        if upgrade:
+            pre_update = package.info.get('pre_update_hook')
+            if pre_update:
+                getattr(py_module, pre_update)(cr, registry)
 
         model_names = registry.load(cr, package)
 
@@ -237,6 +242,10 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
                 post_init = package.info.get('post_init_hook')
                 if post_init:
                     getattr(py_module, post_init)(cr, registry)
+            if upgrade:
+                post_update = package.info.get('post_update_hook')
+                if post_update:
+                    getattr(py_module, post_update)(cr, registry)
 
             if mode == 'update':
                 # validate the views that have not been checked yet

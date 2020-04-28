@@ -36,5 +36,6 @@
     ],
     'qweb': ['static/src/xml/website.backend.xml'],
     'application': True,
+    'post_update_hook': 'post_update_hook',
     'uninstall_hook': 'uninstall_hook',
 }

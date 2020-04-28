@@ -1489,3 +1489,48 @@ actual arch.
                 view._check_xml()
             except Exception as e:
                 self.raise_view_error("Can't validate view:\n%s" % e, view.id)
+
+    def _get_specific_views(self):
+        """ Given a view, return a record set containing all the specific views
+            for that view's key.
+            If the given view is already specific, it will also return itself.
+        """
+        self.ensure_one()
+        domain = [('key', '=', self.key), ('id', '!=', self.id)]
+        return self.with_context(active_test=False).search(domain)
+
+    def _load_records_write(self, values):
+        """ During module update, when updating a generic view, we should also
+            update its specific views (COW'd).
+            Note that we will only update unmodified fields. That will mimic the
+            noupdate behavior on views having an ir.model.data.
+        """
+        if self.type == 'qweb':
+            for cow_view in self._get_specific_views():
+                authorized_vals = {}
+                for key in values:
+                    if cow_view[key] == self[key]:
+                        authorized_vals[key] = values[key]
+                self._load_records_write_helper(cow_view, authorized_vals)
+        super(View, self)._load_records_write(values)
+
+    def _load_records_write_helper(self, record, values):
+        """ Retain the record id and unmodified fields value flagged
+            as write to update specific view if needed
+        """
+        self.pool.load_records_duplicated_views[record.id] = ('write', values)
+
+    def _load_records_create(self, values):
+        """ During module install, when creating a generic child view, we should
+            also create that view under specific view trees (COW'd).
+        """
+        records = super(View, self)._load_records_create(values)
+        for record in records:
+            if record.type == 'qweb' and record.inherit_id:
+                self._load_records_create_helper(record)
+        return records
+
+    def _load_records_create_helper(self, record):
+        """ Retain the record id flagged as create to create specific view if needed
+        """
+        self.pool.load_records_duplicated_views[record.id] = ('create', {})

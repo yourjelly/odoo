@@ -10,6 +10,20 @@ from odoo import api, SUPERUSER_ID
 from functools import partial
 
 
+def post_update_hook(cr, registry):
+    env = api.Environment(cr, SUPERUSER_ID, {})
+    View = env['ir.ui.view']
+
+    record_action_dict = registry.load_records_duplicated_views
+    for record in View.browse(record_action_dict.keys()):
+        action, values = record_action_dict[record.id]
+        if action == 'write':
+            View._load_records_write_helper(record, values)
+        else:
+            View._load_records_create_helper(record)
+
+    record_action_dict.clear()
+
 def uninstall_hook(cr, registry):
     def rem_website_id_null(dbname):
         db_registry = odoo.modules.registry.Registry.new(dbname)
