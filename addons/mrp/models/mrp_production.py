@@ -579,7 +579,8 @@ class MrpProduction(models.Model):
         if not production_move:
             # Happens when opening the mo?
             return
-        vals = production_move._set_quantity_done_prepare_vals(self.qty_producing - production_move.quantity_done, in_place=True)  # FIXME sle: uom mismatch
+        production_move.move_line_ids.qty_done = 0
+        vals = production_move._set_quantity_done_prepare_vals(self.qty_producing)  # FIXME sle: uom mismatch
         if vals['to_create']:
             print('created a finished line')
             production_move.move_line_ids.new(dict(vals['to_create'], lot_id=self.lot_producing_id.id))
@@ -592,7 +593,8 @@ class MrpProduction(models.Model):
             if move.has_tracking != 'none':
                 continue
             new_qty = move.product_uom._compute_quantity(self.qty_producing, self.product_uom_id) * move.unit_factor
-            vals = move._set_quantity_done_prepare_vals(new_qty - move.quantity_done, in_place=True)
+            move.move_line_ids.filtered(lambda ml: ml.state not in ('done', 'cancel')).qty_done = 0
+            vals = move._set_quantity_done_prepare_vals(new_qty)
             if vals['to_create']:
                 print('created a consumed line')
                 move.move_line_ids.new(vals['to_create'])

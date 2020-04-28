@@ -1515,12 +1515,12 @@ class StockMove(models.Model):
         else:
             return [(self.picking_id, self.product_id.responsible_id, visited)]
 
-    def _set_quantity_done_prepare_vals(self, qty, in_place=False):
+    def _set_quantity_done_prepare_vals(self, qty):
         res = {'to_write': [], 'to_create': []}
         if not self.move_line_ids:
             print('_set_quantity_done did not find any existing move lines')
         for ml in self.move_line_ids:
-            ml_qty = ml.product_uom_qty - ml.qty_done if not in_place else ml.qty_done
+            ml_qty = ml.product_uom_qty - ml.qty_done
             if float_compare(ml_qty, 0, precision_rounding=ml.product_uom_id.rounding) <= 0:
                 continue
             # Convert move line qty into move uom
