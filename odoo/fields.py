@@ -991,6 +991,10 @@ class Field(MetaField('DummyField', (object,), {})):
         This method is meant to be used internally and has very little benefit
         over a simple call to `~odoo.models.BaseModel.mapped()` on a recordset.
         """
+#        if records.env.context.get('debug'):
+#            if self.name == 'quantity_done':
+#                records.env.cache._data[self] = {}
+
         if self.name == 'id':
             # not stored in cache
             return list(records._ids)

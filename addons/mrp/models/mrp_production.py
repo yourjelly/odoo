@@ -456,6 +456,7 @@ class MrpProduction(models.Model):
         for order in self:
             already_reserved = order.is_locked and order.state not in ('done', 'cancel') and order.mapped('move_raw_ids.move_line_ids')
             any_quantity_done = any([m.quantity_done > 0 for m in order.move_raw_ids])
+
             order.unreserve_visible = not any_quantity_done and already_reserved
             order.reserve_visible = order.state in ('confirmed', 'planned') and any(move.state in ['confirmed', 'partially_available'] for move in order.move_raw_ids)
 
@@ -600,7 +601,6 @@ class MrpProduction(models.Model):
                 move.move_line_ids.new(vals['to_create'])
             if vals['to_write']:
                 for move_line, vals in vals['to_write']:
-                    print('updated a consumed line')
                     move_line.update(vals)
 
     def write(self, vals):

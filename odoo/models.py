@@ -5779,8 +5779,8 @@ Record ids: %(records)s
                                 records = self.exists()[invf.name]
 
                         # TODO: find a better fix
-                        if key.model_name == records._name:
-                            break
+                        #if key.model_name == records._name:
+                        #    break
                 else:
                     new_records = self.filtered(lambda r: not r.id)
                     real_records = self - new_records
