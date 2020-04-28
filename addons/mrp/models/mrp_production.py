@@ -176,8 +176,7 @@ class MrpProduction(models.Model):
         copy=False, states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         domain=[('scrapped', '=', False)])
     move_byproduct_ids = fields.One2many(
-        'stock.move', 'production_id', 'Finished Products',
-        domain="[('scrapped', '=', False), ('product_id', '!=', product_id)]")
+        'stock.move', 'Finished Products', compute='_compute_byproduct_ids')
     finished_move_line_ids = fields.One2many(
         'stock.move.line', compute='_compute_lines', inverse='_inverse_lines', string="Finished Product"
         )
@@ -479,6 +478,10 @@ class MrpProduction(models.Model):
         for production in self:
             production.scrap_count = count_data.get(production.id, 0)
 
+    def _compute_byproduct_ids(self):
+        for order in self:
+            order.move_byproduct_ids = order.move_finished_ids.filtered(lambda m: m.product_id != order.product_id)
+
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per Company!'),
         ('qty_positive', 'check (product_qty > 0)', 'The quantity to produce must be positive!'),
@@ -596,7 +599,7 @@ class MrpProduction(models.Model):
             if move.has_tracking != 'none':
                 continue
             new_qty = move.product_uom._compute_quantity(self.qty_producing, self.product_uom_id) * move.unit_factor
-            vals = move._set_quantity_done_prepare_vals(new_qty)
+            vals = move._set_quantity_done_prepare_vals(new_qty - move.quantity_done)
             if vals:
                 self.env['stock.move.line'].new(vals)
 
