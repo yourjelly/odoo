@@ -49,15 +49,15 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         expected_liquidity_line = {
             'debit': 50.0,
             'credit': 0.0,
-            'amount_currency': 0.0,
-            'currency_id': False,
+            'amount_currency': 50.0,
+            'currency_id': self.company_data['currency'].id,
             'account_id': self.payment_debit_account_id.id,
         }
         expected_counterpart_line = {
             'debit': 0.0,
             'credit': 50.0,
-            'amount_currency': 0.0,
-            'currency_id': False,
+            'amount_currency': -50.0,
+            'currency_id': self.company_data['currency'].id,
             'account_id': copy_receivable.id,
         }
 
@@ -114,16 +114,16 @@ class TestAccountPayment(AccountTestInvoicingCommon):
                 (1, counterpart_lines.id, {
                     'debit': 0.0,
                     'credit': 75.0,
-                    'amount_currency': 0.0,
-                    'currency_id': False,
+                    'amount_currency': -75.0,
+                    'currency_id': self.company_data['currency'].id,
                     'account_id': copy_receivable.id,
                     'partner_id': self.partner_b.id,
                 }),
                 (1, liquidity_lines.id, {
                     'debit': 100.0,
                     'credit': 0.0,
-                    'amount_currency': 0.0,
-                    'currency_id': False,
+                    'amount_currency': 100.0,
+                    'currency_id': self.company_data['currency'].id,
                     'partner_id': self.partner_b.id,
                 }),
 
@@ -131,8 +131,8 @@ class TestAccountPayment(AccountTestInvoicingCommon):
                 (0, 0, {
                     'debit': 0.0,
                     'credit': 25.0,
-                    'amount_currency': 0.0,
-                    'currency_id': False,
+                    'amount_currency': -25.0,
+                    'currency_id': self.company_data['currency'].id,
                     'account_id': self.company_data['default_account_revenue'].id,
                     'partner_id': self.partner_b.id,
                 }),
@@ -153,13 +153,14 @@ class TestAccountPayment(AccountTestInvoicingCommon):
                 **expected_counterpart_line,
                 'debit': 0.0,
                 'credit': 75.0,
+                'amount_currency': -75.0,
                 'partner_id': self.partner_b.id,
             },
             {
                 'debit': 0.0,
                 'credit': 25.0,
-                'amount_currency': 0.0,
-                'currency_id': False,
+                'amount_currency': -25.0,
+                'currency_id': self.company_data['currency'].id,
                 'account_id': self.company_data['default_account_revenue'].id,
                 'partner_id': self.partner_b.id,
             },
@@ -167,6 +168,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
                 **expected_liquidity_line,
                 'debit': 100.0,
                 'credit': 0.0,
+                'amount_currency': 100.0,
                 'account_id': self.payment_debit_account_id.id,
                 'partner_id': self.partner_b.id,
             },
@@ -200,15 +202,15 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         expected_liquidity_line = {
             'debit': 50.0,
             'credit': 0.0,
-            'amount_currency': 0.0,
-            'currency_id': False,
+            'amount_currency': 50.0,
+            'currency_id': self.company_data['currency'].id,
             'account_id': self.payment_debit_account_id.id,
         }
         expected_counterpart_line = {
             'debit': 0.0,
             'credit': 50.0,
-            'amount_currency': 0.0,
-            'currency_id': False,
+            'amount_currency': -50.0,
+            'currency_id': self.company_data['currency'].id,
             'account_id': copy_receivable.id,
         }
 
@@ -261,20 +263,17 @@ class TestAccountPayment(AccountTestInvoicingCommon):
 
         move_form = Form(payment.move_id)
         with move_form.line_ids.edit(0) as line_form:
-            line_form.currency_id = self.env['res.currency']
-            line_form.amount_currency = 0.0
-            line_form.debit = 100.0
+            line_form.currency_id = self.company_data['currency']
+            line_form.amount_currency = 100.0
             line_form.partner_id = self.partner_b
         with move_form.line_ids.edit(1) as line_form:
-            line_form.currency_id = self.env['res.currency']
-            line_form.amount_currency = 0.0
-            line_form.credit = 75.0
+            line_form.currency_id = self.company_data['currency']
+            line_form.amount_currency = -75.0
             line_form.account_id = copy_receivable
             line_form.partner_id = self.partner_b
         with move_form.line_ids.new() as line_form:
-            line_form.currency_id = self.env['res.currency']
-            line_form.amount_currency = 0.0
-            line_form.credit = 25.0
+            line_form.currency_id = self.company_data['currency']
+            line_form.amount_currency = -25.0
             line_form.account_id = self.company_data['default_account_revenue']
             line_form.partner_id = self.partner_b
         move_form.save()
@@ -289,13 +288,14 @@ class TestAccountPayment(AccountTestInvoicingCommon):
                 **expected_counterpart_line,
                 'debit': 0.0,
                 'credit': 75.0,
+                'amount_currency': -75.0,
                 'partner_id': self.partner_b.id,
             },
             {
                 'debit': 0.0,
                 'credit': 25.0,
-                'amount_currency': 0.0,
-                'currency_id': False,
+                'amount_currency': -25.0,
+                'currency_id': self.company_data['currency'].id,
                 'account_id': self.company_data['default_account_revenue'].id,
                 'partner_id': self.partner_b.id,
             },
@@ -303,6 +303,7 @@ class TestAccountPayment(AccountTestInvoicingCommon):
                 **expected_liquidity_line,
                 'debit': 100.0,
                 'credit': 0.0,
+                'amount_currency': 100.0,
                 'account_id': self.payment_debit_account_id.id,
                 'partner_id': self.partner_b.id,
             },
@@ -330,15 +331,15 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         expected_liquidity_line = {
             'debit': 50.0,
             'credit': 0.0,
-            'amount_currency': 0.0,
-            'currency_id': False,
+            'amount_currency': 50.0,
+            'currency_id': self.company_data['currency'].id,
             'account_id': self.payment_debit_account_id.id,
         }
         expected_counterpart_line = {
             'debit': 0.0,
             'credit': 50.0,
-            'amount_currency': 0.0,
-            'currency_id': False,
+            'amount_currency': -50.0,
+            'currency_id': self.company_data['currency'].id,
             'account_id': self.company_data['company'].transfer_account_id.id,
         }
 

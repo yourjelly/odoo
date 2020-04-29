@@ -72,9 +72,7 @@ class AccountTransferWizard(models.TransientModel):
                 counterpart_currency = self.destination_account_id.currency_id
                 counterpart_amount_currency = self.company_id.currency_id._convert(line.balance, self.destination_account_id.currency_id, self.company_id, line.date)
 
-            if counterpart_currency:
-                counterpart_balances[(line.partner_id, counterpart_currency)]['amount_currency'] += counterpart_amount_currency
-
+            counterpart_balances[(line.partner_id, counterpart_currency)]['amount_currency'] += counterpart_amount_currency
             counterpart_balances[(line.partner_id, counterpart_currency)]['balance'] += line.balance
             grouped_source_lines[(line.partner_id, line.currency_id, line.account_id)] += line
 
@@ -83,14 +81,14 @@ class AccountTransferWizard(models.TransientModel):
             source_accounts = self.move_line_ids.mapped('account_id')
             counterpart_label = len(source_accounts) == 1 and _("Transfer from %s") % source_accounts.display_name or _("Transfer counterpart")
 
-            if not self.company_id.currency_id.is_zero(counterpart_vals['balance']) or (counterpart_currency and not counterpart_currency.is_zero(counterpart_vals['amount_currency'])):
+            if not self.company_id.currency_id.is_zero(counterpart_vals['balance']) or not counterpart_currency.is_zero(counterpart_vals['amount_currency']):
                 line_vals.append({
                     'name': counterpart_label,
                     'debit': counterpart_vals['balance'] > 0 and self.company_id.currency_id.round(counterpart_vals['balance']) or 0,
                     'credit': counterpart_vals['balance'] < 0 and self.company_id.currency_id.round(-counterpart_vals['balance']) or 0,
                     'account_id': self.destination_account_id.id,
                     'partner_id': counterpart_partner.id or None,
-                    'amount_currency': counterpart_currency and counterpart_currency.round((counterpart_vals['balance'] < 0 and -1 or 1) * abs(counterpart_vals['amount_currency'])) or 0,
+                    'amount_currency': counterpart_currency.round((counterpart_vals['balance'] < 0 and -1 or 1) * abs(counterpart_vals['amount_currency'])),
                     'currency_id': counterpart_currency.id or None,
                 })
 

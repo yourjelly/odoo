@@ -567,34 +567,29 @@ class AccountBankStatementLine(models.Model):
                 balance = self.amount_currency
             else:
                 amount_currency = self.amount
-                balance = journal_currency._convert(amount_currency, journal.company_id.currency_id, journal.company_id, self.date)
+                balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, self.date)
         elif self.foreign_currency_id and not journal_currency:
-            if self.foreign_currency_id == company_currency:
-                amount_currency = 0.0
-                balance = self.amount
-                currency_id = False
-            else:
-                amount_currency = self.amount_currency
-                balance = self.amount
-                currency_id = self.foreign_currency_id.id
+            amount_currency = self.amount_currency
+            balance = self.amount
+            currency_id = self.foreign_currency_id.id
         elif not self.foreign_currency_id and journal_currency:
             currency_id = journal_currency.id
             amount_currency = self.amount
             balance = journal_currency._convert(amount_currency, journal.company_id.currency_id, journal.company_id, self.date)
         else:
-            currency_id = False
-            amount_currency = 0.0
+            currency_id = company_currency.id
+            amount_currency = self.amount
             balance = self.amount
 
         return {
             'name': self.payment_ref,
             'move_id': self.move_id.id,
             'partner_id': self.partner_id.id,
-            'currency_id': currency_id if amount_currency else False,
+            'currency_id': currency_id,
             'account_id': journal.default_debit_account_id.id if balance >= 0 else journal.default_credit_account_id.id,
             'debit': balance > 0 and balance or 0.0,
             'credit': balance < 0 and -balance or 0.0,
-            'amount_currency': amount_currency if currency_id else False,
+            'amount_currency': amount_currency,
         }
 
     @api.model
@@ -628,141 +623,106 @@ class AccountBankStatementLine(models.Model):
         elif move_line:
             currency_id = move_line.currency_id.id
         else:
-            currency_id = self.foreign_currency_id.id
+            currency_id = self.foreign_currency_id.id or journal_currency.id or company_currency.id
 
-        if currency_id:
-            if self.foreign_currency_id and journal_currency:
+        if self.foreign_currency_id and journal_currency:
 
-                # Different currencies set on the company, the journal, the statement line and the counterpart line.
-                # Since we can express only one foreign currency on a journal item, only the foreign currency
-                # will be used on the journal item we are created. However, in any case, the rate used by the
-                # statement line is kept to convert from the journal's currency to the foreign's currency.
+            # Different currencies set on the company, the journal, the statement line and the counterpart line.
+            # Since we can express only one foreign currency on a journal item, only the foreign currency
+            # will be used on the journal item we are created. However, in any case, the rate used by the
+            # statement line is kept to convert from the journal's currency to the foreign's currency.
 
-                if currency_id == self.foreign_currency_id.id:
+            if currency_id == self.foreign_currency_id.id == company_currency.id:
 
-                    # The counterpart currency if the same as the foreign currency set on the statement line.
-                    # There is also a foreign currency set on the journal so the journal item to create will
-                    # use the foreign currency set on the statement line.
+                amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
+                balance = amount_currency
 
-                    amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
-                    balance = journal_currency._convert(amount_currency / statement_line_rate, company_currency, journal.company_id, self.date)
+            elif currency_id == self.foreign_currency_id.id:
 
-                elif currency_id == journal_currency.id and self.foreign_currency_id == company_currency:
+                # The counterpart currency if the same as the foreign currency set on the statement line.
+                # There is also a foreign currency set on the journal so the journal item to create will
+                # use the foreign currency set on the statement line.
 
-                    # The counterpart currency if the same as the foreign currency set on the journal.
-                    # There is also a foreign currency set on the statement line that is the same as the company one.
-                    # Then, the journal item to create will use the company's currency.
+                amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
+                balance = journal_currency._convert(amount_currency / statement_line_rate, company_currency, journal.company_id, self.date)
 
-                    amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
-                    balance = amount_currency * statement_line_rate
-                    currency_id = False
-                    amount_currency = 0.0
+            elif currency_id == journal_currency.id and self.foreign_currency_id == company_currency:
 
-                elif currency_id == journal_currency.id and self.foreign_currency_id != company_currency:
+                # The counterpart currency if the same as the foreign currency set on the journal.
+                # There is also a foreign currency set on the statement line that is the same as the company one.
+                # Then, the journal item to create will use the company's currency.
 
-                    # The counterpart currency if the same as the foreign currency set on the journal.
-                    # There is also a foreign currency set on the statement line.
-                    # The residual amount will be convert to the foreign currency set on the statement line.
+                amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
+                balance = amount_currency * statement_line_rate
+                currency_id = company_currency.id
+                amount_currency = balance
 
-                    amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
-                    balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, self.date)
-                    amount_currency *= statement_line_rate
-                    currency_id = self.foreign_currency_id.id
+            elif currency_id == journal_currency.id and self.foreign_currency_id != company_currency:
 
-                else:
+                # The counterpart currency if the same as the foreign currency set on the journal.
+                # There is also a foreign currency set on the statement line.
+                # The residual amount will be convert to the foreign currency set on the statement line.
 
-                    # Whatever the currency set on the journal item passed as parameter, the counterpart line
-                    # will be expressed in the foreign currency set on the statement line.
-
-                    balance = counterpart_vals.pop('balance', -move_line.amount_residual if move_line else 0.0)
-                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
-                    amount_currency *= statement_line_rate
-                    currency_id = self.foreign_currency_id.id
-
-            elif self.foreign_currency_id and not journal_currency:
-
-                # Different currencies set on the company, the statement line and the counterpart line.
-                # In that case, the 'amount' set on the statement line is expressed in the company's currency
-                # and is used as conversion rate between the company's currency and the foreign currency.
-
-                if currency_id == self.foreign_currency_id.id:
-                    amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
-                    balance = amount_currency / statement_line_rate
-                else:
-                    balance = counterpart_vals.pop('balance', -move_line.amount_residual if move_line else 0.0)
-                    amount_currency = balance * statement_line_rate
-                    currency_id = self.foreign_currency_id.id
-
-            elif not self.foreign_currency_id and journal_currency:
-
-                # Different currencies set on the company, the journal and the counterpart line.
-                # Everything will be expressed in the journal's currency.
-
-                if currency_id == journal_currency.id:
-                    amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
-                    balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, self.date)
-                else:
-                    balance = counterpart_vals.pop('balance', -move_line.amount_residual if move_line else 0.0)
-                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
-                    currency_id = journal_currency.id
+                amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
+                balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, self.date)
+                amount_currency *= statement_line_rate
+                currency_id = self.foreign_currency_id.id
 
             else:
 
-                # Only a foreign currency set on the counterpart line.
-                # Ignore it and record the line using the company's currency.
+                # Whatever the currency set on the journal item passed as parameter, the counterpart line
+                # will be expressed in the foreign currency set on the statement line.
 
                 balance = counterpart_vals.pop('balance', -move_line.amount_residual if move_line else 0.0)
-                amount_currency = 0.0
-                currency_id = False
+                amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
+                amount_currency *= statement_line_rate
+                currency_id = self.foreign_currency_id.id
 
-        else:
-            balance = counterpart_vals.pop('balance', -move_line.amount_residual if move_line else 0.0)
+        elif self.foreign_currency_id and not journal_currency:
 
-            if self.foreign_currency_id and journal_currency:
+            # Different currencies set on the company, the statement line and the counterpart line.
+            # In that case, the 'amount' set on the statement line is expressed in the company's currency
+            # and is used as conversion rate between the company's currency and the foreign currency.
 
-                # Different currencies set on the company, the journal and the statement line.
-                # Obviously, the foreign currency set on the statement line will be set on the journal item
-                # to create. Again, keep the same conversion rate as the statement line when converting from
-                # the journal's currency to its foreign currency.
-
-                if self.foreign_currency_id == company_currency:
-                    amount_currency = 0.0
-                else:
-                    amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
-                    amount_currency *= statement_line_rate
-                    currency_id = self.foreign_currency_id.id
-
-            elif self.foreign_currency_id and not journal_currency:
-
-                # Different currencies set on the company and the statement line.
-                # Record the counterpart line using the foreign currency.
-
+            if currency_id == self.foreign_currency_id.id:
+                amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
+                balance = amount_currency / statement_line_rate
+            else:
+                balance = counterpart_vals.pop('balance', -move_line.amount_residual if move_line else 0.0)
                 amount_currency = balance * statement_line_rate
                 currency_id = self.foreign_currency_id.id
 
-            elif not self.foreign_currency_id and journal_currency:
+        elif not self.foreign_currency_id and journal_currency:
 
-                # Different currencies set on the company and the journal.
-                # Record the counterpart line using the company's currency.
+            # Different currencies set on the company, the journal and the counterpart line.
+            # Everything will be expressed in the journal's currency.
 
+            if currency_id == journal_currency.id:
+                amount_currency = counterpart_vals.pop('balance', -move_line.amount_residual_currency if move_line else 0.0)
+                balance = journal_currency._convert(amount_currency, company_currency, journal.company_id, self.date)
+            else:
+                balance = counterpart_vals.pop('balance', -move_line.amount_residual if move_line else 0.0)
                 amount_currency = company_currency._convert(balance, journal_currency, journal.company_id, self.date)
                 currency_id = journal_currency.id
 
-            else:
+        else:
 
-                # Single currency.
+            # Only a foreign currency set on the counterpart line.
+            # Ignore it and record the line using the company's currency.
 
-                amount_currency = 0.0
+            balance = counterpart_vals.pop('balance', -move_line.amount_residual if move_line else 0.0)
+            amount_currency = balance
+            currency_id = company_currency.id
 
         return {
             **counterpart_vals,
             'name': counterpart_vals.get('name', move_line.name if move_line else ''),
             'move_id': self.move_id.id,
             'partner_id': self.partner_id.id,
-            'currency_id': currency_id if amount_currency else False,
+            'currency_id': currency_id,
             'account_id': counterpart_vals.get('account_id', move_line.account_id.id if move_line else False),
-            'debit': balance if balance > 0 else 0.0,
-            'credit': -balance if balance < 0 else 0.0,
+            'debit': balance if balance > 0.0 else 0.0,
+            'credit': -balance if balance < 0.0 else 0.0,
             'amount_currency': amount_currency,
         }
 
@@ -784,24 +744,18 @@ class AccountBankStatementLine(models.Model):
 
         liquidity_line_vals = self._prepare_liquidity_move_line_vals()
 
+        # Ensure the counterpart will have a balance exactly equals to the amount in journal currency.
+        # This avoid some rounding issues when the currency rate between two currencies is not symmetrical.
+        # E.g:
+        # A.convert(amount_a, B) = amount_b
+        # B.convert(amount_b, A) = amount_c != amount_a
+
         counterpart_vals = {
             'name': self.payment_ref,
             'account_id': counterpart_account_id,
+            'currency_id': liquidity_line_vals['currency_id'],
+            'balance': -liquidity_line_vals['amount_currency'],
         }
-
-        if liquidity_line_vals['currency_id']:
-            # Ensure the counterpart will have a balance exactly equals to the amount in journal currency.
-            # This avoid some rounding issues when the currency rate between two currencies is not symmetrical.
-            # E.g:
-            # A.convert(amount_a, B) = amount_b
-            # B.convert(amount_b, A) = amount_c != amount_a
-
-            counterpart_vals.update({
-                'currency_id': liquidity_line_vals['currency_id'],
-                'balance': -liquidity_line_vals['amount_currency'],
-            })
-        else:
-            counterpart_vals['balance'] = liquidity_line_vals['credit'] - liquidity_line_vals['debit']
 
         counterpart_line_vals = self._prepare_counterpart_move_line_vals(counterpart_vals)
         return [liquidity_line_vals, counterpart_line_vals]
@@ -964,14 +918,13 @@ class AccountBankStatementLine(models.Model):
                             'foreign_currency_id': False,
                         })
 
-                    elif not suspense_lines.currency_id and st_line.foreign_currency_id == company_currency:
+                    elif not journal_currency and suspense_lines.currency_id == company_currency:
 
-                        # The suspense line has no foreign currency because the foreign currency set on the
-                        # statement line is the same as the company one. In that case, don't erase the
-                        # 'foreign_currency_id' field.
+                        # Don't set a specific foreign currency on the statement line.
 
                         st_line_vals_to_write.update({
-                            'amount_currency': -suspense_lines.balance,
+                            'amount_currency': 0.0,
+                            'foreign_currency_id': False,
                         })
 
                     else:
@@ -1164,7 +1117,7 @@ class AccountBankStatementLine(models.Model):
                 'name': '%s: %s' % (self.payment_ref, _('Open Balance')),
                 'account_id': open_balance_account.id,
                 'balance': -total_balance,
-                'currency_id': False,
+                'currency_id': self.company_currency_id.id,
             })
         else:
             open_balance_vals = None

@@ -187,21 +187,11 @@ class AccountPayment(models.Model):
         else:
             counterpart_amount = 0.0
 
-        # Manage currency.
-        if self.currency_id == self.company_id.currency_id:
-            # Single-currency.
-            balance = counterpart_amount
-            counterpart_amount_currency = 0.0
-            write_off_balance = write_off_amount
-            write_off_amount_currency = 0.0
-            currency_id = False
-        else:
-            # Multi-currencies.
-            balance = self.currency_id._convert(counterpart_amount, self.company_id.currency_id, self.company_id, self.date)
-            counterpart_amount_currency = counterpart_amount
-            write_off_balance = self.currency_id._convert(write_off_amount, self.company_id.currency_id, self.company_id, self.date)
-            write_off_amount_currency = write_off_amount
-            currency_id = self.currency_id.id
+        balance = self.currency_id._convert(counterpart_amount, self.company_id.currency_id, self.company_id, self.date)
+        counterpart_amount_currency = counterpart_amount
+        write_off_balance = self.currency_id._convert(write_off_amount, self.company_id.currency_id, self.company_id, self.date)
+        write_off_amount_currency = write_off_amount
+        currency_id = self.currency_id.id
 
         if self.is_internal_transfer:
             if self.payment_type == 'inbound':
@@ -598,10 +588,10 @@ class AccountPayment(models.Model):
                 else:
                     partner_type = 'supplier'
 
-                liquidity_amount = liquidity_lines.amount_currency if liquidity_lines.currency_id else liquidity_lines.balance
+                liquidity_amount = liquidity_lines.amount_currency
 
                 move_vals_to_write.update({
-                    'currency_id': liquidity_lines.currency_id.id or liquidity_lines.company_currency_id.id,
+                    'currency_id': liquidity_lines.currency_id.id,
                     'partner_id': liquidity_lines.partner_id.id,
                 })
                 payment_vals_to_write.update({
@@ -609,7 +599,7 @@ class AccountPayment(models.Model):
                     'payment_type': 'inbound' if liquidity_amount > 0.0 else 'outbound',
                     'payment_reference': liquidity_lines.name,
                     'partner_type': partner_type,
-                    'currency_id': liquidity_lines.currency_id.id or liquidity_lines.company_currency_id.id,
+                    'currency_id': liquidity_lines.currency_id.id,
                     'destination_account_id': counterpart_lines.account_id.id,
                     'partner_id': liquidity_lines.partner_id.id,
                 })
@@ -637,9 +627,8 @@ class AccountPayment(models.Model):
             # This allows to create a new payment with custom 'line_ids'.
 
             if writeoff_lines:
-                writeoff_amount_field = 'balance' if pay.currency_id == pay.company_id.currency_id else 'amount_currency'
-                writeoff_amount = sum(writeoff_lines.mapped(writeoff_amount_field))
-                counterpart_amount = counterpart_lines[writeoff_amount_field]
+                writeoff_amount = sum(writeoff_lines.mapped('amount_currency'))
+                counterpart_amount = counterpart_lines['amount_currency']
                 if writeoff_amount > 0.0 and counterpart_amount > 0.0:
                     sign = 1
                 else:

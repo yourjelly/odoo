@@ -382,7 +382,7 @@ class AccountPartialReconcile(models.Model):
                                 elif line.balance < 0.0 and residual_balance - balance > 0.0:
                                     balance = line.balance - residual_balance
 
-                        amount_currency = 0.0
+                        amount_currency = balance
 
                     else:
                         # Percentage expressed in the foreign currency.
