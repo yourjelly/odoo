@@ -1518,13 +1518,8 @@ class StockMove(models.Model):
         else:
             return [(self.picking_id, self.product_id.responsible_id, visited)]
 
-    def _set_quantity_done(self, qty):
-        """
-        Set the given quantity as quantity done on the move through the move lines. The method is
-        able to handle move lines with a different UoM than the move (but honestly, this would be
-        looking for trouble...).
-        @param qty: quantity in the UoM of move.product_uom
-        """
+    def _set_quantity_done_prepare_vals(self, qty):
+        res = {'to_write': [], 'to_create': []}
         for ml in self.move_line_ids:
             ml_qty = ml.product_uom_qty - ml.qty_done
             if float_compare(ml_qty, 0, precision_rounding=ml.product_uom_id.rounding) <= 0:
@@ -1541,7 +1536,7 @@ class StockMove(models.Model):
             # Assign qty_done and explicitly round to make sure there is no inconsistency between
             # ml.qty_done and qty.
             taken_qty = float_round(taken_qty, precision_rounding=ml.product_uom_id.rounding)
-            ml.qty_done += taken_qty
+            res['to_write'].append((ml, {'qty_done': ml.qty_done + taken_qty}))
             if ml.product_uom_id != self.product_uom:
                 taken_qty = ml.product_uom_id._compute_quantity(ml_qty, self.product_uom, round=False)
             qty -= taken_qty
@@ -1551,7 +1546,22 @@ class StockMove(models.Model):
         if float_compare(qty, 0.0, precision_rounding=self.product_uom.rounding) > 0:
             vals = self._prepare_move_line_vals(quantity=0)
             vals['qty_done'] = qty
-            ml = self.env['stock.move.line'].create(vals)
+            res['to_create'] = vals
+        return res
+
+    def _set_quantity_done(self, qty):
+        """
+        Set the given quantity as quantity done on the move through the move lines. The method is
+        able to handle move lines with a different UoM than the move (but honestly, this would be
+        looking for trouble...).
+        @param qty: quantity in the UoM of move.product_uom
+        """
+        vals = self._set_quantity_done_prepare_vals(qty)
+        if vals['to_create']:
+            self.env['stock.move.line'].create(vals['to_create'])
+        if vals['to_write']:
+            for move_line, vals in vals['to_write']:
+                move_line.write(vals)
 
     def _adjust_procure_method(self):
         """ This method will try to apply the procure method MTO on some moves if
