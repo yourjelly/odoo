@@ -8,7 +8,7 @@ odoo.define('point_of_sale.tests.PaymentScreen', async function (require) {
     const { xml } = owl.tags;
     const { useState } = owl;
 
-    QUnit.module('PaymentScreen and its components', {});
+    QUnit.module('unit tests for PaymentScreen components', {});
 
     QUnit.test('PaymentMethodButton', async function (assert) {
         assert.expect(2);

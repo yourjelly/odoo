@@ -7,7 +7,7 @@ odoo.define('point_of_sale.tests.ChromeWidgets', async function (require) {
     const makePosTestEnv = require('point_of_sale.test_env');
     const { xml } = owl.tags;
 
-    QUnit.module('Chrome Widgets', {});
+    QUnit.module('unit tests for Chrome Widgets', {});
 
     QUnit.test('CashierName', async function (assert) {
         assert.expect(1);

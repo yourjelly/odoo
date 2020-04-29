@@ -9,7 +9,7 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
     const { xml } = owl.tags;
     const { useState } = owl;
 
-    QUnit.module('ProductScreen and its child components', {});
+    QUnit.module('unit tests for ProductScreen components', {});
 
     QUnit.test('ActionpadWidget', async function (assert) {
         assert.expect(7);
@@ -71,7 +71,7 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
         assert.verifySteps(['PaymentScreen']);
 
         // remove the extension
-        // calling remove on the extension also recomputes
+        // Calling remove on the extension also recomputes
         // the extended class.
         extension.remove();
 
@@ -353,7 +353,7 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
 
         const inputEl = parent.el.querySelector('.searchbox input');
         await testUtils.dom.triggerEvent(inputEl, 'keyup', { key: 'A' });
-        // triggering keyup event doesn't type the key to the input
+        // Triggering keyup event doesn't type the key to the input
         // so we manually assign the value of the input.
         inputEl.value = 'A';
         await wait(30);
@@ -363,7 +363,7 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
         await testUtils.dom.triggerEvent(inputEl, 'keyup', { key: 'C' });
         inputEl.value = 'ABC';
         await wait(110);
-        // only after waiting for more than 100ms that update-search is trigger
+        // Only after waiting for more than 100ms that update-search is triggered
         // because the method is debounced.
         assert.verifySteps(['ABC']);
         await testUtils.dom.triggerEvent(inputEl, 'keyup', { key: 'D' });
@@ -536,6 +536,7 @@ odoo.define('point_of_sale.tests.ProductScreen', async function (require) {
         parent.destroy();
 
         // 2. Test orderline with lot icon
+
         parent = new Parent(chair2);
         await parent.mount(testUtils.prepareTarget());
 

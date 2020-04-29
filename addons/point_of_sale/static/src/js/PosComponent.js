@@ -5,11 +5,12 @@ odoo.define('point_of_sale.PosComponent', function(require) {
 
     class PosComponent extends Component {
         /**
-         * This function is available to all Components that inherits this class.
+         * This function is available to all Components that inherit this class.
          * The goal of this function is to show an awaitable dialog (popup) that
          * returns a response after user interaction. See the following for quick
          * demonstration:
          *
+         * ```
          * async getUserName() {
          *   const userResponse = await this.showPopup(
          *     'TextInputPopup',
@@ -20,6 +21,7 @@ odoo.define('point_of_sale.PosComponent', function(require) {
          *   // saved in `userResponse`.
          *   console.log(userResponse); // logs { confirmed: true, payload: <name> }
          * }
+         * ```
          *
          * @param {String} name Name of the popup component
          * @param {Object} props Object that will be used to render to popup

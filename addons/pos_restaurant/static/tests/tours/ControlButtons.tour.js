@@ -14,7 +14,7 @@ odoo.define('pos_restaurant.tour.ControlButtons', function (require) {
     // when finished, steps can be taken from getSteps
     startSteps();
 
-    // Test transfer button
+    // Test TransferOrderButton
     FloorScreen.do.clickTable('T2');
     ProductScreen.exec.order('Water', '5.0', '2.0');
     ProductScreen.do.clickTransferButton();
@@ -27,11 +27,11 @@ odoo.define('pos_restaurant.tour.ControlButtons', function (require) {
     FloorScreen.do.clickTable('T4');
     ProductScreen.do.clickOrderline('Water', '5.0', '2.0');
 
-    // Test split bill
+    // Test SplitBillButton
     ProductScreen.do.clickSplitBillButton();
     SplitBillScreen.do.clickBack();
 
-    // Test note button
+    // Test OrderlineNoteButton
     ProductScreen.do.clickNoteButton();
     TextAreaPopup.check.isShown();
     TextAreaPopup.do.inputText('test note');
@@ -40,7 +40,7 @@ odoo.define('pos_restaurant.tour.ControlButtons', function (require) {
     ProductScreen.exec.order('Water', '8', '1.1');
     ProductScreen.check.selectedOrderlineHas('Water', '8', '8.80');
 
-    // Test print bill button
+    // Test PrintBillButton
     ProductScreen.do.clickPrintBillButton();
     BillScreen.check.isShown();
     BillScreen.do.clickBack();

@@ -8,7 +8,7 @@ odoo.define('point_of_sale.test_popups', async function(require) {
     const PopupControllerMixin = require('point_of_sale.PopupControllerMixin');
     const { xml } = owl.tags;
 
-    QUnit.module('Test Pos Popups', {
+    QUnit.module('unit tests for Popups', {
         before() {
             class Root extends PopupControllerMixin(PosComponent) {
                 static template = xml`

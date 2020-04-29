@@ -3,7 +3,7 @@ odoo.define('point_of_sale.tests.ComponentRegistry', async function(require) {
 
     const Registries = require('point_of_sale.Registries');
 
-    QUnit.module('Test Pos Popups', {
+    QUnit.module('unit tests for ComponentRegistry', {
         before() {},
     });
 
