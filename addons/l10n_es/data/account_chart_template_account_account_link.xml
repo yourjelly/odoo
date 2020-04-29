@@ -13,6 +13,8 @@
             <field name="income_currency_exchange_account_id" ref="account_common_768"/>
             <field name="expense_currency_exchange_account_id" ref="account_common_668"/>
             <field name="default_pos_receivable_account_id" ref="account_common_4301" />
+            <field name="property_tax_payable_account_id" ref="account_common_4750"/>
+            <field name="property_tax_receivable_account_id" ref="account_common_4700"/>
         </record>
 
     </data>
