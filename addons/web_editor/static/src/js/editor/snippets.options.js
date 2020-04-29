@@ -2028,6 +2028,8 @@ const SnippetOptionWidget = Widget.extend({
         const uiFragment = document.createDocumentFragment();
         ($xml || this.$originalUIElements).clone(true).appendTo(uiFragment);
 
+        await this._renderCustomXML(uiFragment);
+
         // Build layouting components first
         uiFragment.querySelectorAll('we-row').forEach(el => {
             const infos = this._extraInfoFromDescriptionElement(el);
@@ -2037,7 +2039,6 @@ const SnippetOptionWidget = Widget.extend({
         });
 
         // Load widgets
-        await this._renderCustomXML(uiFragment);
         await this._renderXMLWidgets(uiFragment);
         await this._renderCustomWidgets(uiFragment);
 
