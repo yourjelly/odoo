@@ -3,6 +3,7 @@ odoo.define('point_of_sale.tour.PosHr', function (require) {
 
     const { PosHr } = require('pos_hr.tour.PosHrTourMethods');
     const { ProductScreen } = require('point_of_sale.tour.ProductScreenTourMethods');
+    const { ErrorPopup } = require('point_of_sale.tour.ErrorPopupTourMethods');
     const { NumberPopup } = require('point_of_sale.tour.NumberPopupTourMethods');
     const { SelectionPopup } = require('point_of_sale.tour.SelectionPopupTourMethods');
     const { getSteps, startSteps } = require('point_of_sale.tour.utils');
@@ -16,6 +17,14 @@ odoo.define('point_of_sale.tour.PosHr', function (require) {
     SelectionPopup.check.hasSelectionItem('Pos Employee1');
     SelectionPopup.check.hasSelectionItem('Pos Employee2');
     SelectionPopup.check.hasSelectionItem('Mitchell Admin');
+    SelectionPopup.do.clickItem('Pos Employee1');
+    NumberPopup.check.isShown();
+    NumberPopup.do.pressNumpad('2 5 8 1');
+    NumberPopup.check.inputShownIs('••••');
+    NumberPopup.do.clickConfirm();
+    ErrorPopup.check.isShown();
+    ErrorPopup.do.clickConfirm();
+    PosHr.do.clickLoginButton();
     SelectionPopup.do.clickItem('Pos Employee1');
     NumberPopup.check.isShown();
     NumberPopup.do.pressNumpad('2 5 8 0');

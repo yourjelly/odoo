@@ -1,10 +1,17 @@
-odoo.define('point_of_sale.LoginScreen', function(require) {
+odoo.define('point_of_sale.LoginScreen', function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
+    const useSelectEmployee = require('pos_hr.useSelectEmployee');
 
     class LoginScreen extends PosComponent {
+        constructor() {
+            super(...arguments);
+            const { selectEmployee, askPin } = useSelectEmployee();
+            this.selectEmployee = selectEmployee;
+            this.askPin = askPin;
+        }
         mounted() {
             if (this.env.pos.barcode_reader) {
                 this.env.pos.barcode_reader.set_action_callback(
@@ -33,7 +40,7 @@ odoo.define('point_of_sale.LoginScreen', function(require) {
             this.trigger('close-pos');
         }
         async selectCashier() {
-            const selectionList = this.env.pos.employees.map(employee => {
+            const list = this.env.pos.employees.map((employee) => {
                 return {
                     id: employee.id,
                     item: employee,
@@ -41,41 +48,11 @@ odoo.define('point_of_sale.LoginScreen', function(require) {
                     isSelected: false,
                 };
             });
-            let { confirmed: confirmSelection, payload: selectedEmployee } = await this.showPopup(
-                'SelectionPopup',
-                {
-                    title: 'Who are you?',
-                    list: selectionList,
-                }
-            );
 
-            if (!confirmSelection) return;
-
-            if (!selectedEmployee.pin) {
-                this.env.pos.set_cashier(selectedEmployee);
+            const employee = await this.selectEmployee(list);
+            if (employee) {
+                this.env.pos.set_cashier(employee);
                 this.back();
-                return;
-            }
-
-            const { confirmed: confirmPin, payload: inputtedPin } = await this.showPopup(
-                'NumberPopup',
-                {
-                    isPassword: true,
-                    title: "What's the password?",
-                    startingValue: null,
-                }
-            );
-
-            if (!confirmPin) return;
-
-            if (selectedEmployee.pin === Sha1.hash(inputtedPin)) {
-                this.env.pos.set_cashier(selectedEmployee);
-                this.back();
-            } else {
-                await this.showPopup('ErrorPopup', {
-                    title: this.env._t('Incorrect Password'),
-                    body: this.env._t('The inputted password is not correct. Please try again.'),
-                });
             }
         }
         async _barcodeCashierAction(code) {
@@ -87,31 +64,11 @@ odoo.define('point_of_sale.LoginScreen', function(require) {
                 }
             }
 
-            if (!theEmployee.pin) {
+            if (!theEmployee) return;
+
+            if (!theEmployee.pin || (await this.askPin(theEmployee))) {
                 this.env.pos.set_cashier(theEmployee);
                 this.back();
-                return;
-            }
-
-            const { confirmed: confirmPin, payload: inputtedPin } = await this.showPopup(
-                'NumberPopup',
-                {
-                    isPassword: true,
-                    title: "What's the password?",
-                    startingValue: null,
-                }
-            );
-
-            if (!confirmPin) return;
-
-            if (theEmployee.pin === Sha1.hash(inputtedPin)) {
-                this.env.pos.set_cashier(theEmployee);
-                this.back();
-            } else {
-                await this.showPopup('ErrorPopup', {
-                    title: this.env._t('Incorrect Password'),
-                    body: this.env._t('The inputted password is not correct. Please try again.'),
-                });
             }
         }
     }

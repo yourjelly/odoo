@@ -23,7 +23,7 @@ odoo.define('point_of_sale.tour.NumberPopupTourMethods', function (require) {
                     trigger = `.popup-numpad .number-char.dot`;
                 }
                 return {
-                    content: `'${key}' pressed in product screen numpad`,
+                    content: `'${key}' pressed in numpad`,
                     trigger,
                 };
             }
@@ -52,8 +52,14 @@ odoo.define('point_of_sale.tour.NumberPopupTourMethods', function (require) {
         inputShownIs(val) {
             return [
                 {
+                    content: 'number input element check',
+                    trigger: '.modal-dialog .popup-number .popup-input',
+                    run: () => {},
+                },
+                {
                     content: `input shown is '${val}'`,
-                    trigger: `.popup-input:contains("${val}")`,
+                    trigger: `.modal-dialog .popup-number .popup-input:contains("${val}")`,
+                    run: () => {},
                 },
             ];
         }

@@ -1,11 +1,17 @@
-odoo.define('pos_hr.CashierName', function(require) {
+odoo.define('pos_hr.CashierName', function (require) {
     'use strict';
 
     const CashierName = require('point_of_sale.CashierName');
     const Registries = require('point_of_sale.Registries');
+    const useSelectEmployee = require('pos_hr.useSelectEmployee');
 
-    const PosHrCashierName = CashierName =>
+    const PosHrCashierName = (CashierName) =>
         class extends CashierName {
+            constructor() {
+                super(...arguments);
+                const { selectEmployee } = useSelectEmployee();
+                this.selectEmployee = selectEmployee;
+            }
             mounted() {
                 this.env.pos.on('change:cashier', this.render, this);
             }
@@ -15,9 +21,9 @@ odoo.define('pos_hr.CashierName', function(require) {
             async selectCashier() {
                 if (!this.env.pos.config.module_pos_hr) return;
 
-                const selectionList = this.env.pos.employees
-                    .filter(employee => employee.id !== this.env.pos.get_cashier().id)
-                    .map(employee => {
+                const list = this.env.pos.employees
+                    .filter((employee) => employee.id !== this.env.pos.get_cashier().id)
+                    .map((employee) => {
                         return {
                             id: employee.id,
                             item: employee,
@@ -25,41 +31,10 @@ odoo.define('pos_hr.CashierName', function(require) {
                             isSelected: false,
                         };
                     });
-                let {
-                    confirmed: confirmSelection,
-                    payload: selectedEmployee,
-                } = await this.showPopup('SelectionPopup', {
-                    title: 'Who are you?',
-                    list: selectionList,
-                });
 
-                if (!confirmSelection) return;
-
-                if (!selectedEmployee.pin) {
-                    this.env.pos.set_cashier(selectedEmployee);
-                    return;
-                }
-
-                const { confirmed: confirmPin, payload: inputtedPin } = await this.showPopup(
-                    'NumberPopup',
-                    {
-                        isPassword: true,
-                        title: "What's the password?",
-                        startingValue: null,
-                    }
-                );
-
-                if (!confirmPin) return;
-
-                if (selectedEmployee.pin === Sha1.hash(inputtedPin)) {
-                    this.env.pos.set_cashier(selectedEmployee);
-                } else {
-                    await this.showPopup('ErrorPopup', {
-                        title: this.env._t('Incorrect Password'),
-                        body: this.env._t(
-                            'The inputted password is not correct. Please try again.'
-                        ),
-                    });
+                const employee = await this.selectEmployee(list);
+                if (employee) {
+                    this.env.pos.set_cashier(employee);
                 }
             }
         };
