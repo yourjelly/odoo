@@ -94,41 +94,16 @@ class View(models.Model):
 
         return True
 
-    @api.multi
-    def _get_specific_views(self):
-        """ Given a view, return a record set containing all the specific views
-            for that view's key.
-            If the given view is already specific, it will also return itself.
+    @api.model
+    def _validate_custom_views(self, model):
+        """ Write/create all fork views if original views have been updated/created
         """
-        self.ensure_one()
-        domain = [('key', '=', self.key), ('website_id', '!=', False)]
-        return self.with_context(active_test=False).search(domain)
-
-    def _load_records_write(self, values):
-        """ During module update, when updating a generic view, we should also
-            update its specific views (COW'd).
-            Note that we will only update unmodified fields. That will mimic the
-            noupdate behavior on views having an ir.model.data.
-        """
-        if self.type == 'qweb' and not self.website_id:
-            # Update also specific views
-            for cow_view in self._get_specific_views():
-                authorized_vals = {}
-                for key in values:
-                    if cow_view[key] == self[key]:
-                        authorized_vals[key] = values[key]
-                cow_view.write(authorized_vals)
-        super(View, self)._load_records_write(values)
-
-    def _load_records_create(self, values):
-        """ During module install, when creating a generic child view, we should
-            also create that view under specific view trees (COW'd).
-            Top level view (no inherit_id) do not need that behavior as they
-            will be shared between websites since there is no specific yet.
-        """
-        records = super(View, self)._load_records_create(values)
-        for record in records:
-            if record.type == 'qweb' and record.inherit_id and not record.website_id and not record.inherit_id.website_id:
+        record_action_dict = self.pool.load_records_duplicated_views
+        for record in self.browse(record_action_dict.keys()):
+            action, values = record_action_dict[record.id]
+            if action == 'write' and record.website_id:
+                record.write(values)
+            elif not record.website_id and not record.inherit_id.website_id:
                 specific_parent_views = record.with_context(active_test=False).search([
                     ('key', '=', record.inherit_id.key),
                     ('website_id', '!=', None),
@@ -137,7 +112,8 @@ class View(models.Model):
                     record.with_context(website_id=specific_parent_view.website_id.id).write({
                         'inherit_id': specific_parent_view.id,
                     })
-        return records
+
+        return super(View, self)._validate_custom_views(model)
 
     @api.multi
     def unlink(self):

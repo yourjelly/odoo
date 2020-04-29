@@ -1443,6 +1443,7 @@ actual arch.
         """Validate architecture of custom views (= without xml id) for a given model.
             This method is called at the end of registry update.
         """
+        self.pool.load_records_duplicated_views.clear()  # COW'd records have been updated/created by now
         query = """SELECT max(v.id)
                      FROM ir_ui_view v
                 LEFT JOIN ir_model_data md ON (md.model = 'ir.ui.view' AND md.res_id = v.id)
@@ -1489,3 +1490,37 @@ actual arch.
                 view._check_xml()
             except Exception as e:
                 self.raise_view_error("Can't validate view:\n%s" % e, view.id)
+
+    def _get_specific_views(self):
+        """ Given a view, return a record set containing all the specific views
+            for that view's key.
+            If the given view is already specific, it will also return itself.
+        """
+        self.ensure_one()
+        domain = [('key', '=', self.key), ('id', '!=', self.id)]
+        return self.with_context(active_test=False).search(domain)
+
+    def _load_records_write(self, values):
+        """ During module update, when updating a generic view, we should also
+            update its specific views (COW'd).
+            Note that we will only update unmodified fields. That will mimic the
+            noupdate behavior on views having an ir.model.data.
+        """
+        if self.type == 'qweb':
+            for cow_view in self._get_specific_views():
+                authorized_vals = {}
+                for key in values:
+                    if cow_view[key] == self[key]:
+                        authorized_vals[key] = values[key]
+                self.pool.load_records_duplicated_views[cow_view.id] = ('write', authorized_vals)
+        super(View, self)._load_records_write(values)
+
+    def _load_records_create(self, values):
+        """ During module install, when creating a generic child view, we should
+            also create that view under specific view trees (COW'd).
+        """
+        records = super(View, self)._load_records_create(values)
+        for record in records:
+            if record.type == 'qweb' and record.inherit_id:
+                self.pool.load_records_duplicated_views[record.id] = ('create', {})
+        return records
