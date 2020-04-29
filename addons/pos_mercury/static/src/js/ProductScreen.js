@@ -1,17 +1,17 @@
-odoo.define('pos_mercury.ProductScreen', function(require) {
+odoo.define('pos_mercury.ProductScreen', function (require) {
     'use strict';
 
     const ProductScreen = require('point_of_sale.ProductScreen');
     const Registries = require('point_of_sale.Registries');
+    const { useBarcodeReader } = require('point_of_sale.custom_hooks');
 
-    const PosMercuryProductScreen = ProductScreen =>
+    const PosMercuryProductScreen = (ProductScreen) =>
         class extends ProductScreen {
-            mounted() {
-                super.mounted();
-                this.env.pos.barcode_reader.set_action_callback(
-                    'credit',
-                    this.credit_error_action.bind(this)
-                );
+            constructor() {
+                super(...arguments);
+                useBarcodeReader({
+                    credit: this.credit_error_action,
+                });
             }
             credit_error_action() {
                 this.showPopup('ErrorPopup', {

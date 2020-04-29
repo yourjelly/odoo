@@ -104,5 +104,24 @@ odoo.define('point_of_sale.custom_hooks', function (require) {
         });
     }
 
-    return { useErrorHandlers, useAutoFocusToLast, onChangeOrder };
+    function useBarcodeReader(callbackMap) {
+        const current = Component.current;
+        for (let [key, callback] of Object.entries(callbackMap)) {
+            callbackMap[key] = callback.bind(current);
+        }
+        onMounted(() => {
+            if (current.env.pos.barcode_reader) {
+                current.env.pos.barcode_reader.set_action_callback(callbackMap);
+            }
+        });
+        onWillUnmount(() => {
+            if (current.env.pos.barcode_reader) {
+                for (let key in callbackMap) {
+                    current.env.pos.barcode_reader.remove_action_callback(key);
+                }
+            }
+        });
+    }
+
+    return { useErrorHandlers, useAutoFocusToLast, onChangeOrder, useBarcodeReader };
 });

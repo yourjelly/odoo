@@ -4,6 +4,7 @@ odoo.define('point_of_sale.LoginScreen', function (require) {
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
     const useSelectEmployee = require('pos_hr.useSelectEmployee');
+    const { useBarcodeReader } = require('point_of_sale.custom_hooks');
 
     class LoginScreen extends PosComponent {
         constructor() {
@@ -11,19 +12,9 @@ odoo.define('point_of_sale.LoginScreen', function (require) {
             const { selectEmployee, askPin } = useSelectEmployee();
             this.selectEmployee = selectEmployee;
             this.askPin = askPin;
-        }
-        mounted() {
-            if (this.env.pos.barcode_reader) {
-                this.env.pos.barcode_reader.set_action_callback(
-                    'cashier',
-                    this._barcodeCashierAction.bind(this)
-                );
-            }
-        }
-        willUnmount() {
-            if (this.env.pos.barcode_reader) {
-                this.env.pos.barcode_reader.remove_action_callback('cashier');
-            }
+            useBarcodeReader({
+                cashier: this._barcodeCashierAction,
+            });
         }
         back() {
             this.props.resolve({ confirmed: false, payload: false });

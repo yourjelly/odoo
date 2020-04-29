@@ -5,7 +5,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
     const Registries = require('point_of_sale.Registries');
-    const { onChangeOrder } = require('point_of_sale.custom_hooks');
+    const { onChangeOrder, useBarcodeReader } = require('point_of_sale.custom_hooks');
 
     class ProductScreen extends PosComponent {
         /**
@@ -18,6 +18,14 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             useListener('new-orderline-selected', this._newOrderlineSelected);
             useListener('set-numpad-mode', this._setNumpadMode);
             useListener('click-product', this._clickProduct);
+            useBarcodeReader({
+                product: this._barcodeProductAction,
+                weight: this._barcodeProductAction,
+                price: this._barcodeProductAction,
+                client: this._barcodeClientAction,
+                discount: this._barcodeDiscountAction,
+                error: this._barcodeErrorAction,
+            })
             onChangeOrder(null, (newOrder) => newOrder && this.render());
             NumberBuffer.use({
                 nonKeyboardInputEvent: 'numpad-click-input',
@@ -25,21 +33,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 useWithBarcode: true,
             });
             this.numpadMode = 'quantity';
-        }
-        mounted() {
-            this.env.pos.barcode_reader.set_action_callback({
-                product: this._barcodeProductAction.bind(this),
-                weight: this._barcodeProductAction.bind(this),
-                price: this._barcodeProductAction.bind(this),
-                client: this._barcodeClientAction.bind(this),
-                discount: this._barcodeDiscountAction.bind(this),
-                error: this._barcodeErrorAction.bind(this),
-            });
-        }
-        willUnmount() {
-            if (this.env.pos.barcode_reader) {
-                this.env.pos.barcode_reader.reset_action_callbacks();
-            }
         }
         /**
          * To be overridden by modules that checks availability of

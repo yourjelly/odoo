@@ -5,6 +5,7 @@ odoo.define('pos_mercury.PaymentScreen', function (require) {
     const PaymentScreen = require('point_of_sale.PaymentScreen');
     const Registries = require('point_of_sale.Registries');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
+    const { useBarcodeReader } = require('point_of_sale.custom_hooks');
 
     // Lookup table to store status and error messages
     const lookUpCodeTransaction = {
@@ -95,6 +96,11 @@ odoo.define('pos_mercury.PaymentScreen', function (require) {
         class extends PaymentScreen {
             constructor() {
                 super(...arguments);
+                if (this.env.pos.getOnlinePaymentMethods().length !== 0) {
+                    useBarcodeReader({
+                        credit: this.credit_code_action,
+                    });
+                }
                 // How long we wait for the odoo server to deliver the response of
                 // a Vantiv transaction
                 this.server_timeout_in_ms = 95000;
@@ -554,24 +560,6 @@ odoo.define('pos_mercury.PaymentScreen', function (require) {
                     order.trigger('change', order);
                     this.render();
                 }
-            }
-
-            /**
-             * @override
-             */
-            mounted() {
-                super.mounted();
-                if (this.env.pos.getOnlinePaymentMethods().length !== 0) {
-                    this.env.pos.barcode_reader.set_action_callback(
-                        'credit',
-                        this.credit_code_action.bind(this)
-                    );
-                }
-            }
-
-            willUnmount() {
-                super.willUnmount();
-                this.env.pos.barcode_reader.remove_action_callback('credit');
             }
         };
 
