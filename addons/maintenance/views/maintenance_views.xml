@@ -165,7 +165,7 @@
                                     <div class="oe_kanban_bottom_right">
                                         <field name="kanban_state" widget="state_selection"/>
                                         <t t-set="unassigned"><t t-esc="_t('Unassigned')"/></t>
-                                        <field name="user_id" widget="many2one_avatar_user"/>
+                                        <field name="user_id" widget="mail_many2one_avatar"/>
                                     </div>
                                 </div>
                             </div>

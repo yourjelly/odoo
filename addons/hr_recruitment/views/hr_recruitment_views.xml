@@ -332,7 +332,7 @@
                                             <field name="legend_done" invisible="1"/>
                                         </div>
                                         <t t-set="unassigned"><t t-esc="_t('Unassigned')"/></t>
-                                        <field name="user_id" widget="many2one_avatar_user"/>
+                                        <field name="user_id" widget="mail_many2one_avatar"/>
                                     </div>
 
                                 </div>
