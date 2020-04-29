@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import random
+import uuid
 
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessDenied, AccessError
@@ -9,6 +10,8 @@ from odoo.exceptions import AccessDenied, AccessError
 
 class CrmLead(models.Model):
     _inherit = "crm.lead"
+
+    access_token = fields.Char('Security Token', copy=False, default=lambda self: str(uuid.uuid4()))
 
     partner_latitude = fields.Float('Geo Latitude', digits=(16, 5))
     partner_longitude = fields.Float('Geo Longitude', digits=(16, 5))

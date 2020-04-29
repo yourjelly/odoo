@@ -606,6 +606,7 @@
                         <div class="col-lg-8 offset-lg-2">
                             <t t-call="portal.message_thread">
                                 <t t-set="object" t-value="product"/>
+                                <t t-set="token" t-value="product.access_token"/>
                                 <t t-set="display_rating" t-value="True"/>
                             </t>
                         </div>

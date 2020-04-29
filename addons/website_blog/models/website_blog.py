@@ -3,6 +3,7 @@
 
 from datetime import datetime
 import random
+import uuid
 import json
 
 from odoo import api, models, fields, _
@@ -154,6 +155,8 @@ class BlogPost(models.Model):
     author_avatar = fields.Binary(related='author_id.image_128', string="Avatar", readonly=False)
     visits = fields.Integer('No of Views', copy=False, default=0)
     website_id = fields.Many2one(related='blog_id.website_id', readonly=True)
+
+    access_token = fields.Char('Security Token', copy=False, default=lambda self: str(uuid.uuid4()))
 
     @api.depends('content', 'teaser_manual')
     def _compute_teaser(self):

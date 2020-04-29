@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import uuid
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 from odoo.addons.http_routing.models.ir_http import slug
@@ -176,6 +178,8 @@ class ProductTemplate(models.Model):
     _name = 'product.template'
     _mail_post_access = 'read'
     _check_company_auto = True
+
+    access_token = fields.Char('Security Token', copy=False, default=lambda self: str(uuid.uuid4()))
 
     website_description = fields.Html('Description for the website', sanitize_attributes=False, translate=html_translate, sanitize_form=False)
     alternative_product_ids = fields.Many2many(

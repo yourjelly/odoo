@@ -386,6 +386,7 @@ list of filtered posts (by date or tag).
                     </div>
                     <t t-call="portal.message_thread">
                         <t t-set="object" t-value="blog_post"/>
+                        <t t-set="token" t-value="blog_post.access_token"/>
                     </t>
                 </div>
             </div>
