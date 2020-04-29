@@ -258,7 +258,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
                     this.state.buffer += input;
                 }
             }
-            if (this.state.buffer === '-' || /^(0)\1+$/.test(this.state.buffer)) {
+            if (this.state.buffer === '-') {
                 this.state.buffer = '';
             }
             // once an input is accepted and updated the buffer,
