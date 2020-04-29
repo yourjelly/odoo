@@ -1,4 +1,4 @@
-odoo.define('web.OwlCompatibility', function () {
+odoo.define('web.OwlCompatibility', function (require) {
     "use strict";
 
     /**
@@ -12,6 +12,7 @@ odoo.define('web.OwlCompatibility', function () {
     const { Component, hooks, tags } = owl;
     const { useRef, useSubEnv } = hooks;
     const { xml } = tags;
+    const AbstractRendererOwl = require('web.AbstractRendererOwl');
 
     const widgetSymbol = odoo.widgetSymbol;
     const children = new WeakMap(); // associates legacy widgets with their Owl children
@@ -72,7 +73,7 @@ odoo.define('web.OwlCompatibility', function () {
      *         }
      *     }
      */
-    class ComponentAdapter extends Component {
+    class ComponentAdapter extends AbstractRendererOwl {
         /**
          * Creates the template on-the-fly, depending on the type of Component
          * (legacy widget or Owl component).
@@ -80,6 +81,10 @@ odoo.define('web.OwlCompatibility', function () {
          * @override
          */
         constructor(parent, props) {
+            ComponentAdapter.template = tags.xml`<span/>`;;
+            super(...arguments);
+            ComponentAdapter.template = null;
+
             if (!props.Component) {
                 throw Error(`ComponentAdapter: 'Component' prop is missing.`);
             }
@@ -95,10 +100,7 @@ odoo.define('web.OwlCompatibility', function () {
                 }
                 template = tags.xml`<t t-component="props.Component"${propsStr}/>`;
             }
-            ComponentAdapter.template = template;
-            super(...arguments);
             this.template = template;
-            ComponentAdapter.template = null;
 
             this.widget = null; // widget instance, if Component is a legacy widget
         }
@@ -218,48 +220,18 @@ odoo.define('web.OwlCompatibility', function () {
                 console.warn(`ComponentAdapter: Widget could not be re-rendered, maybe override 'renderWidget' function?`);
             }
         }
+    }
 
-        /**
-         * Mocks _trigger_up to redirect Odoo legacy events to OWL events.
-         *
-         * @private
-         * @param {OdooEvent} ev
-         */
-        _trigger_up(ev) {
-            const evType = ev.name;
-            const payload = ev.data;
-            if (evType === 'call_service') {
-                let args = payload.args || [];
-                if (payload.service === 'ajax' && payload.method === 'rpc') {
-                    // ajax service uses an extra 'target' argument for rpc
-                    args = args.concat(ev.target);
-                }
-                const service = this.env.services[payload.service];
-                const result = service[payload.method].apply(service, args);
-                payload.callback(result);
-            } else if (evType === 'get_session') {
-                if (payload.callback) {
-                    payload.callback(this.env.session);
-                }
-            } else if (evType === 'load_views') {
-                const params = {
-                    model: payload.modelName,
-                    context: payload.context,
-                    views_descr: payload.views,
-                };
-                this.env.dataManager
-                    .load_views(params, payload.options || {})
-                    .then(payload.on_success);
-            } else if (evType === 'load_filters') {
-                return this.env.dataManager
-                    .load_filters(payload)
-                    .then(payload.on_success);
-            } else {
-                payload.__targetWidget = ev.target;
-                this.trigger(evType.replace(/_/g, '-'), payload);
-            }
+    /*
+     *
+     */
+    class FieldAdapter extends ComponentAdapter {
+        get widgetArgs() {
+            return [this.props.fieldName, this.props.record, this.props.options];
         }
     }
+    FieldAdapter.props = ['record', 'options', 'fieldName', 'Component']
+
 
 
     /**
@@ -519,6 +491,7 @@ odoo.define('web.OwlCompatibility', function () {
 
     return {
         ComponentAdapter,
+        FieldAdapter,
         ComponentWrapper,
         WidgetAdapterMixin,
     };

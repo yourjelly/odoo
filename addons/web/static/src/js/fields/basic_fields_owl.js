@@ -4,6 +4,9 @@ odoo.define('web.basic_fields_owl', function (require) {
     const AbstractField = require('web.AbstractFieldOwl');
     const CustomCheckbox = require('web.CustomCheckbox');
     const { _lt } = require('web.translation');
+    const core = require('web.core');
+    const basic_fields = require('web.basic_fields');
+    const { FieldAdapter, WidgetAdapterMixin } = require('web.OwlCompatibility');
 
 
     /**
@@ -124,9 +127,17 @@ odoo.define('web.basic_fields_owl', function (require) {
     FieldBoolean.supportedFieldTypes = ['boolean'];
     FieldBoolean.template = 'web.FieldBoolean';
 
+    let classes = {}
+    _.filter(_.keys(basic_fields), key => key.startsWith('Field')).forEach(name => {
+        classes[name] = class extends FieldAdapter {
+            updateWidget() {}
+            renderWidget() {}
+        };
+        classes[name].defaultProps = {Component: _.extend(basic_fields[name], WidgetAdapterMixin)};
+    })
 
-    return {
-        FieldBadge,
+    return _.extend(classes, {
         FieldBoolean,
-    };
+        FieldBadge,
+    });
 });

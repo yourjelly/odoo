@@ -308,6 +308,7 @@
         <script type="text/javascript" src="/web/static/src/js/fields/field_wrapper.js"></script>
         <script type="text/javascript" src="/web/static/src/js/fields/abstract_field_owl.js"></script>
         <script type="text/javascript" src="/web/static/src/js/fields/basic_fields_owl.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/fields/relational_fields_owl.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/views/abstract_view.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/abstract_renderer.js"></script>
