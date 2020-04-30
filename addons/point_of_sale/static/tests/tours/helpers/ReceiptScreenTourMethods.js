@@ -28,6 +28,11 @@ odoo.define('point_of_sale.tour.ReceiptScreenTourMethods', function (require) {
         changeIs(amount) {
             return [
                 {
+                    content: `check if change field is visible`,
+                    trigger: `.receipt-screen .change-value`,
+                    run: () => {},
+                },
+                {
                     content: `change amount should be ${amount}`,
                     trigger: `.receipt-screen .change-value:contains("${amount}")`,
                     run: () => {},
