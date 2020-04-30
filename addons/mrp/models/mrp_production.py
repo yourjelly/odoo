@@ -80,9 +80,9 @@ class MrpProduction(models.Model):
         readonly=True, required=True,
         states={'draft': [('readonly', False)]}, domain="[('category_id', '=', product_uom_category_id)]")
     lot_producing_id = fields.Many2one(
-        'stock.production.lot', string='Lot/Serial Number of the finished product',
+        'stock.production.lot', string='Lot/Serial Number of the finished product', copy=False,
         domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
-    qty_producing = fields.Float(string="Quantity Producing")
+    qty_producing = fields.Float(string="Quantity Producing", copy=False)
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     picking_type_id = fields.Many2one(
