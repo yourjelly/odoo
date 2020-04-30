@@ -582,10 +582,10 @@ class MrpProduction(models.Model):
             for move_line, vals in vals['to_write']:
                 move_line.update(dict(vals, lot_id=self.lot_producing_id.id))
 
-        for move in self.move_raw_ids:
+        for move in (self.move_raw_ids | self.move_finished_ids.filtered(lambda m: m.product_id != self.product_id)):
             if move.has_tracking != 'none':
                 continue
-            new_qty = move.product_uom._compute_quantity(qty_producing, self.product_uom_id) * move.unit_factor
+            new_qty = qty_producing * move.unit_factor
             move.move_line_ids.filtered(lambda ml: ml.state not in ('done', 'cancel')).qty_done = 0
             vals = move._set_quantity_done_prepare_vals(new_qty)
             if vals['to_create']:
