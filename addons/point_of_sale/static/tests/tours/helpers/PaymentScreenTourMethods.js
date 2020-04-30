@@ -80,6 +80,15 @@ odoo.define('point_of_sale.tour.PaymentScreenTourMethods', function (require) {
     }
 
     class Check {
+        isShown() {
+            return [
+                {
+                    content: 'payment screen is shown',
+                    trigger: '.pos .payment-screen',
+                    run: () => {},
+                },
+            ];
+        }
         /**
          * Check if change is the provided amount.
          * @param {String} amount

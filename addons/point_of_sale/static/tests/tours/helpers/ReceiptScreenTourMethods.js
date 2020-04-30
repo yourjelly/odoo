@@ -15,6 +15,16 @@ odoo.define('point_of_sale.tour.ReceiptScreenTourMethods', function (require) {
     }
 
     class Check {
+        isShown() {
+            return [
+                {
+                    content: 'receipt screen is shown',
+                    trigger: '.pos .receipt-screen',
+                    run: () => {},
+                },
+            ];
+        }
+
         receiptIsThere() {
             return [
                 {

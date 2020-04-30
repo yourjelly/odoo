@@ -18,6 +18,7 @@ odoo.define('point_of_sale.tour.Chrome', function (require) {
     Chrome.do.newOrder();
     ProductScreen.exec.order('Monitor Stand', '3', '4');
     ProductScreen.do.clickPayButton();
+    PaymentScreen.check.isShown();
 
     // Order 3 is at Receipt Screen
     Chrome.do.newOrder();
@@ -25,6 +26,7 @@ odoo.define('point_of_sale.tour.Chrome', function (require) {
     ProductScreen.do.clickPayButton();
     PaymentScreen.do.clickPaymentMethod('Bank');
     PaymentScreen.do.clickValidate();
+    ReceiptScreen.check.isShown();
 
     // Select order 1, should be at Product Screen
     Chrome.do.selectOrder('1');
