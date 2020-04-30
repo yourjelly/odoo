@@ -1009,7 +1009,7 @@ class ChromeBrowser():
         if self.screencasts_dir:
             os.makedirs(self.screencasts_dir, exist_ok=True)
             os.makedirs(self.screencasts_frames_dir, exist_ok=True)
-            self._websocket_send('Page.startScreencast', params={'maxWidth': 1024, 'maxHeight': 576})
+            self._websocket_send('Page.startScreencast', params={'maxWidth': 1366, 'maxHeight': 768})
         else:
             _logger.warning('Unable to start screencast as no destination folder for frames is '
                             'available. Make sure that you provided the --screencast option to '
@@ -1085,6 +1085,20 @@ class ChromeBrowser():
         if wait_stop and frame_id:
             self._logger.info('Waiting for frame "%s" to stop loading', frame_id)
             self._websocket_wait_event('Page.frameStoppedLoading', params={'frameId': frame_id})
+
+    def _wait_for_selector(self, selector, timeout=10, frame_id=None):
+        """Wait for a specific selector to be present.
+
+        :param str selector: CSS selector
+        :param int timeout[10]: timeout time, in seconds
+        :param str frame_id: if set, will look for the selector in the mention
+            frame instead of the main one. Useful when dealing with iframes that
+            are not on the same domain. Leave empty when dealing with a normal page.
+        :raises: ChromeBrowserException if the element is not found
+        """
+        found_elem = self._wait_ready("Boolean(document.querySelectorAll('%s').length)" % selector, timeout=timeout)
+        if not found_elem:
+            raise ChromeBrowserException('could not click as element was not found in page')
 
     def clear(self):
         self._websocket_send('Page.stopScreencast')
