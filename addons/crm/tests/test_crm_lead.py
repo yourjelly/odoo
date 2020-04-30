@@ -4,7 +4,6 @@
 from odoo.addons.crm.tests.common import TestCrmCommon, INCOMING_EMAIL
 from odoo.tests.common import users
 from odoo.tools import mute_logger
-from odoo.tests import Form
 
 
 class TestCRMLead(TestCrmCommon):
@@ -87,29 +86,39 @@ class TestCRMLead(TestCrmCommon):
     @mute_logger('odoo.addons.phone_validation.tools.phone_validation')
     def test_field_email_and_phone(self):
         lead, partner = self.lead_1, self.contact_2
-        lead.partner_id = partner
+        lead.write({
+            'partner_id': partner.id,
+            'country_id': self.env.ref('base.be').id,
+        })
+        partner.country_id = self.env.ref('base.be')
 
         # email & phone must be automatically set on the lead
-        lead_form = Form(lead)
-        lead_form.partner_id = partner
-        lead = lead_form.save()
+        lead.partner_id = partner
         self.assertEqual(lead.email_from, partner.email)
         self.assertEqual(lead.phone, partner.phone)
+
+        self.assertTrue('phone' in lead._phone_get_number_fields())
+        self.assertTrue('mobile' in lead._phone_get_number_fields())
+        self.assertTrue('phone' in partner._phone_get_number_fields())
+        self.assertTrue('mobile' in partner._phone_get_number_fields())
 
         # writing on the lead field must change the partner field
-        lead_form = Form(lead)
-        lead_form.email_from = 'new@email.com'
-        lead_form.phone = '+32499999999'
-        lead = lead_form.save()
-        self.assertEqual(lead.email_from, partner.email)
-        self.assertEqual(lead.phone, partner.phone)
-        self.assertEqual(lead.phone, '+32 499 99 99 99')
+        lead.email_from = 'new@email.com'
+        lead.phone = '+3  24888888    88'
+
+
+        print(lead.phone_get_sanitized_number('phone'))
+
+        self.assertEqual('new@email.com', partner.email)
+        self.assertEqual('+32488888888', lead.phone_get_sanitized_number('phone'))
+        self.assertEqual('+32488888888', lead.phone_sanitized)
+        self.assertEqual('+32488888888', partner.phone_sanitized)
 
         # writing on the partner must change the lead values
-        partner_form = Form(partner)
-        partner_form.email = 'new_super@email.com'
-        partner_form.phone = '+32488888888'
-        partner = partner_form.save()
+        partner.email = 'new_super@email.com'
+        partner.phone = '+3249      9999999'
 
         self.assertEqual('new_super@email.com', lead.email_from)
-        self.assertEqual('+32 488 88 88 88', lead.phone)
+        self.assertEqual(lead.phone, partner.phone)
+        self.assertEqual('+32499999999', lead.phone_sanitized)
+        self.assertEqual('+32499999999', partner.phone_sanitized)
