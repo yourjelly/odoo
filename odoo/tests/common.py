@@ -626,8 +626,11 @@ class ChromeBrowser():
         otc = odoo.tools.config
         self.screenshots_dir = os.path.join(otc['screenshots'], get_db_name(), 'screenshots')
         self.screencasts_dir = None
+        self.screencasts_frames_dir = None
+        self.screencast_frame_nb = 0
         if otc['screencasts']:
             self.screencasts_dir = os.path.join(otc['screencasts'], get_db_name(), 'screencasts')
+            self.screencasts_frames_dir = os.path.join(self.screencasts_dir, 'frames')
         self.screencast_frames = []
         os.makedirs(self.screenshots_dir, exist_ok=True)
 
@@ -893,6 +896,19 @@ class ChromeBrowser():
             self._save_screencast()
             raise ChromeBrowserException(descr or pprint.pformat(exception_details))
 
+        if res.get('method') == 'Page.screencastFrame' and self.screencasts_frames_dir:
+            session_id = res.get('params').get('sessionId')
+            self._websocket_send('Page.screencastFrameAck', params={'sessionId': int(session_id)})
+            outfile = os.path.join(self.screencasts_frames_dir, 'frame_%05d.b64' % self.screencast_frame_nb)
+            frame = res.get('params')
+            with open(outfile, 'w') as f:
+                f.write(frame.get('data'))
+                self.screencast_frame_nb += 1
+                self.screencast_frames.append({
+                    'file_path': outfile,
+                    'timestamp': frame.get('metadata').get('timestamp')
+                })
+
         return res
 
     _TO_LEVEL = {
@@ -970,7 +986,9 @@ class ChromeBrowser():
                 png_file.write(frame)
 
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-        fname = '%s_screencast_%s.mp4' % (prefix, timestamp)
+        fname = 'screencast_%s.mp4' % (timestamp)
+        if prefix:
+            fname = '_'.join([prefix, fname])
         outfile = os.path.join(self.screencasts_dir, fname)
 
         try:
@@ -990,9 +1008,16 @@ class ChromeBrowser():
     def start_screencast(self):
         if self.screencasts_dir:
             os.makedirs(self.screencasts_dir, exist_ok=True)
-            self.screencasts_frames_dir = os.path.join(self.screencasts_dir, 'frames')
             os.makedirs(self.screencasts_frames_dir, exist_ok=True)
-        self._websocket_send('Page.startScreencast', params={'maxWidth': 1024, 'maxHeight': 576})
+            self._websocket_send('Page.startScreencast', params={'maxWidth': 1024, 'maxHeight': 576})
+        else:
+            _logger.warning('Unable to start screencast as no destination folder for frames is '
+                            'available. Make sure that you provided the --screencast option to '
+                            'the CLI with a valid path name.')
+
+    def stop_screencast(self, prefix=None):
+        self._save_screencast(prefix=prefix)
+        self._websocket_send('Page.stopScreencast')
 
     def set_cookie(self, name, value, path, domain):
         params = {'name': name, 'value': value, 'path': path, 'domain': domain}
@@ -1036,8 +1061,6 @@ class ChromeBrowser():
         self._logger.info('Evaluate test code "%s"', code)
         code_id = self._websocket_send('Runtime.evaluate', params={'expression': code})
         start_time = time.time()
-        logged_error = False
-        nb_frame = 0
         while time.time() - start_time < timeout:
             res = self._get_message()
 
@@ -1047,18 +1070,6 @@ class ChromeBrowser():
                     raise ChromeBrowserException("Running code returned an error: %s" % res)
             elif res.get('success'):
                 return True
-            elif res.get('method') == 'Page.screencastFrame':
-                session_id = res.get('params').get('sessionId')
-                self._websocket_send('Page.screencastFrameAck', params={'sessionId': int(session_id)})
-                outfile = os.path.join(self.screencasts_frames_dir, 'frame_%05d.b64' % nb_frame)
-                frame = res.get('params')
-                with open(outfile, 'w') as f:
-                    f.write(frame.get('data'))
-                    nb_frame += 1
-                    self.screencast_frames.append({
-                        'file_path': outfile,
-                        'timestamp': frame.get('metadata').get('timestamp')
-                    })
             elif res:
                 self._logger.debug('chrome devtools protocol event: %s', res)
         self.take_screenshot()
