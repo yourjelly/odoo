@@ -25,7 +25,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
         constructor() {
             super(...arguments);
             useListener('show-main-screen', this.__showScreen);
-            useListener('pos-error', this.onPosError);
             useListener('toggle-debug-widget', debounce(this._toggleDebugWidget, 100));
             useListener('show-temp-screen', this.__showTempScreen);
             useListener('close-temp-screen', this.__closeTempScreen);
@@ -289,9 +288,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
         }
         _onSetSyncStatus({ detail: { status, pending }}) {
             this.env.pos.set('synch', { status, pending });
-        }
-        onPosError(event) {
-            console.warn(event.detail.error);
         }
 
         // TO PASS AS PARAMETERS //
