@@ -291,6 +291,11 @@ class TestMrpOrder(TestMrpCommon):
         mo_form.qty_producing = 1
         mo = mo_form.save()
 
+        details_operation_form = Form(mo.move_raw_ids[1], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.new() as ml:
+            ml.lot_id = lot_1
+            ml.qty_done = 20
+        details_operation_form.save()
         mo.move_finished_ids.move_line_ids.qty_done -= 1
         update_quantity_wizard = self.env['change.production.qty'].create({
             'mo_id': mo.id,
@@ -327,41 +332,12 @@ class TestMrpOrder(TestMrpCommon):
         })
         update_quantity_wizard.change_prod_qty()
         mo_form = Form(mo)
-        mo_form.qty_producing = 1
+        mo_form.qty_producing = 3
         mo = mo_form.save()
         mo.button_mark_done()
 
         self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id == p1).mapped('quantity_done')), 20)
         self.assertEqual(sum(mo.move_finished_ids.mapped('quantity_done')), 5)
-
-    def test_update_quantity_3(self):
-        """ Build 1 final products then update the Manufacturing
-        order quantity. Check the remaining quantity to produce
-        take care of the first quantity produced."""
-        self.stock_location = self.env.ref('stock.stock_location_stock')
-        mo, bom, p_final, p1, p2 = self.generate_mo(qty_final=2)
-        self.assertEqual(len(mo), 1, 'MO should have been created')
-
-        self.env['stock.quant']._update_available_quantity(p1, self.stock_location, 20)
-        self.env['stock.quant']._update_available_quantity(p2, self.stock_location, 5)
-        mo.action_assign()
-
-        mo_form = Form(mo)
-        mo_form.qty_producing = 1
-        mo = mo_form.save()
-
-        update_quantity_wizard = self.env['change.production.qty'].create({
-            'mo_id': mo.id,
-            'product_qty': 3,
-        })
-        update_quantity_wizard.change_prod_qty()
-
-        mo_form = Form(mo)
-        mo_form.qty_producing = 1
-        mo = mo_form.save()
-        mo.button_mark_done()
-        self.assertEqual(sum(mo.move_raw_ids.filtered(lambda m: m.product_id == p1).mapped('quantity_done')), 12)
-        self.assertEqual(sum(mo.move_finished_ids.mapped('quantity_done')), 3)
 
     def test_rounding(self):
         """ Checks we round up when bringing goods to produce and round half-up when producing.
@@ -918,9 +894,9 @@ class TestMrpOrder(TestMrpCommon):
 
         mo_form = Form(mo1)
         mo_form.qty_producing = 1
-        mo = mo_form.save()
-        mo.action_generate_serial()
-        sn = mo.lot_producing_id
+        mo1 = mo_form.save()
+        mo1.action_generate_serial()
+        sn = mo1.lot_producing_id
         mo1.button_mark_done()
 
         mo_form = Form(self.env['mrp.production'])
@@ -931,7 +907,7 @@ class TestMrpOrder(TestMrpCommon):
         mo2.action_confirm()
 
         mo_form = Form(mo2)
-        produce_form.lot_producing_id = sn
+        mo_form.lot_producing_id = sn
         mo2 = mo_form.save()
         with self.assertRaises(UserError):
             mo2.button_mark_done()
@@ -945,8 +921,11 @@ class TestMrpOrder(TestMrpCommon):
             'product_id': p2.id,
             'company_id': self.env.company.id,
         })
+        mo_form = Form(mo1)
+        mo_form.qty_producing = 1
+        mo1 = mo_form.save()
         details_operation_form = Form(mo1.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
-        with details_operation_form.move_line_ids.new(0) as ml:
+        with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
         mo1.button_mark_done()
@@ -958,8 +937,11 @@ class TestMrpOrder(TestMrpCommon):
         mo2 = mo_form.save()
         mo2.action_confirm()
 
+        mo_form = Form(mo2)
+        mo_form.qty_producing = 1
+        mo2 = mo_form.save()
         details_operation_form = Form(mo2.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
-        with details_operation_form.move_line_ids.new(0) as ml:
+        with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
         with self.assertRaises(UserError):
@@ -996,8 +978,12 @@ class TestMrpOrder(TestMrpCommon):
             'company_id': self.env.company.id,
         })
 
-        details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
-        with details_operation_form.move_line_ids.edit(0) as ml:
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1
+        mo = mo_form.save()
+        move_byproduct = mo.move_finished_ids.filtered(lambda m: m.product_id != mo.product_id)
+        details_operation_form = Form(move_byproduct, view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
         mo.button_mark_done()
@@ -1009,8 +995,12 @@ class TestMrpOrder(TestMrpCommon):
         mo2 = mo_form.save()
         mo2.action_confirm()
 
-        details_operation_form = Form(mo2.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
-        with details_operation_form.move_line_ids.edit(0) as ml:
+        mo_form = Form(mo2)
+        mo_form.qty_producing = 1
+        mo2 = mo_form.save()
+        move_byproduct = mo2.move_finished_ids.filtered(lambda m: m.product_id != mo.product_id)
+        details_operation_form = Form(move_byproduct, view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
         with self.assertRaises(UserError):
@@ -1025,8 +1015,11 @@ class TestMrpOrder(TestMrpCommon):
             'product_id': p2.id,
             'company_id': self.env.company.id,
         })
+        mo_form = Form(mo1)
+        mo_form.qty_producing = 1
+        mo1 = mo_form.save()
         details_operation_form = Form(mo1.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
-        with details_operation_form.move_line_ids.edit(0) as ml:
+        with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
         mo1.button_mark_done()
@@ -1046,8 +1039,11 @@ class TestMrpOrder(TestMrpCommon):
         mo2 = mo_form.save()
         mo2.action_confirm()
 
+        mo_form = Form(mo2)
+        mo_form.qty_producing = 1
+        mo2 = mo_form.save()
         details_operation_form = Form(mo2.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
-        with details_operation_form.move_line_ids.edit(0) as ml:
+        with details_operation_form.move_line_ids.new() as ml:
             ml.lot_id = sn
         details_operation_form.save()
         mo2.button_mark_done()
