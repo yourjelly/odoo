@@ -12,9 +12,12 @@ odoo.define('point_of_sale.LoginScreen', function (require) {
             const { selectEmployee, askPin } = useSelectEmployee();
             this.selectEmployee = selectEmployee;
             this.askPin = askPin;
-            useBarcodeReader({
-                cashier: this._barcodeCashierAction,
-            });
+            useBarcodeReader(
+                {
+                    cashier: this._barcodeCashierAction,
+                },
+                true
+            );
         }
         back() {
             this.props.resolve({ confirmed: false, payload: false });

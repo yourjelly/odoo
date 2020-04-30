@@ -104,20 +104,31 @@ odoo.define('point_of_sale.custom_hooks', function (require) {
         });
     }
 
-    function useBarcodeReader(callbackMap) {
+    function useBarcodeReader(callbackMap, exclusive = false) {
         const current = Component.current;
+        const barcodeReader = current.env.pos.barcode_reader;
         for (let [key, callback] of Object.entries(callbackMap)) {
             callbackMap[key] = callback.bind(current);
         }
         onMounted(() => {
-            if (current.env.pos.barcode_reader) {
-                current.env.pos.barcode_reader.set_action_callback(callbackMap);
+            if (barcodeReader) {
+                for (let key in callbackMap) {
+                    if (exclusive) {
+                        barcodeReader.set_exclusive_callback(key, callbackMap[key]);
+                    } else {
+                        barcodeReader.set_action_callback(key, callbackMap[key]);
+                    }
+                }
             }
         });
         onWillUnmount(() => {
-            if (current.env.pos.barcode_reader) {
+            if (barcodeReader) {
                 for (let key in callbackMap) {
-                    current.env.pos.barcode_reader.remove_action_callback(key);
+                    if (exclusive) {
+                        barcodeReader.remove_exclusive_callback(key, callbackMap[key]);
+                    } else {
+                        barcodeReader.remove_action_callback(key, callbackMap[key]);
+                    }
                 }
             }
         });
