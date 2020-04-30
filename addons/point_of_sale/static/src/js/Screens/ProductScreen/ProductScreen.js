@@ -37,6 +37,7 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
         /**
          * To be overridden by modules that checks availability of
          * connected scale.
+         * @see _onScaleNotAvailable
          */
         get isScaleAvailable() {
             return true;
@@ -216,7 +217,8 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
             }
         }
         /**
-         * To be overridden by modules that checks availa
+         * override this method to perform procedure if the scale is not available.
+         * @see isScaleAvailable
          */
         async _onScaleNotAvailable() {}
         async _showDecreaseQuantityPopup() {
