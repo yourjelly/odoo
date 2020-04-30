@@ -872,6 +872,13 @@ class MrpProduction(models.Model):
             'view_mode': 'tree,form',
         }
 
+    def action_generate_serial(self):
+        self.ensure_one()
+        self.finished_lot_id = self.env['stock.production.lot'].create({
+            'product_id': self.product_id.id,
+            'company_id': self.production_id.company_id.id
+        })
+
     def action_confirm(self):
         self._check_company()
         for production in self:

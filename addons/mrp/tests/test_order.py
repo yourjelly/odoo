@@ -8,8 +8,6 @@ from odoo.fields import Datetime as Dt
 from odoo.exceptions import UserError
 from odoo.addons.mrp.tests.common import TestMrpCommon
 
-import unittest
-@unittest.skip
 class TestMrpOrder(TestMrpCommon):
 
     def test_access_rights_manager(self):
@@ -421,12 +419,10 @@ class TestMrpOrder(TestMrpCommon):
         mo_form.qty_producing = 3
 
         # check than all quantities are update correctly
-        with mo_form.move_raw_ids.edit(0) as move:
-            self.assertEqual(move.product_uom_qty, 3, "Wrong quantity to consume")
-            self.assertEqual(move.quantity_done, 3, "Wrong quantity done")
-        with mo_form.move_raw_ids.edit(1) as move:
-            self.assertEqual(move.product_uom_qty, 12, "Wrong quantity to consume")
-            self.assertEqual(move.qty_done, 12, "Wrong quantity done")
+        self.assertEqual(mo_form.move_raw_ids._record[0]['product_uom_qty'], 5, "Wrong quantity to consume")
+        self.assertEqual(mo_form.move_raw_ids[0].quantity_done, 3, "Wrong quantity done")
+        self.assertEqual(mo_form.move_raw_ids[1].product_uom_qty, 20, "Wrong quantity to consume")
+        self.assertEqual(mo_form.move_raw_ids[1].qty_done, 12, "Wrong quantity done")
 
     def test_product_produce_2(self):
         """ Checks that, for a BOM where one of the components is tracked by serial number and the
@@ -574,12 +570,9 @@ class TestMrpOrder(TestMrpCommon):
         ml_p1[0].qty_done = 1.0
 
         # Produce baby!
-        product_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        product_produce = product_form.save()
-        product_produce.do_produce()
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1
+        mo = mo_form.save()
 
         m_p1 = mo.move_raw_ids.filtered(lambda x: x.product_id == p1)
         ml_p1 = m_p1.mapped('move_line_ids')
@@ -594,7 +587,7 @@ class TestMrpOrder(TestMrpCommon):
     def test_product_produce_6(self):
         """ Plan 5 finished products, reserve and produce 3. Post the current production.
         Simulate an unlock and edit and, on the opened moves, set the consumed quantity
-        to 3. Now, try to update the quantity to produce to 3. It should fail since there
+        to 3. Now, try to update the quantity to mo2 to 3. It should fail since there
         are consumed quantities. Unlock and edit, remove the consumed quantities and
         update the quantity to produce to 3."""
         self.stock_location = self.env.ref('stock.stock_location_stock')
@@ -606,13 +599,9 @@ class TestMrpOrder(TestMrpCommon):
         self.env['stock.quant']._update_available_quantity(p2, self.stock_location, 5)
         mo.action_assign()
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        produce_form.qty_producing = 3
-        produce_wizard = produce_form.save()
-        produce_wizard.do_produce()
+        mo_form = Form(mo)
+        mo_form.qty_producing = 3
+        mo = mo_form.save()
 
         mo.post_inventory()
         self.assertEqual(len(mo.move_raw_ids), 4)
@@ -652,26 +641,11 @@ class TestMrpOrder(TestMrpCommon):
         self.env['stock.quant']._update_available_quantity(p2, self.stock_shelf_1, 1)
         self.env['stock.quant']._update_available_quantity(p2, self.stock_shelf_2, 1)
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        produce_form.qty_producing = 1
-        produce_wizard = produce_form.save()
+        mo_form = Form(mo)
+        mo_form.qty_producing = 2
 
-        self.assertEqual(len(produce_wizard.raw_workorder_line_ids), 2)
-        produce_wizard.do_produce()
-
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        produce_form.qty_producing = 1
-
-        produce_wizard = produce_form.save()
-
-        self.assertEqual(len(produce_wizard.raw_workorder_line_ids), 2)
-        produce_wizard.do_produce()
+        self.assertEqual(len(mo_form.move_raw_ids), 2)
+        mo = mo_form.save()
 
         mo.button_mark_done()
         mo_move_line_p1 = mo.move_raw_ids[1].move_line_ids
@@ -688,66 +662,6 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(self.env['stock.quant']._gather(p2, self.stock_shelf_2, strict=True).quantity, 0)
         self.assertEqual(self.env['stock.quant']._gather(p_final, self.stock_location, strict=True).quantity, 2)
 
-    def test_product_produce_8(self):
-        """ Produce more than reserved and planned. Check that produce wizard
-        only propose one line for product not reserved.
-        """
-        mo, bom, p_final, p1, p2 = self.generate_mo(qty_final=2)
-        self.assertEqual(len(mo), 1, 'MO should have been created')
-
-        self.stock_location = self.env.ref('stock.stock_location_stock')
-
-        self.env['stock.quant']._update_available_quantity(p1, self.stock_location, 5)
-        self.env['stock.quant']._update_available_quantity(p2, self.stock_location, 2)
-
-        mo.action_assign()
-
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        produce_form.qty_producing = 1
-        produce_wizard = produce_form.save()
-        self.assertEqual(len(produce_wizard.raw_workorder_line_ids), 2)
-        self.assertEqual(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p1).qty_reserved, 4)
-        self.assertEqual(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p2).qty_reserved, 1)
-        produce_wizard.do_produce()
-
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        produce_form.qty_producing = 1
-        produce_wizard = produce_form.save()
-        # p1 1 1 1
-        # p1 3 0 3
-        # p2 1 1 1
-        self.assertEqual(len(produce_wizard.raw_workorder_line_ids), 3)
-        self.assertEqual(sum(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p1).mapped('qty_reserved')), 1)
-        self.assertEqual(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p1 and l.qty_reserved).qty_to_consume, 1)
-        self.assertEqual(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p1 and not l.qty_reserved).qty_to_consume, 3)
-        self.assertEqual(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p2).qty_reserved, 1)
-
-        with Form(produce_wizard) as produce_form:
-            produce_form.qty_producing = 2
-        # p1 1 1 1
-        # p1 7 0 7
-        # p2 1 1 1
-        # p2 1 0 1
-        self.assertEqual(len(produce_wizard.raw_workorder_line_ids), 4)
-        self.assertEqual(sum(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p1).mapped('qty_reserved')), 1)
-        self.assertEqual(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p1 and l.qty_reserved).qty_to_consume, 1)
-        self.assertEqual(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p1 and not l.qty_reserved).qty_to_consume, 7)
-        self.assertEqual(sum(produce_wizard.raw_workorder_line_ids.filtered(lambda l: l.product_id == p2).mapped('qty_reserved')), 1)
-
-        produce_wizard.do_produce()
-
-        mo.button_mark_done()
-
-        self.assertEqual(self.env['stock.quant']._gather(p1, self.stock_location, strict=True).quantity, -7)
-        self.assertEqual(self.env['stock.quant']._gather(p2, self.stock_location, strict=True).quantity, -1)
-        self.assertEqual(self.env['stock.quant']._gather(p_final, self.stock_location, strict=True).quantity, 3)
-
     def test_product_produce_9(self):
         """ Checks the constraints of a strict BOM without tracking when playing around in the
         produce wizard.
@@ -761,52 +675,34 @@ class TestMrpOrder(TestMrpCommon):
 
         mo.action_assign()
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
+        mo_form = Form(mo)
 
         with self.assertRaises(UserError):
             # try adding another line for a bom product to increase the quantity
-            produce_form.qty_producing = 1
-            with produce_form.raw_workorder_line_ids.new() as line:
-                line.product_id = p1
-                line.qty_done = 1
-            product_produce = produce_form.save()
-            product_produce.do_produce()
+            mo_form.qty_producing = 1
+            with mo_form.move_raw_ids.new() as move:
+                move.product_id = p1
+                move.quantity_done = 1
+            mo = mo_form.save()
+            mo.button_mark_done()
 
         with self.assertRaises(UserError):
             # Try updating qty_done
-            product_produce = produce_form.save()
-            product_produce.raw_workorder_line_ids[0].qty_done += 1
-            product_produce.do_produce()
-
-        with self.assertRaises(UserError):
-            # try adding another product
-            produce_form = Form(self.env['mrp.product.produce'].with_context({
-                'active_id': mo.id,
-                'active_ids': [mo.id],
-            }))
-            produce_form.qty_producing = 1
-            with produce_form.raw_workorder_line_ids.new() as line:
-                line.product_id = self.product_4
-                line.qty_done = 1
-            product_produce = produce_form.save()
-            product_produce.do_produce()
+            mo = mo_form.save()
+            mo.move_raw_ids[0].move_line_ids[0].qty_done += 1
+            mo.button_mark_done()
 
         # try adding another line for a bom product but the total quantity is good
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        produce_form.qty_producing = 1
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1
 
-        with produce_form.raw_workorder_line_ids.new() as line:
+        with mo_form.move_raw_ids.new() as line:
             line.product_id = p1
-            line.qty_done = 1
-        product_produce = produce_form.save()
-        product_produce.raw_workorder_line_ids[1].qty_done -= 1
-        product_produce.do_produce()
+            line.quantity_done = 1
+        with mo_form.move_raw_ids.edit(0) as move:
+            move.quantity_done -= 1
+        mo = mo_form.save()
+        mo.button_mark_done()
 
     def test_product_produce_10(self):
         """ Produce byproduct with serial, lot and not tracked.
@@ -874,84 +770,89 @@ class TestMrpOrder(TestMrpCommon):
         mo = mo_form.save()
 
         mo.action_confirm()
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        self.assertEqual(len(produce_form.finished_workorder_line_ids), 4)
-        produce_wizard = produce_form.save()
-        wokorder_lines_byproduct_1 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct1)
-        self.assertEqual(len(wokorder_lines_byproduct_1), 2)
-        self.assertEqual(wokorder_lines_byproduct_1.mapped('qty_to_consume'), [1.0, 1.0])
-        self.assertEqual(wokorder_lines_byproduct_1.mapped('qty_done'), [1.0, 1.0])
-        wokorder_lines_byproduct_2 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct2)
-        self.assertEqual(len(wokorder_lines_byproduct_2), 1)
-        self.assertEqual(wokorder_lines_byproduct_2.qty_to_consume, 4.0)
-        self.assertEqual(wokorder_lines_byproduct_2.qty_done, 4.0)
+        move_byproduct_1 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct1)
+        self.assertEqual(len(move_byproduct_1), 1)
+        self.assertEqual(move_byproduct_1.product_uom_qty, 2.0)
+        self.assertEqual(move_byproduct_1.quantity_done, 0)
+        self.assertEqual(len(move_byproduct_1.move_line_ids), 0)
 
-        wokorder_lines_byproduct_3 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct3)
-        self.assertEqual(wokorder_lines_byproduct_3.qty_to_consume, 4.0)
-        self.assertEqual(wokorder_lines_byproduct_3.qty_done, 4.0)
-        self.assertEqual(wokorder_lines_byproduct_3.product_uom_id, dozen)
+        move_byproduct_2 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct2)
+        self.assertEqual(len(move_byproduct_2), 1)
+        self.assertEqual(move_byproduct_2.product_uom_qty, 4.0)
+        self.assertEqual(move_byproduct_2.quantity_done, 0)
+        self.assertEqual(len(move_byproduct_2.move_line_ids), 0)
 
-        produce_form = Form(produce_wizard)
-        produce_form.qty_producing = 1.0
-        self.assertEqual(len(produce_form.finished_workorder_line_ids), 3)
-        produce_wizard = produce_form.save()
-        wokorder_lines_byproduct_1 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct1)
-        self.assertEqual(len(wokorder_lines_byproduct_1), 1)
-        self.assertEqual(wokorder_lines_byproduct_1.qty_to_consume, 1.0)
-        self.assertEqual(wokorder_lines_byproduct_1.qty_done, 1.0)
-        wokorder_lines_byproduct_2 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct2)
-        self.assertEqual(len(wokorder_lines_byproduct_2), 1)
-        self.assertEqual(wokorder_lines_byproduct_2.qty_to_consume, 2.0)
-        self.assertEqual(wokorder_lines_byproduct_2.qty_done, 2.0)
+        move_byproduct_3 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct3)
+        self.assertEqual(move_byproduct_3.product_uom_qty, 4.0)
+        self.assertEqual(move_byproduct_3.quantity_done, 4.0)
+        self.assertEqual(move_byproduct_3.product_uom, dozen)
+        self.assertEqual(len(move_byproduct_3.move_line_ids), 0)
 
-        wokorder_lines_byproduct_3 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct3)
-        self.assertEqual(wokorder_lines_byproduct_3.qty_to_consume, 2.0)
-        self.assertEqual(wokorder_lines_byproduct_3.qty_done, 2.0)
-        self.assertEqual(wokorder_lines_byproduct_3.product_uom_id, dozen)
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1.0
+        mo = mo_form.save()
+        move_byproduct_1 = mo_form.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct1)
+        self.assertEqual(len(move_byproduct_1), 1)
+        self.assertEqual(move_byproduct_1.product_uom_qty, 1.0)
+        self.assertEqual(move_byproduct_1.quantity_done, 1.0)
 
-        produce_form = Form(produce_wizard)
-        wokorder_lines_byproduct_1.lot_id = self.serial_1
-        wokorder_lines_byproduct_2.lot_id = self.lot_1
-        produce_wizard = produce_form.save()
-        produce_wizard.do_produce()
+        move_byproduct_2 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct2)
+        self.assertEqual(len(move_byproduct_2), 1)
+        self.assertEqual(move_byproduct_2.product_uom_qty, 2.0)
+        self.assertEqual(move_byproduct_2.quantity_done, 2.0)
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        self.assertEqual(produce_form.qty_producing, 1.0)
-        self.assertEqual(len(produce_form.finished_workorder_line_ids), 3)
-        produce_wizard = produce_form.save()
+        move_byproduct_3 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct3)
+        self.assertEqual(move_byproduct_3.product_uom_qty, 2.0)
+        self.assertEqual(move_byproduct_3.quantity_done, 2.0)
+        self.assertEqual(move_byproduct_3.product_uom, dozen)
 
-        wokorder_lines_byproduct_1 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct1)
-        self.assertEqual(len(wokorder_lines_byproduct_1), 1)
-        self.assertEqual(wokorder_lines_byproduct_1.qty_to_consume, 1.0)
-        self.assertEqual(wokorder_lines_byproduct_1.qty_done, 1.0)
-        wokorder_lines_byproduct_2 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct2)
-        self.assertEqual(len(wokorder_lines_byproduct_2), 1)
-        self.assertEqual(wokorder_lines_byproduct_2.qty_to_consume, 2.0)
-        self.assertEqual(wokorder_lines_byproduct_2.qty_done, 2.0)
-
-        wokorder_lines_byproduct_3 = produce_wizard.finished_workorder_line_ids.filtered(lambda l: l.product_id == self.byproduct3)
-        self.assertEqual(wokorder_lines_byproduct_3.qty_to_consume, 2.0)
-        self.assertEqual(wokorder_lines_byproduct_3.qty_done, 2.0)
-        self.assertEqual(wokorder_lines_byproduct_3.product_uom_id, dozen)
-
-        produce_form = Form(produce_wizard)
-        wokorder_lines_byproduct_1.lot_id = self.serial_2
-        wokorder_lines_byproduct_2.lot_id = self.lot_2
-        wokorder_lines_byproduct_3.qty_done = 3.0
-        produce_wizard = produce_form.save()
-
-        produce_wizard.do_produce()
-
+        details_operation_form = Form(mo.move_byproduct_1, view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(1) as ml:
+            ml.lot_id = self.serial_1
+        details_operation_form.save()
+        details_operation_form = Form(mo.move_byproduct_2, view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(2) as ml:
+            ml.lot_id = self.lot_1
+        details_operation_form.save()
         mo.button_mark_done()
-        move_lines_byproduct_1 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct1).mapped('move_line_ids')
-        move_lines_byproduct_2 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct2).mapped('move_line_ids')
-        move_lines_byproduct_3 = mo.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct3).mapped('move_line_ids')
+        backorder = Form(self.env['mrp.production.backorder'].with_context(
+            default_mrp_production_ids=[mo.id])
+        )
+        backorder.save().action_backorder()
+        mo2 = mo.procurement_group_id.mrp_production_ids[-1]
+
+        mo_form = Form(mo2)
+        mo_form.qty_producing = 1
+        mo2 = mo_form.save()
+
+        move_byproduct_1 = mo2.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct1)
+        self.assertEqual(len(move_byproduct_1), 1)
+        self.assertEqual(move_byproduct_1.qty_to_consume, 1.0)
+        self.assertEqual(move_byproduct_1.quantity_done, 1.0)
+
+        move_byproduct_2 = mo2.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct2)
+        self.assertEqual(len(move_byproduct_2), 1)
+        self.assertEqual(move_byproduct_2.qty_to_consume, 2.0)
+        self.assertEqual(move_byproduct_2.quantity_done, 2.0)
+
+        move_byproduct_3 = mo2.move_finished_ids.filtered(lambda l: l.product_id == self.byproduct3)
+        self.assertEqual(move_byproduct_3.qty_to_consume, 2.0)
+        self.assertEqual(move_byproduct_3.quantity_done, 2.0)
+        self.assertEqual(move_byproduct_3.product_uom, dozen)
+
+        details_operation_form = Form(mo2.move_byproduct_1, view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(0) as ml:
+            ml.lot_id = self.serial_2
+        details_operation_form.save()
+        details_operation_form = Form(mo2.move_byproduct_2, view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(0) as ml:
+            ml.lot_id = self.lot_2
+        details_operation_form.save()
+
+        mo2.button_mark_done()
+        move_lines_byproduct_1 = (mo | mo2).move_finished_ids.filtered(lambda l: l.product_id == self.byproduct1).mapped('move_line_ids')
+        move_lines_byproduct_2 = (mo | mo2).move_finished_ids.filtered(lambda l: l.product_id == self.byproduct2).mapped('move_line_ids')
+        move_lines_byproduct_3 = (mo | mo2).move_finished_ids.filtered(lambda l: l.product_id == self.byproduct3).mapped('move_line_ids')
         self.assertEqual(move_lines_byproduct_1.filtered(lambda ml: ml.lot_id == self.serial_1).qty_done, 1.0)
         self.assertEqual(move_lines_byproduct_1.filtered(lambda ml: ml.lot_id == self.serial_2).qty_done, 1.0)
         self.assertEqual(move_lines_byproduct_2.filtered(lambda ml: ml.lot_id == self.lot_1).qty_done, 2.0)
@@ -974,43 +875,37 @@ class TestMrpOrder(TestMrpCommon):
         mo.bom_id.consumption = 'flexible'  # Because we'll over-consume with a product not defined in the BOM
         mo.action_assign()
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        produce_form.qty_producing = 3
-        self.assertEqual(len(produce_form.raw_workorder_line_ids._records), 4, 'Update the produce quantity should change the components quantity.')
-        self.assertEqual(sum([x['qty_done'] for x in produce_form.raw_workorder_line_ids._records]), 15, 'Update the produce quantity should change the components quantity.')
-        self.assertEqual(sum([x['qty_reserved'] for x in produce_form.raw_workorder_line_ids._records]), 5, 'Update the produce quantity should not change the components reserved quantity.')
-        produce_form.qty_producing = 4
-        self.assertEqual(len(produce_form.raw_workorder_line_ids._records), 4, 'Update the produce quantity should change the components quantity.')
-        self.assertEqual(sum([x['qty_done'] for x in produce_form.raw_workorder_line_ids._records]), 20, 'Update the produce quantity should change the components quantity.')
-        self.assertEqual(sum([x['qty_reserved'] for x in produce_form.raw_workorder_line_ids._records]), 5, 'Update the produce quantity should not change the components reserved quantity.')
+        mo_form = Form(mo)
+        mo_form.qty_producing = 3
+        self.assertEqual(len(mo_form.move_raw_ids.move_line_ids), 4, 'Update the produce quantity should change the components quantity.')
+        self.assertEqual(sum([x['quantity_done'] for x in mo_form.move_raw_ids]), 15, 'Update the produce quantity should change the components quantity.')
+        self.assertEqual(sum([x['reserved_availability'] for x in mo_form.move_raw_ids]), 5, 'Update the produce quantity should not change the components reserved quantity.')
+        mo_form.qty_producing = 4
+        self.assertEqual(len(mo_form.move_raw_ids.move_line_ids), 4, 'Update the produce quantity should change the components quantity.')
+        self.assertEqual(sum([x['quantity_done'] for x in mo_form.move_raw_ids]), 20, 'Update the produce quantity should change the components quantity.')
+        self.assertEqual(sum([x['reserved_availability'] for x in mo_form.move_raw_ids]), 5, 'Update the produce quantity should not change the components reserved quantity.')
 
-        produce_form.qty_producing = 1
-        self.assertEqual(len(produce_form.raw_workorder_line_ids._records), 2, 'Update the produce quantity should change the components quantity.')
-        self.assertEqual(sum([x['qty_done'] for x in produce_form.raw_workorder_line_ids._records]), 5, 'Update the produce quantity should change the components quantity.')
-        self.assertEqual(sum([x['qty_reserved'] for x in produce_form.raw_workorder_line_ids._records]), 5, 'Update the produce quantity should not change the components reserved quantity.')
+        mo_form.qty_producing = 1
+        self.assertEqual(len(mo_form.move_raw_ids.move_line_ids), 2, 'Update the produce quantity should change the components quantity.')
+        self.assertEqual(sum([x['quantity_done'] for x in mo_form.move_raw_ids]), 5, 'Update the produce quantity should change the components quantity.')
+        self.assertEqual(sum([x['reserved_availability'] for x in mo.move_raw_ids]), 5, 'Update the produce quantity should not change the components reserved quantity.')
         # try adding another product that doesn't belong to the BoM
-        with produce_form.raw_workorder_line_ids.new() as line:
-            line.product_id = self.product_4
-            line.qty_done = 1
-        produce_wizard = produce_form.save()
-        produce_wizard.do_produce()
+        with mo_form.move_raw_ids.new() as move:
+            move.product_id = self.product_4
+            move.quantity_done = 1
+        mo = mo_form.save()
+        mo.button_mark_done()
 
     def test_product_produce_duplicate_1(self):
         """ produce a finished product tracked by serial number 2 times with the
         same SN. Check that an error is raised the second time"""
         mo1, bom, p_final, p1, p2 = self.generate_mo(tracking_final='serial', qty_final=1, qty_base_1=1,)
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo1.id,
-            'active_ids': [mo1.id],
-        }))
-        product_produce = produce_form.save()
-        product_produce.action_generate_serial()
-        sn = product_produce.finished_lot_id
-        product_produce.do_produce()
+        mo_form = Form(mo1)
+        mo_form.qty_producing = 1
+        mo = mo_form.save()
+        mo.action_generate_serial()
+        sn = mo.lot_producing_id
         mo1.button_mark_done()
 
         mo_form = Form(self.env['mrp.production'])
@@ -1020,14 +915,11 @@ class TestMrpOrder(TestMrpCommon):
         mo2 = mo_form.save()
         mo2.action_confirm()
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo2.id,
-            'active_ids': [mo2.id],
-        }))
-        produce_form.finished_lot_id = sn
-        product_produce = produce_form.save()
+        mo_form = Form(mo2)
+        produce_form.lot_producing_id = sn
+        mo2 = mo_form.save()
         with self.assertRaises(UserError):
-            product_produce.do_produce()
+            mo2.button_mark_done()
 
     def test_product_produce_duplicate_2(self):
         """ produce a finished product with component tracked by serial number 2
@@ -1038,14 +930,10 @@ class TestMrpOrder(TestMrpCommon):
             'product_id': p2.id,
             'company_id': self.env.company.id,
         })
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo1.id,
-            'active_ids': [mo1.id],
-        }))
-        with produce_form.raw_workorder_line_ids.edit(0) as line:
-            line.lot_id = sn
-        product_produce = produce_form.save()
-        product_produce.do_produce()
+        details_operation_form = Form(mo1.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.new(0) as ml:
+            ml.lot_id = sn
+        details_operation_form.save()
         mo1.button_mark_done()
 
         mo_form = Form(self.env['mrp.production'])
@@ -1055,15 +943,12 @@ class TestMrpOrder(TestMrpCommon):
         mo2 = mo_form.save()
         mo2.action_confirm()
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo2.id,
-            'active_ids': [mo2.id],
-        }))
-        with produce_form.raw_workorder_line_ids.edit(0) as line:
-            line.lot_id = sn
-        product_produce = produce_form.save()
+        details_operation_form = Form(mo2.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.new(0) as ml:
+            ml.lot_id = sn
+        details_operation_form.save()
         with self.assertRaises(UserError):
-            product_produce.do_produce()
+            mo2.button_mark_done()
 
     def test_product_produce_duplicate_3(self):
         """ produce a finished product with by-product tracked by serial number 2
@@ -1095,15 +980,11 @@ class TestMrpOrder(TestMrpCommon):
             'product_id': byproduct.id,
             'company_id': self.env.company.id,
         })
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
 
-        with produce_form.finished_workorder_line_ids.edit(0) as line:
-            line.lot_id = sn
-        product_produce = produce_form.save()
-        product_produce.do_produce()
+        details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(0) as ml:
+            ml.lot_id = sn
+        details_operation_form.save()
         mo.button_mark_done()
 
         mo_form = Form(self.env['mrp.production'])
@@ -1113,15 +994,12 @@ class TestMrpOrder(TestMrpCommon):
         mo2 = mo_form.save()
         mo2.action_confirm()
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo2.id,
-            'active_ids': [mo2.id],
-        }))
-        with produce_form.finished_workorder_line_ids.edit(0) as line:
-            line.lot_id = sn
-        product_produce = produce_form.save()
+        details_operation_form = Form(mo2.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(0) as ml:
+            ml.lot_id = sn
+        details_operation_form.save()
         with self.assertRaises(UserError):
-            product_produce.do_produce()
+            mo2.button_mark_done()
 
     def test_product_produce_duplicate_4(self):
         """ Consuming the same serial number two times should not give an error if
@@ -1132,14 +1010,10 @@ class TestMrpOrder(TestMrpCommon):
             'product_id': p2.id,
             'company_id': self.env.company.id,
         })
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo1.id,
-            'active_ids': [mo1.id],
-        }))
-        with produce_form.raw_workorder_line_ids.edit(0) as line:
-            line.lot_id = sn
-        product_produce = produce_form.save()
-        product_produce.do_produce()
+        details_operation_form = Form(mo1.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(0) as ml:
+            ml.lot_id = sn
+        details_operation_form.save()
         mo1.button_mark_done()
 
         unbuild_form = Form(self.env['mrp.unbuild'])
@@ -1157,14 +1031,11 @@ class TestMrpOrder(TestMrpCommon):
         mo2 = mo_form.save()
         mo2.action_confirm()
 
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo2.id,
-            'active_ids': [mo2.id],
-        }))
-        with produce_form.raw_workorder_line_ids.edit(0) as line:
-            line.lot_id = sn
-        product_produce = produce_form.save()
-        product_produce.do_produce()
+        details_operation_form = Form(mo2.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))
+        with details_operation_form.move_line_ids.edit(0) as ml:
+            ml.lot_id = sn
+        details_operation_form.save()
+        mo2.button_mark_done()
 
     def test_product_produce_uom(self):
         """ Produce a finished product tracked by serial number. Set another
@@ -1215,17 +1086,11 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mo.move_raw_ids.product_qty, 12, '12 units should be reserved.')
 
         # produce product
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        produce_form.finished_lot_id = final_product_lot
-        product_produce = produce_form.save()
-        self.assertEqual(product_produce.qty_producing, 1)
-        self.assertEqual(product_produce.product_uom_id, unit, 'Should be 1 unit since the tracking is serial.')
-        product_produce.finished_lot_id = final_product_lot.id
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1
+        mo_form.lot_producing_id = final_product_lot
+        mo = mo_form.save()
 
-        product_produce.do_produce()
         move_line_raw = mo.move_raw_ids.mapped('move_line_ids').filtered(lambda m: m.qty_done)
         self.assertEqual(move_line_raw.qty_done, 1)
         self.assertEqual(move_line_raw.product_uom_id, unit, 'Should be 1 unit since the tracking is serial.')
@@ -1283,17 +1148,15 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mo.move_raw_ids.product_uom, paire, 'Move UoM should be "Paire".')
 
         # produce product
-        produce_form = Form(self.env['mrp.product.produce'].with_context({
-            'active_id': mo.id,
-            'active_ids': [mo.id],
-        }))
-        product_produce = produce_form.save()
-        self.assertEqual(product_produce.qty_producing, 1)
-        self.assertEqual(len(product_produce.raw_workorder_line_ids), 2, 'Should be 2 lines since the component tracking is serial and quantity 2.')
-        self.assertEqual(product_produce.raw_workorder_line_ids[0].qty_to_consume, 1, 'Should be 1 unit since the tracking is serial and quantity 2.')
-        self.assertEqual(product_produce.raw_workorder_line_ids[0].product_uom_id, unit, 'Should be the product uom so "unit"')
-        self.assertEqual(product_produce.raw_workorder_line_ids[1].qty_to_consume, 1, 'Should be 1 unit since the tracking is serial and quantity 2.')
-        self.assertEqual(product_produce.raw_workorder_line_ids[1].product_uom_id, unit, 'should be the product uom so "unit"')
+        mo_form = Form(mo)
+        mo_form.qty_producing = 1
+        mo = mo_form.save()
+
+        self.assertEqual(len(mo.move_raw_ids.move_line_ids), 2, 'Should be 2 lines since the component tracking is serial and quantity 2.')
+        self.assertEqual(mo.move_raw_ids[0].product_uom_qty, 1, 'Should be 1 unit since the tracking is serial and quantity 2.')
+        self.assertEqual(mo.move_raw_ids[0].product_uom_id, unit, 'Should be the product uom so "unit"')
+        self.assertEqual(mo.move_raw_ids[1].product_uom_qty, 1, 'Should be 1 unit since the tracking is serial and quantity 2.')
+        self.assertEqual(mo.move_raw_ids[1].product_uom_id, unit, 'should be the product uom so "unit"')
 
     def test_product_type_service_1(self):
         # Create finished product
