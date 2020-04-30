@@ -245,7 +245,7 @@
                         </page>
                         <page string="Finished Products" name="finished_products">
                             <field name="move_finished_ids" context="{'default_location_id': production_location_id, 'default_location_dest_id': location_src_id, 'default_state': 'draft', 'default_production_id': id, 'default_picking_type_id': picking_type_id}" attrs="{'readonly': [('state', '=', 'done'), ('is_locked', '=', True)]}">
-                                <tree delete="0" default_order="is_done,sequence" decoration-muted="is_done" decoration-warning="quantity_done&gt;product_uom_qty" decoration-success="not is_done and quantity_done - product_uom_qty &lt; 0.0001" decoration-danger="not is_done and reserved_availability &lt; product_uom_qty and product_uom_qty - reserved_availability &gt; 0.0001" editable="bottom">
+                                <tree delete="0" default_order="is_done,sequence" decoration-muted="is_done" editable="bottom">
                                     <field name="product_id" required="1"/>
 
                                     <field name="move_line_ids" invisible="1">
@@ -281,9 +281,8 @@
                                     <field name="warehouse_id" invisible="1"/>
                                     <field name="location_dest_id" domain="[('id', 'child_of', parent.location_dest_id)]" invisible="1"/>
                                     <field name="state" invisible="1" force_save="1"/>
-                                    <field name="product_uom_qty" string="To Consume"/>
-                                    <field name="reserved_availability" attrs="{'invisible': [('is_done', '=', True)], 'column_invisible': [('parent.state', 'in', ('draft', 'done'))]}" string="Reserved"/>
-                                    <field name="quantity_done" string="Consumed" attrs="{'column_invisible': [('parent.state', '=', 'draft')]}"/>
+                                    <field name="product_uom_qty" string="To Produce"/>
+                                    <field name="quantity_done" string="Produced" attrs="{'column_invisible': [('parent.state', '=', 'draft')]}"/>
                                     <button name="action_show_details" type="object" icon="fa-list" attrs="{'invisible': [('has_tracking', '=', 'none')]}" options="{&quot;warn&quot;: true}"/>
                                 </tree>
                             </field>
