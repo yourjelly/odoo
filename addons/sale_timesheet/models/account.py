@@ -56,14 +56,18 @@ class AccountAnalyticLine(models.Model):
                     raise ValidationError(_("This timesheet line cannot be billed: there is no Sale Order Item defined on the task, nor on the project. Please define one to save your timesheet line."))
 
     def write(self, values):
+        import pdb;pdb.set_trace()
         # prevent to update invoiced timesheets if one line is of type delivery
         self._check_can_write(values)
         result = super(AccountAnalyticLine, self).write(values)
         return result
 
     def _check_can_write(self, values):
+        import pdb;pdb.set_trace()
         if self.sudo().filtered(lambda aal: aal.so_line.product_id.invoice_policy == "delivery") and self.filtered(lambda t: t.timesheet_invoice_id and t.timesheet_invoice_id.state != 'cancel'):
+            import pdb;pdb.set_trace()
             if any([field_name in values for field_name in ['unit_amount', 'employee_id', 'project_id', 'task_id', 'so_line', 'amount', 'date']]):
+                import pdb;pdb.set_trace()
                 raise UserError(_('You can not modify already invoiced timesheets (linked to a Sales order items invoiced on Time and material).'))
 
     @api.model
