@@ -137,14 +137,14 @@
                                     <field name="qty_producing" digits="[12,3]" class="text-left"  attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"/>
                                     /
                                 </div>
-                                <field name="product_qty" class="oe_inline text-left" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                <field name="product_qty" class="oe_inline text-left" attrs="{'readonly': [('state', '!=', 'draft')], 'invisible': [('state', 'not in', ('draft', 'done'))]}"/>
+                                <button type="action" name="%(mrp.action_change_production_qty)d"
+                                    context="{'default_mo_id': id}" class="oe_link oe_inline" attrs="{'invisible': ['|', ('state', 'in', ('draft', 'done','cancel')), ('id', '=', False)]}">
+                                    <field name="product_qty" class="oe_inline" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                                </button>
                                 <label for="product_uom_id" string="" class="oe_inline"/>
                                 <field name="product_uom_category_id" invisible="1"/>
                                 <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" force_save="1" groups="uom.group_uom" attrs="{'readonly': [('state', '!=', 'draft')]}" class="oe_inline"/>
-                                <button type="action"
-                                    name="%(mrp.action_change_production_qty)d"
-                                    context="{'default_mo_id': id}"
-                                    string="Update" class="oe_link oe_inline" attrs="{'invisible': ['|', '|', ('state', 'in', ('draft', 'done','cancel')), ('id', '=', False), ('bom_id', '=', False)]}"/>
                             </div>
                             <label for="lot_producing_id" attrs="{'invisible': [('product_tracking', 'in', ('none', False))]}"/>
                             <div class="o_row" attrs="{'invisible': [('product_tracking', 'in', ('none', False))]}">
