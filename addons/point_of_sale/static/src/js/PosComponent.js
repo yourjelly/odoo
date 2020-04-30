@@ -1,4 +1,4 @@
-odoo.define('point_of_sale.PosComponent', function(require) {
+odoo.define('point_of_sale.PosComponent', function (require) {
     'use strict';
 
     const { Component } = owl;
@@ -27,12 +27,12 @@ odoo.define('point_of_sale.PosComponent', function(require) {
          * @param {Object} props Object that will be used to render to popup
          */
         showPopup(name, props) {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
                 this.trigger('show-popup', { name, props, resolve });
             });
         }
         showTempScreen(name, props) {
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
                 this.trigger('show-temp-screen', { name, props, resolve });
             });
         }
@@ -44,6 +44,14 @@ odoo.define('point_of_sale.PosComponent', function(require) {
          */
         playSound(name) {
             this.trigger('play-sound', name);
+        }
+        /**
+         * Control the SyncNotification component.
+         * @param {String} status 'connected' | 'connecting' | 'disconnected' | 'error'
+         * @param {String} pending number of pending orders to sync
+         */
+        setSyncStatus(status, pending) {
+            this.trigger('set-sync-status', { status, pending });
         }
     }
 

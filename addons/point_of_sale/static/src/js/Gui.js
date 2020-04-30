@@ -1,4 +1,4 @@
-odoo.define('point_of_sale.Gui', function(require) {
+odoo.define('point_of_sale.Gui', function (require) {
     'use strict';
 
     /**
@@ -27,7 +27,12 @@ odoo.define('point_of_sale.Gui', function(require) {
      */
     const configureGui = ({ component }) => {
         config.component = component;
-        config.availableMethods = new Set(['showPopup', 'showTempScreen', 'playSound']);
+        config.availableMethods = new Set([
+            'showPopup',
+            'showTempScreen',
+            'playSound',
+            'setSyncStatus',
+        ]);
     };
 
     /**
@@ -37,7 +42,7 @@ odoo.define('point_of_sale.Gui', function(require) {
     const Gui = new Proxy(config, {
         get(target, key) {
             const { component, availableMethods } = target;
-            if (!component) throw new Error(`Call 'use' before using Gui.`);
+            if (!component) throw new Error(`Call 'configureGui' before using Gui.`);
             const isMounted = component.__owl__.isMounted;
             if (availableMethods.has(key) && isMounted) {
                 return component[key].bind(component);

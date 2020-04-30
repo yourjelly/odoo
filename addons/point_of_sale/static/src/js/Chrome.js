@@ -32,6 +32,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('close-pos', this._closePos);
             useListener('loading-skip-callback', () => this._loadingSkipCallback());
             useListener('play-sound', this._onPlaySound);
+            useListener('set-sync-status', this._onSetSyncStatus);
             NumberBuffer.activate();
 
             this.state = useState({
@@ -285,6 +286,9 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 src = "/point_of_sale/static/src/sounds/bell.wav";
             }
             this.state.sound.src = src;
+        }
+        _onSetSyncStatus({ detail: { status, pending }}) {
+            this.env.pos.set('synch', { status, pending });
         }
         onPosError(event) {
             console.warn(event.detail.error);
