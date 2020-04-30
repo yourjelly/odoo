@@ -80,6 +80,7 @@ exports.PosModel = Backbone.Model.extend({
             'selectedOrder':    null,
             'selectedClient':   null,
             'cashier':          null,
+            'selectedCategoryId': null,
         });
 
         this.get('orders').on('remove', function(order,_unused_,options){

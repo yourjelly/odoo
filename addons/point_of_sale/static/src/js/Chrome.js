@@ -38,13 +38,6 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 uiState: 'LOADING', // 'LOADING' | 'READY' | 'CLOSING'
                 debugWidgetIsShown: true,
                 hasBigScrollBars: false,
-                // Used a property to the ProductScreen.
-                // This is to make sure that any change in selected
-                // category from one order, is also reflected to other
-                // orders.
-                // IMPROVEMENT: Perhaps we put this in a global context
-                // such as the pos in env.
-                selectedCategoryId: { value: 0 },
                 sound: { src: null },
             });
 
@@ -132,9 +125,12 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 this.env.pos = new models.PosModel(posModelDefaultAttributes);
                 await this.env.pos.ready;
                 this._buildChrome();
-                this.state.selectedCategoryId.value = this.env.pos.config.iface_start_categ_id
-                    ? this.env.pos.config.iface_start_categ_id[0]
-                    : 0;
+                this.env.pos.set(
+                    'selectedCategoryId',
+                    this.env.pos.config.iface_start_categ_id
+                        ? this.env.pos.config.iface_start_categ_id[0]
+                        : 0
+                );
                 this.state.uiState = 'READY';
                 this.env.pos.on('change:selectedOrder', this._showSavedScreen, this);
                 this._showStartScreen();
@@ -206,12 +202,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             // 1. Set the information of the screen to display.
             this.mainScreen.name = name;
             this.mainScreen.component = this.constructor.components[name];
-            this.mainScreenProps = Object.assign(
-                {
-                    selectedCategoryId: this.state.selectedCategoryId,
-                },
-                props || {}
-            );
+            this.mainScreenProps = props || {};
             // 2. Save the screen to the order.
             //  - This screen is shown when the order is selected.
             this._setScreenData(name, props);

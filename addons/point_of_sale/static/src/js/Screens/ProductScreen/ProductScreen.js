@@ -8,10 +8,6 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
     const { onChangeOrder, useBarcodeReader } = require('point_of_sale.custom_hooks');
 
     class ProductScreen extends PosComponent {
-        /**
-         * @param {Object} props
-         * @param {Object} props.selectedCategoryId the selected category id for the app.
-         */
         constructor() {
             super(...arguments);
             useListener('update-selected-orderline', this._updateSelectedOrderline);
