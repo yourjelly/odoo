@@ -81,6 +81,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        import pdb;pdb.set_trace()
         default_user_id = self._default_user()
         user_ids = list(map(lambda x: x.get('user_id', default_user_id), filter(lambda x: not x.get('employee_id') and x.get('project_id'), vals_list)))
         employees = self.env['hr.employee'].search([('user_id', 'in', user_ids)])
@@ -102,6 +103,7 @@ class AccountAnalyticLine(models.Model):
         return lines
 
     def write(self, values):
+        import pdb;pdb.set_trace()
         # If it's a basic user then check if the timesheet is his own.
         if not self.user_has_groups('hr_timesheet.group_hr_timesheet_approver') and any(self.env.user.id != analytic_line.user_id.id for analytic_line in self):
             raise AccessError(_("You cannot access timesheets that are not yours."))
