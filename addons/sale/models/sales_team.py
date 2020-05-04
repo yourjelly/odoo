@@ -126,10 +126,14 @@ class CrmTeam(models.Model):
         super(CrmTeam,self)._compute_dashboard_button_name()
         if self._context.get('in_sales_app'):
             self.update({'dashboard_button_name': _("Sales Analysis")})
+            print(self.update({'dashboard_button_name': _("Sales Analysis")}))
 
     def action_primary_channel_button(self):
         if self._context.get('in_sales_app'):
-            return self.env.ref('sale.action_order_report_so_salesteam').read()[0]
+            print(self.env.ref('sale.action_order_report_so_salesteam').read())
+            print(self.env.ref('sale.action_order_report_so_salesteam').read()[0]['id'])
+            return self.env.ref('sale.action_order_report_so_salesteam').read()[0]['id']
+        print(super(CrmTeam, self).action_primary_channel_button())
         return super(CrmTeam, self).action_primary_channel_button()
 
     def update_invoiced_target(self, value):
