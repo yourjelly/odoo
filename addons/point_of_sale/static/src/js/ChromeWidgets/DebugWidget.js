@@ -1,10 +1,11 @@
-odoo.define('point_of_sale.DebugWidget', function(require) {
+odoo.define('point_of_sale.DebugWidget', function (require) {
     'use strict';
 
     const { useState } = owl;
     const { useRef } = owl.hooks;
     const { getFileAsText } = require('point_of_sale.utils');
     const { parse } = require('web.field_utils');
+    const NumberBuffer = require('point_of_sale.NumberBuffer');
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
@@ -16,6 +17,7 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
                 weightInput: '',
                 isPaidOrdersReady: false,
                 isUnpaidOrdersReady: false,
+                buffer: NumberBuffer.get(),
             });
 
             // NOTE: Perhaps this can still be improved.
@@ -42,6 +44,12 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
                     }).bind(this)
                 );
             }
+        }
+        mounted() {
+            NumberBuffer.on('buffer-update', this, this._onBufferUpdate);
+        }
+        willUnmount() {
+            NumberBuffer.off('buffer-update', this, this._onBufferUpdate);
         }
         toggleWidget() {
             this.state.isShown = !this.state.isShown;
@@ -137,6 +145,12 @@ odoo.define('point_of_sale.DebugWidget', function(require) {
         }
         refreshDisplay() {
             this.env.pos.proxy.message('display_refresh', {});
+        }
+        _onBufferUpdate(buffer) {
+            this.state.buffer = buffer;
+        }
+        get bufferRepr() {
+            return `"${this.state.buffer}"`;
         }
     }
     DebugWidget.template = 'DebugWidget';

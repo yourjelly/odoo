@@ -2,6 +2,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
     'use strict';
 
     const { Component, useState } = owl;
+    const { EventBus } = owl.core;
     const { onMounted, onWillUnmount, useExternalListener } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
     const { parse } = require('web.field_utils');
@@ -57,8 +58,9 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
      * - Relieve the buffer from responsibility of handling `Enter` and other control keys.
      * - Make the constants (ALLOWED_KEYS, etc.) more configurable.
      */
-    class NumberBuffer {
+    class NumberBuffer extends EventBus {
         constructor() {
+            super();
             this.isReset = false;
             this.bufferHolderStack = [];
         }
@@ -66,7 +68,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
          * @returns {String} value of the buffer, e.g. '-95.79'
          */
         get() {
-            return this.state.buffer;
+            return this.state ? this.state.buffer : null;
         }
         /**
          * Takes a string that is convertible to float, and set it as
@@ -76,6 +78,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
          */
         set(val) {
             this.state.buffer = !isNaN(parseFloat(val)) ? val : '';
+            this.trigger('buffer-update', this.state.buffer);
         }
         /**
          * Resets the buffer to empty string.
@@ -83,6 +86,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
         reset() {
             this.isReset = true;
             this.state.buffer = '';
+            this.trigger('buffer-update', this.state.buffer);
         }
         /**
          * @returns {number} float equivalent of the value of buffer
@@ -264,6 +268,8 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
             // once an input is accepted and updated the buffer,
             // the buffer should not be in reset state anymore.
             this.isReset = false;
+
+            this.trigger('buffer-update', this.state.buffer);
         }
     }
 
