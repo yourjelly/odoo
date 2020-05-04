@@ -116,6 +116,9 @@ class Registry(Mapping):
         self.updated_modules = []       # installed/updated modules
         self.loaded_xmlids = set()
 
+        # COW qweb views that need processing. see _load_records
+        self.load_records_write_duplicated_views = dict()
+
         self.db_name = db_name
         self._db = odoo.sql_db.db_connect(db_name)
 

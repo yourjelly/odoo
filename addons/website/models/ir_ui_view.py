@@ -104,6 +104,25 @@ class View(models.Model):
         domain = [('key', '=', self.key), ('website_id', '!=', False)]
         return self.with_context(active_test=False).search(domain)
 
+    def _validate_custom_views(self, model):
+        """ Creates a specific views for each parent's specific views.
+            Note that specific inherit views should be set inactive if not used and
+            not deleted as they will be recreated here on update (same behaviour as a generic one).
+        """
+        if self.pool.load_records_write_duplicated_views is not None:
+            records = self.search([('type', '=', 'qweb'), ('inherit_id', '!=', False), ('website_id', '=', False)])
+            for record in records:
+                specific_parent_views = record.with_context(active_test=False).search([
+                    ('key', '=', record.inherit_id.key),
+                    ('website_id', '!=', None),
+                ])
+                for specific_parent_view in specific_parent_views:
+                    record.with_context(website_id=specific_parent_view.website_id.id).write({
+                        'inherit_id': specific_parent_view.id,
+                    })
+            self.pool.load_records_write_duplicated_views = None
+        super(View, self)._validate_custom_views(model)
+
     def _load_records_write(self, values):
         """ During module update, when updating a generic view, we should also
             update its specific views (COW'd).
@@ -115,29 +134,22 @@ class View(models.Model):
             for cow_view in self._get_specific_views():
                 authorized_vals = {}
                 for key in values:
-                    if cow_view[key] == self[key]:
+                    if cow_view[key] == self[key] and cow_view[key] != values[key]:
                         authorized_vals[key] = values[key]
                 cow_view.write(authorized_vals)
         super(View, self)._load_records_write(values)
 
-    def _load_records_create(self, values):
-        """ During module install, when creating a generic child view, we should
-            also create that view under specific view trees (COW'd).
-            Top level view (no inherit_id) do not need that behavior as they
-            will be shared between websites since there is no specific yet.
-        """
-        records = super(View, self)._load_records_create(values)
-        for record in records:
-            if record.type == 'qweb' and record.inherit_id and not record.website_id and not record.inherit_id.website_id:
-                specific_parent_views = record.with_context(active_test=False).search([
-                    ('key', '=', record.inherit_id.key),
-                    ('website_id', '!=', None),
-                ])
-                for specific_parent_view in specific_parent_views:
-                    record.with_context(website_id=specific_parent_view.website_id.id).write({
-                        'inherit_id': specific_parent_view.id,
-                    })
-        return records
+    def _load_records(self, data_list, update=False):
+        process_duplicated = self.pool.load_records_write_duplicated_views
+        if process_duplicated:
+            # Write changes made on all views having specific view.
+            # This is done here as the update might be stopped between generic view write
+            # and specific view write resulting in the generic view's preupdate state being lost
+            # and the specific view noupdate status being inacurate.
+            for record in self.browse(process_duplicated.keys()):
+                record._load_records_write(process_duplicated[record.id])
+            process_duplicated.clear()
+        return super(View, self)._load_records(data_list, update)
 
     @api.multi
     def unlink(self):

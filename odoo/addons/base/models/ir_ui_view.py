@@ -1489,3 +1489,33 @@ actual arch.
                 view._check_xml()
             except Exception as e:
                 self.raise_view_error("Can't validate view:\n%s" % e, view.id)
+
+    def _get_specific_views(self):
+        """ Given a view, return a record set containing all the specific views
+            for that view's key.
+        """
+        self.ensure_one()
+        domain = [('key', '=', self.key), ('id', '!=', self.id)]
+        return self.with_context(active_test=False).search(domain)
+
+    def _load_records_write(self, values):
+        """ During module update, when updating a generic view, we should also
+            update its specific views (COW'd).
+            Specific views being dependant of website but website's overrides not being
+            loaded at this point in an update scenario we need to save the changes to
+            apply them once website is loaded.
+            Note that we need to store the generic view changes and not update it here as
+            if the update is stopped before the specific views are updated, the generic view
+            pre update state will be lost and the noupdate status of the specific views will
+            no longer be accurate. This is due to the fact that we commit changes after each module
+            initialization.
+        """
+        modules = tuple(self.pool._init_modules) + (self._context.get('install_module'),)
+        website = self.env.ref('base.module_website', False)
+        website_installed = website and website.state in ('installed', 'to install', 'to upgrade')
+        if website_installed and 'website' not in modules and self.type == 'qweb' and self._get_specific_views():
+            # Writing a view which might have a specific one before website is installed
+            # We delay the write as the specific view will be updated in a different module.
+            self.pool.load_records_write_duplicated_views[self.id] = values
+        else:
+            super(View, self)._load_records_write(values)
