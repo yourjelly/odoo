@@ -5,6 +5,7 @@ var Session = require('web.Session');
 var core = require('web.core');
 var _t = core._t;
 
+// IMPROVEMENT: This is too much. We can get away from this class.
 class PrintResult {
     constructor({ successful, message }) {
         this.successful = successful;

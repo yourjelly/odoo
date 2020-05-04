@@ -29,7 +29,7 @@ odoo.define('point_of_sale.NumpadWidget', function(require) {
             return !this.env.pos.config.restrict_price_control || cashier.role == 'manager';
         }
         changeMode(mode) {
-            if (!this.hasPriceControlRights && this.state.mode === 'price') {
+            if (!this.hasPriceControlRights && mode === 'price') {
                 return;
             }
             this.state.mode = mode;

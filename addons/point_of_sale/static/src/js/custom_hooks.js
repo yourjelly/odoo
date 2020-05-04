@@ -6,6 +6,9 @@ odoo.define('point_of_sale.custom_hooks', function (require) {
 
     /**
      * Introduce error handlers in the component.
+     *
+     * IMPROVEMENT: This is a terrible hook. There could be a better way to handle
+     * the error when the order failed to sync.
      */
     function useErrorHandlers() {
         const component = Component.current;

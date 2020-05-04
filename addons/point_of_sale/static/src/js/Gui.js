@@ -2,8 +2,8 @@ odoo.define('point_of_sale.Gui', function (require) {
     'use strict';
 
     /**
-     * This module bridges Chrome (owl.Component) to other data classes
-     * (such as those defined in models.js) but not vice versa.
+     * This module bridges the data classes (such as those defined in
+     * models.js) to the view (owl.Component) but not vice versa.
      *
      * The idea is to be able to perform side-effects to the user interface
      * during calculation. Think of console.log during times we want to see
@@ -13,9 +13,15 @@ odoo.define('point_of_sale.Gui', function (require) {
      *
      * This however can be dangerous to the user interface as it can be possible
      * that a rendered component is destroyed during the calculation. Because of
-     * this, we are going to limit external ui controls to those safe ones to use:
+     * this, we are going to limit external ui controls to those safe ones to
+     * use such as:
      *  - `showPopup`
      *  - `showTempScreen`
+     *
+     * IMPROVEMENT: After all, this Gui layer seems to be a good abstraction because
+     * there is a complete decoupling between data and view despite the data being
+     * able to use selected functionalities in the view layer. More formalized
+     * implementation is welcome.
      */
 
     const config = {};
