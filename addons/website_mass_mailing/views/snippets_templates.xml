@@ -65,12 +65,22 @@
             t-att-data-selector="selector"
             t-attf-data-exclude=".o_newsletter_modal #{selector}">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
+            <we-select string="Size" data-apply-to=".o_newsletter_modal">
+                <we-button data-select-class="modal-sm">Small</we-button>
+                <we-button data-select-class="modal-md" data-name="s_popup_size_md">Medium</we-button>
+                <we-button data-select-class="modal-lg">Large</we-button>
+                <we-button data-select-class="modal-xl">Big</we-button>
+                <we-button data-select-class="s_popup_full" data-name="s_popup_size_full">Full</we-button>
+            </we-select>
         </div>
         <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
         </div>
+    </xpath>
+    <xpath expr="//div[@data-js='SnippetPopup']" position="attributes">
+        <attribute name="data-selector" separator="," add=".o_newsletter_popup"/>
     </xpath>
 </template>
 
