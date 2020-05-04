@@ -194,7 +194,8 @@ class Currency(models.Model):
         if self == to_currency:
             to_amount = from_amount
         else:
-            to_amount = from_amount * self._get_conversion_rate(self, to_currency, company, date)
+            conversion_rate = self._get_conversion_rate(self, to_currency, company, date)
+            to_amount = from_amount * (to_currency.round(conversion_rate) if round else conversion_rate)
         # apply rounding
         return to_currency.round(to_amount) if round else to_amount
 
