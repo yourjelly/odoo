@@ -5,6 +5,7 @@ from unittest.mock import patch
 
 from odoo.addons.test_mail.tests.common import TestMailCommon
 from odoo.tests.common import tagged
+from odoo.tests import Form
 
 
 @tagged('mail_track')
@@ -128,6 +129,28 @@ class TestTracking(TestMailCommon):
         self.assertEqual(record.message_ids[0].body, '<p>Hello Test</p>')
         # one email send due to template
         self.assertSentEmail(self.record.env.user.partner_id, [self.partner_admin], body='<p>Hello Test</p>')
+
+    def test_notify_track_groups(self):
+        # patch the group attribute
+        field = self.record._fields['email_from']
+        self.addCleanup(setattr, field, 'groups', field.groups)
+        field.groups = 'base.group_erp_manager'
+
+        self.record.sudo().write({'email_from': 'X'})
+        self.flush_tracking()
+
+        msg_emp = self.record._notify_prepare_template_context(self.record.message_ids, {})
+        msg_sudo = self.record.sudo()._notify_prepare_template_context(self.record.message_ids, {})
+        self.assertFalse(msg_emp.get('tracking_values'), "should not have protected tracking values")
+        self.assertTrue(msg_sudo.get('tracking_values'), "should have protected tracking values")
+
+        # test editing the record with user not in the group of the field
+        self.record.invalidate_cache()
+        self.record.clear_caches()
+        record_form = Form(self.record.with_user(self.user_employee))
+        record_form.name = 'mm'
+        record = record_form.save()
+        self.assertEqual(record.name, 'mm')
 
     def test_create_partner_from_tracking_multicompany(self):
         company1 = self.env['res.company'].create({'name': 'company1'})
