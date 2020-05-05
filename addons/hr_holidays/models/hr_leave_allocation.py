@@ -447,9 +447,9 @@ class HolidaysAllocation(models.Model):
     # Business methods
     ####################################################
 
-    def _prepare_holiday_values(self, employee):
+    def _prepare_holiday_values(self, employees):
         self.ensure_one()
-        values = {
+        return [{
             'name': self.name,
             'holiday_type': 'employee',
             'holiday_status_id': self.holiday_status_id.id,
@@ -464,8 +464,7 @@ class HolidaysAllocation(models.Model):
             'interval_number': self.interval_number,
             'number_per_interval': self.number_per_interval,
             'unit_per_interval': self.unit_per_interval,
-        }
-        return values
+        } for employee in employees]
 
     def action_draft(self):
         if any(holiday.state not in ['confirm', 'refuse'] for holiday in self):
@@ -527,11 +526,10 @@ class HolidaysAllocation(models.Model):
             else:
                 employees = self.env['hr.employee'].search([('company_id', '=', self.mode_company_id.id)])
 
-            for employee in employees:
-                childs += self.with_context(
-                    mail_notify_force_send=False,
-                    mail_activity_automation_skip=True
-                ).create(self._prepare_holiday_values(employee))
+            childs += self.with_context(
+                mail_notify_force_send=False,
+                mail_activity_automation_skip=True,
+            ).create(self._prepare_holiday_values(employees))
             # TODO is it necessary to interleave the calls?
             childs.action_approve()
             if childs and self.validation_type == 'both':
