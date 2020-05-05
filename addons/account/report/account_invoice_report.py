@@ -19,8 +19,9 @@ class AccountInvoiceReport(models.Model):
     company_id = fields.Many2one('res.company', string='Company', readonly=True)
     company_currency_id = fields.Many2one('res.currency', string='Company Currency', readonly=True)
     partner_id = fields.Many2one('res.partner', string='Partner', readonly=True)
-    commercial_partner_id = fields.Many2one('res.partner', string='Partner Company', help="Commercial Entity")
-    country_id = fields.Many2one('res.country', string="Country")
+    commercial_partner_id = fields.Many2one(
+        'res.partner', string='Partner Company', help="Commercial Entity", readonly=True)
+    country_id = fields.Many2one('res.country', string="Country", readonly=True)
     invoice_user_id = fields.Many2one('res.users', string='Salesperson', readonly=True)
     move_type = fields.Selection([
         ('out_invoice', 'Customer Invoice'),
@@ -48,7 +49,9 @@ class AccountInvoiceReport(models.Model):
     product_categ_id = fields.Many2one('product.category', string='Product Category', readonly=True)
     invoice_date_due = fields.Date(string='Due Date', readonly=True)
     account_id = fields.Many2one('account.account', string='Revenue/Expense Account', readonly=True, domain=[('deprecated', '=', False)])
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', groups="analytic.group_analytic_accounting")
+    analytic_account_id = fields.Many2one(
+        'account.analytic.account', string='Analytic Account', groups="analytic.group_analytic_accounting",
+        readonly=True)
     price_subtotal = fields.Float(string='Untaxed Total', readonly=True)
     price_average = fields.Float(string='Average Price', readonly=True, group_operator="avg")
 

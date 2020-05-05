@@ -52,9 +52,9 @@ class SaleReport(models.Model):
 
     discount = fields.Float('Discount %', readonly=True)
     discount_amount = fields.Float('Discount Amount', readonly=True)
-    campaign_id = fields.Many2one('utm.campaign', 'Campaign')
-    medium_id = fields.Many2one('utm.medium', 'Medium')
-    source_id = fields.Many2one('utm.source', 'Source')
+    campaign_id = fields.Many2one('utm.campaign', 'Campaign', readonly=True)
+    medium_id = fields.Many2one('utm.medium', 'Medium', readonly=True)
+    source_id = fields.Many2one('utm.source', 'Source', readonly=True)
 
     order_id = fields.Many2one('sale.order', 'Order #', readonly=True)
 
