@@ -70,10 +70,15 @@
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
+            <we-select string="Change Newsletter">
+            </we-select>
         </div>
     </xpath>
-    <xpath expr="//[@id='s_popup_options']" position="attributes">
-            <attribute name="data-selector" separator="," add=".o_newsletter_popup"/>
+</template>
+
+<template id="popup_options" inherit_id="website.s_popup_options">
+    <xpath expr="//div[@id='snippet_popup']" position="attributes">
+        <attribute name="data-selector" seperator="," add=".o_newsletter_popup s_newsletter_block"></attribute> 
     </xpath>
 </template>
 
