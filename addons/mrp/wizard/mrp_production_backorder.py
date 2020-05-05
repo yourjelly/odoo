@@ -86,7 +86,7 @@ class MrpProductionBackorder(models.TransientModel):
         return backorders
 
     def action_close_mo(self):
-        self.mrp_production_ids.post_inventory()
+        self.mrp_production_ids._post_inventory()
         for wo in self.mrp_production_ids.workorder_ids:
             if wo.state in ('done', 'cancel'):
                 continue
@@ -94,7 +94,7 @@ class MrpProductionBackorder(models.TransientModel):
         return self.mrp_production_ids._button_mark_done()
 
     def action_backorder(self):
-        self.mrp_production_ids.post_inventory()
+        self.mrp_production_ids._post_inventory()
         backorders = self._generate_backorder_productions()
         action = {
             'res_model': 'mrp.production',
