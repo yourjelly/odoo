@@ -553,11 +553,13 @@ class MailThread(models.AbstractModel):
     @tools.ormcache()
     def _get_tracked_fields(self):
         """ Return the set of tracked fields names for the current model. """
-        return {
+        fields = {
             name
             for name, field in self._fields.items()
             if getattr(field, 'tracking', None) or getattr(field, 'track_visibility', None)
         }
+
+        return set(self.fields_get(fields))
 
     def _creation_subtype(self):
         """ Give the subtypes triggered by the creation of a record
