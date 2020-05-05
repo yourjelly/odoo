@@ -130,9 +130,10 @@ class CrmTeam(models.Model):
 
     def action_primary_channel_button(self):
         if self._context.get('in_sales_app'):
-            print(self.env.ref('sale.action_order_report_so_salesteam').read())
-            print(self.env.ref('sale.action_order_report_so_salesteam').read()[0]['id'])
-            return self.env.ref('sale.action_order_report_so_salesteam').read()[0]['id']
+            result = str(self.env.ref('sale.action_order_report_so_salesteam').read()[0])
+            print(result)
+            # return self.env.ref('sale.action_order_report_so_salesteam').read()[0]
+            return result
         print(super(CrmTeam, self).action_primary_channel_button())
         return super(CrmTeam, self).action_primary_channel_button()
 
