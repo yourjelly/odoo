@@ -349,9 +349,9 @@ options.Class.include({
      * @private
      */
     _customizeWebsiteVariable: async function (value, params) {
-        const values = {};
-        values[params.variable] = value;
-        return this._makeSCSSCusto('/website/static/src/scss/options/user_values.scss', values);
+        return this._makeSCSSCusto('/website/static/src/scss/options/user_values.scss', {
+            [params.variable]: value,
+        });
     },
     /**
      * @private
@@ -771,15 +771,6 @@ options.registry.Theme = options.Class.extend({
         return this._super(...arguments);
     },
     /**
-     * @override
-     */
-    _computeWidgetVisibility: async function (widgetName, params) {
-        if (widgetName === 'theme_color_suggestions') {
-            return false;
-        }
-        return this._super(...arguments);
-    },
-    /**
      * @private
      * @param {DOMElement} node
      * @param {String} content text of the editor
@@ -830,6 +821,22 @@ options.registry.Theme = options.Class.extend({
      * @override
      */
     async _renderCustomXML(uiFragment) {
+        const paletteSelectorEl = uiFragment.querySelector('[data-variable="color-palettes-number"]');
+        const style = window.getComputedStyle(document.documentElement);
+        const nbPalettes = parseInt(style.getPropertyValue('--number-of-color-palettes'));
+        for (let i = 1; i <= nbPalettes; i++) {
+            const btnEl = document.createElement('we-button');
+            btnEl.dataset.customizeWebsiteVariable = i;
+            for (let c = 1; c <= 5; c++) {
+                const colorPreviewEl = document.createElement('span');
+                colorPreviewEl.classList.add('o_palette_color_preview');
+                const color = style.getPropertyValue(`--o-palette-${i}-o-color-${c}`).trim();
+                colorPreviewEl.style.backgroundColor = color;
+                btnEl.appendChild(colorPreviewEl);
+            }
+            paletteSelectorEl.appendChild(btnEl);
+        }
+
         const ccEl = uiFragment.querySelector('.o_color_combinations_edition');
         for (let i = 1; i <= 5; i++) {
             const togglerEl = document.createElement('we-toggler');

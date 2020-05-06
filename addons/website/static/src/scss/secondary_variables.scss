@@ -42,6 +42,14 @@ $o-website-values: map-merge($o-base-website-values-palette, o-map-omit($o-websi
 // Colors
 //------------------------------------------------------------------------------
 
+// First change the palette number to the actual user choice if any.
+$-color-palettes-number: o-website-value('color-palettes-number');
+@if $-color-palettes-number {
+    $o-color-palette-number: $-color-palettes-number;
+    $o-theme-color-palette-number: $-color-palettes-number;
+    $o-gray-color-palette-number: $-color-palettes-number;
+}
+
 $o-has-customized-13-0-color-system:
     not not (map-get($o-user-theme-color-palette, 'primary')
     or map-get($o-user-theme-color-palette, 'secondary')
@@ -94,6 +102,7 @@ $o-theme-color-palettes: append($o-theme-color-palettes, $-actual-user-theme-col
 
 // Enable last color and theme color palettes, which are now the user customized
 // color palettes.
+$o-original-color-palette-number: $o-color-palette-number;
 $o-color-palette-number: length($o-color-palettes);
 $o-theme-color-palette-number: length($o-theme-color-palettes);
 
