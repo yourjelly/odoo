@@ -26,6 +26,7 @@ var SnippetEditor = Widget.extend({
     custom_events: {
         'option_update': '_onOptionUpdate',
         'user_value_widget_request': '_onUserValueWidgetRequest',
+        'user_value_widget_blink_request': '_onUserValueWidgetBlinkRequest',
         'snippet_option_update': '_onSnippetOptionUpdate',
         'snippet_option_visibility_update': '_onSnippetOptionVisibilityUpdate',
     },
@@ -422,6 +423,20 @@ var SnippetEditor = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * @private
+     * @param {string} name
+     * @returns {UserValueWidget|null}
+     */
+    _findWidget: function (name) {
+        for (const key of Object.keys(this.styles)) {
+            const widget = this.styles[key].findWidget(name);
+            if (widget) {
+                return widget;
+            }
+        }
+        return null;
+    },
+    /**
      * Instantiates the snippet's options.
      *
      * @private
@@ -778,11 +793,23 @@ var SnippetEditor = Widget.extend({
      */
     _onUserValueWidgetRequest: function (ev) {
         ev.stopPropagation();
-        for (const key of Object.keys(this.styles)) {
-            const widget = this.styles[key].findWidget(ev.data.name);
+        const widget = this._findWidget(ev.data.name);
+        if (widget) {
+            ev.data.onSuccess(widget);
+        }
+    },
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onUserValueWidgetBlinkRequest: function (ev) {
+        ev.stopPropagation();
+        for (const name of ev.data.names) {
+            const widget = this._findWidget(name);
             if (widget) {
-                ev.data.onSuccess(widget);
-                return;
+                widget.blink();
+            } else {
+                console.warn(`Cannot make missing widget "${ev.data.name}" blink`);
             }
         }
     },

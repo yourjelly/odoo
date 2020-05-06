@@ -121,6 +121,9 @@ function createPropertyProxy(obj, propertyName, value) {
  */
 const UserValueWidget = Widget.extend({
     className: 'o_we_user_value_widget',
+    events: {
+        'click': '_onClick',
+    },
     custom_events: {
         'user_value_update': '_onUserValueNotification',
     },
@@ -146,11 +149,29 @@ const UserValueWidget = Widget.extend({
         $el.append(this.containerEl);
         return $el;
     },
+    /**
+     * @override
+     */
+    start: async function () {
+        await this._super(...arguments);
+
+        if (this.el.dataset.blink) {
+            this.$el.tooltip({
+                delay: 0,
+            });
+        }
+    },
 
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * Makes the widget blink for an instant.
+     */
+    blink: function () {
+        this.$el.odooBounce();
+    },
     /**
      * Closes the widget (only meaningful for widgets that can be closed).
      */
@@ -466,6 +487,16 @@ const UserValueWidget = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * @private
+     */
+    _onClick: function (ev) {
+        if (this.el.dataset.blink) {
+            this.trigger_up('user_value_widget_blink_request', {
+                names: this.el.dataset.blink.split(/\s*,\s*/),
+            });
+        }
+    },
+    /**
      * Should be called when an user event on the widget indicates a value
      * change.
      *
@@ -524,12 +555,12 @@ const UserValueWidget = Widget.extend({
 
 const ButtonUserValueWidget = UserValueWidget.extend({
     tagName: 'we-button',
-    events: {
+    events: _.extend({}, UserValueWidget.prototype.events, {
         'click': '_onButtonClick',
         'click [role="button"]': '_onInnerButtonClick',
         'mouseenter': '_onUserValuePreview',
         'mouseleave': '_onUserValueReset',
-    },
+    }),
 
     /**
      * @override
@@ -623,9 +654,6 @@ const CheckboxUserValueWidget = ButtonUserValueWidget.extend({
 
 const SelectUserValueWidget = UserValueWidget.extend({
     tagName: 'we-select',
-    events: {
-        'click': '_onClick',
-    },
 
     /**
      * @override
@@ -721,9 +749,11 @@ const SelectUserValueWidget = UserValueWidget.extend({
     /**
      * Called when the select is clicked anywhere -> open/close it.
      *
-     * @private
+     * @override
      */
-    _onClick: function () {
+    _onClick: function (ev) {
+        this._super(...arguments);
+
         if (!this.menuTogglerEl.classList.contains('active')) {
             this.trigger_up('user_value_widget_opening');
         }
@@ -737,11 +767,11 @@ const SelectUserValueWidget = UserValueWidget.extend({
 
 const InputUserValueWidget = UserValueWidget.extend({
     tagName: 'we-input',
-    events: {
+    events: _.extend({}, UserValueWidget.prototype.events, {
         'input input': '_onInputInput',
         'blur input': '_onInputBlur',
         'keydown input': '_onInputKeydown',
-    },
+    }),
 
     /**
      * @override
@@ -1138,10 +1168,10 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
 
 const ImagepickerUserValueWidget = UserValueWidget.extend({
     tagName: 'we-imagepicker',
-    events: {
+    events: _.extend({}, UserValueWidget.prototype.events, {
         'click .o_we_edit_image': '_onEditImage',
         'click .o_we_remove_image': '_onRemoveImage',
-    },
+    }),
 
     /**
      * @override
@@ -1233,11 +1263,11 @@ const ImagepickerUserValueWidget = UserValueWidget.extend({
 });
 
 const DatetimePickerUserValueWidget = InputUserValueWidget.extend({
-    events: { // Explicitely not consider all InputUserValueWidget events
+    events: _.extend({}, UserValueWidget.prototype.events, { // Explicitely not consider all InputUserValueWidget events
         'blur input': '_onInputBlur',
         'change.datetimepicker': '_onDateTimePickerChange',
         'error.datetimepicker': '_onDateTimePickerError',
-    },
+    }),
 
     /**
      * @override
