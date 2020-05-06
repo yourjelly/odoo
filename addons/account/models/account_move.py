@@ -229,6 +229,12 @@ class AccountMove(models.Model):
     reversed_entry_id = fields.Many2one('account.move', string="Reversal of", readonly=True, copy=False,
         check_company=True)
 
+    # ==== Storno ====
+    use_storno_accounting = fields.Boolean(
+        string="Storno Accounting",
+        store=True,
+        compute='_compute_use_storno_accounting')
+
     # =========================================================
     # Invoice related fields
     # =========================================================
@@ -1415,6 +1421,13 @@ class AccountMove(models.Model):
                     % format_date(self.env, move.company_id.tax_lock_date))
             else:
                 move.tax_lock_date_message = False
+
+    @api.depends('move_type', 'company_id')
+    def _compute_use_storno_accounting(self):
+        for move in self:
+            company = move.company_id or self.env.company
+            move.use_storno_accounting = move.move_type in ('out_refund', 'in_refund')\
+                                         and company.use_storno_accounting
 
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
@@ -2614,6 +2627,7 @@ class AccountMoveLine(models.Model):
     product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
     product_id = fields.Many2one('product.product', string='Product')
     product_uom_category_id = fields.Many2one('uom.category', related='product_id.uom_id.category_id')
+    use_storno_accounting = fields.Boolean(related='move_id.use_storno_accounting', store=True)
 
     # ==== Origin fields ====
     reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False, readonly=True, check_company=True)
@@ -2684,11 +2698,6 @@ class AccountMoveLine(models.Model):
         help="Technical field used to compute the monetary field. As currency_id is not a required field, we need to use either the foreign currency, either the company one.")
 
     _sql_constraints = [
-        (
-            'check_credit_debit',
-            'CHECK(credit + debit>=0 AND credit * debit=0)',
-            'Wrong credit or debit value in accounting entry !'
-        ),
         (
             'check_accountable_required_fields',
              "CHECK(COALESCE(display_type IN ('line_section', 'line_note'), 'f') OR account_id IS NOT NULL)",
@@ -3371,6 +3380,20 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
     # -------------------------------------------------------------------------
+
+    @api.constrains('debit', 'credit', 'amount_currency',
+                    'currency_id', 'company_currency_id',
+                    'use_storno_accounting')
+    def _check_accounting_fields(self):
+        for line in self:
+            debit_or_credit_not_zero = bool(line.debit * line.credit)
+            if line.use_storno_accounting:
+                debit_or_credit_bad_sign = line.debit + line.credit <= 0.0
+            else:
+                debit_or_credit_bad_sign = line.debit + line.credit >= 0.0
+
+            if debit_or_credit_not_zero or debit_or_credit_bad_sign:
+                raise ValidationError(_("Wrong credit or debit value in accounting entry !"))
 
     @api.constrains('account_id', 'journal_id')
     def _check_constrains_account_id_journal_id(self):
