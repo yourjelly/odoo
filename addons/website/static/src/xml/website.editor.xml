@@ -84,6 +84,26 @@
         </we-button>
     </t>
 
+    <t t-name="website.color_combination_edition">
+        <div>
+            <we-colorpicker string="Background" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-bg"/>
+            <we-colorpicker string="Text" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-text"/>
+            <we-colorpicker string="Headings" class="o_cc_subheadings_toggler" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-headings"/>
+            <we-row string="Sub-Headings" class="o_cc_subheadings_collapse">
+                <we-colorpicker title="Headings 2" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-h2"/>
+                <we-colorpicker title="Headings 3" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-h3"/>
+                <we-colorpicker title="Headings 4" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-h4"/>
+                <we-colorpicker title="Headings 5" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-h5"/>
+                <we-colorpicker title="Headings 6" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-h6"/>
+            </we-row>
+            <we-colorpicker string="Link" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-link"/>
+            <we-colorpicker string="Primary Button" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-primary"/>
+            <we-colorpicker string="Primary Button (outline)" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-outline-primary"/>
+            <we-colorpicker string="Secondary Button" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-secondary"/>
+            <we-colorpicker string="Secondary Button (outline)" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-outline-secondary"/>
+        </div>
+    </t>
+
     <!-- Theme - custom code -->
     <div t-name="website.custom_code_dialog_content">
         <div class="mb-2" t-esc="contentText"/>

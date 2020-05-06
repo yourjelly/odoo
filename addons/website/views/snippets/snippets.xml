@@ -638,20 +638,47 @@
             still customizable.
         </we-alert>
         <we-row string="Theme colors">
-            <we-colorpicker title="Primary" data-customize-website-color="" data-color="o-color-1"/>
-            <we-colorpicker title="Secondary" data-customize-website-color="" data-color="o-color-2"/>
+            <we-colorpicker data-name="color_1_opt" title="Primary" data-customize-website-color="" data-color="o-color-1"/>
+            <we-colorpicker data-name="color_2_opt" title="Secondary" data-customize-website-color="" data-color="o-color-2"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-3"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-4"/>
             <we-colorpicker data-customize-website-color="" data-color="o-color-5"/>
         </we-row>
+        <div class="o_no_color_combination_edition">
+            <we-colorpicker data-blink="body_bg_color_opt, body_bg_type_opt, body_bg_image_opt"
+                title="This color is always transparent to let your website background appear throughout your website"
+                data-disabled="true"
+                string="Background"/>
+            <we-colorpicker string="Text" data-customize-website-color="" data-color="text"/>
+            <we-colorpicker string="Headings" class="o_cc_subheadings_toggler" data-customize-website-color="" data-color="h1"/>
+            <we-row string="Sub-Headings" class="o_cc_subheadings_collapse">
+                <we-colorpicker title="Headings 2" data-customize-website-color="" data-color="h2"/>
+                <we-colorpicker title="Headings 3" data-customize-website-color="" data-color="h3"/>
+                <we-colorpicker title="Headings 4" data-customize-website-color="" data-color="h4"/>
+                <we-colorpicker title="Headings 5" data-customize-website-color="" data-color="h5"/>
+                <we-colorpicker title="Headings 6" data-customize-website-color="" data-color="h6"/>
+            </we-row>
+            <t t-set="color_1_link_message">To help you keep a consistent website, this color is always linked to the primary theme color</t>
+            <t t-set="color_2_link_message">To help you keep a consistent website, this color is always linked to the secondary theme color</t>
+            <we-colorpicker data-blink="color_1_opt" t-att-title="color_1_link_message" data-disabled="true"
+                string="Link" data-customize-website-color="" data-color="o-color-1"/>
+            <we-colorpicker data-blink="color_1_opt" t-att-title="color_1_link_message" data-disabled="true"
+                string="Primary Button" data-customize-website-color="" data-color="o-color-1"/>
+            <we-colorpicker data-blink="color_1_opt" t-att-title="color_1_link_message" data-disabled="true"
+                string="Primary Button (Outline)" data-customize-website-color="" data-color="o-color-1"/>
+            <we-colorpicker data-blink="color_2_opt" t-att-title="color_2_link_message" data-disabled="true"
+                string="Secondary Button" data-customize-website-color="" data-color="o-color-2"/>
+            <we-colorpicker data-blink="color_2_opt" t-att-title="color_2_link_message" data-disabled="true"
+                string="Secondary Button (Outline)" data-customize-website-color="" data-color="o-color-2"/>
+        </div>
+        <div class="o_color_combinations_edition"/>
         <we-row string="Status Colors">
             <we-colorpicker title="Success" data-customize-website-color="" data-color-type="theme" data-color="success"/>
             <we-colorpicker title="Info" data-customize-website-color="" data-color-type="theme" data-color="info"/>
             <we-colorpicker title="Warning" data-customize-website-color="" data-color-type="theme" data-color="warning"/>
             <we-colorpicker title="Error" data-customize-website-color="" data-color-type="theme" data-color="danger"/>
         </we-row>
-        <we-row string="Texts">
-            <we-colorpicker data-customize-website-color="" data-color="text"/>
+        <we-row string="Typography">
             <we-fontfamilypicker data-variable="font-number"/>
             <we-input data-customize-website-variable="null" data-variable="font-size-base" data-unit="px" data-save-unit="rem"/>
         </we-row>
@@ -660,17 +687,7 @@
             <we-button data-customize-website-variable="hover">On Hover</we-button>
             <we-button data-customize-website-variable="always">Always</we-button>
         </we-select>
-        <we-row string="Headings">
-            <we-colorpicker data-customize-website-color="" data-color="h1"/>
-            <we-fontfamilypicker data-variable="headings-font-number"/>
-        </we-row>
-        <we-row string="Sub-Headings">
-            <we-colorpicker title="Headings 2" data-customize-website-color="" data-color="h2"/>
-            <we-colorpicker title="Headings 3" data-customize-website-color="" data-color="h3"/>
-            <we-colorpicker title="Headings 4" data-customize-website-color="" data-color="h4"/>
-            <we-colorpicker title="Headings 5" data-customize-website-color="" data-color="h5"/>
-            <we-colorpicker title="Headings 6" data-customize-website-color="" data-color="h6"/>
-        </we-row>
+        <we-fontfamilypicker string="Headings" data-variable="headings-font-number"/>
         <we-fontfamilypicker string="Buttons Font" data-variable="buttons-font-number"/>
         <we-select string="Main Buttons" data-variable="btn-primary-outline">
             <we-button data-customize-website-variable="false">Fill</we-button>
@@ -681,13 +698,13 @@
             <we-button data-customize-website-variable="true">Outline</we-button>
         </we-select>
         <we-row string="Background">
-            <we-colorpicker title="Body" data-customize-website-color="" data-color="body"/>
-            <we-select>
+            <we-colorpicker data-name="body_bg_color_opt" title="Body" data-customize-website-color="" data-color="body"/>
+            <we-select data-name="body_bg_type_opt">
                 <we-button data-name="no_background_opt" data-customize-website-views="">None</we-button>
                 <we-button data-customize-website-views="website.option_custom_body_image">Image</we-button>
                 <we-button data-customize-website-views="website.option_custom_body_image, website.option_custom_body_pattern">Pattern</we-button>
             </we-select>
-            <we-imagepicker data-dependencies="!no_background_opt" data-customize-body-bg=""/>
+            <we-imagepicker data-name="body_bg_image_opt" data-dependencies="!no_background_opt" data-customize-body-bg=""/>
         </we-row>
         <we-select string="Layout">
             <we-button data-customize-website-views="">Full</we-button>

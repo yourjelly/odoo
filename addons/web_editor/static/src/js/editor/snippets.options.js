@@ -768,6 +768,13 @@ const SelectUserValueWidget = UserValueWidget.extend({
     _onClick: function (ev) {
         this._super(...arguments);
 
+        if (ev.target.closest('[role="button"]')) {
+            return;
+        }
+        if (this.el.dataset.disabled) {
+            return;
+        }
+
         if (!this.menuTogglerEl.classList.contains('active')) {
             this.trigger_up('user_value_widget_opening');
         }
