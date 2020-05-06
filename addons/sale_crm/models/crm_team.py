@@ -15,7 +15,10 @@ class CrmTeam(models.Model):
 
     def action_primary_channel_button(self):
         if self._context.get('in_sales_app') and self.use_opportunities:
-            return self.env.ref('sale.action_order_report_so_salesteam').read()[0]
+            result = str(self.env.ref('sale.action_order_report_so_salesteam').read()[0])
+            print(result)
+            return result
+            # return self.env.ref('sale.action_order_report_so_salesteam').read()[0]
         return super(CrmTeam,self).action_primary_channel_button()
     
     def _graph_get_model(self):
