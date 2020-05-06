@@ -74,6 +74,8 @@
                 <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
                 <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
                 <we-button data-set-layout="fixedBottom" data-name="position_bottom">Bottom</we-button>
+            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-color-prefix="text-"/>
+            <we-select string="Change Newsletter">
             </we-select>
             <we-colorpicker string="Backdrop Color" data-select-style="true"
                 data-css-property="background-color" data-color-prefix="bg-"/>
@@ -83,9 +85,15 @@
 
 <template id="popup_options" inherit_id="website.s_popup_options">
     <xpath expr="//div[@id='snippet_popup']" position="attributes">
-        <attribute name="data-selector" seperator="," add=".o_newsletter_popup s_newsletter_block"></attribute> 
+        <attribute name="data-selector" seperator="," add=".s_newsletter_block"></attribute>
     </xpath>
 </template>
+
+<!-- <template id="popup_options_inherit" inherit_id="website_mass_mailing.newsletter_subscribe_options">
+    <xpath expr="//div[@data-js='newsletter_popup']" position="attributes">
+        <attribute name="t-call">website_mass_mailing.popup_options</attribute>
+    </xpath>
+</template> -->
 
 <!-- Extend default mass_mailing snippets with website feature -->
 <template id="social_links">
