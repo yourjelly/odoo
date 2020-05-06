@@ -70,6 +70,8 @@
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
+            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-color-prefix="text-"/>
+            <we-select string="Change Newsletter"></we-select>
             <we-select string="Position" data-target=".o_newsletter_popup">
                 <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
                 <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
@@ -83,17 +85,17 @@
     </xpath>
 </template>
 
-<template id="popup_options" inherit_id="website.s_popup_options">
+<!-- <template id="popup_options" inherit_id="website.s_popup_options">
     <xpath expr="//div[@id='snippet_popup']" position="attributes">
         <attribute name="data-selector" seperator="," add=".s_newsletter_block"></attribute>
     </xpath>
-</template>
+</template> -->
 
-<!-- <template id="popup_options_inherit" inherit_id="website_mass_mailing.newsletter_subscribe_options">
+<template id="popup_options_inherit" inherit_id="website_mass_mailing.newsletter_subscribe_options">
     <xpath expr="//div[@data-js='newsletter_popup']" position="attributes">
         <attribute name="t-call">website_mass_mailing.popup_options</attribute>
     </xpath>
-</template> -->
+</template>
 
 <!-- Extend default mass_mailing snippets with website feature -->
 <template id="social_links">
