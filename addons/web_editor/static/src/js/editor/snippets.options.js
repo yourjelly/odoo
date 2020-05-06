@@ -24,10 +24,8 @@ var _t = core._t;
  * @returns {HTMLElement} - the original 'el' argument
  */
 function _addTitleAndAllowedAttributes(el, title, options) {
-    let tooltipEl = el;
     if (title) {
         const titleEl = _buildTitleElement(title);
-        tooltipEl = titleEl;
         el.appendChild(titleEl);
     }
 
@@ -35,7 +33,7 @@ function _addTitleAndAllowedAttributes(el, title, options) {
         el.classList.add(...options.classes);
     }
     if (options && options.tooltip) {
-        tooltipEl.title = options.tooltip;
+        el.title = options.tooltip;
     }
     if (options && options.placeholder) {
         el.setAttribute('placeholder', options.placeholder);
