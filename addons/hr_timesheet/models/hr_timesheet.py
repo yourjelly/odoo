@@ -97,13 +97,13 @@ class AccountAnalyticLine(models.Model):
 
         lines = super(AccountAnalyticLine, self).create(vals_list)
         for line, values in zip(lines, vals_list):
-            import pdb;pdb.set_trace()
             if line.project_id:  # applied only for timesheet
+                import pdb;pdb.set_trace()
                 line._timesheet_postprocess(values)
         return lines
 
     def write(self, values):
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         # If it's a basic user then check if the timesheet is his own.
         if not self.user_has_groups('hr_timesheet.group_hr_timesheet_approver') and any(self.env.user.id != analytic_line.user_id.id for analytic_line in self):
             raise AccessError(_("You cannot access timesheets that are not yours."))
@@ -173,7 +173,7 @@ class AccountAnalyticLine(models.Model):
 
     def _timesheet_postprocess(self, values):
         """ Hook to update record one by one according to the values of a `write` or a `create`. """
-        import pdb;pdb.set_trace()
+        # import pdb;pdb.set_trace()
         sudo_self = self.sudo()  # this creates only one env for all operation that required sudo() in `_timesheet_postprocess_values`override
         values_to_write = self._timesheet_postprocess_values(values)
         for timesheet in sudo_self:
