@@ -99,42 +99,46 @@ class CrmTeam(models.Model):
 
     def _graph_get_model(self):
         if self._context.get('in_sales_app'):
+            print(self._context.get('in_sales_app'))
             return 'sale.report'
         return super(CrmTeam,self)._graph_get_model()
 
     def _graph_date_column(self):
         if self._context.get('in_sales_app'):
+            print(self._context.get('in_sales_app'))
             return 'date'
         return super(CrmTeam,self)._graph_date_column()
 
     def _graph_y_query(self):
         if self._context.get('in_sales_app'):
+            print(self._context.get('in_sales_app'))
             return 'SUM(price_subtotal)'
         return super(CrmTeam,self)._graph_y_query()
 
     def _extra_sql_conditions(self):
         if self._context.get('in_sales_app'):
+            print(self._context.get('in_sales_app'))
             return "AND state in ('sale', 'done', 'pos_done')"
         return super(CrmTeam,self)._extra_sql_conditions()
 
     def _graph_title_and_key(self):
         if self._context.get('in_sales_app'):
+            print(self._context.get('in_sales_app'))
             return ['', _('Sales: Untaxed Total')] # no more title
         return super(CrmTeam, self)._graph_title_and_key()
 
     def _compute_dashboard_button_name(self):
         super(CrmTeam,self)._compute_dashboard_button_name()
         if self._context.get('in_sales_app'):
+            print(self._context.get('in_sales_app'))
             self.update({'dashboard_button_name': _("Sales Analysis")})
-            print(self.update({'dashboard_button_name': _("Sales Analysis")}))
 
     def action_primary_channel_button(self):
         if self._context.get('in_sales_app'):
             result = str(self.env.ref('sale.action_order_report_so_salesteam').read()[0])
             print(result)
-            # return self.env.ref('sale.action_order_report_so_salesteam').read()[0]
             return result
-        print(super(CrmTeam, self).action_primary_channel_button())
+            # return self.env.ref('sale.action_order_report_so_salesteam').read()[0]
         return super(CrmTeam, self).action_primary_channel_button()
 
     def update_invoiced_target(self, value):
