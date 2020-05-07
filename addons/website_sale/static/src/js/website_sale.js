@@ -337,7 +337,7 @@ publicWidget.registry.WebsiteSale = publicWidget.Widget.extend(VariantMixin, {
                 } else {
                     $(".div_zip").after($(".div_city"));
                 }
-                var all_fields = ["street", "zip", "city", "country_name"]; // "state_code"];
+                var all_fields = ["zip", "city", "country_name"];
                 _.each(all_fields, function (field) {
                     $(".checkout_autoformat .div_" + field.split('_')[0]).toggle($.inArray(field, data.fields)>=0);
                 });
