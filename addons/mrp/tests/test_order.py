@@ -98,10 +98,11 @@ class TestMrpOrder(TestMrpCommon):
         mo_form.qty_producing = 1.0
         man_order = mo_form.save()
 
-        man_order.button_mark_done()
+        action = man_order.button_mark_done()
         self.assertEqual(man_order.state, 'progress', "Production order should be open a backorder wizard, then not done yet.")
 
-        backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[man_order.id]))
+        backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
+
         backorder.save().action_close_mo()
         self.assertEqual(man_order.state, 'done', "Production order should be done.")
 
@@ -442,7 +443,8 @@ class TestMrpOrder(TestMrpCommon):
 
         remaining_lot = (lot_p1_1 | lot_p1_2) - consumed_lots
         remaining_lot.ensure_one()
-        backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[mo.id]))
+        action = mo.button_mark_done()
+        backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder.save().action_backorder()
 
         # Check MO backorder
