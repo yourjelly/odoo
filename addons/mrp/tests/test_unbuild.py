@@ -443,7 +443,7 @@ class TestUnbuild(TestMrpCommon):
             ml.lot_id = lot_1
         details_operation_form.save()
         action = mo.button_mark_done()
-        backorder = Form(self.env[action['res_model']].with_context(default_mrp_production_ids=[mo.id]))
+        backorder = Form(self.env[action['res_model']].with_context(**action['context']))
         backorder.save().action_backorder()
 
         lot_2 = self.env['stock.production.lot'].create({

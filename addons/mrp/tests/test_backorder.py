@@ -64,8 +64,8 @@ class TestMrpProductionBackorder(TestMrpCommon):
         mo_form.qty_producing = 1
         production = mo_form.save()
 
-        production.button_mark_done()
-        backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[production.id]))
+        action = production.button_mark_done()
+        backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder.save().action_backorder()
 
         # Two related MO to the procurement group
@@ -107,7 +107,8 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.assertEqual(sum(pbm_move.filtered(lambda m: m.product_id.id == product_to_use_1.id).mapped("product_qty")), 16)
         self.assertEqual(sum(pbm_move.filtered(lambda m: m.product_id.id == product_to_use_2.id).mapped("product_qty")), 4)
 
-        backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[production.id]))
+        action = production.button_mark_done()
+        backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder.save().action_backorder()
 
         mo_backorder = production.procurement_group_id.mrp_production_ids[-1]
@@ -154,7 +155,8 @@ class TestMrpProductionBackorder(TestMrpCommon):
         mo_form.qty_producing = 1
         production = mo_form.save()
 
-        backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[production.id]))
+        action = production.button_mark_done()
+        backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder.save().action_backorder()
 
         mo_backorder = production.procurement_group_id.mrp_production_ids[-1]
@@ -214,7 +216,8 @@ class TestMrpProductionBackorder(TestMrpCommon):
 
             active_production.button_mark_done()
             if i + 1 != nb_product_todo:  # If last MO, don't make a backorder
-                backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[active_production.id]))
+                action = active_production.button_mark_done()
+                backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
                 backorder.save().action_backorder()
             active_production = active_production.procurement_group_id.mrp_production_ids[-1]
 
@@ -270,7 +273,8 @@ class TestMrpProductionBackorder(TestMrpCommon):
 
             active_production.button_mark_done()
             if i + 1 != nb_product_todo:  # If last MO, don't make a backorder
-                backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[active_production.id]))
+                action = active_production.button_mark_done()
+                backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
                 backorder.save().action_backorder()
             active_production = active_production.procurement_group_id.mrp_production_ids[-1]
 
@@ -310,6 +314,7 @@ class TestMrpWorkorderBackorder(SavepointCase):
             'product_tmpl_id': cls.finished1.product_tmpl_id.id,
             'product_uom_id': cls.uom_unit.id,
             'product_qty': 1,
+            'consumption': 'flexible',
             'type': 'normal',
             'bom_line_ids': [
                 (0, 0, {'product_id': cls.compfinished1.id, 'product_qty': 1}),
@@ -356,8 +361,8 @@ class TestMrpWorkorderBackorder(SavepointCase):
             w.qty_producing = 1
         workorder2.record_production()
 
-        backorder_wiz = mo.with_context(debug=True).button_mark_done()
-        backorder = Form(self.env['mrp.production.backorder'].with_context(default_mrp_production_ids=[mo.id]))
+        action = mo.with_context(debug=True).button_mark_done()
+        backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder.save().action_backorder()
         mo_backorder = mo.procurement_group_id.mrp_production_ids[-1]
         mo_backorder.button_plan()

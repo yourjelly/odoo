@@ -639,7 +639,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         details_operation_form.save()
 
         action = mo_custom_laptop.button_mark_done()
-        backorder = Form(self.env[action['res_model']].with_context(default_mrp_production_ids=[mo_custom_laptop.id]))
+        backorder = Form(self.env[action['res_model']].with_context(**action['context']))
         backorder.save().action_backorder()
 
         # Check consumed move after produce 6 quantity of customized laptop.
