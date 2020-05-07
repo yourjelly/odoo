@@ -879,7 +879,7 @@ class MrpProduction(models.Model):
         return {
             'res_model': 'mrp.production',
             'type': 'ir.actions.act_window',
-            'name': _("backorder MO's"),
+            'name': _("Backorder MO's"),
             'domain': [('id', 'in', backorder_ids)],
             'view_mode': 'tree,form',
         }
@@ -1189,6 +1189,7 @@ class MrpProduction(models.Model):
             # TODO : multi _check_lots and _check_sn_uniqueness + error message with MO name
             order._check_lots()
             order._check_sn_uniqueness()
+            order._strict_consumption_check()
 
         quantity_issues = self._get_quantity_produced_issues()
         if quantity_issues:

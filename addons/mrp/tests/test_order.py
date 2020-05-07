@@ -752,10 +752,8 @@ class TestMrpOrder(TestMrpCommon):
             ml.lot_id = self.lot_1
             ml.qty_done = 2
         details_operation_form.save()
-        mo.button_mark_done()
-        backorder = Form(self.env['mrp.production.backorder'].with_context(
-            default_mrp_production_ids=[mo.id])
-        )
+        action = mo.button_mark_done()
+        backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder.save().action_backorder()
         mo2 = mo.procurement_group_id.mrp_production_ids[-1]
 
