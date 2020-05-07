@@ -51,7 +51,7 @@
 </template>
 
 <template id="s_newsletter_subscribe_popup" name="Newsletter Popup">
-    <div class="o_newsletter_popup o_snippet_invisible s_popup_center" data-list-id="0"/>
+    <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0"/>
 </template>
 
 <template id="newsletter_subscribe_options" name="Newsletter Subscribe Options" inherit_id="website.snippet_options">
@@ -70,30 +70,21 @@
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
-            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-color-prefix="text-"/>
             <we-select string="Change Newsletter"></we-select>
-            <we-select string="Position" data-target=".o_newsletter_popup">
+            <we-select string="Position" data-target=".s_newsletter_block">
                 <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
                 <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
                 <we-button data-set-layout="fixedBottom" data-name="position_bottom">Bottom</we-button>
             <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-color-prefix="text-"/>
             <we-select string="Change Newsletter">
             </we-select>
-            <we-colorpicker string="Backdrop Color" data-select-style="true"
-                data-css-property="background-color" data-color-prefix="bg-"/>
         </div>
     </xpath>
 </template>
 
-<!-- <template id="popup_options" inherit_id="website.s_popup_options">
-    <xpath expr="//div[@id='snippet_popup']" position="attributes">
-        <attribute name="data-selector" seperator="," add=".s_newsletter_block"></attribute>
-    </xpath>
-</template> -->
-
-<template id="popup_options_inherit" inherit_id="website_mass_mailing.newsletter_subscribe_options">
-    <xpath expr="//div[@data-js='newsletter_popup']" position="attributes">
-        <attribute name="t-call">website_mass_mailing.popup_options</attribute>
+<template id="popup_options" inherit_id="website.s_popup_options">
+    <xpath expr="//div[@data-js='SnippetPopup']" position="attributes">
+        <attribute name="data-selector" seperator="," add=".s_newsletter_block"/>
     </xpath>
 </template>
 

@@ -34,7 +34,7 @@
 
 <template id="s_popup_options" inherit_id="website.snippet_options">
     <xpath expr="." position="inside">
-        <div id="snippet_popup" data-js="SnippetPopup" data-selector=".s_popup" data-target=".s_popup_main">
+        <div id="snippet_popup" data-js="SnippetPopup" data-selector=".s_popup .o_newsletter_popup" data-target=".s_popup_main">
             <we-select string="Position">
                 <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
                 <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
