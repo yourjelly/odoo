@@ -1164,28 +1164,44 @@ class MrpProduction(models.Model):
             order.move_finished_ids.move_line_ids.consume_line_ids = [(6, 0, consume_move_lines.ids)]
         return True
 
-    def _open_backorder(self):
+    def _get_quantity_produced_issues(self):
+        quantity_issues = []
+        for order in self:
+            if not float_is_zero(order._get_quantity_to_backorder(), precision_digits=order.product_uom_id.rounding):
+                quantity_issues.append(order)
+        return quantity_issues
+
+    def _action_generate_backorder_wizard(self, quantity_issues):
         ctx = self.env.context.copy()
-        ctx.update({'default_mrp_production_ids': self.ids})
+        lines = []
+        for order in quantity_issues:
+            lines.append((0, 0, {
+                'mrp_production_id': order.id,
+                'to_backorder': True
+            }))
+        ctx.update({'default_mrp_production_ids': self.ids, 'default_mrp_production_backorder_line_ids': lines})
         action = self.env.ref('mrp.action_mrp_production_backorder').read()[0]
         action['context'] = ctx
         return action
 
     def button_mark_done(self):
-        self.ensure_one()
-        self._check_company()
-        self._check_lots()
-        self._check_sn_uniqueness()
-        self._strict_consumption_check()
+        for order in self:
+            # TODO : multi _check_lots and _check_sn_uniqueness + error message with MO name
+            order._check_lots()
+            order._check_sn_uniqueness()
 
-        if float_is_zero(self._get_quantity_to_backorder(), precision_digits=self.product_uom_id.rounding):
-            self.post_inventory()
-            for wo in self.workorder_ids:
-                if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
-                    raise UserError(_('Work order %s is still running') % wo.name)
-            return self._button_mark_done()
+        quantity_issues = self._get_quantity_produced_issues()
+        if quantity_issues:
+            return self._action_generate_backorder_wizard(quantity_issues)
 
-        return self._open_backorder()
+        for wo in self.workorder_ids:
+            if wo.time_ids.filtered(lambda x: (not x.date_end) and (x.loss_type in ('productive', 'performance'))):
+                if len(self) > 1:
+                    raise UserError(_('%s : Work order %s is still running') % (wo.production_id.name, wo.name))
+                raise UserError(_('Work order %s is still running') % wo.name)
+
+        self.post_inventory()
+        return self._button_mark_done()
 
     def _button_mark_done(self):
         # Moves without quantity done are not posted => set them as done instead of canceling. In

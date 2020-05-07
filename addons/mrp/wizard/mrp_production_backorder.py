@@ -4,6 +4,7 @@ import math
 import re
 
 from odoo import api, fields, models, _
+from odoo.tools import float_is_zero
 
 SIZE_BACK_ORDER_NUMERING = 3
 
@@ -21,26 +22,13 @@ class MrpProductionBackorder(models.TransientModel):
     _name = 'mrp.production.backorder'
     _description = "Wizard to mark as done or create back order"
 
-    @api.model
-    def default_get(self, fields):
-        res = super().default_get(fields)
-        production_ids = self.env.context.get('default_mrp_production_ids') or self.env.context.get('active_ids')
-        if 'mrp_production_backorder_line_ids' in fields and production_ids:
-            self.env['mrp.production'].browse(production_ids)
-            res['mrp_production_backorder_line_ids'] = [(0, 0, {'mrp_production_id': mo_id, 'to_backorder': True}) for mo_id in production_ids]
-        return res
+    mrp_production_ids = fields.Many2many('mrp.production')
 
-    mrp_production_ids = fields.Many2many('mrp.production', compute="_compute_mrp_production_ids")
     mrp_production_backorder_line_ids = fields.One2many(
         'mrp.production.backorder.line',
         'mrp_production_backorder_id',
         string="Backorder Confirmation Lines")
     show_backorder_lines = fields.Boolean("Show backorder lines", compute="_compute_show_backorder_lines")
-
-    @api.depends('mrp_production_backorder_line_ids.to_backorder', 'mrp_production_backorder_line_ids.mrp_production_id')
-    def _compute_mrp_production_ids(self):
-        for wizard in self:
-            wizard.mrp_production_ids = self.mrp_production_backorder_line_ids.filtered(lambda l: l.to_backorder).mrp_production_id
 
     @api.depends('mrp_production_backorder_line_ids')
     def _compute_show_backorder_lines(self):
@@ -51,7 +39,6 @@ class MrpProductionBackorder(models.TransientModel):
     def _get_name_backorder(self, name, sequence):
         if not sequence:
             return name
-        # TODO: What we do when the sequence is full after 999 ?
         seq_back = "-" + "0" * (SIZE_BACK_ORDER_NUMERING - 1 - int(math.log10(sequence))) + str(sequence)
         if re.search("-\\d{%d}$" % SIZE_BACK_ORDER_NUMERING, name):
             return name[:-SIZE_BACK_ORDER_NUMERING-1] + seq_back
@@ -69,9 +56,9 @@ class MrpProductionBackorder(models.TransientModel):
             'lot_producing_id': False,
         }
 
-    def _do_backorder_mos(self):
+    def _generate_backorder_productions(self):
         backorders = self.env['mrp.production']
-        for production in self.mrp_production_ids:
+        for production in self.mrp_production_backorder_line_ids.filtered(lambda l: l.to_backorder).mrp_production_id:
             if production.backorder_sequence == 0:  # Activate backorder naming
                 production.backorder_sequence = 1
             for wo in production.workorder_ids:
@@ -89,8 +76,8 @@ class MrpProductionBackorder(models.TransientModel):
             production.name = self._get_name_backorder(production.name, production.backorder_sequence)
             # update moves references
             (production.move_raw_ids | production.move_finished_ids).reference = production.name
-            production._button_mark_done()
 
+        self.mrp_production_ids._button_mark_done()
         backorders.action_confirm()
         # Remove the serial move line without reserved quantity. Post inventory will assigned all the non done moves
         # So those move lines are duplicated.
@@ -108,7 +95,7 @@ class MrpProductionBackorder(models.TransientModel):
 
     def action_backorder(self):
         self.mrp_production_ids.post_inventory()
-        backorders = self._do_backorder_mos()
+        backorders = self._generate_backorder_productions()
         action = {
             'res_model': 'mrp.production',
             'type': 'ir.actions.act_window',
