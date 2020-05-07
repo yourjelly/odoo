@@ -27,7 +27,7 @@ def chain_factories(field_factories, model_name):
 
 def root_factory():
     """ Return a generator with empty values dictionaries (except for the flag ``__complete``). """
-    yield {'__complete': False}
+    #yield {'__complete': False} TODO OCO créer tjrs au moins 1 élément ... ça m'emmerde pour la company !
     while True:
         yield {'__complete': True}
 

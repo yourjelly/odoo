@@ -413,3 +413,47 @@ class TestReconciliationMatchingRules(AccountTestCommon):
             bank_line_1.id: {'aml_ids': [payment_bnk_line.id], 'model': self.rule_0}
         }
         self._check_statement_matching(self.rule_0, expected_values, statements=bank_st)
+
+    def test_partner_mapping_rule(self):
+        # First make sure bank_line_1 has no partner and a payment_ref compliant with rule_3
+        # and bank_line_2 won't match rule 1 and 3
+        self.bank_line_1.write({'partner_id': None, 'payment_ref': 'toto42'})
+        self.bank_line_2.write({'partner_id': None})
+
+        # rule 3 is executed after rule 1, so there should be no matching
+        rules = self.rule_1 + self.rule_3
+        self._check_statement_matching(rules, {
+            self.bank_line_1.id: {'aml_ids': []},
+            self.bank_line_2.id: {'aml_ids': []},
+        }, self.bank_st)
+
+        # If rule 3 is executed before rule 1, bank_line_1 matches (since rule_3 sets the partner required by rule_1)
+        self.rule_1.sequence = 2
+        self.rule_3.sequence = 1
+        self._check_statement_matching(rules, {
+            self.bank_line_1.id: {'aml_ids': [self.invoice_line_1.id], 'model': self.rule_1},
+            self.bank_line_2.id: {'aml_ids': []},
+        }, self.bank_st)
+
+    def test_invoice_matching_rule_no_partner(self):
+        """ Tests that a statement line without any partner can be matched to the
+        right invoice if they have the same payment reference.
+        """
+        self.invoice_line_1.move_id.write({'payment_reference': 'Tournicoti66'})
+
+        self.bank_line_1.write({
+            'payment_ref': 'Tournicoti66',
+            'partner_id': None,
+        })
+
+        self.rule_1.write({
+            'line_ids': [(5, 0, 0)],
+            'match_partner': False,
+            'match_label': 'contains',
+            'match_label_param': 'Tournicoti', # So that we only match what we want to test
+        })
+
+        self._check_statement_matching(self.rule_1, {
+            self.bank_line_1.id: {'aml_ids': [self.invoice_line_1.id], 'model': self.rule_1},
+            self.bank_line_2.id: {'aml_ids': []},
+        }, self.bank_st)

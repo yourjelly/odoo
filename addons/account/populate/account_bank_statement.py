@@ -22,7 +22,7 @@ class AccountBankStatement(models.Model):
     def _populate_factories(self):
         @lru_cache()
         def search_journal_ids(company_id):
-            return self.env['account.journal'].search([('company_id', '=', company_id), ('type', 'in', ('cash', 'bank'))]).ids
+            return self.env['account.journal'].search([('company_id', '=', company_id), ('type', 'in', ('cash', 'bank'))], limit=1).ids
 
         def get_journal(random, values, **kwargs):
             return random.choice(search_journal_ids(values['company_id']))
@@ -75,7 +75,7 @@ class AccountBankStatementLine(models.Model):
         return [
             ('statement_id', populate.randomize(self.env.registry.populated_models['account.bank.statement'])),
             ('partner_id', populate.compute(get_partner)),
-            ('payment_ref', populate.constant('statement_{values[statement_id]}_{counter}')),
+            ('payment_ref', populate.constant('default ref')),
             ('date', populate.compute(get_date)),
             ('amount', populate.compute(get_amount)),
             ('currency_id', populate.compute(get_currency)),

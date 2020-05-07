@@ -11,9 +11,9 @@ class Partner(models.Model):
     _inherit = "res.company"
 
     _populate_sizes = {
-        'small': 5,
-        'medium': 10,
-        'large': 50,
+        'small': 0,
+        'medium': 0,
+        'large': 0,
     }
 
     def _populate_factories(self):
@@ -24,12 +24,11 @@ class Partner(models.Model):
         return [
             ('name', populate.constant('company_{counter}')),
             ('sequence', populate.randint(0, 100)),
-            ('company_registry', populate.iterate([False, 'company_registry_{counter}'])),
-            ('base_onboarding_company_state', populate.iterate(
-                [False] + [e[0] for e in type(self).base_onboarding_company_state.selection])),
-            ('primary_color', populate.iterate([False, '', '#ff7755'])),
-            ('secondary_color', populate.iterate([False, '', '#ffff55'], seed='primary_color')),
-            ('currency_id', populate.iterate([ref('base.EUR').id, ref('base.USD').id, ref('base.CHF').id, ref('base.CHF').id])),  # add more?
+            ('company_registry', populate.constant('company_registry_{counter}')),
+            ('base_onboarding_company_state', populate.constant(False)),
+            ('primary_color', populate.constant(False)),
+            ('secondary_color', populate.constant(False)),
+            ('currency_id', populate.constant(ref('base.EUR').id)),  # add more?
             ('name', populate.compute(get_name)),
         ]
 
