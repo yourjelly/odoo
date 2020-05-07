@@ -916,6 +916,11 @@ var SnippetsMenu = Widget.extend({
      *        child
      */
     _activateInsertionZones: function ($selectorSiblings, $selectorChildren) {
+        debugger;
+         if ($('body').hasClass('modal-open'))
+        {
+            return false;
+        }
         var self = this;
 
         function isFullWidth($elem) {
@@ -1063,12 +1068,6 @@ var SnippetsMenu = Widget.extend({
      *          (might be async when an editor must be created)
      */
     _activateSnippet: function ($snippet, previewMode) {
-        debugger;
-         if ($('body').hasClass('modal-open'))
-        {
-            return false;
-        }
-        debugger;
         return this._activateSnippetMutex.exec(() => {
             return new Promise(resolve => {
                 // Take the first parent of the provided DOM (or itself) which
