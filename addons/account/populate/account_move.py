@@ -14,7 +14,7 @@ class AccountMove(models.Model):
     _inherit = "account.move"
 
     _populate_sizes = {
-        'small': 200,
+        'small': 5000, #TODO OCO changé pour ne pas faire un populate différent qui regénère une company
         'medium': 5000,
         'large': 100000,
     }

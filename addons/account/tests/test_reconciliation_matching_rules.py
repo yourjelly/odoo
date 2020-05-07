@@ -466,5 +466,3 @@ class TestReconciliationMatchingRules(AccountTestCommon):
             self.bank_line_1.id: {'aml_ids': [self.invoice_line_1.id], 'model': self.rule_1},
             self.bank_line_2.id: {'aml_ids': []},
         }, self.bank_st)
-
-

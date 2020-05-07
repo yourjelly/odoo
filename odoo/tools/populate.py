@@ -17,7 +17,7 @@ def format_str(val, counter, values):
     return val
 
 
-def chain_factories(field_factories, model_name): 
+def chain_factories(field_factories, model_name):
     """ Instanciate a generator by calling all the field factories. """
     generator = root_factory()
     for (fname, field_factory) in field_factories:
@@ -27,7 +27,7 @@ def chain_factories(field_factories, model_name):
 
 def root_factory():
     """ Return a generator with empty values dictionaries (except for the flag ``__complete``). """
-    yield {'__complete': False}
+    #yield {'__complete': False} TODO OCO créer tjrs au moins 1 élément ... ça m'emmerde pour la company !
     while True:
         yield {'__complete': True}
 
