@@ -56,6 +56,8 @@
                     </tr>
                 </table>
             </we-matrix>
+            <we-input string="min value" data-select-data-attribute="" data-attribute-name="minValue"/>
+            <we-input string="max value" data-select-data-attribute="" data-attribute-name="maxValue"/>
             <we-colorpicker string="Background" data-name="chart_bg_color_opt"
                 data-color-change=""
                 data-attribute-name="backgroundColor"
