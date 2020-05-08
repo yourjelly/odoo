@@ -4,7 +4,7 @@
 
 from odoo.addons.account.tests.common import AccountTestCommon
 from odoo.tests.common import SavepointCase
-from odoo.cli.populate import Populate
+#from odoo.cli.populate import Populate TODO OCO non, en fait, pas ici
 from odoo.exceptions import UserError
 from unittest import skip
 from datetime import datetime
@@ -24,8 +24,8 @@ class TestRecModelsPerf(SavepointCase):
 
         #TODO OCO call populate
 
-        #TODO OCO tailles?
-        #Populate.populate(cls.env, 'small', ['account.bank.statement.line', 'account.move']) #TODO OCO uncomment for re-generation
+        #TODO OCO à faire tourner pour préparer la db, dans un shell ou quoi (pas ici, car commit tout; y compris les opérations des tests)
+        #Populate.populate(cls.env, 'small', ['account.bank.statement.line', 'account.move'])
 
         cls.env.cr.execute("select max(id) from res_company;")
         populated_company_id = cls.env.cr.fetchone()[0]
