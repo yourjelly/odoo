@@ -72,15 +72,15 @@ class TestRecModelsPerf(SavepointCase):
 
         # Prepare data to match rules
         st_line_id_lower_bound = 0
-        last_changed_invoice_id = 0
+        selected_invoice_ids = []
         for percent, rule in rules_no_partners:
             _logger.info("Generating data for rule %s" % rule.id)
-            last_changed_invoice_id = self._prepare_rule_data(rule, percent, st_line_id_lower_bound, last_changed_invoice_id)
+            self._prepare_rule_data(rule, percent, st_line_id_lower_bound, selected_invoice_ids)
             st_line_id_lower_bound += percent
 
         for percent, rule in rules_restrict_partners:
             _logger.info("Generating data for rule %s" % rule.id)
-            last_changed_invoice_id = self._prepare_rule_data(rule, percent, st_line_id_lower_bound, last_changed_invoice_id, True)
+            self._prepare_rule_data(rule, percent, st_line_id_lower_bound, selected_invoice_ids, True)
             st_line_id_lower_bound += percent
 
         self.env['account.bank.statement'].search([('company_id', '=', self.company.id), ('state', '=', 'open')]).button_post()
@@ -117,9 +117,10 @@ class TestRecModelsPerf(SavepointCase):
             rslt[order] = delta.seconds * 1000000 + delta.microseconds
 
         _logger.info("RESULT " + str(rslt))
+        self.env.cr.commit()
 
 
-    def _prepare_rule_data(self, rule, percent, st_line_id_lower_bound, last_changed_invoice_id, force_partner=False):
+    def _prepare_rule_data(self, rule, percent, st_line_id_lower_bound, selected_invoice_ids, force_partner=False):
         self.env.cr.execute("""
             select array_agg(id)
             from account_bank_statement_line
@@ -136,12 +137,12 @@ class TestRecModelsPerf(SavepointCase):
             invoice = self.env['account.move'].search([('move_type', 'in', ('in_invoice', 'out_invoice', 'in_refund', 'out_refund')),
                                              ('state', '=', 'posted'),
                                              ('payment_state', '=', 'not_paid'),
-                                             ('id', '>', last_changed_invoice_id)], limit=1, order='id ASC')
+                                             ('id', 'not in', selected_invoice_ids)], limit=1, order='id ASC')
 
             if not invoice:
                 raise UserError("Should always get an invoice here! Maybe you had bad luck with populate? :o")
 
-            #TODO OCO je ne fais pas ça en sql, mais ce sera pê nécessaire si trop lent
+            selected_invoice_ids.append(invoice.id)
             invoice.button_draft()
             invoice.write({'payment_reference': reference_to_set})
             invoice.post()
@@ -154,10 +155,6 @@ class TestRecModelsPerf(SavepointCase):
                 rule.write({'match_partner_ids': [(4, invoice.partner_id.id, 0)]})
 
             st_line.write(st_line_vals)
-
-            last_changed_invoice_id = invoice.id
-
-        return last_changed_invoice_id
 
     def test_no_model_matching_anything(self):
         pass #TODO OCO
