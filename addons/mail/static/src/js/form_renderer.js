@@ -43,8 +43,10 @@ FormRenderer.include({
     //--------------------------------------------------------------------------
 
     /**
-     * Overrides the function that renders the nodes to return the chatter's $el
-     * for the 'oe_chatter' div node.
+     * Overrides the function that renders the nodes to process the 'oe_chatter'
+     * div node: we instantiate (or update if it already exists) the chatter,
+     * and we return a fake node that we will use as a hook to insert the
+     * chatter into the DOM when the whole view will be rendered.
      *
      * @override
      * @private
@@ -57,19 +59,30 @@ FormRenderer.include({
                     isEditable: this.activeActions.edit,
                     viewType: 'form',
                 });
-
-                var $temporaryParentDiv = $('<div>');
-                this.defs.push(this.chatter.appendTo($temporaryParentDiv).then(function () {
-                    self.chatter.$el.unwrap();
+                this.defs.push(this.chatter.appendTo($('<div>')).then(function () {
                     self._handleAttributes(self.chatter.$el, node);
                 }));
-                return $temporaryParentDiv;
             } else {
                 this.chatter.update(this.state);
-                return this.chatter.$el;
             }
+            return $('<div>', { class: 'oe_chatter', id: 'temp_chatter_hook' });
         } else {
             return this._super.apply(this, arguments);
+        }
+    },
+    /**
+     * @override
+     */
+    _updateView: function () {
+        // detach the chatter before calling _super, as we'll empty the html,
+        // which would remove all handlers on the chatter
+        if (this.chatter) {
+            this.chatter.$el.detach();
+        }
+        this._super(...arguments);
+        // replace our hook by the chatter's el once the view has been updated
+        if (this.chatter) {
+            this.$('#temp_chatter_hook').replaceWith(this.chatter.$el);
         }
     },
 });
