@@ -104,6 +104,15 @@ options.registry.SnippetPopup = options.Class.extend({
     /**
      * @override
      */
+    updateUI:function() {
+        this._super(...arguments);
+        if  (this.$target.children().hasClass('s_popup_full')) {
+            this.$el.find('.s_popup_backdrop').hide();
+        }
+        else {
+            this.$el.find('.s_popup_backdrop').show();
+        }
+    },
     _computeWidgetState: function (methodName, params) {
         switch (methodName) {
             case 'moveBlock':

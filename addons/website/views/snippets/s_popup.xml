@@ -63,6 +63,7 @@
         </t>
         <t t-set="extra_popup_options">
             <we-colorpicker string="Close Button Color"
+                            class="s_popup_backdrop"
                             data-select-style="true"
                             data-css-property="color"
                             data-color-prefix="text-"
