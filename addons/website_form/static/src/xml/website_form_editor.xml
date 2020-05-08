@@ -4,9 +4,6 @@
     <!-- End Message -->
     <t t-name="website_form.s_website_form_end_message">
         <div class="s_website_form_end_message d-none">
-            <div class="text-center alert alert-info css_non_editable_mode_hidden o_not_editable" t-ignore="True" role="status">
-                The following message will become visible <strong>only</strong> once the form is sent.
-            </div>
             <div class="oe_structure">
                 <section class="s_text_block pt64 pb64" data-snippet="s_text_block">
                     <div class="container">
