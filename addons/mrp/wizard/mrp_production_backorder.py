@@ -67,6 +67,7 @@ class MrpProductionBackorder(models.TransientModel):
                 wo.button_finish()
 
             backorder_mo = production.copy(default=self._get_backorder_mo_vals(production))
+
             production.move_raw_ids.filtered(lambda m: m.state not in ('done', 'cancel')).write({
                 'raw_material_production_id': backorder_mo.id,
                 'reference': backorder_mo.name,
@@ -86,6 +87,7 @@ class MrpProductionBackorder(models.TransientModel):
         # So those move lines are duplicated.
         backorders.move_raw_ids.move_line_ids.filtered(lambda ml: ml.product_id.tracking == 'serial' and ml.product_qty == 0).unlink()
         backorders.move_raw_ids._recompute_state()
+
         return backorders
 
     def action_close_mo(self):
