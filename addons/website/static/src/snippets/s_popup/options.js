@@ -48,6 +48,7 @@ options.registry.SnippetPopup = options.Class.extend({
     onTargetShow: async function () {
         this.$target.modal('show');
         $(document.body).children('.modal-backdrop:last').addClass('d-none');
+        $('body').addClass('modal-open');
     },
     /**
      * @override
