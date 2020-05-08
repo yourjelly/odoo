@@ -93,12 +93,31 @@ class TestRecModelsPerf(SavepointCase):
         """)
         statement_line_ids = self.env.cr.fetchone()[0]
 
-        #TODO OCO c'est ici qu'il va falloir faire des variations de séquences des modèles
-        time_start = datetime.now()
-        self.env['account.reconciliation.widget'].get_bank_statement_line_data(statement_line_ids, None)
-        time_stop = datetime.now()
-        delta = time_stop - time_start
-        _logger.info("Done in %s.%s seconds" % (delta.seconds, str(delta.microseconds).zfill(6)))
+        # Test models in various orders
+        sequence_orders = {
+            'increasing_percent': lambda x: x[0],
+            'decreasing_percent': lambda x: -x[0],
+            'no_partner_first': lambda x: (x[1]['match_partner']and -1 or 1) * x[0],
+            'no_partner_last': lambda x: (x[1]['match_partner']and 1 or -1) * x[0],
+        }
+
+        rslt = {}
+        all_rules = rules_no_partners + rules_restrict_partners
+        for order, sorting_fun in sequence_orders.items():
+            # Reassign rule sequences
+            all_rules.sort(key=sorting_fun)
+            for index, (percent, rule) in enumerate(all_rules):
+                rule.write({'sequence': index})
+
+            # Measure performance
+            time_start = datetime.now()
+            self.env['account.reconciliation.widget'].get_bank_statement_line_data(statement_line_ids, None)
+            time_stop = datetime.now()
+            delta = time_stop - time_start
+            rslt[order] = delta.seconds * 1000000 + delta.microseconds
+
+        _logger.info("RESULT " + str(rslt))
+
 
     def _prepare_rule_data(self, rule, percent, st_line_id_lower_bound, last_changed_invoice_id, force_partner=False):
         self.env.cr.execute("""
