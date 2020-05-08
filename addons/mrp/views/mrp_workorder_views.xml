@@ -135,9 +135,9 @@
                     <group>
                         <label for="date_planned_start" string="Planned Date"/>
                         <div class="oe_inline">
-                            <field name="date_planned_start" class="mr8 oe_inline" required="True"/>
+                            <field name="date_planned_start" class="mr8 oe_inline"/>
                             <strong class="mr8 oe_inline">to</strong>
-                            <field name="date_planned_finished" class="oe_inline" required="True"/>
+                            <field name="date_planned_finished" class="oe_inline"/>
                             <field name="show_json_popover" invisible="1"/>
                             <field name="json_popover" widget="mrp_workorder_popover" class="oe_inline mx-2" attrs="{'invisible': [('show_json_popover', '=', False)]}"/>
                         </div>

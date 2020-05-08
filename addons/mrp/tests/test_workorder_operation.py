@@ -1251,7 +1251,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         self.assertEqual(bool(leave.exists()), True)
         # Unplans the MO and checks the workorder and its leave no more exist.
         mo.button_unplan()
-        self.assertEqual(bool(mo.workorder_ids.exists()), False)
+        self.assertEqual(bool(mo.workorder_ids.exists()), True)
         self.assertEqual(bool(leave.exists()), False)
         # Plans (again) the MO and checks the date is still the same.
         mo.button_plan()
