@@ -81,7 +81,7 @@
             <field name="model">stock.move</field>
             <field name="priority">1000</field>
             <field name="arch" type="xml">
-                <tree delete="0" default_order="is_done,sequence" decoration-muted="is_done" decoration-warning="quantity_done - product_uom_qty &gt; 0.0001" decoration-success="not is_done and quantity_done - product_uom_qty &lt; 0.0001" decoration-danger="not is_done and reserved_availability &lt; product_uom_qty and product_uom_qty - reserved_availability &gt; 0.0001">
+                <tree delete="0" default_order="is_done,sequence" decoration-muted="is_done">
                     <field name="product_id" required="1"/>
                     <field name="company_id" invisible="1"/>
                     <field name="product_uom_category_id" invisible="1"/>
@@ -101,8 +101,16 @@
                     <field name="warehouse_id" invisible="1"/>
                     <field name="location_dest_id" domain="[('id', 'child_of', parent.location_dest_id)]" invisible="1"/>
                     <field name="state" invisible="1" force_save="1"/>
+                    <field name="reserved_availability" invisible="1"/>
+                    <field name="availability_state" invisible="1"/>
+                    <field name="availability_indication" string="Availability"
+                        decoration-bf="availability_state in ['waiting', 'late']"
+                        decoration-warning="availability_state == 'waiting'"
+                        decoration-danger="availability_state == 'late'"
+                        attrs="{
+                            'invisible': [('is_done', '=', True)],
+                            'column_invisible': [('parent.state', 'in', ('draft', 'done'))]}"/>
                     <field name="product_uom_qty" string="To Consume"/>
-                    <field name="reserved_availability" attrs="{'invisible': [('is_done', '=', True)], 'column_invisible': [('parent.state', 'in', ('draft', 'done'))]}" string="Reserved"/>
                     <field name="quantity_done" string="Consumed" attrs="{'column_invisible': [('parent.state', '=', 'draft')]}" readonly="1"/>
                 </tree>
             </field>
