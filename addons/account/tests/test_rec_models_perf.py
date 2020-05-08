@@ -4,7 +4,7 @@
 
 from odoo.addons.account.tests.common import AccountTestCommon
 from odoo.tests.common import SavepointCase
-from odoo.cli.populate import Populate
+#from odoo.cli.populate import Populate TODO OCO non, en fait, pas ici
 from odoo.exceptions import UserError
 from unittest import skip
 from datetime import datetime
@@ -18,14 +18,35 @@ _logger = logging.getLogger()
 #class TestRecModelsPerf(AccountTestCommon): #To generate data only (useful ?? Everything is regenerated)
 class TestRecModelsPerf(SavepointCase):
 
+    """
+    TODO OCO
+    pour régler le petit souci de wan avec les partner sur les amls:
+
+    update account_move_line aml
+    set partner_id = move.partner_id
+    from account_move move, account_account acc
+    where move.move_type in ('in_invoice', 'out_invoice', 'in_refund', 'out_refund')
+    and aml.move_id = move.id
+    and acc.id = aml.account_id
+    and acc.internal_type not in ('receivable', 'payable');
+
+    update account_move_line aml
+    set partner_id = coalesce(move.commercial_partner_id, move.partner_id)
+    from account_move move, account_account acc
+    where move.move_type in ('in_invoice', 'out_invoice', 'in_refund', 'out_refund')
+    and aml.move_id = move.id
+    and acc.id = aml.account_id
+    and acc.internal_type in ('receivable', 'payable');
+    """
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
 
-        #TODO OCO call populate
+        #TODO OCO à faire tourner pour préparer la db, dans un shell ou quoi (pas ici, car commit tout; y compris les opérations des tests)
+        #Populate.populate(cls.env, 'small', ['account.bank.statement.line', 'account.move'])
 
-        #TODO OCO tailles?
-        #Populate.populate(cls.env, 'small', ['account.bank.statement.line', 'account.move']) #TODO OCO uncomment for re-generation
+        cls.env['account.reconcile.model'].search([]).unlink()
 
         cls.env.cr.execute("select max(id) from res_company;")
         populated_company_id = cls.env.cr.fetchone()[0]
@@ -72,15 +93,15 @@ class TestRecModelsPerf(SavepointCase):
 
         # Prepare data to match rules
         st_line_id_lower_bound = 0
-        last_changed_invoice_id = 0
+        selected_invoice_ids = []
         for percent, rule in rules_no_partners:
             _logger.info("Generating data for rule %s" % rule.id)
-            last_changed_invoice_id = self._prepare_rule_data(rule, percent, st_line_id_lower_bound, last_changed_invoice_id)
+            self._prepare_rule_data(rule, percent, st_line_id_lower_bound, selected_invoice_ids)
             st_line_id_lower_bound += percent
 
         for percent, rule in rules_restrict_partners:
             _logger.info("Generating data for rule %s" % rule.id)
-            last_changed_invoice_id = self._prepare_rule_data(rule, percent, st_line_id_lower_bound, last_changed_invoice_id, True)
+            self._prepare_rule_data(rule, percent, st_line_id_lower_bound, selected_invoice_ids, True)
             st_line_id_lower_bound += percent
 
         self.env['account.bank.statement'].search([('company_id', '=', self.company.id), ('state', '=', 'open')]).button_post()
@@ -94,17 +115,17 @@ class TestRecModelsPerf(SavepointCase):
         statement_line_ids = self.env.cr.fetchone()[0]
 
         # Test models in various orders
-        """'increasing_percent': lambda x: x[0],
+        sequence_orders = {
+            'increasing_percent': lambda x: x[0],
             'decreasing_percent': lambda x: -x[0],
             'no_partner_first': lambda x: (x[1]['match_partner']and -1 or 1) * x[0],
-            'no_partner_last': lambda x: (x[1]['match_partner']and 1 or -1) * x[0],"""
-        sequence_orders = {
-            'natural': lambda x: x[1].sequence,
+            'no_partner_last': lambda x: (x[1]['match_partner']and 1 or -1) * x[0],
         }
 
         rslt = {}
         all_rules = rules_no_partners + rules_restrict_partners
         for order, sorting_fun in sequence_orders.items():
+            _logger.info("Testing order %s" % order)
             # Reassign rule sequences
             all_rules.sort(key=sorting_fun)
             for index, (percent, rule) in enumerate(all_rules):
@@ -120,7 +141,7 @@ class TestRecModelsPerf(SavepointCase):
         _logger.info("RESULT " + str(rslt))
 
 
-    def _prepare_rule_data(self, rule, percent, st_line_id_lower_bound, last_changed_invoice_id, force_partner=False):
+    def _prepare_rule_data(self, rule, percent, st_line_id_lower_bound, selected_invoice_ids, force_partner=False):
         self.env.cr.execute("""
             select array_agg(id)
             from account_bank_statement_line
@@ -133,21 +154,25 @@ class TestRecModelsPerf(SavepointCase):
         st_line_ids_to_change = self.env.cr.fetchone()[0]
 
         for st_line_id in st_line_ids_to_change:
+            st_line = self.env['account.bank.statement.line'].browse(st_line_id)
+
             reference_to_set = rule.match_label_param + str(st_line_id)
-            invoice = self.env['account.move'].search([('move_type', 'in', ('in_invoice', 'out_invoice', 'in_refund', 'out_refund')),
+            allowed_types = st_line.amount > 0 and ('out_invoice', 'in_refund') or ('in_invoice', 'out_refund')
+            invoice = self.env['account.move'].search([('move_type', 'in', allowed_types),
                                              ('state', '=', 'posted'),
                                              ('payment_state', '=', 'not_paid'),
-                                             ('id', '>', last_changed_invoice_id)], limit=1, order='id ASC')
+                                             ('currency_id', '=', st_line.currency_id.id),
+                                             ('id', 'not in', selected_invoice_ids)], limit=1, order='id ASC')
 
             if not invoice:
                 raise UserError("Should always get an invoice here! Maybe you had bad luck with populate? :o")
 
-            #TODO OCO je ne fais pas ça en sql, mais ce sera pê nécessaire si trop lent
+            selected_invoice_ids.append(invoice.id)
             invoice.button_draft()
             invoice.write({'payment_reference': reference_to_set})
+            invoice._onchange_payment_reference()
             invoice.post()
 
-            st_line = self.env['account.bank.statement.line'].browse(st_line_id)
             st_line_vals = {'payment_ref': reference_to_set, 'partner_id': None}
 
             if force_partner:
@@ -155,10 +180,6 @@ class TestRecModelsPerf(SavepointCase):
                 rule.write({'match_partner_ids': [(4, invoice.partner_id.id, 0)]})
 
             st_line.write(st_line_vals)
-
-            last_changed_invoice_id = invoice.id
-
-        return last_changed_invoice_id
 
     def test_no_model_matching_anything(self):
         pass #TODO OCO
