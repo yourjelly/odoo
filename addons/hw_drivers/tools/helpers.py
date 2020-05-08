@@ -137,10 +137,10 @@ def get_odoo_server_url():
     ap = subprocess.call(['systemctl', 'is-active', 'hostapd']) # if service is active return 0 else inactive
     if not ap:
         return False
-    return read_file_first_line('odoo-remote-server.conf')
+    return read_iot_config('iot_box_config').get('url_odoo_server', False)
 
 def get_token():
-    return read_file_first_line('token')
+    return read_iot_config('iot_box_config').get('token_odoo_server', False)
 
 def get_version():
     return subprocess.check_output(['cat', '/home/pi/iotbox_version']).decode().rstrip()

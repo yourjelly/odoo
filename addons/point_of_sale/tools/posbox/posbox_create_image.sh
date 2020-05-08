@@ -30,6 +30,7 @@ OVERWRITE_FILES_BEFORE_INIT_DIR="${__dir}/overwrite_before_init"
 OVERWRITE_FILES_AFTER_INIT_DIR="${__dir}/overwrite_after_init"
 VERSION=13.0
 VERSION_IOTBOX=20.02
+IOT_CONFIG="{'iot_box_config': {'iot_box_version': '${VERSION_IOTBOX}'}}"
 REPO=https://github.com/odoo/odoo.git
 
 if ! file_exists *raspbian*.img ; then
@@ -131,7 +132,7 @@ cp -av "${OVERWRITE_FILES_BEFORE_INIT_DIR}"/* "${MOUNT_POINT}"
 chroot "${MOUNT_POINT}" /bin/bash -c "sudo /etc/init_posbox_image.sh"
 
 # copy iotbox version
-echo "${VERSION_IOTBOX}" > "${MOUNT_POINT}"/home/pi/iotbox_version
+echo "${IOT_CONFIG}" > "${MOUNT_POINT}"/home/pi/iot_config
 
 # get rid of the git clone
 rm -rfv "${CLONE_DIR}"

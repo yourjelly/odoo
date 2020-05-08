@@ -101,7 +101,7 @@ class StatusController(http.Controller):
                 }
                 helpers.write_iot_config(iot_box_config)
 
-                subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
+                subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), '', 'noreboot'])
                 helpers.check_certificate()
                 m.send_alldevices()
                 m.load_drivers()
