@@ -963,9 +963,21 @@ class MrpProduction(models.Model):
         return True
 
     def button_plan(self):
-        """ Create work orders. And probably do stuff, like things. """
         orders_to_plan = self.filtered(lambda order: not order.is_planned)
-        for order in orders_to_plan:
+        view = self.env.ref('mrp.plan_from_view_form')
+        return {
+            'name': _('Plan'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'mrp.plan.from',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'context': dict(self.env.context, default_mrp_production_ids=[(4, p.id) for p in orders_to_plan]),
+        }
+
+    def _button_plan(self):
+        for order in self:
             order.move_raw_ids.filtered(lambda m: m.state == 'draft')._action_confirm()
             # `propagate_date` enables the automatic rescheduling which could lead to hard to
             # understand behavior if a manufacturing order is planned, i.e. if the work orders do

@@ -891,7 +891,8 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         production_table.action_confirm()
 
         # Create work order
-        production_table.button_plan()
+        action = production_table.button_plan()
+        Form(self.env[action['res_model']].with_context(action['context'])).save().plan()
         workorder = production_table.workorder_ids[0]
 
         # Check that the workorder is planned now and that it lasts one hour
@@ -912,12 +913,15 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         production_table_form.bom_id = self.mrp_bom_desk
         production_table_form.product_qty = 1.0
         production_table_form.product_uom_id = dining_table.uom_id
-        production_table_form.date_planned_start = date_start
         production_table = production_table_form.save()
         production_table.action_confirm()
 
         # Create work order
-        production_table.button_plan()
+        action = production_table.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = date_start
+        wiz.save().plan()
+
         workorder = production_table.workorder_ids[0]
 
         # Check that the workorder is planned now and that it lasts one hour
@@ -938,12 +942,14 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         production_table_form.bom_id = self.mrp_bom_desk
         production_table_form.product_qty = 1.0
         production_table_form.product_uom_id = dining_table.uom_id
-        production_table_form.date_planned_start = date_start
         production_table = production_table_form.save()
         production_table.action_confirm()
 
         # Create work order
-        production_table.button_plan()
+        action = production_table.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = date_start
+        wiz.save().plan()
         workorder_prev = production_table.workorder_ids[0]
 
         # Check that the workorder is planned now and that it lasts one hour
@@ -958,12 +964,14 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         production_table_form.bom_id = self.mrp_bom_desk
         production_table_form.product_qty = 1.0
         production_table_form.product_uom_id = dining_table.uom_id
-        production_table_form.date_planned_start = date_start
         production_table = production_table_form.save()
         production_table.action_confirm()
 
         # Create work order
-        production_table.button_plan()
+        action = production_table.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = date_start
+        wiz.save().plan()
         workorder = production_table.workorder_ids[0]
 
         # Check that the workorder is planned now and that it lasts one hour
@@ -1022,10 +1030,12 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             mo_form.product_id = self.product_4
             mo_form.bom_id = self.planning_bom
             mo_form.product_qty = 1
-            mo_form.date_planned_start = planned_date
             mo = mo_form.save()
             mo.action_confirm()
-            mo.button_plan()
+            action = mo.button_plan()
+            wiz = Form(self.env[action['res_model']].with_context(action['context']))
+            wiz.plan_from = planned_date
+            wiz.save().plan()
             # Check that workcenters change
             self.assertEqual(mo.workorder_ids.workcenter_id, workcenters[i], "wrong workcenter %d" % i)
             self.assertAlmostEqual(mo.date_planned_start, planned_date, delta=timedelta(seconds=10))
@@ -1040,10 +1050,12 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
             mo_form.product_id = self.product_4
             mo_form.bom_id = self.planning_bom
             mo_form.product_qty = 1
-            mo_form.date_planned_start = planned_date
             mo = mo_form.save()
             mo.action_confirm()
-            mo.button_plan()
+            action = mo.button_plan()
+            wiz = Form(self.env[action['res_model']].with_context(action['context']))
+            wiz.plan_from = planned_date
+            wiz.save().plan()
             # Check that workcenters change
             self.assertEqual(mo.workorder_ids.workcenter_id, workcenters[i], "wrong workcenter %d" % i)
             self.assertNotEqual(mo.date_planned_start, planned_date)
@@ -1076,7 +1088,8 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         mo = mo_form.save()
         mo.action_confirm()
         plan = datetime.now()
-        mo.button_plan()
+        action = mo.button_plan()
+        Form(self.env[action['res_model']].with_context(action['context'])).save().plan()
         self.assertEqual(mo.workorder_ids[0].workcenter_id, self.wc_alt_2, "wrong workcenter")
         self.assertEqual(mo.workorder_ids[1].workcenter_id, self.wc_alt_1, "wrong workcenter")
 
@@ -1105,11 +1118,15 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         mo_form.product_id = self.product_4
         mo_form.bom_id = self.planning_bom
         mo_form.product_qty = 1
-        mo_form.date_planned_start = datetime(2019, 5, 13, 14, 0, 0, 0)
+        start = datetime(2019, 5, 13, 14, 0, 0, 0)
         mo = mo_form.save()
-        start = mo.date_planned_start
         mo.action_confirm()
         mo.button_plan()
+        action = mo.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = start
+        wiz.save().plan()
+
         self.assertEqual(mo.workorder_ids[0].workcenter_id, self.wc_alt_2, "wrong workcenter")
         wo1_start = mo.workorder_ids[0].date_planned_start
         wo1_stop = mo.workorder_ids[0].date_planned_finished
@@ -1121,10 +1138,13 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         mo_form.product_id = self.product_4
         mo_form.bom_id = self.planning_bom
         mo_form.product_qty = 1
-        mo_form.date_planned_start = datetime(2019, 5, 13, 9, 0, 0, 0)
+        start = datetime(2019, 5, 13, 9, 0, 0, 0)
         mo = mo_form.save()
         mo.action_confirm()
-        mo.button_plan()
+        action = mo.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = start
+        wiz.save().plan()
         self.assertEqual(mo.workorder_ids[0].workcenter_id, self.wc_alt_2, "wrong workcenter")
         wo1_start = mo.workorder_ids[0].date_planned_start
         wo1_stop = mo.workorder_ids[0].date_planned_finished
@@ -1146,7 +1166,8 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         mo = mo_form.save()
         mo.action_confirm()
         with self.assertRaises(UserError):
-            mo.button_plan()
+            action = mo.button_plan()
+            Form(self.env[action['res_model']].with_context(action['context'])).save().plan()
 
     def test_planning_5(self):
         """ Cancelling a production with workorders should free all reserved slot
@@ -1184,10 +1205,13 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         mo_form.product_id = self.product_4
         mo_form.bom_id = self.planning_bom
         mo_form.product_qty = 1
-        mo_form.date_planned_start = datetime(2019, 5, 13, 9, 0, 0, 0)
+        start = datetime(2019, 5, 13, 9, 0, 0, 0)
         mo = mo_form.save()
         mo.action_confirm()
-        mo.button_plan()
+        action = mo.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = start
+        wiz.save().plan()
         wo = mo.workorder_ids
         self.assertAlmostEqual(wo.date_planned_start, datetime(2019, 5, 13, 9, 0, 0, 0), delta=timedelta(seconds=10))
         self.assertAlmostEqual(wo.date_planned_finished, datetime(2019, 5, 13, 9, 0, 0, 0) + timedelta(minutes=60), delta=timedelta(seconds=10))
@@ -1201,10 +1225,13 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         mo_form.product_id = self.product_4
         mo_form.bom_id = self.planning_bom
         mo_form.product_qty = 1
-        mo_form.date_planned_start = datetime(2019, 5, 13, 9, 0, 0, 0)
+        start = datetime(2019, 5, 13, 9, 0, 0, 0)
         mo = mo_form.save()
         mo.action_confirm()
-        mo.button_plan()
+        action = mo.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = start
+        wiz.save().plan()
         wo = mo.workorder_ids
         wo.button_start()
         self.assertAlmostEqual(wo.date_start, datetime.now(), delta=timedelta(seconds=10))
@@ -1240,11 +1267,13 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         mo_form.product_id = self.product_4
         mo_form.bom_id = self.planning_bom
         mo_form.product_qty = 1
-        mo_form.date_planned_start = planned_date
         mo = mo_form.save()
         mo.action_confirm()
         # Plans the MO and checks the date.
-        mo.button_plan()
+        action = mo.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = planned_date
+        wiz.save().plan()
         self.assertAlmostEqual(mo.date_planned_start, planned_date, delta=timedelta(seconds=10))
         self.assertEqual(bool(mo.workorder_ids.exists()), True)
         leave = mo.workorder_ids.leave_id
@@ -1254,7 +1283,10 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         self.assertEqual(bool(mo.workorder_ids.exists()), True)
         self.assertEqual(bool(leave.exists()), False)
         # Plans (again) the MO and checks the date is still the same.
-        mo.button_plan()
+        action = mo.button_plan()
+        wiz = Form(self.env[action['res_model']].with_context(action['context']))
+        wiz.plan_from = planned_date
+        wiz.save().plan()
         self.assertAlmostEqual(mo.date_planned_start, planned_date, delta=timedelta(seconds=10))
         self.assertAlmostEqual(mo.date_planned_start, mo.workorder_ids.date_planned_start, delta=timedelta(seconds=10))
 
@@ -1373,7 +1405,8 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
 
         production_table.action_confirm()
         # Create work order
-        production_table.button_plan()
+        action = production_table.button_plan()
+        Form(self.env[action['res_model']].with_context(action['context'])).save().plan()
         # Check Work order created or not
         self.assertEqual(len(production_table.workorder_ids), 3)
 
