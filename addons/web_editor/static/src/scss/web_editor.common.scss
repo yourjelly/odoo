@@ -10,7 +10,6 @@
     // Most of the keys of the color combination color should be null. We have
     // to indicate their fallback values.
     @for $index from 1 through length($o-color-combinations) {
-
         $-text: color('o-cc#{$index}-text') or color-yiq(o-get-color(color('o-cc#{$index}-bg')));
         $-headings: color('o-cc#{$index}-headings') or $-text;
         $-h2: color('o-cc#{$index}-h2') or $-headings;
@@ -49,16 +48,16 @@
         @if not $-btn-primary {
             --o-cc#{$index}-btn-primary: #{theme-color('primary')};
         }
-        @if not color('o-cc#{$index}-btn-outline-primary') {
-            --o-cc#{$index}-btn-outline-primary: #{$-btn-primary or theme-color('primary')};
+        @if not color('o-cc#{$index}-btn-primary-border') {
+            --o-cc#{$index}-btn-primary-border: #{$-btn-primary or theme-color('primary')};
         }
 
         $-btn-secondary: color('o-cc#{$index}-btn-secondary');
         @if not $-btn-secondary {
             --o-cc#{$index}-btn-secondary: #{theme-color('secondary')};
         }
-        @if not color('o-cc#{$index}-btn-outline-secondary') {
-            --o-cc#{$index}-btn-outline-secondary: #{$-btn-secondary or theme-color('secondary')};
+        @if not color('o-cc#{$index}-btn-secondary-border') {
+            --o-cc#{$index}-btn-secondary-border: #{$-btn-secondary or theme-color('secondary')};
         }
     }
 }

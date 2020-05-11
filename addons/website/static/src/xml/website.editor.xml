@@ -96,11 +96,15 @@
                 <we-colorpicker title="Headings 5" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-h5"/>
                 <we-colorpicker title="Headings 6" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-h6"/>
             </we-row>
-            <we-colorpicker string="Link" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-link"/>
-            <we-colorpicker string="Primary Button" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-primary"/>
-            <we-colorpicker string="Primary Button (outline)" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-outline-primary"/>
-            <we-colorpicker string="Secondary Button" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-secondary"/>
-            <we-colorpicker string="Secondary Button (outline)" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-outline-secondary"/>
+            <we-colorpicker string="Links" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-link"/>
+            <we-row string="Main Buttons">
+                <we-colorpicker title="Background" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-primary"/>
+                <we-colorpicker title="Border" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-primary-border"/>
+            </we-row>
+            <we-row string="Buttons">
+                <we-colorpicker title="Background" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-secondary"/>
+                <we-colorpicker title="Border" data-customize-website-color="null" t-attf-data-color="o-cc#{number}-btn-secondary-border"/>
+            </we-row>
         </div>
     </t>
 

@@ -618,7 +618,7 @@ options.registry.Theme = options.Class.extend({
         '/web/static/lib/ace/mode-xml.js',
     ],
     events: {
-        'click .o_no_color_combination_edition we-toggler, .o_color_combinations_edition we-toggler': '_onCCTogglerClick',
+        'click .o_color_combinations_edition we-toggler': '_onCCTogglerClick',
         'click .o_cc_subheadings_toggler_icon': '_onCCHeadingsTogglerClick',
     },
 
@@ -830,34 +830,22 @@ options.registry.Theme = options.Class.extend({
      * @override
      */
     async _renderCustomXML(uiFragment) {
-        function addColorPreview(containerEl, editionEls, number) {
+        const ccEl = uiFragment.querySelector('.o_color_combinations_edition');
+        for (let i = 1; i <= 5; i++) {
             const togglerEl = document.createElement('we-toggler');
             togglerEl.classList.add('pt-0', 'pb-0', 'pl-0');
             const divEl = document.createElement('div');
             divEl.classList.add('o_we_cc_preview_container');
             const ccPreviewEl = $(qweb.render('web_editor.color.combination.preview'))[0];
-            ccPreviewEl.classList.add('p-1', 'text-center');
-            if (number) {
-                ccPreviewEl.classList.add(`o_cc${number}`);
-            }
+            ccPreviewEl.classList.add('p-1', 'text-center', `o_cc${i}`);
             divEl.appendChild(ccPreviewEl);
             togglerEl.appendChild(divEl);
-            containerEl.appendChild(togglerEl);
+            ccEl.appendChild(togglerEl);
 
             const collapseEl = document.createElement('we-collapse');
-            for (const el of editionEls) {
-                collapseEl.appendChild(el);
-            }
-            containerEl.appendChild(collapseEl);
-        }
-
-        const noCcEl = uiFragment.querySelector('.o_no_color_combination_edition');
-        addColorPreview(noCcEl, [...noCcEl.children]);
-
-        const ccEl = uiFragment.querySelector('.o_color_combinations_edition');
-        for (let i = 1; i <= 5; i++) {
             const editionEl = $(qweb.render('website.color_combination_edition', {number: i}))[0];
-            addColorPreview(ccEl, [editionEl], i);
+            collapseEl.appendChild(editionEl);
+            ccEl.appendChild(collapseEl);
         }
     },
 
@@ -870,7 +858,7 @@ options.registry.Theme = options.Class.extend({
      * @param {Event} ev
      */
     _onCCTogglerClick(ev) {
-        const ccTogglerEls = this.el.querySelectorAll('.o_no_color_combination_edition we-toggler, .o_color_combinations_edition we-toggler');
+        const ccTogglerEls = this.el.querySelectorAll('.o_color_combinations_edition we-toggler');
         for (const el of ccTogglerEls) {
             if (el !== ev.currentTarget) {
                 el.classList.remove('active');

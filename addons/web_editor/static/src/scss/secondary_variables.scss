@@ -7,7 +7,8 @@
 $o-color-palette: nth($o-color-palettes, $o-color-palette-number) !default;
 $o-color-palette: map-merge($o-base-color-palette, o-map-omit($o-color-palette));
 @function palette-color($key) {
-    @return map-get($o-color-palette, $key);
+    $value: map-get($o-color-palette, $key);
+    @return if(map-has-key($o-color-palette, $value), map-get($o-color-palette, $value), $value); // FIXME review
 }
 // Color combinations
 $o-color-combinations: nth($o-color-combinations-presets, $o-color-combinations-preset-number) !default;
