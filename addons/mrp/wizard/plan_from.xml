@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="plan_from_view_form" model="ir.ui.view">
+        <field name="name">Plan From</field>
+        <field name="model">mrp.plan.from</field>
+        <field name="arch" type="xml">
+            <form string="Plan From">
+                <group>
+                    <field name="plan_from"/>
+                </group>
+                <footer>
+                    <button name="plan" string="Plan" colspan="1" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
+
