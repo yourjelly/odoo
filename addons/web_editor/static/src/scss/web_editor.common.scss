@@ -551,9 +551,9 @@ blockquote {
     $-h6: map-get($config, 'h6');
     $-link: map-get($config, 'link');
     $-btn-primary: map-get($config, 'btn-primary');
-    $-btn-outline-primary: map-get($config, 'btn-outline-primary');
+    $-btn-primary-border: map-get($config, 'btn-primary-border');
     $-btn-secondary: map-get($config, 'btn-secondary');
-    $-btn-outline-secondary: map-get($config, 'btn-outline-secondary');
+    $-btn-secondary-border: map-get($config, 'btn-secondary-border');
 
     // Those color classes color multiple elements when applied on a snippet.
     // Those rules are not important so that they can be overridden through
@@ -604,62 +604,50 @@ blockquote {
         // would not make sense to combine multiple btn classes anyway).
 
         // Primary
-        @if has-related-color-classes($-btn-primary, 'btn') {
+        @if not $-btn-primary-border and has-related-color-classes($-btn-primary, 'btn') {
             .btn-fill-primary {
                 @extend .btn-fill-#{$-btn-primary};
             }
-        } @else if $-btn-primary {
-            $-btn-primary-color: o-get-color($-btn-primary);
+        } @else if $-btn-primary or $-btn-primary-border {
+            $-btn-primary-color: if($-btn-primary, o-get-color($-btn-primary), theme-color('primary'));
+            $-btn-primary-border-color: if($-btn-primary-border, o-get-color($-btn-primary-border), $-btn-primary-color);
             .btn-fill-primary {
-                @include button-variant($-btn-primary-color, $-btn-primary-color);
+                @include button-variant($-btn-primary-color, $-btn-primary-border-color);
             }
         }
 
+        $-btn-outline-primary: $-btn-primary-border or $-btn-primary;
         @if has-related-color-classes($-btn-outline-primary, 'btn') {
             .btn-outline-primary {
                 @extend .btn-outline-#{$-btn-outline-primary};
             }
-        } @else {
-            $-btn-outline-primary-color: null;
-            @if $-btn-outline-primary {
-                $-btn-outline-primary-color: o-get-color($-btn-outline-primary);
-            } @else if $-btn-primary {
-                $-btn-outline-primary-color: o-get-color($-btn-primary);
-            }
-            @if $-btn-outline-primary-color {
-                .btn-outline-primary {
-                    @include button-outline-variant($-btn-outline-primary-color);
-                }
+        } @else if $-btn-outline-primary {
+            .btn-outline-primary {
+                @include button-outline-variant(o-get-color($-btn-outline-primary));
             }
         }
 
         // Secondary
-        @if has-related-color-classes($-btn-secondary, 'btn') {
+        @if not $-btn-secondary-border and has-related-color-classes($-btn-secondary, 'btn') {
             .btn-fill-secondary {
                 @extend .btn-fill-#{$-btn-secondary};
             }
-        } @else if $-btn-secondary {
-            $-btn-secondary-color: o-get-color($-btn-secondary);
+        } @else if $-btn-secondary or $-btn-secondary-border {
+            $-btn-secondary-color: if($-btn-secondary, o-get-color($-btn-secondary), theme-color('secondary'));
+            $-btn-secondary-border-color: if($-btn-secondary-border, o-get-color($-btn-secondary-border), $-btn-secondary-color);
             .btn-fill-secondary {
-                @include button-variant($-btn-secondary-color, $-btn-secondary-color);
+                @include button-variant($-btn-secondary-color, $-btn-secondary-border-color);
             }
         }
 
+        $-btn-outline-secondary: $-btn-secondary-border or $-btn-secondary;
         @if has-related-color-classes($-btn-outline-secondary, 'btn') {
             .btn-outline-secondary {
                 @extend .btn-outline-#{$-btn-outline-secondary};
             }
-        } @else {
-            $-btn-outline-secondary-color: null;
-            @if $-btn-outline-secondary {
-                $-btn-outline-secondary-color: o-get-color($-btn-outline-secondary);
-            } @else if $-btn-secondary {
-                $-btn-outline-secondary-color: o-get-color($-btn-secondary);
-            }
-            @if $-btn-outline-secondary-color {
-                .btn-outline-secondary {
-                    @include button-outline-variant($-btn-outline-secondary-color);
-                }
+        } @else if $-btn-outline-secondary {
+            .btn-outline-secondary {
+                @include button-outline-variant(o-get-color($-btn-outline-secondary));
             }
         }
     }
