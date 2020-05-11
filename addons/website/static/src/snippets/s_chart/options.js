@@ -18,6 +18,8 @@ options.registry.InnerChart = options.Class.extend({
         'click we-button.o_we_matrix_remove_row': '_onRemoveRowClick',
         'blur we-matrix input': '_onMatrixInputFocusOut',
         'focus we-matrix input': '_onMatrixInputFocus',
+        'blur .o-value': '_onMinMaxInputFocusOut',
+        'focus .o-value': '_onMinMaxInputFocusIn',
     }),
 
     /**
@@ -471,6 +473,25 @@ options.registry.InnerChart = options.Class.extend({
             this._displayRemoveRowButton(row - 1);
         }
         this.updateUI();
+    },
+    /**
+     * Set the Min-Max value of x-axis and reload graph
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onMinMaxInputFocusOut: function (ev) {
+        setTimeout(() => {
+            if (ev.currentTarget === document.activeElement) {
+                return;
+            }
+            this._reloadGraph();
+        });
+    },
+
+    _onMinMaxInputFocusIn: function (ev) {
+        this.selectedvalue = ev.target;
+
     },
 });
 });
