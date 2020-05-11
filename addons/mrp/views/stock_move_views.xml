@@ -83,6 +83,7 @@
             <field name="arch" type="xml">
                 <tree delete="0" default_order="is_done,sequence" decoration-muted="is_done">
                     <field name="product_id" required="1"/>
+                    <field name="product_type" invisible="1"/>
                     <field name="company_id" invisible="1"/>
                     <field name="product_uom_category_id" invisible="1"/>
                     <field name="name" invisible="1"/>
@@ -110,6 +111,9 @@
                         attrs="{
                             'invisible': [('is_done', '=', True)],
                             'column_invisible': [('parent.state', 'in', ('draft', 'done'))]}"/>
+                    <button name="action_open_replenishment_report" title="Replenishment Report"
+                        icon="fa-area-chart" type="object"
+                        attrs="{'invisible': ['|', ('product_type', '!=', 'product'), ('parent.state', 'in', ['draft', 'cancel'])]}"/>
                     <field name="product_uom_qty" string="To Consume"/>
                     <field name="quantity_done" string="Consumed" attrs="{'column_invisible': [('parent.state', '=', 'draft')]}" readonly="1"/>
                 </tree>
