@@ -100,5 +100,6 @@ registry
 // Special fields
 registry
     .add('timezone_mismatch', special_fields.FieldTimezoneMismatch)
-    .add('report_layout', special_fields.FieldReportLayout);
+    .add('report_layout', special_fields.FieldReportLayout)
+    .add('vat_label', special_fields.FieldCharVatLabel);
 });

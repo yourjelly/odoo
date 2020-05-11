@@ -4,8 +4,10 @@ odoo.define('web.special_fields', function (require) {
 var core = require('web.core');
 var field_utils = require('web.field_utils');
 var relational_fields = require('web.relational_fields');
+var basic_fields = require('web.basic_fields');
 
 var FieldSelection = relational_fields.FieldSelection;
+var FieldChar = basic_fields.FieldChar;
 var _t = core._t;
 
 
@@ -191,10 +193,67 @@ var FieldReportLayout = relational_fields.FieldMany2One.extend({
     },
 });
 
+var FieldCharVatLabel = FieldChar.extend({
+    resetOnAnyFieldChange: true, // Have to listen to country changes
+
+    init: function (parent, record, nodeInfo) {
+        this._super.apply(this, arguments);
+        this.vat_label = "VAT"
+    },
+
+    willStart: function() {
+        return this._super.apply(this, arguments).then(() => {
+            return this._get_country_vat_label()
+        })
+    },
+    /**
+     * get label of country in current form
+     */
+    _get_country_vat_label: function () {
+        var countryField = this.nodeOptions.country_field || this.field.country_field || 'country_id';
+        var countryID = this.record.data[countryField] && this.record.data[countryField].res_id;
+        var vat_label = "VAT"
+        return this._rpc({
+                model: 'res.country',
+                method: 'read',
+                args: [countryID, ['vat_label']],
+            }).then((result) => {
+                if (result && result[0].vat_label) {
+                    this.vat_label = result[0].vat_label;
+                }
+            });
+    },
+
+    _render: function(){
+        this._super.apply(this, arguments)
+        return this._setCountryLable();
+    },
+
+    _reset: function (record, event) {
+        this._setCountryLable()
+    },
+
+    /**
+     * Deduces the currency description from the field options and view state.
+     * The description is then available at this.currency.
+     *
+     * @private
+     */
+    _setCountryLable: function () {
+        this.field.string = this.vat_label
+        var idForLabel = this.$el && this.$el[0].id
+        if (idForLabel){
+            var label_text = $('label.o_form_label[for=' + idForLabel + ']')
+            label_text[0].innerText = this.field.string
+        }
+    },
+
+});
 
 return {
     FieldTimezoneMismatch: FieldTimezoneMismatch,
     FieldReportLayout: FieldReportLayout,
+    FieldCharVatLabel: FieldCharVatLabel,
 };
 
 });
