@@ -85,13 +85,15 @@
                 <we-button data-select-class="modal-xl">Big</we-button>
                 <we-button data-select-class="s_popup_full" data-name="s_popup_size_full">Full</we-button>
             </we-select>
+            <we-colorpicker string="Backdrop Color" data-select-style="true"
+                data-css-property="background-color" data-color-prefix="bg-"/>
         </div>
     </xpath>
 </template>
 
 <template id="popup_options" inherit_id="website.s_popup_options">
     <xpath expr="//div[@id='snippet_popup']" position="attributes">
-        <attribute name="data-selector" seperator="," add=".s_newsletter_block"/>
+        <attribute name="data-selector" seperator="," add=".s_newsletter_block .o_newsletter_popup .o_newsletter_modal"/>
     </xpath>
 </template>
 
