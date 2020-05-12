@@ -490,7 +490,8 @@ options.registry.InnerChart = options.Class.extend({
     },
 
     _onMinMaxInputFocusIn: function (ev) {
-        this.selectedvalue = ev.target;
+        this.target = ev.target;
+        const selectedvalue = ev.target.value;
 
     },
 });
