@@ -14,8 +14,7 @@ import logging
 _logger = logging.getLogger()
 
 
-#@skip
-#class TestRecModelsPerf(AccountTestCommon): #To generate data only (useful ?? Everything is regenerated)
+#@skip#TODO OCO
 class TestRecModelsPerf(SavepointCase):
 
     """
