@@ -315,7 +315,6 @@ class AccountBankStatement(models.Model):
                 else:
                     balance_end_real = formatLang(self.env, stmt.balance_end_real, currency_obj=stmt.currency_id)
                     balance_end = formatLang(self.env, stmt.balance_end, currency_obj=stmt.currency_id)
-                    import pdb; pdb.set_trace() #TODO OCO
                     raise UserError(_('The ending balance is incorrect !\nThe expected balance (%s) is different from the computed one. (%s)')
                         % (balance_end_real, balance_end))
         return True
