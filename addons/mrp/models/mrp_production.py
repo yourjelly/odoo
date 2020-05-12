@@ -223,7 +223,7 @@ class MrpProduction(models.Model):
     is_locked = fields.Boolean('Is Locked', default=True, copy=False)
     is_planned = fields.Boolean('Its Operations are Planned', compute="_compute_is_planned")
     show_final_lots = fields.Boolean('Show Final Lots', compute='_compute_show_lots')
-    production_location_id = fields.Many2one('stock.location', "Production Location", related='product_id.property_stock_production', readonly=False, related_sudo=False)
+    production_location_id = fields.Many2one('stock.location', "Production Location", compute="_compute_production_location", store=True)
     picking_ids = fields.Many2many('stock.picking', compute='_compute_picking_ids', string='Picking associated to this manufacturing order')
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
     confirm_cancel = fields.Boolean(compute='_compute_confirm_cancel')
@@ -373,6 +373,19 @@ class MrpProduction(models.Model):
                 production.product_uom_qty = production.product_uom_id._compute_quantity(production.product_qty, production.product_id.uom_id)
             else:
                 production.product_uom_qty = production.product_qty
+
+    @api.depends('product_id', 'company_id')
+    def _compute_production_location(self):
+        production_by_company = self.env['stock.location'].read_group([
+            ('company_id', 'in', self.company_id.ids),
+            ('usage', '=', 'production')
+        ], ['company_id', 'ids:array_agg(id)'], ['company_id'])
+        production_by_company = {pbc['company_id'][0]: pbc['ids'] for pbc in production_by_company}
+        for production in self:
+            if production.product_id:
+                production.production_location_id = production.product_id.with_company(production.company_id).property_stock_production
+            else:
+                production.production_location_id = production_by_company.get(production.company_id.id)
 
     @api.depends('product_id.tracking')
     def _compute_show_lots(self):
