@@ -391,8 +391,11 @@ class AccountReconcileModel(models.Model):
         for st_line in st_lines:
             partner = (partner_map and partner_map.get(st_line.id) and self.env['res.partner'].browse(partner_map[st_line.id])) or st_line.partner_id
 
+            print("ST line %s" % st_line.payment_ref)#TODO OCO DEBUG
             for rec_model in available_models:
+                print(">>try %s" % rec_model.name)#TODO OCO DEBUG
                 if rec_model._is_applicable_for(st_line, partner):
+                    print("REC MODEL %s" % rec_model.name)#TODO OCO DEBUG
                     if rec_model.rule_type == 'partner_mapping':
                         partner = rec_model._apply_partner_mapping_rule(st_line)
                         continue

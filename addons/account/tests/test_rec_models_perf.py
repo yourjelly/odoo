@@ -51,6 +51,7 @@ class TestRecModelsPerf(SavepointCase):
         cls.env.cr.execute("select max(id) from res_company;")
         populated_company_id = cls.env.cr.fetchone()[0]
         cls.company = cls.env['res.company'].browse(populated_company_id)
+        #TODO OCO faire varier le nombre de st lines ?? C'est p-ê ça qui charge ton modèle ; 100 d'un coup ? (c'est pas tant que ça :/)
 
 
     @classmethod
@@ -78,17 +79,17 @@ class TestRecModelsPerf(SavepointCase):
                 'match_label': 'contains',
                 'match_label_param': label,
             }))
-            for percent, label in [(5, 'titi'), (10, 'toto'), (15, 'dudu')]
+            for percent, label in [(5, 'titi'), (10, 'toto'), (15, 'dudu'), (30, 'tournicoti')]
         ]
 
         rules_restrict_partners = [
             (percent, self.create_rec_model({
-                'name': label + " (no partners) - " + str(percent) + "% of st lines",
+                'name': label + " (restricted partners) - " + str(percent) + "% of st lines",
                 'match_label': 'contains',
                 'match_label_param': label,
                 'match_partner': True,
             }))
-            for percent, label in [(5, 'Zorro'), (15, 'coucou')]
+            for percent, label in [(5, 'Zorro'), (15, 'coucou'), (20, 'wtf')]
         ]
 
         # Prepare data to match rules
@@ -118,14 +119,15 @@ class TestRecModelsPerf(SavepointCase):
         sequence_orders = {
             'increasing_percent': lambda x: x[0],
             'decreasing_percent': lambda x: -x[0],
-            'no_partner_first': lambda x: (x[1]['match_partner']and -1 or 1) * x[0],
-            'no_partner_last': lambda x: (x[1]['match_partner']and 1 or -1) * x[0],
+            'restrict_partner_first': lambda x: (x[1]['match_partner']and -1 or 1) * x[0],
+            'restrict_partner_last': lambda x: (x[1]['match_partner']and 1 or -1) * x[0],
         }
 
         rslt = {}
         all_rules = rules_no_partners + rules_restrict_partners
         for order, sorting_fun in sequence_orders.items():
             _logger.info("Testing order %s" % order)
+            print("Testing order %s" % order)
             # Reassign rule sequences
             all_rules.sort(key=sorting_fun)
             for index, (percent, rule) in enumerate(all_rules):
