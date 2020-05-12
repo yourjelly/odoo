@@ -89,7 +89,7 @@ class TestRecModelsPerf(SavepointCase):
                 'match_label_param': label,
                 'match_partner': True,
             }))
-            for percent, label in [(5, 'Zorro'), (15, 'coucou'), (20, 'wtf')]
+            for percent, label in [(5, 'Zorro'), (15, 'coucou')]
         ]
 
         # Prepare data to match rules
