@@ -388,28 +388,41 @@ class AccountReconcileModel(models.Model):
         aml_ids_to_exclude = set() # Keep track of already processed amls.
         reconciled_amls_ids = set() # Keep track of already reconciled amls.
 
+        # First associate with each rec models all the statement lines for which it is applicable
+        lines_with_partner_per_model = defaultdict(lambda: [])
         for st_line in st_lines:
             partner = (partner_map and partner_map.get(st_line.id) and self.env['res.partner'].browse(partner_map[st_line.id])) or st_line.partner_id
 
-            print("ST line %s" % st_line.payment_ref)#TODO OCO DEBUG
             for rec_model in available_models:
-                print(">>try %s" % rec_model.name)#TODO OCO DEBUG
                 if rec_model._is_applicable_for(st_line, partner):
-                    print("REC MODEL %s" % rec_model.name)#TODO OCO DEBUG
                     if rec_model.rule_type == 'partner_mapping':
                         partner = rec_model._apply_partner_mapping_rule(st_line)
-                        continue
+                    else:
+                        lines_with_partner_per_model[rec_model].append((st_line, partner))
 
-                    candidates = rec_model._get_candidates(st_line, excluded_ids, partner, date_limit)
-                    if candidates:
-                        # If we don't have any candidate for this model, jump to the next one.
-                        model_rslt, new_reconciled_aml_ids, new_treated_aml_ids = rec_model._get_rule_result(st_line, candidates, aml_ids_to_exclude, reconciled_amls_ids, partner_map)
+        # Execute only one SQL query for each model (for performance)
+        matched_lines = self.env['account.bank.statement.line']
+        for rec_model in available_models:
 
-                        if model_rslt:
-                            results[st_line.id] = model_rslt
-                            reconciled_amls_ids |= new_reconciled_aml_ids
-                            aml_ids_to_exclude |= new_treated_aml_ids
-                            break
+            # We filter the lines for this model, in case a previous one has already found something for them
+            filtered_st_lines_with_partner = [x for x in lines_with_partner_per_model[rec_model] if x[0] not in matched_lines]
+
+            if not filtered_st_lines_with_partner:
+                # No unreconciled statement line for this model
+                continue
+
+            all_model_candidates = rec_model._get_candidates(filtered_st_lines_with_partner, excluded_ids, date_limit)
+
+            for st_line, partner in filtered_st_lines_with_partner:
+                candidates = all_model_candidates[st_line.id]
+                if candidates:
+                    model_rslt, new_reconciled_aml_ids, new_treated_aml_ids = rec_model._get_rule_result(st_line, candidates, aml_ids_to_exclude, reconciled_amls_ids, partner)
+
+                    if model_rslt:
+                        results[st_line.id] = model_rslt
+                        reconciled_amls_ids |= new_reconciled_aml_ids
+                        aml_ids_to_exclude |= new_treated_aml_ids
+                        matched_lines += st_line
 
         return results
 
@@ -476,7 +489,7 @@ class AccountReconcileModel(models.Model):
                 return partner_mapping.partner_id
         return None
 
-    def _get_candidates(self, st_line, excluded_ids, partner, date_limit):
+    def _get_candidates(self, st_lines_with_partner, excluded_ids, date_limit): #TODO OCO reDOC
         """ Returns the match candidates for this rule, with respect to the provided parameters.
 
         :param st_line: the statement line we want to retrieve candidates for
@@ -488,17 +501,21 @@ class AccountReconcileModel(models.Model):
         self.ensure_one()
 
         treatment_map = {
-            'invoice_matching': lambda x: x._get_invoice_matching_query(st_line, date_limit, excluded_ids, partner),
-            'writeoff_suggestion': lambda x: x._get_writeoff_suggestion_query(st_line, excluded_ids),
+            'invoice_matching': lambda x: x._get_invoice_matching_query(st_lines_with_partner, date_limit, excluded_ids),
+            'writeoff_suggestion': lambda x: x._get_writeoff_suggestion_query(st_lines_with_partner, excluded_ids),
         }
 
         query_generator = treatment_map[self.rule_type]
         query, params = query_generator(self)
         self._cr.execute(query, params)
 
-        return self._cr.dictfetchall()
+        rslt = defaultdict(lambda: [])
+        for candidate_dict in self._cr.dictfetchall():
+            rslt[candidate_dict['id']].append(candidate_dict)
 
-    def _get_invoice_matching_query(self, st_line, date_limit, excluded_ids, partner):
+        return rslt
+
+    def _get_invoice_matching_query(self, st_lines_with_partner, date_limit, excluded_ids):
         ''' Get the query applying all rules trying to match existing entries with the given statement lines.
         :param st_line:        Account.bank.statement.lines recordset.
         :param excluded_ids:    Account.move.lines to exclude.
@@ -560,34 +577,23 @@ class AccountReconcileModel(models.Model):
         LEFT JOIN account_move move             ON move.id = aml.move_id AND move.state = 'posted'
         LEFT JOIN account_account account       ON account.id = aml.account_id
         WHERE
-            st_line.id IN %(st_line_ids)s
-            AND aml.company_id = st_line_move.company_id
+            aml.company_id = st_line_move.company_id
             AND move.state = 'posted'
-            AND (
-                    -- the field match_partner of the rule might enforce the second part of
-                    -- the OR condition, thanks to _is_applicable_for
-                    %(partner_id)s = 0
-                    OR
-                    aml.partner_id = %(partner_id)s
-                )
             AND CASE WHEN st_line.amount > 0.0
                      THEN aml.balance > 0
                      ELSE aml.balance < 0
                 END
+            AND account.reconcile IS TRUE
+            AND aml.reconciled IS FALSE
+        '''
 
-            -- if there is a partner, propose all aml of the partner, otherwise propose only the ones
-            -- matching the statement line communication
-            AND
-            (
-                (
-                    %(partner_id)s != 0
-                    AND
-                    aml.partner_id = %(partner_id)s
-                )
-                OR
-                (
-                    %(partner_id)s = 0
-                    AND
+        #TODO OCO ce bloc-là, éventuellement dans une fonction ?
+        st_lines_queries = []
+        for st_line, partner in st_lines_with_partner:
+            if partner:
+                st_line_subquery = r"aml.partner_id = %s" % partner.id
+            else:
+                st_line_subquery = r"""
                     substring(REGEXP_REPLACE(st_line.payment_ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
                     AND
                     (
@@ -618,11 +624,11 @@ class AccountReconcileModel(models.Model):
                             regexp_replace(move.payment_reference, '\s+', '', 'g') = regexp_replace(st_line.payment_ref, '\s+', '', 'g')
                         )
                     )
-                )
-            )
-            AND account.reconcile IS TRUE
-            AND aml.reconciled IS FALSE
-        '''
+                """
+
+            st_lines_queries.append(r"st_line.id = %s AND (%s)" % (st_line.id, st_line_subquery))
+
+        query += r" AND (%s) " % " OR ".join(st_lines_queries)
 
         # Filter on the same currency.
         if self.match_same_currency:
@@ -632,8 +638,6 @@ class AccountReconcileModel(models.Model):
         params = {
             'sequence': self.sequence,
             'model_id': self.id,
-            'st_line_ids': tuple(st_line.ids),
-            'partner_id': partner.id or 0,
         }
 
         if date_limit:
@@ -650,7 +654,7 @@ class AccountReconcileModel(models.Model):
 
         return query, params
 
-    def _get_writeoff_suggestion_query(self, st_lines, excluded_ids=None):
+    def _get_writeoff_suggestion_query(self, st_lines_with_partner, excluded_ids=None):
         ''' Get the query applying all reconciliation rules.
         :param st_lines:        Account.bank.statement.lines recordset.
         :param excluded_ids:    Account.move.lines to exclude.
@@ -676,7 +680,7 @@ class AccountReconcileModel(models.Model):
         params = {
             'sequence': self.sequence,
             'model_id': self.id,
-            'st_line_ids': tuple(st_lines.ids),
+            'st_line_ids': tuple(st_line.id for (st_line, partner) in st_lines_with_partner),
         }
 
         return query, params
@@ -694,7 +698,7 @@ class AccountReconcileModel(models.Model):
         else:
             return None, set(), set()
 
-    def _get_invoice_matching_rule_result(self, st_line, candidates, aml_ids_to_exclude, reconciled_amls_ids, partner_map):
+    def _get_invoice_matching_rule_result(self, st_line, candidates, aml_ids_to_exclude, reconciled_amls_ids, partner):
         new_reconciled_aml_ids = set()
         new_treated_aml_ids = set()
         candidates, priorities = self._filter_candidates(candidates, aml_ids_to_exclude, reconciled_amls_ids)
@@ -716,7 +720,6 @@ class AccountReconcileModel(models.Model):
             new_treated_aml_ids = set(rslt['aml_ids'])
 
             # Create write-off lines.
-            partner = partner_map and partner_map.get(st_line.id) and self.env['res.partner'].browse(partner_map[st_line.id])
             lines_vals_list = self._prepare_reconciliation(st_line, aml_ids=rslt['aml_ids'], partner=partner)
 
             # A write-off must be applied if there are some 'new' lines to propose.
@@ -816,7 +819,7 @@ class AccountReconcileModel(models.Model):
 
         return candidates_by_priority
 
-    def _get_writeoff_suggestion_rule_result(self, st_line, partner_map):
+    def _get_writeoff_suggestion_rule_result(self, st_line, partner):
         rslt = {
             'model': self,
             'status': 'write_off',
@@ -824,7 +827,6 @@ class AccountReconcileModel(models.Model):
         }
 
         # Create write-off lines.
-        partner = (partner_map and partner_map.get(st_line.id) and self.env['res.partner'].browse(partner_map[st_line.id])) or st_line.partner_id
         lines_vals_list = self._prepare_reconciliation(st_line, partner=partner)
 
         # Process auto-reconciliation.
