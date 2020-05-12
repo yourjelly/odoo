@@ -494,9 +494,7 @@ class TestStockValuationWithCOA(AccountTestCommon):
         })
 
         self.product1.product_tmpl_id.categ_id.property_cost_method = 'fifo'
-
-        # 'product.category' object has no attribute 'valuation'
-        # self.product1.product_tmpl_id.categ_id.valuation = 'real_time'
+        self.product1.product_tmpl_id.categ_id.property_valuation = 'real_time'
 
         # Receive 10@10 ; create the vendor bill
         po1 = self.env['purchase.order'].create({

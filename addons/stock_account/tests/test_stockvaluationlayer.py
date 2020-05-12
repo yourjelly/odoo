@@ -108,9 +108,7 @@ class TestStockValuationCommon(SavepointCase):
             'picking_type_id': self.picking_type_out.id,
         })
         if unit_cost:
-            # 'stock.move' object has no attribute 'unit_cost'
-            # dropshipped.unit_cost = unit_cost
-            pass
+            dropshipped.price_unit = unit_cost
         dropshipped._action_confirm()
         dropshipped._action_assign()
         dropshipped.move_line_ids.qty_done = quantity

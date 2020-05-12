@@ -140,10 +140,9 @@ class TestRobustness(SavepointCase):
         move1._action_confirm()
         move1._action_assign()
 
-        # 'stock.move' object has no attribute 'result_package_id'
-        # move1.result_package_id = False
-
+        self.assertEqual(move1.move_line_ids.package_id, package)
         package.unpack()
+        self.assertEqual(move1.move_line_ids.package_id, self.env['stock.quant.package'])
 
         # unreserve
         move1._do_unreserve()

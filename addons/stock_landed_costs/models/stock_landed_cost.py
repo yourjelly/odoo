@@ -334,10 +334,6 @@ class StockLandedCostLine(models.Model):
 
     @api.onchange('product_id')
     def onchange_product_id(self):
-        if not self.product_id:
-            # 'stock.landed.cost.lines' object has no attribute 'quantity'
-            # self.quantity = 0.0
-            pass
         self.name = self.product_id.name or ''
         self.split_method = self.product_id.product_tmpl_id.split_method_landed_cost or self.split_method or 'equal'
         self.price_unit = self.product_id.standard_price or 0.0
