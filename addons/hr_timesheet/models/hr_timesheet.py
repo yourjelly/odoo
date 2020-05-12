@@ -98,7 +98,7 @@ class AccountAnalyticLine(models.Model):
         lines = super(AccountAnalyticLine, self).create(vals_list)
         for line, values in zip(lines, vals_list):
             if line.project_id:  # applied only for timesheet
-                import pdb;pdb.set_trace()
+                # import pdb;pdb.set_trace()
                 line._timesheet_postprocess(values)
         return lines
 

@@ -65,6 +65,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
     @api.onchange('advance_payment_method')
     def onchange_advance_payment_method(self):
+        import pdb;pdb.set_trace()
         if self.advance_payment_method == 'percentage':
             amount = self.default_get(['amount']).get('amount')
             return {'value': {'amount': amount}}
@@ -146,6 +147,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
         return so_values
 
     def create_invoices(self):
+        import pdb;pdb.set_trace()
         sale_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
 
         if self.advance_payment_method == 'delivered':

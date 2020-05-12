@@ -50,6 +50,7 @@ class ProjectCreateSalesOrder(models.TransientModel):
             self.price_unit = 0.0
 
     def action_create_sale_order(self):
+        import pdb;pdb.set_trace()
         # if project linked to SO line or at least on tasks with SO line, then we consider project as billable.
         if self.project_id.sale_line_id:
             raise UserError(_("The project is already linked to a sales order item."))
@@ -85,6 +86,7 @@ class ProjectCreateSalesOrder(models.TransientModel):
         return action
 
     def _create_sale_order(self):
+        import pdb;pdb.set_trace()
         """ Private implementation of generating the sales order """
         sale_order = self.env['sale.order'].create({
             'project_id': self.project_id.id,
