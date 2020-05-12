@@ -15,7 +15,7 @@ class AccountMove(models.Model):
 
     _populate_sizes = {
         'small': 5000, #TODO OCO changé pour ne pas faire un populate différent qui regénère une company
-        'medium': 5000,
+        'medium': 10000,
         'large': 100000,
     }
 

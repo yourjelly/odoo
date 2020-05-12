@@ -105,7 +105,8 @@ class TestRecModelsPerf(SavepointCase):
             self._prepare_rule_data(rule, percent, st_line_id_lower_bound, selected_invoice_ids, True)
             st_line_id_lower_bound += percent
 
-        self.env['account.bank.statement'].search([('company_id', '=', self.company.id), ('state', '=', 'open')]).button_post()
+        statements_to_post = self.env['account.bank.statement'].search([('company_id', '=', self.company.id), ('state', '=', 'open')])
+        statements_to_post.button_post()
         # Test
         #TODO OCO bon, du coup, il faudra tout bouger dans account_accountant
         self.env.cr.execute("""
