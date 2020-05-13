@@ -215,6 +215,26 @@ class StockMove(models.Model):
             production._action_cancel()
         return res
 
+    def _get_consuming_document(self):
+        """ WIP """
+        res = super()._get_consuming_document()
+        return res or self.raw_material_production_id
+
+    def _get_replenishment_document(self):
+        """ TODO WIP """
+        res = super()._get_replenishment_document()
+        return res or self.production_id
+
+    def _is_consuming(self):
+        """ TODO WIP """
+        res = super()._is_consuming()
+        return res or (self.picking_type_id.code == 'mrp_operation' and self.raw_material_production_id)
+
+    def _is_replenishing(self):
+        """ TODO WIP """
+        res = super()._is_replenishing()
+        return res or (self.picking_type_id.code == 'mrp_operation' and self.production_id)
+
     def _prepare_phantom_move_values(self, bom_line, product_qty, quantity_done):
         return {
             'picking_id': self.picking_id.id if self.picking_id else False,
