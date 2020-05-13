@@ -40,7 +40,7 @@
             <field name="position_id" ref="afpt_non_recoverable_vat_4"/>
             <field name="tax_src_id" ref="l10n_cl.OTAX_19"/>
             <field name="tax_dest_id" ref="l10n_cl.iva_compra_no_recup"/>
-        </record>
+       </record>
         <record id="afpt_non_recoverable_vat_4_account_1" model="account.fiscal.position.account.template">
             <field name="position_id" ref="afpt_non_recoverable_vat_4"/>
             <field name="account_src_id" ref="l10n_cl.account_410235"/>
@@ -50,7 +50,7 @@
             <field name="position_id" ref="afpt_non_recoverable_vat_4"/>
             <field name="account_src_id" ref="l10n_cl.account_410230"/>
             <field name="account_dest_id" ref="l10n_cl.account_410165"/>
-        </record>
+       </record>
 
         <record id="afpt_non_recoverable_vat_9" model="account.fiscal.position.template">
             <field name="name">Compras - Otros</field>
@@ -103,7 +103,7 @@
         <record id="afpt_purchase_supermarket_tax" model="account.fiscal.position.tax.template">
             <field name="position_id" ref="afpt_purchase_supermarket"/>
             <field name="tax_src_id" ref="l10n_cl.ITAX_19"/>
-            <field name="tax_dest_id" ref="l10n_cl.tax_report_compras_iva_supermercado"/>
+            <field name="tax_dest_id" ref="l10n_cl.iva_supermercado_recup"/>
         </record>
         <record id="afpt_purchase_supermarket_account" model="account.fiscal.position.account.template">
             <field name="position_id" ref="afpt_purchase_supermarket"/>
