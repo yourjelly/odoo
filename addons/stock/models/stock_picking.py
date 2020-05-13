@@ -370,10 +370,34 @@ class Picking(models.Model):
     immediate_transfer = fields.Boolean(default=False)
     package_level_ids = fields.One2many('stock.package_level', 'picking_id')
     package_level_ids_details = fields.One2many('stock.package_level', 'picking_id')
+    components_availability = fields.Char(compute='_compute_components_availability')
+    components_availability_state = fields.Selection([
+        ('available', 'Available'),
+        ('waiting', 'Should be available on time'),
+        ('late', 'Will not be available at time'),
+    ], compute='_compute_components_availability')
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
+
+    @api.depends('move_lines')
+    def _compute_components_availability(self):
+        inactive_pickings = self.filtered(lambda picking: picking.state in ['cancel', 'draft', 'done'])
+        inactive_pickings.update({
+            'components_availability': '',
+            'components_availability_state': 'available'
+        })
+        active_pickings = (self - inactive_pickings)
+        for picking in active_pickings:
+            worst_moves = picking.move_lines.filtered(lambda move: move.availability_state == 'late')
+            worst_moves = worst_moves or picking.move_lines.filtered(lambda move: move.availability_state == 'waiting')
+            if worst_moves:
+                picking.components_availability_state = worst_moves[0].availability_state
+                picking.components_availability = worst_moves[0].availability_indication
+            else:
+                picking.components_availability_state = 'available'
+                picking.components_availability = 'Available'
 
     def _compute_has_tracking(self):
         for picking in self:

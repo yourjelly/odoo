@@ -12,7 +12,8 @@ from dateutil import relativedelta
 
 from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_compare, float_is_zero, float_round
+from odoo.tools.float_utils import float_compare, float_is_zero, float_repr, float_round
+from odoo.tools.misc import format_date as odoo_format_date
 
 PROCUREMENT_PRIORITIES = [('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')]
 
@@ -178,11 +179,40 @@ class StockMove(models.Model):
     next_serial = fields.Char('First SN')
     next_serial_count = fields.Integer('Number of SN')
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Original Reordering Rule', check_company=True)
+    availability_indication = fields.Char('Availability', compute='_compute_availability_indication')
+    availability_state = fields.Selection([
+        ('available', 'Available'),
+        ('waiting', 'Should be available on time'),
+        ('late', 'Will not be available at time'),
+    ], compute='_compute_availability_indication')
 
     @api.onchange('product_id', 'picking_type_id')
     def onchange_product(self):
         if self.product_id:
             self.description_picking = self.product_id._get_description(self.picking_type_id)
+
+    @api.depends('date', 'date_expected', 'product_id.route_ids', 'product_type', 'product_uom_qty', 'reserved_availability')
+    def _compute_availability_indication(self):
+        mto_route = self.env.ref('stock.route_warehouse0_mto')
+        today = datetime.today()
+        for move in self:
+            if move.product_type != 'product' or move.reserved_availability == move.product_uom_qty:
+                move.availability_state = 'available'
+                precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+                move.availability_indication = float_repr(move.reserved_availability, precision)
+            elif mto_route in move.product_id.route_ids:
+                if move.move_orig_ids:
+                    move.availability_indication = 'Exp %s' % (odoo_format_date(self.env, move.move_orig_ids.date_expected))
+                    if move.move_orig_ids.date_expected >= today:
+                        move.availability_state = 'waiting'
+                    else:
+                        move.availability_state = 'late'
+                else:
+                    move.availability_state = 'late'
+                    move.availability_indication = 'Not Available'
+            else:
+                move.availability_indication = 'Not Available'
+                move.availability_state = 'late'
 
     @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
     def _compute_display_assign_serial(self):
