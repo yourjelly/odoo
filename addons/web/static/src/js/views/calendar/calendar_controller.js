@@ -307,7 +307,7 @@ var CalendarController = AbstractController.extend({
 
         var options = _.extend({}, this.options, event.options, {
             context: context,
-            title: _.str.sprintf(_t('Create: %s'), (this.displayName || this.renderer.arch.attrs.string))
+            title: _.str.sprintf(_t('Create: %s'), (this.displayName || this.renderer.props.arch.attrs.string))
         });
 
         if (this.quick != null) {
@@ -325,8 +325,8 @@ var CalendarController = AbstractController.extend({
         }
 
         var title = _t("Create");
-        if (this.renderer.arch.attrs.string) {
-            title += ': ' + this.renderer.arch.attrs.string;
+        if (this.renderer.props.arch.attrs.string) {
+            title += ': ' + this.renderer.props.arch.attrs.string;
         }
         if (this.eventOpenPopup) {
             if (this.previousOpen) { this.previousOpen.close(); }
@@ -460,7 +460,7 @@ var CalendarController = AbstractController.extend({
             this.$buttons.find('.o_calendar_button_' + this.mode).addClass('active');
         }
         const title = `${this.displayName} (${event.data.title})`;
-        return this.updateControlPanel({ title });
+        Promise.resolve().then(() => this.updateControlPanel({ title }));
     },
 });
 

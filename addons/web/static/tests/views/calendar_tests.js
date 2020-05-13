@@ -13,18 +13,6 @@ var testUtils = require('web.test_utils');
 var session = require('web.session');
 
 var createActionManager = testUtils.createActionManager;
-
-CalendarRenderer.include({
-    getAvatars: function () {
-        var res = this._super.apply(this, arguments);
-        for (var k in res) {
-            res[k] = res[k].replace(/src="([^"]+)"/, 'data-src="\$1"');
-        }
-        return res;
-    }
-});
-
-
 var createCalendarView = testUtils.createCalendarView;
 
 // 2016-12-12 08:00:00
@@ -270,6 +258,7 @@ QUnit.module('Views', {
         });
 
         await testUtils.dom.click(calendar.$('.fc-event:contains(event 4) .fc-content'));
+        await testUtils.nextTick();
 
         assert.containsOnce(calendar, '.o_cw_popover',
             "should open a popover clicking on event");
@@ -313,11 +302,13 @@ QUnit.module('Views', {
 
         // switch to day mode
         await testUtils.dom.click($('.o_control_panel .o_calendar_button_day'));
+        await testUtils.nextTick();
         assert.strictEqual($('.o_control_panel .breadcrumb-item').text(),
             'Meetings Test (December 12, 2016)', "should display the current day");
 
         // switch to month mode
         await testUtils.dom.click($('.o_control_panel .o_calendar_button_month'));
+        await testUtils.nextTick();
         assert.strictEqual($('.o_control_panel .breadcrumb-item').text(),
             'Meetings Test (December 2016)', "should display the current month");
 
@@ -356,6 +347,7 @@ QUnit.module('Views', {
         // click on an existing event to open the formViewDialog
 
         await testUtils.dom.click(calendar.$('.fc-event:contains(event 4) .fc-content'));
+        await testUtils.nextTick();
 
         assert.ok(calendar.$('.o_cw_popover').length, "should open a popover clicking on event");
         assert.ok(calendar.$('.o_cw_popover .o_cw_popover_edit').length, "popover should have an edit button");
@@ -668,6 +660,7 @@ QUnit.module('Views', {
         // delete record
 
         await testUtils.dom.click($newevent);
+        await testUtils.nextTick();
         await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_delete'));
         await testUtils.dom.click($('.modal button.btn-primary:contains(Ok)'));
         assert.containsNone(calendar, '.fc-content', "should delete the record");
@@ -1097,6 +1090,7 @@ QUnit.module('Views', {
         // delete record
 
         await testUtils.dom.click($newevent);
+        await testUtils.nextTick();
         await testUtils.dom.click(calendar.$('.o_cw_popover .o_cw_popover_delete'));
         await testUtils.dom.click($('.modal button.btn-primary:contains(Ok)'));
         assert.containsNone(calendar, '.fc-content', "should delete the record");
@@ -1549,6 +1543,7 @@ QUnit.module('Views', {
 
         testUtils.fields.editInput($('.modal input:first'), 'new event');
         await testUtils.dom.click($('.modal button.btn:contains(Create)'));
+        await testUtils.nextTick();
         var $newevent = calendar.$('.fc-event:contains(new event)');
 
         assert.strictEqual($newevent.text().replace(/[\s\n\r]+/g, ''), "newevent",

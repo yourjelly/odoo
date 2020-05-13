@@ -7,6 +7,7 @@ var CalendarController = require('web.CalendarController');
 var CalendarRenderer = require('web.CalendarRenderer');
 var core = require('web.core');
 var pyUtils = require('web.py_utils');
+var RendererWrapper = require('web.RendererWrapper');
 var utils = require('web.utils');
 
 var _lt = core._lt;
@@ -175,6 +176,14 @@ var CalendarView = AbstractView.extend({
         this.loadParams.filters = filters;
         this.loadParams.mode = (params.context && params.context.default_mode) || attrs.mode;
         this.loadParams.initialDate = moment(params.initialDate || new Date());
+    },
+    /**
+     *
+     * @override
+     */
+    getRenderer(parent, state) {
+        state = Object.assign({}, state, this.rendererParams);
+        return new RendererWrapper(parent, this.config.Renderer, state);
     },
 });
 

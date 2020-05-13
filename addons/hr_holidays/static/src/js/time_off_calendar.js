@@ -6,6 +6,7 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
     var CalendarController = require("web.CalendarController");
     var CalendarRenderer = require("web.CalendarRenderer");
     var CalendarView = require("web.CalendarView");
+    const utils = require("web.utils");
     var viewRegistry = require('web.view_registry');
 
     var _t = core._t;
@@ -103,13 +104,9 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
         },
     });
 
-    var TimeOffPopoverRenderer = CalendarRenderer.extend({
-        config: _.extend({}, CalendarRenderer.prototype.config, {
-            CalendarPopover: TimeOffCalendarPopover,
-        }),
-
-        _getPopoverParams: function (eventData) {
-            let params = this._super.apply(this, arguments);
+    class TimeOffPopoverRenderer extends CalendarRenderer {
+        _getPopoverParams(eventData) {
+            let params = super._getPopoverParams(...arguments);
             let calendarIcon;
             let state = eventData.extendedProps.record.state;
 
@@ -121,30 +118,53 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
                 calendarIcon = 'fa-calendar-o';
             }
 
-            params['title'] = eventData.extendedProps.record.display_name.split(':').slice(0, -1).join(':');
-            params['template'] = QWeb.render('hr_holidays.calendar.popover.placeholder', {color: this.getColor(eventData.color_index), calendarIcon: calendarIcon});
-            return params;
-        },
-    });
-
-    var TimeOffCalendarRenderer = TimeOffPopoverRenderer.extend({
-        _render: function () {
-            var self = this;
-            return this._super.apply(this, arguments).then(function () {
-                return self._rpc({
-                    model: 'hr.leave.type',
-                    method: 'get_days_all_request',
-                    context: self.context,
-                });
-            }).then(function (result) {
-                self.$el.parent().find('.o_timeoff_container').remove();
-                var elem = QWeb.render('hr_holidays.dashboard_calendar_header', {
-                    timeoffs: result,
-                });
-                self.$el.before(elem);
+            return Object.assign(params, {
+                title: eventData.extendedProps.record.display_name.split(':').slice(0, -1).join(':'),
+                template: this.env.qweb.renderToString('hr_holidays.calendar.popover.placeholder', {
+                    color: this.getColor(eventData.color_index),
+                    calendarIcon: calendarIcon,
+                }),
             });
+        }
+    }
+    TimeOffPopoverRenderer.components = Object.assign({},
+        CalendarRenderer.components,
+        {
+            CalendarPopover: TimeOffCalendarPopover,
         },
-    });
+    );
+
+    class TimeOffCalendarRenderer extends TimeOffPopoverRenderer {
+        async willStart() {
+            await super.willStart(...arguments);
+            await this.loadHeader();
+        }
+        async willUpdateProps() {
+            await super.willUpdateProps(...arguments);
+            await this.loadHeader();
+        }
+        async loadHeader() {
+            this.timeoffs = await this.env.services.rpc({
+                model: 'hr.leave.type',
+                method: 'get_days_all_request',
+                context: this.env.context,
+            });
+        }
+        _render() {
+            super._render();
+            const container = this.el.parentElement.querySelector('.o_timeoff_container');
+            if (container) {
+                container.remove();
+            }
+            const elem = utils.stringToElement(
+                this.env.qweb.renderToString('hr_holidays.dashboard_calendar_header', {
+                    timeoffs: this.timeoffs,
+                })
+            );
+            this.el.parentElement.insertBefore(elem, this.el);
+        }
+    }
+
     var TimeOffCalendarView = CalendarView.extend({
         config: _.extend({}, CalendarView.prototype.config, {
             Controller: TimeOffCalendarController,

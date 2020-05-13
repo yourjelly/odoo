@@ -11,6 +11,7 @@ const CalendarModel = require('calendar.CalendarModel');
 const viewRegistry = require('web.view_registry');
 
 var _t = core._t;
+const { useState } = owl.hooks;
 
 const GoogleCalendarModel = CalendarModel.extend({
 
@@ -96,54 +97,25 @@ const GoogleCalendarController = CalendarController.extend({
     }
 });
 
-const GoogleCalendarRenderer = CalendarRenderer.extend({
-    events: _.extend({}, CalendarRenderer.prototype.events, {
-        'click .o_google_sync_button': '_onSyncCalendar',
-    }),
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * Adds the Sync with Google button in the sidebar
-     *
-     * @private
-     */
-    _initSidebar: function () {
-        var self = this;
-        this._super.apply(this, arguments);
-        this.$googleButton = $();
-        if (this.model === "calendar.event") {
-            this.$googleButton = $('<button/>', {type: 'button', html: _t("Sync with <b>Google</b>")})
-                                .addClass('o_google_sync_button oe_button btn btn-secondary')
-                                .prepend($('<img/>', {
-                                    src: "/google_calendar/static/src/img/calendar_32.png",
-                                }))
-                                .appendTo(self.$sidebar);
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Handlers
-    //--------------------------------------------------------------------------
-
+class GoogleCalendarRenderer extends CalendarRenderer {
+    constructor() {
+        super(...arguments);
+        this.isDisabled = useState({ value: false });
+    }
     /**
      * Requests to sync the calendar with Google Calendar
      *
      * @private
      */
-    _onSyncCalendar: function () {
-        var self = this;
-        var context = this.getSession().user_context;
-        this.$googleButton.prop('disabled', true);
-        this.trigger_up('syncCalendar', {
-            on_always: function () {
-                self.$googleButton.prop('disabled', false);
+    _onSyncCalendar() {
+        this.isDisabled.value = true;
+        this.trigger('syncCalendar', {
+            on_always: () => {
+                this.isDisabled.value = false;
             },
         });
-    },
-});
+    }
+}
 
 var GoogleCalendarView = CalendarView.extend({
     config: _.extend({}, CalendarView.prototype.config, {

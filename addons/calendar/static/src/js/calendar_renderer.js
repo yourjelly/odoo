@@ -36,7 +36,10 @@ const AttendeeCalendarPopover = CalendarPopover.extend({
      * @return {boolean}
      */
     isCurrentPartnerAttendee() {
-        return this.event.extendedProps.record.partner_ids.includes(session.partner_id);
+        if (this.event.extendedProps.record.partner_ids) {
+            return this.event.extendedProps.record.partner_ids.includes(session.partner_id);
+        }
+        return false;
     },
     /**
      * @override
@@ -97,11 +100,13 @@ const AttendeeCalendarPopover = CalendarPopover.extend({
 });
 
 
-const AttendeeCalendarRenderer = CalendarRenderer.extend({
-	config: _.extend({}, CalendarRenderer.prototype.config, {
-		CalendarPopover: AttendeeCalendarPopover,
-	}),
-});
+class AttendeeCalendarRenderer extends CalendarRenderer {}
+AttendeeCalendarRenderer.components = Object.assign({},
+    CalendarRenderer.components,
+    {
+        CalendarPopover: AttendeeCalendarPopover,
+    },
+);
 
 return AttendeeCalendarRenderer
 

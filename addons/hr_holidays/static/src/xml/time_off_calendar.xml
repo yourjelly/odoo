@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <templates id="template" xml:space="preserve">
-    <t t-name="hr_holidays.dashboard_calendar_header">
+    <t t-name="hr_holidays.dashboard_calendar_header" owl="1">
         <div class="o_timeoff_container d-flex">
             <div t-foreach="timeoffs" t-as="timeoff" t-attf-class="o_timeoff_card flex-grow-1 d-flex flex-column {{ timeoff_last ? 'o_timeoff_card_last' : '' }}">
                 <t t-set="need_allocation" t-value="timeoff[2] !== 'no'"/>
                 <t t-set="cl" t-value="'text-muted'"/>
 
-                <t t-if="need_allocation &amp;&amp; timeoff[1]['virtual_remaining_leaves'] &gt; 0">
+                <t t-if="need_allocation and timeoff[1]['virtual_remaining_leaves'] gt 0">
                     <t t-set="cl" t-value="'o_timeoff_green'"/>
                 </t>
 
@@ -39,7 +39,7 @@
         </button>
     </t>
 
-    <t t-name="hr_holidays.calendar.popover.placeholder">
+    <t t-name="hr_holidays.calendar.popover.placeholder" owl="1">
         <div t-attf-class="o_cw_popover popover card shadow #{typeof color === 'number' ? _.str.sprintf('o_calendar_color_%s', color) : ''}" role="tooltip">
             <div class="arrow"/>
             <div class="card-header d-flex justify-content-between py-2 pr-2">

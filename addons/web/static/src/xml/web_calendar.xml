@@ -1,25 +1,40 @@
 <template>
-    <div t-name="CalendarView" class="o_calendar_container">
-        <div class="o_calendar_view">
-            <div class="o_calendar_buttons" role="toolbar" aria-label="Calendar toolbar"/>
-            <div class="o_calendar_widget" />
-        </div>
-        <div class="o_calendar_sidebar_container d-none d-md-block">
-            <div class="o_calendar_sidebar">
-                <div class="o_calendar_mini"/>
+    <t t-name="web.CalendarRenderer" owl="1">
+        <div class="o_calendar_container"
+            t-on-edit-event="_onEditEvent"
+            t-on-delete-event="_onDeleteEvent">
+            <div class="o_calendar_view">
+                <div class="o_calendar_buttons" role="toolbar" aria-label="Calendar toolbar"/>
+                <div class="o_calendar_widget" t-ref="calendar"/>
+            </div>
+            <div class="o_calendar_sidebar_container d-md-block">
+                <div class="o_calendar_sidebar">
+                    <div class="o_calendar_mini" t-ref="calendar-mini"/>
+                    <t t-if="!props.fullWidth">
+                        <t t-foreach="props.filters" t-as="filterGroupId" t-key="filterGroupId">
+                            <t t-set="filterGroup" t-value="props.filters[filterGroupId]"/>
+                            <t t-if="filterGroup.filters.some(f => f.display == null || f.display)">
+                                <SidebarFilterAdapter t-props="_getSidebarFilterProps(filterGroupId)"/>
+                            </t>
+                        </t>
+                    </t>
+                </div>
             </div>
         </div>
-    </div>
+    </t>
 
-    <t t-name="calendar-box">
-        <div t-att-style="typeof color === 'string' ? ('background-color:' + color) + ';' : ''" t-attf-class="#{record.is_highlighted ? 'o_event_hightlight' : ''} #{typeof color === 'number' ? _.str.sprintf('o_calendar_color_%s', color) : 'o_calendar_color_1'}">
+    <t t-name="web.CalendarRenderer.event" owl="1">
+        <div t-att-style="typeof color === 'string' ? ('background-color:' + color) + ';' : ''"
+             t-att-class="{'o_event_hightlight': record.is_highlighted}"
+             t-attf-class="o_calendar_color_{{typeof color === 'number' ? color : '1'}}">
             <span class="fc-time"/>
             <div class="o_event_title" t-esc="record.display_name"/>
         </div>
     </t>
 
-    <t t-name="CalendarView.event.popover.placeholder">
-        <div t-attf-class="o_cw_popover popover card shadow #{typeof color === 'number' ? _.str.sprintf('o_calendar_color_%s', color) : ''}" role="tooltip">
+    <t t-name="web.CalendarRenderer.event.popover.placeholder" owl="1">
+        <div role="tooltip" class="o_cw_popover popover card shadow"
+             t-attf-class="{{typeof color === 'number' ? 'o_calendar_color_' + color : ''}}">
             <div class="arrow"/>
             <div class="card-header d-flex justify-content-between py-2 pr-2">
                 <h4 class="popover-header border-0 p-0 pt-1"/>

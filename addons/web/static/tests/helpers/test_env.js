@@ -2,6 +2,7 @@ odoo.define('web.test_env', async function (require) {
     "use strict";
 
     const AbstractStorageService = require('web.AbstractStorageService');
+    const { device } = require('web.config');
     const Bus = require("web.Bus");
     const RamStorage = require('web.RamStorage');
     const { buildQuery } = require("web.rpc");
@@ -36,7 +37,7 @@ odoo.define('web.test_env', async function (require) {
             _t: env._t || Object.assign((s => s), { database }),
             _lt: env._lt || Object.assign((s => s), { database }),
             bus: new Bus(),
-            device: Object.assign({ isMobile: false }, env.device),
+            device: Object.assign({}, device, env.device),
             isDebug: env.isDebug || (() => false),
             qweb: new owl.QWeb({ templates: session.owlTemplates }),
             services: Object.assign({

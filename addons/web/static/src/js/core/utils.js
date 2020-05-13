@@ -909,6 +909,15 @@ var utils = {
             ['name', '=like', '%.assets\_%.js'],
         ];
     },
+    /**
+     *
+     * @param {string} html
+     */
+    stringToElement: function (html) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = html;
+        return tmp.children[0];
+    }
 };
 
 return utils;
