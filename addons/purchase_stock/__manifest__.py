@@ -21,6 +21,7 @@
         'views/stock_production_lot_views.xml',
         'report/purchase_report_views.xml',
         'report/purchase_report_templates.xml',
+        'report/report_replenishment.xml',
         'report/report_stock_rule.xml',
     ],
     'demo': [
