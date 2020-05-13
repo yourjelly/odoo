@@ -24,6 +24,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
     invoicing_timesheet_enabled = fields.Boolean(default=_default_invoicing_timesheet_enabled)
 
     def create_invoices(self):
+        import pdb;pdb.set_trace()
         """ Override method from sale/wizard/sale_make_invoice_advance.py
 
             When the user want to invoice the timesheets to the SO
