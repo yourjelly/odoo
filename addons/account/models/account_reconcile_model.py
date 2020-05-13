@@ -269,7 +269,7 @@ class AccountReconcileModel(models.Model):
         if self.rule_type == 'invoice_matching' and (not self.match_total_amount or (self.match_total_amount_param == 100)):
             return []
 
-        line_currency = st_line.currency_id or st_line.journal_id.currency_id or self.company_id.currency_id
+        line_currency = st_line.foreign_currency_id or st_line.currency_id
         if line_currency.is_zero(residual_balance):
             # No writeoff needs to be done for a full reconciliation
             return []
@@ -753,21 +753,26 @@ class AccountReconcileModel(models.Model):
             return False
 
         # Match total residual amount.
+        line_currency = statement_line.foreign_currency_id or statement_line.currency_id
+
+        candidate_currencies = set(candidate['aml_currency_id'] or statement_line.company_id.currency_id.id for candidate in candidates)
+        if candidate_currencies != {line_currency.id}:
+            # We don't apply any automatic match based on residual amount if candidates have differenct currencies
+            return False
+
         total_residual = 0.0
         for aml in candidates:
             if aml['account_internal_type'] == 'liquidity':
                 total_residual += aml['aml_currency_id'] and aml['aml_amount_currency'] or aml['aml_balance']
             else:
                 total_residual += aml['aml_currency_id'] and aml['aml_amount_residual_currency'] or aml['aml_amount_residual']
-        line_residual = statement_line.currency_id and statement_line.amount_currency or statement_line.amount
-        line_currency = statement_line.currency_id or statement_line.journal_id.currency_id or statement_line.company_id.currency_id
 
         # Statement line amount is equal to the total residual.
-        if float_is_zero(total_residual - line_residual, precision_rounding=line_currency.rounding):
+        if float_is_zero(total_residual + statement_line.amount_residual, precision_rounding=line_currency.rounding):
             return True
 
-        line_residual_to_compare = line_residual if line_residual > 0.0 else -line_residual
-        total_residual_to_compare = total_residual if line_residual > 0.0 else -total_residual
+        line_residual_to_compare = abs(statement_line.amount_residual)
+        total_residual_to_compare = abs(total_residual)
 
         if line_residual_to_compare > total_residual_to_compare:
             amount_percentage = (total_residual_to_compare / line_residual_to_compare) * 100
