@@ -806,6 +806,23 @@ class AccountBankStatementLine(models.Model):
         counterpart_line_vals = self._prepare_counterpart_move_line_vals(counterpart_vals)
         return [liquidity_line_vals, counterpart_line_vals]
 
+    def get_residual_amount(self):
+        """ Returns the residual amount of this statement line, in its currency.
+        """
+        self.ensure_one()
+        liquidity_lines, suspense_lines, other_lines = self._seek_for_lines()
+        st_line_currency = suspense_lines.currency_id or suspense_lines.company_currency_id
+        balance_field, residual_field = ('amount_currency', 'amount_residual_currency') if suspense_lines.currency_id else ('balance', 'amount_residual')
+
+        if self.to_check:
+            rslt = -sum(liquidity_lines.mapped(balance_field))
+        elif suspense_lines.account_id.reconcile:
+            rslt = sum(suspense_lines.mapped(residual_field))
+        else:
+            rslt = sum(suspense_lines.mapped(balance_field))
+
+        return rslt
+
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------

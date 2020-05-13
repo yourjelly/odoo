@@ -96,10 +96,12 @@ class TestReconciliationMatchingRules(AccountTestCommon):
         })
 
     @classmethod
-    def _create_invoice_line(cls, amount, partner, type):
+    def _create_invoice_line(cls, amount, partner, type, currency=None):
         ''' Create an invoice on the fly.'''
         invoice_form = Form(cls.env['account.move'].with_context(default_move_type=type, default_invoice_date='2019-09-01', default_date='2019-09-01'))
         invoice_form.partner_id = partner
+        if currency:
+            invoice_form.currency_id = currency
         with invoice_form.invoice_line_ids.new() as invoice_line_form:
             invoice_line_form.name = 'xxxx'
             invoice_line_form.quantity = 1
@@ -414,27 +416,6 @@ class TestReconciliationMatchingRules(AccountTestCommon):
         }
         self._check_statement_matching(self.rule_0, expected_values, statements=bank_st)
 
-    def test_partner_mapping_rule(self):
-        # First make sure bank_line_1 has no partner and a payment_ref compliant with rule_3
-        # and bank_line_2 won't match rule 1 and 3
-        self.bank_line_1.write({'partner_id': None, 'payment_ref': 'toto42'})
-        self.bank_line_2.write({'partner_id': None})
-
-        # rule 3 is executed after rule 1, so there should be no matching
-        rules = self.rule_1 + self.rule_3
-        self._check_statement_matching(rules, {
-            self.bank_line_1.id: {'aml_ids': []},
-            self.bank_line_2.id: {'aml_ids': []},
-        }, self.bank_st)
-
-        # If rule 3 is executed before rule 1, bank_line_1 matches (since rule_3 sets the partner required by rule_1)
-        self.rule_1.sequence = 2
-        self.rule_3.sequence = 1
-        self._check_statement_matching(rules, {
-            self.bank_line_1.id: {'aml_ids': [self.invoice_line_1.id], 'model': self.rule_1},
-            self.bank_line_2.id: {'aml_ids': []},
-        }, self.bank_st)
-
     def test_invoice_matching_rule_no_partner(self):
         """ Tests that a statement line without any partner can be matched to the
         right invoice if they have the same payment reference.
@@ -457,3 +438,19 @@ class TestReconciliationMatchingRules(AccountTestCommon):
             self.bank_line_1.id: {'aml_ids': [self.invoice_line_1.id], 'model': self.rule_1},
             self.bank_line_2.id: {'aml_ids': []},
         }, self.bank_st)
+
+    def test_match_different_currencies(self):
+        partner = self.env['res.partner'].create({'name': 'Bernard Gagnant'})
+        self.rule_1.write({'match_partner_ids': [(6, 0, partner.ids)], 'match_same_currency': False})
+
+        currency_inv = self.env.ref('base.EUR')
+        currency_statement = self.env.ref('base.JPY')
+
+        currency_statement.active = True
+
+        invoice_line = self._create_invoice_line(100, partner, 'out_invoice', currency=currency_inv)
+
+        self.bank_line_2.unlink()
+        self.bank_line_1.write({'partner_id': partner.id, 'foreign_currency_id': currency_statement.id, 'amount_currency': 100, 'payment_ref': 'test'})
+        self.env['account.reconcile.model'].flush()
+        self._check_statement_matching(self.rule_1, {self.bank_line_1.id: {'aml_ids': []}}, statements=self.bank_st)
