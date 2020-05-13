@@ -5,8 +5,21 @@ var core = require('web.core');
 var rpc = require('web.rpc');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
 var options = require('web_editor.snippets.options');
+require('website.s_popup_options');
 var wUtils = require('website.utils');
 var _t = core._t;
+
+options.registry.NewsletterBlock = options.registry.SnippetPopup.extend({
+    selector: ".s_newsletter_block",
+
+    setLayout: function (previewMode, widgetValue, params) {
+                const isModal = widgetValue === 'modal';
+                const isTop = widgetValue === 'fixedTop';
+                this.$target.toggleClass('s_popup_fixed', !isModal);
+                this.$target.toggleClass('s_popup_fixed_top', isTop);
+                this.$target.toggleClass('s_popup_center modal', isModal);
+    },
+})
 
 
 options.registry.mailing_list_subscribe = options.Class.extend({
@@ -24,31 +37,24 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      */
     select_mailing_list: function (previewMode, value) {
         var self = this;
-        var def = wUtils.prompt({
-            'id': this.popup_template_id,
-            'window_title': this.popup_title,
-            'select': _t("Newsletter"),
-            'init': function (field, dialog) {
-                return rpc.query({
+        var def = rpc.query({
                     model: 'mailing.list',
                     method: 'name_search',
                     args: ['', [['is_public', '=', true]]],
                     context: self.options.recordInfo.context,
                 }).then(function (data) {
-                    $(dialog).find('.btn-primary').prop('disabled', !data.length);
-                    var list_id = self.$target.attr("data-list-id");
-                    $(dialog).on('show.bs.modal', function () {
-                        if (list_id !== "0"){
-                            $(dialog).find('select').val(list_id);
-                        };
-                    });
-                    return data;
+                    //$(dialog).find('.btn-primary').prop('disabled', !data.length);
+                    // var list_id = self.$target.attr("data-list-id");
+                    // $(dialog).on('show.bs.modal', function () {
+                    //     if (list_id !== "0"){
+                    //         $(dialog).find('select').val(list_id);
+                    //     };
+                    // });
+                    // return data;
                 });
-            },
-        });
-        def.then(function (result) {
-            self.$target.attr("data-list-id", result.val);
-        });
+        // def.then(function (result) {
+        //     self.$target.attr("data-list-id", result.val);
+        // });
         return def;
     },
     /**

@@ -161,7 +161,6 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
      * @private
      */
     _dialogInit: function (content, email) {
-        debugger;
         var self = this;
         this.massMailingPopup = new Dialog(this, {
             technical: false,
