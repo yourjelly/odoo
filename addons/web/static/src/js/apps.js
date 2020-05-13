@@ -1,4 +1,4 @@
-odoo.define('web.Apps', function (require) {
+odoo.define('web.apps', function (require) {
 "use strict";
 
 var AbstractAction = require('web.AbstractAction');
@@ -163,9 +163,9 @@ var AppsUpdates = Apps.extend({
     remote_action_tag: 'loempia.embed.updates',
 });
 
-core.action_registry.add("apps", Apps);
-core.action_registry.add("apps.updates", AppsUpdates);
-
-return Apps;
+return {
+    Apps,
+    AppsUpdates,
+};
 
 });

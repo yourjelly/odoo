@@ -68,8 +68,6 @@ var ChangePassword = AbstractAction.extend({
     },
 });
 
-core.action_registry.add("change_password", ChangePassword);
-
 return ChangePassword;
 
 });

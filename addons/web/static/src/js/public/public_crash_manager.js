@@ -22,7 +22,7 @@ const PublicCrashManager = CrashManager.extend({
     },
 });
 
-core.serviceRegistry.add('crash_manager', PublicCrashManager);
+core.serviceRegistry.add('crash_manager', PublicCrashManager); // FIXME
 
 return {
     CrashManager: PublicCrashManager,

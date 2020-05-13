@@ -6,14 +6,11 @@ odoo.define('web.SessionStorageService', function (require) {
  */
 
 var AbstractStorageService = require('web.AbstractStorageService');
-var core = require('web.core');
 var sessionStorage = require('web.sessionStorage');
 
 var SessionStorageService = AbstractStorageService.extend({
     storage: sessionStorage,
 });
-
-core.serviceRegistry.add('session_storage', SessionStorageService);
 
 return SessionStorageService;
 

@@ -5,7 +5,7 @@ var Bus = require('web.Bus');
 var config = require('web.config');
 var Class = require('web.Class');
 var QWeb = require('web.QWeb');
-var Registry = require('web.Registry');
+const { actionRegistry, crashRegistry, serviceRegistry } = require('web.setup');
 var translation = require('web.translation');
 
 /**
@@ -36,10 +36,10 @@ return {
     _t: translation._t,
     _lt: translation._lt,
 
-    // registries
-    action_registry: new Registry(),
-    crash_registry: new Registry(),
-    serviceRegistry: new Registry(),
+    // registries (deprecated, should be accessed from 'web.setup')
+    action_registry: actionRegistry,
+    crash_registry: crashRegistry,
+    serviceRegistry: serviceRegistry,
     /**
      * @type {String}
      */

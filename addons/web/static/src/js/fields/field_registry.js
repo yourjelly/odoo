@@ -1,18 +1,18 @@
-odoo.define('web.field_registry', function (require) {
-"use strict";
+odoo.define('web.FieldRegistry', function (require) {
+    "use strict";
 
-var Registry = require('web.Registry');
+    const Registry = require('web.Registry');
 
-var FieldRegistry = Registry.extend({
-    add: function (key, value, score) {
-        if (value.prototype instanceof owl.Component) {
-            throw new Error("This registry should not contain any Component. Use 'web.field_registry_owl' instead.");
-        }
-        return this._super(...arguments);
-    },
-});
+    const FieldRegistry = Registry.extend({
+        add(key, value) {
+            if (value.prototype instanceof owl.Component) {
+                throw new Error("This registry should not contain any Component. Use 'web.field_registry_owl' instead.");
+            }
+            return this._super(...arguments);
+        },
+    });
 
-return new FieldRegistry();
+    return FieldRegistry;
 });
 
 odoo.define('web._field_registry', function (require) {

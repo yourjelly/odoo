@@ -6,14 +6,11 @@ odoo.define('web.LocalStorageService', function (require) {
  */
 
 var AbstractStorageService = require('web.AbstractStorageService');
-var core = require('web.core');
 var localStorage = require('web.local_storage');
 
 var LocalStorageService = AbstractStorageService.extend({
     storage: localStorage,
 });
-
-core.serviceRegistry.add('local_storage', LocalStorageService);
 
 return LocalStorageService;
 

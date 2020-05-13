@@ -259,7 +259,6 @@
         <script type="text/javascript" src="/web/static/src/js/core/data_comparison_utils.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/math_utils.js"></script>
         <script type="text/javascript" src="/web/static/src/js/core/misc.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/services/crash_manager_service.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/data_manager.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/report_service.js"></script>
         <script type="text/javascript" src="/web/static/src/js/services/session.js"></script>

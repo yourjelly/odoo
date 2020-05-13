@@ -3,11 +3,12 @@ odoo.define("web.env", function (require) {
 
     const { jsonRpc } = require('web.ajax');
     const { device, isDebug } = require("web.config");
-    const { bus, serviceRegistry } = require("web.core");
+    const { bus } = require("web.core");
     const dataManager = require('web.data_manager');
     const { blockUI, unblockUI } = require("web.framework");
     const rpc = require("web.rpc");
     const session = require("web.session");
+    const { serviceRegistry } = require("web.setup");
     const { _t } = require('web.translation');
     const utils = require("web.utils");
 

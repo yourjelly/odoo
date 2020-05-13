@@ -153,9 +153,6 @@ function Reload(parent, action) {
     redirect(url, params.wait);
 }
 
-core.action_registry.add("reload", Reload);
-
-
 /**
  * Client action to go back home.
  */
@@ -163,18 +160,15 @@ function Home (parent, action) {
     var url = '/' + (window.location.search || '');
     redirect(url, action && action.params && action.params.wait);
 }
-core.action_registry.add("home", Home);
 
 function login() {
     redirect('/web/login');
 }
-core.action_registry.add("login", login);
 
 function logout() {
     redirect('/web/session/logout');
     return new Promise();
 }
-core.action_registry.add("logout", logout);
 
 /**
  * @param {ActionManager} parent
@@ -185,7 +179,6 @@ core.action_registry.add("logout", logout);
 function displayNotification(parent, action) {
     parent.displayNotification(action.params);
 }
-core.action_registry.add("display_notification", displayNotification);
 
 /**
  * Client action to refresh the session context (making sure
@@ -198,7 +191,6 @@ function ReloadContext (parent, action) {
         Reload(parent, action);
     });
 }
-core.action_registry.add("reload_context", ReloadContext);
 
 // In Internet Explorer, document doesn't have the contains method, so we make a
 // polyfill for the method in order to be compatible.
@@ -222,6 +214,12 @@ return {
     blockUI: blockUI,
     unblockUI: unblockUI,
     redirect: redirect,
+    Reload,
+    Home,
+    login,
+    logout,
+    displayNotification,
+    ReloadContext,
 };
 
 });

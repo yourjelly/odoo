@@ -3,7 +3,6 @@ odoo.define('web.NotificationService', function (require) {
 
 var AbstractService = require('web.AbstractService');
 var Notification = require('web.Notification');
-var core = require('web.core');
 
 var id = 0;
 
@@ -104,8 +103,6 @@ var NotificationService = AbstractService.extend({
         }
     },
 });
-
-core.serviceRegistry.add('notification', NotificationService);
 
 return NotificationService;
 });

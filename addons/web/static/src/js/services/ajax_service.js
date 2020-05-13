@@ -3,7 +3,6 @@ odoo.define('web.AjaxService', function (require) {
 
 var AbstractService = require('web.AbstractService');
 var ajax = require('web.ajax');
-var core = require('web.core');
 var session = require('web.session');
 
 var AjaxService = AbstractService.extend({
@@ -33,8 +32,6 @@ var AjaxService = AbstractService.extend({
         return promise;
     },
 });
-
-core.serviceRegistry.add('ajax', AjaxService);
 
 return AjaxService;
 

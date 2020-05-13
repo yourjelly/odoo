@@ -1,7 +1,7 @@
 odoo.define('web.ServiceProviderMixin', function (require) {
 "use strict";
 
-var core = require('web.core');
+const { serviceRegistry } = require('web.setup');
 
 var ServiceProviderMixin = {
     services: {}, // dict containing deployed service instances
@@ -19,7 +19,7 @@ var ServiceProviderMixin = {
         this.on('call_service', this, this._call_service.bind(this));
 
         // add already registered services from the service registry
-        _.each(core.serviceRegistry.map, function (Service, serviceName) {
+        _.each(serviceRegistry.map, function (Service, serviceName) {
             if (serviceName in self.UndeployedServices) {
                 throw new Error('Service "' + serviceName + '" is already loaded.');
             }
@@ -28,7 +28,7 @@ var ServiceProviderMixin = {
         this._deployServices();
 
         // listen on newly added services
-        core.serviceRegistry.onAdd(function (serviceName, Service) {
+        serviceRegistry.onAdd(function (serviceName, Service) {
             if (serviceName in self.services || serviceName in self.UndeployedServices) {
                 throw new Error('Service "' + serviceName + '" is already loaded.');
             }

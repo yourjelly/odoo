@@ -1,4 +1,4 @@
-odoo.define('report.client_action', function (require) {
+odoo.define('web.ReportClientAction', function (require) {
 'use strict';
 
 var AbstractAction = require('web.AbstractAction');
@@ -125,8 +125,6 @@ var ReportAction = AbstractAction.extend({
     },
 
 });
-
-core.action_registry.add('report.client_action', ReportAction);
 
 return ReportAction;
 

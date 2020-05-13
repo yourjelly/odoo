@@ -1,9 +1,10 @@
 odoo.define('web.ErrorDialogRegistry', function (require) {
 "use strict";
 
-var Registry = require('web.Registry');
+var { errorDialogRegistry } = require('web.setup');
 
-return new Registry();
+// deprecated (should use 'web.setup' instead)
+return errorDialogRegistry;
 });
 
 odoo.define('web.CrashManager', function (require) {
@@ -13,7 +14,7 @@ const AbstractService = require('web.AbstractService');
 var ajax = require('web.ajax');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
-var ErrorDialogRegistry = require('web.ErrorDialogRegistry');
+var { crashRegistry, errorDialogRegistry } = require('web.setup');
 var Widget = require('web.Widget');
 
 var _t = core._t;
@@ -195,8 +196,8 @@ var CrashManager = AbstractService.extend({
             return;
         }
 
-        // Special exception handlers, see crash_registry bellow
-        var handler = core.crash_registry.get(error.data.name, true);
+        // Special exception handlers, see crashRegistry in 'web.setup'
+        var handler = crashRegistry.get(error.data.name, true);
         if (handler) {
             new (handler)(this, error).display();
             return;
@@ -230,7 +231,7 @@ var CrashManager = AbstractService.extend({
             return;
         }
         error.traceback = error.data.debug;
-        var dialogClass = error.data.context && ErrorDialogRegistry.get(error.data.context.exception_class) || ErrorDialog;
+        var dialogClass = error.data.context && errorDialogRegistry.get(error.data.context.exception_class) || ErrorDialog;
         var dialog = new dialogClass(this, {
             title: _.str.capitalize(error.type) || _t("Odoo Error"),
         }, error);
@@ -349,19 +350,16 @@ var RedirectWarningHandler = Widget.extend(ExceptionHandler, {
     }
 });
 
-core.crash_registry.add('odoo.exceptions.RedirectWarning', RedirectWarningHandler);
 
-function session_expired(cm) {
+function onSessionExpired(cm) {
     return {
         display: function () {
             cm.show_warning({type: _t("Odoo Session Expired"), message: _t("Your Odoo session expired. Please refresh the current web page.")});
         }
     };
 }
-core.crash_registry.add('odoo.http.SessionExpiredException', session_expired);
-core.crash_registry.add('werkzeug.exceptions.Forbidden', session_expired);
 
-core.crash_registry.add('504', function (cm) {
+function onError504(cm) {
     return {
         display: function () {
             cm.show_warning({
@@ -369,12 +367,15 @@ core.crash_registry.add('504', function (cm) {
                 message: _t("The operation was interrupted. This usually means that the current operation is taking too much time.")});
         }
     };
-});
+}
 
 return {
-    CrashManager: CrashManager,
-    ErrorDialog: ErrorDialog,
-    WarningDialog: WarningDialog,
+    CrashManager,
+    onError504,
+    ErrorDialog,
+    WarningDialog,
+    RedirectWarningHandler,
+    onSessionExpired,
     disable: () => active = false,
 };
 });

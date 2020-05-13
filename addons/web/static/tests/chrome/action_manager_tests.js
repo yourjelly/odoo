@@ -2,18 +2,18 @@ odoo.define('web.action_manager_tests', function (require) {
 "use strict";
 
 var ActionManager = require('web.ActionManager');
-var ReportClientAction = require('report.client_action');
+var ReportClientAction = require('web.ReportClientAction');
 var Notification = require('web.Notification');
 var NotificationService = require('web.NotificationService');
 var AbstractAction = require('web.AbstractAction');
 var AbstractStorageService = require('web.AbstractStorageService');
 var BasicFields = require('web.basic_fields');
-var core = require('web.core');
 var ListController = require('web.ListController');
 var StandaloneFieldManagerMixin = require('web.StandaloneFieldManagerMixin');
 var RamStorage = require('web.RamStorage');
 var ReportService = require('web.ReportService');
 var SessionStorageService = require('web.SessionStorageService');
+const { actionRegistry } = require('web.setup');
 var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
 
@@ -723,7 +723,7 @@ QUnit.module('ActionManager', {
                 this.$el.addClass('o_client_action_test');
             },
         });
-        core.action_registry.add('HelloWorldTest', ClientAction);
+        actionRegistry.add('HelloWorldTest', ClientAction);
 
         var actionManager = await createActionManager({
             actions: this.actions,
@@ -744,7 +744,7 @@ QUnit.module('ActionManager', {
         assert.verifySteps([]);
 
         actionManager.destroy();
-        delete core.action_registry.map.HelloWorldTest;
+        delete actionRegistry.map.HelloWorldTest;
     });
 
     QUnit.test('properly load act window actions', async function (assert) {
@@ -1137,7 +1137,7 @@ QUnit.module('ActionManager', {
                 return this._super.apply(this, arguments);
             },
         });
-        core.action_registry.add('ClientAction', ClientAction);
+        actionRegistry.add('ClientAction', ClientAction);
 
         var actionManager = await createActionManager({
             actions: this.actions,
@@ -1187,7 +1187,7 @@ QUnit.module('ActionManager', {
                 return this._super.apply(this, arguments);
             },
         });
-        core.action_registry.add('ClientAction', ClientAction);
+        actionRegistry.add('ClientAction', ClientAction);
 
         var actionManager = await createActionManager({
             actions: this.actions,
@@ -1218,7 +1218,7 @@ QUnit.module('ActionManager', {
         assert.verifySteps(['start', 'start']);
 
         actionManager.destroy();
-        delete core.action_registry.map.ClientAction;
+        delete actionRegistry.map.ClientAction;
     });
 
     QUnit.test('load a window action without id (in a multi-record view)', async function (assert) {
@@ -1801,7 +1801,7 @@ QUnit.module('ActionManager', {
                 this.$el.addClass('o_client_action_test');
             },
         });
-        core.action_registry.add('HelloWorldTest', ClientAction);
+        actionRegistry.add('HelloWorldTest', ClientAction);
 
         var actionManager = await createActionManager({
             mockRPC: function (route, args) {
@@ -1818,7 +1818,7 @@ QUnit.module('ActionManager', {
         assert.verifySteps([]);
 
         actionManager.destroy();
-        delete core.action_registry.map.HelloWorldTest;
+        delete actionRegistry.map.HelloWorldTest;
     });
 
     QUnit.test('client action with control panel', async function (assert) {
@@ -1833,7 +1833,7 @@ QUnit.module('ActionManager', {
                 await this._super.apply(this, arguments);
             },
         });
-        core.action_registry.add('HelloWorldTest', ClientAction);
+        actionRegistry.add('HelloWorldTest', ClientAction);
 
         var actionManager = await createActionManager();
         await actionManager.doAction('HelloWorldTest');
@@ -1848,7 +1848,7 @@ QUnit.module('ActionManager', {
             'Hello World', "should have correctly rendered the client action");
 
         actionManager.destroy();
-        delete core.action_registry.map.HelloWorldTest;
+        delete actionRegistry.map.HelloWorldTest;
     });
 
     QUnit.test('state is pushed for client actions', async function (assert) {
@@ -1872,14 +1872,14 @@ QUnit.module('ActionManager', {
                 },
             },
         });
-        core.action_registry.add('HelloWorldTest', ClientAction);
+        actionRegistry.add('HelloWorldTest', ClientAction);
 
         await actionManager.doAction('HelloWorldTest');
 
         assert.verifySteps(['push state']);
 
         actionManager.destroy();
-        delete core.action_registry.map.HelloWorldTest;
+        delete actionRegistry.map.HelloWorldTest;
     });
 
     QUnit.test('breadcrumb is updated on title change', async function (assert) {
@@ -1900,7 +1900,7 @@ QUnit.module('ActionManager', {
             },
         });
         var actionManager = await createActionManager();
-        core.action_registry.add('HelloWorldTest', ClientAction);
+        actionRegistry.add('HelloWorldTest', ClientAction);
         await actionManager.doAction('HelloWorldTest');
 
         assert.strictEqual($('ol.breadcrumb').text(), "initial title",
@@ -1911,7 +1911,7 @@ QUnit.module('ActionManager', {
             "should have updated title as breadcrumb content");
 
         actionManager.destroy();
-        delete core.action_registry.map.HelloWorldTest;
+        delete actionRegistry.map.HelloWorldTest;
     });
 
     QUnit.test('test display_notification client action', async function (assert) {
@@ -3841,7 +3841,7 @@ QUnit.module('ActionManager', {
                 this.$el.addClass('o_test');
             },
         });
-        core.action_registry.add('test', ClientAction);
+        actionRegistry.add('test', ClientAction);
 
         var actionManager = await createActionManager({
             actions: this.actions,
@@ -3859,7 +3859,7 @@ QUnit.module('ActionManager', {
         assert.verifySteps(['on_attach_callback']);
 
         actionManager.destroy();
-        delete core.action_registry.map.test;
+        delete actionRegistry.map.test;
     });
 
     QUnit.module('Actions in target="inline"');
@@ -4139,7 +4139,7 @@ QUnit.module('ActionManager', {
             },
         });
 
-        core.action_registry.add('slowAction', ClientAction);
+        actionRegistry.add('slowAction', ClientAction);
 
         var actionManager = await createActionManager({
             actions: this.actions,
@@ -4154,14 +4154,14 @@ QUnit.module('ActionManager', {
             'should have loaded a kanban view');
 
         actionManager.destroy();
-        delete core.action_registry.map.slowAction;
+        delete actionRegistry.map.slowAction;
     });
 
     QUnit.test('abstract action does not crash on navigation_moves', async function (assert) {
         assert.expect(1);
         var ClientAction = AbstractAction.extend({
         });
-        core.action_registry.add('ClientAction', ClientAction);
+        actionRegistry.add('ClientAction', ClientAction);
         var actionManager = await createActionManager({
             actions: this.actions,
             archs: this.archs,
@@ -4172,7 +4172,7 @@ QUnit.module('ActionManager', {
 
         assert.ok(true); // no error so it's good
         actionManager.destroy();
-        delete core.action_registry.ClientAction;
+        delete actionRegistry.ClientAction;
     });
 
     QUnit.test('fields in abstract action does not crash on navigation_moves', async function (assert) {
@@ -4205,7 +4205,7 @@ QUnit.module('ActionManager', {
                 });
             }
         });
-        core.action_registry.add('ClientAction', ClientAction);
+        actionRegistry.add('ClientAction', ClientAction);
         var actionManager = await createActionManager({
             actions: this.actions,
             archs: this.archs,
@@ -4222,7 +4222,7 @@ QUnit.module('ActionManager', {
         assert.notOk(event.isDefaultPrevented(),
             "the keyboard event default should not be prevented"); // no crash is good
         actionManager.destroy();
-        delete core.action_registry.ClientAction;
+        delete actionRegistry.ClientAction;
     });
 
     QUnit.test('web client is not deadlocked when a view crashes', async function (assert) {

@@ -1,10 +1,10 @@
-odoo.define('web.field_registry_owl', function (require) {
+odoo.define('web.OwlFieldRegistry', function (require) {
     "use strict";
 
     const Registry = require('web.Registry');
 
-    const FieldRegistry = Registry.extend({
-        add: function (key, value, score) {
+    const OwlFieldRegistry = Registry.extend({
+        add(key, value) {
             if (!(value.prototype instanceof owl.Component)) {
                 throw new Error("This registry should only contain subclasses of Component");
             }
@@ -12,7 +12,7 @@ odoo.define('web.field_registry_owl', function (require) {
         },
     });
 
-    return new FieldRegistry();
+    return OwlFieldRegistry;
 });
 
 odoo.define('web._field_registry_owl', function (require) {
