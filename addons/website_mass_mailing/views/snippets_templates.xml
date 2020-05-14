@@ -70,7 +70,7 @@
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
-            <we-select string="Change Newsletter"></we-select>
+            <we-select string="Change Newsletter" data-select_mailing_list="" data-no-preview="true"/>
         </div>
     </xpath>
     <xpath expr="//div[last()]" position="after">

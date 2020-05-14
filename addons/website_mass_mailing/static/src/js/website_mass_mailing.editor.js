@@ -6,7 +6,6 @@ var rpc = require('web.rpc');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
 var options = require('web_editor.snippets.options');
 require('website.s_popup_options');
-var wUtils = require('website.utils');
 var QWeb = core.qweb;
 var _t = core._t;
 
@@ -25,8 +24,6 @@ options.registry.NewsletterBlock = options.registry.SnippetPopup.extend({
 
 options.registry.mailing_list_subscribe = options.Class.extend({
     xmlDependencies: ['/website_mass_mailing/static/src/xml/website_mass_mailing.xml'],
-    //popup_template_id: "editor_new_mailing_list_subscribe_button",
-    //popup_title: _t("Add a Newsletter Subscribe Button"),
 
     //--------------------------------------------------------------------------
     // Options
@@ -40,21 +37,19 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     select_mailing_list: function (previewMode, value) {
         debugger;
         var self = this;
-        var def = rpc.query({
+        var def = self._rpc({
                     model: 'mailing.list',
                     method: 'name_search',
                     args: ['', [['is_public', '=', true]]],
                     context: self.options.recordInfo.context,
-                }).then(function (data) {
-                    //var list_id = $(QWeb.render('editor_new_mailing_list_subscribe_button'));
+                }).then(function (data) {QWeb.render('editor_new_mailing_list_subscribe_button', {'list_id': data});
                     //$(dialog).find('.btn-primary').prop('disabled', !data.length);
-                    // var list_id = self.$target.attr("data-list-id");
-                    // $(dialog).on('show.bs.modal', function () {
+                    //var list_id = self.$target.attr("data-list-id");
                     // if (list_id !== "0"){
                     //     $(this).find('select').val(list_id);
                     // };
                 });
-                return data;
+                //return data;
         // def.then(function (result) {
         //     self.$target.attr("data-list-id", result.val);
         // });
