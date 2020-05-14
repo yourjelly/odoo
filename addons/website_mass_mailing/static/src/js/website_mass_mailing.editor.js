@@ -7,6 +7,7 @@ var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
 var options = require('web_editor.snippets.options');
 require('website.s_popup_options');
 var wUtils = require('website.utils');
+var QWeb = core.qweb;
 var _t = core._t;
 
 options.registry.NewsletterBlock = options.registry.SnippetPopup.extend({
@@ -23,8 +24,9 @@ options.registry.NewsletterBlock = options.registry.SnippetPopup.extend({
 
 
 options.registry.mailing_list_subscribe = options.Class.extend({
-    popup_template_id: "editor_new_mailing_list_subscribe_button",
-    popup_title: _t("Add a Newsletter Subscribe Button"),
+    xmlDependencies: ['/website_mass_mailing/static/src/xml/website_mass_mailing.xml'],
+    //popup_template_id: "editor_new_mailing_list_subscribe_button",
+    //popup_title: _t("Add a Newsletter Subscribe Button"),
 
     //--------------------------------------------------------------------------
     // Options
@@ -36,6 +38,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @see this.selectClass for parameters
      */
     select_mailing_list: function (previewMode, value) {
+        debugger;
         var self = this;
         var def = rpc.query({
                     model: 'mailing.list',
@@ -43,15 +46,15 @@ options.registry.mailing_list_subscribe = options.Class.extend({
                     args: ['', [['is_public', '=', true]]],
                     context: self.options.recordInfo.context,
                 }).then(function (data) {
+                    //var list_id = $(QWeb.render('editor_new_mailing_list_subscribe_button'));
                     //$(dialog).find('.btn-primary').prop('disabled', !data.length);
                     // var list_id = self.$target.attr("data-list-id");
                     // $(dialog).on('show.bs.modal', function () {
-                    //     if (list_id !== "0"){
-                    //         $(dialog).find('select').val(list_id);
-                    //     };
-                    // });
-                    // return data;
+                    // if (list_id !== "0"){
+                    //     $(this).find('select').val(list_id);
+                    // };
                 });
+                return data;
         // def.then(function (result) {
         //     self.$target.attr("data-list-id", result.val);
         // });

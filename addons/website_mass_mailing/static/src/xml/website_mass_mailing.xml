@@ -12,4 +12,7 @@
         </div>
     </div>
 </t>
+<t t-name="editor_new_mailing_list_subscribe_button">
+    <t t-foreach="mass_mailing_list" t-as="mail"/>
+</t>
 </templates>
