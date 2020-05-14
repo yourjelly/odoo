@@ -644,13 +644,11 @@ class AccountReconcileModel(models.Model):
             else:
                 total_residual += aml['aml_currency_id'] and aml['aml_amount_residual_currency'] or aml['aml_amount_residual']
 
-        line_residual = statement_line.get_residual_amount()
-
         # Statement line amount is equal to the total residual.
-        if float_is_zero(total_residual + line_residual, precision_rounding=line_currency.rounding):
+        if float_is_zero(total_residual + statement_line.amount_residual, precision_rounding=line_currency.rounding):
             return True
 
-        line_residual_to_compare = abs(line_residual)
+        line_residual_to_compare = abs(statement_line.amount_residual)
         total_residual_to_compare = abs(total_residual)
 
         if line_residual_to_compare > total_residual_to_compare:
@@ -720,7 +718,6 @@ class AccountReconcileModel(models.Model):
         # Iterate all and create results.
         for line in st_lines:
             line_currency = line.foreign_currency_id or line.currency_id
-            line_residual = line.get_residual_amount()
 
             # Search for applicable rule.
             # /!\ BREAK are very important here to avoid applying multiple rules on the same line.
@@ -772,7 +769,7 @@ class AccountReconcileModel(models.Model):
                         for c in available_candidates:
                             residual_amount = c['aml_currency_id'] and c['aml_amount_residual_currency'] or c['aml_amount_residual']
 
-                            if float_is_zero(residual_amount + line_residual, precision_rounding=line_currency.rounding):
+                            if float_is_zero(residual_amount + line.amount_residual, precision_rounding=line_currency.rounding):
                                 available_candidates = [c]
                                 break
 

@@ -505,6 +505,10 @@ class AccountBankStatementLine(models.Model):
         help="The amount expressed in an optional other currency if it is a multi-currency entry.")
     foreign_currency_id = fields.Many2one('res.currency', string='Foreign Currency',
         help="The optional other currency if it is a multi-currency entry.")
+    amount_residual = fields.Float(string="Residual Amount",
+        compute="_compute_is_reconciled",
+        store=True,
+        help="The amount left to be reconciled on this statement line (signed according to its move lines' balance), expressed in its currency. This is a technical field use to speedup the application of reconciliation models.")
     currency_id = fields.Many2one('res.currency', string='Journal Currency')
     partner_id = fields.Many2one(
         comodel_name='res.partner',
@@ -806,7 +810,32 @@ class AccountBankStatementLine(models.Model):
         counterpart_line_vals = self._prepare_counterpart_move_line_vals(counterpart_vals)
         return [liquidity_line_vals, counterpart_line_vals]
 
-    def get_residual_amount(self):
+    # -------------------------------------------------------------------------
+    # COMPUTE METHODS
+    # -------------------------------------------------------------------------
+
+    @api.depends('currency_id', 'amount', 'foreign_currency_id',
+                 'move_id.line_ids', 'move_id.line_ids.matched_debit_ids', 'move_id.line_ids.matched_credit_ids')
+    def _compute_is_reconciled(self):
+        ''' Compute the field indicating if the statement lines are already reconciled with something.
+        This field is used for display purpose (e.g. display the 'cancel' button on the statement lines).
+        Also computes the residual amount of the statement line.
+        '''
+        for st_line in self:
+            liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
+
+            if not st_line.id or suspense_lines:
+                # New record: The journal items are not yet there.
+                st_line.is_reconciled = False
+            elif st_line.currency_id.is_zero(st_line.amount):
+                st_line.is_reconciled = True
+            else:
+                # The journal entry seems reconciled.
+                st_line.is_reconciled = True
+
+            st_line.amount_residual = st_line._get_residual_amount()
+
+    def _get_residual_amount(self):
         """ Returns the residual amount of this statement line, in its currency.
         """
         self.ensure_one()
@@ -822,28 +851,6 @@ class AccountBankStatementLine(models.Model):
             rslt = sum(suspense_lines.mapped(balance_field))
 
         return rslt
-
-    # -------------------------------------------------------------------------
-    # COMPUTE METHODS
-    # -------------------------------------------------------------------------
-
-    @api.depends('currency_id', 'amount',
-                 'move_id.line_ids', 'move_id.line_ids.matched_debit_ids', 'move_id.line_ids.matched_credit_ids')
-    def _compute_is_reconciled(self):
-        ''' Compute the field indicating if the statement lines are already reconciled with something.
-        This field is used for display purpose (e.g. display the 'cancel' button on the statement lines).
-        '''
-        for st_line in self:
-            liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
-
-            if not st_line.id or suspense_lines:
-                # New record: The journal items are not yet there.
-                st_line.is_reconciled = False
-            elif st_line.currency_id.is_zero(st_line.amount):
-                st_line.is_reconciled = True
-            else:
-                # The journal entry seems reconciled.
-                st_line.is_reconciled = True
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
