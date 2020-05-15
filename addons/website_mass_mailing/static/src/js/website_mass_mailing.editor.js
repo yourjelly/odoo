@@ -37,22 +37,22 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     select_mailing_list: function (previewMode, value) {
         debugger;
         var self = this;
-        var def = self._rpc({
+        var def = this._rpc({
                     model: 'mailing.list',
                     method: 'name_search',
                     args: ['', [['is_public', '=', true]]],
                     context: self.options.recordInfo.context,
                 }).then(function (data) {QWeb.render('editor_new_mailing_list_subscribe_button', {'list_id': data});
                     //$(dialog).find('.btn-primary').prop('disabled', !data.length);
-                    //var list_id = self.$target.attr("data-list-id");
-                    // if (list_id !== "0"){
-                    //     $(this).find('select').val(list_id);
-                    // };
+                    var list_id = data;
+                    if (list_id !== "0"){
+                        $(this).find('we-select').val(list_id);
+                    };
                 });
                 //return data;
-        // def.then(function (result) {
-        //     self.$target.attr("data-list-id", result.val);
-        // });
+        def.then(function (result) {
+            return self.result.val;
+        });
         return def;
     },
     /**
@@ -68,8 +68,6 @@ options.registry.mailing_list_subscribe = options.Class.extend({
 });
 
 options.registry.newsletter_popup = options.registry.mailing_list_subscribe.extend({
-    popup_template_id: "editor_new_mailing_list_subscribe_popup",
-    popup_title: _t("Add a Newsletter Subscribe Popup"),
 
     /**
      * @override
