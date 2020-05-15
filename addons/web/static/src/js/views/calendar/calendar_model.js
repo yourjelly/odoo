@@ -12,7 +12,8 @@ var _t = core._t;
 var scales = [
     'day',
     'week',
-    'month'
+    'month',
+    'year',
 ];
 
 function dateToServer (date) {

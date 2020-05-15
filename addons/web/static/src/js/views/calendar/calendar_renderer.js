@@ -20,7 +20,8 @@ const { useRef } = owl.hooks;
 const scales = {
     day: 'timeGridDay',
     week: 'timeGridWeek',
-    month: 'dayGridMonth'
+    month: 'dayGridMonth',
+    year: 'dayGridYear',
 };
 
 const SidebarFilterM2O = relational_fields.FieldMany2One.extend({
@@ -397,7 +398,59 @@ class CalendarRenderer extends AbstractRenderer {
                 'moment',
                 'interaction',
                 'dayGrid',
-                'timeGrid'
+                'timeGrid',
+                FullCalendar.createPlugin({
+                    views: {
+                        dayGridYear: class extends FullCalendar.View {
+                            initialize() {
+                                this.renderSkeleton();
+                                this.subCalendars = [];
+                                for (let i = 0; i < 12; i++) {
+                                    const subCalendar = new FullCalendar.Calendar(this.el.querySelector(`[month-cell-index="${i}"]`), {
+                                        plugins: [
+                                            'moment',
+                                            'interaction',
+                                            'dayGrid',
+                                            'timeGrid',
+                                        ],
+                                        defaultDate: (new Date()).setMonth(i),
+                                        defaultView: 'dayGridMonth',
+                                        header: false,
+                                    });
+                                    this.subCalendars.push(subCalendar);
+                                }
+                            }
+                            destroy() {
+                                for (const subCalendar of this.subCalendars) {
+                                    subCalendar.destroy();
+                                }
+                                this.el.remove();
+                            }
+                            renderSkeleton() {
+                                const containerEl = document.createElement('div');
+                                this.el.appendChild(containerEl);
+                                for (let i = 0; i < 12; i++) {
+                                    const monthCellEl = document.createElement('div');
+                                    containerEl.appendChild(monthCellEl);
+                                    monthCellEl.setAttribute('month-cell-index', i);
+                                    Object.assign(monthCellEl.style, {
+                                        flex: '25%',
+                                    });
+                                }
+                                Object.assign(containerEl.style, {
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                    flex: '1',
+                                });
+                            }
+                            renderDates() {
+                                for (const subCalendar of this.subCalendars) {
+                                    subCalendar.render();
+                                }
+                            }
+                        }
+                    }
+                })
             ],
             eventDrop: ({ event }) => {
                 event = this._convertEventToFC3Event(event);
@@ -697,10 +750,12 @@ class CalendarRenderer extends AbstractRenderer {
             case 'week': $a = this.$calendarMini.find('tr:has(.ui-state-active)'); break;
             case 'day': $a = this.$calendarMini.find('a.ui-state-active'); break;
         }
-        $a.addClass('o_selected_range');
-        setTimeout(function () {
-            $a.not('.ui-state-active').addClass('o_color');
-        });
+        if ($a) {
+            $a.addClass('o_selected_range');
+            setTimeout(function () {
+                $a.not('.ui-state-active').addClass('o_color');
+            });
+        }
     }
     /**
      * Render the specific code for the FullCalendar when it's in the DOM

@@ -44,6 +44,7 @@ var CalendarController = AbstractController.extend({
         'click button.o_calendar_button_day': '_onButtonScale',
         'click button.o_calendar_button_week': '_onButtonScale',
         'click button.o_calendar_button_month': '_onButtonScale',
+        'click button.o_calendar_button_year': '_onButtonScale',
     }),
     /**
      * @override

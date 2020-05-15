@@ -122,6 +122,7 @@
             <button type="button" class="o_calendar_button_day btn btn-secondary">Day</button>
             <button type="button" class="o_calendar_button_week btn btn-secondary">Week</button>
             <button type="button" class="o_calendar_button_month btn btn-secondary">Month</button>
+            <button type="button" class="o_calendar_button_year btn btn-secondary">Year</button>
         </div>
     </t>
 
