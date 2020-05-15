@@ -124,6 +124,9 @@
     <xpath expr="//header" position="attributes">
         <attribute name="data-name">Header</attribute>
     </xpath>
+    <xpath expr="//header/nav" position="attributes">
+        <attribute name="class" remove="bg-light" separator=" "/> <!-- Background now controlled by css configuration, using color combinations -->
+    </xpath>
     <xpath expr="//header//ul[@id='top_menu']" position="attributes">
         <attribute name="class" separator=" " add="o_menu_loading"/>
     </xpath>
@@ -144,6 +147,7 @@
 
     <xpath expr="//footer" position="attributes">
         <attribute name="data-name">Footer</attribute>
+        <attribute name="class" remove="bg-light" separator=" "/> <!-- Background now controlled by css configuration, using color combinations -->
     </xpath>
     <xpath expr="//div[hasclass('o_footer_copyright')]//span[@t-field='res_company.name']" position="after">
         <t t-call="website.language_selector"/>
