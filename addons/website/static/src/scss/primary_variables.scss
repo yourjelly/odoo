@@ -6,7 +6,7 @@ $o-theme-layout: 'full';
 
 $o-base-color-palette: map-merge($o-base-color-palette, (
     'body': $o-portal-default-body-bg,
-    'menu': 2, // o_cc2
+    'menu': 1, // o_cc1
     'footer': 5, // o_cc5
     'copyright': 'black-15', // o_cc5
 ));
