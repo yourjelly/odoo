@@ -14,7 +14,7 @@ import logging
 _logger = logging.getLogger()
 
 
-#@skip#TODO OCO: no need to run it on runbot :p
+@skip#TODO OCO: no need to run it on runbot :p
 class TestRecModelsPerf(SavepointCase):
 
     """
