@@ -12,10 +12,4 @@
         </div>
     </div>
 </t>
-<t t-name="editor_new_mailing_list_subscribe_button">
-    <t t-foreach="list_id" t-as="list"/>
-    <t t-if="list">
-        <t t-esc="list"/>
-    </t>
-</t>
 </templates>

@@ -1004,7 +1004,6 @@ options.registry.WebsiteFieldEditor = FieldEditor.extend({
      * @param {HTMLElement} selectMenu
      */
     _loadListDropdown: function (selectMenu) {
-        debugger;
         selectMenu = selectMenu || this.el.querySelector('we-list we-select-menu');
         if (selectMenu) {
             selectMenu.innerHTML = '';

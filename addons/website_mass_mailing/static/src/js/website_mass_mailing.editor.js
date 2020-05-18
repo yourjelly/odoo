@@ -29,6 +29,11 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     // Options
     //--------------------------------------------------------------------------
 
+    start: function () {
+        const selectMenuEl = document.createElement('we-select-menu');
+        this.select_mailing_list(selectMenuEl);
+        return this._super(...arguments);
+    },
     /**
      * Allows to select mailing list.
      *
@@ -41,7 +46,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
                     method: 'name_search',
                     args: ['', [['is_public', '=', true]]],
                     context: self.options.recordInfo.context,
-                }).then(function (data) {QWeb.render('editor_new_mailing_list_subscribe_button', {'list_id': data});
+                }).then(function (data) {
                     //$(dialog).find('.btn-primary').prop('disabled', !data.length);
                     var list_id = self.$target.attr("data-list-id");
                     if (list_id !== "0"){
