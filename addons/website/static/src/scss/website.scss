@@ -135,6 +135,10 @@ $-header-nav-link-height: $nav-link-height;
         // to be at the same place of the dropzone at the top of the #footer element
         border-top: 1px solid transparent;
     }
+
+    .o_footer_copyright {
+        @include o-apply-colors('copyright', $background: o-color('footer'));
+    }
 }
 h2, h3, h4, h5, h6 {
     color: color('o-cc1-h2');

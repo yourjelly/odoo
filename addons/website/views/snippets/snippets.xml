@@ -504,6 +504,9 @@
         <we-colorpicker string="Colors"
                         data-customize-website-color="" data-color="footer"
                         data-with-combinations="true"/>
+        <we-colorpicker string="Copyright"
+                        data-customize-website-color="" data-color="copyright"
+                        data-with-combinations="true"/>
         <we-select string="Footer Template" data-variable="footer-template" data-reload="/">
             <we-button id="option_template_footer_products_contacts_about_us"
                        data-customize-website-views="website.footer_custom"
