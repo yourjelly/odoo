@@ -28,6 +28,12 @@ var AbstractAction = Widget.extend(ActionMixin, {
     hasControlPanel: false,
 
     /**
+     * Owl component to render as the control panel. The component
+     * should extend the regular control panel component.
+     */
+    controlPanelComponent: ControlPanel,
+
+    /**
      * If true, this flag indicates that the client action should automatically
      * fetch the <arch> of a search view (or control panel view).  Note that
      * to do that, it also needs a specific modelName.
@@ -130,7 +136,7 @@ var AbstractAction = Widget.extend(ActionMixin, {
                 this._setTitle(this.controlPanelProps.title);
             }
             this.controlPanelProps.title = this.getTitle();
-            this._controlPanelWrapper = new ComponentWrapper(this, ControlPanel, this.controlPanelProps);
+            this._controlPanelWrapper = new ComponentWrapper(this, this.controlPanelComponent, this.controlPanelProps);
             await this._controlPanelWrapper.mount(this.el, { position: 'first-child' });
 
         }
