@@ -35,7 +35,6 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @see this.selectClass for parameters
      */
     select_mailing_list: function (previewMode, value) {
-        debugger;
         var self = this;
         var def = this._rpc({
                     model: 'mailing.list',
@@ -44,14 +43,14 @@ options.registry.mailing_list_subscribe = options.Class.extend({
                     context: self.options.recordInfo.context,
                 }).then(function (data) {QWeb.render('editor_new_mailing_list_subscribe_button', {'list_id': data});
                     //$(dialog).find('.btn-primary').prop('disabled', !data.length);
-                    var list_id = data;
+                    var list_id = self.$target.attr("data-list-id");
                     if (list_id !== "0"){
                         $(this).find('we-select').val(list_id);
                     };
+                return data;
                 });
-                //return data;
         def.then(function (result) {
-            return self.result.val;
+            self.$target.attr("data-list-id", result.val);
         });
         return def;
     },
@@ -128,6 +127,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
      * @override
      */
     select_mailing_list: function () {
+        debugger;
         var self = this;
         return this._super.apply(this, arguments).then(function () {
             self.$target.data('quick-open', true);
