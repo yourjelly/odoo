@@ -1236,7 +1236,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'date': move_reversal.date,
             'state': 'posted',
             'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
-            'payment_state': 'paid',
+            'payment_state': 'reversal',
         })
 
     def test_in_invoice_create_refund_multi_currency(self):
@@ -1362,7 +1362,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'date': move_reversal.date,
             'state': 'posted',
             'ref': 'Reversal of: %s, %s' % (self.invoice.name, move_reversal.reason),
-            'payment_state': 'paid',
+            'payment_state': 'reversal',
         })
 
     def test_in_invoice_create_1(self):

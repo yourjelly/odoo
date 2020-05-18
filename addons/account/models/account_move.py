@@ -224,6 +224,7 @@ class AccountMove(models.Model):
         ('paid', 'Paid'),
         ('partial', 'Partially Paid'),
         ('reversed', 'Reversed'),
+        ('reversal', 'Reversal'),
         ('invoicing_legacy', 'Invoicing App Legacy')],
         string="Payment Status", store=True, readonly=True, copy=False, tracking=True,
         compute='_compute_amount')
@@ -1262,7 +1263,7 @@ class AccountMove(models.Model):
 
                 if currency.is_zero(move.amount_residual):
                     if all(payment.is_matched for payment in move._get_reconciled_payments()):
-                        new_pmt_state = 'paid'
+                        new_pmt_state = move.move_type in ('out_refund', 'in_refund') and 'reversal' or 'paid'
                     else:
                         new_pmt_state = move._get_invoice_in_payment_state()
                 elif currency.compare_amounts(total_to_pay, total_residual) != 0:
@@ -1862,7 +1863,7 @@ class AccountMove(models.Model):
         if not self.is_invoice(include_receipts=True):
             return super(AccountMove, self)._track_subtype(init_values)
 
-        if 'payment_state' in init_values and self.payment_state == 'paid':
+        if 'payment_state' in init_values and self.payment_state in ('paid', 'reversal'):
             return self.env.ref('account.mt_invoice_paid')
         elif 'state' in init_values and self.state == 'posted' and self.is_sale_document(include_receipts=True):
             return self.env.ref('account.mt_invoice_validated')
@@ -4387,7 +4388,7 @@ class AccountMoveLine(models.Model):
 
         # List unpaid invoices
         not_paid_invoices = self.move_id.filtered(
-            lambda move: move.is_invoice(include_receipts=True) and move.payment_state not in ('paid', 'in_payment')
+            lambda move: move.is_invoice(include_receipts=True) and move.payment_state not in ('paid', 'reversal', 'in_payment')
         )
 
         # ==== Check the lines can be reconciled together ====
@@ -4480,7 +4481,7 @@ class AccountMoveLine(models.Model):
 
         # Trigger action for paid invoices
         not_paid_invoices\
-            .filtered(lambda move: move.payment_state in ('paid', 'in_payment'))\
+            .filtered(lambda move: move.payment_state in ('paid', 'reversal', 'in_payment'))\
             .action_invoice_paid()
 
         return results

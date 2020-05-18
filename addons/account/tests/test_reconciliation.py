@@ -750,7 +750,7 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         self.assertEqual(inv1_receivable.full_reconcile_id, move_balance_receiv.full_reconcile_id)
 
         self.assertTrue(inv1.payment_state in ('in_payment', 'paid'), "Invoice should be paid")
-        self.assertEqual(inv2.payment_state, 'paid')
+        self.assertEqual(inv2.payment_state, 'reversal')
 
     def test_inv_refund_foreign_payment_writeoff_domestic3(self):
         """
@@ -818,7 +818,7 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         self.assertFalse(inv1_receivable.full_reconcile_id.exchange_move_id)
 
         self.assertTrue(inv1.payment_state in ('in_payment', 'paid'), "Invoice should be paid")
-        self.assertEqual(inv2.payment_state, 'paid')
+        self.assertEqual(inv2.payment_state, 'reversal')
 
     def test_inv_refund_foreign_payment_writeoff_domestic4(self):
         """
@@ -895,7 +895,7 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         self.assertEqual(inv1_receivable.full_reconcile_id, move_balance_receiv.full_reconcile_id)
 
         self.assertTrue(inv1.payment_state in ('in_payment', 'paid'), "Invoice should be paid")
-        self.assertEqual(inv2.payment_state, 'paid')
+        self.assertEqual(inv2.payment_state, 'reversal')
 
     def test_inv_refund_foreign_payment_writeoff_domestic5(self):
         """
@@ -957,7 +957,7 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         self.assertFalse(inv1_receivable.full_reconcile_id.exchange_move_id)
 
         self.assertTrue(inv1.payment_state in ('in_payment', 'paid'), "Invoice should be paid")
-        self.assertEqual(inv2.payment_state, 'paid')
+        self.assertEqual(inv2.payment_state, 'reversal')
 
     def test_inv_refund_foreign_payment_writeoff_domestic6(self):
         """
@@ -1015,8 +1015,8 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         exchange_rcv = inv1_receivable.full_reconcile_id.exchange_move_id.line_ids.filtered(lambda l: l.account_id.internal_type == 'receivable')
         self.assertEqual(exchange_rcv.amount_currency, 0.01)
 
-        self.assertTrue(inv1.payment_state in ('in_payment', 'paid'), "Invoice should be paid")
-        self.assertEqual(inv2.payment_state, 'paid')
+        self.assertTrue(inv1.payment_state in ('in_payment', 'paid'), "Invoice should be reversal")
+        self.assertEqual(inv2.payment_state, 'reversal')
 
     def test_inv_refund_foreign_payment_writeoff_domestic6bis(self):
         """
@@ -1091,7 +1091,7 @@ class TestReconciliationExec(TestAccountReconciliationCommon):
         self.assertTrue(inv1_receivable.full_reconcile_id.exchange_move_id)
 
         self.assertTrue(inv1.payment_state in ('in_payment', 'paid'), "Invoice should be paid")
-        self.assertEqual(inv2.payment_state, 'paid')
+        self.assertEqual(inv2.payment_state, 'reversal')
 
     def test_inv_refund_foreign_payment_writeoff_domestic7(self):
         """

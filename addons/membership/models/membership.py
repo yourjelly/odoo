@@ -65,7 +65,7 @@ class MembershipLine(models.Model):
             if move_state == 'draft':
                 line.state = 'waiting'
             elif move_state == 'posted':
-                if payment_state == 'paid':
+                if payment_state in ('paid', 'reversed'):
                     if reverse_map.get(line.account_invoice_id.id):
                         line.state = 'canceled'
                     else:

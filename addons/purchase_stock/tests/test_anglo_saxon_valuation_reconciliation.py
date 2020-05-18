@@ -114,7 +114,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCommon):
 
         # Check the result
         self.assertEqual(invoice.payment_state, 'reversed', "Invoice should be in 'reversed' state")
-        self.assertEqual(refund_invoice.payment_state, 'paid', "Refund should be in 'paid' state")
+        self.assertEqual(refund_invoice.payment_state, 'reversal', "Refund should be in 'reversal' state")
         self.check_reconciliation(refund_invoice, return_pick)
 
     def test_multiple_shipments_invoices(self):
