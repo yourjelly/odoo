@@ -105,6 +105,29 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     /**
      * @override
      */
+    willStart: async function () {
+        const _super = this._super.bind(this);
+        const self = this;
+        this.mailingList = await rpc.query({
+            model: 'mailing.list',
+            method: 'name_search',
+            args: ['', [['is_public', '=', true]]],
+            context: self.options.recordInfo.context,
+        }).then(function (data) {
+           // Create the buttons for the type we-select
+           return Object.keys(data).map(key => {
+            const record = data[key];
+            const button = document.createElement('we-button');
+            button.dataset.recordID = record[0];
+            button.textContent = record[1];
+            return button;
+        })
+        });
+        return _super(...arguments);
+    },
+    /**
+     * @override
+     */
     start: function () {
         this.$target.on('hidden.bs.modal.newsletter_popup_option', () => {
             this.trigger_up('snippet_option_visibility_update', {show: false});
@@ -167,6 +190,16 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             self.$target.removeData('content');
             return self._refreshPublicWidgets();
         });
+    },
+    /**
+     * @override
+     */
+    _renderCustomXML: function (uiFragment) {
+        debugger;
+        const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
+        if (this.mailingList.length) {
+            this.mailingList.forEach(option => selectEl.append(option.cloneNode(true)));
+        }
     },
 });
 
