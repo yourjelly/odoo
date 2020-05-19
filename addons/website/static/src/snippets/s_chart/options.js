@@ -172,6 +172,7 @@ options.registry.InnerChart = options.Class.extend({
         const data = {
             labels: [],
             datasets: [],
+            values: [],
         };
         this.tableEl.querySelectorAll('tr:first-child input').forEach(el => {
             data.datasets.push({

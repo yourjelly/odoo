@@ -89,7 +89,7 @@ const ChartWidget = publicWidget.Widget.extend({
                 yAxes: [{
                     stacked: this.el.dataset.stacked === 'true',
                     ticks: {
-                        beginAtZero: false
+                        beginAtZero: true
                     },
                 }],
             };
