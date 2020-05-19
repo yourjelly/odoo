@@ -15,53 +15,75 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     popup_template_id: "editor_new_mailing_list_subscribe_button",
     popup_title: _t("Add a Newsletter Subscribe Button"),
 
+    /**
+     * @override
+     */
+    willStart: async function () {
+        const _super = this._super.bind(this);
+        const self = this;
+        this.mailingList = await rpc.query({
+            model: 'mailing.list',
+            method: 'name_search',
+            args: ['', [['is_public', '=', true]]],
+            context: self.options.recordInfo.context,
+        }).then(function (data) {
+           // Create the buttons for the mailing list we-select
+           return Object.keys(data).map(key => {
+            const record = data[key];
+            const button = document.createElement('we-button');
+            button.dataset.mailingList = record[0];
+            button.textContent = record[1];
+            return button;
+        })
+        });
+        return _super(...arguments);
+    },
+
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
 
-    /**
-     * Allows to select mailing list.
-     *
-     * @see this.selectClass for parameters
-     */
-    select_mailing_list: function (previewMode, value) {
-        var self = this;
-        var def = wUtils.prompt({
-            'id': this.popup_template_id,
-            'window_title': this.popup_title,
-            'select': _t("Newsletter"),
-            'init': function (field, dialog) {
-                return rpc.query({
-                    model: 'mailing.list',
-                    method: 'name_search',
-                    args: ['', [['is_public', '=', true]]],
-                    context: self.options.recordInfo.context,
-                }).then(function (data) {
-                    $(dialog).find('.btn-primary').prop('disabled', !data.length);
-                    var list_id = self.$target.attr("data-list-id");
-                    $(dialog).on('show.bs.modal', function () {
-                        if (list_id !== "0"){
-                            $(dialog).find('select').val(list_id);
-                        };
-                    });
-                    return data;
-                });
-            },
-        });
-        def.then(function (result) {
-            self.$target.attr("data-list-id", result.val);
-        });
-        return def;
-    },
     /**
      * @override
      */
     onBuilt: function () {
         var self = this;
         this._super();
-        this.select_mailing_list('click').guardedCatch(function () {
-            self.getParent()._onRemoveClick($.Event( "click" ));
-        });
+    },
+    /**
+     * Replace the current mailing_list_ID with the existing mailing_list_id selected.
+     */
+    mailingList: async function (previewMode, value, params) {
+        debugger;
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _renderCustomXML: function (uiFragment) {
+        const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
+        if (this.mailingList.length) {
+            this.mailingList.forEach(option => selectEl.append(option.cloneNode(true)));
+        }
+    },
+    /**
+     * @override
+     */
+    _computeWidgetState: function (methodName, params) {
+        if (methodName === 'mailingList') {
+            return this._getMailingListID();
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * @private
+     */
+    _getMailingListID: function () {
+        return this.$target.data('list-id');
     },
 });
 
@@ -102,29 +124,6 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     popup_template_id: "editor_new_mailing_list_subscribe_popup",
     popup_title: _t("Add a Newsletter Subscribe Popup"),
 
-    /**
-     * @override
-     */
-    willStart: async function () {
-        const _super = this._super.bind(this);
-        const self = this;
-        this.mailingList = await rpc.query({
-            model: 'mailing.list',
-            method: 'name_search',
-            args: ['', [['is_public', '=', true]]],
-            context: self.options.recordInfo.context,
-        }).then(function (data) {
-           // Create the buttons for the type we-select
-           return Object.keys(data).map(key => {
-            const record = data[key];
-            const button = document.createElement('we-button');
-            button.dataset.recordID = record[0];
-            button.textContent = record[1];
-            return button;
-        })
-        });
-        return _super(...arguments);
-    },
     /**
      * @override
      */
@@ -175,31 +174,11 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         this.$target.off('.newsletter_popup_option');
         this._super.apply(this, arguments);
     },
-
-    //--------------------------------------------------------------------------
-    // Options
-    //--------------------------------------------------------------------------
-
     /**
-     * @override
+     * Replace the current mailing_list_ID with the existing mailing_list_id selected.
      */
-    select_mailing_list: function () {
-        var self = this;
-        return this._super.apply(this, arguments).then(function () {
-            self.$target.data('quick-open', true);
-            self.$target.removeData('content');
-            return self._refreshPublicWidgets();
-        });
-    },
-    /**
-     * @override
-     */
-    _renderCustomXML: function (uiFragment) {
+    mailingList: async function (previewMode, value, params) {
         debugger;
-        const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
-        if (this.mailingList.length) {
-            this.mailingList.forEach(option => selectEl.append(option.cloneNode(true)));
-        }
     },
 });
 
