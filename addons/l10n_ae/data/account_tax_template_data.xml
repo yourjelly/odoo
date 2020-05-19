@@ -828,7 +828,8 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'plus_report_line_ids': [ref('tax_report_line_expense_supplies_reverse_base'),ref('tax_report_line_standard_rated_expense_base')],
+                'plus_report_line_ids': [ref('tax_report_line_expense_supplies_reverse_base')],
+                'minus_report_line_ids': [ref('tax_report_line_supplies_reverse_charge_base')],
             }),
             (0,0, {
                 'factor_percent': -100,
@@ -847,7 +848,8 @@
             (0,0, {
                 'factor_percent': 100,
                 'repartition_type': 'base',
-                'minus_report_line_ids': [ref('tax_report_line_expense_supplies_reverse_base'),ref('tax_report_line_standard_rated_expense_base')],
+                'minus_report_line_ids': [ref('tax_report_line_expense_supplies_reverse_base')],
+                'plus_report_line_ids': [ref('tax_report_line_supplies_reverse_charge_base')],
             }),
             (0,0, {
                 'factor_percent': -100,
