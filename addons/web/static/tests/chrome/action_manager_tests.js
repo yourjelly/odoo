@@ -4038,11 +4038,7 @@ QUnit.module('ActionManager', {
             "list view is not grouped");
 
         // open group by dropdown
-<<<<<<< 619bb1ea1f3726c58ae3c4013397a8090cab822d
-        await testUtils.dom.click($('.o_control_panel .o_cp_bottom_right button:contains(Group By)'));
-=======
-        await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_cp_right button:contains(Group By)'));
->>>>>>> [WIP] rewrite webclient/menu/actionmanager with owl
+        await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_cp_bottom_right button:contains(Group By)'));
 
         // click on first link
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_group_by_menu a:first'));
