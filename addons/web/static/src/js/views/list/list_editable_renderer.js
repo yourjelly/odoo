@@ -1620,6 +1620,7 @@ ListRenderer.include({
      * @param {MouseEvent} event
      */
     _onRemoveIconClick: function (event) {
+        debugger;
         event.stopPropagation();
         var $row = $(event.target).closest('tr');
         var id = $row.data('id');

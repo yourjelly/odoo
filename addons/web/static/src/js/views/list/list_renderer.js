@@ -979,7 +979,8 @@ var ListRenderer = BasicRenderer.extend({
         this.hasHandle = orderedBy.length === 0 || orderedBy[0].name === this.handleField;
         this._computeAggregates();
 
-        var $table = $('<table>').addClass('o_list_table table table-sm table-hover table-striped');
+
+        var $table = $('<table>').addClass('o_list_table table table-sm table-hover table-striped fa fa-trash');
         $table.toggleClass('o_list_table_grouped', this.isGrouped);
         $table.toggleClass('o_list_table_ungrouped', !this.isGrouped);
         var defs = [];
