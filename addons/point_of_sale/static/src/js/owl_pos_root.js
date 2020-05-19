@@ -2,11 +2,11 @@ odoo.define('point_of_sale.owlPosRoot', function (require) {
     "use strict";
 
     const ActionManager = require('web.ActionManager');
-    const chrome = require('point_of_sale.chrome');
+    const chrome = require('point_of_sale.Chrome');
 
     class PosRoot extends owl.Component {
         constructor() {
-            super();
+            super(...arguments);
             // Pos needs to be able to print Invoices
             // this is the SOLE purpose of this actionManager
             this.actionManager = new ActionManager(this.env);

@@ -122,7 +122,8 @@ odoo.define('point_of_sale.Chrome', function(require) {
                 const posModelDefaultAttributes = {
                     rpc: this.rpc.bind(this),
                     session: this.env.session,
-                    do_action: this.props.webClient.do_action.bind(this.props.webClient),
+                    // LPE FIXME actionManager is not in bus anymore
+                    do_action: (...args) => this.env.bus.trigger('do-action', ...args),
                     setLoadingMessage: this.setLoadingMessage.bind(this),
                     showLoadingSkip: this.showLoadingSkip.bind(this),
                     setLoadingProgress: this.setLoadingProgress.bind(this),
