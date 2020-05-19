@@ -13,25 +13,19 @@ options.registry.NewsletterBlock = options.registry.SnippetPopup.extend({
     selector: ".s_newsletter_block",
 
     setLayout: function (previewMode, widgetValue, params) {
-                const isModal = widgetValue === 'modal';
-                const isTop = widgetValue === 'fixedTop';
-                this.$target.toggleClass('s_popup_fixed', !isModal);
-                this.$target.toggleClass('s_popup_fixed_top', isTop);
-                this.$target.toggleClass('s_popup_center modal', isModal);
+        return this._super(...arguments);
     },
 })
 
 
 options.registry.mailing_list_subscribe = options.Class.extend({
-    xmlDependencies: ['/website_mass_mailing/static/src/xml/website_mass_mailing.xml'],
-
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
 
-    start: function () {
-        const selectMenuEl = document.createElement('we-select-menu');
-        this.select_mailing_list(selectMenuEl);
+    willStart: function () {
+        this.selectMenuEl = document.createElement('we-select-menu');
+        this.select_mailing_list(this.selectMenuEl);
         return this._super(...arguments);
     },
     /**
@@ -49,9 +43,6 @@ options.registry.mailing_list_subscribe = options.Class.extend({
                 }).then(function (data) {
                     //$(dialog).find('.btn-primary').prop('disabled', !data.length);
                     var list_id = self.$target.attr("data-list-id");
-                    if (list_id !== "0"){
-                        $(this).find('we-select').val(list_id);
-                    };
                 return data;
                 });
         def.then(function (result) {
@@ -68,6 +59,17 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         this.select_mailing_list('click').guardedCatch(function () {
             self.getParent()._onRemoveClick($.Event( "click" ));
         });
+    },
+
+    /**
+    *@override
+    */
+    _renderCustomXML: function (uiFragment) {
+        const menuEl = uiFragment.querySelector('we-select[data-name="mail_list"]');
+        if (this.selectMenuEl.length) {
+            this.selectMenuEl.forEach(option => menuEl.append(option.cloneNode(true)));
+        }
+
     },
 });
 
@@ -132,7 +134,6 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
      * @override
      */
     select_mailing_list: function () {
-        debugger;
         var self = this;
         return this._super.apply(this, arguments).then(function () {
             self.$target.data('quick-open', true);
