@@ -83,6 +83,9 @@ class MailTemplate(models.Model):
                 template.ref_ir_act_window.unlink()
         return True
 
+    def reset_mail_template(self):
+        pass
+
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']
         view = self.env.ref('mail.email_compose_message_wizard_form')
