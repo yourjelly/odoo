@@ -2,7 +2,6 @@ odoo.define('point_of_sale.owlPosRoot', function (require) {
     "use strict";
 
     const ActionManager = require('web.ActionManager');
-    const chrome = require('point_of_sale.Chrome');
 
     class PosRoot extends owl.Component {
         constructor() {
@@ -12,7 +11,6 @@ odoo.define('point_of_sale.owlPosRoot', function (require) {
             // LPE FIXME
             this.actionManager = new ActionManager(this.env);
             this.env.actionManager = this.actionManager;
-            this.PosChrome = chrome.Chrome;
             this.chromeRef = owl.hooks.useRef('chromeRef');
         }
         mounted() {
