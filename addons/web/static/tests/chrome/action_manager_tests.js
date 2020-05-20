@@ -4284,7 +4284,7 @@ QUnit.module('ActionManager', {
             "should be grouped by 'bar' (two groups) at first load");
 
         // groupby 'bar' using the searchview
-        await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_cp_right button:contains(Group By)'));
+        await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_cp_bottom_right button:contains(Group By)'));
         await testUtils.dom.click($(webClient.el).find('.o_control_panel .o_group_by_menu a:first'));
 
         assert.containsN(webClient, '.o_group_header', 5,
