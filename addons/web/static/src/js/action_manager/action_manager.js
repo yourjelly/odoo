@@ -365,7 +365,7 @@ class ActionManager extends core.EventBus {
         if (controller.options && controller.options.on_fail) {
             controller.options.on_fail();
         }
-        this.restoreController();
+        //this.restoreController();
     }
 
     //--------------------------------------------------------------------------
