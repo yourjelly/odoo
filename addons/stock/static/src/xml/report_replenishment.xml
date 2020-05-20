@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template" xml:space="preserve">
+
+<button t-name="replenish_report_buttons"
+    class="btn btn-primary o_report_replenish_buy"
+    type="button" title="Replenish">
+    Replenish
+</button>
+
+</templates>

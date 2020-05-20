@@ -460,6 +460,11 @@ class Product(models.Model):
         ]
         return self.env['product.template']._get_action_view_related_putaway_rules(domain)
 
+    def action_open_forecasted_report(self):
+        self.ensure_one()
+        action = self.env.ref('stock.stock_replenishment_product_product_action').read()[0]
+        return action
+
     def action_open_product_lot(self):
         self.ensure_one()
         action = self.env.ref('stock.action_production_lot_form').read()[0]
@@ -729,6 +734,11 @@ class ProductTemplate(models.Model):
             if existing_move_lines:
                 raise UserError(_("You can not change the type of a product that is currently reserved on a stock move. If you need to change the type, you should first unreserve the stock move."))
         return super(ProductTemplate, self).write(vals)
+
+    def action_open_forecasted_report(self):
+        self.ensure_one()
+        action = self.env.ref('stock.stock_replenishment_product_product_action').read()[0]
+        return action
 
     # Be aware that the exact same function exists in product.product
     def action_open_quants(self):

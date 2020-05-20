@@ -1,38 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
   <!-- Reports -->
-    <report
-        id="stock_replenishment_report_product_product_action"
-        string="Forecasted Inventory"
-        model="product.product"
-        report_type="qweb-html"
-        name="stock.report_product_product_replenishment"
-        file="stock.report_product_product_replenishment"/>
+    <record id="stock_replenishment_report_product_product_action" model="ir.actions.report">
+        <field name="name">stock.report_product_product_replenishment</field>
+        <field name="model">product.product</field>
+        <field name="report_type">qweb-html</field>
+        <field name="report_name">stock.report_product_product_replenishment</field>
+    </record>
+    <record id="stock_replenishment_report_product_template_action" model="ir.actions.report">
+        <field name="name">stock.report_product_template_replenishment</field>
+        <field name="model">product.template</field>
+        <field name="report_type">qweb-html</field>
+        <field name="report_name">stock.report_product_template_replenishment</field>
+    </record>
 
-    <report
-        id="stock_replenishment_report_product_template_action"
-        string="Forecasted Inventory"
-        model="product.template"
-        report_type="qweb-html"
-        name="stock.report_product_template_replenishment"
-        file="stock.report_replenishment"/>
+    <record id="stock_replenishment_product_product_action" model="ir.actions.client">
+        <field name="name">Forecasted Report</field>
+        <field name="tag">replenish_report</field>
+    </record>
 
   <!-- Templates -->
     <template id="assets_common_replenishment_report" name="Forecasted Inventory CSS" inherit_id="web.report_assets_common">
         <xpath expr="." position="inside">
             <link rel="stylesheet" type="text/scss" href="/stock/static/src/scss/report_replenishment.scss"/>
         </xpath>
-        <xpath expr="script" position="after">
-            <script type="text/javascript" src="/stock/static/src/js/stock_replenish_report.js"/>
-        </xpath>
     </template>
 
     <template id="report_product_product_replenishment">
         <t t-call="web.html_container">
-            <div class="o_statusbar_buttons">
-                <button class="btn btn-primary" title="test" name="test">Test</button>
-            </div>
-            <div js_class="stock_replenish_report" class="page pt-3">
+            <div class="page pt-3">
+                <div id="o_report_graph"/>
                 <div class="d-flex justify-content-between">
                     <div class="o_product_name">
                         <h3>
