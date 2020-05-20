@@ -39,6 +39,8 @@ options.registry.InnerChart = options.Class.extend({
 
         // Build matrix content
         this.tableEl = this.el.querySelector('we-matrix table');
+        this.minEl = this.el.querySelector('we-input[data-attribute-name="minValue"]');
+        this.maxEl = this.el.querySelector('we-input[data-attribute-name="maxValue"]');
         const data = JSON.parse(this.$target[0].dataset.data);
         data.labels.forEach(el => {
             this._addRow(el);
@@ -193,6 +195,14 @@ options.registry.InnerChart = options.Class.extend({
                 }
             });
         });
+        this.minEl.querySelectorAll('input').forEach(el => {
+            const minval = el.value || '';
+            data.values.push(minval);
+        });
+        this.maxEl.querySelectorAll('input').forEach(el => {
+            const maxval = el.value || '';
+            data.values.push(maxval);
+        });
         return JSON.stringify(data);
     },
     /**
@@ -330,8 +340,8 @@ options.registry.InnerChart = options.Class.extend({
      *
      * @private
      */
-    _setDefaultSelectedInput: function () {
-        this.lastEditableSelectedInput = this.tableEl.querySelector('td input');
+    _setDefaultSelectedInput: function (ev) {
+        this.lastEditableSelectedInput = this.tableEl.querySelector('td input') || this.minEl.querySelector('input');
         if (this._isPieChart()) {
             this.colorPaletteSelectedInput = this.lastEditableSelectedInput;
         } else {
@@ -491,9 +501,8 @@ options.registry.InnerChart = options.Class.extend({
     },
 
     _onMinMaxInputFocusIn: function (ev) {
-        this.target = ev.target;
-        const selectedvalue = ev.target.value;
-
+        this.lastEditableSelectedInput = ev.target;
+        this.updateUI();
     },
 });
 });

@@ -60,9 +60,9 @@
                     <tr>
                         <th><we-button class="fa fa-fw fa-plus add_row"/></th>
                     </tr>
-                    <we-input string="min value" class="o-value" data-select-data-attribute="" data-attribute-name="minValue"/>
-                    <we-input string="max value" class="o-value mt-1 mb-2" data-select-data-attribute="" data-attribute-name="maxValue"/>
                 </table>
+                <we-input string="min value" class="o-value" data-select-data-attribute="" data-attribute-name="minValue"/>
+                <we-input string="max value" class="o-value mt-1 mb-2" data-select-data-attribute="" data-attribute-name="maxValue"/>
             </we-matrix>
             <we-colorpicker string="Background" data-name="chart_bg_color_opt"
                 data-color-change=""
