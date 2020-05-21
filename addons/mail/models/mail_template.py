@@ -4,10 +4,13 @@
 import base64
 import logging
 
-
+import odoo
+import os.path
+from lxml import etree
+from odoo.tools.misc import file_open
+from odoo.tools.convert import xml_import
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
-
 _logger = logging.getLogger(__name__)
 
 
@@ -84,7 +87,17 @@ class MailTemplate(models.Model):
         return True
 
     def reset_mail_template(self):
-        pass
+        for template in self:
+            info = odoo.modules.module.load_information_from_description_file(template._module)
+            for dfile in info.get('data'):
+                pathname = os.path.join(template._module, dfile)
+                print(pathname, "feeeeeeeeeeeeeeee")
+                with file_open(pathname, 'rb') as fp:
+                    doc = etree.parse(fp)
+                    obj = xml_import(self.env.cr, template._module, fp, {})
+                    record = obj._tag_root(doc.getroot())
+                    print(dir(record), "lllllllllllllllll")
+
 
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']
