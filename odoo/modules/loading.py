@@ -289,6 +289,9 @@ def load_module_graph(cr, graph, status=None, perform_checks=True,
                     time.time() - module_t0,
                     cr.sql_log_count - module_cursor_query_count,
                     odoo.sql_db.sql_counter - module_extra_query_count)  # extra queries: testes, notify, any other closed cursor
+        print("module_name ---------------->", module_name)
+        print("cr.sql_log_count - module_cursor_query_count ---------------->", cr.sql_log_count - module_cursor_query_count)
+        print("odoo.sql_db.sql_counter - module_extra_query_count ---------------->", odoo.sql_db.sql_counter - module_extra_query_count)
 
     _logger.runbot("%s modules loaded in %.2fs, %s queries (+%s extra)",
                    len(graph),

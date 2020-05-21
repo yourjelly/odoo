@@ -42,6 +42,7 @@ class TestGetMailChannel(TransactionCase):
         self.patch(type(self.env['im_livechat.channel']), '_get_available_users', get_available_users)
 
     def test_get_mail_channel(self):
+        import pdb; pdb.set_trace()
         """For a livechat with 5 available operators, we open 5 channels 5 times (25 channels total).
         For every 5 channels opening, we check that all operators were assigned.
         """
