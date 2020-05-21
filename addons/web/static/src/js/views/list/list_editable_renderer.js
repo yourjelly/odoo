@@ -88,10 +88,12 @@ ListRenderer.include({
         // if addTrashIcon is true, there will be a small trash icon at the end
         // of each line, so the user can delete a record.
         this.addTrashIcon = params.addTrashIcon;
+        console.log(this.addTrashIcon)
 
         // replace the trash icon by X in case of many2many relations
         // so that it means 'unlink' instead of 'remove'
         this.isMany2Many = params.isMany2Many;
+        console.log(this.isMany2Many)
 
         this.currentRow = null;
         this.currentFieldIndex = null;
@@ -1172,17 +1174,14 @@ ListRenderer.include({
     _renderRow: function (record, index) {
         debugger;
         var $row = this._super.apply(this, arguments);
-        console.log(">>>>>>>>>>>>")
         if (this.addTrashIcon) {
             debugger;
-            console.log(this.addTrashIcon,"<<<<<<<<<");
             var $icon = this.isMany2Many ?
                 $('<button>', {'class': 'fa fa-times', 'name': 'unlink', 'aria-label': _t('Unlink row ') + (index + 1)}) :
                 $('<button>', {'class': 'fa fa-trash-o', 'name': 'delete', 'aria-label': _t('Delete row ') + (index + 1)});
             var $td = $('<td>', {class: 'o_list_record_remove'}).append($icon);
             $row.append($td);
         }
-        debugger;
         return $row;
     },
     /**

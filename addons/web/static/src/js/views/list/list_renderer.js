@@ -418,7 +418,6 @@ var ListRenderer = BasicRenderer.extend({
      * @returns {jQueryElement} a <td> element
      */
     _renderBodyCell: function (record, node, colIndex, options) {
-        debugger;
         var tdClassName = 'o_data_cell';
         if (node.tag === 'button') {
             tdClassName += ' o_list_button';
@@ -438,7 +437,6 @@ var ListRenderer = BasicRenderer.extend({
         if (node.attrs.readOnly) {
             tdClassName += ' oe_read_only';
         }
-        // debugger;
         var $td = $('<td>', { class: tdClassName, tabindex: -1 });
 
         // We register modifiers on the <td> element so that it gets the correct
@@ -983,7 +981,7 @@ var ListRenderer = BasicRenderer.extend({
 
 
         var $table = $('<table>').addClass('o_list_table table table-sm table-hover table-striped');
-        $table.toggleClass('o_list_table_grouped fa fa-trash-o', this.isGrouped);
+        $table.toggleClass('o_list_table_grouped', this.isGrouped);
         $table.toggleClass('o_list_table_ungrouped', !this.isGrouped);
         var defs = [];
         this.defs = defs;
