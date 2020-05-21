@@ -55,6 +55,10 @@ options.registry.InnerChart = options.Class.extend({
                 this._addColumn(el.label, el.data, el.backgroundColor, el.borderColor);
             }
         });
+        data.values.forEach(el => {
+            this._onaddminvalue();
+
+        });
         this._displayRemoveColButton();
         this._displayRemoveRowButton();
         this._setDefaultSelectedInput();

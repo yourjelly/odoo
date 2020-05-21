@@ -89,7 +89,9 @@ const ChartWidget = publicWidget.Widget.extend({
                 yAxes: [{
                     stacked: this.el.dataset.stacked === 'true',
                     ticks: {
-                        beginAtZero: true
+                        beginAtZero: false,
+                        suggestedMin: 5,
+                        suggestedMax: 50
                     },
                 }],
             };
