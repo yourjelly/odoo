@@ -22,11 +22,28 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
+    init: function () {
+        this._super.apply(this, arguments);
+    },
 
-    willStart: function () {
-        this.selectMenuEl = document.createElement('we-select-menu');
-        this.select_mailing_list(this.selectMenuEl);
-        return this._super(...arguments);
+    willStart: async function () {
+        const _super = this._super.bind(this);
+        var self = this;
+        this.selectMenuEl = await this._rpc({
+            model: 'mailing.list',
+            method: 'name_search',
+            args: ['', [['is_public', '=', true]]],
+            context: self.options.recordInfo.context,
+        }).then(function (data) {
+                return Object.keys(data).map(key => {
+                    const maillist = data[key];
+                    const button = document.createElement('we-button');
+                    button.dataset.selectMenuEl = maillist[0];
+                    button.textContent = maillist[1];
+                    return button;
+                }).sort((a, b) => (a.textContent > b.textContent) ? 1 : (a.textContent < b.textContent) ? -1 : 0);
+            });
+        return _super(...arguments);
     },
     /**
      * Allows to select mailing list.
@@ -36,15 +53,14 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     select_mailing_list: function (previewMode, value) {
         var self = this;
         var def = this._rpc({
-                    model: 'mailing.list',
-                    method: 'name_search',
-                    args: ['', [['is_public', '=', true]]],
-                    context: self.options.recordInfo.context,
-                }).then(function (data) {
-                    //$(dialog).find('.btn-primary').prop('disabled', !data.length);
-                    var list_id = self.$target.attr("data-list-id");
+                model: 'mailing.list',
+                method: 'name_search',
+                args: ['', [['is_public', '=', true]]],
+                context: self.options.recordInfo.context,
+            }).then(function (data) {
+                var list_id = self.$target.attr("data-list-id");
                 return data;
-                });
+            });
         def.then(function (result) {
             self.$target.attr("data-list-id", result.val);
         });
@@ -56,9 +72,17 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     onBuilt: function () {
         var self = this;
         this._super();
-        this.select_mailing_list('click').guardedCatch(function () {
-            self.getParent()._onRemoveClick($.Event( "click" ));
-        });
+        this._assignUniqueID();
+        // this.select_mailing_list('click').guardedCatch(function () {
+        //     self.getParent()._onRemoveClick($.Event( "click" ));
+        // });
+    },
+
+    /**
+    *@override
+    */
+    _assignUniqueID: function () {
+        this.$target.closest('.s_newsletter_block').attr('id', 'sNewsletterBlock' + Date.now());
     },
 
     /**

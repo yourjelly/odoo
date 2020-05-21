@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<!-- <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 <t t-name="website_mass_mailing.edition.wrapper">
     <div class="modal fade show d-block o_newsletter_modal">
@@ -12,4 +12,4 @@
         </div>
     </div>
 </t>
-</templates>
+</templates> -->
