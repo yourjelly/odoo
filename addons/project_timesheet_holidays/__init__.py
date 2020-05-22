@@ -12,6 +12,7 @@ def post_init(cr, registry):
     from odoo import api, SUPERUSER_ID
 
     env = api.Environment(cr, SUPERUSER_ID, {})
+    env['res.company'].search([('leave_timesheet_project_id', '=', False)])._create_leave_project_task()
     for hr_leave_type in env['hr.leave.type'].search([('timesheet_generate', '=', True), ('timesheet_project_id', '=', False)]):
         company = hr_leave_type.company_id or env.company
         hr_leave_type.write({

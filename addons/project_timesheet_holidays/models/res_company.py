@@ -22,9 +22,6 @@ class Company(models.Model):
                 if company.leave_timesheet_project_id.sudo().company_id != company:
                     raise ValidationError(_('The Internal Project of a company should be in that company.'))
 
-    def init(self):
-        self.search([('leave_timesheet_project_id', '=', False)])._create_leave_project_task()
-
     @api.model_create_multi
     def create(self, values):
         company = super(Company, self).create(values)
