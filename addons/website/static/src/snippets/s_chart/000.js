@@ -90,8 +90,6 @@ const ChartWidget = publicWidget.Widget.extend({
                     stacked: this.el.dataset.stacked === 'true',
                     ticks: {
                         beginAtZero: false,
-                        suggestedMin: 5,
-                        suggestedMax: 50
                     },
                 }],
             };

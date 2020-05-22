@@ -39,8 +39,7 @@ options.registry.InnerChart = options.Class.extend({
 
         // Build matrix content
         this.tableEl = this.el.querySelector('we-matrix table');
-        this.minEl = this.el.querySelector('we-input[data-attribute-name="minValue"]');
-        this.maxEl = this.el.querySelector('we-input[data-attribute-name="maxValue"]');
+        this.minmaxEl = this.el.querySelector('we-column input')
         const data = JSON.parse(this.$target[0].dataset.data);
         data.labels.forEach(el => {
             this._addRow(el);
@@ -54,10 +53,6 @@ options.registry.InnerChart = options.Class.extend({
             } else {
                 this._addColumn(el.label, el.data, el.backgroundColor, el.borderColor);
             }
-        });
-        data.values.forEach(el => {
-            this._onaddminvalue();
-
         });
         this._displayRemoveColButton();
         this._displayRemoveRowButton();
@@ -199,13 +194,11 @@ options.registry.InnerChart = options.Class.extend({
                 }
             });
         });
-        this.minEl.querySelectorAll('input').forEach(el => {
-            const minval = el.value || '';
-            data.values.push(minval);
-        });
-        this.maxEl.querySelectorAll('input').forEach(el => {
-            const maxval = el.value || '';
-            data.values.push(maxval);
+        this.minmaxEl.querySelector('input').forEach(el => {
+            data.values.push({
+                minValue: el.value || '',
+                maxValue: el.value || '',
+            });
         });
         return JSON.stringify(data);
     },
