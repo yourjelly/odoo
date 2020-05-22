@@ -8,7 +8,9 @@ import odoo
 import os.path
 from lxml import etree
 from odoo.tools.misc import file_open
+from odoo.tools.convert import _eval_xml
 from odoo.tools.convert import xml_import
+from odoo.tools.safe_eval import safe_eval
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
@@ -88,16 +90,30 @@ class MailTemplate(models.Model):
 
     def reset_mail_template(self):
         for template in self:
-            info = odoo.modules.module.load_information_from_description_file(template._module)
-            for dfile in info.get('data'):
-                pathname = os.path.join(template._module, dfile)
-                print(pathname, "feeeeeeeeeeeeeeee")
-                with file_open(pathname, 'rb') as fp:
-                    doc = etree.parse(fp)
-                    obj = xml_import(self.env.cr, template._module, fp, {})
-                    record = obj._tag_root(doc.getroot())
-                    print(dir(record), "lllllllllllllllll")
+            model, xml_id = template.get_external_id().get(template.id).split('.')
+            info = odoo.modules.module.load_information_from_description_file(model)
+            for dfile in [k for k in info.get('data') if os.path.splitext(k)[1].lower() == '.xml' in k]:
+                pathname = os.path.join(model, dfile)
+                ext = os.path.splitext(pathname)[1].lower()
+                if ext == '.xml':
 
+                    with file_open(pathname, 'rb') as fp:
+                        doc = etree.parse(fp)
+                        for rec in doc.xpath("//record"):
+
+                            if rec.get('id') == xml_id:
+                                obj = xml_import(self.env.cr, model, {}, mode='update', xml_filename=pathname)
+                                obj._tag_record(rec)
+                                for field in rec:
+                                    # f_val = _eval_xml({'idref': {xml_id: template.id}}, field, self.env)
+                                    # # if field.get("type") == "html":
+                                    # #     f_val = _eval_xml(self, field, self.env)
+                                    # # elif field.get("eval"):
+                                    # #     f_val = safe_eval(field.get("eval"))
+                                    # # elif field.get("ref"):
+                                    # #     f_val = self.env['ir.model.data'].xmlid_to_res_model_res_id(field.get("ref"))[1]
+                                    # # else:
+                                    f_val = field.text
 
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']
