@@ -73,9 +73,9 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         var self = this;
         this._super();
         this._assignUniqueID();
-        // this.select_mailing_list('click').guardedCatch(function () {
-        //     self.getParent()._onRemoveClick($.Event( "click" ));
-        // });
+        this.select_mailing_list('click').guardedCatch(function () {
+            self.getParent()._onRemoveClick($.Event( "click" ));
+        });
     },
 
     /**
@@ -83,6 +83,10 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     */
     _assignUniqueID: function () {
         this.$target.closest('.s_newsletter_block').attr('id', 'sNewsletterBlock' + Date.now());
+    },
+
+    _getSelect: function () {
+        return this.$target[0].querySelector('select');
     },
 
     /**

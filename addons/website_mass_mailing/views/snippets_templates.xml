@@ -64,12 +64,12 @@
         <div data-js="mailing_list_subscribe"
             t-att-data-selector="selector"
             t-attf-data-exclude=".o_newsletter_modal #{selector}">
-            <we-select string="Change Newsletter" data-name="mail_list" data-no-preview="true"/>
+            <we-select string="Newsletter" data-name="mail_list" data-no-preview="true"/>
         </div>
         <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
-            <we-select string="Change Newsletter" data-name="mail_list" data-no-preview="true"/>
+            <we-select string="Newsletter" data-name="mail_list" data-no-preview="true"/>
         </div>
     </xpath>
     <xpath expr="//div[last()]" position="after">
@@ -88,6 +88,8 @@
                 <we-button data-select-class="modal-xl">Big</we-button>
                 <we-button data-select-class="s_popup_full" data-name="s_popup_size_full">Full</we-button>
             </we-select>
+            <we-colorpicker string="Backdrop Color" data-select-style="true"
+                data-css-property="background-color" data-color-prefix="bg-" data-dependencies="position_centered"/>
         </div>
     </xpath>
 </template>
