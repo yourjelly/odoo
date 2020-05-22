@@ -88,12 +88,12 @@ ListRenderer.include({
         // if addTrashIcon is true, there will be a small trash icon at the end
         // of each line, so the user can delete a record.
         this.addTrashIcon = params.addTrashIcon;
-        console.log(this.addTrashIcon)
+        console.log(params,"params<<<<<<<<<<<<<<<<<")
+        console.log(this.addTrashIcon,"this.addTrashIcon")
 
         // replace the trash icon by X in case of many2many relations
         // so that it means 'unlink' instead of 'remove'
         this.isMany2Many = params.isMany2Many;
-        console.log(this.isMany2Many)
 
         this.currentRow = null;
         this.currentFieldIndex = null;
