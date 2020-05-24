@@ -211,7 +211,12 @@ class IrMailServer(models.Model):
         if mail_server_id:
             mail_server = self.sudo().browse(mail_server_id)
         elif not host:
-            mail_server = self.sudo().search([], order='sequence', limit=1)
+            uid = self.env.context.get('uid', False)
+            if uid:
+              email = self.env['res.users'].browse(uid).email
+              mail_server = self.sudo().search([('smtp_user', '=', email)], order='sequence', limit=1)
+            if not mail_server:
+                mail_server = self.sudo().search([], order='sequence', limit=1)
 
         if mail_server:
             smtp_server = mail_server.smtp_host
