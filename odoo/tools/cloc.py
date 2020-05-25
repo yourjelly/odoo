@@ -7,6 +7,7 @@ import re
 import shutil
 
 import odoo
+from odoo.tools.config import config
 
 DEFAULT_EXCLUDE = ["__manifest__.py", "__openerp__.py", "tests/**", "static/lib/**",  "static/tests/**" ]
 
@@ -73,7 +74,7 @@ class Cloc(object):
                     for j in ['cloc_exclude','demo','demo_xml']:
                         exclude_list.extend(d.get(j, []))
                     break
-            except OSError: # TODO ast Exceptions
+            except Exception:
                 pass
         if not exclude:
             exclude = set()
@@ -118,48 +119,35 @@ class Cloc(object):
                     continue
                 self.count_path(module_path)
 
-    def count_imported(self, env): # TODO merge with studio
-        domain = [('state', '=', 'installed'), ('imported', '=', True)]
-        imported_modules = env['ir.module.module'].search(domain).mapped('name')
-        for module_name in imported_modules:
-            ids = env['ir.model.data'].search([('model', '=', 'ir.actions.server'), ('module', '=', module_name)]).mapped('res_id')
-            actions = env['ir.actions.server'].search([('state', '=', 'code'), ('id', 'in', ids)])
-            for a in actions:
-                self.book(module_name, "ir.actions.server/%s: %s" % (a.id, a.name), self.parse_py(a.code))
-
-            ids = env['ir.model.data'].search([('model', '=', 'ir.model.fields'), ('module', '=', module_name)]).mapped('res_id')
-            fields = self.env['ir.model.fields'].search([('compute', '!=', False), ('id', 'in', ids)])
-            for f in fields:
-                self.book(module_name, "ir.model.fields/%s: %s" % (f.id, f.name), self.parse_py(f.code))
-
-    def count_studio(self, env):
+    def count_customization(self, env):
+        imported_module = ""
+        if env['ir.module.module']._fields.get('imported'):
+            imported_module = "OR (m.imported = TRUE AND m.state = 'installed')"
         query = """
-            SELECT s.id FROM ir_act_server AS s
+            SELECT s.id, m.name FROM ir_act_server AS s
                 LEFT JOIN ir_model_data AS d ON (d.res_id = s.id AND d.model = 'ir.actions.server')
                 LEFT JOIN ir_module_module AS m ON m.name = d.module
-            WHERE s.state = 'code' AND m.name IS null
-        """
+            WHERE s.state = 'code' AND (m.name IS null {})
+        """.format(imported_module)
         env.cr.execute(query)
-        ids = [r[0] for r in env.cr.fetchall()]
-        for a in env['ir.actions.server'].browse(ids):
-            self.book('__studio__', "ir.actions.server/%s: %s" % (a.id, a.name), self.parse_py(a.code))
+        data = {r[0]: r[1] for r in env.cr.fetchall()}
+        for a in env['ir.actions.server'].browse(data.keys()):
+            self.book(data[a.id] or '__studio__', "ir.actions.server/%s: %s" % (a.id, a.name), self.parse_py(a.code))
 
         query = """
-            SELECT f.id FROM ir_model_fields AS f
+            SELECT f.id, m.name FROM ir_model_fields AS f
                 LEFT JOIN ir_model_data AS d ON (d.res_id = f.id AND d.model = 'ir.model.fields')
                 LEFT JOIN ir_module_module AS m ON m.name = d.module
-            WHERE f.compute IS NOT null AND m.name IS null
-        """
+            WHERE f.compute IS NOT null AND (m.name IS null {})
+        """.format(imported_module)
         env.cr.execute(query)
-        ids = [r[0] for r in env.cr.fetchall()]
-        for f in env['ir.model.fields'].browse(ids):
-            self.book('__studio__', "ir.model.fields/%s: %s" % (f.id, f.name), self.parse_py(f.code))
+        data = {r[0]: r[1] for r in env.cr.fetchall()}
+        for f in env['ir.model.fields'].browse(data.keys()):
+            self.book(data[f.id] or '__studio__', "ir.model.fields/%s: %s" % (f.id, f.name), self.parse_py(f.compute))
 
     def count_env(self, env):
         self.count_modules(env)
-        if env['ir.module.module']._fields.get('imported'):
-            self.count_imported(env)
-        self.count_studio(env)
+        self.count_customization(env)
 
     def count_database(self, database):
         with odoo.api.Environment.manage():
@@ -185,7 +173,7 @@ class Cloc(object):
         for m in sorted(self.modules):
             s += fmt.format(k=m, lines=self.total[m], comment=self.total[m]-self.code[m], code=self.code[m])
             if verbose:
-                for i in sorted(self.modules[m]):
+                for i in sorted(self.modules[m], key=lambda  i: self.modules[m][i][0], reverse=True):
                     code, total = self.modules[m][i]
                     s += fmt.format(k='    '+i, lines=total, comment=total-code, code=code)
         s += hr

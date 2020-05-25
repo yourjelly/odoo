@@ -63,11 +63,6 @@ class PublisherWarrantyContract(AbstractModel):
         if user.partner_id.company_id:
             company_id = user.partner_id.company_id
             msg.update(company_id.read(["name", "email", "phone"])[0])
-        if enterprise_code:
-            import odoo.tools.cloc
-            c = odoo.tools.cloc.Cloc()
-            c.count_env(self.env)
-            msg["cloc"] = c.code
         return msg
 
     @api.model

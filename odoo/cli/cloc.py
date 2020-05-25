@@ -7,6 +7,7 @@ import textwrap
 
 import odoo
 
+from odoo.tools import cloc, config
 from . import Command
 
 class Cloc(Command):
@@ -37,8 +38,9 @@ class Cloc(Command):
         opt, unknown = parser.parse_known_args(args)
         if not opt.database and not opt.path:
             parser.print_help()
+            sys.exit()
 
-        c = odoo.tools.cloc.Cloc()
+        c = cloc.Cloc()
         if opt.database:
             config.parse_config(['-d', opt.database] + unknown)
             c.count_database(opt.database)
