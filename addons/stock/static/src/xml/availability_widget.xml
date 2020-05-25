@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<t t-name="availabilityWidget" owl="1">
+    <div class="text-right">
+        <span t-if="props.available" t-esc="props.record.data.reserved_availability"/>
+        <span t-else="" class="font-weight-bold text-danger">Not Available</span>
+        <button t-if="props.displayChartButton" class="btn btn-link o_icon_button ml-3"
+            title="Forecasted Report">
+            <i class="fa fa-fw fa-area-chart"/>
+        </button>
+    </div>
+</t>
+
+</templates>

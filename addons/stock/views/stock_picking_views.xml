@@ -371,6 +371,8 @@
                                     <field name="reserved_availability" invisible="1"/>
                                     <field name="availability_state" invisible="1"/>
                                     <field name="product_uom_qty" string="Demand" attrs="{'column_invisible': [('parent.immediate_transfer', '=', True)], 'readonly': ['|', ('is_initial_demand_editable', '=', False), '&amp;', '&amp;', ('show_operations', '=', True), ('is_locked', '=', True), ('is_initial_demand_editable', '=', False)]}"/>
+                                    <field name="route_ids" invisible="1"/>
+                                    <widget name="availability"/>
                                     <field name="availability_indication"
                                         decoration-bf="availability_state in ['waiting', 'late']"
                                         decoration-warning="availability_state == 'waiting'"
