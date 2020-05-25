@@ -8,9 +8,9 @@ import odoo
 import os.path
 from lxml import etree
 from odoo.tools.misc import file_open
-from odoo.tools.convert import _eval_xml
-from odoo.tools.convert import xml_import
+from odoo.tools.convert import _eval_xml, xml_import
 from odoo.tools.safe_eval import safe_eval
+from odoo.modules import get_module_path, get_module_resource
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
@@ -88,6 +88,43 @@ class MailTemplate(models.Model):
                 template.ref_ir_act_window.unlink()
         return True
 
+    def _override_translation_term(self, lang, module_name):
+        lang_code = tools.get_iso_codes(lang)
+        base_lang_code = None
+        data = []
+        if '_' in lang_code:
+            base_lang_code = lang_code.split('_')[0]
+        trans_file = get_module_resource(module_name, 'i18n', lang_code + '.po')
+        with file_open(trans_file, mode='rb') as fileobj:
+            _logger.info("loading %s", trans_file)
+            fileformat = os.path.splitext(trans_file)[-1][1:].lower()
+            print(fileobj, fileformat)
+            reader = TranslationFileReader(fileobj, fileformat=fileformat)
+
+            def process_row(row):
+                """Process a single PO (or POT) entry."""
+                # dictionary which holds values for this line of the csv file
+                # {'lang': ..., 'type': ..., 'name': ..., 'res_id': ...,
+                #  'src': ..., 'value': ..., 'module':...}
+                dic = dict.fromkeys(('type', 'name', 'res_id', 'src', 'value',
+                                     'comments', 'imd_model', 'imd_name', 'module'))
+                dic['lang'] = lang
+                dic.update(row)
+
+                # do not import empty values
+                if not False and not dic['value']:
+                    return
+                _rows_data = dict(dic, state="translated")
+                data.append((_rows_data['name'], _rows_data['lang'], _rows_data['res_id'],
+                            _rows_data['src'], _rows_data['type'], _rows_data['imd_model'],
+                            _rows_data['module'], _rows_data['imd_name'], _rows_data['value'],
+                            _rows_data['state'], _rows_data['comments']))
+
+            # First process the entries from the PO file (doing so also fills/removes
+            # the entries from the POT file).
+            for row in reader:
+                process_row(row)
+
     def reset_mail_template(self):
         for template in self:
             model, xml_id = template.get_external_id().get(template.id).split('.')
@@ -100,20 +137,23 @@ class MailTemplate(models.Model):
                     with file_open(pathname, 'rb') as fp:
                         doc = etree.parse(fp)
                         for rec in doc.xpath("//record"):
-
                             if rec.get('id') == xml_id:
                                 obj = xml_import(self.env.cr, model, {}, mode='update', xml_filename=pathname)
                                 obj._tag_record(rec)
-                                for field in rec:
-                                    # f_val = _eval_xml({'idref': {xml_id: template.id}}, field, self.env)
-                                    # # if field.get("type") == "html":
-                                    # #     f_val = _eval_xml(self, field, self.env)
-                                    # # elif field.get("eval"):
-                                    # #     f_val = safe_eval(field.get("eval"))
-                                    # # elif field.get("ref"):
-                                    # #     f_val = self.env['ir.model.data'].xmlid_to_res_model_res_id(field.get("ref"))[1]
-                                    # # else:
-                                    f_val = field.text
+                                self._override_translation_term(self.env.lang, model)
+                                # mods = self.env['ir.module.module'].search([('state', '=', 'installed'), ('name', '=', model)])
+                                # mods._update_translations(self.env.lang, True)
+                                # for field in rec:
+                                #     # f_val = _eval_xml({'idref': {xml_id: template.id}}, field, self.env)
+                                #     # # if field.get("type") == "html":
+                                #     # #     f_val = _eval_xml(self, field, self.env)
+                                #     # # elif field.get("eval"):
+                                #     # #     f_val = safe_eval(field.get("eval"))
+                                #     # # elif field.get("ref"):
+                                #     # #     f_val = self.env['ir.model.data'].xmlid_to_res_model_res_id(field.get("ref"))[1]
+                                #     # # else:
+                                #     # f_val = field.text
+                                #     # print(f_val, "aaaaa")
 
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']
