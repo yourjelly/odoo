@@ -4,18 +4,8 @@ odoo.define('website_mass_mailing.editor', function (require) {
 var core = require('web.core');
 var rpc = require('web.rpc');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
-var options = require('web_editor.snippets.options');
 require('website.s_popup_options');
-var QWeb = core.qweb;
 var _t = core._t;
-
-options.registry.NewsletterBlock = options.registry.SnippetPopup.extend({
-    selector: ".s_newsletter_block",
-
-    setLayout: function (previewMode, widgetValue, params) {
-        return this._super(...arguments);
-    },
-})
 
 
 options.registry.mailing_list_subscribe = options.Class.extend({

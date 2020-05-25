@@ -71,9 +71,7 @@
             data-selector=".o_newsletter_popup">
             <we-select string="Newsletter" data-name="mail_list" data-no-preview="true"/>
         </div>
-    </xpath>
-    <xpath expr="//div[last()]" position="after">
-        <div data-selector=".s_newsletter_block" data-js="NewsletterBlock">
+        <div data-selector=".s_newsletter_block">
             <we-select string="Position">
                 <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
                 <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
@@ -93,13 +91,6 @@
         </div>
     </xpath>
 </template>
-
-<!-- <template id="popup_options" inherit_id="website.s_popup_options">
-    <xpath expr="//div[@data-js='SnippetPopup']" position="attributes">
-        <attribute name="data-selector" separator="," add=".s_newsletter_block"/>
-        <attribute name="data-target" separator="," add=".s_newsletter_block"/>
-    </xpath>
-</template> -->
 
 <!-- Extend default mass_mailing snippets with website feature -->
 <template id="social_links">
