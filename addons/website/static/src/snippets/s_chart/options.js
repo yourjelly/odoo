@@ -39,7 +39,6 @@ options.registry.InnerChart = options.Class.extend({
 
         // Build matrix content
         this.tableEl = this.el.querySelector('we-matrix table');
-        this.minmaxEl = this.el.querySelector('we-column input')
         const data = JSON.parse(this.$target[0].dataset.data);
         data.labels.forEach(el => {
             this._addRow(el);
@@ -173,7 +172,6 @@ options.registry.InnerChart = options.Class.extend({
         const data = {
             labels: [],
             datasets: [],
-            values: [],
         };
         this.tableEl.querySelectorAll('tr:first-child input').forEach(el => {
             data.datasets.push({
@@ -192,12 +190,6 @@ options.registry.InnerChart = options.Class.extend({
                     data.datasets[i].backgroundColor.push(el.dataset.backgroundColor || '');
                     data.datasets[i].borderColor.push(el.dataset.borderColor || '');
                 }
-            });
-        });
-        this.minmaxEl.querySelector('input').forEach(el => {
-            data.values.push({
-                minValue: el.value || '',
-                maxValue: el.value || '',
             });
         });
         return JSON.stringify(data);
@@ -498,7 +490,8 @@ options.registry.InnerChart = options.Class.extend({
     },
 
     _onMinMaxInputFocusIn: function (ev) {
-        this.lastEditableSelectedInput = ev.target;
+        const minvalue = ev.target.value;
+        // localStorage.setItem('minimumvalue', minvalue);
         this.updateUI();
     },
 });

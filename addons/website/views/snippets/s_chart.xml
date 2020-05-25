@@ -12,12 +12,6 @@
                         &quot;backgroundColor&quot;:&quot;alpha&quot;,
                         &quot;borderColor&quot;:&quot;alpha&quot;
                     }
-                ],
-                &quot;values&quot;:[
-                    {
-                        &quot;minValue&quot;:&quot;0&quot;,
-                        &quot;maxValue&quot;:&quot;25&quot;
-                    }
                 ]
             }">
         <h2>A Chart Title</h2>
@@ -62,10 +56,8 @@
                     </tr>
                 </table>
             </we-matrix>
-            <we-column>
-                <we-input string="min value" class="o-value" data-select-data-attribute="" data-attribute-name="minValue"/>
-                <we-input string="max value" class="o-value mt-1" data-select-data-attribute="" data-attribute-name="maxValue"/>
-            </we-column>
+            <we-input string="min value" class="o-value" data-select-data-attribute="" data-attribute-name="minValue"/>
+            <we-input string="max value" class="o-value" data-select-data-attribute="" data-attribute-name="maxValue"/>
             <we-colorpicker string="Background" data-name="chart_bg_color_opt"
                 data-color-change=""
                 data-attribute-name="backgroundColor"

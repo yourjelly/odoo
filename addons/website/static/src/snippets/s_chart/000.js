@@ -25,6 +25,7 @@ const ChartWidget = publicWidget.Widget.extend({
     start: function () {
         // Convert Theme colors to css color
         const data = JSON.parse(this.el.dataset.data);
+        // var value = localStorage.getItem("minimumvalue");
         data.datasets.forEach(el => {
             if (Array.isArray(el.backgroundColor)) {
                 el.backgroundColor = el.backgroundColor.map(el => this._convertToCssColor(el));
@@ -89,7 +90,8 @@ const ChartWidget = publicWidget.Widget.extend({
                 yAxes: [{
                     stacked: this.el.dataset.stacked === 'true',
                     ticks: {
-                        beginAtZero: false,
+                        beginAtZero: true,
+                        // min: value,
                     },
                 }],
             };
