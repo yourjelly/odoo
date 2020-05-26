@@ -4,6 +4,7 @@ odoo.define('website.s_chart_options', function (require) {
 var core = require('web.core');
 const {ColorpickerWidget} = require('web.Colorpicker');
 var options = require('web_editor.snippets.options');
+var local_storage = require('web.local_storage');
 
 var _t = core._t;
 
@@ -490,9 +491,10 @@ options.registry.InnerChart = options.Class.extend({
     },
 
     _onMinMaxInputFocusIn: function (ev) {
-        const minvalue = ev.target.value;
-        // localStorage.setItem('minimumvalue', minvalue);
-        this.updateUI();
+        const minvalue = ev.target.value || '';
+        local_storage.setItem('minimumvalue', minvalue);
+        await this._refreshPublicWidgets();
+        // this.updateUI();
     },
 });
 });

@@ -2,6 +2,7 @@ odoo.define('website.s_chart', function (require) {
 'use strict';
 
 const publicWidget = require('web.public.widget');
+var local_storage = require('web.local_storage');
 
 const ChartWidget = publicWidget.Widget.extend({
     selector: '.s_chart',
@@ -25,7 +26,6 @@ const ChartWidget = publicWidget.Widget.extend({
     start: function () {
         // Convert Theme colors to css color
         const data = JSON.parse(this.el.dataset.data);
-        // var value = localStorage.getItem("minimumvalue");
         data.datasets.forEach(el => {
             if (Array.isArray(el.backgroundColor)) {
                 el.backgroundColor = el.backgroundColor.map(el => this._convertToCssColor(el));
@@ -80,6 +80,7 @@ const ChartWidget = publicWidget.Widget.extend({
                 },
             };
         } else {
+            const minvalue = local_storage.getItem('minimumvalue');
             chartData.options.scales = {
                 xAxes: [{
                     stacked: this.el.dataset.stacked === 'true',
@@ -91,7 +92,8 @@ const ChartWidget = publicWidget.Widget.extend({
                     stacked: this.el.dataset.stacked === 'true',
                     ticks: {
                         beginAtZero: true,
-                        // min: value,
+                        min: parseInt(minvalue),
+                        // max: ,
                     },
                 }],
             };
@@ -103,9 +105,10 @@ const ChartWidget = publicWidget.Widget.extend({
                 duration: 0,
             };
         }
-
         const canvas = this.el.querySelector('canvas');
         this.chart = new window.Chart(canvas, chartData);
+        const minvalue = this.chart.boxes[3].start;
+        const maxvalue = this.chart.boxes[3].end;
         return this._super.apply(this, arguments);
     },
     /**
