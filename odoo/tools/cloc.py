@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import ast
-import glob
+import pathlib
 import os
 import re
 import shutil
@@ -9,7 +9,7 @@ import shutil
 import odoo
 from odoo.tools.config import config
 
-DEFAULT_EXCLUDE = ["__manifest__.py", "__openerp__.py", "tests/**", "static/lib/**",  "static/tests/**" ]
+DEFAULT_EXCLUDE = ["__manifest__.py", "__openerp__.py", "tests/**/*", "static/lib/**/*",  "static/tests/**/*" ]
 
 STANDARD_MODULE = [ 'web', 'web_enterprise', 'website_animate', 'base' ]
 
@@ -79,7 +79,7 @@ class Cloc(object):
         if not exclude:
             exclude = set()
         for i in exclude_list:
-            exclude.update(glob.glob(os.path.join(path, i), recursive=True))
+            exclude.update(str(p) for p in pathlib.Path(path).glob(i))
 
         module_name = os.path.basename(path)
         self.book(module_name)
@@ -165,19 +165,19 @@ class Cloc(object):
         if not width:
             width = min(self.max_width, shutil.get_terminal_size()[0]-24)
         hr = "-"*(width+24) + "\n"
-        fmt = '{k:%d}{lines:>8}{comment:>8}{code:>8}\n' % (width,)
+        fmt = '{k:%d}{lines:>8}{other:>8}{code:>8}\n' % (width,)
 
         # Render
-        s = fmt.format(k="Odoo cloc", lines="Line", comment="Comment", code="Code")
+        s = fmt.format(k="Odoo cloc", lines="Line", other="Other", code="Code")
         s += hr
         for m in sorted(self.modules):
-            s += fmt.format(k=m, lines=self.total[m], comment=self.total[m]-self.code[m], code=self.code[m])
+            s += fmt.format(k=m, lines=self.total[m], other=self.total[m]-self.code[m], code=self.code[m])
             if verbose:
                 for i in sorted(self.modules[m], key=lambda  i: self.modules[m][i][0], reverse=True):
                     code, total = self.modules[m][i]
-                    s += fmt.format(k='    '+i, lines=total, comment=total-code, code=code)
+                    s += fmt.format(k='    '+i, lines=total, other=total-code, code=code)
         s += hr
         total = sum(self.total.values())
         code = sum(self.code.values())
-        s += fmt.format(k='', lines=total, comment=total-code, code=code)
+        s += fmt.format(k='', lines=total, other=total-code, code=code)
         print(s)
