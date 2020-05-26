@@ -9,15 +9,18 @@ import shutil
 import odoo
 from odoo.tools.config import config
 
+VERSION = 1
 DEFAULT_EXCLUDE = ["__manifest__.py", "__openerp__.py", "tests/**/*", "static/lib/**/*",  "static/tests/**/*" ]
 
 STANDARD_MODULE = [ 'web', 'web_enterprise', 'website_animate', 'base' ]
+MAX_FILE_SIZE = 25 * 2**20 #25 MO
 
 class Cloc(object):
     def __init__(self):
         self.modules = {}
         self.code = {}
         self.total = {}
+        self.errors = {}
         self.max_width = 70
 
     #------------------------------------------------------
@@ -54,13 +57,16 @@ class Cloc(object):
     #------------------------------------------------------
     # Enumeratation
     #------------------------------------------------------
-    def book(self, module, item='', count=(0,0)):
+    def book(self, module, item='', count=(0,0), error=None):
         self.modules.setdefault(module,{})
         if item:
             self.modules[module][item] = count
         self.code[module] = self.code.get(module,0) + count[0]
         self.total[module] = self.total.get(module,0) + count[1]
         self.max_width = max(self.max_width, len(module), len(item)+4)
+        if error:
+            self.errors.setdefault(module, {})
+            self.errors[module][item] = error
 
     def count_path(self, path, exclude=None):
         path = path.rstrip('/')
@@ -92,10 +98,17 @@ class Cloc(object):
 
                 ext = os.path.splitext(file_path)[1].lower()
                 if ext in ['.py','.js','.xml']:
+                    if os.path.getsize(file_path) > MAX_FILE_SIZE:
+                        self.book(module_name, file_path, error="File Max Size Exceeded")
+                        continue
+
                     with open(file_path,'rb') as f:
                         content = f.read().decode('latin1')
                     if ext == '.py':
-                        self.book(module_name, file_path, self.parse_py(content))
+                        try:
+                            self.book(module_name, file_path, self.parse_py(content))
+                        except SyntaxError:
+                            self.book(module_name, file_path, error="Syntax Error")
                     elif ext == '.js':
                         self.book(module_name, file_path, self.parse_js(content))
                     elif ext == '.xml':
@@ -132,7 +145,7 @@ class Cloc(object):
         env.cr.execute(query)
         data = {r[0]: r[1] for r in env.cr.fetchall()}
         for a in env['ir.actions.server'].browse(data.keys()):
-            self.book(data[a.id] or '__studio__', "ir.actions.server/%s: %s" % (a.id, a.name), self.parse_py(a.code))
+            self.book(data[a.id] or "odoo/studio", "ir.actions.server/%s: %s" % (a.id, a.name), self.parse_py(a.code))
 
         query = """
             SELECT f.id, m.name FROM ir_model_fields AS f
@@ -143,7 +156,7 @@ class Cloc(object):
         env.cr.execute(query)
         data = {r[0]: r[1] for r in env.cr.fetchall()}
         for f in env['ir.model.fields'].browse(data.keys()):
-            self.book(data[f.id] or '__studio__', "ir.model.fields/%s: %s" % (f.id, f.name), self.parse_py(f.compute))
+            self.book(data[f.id] or "odoo/studio", "ir.model.fields/%s: %s" % (f.id, f.name), self.parse_py(f.compute))
 
     def count_env(self, env):
         self.count_modules(env)
@@ -181,3 +194,11 @@ class Cloc(object):
         code = sum(self.code.values())
         s += fmt.format(k='', lines=total, other=total-code, code=code)
         print(s)
+
+        if self.errors:
+            e = "\nErrors\n\n"
+            for m in sorted(self.errors):
+                e += "{}\n".format(m)
+                for i in sorted(self.errors[m]):
+                    e += fmt.format(k='    '+i, lines=self.errors[m][i], other='', code='')
+            print(e)
