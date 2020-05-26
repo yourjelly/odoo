@@ -4,7 +4,7 @@ odoo.define('website_mass_mailing.editor', function (require) {
 var core = require('web.core');
 var rpc = require('web.rpc');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
-require('website.s_popup_options');
+var options = require('web_editor.snippets.options');
 var _t = core._t;
 
 
@@ -31,7 +31,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
                     button.dataset.selectMenuEl = maillist[0];
                     button.textContent = maillist[1];
                     return button;
-                }).sort((a, b) => (a.textContent > b.textContent) ? 1 : (a.textContent < b.textContent) ? -1 : 0);
+                });
             });
         return _super(...arguments);
     },
@@ -62,21 +62,9 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     onBuilt: function () {
         var self = this;
         this._super();
-        this._assignUniqueID();
         this.select_mailing_list('click').guardedCatch(function () {
             self.getParent()._onRemoveClick($.Event( "click" ));
         });
-    },
-
-    /**
-    *@override
-    */
-    _assignUniqueID: function () {
-        this.$target.closest('.s_newsletter_block').attr('id', 'sNewsletterBlock' + Date.now());
-    },
-
-    _getSelect: function () {
-        return this.$target[0].querySelector('select');
     },
 
     /**
