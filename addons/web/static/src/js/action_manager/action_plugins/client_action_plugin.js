@@ -13,6 +13,25 @@ odoo.define('web.ClientActionPlugin', function (require) {
     const Widget = require('web.Widget');
 
     class ClientActionPlugin extends ActionAbstractPlugin {
+        willHandle(command) {
+            const { name } = command;
+            switch (name) {
+                case "LOAD_STATE":
+                case "_RESTORE":
+                    return true;
+            }
+            return super.willHandle(command);
+        }
+        handle(command) {
+            const { name , payload } = command;
+            switch (name) {
+                case "LOAD_STATE":
+                    return this.loadState(...payload);
+                case "_RESTORE":
+                    return this.dispatch('_PUSH_CONTROLLERS', ...payload);
+            }
+            return super.handle(...arguments);
+        }
     /**
      * Executes actions of type 'ir.actions.client'.
      *
@@ -43,7 +62,7 @@ odoo.define('web.ClientActionPlugin', function (require) {
         options.controllerID = controller.jsID;
         controller.options = options;
         action.id = action.id || action.tag;
-        this.pushControllers([controller]);
+        return this.pushControllers([controller]);
     }
     /**
      * @override

@@ -265,9 +265,10 @@ QUnit.test('activity view: batch send mail on activity', async function (assert)
 QUnit.test('activity view: activity widget', async function (assert) {
     assert.expect(16);
 
-    const bus = new Bus();
-    bus.on('do-action', null, payload => {
-        var action = payload.action;
+    const actionManager = {};
+    actionManager.dispatch = (cmdName, ...payload) => {
+        const [ action ] = payload;
+        if (cmdName !== 'DO_ACTION') return;
         if (action.serverGeneratedAction) {
             assert.step('serverGeneratedAction');
         } else if (action.res_model === 'mail.compose.message') {
@@ -288,7 +289,7 @@ QUnit.test('activity view: activity widget', async function (assert) {
         } else {
             assert.step("Unexpected action");
         }
-    });
+    };
     const params = {
         View: ActivityView,
         model: 'task',
@@ -315,7 +316,7 @@ QUnit.test('activity view: activity widget', async function (assert) {
             }
             return this._super.apply(this, arguments);
         },
-        bus: bus,
+        env: { actionManager },
     };
 
     var activity = await createView(params);
@@ -353,7 +354,6 @@ QUnit.test('activity view: activity widget', async function (assert) {
     ]);
 
     activity.destroy();
-    bus.destroy();
 });
 QUnit.test('activity view: no group_by_menu and no comparison_menu', async function (assert) {
     assert.expect(4);

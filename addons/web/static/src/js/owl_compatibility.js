@@ -1,4 +1,4 @@
-odoo.define('web.OwlCompatibility', function () {
+odoo.define('web.OwlCompatibility', function (require) {
     "use strict";
 
     /**
@@ -12,6 +12,8 @@ odoo.define('web.OwlCompatibility', function () {
     const { Component, hooks, tags } = owl;
     const { useRef, useSubEnv } = hooks;
     const { xml } = tags;
+
+    const patchMixin = require('web.patchMixin');
 
     const widgetSymbol = odoo.widgetSymbol;
     const children = new WeakMap(); // associates legacy widgets with their Owl children
@@ -280,9 +282,10 @@ odoo.define('web.OwlCompatibility', function () {
                     .create_filter(payload.filter)
                     .then(payload.on_success);
             } else if (evType === 'do_action') {
-                return this.env.bus.trigger('do-action', payload);
+                const { action , options , on_success , on_fail } = payload;
+                return this.env.actionManager.dispatch('DO_ACTION', action, options, on_success ,on_fail);
             } else if (evType === 'switch_view') {
-                return this.env.bus.trigger('switch-view', payload);
+                return this.env.actionManager.dispatch('SWITCH_VIEW', payload);
             } else if (evType === 'history_back') {
                 return this.env.bus.trigger('history-back', payload);
             } else if (evType === 'show_effect') {
@@ -551,7 +554,7 @@ odoo.define('web.OwlCompatibility', function () {
     ComponentWrapper.template = xml`<t t-component="Component" t-props="props" t-ref="component"/>`;
 
     return {
-        ComponentAdapter,
+        ComponentAdapter: patchMixin(ComponentAdapter),
         ComponentWrapper,
         WidgetAdapterMixin,
     };

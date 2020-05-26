@@ -5940,7 +5940,7 @@ QUnit.module('ActionManager', {
         assert.containsOnce(webClient, '.o_form_view.o_form_editable');
 
         await testUtils.fields.editInput($(webClient.el).find('input[name=foo]'), 'val');
-        webClient.actionManager._clearUncommittedChanges();
+        webClient.env.actionManager._clearUncommittedChanges();
         await nextTick();
         await testUtils.owlCompatibilityExtraNextTick();
 
@@ -5949,7 +5949,7 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click($('.modal .modal-footer .btn-primary'));
         await testUtils.owlCompatibilityExtraNextTick();
 
-        webClient.actionManager._clearUncommittedChanges();
+        webClient.env.actionManager._clearUncommittedChanges();
         await nextTick();
         await testUtils.owlCompatibilityExtraNextTick();
 

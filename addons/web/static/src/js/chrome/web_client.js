@@ -17,6 +17,9 @@ const { hooks } = owl;
 const { useRef, useExternalListener } = hooks;
 
 class WebClient extends KeyboardNavigation {
+    // TODO:
+    // Move URL stuff elsewhere
+    // then updateState may be moved too !
     constructor() {
         super();
         this.LoadingWidget = LoadingWidget;
@@ -27,12 +30,12 @@ class WebClient extends KeyboardNavigation {
         this.currentMainComponent = useRef('currentMainComponent');
         this.currentDialogComponent = useRef('currentDialogComponent');
         this.menu = useRef('menu');
-        this._setActionManager();
+        this.actionManager = ActionManager.useActionManager();
 
         // the state of the webclient contains information like the current
         // menu id, action id, view type (for act_window actions)...
         this.ignoreHashchange = false;
-        this.state = {};
+        this.urlState = {};
         this._titleParts = {};
 
         // FIXME: get rid of bus event, or manage them as they should
@@ -40,14 +43,32 @@ class WebClient extends KeyboardNavigation {
         this.env.bus.on('show-effect', this, this._onShowEffect);
         this.env.bus.on('connection_lost', this, this._onConnectionLost);
         this.env.bus.on('connection_restored', this, this._onConnectionRestored);
-        this.env.bus.on('webclient-class-included', this, this.render);
         this.env.bus.on('set_title_part', this, payload => this._onSetTitlePart({ detail: payload }));
 
-        this.renderingInfo = null;
-        this.rState = null;
         this.controllerComponentMap = new Map();
         this.allComponents = this.constructor.components;
     }
+    get rState() {
+        // TODO: make this cached (by revNumber or ...)?
+        const { controllerStack , dialog } = this.actionManager.state;
+        const localStack = controllerStack.slice().reverse();
+        const main = localStack[0];
+        const fullscreen = localStack.some(elm => elm.action.target === 'fullscreen');
+        const elm = localStack.find(elm => elm.controller.options && elm.controller.options.menuID);
+        let menuID = elm && elm.controller.options.menuID;
+        if (!menuID) {
+            if (this.urlState.menu_id) {
+                menuID = this.urlState.menu_id;
+            } else if (main) {
+                const menu = Object.values(this.menus).find(menu => {
+                    return menu.actionID === main.action.id;
+                });
+                menuID = menu && menu.id;
+            }
+        }
+        return { main , dialog , fullscreen, menuID };
+    }
+
     //--------------------------------------------------------------------------
     // OWL Overrides
     //--------------------------------------------------------------------------
@@ -58,9 +79,6 @@ class WebClient extends KeyboardNavigation {
         }
         // Errors that have been handled before
         console.warn(e);
-        const newStack = this.renderingInfo.controllerStack;
-        const newDialog = this.renderingInfo.dialog;
-        this.actionManager.rollBack(newStack, newDialog);
     }
     mounted() {
         super.mounted();
@@ -86,12 +104,15 @@ class WebClient extends KeyboardNavigation {
 
     get bodyClass() {
         return {
-            o_fullscreen: this.renderingInfo && this.renderingInfo.fullscreen,
+            o_fullscreen: this.rState.fullscreen,
             o_rtl: this.env._t.database.parameters.direction === 'rtl',
             o_touch_device: this.env.device.touch,
         };
     }
     get isRendering() {
+        // TODO: this thing is meant to prevent DOM event or bus events
+        // to actually do anything *during* our rendering
+        // i.e.: before the webClient is fully in the dom and fully patched
         const { isMounted , currentFiber } = this.__owl__;
         return isMounted && currentFiber && !currentFiber.isCompleted;
     }
@@ -99,17 +120,6 @@ class WebClient extends KeyboardNavigation {
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-    _cancel() {
-        if (this.isRendering) {
-            this.__owl__.currentFiber.cancel();
-        }
-        //this.renderingInfo = null;
-    }
-    async _clearUncommitedChanges() {
-        if (!this.currentDialogComponent.comp && this.currentMainComponent.comp) {
-            await this.currentMainComponent.comp.canBeRemoved();
-        }
-    }
     _computeTitle() {
         const parts = Object.keys(this._titleParts).sort();
         let tmp = "";
@@ -218,16 +228,24 @@ class WebClient extends KeyboardNavigation {
         });
     }
     async _loadState(state) {
-        let stateLoaded = await this.actionManager.loadState(state, { menuID: state.menu_id });
-        if (stateLoaded === null) {
+        const stateLoaded = await this.actionManager.dispatch('LOAD_STATE',
+            state, { menuID: state.menu_id }
+        );
+        if (!stateLoaded) {
             if ('menu_id' in state) {
                 const action = this.menus[state.menu_id].actionID;
-                return this.actionManager.doAction(action, state);
-            } else {//if (('home' in state || Object.keys(state).filter(key => key !== 'cids').length === 0)) {
+                return this.actionManager.dispatch('DO_ACTION', action, state);
+            } else {
                 const {actionID , menuID} = this._getHomeAction();
                 if (actionID) {
-                    return this.actionManager.doAction(actionID, {menuID, clear_breadcrumbs: true});
+                    return this.actionManager.dispatch('DO_ACTION',
+                        actionID,
+                        {menuID, clear_breadcrumbs: true}
+                    );
                 } else {
+                    // TODO: clean me: just signals to WebClient
+                    // that the AM did not handle the state
+                    // We should re-render anyway
                     return 'render';
                 }
             }
@@ -263,24 +281,6 @@ class WebClient extends KeyboardNavigation {
         scrollingEl.scrollTop = scrollPosition.top || 0;
         scrollingEl.scrollLeft = scrollPosition.left || 0;
     }
-    _setActionManager() {
-        this.actionManager = new ActionManager(this.env);
-        this.actionManager.on('cancel', this, this._cancel);
-        this.actionManager.on('update', this, this._onActionManagerUpdated);
-        this.actionManager.on('clear-uncommitted-changes', this, async (callBack) => {
-            await this._clearUncommitedChanges();
-            callBack();
-        });
-        this.actionManager.on('controller-cleaned', this, (controllerIds) => {
-            for (const jsID of controllerIds) {
-                const comp = this.controllerComponentMap.get(jsID);
-                this.controllerComponentMap.delete(jsID);
-                if (comp) {
-                    comp.destroy(true);
-                }
-            }
-        });
-    }
     _setTitlePart(part, title) {
         this._titleParts[part] = title;
     }
@@ -297,7 +297,7 @@ class WebClient extends KeyboardNavigation {
         document.title = title;
     }
     _storeScrollPosition(scrollPosition) {
-        const cStack = this.renderingInfo.controllerStack;
+        const cStack = this.actionManager.state.controllerStack;
         const { controller } = cStack[cStack.length-2] || {};
         if (controller) {
             controller.scrollPosition = scrollPosition;
@@ -309,8 +309,8 @@ class WebClient extends KeyboardNavigation {
      */
     _updateState(state) {
         // the action and menu_id may not have changed
-        state.action = state.action || this.state.action || null;
-        const menuID = state.menu_id || this.state.menu_id || '';
+        state.action = state.action || this.urlState.action || null;
+        const menuID = state.menu_id || this.urlState.menu_id || '';
         if (menuID) {
             state.menu_id = menuID;
         }
@@ -318,7 +318,7 @@ class WebClient extends KeyboardNavigation {
             this._setTitlePart('action', state.title);
             delete state.title
         }
-        this.state = state;
+        this.urlState = state;
         const hashParams = new URLSearchParams();
         for (const key in state) {
             if (state[key] !== null) {
@@ -332,118 +332,59 @@ class WebClient extends KeyboardNavigation {
         this._setWindowTitle(this._computeTitle());
     }
     _wcUpdated() {
-        if (this.renderingInfo) {
-            let state = {};
-            if (this.renderingInfo.main) {
-                const main = this.renderingInfo.main;
-                const mainComponent = this.currentMainComponent.comp;
-                this.controllerComponentMap.set(main.controller.jsID, mainComponent);
-                Object.assign(state, mainComponent.getState());
-                state.action = main.action.id;
-                let active_id = null;
-                let active_ids = null;
-                if (main.action.context) {
-                    active_id = main.action.context.active_id || null;
-                    active_ids = main.action.context.active_ids;
-                    if (active_ids && !(active_ids.length === 1 && active_ids[0] === active_id)) {
-                        active_ids = active_ids.join(',');
-                    } else {
-                        active_ids = null;
-                    }
-                }
-                if (active_id) {
-                    state.active_id = active_id;
-                }
-                if (active_ids) {
-                    state.active_ids = active_ids;
-                }
-                if (!('title' in state)) {
-                    state.title = mainComponent.title;
-                }
-                // keep cids in hash
-                //this._determineCompanyIds(state);
-                const scrollPosition = this.renderingInfo.main.controller.scrollPosition;
-                if (scrollPosition) {
-                    this._scrollTo(scrollPosition);
+        const state = {};
+        const { main, dialog , menuID } = this.rState; 
+        if (main) {
+            const mainComponent = this.currentMainComponent.comp;
+            Object.assign(state, mainComponent.getState());
+            state.action = main.action.id;
+            let active_id = null;
+            let active_ids = null;
+            if (main.action.context) {
+                active_id = main.action.context.active_id || null;
+                active_ids = main.action.context.active_ids;
+                if (active_ids && !(active_ids.length === 1 && active_ids[0] === active_id)) {
+                    active_ids = active_ids.join(',');
+                } else {
+                    active_ids = null;
                 }
             }
-            if (this.renderingInfo.dialog) {
-                this.controllerComponentMap.set(this.renderingInfo.dialog.controller.jsID, this.currentDialogComponent.comp);
+            if (active_id) {
+                state.active_id = active_id;
             }
-            const newStack = this.renderingInfo.controllerStack || [];
-            const newDialog = this.renderingInfo.dialog;
-            this.actionManager.commit(newStack, newDialog, this.renderingInfo.onCommit);
-
-            if (this.renderingInfo.menuID) {
-                state.menu_id = this.renderingInfo.menuID;
+            if (active_ids) {
+                state.active_ids = active_ids;
             }
-            if (!this.renderingInfo.dialog) {
-                this._updateState(state);
+            if (!('title' in state)) {
+                state.title = mainComponent.title;
+            }
+            // keep cids in hash
+            //this._determineCompanyIds(state);
+            const scrollPosition = main.controller.scrollPosition;
+            if (scrollPosition) {
+                this._scrollTo(scrollPosition);
             }
         }
-        this.rState = this.renderingInfo || this.rState;
-        if (this.rState && this.rState.main) {
-            this.rState.main.reload = false;
+        if (menuID) {
+            state.menu_id = menuID;
         }
-        this.renderingInfo = null;
-        this.env.bus.trigger('web-client-updated', this);
-    }
-    _getBreadcrumb({action, controller}) {
-        const component = this.controllerComponentMap.get(controller.jsID);
-        return {
-            controllerID: controller.jsID,
-            title: component && component.title || action.name,
-        };
+        if (!dialog && main) {
+            this._updateState(state);
+        }
     }
 
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
 
-    _onActionManagerUpdated(payload) {
-        const { controllerStack, dialog, onCommit, doOwlReload } = payload;
-        const breadcrumbs = [];
-        let fullscreen = false;
-        let menuID;
-        controllerStack.forEach((elm, index) =>{
-            const controller = elm.controller;
-            menuID = controller.options && controller.options.menuID || menuID;
-            if (elm.action.target === 'fullscreen') {
-                fullscreen = true;
-            }
-            const component = this.controllerComponentMap.get(controller.jsID);
-            breadcrumbs.push(this._getBreadcrumb(elm));
-            controller.viewOptions = controller.viewOptions || {};
-            controller.viewOptions.breadcrumbs = breadcrumbs.slice(0, index);
-        });
-        const main = controllerStack[controllerStack.length - 1];
-        if (!menuID) {
-            if (this.state.menu_id) {
-                menuID = this.state.menu_id;
-            } else if (main) {
-                const menu = Object.values(this.menus).find(menu => {
-                    return menu.actionID === main.action.id;
-                });
-                menuID = menu && menu.id;
-            }
-        }
-        if (main) {
-            main.reload = doOwlReload !== undefined ? doOwlReload && !dialog : !dialog;
-        }
-        this.renderingInfo = {
-            main, dialog, menuID, fullscreen,
-            controllerStack, onCommit
-        };
-        this._domCleaning();
-        this.render();
-    }
     /**
      * @private
      * @param {OdooEvent} ev
      * @param {integer} ev.detail.controllerID
      */
     _onBreadcrumbClicked(ev) {
-        this.actionManager.restoreController(ev.detail.controllerID);
+        // TODO: it is pôssible now to put this in action_adapter
+        this.actionManager.dispatch('RESTORE_CONTROLLER', ev.detail.controllerID);
     }
     /**
      * Whenever the connection is lost, we need to notify the user.
@@ -475,7 +416,8 @@ class WebClient extends KeyboardNavigation {
         }
     }
     _onDialogClosed() {
-        this.actionManager.doAction({type: 'ir.actions.act_window_close'});
+        // TODO: may be moved in dialogAction or action_adapter ?
+        this.actionManager.dispatch('DO_ACTION', {type: 'ir.actions.act_window_close'});
     }
     /**
      * Displays a warning in a dialog or with the notification service
@@ -512,7 +454,7 @@ class WebClient extends KeyboardNavigation {
      * @param {Object} ev.detail
      */
     _onExecuteAction(ev) {
-        this.actionManager.executeInFlowAction(ev.detail);
+        this.actionManager.dispatch('EXECUTE_IN_FLOW', ev.detail);
     }
     _onGenericClick(ev) {
         this._domCleaning();
@@ -535,7 +477,7 @@ class WebClient extends KeyboardNavigation {
                 let matchingEl = null;
                 try {
                     matchingEl = this.el.querySelector(`.o_content #${href.value.substr(1)}`);
-                } catch (e) {} // Inavlid selector: not an anchor anyway
+                } catch (e) {} // Invalid selector: not an anchor anyway
                 if (matchingEl) {
                     const {top, left} = matchingEl.getBoundingClientRect();
                     this._scrollTo({top, left});
@@ -560,7 +502,7 @@ class WebClient extends KeyboardNavigation {
      */
     _onOpenMenu(ev) {
         const action = this.menus[ev.detail.menuID].actionID;
-        this.actionManager.doAction(action, {
+        this.actionManager.dispatch('DO_ACTION', action, {
             clear_breadcrumbs: true,
             menuID: ev.detail.menuID,
         });

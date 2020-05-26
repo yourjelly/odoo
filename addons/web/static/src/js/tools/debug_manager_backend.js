@@ -1,6 +1,8 @@
 odoo.define('web.DebugManager.Backend', function (require) {
 "use strict";
 
+const ActionAdapter = require('web.ActionAdapter');
+const ActionManager = require('web.ActionManager'); 
 const DialogAction = require('web.DialogAction');
 var DebugManager = require('web.DebugManager');
 var dialogs = require('web.view_dialogs');
@@ -16,7 +18,6 @@ var Widget = require('web.Widget');
 
 var QWeb = core.qweb;
 var _t = core._t;
-
 /**
  * DebugManager features depending on backend
  */
@@ -114,6 +115,7 @@ DebugManager.include({
         this._super(...arguments);
         this.env = env;
         this.mode = mode || 'main';
+        this.actionManager = this.env.actionManager;
     },
     async willStart() {
         const [_, canSeeRecordRules, canSeeModelAccess] = await Promise.all([
@@ -126,17 +128,24 @@ DebugManager.include({
     },
     async start() {
         await this._super(...arguments);
-        this._updateCB = webClient => {
-            const state = webClient.actionManager.getCurrentState();
-            const { action } = state[this.mode] || {};
-            const refKey = this.mode === 'main' ? 'currentMainComponent' : 'currentDialogComponent';
-            const component = webClient[refKey].comp;
+        const amState = this.actionManager.getExternalState();
+        this._updateCB = () => {
+            const { controllerStack, dialog } = amState;
+            let action, controller;
+            if (this.mode === 'main') {
+                ({ action,  controller } = controllerStack[controllerStack.length-1] || {});
+            } else {
+                ({ action,  controller } = dialog);
+            }
+            const component = ActionAdapter.getInstance(controller && controller.jsID);
+            action = component ? action : null;
             this.update('action', action, component);
         };
-        this.env.bus.on('web-client-updated', this, this._updateCB);
+        // FIXME: this won't work, probably when switching back to the home menu
+        this.actionManager.on('committed', this, this._updateCB);
     },
     destroy: function () {
-        this.env.bus.off('web-client-updated', this, this._updateCB);
+        this.actionManager.off('committed', this);
         this._super(...arguments);
     },
     /**
@@ -744,8 +753,13 @@ var RequestDetails = Widget.extend({
 });
 
 class DebugManagerAdapter extends ComponentAdapter {
+    constructor(parent, props) {
+        props.Component = DebugManager;
+        super(...arguments);
+    }
     get widgetArgs() {
-        return [this.env, 'dialog'];
+        const mode = this.props.inDialog ? 'dialog' : 'main';
+        return [this.env, mode];
     }
     update() {
         this.widget.update(...arguments);
@@ -773,7 +787,7 @@ DebugManager.deploy = function () {
         async willStart() {
             await this._super(...arguments);
             this.debugManager = new DebugManagerAdapter(this, {
-                Component: DebugManager,
+                inDialog: true,
             });
             await this.debugManager.mount(document.createDocumentFragment());
         },

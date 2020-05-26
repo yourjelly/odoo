@@ -1,11 +1,30 @@
 odoo.define('web.ActionAbstractPlugin', function (require) {
     "use_strict";
 
+    // TODO: CLEAN ME
     class ActionAbstractPlugin {
         constructor(actionManager, env) {
             this.actionManager = actionManager;
             this.env = env;
         }
+        willHandle({ name, payload }) {
+            const handledCommands = [
+                '_EXECUTE',
+            ];
+            if (handledCommands.includes(name) &&
+                payload[0].type === this.constructor.type
+            ) {
+                return true;
+            }
+            return false;
+        }
+        handle({name, payload}) {
+            if (name === '_EXECUTE') {
+                return this.executeAction(...payload);
+            }
+        }
+        beforeHandle(command) {}
+        afterHandle(command) {}
         //----------------------------------------------------------------------
         // API
         //----------------------------------------------------------------------
@@ -37,25 +56,34 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         get currentDialogController() {
             return this.actionManager.currentDialogController;
         }
+        get rev() {
+            return this.actionManager.rev;
+        }
 
         //----------------------------------------------------------------------
         // Public
         // Normalized shorthands to ActionManager's methods
         //----------------------------------------------------------------------
+        dispatch() {
+            return this.actionManager._dispatch(...arguments);
+        }
         doAction() {
-            return this.actionManager.doAction(...arguments);
+            return this.dispatch('DO_ACTION', ...arguments);
         }
         makeBaseController() {
             return this.actionManager.makeBaseController(...arguments);
         }
         pushControllers() {
-            return this.actionManager.pushControllers(...arguments);
+            return this.dispatch('_PUSH_CONTROLLERS', ...arguments);
         }
         rpc() {
             return this.transactionAdd(this.env.services.rpc(...arguments));
         }
         transactionAdd() {
             return this.actionManager._transaction.add(...arguments);
+        }
+        _clearUncommittedChanges() {
+            return this.actionManager._clearUncommittedChanges();
         }
     }
     ActionAbstractPlugin.type = null;

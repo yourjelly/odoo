@@ -10,7 +10,29 @@ odoo.define('web.CloseActionPlugin', function (require) {
     const ActionManager = require('web.ActionManager');
 
     class CloseActionPlugin extends ActionAbstractPlugin {
-        async executeAction(action, options) {
+        willHandle({name}) {
+            switch (name) {
+                case '_COMMIT':
+                    return true;
+            }
+            return super.willHandle(...arguments);
+        }
+        handle(command) {
+            if (command.name === "_EXECUTE") {
+                const prepared = this._executeAction(...command.payload);
+                const { controller , onCommit , doOwlReload} = prepared;
+                command.root.onCommit = onCommit;
+                command.addOutput({doOwlReload});
+                return this.pushControllers([controller]);
+            }
+            if (command.name === "_COMMIT") {
+                const [commandToCommit] = command.payload;
+                if (commandToCommit.onCommit) {
+                    commandToCommit.onCommit();
+                }
+            }
+        }
+        _executeAction(action, options) {
             const dialog = this.currentDialogController;
             // I'm afraid this is mandatory
             // some legacy modals make their main controller
@@ -30,7 +52,7 @@ odoo.define('web.CloseActionPlugin', function (require) {
             let onCommit = null;
             if (action.effect) {
                 onCommit = () => {
-                    const payload = Object.assign({}, action.effect, {force: true})
+                    const payload = Object.assign({}, action.effect, {force: true});
                     this.env.bus.trigger('show-effect', payload);
                 };
             }
@@ -41,7 +63,11 @@ odoo.define('web.CloseActionPlugin', function (require) {
                 controller.options = controller.options || {};
                 controller.options.on_success = options.on_success;
             }
-            return this.pushControllers([controller], { onCommit , doOwlReload });
+            return {
+                onCommit,
+                controller,
+                doOwlReload,
+            };
         }
     }
     CloseActionPlugin.type = 'ir.actions.act_window_close';
