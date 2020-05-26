@@ -11,6 +11,7 @@ from odoo.tools.misc import file_open
 from odoo.tools.convert import _eval_xml, xml_import
 from odoo.tools.safe_eval import safe_eval
 from odoo.modules import get_module_path, get_module_resource
+from odoo.tools.translate import TranslationFileReader
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
@@ -88,18 +89,12 @@ class MailTemplate(models.Model):
                 template.ref_ir_act_window.unlink()
         return True
 
-    def _override_translation_term(self, lang, module_name):
-        lang_code = tools.get_iso_codes(lang)
-        base_lang_code = None
-        data = []
-        if '_' in lang_code:
-            base_lang_code = lang_code.split('_')[0]
-        trans_file = get_module_resource(module_name, 'i18n', lang_code + '.po')
+    def _get_translation_data(self, trans_file, lang):
         with file_open(trans_file, mode='rb') as fileobj:
             _logger.info("loading %s", trans_file)
             fileformat = os.path.splitext(trans_file)[-1][1:].lower()
-            print(fileobj, fileformat)
             reader = TranslationFileReader(fileobj, fileformat=fileformat)
+            data = []
 
             def process_row(row):
                 """Process a single PO (or POT) entry."""
@@ -110,9 +105,8 @@ class MailTemplate(models.Model):
                                      'comments', 'imd_model', 'imd_name', 'module'))
                 dic['lang'] = lang
                 dic.update(row)
-
-                # do not import empty values
-                if not False and not dic['value']:
+                # # do not import empty values
+                if not dic['value']:
                     return
                 _rows_data = dict(dic, state="translated")
                 data.append((_rows_data['name'], _rows_data['lang'], _rows_data['res_id'],
@@ -124,6 +118,18 @@ class MailTemplate(models.Model):
             # the entries from the POT file).
             for row in reader:
                 process_row(row)
+        return data
+
+    def _override_translation_term(self, lang, module_name):
+        lang_code = tools.get_iso_codes(lang)
+        base_lang_code = None
+        if '_' in lang_code:
+            base_lang_code = lang_code.split('_')[0]
+        base_lang_code_data = self._get_translation_data(get_module_resource(module_name, 'i18n', base_lang_code + '.po'), lang)
+        lang_code_data = self._get_translation_data(get_module_resource(module_name, 'i18n', lang_code + '.po'), lang)
+
+        print(base_lang_code_data, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+        print(lang_code_data, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
 
     def reset_mail_template(self):
         for template in self:
