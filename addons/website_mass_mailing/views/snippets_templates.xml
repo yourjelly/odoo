@@ -76,6 +76,7 @@
                 <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
                 <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
                 <we-button data-set-layout="fixedBottom" data-name="position_bottom">Bottom</we-button>
+            </we-select>
             <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-color-prefix="text-"/>
             <we-select string="Change Newsletter">
             </we-select>
