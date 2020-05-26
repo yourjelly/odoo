@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="web.WebClient" owl="1">
-        <t t-set="renderingInfo" t-value="renderingInfo || rState || {}"/>
+        <t t-set="renderingInfo" t-value="rState"/>
         <t t-set='dialog' t-value='renderingInfo.dialog' />
         <t t-set="main" t-value="renderingInfo.main"/>
         <body class="o_web_client" t-att-class="bodyClass"
@@ -19,12 +19,11 @@
 
             <div class="o_action_manager">
                 <!-- fixme: class below totally ignored -->
-                <ActionAdapter t-if="main" class="o_action" t-ref="currentMainComponent"
-                        t-key="main.controller.jsID"
-                        Component="main.controller.Component"
-                        action="main.action"
-                        options="main.controller.options"
-                        reload="main.reload"/>
+                <ActionAdapter t-if="main" class="o_action"
+                    t-ref="currentMainComponent"
+                    t-key="main.controller.jsID"
+                    t-props="main"
+                />
             </div>
             <DialogAction t-if='dialog' t-key="dialog.controller.jsID"
                 contentClass="dialog.controller.className"
@@ -32,11 +31,10 @@
                 stopClicks="false"
                 title="dialog.action.name"
                 t-on-dialog-closed="_onDialogClosed">
-                <ActionAdapter class="o_action" t-key="dialog.controller.jsID"
+                <ActionAdapter class="o_action"
                     t-ref="currentDialogComponent"
-                    Component="dialog.controller.Component"
-                    action="dialog.action"
-                    options="dialog.controller.options"
+                    t-key="dialog.controller.jsID"
+                    t-props="dialog"
                     inDialog=""/>
             </DialogAction>
             <div class="o_dialogs"/>

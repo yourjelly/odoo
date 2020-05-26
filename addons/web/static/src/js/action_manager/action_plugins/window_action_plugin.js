@@ -11,13 +11,33 @@ odoo.define('web.WindowActionPlugin', function (require) {
     const viewRegistry = require('web.view_registry');
 
     class WindowActionPlugin extends ActionAbstractPlugin {
-        constructor() {
-            super(...arguments);
-            this.env.bus.on('switch-view', this, this._onSwitchView);
+        willHandle({name, payload}) {
+            switch (name) {
+                case "_RESTORE": {
+                    const [ action ] = payload || [];
+                    if (action && action.type === this.constructor.type) {
+                        return true;
+                    }
+                    break;
+                }
+                case "SWITCH_VIEW":
+                    return true;
+                case "LOAD_STATE":
+                    return true;
+            }
+            return super.willHandle(...arguments);
         }
-        destroy() {
-            super.destroy(...arguments);
-            this.env.bus.off('switch-view', this, this._onSwitchView);
+        handle(command) {
+            const {name, payload} = command;
+            switch (name) {
+                case "_RESTORE":
+                    return this.restoreController(...payload);
+                case "SWITCH_VIEW":
+                    return this._onSwitchView(...payload);
+                case "LOAD_STATE":
+                    return this.loadState(...payload);
+            }
+            return super.handle(...arguments);
         }
 
         //--------------------------------------------------------------------------
@@ -62,16 +82,18 @@ odoo.define('web.WindowActionPlugin', function (require) {
                     lazyView = this._findMobileView(views, lazyView.multiRecord) || lazyView;
                 }
             }
-            const baseControllerParams = Object.assign({}, options);
             const controllers = [];
+            const baseControllerParams = Object.assign({}, options);
             if (lazyView) {
+                const controllerID = baseControllerParams.controllerID;
+                baseControllerParams.controllerID = null;
                 this._createViewController(action, lazyView.type, {controllerState: options.controllerState}, baseControllerParams);
                 action.controller.options = options;
                 this.controllers[action.controller.jsID] = action.controller;
                 controllers.push(action.controller);
                 Object.assign(
                     baseControllerParams,
-                    { index: action.controller.index + 1 }
+                    { index: action.controller.index + 1 , controllerID }
                 );
             }
 
@@ -82,11 +104,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
             this._createViewController(action, curView.type, viewOptions, baseControllerParams);
             action.controller.options = options;
             controllers.push(action.controller);
-            let pushOptions;
-            if (options && 'pushOptions' in options) {
-                pushOptions = options.pushOptions;
-            }
-            this.pushControllers(controllers, pushOptions);
+            return this.dispatch('_PUSH_CONTROLLERS', controllers);
         }
         /**
          * @override
@@ -103,8 +121,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
                     // this._closeDialog(true); // there may be a currently opened dialog, close it // FIXME
                     var viewOptions = {currentId: state.id};
                     var viewType = state.view_type || currentController.viewType;
-                    this._switchController(currentAction, viewType, viewOptions);
-                    return true;
+                    return this._switchController(currentAction, viewType, viewOptions);
                 } else if (!action_registry.contains(state.action)) {
                     // the action to load isn't the current one, so execute it
                     var context = {};
@@ -159,8 +176,8 @@ odoo.define('web.WindowActionPlugin', function (require) {
          * @override
          * @private
          */
-        restoreControllerHook(action, controller) {
-            this._switchController(action, controller.viewType);
+        restoreController(action, controller) {
+            return this._switchController(action, controller.viewType);
         }
 
         //--------------------------------------------------------------------------
@@ -202,7 +219,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
 
             const viewDescr = action.views.find(view => view.type === viewType);
             if (!viewDescr) {
-                throw new Error('Plugin Error');
+                throw new Error(`Plugin Error: view type '${viewType}' not available in action`);
             }
             const params = Object.assign({}, options, {Component: viewDescr.View});
             const newController = this.makeBaseController(action, params);
@@ -351,16 +368,8 @@ odoo.define('web.WindowActionPlugin', function (require) {
                     return c.viewType === viewType && c.actionID === action.jsID;
                 });
             }
-            try {
-                this._createViewController(action, viewType, viewOptions, { index });
-            } catch (e) {
-                if (e.message === 'Plugin Error') {
-                    return Promise.reject();
-                } else {
-                    throw e;
-                }
-            }
-            this.pushControllers([action.controller]);
+            this._createViewController(action, viewType, viewOptions, { index });
+            return this.pushControllers([action.controller]);
         }
 
         //--------------------------------------------------------------------------
@@ -378,8 +387,8 @@ odoo.define('web.WindowActionPlugin', function (require) {
          * @param {mode} [payload.mode] the mode to open, i.e. 'edit' or 'readonly'
          *   (only relevant for form views)
          */
-        _onSwitchView(payload) {
-            this.actionManager.trigger('cancel');
+        async _onSwitchView(payload) {
+            await this._clearUncommittedChanges();
             const viewType = payload.view_type;
             const { action } = this._getMainActionDescriptors();
             // TODO: find a way to save/restore state
@@ -393,7 +402,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
             if (payload.mode) {
                 options.mode = payload.mode;
             }
-            this._switchController(action, viewType, options);
+            return this._switchController(action, viewType, options);
         }
     }
     WindowActionPlugin.type = 'ir.actions.act_window';
