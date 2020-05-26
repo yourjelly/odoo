@@ -377,7 +377,9 @@ var SnippetEditor = Widget.extend({
         }
 
         // Show/hide overlay in preview mode or not
-        this.$el.toggleClass('oe_active', show);
+        if (!this.$target.hasClass('s_popup')){
+            this.$el.toggleClass('oe_active', show);
+        }
         this.cover();
     },
     /**
