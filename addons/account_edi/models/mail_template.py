@@ -17,16 +17,10 @@ class MailTemplate(models.Model):
         if self.model != 'account.move':
             return res
 
-        existing_attachments = self.env['ir.attachment'].search([
-                ('res_model', '=', 'account.move'),
-                ('res_id', 'in', res_ids),
-                ('edi_format_id', '!=', False)])
+        existing_documents = self.env['account.edi.document'].search([('move_id', 'in', res_ids)])
 
         for record in self.env[self.model].browse(res_ids):
-            available_formats = existing_attachments.filtered(lambda a: a.res_id == record.id)
-            missing_formats = record.journal_id.edi_format_ids.filtered(lambda f: f._origin.id not in available_formats.edi_format_id.ids)
-            new_attachments = missing_formats._create_ir_attachments(record)
-            available_formats |= new_attachments
-            (res[record.id] if multi_mode else res).setdefault('attachments', []).extend([(a.name, a.datas) for a in available_formats])
+            available_formats = existing_documents.filtered(lambda a: a.move_id == record)
+            (res[record.id] if multi_mode else res).setdefault('attachments', []).extend([(d.attachment_id.name, d.attachment_id.datas) for d in available_formats])
 
         return res

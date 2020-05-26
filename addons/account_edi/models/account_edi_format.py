@@ -20,50 +20,129 @@ class AccountEdiFormat(models.Model):
     name = fields.Char()
     code = fields.Char()
     hide_on_journal = fields.Selection([('import_export', 'Import/Export'), ('import', 'Import Only')], default='import_export', help='used to hide this EDI format on journals')
+    has_web_service = fields.Boolean()
 
     _sql_constraints = [
         ('unique_code', 'unique (code)', 'This code already exists')
     ]
 
     ####################################################
+    # Low-level methods
+    ####################################################
+
+    @api.model
+    def create(self, vals):
+        res = super().create(vals)
+
+        journals = self.env['account.journal'].search([('type', 'in', ('sale', 'purchase'))])
+        for journal in journals:
+            if res._enable_edi_on_journal_by_default(journal):
+                journal.edi_format_ids += res
+
+        return res
+
+    ####################################################
     # Export method to override based on EDI Format
     ####################################################
 
-    def _export_invoice_to_attachment(self, invoice):
-        """ Create the file content representing the invoice.
+    def _is_invoice_edi_needed(self, invoice):
+        """ Is the EDI necessary for this invoice ?
+            (for example, some edi_format might be specific to some countries).
 
-        :param invoice: the invoice to encode.
-        :returns: a dictionary (values are compatible to create an ir.attachment)
-        * name : the name of the file
-        * datas : the content of the file,
-        * res_model : 'account.move',
-        * res_id: the id of invoice
-        * mimetype : the mimetype of the attachment
+        :param invoice: The invoice.
+        :returns:       True if this invoice needs to be exported in this format, False otherwise.
         """
         # TO OVERRIDE
+        self.ensure_one()
+        return True
+
+    def _is_payment_edi_needed(self, payment):
+        """ Is the EDI necessary for this payment ?
+
+        :param invoice: The account.move representing the payment.
+        :returns:       True if this payment needs to be exported in this format, False otherwise.
+        """
         self.ensure_one()
         return False
 
-    def _export_invoice_to_embed_to_pdf(self, pdf_content, invoice):
-        """ Create the file content representing the invoice when it's destined
-            to be embed into a pdf.
-            - default: creates the default EDI document (_export_invoice_to_attachment).
-            - Should return False if this EDI format should not be embedded.
-            - Should be overriden only if a specific behavior (for example,
-            include the pdf content inside the file).
+    def _needs_web_services(self):
+        """ Does this edi format needs webservices for generating the edi file ?
+            If False, the file will be generated automatically.
+            Can be overriden.
 
-            :param pdf_content: the pdf before any EDI format was added.
-            :param invoice: the invoice to add.
-            :returns: a dictionary or False if this EDI format must not be embedded to pdf.
-            * name : the name of the file
-            * datas : the content of the file,
-            * res_model : 'account.move',
-            * res_id: the id of invoice
-            * mimetype : the mimetype of the attachment
+            :return: False if the edi file can be generated automatically.
+        """
+        self.ensure_one()
+        return self.has_web_service
+
+    def _enable_edi_on_journal_by_default(self, journal):
+        """ Should the format be enabled by default on the journal ?
+
+        :param journal: The journal
+        :param company: The journal's company
+        :returns:       True if this format should be enabled by default on the journal, False otherwise.
         """
         # TO OVERRIDE
         self.ensure_one()
-        return self._export_invoice_to_attachment(invoice)
+        return journal.type in ['sale', 'purchase']
+
+    def _embed_invoice_attachment_to_pdf(self):
+        """ Does the documents of this format need to be embedded in the pdf.
+
+            :return: True if the documents needs to be embedded, False otherwise.
+        """
+        # TO OVERRIDE
+        return True
+
+    def _post_invoice_edi(self, invoices):
+        """ Create the file content representing the invoice (and calls webservices if necessary).
+
+        :param invoice: A list of invoices to post.
+        :returns:       A dictionary with the invoice as key and as value, another dictionary:
+        * attachment:   The attachment representing the invoice in this edi_format if the edi was successfully posted.
+        * error:        An error if the edi was not successfully posted.
+        """
+        # TO OVERRIDE
+        self.ensure_one()
+        return {}
+
+    def _cancel_invoice_edi(self, invoices):
+        """Calls the webservices to cancel the invoice of this document.
+
+        :param documents: A list of invoices to cancel.
+        :returns:         A dictionary with the invoice as key and as value:
+                          - True if the invoice was successfully cancelled.
+                          - False or the string of an error if the invoice was not cancelled.
+        """
+        # TO OVERRIDE
+        self.ensure_one()
+        return {invoice: True for invoice in invoices}  # By default, cancel succeeds doing nothing.
+
+    def _post_payment_edi(self, payments_with_reconciled):
+        """ Create the file content representing the payment (and calls webservices if necessary).
+
+        :param payments_with_reconciled:   A list of tuples (payment, reconciled)
+        * payment:                         The payment to post.
+        * reconciled:                      The invoices that were reconciled with this payment.
+        :returns:                          A dictionary with the payment as key and as value, another dictionary:
+        * attachment:                      The attachment representing the payment in this edi_format if the edi was successfully posted.
+        * error:                           An error if the edi was not successfully posted.
+        """
+        # TO OVERRIDE
+        self.ensure_one()
+        return {}
+
+    def _cancel_payment_edi(self, moves):
+        """Calls the webservices to cancel the payment of this document.
+
+        :param moves:     A list of payments to cancel.
+        :returns:         A dictionary with the payment as key and as value:
+                          - True if the payment was successfully cancelled.
+                          - False or the string of an error if the payment was not cancelled.
+        """
+        # TO OVERRIDE
+        self.ensure_one()
+        return {move: True for move in moves}  # By default, cancel succeeds doing nothing.
 
     ####################################################
     # Import methods to override based on EDI Format
@@ -129,12 +208,11 @@ class AccountEdiFormat(models.Model):
         """
         attachments = []
         for edi_format in self:
-            try:
-                vals = edi_format._export_invoice_to_embed_to_pdf(pdf_content, invoice)
-            except:
-                continue
-            if vals:
-                attachments.append(vals)
+            edi_document = invoice.edi_document_ids.filtered(lambda d: d.edi_format_id == edi_format)
+            if edi_format._embed_invoice_attachment_to_pdf():
+                attachment = edi_document.attachment_id
+                datas = base64.b64decode(attachment.with_context(bin_size=False).datas)
+                attachments.append({'name': attachment.name, 'datas': datas})
 
         if attachments:
             # Add the attachments to the pdf file
@@ -150,23 +228,6 @@ class AccountEdiFormat(models.Model):
             reader_buffer.close()
             buffer.close()
         return pdf_content
-
-    def _create_ir_attachments(self, invoice):
-        """ Create ir.attachment for the EDIs from invoice.
-
-        :param invoice: the invoice to generate the EDI from.
-        :returns: the newly created attachments.
-        """
-        attachment_vals_list = []
-        for edi_format in self:
-            vals = edi_format._export_invoice_to_attachment(invoice)
-            if vals:
-                vals['datas'] = base64.encodebytes(vals['datas'])
-                vals['edi_format_id'] = edi_format._origin.id
-                attachment_vals_list.append(vals)
-        res = self.env['ir.attachment'].create(attachment_vals_list)
-        invoice.edi_document_ids |= res
-        return res
 
     ####################################################
     # Import Internal methods (not meant to be overridden)

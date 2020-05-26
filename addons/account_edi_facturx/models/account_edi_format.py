@@ -8,6 +8,7 @@ from odoo.exceptions import UserError
 from datetime import datetime
 from lxml import etree
 from PyPDF2 import PdfFileReader
+import base64
 
 import io
 
@@ -22,10 +23,23 @@ DEFAULT_FACTURX_DATE_FORMAT = '%Y%m%d'
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
 
-    def _export_invoice_to_attachment(self, invoice):
+    def _enable_edi_on_journal_by_default(self, journal):
         self.ensure_one()
         if self.code != 'facturx_1_0_05':
-            return super()._export_invoice_to_attachment(invoice)
+            return super()._enable_edi_on_journal_by_default(journal)
+        return journal.type in ['sale', 'purchase'] and journal.company_id.country_id in [self.env.ref('base.fr'), self.env.ref('base.de')]
+
+    def _post_invoice_edi(self, invoices):
+        self.ensure_one()
+        if self.code != 'facturx_1_0_05':
+            return super()._post_invoice_edi(invoices)
+        res = {}
+        for invoice in invoices:
+            attachment = self._export_facturx(invoice)
+            res[invoice] = {'attachment': attachment}
+        return res
+
+    def _export_facturx(self, invoice):
 
         def format_date(dt):
             # Format the date in the Factur-x standard.
@@ -36,6 +50,7 @@ class AccountEdiFormat(models.Model):
             # Format the monetary values to avoid trailing decimals (e.g. 90.85000000000001).
             return float_repr(number, currency.decimal_places)
 
+        self.ensure_one()
         # Create file content.
         template_values = {
             'record': invoice,
@@ -45,12 +60,13 @@ class AccountEdiFormat(models.Model):
         xml_content = b"<?xml version='1.0' encoding='UTF-8'?>"
         xml_content += self.env.ref('account_edi_facturx.account_invoice_facturx_export')._render(template_values)
         xml_name = '%s_facturx.xml' % (invoice.name.replace('/', '_'))
-        return {'name': xml_name,
-                'datas': xml_content,
-                'res_model': 'account.move',
-                'res_id': invoice._origin.id,
-                'mimetype': 'application/xml'
-                }
+        return self.env['ir.attachment'].create({
+            'name': xml_name,
+            'datas': base64.encodebytes(xml_content),
+            'res_model': 'account.move',
+            'res_id': invoice._origin.id,
+            'mimetype': 'application/xml'
+        })
 
     def _is_facturx(self, filename, tree):
         return self.code == 'facturx_1_0_05' and tree.tag == '{urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100}CrossIndustryInvoice'
@@ -58,7 +74,7 @@ class AccountEdiFormat(models.Model):
     def _create_invoice_from_xml_tree(self, filename, tree):
         self.ensure_one()
         if self._is_facturx(filename, tree):
-            return self._import_facturx(tree, self.env['account_move'])
+            return self._import_facturx(tree, self.env['account.move'])
         return super()._create_invoice_from_xml_tree(filename, tree)
 
     def _update_invoice_from_xml_tree(self, filename, tree, invoice):

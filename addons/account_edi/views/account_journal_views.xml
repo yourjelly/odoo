@@ -7,8 +7,8 @@
             <field name="inherit_id" ref="account.view_account_journal_form" />
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='advanced_settings']/group" position="inside">
-                    <group string="Electronic Data Interchange" >
-                        <field name="edi_format_ids" widget="many2many_tags"/>
+                    <group string="Electronic Data Interchange" attrs="{'invisible': [('type', 'not in', ['sale', 'purchase'])]}">
+                        <field name="edi_format_ids" widget="many2many_checkboxes"/>
                     </group>
                 </xpath>
             </field>

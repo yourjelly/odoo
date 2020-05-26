@@ -1,0 +1,11 @@
+<odoo>
+    <record id="ir_cron_edi_network" model="ir.cron">
+        <field name="name">EDI : Perform network operations</field>
+        <field name="model_id" ref="model_account_edi_document"/>
+        <field name="state">code</field>
+        <field name="code">model.action_cron_post_or_cancel_asynchronous_invoice_edi()</field>
+        <field name="interval_number">4</field>
+        <field name="interval_type">hours</field>
+        <field name="numbercall">-1</field>
+    </record>
+</odoo>
