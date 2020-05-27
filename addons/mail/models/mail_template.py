@@ -89,47 +89,44 @@ class MailTemplate(models.Model):
                 template.ref_ir_act_window.unlink()
         return True
 
-    def _get_translation_data(self, trans_file, lang):
-        with file_open(trans_file, mode='rb') as fileobj:
-            _logger.info("loading %s", trans_file)
-            fileformat = os.path.splitext(trans_file)[-1][1:].lower()
-            reader = TranslationFileReader(fileobj, fileformat=fileformat)
-            data = []
+    def _get_translation_data(self, trans_file, lang, xml_id):
+        if trans_file:
+            with file_open(trans_file, mode='rb') as fileobj:
+                fileformat = os.path.splitext(trans_file)[-1][1:].lower()
+                reader = TranslationFileReader(fileobj, fileformat=fileformat)
+                data = []
 
-            def process_row(row):
-                """Process a single PO (or POT) entry."""
-                # dictionary which holds values for this line of the csv file
-                # {'lang': ..., 'type': ..., 'name': ..., 'res_id': ...,
-                #  'src': ..., 'value': ..., 'module':...}
-                dic = dict.fromkeys(('type', 'name', 'res_id', 'src', 'value',
-                                     'comments', 'imd_model', 'imd_name', 'module'))
-                dic['lang'] = lang
-                dic.update(row)
-                # # do not import empty values
-                if not dic['value']:
-                    return
-                _rows_data = dict(dic, state="translated")
-                data.append((_rows_data['name'], _rows_data['lang'], _rows_data['res_id'],
-                            _rows_data['src'], _rows_data['type'], _rows_data['imd_model'],
-                            _rows_data['module'], _rows_data['imd_name'], _rows_data['value'],
-                            _rows_data['state'], _rows_data['comments']))
+                def process_row(row):
+                    """Process a single PO (or POT) entry."""
+                    # dictionary which holds values for this line of the csv file
+                    # {'lang': ..., 'type': ..., 'name': ..., 'res_id': ...,
+                    #  'src': ..., 'value': ..., 'module':...}
+                    dic = dict.fromkeys(('type', 'name', 'res_id', 'src', 'value',
+                                         'comments', 'imd_model', 'imd_name', 'module'))
+                    dic['lang'] = lang
+                    dic.update(row)
+                    # # do not import empty values
+                    if not dic['value']:
+                        return
+                    if dic['imd_name'] == xml_id:
+                        self.env['ir.translation']._set_ids(
+                            dic['name'], 'model', lang, self._ids, dic['value'], dic['src'],
+                        )
 
-            # First process the entries from the PO file (doing so also fills/removes
-            # the entries from the POT file).
-            for row in reader:
-                process_row(row)
-        return data
+                # First process the entries from the PO file (doing so also fills/removes
+                # the entries from the POT file).
+                for row in reader:
+                    process_row(row)
 
-    def _override_translation_term(self, lang, module_name):
+        return True
+
+    def _override_translation_term(self, lang, module_name, xml_id):
         lang_code = tools.get_iso_codes(lang)
         base_lang_code = None
         if '_' in lang_code:
             base_lang_code = lang_code.split('_')[0]
-        base_lang_code_data = self._get_translation_data(get_module_resource(module_name, 'i18n', base_lang_code + '.po'), lang)
-        lang_code_data = self._get_translation_data(get_module_resource(module_name, 'i18n', lang_code + '.po'), lang)
-
-        print(base_lang_code_data, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
-        print(lang_code_data, "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+        self._get_translation_data(get_module_resource(module_name, 'i18n', base_lang_code + '.po'), lang, xml_id)
+        self._get_translation_data(get_module_resource(module_name, 'i18n', lang_code + '.po'), lang, xml_id)
 
     def reset_mail_template(self):
         for template in self:
@@ -144,22 +141,9 @@ class MailTemplate(models.Model):
                         doc = etree.parse(fp)
                         for rec in doc.xpath("//record"):
                             if rec.get('id') == xml_id:
-                                obj = xml_import(self.env.cr, model, {}, mode='update', xml_filename=pathname)
+                                obj = xml_import(self.env.cr, model, {}, mode='init', xml_filename=pathname)
                                 obj._tag_record(rec)
-                                self._override_translation_term(self.env.lang, model)
-                                # mods = self.env['ir.module.module'].search([('state', '=', 'installed'), ('name', '=', model)])
-                                # mods._update_translations(self.env.lang, True)
-                                # for field in rec:
-                                #     # f_val = _eval_xml({'idref': {xml_id: template.id}}, field, self.env)
-                                #     # # if field.get("type") == "html":
-                                #     # #     f_val = _eval_xml(self, field, self.env)
-                                #     # # elif field.get("eval"):
-                                #     # #     f_val = safe_eval(field.get("eval"))
-                                #     # # elif field.get("ref"):
-                                #     # #     f_val = self.env['ir.model.data'].xmlid_to_res_model_res_id(field.get("ref"))[1]
-                                #     # # else:
-                                #     # f_val = field.text
-                                #     # print(f_val, "aaaaa")
+                                self._override_translation_term(self.env.lang, model, xml_id)
 
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']
