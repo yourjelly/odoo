@@ -62,22 +62,47 @@ class AccountingSavepointCase(SavepointCase):
         # The currency could be different after the installation of the chart template.
         company.write({'currency_id': kwargs.get('currency_id', cls.env.user.company_id.currency_id.id)})
 
+        default_account_revenue = None
+        default_account_expense = None
+        default_account_receivable = None
+        default_account_payable = None
+        if chart_template.property_account_income_id or chart_template.property_account_income_categ_id:
+            try:
+                default_account_revenue = cls.env.ref( \
+                    list(chart_template.property_account_income_id.get_xml_id().values())[0].replace('.', '.%s_' % (company.id)))
+            except:
+                default_account_revenue = cls.env.ref( \
+                    list(chart_template.property_account_income_categ_id.get_xml_id().values())[0].replace('.', '.%s_' % (company.id)))
+        if chart_template.property_account_expense_id or chart_template.property_account_expense_categ_id:
+            try:
+                default_account_expense = cls.env.ref( \
+                    list(chart_template.property_account_expense_id.get_xml_id().values())[0].replace('.', '.%s_' % (company.id)))
+            except:
+                default_account_expense = cls.env.ref( \
+                    list(chart_template.property_account_expense_categ_id.get_xml_id().values())[0].replace('.', '.%s_' % (company.id)))
+        if chart_template.property_account_receivable_id:
+            default_account_receivable = cls.env.ref( \
+                list(chart_template.property_account_receivable_id.get_xml_id().values())[0].replace('.', '.%s_' % (company.id)))
+        if chart_template.property_account_payable_id:
+            default_account_payable = cls.env.ref( \
+                list(chart_template.property_account_payable_id.get_xml_id().values())[0].replace('.', '.%s_' % (company.id)))
+
         return {
             'company': company,
             'currency': company.currency_id,
-            'default_account_revenue': cls.env['account.account'].search([
+            'default_account_revenue': default_account_revenue or cls.env['account.account'].search([
                     ('company_id', '=', company.id),
                     ('user_type_id', '=', cls.env.ref('account.data_account_type_revenue').id)
                 ], limit=1),
-            'default_account_expense': cls.env['account.account'].search([
+            'default_account_expense': default_account_expense or cls.env['account.account'].search([
                     ('company_id', '=', company.id),
                     ('user_type_id', '=', cls.env.ref('account.data_account_type_expenses').id)
                 ], limit=1),
-            'default_account_receivable': cls.env['account.account'].search([
+            'default_account_receivable': default_account_receivable or cls.env['account.account'].search([
                     ('company_id', '=', company.id),
                     ('user_type_id.type', '=', 'receivable')
                 ], limit=1),
-            'default_account_payable': cls.env['account.account'].search([
+            'default_account_payable': default_account_payable or cls.env['account.account'].search([
                     ('company_id', '=', company.id),
                     ('user_type_id.type', '=', 'payable')
                 ], limit=1),
