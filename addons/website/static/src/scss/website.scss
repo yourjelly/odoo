@@ -76,6 +76,28 @@ $-font-numbers: (
     }
 }
 
+#o_preheader {
+    @include o-apply-colors('preheader');
+
+    &.o_preheader_icons {
+        #o_theme_contact .fa {
+            opacity: 0.5;
+        }
+
+        .o_preheader_icons_btns_circle .fa {
+            @include size(30px);
+            line-height: 30px;
+        }
+    }
+}
+
+#wrapwrap.o_header_overlay #o_preheader {
+    // Hide preheaders on this page if menu is set as transparent.
+    // TODO: find a way to hide sidebar's preheaders options
+    // when transparent menu is active
+    display: none;
+}
+
 .navbar {
     @if ($o-theme-navbar-font != $o-theme-font) {
         font-family: $o-theme-navbar-font;

@@ -397,6 +397,40 @@
          data-selector="#wrapwrap > header"
          data-no-check="true"
          groups="website.group_website_designer">
+        <we-row string="Pre Header">
+            <we-select id="preheader_templates_select" data-variable="preheader-template" data-reload="/">
+                <we-button id="option_template_preheader_none"
+                           data-name="preheader_none_opt"
+                           data-customize-website-views=""
+                           data-customize-website-variable="none"
+                           string="None"/>
+                <we-button id="option_template_preheader_line"
+                           data-name="preheader_line_opt"
+                           data-customize-website-views="website.template_preheader_line"
+                           data-customize-website-variable="line"
+                           string="Line"/>
+                <we-button id="option_template_preheader_magazine"
+                           data-name="preheader_magazine_opt"
+                           data-customize-website-views="website.template_preheader_magazine"
+                           data-customize-website-variable="magazine"
+                           string="Magazine"/>
+                <we-button id="option_template_preheader_icons"
+                           data-name="preheader_icons_opt"
+                           data-customize-website-views="website.template_preheader_icons"
+                           data-customize-website-variable="icons"
+                           string="Icons"/>
+                 <we-button id="option_template_preheader_image"
+                           data-name="preheader_image_opt"
+                           data-customize-website-views="website.template_preheader_image"
+                           data-customize-website-variable="image"
+                           string="Image"/>
+            </we-select>
+
+            <we-colorpicker data-customize-website-color="" data-color="preheader"
+                            data-dependencies="preheader_icons_opt"
+                            data-with-combinations="true"/>
+        </we-row>
+        <we-row/>
         <we-checkbox string="Show Sign In" data-customize-website-views="portal.portal_show_sign_in" data-reload="/"/>
         <we-colorpicker string="Colors"
                         data-customize-website-color="" data-color="menu"
