@@ -170,7 +170,6 @@ class TestTraceability(TestMrpCommon):
             'name': 'Final_lot_1',
             'company_id': self.env.company.id,
         })
-        mo_form.qty_producing = 1
         mo = mo_form.save()
 
         details_operation_form = Form(mo.move_raw_ids[0], view=self.env.ref('stock.view_stock_move_operations'))

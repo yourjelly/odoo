@@ -599,7 +599,7 @@ class MrpProduction(models.Model):
         self.location_src_id = self.picking_type_id.default_location_src_id.id or location.id
         self.location_dest_id = self.picking_type_id.default_location_dest_id.id or location.id
 
-    @api.onchange('qty_producing', 'lot_producing_id')
+    @api.onchange('qty_producing')
     def _onchange_producing(self):
         trigger_warning = False
         if self.product_id.tracking == 'serial':
@@ -607,7 +607,6 @@ class MrpProduction(models.Model):
             if qty_producing_uom not in (0, 1):
                 self.qty_producing = self.product_id.uom_id._compute_quantity(1, self.product_uom_id, rounding_method='HALF-UP')
                 trigger_warning = True
-
         for move in (self.move_raw_ids | self.move_finished_ids.filtered(lambda m: m.product_id != self.product_id)):
             if move.state in ('done', 'cancel'):
                 continue
@@ -616,7 +615,13 @@ class MrpProduction(models.Model):
                 continue
             if move.has_tracking != 'none' or move.state == 'done':
                 continue
-            move._update_quantity_done(self)
+            vals = move._update_quantity_done(self)
+            if vals.get('to_create'):
+                for res in vals['to_create']:
+                    move.move_line_ids.new(res)
+            if vals.get('to_write'):
+                for move_line, res in vals['to_write']:
+                    move_line.update(res)
 
         if trigger_warning:
             return {'warning': {'message': _("You can only produce 1.")}}
@@ -992,6 +997,18 @@ class MrpProduction(models.Model):
             production.move_raw_ids._adjust_procure_method()
             (production.move_raw_ids | production.move_finished_ids)._action_confirm()
             production.workorder_ids._action_confirm()
+            if production.product_tracking == 'serial':
+                production.qty_producing = 1
+                for move in production.move_raw_ids | production.move_byproduct_ids:
+                    if move.has_tracking != 'none':
+                        continue
+                    vals = move._update_quantity_done(production)
+                    if vals.get('to_create'):
+                        for res in vals['to_create']:
+                            move.move_line_ids.create(res)
+                    if vals.get('to_write'):
+                        for move_line, res in vals['to_write']:
+                            move_line.write(res)
         return True
 
     def action_assign(self):
@@ -1542,6 +1559,8 @@ class MrpProduction(models.Model):
             if move.has_tracking != 'serial':
                 continue
             for move_line in move.move_line_ids:
+                if float_is_zero(move_line.qty_done, precision_rounding=move_line.product_uom_id.rounding):
+                    continue
                 domain = [
                     ('lot_id', '=', move_line.lot_id.id),
                     ('qty_done', '=', 1),

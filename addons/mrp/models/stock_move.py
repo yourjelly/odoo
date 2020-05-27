@@ -187,7 +187,13 @@ class StockMove(models.Model):
     def _onchange_product_uom_qty(self):
         if self.raw_material_production_id and self.has_tracking == 'none':
             mo = self.raw_material_production_id
-            self._update_quantity_done(mo)
+            vals = self._update_quantity_done(mo)
+            if vals.get('to_create'):
+                for res in vals['to_create']:
+                    self.move_line_ids.new(res)
+            if vals.get('to_write'):
+                for move_line, res in vals['to_write']:
+                    move_line.update(res)
 
     @api.model
     def default_get(self, fields_list):
@@ -374,15 +380,11 @@ class StockMove(models.Model):
 
     def _update_quantity_done(self, mo):
         self.ensure_one()
+        ml_values = {}
         new_qty = mo.product_uom_id._compute_quantity((mo.qty_producing - mo.qty_produced) * self.unit_factor, mo.product_uom_id, rounding_method='HALF-UP')
         if not self.is_quantity_done_editable:
             self.move_line_ids.filtered(lambda ml: ml.state not in ('done', 'cancel')).qty_done = 0
-            vals = self._set_quantity_done_prepare_vals(new_qty)
-            if vals['to_create']:
-                for res in vals['to_create']:
-                    self.move_line_ids.new(res)
-            if vals['to_write']:
-                for move_line, res in vals['to_write']:
-                    move_line.update(res)
+            ml_values = self._set_quantity_done_prepare_vals(new_qty)
         else:
             self.quantity_done = new_qty
+        return ml_values

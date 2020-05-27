@@ -132,7 +132,7 @@
                             <field name="product_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
                             <field name="product_tmpl_id" invisible="1"/>
                             <field name="product_description_variants" attrs="{'invisible': [('product_description_variants', 'in', (False, ''))], 'readonly': [('state', '!=', 'draft')]}"/>
-                            <label for="product_qty"/>
+                            <label for="product_qty" string="Quantity"/>
                             <div class="o_row no-gutters d-flex">
                                 <div attrs="{'invisible': [('state', '=', 'draft')]}" class="o_row">
                                     <field name="qty_producing" digits="[12,3]" class="text-left"  attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}"/>
@@ -146,6 +146,7 @@
                                 <label for="product_uom_id" string="" class="oe_inline"/>
                                 <field name="product_uom_category_id" invisible="1"/>
                                 <field name="product_uom_id" options="{'no_open': True, 'no_create': True}" force_save="1" groups="uom.group_uom" attrs="{'readonly': [('state', '!=', 'draft')]}" class="oe_inline"/>
+                                <span class='text-bf'>To Produce</span>
                             </div>
                             <label for="lot_producing_id" attrs="{'invisible': [('product_tracking', 'in', ('none', False))]}"/>
                             <div class="o_row" attrs="{'invisible': [('product_tracking', 'in', ('none', False))]}">
@@ -174,8 +175,8 @@
                     </group>
                     <notebook>
                         <page string="Components" name="components">
-                            <field name="move_raw_ids" 
-                                context="{'default_date_expected': date_planned_start, 'default_location_id': location_src_id, 'default_location_dest_id': production_location_id, 'default_state': 'draft', 'default_raw_material_production_id': id, 'default_picking_type_id': picking_type_id, 'default_company_id': company_id}" 
+                            <field name="move_raw_ids"
+                                context="{'default_date_expected': date_planned_start, 'default_location_id': location_src_id, 'default_location_dest_id': production_location_id, 'default_state': 'draft', 'default_raw_material_production_id': id, 'default_picking_type_id': picking_type_id, 'default_company_id': company_id}"
                                 attrs="{'readonly': ['|', ('state', '=', 'cancel'), '&amp;', ('state', '=', 'done'), ('is_locked', '=', True)]}">
                                 <tree delete="0" default_order="is_done,sequence" editable="bottom">
                                     <field name="product_id" required="1" attrs="{'readonly': ['|', '|', ('has_move_lines', '=', True), ('state', '=', 'cancel'), '&amp;', ('state', '!=', 'draft'), ('additional', '=', False) ]}"/>
@@ -220,7 +221,7 @@
                                     <field name="location_dest_id" domain="[('id', 'child_of', parent.location_dest_id)]" invisible="1"/>
                                     <field name="state" invisible="1" force_save="1"/>
                                     <field name="should_consume_qty" invisible="1"/>
-                                    <field name="product_uom_qty" widget="mrp_should_consume" string="To Consume" attrs="{'readonly': ['&amp;', ('parent.state', '!=', 'draft'), '|', ('parent.state', 'not in', ('confirmed', 'planned', 'progress', 'to_close')), ('parent.is_locked', '=', True)]}"/>
+                                    <field name="product_uom_qty" widget="mrp_should_consume" string="To Consume" attrs="{'readonly': ['&amp;', ('parent.state', '!=', 'draft'), '|', ('parent.state', 'not in', ('confirmed', 'planned', 'progress', 'to_close')), ('parent.is_locked', '=', True)]}" width="1"/>
                                     <field name="reserved_availability" attrs="{'invisible': [('is_done', '=', True)], 'column_invisible': [('parent.state', 'in', ('draft', 'done'))]}" string="Reserved" decoration-danger="not is_done and reserved_availability &lt; product_uom_qty and product_uom_qty - reserved_availability &gt; 0.0001"/>
                                     <field name="is_quantity_done_editable" invisible="1"/>
                                     <field name="quantity_done" string="Consumed"

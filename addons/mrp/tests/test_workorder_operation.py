@@ -152,7 +152,6 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         production_table_form.product_qty = 1.0
         production_table_form.product_uom_id = dining_table.uom_id
         production_table = production_table_form.save()
-        production_table.action_confirm()
 
         # Set tracking lot on finish and consume products.
         dining_table.tracking = 'lot'
@@ -160,6 +159,7 @@ class TestWorkOrderProcess(TestWorkOrderProcessCommon):
         product_table_leg.tracking = 'lot'
         product_bolt.tracking = "lot"
 
+        production_table.action_confirm()
         # Initial inventory of product sheet, lags and bolt
         lot_sheet = self.env['stock.production.lot'].create({'product_id': product_table_sheet.id, 'company_id': self.env.company.id})
         lot_leg = self.env['stock.production.lot'].create({'product_id': product_table_leg.id, 'company_id': self.env.company.id})
