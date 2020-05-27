@@ -19,8 +19,8 @@ options.registry.InnerChart = options.Class.extend({
         'click we-button.o_we_matrix_remove_row': '_onRemoveRowClick',
         'blur we-matrix input': '_onMatrixInputFocusOut',
         'focus we-matrix input': '_onMatrixInputFocus',
-        'blur .o-value': '_onMinMaxInputFocusOut',
-        'focus .o-value': '_onMinMaxInputFocusIn',
+        'blur .o-min-value': '_onMinInputFocus',
+        'blur .o-max-value': '_onMaxInputFocus',
     }),
 
     /**
@@ -35,6 +35,7 @@ options.registry.InnerChart = options.Class.extend({
      * @override
      */
     start: function () {
+        debugger;
         this.backSelectEl = this.el.querySelector('[data-name="chart_bg_color_opt"]');
         this.borderSelectEl = this.el.querySelector('[data-name="chart_border_color_opt"]');
 
@@ -476,25 +477,26 @@ options.registry.InnerChart = options.Class.extend({
         this.updateUI();
     },
     /**
-     * Set the Min-Max value of x-axis and reload graph
+     * Set the Min value of y-axis and refresh widget
      *
      * @private
      * @param {Event} ev
      */
-    _onMinMaxInputFocusOut: function (ev) {
-        setTimeout(() => {
-            if (ev.currentTarget === document.activeElement) {
-                return;
-            }
-            this._reloadGraph();
-        });
-    },
-
-    _onMinMaxInputFocusIn: function (ev) {
-        const minvalue = ev.target.value || '';
-        local_storage.setItem('minimumvalue', minvalue);
+    _onMinInputFocus: async function (ev) {
+        const minval = ev.target.value || 0;
+        local_storage.setItem('minimumvalue', minval);
         await this._refreshPublicWidgets();
-        // this.updateUI();
+    },
+     /**
+     * Set the Max value of y-axis and refresh widget
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onMaxInputFocus: async function (ev) {
+        const maxval = ev.target.value || '';
+        local_storage.setItem('maximumvalue', maxval);
+        await this._refreshPublicWidgets();
     },
 });
 });

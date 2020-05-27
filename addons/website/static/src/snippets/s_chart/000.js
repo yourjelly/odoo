@@ -81,6 +81,7 @@ const ChartWidget = publicWidget.Widget.extend({
             };
         } else {
             const minvalue = local_storage.getItem('minimumvalue');
+            const maxvalue = local_storage.getItem('maximumvalue');
             chartData.options.scales = {
                 xAxes: [{
                     stacked: this.el.dataset.stacked === 'true',
@@ -93,7 +94,7 @@ const ChartWidget = publicWidget.Widget.extend({
                     ticks: {
                         beginAtZero: true,
                         min: parseInt(minvalue),
-                        // max: ,
+                        suggestedMax: parseInt(maxvalue),
                     },
                 }],
             };
@@ -105,10 +106,12 @@ const ChartWidget = publicWidget.Widget.extend({
                 duration: 0,
             };
         }
+
+        debugger;
         const canvas = this.el.querySelector('canvas');
         this.chart = new window.Chart(canvas, chartData);
-        const minvalue = this.chart.boxes[3].start;
-        const maxvalue = this.chart.boxes[3].end;
+        const maxtick = this.chart.boxes[3].max;
+        local_storage.setItem('maximumtick', maxtick);
         return this._super.apply(this, arguments);
     },
     /**
