@@ -109,6 +109,7 @@ class PurchaseOrder(models.Model):
         string='Receipt Date', index=True, copy=False,
         help="Delivery date promised by vendor. This date is used to determine expected arrival of products.")
     expected_date = fields.Datetime("Expected Date", compute='_compute_expected_date', store=True,
+        readonly=False,
         help="Delivery date expected by vendor, computed from the minimum lead time of the order lines.")
     date_calendar_start = fields.Datetime(compute='_compute_date_calendar_start', readonly=True, store=True)
 
@@ -186,10 +187,10 @@ class PurchaseOrder(models.Model):
             result.append((po.id, name))
         return result
 
-    @api.onchange('date_planned')
-    def onchange_date_planned(self):
-        if self.date_planned:
-            self.order_line.date_planned = self.date_planned
+    @api.onchange('expected_date')
+    def onchange_expected_date(self):
+        if self.expected_date:
+            self.order_line.date_planned = self.expected_date
 
     @api.model
     def create(self, vals):
@@ -699,6 +700,14 @@ class PurchaseOrder(models.Model):
         for line, date in updated_dates:
             note += _('<p> &nbsp; - %s from %s to %s </p>') % (line.product_id.display_name, line.date_planned, date)
         return note
+
+    def onchange(self, values, field_name, field_onchange):
+        result = super(PurchaseOrder, self).onchange(values, field_name, field_onchange)
+        if (field_name=='order_line') and ('value' in result):
+            for line in result['value'].get('order_line', []):
+                if (line[0]<2) and ('date_planned' in line[2]):
+                    del line[2]['date_planned']
+        return result
 
 
 class PurchaseOrderLine(models.Model):
