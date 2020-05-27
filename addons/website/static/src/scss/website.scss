@@ -76,6 +76,31 @@ $-font-numbers: (
     }
 }
 
+@if (o-website-value('preheader-template')) {
+    #o_preheader {
+        @if (o-website-value('preheader-template') == 'preheader_icons') {
+            @include o-apply-colors('preheader');
+
+            #o_theme_contact .fa {
+                opacity: 0.5;
+            }
+
+            .o_preheader_icons_btns_circle .fa {
+                @include size(30px);
+                line-height: 30px;
+            }
+        } @else if (o-website-value('preheader-template') == 'preheader_image') {
+            height: #{o-website-value('preheader-height')}vh;
+            background-position: center;
+        }
+
+        #wrapwrap.o_header_overlay & {
+            // Hide preheaders on this page if menu is set as transparent.
+            display: none;
+        }
+    }
+}
+
 .navbar {
     @if ($o-theme-navbar-font != $o-theme-font) {
         font-family: $o-theme-navbar-font;

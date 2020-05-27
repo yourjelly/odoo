@@ -137,6 +137,8 @@ $-with-support-theme-fonts: ();
 }
 $o-theme-fonts: $-with-support-theme-fonts;
 
+$o-theme-preheader-height: o-website-value('preheader-height') !default;
+
 $o-theme-navbar-logo-height: o-website-value('logo-height') !default;
 $o-theme-navbar-fixed-logo-height: o-website-value('fixed-logo-height') !default;
 

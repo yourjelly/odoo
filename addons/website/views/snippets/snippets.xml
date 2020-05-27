@@ -404,6 +404,51 @@
          data-selector="#wrapwrap > header"
          data-no-check="true"
          groups="website.group_website_designer">
+        <we-select string="Pre Header"
+                   class="mb-3"
+                   id="preheader_templates_select"
+                   data-dependencies="!header_transparent_opt"
+                   data-variable="preheader-template"
+                   data-reload="/">
+            <we-button id="option_template_preheader_none"
+                       data-name="preheader_none_opt"
+                       data-customize-website-views=""
+                       data-customize-website-variable=""
+                       string="None"/>
+            <we-button id="option_template_preheader_line"
+                       data-name="preheader_line_opt"
+                       data-customize-website-views="website.template_preheader_line"
+                       data-customize-website-variable="preheader_line"
+                       string="Line"/>
+            <we-button id="option_template_preheader_magazine"
+                       data-name="preheader_magazine_opt"
+                       data-customize-website-views="website.template_preheader_magazine"
+                       data-customize-website-variable="preheader_magazine"
+                       string="Magazine"/>
+            <we-button id="option_template_preheader_icons"
+                       data-name="preheader_icons_opt"
+                       data-customize-website-views="website.template_preheader_icons"
+                       data-customize-website-variable="preheader_icons"
+                       string="Icons"/>
+             <we-button id="option_template_preheader_image"
+                       data-name="preheader_image_opt"
+                       data-dependencies="!header_transparent_opt"
+                       data-customize-website-views="website.template_preheader_image"
+                       data-customize-website-variable="preheader_image"
+                       string="Image"/>
+        </we-select>
+        <we-colorpicker string="⌙ Colors"
+                        class="mt-n2 mb-3"
+                        data-customize-website-color=""
+                        data-dependencies="preheader_icons_opt"
+                        data-color="preheader"
+                        data-with-combinations="true"/>
+        <we-input string="⌙ Height"
+                  class="mt-n2 mb-3"
+                  data-dependencies="preheader_image_opt"
+                  data-variable="preheader-height"
+                  data-customize-website-variable="3"/>
+
         <we-checkbox string="Show Sign In" data-customize-website-views="portal.portal_show_sign_in" data-reload="/"/>
         <we-colorpicker string="Colors"
                         data-customize-website-color="" data-color="menu"
