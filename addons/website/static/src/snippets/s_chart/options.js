@@ -483,7 +483,7 @@ options.registry.InnerChart = options.Class.extend({
      * @param {Event} ev
      */
     _onMinInputFocus: async function (ev) {
-        const minval = ev.target.value || 0;
+        const minval = ev.target.value;
         local_storage.setItem('minimumvalue', minval);
         await this._refreshPublicWidgets();
     },
@@ -494,7 +494,8 @@ options.registry.InnerChart = options.Class.extend({
      * @param {Event} ev
      */
     _onMaxInputFocus: async function (ev) {
-        const maxval = ev.target.value || '';
+        const $target = ev.target;
+        const maxval = $target.value;
         local_storage.setItem('maximumvalue', maxval);
         await this._refreshPublicWidgets();
     },
