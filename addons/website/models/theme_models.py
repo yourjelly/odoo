@@ -167,6 +167,11 @@ class Theme(models.AbstractModel):
             }
         )
 
+        # Reinitialize preheader templates
+        self.disable_view('website.template_preheader_magazine')
+        self.disable_view('website.template_preheader_icons')
+        self.disable_view('website.template_preheader_image')
+
         # Reinitialize header templates
         self.disable_view('website.template_header_hamburger')
         self.disable_view('website.template_header_hamburger_left')
