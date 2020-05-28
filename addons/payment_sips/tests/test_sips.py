@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from odoo.tests import tagged
-from odoo.addons.payment.tests.common import PaymentAcquirerCommon
+from odoo.tests import tagged, HttpCase, new_test_user
+from odoo.addons.payment.tests.common import PaymentAcquirerHttpCommon
+from odoo.addons.account.tests.common import create_accounting_minimal_data
+from odoo.tools import config
+from odoo.addons.payment_sips.controllers.main import SipsController
 
 
 @tagged('post_install', '-at_install', '-standard', 'external')
-class SipsTest(PaymentAcquirerCommon):
+class SipsTest(PaymentAcquirerHttpCommon):
 
     def setUp(self):
         super().setUp()
@@ -14,6 +17,7 @@ class SipsTest(PaymentAcquirerCommon):
             'sips_merchant_id': 'dummy_mid',
             'sips_secret': 'dummy_secret',
         })
+        self.notify_url = self._convert_url(SipsController._notify_url)
 
     def test_10_sips_form_render(self):
         self.assertEqual(self.sips.state, 'test', 'test without test environment')
@@ -54,9 +58,9 @@ class SipsTest(PaymentAcquirerCommon):
                     'holderAuthentMethod=NO_AUTHENT_METHOD',
             'Encode': '',
             'InterfaceVersion': 'HP_2.4',
-            'Seal': 'f03f64da6f57c171904d12bf709b1d6d3385131ac914e97a7e1db075ed438f3e',
             'locale': 'en'
         }
+        sips_post_data['Seal'] = self.sips._sips_generate_shasign(sips_post_data)
 
         tx = self.env['payment.transaction'].create({
             'amount': 314.0,
@@ -66,8 +70,12 @@ class SipsTest(PaymentAcquirerCommon):
             'partner_name': 'Norbert Buyer',
             'partner_country_id': self.country_france.id})
 
-        # validate it
-        tx.form_feedback(sips_post_data, 'sips')
+        # validate it in POST
+        response = self.opener.post(self.notify_url, data=sips_post_data)
+        self.assertEqual(response.status_code, 200)
+
+        self.env['base'].flush()
+        self.env['base'].invalidate_cache()
         self.assertEqual(tx.state, 'done', 'Sips: validation did not put tx into done state')
         self.assertEqual(tx.acquirer_reference, 'SO100x1', 'Sips: validation did not update tx id')
         
@@ -86,6 +94,7 @@ class SipsTest(PaymentAcquirerCommon):
             'InterfaceVersion': 'HP_2.4',
             'Seal': '6e1995ea5432580860a04d8515b6eb1507996f97b3c5fa04fb6d9568121a16a2'
         }
+        sips_post_data['Seal'] = self.sips._sips_generate_shasign(sips_post_data)
         tx = self.env['payment.transaction'].create({
             'amount': 314.0,
             'acquirer_id': self.sips.id,
@@ -93,8 +102,11 @@ class SipsTest(PaymentAcquirerCommon):
             'reference': 'SO100x2',
             'partner_name': 'Norbert Buyer',
             'partner_country_id': self.country_france.id})
-        tx.form_feedback(sips_post_data, 'sips')
+        response = self.opener.post(self.notify_url, data=sips_post_data)
+        self.assertEqual(response.status_code, 200)
         # check state
+        self.env['base'].flush()
+        self.env['base'].invalidate_cache()
         self.assertEqual(tx.state, 'cancel', 'Sips: erroneous validation did not put tx into error state')
 
     def test_30_sips_badly_formatted_date(self):
@@ -121,9 +133,9 @@ class SipsTest(PaymentAcquirerCommon):
                     'holderAuthentMethod=NO_AUTHENT_METHOD' % (bad_date,),
             'Encode': '',
             'InterfaceVersion': 'HP_2.4',
-            'Seal': 'f03f64da6f57c171904d12bf709b1d6d3385131ac914e97a7e1db075ed438f3e',
             'locale': 'en'
         }
+        sips_post_data['Seal'] = self.sips._sips_generate_shasign(sips_post_data)
 
         tx = self.env['payment.transaction'].create({
             'amount': 314.0,
@@ -134,5 +146,14 @@ class SipsTest(PaymentAcquirerCommon):
             'partner_country_id': self.country_france.id})
 
         # validate it
-        tx.form_feedback(sips_post_data, 'sips')
+        response = self.opener.post(self.notify_url, data=sips_post_data)
+        self.assertEqual(response.status_code, 200)
+        self.env['base'].flush()
+        self.env['base'].invalidate_cache()
         self.assertEqual(tx.state, 'done', 'Sips: validation did not put tx into done state when date format was weird')
+
+    def _convert_url(self, url):
+        assert url.startswith('/')
+        port = config['http_port']
+        host = '127.0.0.1'
+        return f"http://{host}:{port}{url}"
