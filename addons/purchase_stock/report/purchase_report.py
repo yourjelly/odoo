@@ -54,11 +54,11 @@ class PurchaseReport(models.Model):
                               SELECT extract(epoch from age(po.effective_date,COALESCE(po.date_planned, po.expected_date)))/(24*60*60) AS po_receipt_delay
                               FROM purchase_order po
                               WHERE po.id IN (
-                                  SELECT "purchase_report"."order_id" FROM %s WHERE %s)
+                                  SELECT "purchase_report"."order_id" FROM %s WHERE %s AND effective_date IS NOT NULL)
                               ) AS receipt_delay
                     """
 
-            subdomain = domain + [('company_id', '=', self.env.company.id), ('effective_date', '!=', False)]
+            subdomain = domain + [('company_id', '=', self.env.company.id)]
             subtables, subwhere, subparams = expression(subdomain, self).query.get_sql()
 
             self.env.cr.execute(query % (subtables, subwhere), subparams)
