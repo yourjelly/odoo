@@ -1174,6 +1174,7 @@ ListRenderer.include({
     _renderRow: function (record, index) {
         debugger;
         var $row = this._super.apply(this, arguments);
+        console.log($row, this,"$row")
         if (this.addTrashIcon) {
             debugger;
             var $icon = this.isMany2Many ?
@@ -1624,7 +1625,6 @@ ListRenderer.include({
      * @param {MouseEvent} event
      */
     _onRemoveIconClick: function (event) {
-        debugger;
         event.stopPropagation();
         var $row = $(event.target).closest('tr');
         var id = $row.data('id');
