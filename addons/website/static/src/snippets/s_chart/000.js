@@ -2,7 +2,6 @@ odoo.define('website.s_chart', function (require) {
 'use strict';
 
 const publicWidget = require('web.public.widget');
-var local_storage = require('web.local_storage');
 
 const ChartWidget = publicWidget.Widget.extend({
     selector: '.s_chart',
@@ -80,19 +79,23 @@ const ChartWidget = publicWidget.Widget.extend({
                 },
             };
         } else {
+            const minvalue = this.el.dataset.minValue || 0;
+            const maxvalue = this.el.dataset.maxValue || 25;
             chartData.options.scales = {
                 xAxes: [{
                     stacked: this.el.dataset.stacked === 'true',
                     ticks: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        min: parseInt(this.el.dataset.minValue),
+                        max: parseInt(this.el.dataset.maxValue),
                     },
                 }],
                 yAxes: [{
                     stacked: this.el.dataset.stacked === 'true',
                     ticks: {
                         beginAtZero: true,
-                        min: parseInt(this.el.dataset.minValue),
-                        max: parseInt(this.el.dataset.maxValue),
+                        min: parseInt(minvalue),
+                        max: parseInt(maxvalue),
                     },
                 }],
             };

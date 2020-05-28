@@ -4,7 +4,6 @@ odoo.define('website.s_chart_options', function (require) {
 var core = require('web.core');
 const {ColorpickerWidget} = require('web.Colorpicker');
 var options = require('web_editor.snippets.options');
-var local_storage = require('web.local_storage');
 
 var _t = core._t;
 
@@ -19,6 +18,8 @@ options.registry.InnerChart = options.Class.extend({
         'click we-button.o_we_matrix_remove_row': '_onRemoveRowClick',
         'blur we-matrix input': '_onMatrixInputFocusOut',
         'focus we-matrix input': '_onMatrixInputFocus',
+        'blur .o-min-value': '_onMinInputFocus',
+        'blur .o-max-value': '_onMaxInputFocus',
     }),
 
     /**
@@ -474,6 +475,26 @@ options.registry.InnerChart = options.Class.extend({
             this._displayRemoveRowButton(row - 1);
         }
         this.updateUI();
+    },
+    /**
+     * Set the Min value of y-axis and refresh widget
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onMinInputFocus: async function (ev) {
+        this.$target[0].dataset.minValue = ev.target.value;
+        await this._refreshPublicWidgets();
+    },
+    /**
+     * Set the Max value of y-axis and refresh widget
+     *
+     * @private
+     * @param {Event} ev
+     */
+    _onMaxInputFocus: async function (ev) {
+        this.$target[0].dataset.maxValue = ev.target.value;
+        await this._refreshPublicWidgets();
     },
     /**
      * @private
