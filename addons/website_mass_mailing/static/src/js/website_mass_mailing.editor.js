@@ -28,45 +28,21 @@ options.registry.mailing_list_subscribe = options.Class.extend({
                 return Object.keys(data).map(key => {
                     const maillist = data[key];
                     const button = document.createElement('we-button');
-                    button.dataset.selectMenuEl = maillist[0];
+                    button.dataset.litsID = self.$target.attr("data-list-id");
                     button.textContent = maillist[1];
                     return button;
                 });
             });
         return _super(...arguments);
     },
-    /**
-     * Allows to select mailing list.
-     *
-     * @see this.selectClass for parameters
-     */
-    select_mailing_list: function (previewMode, value) {
-        var self = this;
-        var def = this._rpc({
-                model: 'mailing.list',
-                method: 'name_search',
-                args: ['', [['is_public', '=', true]]],
-                context: self.options.recordInfo.context,
-            }).then(function (data) {
-                var list_id = self.$target.attr("data-list-id");
-                return data;
-            });
-        def.then(function (result) {
-            self.$target.attr("data-list-id", result.val);
-        });
-        return def;
-    },
+
     /**
      * @override
      */
     onBuilt: function () {
         var self = this;
         this._super();
-        this.select_mailing_list('click').guardedCatch(function () {
-            self.getParent()._onRemoveClick($.Event( "click" ));
-        });
     },
-
     /**
     *@override
     */
@@ -130,22 +106,6 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     destroy: function () {
         this.$target.off('.newsletter_popup_option');
         this._super.apply(this, arguments);
-    },
-
-    //--------------------------------------------------------------------------
-    // Options
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    select_mailing_list: function () {
-        var self = this;
-        return this._super.apply(this, arguments).then(function () {
-            self.$target.data('quick-open', true);
-            self.$target.removeData('content');
-            return self._refreshPublicWidgets();
-        });
     },
 });
 
