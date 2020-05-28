@@ -35,7 +35,6 @@ options.registry.InnerChart = options.Class.extend({
      * @override
      */
     start: function () {
-        debugger;
         this.backSelectEl = this.el.querySelector('[data-name="chart_bg_color_opt"]');
         this.borderSelectEl = this.el.querySelector('[data-name="chart_border_color_opt"]');
 
@@ -331,8 +330,8 @@ options.registry.InnerChart = options.Class.extend({
      *
      * @private
      */
-    _setDefaultSelectedInput: function (ev) {
-        this.lastEditableSelectedInput = this.tableEl.querySelector('td input') || this.minEl.querySelector('input');
+    _setDefaultSelectedInput: function () {
+        this.lastEditableSelectedInput = this.tableEl.querySelector('td input');
         if (this._isPieChart()) {
             this.colorPaletteSelectedInput = this.lastEditableSelectedInput;
         } else {
