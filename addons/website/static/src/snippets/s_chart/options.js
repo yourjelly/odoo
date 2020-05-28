@@ -19,8 +19,6 @@ options.registry.InnerChart = options.Class.extend({
         'click we-button.o_we_matrix_remove_row': '_onRemoveRowClick',
         'blur we-matrix input': '_onMatrixInputFocusOut',
         'focus we-matrix input': '_onMatrixInputFocus',
-        'blur .o-min-value': '_onMinInputFocus',
-        'blur .o-max-value': '_onMaxInputFocus',
     }),
 
     /**
@@ -158,8 +156,10 @@ options.registry.InnerChart = options.Class.extend({
      */
     _reloadGraph: async function () {
         const jsonValue = this._matrixToChartData();
+        const data = JSON.parse(jsonValue);
         if (this.$target[0].dataset.data !== jsonValue) {
             this.$target[0].dataset.data = jsonValue;
+            this._onUpdateMinMax(data);
             await this._refreshPublicWidgets();
         }
     },
@@ -476,27 +476,14 @@ options.registry.InnerChart = options.Class.extend({
         this.updateUI();
     },
     /**
-     * Set the Min value of y-axis and refresh widget
-     *
      * @private
-     * @param {Event} ev
+     * @param {Object} data
      */
-    _onMinInputFocus: async function (ev) {
-        const minval = ev.target.value;
-        local_storage.setItem('minimumvalue', minval);
-        await this._refreshPublicWidgets();
-    },
-     /**
-     * Set the Max value of y-axis and refresh widget
-     *
-     * @private
-     * @param {Event} ev
-     */
-    _onMaxInputFocus: async function (ev) {
-        const $target = ev.target;
-        const maxval = $target.value;
-        local_storage.setItem('maximumvalue', maxval);
-        await this._refreshPublicWidgets();
+    _onUpdateMinMax: function (data) {
+        const minVal =  Math.min(...data.datasets[0].data);
+        this.$target[0].dataset.minValue = minVal < 0 ? minVal : 0;
+        this.$target[0].dataset.maxValue =  Math.max(...data.datasets[0].data);
+        this.updateUI()
     },
 });
 });

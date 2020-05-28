@@ -2,7 +2,7 @@
 <odoo>
 
 <template id="s_chart" name="Chart">
-    <div class="s_chart" data-type="bar" data-legend-position="top" data-tooltip-display="true" data-stacked="false" data-border-width="2"
+    <div class="s_chart" data-type="bar" data-legend-position="top" data-tooltip-display="true" data-stacked="false" data-border-width="2" data-min-value="0" data-max-value="25"
             data-data="{
                 &quot;labels&quot;:[&quot;First&quot;,&quot;Second&quot;,&quot;Third&quot;,&quot;Fourth&quot;,&quot;Fifth&quot;],
                 &quot;datasets&quot;:[
@@ -56,8 +56,8 @@
                     </tr>
                 </table>
             </we-matrix>
-            <we-input string="min value" class="o-min-value" data-attribute-name="minValue"/>
-            <we-input string="max value" class="o-max-value" data-attribute-name="maxValue"/>
+            <we-input string="min value" data-select-data-attribute="" data-attribute-name="minValue"/>
+            <we-input string="max value" data-select-data-attribute="" data-attribute-name="maxValue"/>
             <we-colorpicker string="Background" data-name="chart_bg_color_opt"
                 data-color-change=""
                 data-attribute-name="backgroundColor"

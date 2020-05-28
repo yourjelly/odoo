@@ -80,8 +80,6 @@ const ChartWidget = publicWidget.Widget.extend({
                 },
             };
         } else {
-            const minvalue = local_storage.getItem('minimumvalue') || 0;
-            const maxvalue = local_storage.getItem('maximumvalue') || 25;
             chartData.options.scales = {
                 xAxes: [{
                     stacked: this.el.dataset.stacked === 'true',
@@ -93,8 +91,8 @@ const ChartWidget = publicWidget.Widget.extend({
                     stacked: this.el.dataset.stacked === 'true',
                     ticks: {
                         beginAtZero: true,
-                        min: parseInt(minvalue),
-                        max: parseInt(maxvalue),
+                        min: parseInt(this.el.dataset.minValue),
+                        max: parseInt(this.el.dataset.maxValue),
                     },
                 }],
             };
