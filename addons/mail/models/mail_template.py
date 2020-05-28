@@ -8,9 +8,8 @@ import odoo
 import os.path
 from lxml import etree
 from odoo.tools.misc import file_open
-from odoo.tools.convert import _eval_xml, xml_import
-from odoo.tools.safe_eval import safe_eval
-from odoo.modules import get_module_path, get_module_resource
+from odoo.tools.convert import xml_import
+from odoo.modules import get_module_resource
 from odoo.tools.translate import TranslationFileReader
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
@@ -90,11 +89,16 @@ class MailTemplate(models.Model):
         return True
 
     def _get_translation_data(self, trans_file, lang, xml_id):
+        if lang == "en_US" and not trans_file:
+            translation_terms = self.env['ir.translation'].search([('res_id', '=', self.id), ('lang', '=', lang)])
+            for term in translation_terms:
+                term.write({
+                    'value': term.src
+                })
         if trans_file:
             with file_open(trans_file, mode='rb') as fileobj:
                 fileformat = os.path.splitext(trans_file)[-1][1:].lower()
                 reader = TranslationFileReader(fileobj, fileformat=fileformat)
-                data = []
 
                 def process_row(row):
                     """Process a single PO (or POT) entry."""
@@ -117,7 +121,6 @@ class MailTemplate(models.Model):
                 # the entries from the POT file).
                 for row in reader:
                     process_row(row)
-
         return True
 
     def _override_translation_term(self, lang, module_name, xml_id):
@@ -136,14 +139,12 @@ class MailTemplate(models.Model):
                 pathname = os.path.join(model, dfile)
                 ext = os.path.splitext(pathname)[1].lower()
                 if ext == '.xml':
-
                     with file_open(pathname, 'rb') as fp:
                         doc = etree.parse(fp)
-                        for rec in doc.xpath("//record"):
-                            if rec.get('id') == xml_id:
-                                obj = xml_import(self.env.cr, model, {}, mode='init', xml_filename=pathname)
-                                obj._tag_record(rec)
-                                self._override_translation_term(self.env.lang, model, xml_id)
+                        for rec in doc.xpath("//record[@id='"+xml_id+"']"):
+                            obj = xml_import(self.env.cr, model, {}, mode='init', xml_filename=pathname)
+                            obj._tag_record(rec)
+                            self._override_translation_term(self.env.lang, model, xml_id)
 
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']
