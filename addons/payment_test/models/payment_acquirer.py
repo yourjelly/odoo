@@ -28,10 +28,14 @@ class PaymentAcquirerTest(models.Model):
     @api.model
     def test_s2s_form_process(self, data):
         """ Return a minimal token to allow proceeding to transaction creation. """
+        card_num = data.get('cc_number')
+        card_num = ''.join(['********', card_num[-4:]])
         payment_token = self.env['payment.token'].sudo().create({
             'acquirer_ref': uuid4(),
             'acquirer_id': int(data['acquirer_id']),
-            'partner_id': int(data['partner_id'])
+            'partner_id': int(data['partner_id']),
+            'name': card_num,
+            'verified': True,
         })
         return payment_token
 
