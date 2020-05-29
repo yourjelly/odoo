@@ -762,6 +762,43 @@
     </xpath>
 </template>
 
+<!-- Footer options -->
+<template id="option_footer_scrolltop" inherit_id="website.assets_frontend" active="False">
+    <xpath expr="//link[last()]" position="after">
+        <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/options/footer/option_footer_scrollTop.scss"/>
+    </xpath>
+    <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/website/static/src/js/content/footer.scrollTop.js"/>
+    </xpath>
+</template>
+
+<template id="option_footer_scrolltop_center" inherit_id="website.layout" active="False">
+    <xpath expr="//div[@id='footer']" position="after">
+        <div id="o_footer_scrolltop_wrapper" class="position-relative mb-n3" contentEditable="False">
+            <div class="container text-center">
+                <span id="o_footer_scrolltop"
+                    title="Scroll To Top"
+                    class="d-inline-flex align-items-center justify-content-center position-relative rounded-circle p-2">
+                    <span class="rounded-circle w-100 h-100 position-absolute"/>
+                    <i class="fa fa fa-angle-up fa-2x"/>
+                </span>
+            </div>
+        </div>
+    </xpath>
+</template>
+
+<template id="option_footer_scrolltop_left" inherit_id="website.layout" active="False">
+    <xpath expr="//div[@id='o_footer_scrolltop_wrapper']/div" position="attributes">
+        <attribute name="class" add="text-left" remove="text-center" separator=" "/>
+    </xpath>
+</template>
+
+<template id="option_footer_scrolltop_right" inherit_id="website.layout" active="False">
+    <xpath expr="//div[@id='o_footer_scrolltop_wrapper']/div" position="attributes">
+        <attribute name="class" add="text-right" remove="text-center" separator=" "/>
+    </xpath>
+</template>
+
 <template id="option_custom_body_pattern" inherit_id="website.assets_frontend" active="False">
     <xpath expr="//link[last()]" position="after">
         <link rel="stylesheet" type="text/scss" href="/website/static/src/scss/options/layout/option_custom_body_pattern.scss"/>
