@@ -72,6 +72,8 @@ class MailTemplate(models.Model):
                                         help="Sidebar action to make this template available on records "
                                              "of the related document model")
 
+    reset_template = fields.Boolean(compute='_compute_reset_template')
+
     def unlink(self):
         self.unlink_action()
         return super(MailTemplate, self).unlink()
@@ -145,6 +147,10 @@ class MailTemplate(models.Model):
                             obj = xml_import(self.env.cr, model, {}, mode='init', xml_filename=pathname)
                             obj._tag_record(rec)
                             self._override_translation_term(self.env.lang, model, xml_id)
+
+    def _compute_reset_template(self):
+        for template in self:
+            template.reset_template = bool(template.get_external_id().get(template.id))
 
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']

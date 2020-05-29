@@ -9,6 +9,7 @@
                     <sheet>
                         <div class="oe_button_box" name="button_box">
                             <field name="ref_ir_act_window" invisible="1"/>
+                            <field name="reset_template" invisible="1"/>
                             <button class="oe_stat_button"
                                     groups="base.group_system"
                                     name="create_action" type="object"
@@ -33,6 +34,7 @@
                                     type="action" target="new"/>
                             <button class="oe_stat_button"
                                     name="reset_mail_template" type="object" icon="fa-refresh"
+                                    attrs="{'invisible':[('reset_template','=',False)]}"
                                     help="Discard the user made changes and reset this template to it's initial state">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_text">Reset</span>

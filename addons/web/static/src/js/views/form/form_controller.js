@@ -238,7 +238,7 @@ var FormController = BasicController.extend({
         const changedFields = await this._super(...arguments);
         // the title could have been changed
         this._updateControlPanel();
-
+        debugger;
         if (_t.database.multi_lang && changedFields.length) {
             // need to make sure changed fields that should be translated
             // are displayed with an alert
@@ -462,10 +462,12 @@ var FormController = BasicController.extend({
                 // by the basic model, such as the new res_id, if the record is
                 // new.
                 var record = self.model.get(ev.data.record.id);
+                debugger;
                 return self._callButtonAction(attrs, record);
             });
         }
         var attrs = ev.data.attrs;
+        debugger;
         if (attrs.confirm) {
             def = new Promise(function (resolve, reject) {
                 Dialog.confirm(this, attrs.confirm, {
@@ -475,6 +477,7 @@ var FormController = BasicController.extend({
         } else if (attrs.special === 'cancel') {
             def = this._callButtonAction(attrs, ev.data.record);
         } else if (!attrs.special || attrs.special === 'save') {
+            debugger;
             // save the record but don't switch to readonly mode
             def = saveAndExecuteAction();
         } else {
@@ -485,6 +488,7 @@ var FormController = BasicController.extend({
         // Kind of hack for FormViewDialog: button on footer should trigger the dialog closing
         // if the `close` attribute is set
         def.then(function () {
+            debugger;
             self._enableButtons();
             if (attrs.close) {
                 self.trigger_up('close_dialog');
