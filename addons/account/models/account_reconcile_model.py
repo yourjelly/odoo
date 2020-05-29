@@ -335,15 +335,15 @@ class AccountReconcileModel(models.Model):
 
         # Filter on partners.
         if rule.match_partner:
-            query += ' AND line_partner.partner_id != 0'
+            query += ' AND COALESCE(st_line.partner_id, line_partner.partner_id) != 0'
 
             if rule.match_partner_ids:
-                query += ' AND line_partner.partner_id IN %s'
+                query += ' AND COALESCE(st_line.partner_id, line_partner.partner_id) IN %s'
                 params += [tuple(rule.match_partner_ids.ids)]
 
             if rule.match_partner_category_ids:
                 query += '''
-                    AND line_partner.partner_id IN (
+                    AND COALESCE(st_line.partner_id, line_partner.partner_id) IN (
                         SELECT DISTINCT categ.partner_id FROM res_partner_res_partner_category_rel categ WHERE categ.category_id IN %s
                     )
                 '''
@@ -364,10 +364,11 @@ class AccountReconcileModel(models.Model):
             )'''
         # Compute partners values table.
         # This is required since some statement line's partners could be shadowed in the reconciliation widget.
-        partners_list = []
+        partners_list = ['(0,0)'] #TODO OCO DEBUG moche pour éviter une map vide
         for line in st_lines:
-            partner_id = partner_map and partner_map.get(line.id) or line.partner_id.id or 0
-            partners_list.append('(%d, %d)' % (line.id, partner_id))
+            partner_id = partner_map and partner_map.get(line.id)
+            if partner_id:
+                partners_list.append('(%d, %d)' % (line.id, partner_id))
         partners_table = 'SELECT * FROM (VALUES %s) AS line_partner (line_id, partner_id)' % ','.join(partners_list)
         with_tables += ', partners_table AS (' + partners_table + ')'
         return with_tables
@@ -418,7 +419,7 @@ class AccountReconcileModel(models.Model):
             LEFT JOIN account_journal journal       ON journal.id = st_line.journal_id
             LEFT JOIN jnl_precision                 ON jnl_precision.journal_id = journal.id
             LEFT JOIN res_company company           ON company.id = st_line.company_id
-            LEFT JOIN partners_table line_partner   ON line_partner.line_id = st_line.id
+            LEFT JOIN partners_table line_partner   ON st_line.partner_id IS NULL AND line_partner.line_id = st_line.id
             , account_move_line aml
             LEFT JOIN account_move move             ON move.id = aml.move_id
             LEFT JOIN account_account account       ON account.id = aml.account_id
@@ -427,9 +428,9 @@ class AccountReconcileModel(models.Model):
                 AND (
                         -- the field match_partner of the rule might enforce the second part of
                         -- the OR condition, later in _apply_conditions()
-                        line_partner.partner_id = 0
+                        COALESCE(st_line.partner_id, line_partner.partner_id, 0) = 0
                         OR
-                        aml.partner_id = line_partner.partner_id
+                        aml.partner_id = COALESCE(st_line.partner_id, line_partner.partner_id)
                     )
                 AND CASE WHEN st_line.amount > 0.0
                          THEN aml.balance > 0
@@ -441,13 +442,13 @@ class AccountReconcileModel(models.Model):
                 AND
                 (
                     (
-                        line_partner.partner_id != 0
+                        COALESCE(st_line.partner_id, line_partner.partner_id, 0) != 0
                         AND
-                        aml.partner_id = line_partner.partner_id
+                        aml.partner_id = COALESCE(st_line.partner_id, line_partner.partner_id)
                     )
                     OR
                     (
-                        line_partner.partner_id = 0
+                        COALESCE(st_line.partner_id, line_partner.partner_id, 0) = 0
                         AND
                         substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
                         AND
