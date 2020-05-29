@@ -58,7 +58,7 @@ class PurchaseReport(models.Model):
                               ) AS receipt_delay
                     """
 
-            subdomain = domain + [('company_id', '=', self.env.company.id)]
+            subdomain = domain + [('company_id', '=', self.env.company.id), ('effective_date', '!=', False)]
             subtables, subwhere, subparams = expression(subdomain, self).query.get_sql()
 
             self.env.cr.execute(query % (subtables, subwhere), subparams)
