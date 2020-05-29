@@ -164,6 +164,7 @@ class Theme(models.AbstractModel):
                 'color-palettes-number': 'null',
                 'header-template': 'null',
                 'footer-template': 'null',
+                'footer-scrolltop': 'null',
             }
         )
 
@@ -184,6 +185,12 @@ class Theme(models.AbstractModel):
         self.disable_view('website.template_footer_name_logo_links_about_us')
         self.disable_view('website.template_footer_logo_only')
         self.disable_view('website.template_footer_address_logo')
+
+        # Reinitialize footer scrollTop templates
+        self.disable_view('website.option_footer_scrolltop')
+        self.disable_view('website.option_footer_scrolltop_center')
+        self.disable_view('website.option_footer_scrolltop_left')
+        self.disable_view('website.option_footer_scrolltop_right')
 
         # Call specific theme post copy
         theme_post_copy = '_%s_post_copy' % mod.name
