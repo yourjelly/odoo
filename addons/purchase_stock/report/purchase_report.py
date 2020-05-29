@@ -54,10 +54,7 @@ class PurchaseReport(models.Model):
                               SELECT extract(epoch from age(po.effective_date,COALESCE(po.date_planned, po.expected_date)))/(24*60*60) AS po_receipt_delay
                               FROM purchase_order po
                               WHERE po.id IN (
-                                  SELECT order_id
-                                  FROM %s
-                                  WHERE effective_date IS NOT NULL
-                                  AND %s )
+                                  SELECT "purchase_report"."order_id" FROM %s WHERE %s)
                               ) AS receipt_delay
                     """
 
