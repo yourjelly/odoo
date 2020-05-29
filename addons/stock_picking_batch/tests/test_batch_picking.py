@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import datetime
+
+from datetime import datetime, timedelta
+
 from odoo.tests import Form
 from odoo.tests.common import TransactionCase
 
@@ -58,192 +62,251 @@ class TestBatchPicking(TransactionCase):
             'location_dest_id': self.customer_location.id,
         })
 
+        self.picking_client_3 = self.env['stock.picking'].create({
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'picking_type_id': self.picking_type_out,
+            'company_id': self.env.company.id,
+        })
+
+        self.env['stock.move'].create({
+            'name': self.productB.name,
+            'product_id': self.productB.id,
+            'product_uom_qty': 10,
+            'product_uom': self.productA.uom_id.id,
+            'picking_id': self.picking_client_3.id,
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+        })
+
         self.batch = self.env['stock.picking.batch'].create({
             'name': 'Batch 1',
             'company_id': self.env.company.id,
             'picking_ids': [(4, self.picking_client_1.id), (4, self.picking_client_2.id)]
         })
 
-    def test_simple_batch_with_manual_qty_done(self):
-        """ Test a simple batch picking with all quantity for picking available.
-        The user set all the quantity_done on picking manually and no wizard are used.
+    def test_batch_default_scheduled_date(self):
+        """ Test to make sure the correct default batch scheduled date is set.
+        There are different ways to create a batch picking which should have the same
+        result.
         """
-        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10.0)
-        self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
 
-        # Confirm batch, pickings should not be automatically assigned.
-        self.batch.action_confirm()
-        self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
-        self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
-        # Ask to assign, so pickings should be assigned now.
-        self.batch.action_assign()
-        self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
-        self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
+        today = datetime.now()
 
-        self.picking_client_1.move_lines.quantity_done = 10
-        self.picking_client_2.move_lines.quantity_done = 10
-        self.batch.action_done()
+        with Form(self.batch) as batch_form:
+            # manually setting batch scheduled date => picking's scheduled dates auto update to match
+            batch_form.scheduled_date = today - timedelta(days=1)
+        # self.assertEqual(self.batch.scheduled_date, self.picking_client_1.scheduled_date)
+        # self.assertEqual(self.batch.scheduled_date, self.picking_client_2.scheduled_date)
 
-        self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
-        self.assertEqual(self.picking_client_2.state, 'done', 'Picking 2 should be done')
+        # manually update picking scheduled dates => batch's scheduled date auto update to match lowest value
+        # self.picking_client_1.scheduled_date = today - timedelta(days=1)
+        # self.picking_client_2.scheduled_date = today - timedelta(days=2)
+        # self.assertEqual(self.batch.scheduled_date, self.picking_client_2.scheduled_date)
+        # # but individual pickings keep original scheduled dates
+        # self.assertEqual(self.picking_client_1.scheduled_date, today - timedelta(days=1))
+        # self.assertEqual(self.picking_client_2.scheduled_date, today - timedelta(days=2))
 
-        quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
-        quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
+        # # add a new picking with an earlier scheduled date => batch's scheduled date should auto-update
+        # self.picking_client_3.scheduled_date = today - timedelta(days=3)
+        # self.batch.write({'picking_ids': [(4, self.picking_client_3.id)]})
+        # self.assertEqual(self.batch.scheduled_date, self.picking_client_3.scheduled_date)
+        # # individual pickings keep original scheduled dates
+        # self.assertEqual(self.picking_client_1.scheduled_date, today - timedelta(days=1))
+        # self.assertEqual(self.picking_client_2.scheduled_date, today - timedelta(days=2))
 
-        # ensure that quantity for picking has been moved
-        self.assertFalse(sum(quant_A.mapped('quantity')))
-        self.assertFalse(sum(quant_B.mapped('quantity')))
+        # # remove that picking and batch scheduled date should auto-update to next min date
+        # self.batch.write({'picking_ids': [(3, self.picking_client_3.id)]})
+        # self.assertEqual(self.batch.scheduled_date, self.picking_client_2.scheduled_date)
 
-    def test_simple_batch_with_wizard(self):
-        """ Test a simple batch picking with all quantity for picking available.
-        The user use the wizard in order to complete automatically the quantity_done to
-        the initial demand (or reserved quantity in this test).
-        """
-        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10.0)
-        self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
+        # # remove all pickings and batch scheduled date should default to none
+        # self.batch.write({'picking_ids': [(3, self.picking_client_1.id)]})
+        # self.batch.write({'picking_ids': [(3, self.picking_client_2.id)]})
+        # self.assertEqual(self.batch.scheduled_date, False)
 
-        # Confirm batch, pickings should not be automatically assigned.
-        self.batch.action_confirm()
-        self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
-        self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
-        # Ask to assign, so pickings should be assigned now.
-        self.batch.action_assign()
-        self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
-        self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
+        # test with batch picking created by wizard
+        # wizard = Form(self.env['stock.picking.to.batch'].with_context(active_ids=set(copies.ids) - set(copies[4].ids), active_model='account.move'))
 
-        # There should be a wizard asking to process picking without quantity done
-        immediate_transfer_wizard_dict = self.batch.action_done()
-        self.assertTrue(immediate_transfer_wizard_dict)
-        immediate_transfer_wizard = Form(self.env[(immediate_transfer_wizard_dict.get('res_model'))].with_context(immediate_transfer_wizard_dict['context'])).save()
-        self.assertEqual(len(immediate_transfer_wizard.pick_ids), 2)
-        immediate_transfer_wizard.process()
+    # def test_simple_batch_with_manual_qty_done(self):
+    #     """ Test a simple batch picking with all quantity for picking available.
+    #     The user set all the quantity_done on picking manually and no wizard are used.
+    #     """
+    #     self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10.0)
+    #     self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
 
-        self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
-        self.assertEqual(self.picking_client_2.state, 'done', 'Picking 2 should be done')
+    #     # Confirm batch, pickings should not be automatically assigned.
+    #     self.batch.action_confirm()
+    #     self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
+    #     self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
+    #     # Ask to assign, so pickings should be assigned now.
+    #     self.batch.action_assign()
+    #     self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
+    #     self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
-        quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
+    #     self.picking_client_1.move_lines.quantity_done = 10
+    #     self.picking_client_2.move_lines.quantity_done = 10
+    #     self.batch.action_done()
 
-        # ensure that quantity for picking has been moved
-        self.assertFalse(sum(quant_A.mapped('quantity')))
-        self.assertFalse(sum(quant_B.mapped('quantity')))
+    #     self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
+    #     self.assertEqual(self.picking_client_2.state, 'done', 'Picking 2 should be done')
 
-    def test_batch_with_backorder_wizard(self):
-        """ Test a simple batch picking with only one quantity fully available.
-        The user will set by himself the quantity reserved for each picking and
-        run the picking batch. There should be a wizard asking for a backorder.
-        """
-        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 5.0)
-        self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
+    #     quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
+    #     quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
 
-        # Confirm batch, pickings should not be automatically assigned.
-        self.batch.action_confirm()
-        self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
-        self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
-        # Ask to assign, so pickings should be assigned now.
-        self.batch.action_assign()
-        self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
-        self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
+    #     # ensure that quantity for picking has been moved
+    #     self.assertFalse(sum(quant_A.mapped('quantity')))
+    #     self.assertFalse(sum(quant_B.mapped('quantity')))
 
-        self.picking_client_1.move_lines.quantity_done = 5
-        self.picking_client_2.move_lines.quantity_done = 10
+    # def test_simple_batch_with_wizard(self):
+    #     """ Test a simple batch picking with all quantity for picking available.
+    #     The user use the wizard in order to complete automatically the quantity_done to
+    #     the initial demand (or reserved quantity in this test).
+    #     """
+    #     self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 10.0)
+    #     self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
 
-        # There should be a wizard asking to process picking without quantity done
-        back_order_wizard_dict = self.batch.action_done()
-        self.assertTrue(back_order_wizard_dict)
-        back_order_wizard = Form(self.env[(back_order_wizard_dict.get('res_model'))].with_context(back_order_wizard_dict['context'])).save()
-        self.assertEqual(len(back_order_wizard.pick_ids), 1)
-        back_order_wizard.process()
+    #     # Confirm batch, pickings should not be automatically assigned.
+    #     self.batch.action_confirm()
+    #     self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
+    #     self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
+    #     # Ask to assign, so pickings should be assigned now.
+    #     self.batch.action_assign()
+    #     self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
+    #     self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.assertEqual(self.picking_client_2.state, 'done', 'Picking 2 should be done')
-        self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
-        self.assertEqual(self.picking_client_1.move_lines.product_uom_qty, 5, 'initial demand should be 5 after picking split')
-        self.assertTrue(self.env['stock.picking'].search([('backorder_id', '=', self.picking_client_1.id)]), 'no back order created')
+    #     # There should be a wizard asking to process picking without quantity done
+    #     immediate_transfer_wizard_dict = self.batch.action_done()
+    #     self.assertTrue(immediate_transfer_wizard_dict)
+    #     immediate_transfer_wizard = Form(self.env[(immediate_transfer_wizard_dict.get('res_model'))].with_context(immediate_transfer_wizard_dict['context'])).save()
+    #     self.assertEqual(len(immediate_transfer_wizard.pick_ids), 2)
+    #     immediate_transfer_wizard.process()
 
-        quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
-        quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
+    #     self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
+    #     self.assertEqual(self.picking_client_2.state, 'done', 'Picking 2 should be done')
 
-        # ensure that quantity for picking has been moved
-        self.assertFalse(sum(quant_A.mapped('quantity')))
-        self.assertFalse(sum(quant_B.mapped('quantity')))
+    #     quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
+    #     quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
 
-    def test_batch_with_immediate_transfer_and_backorder_wizard(self):
-        """ Test a simple batch picking with only one product fully available.
-        Everything should be automatically. First one backorder in order to set quantity_done
-        to reserved quantity. After a second wizard asking for a backorder for the quantity that
-        has not been fully transfered.
-        """
-        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 5.0)
-        self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
+    #     # ensure that quantity for picking has been moved
+    #     self.assertFalse(sum(quant_A.mapped('quantity')))
+    #     self.assertFalse(sum(quant_B.mapped('quantity')))
 
-        # Confirm batch, pickings should not be automatically assigned.
-        self.batch.action_confirm()
-        self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
-        self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
-        # Ask to assign, so pickings should be assigned now.
-        self.batch.action_assign()
-        self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
-        self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
+    # def test_batch_with_backorder_wizard(self):
+    #     """ Test a simple batch picking with only one quantity fully available.
+    #     The user will set by himself the quantity reserved for each picking and
+    #     run the picking batch. There should be a wizard asking for a backorder.
+    #     """
+    #     self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 5.0)
+    #     self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
 
-        # There should be a wizard asking to process picking without quantity done
-        immediate_transfer_wizard_dict = self.batch.action_done()
-        self.assertTrue(immediate_transfer_wizard_dict)
-        immediate_transfer_wizard = Form(self.env[(immediate_transfer_wizard_dict.get('res_model'))].with_context(immediate_transfer_wizard_dict['context'])).save()
-        self.assertEqual(len(immediate_transfer_wizard.pick_ids), 2)
-        back_order_wizard_dict = immediate_transfer_wizard.process()
-        self.assertTrue(back_order_wizard_dict)
-        back_order_wizard = Form(self.env[(back_order_wizard_dict.get('res_model'))].with_context(back_order_wizard_dict['context'])).save()
-        self.assertEqual(len(back_order_wizard.pick_ids), 1)
-        back_order_wizard.process()
+    #     # Confirm batch, pickings should not be automatically assigned.
+    #     self.batch.action_confirm()
+    #     self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
+    #     self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
+    #     # Ask to assign, so pickings should be assigned now.
+    #     self.batch.action_assign()
+    #     self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
+    #     self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
-        self.assertEqual(self.picking_client_1.move_lines.product_uom_qty, 5, 'initial demand should be 5 after picking split')
-        self.assertTrue(self.env['stock.picking'].search([('backorder_id', '=', self.picking_client_1.id)]), 'no back order created')
+    #     self.picking_client_1.move_lines.quantity_done = 5
+    #     self.picking_client_2.move_lines.quantity_done = 10
 
-        quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
-        quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
+    #     # There should be a wizard asking to process picking without quantity done
+    #     back_order_wizard_dict = self.batch.action_done()
+    #     self.assertTrue(back_order_wizard_dict)
+    #     back_order_wizard = Form(self.env[(back_order_wizard_dict.get('res_model'))].with_context(back_order_wizard_dict['context'])).save()
+    #     self.assertEqual(len(back_order_wizard.pick_ids), 1)
+    #     back_order_wizard.process()
 
-        # ensure that quantity for picking has been moved
-        self.assertFalse(sum(quant_A.mapped('quantity')))
-        self.assertFalse(sum(quant_B.mapped('quantity')))
+    #     self.assertEqual(self.picking_client_2.state, 'done', 'Picking 2 should be done')
+    #     self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
+    #     self.assertEqual(self.picking_client_1.move_lines.product_uom_qty, 5, 'initial demand should be 5 after picking split')
+    #     self.assertTrue(self.env['stock.picking'].search([('backorder_id', '=', self.picking_client_1.id)]), 'no back order created')
 
-    def test_batch_with_immediate_transfer_and_backorder_wizard_with_manual_operations(self):
-        """ Test a simple batch picking with only one quantity fully available.
-        The user set the quantity done only for the partially available picking.
-        The test should run the immediate transfer for the first picking and then
-        the backorder wizard for the second picking.
-        """
-        self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 5.0)
-        self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
+    #     quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
+    #     quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
 
-        # Confirm batch, pickings should not be automatically assigned.
-        self.batch.action_confirm()
-        self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
-        self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
-        # Ask to assign, so pickings should be assigned now.
-        self.batch.action_assign()
-        self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
-        self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
+    #     # ensure that quantity for picking has been moved
+    #     self.assertFalse(sum(quant_A.mapped('quantity')))
+    #     self.assertFalse(sum(quant_B.mapped('quantity')))
 
-        self.picking_client_1.move_lines.quantity_done = 5
-        # There should be a wizard asking to process picking without quantity done
-        immediate_transfer_wizard_dict = self.batch.action_done()
-        self.assertTrue(immediate_transfer_wizard_dict)
-        immediate_transfer_wizard = Form(self.env[(immediate_transfer_wizard_dict.get('res_model'))].with_context(immediate_transfer_wizard_dict['context'])).save()
-        self.assertEqual(len(immediate_transfer_wizard.pick_ids), 1)
-        back_order_wizard_dict = immediate_transfer_wizard.process()
-        self.assertTrue(back_order_wizard_dict)
-        back_order_wizard = Form(self.env[(back_order_wizard_dict.get('res_model'))].with_context(back_order_wizard_dict['context'])).save()
-        self.assertEqual(len(back_order_wizard.pick_ids), 1)
-        back_order_wizard.process()
+    # def test_batch_with_immediate_transfer_and_backorder_wizard(self):
+    #     """ Test a simple batch picking with only one product fully available.
+    #     Everything should be automatically. First one backorder in order to set quantity_done
+    #     to reserved quantity. After a second wizard asking for a backorder for the quantity that
+    #     has not been fully transfered.
+    #     """
+    #     self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 5.0)
+    #     self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
 
-        self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
-        self.assertEqual(self.picking_client_1.move_lines.product_uom_qty, 5, 'initial demand should be 5 after picking split')
-        self.assertTrue(self.env['stock.picking'].search([('backorder_id', '=', self.picking_client_1.id)]), 'no back order created')
+    #     # Confirm batch, pickings should not be automatically assigned.
+    #     self.batch.action_confirm()
+    #     self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
+    #     self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
+    #     # Ask to assign, so pickings should be assigned now.
+    #     self.batch.action_assign()
+    #     self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
+    #     self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
 
-        quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
-        quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
+    #     # There should be a wizard asking to process picking without quantity done
+    #     immediate_transfer_wizard_dict = self.batch.action_done()
+    #     self.assertTrue(immediate_transfer_wizard_dict)
+    #     immediate_transfer_wizard = Form(self.env[(immediate_transfer_wizard_dict.get('res_model'))].with_context(immediate_transfer_wizard_dict['context'])).save()
+    #     self.assertEqual(len(immediate_transfer_wizard.pick_ids), 2)
+    #     back_order_wizard_dict = immediate_transfer_wizard.process()
+    #     self.assertTrue(back_order_wizard_dict)
+    #     back_order_wizard = Form(self.env[(back_order_wizard_dict.get('res_model'))].with_context(back_order_wizard_dict['context'])).save()
+    #     self.assertEqual(len(back_order_wizard.pick_ids), 1)
+    #     back_order_wizard.process()
 
-        # ensure that quantity for picking has been moved
-        self.assertFalse(sum(quant_A.mapped('quantity')))
-        self.assertFalse(sum(quant_B.mapped('quantity')))
+    #     self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
+    #     self.assertEqual(self.picking_client_1.move_lines.product_uom_qty, 5, 'initial demand should be 5 after picking split')
+    #     self.assertTrue(self.env['stock.picking'].search([('backorder_id', '=', self.picking_client_1.id)]), 'no back order created')
+
+    #     quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
+    #     quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
+
+    #     # ensure that quantity for picking has been moved
+    #     self.assertFalse(sum(quant_A.mapped('quantity')))
+    #     self.assertFalse(sum(quant_B.mapped('quantity')))
+
+    # def test_batch_with_immediate_transfer_and_backorder_wizard_with_manual_operations(self):
+    #     """ Test a simple batch picking with only one quantity fully available.
+    #     The user set the quantity done only for the partially available picking.
+    #     The test should run the immediate transfer for the first picking and then
+    #     the backorder wizard for the second picking.
+    #     """
+    #     self.env['stock.quant']._update_available_quantity(self.productA, self.stock_location, 5.0)
+    #     self.env['stock.quant']._update_available_quantity(self.productB, self.stock_location, 10.0)
+
+    #     # Confirm batch, pickings should not be automatically assigned.
+    #     self.batch.action_confirm()
+    #     self.assertEqual(self.picking_client_1.state, 'confirmed', 'Picking 1 should be confirmed')
+    #     self.assertEqual(self.picking_client_2.state, 'confirmed', 'Picking 2 should be confirmed')
+    #     # Ask to assign, so pickings should be assigned now.
+    #     self.batch.action_assign()
+    #     self.assertEqual(self.picking_client_1.state, 'assigned', 'Picking 1 should be ready')
+    #     self.assertEqual(self.picking_client_2.state, 'assigned', 'Picking 2 should be ready')
+
+    #     self.picking_client_1.move_lines.quantity_done = 5
+    #     # There should be a wizard asking to process picking without quantity done
+    #     immediate_transfer_wizard_dict = self.batch.action_done()
+    #     self.assertTrue(immediate_transfer_wizard_dict)
+    #     immediate_transfer_wizard = Form(self.env[(immediate_transfer_wizard_dict.get('res_model'))].with_context(immediate_transfer_wizard_dict['context'])).save()
+    #     self.assertEqual(len(immediate_transfer_wizard.pick_ids), 1)
+    #     back_order_wizard_dict = immediate_transfer_wizard.process()
+    #     self.assertTrue(back_order_wizard_dict)
+    #     back_order_wizard = Form(self.env[(back_order_wizard_dict.get('res_model'))].with_context(back_order_wizard_dict['context'])).save()
+    #     self.assertEqual(len(back_order_wizard.pick_ids), 1)
+    #     back_order_wizard.process()
+
+    #     self.assertEqual(self.picking_client_1.state, 'done', 'Picking 1 should be done')
+    #     self.assertEqual(self.picking_client_1.move_lines.product_uom_qty, 5, 'initial demand should be 5 after picking split')
+    #     self.assertTrue(self.env['stock.picking'].search([('backorder_id', '=', self.picking_client_1.id)]), 'no back order created')
+
+    #     quant_A = self.env['stock.quant']._gather(self.productA, self.stock_location)
+    #     quant_B = self.env['stock.quant']._gather(self.productB, self.stock_location)
+
+    #     # ensure that quantity for picking has been moved
+    #     self.assertFalse(sum(quant_A.mapped('quantity')))
+    #     self.assertFalse(sum(quant_B.mapped('quantity')))
