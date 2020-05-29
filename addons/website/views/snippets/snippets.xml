@@ -572,6 +572,29 @@
                        data-customize-website-variable="address_logo"
                        string="Address - Logo"/>
         </we-select>
+        <we-row/>
+        <we-select string="Scroll Top Button" data-variable="footer-scrolltop" data-reload="/">
+            <we-button id="option_footer_scrolltop_none"
+                       data-customize-website-views=""
+                       data-name="footer_scrolltop_none_opt"
+                       data-customize-website-variable=""
+                       string="None"/>
+            <we-button id="option_footer_scrolltop_center"
+                       data-name="footer_scrolltop_none_center"
+                       data-customize-website-views="website.option_footer_scrolltop, website.option_footer_scrolltop_center"
+                       data-customize-website-variable="footer_scrolltop_center"
+                       string="Center"/>
+            <we-button id="option_footer_scrolltop_left"
+                       data-name="footer_scrolltop_none_left"
+                       data-customize-website-views="website.option_footer_scrolltop, website.option_footer_scrolltop_center, website.option_footer_scrolltop_left"
+                       data-customize-website-variable="footer_scrolltop_left"
+                       string="Left"/>
+            <we-button id="option_footer_scrolltop_right"
+                       data-name="footer_scrolltop_none_right"
+                       data-customize-website-views="website.option_footer_scrolltop, website.option_footer_scrolltop_center, website.option_footer_scrolltop_right"
+                       data-customize-website-variable="footer_scrolltop_right"
+                       string="Right"/>
+        </we-select>
     </div>
 
     <div data-selector=".o_footer_copyright"
