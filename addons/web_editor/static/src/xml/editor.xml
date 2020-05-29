@@ -201,29 +201,29 @@
                 <div class="o_video_dialog_options hidden mt48">
                     <small class="text-muted">Options</small>
                     <ul class="list-group">
-                        <li class="list-group-item o_yt_option o_vim_option o_dm_option">
+                        <li class="list-group-item o_youtube_option o_vimeo_option o_dailymotion_option">
                             <label class="o_switch mb0">
                                 <input id="o_video_autoplay" type="checkbox"/><span/>
                                 <span style="margin-right: 8px;">Autoplay</span>
                                 <span class="small text-muted" style="margin-left: auto;">Videos are muted when autoplay is enabled</span>
                             </label>
                         </li>
-                        <li class="list-group-item o_yt_option o_vim_option">
+                        <li class="list-group-item o_youtube_option o_vimeo_option">
                             <label class="o_switch mb0"><input id="o_video_loop" type="checkbox"/><span/>Loop</label>
                         </li>
-                        <li class="list-group-item o_yt_option o_dm_option">
+                        <li class="list-group-item o_youtube_option o_dailymotion_option">
                             <label class="o_switch mb0"><input id="o_video_hide_controls" type="checkbox"/><span/>Hide player controls</label>
                         </li>
-                        <li class="list-group-item o_yt_option">
+                        <li class="list-group-item o_youtube_option">
                             <label class="o_switch mb0"><input id="o_video_hide_fullscreen" type="checkbox"/><span/>Hide fullscreen button</label>
                         </li>
-                        <li class="list-group-item o_yt_option">
+                        <li class="list-group-item o_youtube_option">
                             <label class="o_switch mb0"><input id="o_video_hide_yt_logo" type="checkbox"/><span/>Hide Youtube logo</label>
                         </li>
-                        <li class="list-group-item o_dm_option">
+                        <li class="list-group-item o_dailymotion_option">
                             <label class="o_switch mb0"><input id="o_video_hide_dm_logo" type="checkbox"/><span/>Hide Dailymotion logo</label>
                         </li>
-                        <li class="list-group-item o_dm_option">
+                        <li class="list-group-item o_dailymotion_option">
                             <label class="o_switch mb0"><input id="o_video_hide_dm_share" type="checkbox"/><span/>Hide sharing button</label>
                         </li>
                     </ul>
