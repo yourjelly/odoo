@@ -1,0 +1,27 @@
+@keyframes o-btn-ripple {
+    100% { opacity: 0; transform: scale(2.5); }
+}
+
+.o_btn_ripple {
+    display: none;
+    position: absolute;
+    border-radius: 100%;
+    opacity: .3;
+    z-index: -1;
+    background: currentColor;
+    pointer-events: none;
+    transform: scale(0);
+}
+
+.btn, .dropdown-item, .dropdown-toggle {
+    &.o_js_btn_has_ripple {
+        transform-style: preserve-3d;
+        position: relative !important;
+        overflow: hidden !important;
+
+        .o_btn_ripple {
+            display: block;
+            animation: o-btn-ripple ease-in;
+        }
+    }
+}
