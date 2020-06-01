@@ -4858,6 +4858,9 @@ var BasicModel = AbstractModel.extend({
         if (options.domain !== undefined) {
             element.domain = options.domain;
         }
+        if (options.filter_domain !== undefined) {
+            element.filter_domain = options.filter_domain;
+        }
         if (options.groupBy !== undefined) {
             element.groupedBy = options.groupBy;
         }
@@ -4951,7 +4954,7 @@ var BasicModel = AbstractModel.extend({
                 model: list.model,
                 fields: fieldNames,
                 context: _.extend({}, list.getContext(), {bin_size: true}),
-                domain: list.domain || [],
+                domain: list.filter_domain || list.domain || [],
                 limit: list.limit,
                 offset: list.loadMoreOffset + list.offset,
                 orderBy: list.orderedBy,
