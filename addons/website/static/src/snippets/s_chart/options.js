@@ -18,8 +18,7 @@ options.registry.InnerChart = options.Class.extend({
         'click we-button.o_we_matrix_remove_row': '_onRemoveRowClick',
         'blur we-matrix input': '_onMatrixInputFocusOut',
         'focus we-matrix input': '_onMatrixInputFocus',
-        'blur .o-min-value': '_onMinInputFocus',
-        'blur .o-max-value': '_onMaxInputFocus',
+        'blur .o-MinMaxUpdate': '_onMinMaxValueFocus',
     }),
 
     /**
@@ -36,6 +35,10 @@ options.registry.InnerChart = options.Class.extend({
     start: function () {
         this.backSelectEl = this.el.querySelector('[data-name="chart_bg_color_opt"]');
         this.borderSelectEl = this.el.querySelector('[data-name="chart_border_color_opt"]');
+
+        //Min-Max value of vertical axis
+        this.minEl = this.el.querySelector('.o-min-value input');
+        this.maxEl = this.el.querySelector('.o-max-value input');
 
         // Build matrix content
         this.tableEl = this.el.querySelector('we-matrix table');
@@ -157,10 +160,8 @@ options.registry.InnerChart = options.Class.extend({
      */
     _reloadGraph: async function () {
         const jsonValue = this._matrixToChartData();
-        const data = JSON.parse(jsonValue);
         if (this.$target[0].dataset.data !== jsonValue) {
             this.$target[0].dataset.data = jsonValue;
-            this._onUpdateMinMax(data);
             await this._refreshPublicWidgets();
         }
     },
@@ -477,34 +478,15 @@ options.registry.InnerChart = options.Class.extend({
         this.updateUI();
     },
     /**
-     * Set the Min value of y-axis and refresh widget
+     * Set the Min-Max value of vertical-axis and refresh widget
      *
      * @private
      * @param {Event} ev
      */
-    _onMinInputFocus: async function (ev) {
-        this.$target[0].dataset.minValue = ev.target.value;
+    _onMinMaxValueFocus: async function (ev) {
+        this.$target[0].dataset.minValue = this.minEl.value;
+        this.$target[0].dataset.maxValue = this.maxEl.value;
         await this._refreshPublicWidgets();
-    },
-    /**
-     * Set the Max value of y-axis and refresh widget
-     *
-     * @private
-     * @param {Event} ev
-     */
-    _onMaxInputFocus: async function (ev) {
-        this.$target[0].dataset.maxValue = ev.target.value;
-        await this._refreshPublicWidgets();
-    },
-    /**
-     * @private
-     * @param {Object} data
-     */
-    _onUpdateMinMax: function (data) {
-        const minVal =  Math.min(...data.datasets[0].data);
-        this.$target[0].dataset.minValue = minVal < 0 ? minVal : 0;
-        this.$target[0].dataset.maxValue =  Math.max(...data.datasets[0].data);
-        this.updateUI()
     },
 });
 });

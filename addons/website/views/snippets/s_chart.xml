@@ -56,8 +56,8 @@
                     </tr>
                 </table>
             </we-matrix>
-            <we-input string="min value" class="o-min-value" data-attribute-name="minValue" data-dependencies="bar_chart_opt, horizontal_bar_chart_opt, line_chart_opt"/>
-            <we-input string="max value" class="o-max-value" data-attribute-name="maxValue" data-dependencies="bar_chart_opt, horizontal_bar_chart_opt, line_chart_opt"/>
+            <we-input string="min value" class="o-min-value o-MinMaxUpdate" data-attribute-name="minValue" data-dependencies="bar_chart_opt, horizontal_bar_chart_opt, line_chart_opt"/>
+            <we-input string="max value" class="o-max-value o-MinMaxUpdate" data-attribute-name="maxValue" data-dependencies="bar_chart_opt, horizontal_bar_chart_opt, line_chart_opt"/>
             <we-colorpicker string="Background" data-name="chart_bg_color_opt"
                 data-color-change=""
                 data-attribute-name="backgroundColor"
