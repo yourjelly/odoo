@@ -147,6 +147,10 @@ class MailTemplate(models.Model):
                             obj = xml_import(self.env.cr, model, {}, mode='init', xml_filename=pathname)
                             obj._tag_record(rec)
                             self._override_translation_term(self.env.lang, model, xml_id)
+        return {
+                'type': 'ir.actions.client',
+                'tag': 'reload',
+            }
 
     def _compute_reset_template(self):
         for template in self:
