@@ -104,6 +104,7 @@ var AbstractWebClient = Widget.extend(KeyboardNavigationMixin, {
         this.env = env;
         core.bus.on('legacy_webclient_request', this, this._onLegacyWebclientRequest);
     },
+    
     /**
      * @override
      */
@@ -122,8 +123,14 @@ var AbstractWebClient = Widget.extend(KeyboardNavigationMixin, {
         var state = $.bbq.getState();
         // If not set on the url, retrieve cids from the local storage
         // of from the default company on the user
-        var current_company_id = session.user_companies.current_company[0]
-        if (!state.cids) {
+
+
+        console.log("\n\n\n\n\n\n\n\n\n\n check......",session.user_companies.current_company[0]);
+        
+        var current_company_id = session.user_companies.current_company[0];
+
+        if (!state.cids) 
+        {
             state.cids = utils.get_cookie('cids') !== null ? utils.get_cookie('cids') : String(current_company_id);
         }
         var stateCompanyIDS = _.map(state.cids.split(','), function (cid) { return parseInt(cid) });

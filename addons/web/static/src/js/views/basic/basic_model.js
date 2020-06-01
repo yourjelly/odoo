@@ -3644,8 +3644,10 @@ var BasicModel = AbstractModel.extend({
         // Uses "current_company_id" because "company_id" would conflict with all the company_id fields
         // in general, the actual "company_id" field of the form should be used for m2o domains, not this fallback
         if (session.user_context.allowed_company_ids) {
+            console.log("\n\n\n\n 1st one..................");
             var current_company = session.user_context.allowed_company_ids[0];
         } else {
+            console.log("\n\n\n\n 2nd one..................");
             var current_company = session.user_companies ? session.user_companies.current_company[0] : false;
         }
         return _.extend({
