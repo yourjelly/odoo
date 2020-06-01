@@ -5,7 +5,27 @@ var core = require('web.core');
 var rpc = require('web.rpc');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
 var options = require('web_editor.snippets.options');
+require('website.s_popup_options');
 var _t = core._t;
+
+options.registry.NewsletterPopup = options.registry.SnippetPopup.extend({
+    selector: '.s_newsletter_block .o_newsletter_popup',
+
+    setLayout: function (previewMode, widgetValue, params) {
+        const isModal = widgetValue === 'modal';
+        const isTop = widgetValue === 'fixedTop';
+        this.$target.toggleClass('s_popup_fixed', !isModal);
+        this.$target.toggleClass('s_popup_fixed_top', isTop);
+        this.$target.toggleClass('s_popup_center modal', isModal);
+        this.$target.find('.s_popup_frame').toggleClass('modal-dialog modal-dialog-centered', isModal);
+        this.$target.find('.s_popup_content').toggleClass('modal-content', isModal);
+    },
+
+    moveBlock: function (previewMode, widgetValue, params) {
+        const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
+        this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
+    },
+})
 
 
 options.registry.mailing_list_subscribe = options.Class.extend({
