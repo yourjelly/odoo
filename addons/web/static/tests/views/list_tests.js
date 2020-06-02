@@ -427,8 +427,8 @@ QUnit.module('Views', {
         list.destroy();
     });
 
-    QUnit.test('column names (noLabel, label, string and default)', async function (assert) {
-        assert.expect(4);
+    QUnit.test('column names (noLabel, label, string, nolabel(field attr) and default)', async function (assert) {
+        assert.expect(5);
 
         const FieldChar = fieldRegistry.get('char');
         fieldRegistry.add('nolabel_char', FieldChar.extend({
@@ -437,7 +437,6 @@ QUnit.module('Views', {
         fieldRegistry.add('label_char', FieldChar.extend({
             label: "Some static label",
         }));
-
         const list = await createView({
             View: ListView,
             model: 'foo',
@@ -448,6 +447,7 @@ QUnit.module('Views', {
                     <field name="foo" widget="label_char"/>
                     <field name="int_field" string="My custom label"/>
                     <field name="text"/>
+                    <field name="qux" nolabel="1"/>
                 </tree>`,
         });
 
@@ -455,6 +455,7 @@ QUnit.module('Views', {
         assert.strictEqual(list.$('thead th[data-name=foo]').text(), 'Some static label');
         assert.strictEqual(list.$('thead th[data-name=int_field]').text(), 'My custom label');
         assert.strictEqual(list.$('thead th[data-name=text]').text(), 'text field');
+        assert.strictEqual(list.$('thead th[data-name=qux]').text(), '');
 
         list.destroy();
     });

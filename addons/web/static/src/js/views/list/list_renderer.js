@@ -856,7 +856,7 @@ var ListRenderer = BasicRenderer.extend({
      * @returns {jQueryElement} a <th> element
      */
     _renderHeaderCell: function (node) {
-        const { icon, name, string } = node.attrs;
+        const { icon, name, string, nolabel } = node.attrs;
         var order = this.state.orderedBy;
         var isNodeSorted = order[0] && order[0].name === name;
         var field = this.state.fields[name];
@@ -886,6 +886,9 @@ var ListRenderer = BasicRenderer.extend({
             } else if (FieldWidget.prototype.label) {
                 description = FieldWidget.prototype.label;
             }
+        }
+        if (nolabel && nolabel === "1") {
+            description = '';
         }
         $th.text(description)
             .attr('tabindex', -1)
