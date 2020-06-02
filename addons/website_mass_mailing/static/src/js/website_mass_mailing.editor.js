@@ -31,7 +31,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
            return Object.keys(data).map(key => {
             const record = data[key];
             const button = document.createElement('we-button');
-            button.dataset.mailingList = record[0];
+            button.dataset.selectMailingList = record[0];
             button.textContent = record[1];
             return button;
         })
@@ -47,14 +47,14 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @override
      */
     onBuilt: function () {
-        var self = this;
         this._super();
+        this.$target.attr("data-list-id", this._getMailingListID());
     },
     /**
      * Replace the current mailing_list_ID with the existing mailing_list_id selected.
      */
-    mailingList: async function (previewMode, value, params) {
-        debugger;
+    selectMailingList: async function (previewMode, value, params) {
+        this.$target.attr("data-list-id", value);
     },
 
     //--------------------------------------------------------------------------
@@ -74,7 +74,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @override
      */
     _computeWidgetState: function (methodName, params) {
-        if (methodName === 'mailingList') {
+        if (methodName === 'selectMailingList') {
             return this._getMailingListID();
         }
         return this._super(...arguments);
@@ -83,7 +83,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @private
      */
     _getMailingListID: function () {
-        return this.$target.data('list-id');
+        return this.$target.data('list-id') || this.mailingList[0].dataset.selectMailingList;
     },
 });
 
@@ -173,12 +173,6 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     destroy: function () {
         this.$target.off('.newsletter_popup_option');
         this._super.apply(this, arguments);
-    },
-    /**
-     * Replace the current mailing_list_ID with the existing mailing_list_id selected.
-     */
-    mailingList: async function (previewMode, value, params) {
-        debugger;
     },
 });
 
