@@ -35,6 +35,7 @@
                             <button class="oe_stat_button"
                                     name="reset_mail_template" type="object" icon="fa-refresh"
                                     attrs="{'invisible':[('reset_template','=',False)]}"
+                                    options='{"reset": "true"}'
                                     help="Discard the user made changes and reset this template to it's initial state">
                                 <div class="o_field_widget o_stat_info">
                                     <span class="o_stat_text">Reset</span>

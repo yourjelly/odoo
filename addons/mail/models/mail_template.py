@@ -152,6 +152,16 @@ class MailTemplate(models.Model):
                 'tag': 'reload',
             }
 
+    def _get_inherited_module(self, module):
+        info = odoo.modules.module.load_information_from_description_file(module)
+        packages = []
+        packages.append((module, info))
+        dependencies = dict([(p, info['depends']) for p, info in packages])
+        current, later = set([p for p, info in packages]), set()
+        while packages and current > later:
+            package, info = packages[0]
+            deps = info['depends']
+
     def _compute_reset_template(self):
         for template in self:
             template.reset_template = bool(template.get_external_id().get(template.id))

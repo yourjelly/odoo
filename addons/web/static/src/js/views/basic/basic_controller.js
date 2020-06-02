@@ -189,7 +189,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
         this.savingDef = new Promise(function (resolve) {
             unlockedMutex.then(resolve).guardedCatch(resolve);
         });
-        console.log(unlockedMutex, "ccccccccccccccccc");
+
         return unlockedMutex;
     },
     /**

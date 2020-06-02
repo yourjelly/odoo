@@ -131,7 +131,7 @@ var FormRenderer = BasicRenderer.extend({
      */
     displayTranslationAlert: function () {
         this.$('.o_notification_box').remove();
-        if (this.alertFields[this.state.res_id]) {
+        if (!_.isEmpty(this.alertFields[this.state.res_id])) {
             var $notification = $(qweb.render('notification-box', {type: 'info'}))
                 .append(qweb.render('translation-alert', {
                     fields: this.alertFields[this.state.res_id],
