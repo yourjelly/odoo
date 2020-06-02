@@ -71,7 +71,7 @@
             data-selector=".o_newsletter_popup">
             <we-select string="Newsletter" data-name="mail_list" data-no-preview="true"/>
         </div>
-        <div data-js="NewsletterPopup" data-selector=".s_newsletter_block">
+        <div data-js="NewsletterPopup" data-selector=".o_newsletter_modal">
             <we-select string="Position">
                 <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
                 <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
@@ -92,6 +92,7 @@
                 <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
             </we-select>
             <we-input string="Delay" data-select-data-attribute="" data-attribute-name="showAfter" data-unit="s" data-save-unit="ms" data-dependencies="show_delay"/>
+            <t t-set="unit_popup_duration">days</t>
             <we-select string="Show on" data-no-preview="true">
                 <we-button data-move-block="moveToBody">This page</we-button>
                 <we-button data-move-block="moveToFooter">All pages</we-button>

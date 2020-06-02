@@ -9,7 +9,10 @@ require('website.s_popup_options');
 var _t = core._t;
 
 options.registry.NewsletterPopup = options.registry.SnippetPopup.extend({
-    selector: '.s_newsletter_block .o_newsletter_popup',
+
+    start: function () {
+        return this._super(...arguments);
+    },
 
     setLayout: function (previewMode, widgetValue, params) {
         const isModal = widgetValue === 'modal';
@@ -19,11 +22,27 @@ options.registry.NewsletterPopup = options.registry.SnippetPopup.extend({
         this.$target.toggleClass('s_popup_center modal', isModal);
         this.$target.find('.s_popup_frame').toggleClass('modal-dialog modal-dialog-centered', isModal);
         this.$target.find('.s_popup_content').toggleClass('modal-content', isModal);
+        return this._super(...arguments);
     },
 
     moveBlock: function (previewMode, widgetValue, params) {
         const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
-        this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
+        this.$target.closest('.s_newsletter_block').prependTo($container.find('.oe_structure:o_editable').first());
+    },
+
+    _computeWidgetState: function (methodName, params) {
+        switch (methodName) {
+            case 'moveBlock':
+                return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
+            case 'setLayout':
+                if (this.$target.hasClass('s_popup_center')) {
+                    return 'modal';
+                } else if (this.$target.hasClass('s_popup_fixed_top')) {
+                    return 'fixedTop';
+                }
+                return 'fixedBottom';
+        }
+        return this._super(...arguments);
     },
 })
 
