@@ -6,7 +6,7 @@ const publicWidget = require('web.public.widget');
 const utils = require('web.utils');
 
 const PopupWidget = publicWidget.Widget.extend({
-    selector: '.s_popup .o_newsletter_modal',
+    selector: '.s_popup',
     events: {
         'click .js_close_popup': '_onCloseClick',
     },
