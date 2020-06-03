@@ -421,13 +421,12 @@ class MrpProduction(models.Model):
             production.workorder_done_count = count_data.get(production.id, 0)
 
     @api.depends(
-        'move_raw_ids.state', 'move_finished_ids.state', 'workorder_ids',
-        'workorder_ids.date_planned_start', 'workorder_ids.date_planned_finished',
-        'workorder_ids.state', 'move_raw_ids.quantity_done', 'product_qty', 'qty_producing')
+        'move_raw_ids.state', 'move_raw_ids.quantity_done', 'move_finished_ids.state',
+        'workorder_ids', 'workorder_ids.state', 'product_qty', 'qty_producing')
     def _compute_state(self):
         """ Compute the production state. It use the same process than stock
         picking. It exists 3 extra steps for production:
-        - progress: At least one item is produced.
+        - progress: At least one item is produced or consumed.
         - to_close: The quantity produced is greater than the quantity to
         produce and all work orders has been finished.
         """
@@ -439,19 +438,15 @@ class MrpProduction(models.Model):
                 production.state = 'draft'
             elif all(move.state == 'cancel' for move in production.move_raw_ids):
                 production.state = 'cancel'
-            elif all(move.state in ['cancel', 'done'] for move in production.move_raw_ids):
-                if (
-                    production.bom_id.consumption == 'flexible'
-                    and float_compare(production.qty_producing, production.product_qty, precision_rounding=production.product_uom_id.rounding) == -1
-                ):
-                    production.state = 'progress'
-                else:
-                    production.state = 'done'
-            elif production.qty_producing >= production.product_qty:
+            elif all(move.state == 'done' for move in production.move_raw_ids):
+                production.state = 'done'
+            elif production.qty_producing >= production.product_qty and all(wo_state == 'done' for wo_state in production.workorder_ids.mapped('state')):
                 production.state = 'to_close'
-            elif production.workorder_ids and any(wo_state == 'progress' for wo_state in production.workorder_ids.mapped('state')):
+            elif any(wo_state in ('progress', 'done') for wo_state in production.workorder_ids.mapped('state')):
                 production.state = 'progress'
-            elif not float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding) and production.qty_producing < production.product_qty:
+            elif not float_is_zero(production.qty_producing, precision_rounding=production.product_uom_id.rounding):
+                production.state = 'progress'
+            elif any(not float_is_zero(move.quantity_done, precision_rounding=move.product_uom.rounding) for move in production.move_raw_ids) :
                 production.state = 'progress'
             else:
                 production.state = 'confirmed'

@@ -284,7 +284,12 @@ class MrpWorkorder(models.Model):
         # Removes references to workorder to avoid Validation Error
         (self.mapped('move_raw_ids') | self.mapped('move_finished_ids')).write({'workorder_id': False})
         self.mapped('leave_id').unlink()
-        return super(MrpWorkorder, self).unlink()
+        mo_dirty = self.production_id.filtered(lambda mo: mo.state in ("confirmed", "progress", "to_close"))
+        res = super().unlink()
+        # We need to go through `_action_confirm` for all workorders of the current productions to
+        # make sure the links between them are correct (`next_work_order_id` could be obsolete now).
+        mo_dirty.workorder_ids._action_confirm()
+        return res
 
     @api.depends('production_id.product_qty', 'qty_produced', 'production_id.product_uom_id')
     def _compute_is_produced(self):
@@ -376,7 +381,7 @@ class MrpWorkorder(models.Model):
                     if workorder.state in ('progress', 'done', 'cancel'):
                         raise UserError(_('You cannot change the workcenter of a work order that is in progress or done.'))
                     workorder.leave_id.resource_id = self.env['mrp.workcenter'].browse(values['workcenter_id']).resource_id
-        if any(k not in ['time_ids', 'duration_expected'] for k in values.keys()) and any(workorder.state == 'done' for workorder in self):
+        if any(k not in ['time_ids', 'duration_expected', 'next_work_order_id'] for k in values.keys()) and any(workorder.state == 'done' for workorder in self):
             raise UserError(_('You can not change the finished work order.'))
         if 'date_planned_start' in values or 'date_planned_finished' in values:
             for workorder in self:
@@ -398,13 +403,18 @@ class MrpWorkorder(models.Model):
 
     @api.model_create_multi
     def create(self, values):
-        wos = super().create(values)
-        wos.filtered(lambda wo: wo.production_id.state in ("confirmed", "progress", "to_close"))._action_confirm()
-        return wos
+        res = super().create(values)
+        # Auto-confirm manually added workorders.
+        # We need to go through `_action_confirm` for all workorders of the current productions to
+        # make sure the links between them are correct.
+        to_confirm = res.filtered(lambda wo: wo.production_id.state in ("confirmed", "progress", "to_close"))
+        to_confirm = to_confirm.production_id.workorder_ids
+        to_confirm._action_confirm()
+        return res
 
     def _action_confirm(self):
         workorders_by_production = defaultdict(lambda: self.env['mrp.workorder'])
-        for workorder in self.production_id.workorder_ids:
+        for workorder in self:
             workorders_by_production[workorder.production_id] |= workorder
 
         for production, workorders in workorders_by_production.items():
@@ -641,6 +651,8 @@ class MrpWorkorder(models.Model):
                 (self.operation_id.batch == 'yes' and
                  float_compare(self.operation_id.batch_size, self.qty_produced, precision_rounding=rounding) <= 0)):
             self.next_work_order_id.state = 'ready'
+        if self.state == 'done' and self.next_work_order_id.state == 'pending':
+            workorder.next_work_order_id.state = 'ready'
 
     @api.model
     def gantt_unavailability(self, start_date, end_date, scale, group_bys=None, rows=None):
