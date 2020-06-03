@@ -150,7 +150,7 @@ class Base(models.AbstractModel):
         field_type = self._fields[group_by].type
         if field_type == 'selection':
             selection_labels = dict(self.fields_get()[group_by]['selection'])
-
+        print(records_values)
         for record_values in records_values:
             group_by_value = record_values[group_by]
 
