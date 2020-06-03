@@ -1195,6 +1195,12 @@ var PivotModel = AbstractModel.extend({
             var measure = column.measure;
             var originIndexes = column.originIndexes || [0];
 
+            //                                                      -------------- -------------------
+            // purpose of this debugger is i changed ordre of th to | This Month | | Previous Period |
+            //                                                      -------------- -------------------
+            // to reverse order but data of tds is not changed due to i am trying to find why data is not changed
+            // data is append in td from below value varible and data get from _getCellValue function.
+            debugger;
             var value = self._getCellValue(groupIntersectionId, measure, originIndexes);
 
             var measurement = {
@@ -1397,11 +1403,12 @@ var PivotModel = AbstractModel.extend({
         const { range, rangeDescription, comparisonRange, comparisonRangeDescription } = this.data.timeRanges;
         if (range) {
             this.data.domains = [this.data.domain.concat(range)];
-            this.data.origins = [rangeDescription];
+            this.data.origins = [];
             if (comparisonRange) {
                 this.data.domains.push(this.data.domain.concat(comparisonRange));
                 this.data.origins.push(comparisonRangeDescription);
             }
+            this.data.origins.push(rangeDescription);
         } else {
             this.data.domains = [this.data.domain];
             this.data.origins = [""];
