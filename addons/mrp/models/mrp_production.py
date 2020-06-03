@@ -303,7 +303,7 @@ class MrpProduction(models.Model):
         for production in self:
             if production.workorder_ids:
                 production.is_planned = all(wo.date_planned_start and wo.date_planned_finished for wo in production.workorder_ids)
-                production.is_partially_planned = any(wo.date_planned_start and wo.date_planned_finished for wo in production.workorder_ids)
+                production.is_partially_planned = any(wo.date_planned_start and wo.date_planned_finished for wo in production.workorder_ids if production.state != 'draft')
             else:
                 production.is_planned = False
                 production.is_partially_planned = False
