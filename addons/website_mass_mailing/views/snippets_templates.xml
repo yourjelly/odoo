@@ -39,7 +39,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-7 offset-lg-5 pt32 pb32 bg-white-75">
-                    <div class="text-center">
+                    <div class="text-center s_newsletter_text">
                         <h1 class="text-uppercase font-weight-bold">Always First.</h1>
                         <p>Be the first to find out all the latest news, products and trends.</p>
                         <t t-snippet-call="website_mass_mailing.s_newsletter_subscribe_form"/>
@@ -86,7 +86,7 @@
             </we-select>
             <we-colorpicker string="Backdrop Color" data-select-style="true"
                 data-css-property="background-color" data-color-prefix="bg-" data-dependencies="position_centered"/>
-            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-color-prefix="text-"/>
+            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-apply-to=".s_newsletter_text" data-color-prefix="text-"/>
             <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
                 <we-button data-select-data-attribute="afterDelay" data-name="show_delay">Delay</we-button>
                 <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
