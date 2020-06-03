@@ -652,7 +652,7 @@ class MrpWorkorder(models.Model):
                  float_compare(self.operation_id.batch_size, self.qty_produced, precision_rounding=rounding) <= 0)):
             self.next_work_order_id.state = 'ready'
         if self.state == 'done' and self.next_work_order_id.state == 'pending':
-            workorder.next_work_order_id.state = 'ready'
+            self.next_work_order_id.state = 'ready'
 
     @api.model
     def gantt_unavailability(self, start_date, end_date, scale, group_bys=None, rows=None):
