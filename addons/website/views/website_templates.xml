@@ -146,6 +146,28 @@
         </t>
     </xpath>
 
+    <!-- Offcanvas Menu -->
+    <xpath expr="//header//ul[hasclass('nav')]" position="before">
+        <div class="o_offcanvas_menu_backdrop" data-toggle="collapse" data-target="#top_menu_collapse" aria-label="Toggle navigation"/>
+    </xpath>
+    <xpath expr="//header//ul[hasclass('nav')]" position="attributes">
+        <attribute name="class" separator=" " add="position-relative"/>
+    </xpath>
+    <xpath expr="//header//ul[hasclass('nav')]/li" position="before">
+        <li class="nav-item o_offcanvas_menu_toggler text-right d-none">
+            <div class="nav-link px-3" type="button" data-toggle="collapse" data-target="#top_menu_collapse" aria-label="Toggle navigation">
+                <span class="fa-2x">&#215;</span>
+            </div>
+        </li>
+    </xpath>
+    <xpath expr="//header//button[hasclass('navbar-toggler')]" position="replace">
+        <div class="o_navbar_toggler_container navbar-toggler border-0">
+            <span data-toggle="collapse" data-target="#top_menu_collapse" aria-label="Toggle navigation">
+                &#9776;
+            </span>
+        </div>
+    </xpath>
+
     <xpath expr="//footer" position="attributes">
         <attribute name="data-name">Footer</attribute>
         <!-- Background now controlled by css configuration, using color combinations -->
@@ -365,26 +387,30 @@
     <xpath expr="//header//nav[hasclass('navbar')]" position="attributes">
         <attribute name="class" remove="navbar-expand-md" separator=" "/>
     </xpath>
-    <xpath expr="//header//button[hasclass('navbar-toggler')]" position="replace">
-        <div class="o_navbar_toggler_container">$0</div>
-    </xpath>
-</template>
-
-<template id="template_header_navbar_text_center" inherit_id="website.layout" name="Template Header Navbar Text Center" active="False">
-    <xpath expr="//header//ul[hasclass('nav')]" position="attributes">
-        <attribute name="class" remove="text-right" add="text-center" separator=" "/>
-    </xpath>
 </template>
 
 <template id="template_header_hamburger_left" inherit_id="website.layout" name="Template Header Hamburger" active="False">
-    <xpath expr="//header//a[hasclass('navbar-brand')]" position="before">
-        <div class="o_navbar_toggler_container o_not_editable"></div>
+    <xpath expr="//header//nav[hasclass('navbar')]" position="attributes">
+        <attribute name="class" add="o_offcanvas_menu_left" separator=" "/>
     </xpath>
-    <xpath expr="//div[hasclass('o_navbar_toggler_container')]" position="inside">
-        <xpath expr="//header//button[hasclass('navbar-toggler')]" position="move"/>
+    <xpath expr="//header//a[hasclass('navbar-brand')]" position="before">
+        <xpath expr="//header//div[hasclass('o_navbar_toggler_container')]" position="move"/>
     </xpath>
     <xpath expr="//header//ul[hasclass('nav')]" position="attributes">
-        <attribute name="class" remove="text-right" add="text-left" separator=" "/>
+        <attribute name="class" remove="ml-auto" add="mr-auto" separator=" "/>
+    </xpath>
+</template>
+
+<template id="template_header_hamburger_full" inherit_id="website.layout" name="Template Header Hamburger Full" active="False">
+    <xpath expr="//header//nav[hasclass('navbar')]" position="attributes">
+        <attribute name="class" add="o_offcanvas_menu_full" separator=" "/>
+    </xpath>
+    <xpath expr="//header//div[hasclass('o_offcanvas_menu_backdrop')]" position="replace"/>
+    <xpath expr="//header//ul[hasclass('nav')]" position="attributes">
+        <attribute name="class" remove="ml-auto" add="w-100 align-items-center" separator=" "/>
+    </xpath>
+    <xpath expr="//header//ul[hasclass('nav')]/li[hasclass('o_offcanvas_menu_toggler')]" position="attributes">
+        <attribute name="class" add="w-75" separator=" "/>
     </xpath>
 </template>
 

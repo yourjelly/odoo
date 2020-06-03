@@ -143,7 +143,7 @@ $-font-numbers: (
     }
 }
 
-.navbar-light {
+.navbar-light,   #top_menu_collapse.show #top_menu, #top_menu_collapse.collapsing #top_menu {
     // Style only navbar-light which Odoo is only supposed to use in standard
     // anyway. Automatically mimic navbar-dark if the user's menu color is dark.
     // Note: this only works because navbar-light is defined before navbar-dark,
@@ -692,6 +692,115 @@ table.table_desc tr td {
 
 $-transition-duration: 200ms;
 
+#top_menu_collapse.collapsing, #top_menu_collapse.show {
+    position: fixed;
+    display: flex;
+    align-items: stretch;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: $zindex-sticky;
+    transition: none;
+    transform: none;
+
+    .o_offcanvas_menu_backdrop {
+        @include o-position-absolute(0, 0, 0, 0);
+        background: currentColor;
+        opacity: .2;
+    }
+
+    #top_menu {
+        flex-wrap: nowrap;
+        overflow: auto;
+        padding-bottom: 2rem;
+        transition: transform .3s cubic-bezier(.694, .0482, .335, 1);
+        max-width: if(o-website-value('header-template') != 'hamburger_full', 560px, 100%);
+
+        .nav-item:not(.o_offcanvas_menu_toggler) {
+            padding-left: $grid-gutter-width;
+            padding-right: $grid-gutter-width;
+
+            @if o-website-value('header-template') == 'hamburger_full' {
+                text-align: center;
+            } @else if o-website-value('header-template') == 'hamburger_logo' {
+                text-align: right;
+            } @else {
+                text-align: left;
+            }
+        }
+
+        // Open all dropdown
+        .dropdown-toggle:after {
+            display: none;
+        }
+        .dropdown-menu {
+            display: block;
+            border: 0;
+            background: inherit;
+            color: inherit;
+        }
+
+        // Note: o_extra_menu_items should be disabled for this layout :(
+        .o_extra_menu_items.dropdown {
+            > a {
+                display: none;
+            }
+            a {
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
+    }
+
+    .o_offcanvas_menu_toggler {
+        display: block!important;
+        order: -1;
+    }
+
+    .o_connected_user header:not(.o_header_is_scrolled) &,
+    .o_connected_user header.o_header_affixed & {
+        padding-top: $o-navbar-height
+    }
+}
+
+@if o-website-value('header-template') == 'hamburger_logo' {
+    // Left-Right transition
+    #top_menu_collapse.collapsing #top_menu {
+        transform: translateX(-100%);
+        .editor_enable & {
+            transform: translateX(230px);
+        }
+    }
+    #top_menu_collapse.show #top_menu {
+        transform: translateX(0);
+        .editor_enable & {
+            transform: translateX(230px);
+        }
+    }
+} @else if o-website-value('header-template') == 'hamburger_full' {
+    // Top-Bottom transition
+    #top_menu_collapse.collapsing #top_menu {
+        transform: translateY(-100%);
+    }
+    #top_menu_collapse.show #top_menu {
+        transform: translateY(0);
+        .editor_enable & {
+            transform: translateX(230px);
+            width: calc(100% - 230px)!important;
+        }
+    }
+} @else {
+    // Right-Left transition (default)
+    #top_menu_collapse.collapsing #top_menu {
+        transform: translateX(100%);
+    }
+    #top_menu_collapse.show #top_menu {
+        transform: translateX(0);
+    }
+}
+
+
 // Affixed Header
 .o_header_affixed {
     display: block;
@@ -704,14 +813,6 @@ $-transition-duration: 200ms;
         transition: transform $-transition-duration;
     }
 
-    .navbar-collapse {
-        @if o-website-value('header-template') != 'logo_hamburger' {
-            max-height: 70vh;
-        }
-        &.show {
-            overflow-y: auto;
-        }
-    }
     &.o_header_is_scrolled {
         .navbar-brand {
             font-size: $o-theme-navbar-fixed-logo-height / $line-height-base;
@@ -780,36 +881,33 @@ header {
             min-width: 0;
         }
     }
-    @if index(('hamburger_logo', 'logo_hamburger'), o-website-value('header-template')) {
+    @if index(('hamburger_logo', 'logo_hamburger', 'hamburger_full'), o-website-value('header-template')) {
         .navbar-brand {
             text-align: center;
         }
         .navbar-brand, .logo img {
             margin: auto;
+
+            @if o-website-value('header-template') == 'hamburger_full' {
+                z-index: $zindex-sticky + 1;
+            }
         }
-        .navbar-nav {
-            margin-top: $spacer / 2;
-        }
-        @if o-website-value('header-template') == 'logo_hamburger' {
+
+        @if o-website-value('header-template') == 'hamburger_logo' {
             .o_navbar_toggler_container {
                 direction: rtl;
             }
-            &:not(.o_header_is_scrolled) .container {
-                padding-top: $spacer;
-                padding-bottom: $spacer;
-            }
-            .container {
-                transition: padding 200ms;
-
-                #top_menu.navbar-nav {
-                    height: 90vh;
-                    padding-top : 10vh;
-                }
-                .dropdown-menu {
-                    text-align: center;
-                }
-            }
         }
+
+        &:not(.o_header_is_scrolled) .container {
+            padding-top: $spacer;
+            padding-bottom: $spacer;
+        }
+
+        .container {
+            transition: padding 200ms;
+        }
+
     } @else if index(('logo_menu_below', 'menu_logo_below'), o-website-value('header-template')) {
         .navbar-brand {
             text-align: center;

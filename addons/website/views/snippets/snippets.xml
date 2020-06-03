@@ -465,11 +465,16 @@
                        data-customize-website-views=""
                        data-customize-website-variable="logo_menu"
                        string="Logo - Menu"/>
+            <we-button id="option_template_header_hamburger"
+                       data-name="header_hamburger"
+                       data-customize-website-views="website.template_header_hamburger"
+                       data-customize-website-variable="logo_hamburger"
+                       string="Hamburger menu (right)"/>
             <we-button id="option_template_header_hamburger_logo_centered"
                        data-name="header_hamburger_logo_centered_opt"
                        data-customize-website-views="website.template_header_hamburger, website.template_header_hamburger_left"
                        data-customize-website-variable="hamburger_logo"
-                       string="Hamburger - Logo"/>
+                       string="Hamburger menu (left)"/>
             <we-button id="option_template_header_logo_menu_below"
                        data-name="header_logo_menu_below_opt"
                        data-customize-website-views=""
@@ -482,9 +487,9 @@
                        string="Menu - Logo (Bottom)"/>
             <we-button id="option_template_header_logo_hamburger"
                        data-name="header_logo_hamburger_opt"
-                       data-customize-website-views="website.template_header_hamburger, website.template_header_navbar_text_center"
-                       data-customize-website-variable="logo_hamburger"
-                       string="Logo - Hamburger (cover)"/>
+                       data-customize-website-views="website.template_header_hamburger, website.template_header_hamburger_full"
+                       data-customize-website-variable="hamburger_full"
+                       string="Hamburger Full"/>
         </we-select>
         <we-select id="header_visibilities_list" string="Header Visibility">
             <we-button id="option_header_visibility_standard"
