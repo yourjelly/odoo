@@ -3,12 +3,12 @@
 
 <template id="s_ras" name="Counter">
     <section class="s_count pt96 pb96" data-scroll-background-ratio="1">
-        <div class="s_count">
+        <div>
         <div class="ml-5">Counter</div>
-        <div class=" w-25 ml-5 p-3" >
-            <div class="d-inline-block h1 plus" style="height:100px">+</div>
-            <div class="d-inline-block ml-2 h3 result" style="height:100px">0</div>
-            <div class="d-inline-block ml-2 h1 minus" style="height:100px">-</div>
+        <div class=" w-25 ml-5 p-3 bg-info">
+            <center><button class="d-inline-block plus">+</button>
+            <button class="d-inline-block ml-2 result">0</button>
+            <button class="d-inline-block ml-2 minus">-</button></center>
         </div>
     </div>
     </section>
