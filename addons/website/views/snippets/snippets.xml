@@ -44,6 +44,7 @@
                     <t t-snippet="website.s_media_list" t-thumbnail="/website/static/src/img/snippets_thumbs/s_media_list.png"/>
                     <t t-snippet="website.s_showcase" t-thumbnail="/website/static/src/img/snippets_thumbs/s_showcase.png"/>
                     <t t-snippet="website.s_parallax" t-thumbnail="/website/static/src/img/snippets_thumbs/s_parallax.png"/>
+                    <t t-snippet="website.s_ras"  t-thumbnail="/website/static/src/img/snippets_thumbs/counter.png"  />
                 </div>
             </div>
 
