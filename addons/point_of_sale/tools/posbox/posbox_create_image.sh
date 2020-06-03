@@ -28,9 +28,9 @@ __base="$(basename ${__file} .sh)"
 MOUNT_POINT="${__dir}/root_mount"
 OVERWRITE_FILES_BEFORE_INIT_DIR="${__dir}/overwrite_before_init"
 OVERWRITE_FILES_AFTER_INIT_DIR="${__dir}/overwrite_after_init"
-VERSION=saas-13.4
+VERSION=master-iot-v3-config-qle
 VERSION_IOTBOX=20.06
-REPO=https://github.com/odoo/odoo.git
+REPO=https://github.com/odoo-dev/odoo.git
 
 if ! file_exists *raspbian*.img ; then
     wget 'http://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2020-02-07/2020-02-05-raspbian-buster-lite.zip' -O raspbian.img.zip
