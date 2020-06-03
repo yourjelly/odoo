@@ -51,7 +51,7 @@
 </template>
 
 <template id="s_newsletter_subscribe_popup" name="Newsletter Popup">
-    <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0"/>
+    <div class="modal o_newsletter_popup o_snippet_invisible" data-list-id="0" data-show-after="5000" data-display="afterDelay" data-consents-duration="7"/>
 </template>
 
 <template id="newsletter_subscribe_options" name="Newsletter Subscribe Options" inherit_id="website.snippet_options">
@@ -82,7 +82,7 @@
                 <we-button data-select-class="modal-sm">Small</we-button>
                 <we-button data-select-class="modal-md">Medium</we-button>
                 <we-button data-select-class="modal-xl">Big</we-button>
-                <we-button data-select-class="s_popup_full" data-name="s_popup_size_full">Full</we-button>
+                <we-button data-select-class="s_newsletter_full" data-name="s_newsletter_size_full">Full</we-button>
             </we-select>
             <we-colorpicker string="Backdrop Color" data-select-style="true"
                 data-css-property="background-color" data-color-prefix="bg-" data-dependencies="position_centered"/>

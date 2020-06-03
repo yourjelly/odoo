@@ -201,5 +201,30 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         utils.set_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID), true);
         $(document).off('mouseleave.open_popup_event');
     },
+
+    _bindPopup: function () {
+        const $main = this.$target.find('.o_newsletter_popup');
+
+        let display = $main.data('display');
+        let delay = $main.data('showAfter');
+
+        if (config.device.isMobile) {
+            if (display === 'onExit') {
+                display = 'afterDelay';
+                delay = 5000;
+            }
+            this.$('.o_newsletter_popup').addClass('s_popup_bottom');
+        }
+
+        if (display === 'afterDelay') {
+            this.timeout = setTimeout(() => this._showPopup(), delay);
+        } else {
+            $(document).on('mouseleave.open_popup', () => this._showPopup());
+        }
+    },
+
+    _showPopup: function () {
+        this.$target.find('.o_newsletter_popup').removeClass('d-none');
+    },
 });
 });

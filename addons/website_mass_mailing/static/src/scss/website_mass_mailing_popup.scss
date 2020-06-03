@@ -26,61 +26,57 @@
         display: block !important;
     }
 
-    &.s_popup_center {
-        .s_popup_full {
-            @include o-position-absolute(0, 0, 0, 0);
-            &.modal-dialog {
-                max-width: 100%;
-                padding: 0 !important;
-                margin: 0 !important;
+    .o_newsletter_popup {
 
-                .modal-content {
-                    height: 100%;
-                    width: 100%;
-                    justify-content: center;
+        &.s_newsletter_center {
+            .s_newsletter_full {
+                @include o-position-absolute(0, 0, 0, 0);
+                &.modal-dialog {
+                    max-width: 100%;
+                    padding: 0 !important;
+                    margin: 0 !important;
+
+                    .modal-content {
+                        height: 100%;
+                        width: 100%;
+                        justify-content: center;
+                    }
                 }
             }
         }
-    }
 
-    &.s_popup_fixed {
-        &.s_popup_fixed_top {
-            .s_popup_content {
-                top: $o-navbar-height;
+        &.s_newsletter_fixed {
+            &.s_newsletter_fixed_top {
+                .s_newsletter_content {
+                    top: $o-navbar-height;
+                }
             }
-        }
-        &:not(.s_popup_fixed_top) {
-            .s_popup_content {
-                bottom: 0;
+            &:not(.s_newsletter_fixed_top) {
+                .s_popup_content {
+                    bottom: 0;
+                }
             }
-        }
-        .s_popup_content {
-            z-index: 1;
-            position: fixed;
-            right: 20px;
-        }
-        .modal-sm .s_popup_content {
-            width: $modal-sm;
-        }
-        .modal-md .s_popup_content {
-            width: $o-modal-md;
-        }
-        .modal-lg .s_popup_content {
-            width: $o-modal-lg;
-        }
-        .modal-xl .s_popup_content {
-            width: $modal-xl;
-        }
-        .s_popup_full .s_popup_content {
-            right: 0;
-            left: 0;
-            .s_popup_close {
-                box-shadow: none;
-                font-size: 60px;
-                margin: 10px;
-                background: none;
+            .s_newsletter_content {
+                z-index: 1;
+                position: fixed;
+                right: 20px;
             }
-
+            .modal-sm .s_newsletter_content {
+                width: $modal-sm;
+            }
+            .modal-md .s_newsletter_content {
+                width: $o-modal-md;
+            }
+            .modal-lg .s_newsletter_content {
+                width: $o-modal-lg;
+            }
+            .modal-xl .s_newsletter_content {
+                width: $modal-xl;
+            }
+            .s_newsletter_full .s_newsletter_content {
+                right: 0;
+                left: 0;
+            }
         }
     }
 }

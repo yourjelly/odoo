@@ -17,11 +17,11 @@ options.registry.NewsletterPopup = options.registry.SnippetPopup.extend({
     setLayout: function (previewMode, widgetValue, params) {
         const isModal = widgetValue === 'modal';
         const isTop = widgetValue === 'fixedTop';
-        this.$target.toggleClass('s_popup_fixed', !isModal);
-        this.$target.toggleClass('s_popup_fixed_top', isTop);
-        this.$target.toggleClass('s_popup_center modal', isModal);
+        this.$target.toggleClass('s_newsletter_fixed', !isModal);
+        this.$target.toggleClass('s_newsletter_fixed_top', isTop);
+        this.$target.toggleClass('s_newsletter_center modal', isModal);
         this.$target.find('.o_newsletter_modal').toggleClass('modal-content', isModal);
-        this.$target.find('.o_newsletter_popup').toggleClass('modal-dialog modal-dialog-centered', isModal);
+        this.$target.find('.o_newsletter_modal').toggleClass('modal-dialog modal-dialog-centered', isModal);
         return this._super(...arguments);
     },
 
@@ -35,9 +35,9 @@ options.registry.NewsletterPopup = options.registry.SnippetPopup.extend({
             case 'moveBlock':
                 return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
             case 'setLayout':
-                if (this.$target.hasClass('s_popup_center')) {
+                if (this.$target.hasClass('s_newsletter_center')) {
                     return 'modal';
-                } else if (this.$target.hasClass('s_popup_fixed_top')) {
+                } else if (this.$target.hasClass('s_newsletter_fixed_top')) {
                     return 'fixedTop';
                 }
                 return 'fixedBottom';
