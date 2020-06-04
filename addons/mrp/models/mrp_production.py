@@ -1299,6 +1299,12 @@ class MrpProduction(models.Model):
                 production.backorder_sequence = 1
 
             backorder_mo = production.copy(default=self._get_backorder_mo_vals(production))
+            for wo in backorder_mo.workorder_ids:
+                wo.qty_produced = 0
+                if wo.product_tracking == 'serial':
+                    wo.qty_producing = 1
+                else:
+                    wo.qty_producing = wo.qty_remaining
 
             production.move_raw_ids.filtered(lambda m: m.state not in ('done', 'cancel')).write({
                 'raw_material_production_id': backorder_mo.id,
