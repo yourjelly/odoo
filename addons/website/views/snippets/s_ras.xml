@@ -10,8 +10,17 @@
             <button class="d-inline-block ml-2 result">0</button>
             <button class="d-inline-block ml-2 minus">-</button></center>
         </div>
+        <button>reset</button>
     </div>
     </section>
+</template>
+
+<template id="s_ras_options" inherit_id="website.snippet_options">
+    <xpath expr="." position="inside">
+        <div data-js="SnipetCounter" data-selector=".s_count">
+            <we-checkbox string="Reset Button" data-select-data-attribute="false|true" data-attribute-name="resetButtonDisplay"/>
+        </div>
+    </xpath>
 </template>
 
 <template id="assets_snippet_s_ras_js_000" inherit_id="website.assets_frontend">
