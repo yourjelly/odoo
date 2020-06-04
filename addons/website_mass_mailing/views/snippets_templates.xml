@@ -102,6 +102,12 @@
     </xpath>
 </template>
 
+<!-- <template id="s_newsletter_popup_options" inherit_id="website.s_popup_options">
+    <xpath expr="//div[@id='snippet_popup']" position="attributes">
+        <attribute name="data-selector" add=".o_newsletter_popup"/>
+    </xpath>
+</template> -->
+
 <!-- Extend default mass_mailing snippets with website feature -->
 <template id="social_links">
     <t t-if="not website">
