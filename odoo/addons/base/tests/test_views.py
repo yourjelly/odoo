@@ -1885,7 +1885,7 @@ class TestViews(ViewCase):
                 </searchpanel>
             </search>
         """
-        self.assertInvalid(arch, "Search tag can only contains one search panel")
+        self.assertInvalid(arch, "Search tag can only contain one search panel")
 
     def test_groups_field(self):
         arch = """
@@ -2035,7 +2035,7 @@ class TestViews(ViewCase):
             </tree>
         """
         self.assertValid(arch % '')
-        self.assertInvalid(arch % '<group/>', "Tree child can only be have one of field, button, control, groupby, widget tag (not group)")
+        self.assertInvalid(arch % '<group/>', "Tree child can only have one of field, button, control, groupby, widget tag (not group)")
 
     @mute_logger('odoo.addons.base.models.ir_ui_view')
     def test_tree_groupby(self):
