@@ -25,12 +25,14 @@ const BaseAnimatedHeader = animations.Animation.extend({
         this.fixedHeader = false;
         this.scrolledPoint = 0;
         this.hasScrolled = false;
+        this.topGap = 0;
     },
     /**
      * @override
      */
     start: function () {
         this.$main = this.$el.next('main');
+        this.$preheader = this.$el.find('#o_preheader');
         this.isOverlayHeader = !!this.$el.closest('.o_header_overlay, .o_header_overlay_theme').length;
         this.$dropdowns = this.$el.find('.dropdown, .dropdown-menu');
         this.$navbarCollapses = this.$el.find('.navbar-collapse');
@@ -81,6 +83,8 @@ const BaseAnimatedHeader = animations.Animation.extend({
      */
     _updateMainPaddingTop: function () {
         this.headerHeight = this.$el.outerHeight();
+        this.topGap = this.$preheader.outerHeight();
+
         if (this.isOverlayHeader) {
             return;
         }
@@ -199,8 +203,8 @@ publicWidget.registry.StandardAffixedHeader = BaseAnimatedHeader.extend({
     _updateHeaderOnScroll: function (scroll) {
         this._super(...arguments);
 
-        const mainPosScrolled = (scroll > this.headerHeight);
-        const reachPosScrolled = (scroll > this.scrolledPoint);
+        const mainPosScrolled = (scroll > (this.headerHeight + this.topGap));
+        const reachPosScrolled = (scroll > this.scrolledPoint + this.topGap);
 
         // Switch between static/fixed position of the header
         if (this.fixedHeader !== mainPosScrolled) {
@@ -210,7 +214,7 @@ publicWidget.registry.StandardAffixedHeader = BaseAnimatedHeader.extend({
         }
         // Show/hide header
         if (this.fixedHeaderShow !== reachPosScrolled) {
-            this.$el.css('transform', reachPosScrolled ? '' : 'translate(0, -100%)');
+            this.$el.css('transform', reachPosScrolled ? 'translate(0, -' + this.topGap +'px)' : 'translate(0, -100%)');
             this.fixedHeaderShow = reachPosScrolled;
         }
     },
