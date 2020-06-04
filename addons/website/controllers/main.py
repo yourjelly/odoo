@@ -158,10 +158,11 @@ class Website(Home):
 
             pages = 0
             locs = request.website.sudo(user=request.website.user_id.id).enumerate_pages()
+            url_root = http.request.env["ir.config_parameter"].sudo().get_param("sitemap.url") or http.request.env["ir.config_parameter"].sudo().get_param("web.base.url")
             while True:
                 values = {
                     'locs': islice(locs, 0, LOC_PER_SITEMAP),
-                    'url_root': request.httprequest.url_root[:-1],
+                    'url_root': url_root,
                 }
                 urls = View.render_template('website.sitemap_locs', values)
                 if urls.strip():
@@ -186,7 +187,7 @@ class Website(Home):
                 # Sitemaps must be split in several smaller files with a sitemap index
                 content = View.render_template('website.sitemap_index_xml', {
                     'pages': pages_with_website,
-                    'url_root': request.httprequest.url_root,
+                    'url_root': url_root,
                 })
                 create_sitemap('/sitemap-%d.xml' % current_website.id, content)
 
