@@ -25,6 +25,7 @@ const GalleryWidget = publicWidget.Widget.extend({
      * @param {Event} ev
      */
     _onClickImg: function (ev) {
+        debugger;
         var self = this;
         var $cur = $(ev.currentTarget);
 

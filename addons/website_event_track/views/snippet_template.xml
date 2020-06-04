@@ -5,7 +5,7 @@
         <section class="s_wevent_track_our_sponsors pt32 pb32" t-att-data-res-id="res_id" t-att-data-res-model="res_model">
 	        <div class="container mt32 mb16 d-print-none">
 	            <h2 class="text-center mb32">Our Sponsors</h2>
-	            <div class="o_our_sponsors o_not_editable"/>
+	            <div class="o_our_sponsors"/>
 	        </div>
         </section>
 </template>

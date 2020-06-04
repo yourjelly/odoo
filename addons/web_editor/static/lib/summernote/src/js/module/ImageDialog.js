@@ -68,6 +68,7 @@ define([
           // Cloning imageInput to clear element.
           $imageInput.replaceWith($imageInput.clone()
             .on('change', function () {
+              debugger;
               deferred.resolve(this.files || this.value);
               $imageDialog.modal('hide');
             })

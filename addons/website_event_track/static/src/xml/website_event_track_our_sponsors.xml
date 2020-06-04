@@ -6,14 +6,14 @@
                 <span style="position: relative; display: inline-block;" class="bg-white">
                     <t t-if="sponsor.url">
                         <a t-att-href="sponsor.url" style="position: relative; display: inline-block;" class="bg-white">
-                            <img class="img img-fluid shadow" t-attf-src="/web/image/event.sponsor/#{sponsor.id}/image_128" t-att-alt="sponsor.partner_name"/>
+                            <img class="img img-fluid shadow sponsor_img" t-attf-src="/web/image/event.sponsor/#{sponsor.id}/image_128" t-att-alt="sponsor.partner_name"/>
                             <div class="ribbon-wrapper">
                                 <div t-esc="sponsor.sponsor_type_id[1]" t-attf-class="ribbon ribbon_#{sponsor.sponsor_type_id[1]}"/>
                             </div>
                         </a>
                     </t>
                     <t t-if="!sponsor.url">
-                        <img class="img img-fluid shadow" t-attf-src="/web/image/event.sponsor/#{sponsor.id}/image_128" t-att-alt="sponsor.partner_name"/>
+                        <img class="img img-fluid shadow sponsor_img" t-attf-src="/web/image/event.sponsor/#{sponsor.id}/image_128" t-att-alt="sponsor.partner_name"/>
                         <div class="ribbon-wrapper">
                             <div t-esc="sponsor.sponsor_type_id[1]" t-attf-class="ribbon ribbon_#{sponsor.sponsor_type_id[1]}"/>
                         </div>

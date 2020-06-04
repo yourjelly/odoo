@@ -9,6 +9,7 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
     selector: '.s_wevent_track_our_sponsors',
     xmlDependencies: ['/website_event_track/static/src/xml/website_event_track_our_sponsors.xml'],
     disabledInEditableMode: false,
+    read_events: {'click .sponsor_img': '_onImgClick'},
 
     /**
      * @constructor
@@ -29,7 +30,9 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-
+    _onImgClick: function (ev) {
+        debugger;
+    },
     /**
      * Fetch sponsors for an event and returns sponsors or demo data.
      *

@@ -556,6 +556,7 @@ var FileWidget = SearchableMediaWidget.extend({
         if (save) {
             this.trigger_up('save_request');
         }
+        debugger;
     },
     /**
      * Updates the add by URL UI.
