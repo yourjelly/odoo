@@ -27,14 +27,14 @@ options.registry.mailing_list_subscribe = options.Class.extend({
             args: ['', [['is_public', '=', true]]],
             context: self.options.recordInfo.context,
         }).then(function (data) {
-           // Create the buttons for the mailing list we-select
-           return Object.keys(data).map(key => {
-            const record = data[key];
-            const button = document.createElement('we-button');
-            button.dataset.selectMailingList = record[0];
-            button.textContent = record[1];
-            return button;
-        })
+            // Create the buttons for the mailing list we-select
+            return Object.keys(data).map(key => {
+                const record = data[key];
+                const button = document.createElement('we-button');
+                button.dataset.selectMailingList = record[0];
+                button.textContent = record[1];
+                return button;
+            });
         });
         return _super(...arguments);
     },
@@ -48,7 +48,12 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      */
     onBuilt: function () {
         this._super();
-        this.$target.attr("data-list-id", this._getMailingListID());
+        const mailingListID = this._getMailingListID();
+        if (mailingListID) {
+            this.$target.attr("data-list-id", mailingListID);
+        } else {
+            this.getParent()._onRemoveClick($.Event( "click" ));
+        }
     },
     /**
      * Replace the current mailing_list_ID with the existing mailing_list_id selected.
@@ -83,7 +88,11 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @private
      */
     _getMailingListID: function () {
-        return this.$target.data('list-id') || this.mailingList[0].dataset.selectMailingList;
+        const listID = parseInt(this.$target.attr('data-list-id'));
+        if (!listID && this.mailingList.length) {
+            listID = this.mailingList[0].dataset.selectMailingList;
+        }
+        return listID;
     },
 });
 
