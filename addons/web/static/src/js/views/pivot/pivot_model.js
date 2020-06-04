@@ -1200,7 +1200,7 @@ var PivotModel = AbstractModel.extend({
             //                                                      -------------- -------------------
             // to reverse order but data of tds is not changed due to i am trying to find why data is not changed
             // data is append in td from below value varible and data get from _getCellValue function.
-            debugger;
+            // debugger;
             var value = self._getCellValue(groupIntersectionId, measure, originIndexes);
 
             var measurement = {
@@ -1299,7 +1299,6 @@ var PivotModel = AbstractModel.extend({
      */
     _prepareData: function (group, groupSubdivisions) {
         var self = this;
-
         var groupRowValues = group.rowValues;
         var groupRowLabels = [];
         var rowSubTree = this.rowGroupTree;
@@ -1320,11 +1319,14 @@ var PivotModel = AbstractModel.extend({
 
         groupSubdivisions.forEach(function (groupSubdivision) {
             groupSubdivision.subGroups.forEach(function (subGroup) {
-
+                // when pass groupSubdivisions values from method tis loop prepair data
+                // based on rowValues and colLabels key is prepaired to measurements so later 
+                // _getCellValue use measurements data.
+                debugger
                 var rowValues = groupRowValues.concat(self._getGroupValues(subGroup, groupSubdivision.rowGroupBy));
                 var rowLabels = groupRowLabels.concat(self._getGroupLabels(subGroup, groupSubdivision.rowGroupBy));
 
-                var colValues = groupColValues.concat(self._getGroupValues(subGroup, groupSubdivision.colGroupBy));
+                var rowValues = groupColValues.concat(self._getGroupValues(subGroup, groupSubdivision.colGroupBy));
                 var colLabels = groupColLabels.concat(self._getGroupLabels(subGroup, groupSubdivision.colGroupBy));
 
                 if (!colValues.length && rowValues.length) {
@@ -1333,7 +1335,6 @@ var PivotModel = AbstractModel.extend({
                 if (colValues.length && !rowValues.length) {
                     self._addGroup(self.colGroupTree, colLabels, colValues);
                 }
-
                 var key = JSON.stringify([rowValues, colValues]);
                 var originIndex = groupSubdivision.group.originIndex;
 
@@ -1511,6 +1512,19 @@ var PivotModel = AbstractModel.extend({
         );
         return this._loadDataDropPrevious.add(Promise.all(proms)).then(function (groupSubdivisions) {
             if (groupSubdivisions.length) {
+                // when apply time range in pivot view from search panel 
+                // apply button is bind with _onApply method and _onApply
+                // method dispatch  dispatch activateTimeRange method  of 
+                // model.js model.js _dispatch method of control_panel_model method
+                // and control_panel_model trigger search which call _onSearch method 
+                // of abstract_controller which call reload method of abstract_controller
+                // abstract controller call update method which call reload method of 
+                // pivot_model and reload method call _loadData method and _loadData call
+                //_subdivideGroup method and in this call prepare data for render and data
+                // render based on groupSubdivisions param so that's why i added debugger to find 
+                // which data is pass in groupSubdivisions param
+                debugger;
+
                 self._prepareData(group, groupSubdivisions);
             }
         });
