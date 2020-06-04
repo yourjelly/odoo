@@ -246,6 +246,18 @@
     </xpath>
 </template>
 
+<template id="template_header_sidenav" inherit_id="website.layout" name="Template Header SideNav" active="False">
+    <xpath expr="//header" position="attributes">
+        <attribute name="t-attf-class" add="o_header_sidenav" separator=" "/>
+    </xpath>
+    <xpath expr="//header//nav[hasclass('navbar')]" position="attributes">
+        <attribute name="class" remove="navbar-expand-md" add="navbar-expand-lg" separator=" "/>
+    </xpath>
+    <xpath expr="//header//ul[@id='top_menu']" position="attributes">
+        <attribute name="class" remove="text-right ml-auto" add="" separator=" "/>
+    </xpath>
+</template>
+
 <!-- Navbar options -->
 <template id="layout_logo_show" inherit_id="website.layout" name="Show Logo">
     <xpath expr="//header//a[hasclass('navbar-brand')]" position="replace">

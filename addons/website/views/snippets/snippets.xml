@@ -467,6 +467,11 @@
                        data-customize-website-views="website.template_header_hamburger, website.template_header_navbar_text_center"
                        data-customize-website-variable="logo_hamburger"
                        string="Logo - Hamburger (cover)"/>
+            <we-button id="option_template_header_sidenav"
+                       data-name="header_sidenav_opt"
+                       data-customize-website-views="website.template_header_sidenav, website.header_shadow, website.no_autohide_menu"
+                       data-customize-website-variable="sidenav"
+                       string="Side Navigation"/>
         </we-select>
         <we-select id="header_visibilities_list" string="Header Visibility">
             <we-button id="option_header_visibility_standard"

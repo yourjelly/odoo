@@ -45,6 +45,7 @@ $-font-numbers: (
 
     --logo-height: #{$o-theme-navbar-logo-height};
     --fixed-logo-height: #{$o-theme-navbar-fixed-logo-height};
+    --sidenav-width: #{$o-theme-sidenav-width};
     --number-of-fonts: #{length($o-theme-fonts)};
 
     --number-of-color-palettes: #{length($o-color-palettes) - 1}; // -1 since the last one is the user customized one
@@ -780,6 +781,42 @@ header {
                     order: -1;
                 }
             }
+        }
+    }
+}
+
+@include media-breakpoint-up(lg) {
+    .o_header_sidenav {
+        position: fixed;
+        display: flex;
+        height: 100%;
+        transform: none !important;
+        .navbar {
+            width: $o-theme-sidenav-width;
+            align-items: start;
+            padding: $spacer;
+            .navbar-brand {
+                max-width: 100%;
+                padding: 0 0 $spacer 0;
+            }
+            #top_menu_container {
+                flex-direction: column;
+                align-items: start;
+                padding: 0;
+            }
+            .navbar-nav {
+                flex-direction: column;
+            }
+            .nav-link,
+            .dropdown-item {
+                white-space: initial;
+            }
+            .dropdown-menu {
+                position: relative;
+            }
+        }
+        & ~ main, & ~ footer {
+            margin-left: $o-theme-sidenav-width;
         }
     }
 }
