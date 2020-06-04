@@ -974,6 +974,8 @@ actual arch.
                     name_manager.must_have_fields(
                         self._get_field_domain_variables(node, field, node_info['editable'])
                     )
+                    if field.type == "monetary":
+                        name_manager.should_have_curr_field(field.currency_field or "currency_id", field.name)
                 views = {}
                 for child in node:
                     if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
@@ -1264,7 +1266,7 @@ actual arch.
                 fields = dict.fromkeys(get_variable_names(expr), '%s=%s' % (attr, expr))
                 name_manager.must_have_fields(fields)
 
-            elif attr in ('attrs', 'context'):
+            elif attr in ('attrs', 'context', 'options'):
                 for key, val_ast in get_dict_asts(expr).items():
                     if attr == 'attrs' and isinstance(val_ast, ast.List):
                         # domains in attrs are used for readonly, invisible, ...
@@ -1272,6 +1274,10 @@ actual arch.
                         desc = '%s.%s' % (attr, key)
                         fields = self._get_client_domain_variables(val_ast, desc, expr)
                         name_manager.must_have_fields(fields)
+
+                    elif attr == "options":
+                        if key == "currency_field":
+                            name_manager.must_have_field(val_ast.s, "%s.%s %s" % (attr, key, expr))
 
                     elif key == 'group_by':  # only in context
                         if not isinstance(val_ast, ast.Str):
@@ -1840,6 +1846,7 @@ class NameManager:
         self.mandatory_fields = dict()
         self.mandatory_parent_fields = dict()
         self.available_actions = set()
+        self.needed_currencies = collections.defaultdict(list)
         self.mandatory_names = dict()
         self.validate = validate
         self.Model = Model
@@ -1850,6 +1857,9 @@ class NameManager:
 
     def has_action(self, name):
         self.available_actions.add(name)
+
+    def should_have_curr_field(self, fname, use):
+        self.needed_currencies[fname].append(use)
 
     def must_have_field(self, name, use):
         if name.startswith('parent.'):
@@ -1894,6 +1904,10 @@ class NameManager:
                 view.handle_view_error('Field %s used in %s must be present in view but is missing.' % (field, use))
             if corresponding_field.get('select') == 'multi':  # mainly for searchpanel, but can be a generic behaviour.
                 view.handle_view_error('Field %s used in %s is present in view but is in select multi.' % (field, use))
+
+        for field, use in self.needed_currencies.items():
+            if field not in self.fields_get:
+                _logger.warning("Missing currency field '%s' for monetary field(s): %s", field, ' ,'.join(use))
 
     def update_view_fields(self):
         for field_name, field_infos in self.available_fields.items():
