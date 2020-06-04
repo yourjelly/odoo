@@ -31,7 +31,7 @@ from odoo.tools.safe_eval import safe_eval
 from odoo.tools.view_validation import valid_view, get_variable_names, get_domain_identifiers, get_dict_asts
 from odoo.tools.translate import xml_translate, TRANSLATED_ATTRS
 from odoo.tools.image import image_data_uri
-from odoo.models import check_method_name
+from odoo.models import check_method_name, regex_order
 from odoo.osv.expression import expression
 
 _logger = logging.getLogger(__name__)
@@ -1314,6 +1314,20 @@ actual arch.
                 msg = _("A role cannot be `none` or `presentation`. "
                         "All your elements must be accessible with screen readers, describe it.")
                 self.handle_view_error(msg, raise_exception=False)
+
+            elif attr == "default_order":
+                if not regex_order.match(expr):
+                    # name_manager.Model._check_qorder(expr)
+                    self.handle_view_error(_("Invalid default_order %s") % expr)
+                for fname in re.findall(r'''\b(?!(?:asc|desc|ASC|DESC)\b)\w+''', expr):
+                    if fname not in name_manager.fields_get:
+                        msg = _("Field %s used in 'default_order' attribute doesn't exist on the model") % fname
+                        self.handle_view_error(msg)
+            elif attr == "default_group_by":
+                fname = expr.split(":")[0]
+                if fname not in name_manager.fields_get:
+                    msg = _("Field %s used in 'default_group_by' attribute doesn't exist on the model") % fname
+                    self.handle_view_error(msg)
 
     def _validate_classes(self, node, expr):
         """ Validate the classes present on node. """
