@@ -231,6 +231,8 @@ class DuplicateNotificationTest(TestMailCommon):
         user_1 = self.env['res.users'].create({'login': 'demo1', 'partner_id': common_partner.id, 'notification_type': 'email'})
         user_2 = self.env['res.users'].create({'login': 'demo2', 'partner_id': common_partner.id, 'notification_type': 'inbox'})
 
+        self._add_user_log(user_2)
+
         #Trigger auto subscribe notification
         test = self.env['mail.test.track'].create({"name": "Test Track", "user_id": user_2.id})
         mail_message = self.env['mail.message'].search([
@@ -261,6 +263,7 @@ class UnlinkedNotificationTest(TestMailCommon):
         """
         common_partner = self.env['res.partner'].create({"name": "demo1", "email": "demo1@test.com"})
         user_1 = self.env['res.users'].create({'login': 'demo1', 'partner_id': common_partner.id, 'notification_type': 'inbox'})
+        self._add_user_log(user_1)
 
         test = self.env['mail.test.track'].create({"name": "Test Track", "user_id": user_1.id})
         test_id = test.id
