@@ -200,15 +200,15 @@
                                     <field name="partner_id"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"
                                            domain="['|', ('parent_id','=', False), ('is_company','=',True)]"/>
-                                    <field name="ref" optional="hidden"/>
-                                    <field name="transaction_type" optional="hidden"/>
-                                    <field name="narration" string="Notes" optional="hidden"/>
+                                    <field name="ref" optional="hide"/>
+                                    <field name="transaction_type" optional="hide"/>
+                                    <field name="narration" string="Notes" optional="hide"/>
                                     <field name="amount"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"/>
-                                    <field name="amount_currency" optional="hidden" groups="base.group_multi_currency"
+                                    <field name="amount_currency" optional="hide" groups="base.group_multi_currency"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"/>
-                                    <field name="account_number" optional="hidden"/>
-                                    <field name="foreign_currency_id" optional="hidden" groups="base.group_multi_currency"
+                                    <field name="account_number" optional="hide"/>
+                                    <field name="foreign_currency_id" optional="hide" groups="base.group_multi_currency"
                                            attrs="{'readonly': [('parent.state', '!=', 'open')]}"/>
 
                                     <!-- Buttons -->
@@ -332,8 +332,8 @@
                     <field name="ref" groups="base.group_no_one"/>
                     <field name="partner_id"/>
                     <field name="amount"/>
-                    <field name="transaction_type" optional="hidden"/>
-                    <field name="narration" optional="hidden"/>
+                    <field name="transaction_type" optional="hide"/>
+                    <field name="narration" optional="hide"/>
                 </tree>
             </field>
         </record>
