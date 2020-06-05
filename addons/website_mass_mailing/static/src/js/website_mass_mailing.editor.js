@@ -25,26 +25,25 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @see this.selectClass for parameters
      */
     createMailingList: function (previewMode, widgetValue, params) {
-        var self = this;
         return wUtils.prompt({
             id: this.popup_template_id,
             window_title: this.popup_title,
             input: _t("Name"),
-        }).then(function (result) {
+        }).then((result) => {
             var name = result.val;
             if (!name) {
                 return;
             }
-            return self._rpc({
+            return this._rpc({
                 model: 'mailing.list',
                 method: 'create',
                 args: [{
                     name: name,
                     is_public: true,
                 }],
-            }).then(function (id) {
-                self.$target.attr("data-list-id", id);
-                return self._rerenderXML();
+            }).then((id) => {
+                this.$target.attr("data-list-id", id);
+                return this._rerenderXML();
             });
         });
     },
@@ -57,8 +56,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         const mailingListID = this._getMailingListID();
         if (mailingListID) {
             this.$target.attr("data-list-id", mailingListID);
-        }
-        else {
+        } else {
             this.createMailingList('click').guardedCatch(() => {
                 this.getParent()._onRemoveClick($.Event( "click" ));
             });
@@ -67,8 +65,8 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     /**
      * Replace the current mailing_list_ID with the existing mailing_list_id selected.
      */
-    selectMailingList: function (previewMode, value, params) {
-        this.$target.attr("data-list-id", value);
+    selectMailingList: function (previewMode, widgetValue, params) {
+        this.$target.attr("data-list-id", widgetValue);
     },
 
     //--------------------------------------------------------------------------
@@ -79,7 +77,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @override
      */
     _renderCustomXML: function (uiFragment) {
-        return this._getMailingLists().then((mailingLists) => {
+        return this._getMailingListButtons().then((mailingLists) => {
             this.mailingLists = mailingLists;
             const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
             if (this.mailingLists.length) {
@@ -99,7 +97,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     /**
      * @private
      */
-    _getMailingLists: function () {
+    _getMailingListButtons: function () {
         return rpc.query({
             model: 'mailing.list',
             method: 'name_search',
