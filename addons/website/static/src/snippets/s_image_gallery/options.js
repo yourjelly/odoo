@@ -36,6 +36,7 @@ options.registry.gallery = options.Class.extend({
         });
 
         this.$target.on('dropped', 'img', function (ev) {
+            debugger;
             self.mode(null, self.getMode());
             if (!ev.target.height) {
                 $(ev.target).one('load', function () {

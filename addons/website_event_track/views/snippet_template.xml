@@ -13,6 +13,7 @@
 <template id="s_image_gallery_options" inherit_id="website.snippet_options">
     <xpath expr="." position="inside">
         <div data-js="sponsors" data-selector=".s_wevent_track_our_sponsors">
+            <we-button data-add-partner="true" data-no-preview="true">Add partner</we-button>
         </div>
     </xpath>
 </template>

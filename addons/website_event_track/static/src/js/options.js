@@ -17,20 +17,16 @@ options.registry.sponsors = options.Class.extend({
     start: function () {
         // The snippet should not be editable
         // this.$target.addClass('o_fake_not_editable').attr('contentEditable', false);
-        debugger;
         // Make sure image previews are updated if images are changed
-        this.$target.on('save', 'img', function (ev) {
-            debugger;
+        this.$target.on('save', '.sponsor_img', function (ev) {
         });
 
         // When the snippet is empty, an edition button is the default content
         // TODO find a nicer way to do that to have editor style
-        this.$target.on('click', '.o_add_sponsors', function (e) {
-            debugger;
+        this.$target.on('click', '.sponsor_img', function (e) {
         });
 
         this.$target.on('dropped', 'img', function (ev) {
-           debugger;
         });
         return this._super.apply(this, arguments);
     },
@@ -38,9 +34,12 @@ options.registry.sponsors = options.Class.extend({
      * @override
      */
     onBuilt: function () {
-        debugger;
     },
 
+    addPartner: function () {
+        debugger;
+
+    },
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
