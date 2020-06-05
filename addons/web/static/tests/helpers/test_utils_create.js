@@ -67,7 +67,6 @@ odoo.define('web.test_utils_create', function (require) {
         }
 
         params.server = mockServer;
-        Component.env = testUtilsMock.getMockedOwlEnv(params);
 
         const userContext = params.context && params.context.user_context || {};
         const actionManager = new ActionManager(widget, userContext);
@@ -142,7 +141,7 @@ odoo.define('web.test_utils_create', function (require) {
         if (!(constructor.prototype instanceof Component)) {
             throw new Error(`Argument "constructor" must be an Owl Component.`);
         }
-        const env = Object.assign(testUtilsMock.getMockedOwlEnv(params), params.env);
+        const cleanUp = await testUtilsMock.setMockedOwlEnv(Component, params);
         class Parent extends Component {
             constructor() {
                 super(...arguments);
@@ -154,7 +153,6 @@ odoo.define('web.test_utils_create', function (require) {
                 }
             }
         }
-        Parent.env = env;
         Parent.template = xml`<t t-component="Component" t-props="state" t-ref="component"/>`;
         const parent = new Parent();
         await parent.mount(prepareTarget(params.debug), { position: 'first-child' });
@@ -162,6 +160,7 @@ odoo.define('web.test_utils_create', function (require) {
         const originalDestroy = child.destroy;
         child.destroy = function () {
             child.destroy = originalDestroy;
+            cleanUp();
             parent.destroy();
         };
         return child;
@@ -358,8 +357,6 @@ odoo.define('web.test_utils_create', function (require) {
         const viewInfo = testUtilsMock.fieldsViewGet(mockServer, params);
 
         params.server = mockServer;
-        const env = Object.assign(testUtilsMock.getMockedOwlEnv(params));
-        Component.env = env;
 
         // create the view
         const View = params.View;
