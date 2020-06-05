@@ -80,8 +80,11 @@
         <div data-js="mailing_list_subscribe"
             t-att-data-selector="selector"
             t-attf-data-exclude=".o_newsletter_modal #{selector}">
-            <we-title>Mailing Subscribe List</we-title>
-            <we-select data-name="mailing_list" data-no-preview="true"></we-select>
+            <we-title>Change Newsletter</we-title>
+            <we-row>
+                <we-select data-name="mailing_list" data-no-preview="true"></we-select>
+                <we-button class="fa fa-fw fa-plus" title="Create a mailing list" data-create-mailing-list="" data-no-preview="true"/>
+            </we-row>
         </div>
         <div data-js="recaptchaSubscribe"
             t-att-data-selector="selector">
@@ -91,8 +94,11 @@
         <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
-            <we-title>Mailing Subscribe List</we-title>
-            <we-select data-name="mailing_list" data-no-preview="true"></we-select>
+            <we-title>Change Newsletter</we-title>
+            <we-row>
+                <we-select data-name="mailing_list" data-no-preview="true"></we-select>
+                <we-button class="fa fa-fw fa-plus" title="Create a mailing list" data-create-mailing-list="" data-no-preview="true"/>
+            </we-row>
         </div>
     </xpath>
 </template>

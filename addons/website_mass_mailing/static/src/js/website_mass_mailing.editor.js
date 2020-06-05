@@ -15,33 +15,39 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     popup_template_id: "editor_new_mailing_list_subscribe_button",
     popup_title: _t("Add a Newsletter Subscribe Button"),
 
-    /**
-     * @override
-     */
-    willStart: async function () {
-        const _super = this._super.bind(this);
-        const self = this;
-        this.mailingList = await rpc.query({
-            model: 'mailing.list',
-            method: 'name_search',
-            args: ['', [['is_public', '=', true]]],
-            context: self.options.recordInfo.context,
-        }).then(function (data) {
-            // Create the buttons for the mailing list we-select
-            return Object.keys(data).map(key => {
-                const record = data[key];
-                const button = document.createElement('we-button');
-                button.dataset.selectMailingList = record[0];
-                button.textContent = record[1];
-                return button;
-            });
-        });
-        return _super(...arguments);
-    },
-
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
+
+    /**
+     * Creates a new mailing.list through a modal prompt.
+     *
+     * @see this.selectClass for parameters
+     */
+    createMailingList: function (previewMode, widgetValue, params) {
+        var self = this;
+        return wUtils.prompt({
+            id: this.popup_template_id,
+            window_title: this.popup_title,
+            input: _t("Name"),
+        }).then(function (result) {
+            var name = result.val;
+            if (!name) {
+                return;
+            }
+            return self._rpc({
+                model: 'mailing.list',
+                method: 'create',
+                args: [{
+                    name: name,
+                    is_public: true,
+                }],
+            }).then(function (id) {
+                self.$target.attr("data-list-id", id);
+                return self._rerenderXML();
+            });
+        });
+    },
 
     /**
      * @override
@@ -51,14 +57,17 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         const mailingListID = this._getMailingListID();
         if (mailingListID) {
             this.$target.attr("data-list-id", mailingListID);
-        } else {
-            this.getParent()._onRemoveClick($.Event( "click" ));
+        }
+        else {
+            this.createMailingList('click').guardedCatch(() => {
+                this.getParent()._onRemoveClick($.Event( "click" ));
+            });
         }
     },
     /**
      * Replace the current mailing_list_ID with the existing mailing_list_id selected.
      */
-    selectMailingList: async function (previewMode, value, params) {
+    selectMailingList: function (previewMode, value, params) {
         this.$target.attr("data-list-id", value);
     },
 
@@ -70,10 +79,13 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @override
      */
     _renderCustomXML: function (uiFragment) {
-        const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
-        if (this.mailingList.length) {
-            this.mailingList.forEach(option => selectEl.append(option.cloneNode(true)));
-        }
+        return this._getMailingLists().then((mailingLists) => {
+            this.mailingLists = mailingLists;
+            const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
+            if (this.mailingLists.length) {
+                this.mailingLists.forEach(option => selectEl.append(option.cloneNode(true)));
+            }
+        });
     },
     /**
      * @override
@@ -87,10 +99,30 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     /**
      * @private
      */
+    _getMailingLists: function () {
+        return rpc.query({
+            model: 'mailing.list',
+            method: 'name_search',
+            args: ['', [['is_public', '=', true]]],
+            context: this.options.recordInfo.context,
+        }).then((data) => {
+            // Create the buttons for the mailing list we-select
+            return Object.keys(data).map(key => {
+                const record = data[key];
+                const button = document.createElement('we-button');
+                button.dataset.selectMailingList = record[0];
+                button.textContent = record[1];
+                return button;
+            });
+        });
+    },
+    /**
+     * @private
+     */
     _getMailingListID: function () {
-        const listID = parseInt(this.$target.attr('data-list-id'));
-        if (!listID && this.mailingList.length) {
-            listID = this.mailingList[0].dataset.selectMailingList;
+        let listID = parseInt(this.$target.attr('data-list-id'));
+        if (!listID && this.mailingLists.length) {
+            listID = this.mailingLists[0].dataset.selectMailingList;
         }
         return listID;
     },
@@ -182,6 +214,21 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     destroy: function () {
         this.$target.off('.newsletter_popup_option');
         this._super.apply(this, arguments);
+    },
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    createMailingList: function () {
+        var self = this;
+        return this._super.apply(this, arguments).then(function () {
+            self.$target.data('quick-open', true);
+            self.$target.removeData('content');
+            return self._refreshPublicWidgets();
+        });
     },
 });
 
