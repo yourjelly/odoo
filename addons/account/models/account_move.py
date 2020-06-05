@@ -3912,27 +3912,26 @@ class AccountMoveLine(models.Model):
                     credit_amount_residual_currency = credit_amount_residual
                     credit_line_currency = credit_line.company_currency_id
 
+            # The debit line is now fully reconciled.
+            if debit_line_currency.is_zero(debit_amount_residual_currency) or debit_amount_residual_currency < 0.0:
+                debit_line = None
+                continue
+
+            # The credit line is now fully reconciled.
+            if credit_line_currency.is_zero(credit_amount_residual_currency) or credit_amount_residual_currency > 0.0:
+                credit_line = None
+                continue
+
             min_amount_residual = min(debit_amount_residual, -credit_amount_residual)
 
             if debit_line_currency == credit_line_currency:
                 # Reconcile on the same currency.
 
-                # The debit line is now fully reconciled.
-                if debit_line_currency.is_zero(debit_amount_residual_currency) or debit_amount_residual_currency < 0.0:
-                    debit_line = None
-                    continue
-
-                # The credit line is now fully reconciled.
-                if credit_line_currency.is_zero(credit_amount_residual_currency) or credit_amount_residual_currency > 0.0:
-                    credit_line = None
-                    continue
-
                 min_amount_residual_currency = min(debit_amount_residual_currency, -credit_amount_residual_currency)
                 min_debit_amount_residual_currency = min_amount_residual_currency
                 min_credit_amount_residual_currency = min_amount_residual_currency
-
             else:
-                # Reconcile on the company's currency.
+                # Reconcile based on the company's currency.
 
                 # The debit line is now fully reconciled.
                 if debit_line.company_currency_id.is_zero(debit_amount_residual) or debit_amount_residual < 0.0:
@@ -3944,18 +3943,28 @@ class AccountMoveLine(models.Model):
                     credit_line = None
                     continue
 
-                min_debit_amount_residual_currency = credit_line.company_currency_id._convert(
-                    min_amount_residual,
+                computed_debit_amount_residual_currency = credit_line.company_currency_id._convert(
+                    -credit_amount_residual,
                     debit_line.currency_id,
                     credit_line.company_id,
                     credit_line.date,
                 )
-                min_credit_amount_residual_currency = debit_line.company_currency_id._convert(
-                    min_amount_residual,
+                computed_debit_rate = computed_debit_amount_residual_currency / -credit_amount_residual
+                computed_credit_amount_residual_currency = debit_line.company_currency_id._convert(
+                    debit_amount_residual,
                     credit_line.currency_id,
                     debit_line.company_id,
                     debit_line.date,
                 )
+                computed_credit_rate = computed_credit_amount_residual_currency / debit_amount_residual
+
+                min_debit_amount_residual_currency = min(computed_debit_amount_residual_currency, debit_amount_residual_currency)
+                min_credit_amount_residual_currency = min(computed_credit_amount_residual_currency, -credit_amount_residual_currency)
+
+                min_amount_residual = credit_line.company_currency_id.round(min(
+                    min_debit_amount_residual_currency / computed_debit_rate,
+                    computed_credit_amount_residual_currency / computed_credit_rate,
+                ))
 
             debit_amount_residual -= min_amount_residual
             debit_amount_residual_currency -= min_debit_amount_residual_currency
@@ -3976,17 +3985,11 @@ class AccountMoveLine(models.Model):
         ''' Generate the exchange difference values used to create the journal items
         in order to fix the residual amounts and add them into 'exchange_diff_move_vals'.
 
-        1) When reconciled on the same foreign currency, the journal items are
+        When reconciled on the same foreign currency, the journal items are
         fully reconciled regarding this currency but it could be not the case
         of the balance that is expressed using the company's currency. In that
         case, we need to create exchange difference journal items to ensure this
         residual amount reaches zero.
-
-        2) When reconciled on the company currency but having different foreign
-        currencies, the journal items are fully reconciled regarding the company
-        currency but it's not always the case for the foreign currencies. In that
-        case, the exchange difference journal items are created to ensure this
-        residual amount in foreign currency reaches zero.
 
         :param exchange_diff_move_vals: The current vals of the exchange difference journal entry.
         :return:                        A list of pair <line, sequence> to perform the reconciliation
@@ -4001,24 +4004,13 @@ class AccountMoveLine(models.Model):
 
             exchange_diff_move_vals['date'] = max(exchange_diff_move_vals['date'], line.date)
 
-            if not line.company_currency_id.is_zero(line.amount_residual):
-                # amount_residual_currency == 0 and amount_residual has to be fixed.
-
-                if line.amount_residual > 0.0:
-                    exchange_line_account = journal.default_debit_account_id
-                else:
-                    exchange_line_account = journal.default_credit_account_id
-
-            elif line.currency_id and not line.currency_id.is_zero(line.amount_residual_currency):
-                # amount_residual == 0 and amount_residual_currency has to be fixed.
-
-                if line.amount_residual_currency > 0.0:
-                    exchange_line_account = journal.default_debit_account_id
-                else:
-                    exchange_line_account = journal.default_credit_account_id
-
-            else:
+            if line.company_currency_id.is_zero(line.amount_residual):
                 continue
+
+            if line.amount_residual > 0.0:
+                exchange_line_account = journal.default_debit_account_id
+            else:
+                exchange_line_account = journal.default_credit_account_id
 
             sequence = len(exchange_diff_move_vals['line_ids'])
             exchange_diff_move_vals['line_ids'] += [
@@ -4026,7 +4018,6 @@ class AccountMoveLine(models.Model):
                     'name': _('Currency exchange rate difference'),
                     'debit': -line.amount_residual if line.amount_residual < 0.0 else 0.0,
                     'credit': line.amount_residual if line.amount_residual > 0.0 else 0.0,
-                    'amount_currency': -line.amount_residual_currency,
                     'account_id': line.account_id.id,
                     'currency_id': line.currency_id.id,
                     'partner_id': line.partner_id.id,
@@ -4036,7 +4027,6 @@ class AccountMoveLine(models.Model):
                     'name': _('Currency exchange rate difference'),
                     'debit': line.amount_residual if line.amount_residual > 0.0 else 0.0,
                     'credit': -line.amount_residual if line.amount_residual < 0.0 else 0.0,
-                    'amount_currency': line.amount_residual_currency,
                     'account_id': exchange_line_account.id,
                     'currency_id': line.currency_id.id,
                     'partner_id': line.partner_id.id,
@@ -4317,15 +4307,16 @@ class AccountMoveLine(models.Model):
             tax_cash_basis_values_per_move = partials._collect_tax_cash_basis_values()
             tax_cash_basis_moves = partials._create_tax_cash_basis_moves(tax_cash_basis_values_per_move)
             results['tax_cash_basis_moves'] = tax_cash_basis_moves
-        else:
-            tax_cash_basis_values_per_move = {}
 
         # ==== Check if a full reconcile is needed ====
 
-        if involved_lines[0].currency_id and all(line.currency_id == involved_lines[0].currency_id for line in involved_lines):
-            is_full_needed = all(line.currency_id.is_zero(line.amount_residual_currency) for line in involved_lines)
-        else:
-            is_full_needed = all(line.company_currency_id.is_zero(line.amount_residual) for line in involved_lines)
+        is_full_needed = True
+        for line in involved_lines:
+            currency = line.currency_id or line.company_currency_id
+            residual_field = line.currency_id and 'amount_residual_currency' or 'amount_residual'
+            if not currency.is_zero(line[residual_field]):
+                is_full_needed = False
+                break
 
         if is_full_needed:
 

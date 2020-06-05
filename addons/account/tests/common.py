@@ -1021,7 +1021,6 @@ class TestAccountReconciliationCommon(AccountTestCommon):
         cls.company = cls.env['res.company'].create({
             'name': 'A test company',
             'currency_id': cls.env.ref('base.EUR').id,
-            'account_cash_basis_base_account_id': cls.tax_base_amount_account.id,
         })
 
         cls.env.user.company_id = cls.company
@@ -1098,6 +1097,7 @@ class TestAccountReconciliationCommon(AccountTestCommon):
             'user_type_id': cls.env.ref('account.data_account_type_current_assets').id,
             'company_id': cls.company.id,
         })
+        cls.company.account_cash_basis_base_account_id = cls.tax_base_amount_account
 
         # Journals
         cls.purchase_journal = cls.env['account.journal'].create({
