@@ -52,7 +52,7 @@ WebsiteNewMenu.include({
 odoo.define('website_sale.editor', function (require) {
 'use strict';
 
-var options = require('web_editor.snippets.options');
+var snippetOptions = require('web_editor.snippets.options');
 var publicWidget = require('web.public.widget');
 const {Class: EditorMenuBar} = require('web_editor.editor');
 const {qweb} = require('web.core');
@@ -273,7 +273,7 @@ function reload() {
     }
 }
 
-options.registry.WebsiteSaleGridLayout = options.Class.extend({
+snippetOptions.registry.WebsiteSaleGridLayout = snippetOptions.SnippetOptionWidget.extend({
 
     /**
      * @override
@@ -344,9 +344,9 @@ options.registry.WebsiteSaleGridLayout = options.Class.extend({
     },
 });
 
-options.registry.WebsiteSaleProductsItem = options.Class.extend({
-    xmlDependencies: (options.Class.prototype.xmlDependencies || []).concat(['/website_sale/static/src/xml/website_sale_utils.xml']),
-    events: _.extend({}, options.Class.prototype.events || {}, {
+snippetOptions.registry.WebsiteSaleProductsItem = snippetOptions.SnippetOptionWidget.extend({
+    xmlDependencies: (snippetOptions.SnippetOptionWidget.prototype.xmlDependencies || []).concat(['/website_sale/static/src/xml/website_sale_utils.xml']),
+    events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.events || {}, {
         'mouseenter .o_wsale_soptions_menu_sizes table': '_onTableMouseEnter',
         'mouseleave .o_wsale_soptions_menu_sizes table': '_onTableMouseLeave',
         'mouseover .o_wsale_soptions_menu_sizes td': '_onTableItemMouseEnter',

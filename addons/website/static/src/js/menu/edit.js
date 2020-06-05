@@ -2,8 +2,9 @@ odoo.define('website.editMenu', function (require) {
 'use strict';
 
 var core = require('web.core');
-var EditorMenu = require('website.editor.menu');
 var websiteNavbarData = require('website.navbar');
+var wysiwygLoader = require('web_editor.loader');
+var ajax = require('web.ajax');
 
 var _t = core._t;
 
@@ -11,8 +12,6 @@ var _t = core._t;
  * Adds the behavior when clicking on the 'edit' button (+ editor interaction)
  */
 var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
-    assetLibs: ['web_editor.compiled_assets_wysiwyg', 'website.compiled_assets_wysiwyg'],
-
     xmlDependencies: ['/website/static/src/xml/website.editor.xml'],
     actions: _.extend({}, websiteNavbarData.WebsiteNavbarActionWidget.prototype.actions, {
         edit: '_startEditMode',
@@ -26,6 +25,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         snippet_dropped: '_onSnippetDropped',
         edition_will_stopped: '_onEditionWillStop',
         edition_was_stopped: '_onEditionWasStopped',
+        request_save: '_onSnippetRequestSave',
     }),
 
     /**
@@ -49,7 +49,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      *
      * @override
      */
-    start: function () {
+    start: async function () {
         var def = this._super.apply(this, arguments);
 
         // If we auto start the editor, do not show a welcome message
@@ -89,7 +89,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @returns {Promise}
      */
     _startEditMode: async function () {
-        var self = this;
+        // Add class in navbar and hide the navbar.
+        this.trigger_up('edit_mode');
+
         if (this.editModeEnable) {
             return;
         }
@@ -100,10 +102,16 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             this.$welcomeMessage.detach(); // detach from the readonly rendering before the clone by summernote
         }
         this.editModeEnable = true;
-        await new EditorMenu(this).prependTo(document.body);
-        this._addEditorMessages();
-        var res = await new Promise(function (resolve, reject) {
-            self.trigger_up('widgets_start_request', {
+
+
+
+        this.wysiwyg = await this._createWysiwyg();
+        await this.wysiwyg.attachTo($('#wrapwrap'));
+
+
+
+        var res = await new Promise( (resolve, reject) => {
+            this.trigger_up('widgets_start_request', {
                 editableMode: true,
                 onSuccess: resolve,
                 onFailure: reject,
@@ -111,8 +119,31 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         });
         // Trigger a mousedown on the main edition area to focus it,
         // which is required for Summernote to activate.
-        this.$editorMessageElements.mousedown();
         return res;
+    },
+
+    _createWysiwyg: async function () {
+        var context;
+        this.trigger_up('context_get', {
+            callback: function (ctx) {
+                context = ctx;
+            },
+        });
+
+        const wysiwyg = await wysiwygLoader.createWysiwyg(this, {
+            legacy: false,
+            snippets: 'website.snippets',
+            recordInfo: {
+                context: context,
+                data_res_model: 'website',
+                data_res_id: context.website_id,
+            }, value: $('#wrapwrap')[0].outerHTML,
+            enableWebsite: true,
+            saveButton: true,
+            location: [document.getElementById('wrapwrap'), 'replace'],
+        }, ['website.compiled_assets_wysiwyg']);
+        await ajax.loadLibs({ assetLibs: [ 'website.compiled_assets_wysiwyg' ] });
+        return wysiwyg;
     },
     /**
      * On save, the editor will ask to parent widgets if something needs to be
@@ -132,18 +163,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     // Private
     //--------------------------------------------------------------------------
 
-    /**
-     * Adds automatic editor messages on drag&drop zone elements.
-     *
-     * @private
-     */
-    _addEditorMessages: function () {
-        var $target = this._targetForEdition();
-        this.$editorMessageElements = $target
-            .find('.oe_structure.oe_empty, [data-oe-type="html"]')
-            .not('[data-editor-message]')
-            .attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-    },
     /**
      * Returns the target for edition.
      *
@@ -255,7 +274,20 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             editableMode: true,
             $target: ev.data.$target,
         });
-        this._addEditorMessages();
+        // this._addEditorMessages();
+    },
+
+    /**
+     * Snippet (menu_data) can request to save the document to leave the page
+     *
+     * @private
+     * @param {OdooEvent} ev
+     * @param {object} ev.data
+     * @param {function} ev.data.onSuccess
+     * @param {function} ev.data.onFailure
+     */
+    _onSnippetRequestSave: function (ev) {
+        this.wysiwyg.saveToServer(false).then(ev.data.onSuccess, ev.data.onFailure);
     },
 });
 

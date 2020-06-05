@@ -4,8 +4,6 @@
 
 // OVERRIDES FOR EDITOR WITH SNIPPETS
 body.editor_enable.editor_has_snippets {
-    padding-left: $o-we-sidebar-width !important;
-
     #web_editor-top-edit .note-popover .popover {
         left: $o-we-sidebar-width !important;
     }
@@ -51,9 +49,6 @@ body.editor_enable.editor_has_snippets {
 #oe_snippets {
     @include o-w-preserve-btn;
 
-    @include o-position-absolute(0, auto, 0, -$o-we-sidebar-width);
-    position: fixed;
-    z-index: $o-we-zindex;
     display: flex;
     flex-flow: column nowrap;
     width: $o-we-sidebar-width;
@@ -67,10 +62,6 @@ body.editor_enable.editor_has_snippets {
     line-height: $o-we-line-height;
 
     transition: left 400ms $o-we-md-ease 0s;
-
-    &.o_loaded {
-        left: 0 !important;
-    }
 
     #snippets_menu {
         flex: 0 0 auto;

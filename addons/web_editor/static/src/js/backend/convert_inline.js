@@ -415,7 +415,7 @@ FieldHtml.include({
      * @private
      */
     _toInline: function () {
-        var $editable = this.wysiwyg.getEditable();
+        var $editable = $('<div>');
         var html = this.wysiwyg.getValue();
         $editable.html(html);
 

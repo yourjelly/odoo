@@ -51,9 +51,12 @@ var EditorMenuBar = Widget.extend({
         window.__EditorMenuBar_$editable = $editable; // TODO remove this hack asap
 
         if (options.snippets) {
-            this.snippetsMenu = new snippetsEditor.Class(this, Object.assign({
+            const $snippetManipulators = $('<div id="oe_manipulators" />');
+            this.snippetsMenu = new snippetsEditor.SnippetsMenu(this, Object.assign({
                 $el: $editable,
                 selectorEditableArea: '.o_editable',
+                $snippetEditorArea: $snippetManipulators,
+                wysiwyg: parent,
             }, options));
         }
 

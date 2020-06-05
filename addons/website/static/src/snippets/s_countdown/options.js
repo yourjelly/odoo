@@ -2,12 +2,12 @@ odoo.define('website.s_countdown_options', function (require) {
 'use strict';
 
 const core = require('web.core');
-const options = require('web_editor.snippets.options');
+const snippetOptions = require('web_editor.snippets.options');
 
 const qweb = core.qweb;
 
-options.registry.countdown = options.Class.extend({
-    events: _.extend({}, options.Class.prototype.events || {}, {
+snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
+    events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.events || {}, {
         'click .toggle-edit-message': '_onToggleEndMessageClick',
     }),
 
@@ -20,46 +20,82 @@ options.registry.countdown = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    endAction: function (previewMode, widgetValue, params) {
-        this.$target[0].dataset.endAction = widgetValue;
-        if (widgetValue === 'message') {
-            if (!this.$target.find('.s_countdown_end_message').length) {
-                const message = this.endMessage || qweb.render('website.s_countdown.end_message');
-                this.$target.append(message);
+    endAction: async function (previewMode, widgetValue, params) {
+        await this.wysiwyg.execBatch(async ()=> {
+            await this.editorHelpers.setAttribute(this.$target[0], `data-end-action`, widgetValue);
+            if (widgetValue === 'message') {
+                if (!this.$target.find('.s_countdown_end_message').length) {
+                    const message = this.endMessage || qweb.render('website.s_countdown.end_message');
+                    await this.editorHelpers.insertHtml(message, this.$target.find('.container')[0], 'INSIDE');
+                }
+            } else {
+                const $message = this.$target.find('.s_countdown_end_message');
+                if ($message.length) {
+                    this.endMessage = $message[0].outerHTML;
+                }
+                await this.editorHelpers.remove($message[0]);
             }
-        } else {
-            const $message = this.$target.find('.s_countdown_end_message').detach();
-            if ($message.length) {
-                this.endMessage = $message[0].outerHTML;
-            }
-        }
+        });
     },
     /**
     * Changes the countdown style.
     *
     * @see this.selectClass for parameters
     */
-    layout: function (previewMode, widgetValue, params) {
-        switch (widgetValue) {
-            case 'circle':
-                this.$target[0].dataset.progressBarStyle = 'disappear';
-                this.$target[0].dataset.progressBarWeight = 'thin';
-                this.$target[0].dataset.layoutBackground = 'none';
-                break;
-            case 'boxes':
-                this.$target[0].dataset.progressBarStyle = 'none';
-                this.$target[0].dataset.layoutBackground = 'plain';
-                break;
-            case 'clean':
-                this.$target[0].dataset.progressBarStyle = 'none';
-                this.$target[0].dataset.layoutBackground = 'none';
-                break;
-            case 'text':
-                this.$target[0].dataset.progressBarStyle = 'none';
-                this.$target[0].dataset.layoutBackground = 'none';
-                break;
-        }
-        this.$target[0].dataset.layout = widgetValue;
+    layout: async function (previewMode, widgetValue, params) {
+            switch (widgetValue) {
+                case 'circle':
+                    if (!previewMode) {
+                        await this.editor.execBatch(async ()=> {
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-progress-bar-style',  'disappear');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-progress-bar-weight',  'thin');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-layout-background',  'none');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-layout',  widgetValue);
+                        });
+                    } else {
+                        this.$target[0].dataset.progressBarStyle = 'disappear';
+                        this.$target[0].dataset.progressBarWeight = 'thin';
+                        this.$target[0].dataset.layoutBackground = 'none';
+                    }
+                    break;
+                case 'boxes':
+                    if (!previewMode) {
+                        await this.editor.execBatch(async ()=> {
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-progress-bar-style',  'none');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-layout-background',  'plain');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-layout',  widgetValue);
+                        });
+                    } else {
+                        this.$target[0].dataset.progressBarStyle = 'none';
+                        this.$target[0].dataset.layoutBackground = 'plain';
+                    }
+                    break;
+                case 'clean':
+                    if (!previewMode) {
+                        await this.editor.execBatch(async ()=> {
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-progress-bar-style',  'none');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-layout-background',  'none');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-layout',  widgetValue);
+                        });
+                    } else {
+                        this.$target[0].dataset.progressBarStyle = 'none';
+                        this.$target[0].dataset.layoutBackground = 'none';
+                    }
+                    break;
+                case 'text':
+                    if (!previewMode) {
+                        await this.editor.execBatch(async ()=> {
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-progress-bar-style',  'none');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-layout-background',  'none');
+                            await this.editorHelpers.setAttribute(this.$target[0], 'data-layout',  widgetValue);
+                        });
+                    } else {
+                        this.$target[0].dataset.progressBarStyle = 'none';
+                        this.$target[0].dataset.layoutBackground = 'none';
+                    }
+                    break;
+            }
+            this.$target[0].dataset.layout = widgetValue;
     },
 
     //--------------------------------------------------------------------------

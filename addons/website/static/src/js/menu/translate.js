@@ -2,7 +2,6 @@ odoo.define('website.translateMenu', function (require) {
 'use strict';
 
 var utils = require('web.utils');
-var TranslatorMenu = require('website.editor.menu.translate');
 var websiteNavbarData = require('website.navbar');
 
 var TranslatePageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({

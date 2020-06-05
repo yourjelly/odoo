@@ -7,13 +7,15 @@ var Wysiwyg = require('web_editor.wysiwyg');
 Wysiwyg.include({
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        this.Editor = editor.Class;
-        if (!this.options.toolbarHandler) {
-            this.options.toolbarHandler = $('#web_editor-top-edit');
+        if (this.options.legacy){
+            this.Editor = editor.Class;
+            if (!this.options.toolbarHandler) {
+                this.options.toolbarHandler = $('#web_editor-top-edit');
+            }
         }
     },
     start: async function () {
-        if (this.options.snippets) {
+        if (this.options.legacy && this.options.snippets) {
             var self = this;
             this.editor = new (this.Editor)(this, this.options);
             this.$editor = this.editor.rte.editable();

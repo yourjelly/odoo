@@ -23,7 +23,7 @@ Wysiwyg.include({
      **/
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        if (this.options.inIframe) {
+        if (this.options.legacy && this.options.inIframe) {
             this._onUpdateIframeId = 'onLoad_' + this.id;
         }
     },
@@ -32,28 +32,30 @@ Wysiwyg.include({
      *
      * @override
      **/
-    willStart: function () {
-        if (!this.options.inIframe) {
-            return this._super();
-        }
+    willStart: async function () {
+        const _super = this._super.bind(this);
+        if (this.options.inIframe && this.options.legacy) {
 
-        var defAsset;
-        if (this.options.iframeCssAssets) {
-            defAsset = ajax.loadAsset(this.options.iframeCssAssets);
+            var defAsset;
+            if (this.options.iframeCssAssets) {
+                defAsset = ajax.loadAsset(this.options.iframeCssAssets);
+            } else {
+                defAsset = Promise.resolve({
+                    cssLibs: [],
+                    cssContents: []
+                });
+            }
+
+            promiseWysiwyg = promiseWysiwyg || ajax.loadAsset('web_editor.wysiwyg_iframe_editor_assets');
+            this.defAsset = Promise.all([promiseWysiwyg, defAsset]);
+
+            this.$target = this.$el;
+            await this.defAsset;
+            await this._loadIframe.call(this);
+            return _super();
         } else {
-            defAsset = Promise.resolve({
-                cssLibs: [],
-                cssContents: []
-            });
+            return _super();
         }
-
-        promiseWysiwyg = promiseWysiwyg || ajax.loadAsset('web_editor.wysiwyg_iframe_editor_assets');
-        this.defAsset = Promise.all([promiseWysiwyg, defAsset]);
-
-        this.$target = this.$el;
-        return this.defAsset
-            .then(this._loadIframe.bind(this))
-            .then(this._super.bind(this));
     },
 
     //--------------------------------------------------------------------------

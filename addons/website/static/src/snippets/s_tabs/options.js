@@ -1,9 +1,9 @@
 odoo.define('website.s_tabs_options', function (require) {
 'use strict';
 
-const options = require('web_editor.snippets.options');
+const snippetOptions = require('web_editor.snippets.options');
 
-options.registry.NavTabs = options.Class.extend({
+snippetOptions.registry.NavTabs = snippetOptions.SnippetOptionWidget.extend({
     isTopOption: true,
 
     /**
@@ -97,6 +97,7 @@ options.registry.NavTabs = options.Class.extend({
      * @private
      */
     _generateUniqueIDs: function () {
+        this._findLinksAndPanes();
         for (var i = 0; i < this.$navLinks.length; i++) {
             var id = _.now() + '_' + _.uniqueId();
             var idLink = 'nav_tabs_link_' + id;
@@ -113,7 +114,7 @@ options.registry.NavTabs = options.Class.extend({
         }
     },
 });
-options.registry.NavTabsStyle = options.Class.extend({
+snippetOptions.registry.NavTabsStyle = snippetOptions.SnippetOptionWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -124,14 +125,27 @@ options.registry.NavTabsStyle = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    setStyle: function (previewMode, widgetValue, params) {
-        const $nav = this.$target.find('.s_tabs_nav:first .nav');
-        const isPills = widgetValue === 'pills';
-        $nav.toggleClass('nav-tabs card-header-tabs', !isPills);
-        $nav.toggleClass('nav-pills', isPills);
-        this.$target.find('.s_tabs_nav:first').toggleClass('card-header', !isPills).toggleClass('mb-3', isPills);
-        this.$target.toggleClass('card', !isPills);
-        this.$target.find('.s_tabs_content:first').toggleClass('card-body', !isPills);
+    setStyle: async function (previewMode, widgetValue, params) {
+        await this.wysiwyg.execBatch(async ()=> {
+            const $nav = this.$target.find('.s_tabs_nav:first .nav');
+            const isPills = widgetValue === 'pills';
+            const firstTab = this.$target.find('.s_tabs_nav:first')[0];
+            if (isPills) {
+                await this.editorHelpers.removeClass($nav, 'nav-tabs card-header-tabs');
+                await this.editorHelpers.addClass($nav, 'nav-pills');
+                await this.editorHelpers.removeClass(firstTab, 'card-header');
+                await this.editorHelpers.addClass(firstTab, 'mb-3');
+                await this.editorHelpers.removeClass(this.$target[0], 'card');
+                await this.editorHelpers.removeClass(this.$target.find('.s_tabs_content:first')[0], 'card-body');
+            } else {
+                await this.editorHelpers.addClass($nav, 'nav-tabs card-header-tabs');
+                await this.editorHelpers.removeClass($nav, 'nav-pills');
+                await this.editorHelpers.addClass(firstTab, 'card-header');
+                await this.editorHelpers.removeClass(firstTab, 'mb-3');
+                await this.editorHelpers.addClass(this.$target[0], 'card');
+                await this.editorHelpers.addClass(this.$target.find('.s_tabs_content:first')[0], 'card-body');
+            }
+        });
     },
     /**
      * Horizontal/vertical nav.
