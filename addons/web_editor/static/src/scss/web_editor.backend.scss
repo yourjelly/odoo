@@ -4,6 +4,8 @@
 
     .note-editable {
         min-height: 330px;
+        outline: none;
+        flex: 1 1 auto;
         font: inherit !important;
         font-family: inherit !important;
         line-height: inherit !important;

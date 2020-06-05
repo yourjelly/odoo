@@ -41,41 +41,29 @@ var MassMailingFieldHtml = FieldHtml.extend({
      *
      * @override
      */
-    commitChanges: function () {
+    commitChanges: async function () {
         var self = this;
-        if (config.isDebug() && this.mode === 'edit') {
-            var layoutInfo = $.summernote.core.dom.makeLayoutInfo(this.wysiwyg.$editor);
-            $.summernote.pluginEvents.codeview(undefined, undefined, layoutInfo, false);
+        await this._super();
+        if (this.mode === 'readonly' || !this.wysiwyg) {
+            return;
         }
-        if (this.mode === 'readonly' || !this.isRendered) {
-            return this._super();
-        }
+
         var fieldName = this.nodeOptions['inline-field'];
+        var $editable = $(this.wysiwyg.editorEditable);
+        const isDirty = this._isDirty;
 
-        if (this.$content.find('.o_basic_theme').length) {
-            this.$content.find('*').css('font-family', '');
-        }
+        convertInline.attachmentThumbnailToLinkImg($editable);
+        convertInline.fontToImg($editable);
+        convertInline.classToStyle($editable);
 
-        var $editable = this.wysiwyg.getEditable();
-
-        return this.wysiwyg.saveModifiedImages(this.$content).then(function () {
-            return self.wysiwyg.save().then(function (result) {
-                self._isDirty = result.isDirty;
-
-                convertInline.attachmentThumbnailToLinkImg($editable);
-                convertInline.fontToImg($editable);
-                convertInline.classToStyle($editable);
-
-                self.trigger_up('field_changed', {
-                    dataPointID: self.dataPointID,
-                    changes: _.object([fieldName], [self._unWrap($editable.html())])
-                });
-
-                if (self._isDirty && self.mode === 'edit') {
-                    return self._doAction();
-                }
-            });
+        self.trigger_up('field_changed', {
+            dataPointID: self.dataPointID,
+            changes: _.object([fieldName], [self._unWrap($editable.html())])
         });
+
+        if (isDirty && self.mode === 'edit') {
+            return self._doAction();
+        }
     },
     /**
      * The html_frame widget is opened in an iFrame that has its URL encoded

@@ -18,30 +18,14 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
     }
 }
 
-.editor_enable {
-    padding-top: var(--o-we-toolbar-height) !important;
+body.editor_enable {
+    padding: 0 !important;
 
     .note-popover .popover .popover-body {
         height: var(--o-we-toolbar-height);
     }
     .note-popover .popover  {
         transform: none;
-    }
-}
-
-#web_editor-top-edit {
-    @include o-position-absolute(0, 0, auto, 0);
-    position: fixed;
-    z-index: $o-we-zindex;
-    height: var(--o-we-toolbar-height);
-    background-color: $o-we-bg;
-
-    .note-popover .popover {
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        border: none !important;
-        max-width: none;
     }
 }
 
@@ -191,16 +175,6 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
 }
 
 // ANIMATIONS
-@keyframes fadeInDownSmall {
-    0% {
-        opacity: 0;
-        transform: translate(0, -5px);
-    }
-    100% {
-        opacity: 1;
-        transform: translate(0, 0);
-    }
-}
 
 @keyframes inputHighlighter {
     from {
@@ -379,7 +353,9 @@ body .modal {
 
 // Highlight selected image/icon
 %o-we-selected-image {
-    outline: 3px solid rgba(150, 150, 220, 0.3);
+    $o-selected-image-color: green;
+    background: $o-selected-image-color;
+    outline: 3px solid $o-selected-image-color;
 }
 
 img.o_we_selected_image {
@@ -393,25 +369,6 @@ img.o_we_selected_image {
 // seeing the images' quality clearly in the wysiwyg.
 img::selection {
     background: transparent;
-}
-
-@include media-breakpoint-down(md) {
-    #web_editor-top-edit {
-        position: initial !important;
-        height: initial !important;
-        top: initial !important;
-        left: initial !important;
-
-        #web_editor-toolbars .popover-body {
-            display: flex;
-            width: 100%;
-            overflow-x: auto;
-
-            .btn-group {
-                position: static;
-            }
-        }
-    }
 }
 
 // User modal in edit mode
@@ -486,4 +443,117 @@ img::selection {
             }
         }
     }
+}
+.wrap_editor {
+    height: 100vh;
+}
+.o_main_sidebar {
+    display: flex;
+}
+.o_editor_center {
+    flex: 1 1 auto;
+    outline: none;
+}
+
+jw-toolbar {
+    display: block;
+    text-align: center;
+
+    jw-group {
+        display: inline-block;
+        margin: 5px;
+    }
+    jw-group jw-separator {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    span {
+        font-weight: 600;
+        padding: 5px;
+    }
+
+    select, option {
+        padding: 5px 10px;
+    }
+
+    option.label {
+        font-weight: bold;
+    }
+
+    .h1 {
+        font-size: 2em;
+        font-weight: bold;
+    }
+    .h2 {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+    .h3 {
+        font-size: 1.17em;
+        font-weight: bold;
+    }
+    .h4 {
+        font-size: 1em;
+        font-weight: bold;
+    }
+    .h5 {
+        font-size: 0.83em;
+        font-weight: bold;
+    }
+    .h6 {
+        font-size: 0.67em;
+        font-weight: bold;
+    }
+    input[type=text], input[type=number], select {
+        flex: 0 1 auto;
+        height: 27px;
+        vertical-align: middle;
+        width: $o-we-sidebar-content-field-input-max-width;
+        border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+        border-radius: $o-we-sidebar-content-field-border-radius;
+
+        &:focus {
+            border-color: $o-we-sidebar-content-field-input-border-color;
+        }
+    }
+    jw-button {
+        width: auto !important;
+        height: 27px;
+        padding: 7px;
+
+        &:hover {
+            background-color: rgb(241, 243, 244);
+            cursor: pointer;
+        }
+
+        &.active {
+            background: #e5e5e5;
+            -webkit-box-shadow: inset 0px 0px 5px #c1c1c1;
+            -moz-box-shadow: inset 0px 0px 5px #c1c1c1;
+            box-shadow: inset 0px 0px 5px #c1c1c1;
+            outline: none;
+        }
+    }
+    .jw-primary-button {
+        background-color: #00A09D;
+        color: white;
+    }
+    .jw-danger-button {
+        background-color: #af120c;
+        color: white;
+    }
+}
+
+.o_web_client jw-toolbar {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    margin: -5px 5px 0 5px;
+    -webkit-box-shadow: 2px 2 5px 1px rgba(0,0,0,0.25);
+    -moz-box-shadow: 2px 2px 5px 1px rgba(0,0,0,0.25);
+    box-shadow: 2px 2px 5px 1px rgba(0,0,0,0.25);
+}
+
+jw-follow-range {
+    z-index: 1050;
 }
