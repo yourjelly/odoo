@@ -4,7 +4,7 @@ const concurrency = require('web.concurrency');
 const qweb = require('web.core').qweb;
 const publicWidget = require('web.public.widget');
 
-
+debugger;
 publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
     selector: '.s_wevent_track_our_sponsors',
     xmlDependencies: ['/website_event_track/static/src/xml/website_event_track_our_sponsors.xml'],

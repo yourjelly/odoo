@@ -7,7 +7,7 @@ var options = require('web_editor.snippets.options');
 
 var _t = core._t;
 var qweb = core.qweb;
-
+debugger;
 options.registry.sponsors = options.Class.extend({
     xmlDependencies: ['/website_event_track/static/src/xml/website_event_track_our_sponsors.xml'],
 
@@ -70,6 +70,5 @@ options.registry.sponsors = options.Class.extend({
     // },
    
 });
-
 
 });
