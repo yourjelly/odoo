@@ -4,7 +4,6 @@ odoo.define('website.tour.rte', function (require) {
 var ajax = require('web.ajax');
 var session = require('web.session');
 var tour = require('web_tour.tour');
-var Wysiwyg = require('web_editor.wysiwyg.root');
 
 var domReady = new Promise(function (resolve) {
     $(resolve);
@@ -77,7 +76,7 @@ tour.register('rte_translator', {
     trigger: '#wrap p font:first',
     run: function (action_helper) {
         action_helper.text('translated french text');
-        Wysiwyg.setRange(this.$anchor.contents()[0], 22);
+        // Wysiwyg.setRange(this.$anchor.contents()[0], 22);
         this.$anchor.trigger($.Event( "keyup", {key: '_', keyCode: 95}));
         this.$anchor.trigger('input');
     },
@@ -87,7 +86,7 @@ tour.register('rte_translator', {
     run: function (action_helper) {
         action_helper.click();
         this.$anchor.prepend('&lt;{translated}&gt;');
-        Wysiwyg.setRange(this.$anchor.contents()[0], 0);
+        // Wysiwyg.setRange(this.$anchor.contents()[0], 0);
         this.$anchor.trigger($.Event( "keyup", {key: '_', keyCode: 95}));
         this.$anchor.trigger('input');
     },

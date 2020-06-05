@@ -63,8 +63,8 @@ odoo.define('website_blog.editor', function (require) {
 
 require('web.dom_ready');
 const {qweb, _t} = require('web.core');
-const options = require('web_editor.snippets.options');
-var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
+const snippetOptions = require('web_editor.snippets.options');
+var Wysiwyg = require('web_editor.wysiwyg');
 
 if (!$('.website_blog').length) {
     return Promise.reject("DOM doesn't contain '.website_blog'");
@@ -72,7 +72,7 @@ if (!$('.website_blog').length) {
 
 const NEW_TAG_PREFIX = 'new-blog-tag-';
 
-WysiwygMultizone.include({
+Wysiwyg.include({
     custom_events: Object.assign({}, WysiwygMultizone.prototype.custom_events, {
         'set_blog_post_updated_tags': '_onSetBlogPostUpdatedTags',
     }),
@@ -84,13 +84,6 @@ WysiwygMultizone.include({
         this._super(...arguments);
         this.blogTagsPerBlogPost = {};
     },
-    /**
-     * @override
-     */
-    async start() {
-        await this._super(...arguments);
-        $('.js_tweet, .js_comment').off('mouseup').trigger('mousedown');
-    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -99,9 +92,9 @@ WysiwygMultizone.include({
     /**
      * @override
      */
-    async save() {
+    async _saveContent() {
         const ret = await this._super(...arguments);
-        await this._saveBlogTags(); // Note: important to be called after save otherwise cleanForSave is not called before
+        await this._saveBlogTags();
         return ret;
     },
 
@@ -150,7 +143,7 @@ WysiwygMultizone.include({
     },
 });
 
-options.registry.many2one.include({
+snippetOptions.registry.many2one.include({
 
     //--------------------------------------------------------------------------
     // Private
@@ -175,7 +168,7 @@ options.registry.many2one.include({
     }
 });
 
-options.registry.CoverProperties.include({
+snippetOptions.registry.CoverProperties.include({
     /**
      * @override
      */

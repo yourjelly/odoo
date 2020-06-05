@@ -3,11 +3,9 @@ odoo.define('mass_mailing.field_html_tests', function (require) {
 
 var ajax = require('web.ajax');
 var FormView = require('web.FormView');
-var FieldHtml = require('web_editor.field.html');
-var MassMailingFieldHtml = require('mass_mailing.FieldHtml');
 var testUtils = require('web.test_utils');
 var weTestUtils = require('web_editor.test_utils');
-var Wysiwyg = require('web_editor.wysiwyg');
+const loader = require('web_editor.loader');
 
 
 QUnit.module('mass_mailing', {}, function () {
@@ -37,26 +35,15 @@ QUnit.module('field html', {
                 }],
             },
         });
-
-        testUtils.mock.patch(ajax, {
-            loadAsset: function (xmlId) {
-                if (xmlId === 'template.assets') {
-                    return Promise.resolve({
-                        cssLibs: [],
-                        cssContents: ['.field_body {background-color: red;}']
-                    });
+        testUtils.mock.patch(loader, {
+            createWysiwyg: () =>{
+                return {
+                    attachTo: async () => {},
+                    focus: async () => {},
                 }
-                if (xmlId === 'template.assets_all_style') {
-                    return Promise.resolve({
-                        cssLibs: $('link[href]:not([type="image/x-icon"])').map(function () {
-                            return $(this).attr('href');
-                        }).get(),
-                        cssContents: ['.field_body {background-color: red;}']
-                    });
-                }
-                throw 'Wrong template';
             },
         });
+        weTestUtils.patch();
     },
     afterEach: function () {
         testUtils.mock.unpatch(ajax);
