@@ -212,7 +212,7 @@ var AbstractWebClient = Widget.extend(KeyboardNavigationMixin, {
     set_action_manager: function () {
         var self = this;
         this.action_manager = new ActionManager(this, session.user_context);
-        this.env.actionManager = this.actionManager;
+        this.env.actionManager = this.action_manager;
         var fragment = document.createDocumentFragment();
         return this.action_manager.appendTo(fragment).then(function () {
             dom.append(self.$el, fragment, {

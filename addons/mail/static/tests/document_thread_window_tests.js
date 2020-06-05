@@ -1,6 +1,7 @@
 odoo.define('mail.documentThreadWindowTests', function (require) {
 "use strict";
 
+const LocalStorageService = require('web.LocalStorageService');
 var mailTestUtils = require('mail.testUtils');
 var MessagingMenu = require('mail.systray.MessagingMenu');
 
@@ -133,14 +134,17 @@ QUnit.test('expand a document thread window', async function (assert) {
         services: this.services,
         data: this.data,
         session: this.session,
-        intercepts: {
-            do_action: function (ev) {
-                assert.deepEqual(ev.data.action, {
-                    res_id: 1,
-                    res_model: 'some.res.model',
-                    type: 'ir.actions.act_window',
-                    views: [[false, 'form']],
-                }, "should open the document in form view");
+        env: {
+            actionManager: {
+                doAction: function (action) {
+                    assert.deepEqual(action, {
+                        res_id: 1,
+                        res_model: 'some.res.model',
+                        type: 'ir.actions.act_window',
+                        views: [[false, 'form']],
+                    }, "should open the document in form view");
+                    return Promise.resolve();
+                },
             },
         },
     });
@@ -177,8 +181,18 @@ QUnit.test('post messages in a document thread window', async function (assert) 
         res_id: 1,
     };
     var messagingMenu = new MessagingMenu();
+    const MockedLocalStorageService = LocalStorageService.extend({
+        setItem(key, value) {
+            if (key === 'mail.document_threads_last_message') {
+                assert.deepEqual(value.messageData, newMessage,
+                    "should write sent message in local storage, to share info with other tabs");
+            }
+        },
+    });
     await testUtils.mock.addMockEnvironment(messagingMenu, {
-        services: this.services,
+        services: Object.assign(this.services, {
+            local_storage: MockedLocalStorageService,
+        }),
         data: this.data,
         session: this.session,
         mockRPC: function (route, args) {
@@ -198,13 +212,7 @@ QUnit.test('post messages in a document thread window', async function (assert) 
             return this._super.apply(this, arguments);
         },
     });
-    testUtils.mock.intercept(messagingMenu, 'call_service', function (ev) {
-        if (ev.data.service === 'local_storage' && ev.data.method === 'setItem' &&
-            ev.data.args[0] === 'mail.document_threads_last_message') {
-            assert.deepEqual(ev.data.args[1].messageData, newMessage,
-                "should write sent message in local storage, to share info with other tabs");
-        }
-    }, true);
+
     await messagingMenu.appendTo($('#qunit-fixture'));
 
     // toggle the messaging menu and open the documentThread
@@ -229,24 +237,25 @@ QUnit.test('post messages in a document thread window', async function (assert) 
 QUnit.test('open, fold, unfold and close a document thread window', async function (assert) {
     assert.expect(20);
     var messagingMenu = new MessagingMenu();
-    await testUtils.mock.addMockEnvironment(messagingMenu, {
-        services: this.services,
-        data: this.data,
-        session: this.session,
-    });
-    await testUtils.nextTick();
-    testUtils.mock.intercept(messagingMenu, 'call_service', function (ev) {
-        if (ev.data.service === 'local_storage' && ev.data.method === 'setItem') {
-            const key = ev.data.args[0];
+    const MockedLocalStorageService = LocalStorageService.extend({
+        setItem(key, value) {
             if (key === 'mail.document_threads_state/some.res.model_1') {
-                const state = ev.data.args[1].state;
+                const state = value.state;
                 assert.ok(state);
                 assert.ok(state.name);
                 assert.ok(state.windowState);
                 assert.step(`${key}: { name: "${state.name}", windowState: '${state.windowState}' }`);
             }
         }
-    }, true);
+    });
+    await testUtils.mock.addMockEnvironment(messagingMenu, {
+        services: Object.assign(this.services, {
+            local_storage: MockedLocalStorageService,
+        }),
+        data: this.data,
+        session: this.session,
+    });
+    await testUtils.nextTick();
     await messagingMenu.appendTo($('#qunit-fixture'));
 
     // toggle the messaging menu and open the documentThread

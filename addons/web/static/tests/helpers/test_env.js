@@ -2,7 +2,6 @@ odoo.define('web.test_env', async function (require) {
     "use strict";
 
     const Bus = require('web.Bus');
-    const DebugManager = require('web.DebugManager');
     const { buildQuery } = require('web.rpc');
     const session = require('web.session');
 
@@ -39,7 +38,10 @@ odoo.define('web.test_env', async function (require) {
                       return env.session.rpc(...arguments); // Compatibility Legacy Widgets
                     }
                 },
-                getCookie() { },
+                getCookie() {},
+                httpRequest(/* route, params = {}, readMethod = 'json' */) {
+                    return Promise.resolve('');
+                },
                 rpc(params, options) {
                     const query = buildQuery(params);
                     return env.session.rpc(query.route, query.params, options);

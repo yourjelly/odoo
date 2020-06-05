@@ -26,8 +26,8 @@ var AbstractService = Class.extend(Mixins.EventDispatcherMixin, ServicesMixin, {
         if (ev.is_stopped()) {
             return;
         }
+        const payload = ev.data;
         if (ev.name === 'call_service') {
-            const payload = ev.data;
             let args = payload.args || [];
             if (payload.service === 'ajax' && payload.method === 'rpc') {
                 // ajax service uses an extra 'target' argument for rpc
@@ -36,6 +36,10 @@ var AbstractService = Class.extend(Mixins.EventDispatcherMixin, ServicesMixin, {
             const service = this.env.services[payload.service];
             const result = service[payload.method].apply(service, args);
             payload.callback(result);
+        } else if (ev.name === 'do_action' && this.env.actionManager) {
+            this.env.actionManager.doAction(payload.action, payload.options)
+                .then(ev.data.on_success || (() => {}))
+                .guardedCatch(ev.data.on_fail || (() => {}));
         }
     },
 });
