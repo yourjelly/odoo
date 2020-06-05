@@ -106,16 +106,20 @@ function _buildRowElement(title, options) {
  * Creates a proxy for an object where one property is replaced by a different
  * value. This value is captured in the closure and can be read and written to.
  *
+ * If the value is a function, return the result of calling it when reading
+ * the property.
+ *
  * @param {Object} obj - the object for which to create a proxy
  * @param {string} propertyName - the name/key of the property to replace
  * @param {*} value - the initial value to give to the property's copy
+*                     If the value is a function, it will be called.
  * @returns {Proxy} a proxy of the object with the property replaced
  */
 function createPropertyProxy(obj, propertyName, value) {
     return new Proxy(obj, {
         get: function (obj, prop) {
             if (prop === propertyName) {
-                return value;
+                return typeof value === 'function' ? value() : value;
             }
             return obj[prop];
         },
@@ -201,6 +205,17 @@ const UserValueWidget = Widget.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * Set the target.
+     *
+     * @param {JQuery} $editorBlock
+     */
+    setTarget($editorBlock) {
+        this.$target = $editorBlock;
+        for (const widget of this._userValueWidgets) {
+            widget.setTarget(this.$target);
+        }
+    },
+    /**
      * Closes the widget (only meaningful for widgets that can be closed).
      */
     close: function () {
@@ -264,7 +279,7 @@ const UserValueWidget = Widget.extend({
      * Returns the option parameters associated to the widget (for a given
      * method name or not). Most are loaded with @see loadMethodsData.
      *
-     * @param {string} [methodName]
+     * @param {string | undefined} [methodName]
      * @returns {Object}
      */
     getMethodsParams: function (methodName) {
@@ -335,36 +350,36 @@ const UserValueWidget = Widget.extend({
      * Loads option method names and option method parameters.
      *
      * @param {string[]} validMethodNames
-     * @param {Object} extraParams
+     * @param {Object | undefined} parentMethodsParams
      */
-    loadMethodsData: function (validMethodNames, extraParams) {
+    loadMethodsData: function (validMethodNames, parentMethodsParams) {
         this._methodsNames = [];
-        this._methodsParams = _.extend({}, extraParams);
+        this._methodsParams = _.extend({}, parentMethodsParams);
         this._methodsParams.optionsPossibleValues = {};
         this._dependencies = [];
         this._triggerWidgetsNames = [];
         this._triggerWidgetsValues = [];
 
-        for (const key in this.el.dataset) {
-            const dataValue = this.el.dataset[key].trim();
+        for (const dataKey in this.el.dataset) {
+            const dataValue = this.el.dataset[dataKey].trim();
 
-            if (key === 'dependencies') {
+            if (dataKey === 'dependencies') {
                 this._dependencies.push(...dataValue.split(/\s*,\s*/g));
-            } else if (key === 'trigger') {
+            } else if (dataKey === 'trigger') {
                 this._triggerWidgetsNames.push(...dataValue.split(/\s*,\s*/g));
-            } else if (key === 'triggerValue') {
+            } else if (dataKey === 'triggerValue') {
                 this._triggerWidgetsValues.push(...dataValue.split(/\s*,\s*/g));
-            } else if (validMethodNames.includes(key)) {
-                this._methodsNames.push(key);
-                this._methodsParams.optionsPossibleValues[key] = dataValue.split(/\s*\|\s*/g);
+            } else if (validMethodNames.includes(dataKey)) {
+                this._methodsNames.push(dataKey);
+                this._methodsParams.optionsPossibleValues[dataKey] = dataValue.split(/\s*\|\s*/g);
             } else {
-                this._methodsParams[key] = dataValue;
+                this._methodsParams[dataKey] = dataValue;
             }
         }
         this._userValueWidgets.forEach(widget => {
-            const inheritedParams = _.extend({}, this._methodsParams);
-            inheritedParams.optionsPossibleValues = null;
-            widget.loadMethodsData(validMethodNames, inheritedParams);
+            const inheritedMethodsParams = _.extend({}, this._methodsParams);
+            inheritedMethodsParams.optionsPossibleValues = null;
+            widget.loadMethodsData(validMethodNames, inheritedMethodsParams);
             const subMethodsNames = widget.getMethodsNames();
             const subMethodsParams = widget.getMethodsParams();
 
@@ -1618,21 +1633,33 @@ const SnippetOptionWidget = Widget.extend({
      *
      * @constructor
      */
-    init: function (parent, $uiElements, $target, $overlay, data, options) {
+    init: function (parent, $uiElements, $snippetBlock, $overlay, data, options) {
         this._super.apply(this, arguments);
 
         this.$originalUIElements = $uiElements;
 
-        this.$target = $target;
         this.$overlay = $overlay;
         this.data = data;
         this.options = options;
+        this.wysiwyg = this.options.wysiwyg;
+        this.editor = this.wysiwyg.editor;
+        this.editorHelpers = this.wysiwyg.editorHelpers;
 
         this.className = 'snippet-option-' + this.data.optionName;
+        this._userValueWidgets = [];
 
+        this.setTarget($snippetBlock);
         this.ownerDocument = this.$target[0].ownerDocument;
 
-        this._userValueWidgets = [];
+    },
+    /**
+     * Set the option target of `this` and all it's widget children.
+     */
+    setOptionTarget($snippetBlock) {
+        this.$target = $snippetBlock;
+        for (const subWidget of this._userValueWidgets) {
+            subWidget.setTarget(this.$target);
+        }
     },
     /**
      * @override
@@ -1741,7 +1768,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Object} params
      * @returns {Promise|undefined}
      */
-    selectClass: function (previewMode, widgetValue, params) {
+    selectClass: async function (previewMode, widgetValue, params) {
         for (const classNames of params.possibleValues) {
             if (classNames) {
                 this.$target[0].classList.remove(...classNames.trim().split(/\s+/g));
@@ -1750,6 +1777,8 @@ const SnippetOptionWidget = Widget.extend({
         if (widgetValue) {
             this.$target[0].classList.add(...widgetValue.trim().split(/\s+/g));
         }
+
+        if (previewMode === false) await this._refreshTarget();
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -1761,9 +1790,13 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Object} params
      * @returns {Promise|undefined}
      */
-    selectDataAttribute: function (previewMode, widgetValue, params) {
-        const value = this._selectAttributeHelper(widgetValue, params);
-        this.$target[0].dataset[params.attributeName] = value;
+    selectDataAttribute: async function (previewMode, widgetValue, params) {
+        const value = await this._selectAttributeHelper(widgetValue, params);
+        this.$target.attr(`data-${params.attributeName}`, value);
+        if (!previewMode) {
+            const attributeName = params.attributeName.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
+            await this.editorHelpers.setAttribute(this.$target[0], `data-${attributeName}`, value);
+        }
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -1775,9 +1808,13 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Object} params
      * @returns {Promise|undefined}
      */
-    selectAttribute: function (previewMode, widgetValue, params) {
-        const value = this._selectAttributeHelper(widgetValue, params);
-        this.$target[0].setAttribute(params.attributeName, value);
+    selectAttribute: async function (previewMode, widgetValue, params) {
+        const value = await this._selectAttributeHelper(widgetValue, params);
+        if (previewMode) {
+            this.$target.attr(params.attributeName, value);
+        } else {
+            await this.editorHelpers.setAttribute(this.$target[0], params.attributeName, value);
+        }
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -1789,7 +1826,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Object} params
      * @returns {Promise|undefined}
      */
-    selectStyle: function (previewMode, widgetValue, params) {
+    selectStyle: async function (previewMode, widgetValue, params) {
         if (params.cssProperty === 'background-color') {
             this.$target.trigger('background-color-event', previewMode);
         }
@@ -1881,6 +1918,8 @@ const SnippetOptionWidget = Widget.extend({
         if (params.extraClass) {
             this.$target.toggleClass(params.extraClass, hasUserValue);
         }
+
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
@@ -1968,11 +2007,13 @@ const SnippetOptionWidget = Widget.extend({
 
                 let obj = this;
                 if (params.applyTo) {
-                    const $firstSubTarget = this.$(params.applyTo).eq(0);
-                    if (!$firstSubTarget.length) {
+                    const $firstSubTargetFn = () => this.$(params.applyTo).eq(0);
+                    if (!$firstSubTargetFn().length) {
                         continue;
                     }
-                    obj = createPropertyProxy(this, '$target', $firstSubTarget);
+                    // We use a function to retrive the value as the """original" $firstSubTarget might
+                    // have been replaced by the jabberwock editor.
+                    obj = createPropertyProxy(this, '$target', $firstSubTargetFn);
                 }
 
                 const value = await this._computeWidgetState.call(obj, methodName, params);
@@ -2005,12 +2046,14 @@ const SnippetOptionWidget = Widget.extend({
 
             let obj = this;
             if (params.applyTo) {
-                const $firstSubTarget = this.$(params.applyTo).eq(0);
-                if (!$firstSubTarget.length) {
+                const $firstSubTargetFn = () => this.$(params.applyTo).eq(0);
+                if (!$firstSubTargetFn().length) {
                     widget.toggleVisibility(false);
                     return;
                 }
-                obj = createPropertyProxy(this, '$target', $firstSubTarget);
+                // We use a function to retrive the value as the "original" $firstSubTarget might have
+                // been replaced by the jabberwock editor.
+                obj = createPropertyProxy(this, '$target', $firstSubTargetFn);
             }
 
             // Make sure to check the visibility of all sub-widgets. For
@@ -2387,6 +2430,9 @@ const SnippetOptionWidget = Widget.extend({
             } else {
                 await this[methodName](previewMode, widgetValue, params);
             }
+            if (previewMode === false) {
+                this.wysiwyg.snippetsMenu.activateLastSnippetBlock();
+            }
         }
 
         // We trigger the event on elements targeted by apply-to if any as
@@ -2401,7 +2447,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Object} params
      * @returns {string|undefined}
      */
-    _selectAttributeHelper(value, params) {
+    async _selectAttributeHelper(value, params) {
         if (!params.attributeName) {
             throw new Error('Attribute name missing');
         }
@@ -2411,9 +2457,29 @@ const SnippetOptionWidget = Widget.extend({
             value = value.split(params.saveUnit).join('');
         }
         if (params.extraClass) {
-            this.$target.toggleClass(params.extraClass, params.defaultValue !== value);
+            if (params.defaultValue === value) {
+                await this.editorHelpers.removeClass(this.$target[0], params.extraClass);
+            } else {
+                await this.editorHelpers.addClass(this.$target[0], params.extraClass);
+            }
         }
         return value;
+    },
+    /**
+     * Refresh the target in the wysiwyg.
+     */
+    async _refreshTarget($target = this.$target) {
+        await this.wysiwyg.editor.execBatch(async () => {
+            const html = $target.html();
+            $target.html('');
+            const attributes = [...$target[0].attributes].reduce( (acc, attribute) => {
+                acc[attribute.name] = attribute.value;
+                return acc
+            }, {})
+            await this.editorHelpers.updateAttributes($target[0], attributes);
+            await this.editorHelpers.empty($target[0]);
+            await this.editorHelpers.insertHtml(html, $target[0], 'INSIDE');
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -2610,7 +2676,7 @@ registry.sizing = SnippetOptionWidget.extend({
             $body.addClass(cursor);
 
             var xy = ev['page' + XY];
-            var bodyMouseMove = function (ev) {
+            var bodyMouseMove = async function (ev) {
                 ev.preventDefault();
 
                 var dd = ev['page' + XY] - xy + resize[1][begin];
@@ -2618,14 +2684,15 @@ registry.sizing = SnippetOptionWidget.extend({
                 var prev = current ? (current - 1) : 0;
 
                 var change = false;
+                const cleanedClass = (self.$target.attr('class') || '').replace(regClass, '');
                 if (dd > (2 * resize[1][next] + resize[1][current]) / 3) {
-                    self.$target.attr('class', (self.$target.attr('class') || '').replace(regClass, ''));
+                    self.$target.attr('class', cleanedClass);
                     self.$target.addClass(resize[0][next]);
                     current = next;
                     change = true;
                 }
                 if (prev !== current && dd < (2 * resize[1][prev] + resize[1][current]) / 3) {
-                    self.$target.attr('class', (self.$target.attr('class') || '').replace(regClass, ''));
+                    self.$target.attr('class', cleanedClass);
                     self.$target.addClass(resize[0][prev]);
                     current = prev;
                     change = true;
@@ -2637,11 +2704,13 @@ registry.sizing = SnippetOptionWidget.extend({
                     $handle.addClass('o_active');
                 }
             };
-            var bodyMouseUp = function () {
+            var bodyMouseUp = async function () {
                 $body.off('mousemove', bodyMouseMove);
                 $body.off('mouseup', bodyMouseUp);
                 $body.removeClass(cursor);
                 $handle.removeClass('o_active');
+
+                await self.editorHelpers.setAttribute(self.$target[0], 'class', self.$target.attr('class'));
 
                 // Highlights the previews for a while
                 var $handlers = self.$overlay.find('.o_handle');
@@ -3241,6 +3310,8 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
             removeOnImageChangeAttrs.forEach(attr => delete this.$target[0].dataset[attr]);
             this.$target.trigger('background_changed', [previewMode]);
         }
+
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
@@ -3264,7 +3335,6 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
     setTarget: function () {
         this._super(...arguments);
         // TODO should be automatic for all options as equal to the start method
-        this.bindBackgroundEvents();
         this.__customImageSrc = this._getSrcFromCssValue();
     },
 
@@ -3306,16 +3376,14 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
      * @returns {boolean} true if the color has been applied (removing the
      *                    background)
      */
-    _onBackgroundColorUpdate: async function (ev, previewMode) {
-        ev.stopPropagation();
-        if (ev.currentTarget !== ev.target) {
-            return false;
+    _onBackgroundColorUpdate: async function (previewMode) {
+        if (this.$target.is('.parallax, .s_parallax_bg')) {
+            return;
         }
         if (previewMode === false) {
             this.__customImageSrc = undefined;
         }
-        await this.background(previewMode, '', {});
-        return true;
+        return this.background(previewMode, '', {});
     },
 });
 
@@ -3356,10 +3424,16 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      *
      * @see this.selectClass for params
      */
-    backgroundType: function (previewMode, widgetValue, params) {
-        this.$target.toggleClass('o_bg_img_opt_repeat', widgetValue === 'repeat-pattern');
-        this.$target.css('background-position', '');
-        this.$target.css('background-size', '');
+    backgroundType: async function (previewMode, widgetValue, params) {
+        await this.wysiwyg.editor.execBatch(async ()=> {
+            if (widgetValue === 'repeat-pattern') {
+                await this.editorHelpers.addClass(this.$target[0], 'o_bg_img_opt_repeat');
+            } else {
+                await this.editorHelpers.removeClass(this.$target[0], 'o_bg_img_opt_repeat');
+            }
+            await this.editorHelpers.setStyle(this.$target[0], 'background-position', '');
+            await this.editorHelpers.setStyle(this.$target[0], 'background-size', '');
+        });
     },
     /**
      * Saves current background position and enables overlay.
@@ -3428,8 +3502,8 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         this.$overlayContent = this.$backgroundOverlay.find('.o_we_overlay_content');
         this.$overlayBackground = this.$overlayContent.find('.o_overlay_background');
 
-        this.$backgroundOverlay.on('click', '.o_btn_apply', () => {
-            this.$target.css('background-position', this.$bgDragger.css('background-position'));
+        this.$backgroundOverlay.on('click', '.o_btn_apply', async () => {
+            await this.editorHelpers.setStyle(this.$target[0], 'background-position', this.$bgDragger.css('background-position'));
             this._toggleBgOverlay(false);
         });
         this.$backgroundOverlay.on('click', '.o_btn_discard', () => {
@@ -3481,7 +3555,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         if (!activate) {
             this.$backgroundOverlay.removeClass('oe_active');
             this.trigger_up('unblock_preview_overlays');
-            this.trigger_up('activate_snippet', {$snippet: this.$target});
+            this.trigger_up('activate_snippet', {$element: this.$target});
 
             $(document).off('click.bgposition');
             return;
@@ -3489,7 +3563,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
 
         this.trigger_up('hide_overlay');
         this.trigger_up('activate_snippet', {
-            $snippet: this.$target,
+            $element: this.$target,
             previewMode: true,
         });
         this.trigger_up('block_preview_overlays');
@@ -3895,7 +3969,6 @@ registry.SnippetSave = SnippetOptionWidget.extend({
 
 return {
     SnippetOptionWidget: SnippetOptionWidget,
-    snippetOptionRegistry: registry,
 
     NULL_ID: NULL_ID,
     UserValueWidget: UserValueWidget,

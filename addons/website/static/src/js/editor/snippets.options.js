@@ -6,15 +6,15 @@ const config = require('web.config');
 var core = require('web.core');
 var Dialog = require('web.Dialog');
 const weUtils = require('web_editor.utils');
-var options = require('web_editor.snippets.options');
+var snippetOptions = require('web_editor.snippets.options');
 const wUtils = require('website.utils');
 require('website.s_popup_options');
 
 var _t = core._t;
 var qweb = core.qweb;
 
-const InputUserValueWidget = options.userValueWidgetsRegistry['we-input'];
-const SelectUserValueWidget = options.userValueWidgetsRegistry['we-select'];
+const InputUserValueWidget = snippetOptions.userValueWidgetsRegistry['we-input'];
+const SelectUserValueWidget = snippetOptions.userValueWidgetsRegistry['we-select'];
 
 const UrlPickerUserValueWidget = InputUserValueWidget.extend({
     custom_events: _.extend({}, InputUserValueWidget.prototype.custom_events || {}, {
@@ -211,15 +211,15 @@ const FontFamilyPickerUserValueWidget = SelectUserValueWidget.extend({
     },
 });
 
-options.userValueWidgetsRegistry['we-urlpicker'] = UrlPickerUserValueWidget;
-options.userValueWidgetsRegistry['we-fontfamilypicker'] = FontFamilyPickerUserValueWidget;
+snippetOptions.userValueWidgetsRegistry['we-urlpicker'] = UrlPickerUserValueWidget;
+snippetOptions.userValueWidgetsRegistry['we-fontfamilypicker'] = FontFamilyPickerUserValueWidget;
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-options.Class.include({
-    xmlDependencies: (options.Class.prototype.xmlDependencies || [])
+snippetOptions.SnippetOptionWidget.include({
+    xmlDependencies: (snippetOptions.SnippetOptionWidget.prototype.xmlDependencies || [])
         .concat(['/website/static/src/xml/website.editor.xml']),
-    custom_events: _.extend({}, options.Class.prototype.custom_events || {}, {
+    custom_events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.custom_events || {}, {
         'google_fonts_custo_request': '_onGoogleFontsCustoRequest',
     }),
 
@@ -500,7 +500,7 @@ options.Class.include({
     },
 });
 
-options.registry.BackgroundImage.include({
+snippetOptions.registry.BackgroundImage.include({
     background: async function (previewMode, widgetValue, params) {
         if (previewMode === 'reset' && this.videoSrc) {
             return this._setBgVideo(false, this.videoSrc);
@@ -562,13 +562,13 @@ options.registry.BackgroundImage.include({
      _onBackgroundColorUpdate: async function (ev, previewMode) {
         const ret = await this._super(...arguments);
         if (ret) {
-            this._setBgVideo(previewMode, '');
+            await this._setBgVideo(previewMode, '');
         }
         return ret;
     },
 });
 
-options.registry.BackgroundOptimize.include({
+snippetOptions.registry.BackgroundOptimize.include({
     /**
      * @override
      */
@@ -580,7 +580,7 @@ options.registry.BackgroundOptimize.include({
     },
 });
 
-options.registry.SwitchTheme = options.Class.extend({
+snippetOptions.registry.SwitchTheme = snippetOptions.Class.extend({
     isTopOption: true,
 
     //--------------------------------------------------------------------------
@@ -607,7 +607,7 @@ options.registry.SwitchTheme = options.Class.extend({
     },
 });
 
-options.registry.Theme = options.Class.extend({
+snippetOptions.registry.Theme = snippetOptions.Class.extend({
     events: {
         'click .o_color_combinations_edition we-toggler': '_onCCTogglerClick',
         // FIXME investigate why using 'click' does not work *anymore* but those
@@ -911,7 +911,7 @@ options.registry.Theme = options.Class.extend({
     },
 });
 
-options.registry.menu_data = options.Class.extend({
+snippetOptions.registry.menu_data = snippetOptions.SnippetOptionWidget.extend({
     /**
      * When the users selects a menu, a dialog is opened to ask him if he wants
      * to follow the link (and leave editor), edit the menu or do nothing.
@@ -954,7 +954,7 @@ options.registry.menu_data = options.Class.extend({
     },
 });
 
-options.registry.company_data = options.Class.extend({
+snippetOptions.registry.company_data = snippetOptions.SnippetOptionWidget.extend({
     /**
      * Fetches data to determine the URL where the user can edit its company
      * data. Saves the info in the prototype to do this only once.
@@ -962,7 +962,7 @@ options.registry.company_data = options.Class.extend({
      * @override
      */
     start: function () {
-        var proto = options.registry.company_data.prototype;
+        var proto = snippetOptions.registry.company_data.prototype;
         var prom;
         var self = this;
         if (proto.__link === undefined) {
@@ -986,7 +986,7 @@ options.registry.company_data = options.Class.extend({
      */
     onFocus: function () {
         var self = this;
-        var proto = options.registry.company_data.prototype;
+        var proto = snippetOptions.registry.company_data.prototype;
 
         Dialog.confirm(this, _t("Do you want to edit the company data ?"), {
             confirm_callback: function () {
@@ -1001,14 +1001,19 @@ options.registry.company_data = options.Class.extend({
     },
 });
 
-options.registry.Carousel = options.Class.extend({
+snippetOptions.registry.Carousel = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
-    start: function () {
+    start: async function () {
         this.$target.carousel('pause');
         this.$indicators = this.$target.find('.carousel-indicators');
         this.$controls = this.$target.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
+
+        // If not id has been attributed yet, do it now.
+        if (this.$target.attr('id') === 'myCarousel') {
+            this._assignUniqueID();
+        }
 
         // Prevent enabling the carousel overlay when clicking on the carousel
         // controls (indeed we want it to change the carousel slide then enable
@@ -1028,7 +1033,7 @@ options.registry.Carousel = options.Class.extend({
             const _slideDuration = (window.performance.now() - _slideTimestamp);
             setTimeout(() => {
                 this.trigger_up('activate_snippet', {
-                    $snippet: this.$target.find('.carousel-item.active'),
+                    $element: this.$target.find('.carousel-item.active'),
                     ifInactiveOptions: true,
                 });
                 this.$target.trigger('active_slide_targeted');
@@ -1075,7 +1080,7 @@ options.registry.Carousel = options.Class.extend({
      *
      * @private
      */
-    _assignUniqueID: function () {
+    _assignUniqueID: async function () {
         const id = 'myCarousel' + Date.now();
         this.$target.attr('id', id);
         this.$target.find('[data-target]').attr('data-target', '#' + id);
@@ -1087,27 +1092,18 @@ options.registry.Carousel = options.Class.extend({
                 $el.attr('href', '#' + id);
             }
         });
+        await this._refreshTarget();
     },
 });
 
-options.registry.CarouselItem = options.Class.extend({
+snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend({
     isTopOption: true,
 
     /**
      * @override
      */
     start: function () {
-        this.$carousel = this.$target.closest('.carousel');
-        this.$indicators = this.$carousel.find('.carousel-indicators');
-        this.$controls = this.$carousel.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
-
-        var leftPanelEl = this.$overlay.data('$optionsSection')[0];
-        var titleTextEl = leftPanelEl.querySelector('we-title > span');
-        this.counterEl = document.createElement('span');
-        titleTextEl.appendChild(this.counterEl);
-
-        leftPanelEl.querySelector('.oe_snippet_remove').classList.add('d-none'); // TODO improve the way to do that
-
+        this._setupCarousel();
         return this._super(...arguments);
     },
     /**
@@ -1116,6 +1112,13 @@ options.registry.CarouselItem = options.Class.extend({
     destroy: function () {
         this._super(...arguments);
         this.$carousel.off('.carousel_item_option');
+    },
+    /**
+     * @override
+     */
+    setOptionTarget() {
+        this._super(...arguments);
+        this._setupCarousel();
     },
 
     //--------------------------------------------------------------------------
@@ -1144,19 +1147,19 @@ options.registry.CarouselItem = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    addSlide: function (previewMode) {
+    addSlide: async function (previewMode) {
         const $items = this.$carousel.find('.carousel-item');
         this.$controls.removeClass('d-none');
-        this.$indicators.append($('<li>', {
+        const $li = $('<li>', {
             'data-target': '#' + this.$target.attr('id'),
             'data-slide-to': $items.length,
-        }));
-        this.$indicators.append(' ');
+        });
+        await this.editorHelpers.insertHtml($li[0].outerHTML, this.$indicators[0], 'INSIDE');
+
         // Need to remove editor data from the clone so it gets its own.
         const $active = $items.filter('.active');
-        $active.clone(false)
-            .removeClass('active')
-            .insertAfter($active);
+        const $clone = $active.clone(false).removeClass('active');
+        await this.editorHelpers.insertHtml($clone[0].outerHTML, $active[0], 'AFTER');
         this.$carousel.carousel('next');
     },
     /**
@@ -1164,14 +1167,16 @@ options.registry.CarouselItem = options.Class.extend({
      *
      * @see this.selectClass for parameters.
      */
-    removeSlide: function (previewMode) {
+    removeSlide: async function (previewMode) {
         const $items = this.$carousel.find('.carousel-item');
         const newLength = $items.length - 1;
         if (!this.removing && newLength > 0) {
             const $toDelete = $items.filter('.active');
-            this.$carousel.one('active_slide_targeted.carousel_item_option', () => {
-                $toDelete.remove();
-                this.$indicators.find('li:last').remove();
+            this.$carousel.one('active_slide_targeted.carousel_item_option', async () => {
+                await this.wysiwyg.editor.execBatch(async () => {
+                    await this.editorHelpers.remove(this.$indicators.find('li:last')[0]);
+                    await this.editorHelpers.remove($toDelete[0]);
+                });
                 this.$controls.toggleClass('d-none', newLength === 1);
                 this.$carousel.trigger('content_changed');
                 this.removing = false;
@@ -1185,7 +1190,7 @@ options.registry.CarouselItem = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    slide: function (previewMode, widgetValue, params) {
+    slide: async function (previewMode, widgetValue, params) {
         switch (widgetValue) {
             case 'left':
                 this.$controls.filter('.carousel-control-prev')[0].click();
@@ -1195,9 +1200,33 @@ options.registry.CarouselItem = options.Class.extend({
                 break;
         }
     },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Setup the carousel element.
+     *
+     * @override
+     */
+    _setupCarousel() {
+        this.$carousel = this.$target.closest('.carousel');
+        this.$indicators = this.$carousel.find('.carousel-indicators');
+        this.$controls = this.$carousel.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
+
+        var leftPanelEl = this.$overlay.data('$optionsSection')[0];
+        var titleTextEl = leftPanelEl.querySelector('we-title > span');
+        if (!this.counterEl) {
+            this.counterEl = document.createElement('span');
+        }
+        titleTextEl.appendChild(this.counterEl);
+
+        leftPanelEl.querySelector('.oe_snippet_remove').classList.add('d-none'); // TODO: improve the way to do that
+    },
 });
 
-options.registry.sizing_x = options.registry.sizing.extend({
+snippetOptions.registry.sizing_x = snippetOptions.registry.sizing.extend({
     /**
      * @override
      */
@@ -1256,7 +1285,7 @@ options.registry.sizing_x = options.registry.sizing.extend({
     },
 });
 
-options.registry.layout_column = options.Class.extend({
+snippetOptions.registry.layout_column = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
@@ -1293,10 +1322,12 @@ options.registry.layout_column = options.Class.extend({
         await new Promise(resolve => setTimeout(resolve));
         if (nbColumns === 0) {
             $row.contents().unwrap().contents().unwrap();
-            this.trigger_up('activate_snippet', {$snippet: this.$target});
+            this.trigger_up('activate_snippet', {$element: this.$target});
         } else if (previousNbColumns === 0) {
-            this.trigger_up('activate_snippet', {$snippet: this.$('> .row').children().first()});
+            this.trigger_up('activate_snippet', {$element: this.$('> .row').children().first()});
         }
+
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
@@ -1366,7 +1397,7 @@ options.registry.layout_column = options.Class.extend({
     },
 });
 
-options.registry.parallax = options.Class.extend({
+snippetOptions.registry.parallax = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
@@ -1390,7 +1421,7 @@ options.registry.parallax = options.Class.extend({
     },
 });
 
-options.registry.ul = options.Class.extend({
+snippetOptions.registry.ul = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
@@ -1419,7 +1450,7 @@ options.registry.ul = options.Class.extend({
     /**
      * @override
      */
-    selectClass: async function () {
+    selectClass: async function (previewMode) {
         await this._super.apply(this, arguments);
 
         this.trigger_up('widgets_stop_request', {
@@ -1443,10 +1474,12 @@ options.registry.ul = options.Class.extend({
             .prepend('<a href="#" class="o_ul_toggle_next fa" />');
         $li.removeClass('o_open').next().addClass('o_close');
         this.$target.find('li').removeClass('o_open');
+
+        if (previewMode === false) await this._refreshTarget();
     },
 });
 
-options.registry.collapse = options.Class.extend({
+snippetOptions.registry.collapse = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
@@ -1524,7 +1557,7 @@ options.registry.collapse = options.Class.extend({
     },
 });
 
-options.registry.Header = options.Class.extend({
+snippetOptions.registry.Header = snippetOptions.Class.extend({
 
     //--------------------------------------------------------------------------
     // Private
@@ -1545,7 +1578,7 @@ options.registry.Header = options.Class.extend({
     },
 });
 
-const VisibilityPageOptionUpdate = options.Class.extend({
+const VisibilityPageOptionUpdate = snippetOptions.Class.extend({
     pageOptionName: undefined,
     showOptionWidgetName: undefined,
     shownValue: '',
@@ -1618,7 +1651,7 @@ const VisibilityPageOptionUpdate = options.Class.extend({
     },
 });
 
-options.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
+snippetOptions.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
     pageOptionName: 'header_visible',
     showOptionWidgetName: 'regular_header_visibility_opt',
 
@@ -1641,7 +1674,7 @@ options.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
         await new Promise(resolve => {
             this.trigger_up('action_demand', {
                 actionName: 'toggle_page_option',
-                params: [{name: 'header_overlay', value: transparent}],
+                params: [{name: 'header_overlay', value: transparent, wysiwyg: this.options.wysiwyg}],
                 onSuccess: () => resolve(),
             });
         });
@@ -1651,7 +1684,7 @@ options.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
         await new Promise(resolve => {
             this.trigger_up('action_demand', {
                 actionName: 'toggle_page_option',
-                params: [{name: 'header_color', value: ''}],
+                params: [{name: 'header_color', value: '', wysiwyg: this.options.wysiwyg}],
                 onSuccess: () => resolve(),
             });
         });
@@ -1679,7 +1712,7 @@ options.registry.TopMenuVisibility = VisibilityPageOptionUpdate.extend({
     },
 });
 
-options.registry.topMenuColor = options.Class.extend({
+snippetOptions.registry.topMenuColor = snippetOptions.SnippetOptionWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -1693,7 +1726,7 @@ options.registry.topMenuColor = options.Class.extend({
         const className = widgetValue ? (params.colorPrefix + widgetValue) : '';
         this.trigger_up('action_demand', {
             actionName: 'toggle_page_option',
-            params: [{name: 'header_color', value: className}],
+            params: [{name: 'header_color', value: className, wysiwyg: this.options.wysiwyg}],
         });
     },
 
@@ -1722,7 +1755,7 @@ options.registry.topMenuColor = options.Class.extend({
 /**
  * Hide/show footer in the current page.
  */
-options.registry.HideFooter = VisibilityPageOptionUpdate.extend({
+snippetOptions.registry.HideFooter = VisibilityPageOptionUpdate.extend({
     pageOptionName: 'footer_visible',
     showOptionWidgetName: 'hide_footer_page_opt',
     shownValue: 'shown',
@@ -1731,7 +1764,7 @@ options.registry.HideFooter = VisibilityPageOptionUpdate.extend({
 /**
  * Handles the edition of snippet's anchor name.
  */
-options.registry.anchor = options.Class.extend({
+snippetOptions.registry.anchor = snippetOptions.SnippetOptionWidget.extend({
     isTopOption: true,
 
     //--------------------------------------------------------------------------
@@ -1866,7 +1899,7 @@ options.registry.anchor = options.Class.extend({
 /**
  * Controls box properties.
  */
-options.registry.Box = options.Class.extend({
+snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -1875,14 +1908,18 @@ options.registry.Box = options.Class.extend({
     /**
      * @see this.selectClass for parameters
      */
-    setShadow(previewMode, widgetValue, params) {
-        this.$target.toggleClass(params.shadowClass, !!widgetValue);
+    async setShadow(previewMode, widgetValue, params) {
+        if (widgetValue) {
+            await this.editorHelpers.addClass(this.$target[0], params.shadowClass);
+        } else {
+            await this.editorHelpers.removeClass(this.$target[0], params.shadowClass);
+        }
         if (widgetValue) {
             const inset = widgetValue === 'inset' ? widgetValue : '';
             const values = this.$target.css('box-shadow').replace('inset', '') + ` ${inset}`;
-            this.$target[0].style.setProperty('box-shadow', values, 'important');
+            await this.editorHelpers.setStyle(this.$target[0], 'box-shadow', values, true);
         } else {
-            this.$target.css('box-shadow', '');
+            await this.editorHelpers.setStyle(this.$target[0], 'box-shadow', '');
         }
     },
 
@@ -1913,8 +1950,8 @@ options.registry.Box = options.Class.extend({
     },
 });
 
-options.registry.CookiesBar = options.registry.SnippetPopup.extend({
-    xmlDependencies: (options.registry.SnippetPopup.prototype.xmlDependencies || []).concat(
+snippetOptions.registry.CookiesBar = snippetOptions.registry.SnippetPopup.extend({
+    xmlDependencies: (snippetOptions.registry.SnippetPopup.prototype.xmlDependencies || []).concat(
         ['/website/static/src/xml/website.cookies_bar.xml']
     ),
 
@@ -1927,7 +1964,7 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
      *
      * @see this.selectClass for parameters
      */
-    selectLayout: function (previewMode, widgetValue, params) {
+    selectLayout: async function (previewMode, widgetValue, params) {
         let websiteId;
         this.trigger_up('context_get', {
             callback: function (ctx) {
@@ -1958,15 +1995,17 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
             if ($currentLayoutEls.length) {
                 // save value before change, eg 'title' is not inside 'discrete' template
                 // but we want to preserve it in case of select another layout later
-                this.$savedSelectors[selector] = $currentLayoutEls;
+                this.$savedSelectors[selector] = $currentLayoutEls.clone();
             }
             const $savedSelector = this.$savedSelectors[selector];
             if ($newLayoutEl.length && $savedSelector && $savedSelector.length) {
-                $newLayoutEl.empty().append($savedSelector);
+                $newLayoutEl.empty().append($savedSelector.clone());
             }
         }
 
         $content.empty().append($template);
+
+        if (previewMode === false) await this._refreshTarget();
     },
 });
 
@@ -1974,7 +2013,7 @@ options.registry.CookiesBar = options.registry.SnippetPopup.extend({
  * Allows edition of 'cover_properties' in website models which have such
  * fields (blogs, posts, events, ...).
  */
-options.registry.CoverProperties = options.Class.extend({
+snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @constructor
      */
@@ -2004,11 +2043,15 @@ options.registry.CoverProperties = options.Class.extend({
      */
     background: async function (previewMode, widgetValue, params) {
         if (widgetValue === '') {
-            this.$image.css('background-image', '');
-            this.$target.removeClass('o_record_has_cover');
+            await this.wysiwyg.editor.execBatch(async ()=> {
+                await this.editorHelpers.setStyle(this.$image[0], 'background-image', '');
+                await this.editorHelpers.removeClass(this.$target[0], 'o_record_has_cover');
+            });
         } else {
-            this.$image.css('background-image', `url('${widgetValue}')`);
-            this.$target.addClass('o_record_has_cover');
+            await this.wysiwyg.editor.execBatch(async () => {
+                await this.editorHelpers.setStyle(this.$image[0], 'background-image', `url('${widgetValue}')`);
+                await this.editorHelpers.addClass(this.$target[0], 'o_record_has_cover');
+            });
             const $defaultSizeBtn = this.$el.find('.o_record_cover_opt_size_default');
             $defaultSizeBtn.click();
             $defaultSizeBtn.closest('we-select').click();
@@ -2017,9 +2060,23 @@ options.registry.CoverProperties = options.Class.extend({
     /**
      * @see this.selectClass for parameters
      */
-    filterValue: function (previewMode, widgetValue, params) {
-        this.$filter.css('opacity', widgetValue || 0);
-        this.$filter.toggleClass('oe_black', parseFloat(widgetValue) !== 0);
+    filterValue: async function (previewMode, widgetValue, params) {
+        if (!previewMode) {
+            await this.wysiwyg.editor.execBatch(async ()=> {
+                await this.editor.execCommand('dom.setStyle', {
+                    domNode: this.$filter[0],
+                    name: 'opacity',
+                    value: widgetValue || "0",
+                });
+                await this.editor.execCommand(parseFloat(widgetValue) !== 0 ? 'dom.addClass' : 'dom.removeClass', {
+                    domNode: this.$filter[0],
+                    class: 'oe_black',
+                });
+            });
+        } else {
+            this.$filter.css('opacity', widgetValue || 0);
+            this.$filter.toggleClass('oe_black', parseFloat(widgetValue) !== 0);
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -2080,7 +2137,7 @@ options.registry.CoverProperties = options.Class.extend({
     },
 });
 
-options.registry.ContainerWidth = options.Class.extend({
+snippetOptions.registry.ContainerWidth = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
@@ -2108,7 +2165,7 @@ options.registry.ContainerWidth = options.Class.extend({
 /**
  * Allows snippets to be moved before the preceding element or after the following.
  */
-options.registry.SnippetMove = options.Class.extend({
+snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
@@ -2141,21 +2198,29 @@ options.registry.SnippetMove = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    moveSnippet: function (previewMode, widgetValue, params) {
+    async moveSnippet (previewMode, widgetValue, params) {
         const isNavItem = this.$target[0].classList.contains('nav-item');
         const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
         switch (widgetValue) {
             case 'prev':
-                this.$target.prev().before(this.$target);
-                if (isNavItem) {
-                    $tabPane.prev().before($tabPane);
-                }
+                await this.wysiwyg.editor.execBatch(async ()=> {
+                    if (this.$target.prev()[0]) {
+                        await this.editorHelpers.moveBefore(this.$target.prev()[0], this.$target[0]);
+                    }
+                    if (isNavItem && $tabPane.prev()[0]) {
+                        await this.editorHelpers.moveBefore($tabPane.prev()[0], $tabPane[0]);
+                    }
+                });
                 break;
             case 'next':
-                this.$target.next().after(this.$target);
-                if (isNavItem) {
-                    $tabPane.next().after($tabPane);
-                }
+                await this.wysiwyg.editor.execBatch(async ()=> {
+                    if (this.$target.next()[0]) {
+                        await this.editorHelpers.moveAfter(this.$target.next()[0], this.$target[0]);
+                    }
+                    if (isNavItem && $tabPane.next()[0]) {
+                        await this.editorHelpers.moveAfter($tabPane.next()[0], $tabPane[0]);
+                    }
+                });
                 break;
         }
         if (params.name === 'move_up_opt' || params.name === 'move_down_opt') {
@@ -2170,14 +2235,7 @@ options.registry.SnippetMove = options.Class.extend({
     },
 });
 
-options.registry.ScrollButton = options.Class.extend({
-    /**
-     * @override
-     */
-    start: async function () {
-        await this._super(...arguments);
-        this.$button = this.$('.o_scroll_button');
-    },
+snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend({
     /**
      * Removes button if the option is not displayed (for example in "fit
      * content" height).
@@ -2186,8 +2244,9 @@ options.registry.ScrollButton = options.Class.extend({
      */
     updateUIVisibility: async function () {
         await this._super(...arguments);
-        if (this.$button.length && this.el.offsetParent === null) {
-            this.$button.detach();
+        const $button = this._getButton();
+        if ($button.length && this.el.offsetParent === null) {
+            await this.editorHelpers.remove($button[0]);
         }
     },
 
@@ -2198,9 +2257,9 @@ options.registry.ScrollButton = options.Class.extend({
     /**
      * Toggles the scroll down button.
      */
-    toggleButton: function (previewMode, widgetValue, params) {
+    toggleButton: async function (previewMode, widgetValue, params) {
         if (widgetValue) {
-            if (!this.$button.length) {
+            if (!this._getButton().length) {
                 const anchor = document.createElement('a');
                 anchor.classList.add(
                     'o_scroll_button',
@@ -2216,11 +2275,11 @@ options.registry.ScrollButton = options.Class.extend({
                 const arrow = document.createElement('i');
                 arrow.classList.add('fa', 'fa-angle-down', 'fa-3x');
                 anchor.appendChild(arrow);
-                this.$button = $(anchor);
+                this.$buttonTemplate = $(anchor);
             }
-            this.$target.append(this.$button);
+            await this.editorHelpers.insertHtml(this.$buttonTemplate[0].outerHTML, this.$target[0], 'INSIDE');
         } else {
-            this.$button.detach();
+            await this.editorHelpers.remove(this._getButton()[0]);
         }
     },
 
@@ -2234,7 +2293,7 @@ options.registry.ScrollButton = options.Class.extend({
     _computeWidgetState: function (methodName, params) {
         switch (methodName) {
             case 'toggleButton':
-                return !!this.$button.parent().length;
+                return !!this._getButton().parent().length;
         }
         return this._super(...arguments);
     },
@@ -2244,6 +2303,12 @@ options.registry.ScrollButton = options.Class.extend({
     _computeVisibility: function () {
         return this.$target.is('.o_full_screen_height, .o_half_screen_height');
     },
+    /**
+     * Get the scroll button
+     */
+    _getButton: function() {
+        return this.$('.o_scroll_button');
+    }
 });
 
 return {

@@ -7,11 +7,11 @@ const wSnippetOptions = require('website.editor.snippets.options');
 
 const FontFamilyPickerUserValueWidget = wSnippetOptions.FontFamilyPickerUserValueWidget;
 
-weSnippetEditor.Class.include({
-    events: _.extend({}, weSnippetEditor.Class.prototype.events, {
+weSnippetEditor.SnippetsMenu.include({
+    events: _.extend({}, weSnippetEditor.SnippetsMenu.prototype.events, {
         'click .o_we_customize_theme_btn': '_onThemeTabClick',
     }),
-    tabs: _.extend({}, weSnippetEditor.Class.prototype.tabs, {
+    tabs: _.extend({}, weSnippetEditor.SnippetsMenu.prototype.tabs, {
         THEME: 'theme',
     }),
 
@@ -22,7 +22,7 @@ weSnippetEditor.Class.include({
     /**
      * @override
      */
-    _computeSnippetTemplates: function (html) {
+    _computeSnippetTemplates: async function (html) {
         const $html = $(html);
         const fontVariables = _.map($html.find('we-fontfamilypicker[data-variable]'), el => {
             return el.dataset.variable;

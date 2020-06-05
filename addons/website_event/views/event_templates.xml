@@ -433,7 +433,7 @@
                 <div class="row no-gutters mt-n4 mb-3">
                     <!-- Description -->
                     <div id="o_wevent_event_main_col" class="col-lg-8 bg-white px-5 pt48 pb-0 shadow-sm">
-                        <span t-field="event.description" itemprop="description"/>
+                        <div t-field="event.description" itemprop="description"/>
                     </div>
                     <div class="col-lg-4 bg-light shadow-sm d-print-none">
                         <!-- Date & Time -->
