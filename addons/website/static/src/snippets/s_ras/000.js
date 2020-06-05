@@ -8,6 +8,7 @@ const CountWidget = publicWidget.Widget.extend({
     events: {
         'click .plus': '_onPlusClick',
         'click .minus': '_onMinusClick',
+        'click .reset': '_onResetClick',
     },
 
     /**
@@ -22,7 +23,14 @@ const CountWidget = publicWidget.Widget.extend({
     },
     _onMinusClick: function () {
         this.resultEL.innerHTML = parseInt(this.resultEL.innerHTML)-1;
-    }
+    },
+    _onResetClick: function () {
+        if (this.resultEL.innerHTML != 0) {
+            this.resultEL.innerHTML = 0;
+        } else {
+            alert("No need to reset! Thanks")
+        }
+    },
 });
 
 publicWidget.registry.CountWidget = CountWidget;

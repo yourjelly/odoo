@@ -8,9 +8,9 @@
         <div class=" w-25 ml-5 p-3 bg-info">
             <center><button class="d-inline-block plus">+</button>
             <button class="d-inline-block ml-2 result">0</button>
-            <button class="d-inline-block ml-2 minus">-</button></center>
+            <button class="d-inline-block ml-2 minus">-</button>
+            <button class="reset d-block">reset</button></center>
         </div>
-        <button>reset</button>
     </div>
     </section>
 </template>
