@@ -893,6 +893,10 @@ var PivotModel = AbstractModel.extend({
      */
     _getMeasurements: function (group) {
         var self = this;
+        // trying to find how data is genrated for pivot view based on this
+        // data may be when change previous peroid to thids month this data maybe
+        // helpfull
+        debugger;
         return this.data.measures.reduce(
             function (measurements, fieldName) {
                 var measurement = group[fieldName];
@@ -1322,11 +1326,11 @@ var PivotModel = AbstractModel.extend({
                 // when pass groupSubdivisions values from method tis loop prepair data
                 // based on rowValues and colLabels key is prepaired to measurements so later 
                 // _getCellValue use measurements data.
-                debugger
+                // debugger
                 var rowValues = groupRowValues.concat(self._getGroupValues(subGroup, groupSubdivision.rowGroupBy));
                 var rowLabels = groupRowLabels.concat(self._getGroupLabels(subGroup, groupSubdivision.rowGroupBy));
 
-                var rowValues = groupColValues.concat(self._getGroupValues(subGroup, groupSubdivision.colGroupBy));
+                var colValues = groupColValues.concat(self._getGroupValues(subGroup, groupSubdivision.colGroupBy));
                 var colLabels = groupColLabels.concat(self._getGroupLabels(subGroup, groupSubdivision.colGroupBy));
 
                 if (!colValues.length && rowValues.length) {
@@ -1337,7 +1341,7 @@ var PivotModel = AbstractModel.extend({
                 }
                 var key = JSON.stringify([rowValues, colValues]);
                 var originIndex = groupSubdivision.group.originIndex;
-
+                
                 if (!(key in self.measurements)) {
                     self.measurements[key] = self.data.origins.map(function () {
                         return self._getMeasurements({});
@@ -1488,7 +1492,7 @@ var PivotModel = AbstractModel.extend({
      */
     _subdivideGroup: function (group, divisors) {
         var self = this;
-
+        
         var key = JSON.stringify([group.rowValues, group.colValues]);
 
         var proms = this.data.origins.reduce(
@@ -1523,7 +1527,7 @@ var PivotModel = AbstractModel.extend({
                 //_subdivideGroup method and in this call prepare data for render and data
                 // render based on groupSubdivisions param so that's why i added debugger to find 
                 // which data is pass in groupSubdivisions param
-                debugger;
+                // debugger;
 
                 self._prepareData(group, groupSubdivisions);
             }
