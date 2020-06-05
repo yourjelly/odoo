@@ -213,6 +213,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         this.$target.off('.newsletter_popup_option');
         this._super.apply(this, arguments);
     },
+
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
