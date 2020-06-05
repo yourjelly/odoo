@@ -25,7 +25,7 @@ options.registry.sponsors = options.Class.extend({
 
         // When the snippet is empty, an edition button is the default content
         // TODO find a nicer way to do that to have editor style
-        this.$target.on('click', '.o_add_images', function (e) {
+        this.$target.on('click', '.o_add_sponsors', function (e) {
             debugger;
         });
 
