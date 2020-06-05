@@ -297,6 +297,12 @@ var MassMailingFieldHtml = FieldHtml.extend({
         }
         this.wysiwyg.trigger('reload_snippet_dropzones');
     },
+    _getWysiwygOptions: function () {
+        return {
+            ...this._super.apply(this, arguments),
+            legacy: true,
+        };
+    },
 
     //--------------------------------------------------------------------------
     // Handler

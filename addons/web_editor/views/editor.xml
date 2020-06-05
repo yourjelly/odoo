@@ -10,11 +10,12 @@
 <template id="compiled_assets_wysiwyg" name="Wysiwyg Editor" groups="base.group_user,base.group_portal">
     <t t-call-assets="web_editor.assets_wysiwyg"/>
 </template>
+<template id="web_editor.compiled_assets_wysiwyg_jabberwock" name="Jabberwock Wysiwyg Editor" groups="base.group_user,base.group_portal">
+    <t t-call-assets="web_editor.assets_wysiwyg_jabberwock"/>
+</template>
 
-<template id="assets_wysiwyg" name="Wysiwyg Editor Assets">
+<template id="web_editor.assets_wysiwyg_base" name="Wysiwyg Editor Assets base">
     <!-- lib -->
-
-    <t t-call-assets="web_editor.assets_summernote"/>
 
     <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/cropperjs/cropper.css"/>
     <script type="text/javascript" src="/web_editor/static/lib/cropperjs/cropper.js"/>
@@ -36,10 +37,8 @@
 
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/fonts.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/base.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/editor/editor.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/editor/rte.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/editor/rte.summernote.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/editor/image_processing.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/editor/summernote_custom_color.js"/>
 
     <!-- widgets & plugins -->
 
@@ -56,8 +55,23 @@
     <script type="text/javascript" src="/web_editor/static/src/js/editor/snippets.options.js"/>
 
     <!-- Launcher -->
-
+    <!-- todo: move to web_editor.assets_wysiwyg_jabberwock. Currently here because wysiwyg
+               depends on it. -->
+    <script type="text/javascript" src="/web_editor/static/lib/jabberwock/jabberwock.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg.js"/>
+</template>
+
+<template id="web_editor.assets_wysiwyg_jabberwock" name="Jabberwock Wysiwyg Editor Assets">
+    <t t-call="web_editor.assets_wysiwyg_base" />
+</template>
+
+<template id="web_editor.assets_wysiwyg" name="Wysiwyg Editor Assets" >
+    <t t-call-assets="web_editor.assets_summernote"/>
+    <t t-call="web_editor.assets_wysiwyg_base" />
+    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/default_options.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/editor/editor.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/editor/rte.js"/>
+    <script type="text/javascript" src="/web_editor/static/src/js/editor/rte.summernote.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_snippets.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_iframe.js"/>
 </template>
@@ -154,6 +168,7 @@
         <link rel="stylesheet" type="text/scss" href="/web_editor/static/src/scss/web_editor.backend.scss"/>
     </xpath>
     <xpath expr="script[last()]" position="after">
+        <script type="text/javascript" src="/web_editor/static/src/js/frontend/loader.js" />
         <script type="text/javascript" src="/web_editor/static/src/js/backend/field_html.js" />
         <script type="text/javascript" src="/web_editor/static/src/js/backend/convert_inline.js" />
     </xpath>
@@ -178,6 +193,7 @@
     </xpath>
     <xpath expr="//script[last()]" position="after">
         <script type="text/javascript" src="/web_editor/static/src/js/frontend/loader.js"/>
+        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/default_options.js"/>
     </xpath>
 </template>
 

@@ -142,6 +142,7 @@ var Widget = core.Class.extend(mixins.PropertiesMixin, ServicesMixin, {
      */
     willStart: function () {
         var proms = [];
+        // todo: check if it is still required
         if (this.xmlDependencies) {
             proms.push.apply(proms, _.map(this.xmlDependencies, function (xmlPath) {
                 return ajax.loadXML(xmlPath, core.qweb);

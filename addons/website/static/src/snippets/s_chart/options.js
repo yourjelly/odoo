@@ -3,15 +3,15 @@ odoo.define('website.s_chart_options', function (require) {
 
 var core = require('web.core');
 const {ColorpickerWidget} = require('web.Colorpicker');
-var options = require('web_editor.snippets.options');
+var snippetOptions = require('web_editor.snippets.options');
 
 var _t = core._t;
 
-options.registry.InnerChart = options.Class.extend({
-    custom_events: _.extend({}, options.Class.prototype.custom_events, {
+snippetOptions.registry.InnerChart = snippetOptions.SnippetOptionWidget.extend({
+    custom_events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.custom_events, {
         'get_custom_colors': '_onGetCustomColors',
     }),
-    events: _.extend({}, options.Class.prototype.events, {
+    events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.events, {
         'click we-button.add_column': '_onAddColumnClick',
         'click we-button.add_row': '_onAddRowClick',
         'click we-button.o_we_matrix_remove_col': '_onRemoveColumnClick',
@@ -155,6 +155,7 @@ options.registry.InnerChart = options.Class.extend({
      */
     _reloadGraph: async function () {
         const jsonValue = this._matrixToChartData();
+        // todo change the dataset in jabberwock
         if (this.$target[0].dataset.data !== jsonValue) {
             this.$target[0].dataset.data = jsonValue;
             await this._refreshPublicWidgets();
@@ -199,7 +200,7 @@ options.registry.InnerChart = options.Class.extend({
      * @returns {HTMLElement}
      */
     _makeDeleteButton: function (...classes) {
-        const rmbuttonEl = options.buildElement('we-button', null, {
+        const rmbuttonEl = snippetOptions.buildElement('we-button', null, {
             classes: ['fa', 'fa-fw', 'fa-minus', ...classes],
         });
         const newEl = document.createElement('td');

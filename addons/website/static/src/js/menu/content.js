@@ -771,11 +771,11 @@ var PageOption = Class.extend({
      * @param {*} [value]
      *        by default: consider the current value is a boolean and toggle it
      */
-    setValue: function (value) {
+    setValue: async function (value, wysiwyg) {
         if (value === undefined) {
             value = !this.value;
         }
-        this.setValueCallback.call(this, value);
+        await this.setValueCallback.call(this, value, wysiwyg);
         this.value = value;
         this.isDirty = true;
     },
@@ -791,12 +791,14 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         toggle_page_option: '_togglePageOption',
     }),
     pageOptionsSetValueCallbacks: {
-        header_overlay: function (value) {
-            $('#wrapwrap').toggleClass('o_header_overlay', value);
+        header_overlay: async function (value, wysiwyg) {
+            await wysiwyg.editorCommands.toggleClass($('#wrapwrap')[0], 'o_header_overlay', value);
         },
-        header_color: function (value) {
-            $('#wrapwrap > header').removeClass(this.value)
-                                   .addClass(value);
+        header_color: async function (value, wysiwyg) {
+            await this.wysiwyg.execBatch(async ()=> {
+                await wysiwyg.editorCommands.removeClasses($('#wrapwrap > header')[0], [this.value]);
+                await wysiwyg.editorCommands.addClasses($('#wrapwrap > header')[0], [value]);
+            });
         },
     },
 
@@ -909,6 +911,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 return self._togglePageOption({
                     name: optionName,
                     value: option.value,
+                    wysiwyg: options.wysiwyg,
                 }, true, true);
             }
         });
@@ -941,7 +944,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @param {boolean} [noReload=false]
      * @returns {Promise}
      */
-    _togglePageOption: function (params, forceSave, noReload) {
+    _togglePageOption: async function (params, forceSave, noReload) {
         // First check it is a website page
         var mo;
         this.trigger_up('main_object_request', {
@@ -960,7 +963,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         }
 
         // Toggle the value
-        option.setValue(params.value);
+        await option.setValue(params.value, params.wysiwyg);
 
         // If simulate is true, it means we want the option to be toggled but
         // not saved on the server yet

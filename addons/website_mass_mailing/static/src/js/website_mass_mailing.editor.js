@@ -3,15 +3,14 @@ odoo.define('website_mass_mailing.editor', function (require) {
 
 var core = require('web.core');
 var rpc = require('web.rpc');
-var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
-var options = require('web_editor.snippets.options');
+var snippetOptions = require('web_editor.snippets.options');
 var wUtils = require('website.utils');
 
 const qweb = core.qweb;
 var _t = core._t;
 
 
-options.registry.mailing_list_subscribe = options.Class.extend({
+snippetOptions.registry.mailing_list_subscribe = snippetOptions.SnippetOptionWidget.extend({
     popup_template_id: "editor_new_mailing_list_subscribe_button",
     popup_title: _t("Add a Newsletter Subscribe Button"),
 
@@ -65,7 +64,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     },
 });
 
-options.registry.recaptchaSubscribe = options.Class.extend({
+snippetOptions.registry.recaptchaSubscribe = snippetOptions.Class.extend({
     xmlDependencies: ['/google_recaptcha/static/src/xml/recaptcha.xml'],
 
     /**
@@ -98,7 +97,7 @@ options.registry.recaptchaSubscribe = options.Class.extend({
     },
 });
 
-options.registry.newsletter_popup = options.registry.mailing_list_subscribe.extend({
+snippetOptions.registry.newsletter_popup = snippetOptions.registry.mailing_list_subscribe.extend({
     popup_template_id: "editor_new_mailing_list_subscribe_popup",
     popup_title: _t("Add a Newsletter Subscribe Popup"),
 
@@ -133,17 +132,18 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
      * @override
      */
     cleanForSave: function () {
-        var self = this;
-        var content = this.$target.data('content');
-        if (content) {
-            this.trigger_up('get_clean_html', {
-                $layout: $('<div/>').html(content),
-                callback: function (html) {
-                    self.$target.data('content', html);
-                },
-            });
-        }
-        this._super.apply(this, arguments);
+        //todo: integration with jabberwock
+        // var self = this;
+        // var content = this.$target.data('content');
+        // if (content) {
+        //     this.trigger_up('get_clean_html', {
+        //         $layout: $('<div/>').html(content),
+        //         callback: function (html) {
+        //             self.$target.data('content', html);
+        //         },
+        //     });
+        // }
+        // this._super.apply(this, arguments);
     },
     /**
      * @override
@@ -167,36 +167,6 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             self.$target.removeData('content');
             return self._refreshPublicWidgets();
         });
-    },
-});
-
-WysiwygMultizone.include({
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    _saveElement: function (outerHTML, recordInfo, editable) {
-        var self = this;
-        var defs = [this._super.apply(this, arguments)];
-        var $popups = $(editable).find('.o_newsletter_popup');
-        _.each($popups, function (popup) {
-            var $popup = $(popup);
-            var content = $popup.data('content');
-            if (content) {
-                defs.push(self._rpc({
-                    route: '/website_mass_mailing/set_content',
-                    params: {
-                        'newsletter_id': parseInt($popup.attr('data-list-id')),
-                        'content': content,
-                    },
-                }));
-            }
-        });
-        return Promise.all(defs);
     },
 });
 });

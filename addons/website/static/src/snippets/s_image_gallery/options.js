@@ -3,12 +3,12 @@ odoo.define('website.s_image_gallery_options', function (require) {
 
 var core = require('web.core');
 var weWidgets = require('wysiwyg.widgets');
-var options = require('web_editor.snippets.options');
+var snippetOptions = require('web_editor.snippets.options');
 
 var _t = core._t;
 var qweb = core.qweb;
 
-options.registry.gallery = options.Class.extend({
+snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
     xmlDependencies: ['/website/static/src/xml/website.gallery.xml'],
 
     /**
@@ -437,7 +437,7 @@ options.registry.gallery = options.Class.extend({
     },
 });
 
-options.registry.gallery_img = options.Class.extend({
+snippetOptions.registry.gallery_img = snippetOptions.SnippetOptionWidget.extend({
     /**
      * Rebuilds the whole gallery when one image is removed.
      *

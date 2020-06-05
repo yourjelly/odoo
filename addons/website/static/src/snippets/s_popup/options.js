@@ -1,9 +1,9 @@
 odoo.define('website.s_popup_options', function (require) {
 'use strict';
 
-const options = require('web_editor.snippets.options');
+const snippetOptions = require('web_editor.snippets.options');
 
-options.registry.SnippetPopup = options.Class.extend({
+snippetOptions.registry.SnippetPopup = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
@@ -60,14 +60,19 @@ options.registry.SnippetPopup = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    setLayout: function (previewMode, widgetValue, params) {
+    setLayout: async function (previewMode, widgetValue, params) {
         const isModal = widgetValue === 'modal';
         const isTop = widgetValue === 'fixedTop';
-        this.$target.toggleClass('s_popup_fixed', !isModal);
-        this.$target.toggleClass('s_popup_fixed_top', isTop);
-        this.$target.toggleClass('s_popup_center modal', isModal);
-        this.$target.find('.s_popup_frame').toggleClass('modal-dialog modal-dialog-centered', isModal);
-        this.$target.find('.s_popup_content').toggleClass('modal-content', isModal);
+        await this.wysiwyg.execBatch(async ()=>{
+            await this.editorCommands.toggleClass(this.$target[0], 's_popup_fixed', !isModal)
+            await this.editorCommands.toggleClass(this.$target[0], 's_popup_fixed_top', !isTop)
+            await this.editorCommands.toggleClass(this.$target[0], 's_popup_center', isModal)
+            await this.editorCommands.toggleClass(this.$target[0], 'modal', isModal)
+            await this.editorCommands.toggleClass(
+                this.$target.find('.s_popup_frame')[0], 'modal', isModal);
+            await this.editorCommands.toggleClass(
+                this.$target.find('.s_popup_content')[0], 'modal-content', isModal);
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -101,7 +106,7 @@ options.registry.SnippetPopup = options.Class.extend({
     },
 });
 
-options.registry.PopupContent = options.Class.extend({
+snippetOptions.registry.PopupContent = snippetOptions.SnippetOptionWidget.extend({
 
     //--------------------------------------------------------------------------
     // Private

@@ -3,11 +3,11 @@ odoo.define('website.s_product_catalog_options', function (require) {
 'use strict';
 
 const core = require('web.core');
-const options = require('web_editor.snippets.options');
+const snippetOptions = require('web_editor.snippets.options');
 
 const _t = core._t;
 
-options.registry.ProductCatalog = options.Class.extend({
+snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -18,30 +18,37 @@ options.registry.ProductCatalog = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    toggleDescription: function (previewMode, widgetValue, params) {
-        const $dishes = this.$('.s_product_catalog_dish');
-        if (widgetValue) {
-            _.each($dishes, el => {
-                const $description = $(el).find('.s_product_catalog_dish_description');
-                if ($description.length) {
-                    $description.removeClass('d-none');
-                } else {
-                    const descriptionEl = document.createElement('p');
-                    descriptionEl.classList.add('s_product_catalog_dish_description', 'o_default_snippet_text');
-                    descriptionEl.textContent = _t("Add a description here");
-                    el.appendChild(descriptionEl);
-                }
-            });
-        } else {
-            _.each($dishes, el => {
-                const $description = $(el).find('.s_product_catalog_dish_description');
-                if ($description.hasClass('o_default_snippet_text')) {
-                    $description.remove();
-                } else {
-                    $description.addClass('d-none');
-                }
-            });
-        }
+    async toggleDescription (previewMode, widgetValue, params) {
+        await this.wysiwyg.execBatch(async ()=>{
+            const $dishes = this.$('.s_product_catalog_dish');
+            if (widgetValue) {
+                for (const el of $dishes.toArray()) {
+                    const $description = $(el).find('.s_product_catalog_dish_description');
+                    if ($description.length) {
+                        await this.editorCommands.removeClasses($description[0], ['d-none']);
+                    } else {
+                        const descriptionEl = document.createElement('p');
+                        descriptionEl.classList.add('s_product_catalog_dish_description', 'o_default_snippet_text');
+                        descriptionEl.textContent = _t("Add a description here");
+
+                        await this.editorCommands.insertHtml(
+                            [el, 'INSIDE'],
+                            descriptionEl.outerHTML
+                        );
+                    }
+                };
+            } else {
+                for (const el of $dishes.toArray()) {
+                    const $description = $(el).find('.s_product_catalog_dish_description');
+                    if ($description.hasClass('o_default_snippet_text')) {
+                        await this.editorCommands.remove($description[0]);
+                    } else {
+                        this.hasDescription = true;
+                        await this.editorCommands.addClasses($description[0], ['d-none']);
+                    }
+                };
+            }
+        });
     },
 
     //--------------------------------------------------------------------------

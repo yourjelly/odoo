@@ -2,12 +2,12 @@ odoo.define('website.s_countdown_options', function (require) {
 'use strict';
 
 const core = require('web.core');
-const options = require('web_editor.snippets.options');
+const snippetOptions = require('web_editor.snippets.options');
 
 const qweb = core.qweb;
 
-options.registry.countdown = options.Class.extend({
-    events: _.extend({}, options.Class.prototype.events || {}, {
+snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
+    events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.events || {}, {
         'click .toggle-edit-message': '_onToggleEndMessageClick',
     }),
 

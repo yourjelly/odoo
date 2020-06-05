@@ -79,7 +79,7 @@ options.registry.mass_mailing_sizing_x = options.Class.extend({
     },
 });
 
-options.registry.mass_mailing_table_item = options.Class.extend({
+options.registry.mass_mailing_table_item = options.SnippetOptionWidget.extend({
     onClone: function (options) {
         this._super.apply(this, arguments);
 
