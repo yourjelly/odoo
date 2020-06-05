@@ -240,9 +240,9 @@ odoo.define('web.test_utils_create', function (require) {
      * mock method, assuming that the user has access rights, and is an admin.
      *
      * @param {Object} [params={}]
-     * @returns {DebugManager}
+     * @returns {Promise<DebugManager>}
      */
-    function createDebugManager(params = {}) {
+    async function createDebugManager(params = {}) {
         const mockRPC = params.mockRPC;
         Object.assign(params, {
             async mockRPC(route, args) {
@@ -267,7 +267,7 @@ odoo.define('web.test_utils_create', function (require) {
             },
         });
         const debugManager = new DebugManager();
-        testUtilsMock.addMockEnvironment(debugManager, params);
+        await testUtilsMock.addMockEnvironment(debugManager, params);
         return debugManager;
     }
 
@@ -303,11 +303,11 @@ odoo.define('web.test_utils_create', function (require) {
      *
      * @param {Object} params This object will be given to addMockEnvironment, so
      *   any parameters from that method applies
-     * @returns {Widget}
+     * @returns {Promise<Widget>}
      */
-    function createParent(params) {
+    async function createParent(params) {
         const widget = new Widget();
-        testUtilsMock.addMockEnvironment(widget, params);
+        await testUtilsMock.addMockEnvironment(widget, params);
         return widget;
     }
 

@@ -17,12 +17,12 @@ odoo.define("web.commonEnv", function (require) {
      * [1] https://github.com/odoo/owl/blob/master/doc/reference/environment.md#content-of-an-environment
      */
 
-    const { jsonRpc } = require('web.ajax');
+    const { jsonRpc } = require("web.ajax");
     const { device, isDebug } = require("web.config");
     const { bus, serviceRegistry } = require("web.core");
     const rpc = require("web.rpc");
     const session = require("web.session");
-    const { _t } = require('web.translation');
+    const { _t } = require("web.translation");
     const utils = require("web.utils");
 
 

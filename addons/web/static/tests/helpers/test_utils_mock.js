@@ -19,8 +19,8 @@ const core = require('web.core');
 const dom = require('web.dom');
 const makeTestEnvironment = require('web.test_env');
 const MockServer = require('web.MockServer');
-const session = require('web.session');
 const RamStorage = require('web.RamStorage');
+const session = require('web.session');
 
 const DebouncedField = basic_fields.DebouncedField;
 
@@ -213,7 +213,7 @@ async function setMockedOwlEnv(Component, params, mockServer) {
                 return Promise.resolve([]);
             },
         }, params.env && params.env.dataManager),
-        services: services,
+        services: Object.assign(services, params.env && params.env.services),
         session: params.session || {},
     });
 
@@ -496,7 +496,7 @@ async function addMockEnvironment(widget, params) {
             context: ev.data.context,
             views_descr: ev.data.views,
         };
-        const views = await env.dataManager.load_views(params, ev.data.optons);
+        const views = await env.dataManager.load_views(params, ev.data.options);
         if ('search' in views && params.favoriteFilters) {
             views.search.favoriteFilters = params.favoriteFilters;
         }
