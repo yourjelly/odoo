@@ -212,7 +212,7 @@ async function setMockedOwlEnv(Component, params, mockServer) {
                 }
                 return Promise.resolve([]);
             },
-        }, params.dataManager),
+        }, params.env && params.env.dataManager),
         services: services,
         session: params.session || {},
     });

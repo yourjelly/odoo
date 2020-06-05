@@ -279,12 +279,12 @@ odoo.define('web.test_utils_create', function (require) {
      * @param {Class} params.Model the model class to use
      * @returns {Model}
      */
-    function createModel(params) {
+    async function createModel(params) {
         const widget = new Widget();
 
         const model = new params.Model(widget);
 
-        testUtilsMock.addMockEnvironment(widget, params);
+        await testUtilsMock.addMockEnvironment(widget, params);
 
         // override the model's 'destroy' so that it calls 'destroy' on the widget
         // instead, as the widget is the parent of the model and the mockServer.
