@@ -289,7 +289,7 @@
                             </div>
                         </div>
                     </t>
-                        
+
                 </div>
                 <div class="o_preheader_magazine_divider w-100" style="border-bottom: 1px solid; opacity: .25;"/>
             </div>
@@ -456,6 +456,12 @@
 <template id="header_shadow" inherit_id="website.layout" name="Header Shadow" active="False">
     <xpath expr="//header" position="attributes">
         <attribute name="t-attf-class" add="shadow" separator=" "/>
+    </xpath>
+</template>
+
+<template id="header_navbar_links_style" inherit_id="website.layout" name="Navbar Links Style" active="False">
+    <xpath expr="//ul[hasclass('navbar-nav')]" position="attributes">
+        <attribute name="class" add="nav-pills" separator=" "/>
     </xpath>
 </template>
 

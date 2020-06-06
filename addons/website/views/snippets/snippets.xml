@@ -522,6 +522,39 @@
                      data-customize-website-views="website.header_hoverable_dropdown"
                      data-select-class="o_hoverable_dropdown"
                      data-no-preview="true"/>
+
+        <we-select string="Navbar Links" id="option_header_navbar_links_style" data-variable="header-navbar-links-style" data-reload="/">
+            <we-button id="option_header_navbar_links_none"
+                        data-name="option_header_navbar_links_none"
+                        data-customize-website-views=""
+                        data-customize-website-variable="none"
+                        string="None"/>
+            <we-button id="option_header_navbar_links_fill"
+                        data-name="option_header_navbar_links_fill"
+                        data-customize-website-views="website.header_navbar_links_style"
+                        data-customize-website-variable="fill"
+                        string="Fill"/>
+            <we-button id="option_header_navbar_links_outline"
+                        data-name="option_header_navbar_links_outline"
+                        data-customize-website-views="website.header_navbar_links_style"
+                        data-customize-website-variable="outline"
+                        string="Outline"/>
+            <we-button id="option_header_navbar_links_pills"
+                        data-name="option_header_navbar_links_pills"
+                        data-customize-website-views="website.header_navbar_links_style"
+                        data-customize-website-variable="pills"
+                        string="Pills"/>
+            <we-button id="option_header_navbar_links_block"
+                        data-name="option_header_navbar_block"
+                        data-customize-website-views="website.header_navbar_links_style"
+                        data-customize-website-variable="block"
+                        string="Block"/>
+            <we-button id="option_header_navbar_links_border_bottom"
+                        data-name="option_header_navbar_border_bottom"
+                        data-customize-website-views=""
+                        data-customize-website-variable="border-bottom"
+                        string="Border Bottom"/>
+        </we-select>
     </div>
 
     <div data-js="topMenuTransparency"

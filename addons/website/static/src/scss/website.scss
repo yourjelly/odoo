@@ -862,8 +862,9 @@ $-transition-duration: 200ms;
     }
 }
 
-// Header templates
+// Header
 header {
+    // Templates
     &:not(.o_header_no_transition) {
         .navbar-brand {
             transition: font-size $-transition-duration, opacity $-transition-duration ease-out;
@@ -936,6 +937,71 @@ header {
             .navbar-collapse {
                 @include media-breakpoint-up(md) {
                     order: -1;
+                }
+            }
+        }
+    }
+
+    // Navbar Links Styles
+    @if o-website-value('header-navbar-links-style') == 'fill' {
+        .navbar .navbar-nav .nav-link {
+            padding-right: $spacer * 1.5;
+            padding-left: $spacer * 1.5;
+        }
+    }
+    @else if o-website-value('header-navbar-links-style') == 'pills' {
+        .navbar {
+            padding-top: $spacer;
+            padding-bottom: $spacer;
+            .navbar-nav .nav-link {
+                padding-right: $spacer * 1.5;
+                padding-left: $spacer * 1.5;
+                border-radius: 10rem;
+            }
+        }
+    }
+    @else if o-website-value('header-navbar-links-style') == 'outline' {
+        .navbar {
+            padding-top: $spacer;
+            padding-bottom: $spacer;
+            .navbar-nav {
+                .nav-link {
+                    padding-right: $spacer * 1.5;
+                    padding-left: $spacer * 1.5;
+                    border: 2px solid transparent;
+                }
+                .nav-link.active,
+                .show > .nav-link {
+                    background-color: transparent !important;
+                    color: $nav-pills-link-active-bg !important;
+                    border-color: $nav-pills-link-active-bg;
+                }
+            }
+        }
+    }
+    @else if o-website-value('header-navbar-links-style') == 'block' {
+        .navbar {
+            padding-top: 0;
+            padding-bottom: 0;
+            .navbar-nav .nav-link {
+                padding: $spacer $spacer * 1.5;
+                border-radius: 0;
+            }
+        }
+    }
+    @else if o-website-value('header-navbar-links-style') == 'border-bottom' {
+        .navbar {
+            padding-top: 0;
+            padding-bottom: 0;
+            .navbar-nav {
+                .nav-link {
+                    padding: $spacer 0;
+                    margin: 0 $spacer;
+                }
+                .nav-link.active,
+                .show > .nav-link {
+                    border-bottom: $spacer/2 solid;
+                    border-color: $nav-pills-link-active-bg;
                 }
             }
         }
