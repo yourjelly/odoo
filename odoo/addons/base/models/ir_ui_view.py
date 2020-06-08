@@ -1166,11 +1166,11 @@ actual arch.
                 # Only case where two same fields has any sense is when they have different labels
                 # TODO needed : and not child.get('position') ?
                 if child.get('name') in fnames:
-                    _logger.warning(
-                        "Tree view %s contains field %s twice (or more)",
+                    msg = _('Tree view %s contains field %s twice (or more)')
+                    self.handle_view_error(msg % (
                         self.env.context.get('install_xmlid') or self.xml_id,
                         child.get('name'),
-                    )
+                    ), raise_exception=False)
                 fnames.append(child.get('name'))
 
     def _validate_tag_kanban(self, node, name_manager, node_info):
