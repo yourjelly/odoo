@@ -1915,7 +1915,8 @@ class NameManager:
 
         for action, use in self.mandatory_names.items():
             if action not in self.available_actions and action not in self.available_fields:
-                view.handle_view_error("Name '%s' used in '%s' must be present in view but is missing." % (action, use))
+                msg = _("Name '%s' used in '%s' must be present in view but is missing.")
+                view.handle_view_error(msg % (action, use))
 
         for field_name in self.available_fields:
             if field_name not in self.fields_get:
@@ -1926,12 +1927,15 @@ class NameManager:
             if field == 'id':  # always available
                 continue
             if "." in field:
-                view.handle_view_error('Invalid composed field %s in %s' % (field, use))
+                msg = _("Invalid composed field %s in %s")
+                view.handle_view_error(msg % (field, use))
             corresponding_field = self.available_fields.get(str(field))
             if corresponding_field is None:
-                view.handle_view_error('Field %s used in %s must be present in view but is missing.' % (field, use))
+                msg = _("Field %s used in %s must be present in view but is missing.")
+                view.handle_view_error(msg % (field, use))
             if corresponding_field.get('select') == 'multi':  # mainly for searchpanel, but can be a generic behaviour.
-                view.handle_view_error('Field %s used in %s is present in view but is in select multi.' % (field, use))
+                msg = _("Field %s used in %s is present in view but is in select multi.")
+                view.handle_view_error(msg % (field, use))
 
         if view.type in ("form", "kanban", "tree"):
             for field, use in self.needed_currencies.items():
