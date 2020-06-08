@@ -845,11 +845,15 @@ class Home(http.Controller):
         request.uid = request.session.uid
         try:
             context = request.env['ir.http'].webclient_rendering_context()
-            response = request.render('web.webclient_bootstrap', qcontext=context)
-            response.headers['X-Frame-Options'] = 'DENY'
-            return response
+            if 'cache_hashes' in context['session_info'].keys():
+                response = request.render('web.webclient_bootstrap', qcontext=context)
+                response.headers['X-Frame-Options'] = 'DENY'
+                return response
+            else:
+                raise AccessError(_('Only administrators can execute this action.'))
         except AccessError:
             return werkzeug.utils.redirect('/web/login?error=access')
+
 
     @http.route('/web/webclient/load_menus/<string:unique>', type='http', auth='user', methods=['GET'])
     def web_load_menus(self, unique):
