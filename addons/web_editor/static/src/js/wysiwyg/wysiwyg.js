@@ -121,7 +121,7 @@ var Wysiwyg = Widget.extend({
                     // As the jabberwock editor currently add <p><br/></p> when the editor is empty,
                     // we need to remove it.
                     if ($firstDiv.html() === '<br>') {
-                        $firstDiv.empty()
+                        $firstDiv.empty();
                     }
 
 
@@ -133,9 +133,9 @@ var Wysiwyg = Widget.extend({
                 snippetMenuElement: $mainSidebar[0],
                 snippetManipulators: $snippetManipulators[0],
                 customCommands: {
-                    openMedia: { handler: this.openMediaDialog.bind(this) },
-                    openLinkDialog: { handler: this.openLinkDialog.bind(this) },
-                    saveOdoo: { handler: this.saveToServer.bind(this) }
+                    openMedia: {handler: this.openMediaDialog.bind(this)},
+                    openLinkDialog: {handler: this.openLinkDialog.bind(this)},
+                    saveOdoo: {handler: this.saveToServer.bind(this)}
                 },
                 source: elementToParse,
                 location: this.options.location,
@@ -147,7 +147,7 @@ var Wysiwyg = Widget.extend({
             await this.editor.start();
             this.editor.enableRender = false;
 
-            const layout = this.editor.plugins.get(JWEditorLib.Layout)
+            const layout = this.editor.plugins.get(JWEditorLib.Layout);
             const domLayout = layout.engines.dom;
             this.domLayout = domLayout;
 
@@ -212,7 +212,7 @@ var Wysiwyg = Widget.extend({
                         });
                     });
                 resolve();
-            })
+            });
             linkDialog.on('cancel', this, resolve);
         });
     },
@@ -225,9 +225,9 @@ var Wysiwyg = Widget.extend({
             mediaDialog.on('save', this, async (element)=> {
                 await this.editor.execCommand('insertHtml', {
                     html: element.outerHTML
-                })
+                });
                 resolve();
-            })
+            });
             mediaDialog.on('cancel', this, resolve);
         });
     },
@@ -265,7 +265,7 @@ var Wysiwyg = Widget.extend({
     focus: function () {
         // todo: handle tab that need to go to next field if the editor does not
         //       catch it.
-        this.$el.find('[contenteditable="true"]').focus()
+        this.$el.find('[contenteditable="true"]').focus();
     },
     /**
      * Get the value of the editable element.
@@ -387,7 +387,7 @@ var Wysiwyg = Widget.extend({
             ],
         });
     },
-    _saveMegaMenuBlocks: async function(outerHTML, recordInfo, editable) {
+    _saveMegaMenuBlocks: async function (outerHTML, recordInfo, editable) {
         // Saving mega menu options
         if ($el.data('oe-field') === 'mega_menu_content') {
             // On top of saving the mega menu content like any other field
@@ -408,7 +408,7 @@ var Wysiwyg = Widget.extend({
             }));
         }
     },
-    _saveNewsletterBlocks: async function(outerHTML, recordInfo, editable) {
+    _saveNewsletterBlocks: async function (outerHTML, recordInfo, editable) {
         var self = this;
         var defs = [this._super.apply(this, arguments)];
         var $popups = $(editable).find('.o_newsletter_popup');
@@ -427,8 +427,7 @@ var Wysiwyg = Widget.extend({
         });
         return Promise.all(defs);
     },
-    _saveTranslationBlocks: async function($el, context, withLang) {
-        var self = this;
+    _saveTranslationBlocks: async function ($el, context, withLang) {
         if ($el.data('oe-translation-id')) {
             return this._rpc({
                 model: 'ir.translation',
@@ -475,12 +474,12 @@ var Wysiwyg = Widget.extend({
                     args: [[cropID], {datas: datas}],
                 });
             }
-            const access_token = await this._rpc({
+            const accessToken = await this._rpc({
                 model: 'ir.attachment',
                 method: 'generate_access_token',
                 args: [[attachmentID]],
             });
-            $croppedImg.attr('src', '/web/image/' + attachmentID + '?access_token=' + access_token[0]);
+            $croppedImg.attr('src', '/web/image/' + attachmentID + '?access_token=' + accessToken[0]);
         });
         return Promise.all(defs);
     },
