@@ -380,7 +380,6 @@ class PaymentAcquirer(models.Model):
          - 'cancel_url': URL if the client cancels the payment -> FIXME
          - 'error_url': URL if there is an issue with the payment -> FIXME
          - context: Odoo context
-
         """
         if values is None:
             values = {}

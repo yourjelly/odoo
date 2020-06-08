@@ -6,7 +6,7 @@
     'version': '1.0',
     'category': '',
     'summary': 'Base Module for Adyen for Platforms',
-    'description': 'Base Module for Adyen for Platforms, used in eCommerce and PoS',
+    'description': 'Base Module for Adyen for Platforms, used in eCommerce',
     'depends': ['mail', 'web'],
     'data': [
         'data/adyen_platforms_data.xml',

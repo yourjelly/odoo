@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="adyen_transaction_data">
+            <input type="hidden" name="data_set" t-att-data-action-url="tx_url" data-remove-me=""/>
+            <input type="hidden" name="tx_id" t-att-value="tx_id"/>
+        </template>
+
+        <template id="adyen_odoo_s2s_form">
+            <input type="hidden" name="data_set" value="/payment/stripe/s2s/create_json_3ds"/>
+            <input type="hidden" name="acquirer_id" t-att-value="id"/>
+            <input type="hidden" name="currency_id" t-att-value="currency_id"/>
+            <input t-if="amount" type="hidden" name="amount" t-att-value="amount"/>
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <div id="dropin-container"></div>
+        </template>
+
+        <template id="assets_frontend" inherit_id="web.assets_frontend">
+            <xpath expr="script[last()]" position="after">
+                <script type="text/javascript" src="/payment_adyen_by_odoo/static/src/js/payment_form.js"></script>
+                <script src="https://checkoutshopper-test.adyen.com/checkoutshopper/sdk/3.8.1/adyen.js"
+                        integrity="sha384-rGkZxBRhUfCECwNuNrllGf8dOpeUsKTMqczAkphoWMne67C32+na/29lUGT3HVOB"
+                        crossorigin="anonymous"></script>
+            </xpath>
+            <xpath expr="link[last()]" position="after">
+                <link rel="stylesheet" href="https://checkoutshopper-test.adyen.com/checkoutshopper/sdk/3.8.1/adyen.css"
+                      integrity="sha384-y1lKqffK5z+ENzddmGIfP3bcMRobxkjDt/9lyPAvV9H3JXbJYxCSD6L8TdyRMCGM"
+                      crossorigin="anonymous"/>
+            </xpath>
+        </template>
+    </data>
+</odoo>
