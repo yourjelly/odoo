@@ -34,10 +34,15 @@ options.registry.sponsors = options.Class.extend({
      * @override
      */
     onBuilt: function () {
+        this.addPartner()
     },
 
     addPartner: function () {
-        debugger;
+        this._rpc({
+            model: 'res.partner',
+            method: 'create',
+            args: [{'name': 'new partner'}],
+        });
 
     },
     //--------------------------------------------------------------------------

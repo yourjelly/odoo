@@ -1,7 +1,7 @@
 odoo.define('website_event_track.our_sponsors', function (require) {
 
 const concurrency = require('web.concurrency');
-const qweb = require('web.core').qweb;
+const core = require('web.core').qweb;
 const publicWidget = require('web.public.widget');
 
 publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
@@ -38,6 +38,8 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
      * @private
      */
     _fetch: function () {
+        const self = this;
+        debugger;
         return this._rpc({
             route: '/event/our_sponsors',
             params: {
@@ -48,22 +50,7 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
             debugger;
             // return demo data for snippet (in case of drag-drop sponsors snippet in edit mode)
             if (!(sponsors && sponsors.length)) {
-                return [{
-                        id: 0,
-                        url: '#',
-                        partner_name: 'Sponsor 1',
-                        sponsor_type_id: [1, 'Gold']
-                    }, {
-                        id: 0,
-                        url: '#',
-                        partner_name: 'Sponsor 2',
-                        sponsor_type_id: [2, 'Silver']
-                    }, {
-                        id: 0,
-                        url: '#',
-                        partner_name: 'Sponsor 3',
-                        sponsor_type_id: [3, 'Bronze']
-                    }]
+                
             }
             return sponsors;
         });
