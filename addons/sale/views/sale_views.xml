@@ -1118,7 +1118,7 @@
             <field name="inherit_id" ref="product.product_template_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@name='email_template_and_project']" position="before">
-                    <group string="Invoicing" name="invoicing" invisible="1">
+                    <group string="Invoicing" name="invoicing" invisible="0">
                         <field name="invoice_policy" widget="radio"/>
                         <field name="service_type" widget="radio" invisible="True"/>
                         <field name="visible_expense_policy" invisible="1"/>

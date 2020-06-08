@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="assets_frontend" inherit_id="website.assets_frontend" name="website_sale_product_configurator assets frontend">
+    <template id="assets_frontend" inherit_id="website_sale.assets_frontend" name="website_sale_product_configurator assets frontend">
         <xpath expr="link[last()]" position="after">
             <link rel="stylesheet" type="text/scss" href="/sale/static/src/scss/product_configurator.scss"/>
             <link rel="stylesheet" type="text/scss" href="/website_sale_product_configurator/static/src/scss/website_sale_options.scss"/>
