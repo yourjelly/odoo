@@ -974,7 +974,8 @@ actual arch.
                     name_manager.must_have_fields(
                         self._get_field_domain_variables(node, field, node_info['editable'])
                     )
-                    if field.type == "monetary":
+                    if field.type == "monetary" and node.get("invisible", "0") != "1":
+                        # currency should be present in view for monetary fields, iff the field is shown
                         name_manager.should_have_curr_field(field.currency_field or "currency_id", field.name)
                 views = {}
                 for child in node:
@@ -1331,6 +1332,11 @@ actual arch.
                 msg = _("A role cannot be `none` or `presentation`. "
                         "All your elements must be accessible with screen readers, describe it.")
                 self.handle_view_error(msg, raise_exception=False)
+
+            elif attr == "widget" and expr == "monetary" and node.tag == "field":
+                field = name_manager.Model._fields.get(node.get("name"))
+                if field and field.type == "monetary":
+                    name_manager.should_have_curr_field(field.currency_field or "currency_id", field.name)
 
             elif attr == "default_order":
                 if not regex_order.match(expr):
@@ -1846,7 +1852,7 @@ class NameManager:
         self.mandatory_fields = dict()
         self.mandatory_parent_fields = dict()
         self.available_actions = set()
-        self.needed_currencies = collections.defaultdict(list)
+        self.needed_currencies = collections.defaultdict(set)
         self.mandatory_names = dict()
         self.validate = validate
         self.Model = Model
@@ -1859,7 +1865,7 @@ class NameManager:
         self.available_actions.add(name)
 
     def should_have_curr_field(self, fname, use):
-        self.needed_currencies[fname].append(use)
+        self.needed_currencies[fname].add(use)
 
     def must_have_field(self, name, use):
         if name.startswith('parent.'):
@@ -1905,9 +1911,15 @@ class NameManager:
             if corresponding_field.get('select') == 'multi':  # mainly for searchpanel, but can be a generic behaviour.
                 view.handle_view_error('Field %s used in %s is present in view but is in select multi.' % (field, use))
 
-        for field, use in self.needed_currencies.items():
-            if field not in self.fields_get:
-                _logger.warning("Missing currency field '%s' for monetary field(s): %s", field, ' ,'.join(use))
+        if view.type in ("form", "kanban", "tree"):
+            for field, use in self.needed_currencies.items():
+                if field not in self.available_fields:
+                    _logger.warning(
+                        "Missing currency field '%s' in view %s for monetary field(s): %s",
+                        field,
+                        view.env.context.get('install_xmlid') or view.xml_id,
+                        ' ,'.join(use),
+                    )
 
     def update_view_fields(self):
         for field_name, field_infos in self.available_fields.items():
