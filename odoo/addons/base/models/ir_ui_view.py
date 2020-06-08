@@ -1358,6 +1358,8 @@ actual arch.
             elif attr == "widget" and expr == "monetary" and node.tag == "field":
                 field = name_manager.Model._fields.get(node.get("name"))
                 if field and field.type == "monetary":
+                    # Or must_have_field? if a monetary widget is manually specified,
+                    # maybe we should require the currency field.
                     name_manager.should_have_curr_field(field.currency_field or "currency_id", field.name)
 
             elif attr == "default_order":
@@ -1940,12 +1942,12 @@ class NameManager:
         if view.type in ("form", "kanban", "tree"):
             for field, use in self.needed_currencies.items():
                 if field not in self.available_fields:
-                    _logger.warning(
-                        "Missing currency field '%s' in view %s for monetary field(s): %s",
+                    msg = _("Missing currency field '%s' in view %s for monetary field(s): %s")
+                    view.handle_view_error(msg % (
                         field,
-                        view.env.context.get('install_xmlid') or view.xml_id,
+                        view.env.context.get("install_xmlid") or view.xml_id,
                         ' ,'.join(use),
-                    )
+                    ), raise_exception=False)
 
     def update_view_fields(self):
         for field_name, field_infos in self.available_fields.items():
