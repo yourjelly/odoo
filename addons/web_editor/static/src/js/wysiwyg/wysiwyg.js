@@ -208,7 +208,7 @@ var Wysiwyg = Widget.extend({
                         };
                         await this.editor.execCommand('link', linkParams);
                         await this.editor.execCommand('addClassToLink', {
-                            classes: params.classes.split(' '),
+                            classes: params.classes,
                         });
                     });
                 resolve();
