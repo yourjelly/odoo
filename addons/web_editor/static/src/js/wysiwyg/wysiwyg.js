@@ -102,6 +102,10 @@ var Wysiwyg = Widget.extend({
 
             this.editor = new JWEditorLib.OdooWebsiteEditor({
                 afterRender: async ()=> {
+                    const $wrapwrap = $('#wrapwrap');
+                    $wrapwrap.removeClass('o_editable'); // clean the dom before edition
+                    this._getEdiable($wrapwrap).addClass('o_editable');
+
                     // todo: change this quick fix
                     const $firstDiv = $('.wrapwrap main>div');
                     if ($firstDiv.length) {
@@ -557,6 +561,21 @@ var Wysiwyg = Widget.extend({
             mediaDialog.on('cancel', this, data.onCancel);
         }
         mediaDialog.open();
+    },
+
+    _getEdiable($element) {
+        return $element.find('[data-oe-model]')
+            .not('.o_not_editable')
+            .filter(function () {
+                var $parent = $(this).closest('.o_editable, .o_not_editable');
+                return !$parent.length || $parent.hasClass('o_editable');
+            })
+            .not('link, script')
+            .not('[data-oe-readonly]')
+            .not('img[data-oe-field="arch"], br[data-oe-field="arch"], input[data-oe-field="arch"]')
+            .not('.oe_snippet_editor')
+            .not('hr, br, input, textarea')
+            .add('.o_editable');
     },
 
     // legacy editor commands

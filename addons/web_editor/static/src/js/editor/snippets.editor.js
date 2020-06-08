@@ -17,6 +17,24 @@ var globalSelector = {
     is: () => false,
 };
 
+// jQuery extensions
+$.extend($.expr[':'], {
+    o_editable: function (node, i, m) {
+        while (node) {
+            if (node.className && _.isString(node.className)) {
+                if (node.className.indexOf('o_not_editable')!==-1 ) {
+                    return false;
+                }
+                if (node.className.indexOf('o_editable')!==-1 ) {
+                    return true;
+                }
+            }
+            node = node.parentNode;
+        }
+        return false;
+    },
+});
+
 /**
  * Management of the overlay and option list for a snippet.
  */
@@ -67,7 +85,7 @@ var SnippetEditor = Widget.extend({
         defs.push(this._initializeOptions());
         var $customize = this._customize$Elements[this._customize$Elements.length - 1];
 
-        this.isTargetParentEditable = this.$snippetBlock.parent().is('.o_editable');
+        this.isTargetParentEditable = this.$snippetBlock.parent().is(':o_editable');
         this.isTargetMovable = this.isTargetParentEditable && this.isTargetMovable;
 
         // Initialize move/clone/remove buttons
