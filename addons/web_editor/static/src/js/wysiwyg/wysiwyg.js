@@ -295,7 +295,7 @@ var Wysiwyg = Widget.extend({
     },
 
     // todo: handle when the server error (previously carlos_danger)
-    saveToServer: async function () {
+    saveToServer: async function (reload = true) {
         const defs = [];
         const promises = [];
         // this trigger will be catched by the "navbar" (i.e. the manager of
@@ -322,7 +322,9 @@ var Wysiwyg = Widget.extend({
         // promises.push(this.saveCroppedImages());
 
         await Promise.all(promises);
-        location.reload();
+        if (reload) {
+            location.reload();
+        }
     },
 
     _saveAllViewsBlocks: async function (views) {
