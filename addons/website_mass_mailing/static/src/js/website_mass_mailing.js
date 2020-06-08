@@ -102,6 +102,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
      */
     start: function () {
         var self = this;
+        this._bindPopup();
         var defs = [this._super.apply(this, arguments)];
         this.websiteID = this._getContext().website_id;
         this.listID = parseInt(this.$target.attr('data-list-id'));
@@ -200,6 +201,28 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         this.massMailingPopup.open();
         utils.set_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID), true);
         $(document).off('mouseleave.open_popup_event');
+    },
+    _bindPopup: function () {
+
+        let display = this.$target.data('display');
+        let delay = this.$target.data('showAfter');
+
+        if (config.device.isMobile) {
+            if (display === 'onExit') {
+                display = 'afterDelay';
+                delay = 5000;
+            }
+            // this.$('.o_newsletter_popup').removeClass('s_popup_center').addClass('s_popup_bottom');
+        }
+
+        if (display === 'afterDelay') {
+            this.timeout = setTimeout(() => this._showPopup(), delay);
+        } else {
+            $(document).on('mouseleave.open_event', () => this._showPopup());
+        }
+    },
+     _showPopup: function () {
+        this.$target.find('.o_newsletter_popup').removeClass('d-none');
     },
 });
 });

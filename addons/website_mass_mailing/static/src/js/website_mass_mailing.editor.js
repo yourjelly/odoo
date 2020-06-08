@@ -4,10 +4,45 @@ odoo.define('website_mass_mailing.editor', function (require) {
 var core = require('web.core');
 var rpc = require('web.rpc');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
-var options = require('web_editor.snippets.options');
+const options = require('web_editor.snippets.options');
 var wUtils = require('website.utils');
 var _t = core._t;
 
+
+options.registry.NewsletterPopup = options.Class.extend({
+
+    setLayout: function (previewMode, widgetValue, params) {
+        debugger;
+        const isModal = widgetValue === 'modal';
+        const isTop = widgetValue === 'fixedTop';
+        this.$target.toggleClass('s_newsletter_fixed', !isModal);
+        this.$target.toggleClass('s_newsletter_fixed_top', isTop);
+        this.$target.toggleClass('s_newsletter_center modal', isModal);
+        this.$target.find('.o_newsletter_modal').toggleClass('modal-content', isModal);
+        this.$target.find('.o_newsletter_modal').toggleClass('modal-dialog modal-dialog-centered', isModal);
+        //return this._super(...arguments);
+    },
+
+    moveBlock: function (previewMode, widgetValue, params) {
+        const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
+        this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
+    },
+
+    _computeWidgetState: function (methodName, params) {
+        switch (methodName) {
+            case 'moveBlock':
+                return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
+            case 'setLayout':
+                if (this.$target.hasClass('s_newsletter_center')) {
+                    return 'modal';
+                } else if (this.$target.hasClass('s_newsletter_fixed_top')) {
+                    return 'fixedTop';
+                }
+                return 'fixedBottom';
+        }
+        return this._super(...arguments);
+    },
+});
 
 options.registry.mailing_list_subscribe = options.Class.extend({
     popup_template_id: "editor_new_mailing_list_subscribe_button",
@@ -62,6 +97,8 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         });
     },
 });
+
+
 
 options.registry.newsletter_popup = options.registry.mailing_list_subscribe.extend({
     popup_template_id: "editor_new_mailing_list_subscribe_popup",
