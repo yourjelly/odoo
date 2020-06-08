@@ -1603,6 +1603,18 @@ class APIKeys(models.Model):
             return {'type': 'ir.actions.act_window_close'}
         raise AccessError(_("You can not remove API keys unless they're yours or you are a system user"))
 
+    def get_api_key(self, key):
+        index = key[:INDEX_SIZE]
+
+        # TODO: add the user id in the KEY
+        # so we fetch/verify only one record instead of all record of the index
+        self.env.cr.execute('SELECT id, key FROM res_users_apikeys WHERE index = %s', [index])
+
+        for [id, current_key] in self.env.cr.fetchall():
+            if KEY_CRYPT_CONTEXT.verify(key, current_key):
+                return self.browse(id)
+
+
 class APIKeyDescription(models.TransientModel):
     _name = _description = 'res.users.apikeys.description'
 
@@ -1621,6 +1633,7 @@ class APIKeyDescription(models.TransientModel):
         VALUES (%s, %s, %s, %s)
         RETURNING id
         """, [self.sudo().name, self.env.user.id, hash_api_key(k), k[:INDEX_SIZE]])
+
         description.unlink()
         self.env['res.users.apikeys'].invalidate_cache(ids=self.env.cr.fetchone())
 

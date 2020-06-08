@@ -108,7 +108,37 @@ class IrHttp(models.AbstractModel):
             request.uid = request.session.uid
 
     @classmethod
+    def _auth_method_api(cls):
+        api_token = request.httprequest.headers.get('Token')
+        if not api_token:
+            return False
+
+        """
+        TODO:
+        - check scope `request.httprequest.url`
+        """
+        print("URL", request.httprequest.url)
+
+        key_identity = request.env["res.users.apikeys"].get_api_key(api_token)
+        if key_identity:
+            # take the identity of the API key user
+            request.uid = key_identity.sudo().user_id.id
+            print("API logged as", key_identity.sudo().user_id.name)
+            return True
+        return False
+
+    @classmethod
     def _authenticate(cls, auth_method='user'):
+
+        print("Authenticate", auth_method)
+
+        if cls._auth_method_api():
+            # bypass all authentication verification is token provided in headers
+            print("\n" * 3)
+            print("Logged with API token")
+            print("\n" * 3)
+            return auth_method
+
         try:
             if request.session.uid:
                 try:
