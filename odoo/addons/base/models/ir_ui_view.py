@@ -1154,10 +1154,21 @@ actual arch.
 
     def _validate_tag_tree(self, node, name_manager, node_info):
         allowed_tags = ('field', 'button', 'control', 'groupby', 'widget')
+        fnames = []
         for child in node.iterchildren(tag=etree.Element):
             if child.tag not in allowed_tags and not isinstance(child, etree._Comment):
                 msg = _('Tree child can only have one of %s tag (not %s)')
                 self.handle_view_error(msg % (', '.join(allowed_tags), child.tag))
+            elif child.tag == "field" and not child.get('string'):
+                # Only case where two same fields has any sense is when they have different labels
+                # TODO needed : and not child.get('position') ?
+                if child.get('name') in fnames:
+                    _logger.warning(
+                        "Tree view %s contains field %s twice (or more)",
+                        self.env.context.get('install_xmlid') or self.xml_id,
+                        child.get('name'),
+                    )
+                fnames.append(child.get('name'))
 
     def _validate_tag_search(self, node, name_manager, node_info):
         if len([c for c in node if c.tag == 'searchpanel']) > 1:
