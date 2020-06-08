@@ -1,7 +1,7 @@
 odoo.define('website_event_track.our_sponsors', function (require) {
 
 const concurrency = require('web.concurrency');
-const core = require('web.core').qweb;
+const qweb = require('web.core').qweb;
 const publicWidget = require('web.public.widget');
 
 publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
@@ -15,7 +15,7 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
-        this._dp = new concurrency.DropPrevious();
+        // this._dp = new concurrency.DropPrevious();
         this.uniqueId = _.uniqueId('o_event_our_sponsors_');
     },
     /**
@@ -40,20 +40,25 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
     _fetch: function () {
         const self = this;
         debugger;
-        return this._rpc({
+        if(this.$el.data('res-id') && this.$el.data('res-model')) {
+            return this._rpc({
             route: '/event/our_sponsors',
             params: {
                 'res_id': this.$el.data('res-id'),
                 'res_model': this.$el.data('res-model')
                 }
-        }).then(sponsors => {
-            debugger;
-            // return demo data for snippet (in case of drag-drop sponsors snippet in edit mode)
-            if (!(sponsors && sponsors.length)) {
-                
-            }
-            return sponsors;
-        });
+            });
+        }
+        else {
+            return this._rpc({
+            route: '/event/our_sponsors',
+            params: {
+                'res_id': this.$el.data('res-id'),
+                'res_model': this.$el.data('res-model')
+                }
+            });
+
+        }
     },
 
     /**

@@ -7,7 +7,7 @@ var options = require('web_editor.snippets.options');
 
 var _t = core._t;
 var qweb = core.qweb;
-debugger;
+
 options.registry.sponsors = options.Class.extend({
     xmlDependencies: ['/website_event_track/static/src/xml/website_event_track_our_sponsors.xml'],
 
@@ -34,14 +34,19 @@ options.registry.sponsors = options.Class.extend({
      * @override
      */
     onBuilt: function () {
-        this.addPartner()
+        _.each(_.range(1,4), function () {
+            debugger;
+            this.addPartner();
+        })
     },
 
     addPartner: function () {
         this._rpc({
-            model: 'res.partner',
+            model: 'event.sponsor',
             method: 'create',
-            args: [{'name': 'new partner'}],
+            args: [{
+                'name': 'new partner'
+            }],
         });
 
     },
