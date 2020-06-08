@@ -285,7 +285,7 @@ var SnippetEditor = Widget.extend({
             this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
             var $parent = this.$snippetBlock.parent();
             this.$snippetBlock.find('*').addBack().tooltip('dispose');
-            this.editorCommands.remove(this.$snippetBlock[0]);
+            await this.editorCommands.remove(this.$snippetBlock[0]);
             this.$el.remove();
 
             var node = $parent[0];
