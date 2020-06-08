@@ -122,6 +122,8 @@
 
     <script type="text/javascript" src="/website/static/src/js/utils.js"/>
 
+    <script type="text/javascript" src="/website/static/src/js/editor/snippets.editor.js"/>
+    <script type="text/javascript" src="/website/static/src/js/editor/snippets.options.js"/>
     <script type="text/javascript" src="/website/static/src/snippets/s_facebook_page/options.js"/>
     <script type="text/javascript" src="/website/static/src/snippets/s_image_gallery/options.js"/>
     <script type="text/javascript" src="/website/static/src/snippets/s_countdown/options.js"/>
