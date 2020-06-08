@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from functools import partial
+import logging
 
 from lxml import etree
 from lxml.builder import E
@@ -10,9 +11,12 @@ from psycopg2 import IntegrityError
 from odoo.exceptions import ValidationError
 from odoo.tests import common
 from odoo.tools import mute_logger
+from odoo.addons.base.models import ir_ui_view
 from odoo.addons.base.models.ir_ui_view import (
     transfer_field_to_modifiers, transfer_node_to_modifiers, simplify_modifiers,
 )
+
+_logger = logging.getLogger(__name__)
 
 
 class ViewXMLID(common.TransactionCase):
@@ -2493,3 +2497,24 @@ class TestQWebRender(ViewCase):
         content3 = self.env['ir.qweb'].with_context(check_view_ids=[view1.id, view2.id, view3.id]).render('base.dummy_primary_ext')
 
         self.assertNotEqual(content1, content3)
+
+
+@common.tagged('post_install', '-at_install', 'upgrade')
+class TestAllViewsInheritance(ViewCase):
+    def test_all(self):
+        INHERIT_ORDER = ir_ui_view.INHERIT_ORDER
+        ir_ui_view.INHERIT_ORDER = 'priority, id desc'
+
+        @self.addCleanup
+        def cleanup():
+            ir_ui_view.INHERIT_ORDER = INHERIT_ORDER
+
+        failed = False
+        for view in self.View.with_context(load_all_views=True).search([("inherit_id", "!=", False)]):
+            try:
+                view._check_xml()
+            except Exception:
+                failed = True
+                _logger.exception("Cannot validate view %s", view.id)
+
+        self.assertFalse(failed, "At least one view failed to render.")
