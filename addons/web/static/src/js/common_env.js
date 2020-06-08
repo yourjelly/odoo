@@ -19,7 +19,7 @@ odoo.define("web.commonEnv", function (require) {
 
     const { jsonRpc } = require("web.ajax");
     const { device, isDebug } = require("web.config");
-    const { bus, serviceRegistry } = require("web.core");
+    const { bus } = require("web.core");
     const rpc = require("web.rpc");
     const session = require("web.session");
     const { _t } = require("web.translation");
@@ -79,46 +79,6 @@ odoo.define("web.commonEnv", function (require) {
         },
         session,
     };
-
-
-    // Deploy services in the env (specializations of AbstractService registered
-    // into the serviceRegistry)
-    const UndeployedServices = {}; // dict containing classes of undeployed services
-    function _deployServices() {
-        let done = false;
-        while (!done) {
-            const serviceName = _.findKey(UndeployedServices, Service => {
-                // no missing dependency
-                return !_.some(Service.prototype.dependencies, depName => {
-                    return !env.services[depName];
-                });
-            });
-            if (serviceName) {
-                const Service = UndeployedServices[serviceName];
-                const service = new Service(env);
-                env.services[serviceName] = service;
-                delete UndeployedServices[serviceName];
-                service.start();
-            } else {
-                done = true;
-            }
-        }
-    }
-    Object.keys(serviceRegistry.map).forEach(serviceName => {
-        if (serviceName in UndeployedServices) {
-            throw new Error(`Service ${serviceName} is already loaded.`);
-        }
-        UndeployedServices[serviceName] = serviceRegistry.get(serviceName);
-    });
-    serviceRegistry.onAdd((serviceName, Service) => {
-        if (serviceName in env.services || serviceName in UndeployedServices) {
-            throw new Error(`Service ${serviceName} is already loaded.`);
-        }
-        UndeployedServices[serviceName] = Service;
-        _deployServices();
-    });
-    _deployServices();
-
 
     return env;
 });
