@@ -1180,19 +1180,19 @@ actual arch.
         all_fnames = set()
         for child in node.iterchildren(tag=etree.Element):
             if child.tag not in allowed_tags and not isinstance(child, etree._Comment):
-                _logger.warning(
-                    _('Kanban view %s should only be have one of %s tag (not %s)'),
+                msg = _('Kanban view %s should only have one of %s tag (not %s)')
+                self.handle_view_error(msg % (
                     self.env.context.get('install_xmlid') or self.xml_id,
                     ', '.join(allowed_tags), child.tag,
-                )
+                ))
             if child.tag == "field":
                 fname = child.get("name")
                 if fname in all_fnames:
-                    _logger.warning(
-                        "Duplicate field '%s' definition in preface of Kanban view %s",
+                    msg = _("Duplicate field '%s' definition in preface of Kanban view %s")
+                    self.handle_view_error(msg % (
                         fname,
                         self.env.context.get('install_xmlid') or self.xml_id,
-                    )
+                    ), raise_exception=False)
                 all_fnames.add(fname)
 
     def _validate_tag_search(self, node, name_manager, node_info):
