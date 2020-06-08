@@ -1,14 +1,11 @@
 odoo.define('website_mass_mailing.editor', function (require) {
 'use strict';
 
-var core = require('web.core');
+const { qweb, _t } = require('web.core');
+const Dialog = require('web.Dialog');
 var rpc = require('web.rpc');
 var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
 var options = require('web_editor.snippets.options');
-var wUtils = require('website.utils');
-
-const qweb = core.qweb;
-var _t = core._t;
 
 
 options.registry.mailing_list_subscribe = options.Class.extend({
@@ -20,35 +17,6 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Creates a new mailing.list through a modal prompt.
-     *
-     * @see this.selectClass for parameters
-     */
-    createMailingList: function (previewMode, widgetValue, params) {
-        return wUtils.prompt({
-            id: this.popup_template_id,
-            window_title: this.popup_title,
-            input: _t("Name"),
-        }).then((result) => {
-            var name = result.val;
-            if (!name) {
-                return;
-            }
-            return this._rpc({
-                model: 'mailing.list',
-                method: 'create',
-                args: [{
-                    name: name,
-                    is_public: true,
-                }],
-            }).then((id) => {
-                this.$target.attr("data-list-id", id);
-                return this._rerenderXML();
-            });
-        });
-    },
-
-    /**
      * @override
      */
     onBuilt: function () {
@@ -57,13 +25,22 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         if (mailingListID) {
             this.$target.attr("data-list-id", mailingListID);
         } else {
-            this.createMailingList('click').guardedCatch(() => {
-                this.getParent()._onRemoveClick($.Event( "click" ));
+            let text =  _t('No mailing list exists in the database, Do you want to create a new mailing list!');
+            Dialog.confirm(this, text, {
+                title: _t("Warning!"),
+                confirm_callback: () => {
+                    window.location.href = '/web#action=mass_mailing.action_view_mass_mailing_lists';
+                },
+                cancel_callback: () => {
+                    this.getParent()._onRemoveClick($.Event( "click" ));
+                },
             });
         }
     },
     /**
      * Replace the current mailing_list_ID with the existing mailing_list_id selected.
+     *
+     * @see this.selectClass for parameters
      */
     selectMailingList: function (previewMode, widgetValue, params) {
         this.$target.attr("data-list-id", widgetValue);
@@ -221,13 +198,11 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     /**
      * @override
      */
-    createMailingList: function () {
-        var self = this;
-        return this._super.apply(this, arguments).then(function () {
-            self.$target.data('quick-open', true);
-            self.$target.removeData('content');
-            return self._refreshPublicWidgets();
-        });
+    selectMailingList: async function (previewMode, widgetValue, params) {
+        await this._super(...arguments);
+        this.$target.data('quick-open', true);
+        this.$target.removeData('content');
+        return this._refreshPublicWidgets();
     },
 });
 
