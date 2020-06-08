@@ -158,16 +158,19 @@ FormRenderer.include({
      * @override
      */
     async _renderView() {
-        await this._super(...arguments);
+        // Launch sync renderig first, but don't wait for it
+        const rendered = this._super(...arguments);
         if (this._hasChatter()) {
             ChatterContainerWrapperComponent.env = this.env;
             if (!this._chatterContainerComponent) {
                 this._makeChatterContainerComponent();
+                await this._mountChatterContainerComponent();
             } else {
                 await this._updateChatterContainerComponent();
             }
-            await this._mountChatterContainerComponent();
         }
+        // the super prom does a lot of things, including putting stuff in dom
+        return rendered;
     },
     /**
      * @private
@@ -175,7 +178,12 @@ FormRenderer.include({
     async _updateChatterContainerComponent() {
         const props = this._makeChatterContainerProps();
         try {
-            await this._chatterContainerComponent.update(props);
+            let forceTarget;
+            if (!document.contains(this._chatterContainerTarget)) {
+                forceTarget = this._chatterContainerTarget;
+                this._chatterContainerComponent.unmount();
+            }
+            await this._chatterContainerComponent.update(props, forceTarget);
         } catch (error) {
             if (error.message !== "Mounting operation cancelled") {
                 throw error;

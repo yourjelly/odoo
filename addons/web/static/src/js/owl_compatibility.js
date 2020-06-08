@@ -434,7 +434,7 @@ odoo.define('web.OwlCompatibility', function () {
          * @param {Object} props
          * @return {Promise}
          */
-        async update(props = {}) {
+        async update(props = {}, forceEl) {
             if (this.__owl__.isDestroyed) {
                 return new Promise(() => {});
             }
@@ -450,6 +450,9 @@ odoo.define('web.OwlCompatibility', function () {
                 // be re-attached, but we need to be reloaded first). In this
                 // case, we have to call 'mount' as Owl would skip the rendering
                 // if we simply call render.
+                if (forceEl) {
+                    this._mountArgs[0] = forceEl;
+                }
                 prom = this.mount(...this._mountArgs);
             }
             return prom;
