@@ -306,6 +306,7 @@ var Wysiwyg = Widget.extend({
         // "before_wysiwig_save" and "before_navbar_wysiwyg_save".
         //
         // "content.js" and "edit.js" that receive that event.
+        this.trigger_up('edition_will_stopped');
         this.trigger_up('ready_to_save', {defs: defs});
         await Promise.all(defs);
 
@@ -322,6 +323,7 @@ var Wysiwyg = Widget.extend({
         // promises.push(this.saveCroppedImages());
 
         await Promise.all(promises);
+        this.trigger_up('edition_was_stopped');
         if (reload) {
             location.reload();
         }
