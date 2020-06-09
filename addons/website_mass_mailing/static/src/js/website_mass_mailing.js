@@ -224,5 +224,11 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
      _showPopup: function () {
         this.$target.find('.o_newsletter_popup').removeClass('d-none');
     },
+    _onCloseClick: function () {
+        debugger;
+        const nbDays = this.$el.find('.o_newsletter_modal').data('consentsDuration');
+        utils.set_cookie(this.$el.attr('id'), true, nbDays * 24 * 60 * 60);
+        this._hidePopup();
+    },
 });
 });

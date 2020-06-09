@@ -97,8 +97,12 @@
             <we-select string="Show on" data-no-preview="true">
                 <we-button data-move-block="moveToBody">This page</we-button>
                 <we-button data-move-block="moveToFooter">All pages</we-button>
-            </we-select>
-            <we-input string="Hide For" title="Once the user closes the popup, it won't be shown again for that period of time." t-attf-data-select-data-attribute="7#{unit_popup_duration}" data-attribute-name="consentsDuration" t-att-data-unit="unit_popup_duration"/> -->
+        </div>
+            </we-select> -->
+        </div>
+        <div data-js="newsletter_popup" data-selector=".o_newsletter_modal">
+            <t t-set="unit_popup_duration">days</t>
+            <we-input string="Hide For" title="Once the user closes the popup, it won't be shown again for that period of time." t-attf-data-select-data-attribute="7#{unit_popup_duration}" data-attribute-name="consentsDuration" t-att-data-unit="unit_popup_duration"/>
         </div>
     </xpath>
 </template>
