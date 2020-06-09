@@ -179,7 +179,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
             });
             $modal.addClass('o_newsletter_modal');
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-            $modal.find('.modal-dialog').addClass('modal-dialog-centered');
+            $modal.find('.modal-dialog').addClass('modal-dialog-centered').addClass('o_newsletter_frame');
             $modal.find('.js_subscribe').data('list-id', self.listID)
                   .find('input.js_subscribe_email').val(email);
             self.trigger_up('widgets_start_request', {
