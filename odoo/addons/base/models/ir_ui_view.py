@@ -974,9 +974,9 @@ actual arch.
                     name_manager.must_have_fields(
                         self._get_field_domain_variables(node, field, node_info['editable'])
                     )
-                    if field.type == "monetary" and node.get("invisible", "0") != "1":
-                        # currency should be present in view for monetary fields, iff the field is shown
-                        name_manager.should_have_curr_field(field.currency_field or "currency_id", field.name)
+                    # if field.type == "monetary" and node.get("invisible", "0") != "1":
+                    #     # currency should be present in view for monetary fields, iff the field is shown
+                    #     name_manager.should_have_curr_field(field.currency_field or "currency_id", field.name)
                 views = {}
                 for child in node:
                     if child.tag in ('form', 'tree', 'graph', 'kanban', 'calendar'):
@@ -1947,7 +1947,7 @@ class NameManager:
                         field,
                         view.env.context.get("install_xmlid") or view.xml_id,
                         ' ,'.join(use),
-                    ), raise_exception=False)
+                    ), raise_exception=True)
 
     def update_view_fields(self):
         for field_name, field_infos in self.available_fields.items():
