@@ -20,15 +20,10 @@ options.registry.NewsletterPopup = options.Class.extend({
         this.$target.toggleClass('s_newsletter_center modal', isModal);
         this.$target.find('.o_newsletter_modal').toggleClass('modal-content', isModal);
         this.$target.find('.o_newsletter_modal').toggleClass('modal-dialog modal-dialog-centered', isModal);
-        //return this._super(...arguments);
-    },
-
-    moveBlock: function (previewMode, widgetValue, params) {
-        const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
-        this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
     },
 
     _computeWidgetState: function (methodName, params) {
+        debugger;
         switch (methodName) {
             case 'moveBlock':
                 return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
