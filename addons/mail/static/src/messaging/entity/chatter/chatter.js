@@ -168,6 +168,14 @@ function ChatterFactory({ Entity }) {
                 }
             }
 
+            if (this.threadModel === previous.threadModel &&
+                this.threadId === previous.threadId &&
+                this.messagePostedHint
+            ) {
+                this.threadViewer.addComponentHint('current-partner-just-posted-message', this.messagePostedHint);
+                this.update({messagePostedHint: false});
+            }
+
             if (previous.activityIds.join(',') !== this.activityIds.join(',')) {
                 this.refreshActivities();
             }
@@ -296,6 +304,9 @@ function ChatterFactory({ Entity }) {
         }),
         messageIds: attr({
             default: [],
+        }),
+        messagePostedHint: attr({
+            default : false,
         }),
         overdueActivities: one2many('Activity', {
             compute: '_computeOverdueActivities',

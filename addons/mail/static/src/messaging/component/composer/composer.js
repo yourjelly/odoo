@@ -173,9 +173,9 @@ class Composer extends Component {
      */
     async _postMessage() {
         // TODO: take suggested recipients into account
-        await this.composer.postMessage({ isLog: this.props.isLog });
+        const messageId = await this.composer.postMessage({ isLog: this.props.isLog });
         // TODO: we might need to remove trigger and use the store to wait for the post rpc to be done
-        this.trigger('o-message-posted');
+        this.trigger('o-message-posted', {messageId});
     }
 
     //--------------------------------------------------------------------------

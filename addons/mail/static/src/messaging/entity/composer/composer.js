@@ -154,6 +154,7 @@ function ComposerFactory({ Entity }) {
                 threadViewer.addComponentHint('current-partner-just-posted-message', messageId);
             }
             this._reset();
+            return messageId;
         }
 
         /**

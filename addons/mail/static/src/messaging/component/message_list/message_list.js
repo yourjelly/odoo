@@ -127,7 +127,7 @@ class MessageList extends Component {
                     this._adjustFromChangeOfThreadCache(hint);
                     break;
                 case 'current-partner-just-posted-message':
-                    this._adjustFromCurrentPartnerJustPostedMessage(hint);
+                    await this._adjustFromCurrentPartnerJustPostedMessage(hint);
                     break;
                 case 'more-messages-loaded':
                     this._adjustFromMoreMessagesLoaded(hint);

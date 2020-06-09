@@ -71,7 +71,10 @@ FormRenderer.include({
         // while attempting to extend them.
         this.on('o_chatter_rendered', this, ev => this._onChatterRendered(ev));
         if (this.chatterFields.hasRecordReloadOnMessagePosted) {
-            this.on('o_message_posted', this, ev => this.trigger_up('reload'));
+            this.on('o_message_posted', this, ev => {
+                this._messagePostedHint = ev.data.messageId;
+                this.trigger_up('reload');
+            });
         }
         if (this.chatterFields.hasRecordReloadOnAttachmentsChanged) {
             this.on('o_attachments_changed', this, ev => this.trigger_up('reload'));
@@ -93,6 +96,8 @@ FormRenderer.include({
             ? this.state.data.message_ids.res_ids
             : [];
         const threadAttachmentCount = this.state.data.message_attachment_count || 0;
+        const messagePostedHint = this._messagePostedHint;
+        this._messagePostedHint = false;
         return {
             activityIds,
             context,
@@ -105,6 +110,7 @@ FormRenderer.include({
             threadAttachmentCount,
             threadId: this.state.res_id,
             threadModel: this.state.model,
+            messagePostedHint,
         };
     },
     /**
