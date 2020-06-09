@@ -648,7 +648,7 @@ options.registry.Theme = options.Class.extend({
                     method: 'save',
                     args: [
                         data[1],
-                        `#wrapwrap { background-image: url("${widgetValue}"); }`,
+                        `body { background-image: url("${widgetValue}"); }`,
                         '//style',
                     ],
                 });
@@ -781,7 +781,7 @@ options.registry.Theme = options.Class.extend({
      */
     _computeWidgetState: async function (methodName, params) {
         if (methodName === 'customizeBodyBg') {
-            const bgURL = $('#wrapwrap').css('background-image');
+            const bgURL = $('body').css('background-image');
             const srcValueWrapper = /url\(['"]*|['"]*\)|^none$/g;
             return bgURL && bgURL.replace(srcValueWrapper, '') || '';
         }

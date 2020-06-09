@@ -59,18 +59,32 @@ $-font-numbers: (
     --custom-colors: #{$custom-colors};
 }
 
-#wrapwrap {
+body {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
     background-attachment: fixed;
+}
 
-    @if ($o-theme-layout == 'boxed') {
-        @include media-breakpoint-up(md) {
-            padding: 0 7.5%;
+#wrapwrap {
+    @if o-website-value('layout') == 'boxed' {
+        @include make-container($grid-gutter-width*2);
+
+        // When #wrapwrap is visually acting like a container (eg. boxed layout),
+        // increase it's maximum size to handle bigger horizontal paddings.
+        &, header#top .container {
+            @include make-container-max-widths($gain: $grid-gutter-width*4);
         }
 
-        #wrap {
+        // Vertically align to content when top-menu has visually "no background".
+        @if o-color('menu') == o-color('body') {
+            header#top .navbar, header#top .container {
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
+
+        main {
             background-color: o-color('o-cc1-bg');
         }
     }
