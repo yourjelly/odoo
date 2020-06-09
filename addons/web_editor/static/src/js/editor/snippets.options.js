@@ -1709,11 +1709,8 @@ const SnippetOptionWidget = Widget.extend({
      */
     selectStyle: async function (previewMode, widgetValue, params) {
         await this.wysiwyg.execBatch(async ()=>{
-            if (params.cssProperty === 'background-color') {
-                let onFinish;
-                const promise = new Promise((resolve)=> onFinish = resolve);
-                this.$target.trigger('background-color-event', [previewMode, onFinish]);
-                await promise;
+            if (params.cssProperty === 'background-color' && this._onBackgroundColorUpdate) {
+                await this._onBackgroundColorUpdate(previewMode);
             }
 
             const cssProps = weUtils.CSS_SHORTHANDS[params.cssProperty] || [params.cssProperty];
@@ -1726,18 +1723,23 @@ const SnippetOptionWidget = Widget.extend({
                 await this.editorCommands.removeClasses(this.$target[0], [params.extraClass]);
             }
 
-            if (weUtils.isColorCombinationName(widgetValue)) {
-                // Those are the special color combinations classes. Just have
-                // to add it (and adding the potential extra class) then leave.
-                await this.editorCommands.addClasses(this.$target[0], ['o_cc', `o_cc${widgetValue}`, params.extraClass]);
-                return;
-            }
             // Only allow to use a color name as a className if we know about the
             // other potential color names (to remove) and if we know about a prefix
             // (otherwise we suppose that we should use the actual related color).
             if (params.colorNames && params.colorPrefix) {
-                const classes = params.colorNames.map(c => params.colorPrefix + c);
+                const classes = weUtils.computeColorClasses(params.colorNames, params.colorPrefix);
                 await this.editorCommands.removeClasses(this.$target[0], classes);
+
+                if (weUtils.isColorCombinationName(widgetValue)) {
+                    // Those are the special color combinations classes. Just have
+                    // to add it (and adding the potential extra class) then leave.
+                    const classes = ['o_cc', `o_cc${widgetValue}`];
+                    if (params.extraClass) {
+                        classes.push(params.extraClass)
+                    };
+                    await this.editorCommands.addClasses(this.$target[0], classes);
+                    return;
+                }
 
                 if (params.colorNames.includes(widgetValue)) {
                     const originalCSSValue = window.getComputedStyle(this.$target[0])[cssProps[0]];
@@ -1785,12 +1787,8 @@ const SnippetOptionWidget = Widget.extend({
                     }
                 }
             }
-            // todo: retrieve styles from the editor
-            const actualStyle = undefined;
-            const fakeElement = document.createElement('div');
-            fakeElement.setAttribute('style', actualStyle);
 
-            const styles = window.getComputedStyle(fakeElement);
+            const styles =  window.getComputedStyle(this.$target[0]);
             let hasUserValue = false;
             for (let i = cssProps.length - 1; i > 0; i--) {
                 hasUserValue = await applyCSS.call(this, cssProps[i], values.pop(), styles) || hasUserValue;
@@ -3212,7 +3210,6 @@ registry.background = SnippetOptionWidget.extend({
     setTarget: function () {
         this._super(...arguments);
         // TODO should be automatic for all options as equal to the start method
-        this.bindBackgroundEvents();
         this.__customImageSrc = this._getSrcFromCssValue();
     },
 
@@ -3254,17 +3251,14 @@ registry.background = SnippetOptionWidget.extend({
      * @returns {boolean} true if the color has been applied (removing the
      *                    background)
      */
-    _onBackgroundColorUpdate: async function (ev, previewMode, onFinish) {
-        ev.stopPropagation();
-        if (ev.currentTarget !== ev.target) {
-            return false;
+    _onBackgroundColorUpdate: async function (previewMode) {
+        if (this.$target.is('.parallax, .s_parallax_bg')) {
+            return;
         }
         if (previewMode === false) {
             this.__customImageSrc = undefined;
         }
-        await this.background(previewMode, '', {});
-        onFinish();
-        return true;
+        return this.background(previewMode, '', {});
     },
 });
 

@@ -1588,7 +1588,7 @@ snippetOptions.registry.topMenuColor = snippetOptions.SnippetOptionWidget.extend
         const className = widgetValue ? (params.colorPrefix + widgetValue) : '';
         this.trigger_up('action_demand', {
             actionName: 'toggle_page_option',
-            params: [{name: 'header_color', value: className}],
+            params: [{name: 'header_color', value: className, wysiwyg: this.options.wysiwyg}],
         });
     },
 

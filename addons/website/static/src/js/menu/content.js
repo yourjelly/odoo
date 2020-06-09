@@ -795,7 +795,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             await wysiwyg.editorCommands.toggleClass($('#wrapwrap')[0], 'o_header_overlay', value);
         },
         header_color: async function (value, wysiwyg) {
-            await this.wysiwyg.execBatch(async ()=> {
+            await wysiwyg.execBatch(async () => {
                 await wysiwyg.editorCommands.removeClasses($('#wrapwrap > header')[0], [this.value]);
                 await wysiwyg.editorCommands.addClasses($('#wrapwrap > header')[0], [value]);
             });
