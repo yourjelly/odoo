@@ -206,6 +206,14 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     },
 });
 
+options.registry.SnippetNewsletterPopup = options.registry.SnippetPopup.extend({
+
+
+});
+options.registry.NewsletterPopupContent = options.registry.PopupContent.extend({
+
+});
+
 WysiwygMultizone.include({
 
     //--------------------------------------------------------------------------
