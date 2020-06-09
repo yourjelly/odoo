@@ -2606,7 +2606,7 @@ registry.sizing = SnippetOptionWidget.extend({
             $body.addClass(cursor);
 
             var xy = ev['page' + XY];
-            var bodyMouseMove = function (ev) {
+            var bodyMouseMove = async function (ev) {
                 ev.preventDefault();
 
                 var dd = ev['page' + XY] - xy + resize[1][begin];
@@ -2614,15 +2614,38 @@ registry.sizing = SnippetOptionWidget.extend({
                 var prev = current ? (current - 1) : 0;
 
                 var change = false;
+                const cleanedClass = (self.$target.attr('class') || '').replace(regClass, '');
                 if (dd > (2 * resize[1][next] + resize[1][current]) / 3) {
-                    self.$target.attr('class', (self.$target.attr('class') || '').replace(regClass, ''));
+                    self.$target.attr('class', cleanedClass);
                     self.$target.addClass(resize[0][next]);
+                    await self.wysiwyg.execBatch(async () => {
+                        await self.editor.execCommand('dom.setAttribute', {
+                            domNode: self.$target[0],
+                            name: 'class',
+                            value: cleanedClass,
+                        });
+                        await self.editor.execCommand('dom.addClass', {
+                            domNode: self.$target[0],
+                            class: resize[0][next],
+                        });
+                    });
                     current = next;
                     change = true;
                 }
                 if (prev !== current && dd < (2 * resize[1][prev] + resize[1][current]) / 3) {
-                    self.$target.attr('class', (self.$target.attr('class') || '').replace(regClass, ''));
+                    self.$target.attr('class', cleanedClass);
                     self.$target.addClass(resize[0][prev]);
+                    await self.wysiwyg.execBatch(async () => {
+                        await self.editor.execCommand('dom.setAttribute', {
+                            domNode: self.$target[0],
+                            name: 'class',
+                            value: cleanedClass,
+                        });
+                        await self.editor.execCommand('dom.addClass', {
+                            domNode: self.$target[0],
+                            class: resize[0][prev],
+                        });
+                    });
                     current = prev;
                     change = true;
                 }
