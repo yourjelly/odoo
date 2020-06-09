@@ -941,69 +941,80 @@ header {
             }
         }
     }
+}
 
-    // Navbar Links Styles
-    @if o-website-value('header-navbar-links-style') == 'fill' {
-        .navbar .navbar-nav .nav-link {
-            padding-right: $spacer * 1.5;
-            padding-left: $spacer * 1.5;
+// Navbar Links Styles
+#wrapwrap header .navbar {
+    // Fill
+    @if o-website-value('navbar-links-style') == 'fill' {
+        .navbar-nav .nav-link {
+            padding-right: $nav-link-padding-x;
+            padding-left: $nav-link-padding-x;
+            @include border-radius($nav-pills-border-radius);
+        }
+        .nav-link.active,
+        .show > .nav-link {
+            color: $component-active-color;
+            background-color: $component-active-bg;
         }
     }
-    @else if o-website-value('header-navbar-links-style') == 'pills' {
-        .navbar {
-            padding-top: $spacer;
-            padding-bottom: $spacer;
-            .navbar-nav .nav-link {
-                padding-right: $spacer * 1.5;
-                padding-left: $spacer * 1.5;
-                border-radius: 10rem;
-            }
+    // Pills
+    @else if o-website-value('navbar-links-style') == 'pills' {
+        padding-top: $navbar-padding-y * 2;
+        padding-bottom: $navbar-padding-y * 2;
+        .nav-link {
+            padding-right: $nav-link-padding-x * 1.5;
+            padding-left: $nav-link-padding-x * 1.5;
+            @include border-radius($badge-pill-border-radius);
+        }
+        .nav-link.active,
+        .show > .nav-link {
+            color: $component-active-color;
+            background-color: $component-active-bg;
         }
     }
-    @else if o-website-value('header-navbar-links-style') == 'outline' {
-        .navbar {
-            padding-top: $spacer;
-            padding-bottom: $spacer;
-            .navbar-nav {
-                .nav-link {
-                    padding-right: $spacer * 1.5;
-                    padding-left: $spacer * 1.5;
-                    border: 2px solid transparent;
-                }
-                .nav-link.active,
-                .show > .nav-link {
-                    background-color: transparent !important;
-                    color: $nav-pills-link-active-bg !important;
-                    border-color: $nav-pills-link-active-bg;
-                }
-            }
+    // Outline
+    @else if o-website-value('navbar-links-style') == 'outline' {
+        padding-top: $navbar-padding-y * 2;
+        padding-bottom: $navbar-padding-y * 2;
+        .nav-link {
+            padding-right: $nav-link-padding-x * 1.5;
+            padding-left: $nav-link-padding-x * 1.5;
+            border: 2px solid transparent;
+            @include border-radius($nav-pills-border-radius);
+        }
+        .nav-link.active,
+        .show > .nav-link {
+            background-color: transparent;
+            color: $component-active-bg;
+            border-color: $component-active-bg;
         }
     }
-    @else if o-website-value('header-navbar-links-style') == 'block' {
-        .navbar {
-            padding-top: 0;
-            padding-bottom: 0;
-            .navbar-nav .nav-link {
-                padding: $spacer $spacer * 1.5;
-                border-radius: 0;
-            }
+    // Block
+    @else if o-website-value('navbar-links-style') == 'block' {
+        padding-top: 0;
+        padding-bottom: 0;
+        .nav-link {
+            padding: $nav-link-padding-y * 2 $nav-link-padding-x * 1.5;
+        }
+        .nav-link.active,
+        .show > .nav-link {
+            color: $component-active-color;
+            background-color: $component-active-bg;
         }
     }
-    @else if o-website-value('header-navbar-links-style') == 'border-bottom' {
-        .navbar {
-            padding-top: 0;
-            padding-bottom: 0;
-            .navbar-nav {
-                .nav-link {
-                    padding: $spacer 0;
-                    margin: 0 $spacer;
-                }
-                .nav-link.active,
-                .show > .nav-link {
-                    border-bottom: $spacer/2 solid;
-                    border-color: $nav-pills-link-active-bg;
-                }
-            }
+    // Border Bottom
+    @else if o-website-value('navbar-links-style') == 'border-bottom' {
+        padding-top: 0;
+        padding-bottom: 0;
+        .nav-link {
+            padding: $nav-link-padding-y * 2 0;
+            margin: 0 $nav-link-padding-x;
+        }
+        .nav-link.active,
+        .show > .nav-link {
+            border-bottom: $nav-link-padding-y solid;
+            border-color: $component-active-color;
         }
     }
 }
