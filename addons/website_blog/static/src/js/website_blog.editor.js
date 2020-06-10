@@ -64,6 +64,7 @@ odoo.define('website_blog.editor', function (require) {
 require('web.dom_ready');
 var core = require('web.core');
 var snippetOptions = require('web_editor.snippets.options');
+require('website.editor.snippets.options');
 
 var _t = core._t;
 
