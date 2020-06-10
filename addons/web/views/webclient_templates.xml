@@ -875,7 +875,7 @@
 
     <template id="web.webclient_bootstrap">
         <t t-call="web.layout">
-            <t  t-if=" 'cache_hashes' in session_info.keys()">
+        <t t-if=" 'cache_hashes' in session_info.keys()">
             <t t-set="head_web">
                 
                 <script type="text/javascript">
@@ -884,6 +884,11 @@
                     odoo.loadMenusPromise = odoo.reloadMenus();
                 </script>
 
+                <t t-call-assets="web.assets_common" t-js="false"/>
+                <t t-call-assets="web.assets_backend" t-js="false"/>
+                <t t-call-assets="web.assets_common" t-css="false"/>
+                <t t-call-assets="web.assets_backend" t-css="false"/>
+                <t t-call="web.conditional_assets_tests"/>
                
             </t>
             <t t-set="head" t-value="head_web + (head or '')"/>

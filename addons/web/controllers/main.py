@@ -843,14 +843,15 @@ class Home(http.Controller):
             return werkzeug.utils.redirect(kw.get('redirect'), 303)
         
         request.uid = request.session.uid
-        # if 'cache_hashes' not in context['session_info'].keys():
-        #     raise AccessDenied(_('Sorry, you are not allowed to access this document.'))
+        context = request.env['ir.http'].webclient_rendering_context()
+
+        if 'cache_hashes' not in context['session_info'].keys():
+            raise AccessDenied(_('Sorry, you are not allowed to access this document.'))
         #     # context['error']=_("Sorry, you are not allowed to access this document.")
         #     # response = request.render('web.webclient_bootstrap', qcontext=context)
         #     # return response
         print("\n\n\n\n..............excution number")
         try:
-            context = request.env['ir.http'].webclient_rendering_context()
             print("\n\n\n\n\n..........context",context)
             response = request.render('web.webclient_bootstrap', qcontext=context)
             response.headers['X-Frame-Options'] = 'DENY'
