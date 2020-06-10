@@ -301,7 +301,6 @@ var Wysiwyg = Widget.extend({
     // todo: handle when the server error (previously carlos_danger)
     saveToServer: async function (reload = true) {
         const defs = [];
-        const promises = [];
         // this trigger will be catched by the "navbar" (i.e. the manager of
         // widgets). It will trigger an action on all thoses widget called
         // "on_save" so that they can do something before the saving occurs.
@@ -315,15 +314,15 @@ var Wysiwyg = Widget.extend({
         await Promise.all(defs);
 
         if (this.snippetsMenu) {
-            promises.push(this.snippetsMenu.cleanForSave());
+            await this.snippetsMenu.cleanForSave();
         }
 
+        await this._saveModifiedImages();
         // todo: avoid redraw the editor if executing execCommand
         await this.editor.execBatch(async ()=> {
-        // todo: make them work
-        await this._saveAllViewsBlocks();
+            // todo: make them work
+            await this._saveAllViewsBlocks();
             await this._saveCoverPropertiesBlocks();
-            // await this.saveCroppedImages();
             // await this._saveNewsletterBlocks();
             // await this._saveMegaMenuBlocks();
             // await this._saveTranslationBlocks();
@@ -450,48 +449,52 @@ var Wysiwyg = Widget.extend({
             });
         }
     },
-    saveCroppedImages: function ($editable) {
-        var defs = _.map($editable.find('.o_cropped_img_to_save'), async croppedImg => {
-            var $croppedImg = $(croppedImg);
-            $croppedImg.removeClass('o_cropped_img_to_save');
+    _saveModifiedImages: async function () {
+        await this.editor.execBatch(async () => {
+            const defs = _.map(this._getEdiable($('#wrapwrap')), async editableEl => {
+                const {oeModel: resModel, oeId: resId} = editableEl.dataset;
+                const proms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
+                    const isBackground = !el.matches('img');
+                    el.classList.remove('o_modified_image_to_save');
 
-            var resModel = $croppedImg.data('crop:resModel');
-            var resID = $croppedImg.data('crop:resID');
-            var cropID = $croppedImg.data('crop:id');
-            var mimetype = $croppedImg.data('crop:mimetype');
-            var originalSrc = $croppedImg.data('crop:originalSrc');
-
-            var datas = $croppedImg.attr('src').split(',')[1];
-            let attachmentID = cropID;
-            if (!cropID) {
-                var name = originalSrc + '.crop';
-                attachmentID = await this._rpc({
-                    model: 'ir.attachment',
-                    method: 'create',
-                    args: [{
-                        res_model: resModel,
-                        res_id: resID,
-                        name: name,
-                        datas: datas,
-                        mimetype: mimetype,
-                        url: originalSrc, // To save the original image that was cropped
-                    }],
+                    await this.editor.execCommand('dom.removeClass', {
+                        domNode: el,
+                        value: 'o_modified_image_to_save',
+                    });
+                    // Modifying an image always creates a copy of the original, even if
+                    // it was modified previously, as the other modified image may be used
+                    // elsewhere if the snippet was duplicated or was saved as a custom one.
+                    const newAttachmentSrc = await this._rpc({
+                        route: `/web_editor/modify_image/${el.dataset.originalId}`,
+                        params: {
+                            res_model: resModel,
+                            res_id: parseInt(resId),
+                            data: (isBackground ? el.dataset.bgSrc : el.getAttribute('src')).split(',')[1],
+                        },
+                    });
+                    if (isBackground) {
+                        await this.editor.execCommand('dom.setStyle', {
+                            domNode: el,
+                            name: 'background-image',
+                            value: `url('${newAttachmentSrc}')`,
+                        });
+                        await this.editor.execCommand('dom.setAttribute', {
+                            domNode: el,
+                            name: 'data-bgSrc',
+                            value: '',
+                        });
+                    } else {
+                        await this.editor.execCommand('dom.setAttribute', {
+                            domNode: el,
+                            name: 'src',
+                            value: newAttachmentSrc,
+                        });
+                    }
                 });
-            } else {
-                await this._rpc({
-                    model: 'ir.attachment',
-                    method: 'write',
-                    args: [[cropID], {datas: datas}],
-                });
-            }
-            const accessToken = await this._rpc({
-                model: 'ir.attachment',
-                method: 'generate_access_token',
-                args: [[attachmentID]],
+                return Promise.all(proms);
             });
-            $croppedImg.attr('src', '/web/image/' + attachmentID + '?access_token=' + accessToken[0]);
+            await Promise.all(defs);
         });
-        return Promise.all(defs);
     },
 
     _onAltDialogDemand: function (data) {
