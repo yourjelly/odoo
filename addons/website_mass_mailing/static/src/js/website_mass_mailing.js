@@ -176,7 +176,12 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
             $modal.find('header button.close').on('mouseup', function (ev) {
                 ev.stopPropagation();
             });
-            $modal.find('header button.close').on('click', self._onCloseClick);
+            $modal.find('header button.close').on('click', function() {
+                debugger;
+                const nbDays = self.$el.find('.o_newsletter_modal').data('consentsDuration');
+                utils.set_cookie(this.listID, true, nbDays * 24 * 60 * 60);
+                self._hidePopup();
+            });
             $modal.addClass('o_newsletter_modal');
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             $modal.find('.modal-dialog').addClass('modal-dialog-centered').addClass('o_newsletter_frame');
@@ -226,12 +231,6 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
     },
     _hidePopup: function () {
         this.$target.find('.o_newsletter_modal').addClass('d-none');
-    },
-    _onCloseClick: function () {
-        debugger;
-        const nbDays = this.$el.find('.o_newsletter_modal').data('consentsDuration');
-        utils.set_cookie(this.listID, true, nbDays * 24 * 60 * 60);
-        this._hidePopup();
     },
 });
 });
