@@ -22,7 +22,9 @@ class Http(models.AbstractModel):
         }
 
     def session_info(self):
+
         user = request.env.user
+        print("\n\n\n\n...........user name", user)
         version_info = odoo.service.common.exp_version()
 
         user_context = request.session.get_context() if request.session.uid else {}

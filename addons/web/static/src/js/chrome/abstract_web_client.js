@@ -125,8 +125,10 @@ var AbstractWebClient = Widget.extend(KeyboardNavigationMixin, {
         // of from the default company on the user
 
 
-        console.log("\n\n\n\n\n\n\n\n\n\n check......",session.user_companies.current_company[0]);
-        
+        if (session.user_companies!= undefined)
+        {
+            console.log("\n\n\n\n\n\n\n\n\n\n check......",session.user_companies.current_company[0]);
+
         var current_company_id = session.user_companies.current_company[0];
 
         if (!state.cids) 
@@ -145,7 +147,7 @@ var AbstractWebClient = Widget.extend(KeyboardNavigationMixin, {
         $.bbq.pushState(state);
         // Update favicon
         $("link[type='image/x-icon']").attr('href', '/web/image/res.company/' + String(stateCompanyIDS[0]) + '/favicon/')
-
+        }
         return session.is_bound
             .then(function () {
                 self.$el.toggleClass('o_rtl', _t.database.parameters.direction === "rtl");

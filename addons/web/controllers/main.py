@@ -843,15 +843,15 @@ class Home(http.Controller):
             return werkzeug.utils.redirect(kw.get('redirect'), 303)
         
         request.uid = request.session.uid
-
-        context = request.env['ir.http'].webclient_rendering_context()
-        if 'cache_hashes' not in context['session_info'].keys():
-            raise AccessDenied(_('Sorry, you are not allowed to access this document.'))
-            # context['error']=_("Sorry, you are not allowed to access this document.")
-            # response = request.render('web.webclient_bootstrap', qcontext=context)
-            # return response
-
+        # if 'cache_hashes' not in context['session_info'].keys():
+        #     raise AccessDenied(_('Sorry, you are not allowed to access this document.'))
+        #     # context['error']=_("Sorry, you are not allowed to access this document.")
+        #     # response = request.render('web.webclient_bootstrap', qcontext=context)
+        #     # return response
+        print("\n\n\n\n..............excution number")
         try:
+            context = request.env['ir.http'].webclient_rendering_context()
+            print("\n\n\n\n\n..........context",context)
             response = request.render('web.webclient_bootstrap', qcontext=context)
             response.headers['X-Frame-Options'] = 'DENY'
             return response
@@ -881,19 +881,13 @@ class Home(http.Controller):
 
     @http.route('/web/login', type='http', auth="none")
     def web_login(self, redirect=None, **kw):
-        print("\n\n\n\n\n..coming in web login..........\n\n\n\n\n")
         ensure_db()
         request.params['login_success'] = False
         if request.httprequest.method == 'GET' and redirect and request.session.uid:
             return http.redirect_with_hash(redirect)
-
-        print("\n\n\n\n\n..coming in web login...redirect.......\n\n\n\n\n",redirect)
-
         if not request.uid:
             request.uid = odoo.SUPERUSER_ID
-
         values = request.params.copy()
-        print("\n\n\n\n\n..coming in web login...values.......\n\n\n\n\n",values)
 
         try:
             values['databases'] = http.db_list()
@@ -904,7 +898,6 @@ class Home(http.Controller):
             old_uid = request.uid
             try:
                 uid = request.session.authenticate(request.session.db, request.params['login'], request.params['password'])
-                print("\n\n\n\n\n..coming in web login...uid.......\n\n\n\n\n",uid)
                 request.params['login_success'] = True
                 return http.redirect_with_hash(self._login_redirect(uid, redirect=redirect))
             except odoo.exceptions.AccessDenied as e:
@@ -925,7 +918,6 @@ class Home(http.Controller):
 
         response = request.render('web.login', values)
         response.headers['X-Frame-Options'] = 'DENY'
-        print("\n\n\n\n\n..coming in web login...response.......\n\n\n\n\n",response)
         return response
 
     @http.route('/web/become', type='http', auth='user', sitemap=False)

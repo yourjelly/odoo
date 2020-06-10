@@ -364,12 +364,14 @@ class IrAttachment(models.Model):
 
     @api.model
     def check(self, mode, values=None):
+        print(" excution 1")
+        print("\n\n\n\n\n\n\n\n........checks",self.env.is_admin())
+        print("\n\n\n\n\n\n\n\n........checks2",self.env.user.has_group('base.group_user'))
+        
         """ Restricts the access to an ir.attachment, according to referred mode """
         if self.env.is_superuser():
             return True
-        # Always require an internal user (aka, employee) to access to a attachment
-        if not (self.env.is_admin() or self.env.user.has_group('base.group_user')):
-            raise AccessError(_("Sorry, you are not allowed to access this document."))
+        
         # collect the records to check (by model)
         model_ids = defaultdict(set)            # {model_name: set(ids)}
         if self:
@@ -405,6 +407,11 @@ class IrAttachment(models.Model):
             access_mode = 'write' if mode in ('create', 'unlink') else mode
             records.check_access_rights(access_mode)
             records.check_access_rule(access_mode)
+            
+        # Always require an internal user (aka, employee) to access to a attachment
+        if not (self.env.is_admin() or self.env.user.has_group('base.group_user')):
+            raise AccessError(_("Sorry, you are not allowed to access this document."))
+
 
 
     def _read_group_allowed_fields(self):
