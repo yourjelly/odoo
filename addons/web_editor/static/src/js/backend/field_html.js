@@ -428,6 +428,20 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @param {OdooEvent} ev
      */
     _onWysiwygFocus: function (ev) {},
+
+    /**
+    * Stops the enter navigation in an html field.
+    *
+    * @private
+    * @param {OdooEvent} ev
+    */
+   _onKeydown: function (ev) {
+       if (ev.which === $.ui.keyCode.ENTER) {
+           ev.stopPropagation();
+           return;
+       }
+       this._super.apply(this, arguments);
+   },
 });
 
 
