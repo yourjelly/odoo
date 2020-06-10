@@ -168,15 +168,15 @@ class WebsiteEventTrackController(http.Controller):
         """
         Returns list of sponsors for event
         """
+        res = []
         if res_id and res_model:
-            res = []
             sponsors = request.env[res_model].search([('id','=',res_id)]).sponsor_ids
             for sponsor in sponsors:
                 res.append(sponsor.read(['id', 'url', 'partner_name', 'sponsor_type_id'])[0])
             return res
         else:
             #static for test
-            sponsors = request.env['res.partner'].search([('name', 'like', 'new partner')])
+            sponsors = request.env['res.partner'].search([('name', 'like', 'new sponsor')])
             for sponsor in sponsors:
                 res.append(sponsor.read(['id'])[0])
             return res

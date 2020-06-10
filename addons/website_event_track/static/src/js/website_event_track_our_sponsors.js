@@ -64,6 +64,7 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
      * @private
      */
     _render: function (sponsors) {
+        debugger;
         this.sponsorsList = $(qweb.render('website_event_track.ourSponsors', {
             uniqueId: this.uniqueId,
             sponsors: sponsors,
