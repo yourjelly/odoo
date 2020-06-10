@@ -770,11 +770,15 @@ class Users(models.Model):
         :raise: odoo.exceptions.AccessDenied when old password is wrong
         :raise: odoo.exceptions.UserError when new password is not set or empty
         """
-        self.check(self._cr.dbname, self._uid, old_passwd)
-        if new_passwd:
-            # use self.env.user here, because it has uid=SUPERUSER_ID
-            return self.env.user.write({'password': new_passwd})
-        raise UserError(_("Setting empty passwords is not allowed for security reasons!"))
+        if not old_passwd:
+            raise AccessDenied()
+        if not new_passwd:
+            raise UserError(_("Setting empty passwords is not allowed for security reasons!"))
+
+        # alternatively: use identitycheck wizard?
+        self._check_credentials(old_passwd, {'interactive': True})
+        # use self.env.user here, because it has uid=SUPERUSER_ID
+        return self.env.user.write({'password': new_passwd})
 
     def preference_save(self):
         return {
