@@ -894,11 +894,16 @@
             <t t-set="head" t-value="head_web + (head or '')"/>
             <t t-set="body_classname" t-value="'o_web_client'"/>
         </t>
-                <t t-call-assets="web.assets_common" t-js="false"/>
+        <t t-else="">
+            
+                 <t t-call-assets="web.assets_common" t-js="false"/>
                 <t t-call-assets="web.assets_backend" t-js="false"/>
                 <t t-call-assets="web.assets_common" t-css="false"/>
                 <t t-call-assets="web.assets_backend" t-css="false"/>
                 <t t-call="web.conditional_assets_tests"/>
+
+        </t>
+               
 
                 <script type="text/javascript" src="/web/static/src/js/main.js"></script>
         </t>
