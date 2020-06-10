@@ -31,3 +31,8 @@
         }
     }
 }
+
+.o_we_shape {
+    @include o-position-absolute(0,0,0,0);
+    background-repeat: no-repeat;
+}

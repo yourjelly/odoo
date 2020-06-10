@@ -8,7 +8,14 @@ const time = require('web.time');
 var Widget = require('web.Widget');
 var ColorPaletteWidget = require('web_editor.ColorPalette').ColorPaletteWidget;
 const weUtils = require('web_editor.utils');
-const {normalizeColor} = weUtils;
+const {
+    normalizeColor,
+    setBgImage,
+    getBgImage,
+    getBgImageSrc,
+    setBgShape,
+    getBgShapeSrc,
+} = weUtils;
 var weWidgets = require('wysiwyg.widgets');
 const {
     loadImage,
@@ -2983,18 +2990,6 @@ registry.ImageOptimize = ImageHandlerOption.extend({
 });
 
 /**
- * Returns the src value from a css value related to a background image
- * (e.g. "url('blabla')" => "blabla" / "none" => "").
- *
- * @param {string} value
- * @returns {string}
- */
-const getSrcFromCssValue = value => {
-    var srcValueWrapper = /url\(['"]*|['"]*\)|^none$/g;
-    return value && value.replace(srcValueWrapper, '') || '';
-};
-
-/**
  * Controls background image width and quality.
  */
 registry.BackgroundOptimize = ImageHandlerOption.extend({
@@ -3050,7 +3045,7 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
      */
     async _applyOptions() {
         await this._super(...arguments);
-        this.$target.css('background-image', `url('${this._getImg().getAttribute('src')}')`);
+        setBgImage(this.$target[0], {'background-image': `url('${this._getImg().getAttribute('src')}')`});
     },
     /**
      * Initializes this.img to an image with the background image url as src.
@@ -3062,9 +3057,14 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
         Object.entries(this.$target[0].dataset).forEach(([key, value]) => {
             this.img.dataset[key] = value;
         });
-        const src = new URL(getSrcFromCssValue(this.$target.css('background-image')), window.location.origin);
+        const src = getBgImageSrc(this.$target[0]) || '';
+        const url = new URL(src, window.location.origin);
         // Make URL relative because that is how image urls are stored in the database.
-        this.img.src = src.origin === window.location.origin ? src.pathname : src;
+        if (url && url.origin === window.location.origin) {
+            this.img.src = url.pathname;
+        } else {
+            this.img.src = '/';
+        }
         return await this._super(...arguments);
     },
 
@@ -3121,10 +3121,15 @@ registry.background = SnippetOptionWidget.extend({
         }
 
         if (widgetValue) {
-            this.$target.css('background-image', `url('${widgetValue}')`);
+            const bg = {'background-image': `url("${widgetValue}")`};
+            if (!this.$target.hasClass('oe_img_bg')) {
+                bg['background-size'] = 'cover';
+                bg['background-repeat'] = 'no-repeat';
+            }
+            setBgImage(this.$target[0], bg);
             this.$target.addClass('oe_img_bg');
         } else {
-            this.$target.css('background-image', '');
+            setBgImage(this.$target[0], {'background-image': 'none'});
             this.$target.removeClass('oe_img_bg');
         }
 
@@ -3179,7 +3184,7 @@ registry.background = SnippetOptionWidget.extend({
      * @returns {string}
      */
     _getSrcFromCssValue: function () {
-        return getSrcFromCssValue(this.$target.css('background-image'));
+        return getBgImageSrc(this.$target[0]) || '';
     },
     /**
      * @override
@@ -3216,6 +3221,130 @@ registry.background = SnippetOptionWidget.extend({
         }
         await this.background(previewMode, '', {});
         return true;
+    },
+});
+
+/**
+ * Handles background shapes.
+ */
+registry.BackgroundShape = SnippetOptionWidget.extend({
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+        this.initialShape = this._getShapeData();
+        this.initialShapeSrc = getBgShapeSrc(this.$target[0]);
+    },
+
+    //--------------------------------------------------------------------------
+    // Options
+    //--------------------------------------------------------------------------
+
+    /**
+     * Sets the current background shape.
+     * @see this.selectClass for params
+     */
+    shape(previewMode, widgetValue, params) {
+        this._markShape({shape: widgetValue});
+        this._setBackground();
+    },
+    /**
+     * Sets the current background shape's colors.
+     * @see this.selectClass for params
+     */
+    color(previewMode, widgetValue, params) {
+        if (previewMode === 'reset') {
+            this.$target[0].dataset.oeShapeData = this.prevShape;
+        } else {
+            if (previewMode === true) {
+                this.prevShape = this.$target[0].dataset.oeShapeData;
+            }
+            this._markShape({[`color${params.colorNumber}`]: widgetValue});
+        }
+        this._setBackground();
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _computeWidgetState(methodName, params) {
+        const {color1, color2, shape} = this._getShapeData();
+        switch (methodName) {
+            case 'shape':
+                return shape;
+            case 'color':
+                return normalizeColor(params.colorNumber === '1' ? color1 : color2);
+        }
+        return this._super(...arguments);
+    },
+    /**
+     * Sets the background to the shape's color-configured url.
+     *
+     * @private
+     */
+    _setBackground() {
+        const {color1, color2, shape} = this._getShapeData();
+        const target = this.$target[0];
+        let shapeContainer = target.querySelector('.o_we_shape');
+        if (!shape) {
+            shapeContainer && shapeContainer.remove();
+            return;
+        }
+        if (!shapeContainer) {
+            shapeContainer = document.createElement('div');
+            target.prepend(shapeContainer);
+            target.style.position = 'relative';
+            shapeContainer.nextElementSibling.style.position = 'relative';
+        }
+        shapeContainer.className = `o_we_shape o_${shape.replace('/', '_')}`;
+        // Reset bg-shape so that the next setBgShape takes the bg-position of the class
+        setBgShape(shapeContainer, {'background-image': 'none'});
+        if (color1 !== 'o-color-1' || color2 !== 'o-color-2') {
+            // Custom colors, overwrite shape that is set by the class
+            setBgShape(shapeContainer, {'background-image': `url("${this._getShapeSrc()}")`});
+        }
+    },
+    /**
+     * Returns the src of the shape corresponding to the current parameters.
+     *
+     * @private
+     */
+    _getShapeSrc() {
+        const {color1, color2, shape} = this._getShapeData();
+        if (!shape) {
+            return '';
+        }
+        const [encodedCol1, encodedCol2] = [color1, color2].map(col => encodeURIComponent(normalizeColor(col)));
+        return `/web_editor/shape/${shape}.svg?c1=${encodedCol1}&c2=${encodedCol2}`;
+    },
+    /**
+     * Overwrites shape properties with the specified data.
+     *
+     * @private
+     * @param {Object} newData an object with the new data
+     */
+    _markShape(newData) {
+        const shapeData = Object.assign(this._getShapeData(), newData);
+        this.$target[0].dataset.oeShapeData = JSON.stringify(shapeData);
+    },
+    /**
+     * Retrives current shape data from the target's dataset.
+     *
+     * @private
+     */
+    _getShapeData() {
+        const defaultData = {
+            shape: '',
+            color1: 'o-color-1',
+            color2: 'o-color-2',
+        };
+        const json = this.$target[0].dataset.oeShapeData;
+        return json ? JSON.parse(json) : defaultData;
     },
 });
 
@@ -3257,9 +3386,11 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     backgroundType: function (previewMode, widgetValue, params) {
-        this.$target.toggleClass('o_bg_img_opt_repeat', widgetValue === 'repeat-pattern');
-        this.$target.css('background-position', '');
-        this.$target.css('background-size', '');
+        setBgImage(this.$target[0], {
+                'background-position': '',
+                'background-size': widgetValue === 'cover' ? 'cover' : 'auto',
+                'background-repeat': widgetValue === 'cover' ? 'no-repeat' : 'repeat',
+            }, true);
     },
     /**
      * Saves current background position and enables overlay.
@@ -3274,7 +3405,8 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
             this.img.src = this._getSrcFromCssValue();
         });
 
-        const position = this.$target.css('background-position').split(' ').map(v => parseInt(v));
+        const bg = getBgImage(this.$target[0]);
+        const position = bg['background-position'].split(' ').map(v => parseInt(v));
         // Convert % values to pixels (because mouse movement is in pixels)
         const delta = this._getBackgroundDelta();
         this.originalPosition = {
@@ -3289,11 +3421,8 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @override
      */
     selectStyle: function (previewMode, widgetValue, params) {
-        if (params.cssProperty === 'background-size'
-                && !this.$target.hasClass('o_bg_img_opt_repeat')) {
-            // Disable the option when the image is in cover mode, otherwise
-            // the background-size: auto style may be forced.
-            return;
+        if (params.cssProperty === 'background-size') {
+            return setBgImage(this.$target[0], {'background-size': widgetValue});
         }
         this._super(...arguments);
     },
@@ -3306,14 +3435,20 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @override
      */
     _computeVisibility: function () {
-        return this._super(...arguments) && (this.$target.css('background-image') !== 'none');
+        return this._super(...arguments) && !!getBgImage(this.$target[0]);
     },
     /**
      * @override
      */
     _computeWidgetState: function (methodName, params) {
-        if (methodName === 'backgroundType') {
-            return this.$target.css('background-repeat') === 'repeat' ? 'repeat-pattern' : 'cover';
+        const bgImage = getBgImage(this.$target[0]);
+        switch (methodName) {
+            case 'backgroundType':
+                return (bgImage && bgImage['background-repeat'] === 'repeat') ? 'repeat-pattern' : 'cover';
+            case 'selectStyle':
+                if (params.cssProperty === 'background-size') {
+                    return bgImage ? bgImage['background-size'] : '';
+                }
         }
         return this._super(...arguments);
     },
@@ -3420,7 +3555,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @returns {string}
      */
     _getSrcFromCssValue: function () {
-        return getSrcFromCssValue(this.$target.css('background-image'));
+        return getBgImageSrc(this.$target[0]) || '';
     },
     /**
      * Returns the difference between the target's size and the background's
@@ -3429,7 +3564,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @private
      */
     _getBackgroundDelta: function () {
-        const bgSize = this.$target.css('background-size');
+        const bgSize = getBgImage(this.$target[0])['background-size'];
         if (bgSize !== 'cover') {
             let [width, height] = bgSize.split(' ');
             if (width === 'auto' && (height === 'auto' || !height)) {
@@ -3497,7 +3632,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         percentPosition.left = isFinite(percentPosition.left) ? percentPosition.left : this.originalPosition.left;
         percentPosition.top = isFinite(percentPosition.top) ? percentPosition.top : this.originalPosition.top;
 
-        this.$bgDragger.css('background-position', `${percentPosition.left}% ${percentPosition.top}%`);
+        setBgImage(this.$bgDragger[0], {'background-position': `${percentPosition.left}% ${percentPosition.top}%`});
 
         function clamp(val, bounds) {
             // We sort the bounds because when one dimension of the rendered background is
