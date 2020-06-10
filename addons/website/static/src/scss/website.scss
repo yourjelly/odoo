@@ -959,3 +959,31 @@ header {
         background-color: rgba(theme-color('primary'), 0.8);
     }
 }
+
+// Background shapes:
+@function str-replace($string, $search, $replace: '') {
+    $index: str-index($string, $search);
+
+    @if $index {
+        @return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace);
+    }
+
+    @return $string;
+}
+
+.o_we_shape {
+    // %23 is the url-encoded form of '#' which doesn't work as is in urls.
+    $c1: str-replace("#{map-get($o-color-palette, 'o-color-1')}", '#', '%23');
+    $c2: str-replace("#{map-get($o-color-palette, 'o-color-2')}", '#', '%23');
+
+    @each $module, $shapes in $bg-shapes {
+        @each $shape, $style in $shapes {
+            // eg: o_website_shape_bg_1
+            &.o_#{$module}_#{$shape} {
+                background-image: url("/web_editor/shape/#{$module}/#{$shape}.svg?c1=#{$c1}&c2=#{$c2}");
+                background-position: map-get($style, position);
+                background-size: map-get($style, size);
+            }
+        }
+    }
+}

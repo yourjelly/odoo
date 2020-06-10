@@ -294,6 +294,42 @@
         t-att-data-exclude="bg_exclude">
         <t t-call="web_editor.image_optimization_controls"/>
     </div>
+    <div data-js="BackgroundShape" string="Shape"
+        t-att-data-selector="bg_selector"
+        t-att-data-exclude="bg_exclude">
+        <we-row string="Shape">
+            <we-colorpicker data-color="true" data-color-number="1" data-dependencies="!shape_none_opt"/>
+            <we-colorpicker data-color="true" data-color-number="2" data-dependencies="!shape_none_opt"/>
+            <we-select>
+                <we-button data-shape="" data-name="shape_none_opt">None</we-button>
+                <we-button data-shape="website/shape_bg_1">Shape 1</we-button>
+                <we-button data-shape="website/shape_bg_2">Shape 2</we-button>
+                <we-button data-shape="website/shape_bg_3">Shape 3</we-button>
+                <we-button data-shape="website/shape_bg_4">Shape 4</we-button>
+                <we-button data-shape="website/shape_bg_5">Shape 5</we-button>
+                <we-button data-shape="website/shape_bg_6">Shape 6</we-button>
+                <we-button data-shape="website/shape_bg_angle_bottom">Angle bottom</we-button>
+                <we-button data-shape="website/shape_bg_angle_top">Angle top</we-button>
+                <we-button data-shape="website/shape_bg_big_triangle">Big triangle</we-button>
+                <we-button data-shape="website/shape_bg_big_triangle_2">Big triangle 2</we-button>
+                <we-button data-shape="website/shape_bg_line_bottom">Line bottom</we-button>
+                <we-button data-shape="website/shape_bg_line_top">Line top</we-button>
+                <we-button data-shape="website/shape_bg_sbu_arc_bottom">Arc bottom</we-button>
+                <we-button data-shape="website/shape_bg_sbu_arc_top">Arc top</we-button>
+                <we-button data-shape="website/shape_bg_sbu_line">Line</we-button>
+                <we-button data-shape="website/shape_bg_sbu_rounded_box_left">Rounded box left</we-button>
+                <we-button data-shape="website/shape_bg_sbu">Shape sbu</we-button>
+                <we-button data-shape="website/shape_bg_sbu2">Shape sbu2</we-button>
+                <we-button data-shape="website/shape_bg_vertical_left">Vertical left</we-button>
+                <we-button data-shape="website/shape_bg_vertical_right">Vertical right</we-button>
+                <we-button data-shape="website/shape_bg_wave_bottom">Wave bottom</we-button>
+                <we-button data-shape="website/shape_bg_wave_top">Wave top</we-button>
+                <we-button data-shape="website/shape_bg_dotted_wave">Dotted wave top</we-button>
+                <we-button data-shape="website/shape_bg_bottom_dotted_wave">Dotted wave bottom</we-button>
+                <we-button data-shape="website/shape_bg_pulse">Pulse</we-button>
+            </we-select>
+        </we-row>
+    </div>
 
     <!-- Background Image Size/Position -->
     <div data-js="BackgroundPosition"

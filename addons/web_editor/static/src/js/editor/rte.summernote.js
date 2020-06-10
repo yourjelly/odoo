@@ -16,6 +16,7 @@ var fonts = require('wysiwyg.fonts');
 var rte = require('web_editor.rte');
 var ServicesMixin = require('web.ServicesMixin');
 var weWidgets = require('wysiwyg.widgets');
+const {setBgImage} = require('web_editor.utils');
 
 var _t = core._t;
 
@@ -1114,7 +1115,7 @@ var SummernoteManager = Class.extend(mixins.EventDispatcherMixin, ServicesMixin,
                     },
                 });
                 if (isBackground) {
-                    $(el).css('background-image', `url('${newAttachmentSrc}')`);
+                    setBgImage(el, {'background-image': `url('${newAttachmentSrc}')`});
                     delete el.dataset.bgSrc;
                 } else {
                     el.setAttribute('src', newAttachmentSrc);

@@ -11,6 +11,7 @@ from lxml import etree
 from odoo.http import request
 from odoo import http, tools, _
 from odoo.exceptions import UserError
+from odoo.modules.module import get_resource_path
 
 logger = logging.getLogger(__name__)
 
@@ -491,3 +492,21 @@ class Web_Editor(http.Controller):
             return attachment.image_src
         attachment.generate_access_token()
         return '%s?access_token=%s' % (attachment.image_src, attachment.access_token)
+
+    @http.route(['/web_editor/shape/<module>/<filename>'], type='http', auth="public", website=True)
+    def background_shape(self, module, filename, c1='#445869', c2='#2DCBB2'):
+        """
+        Returns a color-customized background-shape.
+        """
+        shape_path = get_resource_path(module, 'static/shapes', filename)
+        if not shape_path:
+            raise werkzeug.exceptions.NotFound()
+
+        svg = open(shape_path, 'r').read()
+        svg = svg.replace('#445869', c1).replace('#2DCBB2', c2)
+        # Allows better size-control from css.
+        svg = svg.replace('<svg', '<svg preserveAspectRatio="none"')
+        return request.make_response(svg, [
+            ('Content-type', 'image/svg+xml'),
+            ('Cache-control', 'max-age=%s' % http.STATIC_CACHE_LONG),
+        ])

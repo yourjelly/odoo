@@ -316,3 +316,33 @@ $o-theme-font-names: (
 // instead a unique map: 'name' -> 'config', with config containing the font
 // properties configuration + basic info (url, font-family).
 $o-theme-font-configs: () !default;
+
+// Maybe we want to deduce size from position (bot/top => 100% auto, left/right => auto 100%) ?
+// (module_name: (shape_filename: (position: X, size: Y), ...), other_module: ...)
+$bg-shapes: (website: (
+    shape_bg_1: (position: bottom, size: 100% auto),
+    shape_bg_2: (position: top, size: 100% auto),
+    shape_bg_3: (position: bottom, size: 100% auto),
+    shape_bg_4: (position: top, size: 100% auto),
+    shape_bg_5: (position: right, size: auto 100%),
+    shape_bg_6: (position: left, size: auto 100%),
+    shape_bg_angle_bottom: (position: bottom, size: 100% auto),
+    shape_bg_angle_top: (position: top, size: 100% auto),
+    shape_bg_big_triangle: (position: top, size: 100% auto),
+    shape_bg_big_triangle_2: (position: bottom, size: 100% auto),
+    shape_bg_line_bottom: (position: bottom, size: 100% auto),
+    shape_bg_line_top: (position: top, size: 100% auto),
+    shape_bg_sbu_arc_bottom: (position: bottom, size: 100% auto),
+    shape_bg_sbu_arc_top: (position: top, size: 100% auto),
+    shape_bg_sbu_line: (position: bottom, size: 100% auto),
+    shape_bg_sbu_rounded_box_left: (position: bottom, size: 100% auto),
+    shape_bg_sbu: (position: right, size: auto 100%),
+    shape_bg_sbu2: (position: bottom, size: 100% auto),
+    shape_bg_vertical_left: (position: center, size: 100% auto),
+    shape_bg_vertical_right: (position: center, size: 100% auto),
+    shape_bg_wave_bottom: (position: bottom, size: 100% auto),
+    shape_bg_wave_top: (position: top, size: 100% auto),
+    shape_bg_bottom_dotted_wave: (position: bottom, size: 100% auto),
+    shape_bg_dotted_wave: (position: top, size: 100% auto),
+    shape_bg_pulse: (position: top, size: 100% auto),
+));
