@@ -15,19 +15,6 @@ options.registry.sponsors = options.Class.extend({
      * @override
      */
     start: function () {
-        // The snippet should not be editable
-        // this.$target.addClass('o_fake_not_editable').attr('contentEditable', false);
-        // Make sure image previews are updated if images are changed
-        this.$target.on('save', '.sponsor_img', function (ev) {
-        });
-
-        // When the snippet is empty, an edition button is the default content
-        // TODO find a nicer way to do that to have editor style
-        this.$target.on('click', '.sponsor_img', function (e) {
-        });
-
-        this.$target.on('dropped', 'img', function (ev) {
-        });
         return this._super.apply(this, arguments);
     },
     /**
@@ -50,34 +37,6 @@ options.registry.sponsors = options.Class.extend({
         });
 
     },
-    //--------------------------------------------------------------------------
-    // Options
-    //--------------------------------------------------------------------------
-
-
-    // addImages: function (previewMode) {
-    //     var $container = this.$('> div:first-child');
-    //     var dialog = new weWidgets.MediaDialog(this, {multiImages: true, onlyImages: true, mediaWidth: 1920});
-    //     var lastImage = _.last(this._getImages());
-    //     var index = lastImage ? this._getIndex(lastImage) : -1;
-    //     return new Promise(resolve => {
-    //         dialog.on('save', this, function (attachments) {
-    //             for (var i = 0; i < attachments.length; i++) {
-    //                 $('<img/>', {
-    //                     class: 'img img-fluid',
-    //                     src: attachments[i].image_src,
-    //                     'data-index': ++index,
-    //                     alt: attachments[i].description || '',
-    //                 }).appendTo($container);
-    //             }
-    //             this.mode('reset', this.getMode());
-    //             this.trigger_up('cover_update');
-    //         });
-    //         dialog.on('closed', this, () => resolve());
-    //         dialog.open();
-    //     });
-    // },
-   
 });
 
 });

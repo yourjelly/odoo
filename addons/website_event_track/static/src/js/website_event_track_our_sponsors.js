@@ -15,7 +15,7 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
-        // this._dp = new concurrency.DropPrevious();
+        this._dp = new concurrency.DropPrevious();
         this.uniqueId = _.uniqueId('o_event_our_sponsors_');
     },
     /**
@@ -29,9 +29,6 @@ publicWidget.registry.eventSponsors = publicWidget.Widget.extend({
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
-    _onImgClick: function (ev) {
-        debugger;
-    },
     /**
      * Fetch sponsors for an event and returns sponsors or demo data.
      *
