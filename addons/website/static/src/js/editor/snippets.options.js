@@ -1870,6 +1870,9 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      */
     init: function () {
         this._super.apply(this, arguments);
+
+        this.$image = this.$target.find('.o_record_cover_image');
+        this.$filter = this.$target.find('.o_record_cover_filter');
     },
     /**
      * @override
@@ -1878,13 +1881,6 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
         this.$filterValueOpts = this.$el.find('[data-filter-value]');
 
         return this._super.apply(this, arguments);
-    },
-
-    _setOptionTarget() {
-        this.super(...arguments);
-
-        this.$image = this.$target.find('.o_record_cover_image');
-        this.$filter = this.$target.find('.o_record_cover_filter');
     },
 
     //--------------------------------------------------------------------------

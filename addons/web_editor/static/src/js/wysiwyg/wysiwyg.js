@@ -318,15 +318,17 @@ var Wysiwyg = Widget.extend({
             promises.push(this.snippetsMenu.cleanForSave());
         }
 
-        promises.push(this._saveAllViewsBlocks());
+        // todo: avoid redraw the editor if executing execCommand
+        await this.editor.execBatch(async ()=> {
         // todo: make them work
-        // promises.push(this._saveCoverPropertiesBlocks());
-        // promises.push(this._saveMegaMenuBlocks());
-        // promises.push(this._saveNewsletterBlocks());
-        // promises.push(this._saveTranslationBlocks());
-        // promises.push(this.saveCroppedImages());
+        await this._saveAllViewsBlocks();
+            await this._saveCoverPropertiesBlocks();
+            // await this.saveCroppedImages();
+            // await this._saveNewsletterBlocks();
+            // await this._saveMegaMenuBlocks();
+            // await this._saveTranslationBlocks();
+        });
 
-        await Promise.all(promises);
         this.trigger_up('edition_was_stopped');
         if (reload) {
             location.reload();
@@ -356,7 +358,7 @@ var Wysiwyg = Widget.extend({
     },
 
     _saveCoverPropertiesBlocks: async function (editable) {
-        var el = this.editor.execCommand('dom.getRecordCover');
+        var el = await this.editor.execCommand('dom.getRecordCover');
         if (!el) {
             console.warn('no getRecordCover found');
             return;
