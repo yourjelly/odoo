@@ -97,7 +97,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
     selector: ".o_newsletter_popup",
     disabledInEditableMode: false,
     events: {
-        'click .js_close_popup': '_onCloseClick',
+        'click .close': '_onCloseClick',
     },
 
     /**
