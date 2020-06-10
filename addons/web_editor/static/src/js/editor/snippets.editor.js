@@ -1395,9 +1395,11 @@ continue;
      */
     _loadSnippetsTemplates: async function (invalidateCache) {
         return this._mutex.exec(async () => {
-            await this._destroyEditors();
-            const html = await this.loadSnippets(invalidateCache);
-            await this._computeSnippetTemplates(html);
+            await this.options.wysiwyg.execBatch(async () => {
+                await this._destroyEditors();
+                const html = await this.loadSnippets(invalidateCache);
+                await this._computeSnippetTemplates(html);
+            });
         });
     },
     /**

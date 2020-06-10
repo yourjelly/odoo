@@ -145,7 +145,6 @@ var Wysiwyg = Widget.extend({
 
             this.editor.load(JWEditorLib.DevTools);
             await this.editor.start();
-            this.editor.enableRender = false;
 
             const layout = this.editor.plugins.get(JWEditorLib.Layout);
             const domLayout = layout.engines.dom;
@@ -160,6 +159,7 @@ var Wysiwyg = Widget.extend({
             // todo: handle megamenu
 
             if (this.options.snippets) {
+                this.editor.enableRender = false;
                 this.$webEditorToolbar = $('<div id="web_editor-toolbars">');
 
                 var $toolbarHandler = $('#web_editor-top-edit');
