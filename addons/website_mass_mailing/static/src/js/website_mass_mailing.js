@@ -96,10 +96,6 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
 publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
     selector: ".o_newsletter_popup",
     disabledInEditableMode: false,
-    events: {
-        'click .close': '_onCloseClick',
-    },
-
     /**
      * @override
      */
@@ -180,6 +176,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
             $modal.find('header button.close').on('mouseup', function (ev) {
                 ev.stopPropagation();
             });
+            $modal.find('header button.close').on('click', self._onCloseClick);
             $modal.addClass('o_newsletter_modal');
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             $modal.find('.modal-dialog').addClass('modal-dialog-centered').addClass('o_newsletter_frame');
@@ -215,7 +212,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
                 display = 'afterDelay';
                 delay = 5000;
             }
-            // this.$('.o_newsletter_popup').removeClass('s_popup_center').addClass('s_popup_bottom');
+            this.$('.o_newsletter_popup').removeClass('s_newsletter_center').addClass('s_newsletter_bottom');
         }
 
         if (display === 'afterDelay') {

@@ -12,7 +12,6 @@ var _t = core._t;
 options.registry.NewsletterPopup = options.Class.extend({
 
     setLayout: function (previewMode, widgetValue, params) {
-        debugger;
         const isModal = widgetValue === 'modal';
         const isTop = widgetValue === 'fixedTop';
         this.$target.toggleClass('s_newsletter_fixed', !isModal);
@@ -23,7 +22,6 @@ options.registry.NewsletterPopup = options.Class.extend({
     },
 
     _computeWidgetState: function (methodName, params) {
-        debugger;
         switch (methodName) {
             case 'moveBlock':
                 return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
