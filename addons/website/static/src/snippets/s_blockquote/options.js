@@ -21,7 +21,9 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
         });
         // todo: remove this when the jabberwock editor support miminum dom modification.
         const getContent = () => this.$target.find('.s_blockquote_content');
-        await this.editorCommands.remove(getContent().find('.quote_char')[0]);
+        await this.editor.execCommand('dom.remove', {
+            domNode: getContent().find('.quote_char')[0],
+        });
         if (widgetValue === 'cover') {
             const content = $('<fa/>').addClass('quote_char fa fa-quote-left font-italic')[0].outerHTML;
             await this.editorCommands.insertHtml(

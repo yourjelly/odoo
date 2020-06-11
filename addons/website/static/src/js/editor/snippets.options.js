@@ -2113,7 +2113,9 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
         await this._super(...arguments);
         const $button = this.getButton();
         if ($button.length && this.el.offsetParent === null) {
-            await this.editorCommands.remove($button[0]);
+            await this.editor.execCommand('dom.remove', {
+                domNode: $button[0],
+            });
         }
     },
 
@@ -2148,7 +2150,9 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
             }
             await this.editorCommands.insertHtml([this.$target[0], 'INSIDE'], this.$buttonTemplate[0].outerHTML);
         } else {
-            await this.editorCommands.remove(this.getButton()[0]);
+            await this.editor.execCommand('dom.remove', {
+                domNode: this.getButton()[0],
+            });
         }
     },
 

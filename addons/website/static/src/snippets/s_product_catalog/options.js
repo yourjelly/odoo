@@ -44,7 +44,9 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                 for (const el of $dishes.toArray()) {
                     const $description = $(el).find('.s_product_catalog_dish_description');
                     if ($description.hasClass('o_default_snippet_text')) {
-                        await this.editorCommands.remove($description[0]);
+                        await this.editor.execCommand('dom.remove', {
+                            domNode: $description[0],
+                        });
                     } else {
                         this.hasDescription = true;
                         await this.editor.execCommand('dom.addClass', {

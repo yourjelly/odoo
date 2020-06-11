@@ -41,7 +41,9 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
                 });
             }
 
-            await this.editorCommands.remove($text[0].childNodes[0]);
+            await this.editor.execCommand('dom.remove', {
+                domNode: $text[0].childNodes[0],
+            });
             if (!$text.length) {
                 $text = $('<span/>').addClass('s_progress_bar_text').html(_t('80% Development'));
             }

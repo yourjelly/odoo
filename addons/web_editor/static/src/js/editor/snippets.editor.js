@@ -285,13 +285,17 @@ var SnippetEditor = Widget.extend({
             this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
             var $parent = this.$snippetBlock.parent();
             this.$snippetBlock.find('*').addBack().tooltip('dispose');
-            await this.editorCommands.remove(this.$snippetBlock[0]);
+            await this.editor.execCommand('dom.remove', {
+                domNode: this.$snippetBlock[0],
+            });
             this.$el.remove();
 
             var node = $parent[0];
             if (node && node.firstChild) {
                 if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
-                    this.editorCommands.remove(node.firstChild);
+                    this.editor.execCommand('dom.remove', {
+                        domNode: node.firstChild,
+                    });
                 }
             }
 
@@ -300,7 +304,9 @@ var SnippetEditor = Widget.extend({
                 while (!editor) {
                     var $nextParent = $parent.parent();
                     if (isEmptyAndRemovable($parent)) {
-                        this.editorCommands.remove(this.$parent[0]);
+                        this.editor.execCommand('dom.remove', {
+                            domNode: this.$parent[0],
+                        });
                     }
                     $parent = $nextParent;
                     editor = $parent.data('snippet-editor');
