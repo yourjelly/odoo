@@ -1919,9 +1919,23 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
     /**
      * @see this.selectClass for parameters
      */
-    filterValue: function (previewMode, widgetValue, params) {
-        this.$filter.css('opacity', widgetValue || 0);
-        this.$filter.toggleClass('oe_black', parseFloat(widgetValue) !== 0);
+    filterValue: async function (previewMode, widgetValue, params) {
+        if (!previewMode) {
+            await this.wysiwyg.execBatch(async ()=> {
+                await this.editor.execCommand('dom.setStyle', {
+                    domNode: this.$filter[0],
+                    name: 'opacity',
+                    value: widgetValue || "0",
+                });
+                await this.editor.execCommand(parseFloat(widgetValue) !== 0 ? 'dom.addClass' : 'dom.removeClass', {
+                    domNode: this.$filter[0],
+                    class: 'oe_black',
+                });
+            });
+        } else {
+            this.$filter.css('opacity', widgetValue || 0);
+            this.$filter.toggleClass('oe_black', parseFloat(widgetValue) !== 0);
+        }
     },
 
     //--------------------------------------------------------------------------
