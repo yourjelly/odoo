@@ -2061,27 +2061,20 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
      */
     async moveSnippet (previewMode, widgetValue, params) {
         const isNavItem = this.$target[0].classList.contains('nav-item');
-        // We currently create a function to retrieve the element as all "editorCommands" call
-        // recreate all elements.
-        // todo: remove this when the jabberwock editor support miminum dom modification.
-        const getTabPane = () => isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
+        const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
         switch (widgetValue) {
             case 'prev':
                 await this.wysiwyg.execBatch(async ()=> {
                     await this.editorCommands.moveBefore(this.$target.prev()[0], this.$target[0]);
                     if (isNavItem) {
-                        const $tabPane = getTabPane();
-                        // todo: check if it work
                         await this.editorCommands.moveBefore($tabPane.prev()[0], $tabPane[0]);
                     }
                 });
                 break;
             case 'next':
                 await this.wysiwyg.execBatch(async ()=> {
-
                     await this.editorCommands.moveAfter(this.$target.next()[0], this.$target[0]);
                     if (isNavItem) {
-                        const $tabPane = getTabPane();
                         await this.editorCommands.moveAfter($tabPane.next()[0], $tabPane[0]);
                     }
                 });
