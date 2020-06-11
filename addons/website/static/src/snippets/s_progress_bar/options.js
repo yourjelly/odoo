@@ -52,14 +52,20 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
 
 
             if (widgetValue === 'inline') {
-                await this.editorCommands.insertHtml(
-                    [this.$target.find('.progress-bar')[0], 'INSIDE'],
-                    $text[0].outerHTML,
+                await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                    {
+                        html: $text[0].outerHTML,
+                        domNode: this.$target.find('.progress-bar')[0],
+                        position: 'INSIDE',
+                    }
                 );
             } else {
-                await this.editorCommands.insertHtml(
-                    [this.$target.find('.progress')[0], 'BEFORE'],
-                    $text[0].outerHTML,
+                await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                    {
+                        html: $text[0].outerHTML,
+                        domNode: this.$target.find('.progress')[0],
+                        position: 'BEFORE',
+                    }
                 );
             }
         });

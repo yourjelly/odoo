@@ -2160,7 +2160,13 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
                 anchor.appendChild(arrow);
                 this.$buttonTemplate = $(anchor);
             }
-            await this.editorCommands.insertHtml([this.$target[0], 'INSIDE'], this.$buttonTemplate[0].outerHTML);
+            await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                {
+                    html: this.$buttonTemplate[0].outerHTML,
+                    domNode: this.$target[0],
+                    position: 'INSIDE',
+                }
+            );
         } else {
             await this.editor.execCommand('dom.remove', {
                 domNode: this.getButton()[0],

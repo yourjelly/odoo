@@ -242,10 +242,12 @@ var Wysiwyg = Widget.extend({
                 {},
             );
             mediaDialog.open();
-            mediaDialog.on('save', this, async (element)=> {
-                await this.editor.execCommand('insertHtml', {
-                    html: element.outerHTML
-                });
+            mediaDialog.on('save', this, async (element) => {
+                await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                    {
+                        html: element.outerHTML,
+                    }
+                );
                 resolve();
             });
             mediaDialog.on('cancel', this, resolve);

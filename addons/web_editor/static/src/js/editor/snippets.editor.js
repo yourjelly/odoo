@@ -431,9 +431,12 @@ snippetEditor.destroy();
 
         const $clonedContent = this.$snippetBlock.clone(false);
 
-        const vNode = await this.editorCommands.insertHtml(
-            [this.$snippetBlock[0], 'AFTER'],
-            $clonedContent[0].outerHTML
+        const vNode = await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+            {
+                html: $clonedContent[0].outerHTML,
+                domNode: this.$snippetBlock[0],
+                position: 'AFTER',
+            }
         );
         const jwEditor = this.wysiwyg.editor;
         const dom = jwEditor.plugins.get(this.JWEditorLib.Dom);
@@ -1892,7 +1895,7 @@ continue;
                     _.defer(async () => {
                         self.trigger_up('snippet_dropped', {$target: $snippetToInsert});
                         const jwEditor = self.wysiwyg.editor;
-                        const vNodes = await self.insertSnippet($snippetToInsert);
+                        const vNodes = await self._insertSnippet($snippetToInsert);
                         const layout = jwEditor.plugins.get(self.JWEditorLib.Layout);
                         const domLayout = layout.engines.dom;
                         const domNode = domLayout.getDomNodes(vNodes[0])[0];
@@ -2294,14 +2297,15 @@ continue;
     },
 
     /**
-     * Retrieve a VRange from an element.
+     * Retrieve the relative position of an element.
+     * An element's position is 'BEFORE', 'AFTER' or 'INSIDE' another element
+     * (in that order of priority).
+     * Eg: the element is located before the node `a` -> return [`a`, 'BEFORE'].
      *
-     * The method to find the VNode is the following:
-     * - a sibling after `element` is in vDocument
-     * - a sibling before `element` is in vDocument
-     * - an ancestor of `element` is in vDocument
+     * @param {JQuery} $snippet
+     * @returns {[Node, 'BEFORE'|'AFTER'|'INSIDE']}
      */
-    _getVNodeRange(element) {
+    _getRelativePosition(element) {
         const layout = this.wysiwyg.editor.plugins.get(this.JWEditorLib.Layout);
         const domLayout = layout.engines.dom;
 
@@ -2310,7 +2314,7 @@ continue;
             const nodes = domLayout.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
-                return this.JWEditorLib.VRange.at(node, 'BEFORE')[0];
+                return [currentNode, 'BEFORE'];
             }
             currentNode = currentNode.nextSibling;
         }
@@ -2319,8 +2323,8 @@ continue;
             const nodes = domLayout.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
-                return this.JWEditorLib.VRange.at(node, 'AFTER')[0];
-    }
+                return [currentNode, 'AFTER'];
+            }
             currentNode = currentNode.previousSibling;
         }
         currentNode = element.parentElement;
@@ -2328,17 +2332,31 @@ continue;
             const nodes = domLayout.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
-                return this.JWEditorLib.VRange.at(node, 'INSIDE')[0];
-    }
+                return [currentNode, 'INSIDE'];
+            }
             currentNode = currentNode.parentElement;
         }
     },
-
-    insertSnippet: async function ($snippet) {
-        const rangePoint = this._getVNodeRange($snippet[0]);
-        const result = await this.wysiwyg.editor.execCommand('insertHtml', {
-            html: $snippet[0].outerHTML,
-            rangePoint: rangePoint,
+    /**
+     * Insert a snippet at range.
+     *
+     * @param {JQuery} $snippet
+     * @returns {VNode[]}
+     */
+    _insertSnippet: async function ($snippet) {
+        let result;
+        await this.wysiwyg.editor.execCustomCommand(async () => {
+            const position = this._getRelativePosition($snippet[0]);
+            if (!position) {
+                throw new Error("Could not find a place to insert the snippet.");
+            }
+            result = await this.wysiwyg.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                {
+                    html: $snippet[0].outerHTML,
+                    domNode: position[0],
+                    position: position[1],
+                }
+            );
         });
         return result;
     }

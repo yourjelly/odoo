@@ -26,9 +26,12 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
         });
         if (widgetValue === 'cover') {
             const content = $('<fa/>').addClass('quote_char fa fa-quote-left font-italic')[0].outerHTML;
-            await this.editorCommands.insertHtml(
-                [$content.find('.quote_char')[0], 'BEFORE'],
-                content,
+            await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                {
+                    html: content,
+                    domNode: $content.find('.quote_char')[0],
+                    position: 'BEFORE',
+                }
             );
         }
 

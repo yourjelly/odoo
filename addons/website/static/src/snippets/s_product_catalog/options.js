@@ -34,9 +34,12 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                         descriptionEl.classList.add('s_product_catalog_dish_description', 'o_default_snippet_text');
                         descriptionEl.textContent = _t("Add a description here");
 
-                        await this.editorCommands.insertHtml(
-                            [el, 'INSIDE'],
-                            descriptionEl.outerHTML
+                        await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                            {
+                                html: descriptionEl.outerHTML,
+                                domNode: el,
+                                position: 'INSIDE',
+                            }
                         );
                     }
                 }
