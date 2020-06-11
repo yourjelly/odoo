@@ -187,7 +187,23 @@ var Wysiwyg = Widget.extend({
 
     openLinkDialog() {
         return new Promise(async (resolve) => {
-            const linkInfo = await this.editor.execCommand('dom.getLinkInfo');
+            let linkInfo;
+            await this.editor.execCustomCommand(async () => {
+                const range = this.editor.selection.range;
+                const targettedNodes = range.targetedNodes();
+                const text = targettedNodes.map(x => x.textContent).join('');
+                const inline = this.editor.plugins.get(JWEditorLib.Inline);
+                const modifiers = inline.getCurrentModifiers(range);
+                const linkFormat = modifiers.find(JWEditorLib.LinkFormat);
+                const attributes = modifiers.find(JWEditorLib.Attributes);
+                const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
+                return {
+                    text: text,
+                    url: linkFormat && linkFormat.url || '',
+                    class: attributes && attributes.get('class') || '',
+                    target: linkFormatAttributes && linkFormatAttributes.get('target'),
+                };
+            });
             var linkDialog = new weWidgets.LinkDialog(this,
                 {
                     props: {
