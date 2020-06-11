@@ -78,10 +78,10 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
             const previousProgressChildNodes = $progressBarText[0].childNodes[0];
             $progressBarText.text($progressBarText.text().replace(/[0-9]+%/, value + '%'));
             const replacedText = $progressBarText[0].outerHTML;
-            await this.editorCommands.replace(
-                previousProgressChildNodes,
-                replacedText
-            );
+            await this.editor.execCommands('dom.replace', {
+                domNodes: previousProgressChildNodes,
+                html: replacedText
+            });
             await this.editor.execCommand('dom.setStyle', {
                 domNode: $progressBar[0],
                 name: 'width',
