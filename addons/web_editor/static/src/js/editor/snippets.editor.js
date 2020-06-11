@@ -292,7 +292,7 @@ var SnippetEditor = Widget.extend({
             var node = $parent[0];
             if (node && node.firstChild) {
                 if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
-                    this.editorDom.remove(node.firstChild);
+                    await this.editorDom.remove(node.firstChild);
                 }
             }
 
@@ -301,7 +301,7 @@ var SnippetEditor = Widget.extend({
                 while (!editor) {
                     var $nextParent = $parent.parent();
                     if (isEmptyAndRemovable($parent)) {
-                        this.editorDom.remove(this.$parent[0]);
+                        await this.editorDom.remove(this.$parent[0]);
                     }
                     $parent = $nextParent;
                     editor = $parent.data('snippet-editor');
