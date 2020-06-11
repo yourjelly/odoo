@@ -68,6 +68,8 @@ var SnippetEditor = Widget.extend({
         this.isTargetMovable = false;
         this.JWEditorLib = options.JWEditorLib;
         this.wysiwyg = options.wysiwyg;
+        this.editor = options.wysiwyg.editor;
+        this.editorDom = this.editor.plugins.get(this.JWEditorLib.DomHelpers);
         this.snippetMenu = snippetMenu;
 
         this.__isStarted = new Promise(resolve => {
@@ -284,7 +286,7 @@ var SnippetEditor = Widget.extend({
             this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
             var $parent = this.$snippetBlock.parent();
             this.$snippetBlock.find('*').addBack().tooltip('dispose');
-            await this.editor.execCommand('dom.remove', {
+            await this.editorDom.remove({
                 domNode: this.$snippetBlock[0],
             });
             this.$el.remove();
@@ -292,7 +294,7 @@ var SnippetEditor = Widget.extend({
             var node = $parent[0];
             if (node && node.firstChild) {
                 if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
-                    this.editor.execCommand('dom.remove', {
+                    this.editorDom.remove({
                         domNode: node.firstChild,
                     });
                 }
@@ -303,7 +305,7 @@ var SnippetEditor = Widget.extend({
                 while (!editor) {
                     var $nextParent = $parent.parent();
                     if (isEmptyAndRemovable($parent)) {
-                        this.editor.execCommand('dom.remove', {
+                        this.editorDom.remove({
                             domNode: this.$parent[0],
                         });
                     }
@@ -430,16 +432,16 @@ snippetEditor.destroy();
 
         const $clonedContent = this.$snippetBlock.clone(false);
 
-        const vNode = await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+        const vNode = await this.editorDom.insertHtml(
             {
                 html: $clonedContent[0].outerHTML,
                 domNode: this.$snippetBlock[0],
                 position: 'AFTER',
             }
         );
-        const jwEditor = this.wysiwyg.editor;
-        const dom = jwEditor.plugins.get(this.JWEditorLib.Dom);
-        const $clone = $(dom.domMap.toDom(vNode)[0][0]);
+        const layout = this.editor.plugins.get(this.JWEditorLib.Layout);
+        const domEngine = layout.engines.dom;
+        const $clone = $(domEngine.getDomNodes(vNode)[0]);
 
         // todo: handle history undo in jabberwock
 
@@ -1764,10 +1766,17 @@ continue;
                 };
                 isEnabled = (cache[k]['drop-near'] || cache[k]['drop-in']);
             });
-            await this.wysiwyg.editor.execCommand(isEnabled ? 'dom.removeClass' : 'dom.addClass', {
-                domNode: snippetDraggable,
-                class: 'o_disabled',
-            });
+            if (isEnabled) {
+                await this.editorDom.removeClass({
+                    domNode: snippetDraggable,
+                    class: 'o_disabled',
+                });
+            } else {
+                await this.editorDom.addClass({
+                    domNode: snippetDraggable,
+                    class: 'o_disabled',
+                });
+            }
         }
     },
     /**
@@ -2304,11 +2313,9 @@ continue;
      * @returns {[Node, 'BEFORE'|'AFTER'|'INSIDE']}
      */
     _getRelativePosition(element) {
-        const domHelpers = this.wysiwyg.editor.plugins.get(this.JWEditorLib.DomHelpers);
-
         let currentNode = element.nextSibling;
         while (currentNode) {
-            const nodes = domHelpers.getNodes(currentNode);
+            const nodes = this.editorDom.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
                 return [currentNode, 'BEFORE'];
@@ -2317,7 +2324,7 @@ continue;
         }
         currentNode = element.previousSibling;
         while (currentNode) {
-            const nodes = domHelpers.getNodes(currentNode);
+            const nodes = this.editorDom.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
                 return [currentNode, 'AFTER'];
@@ -2326,7 +2333,7 @@ continue;
         }
         currentNode = element.parentElement;
         while (currentNode) {
-            const nodes = domHelpers.getNodes(currentNode);
+            const nodes = this.editorDom.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
                 return [currentNode, 'INSIDE'];
@@ -2347,7 +2354,7 @@ continue;
             if (!position) {
                 throw new Error("Could not find a place to insert the snippet.");
             }
-            result = await this.wysiwyg.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+            result = await this.editorDom.insertHtml(
                 {
                     html: $snippet[0].outerHTML,
                     domNode: position[0],

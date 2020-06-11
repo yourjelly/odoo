@@ -153,6 +153,8 @@ var Wysiwyg = Widget.extend({
             const editableNVnode = domLayout.components.get('editable')[0];
             this.editorEditable = domLayout.getDomNodes(editableNVnode)[0];
 
+            this.editorDom = this.editor.plugins.get(JWEditorLib.DomHelpers);
+
             // todo: handle megamenu
 
             if (this.options.snippets) {
@@ -240,7 +242,7 @@ var Wysiwyg = Widget.extend({
             );
             mediaDialog.open();
             mediaDialog.on('save', this, async (element) => {
-                await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                await this.editorDom.insertHtml(
                     {
                         html: element.outerHTML,
                     }
@@ -494,7 +496,7 @@ var Wysiwyg = Widget.extend({
                     const isBackground = !el.matches('img');
                     el.classList.remove('o_modified_image_to_save');
 
-                    await this.editor.execCommand('dom.removeClass', {
+                    await this.editorDom.removeClass({
                         domNode: el,
                         value: 'o_modified_image_to_save',
                     });
@@ -510,18 +512,18 @@ var Wysiwyg = Widget.extend({
                         },
                     });
                     if (isBackground) {
-                        await this.editor.execCommand('dom.setStyle', {
+                        await this.editorDom.setStyle({
                             domNode: el,
                             name: 'background-image',
                             value: `url('${newAttachmentSrc}')`,
                         });
-                        await this.editor.execCommand('dom.setAttribute', {
+                        await this.editorDom.setAttribute({
                             domNode: el,
                             name: 'data-bgSrc',
                             value: '',
                         });
                     } else {
-                        await this.editor.execCommand('dom.setAttribute', {
+                        await this.editorDom.setAttribute({
                             domNode: el,
                             name: 'src',
                             value: newAttachmentSrc,

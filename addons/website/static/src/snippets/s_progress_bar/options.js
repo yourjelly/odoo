@@ -27,23 +27,23 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
             // todo: Test this.
             if (this.$target.hasClass('progress')) {
                 this.$target.removeClass('progress');
-                await this.editor.execCommand('dom.removeClass', {
+                await this.editorDom.removeClass({
                     domNode: this.$target[0],
                     class: 'progress',
                 });
-                await this.editor.execCommand('dom.wrap', {
+                await this.editorDom.wrap({
                     domContainer: this.$target.find('.progress-bar')[0],
                     html: $('<div/>', {
                         class: 'progress',
                     })[0].outerHTML,
                 });
-                await this.editor.execCommand('dom.addClass', {
+                await this.editorDom.addClass({
                     domNode: this.$target.find('.progress-bar span')[0],
                     class: 's_progress_bar_text',
                 });
             }
 
-            await this.editor.execCommand('dom.remove', {
+            await this.editorDom.remove({
                 domNode: $text[0].childNodes[0],
             });
             if (!$text.length) {
@@ -52,7 +52,7 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
 
 
             if (widgetValue === 'inline') {
-                await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                await this.editorDom.insertHtml(
                     {
                         html: $text[0].outerHTML,
                         domNode: this.$target.find('.progress-bar')[0],
@@ -60,7 +60,7 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
                     }
                 );
             } else {
-                await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                await this.editorDom.insertHtml(
                     {
                         html: $text[0].outerHTML,
                         domNode: this.$target.find('.progress')[0],
@@ -86,16 +86,16 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
             const previousProgressChildNodes = $progressBarText[0].childNodes[0];
             $progressBarText.text($progressBarText.text().replace(/[0-9]+%/, value + '%'));
             const replacedText = $progressBarText[0].outerHTML;
-            await this.editor.execCommands('dom.replace', {
+            await this.editorDom.replace({
                 domNodes: previousProgressChildNodes,
                 html: replacedText
             });
-            await this.editor.execCommand('dom.setStyle', {
+            await this.editorDom.setStyle({
                 domNode: $progressBar[0],
                 name: 'width',
                 value: value + "%",
             });
-            await this.editor.execCommand('dom.setAttribute', {
+            await this.editorDom.setAttribute({
                 domNode: $progressBar[0],
                 name: 'aria-valuenow',
                 value: '' + value,

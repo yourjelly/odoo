@@ -1763,21 +1763,28 @@ snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     async setShadow(previewMode, widgetValue, params) {
-        await this.editor.execCommand(widgetValue ? 'dom.addClass' : 'dom.removeClass', {
-            domNode: this.$target[0],
-            class: params.shadowClass,
-        });
+        if (widgetValue) {
+            await this.editorDom.addClass({
+                domNode: this.$target[0],
+                class: params.shadowClass,
+            });
+        } else {
+            await this.editorDom.removeClass({
+                domNode: this.$target[0],
+                class: params.shadowClass,
+            });
+        }
         if (widgetValue) {
             const inset = widgetValue === 'inset' ? widgetValue : '';
             const values = this.$target.css('box-shadow').replace('inset', '') + ` ${inset}`;
-            await this.editor.execCommand('dom.setStyle', {
+            await this.editorDom.setStyle({
                 domNode: this.$target[0],
                 name: 'box-shadow',
                 value: values,
                 important: true,
             });
         } else {
-            await this.editor.execCommand('dom.setStyle', {
+            await this.editorDom.setStyle({
                 domNode: this.$target[0],
                 name: 'box-shadow',
                 value: '',
@@ -1895,18 +1902,18 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
     background: async function (previewMode, widgetValue, params) {
         if (widgetValue === '') {
             await this.wysiwyg.execBatch(async ()=> {
-                await this.editor.execCommand('dom.setStyle', {
+                await this.editorDom.setStyle({
                     domNode: this.$image[0],
                     name: 'background-image',
                     value: '',
                 });
-                await this.editor.execCommand('dom.removeClass', {
+                await this.editorDom.removeClass({
                     domNode: this.$target[0],
                     class: 'o_record_has_cover',
                 });
             });
         } else {
-            await this.editor.execCommand('dom.setStyle', {
+            await this.editorDom.setStyle({
                 domNode: this.$image[0],
                 name: 'background-image',
                 value: `url('${widgetValue}')`,
@@ -2066,14 +2073,14 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
             case 'prev':
                 await this.wysiwyg.execBatch(async ()=> {
                     if (this.$target.prev()[0]) {
-                        await this.editor.execCommand('dom.moveBefore', {
+                        await this.editorDom.moveBefore({
                             fromDomNode: this.$target.prev()[0],
                             toDomNode: this.$target[0],
                         });
                     }
                     if (isNavItem) {
                         if ($tabPane.prev()[0]) {
-                            await this.editor.execCommand('dom.moveBefore', {
+                            await this.editorDom.moveBefore({
                                 fromDomNode: $tabPane.prev()[0],
                                 toDomNode: $tabPane[0],
                             });
@@ -2084,14 +2091,14 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
             case 'next':
                 await this.wysiwyg.execBatch(async ()=> {
                     if (this.$target.next()[0]) {
-                        await this.editor.execCommand('dom.moveAfter', {
+                        await this.editorDom.moveAfter({
                             fromDomNode: this.$target.next()[0],
                             toDomNode: this.$target[0],
                         });
                     }
                     if (isNavItem) {
                         if ($tabPane.next()[0]) {
-                            await this.editor.execCommand('dom.moveAfter', {
+                            await this.editorDom.moveAfter({
                                 fromDomNode: $tabPane.next()[0],
                                 toDomNode: $tabPane[0],
                             });
@@ -2126,7 +2133,7 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
         await this._super(...arguments);
         const $button = this.getButton();
         if ($button.length && this.el.offsetParent === null) {
-            await this.editor.execCommand('dom.remove', {
+            await this.editorDom.remove({
                 domNode: $button[0],
             });
         }
@@ -2161,7 +2168,7 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
                 anchor.appendChild(arrow);
                 this.$buttonTemplate = $(anchor);
             }
-            await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+            await this.editorDom.insertHtml(
                 {
                     html: this.$buttonTemplate[0].outerHTML,
                     domNode: this.$target[0],
@@ -2169,7 +2176,7 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
                 }
             );
         } else {
-            await this.editor.execCommand('dom.remove', {
+            await this.editorDom.remove({
                 domNode: this.getButton()[0],
             });
         }

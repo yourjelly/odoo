@@ -25,7 +25,7 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                 for (const el of $dishes.toArray()) {
                     const $description = $(el).find('.s_product_catalog_dish_description');
                     if ($description.length) {
-                        await this.editor.execCommand('dom.removeClass', {
+                        await this.editorDom.removeClass({
                             domNode: $description[0],
                             class: 'd-none',
                         });
@@ -34,7 +34,7 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                         descriptionEl.classList.add('s_product_catalog_dish_description', 'o_default_snippet_text');
                         descriptionEl.textContent = _t("Add a description here");
 
-                        await this.editor.plugins.get(this.JWEditorLib.DomHelpers).insertHtml(
+                        await this.editorDom.insertHtml(
                             {
                                 html: descriptionEl.outerHTML,
                                 domNode: el,
@@ -47,12 +47,12 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                 for (const el of $dishes.toArray()) {
                     const $description = $(el).find('.s_product_catalog_dish_description');
                     if ($description.hasClass('o_default_snippet_text')) {
-                        await this.editor.execCommand('dom.remove', {
+                        await this.editorDom.remove({
                             domNode: $description[0],
                         });
                     } else {
                         this.hasDescription = true;
-                        await this.editor.execCommand('dom.addClass', {
+                        await this.editorDom.addClass({
                             domNode: $description[0],
                             class: 'd-none',
                         });

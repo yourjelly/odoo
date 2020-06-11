@@ -61,29 +61,53 @@ snippetOptions.registry.SnippetPopup = snippetOptions.SnippetOptionWidget.extend
      * @see this.selectClass for parameters
      */
     setLayout: async function (previewMode, widgetValue, params) {
-        const isModal = widgetValue === 'modal';
-        const isTop = widgetValue === 'fixedTop';
         await this.wysiwyg.execBatch(async () => {
-            await this.editor.execCommand(isModal ? 'dom.removeClass' : 'dom.addClass', {
-                domNode: this.$target[0],
-                class: 's_popup_fixed',
-            });
-            await this.editor.execCommand(isTop ? 'dom.removeClass' : 'dom.addClass', {
-                domNode: this.$target[0],
-                class: 's_popup_fixed_top',
-            });
-            await this.editor.execCommand(isModal ? 'dom.addClass' : 'dom.removeClass', {
-                domNode: this.$target[0],
-                class: ['s_popup_center', 'modal'],
-            });
-            await this.editor.execCommand(isModal ? 'dom.addClass' : 'dom.removeClass', {
-                domNode: this.$target.find('.s_popup_frame')[0],
-                class: 'modal',
-            });
-            await this.editor.execCommand(isModal ? 'dom.addClass' : 'dom.removeClass', {
-                domNode: this.$target.find('.s_popup_content')[0],
-                class: 'modal-content',
-            });
+            if (widgetValue === 'modal') {
+                await this.editorDom.removeClass({
+                    domNode: this.$target[0],
+                    class: 's_popup_fixed',
+                });
+                await this.editorDom.addClass({
+                    domNode: this.$target[0],
+                    class: 's_popup_center modal',
+                });
+                await this.editorDom.addClass({
+                    domNode: this.$target.find('.s_popup_frame')[0],
+                    class: 'modal',
+                });
+                await this.editorDom.addClass({
+                    domNode: this.$target.find('.s_popup_content')[0],
+                    class: 'modal-content',
+                });
+            } else {
+                await this.editorDom.addClass({
+                    domNode: this.$target[0],
+                    class: 's_popup_fixed',
+                });
+                await this.editorDom.removeClass({
+                    domNode: this.$target[0],
+                    class: 's_popup_center modal',
+                });
+                await this.editorDom.removeClass({
+                    domNode: this.$target.find('.s_popup_frame')[0],
+                    class: 'modal',
+                });
+                await this.editorDom.removeClass({
+                    domNode: this.$target.find('.s_popup_content')[0],
+                    class: 'modal-content',
+                });
+            }
+            if (widgetValue === 'fixedTop') {
+                await this.editorDom.removeClass({
+                    domNode: this.$target[0],
+                    class: 's_popup_fixed_top',
+                });
+            } else {
+                await this.editorDom.addClass({
+                    domNode: this.$target[0],
+                    class: 's_popup_fixed_top',
+                });
+            }
         });
     },
 

@@ -791,18 +791,25 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     }),
     pageOptionsSetValueCallbacks: {
         header_overlay: async function (value, wysiwyg) {
-            await wysiwyg.editor.execCommand(value ? 'dom.addClass' : 'dom.removeClass', {
-                domNode: $('#wrapwrap')[0],
-                class: 'o_header_overlay',
-            });
+            if (value) {
+                await this.editorDom.addClass({
+                    domNode: $('#wrapwrap')[0],
+                    class: 'o_header_overlay',
+                });
+            } else {
+                await this.editorDom.removeClass({
+                    domNode: $('#wrapwrap')[0],
+                    class: 'o_header_overlay',
+                });
+            }
         },
         header_color: async function (value, wysiwyg) {
-            await wysiwyg.editor.execBatch(async () => {
-                await wysiwyg.editor.execCommand('dom.removeClass', {
+            await this.wysiwyg.execBatch(async () => {
+                await this.editorDom.removeClass({
                     domNode: $('#wrapwrap > header')[0],
                     class: this.value,
                 });
-                await wysiwyg.editor.execCommand('dom.addClass', {
+                await this.editorDom.addClass({
                     domNode: $('#wrapwrap > header')[0],
                     class: value,
                 });
