@@ -31,10 +31,12 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
                     domNode: this.$target[0],
                     class: 'progress',
                 });
-                await this.editorCommands.wrap(
-                    this.$target.find('.progress-bar')[0], $('<div/>', {
+                await this.editor.execCommand('dom.wrap', {
+                    domContainer: this.$target.find('.progress-bar')[0],
+                    html: $('<div/>', {
                         class: 'progress',
-                    })[0].outerHTML);
+                    })[0].outerHTML,
+                });
                 await this.editor.execCommand('dom.addClass', {
                     domNode: this.$target.find('.progress-bar span')[0],
                     class: 's_progress_bar_text',
