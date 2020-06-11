@@ -2306,12 +2306,11 @@ continue;
      * @returns {[Node, 'BEFORE'|'AFTER'|'INSIDE']}
      */
     _getRelativePosition(element) {
-        const layout = this.wysiwyg.editor.plugins.get(this.JWEditorLib.Layout);
-        const domLayout = layout.engines.dom;
+        const domHelpers = this.wysiwyg.editor.plugins.get(this.JWEditorLib.DomHelpers);
 
         let currentNode = element.nextSibling;
         while (currentNode) {
-            const nodes = domLayout.getNodes(currentNode);
+            const nodes = domHelpers.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
                 return [currentNode, 'BEFORE'];
@@ -2320,7 +2319,7 @@ continue;
         }
         currentNode = element.previousSibling;
         while (currentNode) {
-            const nodes = domLayout.getNodes(currentNode);
+            const nodes = domHelpers.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
                 return [currentNode, 'AFTER'];
@@ -2329,7 +2328,7 @@ continue;
         }
         currentNode = element.parentElement;
         while (currentNode) {
-            const nodes = domLayout.getNodes(currentNode);
+            const nodes = domHelpers.getNodes(currentNode);
             const node = nodes && nodes[0];
             if (node) {
                 return [currentNode, 'INSIDE'];

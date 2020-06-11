@@ -197,7 +197,7 @@ var Wysiwyg = Widget.extend({
                 const linkFormat = modifiers.find(JWEditorLib.LinkFormat);
                 const attributes = modifiers.find(JWEditorLib.Attributes);
                 const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
-                return {
+                linkInfo = {
                     text: text,
                     url: linkFormat && linkFormat.url || '',
                     class: attributes && attributes.get('class') || '',
