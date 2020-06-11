@@ -2066,11 +2066,17 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
             case 'prev':
                 await this.wysiwyg.execBatch(async ()=> {
                     if (this.$target.prev()[0]) {
-                        await this.editorCommands.moveBefore(this.$target.prev()[0], this.$target[0]);
+                        await this.editor.execCommand('dom.moveBefore', {
+                            fromDomNode: this.$target.prev()[0],
+                            toDomNode: this.$target[0],
+                        });
                     }
                     if (isNavItem) {
-                        if (tabPane.prev()[0]) {
-                            await this.editorCommands.moveBefore($tabPane.prev()[0], $tabPane[0]);
+                        if ($tabPane.prev()[0]) {
+                            await this.editor.execCommand('dom.moveBefore', {
+                                fromDomNode: $tabPane.prev()[0],
+                                toDomNode: $tabPane[0],
+                            });
                         }
                     }
                 });
@@ -2078,11 +2084,17 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
             case 'next':
                 await this.wysiwyg.execBatch(async ()=> {
                     if (this.$target.next()[0]) {
-                        await this.editorCommands.moveAfter(this.$target.next()[0], this.$target[0]);
+                        await this.editor.execCommand('dom.moveAfter', {
+                            fromDomNode: this.$target.next()[0],
+                            toDomNode: this.$target[0],
+                        });
                     }
                     if (isNavItem) {
-                        if (tabPane.next()[0]) {
-                            await this.editorCommands.moveAfter($tabPane.next()[0], $tabPane[0]);
+                        if ($tabPane.next()[0]) {
+                            await this.editor.execCommand('dom.moveAfter', {
+                                fromDomNode: $tabPane.next()[0],
+                                toDomNode: $tabPane[0],
+                            });
                         }
                     }
                 });
