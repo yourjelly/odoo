@@ -363,16 +363,32 @@ var Wysiwyg = Widget.extend({
     },
 
     _saveCoverPropertiesBlocks: async function (editable) {
-        var el = await this.editor.execCommand('dom.getRecordCover');
+        let el;
+        await this.editor.execCustomCommand(async () => {
+            const layout = this.editor.plugins.get(JWEditorLib.Layout);
+            const domLayout = layout.engines.dom;
+            const editableNode = domLayout.components.get('editable')[0];
+            const covers = editableNode.descendants(node => {
+                const attributes = node.modifiers.find(JWEditorLib.Attributes);
+
+                if (attributes && attributes.length && typeof attributes.get('class') === 'string') {
+                    return attributes.classList.has('o_record_cover_container');
+                }
+            });
+            const cover = covers && covers[0];
+            if (cover) {
+                el = domLayout.getDomNodes(cover)[0];
+            }
+        });
         if (!el) {
-            console.warn('no getRecordCover found');
+            console.warn('No cover found.');
             return;
         }
 
         var resModel = el.dataset.resModel;
         var resID = parseInt(el.dataset.resId);
         if (!resModel || !resID) {
-            throw new Error('There should be a model and id associated to the cover');
+            throw new Error('There should be a model and id associated to the cover.');
         }
 
         this.__savedCovers = this.__savedCovers || {};
