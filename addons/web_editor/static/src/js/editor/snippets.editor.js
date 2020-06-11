@@ -68,7 +68,6 @@ var SnippetEditor = Widget.extend({
         this.isTargetMovable = false;
         this.JWEditorLib = options.JWEditorLib;
         this.wysiwyg = options.wysiwyg;
-        this.editorCommands = options.wysiwyg.editorCommands;
         this.snippetMenu = snippetMenu;
 
         this.__isStarted = new Promise(resolve => {
@@ -902,7 +901,6 @@ var SnippetsMenu = Widget.extend({
         this.$body = this.$editor.closest('body');
 
         this.wysiwyg = options.wysiwyg;
-        this.editorCommands = this.wysiwyg.editorCommands;
 
         this.JWEditorLib = options.JWEditorLib;
         if (this.JWEditorLib) {

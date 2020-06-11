@@ -76,9 +76,10 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
         }
 
         // Blockquote Footer
-        // We currently create a function to retrieve the element as all "editorCommands" call
-        // recreate all elements.
-        // todo: remove this when the jabberwock editor support miminum dom modification.
+        // We currently create a function to retrieve the element as all
+        // `editor.execCommand` calls recreate all elements.
+        // todo: remove this when the jabberwock editor support miminum dom
+        //modification.
         const getFooter = () => this.$target.find('footer');
         await this.editor.execCommand(widgetValue === 'cover' ? 'dom.addClass' : 'dom.removeClass', {
             domNode: [getFooter()[0], this.$target[0]],

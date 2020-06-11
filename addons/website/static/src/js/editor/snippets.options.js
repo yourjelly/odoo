@@ -2109,9 +2109,10 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
      */
     start: async function () {
         await this._super(...arguments);
-        // We currently create a function to retrieve the element as all "editorCommands" call
-        // recreate all elements.
-        // todo: remove this when the jabberwock editor support miminum dom modification.
+        // We currently create a function to retrieve the element as all
+        // `editor.execCommand` calls recreate all elements.
+        // todo: remove this when the jabberwock editor support miminum dom
+        //modification.
         this.getButton = ()=> this.$('.o_scroll_button');
         this.$buttonTemlate = this.$('.o_scroll_button');
     },

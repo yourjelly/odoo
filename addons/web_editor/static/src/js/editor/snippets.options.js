@@ -1529,9 +1529,8 @@ const SnippetOptionWidget = Widget.extend({
         this.$overlay = $overlay;
         this.data = data;
         this.options = options;
-        this.editor = this.options.wysiwyg.editor;
         this.wysiwyg = this.options.wysiwyg;
-        this.editorCommands = this.options.wysiwyg.editorCommands;
+        this.editor = this.options.wysiwyg.editor;
 
         this.className = 'snippet-option-' + this.data.optionName;
         this._userValueWidgets = [];

@@ -153,9 +153,6 @@ var Wysiwyg = Widget.extend({
             const editableNVnode = domLayout.components.get('editable')[0];
             this.editorEditable = domLayout.getDomNodes(editableNVnode)[0];
 
-            // init editor commands helpers for Odoo
-            this.editorCommands = JWEditorLib.getOdooCommands(this.editor);
-
             // todo: handle megamenu
 
             if (this.options.snippets) {
