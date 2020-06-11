@@ -335,7 +335,13 @@ var Wysiwyg = Widget.extend({
     },
 
     _saveAllViewsBlocks: async function (views) {
-        const structureNodes = await this.editor.execCommand('dom.getStructures');
+        let structureNodes;
+        await this.editor.execCustomCommand(async () => {
+            const layout = this.editor.plugins.get(JWEditorLib.Layout);
+            const domLayout = layout.engines.dom;
+            const editable = domLayout.components.get('editable')[0];
+            structureNodes = editable.descendants(JWEditorLib.OdooStructureNode);
+        });
         const promises = [];
         for (const structureNode of structureNodes) {
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
