@@ -1531,7 +1531,7 @@ const SnippetOptionWidget = Widget.extend({
         this.options = options;
         this.wysiwyg = this.options.wysiwyg;
         this.editor = this.options.wysiwyg.editor;
-        this.editorDom = this.editor.plugins.get(this.JWEditorLib.DomHelpers);
+        this.editorDom = this.editor.plugins.get(this.options.JWEditorLib.DomHelpers);
 
         this.className = 'snippet-option-' + this.data.optionName;
         this._userValueWidgets = [];

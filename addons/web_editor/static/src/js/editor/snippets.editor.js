@@ -69,7 +69,7 @@ var SnippetEditor = Widget.extend({
         this.JWEditorLib = options.JWEditorLib;
         this.wysiwyg = options.wysiwyg;
         this.editor = options.wysiwyg.editor;
-        this.editorDom = this.editor.plugins.get(this.JWEditorLib.DomHelpers);
+        this.editorDom = options.wysiwyg.editor.plugins.get(options.JWEditorLib.DomHelpers);
         this.snippetMenu = snippetMenu;
 
         this.__isStarted = new Promise(resolve => {
@@ -898,6 +898,7 @@ var SnippetsMenu = Widget.extend({
             const layout = jwEditor.plugins.get(this.JWEditorLib.Layout);
             this.layoutEngine = layout.engines.dom;
             this.nodeToEditor = new Map();
+            this.editorDom = options.wysiwyg.editor.plugins.get(options.JWEditorLib.DomHelpers);
         }
 
         this._notActivableElementsSelector = [
@@ -1755,9 +1756,9 @@ continue;
                 isEnabled = (cache[k]['drop-near'] || cache[k]['drop-in']);
             });
             if (isEnabled) {
-                await this.editorDom.removeClass(snippetDraggable, 'o_disabled');
+                await self.editorDom.removeClass(snippetDraggable, 'o_disabled');
             } else {
-                await this.editorDom.addClass(snippetDraggable, 'o_disabled');
+                await self.editorDom.addClass(snippetDraggable, 'o_disabled');
             }
         }
     },
