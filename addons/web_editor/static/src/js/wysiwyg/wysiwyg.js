@@ -208,10 +208,10 @@ var Wysiwyg = Widget.extend({
                         };
                         await this.editor.execCommand('link', linkParams);
                         await this.editor.execCustomCommand(async () => {
-                            const nodes = params.context.range.targetedNodes(this.editor.InlineNode);
-                            const links = nodes.map(node => node.modifiers.find(this.editor.LinkFormat)).filter(f => f);
+                            const nodes = this.editor.selection.range.targetedNodes(JWEditorLib.InlineNode);
+                            const links = nodes.map(node => node.modifiers.find(JWEditorLib.LinkFormat)).filter(f => f);
                             for (const link of links) {
-                                link.modifiers.get(this.editor.Attributes).set('class', params.classes);
+                                link.modifiers.get(JWEditorLib.Attributes).set('class', params.classes);
                             }
                         });
                     });
