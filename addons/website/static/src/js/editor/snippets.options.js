@@ -2065,17 +2065,25 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
         switch (widgetValue) {
             case 'prev':
                 await this.wysiwyg.execBatch(async ()=> {
-                    await this.editorCommands.moveBefore(this.$target.prev()[0], this.$target[0]);
+                    if (this.$target.prev()[0]) {
+                        await this.editorCommands.moveBefore(this.$target.prev()[0], this.$target[0]);
+                    }
                     if (isNavItem) {
-                        await this.editorCommands.moveBefore($tabPane.prev()[0], $tabPane[0]);
+                        if (tabPane.prev()[0]) {
+                            await this.editorCommands.moveBefore($tabPane.prev()[0], $tabPane[0]);
+                        }
                     }
                 });
                 break;
             case 'next':
                 await this.wysiwyg.execBatch(async ()=> {
-                    await this.editorCommands.moveAfter(this.$target.next()[0], this.$target[0]);
+                    if (this.$target.next()[0]) {
+                        await this.editorCommands.moveAfter(this.$target.next()[0], this.$target[0]);
+                    }
                     if (isNavItem) {
-                        await this.editorCommands.moveAfter($tabPane.next()[0], $tabPane[0]);
+                        if (tabPane.next()[0]) {
+                            await this.editorCommands.moveAfter($tabPane.next()[0], $tabPane[0]);
+                        }
                     }
                 });
                 break;
