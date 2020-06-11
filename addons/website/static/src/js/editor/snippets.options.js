@@ -1764,31 +1764,16 @@ snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
      */
     async setShadow(previewMode, widgetValue, params) {
         if (widgetValue) {
-            await this.editorDom.addClass({
-                domNode: this.$target[0],
-                class: params.shadowClass,
-            });
+            await this.editorDom.addClass(this.$target[0], params.shadowClass);
         } else {
-            await this.editorDom.removeClass({
-                domNode: this.$target[0],
-                class: params.shadowClass,
-            });
+            await this.editorDom.removeClass(this.$target[0], params.shadowClass);
         }
         if (widgetValue) {
             const inset = widgetValue === 'inset' ? widgetValue : '';
             const values = this.$target.css('box-shadow').replace('inset', '') + ` ${inset}`;
-            await this.editorDom.setStyle({
-                domNode: this.$target[0],
-                name: 'box-shadow',
-                value: values,
-                important: true,
-            });
+            await this.editorDom.setStyle(this.$target[0], 'box-shadow', values, true);
         } else {
-            await this.editorDom.setStyle({
-                domNode: this.$target[0],
-                name: 'box-shadow',
-                value: '',
-            });
+            await this.editorDom.setStyle(this.$target[0], 'box-shadow', '');
         }
     },
 
@@ -1902,22 +1887,11 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
     background: async function (previewMode, widgetValue, params) {
         if (widgetValue === '') {
             await this.wysiwyg.execBatch(async ()=> {
-                await this.editorDom.setStyle({
-                    domNode: this.$image[0],
-                    name: 'background-image',
-                    value: '',
-                });
-                await this.editorDom.removeClass({
-                    domNode: this.$target[0],
-                    class: 'o_record_has_cover',
-                });
+                await this.editorDom.setStyle(this.$image[0], 'background-image', '');
+                await this.editorDom.removeClass(this.$target[0], 'o_record_has_cover');
             });
         } else {
-            await this.editorDom.setStyle({
-                domNode: this.$image[0],
-                name: 'background-image',
-                value: `url('${widgetValue}')`,
-            });
+            await this.editorDom.setStyle(this.$image[0], 'background-image', `url('${widgetValue}')`);
             const $defaultSizeBtn = this.$el.find('.o_record_cover_opt_size_default');
             $defaultSizeBtn.click();
             $defaultSizeBtn.closest('we-select').click();
@@ -2073,17 +2047,11 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
             case 'prev':
                 await this.wysiwyg.execBatch(async ()=> {
                     if (this.$target.prev()[0]) {
-                        await this.editorDom.moveBefore({
-                            fromDomNode: this.$target.prev()[0],
-                            toDomNode: this.$target[0],
-                        });
+                        await this.editorDom.moveBefore(this.$target.prev()[0], this.$target[0]);
                     }
                     if (isNavItem) {
                         if ($tabPane.prev()[0]) {
-                            await this.editorDom.moveBefore({
-                                fromDomNode: $tabPane.prev()[0],
-                                toDomNode: $tabPane[0],
-                            });
+                            await this.editorDom.moveBefore($tabPane.prev()[0], $tabPane[0]);
                         }
                     }
                 });
@@ -2091,17 +2059,11 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
             case 'next':
                 await this.wysiwyg.execBatch(async ()=> {
                     if (this.$target.next()[0]) {
-                        await this.editorDom.moveAfter({
-                            fromDomNode: this.$target.next()[0],
-                            toDomNode: this.$target[0],
-                        });
+                        await this.editorDom.moveAfter(this.$target.next()[0], this.$target[0]);
                     }
                     if (isNavItem) {
                         if ($tabPane.next()[0]) {
-                            await this.editorDom.moveAfter({
-                                fromDomNode: $tabPane.next()[0],
-                                toDomNode: $tabPane[0],
-                            });
+                            await this.editorDom.moveAfter($tabPane.next()[0], $tabPane[0]);
                         }
                     }
                 });
@@ -2133,9 +2095,7 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
         await this._super(...arguments);
         const $button = this.getButton();
         if ($button.length && this.el.offsetParent === null) {
-            await this.editorDom.remove({
-                domNode: $button[0],
-            });
+            await this.editorDom.remove($button[0]);
         }
     },
 
@@ -2168,17 +2128,9 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
                 anchor.appendChild(arrow);
                 this.$buttonTemplate = $(anchor);
             }
-            await this.editorDom.insertHtml(
-                {
-                    html: this.$buttonTemplate[0].outerHTML,
-                    domNode: this.$target[0],
-                    position: 'INSIDE',
-                }
-            );
+            await this.editorDom.insertHtml(this.$buttonTemplate[0].outerHTML, this.$target[0], 'INSIDE');
         } else {
-            await this.editorDom.remove({
-                domNode: this.getButton()[0],
-            });
+            await this.editorDom.remove(this.getButton()[0]);
         }
     },
 

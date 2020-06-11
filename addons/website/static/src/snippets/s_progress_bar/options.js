@@ -27,46 +27,21 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
             // todo: Test this.
             if (this.$target.hasClass('progress')) {
                 this.$target.removeClass('progress');
-                await this.editorDom.removeClass({
-                    domNode: this.$target[0],
-                    class: 'progress',
-                });
-                await this.editorDom.wrap({
-                    domContainer: this.$target.find('.progress-bar')[0],
-                    html: $('<div/>', {
-                        class: 'progress',
-                    })[0].outerHTML,
-                });
-                await this.editorDom.addClass({
-                    domNode: this.$target.find('.progress-bar span')[0],
-                    class: 's_progress_bar_text',
-                });
+                await this.editorDom.removeClass(this.$target[0], 'progress');
+                await this.editorDom.wrap(this.$target.find('.progress-bar')[0], $('<div/>', {class: 'progress'})[0].outerHTML);
+                await this.editorDom.addClass(this.$target.find('.progress-bar span')[0], 's_progress_bar_text');
             }
 
-            await this.editorDom.remove({
-                domNode: $text[0].childNodes[0],
-            });
+            await this.editorDom.remove($text[0].childNodes[0]);
             if (!$text.length) {
                 $text = $('<span/>').addClass('s_progress_bar_text').html(_t('80% Development'));
             }
 
 
             if (widgetValue === 'inline') {
-                await this.editorDom.insertHtml(
-                    {
-                        html: $text[0].outerHTML,
-                        domNode: this.$target.find('.progress-bar')[0],
-                        position: 'INSIDE',
-                    }
-                );
+                await this.editorDom.insertHtml($text[0].outerHTML, this.$target.find('.progress-bar')[0], 'INSIDE');
             } else {
-                await this.editorDom.insertHtml(
-                    {
-                        html: $text[0].outerHTML,
-                        domNode: this.$target.find('.progress')[0],
-                        position: 'BEFORE',
-                    }
-                );
+                await this.editorDom.insertHtml($text[0].outerHTML, this.$target.find('.progress')[0], 'BEFORE');
             }
         });
     },
@@ -86,20 +61,9 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
             const previousProgressChildNodes = $progressBarText[0].childNodes[0];
             $progressBarText.text($progressBarText.text().replace(/[0-9]+%/, value + '%'));
             const replacedText = $progressBarText[0].outerHTML;
-            await this.editorDom.replace({
-                domNodes: previousProgressChildNodes,
-                html: replacedText
-            });
-            await this.editorDom.setStyle({
-                domNode: $progressBar[0],
-                name: 'width',
-                value: value + "%",
-            });
-            await this.editorDom.setAttribute({
-                domNode: $progressBar[0],
-                name: 'aria-valuenow',
-                value: '' + value,
-            });
+            await this.editorDom.replace(previousProgressChildNodes, replacedText);
+            await this.editorDom.setStyle($progressBar[0], 'width', value + "%");
+            await this.editorDom.setAttribute($progressBar[0], 'aria-valuenow', '' + value);
         });
             const $progressBar = this.$target.find('.progress-bar');
     },

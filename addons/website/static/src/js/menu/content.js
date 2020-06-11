@@ -792,27 +792,15 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     pageOptionsSetValueCallbacks: {
         header_overlay: async function (value, wysiwyg) {
             if (value) {
-                await this.editorDom.addClass({
-                    domNode: $('#wrapwrap')[0],
-                    class: 'o_header_overlay',
-                });
+                await this.editorDom.addClass($('#wrapwrap')[0], 'o_header_overlay');
             } else {
-                await this.editorDom.removeClass({
-                    domNode: $('#wrapwrap')[0],
-                    class: 'o_header_overlay',
-                });
+                await this.editorDom.removeClass($('#wrapwrap')[0], 'o_header_overlay');
             }
         },
         header_color: async function (value, wysiwyg) {
             await this.wysiwyg.execBatch(async () => {
-                await this.editorDom.removeClass({
-                    domNode: $('#wrapwrap > header')[0],
-                    class: this.value,
-                });
-                await this.editorDom.addClass({
-                    domNode: $('#wrapwrap > header')[0],
-                    class: value,
-                });
+                await this.editorDom.removeClass($('#wrapwrap > header')[0], this.value);
+                await this.editorDom.addClass($('#wrapwrap > header')[0], value);
             });
         },
     },

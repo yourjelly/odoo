@@ -1660,17 +1660,11 @@ const SnippetOptionWidget = Widget.extend({
         await this.wysiwyg.execBatch(async ()=> {
             for (const classNames of params.possibleValues) {
                 if (classNames) {
-                    await this.editorDom.removeClass({
-                        domNode: this.$target[0],
-                        class: classNames,
-                    });
+                    await this.editorDom.removeClass(this.$target[0], classNames);
                 }
             }
             if (widgetValue) {
-                await this.editorDom.addClass({
-                    domNode: this.$target[0],
-                    class: widgetValue,
-                });
+                await this.editorDom.addClass(this.$target[0], widgetValue);
             }
         });
     },
@@ -1686,11 +1680,7 @@ const SnippetOptionWidget = Widget.extend({
      */
     selectDataAttribute: async function (previewMode, widgetValue, params) {
         const value = await this._selectAttributeHelper(widgetValue, params);
-        await this.editorDom.setAttribute({
-            domNode: this.$target[0],
-            name: `data-${params.attributeName}`,
-            value: value,
-        });
+        await this.editorDom.setAttribute(this.$target[0], `data-${params.attributeName}`, value);
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -1704,11 +1694,7 @@ const SnippetOptionWidget = Widget.extend({
      */
     selectAttribute: async function (previewMode, widgetValue, params) {
         const value = await this._selectAttributeHelper(widgetValue, params);
-        await this.editorDom.setAttribute({
-            domNode: this.$target[0],
-            name: params.attributeName,
-            value: value,
-        });
+        await this.editorDom.setAttribute(this.$target[0], params.attributeName, value);
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -1730,17 +1716,10 @@ const SnippetOptionWidget = Widget.extend({
             for (const cssProp of cssProps) {
                 // Always reset the inline style first to not put inline style on an
                 // element which already have this style through css stylesheets.
-                await this.editorDom.setStyle({
-                    domNode: this.$target[0],
-                    name: cssProp,
-                    value: '',
-                });
+                await this.editorDom.setStyle(this.$target[0], cssProp, '');
             }
             if (params.extraClass) {
-                await this.editorDom.removeClass({
-                    domNode: this.$target[0],
-                    class: params.extraClass,
-                });
+                await this.editorDom.removeClass(this.$target[0], params.extraClass);
             }
 
             // Only allow to use a color name as a className if we know about the
@@ -1748,10 +1727,7 @@ const SnippetOptionWidget = Widget.extend({
             // (otherwise we suppose that we should use the actual related color).
             if (params.colorNames && params.colorPrefix) {
                 const classes = weUtils.computeColorClasses(params.colorNames, params.colorPrefix);
-                await this.editorDom.removeClass({
-                    domNode: this.$target[0],
-                    class: classes,
-                });
+                await this.editorDom.removeClass(this.$target[0], classes);
 
                 if (weUtils.isColorCombinationName(widgetValue)) {
                     // Those are the special color combinations classes. Just have
@@ -1760,37 +1736,25 @@ const SnippetOptionWidget = Widget.extend({
                     if (params.extraClass) {
                         classes.push(params.extraClass);
                     }
-                    await this.editorDom.addClass({
-                        domNode: this.$target[0],
-                        class: classes,
-                    });
+                    await this.editorDom.addClass(this.$target[0], classes);
                     return;
                 }
 
                 if (params.colorNames.includes(widgetValue)) {
                     const originalCSSValue = window.getComputedStyle(this.$target[0])[cssProps[0]];
                     const className = params.colorPrefix + widgetValue;
-                    await this.editorDom.addClass({
-                        domNode: this.$target[0],
-                        class: className,
-                    });
+                    await this.editorDom.addClass(this.$target[0], className);
                     if (originalCSSValue !== window.getComputedStyle(this.$target[0])[cssProps[0]]) {
                         // If applying the class did indeed changed the css
                         // property we are editing, nothing more has to be done.
                         // (except adding the extra class)
-                        await this.editorDom.addClass({
-                            domNode: this.$target[0],
-                            class: className,
-                        });
+                        await this.editorDom.addClass(this.$target[0], className);
                     } else {
                         // Otherwise, it means that class probably does not
                         // exist, we remove it and continue. Especially useful
                         // for some prefixes which only work with some color
                         // names but not all.
-                        await this.editorDom.removeClass({
-                            domNode: this.$target[0],
-                            class: className,
-                        });
+                        await this.editorDom.removeClass(this.$target[0], className);
                     }
                 }
             }
@@ -1833,12 +1797,7 @@ const SnippetOptionWidget = Widget.extend({
 
             async function applyCSS(cssProp, cssValue, styles) {
                 if (!weUtils.areCssValuesEqual(styles[cssProp], cssValue)) {
-                    await this.editorDom.setStyle({
-                        domNode: this.$target[0],
-                        name: cssProp,
-                        value: cssValue,
-                        important: true,
-                    });
+                    await this.editorDom.setStyle(this.$target[0], cssProp, cssValue, true);
                     return true;
                 }
                 return false;
@@ -1846,15 +1805,9 @@ const SnippetOptionWidget = Widget.extend({
 
             if (params.extraClass) {
                 if (hasUserValue) {
-                    await this.editorDom.addClass({
-                        domNode: this.$target[0],
-                        class: params.extraClass,
-                    });
+                    await this.editorDom.addClass(this.$target[0], params.extraClass);
                 } else {
-                    await this.editorDom.removeClass({
-                        domNode: this.$target[0],
-                        class: params.extraClass,
-                    });
+                    await this.editorDom.removeClass(this.$target[0], params.extraClass);
                 }
             }
         });
@@ -2367,15 +2320,9 @@ break;
         }
         if (params.extraClass) {
             if (params.defaultValue === value) {
-                await this.editorDom.removeClass({
-                    domNode: this.$target[0],
-                    class: params.extraClass,
-                });
+                await this.editorDom.removeClass(this.$target[0], params.extraClass);
             } else {
-                await this.editorDom.addClass({
-                    domNode: this.$target[0],
-                    class: params.extraClass,
-                });
+                await this.editorDom.addClass(this.$target[0], params.extraClass);
             }
         }
         return value;
@@ -2632,15 +2579,8 @@ registry.sizing = SnippetOptionWidget.extend({
                     self.$target.attr('class', cleanedClass);
                     self.$target.addClass(resize[0][next]);
                     await self.wysiwyg.execBatch(async () => {
-                        await self.editorDom.setAttribute({
-                            domNode: self.$target[0],
-                            name: 'class',
-                            value: cleanedClass,
-                        });
-                        await self.editorDom.addClass({
-                            domNode: self.$target[0],
-                            class: resize[0][next],
-                        });
+                        await self.editorDom.setAttribute(self.$target[0], 'class', cleanedClass);
+                        await self.editorDom.addClass(self.$target[0], resize[0][next]);
                     });
                     current = next;
                     change = true;
@@ -2649,15 +2589,8 @@ registry.sizing = SnippetOptionWidget.extend({
                     self.$target.attr('class', cleanedClass);
                     self.$target.addClass(resize[0][prev]);
                     await self.wysiwyg.execBatch(async () => {
-                        await self.editorDom.setAttribute({
-                            domNode: self.$target[0],
-                            name: 'class',
-                            value: cleanedClass,
-                        });
-                        await self.editorDom.addClass({
-                            domNode: self.$target[0],
-                            class: resize[0][prev],
-                        });
+                        await self.editorDom.setAttribute(self.$target[0], 'class', cleanedClass);
+                        await self.editorDom.addClass(self.$target[0], resize[0][prev]);
                     });
                     current = prev;
                     change = true;
@@ -3253,25 +3186,11 @@ registry.background = SnippetOptionWidget.extend({
         }
 
         if (widgetValue) {
-            await this.editorDom.setStyle({
-                domNode: this.$target[0],
-                name: 'background-image',
-                value: `url('${widgetValue}')`,
-            });
-            await this.editorDom.addClass({
-                domNode: this.$target[0],
-                class: 'oe_img_bg',
-            });
+            await this.editorDom.setStyle(this.$target[0], 'background-image', `url('${widgetValue}')`);
+            await this.editorDom.addClass(this.$target[0], 'oe_img_bg');
         } else {
-            await this.editorDom.setStyle({
-                domNode: this.$target[0],
-                name: 'background-image',
-                value: '',
-            });
-            await this.editorDom.removeClass({
-                domNode: this.$target[0],
-                class: 'oe_img_bg',
-            });
+            await this.editorDom.setStyle(this.$target[0], 'background-image', '');
+            await this.editorDom.removeClass(this.$target[0], 'oe_img_bg');
         }
 
         if (previewMode === 'reset') {
@@ -3402,26 +3321,12 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
     backgroundType: async function (previewMode, widgetValue, params) {
         await this.wysiwyg.execBatch(async ()=> {
             if (widgetValue === 'repeat-pattern') {
-                await this.editorDom.addClass({
-                    domNode: this.$target[0],
-                    class: 'o_bg_img_opt_repeat',
-                });
+                await this.editorDom.addClass(this.$target[0], 'o_bg_img_opt_repeat');
             } else {
-                await this.editorDom.removeClass({
-                    domNode: this.$target[0],
-                    class: 'o_bg_img_opt_repeat',
-                });
+                await this.editorDom.removeClass(this.$target[0], 'o_bg_img_opt_repeat');
             }
-            await this.editorDom.setStyle({
-                domNode: this.$target[0],
-                name: 'background-position',
-                value: '',
-            });
-            await this.editorDom.setStyle({
-                domNode: this.$target[0],
-                name: 'background-size',
-                value: '',
-            });
+            await this.editorDom.setStyle(this.$target[0], 'background-position', '');
+            await this.editorDom.setStyle(this.$target[0], 'background-size', '');
         });
     },
     /**
@@ -3492,11 +3397,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         this.$overlayBackground = this.$overlayContent.find('.o_overlay_background');
 
         this.$backgroundOverlay.on('click', '.o_btn_apply', async () => {
-            await this.editorDom.setStyle({
-                domNode: this.$target[0],
-                name: 'background-position',
-                value: this.$bgDragger.css('background-position'),
-            });
+            await this.editorDom.setStyle(this.$target[0], 'background-position', this.$bgDragger.css('background-position'));
             this._toggleBgOverlay(false);
         });
         this.$backgroundOverlay.on('click', '.o_btn_discard', () => {

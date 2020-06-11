@@ -131,55 +131,19 @@ snippetOptions.registry.NavTabsStyle = snippetOptions.SnippetOptionWidget.extend
             const isPills = widgetValue === 'pills';
             const firstTab = this.$target.find('.s_tabs_nav:first')[0];
             if (isPills) {
-                await this.editorDom.removeClass({
-                    domNode: $nav,
-                    class: 'nav-tabs card-header-tabs',
-                });
-                await this.editorDom.addClass({
-                    domNode: $nav,
-                    class: 'nav-pills',
-                });
-                await this.editorDom.removeClass({
-                    domNode: firstTab,
-                    class: 'card-header',
-                });
-                await this.editorDom.addClass({
-                    domNode: firstTab,
-                    class: 'mb-3',
-                });
-                await this.editorDom.removeClass({
-                    domNode: this.$target[0],
-                    class: 'card',
-                });
-                await this.editorDom.removeClass({
-                    domNode: this.$target.find('.s_tabs_content:first')[0],
-                    class: 'card-body',
-                });
+                await this.editorDom.removeClass($nav, 'nav-tabs card-header-tabs');
+                await this.editorDom.addClass($nav, 'nav-pills');
+                await this.editorDom.removeClass(firstTab, 'card-header');
+                await this.editorDom.addClass(firstTab, 'mb-3');
+                await this.editorDom.removeClass(this.$target[0], 'card');
+                await this.editorDom.removeClass(this.$target.find('.s_tabs_content:first')[0], 'card-body');
             } else {
-                await this.editorDom.addClass({
-                    domNode: $nav,
-                    class: 'nav-tabs card-header-tabs',
-                });
-                await this.editorDom.removeClass({
-                    domNode: $nav,
-                    class: 'nav-pills',
-                });
-                await this.editorDom.addClass({
-                    domNode: firstTab,
-                    class: 'card-header',
-                });
-                await this.editorDom.removeClass({
-                    domNode: firstTab,
-                    class: 'mb-3',
-                });
-                await this.editorDom.addClass({
-                    domNode: this.$target[0],
-                    class: 'card',
-                });
-                await this.editorDom.addClass({
-                    domNode: this.$target.find('.s_tabs_content:first')[0],
-                    class: 'card-body',
-                });
+                await this.editorDom.addClass($nav, 'nav-tabs card-header-tabs');
+                await this.editorDom.removeClass($nav, 'nav-pills');
+                await this.editorDom.addClass(firstTab, 'card-header');
+                await this.editorDom.removeClass(firstTab, 'mb-3');
+                await this.editorDom.addClass(this.$target[0], 'card');
+                await this.editorDom.addClass(this.$target.find('.s_tabs_content:first')[0], 'card-body');
             }
         });
     },

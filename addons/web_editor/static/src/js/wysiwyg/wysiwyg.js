@@ -242,11 +242,7 @@ var Wysiwyg = Widget.extend({
             );
             mediaDialog.open();
             mediaDialog.on('save', this, async (element) => {
-                await this.editorDom.insertHtml(
-                    {
-                        html: element.outerHTML,
-                    }
-                );
+                await this.editorDom.insertHtml(element.outerHTML);
                 resolve();
             });
             mediaDialog.on('cancel', this, resolve);
@@ -496,10 +492,7 @@ var Wysiwyg = Widget.extend({
                     const isBackground = !el.matches('img');
                     el.classList.remove('o_modified_image_to_save');
 
-                    await this.editorDom.removeClass({
-                        domNode: el,
-                        value: 'o_modified_image_to_save',
-                    });
+                    await this.editorDom.removeClass(el, 'o_modified_image_to_save');
                     // Modifying an image always creates a copy of the original, even if
                     // it was modified previously, as the other modified image may be used
                     // elsewhere if the snippet was duplicated or was saved as a custom one.
@@ -512,22 +505,10 @@ var Wysiwyg = Widget.extend({
                         },
                     });
                     if (isBackground) {
-                        await this.editorDom.setStyle({
-                            domNode: el,
-                            name: 'background-image',
-                            value: `url('${newAttachmentSrc}')`,
-                        });
-                        await this.editorDom.setAttribute({
-                            domNode: el,
-                            name: 'data-bgSrc',
-                            value: '',
-                        });
+                        await this.editorDom.setStyle(el, 'background-image', `url('${newAttachmentSrc}')`);
+                        await this.editorDom.setAttribute(el, 'data-bgSrc', '');
                     } else {
-                        await this.editorDom.setAttribute({
-                            domNode: el,
-                            name: 'src',
-                            value: newAttachmentSrc,
-                        });
+                        await this.editorDom.setAttribute(el, 'src', newAttachmentSrc);
                     }
                 });
                 return Promise.all(proms);

@@ -25,37 +25,23 @@ snippetOptions.registry.ProductCatalog = snippetOptions.SnippetOptionWidget.exte
                 for (const el of $dishes.toArray()) {
                     const $description = $(el).find('.s_product_catalog_dish_description');
                     if ($description.length) {
-                        await this.editorDom.removeClass({
-                            domNode: $description[0],
-                            class: 'd-none',
-                        });
+                        await this.editorDom.removeClass($description[0], 'd-none');
                     } else {
                         const descriptionEl = document.createElement('p');
                         descriptionEl.classList.add('s_product_catalog_dish_description', 'o_default_snippet_text');
                         descriptionEl.textContent = _t("Add a description here");
 
-                        await this.editorDom.insertHtml(
-                            {
-                                html: descriptionEl.outerHTML,
-                                domNode: el,
-                                position: 'INSIDE',
-                            }
-                        );
+                        await this.editorDom.insertHtml(descriptionEl.outerHTML, el, 'INSIDE');
                     }
                 }
             } else {
                 for (const el of $dishes.toArray()) {
                     const $description = $(el).find('.s_product_catalog_dish_description');
                     if ($description.hasClass('o_default_snippet_text')) {
-                        await this.editorDom.remove({
-                            domNode: $description[0],
-                        });
+                        await this.editorDom.remove($description[0]);
                     } else {
                         this.hasDescription = true;
-                        await this.editorDom.addClass({
-                            domNode: $description[0],
-                            class: 'd-none',
-                        });
+                        await this.editorDom.addClass($description[0], 'd-none');
                     }
                 }
             }

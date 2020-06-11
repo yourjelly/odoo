@@ -286,17 +286,13 @@ var SnippetEditor = Widget.extend({
             this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
             var $parent = this.$snippetBlock.parent();
             this.$snippetBlock.find('*').addBack().tooltip('dispose');
-            await this.editorDom.remove({
-                domNode: this.$snippetBlock[0],
-            });
+            await this.editorDom.remove(this.$snippetBlock[0]);
             this.$el.remove();
 
             var node = $parent[0];
             if (node && node.firstChild) {
                 if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
-                    this.editorDom.remove({
-                        domNode: node.firstChild,
-                    });
+                    this.editorDom.remove(node.firstChild);
                 }
             }
 
@@ -305,9 +301,7 @@ var SnippetEditor = Widget.extend({
                 while (!editor) {
                     var $nextParent = $parent.parent();
                     if (isEmptyAndRemovable($parent)) {
-                        this.editorDom.remove({
-                            domNode: this.$parent[0],
-                        });
+                        this.editorDom.remove(this.$parent[0]);
                     }
                     $parent = $nextParent;
                     editor = $parent.data('snippet-editor');
@@ -432,13 +426,7 @@ snippetEditor.destroy();
 
         const $clonedContent = this.$snippetBlock.clone(false);
 
-        const vNode = await this.editorDom.insertHtml(
-            {
-                html: $clonedContent[0].outerHTML,
-                domNode: this.$snippetBlock[0],
-                position: 'AFTER',
-            }
-        );
+        const vNode = await this.editorDom.insertHtml($clonedContent[0].outerHTML, this.$snippetBlock[0], 'AFTER');
         const layout = this.editor.plugins.get(this.JWEditorLib.Layout);
         const domEngine = layout.engines.dom;
         const $clone = $(domEngine.getDomNodes(vNode)[0]);
@@ -1767,15 +1755,9 @@ continue;
                 isEnabled = (cache[k]['drop-near'] || cache[k]['drop-in']);
             });
             if (isEnabled) {
-                await this.editorDom.removeClass({
-                    domNode: snippetDraggable,
-                    class: 'o_disabled',
-                });
+                await this.editorDom.removeClass(snippetDraggable, 'o_disabled');
             } else {
-                await this.editorDom.addClass({
-                    domNode: snippetDraggable,
-                    class: 'o_disabled',
-                });
+                await this.editorDom.addClass(snippetDraggable, 'o_disabled');
             }
         }
     },
@@ -2354,13 +2336,7 @@ continue;
             if (!position) {
                 throw new Error("Could not find a place to insert the snippet.");
             }
-            result = await this.editorDom.insertHtml(
-                {
-                    html: $snippet[0].outerHTML,
-                    domNode: position[0],
-                    position: position[1],
-                }
-            );
+            result = await this.editorDom.insertHtml($snippet[0].outerHTML, position[0], position[1]);
         });
         return result;
     }
