@@ -515,8 +515,7 @@ snippetEditor.destroy();
             const optionInstance = new (snippetOptions.registry[optionName] || snippetOptions.SnippetOptionWidget)(
                 this,
                 option.$el.children(),
-                this.$snippetBlock,
-                option.base_target,
+                option.base_target ? this.$snippetBlock.find(option.base_target).eq(0) : this.$snippetBlock,
                 this.$el,
                 _.extend({
                     optionName: optionName,

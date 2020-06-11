@@ -1521,12 +1521,11 @@ const SnippetOptionWidget = Widget.extend({
      *
      * @constructor
      */
-    init: function (parent, $uiElements, $snippetBlock, base_target, $overlay, data, options) {
+    init: function (parent, $uiElements, $snippetBlock, $overlay, data, options) {
         this._super.apply(this, arguments);
 
         this.$originalUIElements = $uiElements;
 
-        this.base_target = base_target;
         this.$overlay = $overlay;
         this.data = data;
         this.options = options;
