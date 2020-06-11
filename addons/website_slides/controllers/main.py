@@ -203,9 +203,12 @@ class WebsiteSlides(WebsiteProfile):
 
     def _extract_channel_tag_search(self, **post):
         tags = request.env['slide.channel.tag']
+        print("\n\n\n\ntags.................,",tags)
         if post.get('tags'):
             try:
                 tag_ids = literal_eval(post['tags'])
+                print("\n\n\n\n tag_ids.................,",tag_ids)
+
             except:
                 pass
             else:
@@ -312,6 +315,9 @@ class WebsiteSlides(WebsiteProfile):
 
     @http.route('/slides/all', type='http', auth="public", website=True, sitemap=True)
     def slides_channel_all(self, slide_type=None, my=False, **post):
+
+        print("\n\n\n\n\n........slef",self)
+        print("\n\n\n\n\n........post",post)
         """ Home page displaying a list of courses displayed according to some
         criterion and search terms.
 
@@ -340,6 +346,7 @@ class WebsiteSlides(WebsiteProfile):
         search_tags = self._extract_channel_tag_search(**post)
 
         values = self._prepare_user_values(**post)
+        # values['tags']=tuple(values['tags'])
         values.update({
             'channels': channels,
             'tag_groups': tag_groups,
@@ -350,7 +357,7 @@ class WebsiteSlides(WebsiteProfile):
             'search_channel_tag_id': post.get('channel_tag_id'),
             'top3_users': self._get_top3_users(),
         })
-
+        print("\n\n\n\n\n.........",values)
         return request.render('website_slides.courses_all', values)
 
     def _prepare_additional_channel_values(self, values, **kwargs):
