@@ -45,6 +45,22 @@ options.registry.mailing_list_subscribe = options.Class.extend({
     selectMailingList: function (previewMode, widgetValue, params) {
         this.$target.attr("data-list-id", widgetValue);
     },
+    /**
+    * Changes the newsletter style.
+    *
+    * @see this.selectClass for parameters
+    */
+    layout: function (previewMode, widgetValue, params) {
+        this.$target[0].dataset.layout = widgetValue;
+    },
+    /**
+    * Changes the newsletter size.
+    *
+    * @see this.selectClass for parameters
+    */
+    modalSize: function (previewMode, widgetValue, params) {
+        this.$target[0].dataset.modalSize = widgetValue;
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -57,7 +73,7 @@ options.registry.mailing_list_subscribe = options.Class.extend({
         return this._getMailingListButtons().then((mailingLists) => {
             this.mailingLists = mailingLists;
             const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
-            if (this.mailingLists.length) {
+            if (this.mailingLists.length && selectEl) {
                 this.mailingLists.forEach(option => selectEl.append(option.cloneNode(true)));
             }
         });
@@ -66,8 +82,12 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      * @override
      */
     _computeWidgetState: function (methodName, params) {
-        if (methodName === 'selectMailingList') {
-            return this._getMailingListID();
+        switch (methodName) {
+            case 'selectMailingList':
+                return this._getMailingListID();
+            case 'layout':
+            case 'modalSize':
+                return this.$target[0].dataset[methodName];
         }
         return this._super(...arguments);
     },
@@ -100,6 +120,19 @@ options.registry.mailing_list_subscribe = options.Class.extend({
             listID = this.mailingLists[0].dataset.selectMailingList;
         }
         return listID;
+    },
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    updateUIVisibility: async function () {
+        await this._super(...arguments);
+        const dataset = this.$target[0].dataset;
+        this.$target.find('.o_newsletter_modal').addClass(dataset.layout);
+        this.$target.find('.s_newsletter_popup_frame').addClass(dataset.modalSize);
     },
 });
 
