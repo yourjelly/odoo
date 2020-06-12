@@ -241,7 +241,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         await this._super(...arguments);
         const dataset = this.$target[0].dataset;
         this.$target.find('.o_newsletter_modal').addClass(dataset.layout);
-        this.$target.find('.s_newsletter_popup_frame').addClass(dataset.modalSize);
+        this.$target.find('.modal-dialog').addClass(dataset.modalSize);
     },
 });
 
