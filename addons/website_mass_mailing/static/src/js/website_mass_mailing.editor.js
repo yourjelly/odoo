@@ -9,33 +9,37 @@ var wUtils = require('website.utils');
 var _t = core._t;
 
 
-options.registry.NewsletterPopup = options.Class.extend({
+// options.registry.NewsletterPopup = options.Class.extend({
 
-    setLayout: function (previewMode, widgetValue, params) {
-        const isModal = widgetValue === 'modal';
-        const isTop = widgetValue === 'fixedTop';
-        this.$target.toggleClass('s_newsletter_fixed', !isModal);
-        this.$target.toggleClass('s_newsletter_fixed_top', isTop);
-        this.$target.toggleClass('s_newsletter_center modal', isModal);
-        this.$target.find('.o_newsletter_modal').toggleClass('modal-content', isModal);
-        this.$target.find('.o_newsletter_modal').toggleClass('modal-dialog modal-dialog-centered', isModal);
-    },
+//     setLayout: function (previewMode, widgetValue, params) {
+//         debugger;   
+//         const isModal = widgetValue === 'modal';
+//         const isTop = widgetValue === 'fixedTop';
+//         if (isTop) {
+//             this.$target.find('.modal-content').css({'top':'0','right''position':'absolute'})
+//         }
+//         // this.$target.toggleClass('s_newsletter_fixed', !isModal);
+//         // this.$target.toggleClass('s_newsletter_fixed_top', isTop);
+//         // this.$target.toggleClass('s_newsletter_center modal', isModal);
+//         // this.$target.find('.o_newsletter_modal').toggleClass('modal-content', isModal);
+//         // this.$target.find('.o_newsletter_modal').toggleClass('modal-dialog modal-dialog-centered', isModal);
+//     },
 
-    _computeWidgetState: function (methodName, params) {
-        switch (methodName) {
-            case 'moveBlock':
-                return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
-            case 'setLayout':
-                if (this.$target.hasClass('s_newsletter_center')) {
-                    return 'modal';
-                } else if (this.$target.hasClass('s_newsletter_fixed_top')) {
-                    return 'fixedTop';
-                }
-                return 'fixedBottom';
-        }
-        return this._super(...arguments);
-    },
-});
+//     _computeWidgetState: function (methodName, params) {
+//         switch (methodName) {
+//             case 'moveBlock':
+//                 return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
+//             case 'setLayout':
+//                 if (this.$target.hasClass('s_newsletter_center')) {
+//                     return 'modal';
+//                 } else if (this.$target.hasClass('s_newsletter_fixed_top')) {
+//                     return 'fixedTop';
+//                 }
+//                 return 'fixedBottom';
+//         }
+//         return this._super(...arguments);
+//     },
+// });
 
 options.registry.mailing_list_subscribe = options.Class.extend({
     popup_template_id: "editor_new_mailing_list_subscribe_button",
@@ -139,6 +143,28 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             });
         }
         this._super.apply(this, arguments);
+    },
+    layout: function (previewMode, widgetValue, params) {
+        this.$target[0].dataset.layout = widgetValue;
+    },
+    modalSize: function (previewMode, widgetValue, params) {
+        this.$target[0].dataset.modalSize = widgetValue;
+    },
+    updateUIVisibility: async function () {
+        await this._super(...arguments);
+        const dataset = this.$target[0].dataset;
+        this.$target.find('.o_newsletter_modal').addClass(dataset.layout);
+        this.$target.find('.s_newsletter_popup_frame').addClass(dataset.modalSize);
+    },
+    _computeWidgetState: function (methodName, params) {
+        switch (methodName) {
+            case 'selectMailingList':
+                return this._getMailingListID();
+            case 'layout':
+            case 'modalSize':
+                return this.$target[0].dataset[methodName];
+        }
+        return this._super(...arguments);
     },
     /**
      * @override

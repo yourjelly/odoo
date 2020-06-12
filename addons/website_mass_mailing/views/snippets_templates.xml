@@ -51,7 +51,7 @@
 </template>
 
 <template id="s_newsletter_subscribe_popup" name="Newsletter Popup">
-    <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0"/>
+    <div class="o_newsletter_popup o_snippet_invisible" data-layout="modal" data-modal-size="modal-md" data-list-id="0"/>
 </template>
 
 <template id="newsletter_subscribe_options" name="Newsletter Subscribe Options" inherit_id="website.snippet_options">
@@ -70,35 +70,35 @@
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
-        </div>
-        <div data-js="NewsletterPopup" data-selector=".o_newsletter_modal">
-            <we-select string="Position">
+            <we-select string="Position" data-no-preview="true">
 
-                <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
-                <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
-                <we-button data-set-layout="fixedBottom" data-name="position_bottom">Bottom</we-button>
+                <we-button data-layout="fixedTop" data-name="position_top">Top</we-button>
+                <we-button data-layout="modal" data-name="position_centered">Center</we-button>
+                <we-button data-layout="fixedBottom" data-name="position_bottom">Bottom</we-button>
             </we-select>
-            <we-select string="Size" data-apply-to=".o_newsletter_frame">
-                <we-button data-select-class="modal-lg">Large</we-button>
-                <we-button data-select-class="modal-sm">Small</we-button>
-                <we-button data-select-class="modal-md">Medium</we-button>
-                <we-button data-select-class="modal-xl">Big</we-button>
-                <we-button data-select-class="s_newsletter_full" data-name="s_newsletter_size_full">Full</we-button>
+            <we-select string="Size" data-no-preview="true">
+                <we-button data-modal-size="modal-lg">Large</we-button>
+                <we-button data-modal-size="modal-sm">Small</we-button>
+                <we-button data-modal-size="modal-md">Medium</we-button>
+                <we-button data-modal-size="modal-xl">Big</we-button>
+                <we-button data-modal-size="s_newsletter_full" data-name="s_newsletter_size_full">Full</we-button>
             </we-select>
+        </div>
+        <div data-js="newsletter_popup" data-selector=".o_newsletter_popup">
             <we-colorpicker string="Backdrop Color" data-select-style="true"
                 data-css-property="background-color" data-color-prefix="bg-"/>
             <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-apply-to=".s_newsletter_text" data-color-prefix="text-"/>
-            <!-- <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
+            <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
                 <we-button data-select-data-attribute="afterDelay" data-name="show_delay">Delay</we-button>
                 <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
             </we-select>
             <we-input string="Delay" data-select-data-attribute="" data-attribute-name="showAfter" data-unit="s" data-save-unit="ms" data-dependencies="show_delay"/>
-            <we-select string="Show on" data-no-preview="true">
+            <!-- <we-select string="Show on" data-no-preview="true">
                 <we-button data-move-block="moveToBody">This page</we-button>
                 <we-button data-move-block="moveToFooter">All pages</we-button>
             </we-select> -->
         </div>
-        <div data-js="newsletter_popup" data-selector=".o_newsletter_modal">
+        <div data-js="newsletter_popup" data-selector=".o_newsletter_modal" data-exclude="#website_cookies_bar">
             <t t-set="unit_popup_duration">days</t>
             <we-input string="Hide For" title="Once the user closes the popup, it won't be shown again for that period of time." t-attf-data-select-data-attribute="7#{unit_popup_duration}" data-attribute-name="consentsDuration" t-att-data-unit="unit_popup_duration"/>
         </div>

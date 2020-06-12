@@ -7,6 +7,8 @@ var Dialog = require('web.Dialog');
 var utils = require('web.utils');
 var publicWidget = require('web.public.widget');
 
+var WysiwygMultizone = require('web_editor.wysiwyg.multizone');
+
 var _t = core._t;
 
 publicWidget.registry.subscribe = publicWidget.Widget.extend({
@@ -101,13 +103,16 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
      */
     start: function () {
         var self = this;
-        this._bindPopup();
         var defs = [this._super.apply(this, arguments)];
         this.websiteID = this._getContext().website_id;
         this.listID = parseInt(this.$target.attr('data-list-id'));
-        if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !self.editableMode)) {
-            return Promise.all(defs);
+        if (!utils.get_cookie(this.listID)) {
+            this._bindPopup();
         }
+        // if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !self.editableMode)) {
+        //     debugger;
+        //     return Promise.all(defs);
+        // }
         if (this.$target.data('content') && this.editableMode) {
             // To avoid losing user changes.
             this._dialogInit(this.$target.data('content'));
@@ -177,7 +182,6 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
                 ev.stopPropagation();
             });
             $modal.find('header button.close').on('click', function() {
-                debugger;
                 const nbDays = self.$el.find('.o_newsletter_modal').data('consentsDuration');
                 utils.set_cookie(this.listID, true, nbDays * 24 * 60 * 60);
                 self._hidePopup();
