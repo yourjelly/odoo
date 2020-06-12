@@ -1,5 +1,7 @@
 .o_newsletter_modal {
-
+    .modal-content {
+        position: absolute;
+    }
     .modal-header {
         padding: 0;
         border: none;
@@ -21,4 +23,14 @@
         box-shadow: $box-shadow-sm;
     }
 
+    &.fixedTop {
+        .modal-content {
+           top: $o-navbar-height;
+        }
+    }
+    &.fixedBottom {
+        .modal-content {
+           bottom: 0;
+        }
+    }
 }

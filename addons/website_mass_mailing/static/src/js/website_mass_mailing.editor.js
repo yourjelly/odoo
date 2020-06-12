@@ -145,6 +145,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         this._super.apply(this, arguments);
     },
     layout: function (previewMode, widgetValue, params) {
+        debugger;
         this.$target[0].dataset.layout = widgetValue;
     },
     modalSize: function (previewMode, widgetValue, params) {
@@ -161,6 +162,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             case 'selectMailingList':
                 return this._getMailingListID();
             case 'layout':
+                return this.$target[0].dataset[methodName];
             case 'modalSize':
                 return this.$target[0].dataset[methodName];
         }
