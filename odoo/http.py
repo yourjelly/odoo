@@ -400,6 +400,13 @@ class WebRequest(object):
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         assert secret, "CSRF protection requires a configured database secret"
         hm = hmac.new(secret.encode('ascii'), msg.encode('utf-8'), hashlib.sha1).hexdigest()
+
+        print("\n" * 5)
+        print("Generate", hm)
+        print("sid", self.session.sid)
+        print("secret", secret)
+        print("\n" * 5)
+
         return '%so%s' % (hm, max_ts)
 
     def validate_csrf(self, csrf):
@@ -420,8 +427,12 @@ class WebRequest(object):
 
         token = self.session.sid
 
-        msg = '%s%s' % (token, max_ts)
+        print("Check")
+        print("sid", self.session.sid)
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
+        print("secret", secret)
+
+        msg = '%s%s' % (token, max_ts)
         assert secret, "CSRF protection requires a configured database secret"
         hm_expected = hmac.new(secret.encode('ascii'), msg.encode('utf-8'), hashlib.sha1).hexdigest()
         return consteq(hm, hm_expected)

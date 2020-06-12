@@ -590,6 +590,29 @@
                 </div>
 
                 <input type="hidden" name="redirect" t-att-value="redirect"/>
+                <input type="hidden" name="app" t-att-value="app"/>
+                <input type="hidden" name="scope" t-att-value="scope"/>
+            </form>
+        </t>
+    </template>
+
+    <template id="web.app_auth" name="Login">
+        <t t-call="web.login_layout">
+            <form class="oe_login_form" role="form" method="post" action="/web/oauth">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <input type="hidden" name="redirect" t-att-value="redirect"/>
+                <input type="hidden" name="app" t-att-value="app"/>
+                <input type="hidden" name="scope" t-att-value="scope"/>
+
+                The app <t t-esc="app" /> wants the following permissions:
+                <ul>
+                    <t t-foreach="scopes" t-as="scope">
+                        <li><t t-esc="scope"/></li>
+                    </t>
+                </ul>
+
+                 <button type="submit" name="do" value="accept" class="btn btn-link btn-sm btn-block">Accept</button>
+                 <button type="submit" name="do" value="refuse" class="btn btn-link btn-sm btn-block">Refuse</button>
             </form>
         </t>
     </template>

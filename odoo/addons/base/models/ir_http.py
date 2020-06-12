@@ -108,7 +108,49 @@ class IrHttp(models.AbstractModel):
             request.uid = request.session.uid
 
     @classmethod
+    def _auth_token(cls):
+        api_token = request.httprequest.headers.get('Token')
+        if not api_token:
+            return False
+
+        """
+        TODO:
+        - check scope `request.httprequest.url`
+        """
+        print("URL", request.httprequest.url)
+
+        key_identity, scopes = request.env["res.users.apikeys"].get_api_key(api_token)
+        if not key_identity:
+            return False
+
+        requestScopeFound = False
+        for scope in scopes.split(','):
+            if request.httprequest.url.endswith(scope):
+                requestScopeFound = True
+                break
+
+        # If it's a general key for all scopes, then (scopes == None) and it should pass the auth
+        if scopes and not requestScopeFound:
+            return False
+
+        # take the identity of the API key user
+        request.uid = key_identity.sudo().user_id.id
+        print("API logged as", key_identity.sudo().user_id.name)
+        return True
+
+    @classmethod
     def _authenticate(cls, auth_method='user'):
+        # Don't check public methods for a token. The token might be provided by default by a web app, but the app should
+        # still be able to fetch public routes like image?model=res.partner&id=26&field=image_128&unique=06222020104936
+        # without checking the scopes.
+        if auth_method != 'public' and cls._auth_token():
+            # bypass all authentication verification is token provided in headers
+            return auth_method
+
+        print("\n")
+        print("URL", request.httprequest.url)
+        print("\n")
+
         try:
             if request.session.uid:
                 try:

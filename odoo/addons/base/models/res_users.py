@@ -1605,6 +1605,7 @@ class APIKeys(models.Model):
             id serial primary key,
             name varchar not null,
             user_id integer not null REFERENCES res_users(id),
+            scope varchar,
             index varchar({index_size}) not null CHECK (char_length(index) = {index_size}),
             key varchar not null
         );
@@ -1618,6 +1619,29 @@ class APIKeys(models.Model):
             return {'type': 'ir.actions.act_window_close'}
         raise AccessError(_("You can not remove API keys unless they're yours or you are a system user"))
 
+    def get_api_key(self, key):
+        index = key[:INDEX_SIZE]
+        self.env.cr.execute('SELECT id, scope, key FROM res_users_apikeys WHERE index = %s', [index])
+        for [id, scope, current_key] in self.env.cr.fetchall():
+            if KEY_CRYPT_CONTEXT.verify(key, current_key):
+                return self.browse(id), scope
+
+    @api.model
+    def generate(self, name, scope=None):
+        # no need to clear the LRU when *adding* a key, only when removing
+        k = binascii.hexlify(os.urandom(API_KEY_SIZE)).decode()
+        description = self.sudo()
+        self.env.cr.execute("""
+        INSERT INTO res_users_apikeys (name, user_id, scope, key, index)
+        VALUES (%s, %s, %s, %s, %s)
+        RETURNING id
+        """, [name, self.env.user.id, scope, hash_api_key(k), k[:INDEX_SIZE]])
+        description.unlink()
+        record_id = self.env.cr.fetchone()
+        self.env['res.users.apikeys'].invalidate_cache(ids=record_id)
+
+        return k
+
 class APIKeyDescription(models.TransientModel):
     _name = _description = 'res.users.apikeys.description'
 
@@ -1628,16 +1652,8 @@ class APIKeyDescription(models.TransientModel):
         # only create keys for users who can delete their keys
         if not self.user_has_groups('base.group_user,base.group_portal'):
             raise AccessError(_("Only employees and portal users can create API keys"))
-        # no need to clear the LRU when *adding* a key, only when removing
-        k = binascii.hexlify(os.urandom(API_KEY_SIZE)).decode()
-        description = self.sudo()
-        self.env.cr.execute("""
-        INSERT INTO res_users_apikeys (name, user_id, key, index)
-        VALUES (%s, %s, %s, %s)
-        RETURNING id
-        """, [self.sudo().name, self.env.user.id, hash_api_key(k), k[:INDEX_SIZE]])
-        description.unlink()
-        self.env['res.users.apikeys'].invalidate_cache(ids=self.env.cr.fetchone())
+
+        k = self.env['res.users.apikeys'].generate(self.name)
 
         return {
             'type': 'ir.actions.act_window',
