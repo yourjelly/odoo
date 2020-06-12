@@ -51,7 +51,7 @@
 </template>
 
 <template id="s_newsletter_subscribe_popup" name="Newsletter Popup">
-    <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0"/>
+    <div class="o_newsletter_popup o_snippet_invisible" data-layout="modal" data-modal-size="modal-md" data-list-id="0"/>
 </template>
 
 <template id="s_newsletter_subscribe_popup_content" name="Newsletter Popup Content">
@@ -93,19 +93,17 @@
             data-selector=".o_newsletter_popup">
             <we-title>Change Newsletter</we-title>
             <we-select data-name="mailing_list" data-no-preview="true"></we-select>
-        </div>
-        <div data-js="SnippetNewsletterPopup" data-selector=".o_newsletter_modal">
-            <we-select string="Position">
-                <we-button data-set-layout="fixedTop" data-name="position_top">Top</we-button>
-                <we-button data-set-layout="modal" data-name="position_centered">Center</we-button>
-                <we-button data-set-layout="fixedBottom" data-name="position_bottom">Bottom</we-button>
+            <we-select string="Position" data-no-preview="true">
+                <we-button data-layout="fixedTop" data-name="position_top">Top</we-button>
+                <we-button data-layout="modal" data-name="position_centered">Center</we-button>
+                <we-button data-layout="fixedBottom" data-name="position_bottom">Bottom</we-button>
             </we-select>
-            <we-select string="Size" data-apply-to=".s_newsletter_popup_frame">
-                <we-button data-select-class="modal-sm">Small</we-button>
-                <we-button data-select-class="modal-md" data-name="s_popup_size_md">Medium</we-button>
-                <we-button data-select-class="modal-lg">Large</we-button>
-                <we-button data-select-class="modal-xl">Big</we-button>
-                <we-button data-select-class="s_popup_full" data-name="s_popup_size_full">Full</we-button>
+            <we-select string="Size" data-no-preview="true">
+                <we-button data-modal-size="modal-sm">Small</we-button>
+                <we-button data-modal-size="modal-md" data-name="s_popup_size_md">Medium</we-button>
+                <we-button data-modal-size="modal-lg">Large</we-button>
+                <we-button data-modal-size="modal-xl">Big</we-button>
+                <we-button data-modal-size="s_popup_full" data-name="s_popup_size_full">Full</we-button>
             </we-select>
             <we-colorpicker string="Backdrop Color" data-select-style="true"
                 data-css-property="background-color" data-color-prefix="bg-" data-dependencies="position_centered"/>
