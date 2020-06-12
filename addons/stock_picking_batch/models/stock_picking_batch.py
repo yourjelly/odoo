@@ -3,7 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-
+from odoo.tools.float_utils import float_compare, float_is_zero, float_round
 
 class StockPickingBatch(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
@@ -202,6 +202,73 @@ class StockPickingBatch(models.Model):
     def action_assign(self):
         self.ensure_one()
         self.picking_ids.action_assign()
+
+    def put_in_pack(self):
+        """ Action to put move lines with 'Done' quantities into a new pack
+        This method follows same logic to stock.picking.
+        """
+        self.ensure_one()
+        if self.state not in ('done', 'cancel'):
+            picking_move_lines = self.move_line_ids
+
+            move_line_ids = picking_move_lines.filtered(lambda ml:
+                float_compare(ml.qty_done, 0.0, precision_rounding=ml.product_uom_id.rounding) > 0
+                and not ml.result_package_id
+            )
+            if not move_line_ids:
+                move_line_ids = picking_move_lines.filtered(lambda ml: float_compare(ml.product_uom_qty, 0.0,
+                                     precision_rounding=ml.product_uom_id.rounding) > 0 and float_compare(ml.qty_done, 0.0,
+                                     precision_rounding=ml.product_uom_id.rounding) == 0)
+            if move_line_ids:
+                res = self._pre_put_in_pack_hook(move_line_ids)
+                if not res:
+                    res = self._put_in_pack(move_line_ids)
+                return res
+            else:
+                raise UserError(_("Please add 'Done' quantities to the batch picking to create a new pack."))
+
+    # -------------------------------------------------------------------------
+    # Put in pack methods
+    # -------------------------------------------------------------------------
+
+    def _pre_put_in_pack_hook(self, move_line_ids):
+        return self.picking_ids[0]._check_destinations(move_line_ids)
+
+    def _put_in_pack(self, move_line_ids):
+        """ Put move lines with 'Done' quantities into a new pack
+
+        This method follows same logic to stock.picking with the exception that package level
+        is left off (since all pickings are getting same result_package).
+        """
+        package = False
+        if move_line_ids:
+            package = self.env['stock.quant.package'].create({})
+            move_lines_to_pack = self.env['stock.move.line']
+
+            precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+            if float_is_zero(move_line_ids[0].qty_done, precision_digits=precision_digits):
+                for line in move_line_ids:
+                    line.qty_done = line.product_uom_qty
+
+            for ml in move_line_ids:
+                if float_compare(ml.qty_done, ml.product_uom_qty,
+                                 precision_rounding=ml.product_uom_id.rounding) >= 0:
+                    move_lines_to_pack |= ml
+                else:
+                    quantity_left_todo = float_round(
+                        ml.product_uom_qty - ml.qty_done,
+                        precision_rounding=ml.product_uom_id.rounding,
+                        rounding_method='UP')
+                    done_to_keep = ml.qty_done
+                    new_move_line = ml.copy(
+                        default={'product_uom_qty': 0, 'qty_done': ml.qty_done})
+                    ml.write({'product_uom_qty': quantity_left_todo, 'qty_done': 0.0})
+                    new_move_line.write({'product_uom_qty': done_to_keep})
+                    move_lines_to_pack |= new_move_line
+            move_lines_to_pack.write({
+                'result_package_id': package.id,
+            })
+        return package
 
     # -------------------------------------------------------------------------
     # Miscellaneous
