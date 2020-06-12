@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class AccountMove(models.Model):
@@ -12,10 +12,6 @@ class AccountMove(models.Model):
     # -------------------------------------------------------------------------
     # OVERRIDE METHODS
     # -------------------------------------------------------------------------
-
-    def _get_lines_onchange_currency(self):
-        # OVERRIDE
-        return self.line_ids.filtered(lambda l: not l.is_anglo_saxon_line)
 
     def _reverse_move_vals(self, default_values, cancel=True):
         # OVERRIDE
@@ -203,18 +199,23 @@ class AccountMoveLine(models.Model):
 
     is_anglo_saxon_line = fields.Boolean(help="Technical field used to retrieve the anglo-saxon lines.")
 
-    def _get_computed_account(self):
-        # OVERRIDE to use the stock input account by default on vendor bills when dealing
-        # with anglo-saxon accounting.
-        self.ensure_one()
-        if self.product_id.type == 'product' \
-            and self.move_id.company_id.anglo_saxon_accounting \
-            and self.move_id.is_purchase_document():
-            fiscal_position = self.move_id.fiscal_position_id
-            accounts = self.product_id.product_tmpl_id.get_product_accounts(fiscal_pos=fiscal_position)
-            if accounts['stock_input']:
-                return accounts['stock_input']
-        return super(AccountMoveLine, self)._get_computed_account()
+    @api.depends('product_id', 'tax_repartition_line_id')
+    def _compute_account_id(self):
+        # OVERRIDE
+        super()._compute_account_id()
+
+        for line in self:
+            move = line.move_id
+            company = move.company_id or self.env.company
+
+            if line.product_id.type == 'product' \
+                    and company.anglo_saxon_accounting \
+                    and move.is_purchase_document(include_receipts=True):
+                product_accounts = line.product_id.product_tmpl_id\
+                        .with_company(company)\
+                        .get_product_accounts(fiscal_pos=move.fiscal_position_id)
+                if product_accounts['stock_input']:
+                    line.account_id = product_accounts['stock_input']
 
     def _stock_account_get_anglo_saxon_price_unit(self):
         self.ensure_one()

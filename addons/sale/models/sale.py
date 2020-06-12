@@ -531,11 +531,9 @@ class SaleOrder(models.Model):
         a clean extension chain).
         """
         self.ensure_one()
-        journal = self.env['account.move'].with_context(default_move_type='out_invoice')._get_default_journal()
-        if not journal:
-            raise UserError(_('Please define an accounting sales journal for the company %s (%s).') % (self.company_id.name, self.company_id.id))
+        self = self.with_company(self.company_id)
 
-        invoice_vals = {
+        return {
             'ref': self.client_order_ref or '',
             'move_type': 'out_invoice',
             'narration': self.note,
@@ -549,7 +547,6 @@ class SaleOrder(models.Model):
             'partner_shipping_id': self.partner_shipping_id.id,
             'fiscal_position_id': (self.fiscal_position_id or self.fiscal_position_id.get_fiscal_position(self.partner_invoice_id.id)).id,
             'partner_bank_id': self.company_id.partner_id.bank_ids[:1].id,
-            'journal_id': journal.id,  # company comes from the journal
             'invoice_origin': self.name,
             'invoice_payment_term_id': self.payment_term_id.id,
             'payment_reference': self.reference,
@@ -557,7 +554,6 @@ class SaleOrder(models.Model):
             'invoice_line_ids': [],
             'company_id': self.company_id.id,
         }
-        return invoice_vals
 
     def action_quotation_sent(self):
         if self.filtered(lambda so: so.state != 'draft'):

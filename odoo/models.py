@@ -5848,6 +5848,12 @@ Fields:
                 process(method_res)
             return
 
+    def pre_onchange(self, changed_fields):
+        self.ensure_one()
+
+    def post_onchange(self, changed_fields):
+        self.ensure_one()
+
     def onchange(self, values, field_name, field_onchange):
         """ Perform an onchange on the given field.
 
@@ -5863,6 +5869,7 @@ Fields:
             methods to them, and return all the fields in ``field_onchange``.
         """
         # this is for tests using `Form`
+
         self.flush()
 
         env = self.env
@@ -6060,6 +6067,8 @@ Fields:
 
         result = {'warnings': OrderedSet()}
 
+        record.pre_onchange(names)
+
         # process names in order
         while todo:
             # apply field-specific onchange methods
@@ -6075,8 +6084,7 @@ Fields:
                 if name not in done and snapshot0.has_changed(name)
             ]
 
-            if not env.context.get('recursive_onchanges', True):
-                todo = []
+        record.post_onchange(done)
 
         # make the snapshot with the final values of record
         snapshot1 = Snapshot(record, nametree)

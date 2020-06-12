@@ -103,9 +103,9 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         ])
         invoice.action_post()
         self.assertRecordValues(invoice.line_ids.filtered('tax_line_id'), [
-            {'name': self.percent_tax_1.name,       'tax_base_amount': 100, 'price_unit': 21, 'tax_ids': []},
-            {'name': self.percent_tax_1_incl.name,  'tax_base_amount': 100, 'price_unit': 21, 'tax_ids': []},
-            {'name': self.percent_tax_2.name,       'tax_base_amount': 100, 'price_unit': 12, 'tax_ids': []},
+            {'name': self.percent_tax_1.name,       'tax_base_amount': 100, 'balance': -21.0,   'tax_ids': []},
+            {'name': self.percent_tax_1_incl.name,  'tax_base_amount': 100, 'balance': -21.0,   'tax_ids': []},
+            {'name': self.percent_tax_2.name,       'tax_base_amount': 100, 'balance': -12.0,   'tax_ids': []},
         ])
 
     def test_affecting_base_amount(self):
@@ -128,8 +128,8 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         ])
         invoice.action_post()
         self.assertRecordValues(invoice.line_ids.filtered('tax_line_id').sorted(lambda x: x.price_unit), [
-            {'name': self.percent_tax_1_incl.name,      'tax_base_amount': 100, 'price_unit': 21,      'tax_ids': [self.percent_tax_2.id]},
-            {'name': self.percent_tax_2.name,           'tax_base_amount': 221, 'price_unit': 26.52,   'tax_ids': []},
+            {'name': self.percent_tax_1_incl.name,      'tax_base_amount': 100, 'balance': -21,      'tax_ids': [self.percent_tax_2.id]},
+            {'name': self.percent_tax_2.name,           'tax_base_amount': 221, 'balance': -26.52,   'tax_ids': []},
         ])
 
     def test_group_of_taxes(self):
@@ -152,8 +152,8 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
         ])
         invoice.action_post()
         self.assertRecordValues(invoice.line_ids.filtered('tax_line_id').sorted(lambda x: x.price_unit), [
-            {'name': self.percent_tax_1_incl.name,      'tax_base_amount': 100, 'price_unit': 21,      'tax_ids': [self.percent_tax_2.id]},
-            {'name': self.percent_tax_2.name,           'tax_base_amount': 221, 'price_unit': 26.52,   'tax_ids': []},
+            {'name': self.percent_tax_1_incl.name,      'tax_base_amount': 100, 'balance': -21,      'tax_ids': [self.percent_tax_2.id]},
+            {'name': self.percent_tax_2.name,           'tax_base_amount': 221, 'balance': -26.52,   'tax_ids': []},
         ])
 
     def _create_tax_tag(self, tag_name):
