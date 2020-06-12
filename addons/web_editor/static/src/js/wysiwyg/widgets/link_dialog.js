@@ -24,13 +24,11 @@ var LinkDialog = Dialog.extend({
 
     /**
      * @constructor
-     */
-    /**
-     * @constructor
      * @param {} [options.props.text]
      * @param {} [options.props.className]
      */
     init: function (parent, options) {
+        const self = this;
         this._super(parent, _.extend({
             title: _t("Link to"),
         }, this.options));
@@ -68,12 +66,13 @@ var LinkDialog = Dialog.extend({
             className: cleanClassNames,
             url: this.props.url,
             isNewWindow: this.props.isNewWindow,
-        }
+        };
     },
     /**
      * @override
      */
     start: function () {
+        const self = this;
         this.$('input.link-style').prop('checked', false).first().prop('checked', true);
         if (this.props.className) {
             this.$('input[name="link_style_color"], select[name="link_style_size"] > option, select[name="link_style_shape"] > option').each(function () {

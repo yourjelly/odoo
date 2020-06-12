@@ -8,7 +8,7 @@ var snippetOptions = require('web_editor.snippets.options');
 var _t = core._t;
 var qweb = core.qweb;
 
-snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
     xmlDependencies: ['/website/static/src/xml/website.gallery.xml'],
 
     /**
@@ -437,7 +437,7 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
     },
 });
 
-snippetOptions.registry.gallery_img = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.gallery_img = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * Rebuilds the whole gallery when one image is removed.
      *

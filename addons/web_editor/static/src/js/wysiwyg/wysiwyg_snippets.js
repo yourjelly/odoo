@@ -7,7 +7,7 @@ var Wysiwyg = require('web_editor.wysiwyg');
 Wysiwyg.include({
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        if (this.options.legacy){
+        if (this.options.legacy) {
             this.Editor = editor.Class;
             if (!this.options.toolbarHandler) {
                 this.options.toolbarHandler = $('#web_editor-top-edit');

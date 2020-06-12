@@ -3,9 +3,7 @@ odoo.define('web_editor.field.html', function (require) {
 
 var ajax = require('web.ajax');
 var basic_fields = require('web.basic_fields');
-var config = require('web.config');
 var core = require('web.core');
-// var Wysiwyg = reequire('web_editor.wysiwyg.root');
 var wysiwygLoader = require('web_editor.loader');
 var field_registry = require('web.field_registry');
 // must wait for web/ to add the default html widget, otherwise it would override the web_editor one
@@ -14,7 +12,6 @@ require('web._field_registry');
 var _lt = core._lt;
 var TranslatableFieldMixin = basic_fields.TranslatableFieldMixin;
 var QWeb = core.qweb;
-var assetsLoaded;
 
 var jinjaRegex = /(^|\n)\s*%\s(end|set\s)/;
 
@@ -155,7 +152,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      */
     _createWysiwygIntance: async function () {
         this.wysiwyg = await wysiwygLoader.createWysiwyg(this, this._getWysiwygOptions());
-        return this.wysiwyg.attachTo(this).then( () => {
+        return this.wysiwyg.attachTo(this).then(() => {
             this._appendTranslateButton();
         });
     },
@@ -270,7 +267,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
 
         this.$el.empty();
         if (this.nodeOptions.cssReadonly) {
-            const shadowRoot = this.$el[0].attachShadow({ mode: 'open' });
+            const shadowRoot = this.$el[0].attachShadow({mode: 'open'});
             for (const cssLib of this.cssReadonly.cssLibs) {
                 const link = $('<link type="text/css" rel="stylesheet" href="' + cssLib + '"/>')[0];
                 shadowRoot.appendChild(link);
@@ -357,7 +354,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         this._doDebouncedAction.apply(this, arguments);
     },
     /**
-     * Method called when the wysiwyg instance is loaded.
+     * Append the translate button to the DOM.
+     * This method is called when the wysiwyg instance is loaded.
      *
      * @private
      */

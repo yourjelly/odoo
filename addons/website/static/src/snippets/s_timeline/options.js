@@ -3,7 +3,7 @@ odoo.define('website.s_timeline_options', function (require) {
 
 const snippetOptions = require('web_editor.snippets.options');
 
-snippetOptions.registry.Timeline = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.Timeline = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */

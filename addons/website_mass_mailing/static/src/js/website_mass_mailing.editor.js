@@ -10,7 +10,7 @@ const qweb = core.qweb;
 var _t = core._t;
 
 
-snippetOptions.registry.mailing_list_subscribe = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.mailing_list_subscribe = snippetOptions.SnippetOptionsWidget.extend({
     popup_template_id: "editor_new_mailing_list_subscribe_button",
     popup_title: _t("Add a Newsletter Subscribe Button"),
 
@@ -39,9 +39,9 @@ snippetOptions.registry.mailing_list_subscribe = snippetOptions.SnippetOptionWid
                     $(dialog).find('.btn-primary').prop('disabled', !data.length);
                     var list_id = self.$target.attr("data-list-id");
                     $(dialog).on('show.bs.modal', function () {
-                        if (list_id !== "0"){
+                        if (list_id !== "0") {
                             $(dialog).find('select').val(list_id);
-                        };
+                        }
                     });
                     return data;
                 });
@@ -59,7 +59,7 @@ snippetOptions.registry.mailing_list_subscribe = snippetOptions.SnippetOptionWid
         var self = this;
         this._super();
         this.select_mailing_list('click').guardedCatch(function () {
-            self.getParent()._onRemoveClick($.Event( "click" ));
+            self.getParent()._onRemoveClick($.Event("click"));
         });
     },
 });
@@ -132,18 +132,7 @@ snippetOptions.registry.newsletter_popup = snippetOptions.registry.mailing_list_
      * @override
      */
     cleanForSave: function () {
-        //todo: integration with jabberwock
-        // var self = this;
-        // var content = this.$target.data('content');
-        // if (content) {
-        //     this.trigger_up('get_clean_html', {
-        //         $layout: $('<div/>').html(content),
-        //         callback: function (html) {
-        //             self.$target.data('content', html);
-        //         },
-        //     });
-        // }
-        // this._super.apply(this, arguments);
+        // TODO: integration with jabberwock
     },
     /**
      * @override

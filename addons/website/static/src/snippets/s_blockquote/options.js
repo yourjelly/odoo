@@ -3,7 +3,7 @@ odoo.define('website.s_blockquote_options', function (require) {
 
 const snippetOptions = require('web_editor.snippets.options');
 
-snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionsWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -15,7 +15,6 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     display: function (previewMode, widgetValue, params) {
-
         // Classic
         this.$target.find('.s_blockquote_avatar').toggleClass('d-none', widgetValue !== 'classic');
 

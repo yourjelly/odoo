@@ -7,7 +7,6 @@ var core = require('web.core');
 var config = require('web.config');
 
 var qweb = core.qweb;
-var promiseCommon;
 var promiseWysiwyg;
 
 
@@ -52,10 +51,8 @@ Wysiwyg.include({
             this.$target = this.$el;
             await this.defAsset;
             await this._loadIframe.call(this);
-            return _super();
-        } else {
-            return _super();
         }
+        return _super();
     },
 
     //--------------------------------------------------------------------------

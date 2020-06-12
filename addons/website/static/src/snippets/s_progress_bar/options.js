@@ -7,7 +7,7 @@ const snippetOptions = require('web_editor.snippets.options');
 
 const _t = core._t;
 
-snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.progress = snippetOptions.SnippetOptionsWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -19,7 +19,7 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     display: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.execBatch(async () => {
+        await this.wysiwyg.editor.execBatch(async () => {
             // retro-compatibility
 
             let $text = this.$target.find('.s_progress_bar_text');
@@ -51,7 +51,7 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     progressBarValue: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.execBatch(async () => {
+        await this.wysiwyg.editor.execBatch(async () => {
             let value = parseInt(widgetValue);
             value = utils.confine(value, 0, 100);
             const $progressBar = this.$target.find('.progress-bar');
@@ -65,7 +65,6 @@ snippetOptions.registry.progress = snippetOptions.SnippetOptionWidget.extend({
             await this.editorHelpers.setStyle($progressBar[0], 'width', value + "%");
             await this.editorHelpers.setAttribute($progressBar[0], 'aria-valuenow', '' + value);
         });
-            const $progressBar = this.$target.find('.progress-bar');
     },
 
     //--------------------------------------------------------------------------

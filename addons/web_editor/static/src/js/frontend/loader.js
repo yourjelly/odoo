@@ -6,9 +6,9 @@ var ajax = require('web.ajax');
 function waitTimeout(ms) {
     return new Promise((resolve)=>{
         setTimeout(() => {
-            resolve()
+            resolve();
         }, ms);
-    })
+    });
 }
 
 const loadedLib = new Set();
@@ -24,10 +24,10 @@ async function createWysiwyg(parent, options, additionnalAssets = []) {
         'web_editor.compiled_assets_wysiwyg';
     if (!loadedLib.has(assetLib)) {
         // todo: find a better way to add additionnal assets
-        await ajax.loadLibs({ assetLibs: [ assetLib, ...additionnalAssets ] });
+        await ajax.loadLibs({assetLibs: [assetLib, ...additionnalAssets]});
         loadedLib.add(assetLib);
     }
-    await ajax.loadLibs({ assetLibs: [ assetLib ] });
+    await ajax.loadLibs({assetLibs: [assetLib]});
     // todo: find why the service is not yet ready than remove this function
     await waitTimeout(1000);
     const Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];

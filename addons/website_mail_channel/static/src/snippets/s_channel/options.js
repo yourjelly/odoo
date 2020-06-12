@@ -7,7 +7,7 @@ var wUtils = require('website.utils');
 
 var _t = core._t;
 
-snippetOptions.registry.Channel = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.Channel = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */

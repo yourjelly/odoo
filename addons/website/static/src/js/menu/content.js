@@ -798,7 +798,7 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             }
         },
         header_color: async function (value, wysiwyg) {
-            await this.wysiwyg.execBatch(async () => {
+            await this.wysiwyg.editor.execBatch(async () => {
                 await this.editorHelpers.removeClass($('#wrapwrap > header')[0], this.value);
                 await this.editorHelpers.addClass($('#wrapwrap > header')[0], value);
             });

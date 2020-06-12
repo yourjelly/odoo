@@ -3,7 +3,7 @@ odoo.define('website.s_facebook_page_options', function (require) {
 
 const snippetOptions = require('web_editor.snippets.options');
 
-snippetOptions.registry.facebookPage = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.facebookPage = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * Initializes the required facebook page data to create the iframe.
      *

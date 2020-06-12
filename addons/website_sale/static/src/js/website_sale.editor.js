@@ -273,7 +273,7 @@ function reload() {
     }
 }
 
-snippetOptions.registry.WebsiteSaleGridLayout = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.WebsiteSaleGridLayout = snippetOptions.SnippetOptionsWidget.extend({
 
     /**
      * @override
@@ -344,7 +344,7 @@ snippetOptions.registry.WebsiteSaleGridLayout = snippetOptions.SnippetOptionWidg
     },
 });
 
-snippetOptions.registry.WebsiteSaleProductsItem = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.WebsiteSaleProductsItem = snippetOptions.SnippetOptionsWidget.extend({
     xmlDependencies: (snippetOptions.SnippetOptionWidget.prototype.xmlDependencies || []).concat(['/website_sale/static/src/xml/website_sale_utils.xml']),
     events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.events || {}, {
         'mouseenter .o_wsale_soptions_menu_sizes table': '_onTableMouseEnter',

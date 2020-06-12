@@ -7,11 +7,11 @@ var snippetOptions = require('web_editor.snippets.options');
 
 var _t = core._t;
 
-snippetOptions.registry.InnerChart = snippetOptions.SnippetOptionWidget.extend({
-    custom_events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.custom_events, {
+snippetOptions.registry.InnerChart = snippetOptions.SnippetOptionsWidget.extend({
+    custom_events: _.extend({}, snippetOptions.SnippetOptionsWidget.prototype.custom_events, {
         'get_custom_colors': '_onGetCustomColors',
     }),
-    events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.events, {
+    events: _.extend({}, snippetOptions.SnippetOptionsWidget.prototype.events, {
         'click we-button.add_column': '_onAddColumnClick',
         'click we-button.add_row': '_onAddRowClick',
         'click we-button.o_we_matrix_remove_col': '_onRemoveColumnClick',

@@ -69,8 +69,6 @@ publicWidget.registry.websiteProfileEditor = publicWidget.Widget.extend({
             },
             value: $textarea[0].value,
         });
-
-        return;
     },
 
     //--------------------------------------------------------------------------

@@ -3,7 +3,7 @@ odoo.define('website.s_showcase_options', function (require) {
 
 const snippetOptions = require('web_editor.snippets.options');
 
-snippetOptions.registry.Showcase = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.Showcase = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */

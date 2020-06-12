@@ -103,14 +103,10 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         }
         this.editModeEnable = true;
 
-
-
         this.wysiwyg = await this._createWysiwyg();
         await this.wysiwyg.attachTo($('#wrapwrap'));
 
-
-
-        var res = await new Promise( (resolve, reject) => {
+        var res = await new Promise((resolve, reject) => {
             this.trigger_up('widgets_start_request', {
                 editableMode: true,
                 onSuccess: resolve,
@@ -121,7 +117,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // which is required for Summernote to activate.
         return res;
     },
-
+    /**
+     * @private
+     */
     _createWysiwyg: async function () {
         var context;
         this.trigger_up('context_get', {
@@ -142,7 +140,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             saveButton: true,
             location: [document.getElementById('wrapwrap'), 'replace'],
         }, ['website.compiled_assets_wysiwyg']);
-        await ajax.loadLibs({ assetLibs: [ 'website.compiled_assets_wysiwyg' ] });
+        await ajax.loadLibs({assetLibs: ['website.compiled_assets_wysiwyg']});
         return wysiwyg;
     },
     /**
@@ -276,7 +274,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         });
         // this._addEditorMessages();
     },
-
     /**
      * Snippet (menu_data) can request to save the document to leave the page
      *

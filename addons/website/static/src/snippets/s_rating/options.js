@@ -4,7 +4,7 @@ odoo.define('website.s_rating_options', function (require) {
 const weWidgets = require('wysiwyg.widgets');
 const snippetOptions = require('web_editor.snippets.options');
 
-snippetOptions.registry.Rating = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.Rating = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */

@@ -48,7 +48,6 @@ var EditorMenuBar = Widget.extend({
 
         // Snippets edition
         var $editable = this.rte.editable();
-        window.__EditorMenuBar_$editable = $editable; // TODO remove this hack asap
 
         if (options.snippets) {
             const $snippetManipulators = $('<div id="oe_manipulators" />');
@@ -103,7 +102,9 @@ var EditorMenuBar = Widget.extend({
         window.onbeforeunload = function (event) {
             if (rte.history.getEditableHasUndo().length && !flag) {
                 flag = true;
-                _.defer(function () { flag=false; });
+                _.defer(function () {
+                    flag = false;
+                });
                 return _t('This document is not saved!');
             }
         };
@@ -142,7 +143,7 @@ var EditorMenuBar = Widget.extend({
      */
     cancel: function (reload) {
         var self = this;
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             if (!rte.history.getEditableHasUndo().length) {
                 resolve();
             } else {
@@ -191,7 +192,7 @@ var EditorMenuBar = Widget.extend({
      */
     _getDefaultConfig: function ($editable) {
         return {
-            'airMode' : true,
+            'airMode': true,
             'focus': false,
             'airPopover': [
                 ['style', ['style']],
@@ -204,7 +205,7 @@ var EditorMenuBar = Widget.extend({
                 ['history', ['undo', 'redo']],
             ],
             'styleWithSpan': false,
-            'inlinemedia' : ['p'],
+            'inlinemedia': ['p'],
             'lang': 'odoo',
             'onChange': function (html, $editable) {
                 $editable.trigger('content_changed');
@@ -225,7 +226,7 @@ var EditorMenuBar = Widget.extend({
         } else {
             window.location.reload(true);
         }
-        return new Promise(function(){});
+        return new Promise(function () {});
     },
 
     //--------------------------------------------------------------------------

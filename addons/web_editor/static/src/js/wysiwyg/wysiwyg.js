@@ -11,11 +11,11 @@ var id = 0;
 
 var Wysiwyg = Widget.extend({
     defaultOptions: {
-        legacy: true,
+        'legacy': true,
         'focus': false,
         'lang': 'odoo',
-        recordInfo: {
-            context: {},
+        'recordInfo': {
+            'context': {},
         },
         'toolbar': [
             ['style', ['style']],
@@ -66,8 +66,6 @@ var Wysiwyg = Widget.extend({
             const SummernoteManager = odoo.__DEBUG__.services['web_editor.rte.summernote'];
             this._summernoteManager = new SummernoteManager(this);
         }
-        // end legacy editor
-
         this.$target = this.$el;
         return this._super();
     },
@@ -77,7 +75,6 @@ var Wysiwyg = Widget.extend({
      */
     start: async function () {
         if (this.options.legacy) {
-            this.editorCommands = this.legacyEditorCommands;
             this.$target.wrap('<odoo-wysiwyg-container>');
             this.$el = this.$target.parent();
             var options = this._editorOptions();
@@ -90,6 +87,7 @@ var Wysiwyg = Widget.extend({
             this._value = this.$target.html() || this.$target.val();
             return this._super.apply(this, arguments);
         } else {
+            const self = this;
             const _super = this._super;
             const elementToParse = document.createElement('div');
             elementToParse.innerHTML = this.value;
@@ -104,7 +102,7 @@ var Wysiwyg = Widget.extend({
                 afterRender: async ()=> {
                     const $wrapwrap = $('#wrapwrap');
                     $wrapwrap.removeClass('o_editable'); // clean the dom before edition
-                    this._getEdiable($wrapwrap).addClass('o_editable');
+                    this._getEditable($wrapwrap).addClass('o_editable');
 
                     // todo: change this quick fix
                     const $firstDiv = $('.wrapwrap main>div');
@@ -122,12 +120,6 @@ var Wysiwyg = Widget.extend({
                     // we need to remove it.
                     if ($firstDiv.html() === '<br>') {
                         $firstDiv.empty();
-                    }
-
-
-                    if (this.snippetsMenu) {
-                        this.snippetsMenu.$editor = $('#wrapwrap');
-                        await this.snippetsMenu.afterRender();
                     }
                 },
                 snippetMenuElement: $mainSidebar[0],
@@ -174,6 +166,7 @@ var Wysiwyg = Widget.extend({
                 await this.snippetsMenu.appendTo($mainSidebar);
                 this.editor.enableRender = true;
                 this.editor.render();
+                this.snippetsMenu.$editor = $('#wrapwrap');
 
                 this.$el.on('content_changed', function (e) {
                     self.trigger_up('wysiwyg_change');
@@ -303,18 +296,10 @@ var Wysiwyg = Widget.extend({
     setValue: function (value, options) {
         this._value = value;
     },
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    async execBatch(...args) {
-        await this.editor.execBatch(...args);
-    },
-
     // todo: handle when the server error (previously carlos_danger)
     saveToServer: async function (reload = true) {
         const defs = [];
-        // this trigger will be catched by the "navbar" (i.e. the manager of
+        // This trigger will be catched by the "navbar" (i.e. the manager of
         // widgets). It will trigger an action on all thoses widget called
         // "on_save" so that they can do something before the saving occurs.
         //
@@ -334,49 +319,57 @@ var Wysiwyg = Widget.extend({
         // todo: avoid redraw the editor if executing execCommand
         await this.editor.execBatch(async ()=> {
             // todo: make them work
-            await this._saveAllViewsBlocks();
+            await this._saveViewBlocks();
             await this._saveCoverPropertiesBlocks();
-            // await this._saveNewsletterBlocks();
-            // await this._saveMegaMenuBlocks();
-            // await this._saveTranslationBlocks();
         });
 
         this.trigger_up('edition_was_stopped');
         if (reload) {
-            location.reload();
+            window.location.reload();
         }
     },
 
-    _saveAllViewsBlocks: async function (views) {
-        let structureNodes;
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Save all "view" blocks.
+     *
+     * @private
+     */
+    _saveViewBlocks: async function () {
+        const promises = [];
         await this.editor.execCustomCommand(async () => {
             const layout = this.editor.plugins.get(JWEditorLib.Layout);
             const domLayout = layout.engines.dom;
             const editable = domLayout.components.get('editable')[0];
-            structureNodes = editable.descendants(JWEditorLib.OdooStructureNode);
+            const structureNodes = editable.descendants(JWEditorLib.OdooStructureNode);
+            for (const structureNode of structureNodes) {
+                const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
+                const renderedNode = (await renderer.render('dom/html', structureNode))[0];
+
+                promises.push(this._rpc({
+                    model: 'ir.ui.view',
+                    method: 'save',
+                    args: [
+                        parseInt(structureNode.viewId),
+                        renderedNode.outerHTML,
+                        structureNode.xpath,
+                    ],
+                    context: this.options.recordInfo.context,
+                }));
+            }
         });
-        const promises = [];
-        for (const structureNode of structureNodes) {
-            const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
-            const renderedNode = (await renderer.render('dom/html', structureNode))[0];
-
-            promises.push(this._rpc({
-                model: 'ir.ui.view',
-                method: 'save',
-                args: [
-                    parseInt(structureNode.viewId),
-                    renderedNode.outerHTML,
-                    structureNode.xpath,
-                ],
-                context: this.options.recordInfo.context,
-            }));
-        }
-
         return Promise.all(promises);
     },
-
-    _saveCoverPropertiesBlocks: async function (editable) {
-        let el;
+    /**
+     * Save all "cover properties" blocks.
+     *
+     * @private
+     */
+    _saveCoverPropertiesBlocks: async function () {
+        let rpcResult;
         await this.editor.execCustomCommand(async () => {
             const layout = this.editor.plugins.get(JWEditorLib.Layout);
             const domLayout = layout.engines.dom;
@@ -388,63 +381,66 @@ var Wysiwyg = Widget.extend({
                     return attributes.classList.has('o_record_cover_container');
                 }
             });
-            const cover = covers && covers[0];
-            if (cover) {
-                el = domLayout.getDomNodes(cover)[0];
+            const el = covers && covers[0] && domLayout.getDomNodes(covers[0])[0];
+            if (!el) {
+                console.warn('No cover found.');
+                return;
             }
+
+            var resModel = el.dataset.resModel;
+            var resID = parseInt(el.dataset.resId);
+            if (!resModel || !resID) {
+                throw new Error('There should be a model and id associated to the cover.');
+            }
+
+            this.__savedCovers = this.__savedCovers || {};
+            this.__savedCovers[resModel] = this.__savedCovers[resModel] || [];
+
+            if (this.__savedCovers[resModel].includes(resID)) {
+                return;
+            }
+            this.__savedCovers[resModel].push(resID);
+
+            var cssBgImage = $(el.querySelector('.o_record_cover_image')).css('background-image');
+            var coverProps = {
+                'background-image': cssBgImage.replace(/"/g, '').replace(window.location.protocol + "//" + window.location.host, ''),
+                'background_color_class': el.dataset.bgColorClass,
+                'background_color_style': el.dataset.bgColorStyle,
+                'opacity': el.dataset.filterValue,
+                'resize_class': el.dataset.coverClass,
+                'text_align_class': el.dataset.textAlignClass,
+            };
+
+            rpcResult = this._rpc({
+                model: resModel,
+                method: 'write',
+                args: [
+                    resID,
+                    {'cover_properties': JSON.stringify(coverProps)}
+                ],
+            });
         });
-        if (!el) {
-            console.warn('No cover found.');
-            return;
-        }
-
-        var resModel = el.dataset.resModel;
-        var resID = parseInt(el.dataset.resId);
-        if (!resModel || !resID) {
-            throw new Error('There should be a model and id associated to the cover.');
-        }
-
-        this.__savedCovers = this.__savedCovers || {};
-        this.__savedCovers[resModel] = this.__savedCovers[resModel] || [];
-
-        if (this.__savedCovers[resModel].includes(resID)) {
-            return;
-        }
-        this.__savedCovers[resModel].push(resID);
-
-        var cssBgImage = $(el.querySelector('.o_record_cover_image')).css('background-image');
-        var coverProps = {
-            'background-image': cssBgImage.replace(/"/g, '').replace(window.location.protocol + "//" + window.location.host, ''),
-            'background_color_class': el.dataset.bgColorClass,
-            'background_color_style': el.dataset.bgColorStyle,
-            'opacity': el.dataset.filterValue,
-            'resize_class': el.dataset.coverClass,
-            'text_align_class': el.dataset.textAlignClass,
-        };
-
-        return this._rpc({
-            model: resModel,
-            method: 'write',
-            args: [
-                resID,
-                {'cover_properties': JSON.stringify(coverProps)}
-            ],
-        });
+        return rpcResult;
     },
-    _saveMegaMenuBlocks: async function (outerHTML, recordInfo, editable) {
-        // Saving mega menu options
-        if ($el.data('oe-field') === 'mega_menu_content') {
+    /**
+     * Save all "mega menu" blocks.
+     *
+     * @private
+     */
+    _saveMegaMenuBlocks: async function () {
+        if (this.$el.data('oe-field') === 'mega_menu_content') {
             // On top of saving the mega menu content like any other field
             // content, we must save the custom classes that were set on the
             // menu itself.
-            // FIXME normally removing the 'show' class should not be necessary here
-            // TODO check that editor classes are removed here as well
-            var classes = _.without($el.attr('class').split(' '), 'dropdown-menu', 'o_mega_menu', 'show');
+            // FIXME: normally removing the 'show' class should not be necessary here
+            // TODO: check that editor classes are removed here as well
+            let promises = [];
+            var classes = _.without(this.$el.attr('class').split(' '), 'dropdown-menu', 'o_mega_menu', 'show');
             promises.push(this._rpc({
                 model: 'website.menu',
                 method: 'write',
                 args: [
-                    [parseInt($el.data('oe-id'))],
+                    [parseInt(this.$el.data('oe-id'))],
                     {
                         'mega_menu_classes': classes.join(' '),
                     },
@@ -452,26 +448,43 @@ var Wysiwyg = Widget.extend({
             }));
         }
     },
-    _saveNewsletterBlocks: async function (outerHTML, recordInfo, editable) {
-        var self = this;
-        var defs = [this._super.apply(this, arguments)];
-        var $popups = $(editable).find('.o_newsletter_popup');
-        _.each($popups, function (popup) {
-            var $popup = $(popup);
-            var content = $popup.data('content');
-            if (content) {
-                defs.push(self._rpc({
-                    route: '/website_mass_mailing/set_content',
-                    params: {
-                        'newsletter_id': parseInt($popup.attr('data-list-id')),
-                        'content': content,
-                    },
-                }));
+    /**
+     * Save all "newsletter" blocks.
+     *
+     * @private
+     */
+    _saveNewsletterBlocks: async function () {
+        const defs = [];
+        await this.editor.execCustomCommand(async () => {
+            const layout = this.editor.plugins.get(JWEditorLib.Layout);
+            const domLayout = layout.engines.dom;
+            const editableNode = domLayout.components.get('editable')[0];
+            defs.push(this._super.apply(this, arguments));
+            const $popups = $(editableNode).find('.o_newsletter_popup');
+            for (const popup of $popups) {
+                const $popup = $(popup);
+                const content = $popup.data('content');
+                if (content) {
+                    defs.push(this._rpc({
+                        route: '/website_mass_mailing/set_content',
+                        params: {
+                            'newsletter_id': parseInt($popup.attr('data-list-id')),
+                            'content': content,
+                        },
+                    }));
+                }
             }
         });
         return Promise.all(defs);
     },
-    _saveTranslationBlocks: async function ($el, context, withLang) {
+    /**
+     * Save all "translation" blocks.
+     *
+     * @private
+     * @param {JQuery} $el
+     * @param {Object} context
+     */
+    _saveTranslationBlocks: async function ($el, context) {
         if ($el.data('oe-translation-id')) {
             return this._rpc({
                 model: 'ir.translation',
@@ -484,9 +497,14 @@ var Wysiwyg = Widget.extend({
             });
         }
     },
+    /**
+     * Save all modified images.
+     *
+     * @private
+     */
     _saveModifiedImages: async function () {
         await this.editor.execBatch(async () => {
-            const defs = _.map(this._getEdiable($('#wrapwrap')), async editableEl => {
+            const defs = this._getEditable($('#wrapwrap')).map(async editableEl => {
                 const {oeModel: resModel, oeId: resId} = editableEl.dataset;
                 const proms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
                     const isBackground = !el.matches('img');
@@ -516,7 +534,12 @@ var Wysiwyg = Widget.extend({
             await Promise.all(defs);
         });
     },
-
+    /**
+     * Called when a demand to open a alt dialog is received on the bus.
+     *
+     * @private
+     * @param {Object} data
+     */
     _onAltDialogDemand: function (data) {
         if (data.__alreadyDone) {
             return;
@@ -534,6 +557,13 @@ var Wysiwyg = Widget.extend({
         }
         altDialog.open();
     },
+    /**
+     * Called when a demand to open a "crop image" dialog is received on the
+     * bus.
+     *
+     * @private
+     * @param {Object} data
+     */
     _onCropImageDialogDemand: function (data) {
         if (data.__alreadyDone) {
             return;
@@ -554,6 +584,12 @@ var Wysiwyg = Widget.extend({
         }
         cropImageDialog.open();
     },
+    /**
+     * Called when a demand to open a link dialog is received on the bus.
+     *
+     * @private
+     * @param {Object} data
+     */
     _onLinkDialogDemand: function (data) {
         if (data.__alreadyDone) {
             return;
@@ -572,6 +608,12 @@ var Wysiwyg = Widget.extend({
         }
         linkDialog.open();
     },
+    /**
+     * Called when a demand to open a media dialog is received on the bus.
+     *
+     * @private
+     * @param {Object} data
+     */
     _onMediaDialogDemand: function (data) {
         if (data.__alreadyDone) {
             return;
@@ -594,8 +636,13 @@ var Wysiwyg = Widget.extend({
         }
         mediaDialog.open();
     },
-
-    _getEdiable($element) {
+    /**
+     * Returns the editable areas on the page.
+     *
+     * @param {JQuery} $element
+     * @returns {JQuery}
+     */
+    _getEditable($element) {
         return $element.find('[data-oe-model]')
             .not('.o_not_editable')
             .filter(function () {
@@ -609,22 +656,6 @@ var Wysiwyg = Widget.extend({
             .not('hr, br, input, textarea')
             .add('.o_editable');
     },
-
-    // legacy editor commands
-    editorCommands: {
-        toggleClass(remove) {
-            $(element).remove();
-        },
-        hasVNode() {
-            return false;
-        },
-        toggleClass(element) {
-            $(element).toggleClass('o_disabled', !isEnabled);
-        },
-        insertHtml(point, content) {
-            $(point[0]).after(content);
-        }
-    }
 });
 
 return Wysiwyg;

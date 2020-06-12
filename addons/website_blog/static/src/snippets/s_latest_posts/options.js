@@ -4,7 +4,7 @@ odoo.define('website_blog.s_latest_posts_editor', function (require) {
 var snippetOptions = require('web_editor.snippets.options');
 var wUtils = require('website.utils');
 
-snippetOptions.registry.js_get_posts_selectBlog = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.js_get_posts_selectBlog = snippetOptions.SnippetOptionsWidget.extend({
 
     //--------------------------------------------------------------------------
     // Private

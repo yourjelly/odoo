@@ -293,7 +293,7 @@ const FieldEditor = FormEditor.extend({
 });
 
 snippetOptions.registry.WebsiteFormEditor = FormEditor.extend({
-    events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.events || {}, {
+    events: _.extend({}, snippetOptions.SnippetOptionsWidget.prototype.events || {}, {
         'click .toggle-edit-message': '_onToggleEndMessageClick',
     }),
 
@@ -1280,7 +1280,7 @@ snippetOptions.registry.AddField = FieldEditor.extend({
 });
 
 // Superclass for options that need to disable a button from the snippet overlay
-const DisableOverlayButtonOption = snippetOptions.SnippetOptionWidget.extend({
+const DisableOverlayButtonOption = snippetOptions.SnippetOptionsWidget.extend({
     // Disable a button of the snippet overlay
     disableButton: function (buttonName, message) {
         // TODO refactor in master

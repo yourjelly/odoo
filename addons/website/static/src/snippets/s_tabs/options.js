@@ -3,7 +3,7 @@ odoo.define('website.s_tabs_options', function (require) {
 
 const snippetOptions = require('web_editor.snippets.options');
 
-snippetOptions.registry.NavTabs = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.NavTabs = snippetOptions.SnippetOptionsWidget.extend({
     isTopOption: true,
 
     /**
@@ -114,7 +114,7 @@ snippetOptions.registry.NavTabs = snippetOptions.SnippetOptionWidget.extend({
         }
     },
 });
-snippetOptions.registry.NavTabsStyle = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.NavTabsStyle = snippetOptions.SnippetOptionsWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -126,7 +126,7 @@ snippetOptions.registry.NavTabsStyle = snippetOptions.SnippetOptionWidget.extend
      * @see this.selectClass for parameters
      */
     setStyle: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.execBatch(async ()=> {
+        await this.wysiwyg.editor.execBatch(async ()=> {
             const $nav = this.$target.find('.s_tabs_nav:first .nav');
             const isPills = widgetValue === 'pills';
             const firstTab = this.$target.find('.s_tabs_nav:first')[0];

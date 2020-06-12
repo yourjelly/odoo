@@ -223,10 +223,10 @@ snippetOptions.userValueWidgetsRegistry['we-fontfamilypicker'] = FontFamilyPicke
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-snippetOptions.SnippetOptionWidget.include({
-    xmlDependencies: (snippetOptions.SnippetOptionWidget.prototype.xmlDependencies || [])
+snippetOptions.SnippetOptionsWidget.include({
+    xmlDependencies: (snippetOptions.SnippetOptionsWidget.prototype.xmlDependencies || [])
         .concat(['/website/static/src/xml/website.editor.xml']),
-    custom_events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.custom_events || {}, {
+    custom_events: _.extend({}, snippetOptions.SnippetOptionsWidget.prototype.custom_events || {}, {
         'google_fonts_custo_request': '_onGoogleFontsCustoRequest',
     }),
 
@@ -905,7 +905,7 @@ snippetOptions.registry.Theme = snippetOptions.Class.extend({
     },
 });
 
-snippetOptions.registry.menu_data = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.menu_data = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * When the users selects a menu, a dialog is opened to ask him if he wants
      * to follow the link (and leave editor), edit the menu or do nothing.
@@ -948,7 +948,7 @@ snippetOptions.registry.menu_data = snippetOptions.SnippetOptionWidget.extend({
     },
 });
 
-snippetOptions.registry.company_data = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.company_data = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * Fetches data to determine the URL where the user can edit its company
      * data. Saves the info in the prototype to do this only once.
@@ -995,7 +995,7 @@ snippetOptions.registry.company_data = snippetOptions.SnippetOptionWidget.extend
     },
 });
 
-snippetOptions.registry.Carousel = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.Carousel = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -1084,14 +1084,14 @@ snippetOptions.registry.Carousel = snippetOptions.SnippetOptionWidget.extend({
     },
 });
 
-snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionsWidget.extend({
     isTopOption: true,
 
     /**
      * @override
      */
     start: function () {
-        this._setElementFromTarget();
+        this._setupCarousel();
         return this._super(...arguments);
     },
     /**
@@ -1101,25 +1101,12 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
         this._super(...arguments);
         this.$carousel.off('.carousel_item_option');
     },
-
+    /**
+     * @override
+     */
     setOptionTarget() {
         this._super(...arguments);
-        this._setElementFromTarget();
-    },
-
-    _setElementFromTarget() {
-        this.$carousel = this.$target.closest('.carousel');
-        this.$indicators = this.$carousel.find('.carousel-indicators');
-        this.$controls = this.$carousel.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
-
-        var leftPanelEl = this.$overlay.data('$optionsSection')[0];
-        var titleTextEl = leftPanelEl.querySelector('we-title > span');
-        if (!this.counterEl) {
-            this.counterEl = document.createElement('span');
-        }
-        titleTextEl.appendChild(this.counterEl);
-
-        leftPanelEl.querySelector('.oe_snippet_remove').classList.add('d-none'); // TODO improve the way to do that
+        this._setupCarousel();
     },
 
     //--------------------------------------------------------------------------
@@ -1199,6 +1186,30 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
                 break;
         }
     },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * Setup the carousel element.
+     *
+     * @override
+     */
+    _setupCarousel() {
+        this.$carousel = this.$target.closest('.carousel');
+        this.$indicators = this.$carousel.find('.carousel-indicators');
+        this.$controls = this.$carousel.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
+
+        var leftPanelEl = this.$overlay.data('$optionsSection')[0];
+        var titleTextEl = leftPanelEl.querySelector('we-title > span');
+        if (!this.counterEl) {
+            this.counterEl = document.createElement('span');
+        }
+        titleTextEl.appendChild(this.counterEl);
+
+        leftPanelEl.querySelector('.oe_snippet_remove').classList.add('d-none'); // TODO: improve the way to do that
+    },
 });
 
 snippetOptions.registry.sizing_x = snippetOptions.registry.sizing.extend({
@@ -1260,7 +1271,7 @@ snippetOptions.registry.sizing_x = snippetOptions.registry.sizing.extend({
     },
 });
 
-snippetOptions.registry.layout_column = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.layout_column = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -1370,7 +1381,7 @@ snippetOptions.registry.layout_column = snippetOptions.SnippetOptionWidget.exten
     },
 });
 
-snippetOptions.registry.parallax = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.parallax = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -1394,7 +1405,7 @@ snippetOptions.registry.parallax = snippetOptions.SnippetOptionWidget.extend({
     },
 });
 
-snippetOptions.registry.ul = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.ul = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -1450,7 +1461,7 @@ snippetOptions.registry.ul = snippetOptions.SnippetOptionWidget.extend({
     },
 });
 
-snippetOptions.registry.collapse = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.collapse = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -1528,7 +1539,7 @@ snippetOptions.registry.collapse = snippetOptions.SnippetOptionWidget.extend({
     },
 });
 
-snippetOptions.registry.topMenuTransparency = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.topMenuTransparency = snippetOptions.SnippetOptionsWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -1574,7 +1585,7 @@ snippetOptions.registry.topMenuTransparency = snippetOptions.SnippetOptionWidget
     },
 });
 
-snippetOptions.registry.topMenuColor = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.topMenuColor = snippetOptions.SnippetOptionsWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -1617,7 +1628,7 @@ snippetOptions.registry.topMenuColor = snippetOptions.SnippetOptionWidget.extend
 /**
  * Handles the edition of snippet's anchor name.
  */
-snippetOptions.registry.anchor = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.anchor = snippetOptions.SnippetOptionsWidget.extend({
     isTopOption: true,
 
     //--------------------------------------------------------------------------
@@ -1752,7 +1763,7 @@ snippetOptions.registry.anchor = snippetOptions.SnippetOptionWidget.extend({
 /**
  * Controls box properties.
  */
-snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.Box = snippetOptions.SnippetOptionsWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -1855,7 +1866,7 @@ snippetOptions.registry.CookiesBar = snippetOptions.registry.SnippetPopup.extend
  * Allows edition of 'cover_properties' in website models which have such
  * fields (blogs, posts, events, ...).
  */
-snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @constructor
      */
@@ -1885,7 +1896,7 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      */
     background: async function (previewMode, widgetValue, params) {
         if (widgetValue === '') {
-            await this.wysiwyg.execBatch(async ()=> {
+            await this.wysiwyg.editor.execBatch(async ()=> {
                 await this.editorHelpers.setStyle(this.$image[0], 'background-image', '');
                 await this.editorHelpers.removeClass(this.$target[0], 'o_record_has_cover');
             });
@@ -1901,7 +1912,7 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      */
     filterValue: async function (previewMode, widgetValue, params) {
         if (!previewMode) {
-            await this.wysiwyg.execBatch(async ()=> {
+            await this.wysiwyg.editor.execBatch(async ()=> {
                 await this.editor.execCommand('dom.setStyle', {
                     domNode: this.$filter[0],
                     name: 'opacity',
@@ -1978,7 +1989,7 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
     },
 });
 
-snippetOptions.registry.ContainerWidth = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.ContainerWidth = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -2006,7 +2017,7 @@ snippetOptions.registry.ContainerWidth = snippetOptions.SnippetOptionWidget.exte
 /**
  * Allows snippets to be moved before the preceding element or after the following.
  */
-snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -2044,26 +2055,22 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
         const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
         switch (widgetValue) {
             case 'prev':
-                await this.wysiwyg.execBatch(async ()=> {
+                await this.wysiwyg.editor.execBatch(async ()=> {
                     if (this.$target.prev()[0]) {
                         await this.editorHelpers.moveBefore(this.$target.prev()[0], this.$target[0]);
                     }
-                    if (isNavItem) {
-                        if ($tabPane.prev()[0]) {
-                            await this.editorHelpers.moveBefore($tabPane.prev()[0], $tabPane[0]);
-                        }
+                    if (isNavItem && $tabPane.prev()[0]) {
+                        await this.editorHelpers.moveBefore($tabPane.prev()[0], $tabPane[0]);
                     }
                 });
                 break;
             case 'next':
-                await this.wysiwyg.execBatch(async ()=> {
+                await this.wysiwyg.editor.execBatch(async ()=> {
                     if (this.$target.next()[0]) {
                         await this.editorHelpers.moveAfter(this.$target.next()[0], this.$target[0]);
                     }
-                    if (isNavItem) {
-                        if ($tabPane.next()[0]) {
-                            await this.editorHelpers.moveAfter($tabPane.next()[0], $tabPane[0]);
-                        }
+                    if (isNavItem && $tabPane.next()[0]) {
+                        await this.editorHelpers.moveAfter($tabPane.next()[0], $tabPane[0]);
                     }
                 });
                 break;
@@ -2080,7 +2087,7 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
     },
 });
 
-snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -2088,8 +2095,8 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
         await this._super(...arguments);
         // We currently create a function to retrieve the element as all
         // `editor.execCommand` calls recreate all elements.
-        // todo: remove this when the jabberwock editor support miminum dom
-        //modification.
+        // todo: remove this when the jabberwock editor supports miminal dom
+        // modification.
         this.getButton = ()=> this.$('.o_scroll_button');
         this.$buttonTemlate = this.$('.o_scroll_button');
     },

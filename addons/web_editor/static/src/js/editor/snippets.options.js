@@ -161,6 +161,11 @@ const UserValueWidget = Widget.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * Set the target.
+     *
+     * @param {JQuery} $editorBlock
+     */
     setTarget($editorBlock) {
         this.$target = $editorBlock;
         for (const widget of this._userValueWidgets) {
@@ -250,7 +255,7 @@ const UserValueWidget = Widget.extend({
     /**
      * Returns the user value that the widget currently holds. The value is a
      * string, this is the value that will be received in the option methods
-     * of SnippetOptionWidget instances.
+     * of SnippetOptionsWidget instances.
      *
      * @param {string} [methodName]
      * @returns {string}
@@ -1497,10 +1502,10 @@ const userValueWidgetsRegistry = {
 
 /**
  * Handles a set of options for one snippet. The registry returned by this
- * module contains the names of the specialized SnippetOptionWidget which can be
+ * module contains the names of the specialized SnippetOptionsWidget which can be
  * referenced thanks to the data-js key in the web_editor options template.
  */
-const SnippetOptionWidget = Widget.extend({
+const SnippetOptionsWidget = Widget.extend({
     tagName: 'we-customizeblock-option',
     custom_events: {
         'user_value_update': '_onUserValueUpdate',
@@ -1530,7 +1535,7 @@ const SnippetOptionWidget = Widget.extend({
         this.data = data;
         this.options = options;
         this.wysiwyg = this.options.wysiwyg;
-        this.editor = this.options.wysiwyg.editor;
+        this.editor = this.wysiwyg.editor;
         this.editorHelpers = this.wysiwyg.editorHelpers;
 
         this.className = 'snippet-option-' + this.data.optionName;
@@ -1657,7 +1662,7 @@ const SnippetOptionWidget = Widget.extend({
      * @returns {Promise|undefined}
      */
     selectClass: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.execBatch(async ()=> {
+        await this.wysiwyg.editor.execBatch(async ()=> {
             for (const classNames of params.possibleValues) {
                 if (classNames) {
                     await this.editorHelpers.removeClass(this.$target[0], classNames);
@@ -1707,7 +1712,7 @@ const SnippetOptionWidget = Widget.extend({
      * @returns {Promise|undefined}
      */
     selectStyle: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.execBatch(async ()=>{
+        await this.wysiwyg.editor.execBatch(async ()=>{
             if (params.cssProperty === 'background-color' && this._onBackgroundColorUpdate) {
                 await this._onBackgroundColorUpdate(previewMode);
             }
@@ -2207,7 +2212,7 @@ const SnippetOptionWidget = Widget.extend({
     /**
      * @private
      * @param {HTMLElement} parentEl
-     * @param {SnippetOptionWidget|UserValueWidget} parentWidget
+     * @param {SnippetOptionsWidget|UserValueWidget} parentWidget
      * @returns {Promise}
      */
     _renderXMLWidgets: function (parentEl, parentWidget) {
@@ -2481,7 +2486,7 @@ const registry = {};
  * snippet drop (so that base snippet definition do not need to care about that)
  * and on first focus (for compatibility).
  */
-registry.MainColorpicker = SnippetOptionWidget.extend({
+registry.MainColorpicker = SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -2513,7 +2518,7 @@ registry.MainColorpicker = SnippetOptionWidget.extend({
     },
 });
 
-registry.sizing = SnippetOptionWidget.extend({
+registry.sizing = SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -2584,7 +2589,7 @@ registry.sizing = SnippetOptionWidget.extend({
                 if (dd > (2 * resize[1][next] + resize[1][current]) / 3) {
                     self.$target.attr('class', cleanedClass);
                     self.$target.addClass(resize[0][next]);
-                    await self.wysiwyg.execBatch(async () => {
+                    await self.wysiwyg.editor.execBatch(async () => {
                         await self.editorHelpers.setAttribute(self.$target[0], 'class', cleanedClass);
                         await self.editorHelpers.addClass(self.$target[0], resize[0][next]);
                     });
@@ -2594,7 +2599,7 @@ registry.sizing = SnippetOptionWidget.extend({
                 if (prev !== current && dd < (2 * resize[1][prev] + resize[1][current]) / 3) {
                     self.$target.attr('class', cleanedClass);
                     self.$target.addClass(resize[0][prev]);
-                    await self.wysiwyg.execBatch(async () => {
+                    await self.wysiwyg.editor.execBatch(async () => {
                         await self.editorHelpers.setAttribute(self.$target[0], 'class', cleanedClass);
                         await self.editorHelpers.addClass(self.$target[0], resize[0][prev]);
                     });
@@ -2783,7 +2788,7 @@ registry['sizing_y'] = registry.sizing.extend({
  * Abstract option to be extended by the ImageOptimize and BackgroundOptimize
  * options that handles all the common parts.
  */
-const ImageHandlerOption = SnippetOptionWidget.extend({
+const ImageHandlerOption = SnippetOptionsWidget.extend({
 
     /**
      * @override
@@ -3161,7 +3166,7 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
 /**
  * Handles the edition of snippet's background image.
  */
-registry.background = SnippetOptionWidget.extend({
+registry.background = SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -3290,7 +3295,7 @@ registry.background = SnippetOptionWidget.extend({
 /**
  * Handles the edition of snippets' background image position.
  */
-registry.BackgroundPosition = SnippetOptionWidget.extend({
+registry.BackgroundPosition = SnippetOptionsWidget.extend({
     xmlDependencies: ['/web_editor/static/src/xml/editor.xml'],
 
     /**
@@ -3325,7 +3330,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     backgroundType: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.execBatch(async ()=> {
+        await this.wysiwyg.editor.execBatch(async ()=> {
             if (widgetValue === 'repeat-pattern') {
                 await this.editorHelpers.addClass(this.$target[0], 'o_bg_img_opt_repeat');
             } else {
@@ -3596,7 +3601,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
  * Allows to replace a text value with the name of a database record.
  * @todo replace this mechanism with real backend m2o field ?
  */
-registry.many2one = SnippetOptionWidget.extend({
+registry.many2one = SnippetOptionsWidget.extend({
     xmlDependencies: ['/web_editor/static/src/xml/snippets.xml'],
     /**
      * @override
@@ -3756,7 +3761,7 @@ registry.many2one = SnippetOptionWidget.extend({
 /**
  * Allows to display a warning message on outdated snippets.
  */
-registry.VersionControl = SnippetOptionWidget.extend({
+registry.VersionControl = SnippetOptionsWidget.extend({
     xmlDependencies: ['/web_editor/static/src/xml/snippets.xml'],
 
     /**
@@ -3779,7 +3784,7 @@ registry.VersionControl = SnippetOptionWidget.extend({
 /**
  * Handle the save of a snippet as a template that can be reused later
  */
-registry.SnippetSave = SnippetOptionWidget.extend({
+registry.SnippetSave = SnippetOptionsWidget.extend({
     xmlDependencies: ['/web_editor/static/src/xml/editor.xml'],
     isTopOption: true,
 
@@ -3830,7 +3835,7 @@ registry.SnippetSave = SnippetOptionWidget.extend({
 
 
 return {
-    SnippetOptionWidget: SnippetOptionWidget,
+    SnippetOptionsWidget: SnippetOptionsWidget,
 
     UserValueWidget: UserValueWidget,
     userValueWidgetsRegistry: userValueWidgetsRegistry,
@@ -3841,7 +3846,7 @@ return {
     buildRowElement: _buildRowElement,
 
     // Other names for convenience
-    Class: SnippetOptionWidget,
+    Class: SnippetOptionsWidget,
     registry: registry,
 };
 });

@@ -444,65 +444,63 @@ var SnippetEditor = Widget.extend({
      * @returns {Promise}
      */
     removeSnippet: async function () {
-        await this.wysiwyg.execBatch(async ()=> {
-            this.toggleOverlay(false);
-            this.toggleOptions(false);
+        this.toggleOverlay(false);
+        this.toggleOptions(false);
 
-            await new Promise(resolve => {
-                this.trigger_up('call_for_each_child_snippet', {
-                    $snippet: this.$snippetBlock,
-                    callback: function (editor, $snippet) {
-                        for (var i in editor.snippetOptionInstances) {
-                            editor.snippetOptionInstances[i].onRemove();
-                        }
-                        resolve();
-                    },
-                });
-            });
-
-            this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
-            var $parent = this.$snippetBlock.parent();
-            this.$snippetBlock.find('*').addBack().tooltip('dispose');
-            await this.editorHelpers.remove(this.$snippetBlock[0]);
-            this.$el.remove();
-
-            var node = $parent[0];
-            if (node && node.firstChild) {
-                if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
-                    await this.editorHelpers.remove(node.firstChild);
-                }
-            }
-
-            if ($parent.closest(':data("snippet-editor")').length) {
-                var editor = $parent.data('snippet-editor');
-                while (!editor) {
-                    var $nextParent = $parent.parent();
-                    if (isEmptyAndRemovable($parent)) {
-                        await this.editorHelpers.remove(this.$parent[0]);
+        await new Promise(resolve => {
+            this.trigger_up('call_for_each_child_snippet', {
+                $snippet: this.$snippetBlock,
+                callback: function (editor, $snippet) {
+                    for (var i in editor.snippetOptionInstances) {
+                        editor.snippetOptionInstances[i].onRemove();
                     }
-                    $parent = $nextParent;
-                    editor = $parent.data('snippet-editor');
-                }
-                if (isEmptyAndRemovable($parent, editor)) {
-                    // TODO maybe this should be part of the actual Promise being
-                    // returned by the function ?
-                    await new Promise((resolve)=> {
-                        setTimeout(() => editor.removeSnippet().then(resolve));
-                    });
-                }
-            }
-
-            await new Promise((resolve) => this.trigger_up('snippet_removed', {onFinish: resolve}));
-            this.destroy();
-            const childs = this.snippetMenu.getChildsSnippetBlock(this.$snippetBlock);
-            for (const child of childs) {
-                const snippetEditor = $(child).data('snippet-editor');
-                if (snippetEditor) {
-snippetEditor.destroy();
-}
-            }
-            $parent.trigger('content_changed');
+                    resolve();
+                },
+            });
         });
+
+        this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
+        var $parent = this.$snippetBlock.parent();
+        this.$snippetBlock.find('*').addBack().tooltip('dispose');
+        await this.editorHelpers.remove(this.$snippetBlock[0]);
+        this.$el.remove();
+
+        var node = $parent[0];
+        if (node && node.firstChild) {
+            if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
+                await this.editorHelpers.remove(node.firstChild);
+            }
+        }
+
+        if ($parent.closest(':data("snippet-editor")').length) {
+            var editor = $parent.data('snippet-editor');
+            while (!editor) {
+                var $nextParent = $parent.parent();
+                if (isEmptyAndRemovable($parent)) {
+                    await this.editorHelpers.remove(this.$parent[0]);
+                }
+                $parent = $nextParent;
+                editor = $parent.data('snippet-editor');
+            }
+            if (isEmptyAndRemovable($parent, editor)) {
+                // TODO maybe this should be part of the actual Promise being
+                // returned by the function ?
+                await new Promise((resolve)=> {
+                    setTimeout(() => editor.removeSnippet().then(resolve));
+                });
+            }
+        }
+
+        await new Promise((resolve) => this.trigger_up('snippet_removed', {onFinish: resolve}));
+        this.destroy();
+        const childs = this.snippetMenu.getChildsSnippetBlock(this.$snippetBlock);
+        for (const child of childs) {
+            const snippetEditor = $(child).data('snippet-editor');
+            if (snippetEditor) {
+                snippetEditor.destroy();
+            }
+        }
+        $parent.trigger('content_changed');
 
         function isEmptyAndRemovable($el, editor) {
             editor = editor || $el.data('snippet-editor');
@@ -601,10 +599,8 @@ snippetEditor.destroy();
 
         const $clonedContent = this.$snippetBlock.clone(false);
 
-        const vNode = await this.editorHelpers.insertHtml($clonedContent[0].outerHTML, this.$snippetBlock[0], 'AFTER');
-        const layout = this.editor.plugins.get(this.JWEditorLib.Layout);
-        const domEngine = layout.engines.dom;
-        const $clone = $(domEngine.getDomNodes(vNode)[0]);
+        const vNodes = await this.editorHelpers.insertHtml($clonedContent[0].outerHTML, this.$snippetBlock[0], 'AFTER');
+        const $clone = $(this.editorHelpers.getDomNodes(vNodes)[0]);
 
         // todo: handle history undo in jabberwock
 
@@ -684,8 +680,8 @@ snippetEditor.destroy();
                 this.selectorChildren.push(option['drop-in']);
             }
 
-            var optionName = option.option;
-            const optionInstance = new (snippetOptions.registry[optionName] || snippetOptions.SnippetOptionWidget)(
+            var optionName = option.id;
+            const optionInstance = new (snippetOptions.registry[optionName] || snippetOptions.SnippetOptionsWidget)(
                 this,
                 option.$el.children(),
                 option.base_target ? this.$snippetBlock.find(option.base_target).eq(0) : this.$snippetBlock,
@@ -885,7 +881,7 @@ snippetEditor.destroy();
      * @private
      */
     _onOptionsSectionMouseLeave: function (ev) {
-        // this.trigger_up('deactivate_snippet');
+        // TODO: this.trigger_up('deactivate_snippet');
     },
     /**
      * @private
@@ -993,6 +989,10 @@ snippetEditor.destroy();
         }
     },
 });
+
+/**
+* Management of drag&drop menu and snippet related behaviors in the page.
+*/
 var SnippetsMenu = Widget.extend({
     id: 'oe_snippets',
     cacheSnippetTemplate: {},
@@ -1156,7 +1156,6 @@ var SnippetsMenu = Widget.extend({
                 return;
             }
             this._activateSnippet($snippet);
-
         });
 
 
@@ -1193,7 +1192,6 @@ var SnippetsMenu = Widget.extend({
             this._activateSnippet($autoFocusEls.first());
         }
 
-        // hand
         return Promise.all(defs).then(() => {
             this.$('[data-title]').tooltip({
                 delay: 0,
@@ -1263,46 +1261,18 @@ var SnippetsMenu = Widget.extend({
             snippetEditor.destroy();
         });
     },
+    /**
+     * @param {JQuery} $snippetBlock
+     * @returns {JQuery}
+     */
+    getChildsSnippetBlock($snippetBlock) {
+        return $snippetBlock.add(globalSelector.all($snippetBlock));
+    },
 
     //--------------------------------------------------------------------------
     // Private
     //--------------------------------------------------------------------------
 
-    afterRender: function () {
-        this.snippetEditors = this.snippetEditors.filter(x=>!x.isDestroyed());
-        for (const editor of this.snippetEditors) {
-            if (!editor.vNode) {
-continue;
-}
-            if (!this.layoutEngine.getDomNodes(editor.vNode)) {
-debugger;
-}
-
-            const $snippetBlock = $(this.layoutEngine.getDomNodes(editor.vNode)[0][0]);
-            editor.$snippetBlock = $snippetBlock;
-            editor.$snippetBlock.data('snippet-editor', editor);
-        }
-        // We need to do another loop because, side effects of an option
-        // setTarget access the $snippetBlock of the editor that would not
-        // be set otherwise.
-        for (const editor of this.snippetEditors) {
-            if (!editor.vNode) {
-continue;
-}
-            for (const key in editor.snippetOptionInstances) {
-                const $snippetBlock = $(this.layoutEngine.getDomNodes(editor.vNode)[0][0]);
-                editor.snippetOptionInstances[key].setTarget($snippetBlock);
-            }
-        }
-        // debugger
-        // let currentNode = this.includedSnippetNodes[0];
-        // const jwEditor = this.wysiwyg.editor;
-        // const dom = jwEditor.plugins.get(JWEditorLib.Dom);
-        // while (currentNode) {
-        //     currentNode = this.includedSnippetNodes.shift();
-        //     const domNodes = dom.domMap.toDom(currentNode);
-        // }
-    },
     /**
      * Creates drop zones in the DOM (locations where snippets may be dropped).
      * Those locations are determined thanks to the two types of given DOM.
@@ -1478,7 +1448,7 @@ continue;
             $invisibleDOMPanelEl.toggleClass('d-none', !$invisibleSnippets.length);
 
             const proms = _.map($invisibleSnippets, async el => {
-                const editor = await this._getOrCreateSnippetEditor($(el));
+                const editor = await this._getSnippetEditor($(el));
                 const $invisEntry = $('<div/>', {
                     class: 'o_we_invisible_entry d-flex align-items-center justify-content-between',
                     text: editor.getName(),
@@ -1496,6 +1466,7 @@ continue;
      * Note 2: if the given DOM element is not a snippet (no editor option), the
      *         first parent which is one is used instead.
      *
+     * @private
      * @param {jQuery|false} $snippetBlock
      *        The DOM element whose editor (and its parent ones) need to be
      *        enabled. Only disable the current one if false is given.
@@ -1512,56 +1483,56 @@ continue;
             return;
         }
 
-        let enabledEditorHierarchy = [];
+        let enabledSnippetEditorsHierarchy = [];
 
         return this._mutex.exec(async () => {
-            let editorToEnable;
+            let snippetEditor;
             // Take the first parent of the provided DOM (or itself) which
             // should have an associated snippet editor and create + enable it.
             if ($snippetBlock.length) {
                 const $snippet = globalSelector.closest($snippetBlock);
                 if ($snippet.length) {
-                    editorToEnable = await this._getOrCreateSnippetEditor($snippet);
+                    snippetEditor = await this._getSnippetEditor($snippet);
                 }
             }
-            if (ifInactiveOptions && enabledEditorHierarchy.includes(editorToEnable)) {
-                return editorToEnable;
+            if (ifInactiveOptions && enabledSnippetEditorsHierarchy.includes(snippetEditor)) {
+                return snippetEditor;
             }
 
-            const editorToEnableHierarchy = [];
-            let currentEditor = editorToEnable;
-            while (currentEditor && currentEditor.$snippetBlock) {
-                editorToEnableHierarchy.push(currentEditor);
-                currentEditor = currentEditor.getParent();
+            const snippetEditorHierarchy = [];
+            let currentSnippetEditor = snippetEditor;
+            while (currentSnippetEditor && currentSnippetEditor.$snippetBlock) {
+                snippetEditorHierarchy.push(currentSnippetEditor);
+                currentSnippetEditor = currentSnippetEditor.getParent();
             }
 
 
-            // First disable all editors...
-            this._disableAllEditors(previewMode, editorToEnableHierarchy);
-
-            // ... then enable the right editor
-            if (editorToEnable) {
-                //setTimeout(()=>{
-                editorToEnable.toggleOverlay(true, previewMode);
-                editorToEnable.toggleOptions(true);
-                //}, 100)
+            // First disable all snippet editors...
+            for (const currentSnippetEditor of this.snippetEditors) {
+                currentSnippetEditor.toggleOverlay(false, previewMode);
+                if (!previewMode && !snippetEditorHierarchy.includes(currentSnippetEditor)) {
+                    currentSnippetEditor.toggleOptions(false);
+                }
             }
 
-            enabledEditorHierarchy = editorToEnableHierarchy;
-            return editorToEnable;
+            // ... then enable the right snippet editor
+            if (snippetEditor) {
+                snippetEditor.toggleOverlay(true, previewMode);
+                snippetEditor.toggleOptions(true);
+            }
+
+            enabledSnippetEditorsHierarchy = snippetEditorHierarchy;
+            return snippetEditor;
         });
     },
-
-    _disableAllEditorsWithMutex() {
-        this._mutex.exec(this._disableAllEditors.bind(this));
-    },
-    _disableAllEditors(previewMode = false, editorToEnableHierarchy) {
-        for (let i = this.snippetEditors.length; i--;) {
-            const editor = this.snippetEditors[i];
-            editor.toggleOverlay(false, previewMode);
-            if (!previewMode && !(editorToEnableHierarchy && editorToEnableHierarchy.includes(editor))) {
-                editor.toggleOptions(false);
-            }
+    /**
+     * Disable all snippet editors.
+     *
+     * @private
+     */
+    _disableAllSnippetEditors() {
+        for (const currentSnippetEditor of this.snippetEditors) {
+            currentSnippetEditor.toggleOverlay(false, false);
         }
     },
     /**
@@ -1570,7 +1541,7 @@ continue;
      */
     _loadSnippetsTemplates: async function (invalidateCache) {
         return this._mutex.exec(async () => {
-            await this.options.wysiwyg.execBatch(async () => {
+            await this.options.wysiwyg.editor.execBatch(async () => {
                 await this._destroyEditors();
                 const html = await this.loadSnippets(invalidateCache);
                 await this._computeSnippetTemplates(html);
@@ -1605,16 +1576,12 @@ continue;
     _callForEachChildSnippet: function ($snippetBlock, callback) {
         const defs = _.map(this.getChildsSnippetBlock($snippetBlock), async (child) => {
             const $childSnippet = $(child);
-            const editor = await this._getOrCreateSnippetEditor($childSnippet);
-            if (editor) {
-                return callback.call(this, editor, $childSnippet);
+            const snippetEditor = await this._getSnippetEditor($childSnippet);
+            if (snippetEditor) {
+                return callback.call(this, snippetEditor, $childSnippet);
             }
         });
         return Promise.all(defs);
-    },
-
-    getChildsSnippetBlock($snippetBlock) {
-        return $snippetBlock.add(globalSelector.all($snippetBlock));
     },
     /**
      * Close widget for all editors.
@@ -1737,7 +1704,7 @@ continue;
             var noCheck = $dataSelector.data('no-check');
             var optionID = $dataSelector.data('js');
             var option = {
-                'option': optionID,
+                'id': optionID,
                 'base_selector': selector,
                 'base_exclude': exclude,
                 'base_target': target,
@@ -1872,7 +1839,7 @@ continue;
      * @param {jQuery} $snippet
      * @returns {Promise<SnippetEditor>}
      */
-    _getOrCreateSnippetEditor: async function ($snippet) {
+    _getSnippetEditor: async function ($snippet) {
         // todo: the $snippet might be redrawn frequently with the jabberwock.
         //        adapt this code to use a Map<VNode, Editor> instead.
         var snippetEditor = $snippet.data('snippet-editor');
@@ -1883,12 +1850,12 @@ continue;
         var $parent = globalSelector.closest($snippet.parent());
         let parentEditor;
         if ($parent.length) {
-            parentEditor = await this._getOrCreateSnippetEditor($parent);
+            parentEditor = await this._getSnippetEditor($parent);
         }
 
         // When reaching this position, after the Promise resolution, the
         // snippet editor instance might have been created by another call
-        // to _getOrCreateSnippetEditor... the whole logic should be improved
+        // to _getSnippetEditor... the whole logic should be improved
         // to avoid doing this here.
         if (snippetEditor) {
             return snippetEditor.__isStarted;
@@ -1921,7 +1888,6 @@ continue;
             var $snippetTemplate = $snippetDraggable.find('.oe_snippet_body');
 
             var isEnabled = false;
-            // console.log('self.templateOptions:', self.templateOptions)
             _.each(self.templateOptions, function (option, k) {
                 if (isEnabled || !($snippetTemplate.is(option.base_selector) && !$snippetTemplate.is(option.base_exclude))) {
                     return;
@@ -1968,7 +1934,6 @@ continue;
      */
     _makeSnippetDraggable: function ($snippets) {
         var self = this;
-        var $tumb = $snippets.find('.oe_snippet_thumbnail_img:first');
         var $snippetToInsert, dropped, $snippet;
 
         this.draggableComponent = new SmoothOnDragComponent($snippets, {
@@ -2009,7 +1974,7 @@ continue;
                     return;
                 }
 
-                self._disableAllEditorsWithMutex();
+                self._mutex.exec(self._disableAllSnippetEditors.bind(self));
                 self._activateInsertionZones($selectorSiblings, $selectorChildren);
 
                 self.$editor.find('.oe_drop_zone').droppable({
@@ -2166,8 +2131,8 @@ continue;
      */
     _onCloneSnippet: async function (ev) {
         ev.stopPropagation();
-        const editor = await this._getOrCreateSnippetEditor(ev.data.$snippet);
-        await editor.clone();
+        const snippetEditor = await this._getSnippetEditor(ev.data.$snippet);
+        await snippetEditor.clone();
         if (ev.data.onSuccess) {
             ev.data.onSuccess();
         }
@@ -2179,7 +2144,7 @@ continue;
      * @private
      */
     _onDeactivateSnippet: function () {
-        this._disableAllEditorsWithMutex();
+        this._mutex.exec(this._disableAllSnippetEditors.bind(this));
     },
     /**
      * Called when a snippet has moved in the page.
@@ -2206,8 +2171,8 @@ continue;
      * @private
      */
     _onHideOverlay: function () {
-        for (const editor of this.snippetEditors) {
-            editor.toggleOverlay(false);
+        for (const snippetEditor of this.snippetEditors) {
+            snippetEditor.toggleOverlay(false);
         }
     },
     /**
@@ -2272,7 +2237,7 @@ continue;
         ev.preventDefault();
         const $snippet = $(this.invisibleDOMMap.get(ev.currentTarget));
         const isVisible = await this._mutex.exec(async () => {
-            const editor = await this._getOrCreateSnippetEditor($snippet);
+            const editor = await this._getSnippetEditor($snippet);
             return editor.toggleTargetVisibility();
         });
         $(ev.currentTarget).find('.fa')
@@ -2281,14 +2246,14 @@ continue;
         if (isVisible) {
             return this._activateSnippet();
         } else {
-            return this._disableAllEditors();
+            return this._disableAllSnippetEditors();
         }
     },
     /**
      * @private
      */
     _onBlocksTabClick: async function (ev) {
-        await this._disableAllEditorsWithMutex();
+        await this._mutex.exec(this._disableAllSnippetEditors.bind(this));
         this._updateLeftPanelContent({
             content: [],
             tab: this.tabs.BLOCKS,
@@ -2358,7 +2323,7 @@ continue;
      * @private
      */
     _onReloadSnippetTemplate: async function (ev) {
-        await this._disableAllEditorsWithMutex();
+        await this._mutex.exec(this._disableAllSnippetEditors.bind(this));
         await this._loadSnippetsTemplates(true);
     },
     /**
@@ -2379,8 +2344,8 @@ continue;
      */
     _onRemoveSnippet: async function (ev) {
         ev.stopPropagation();
-        const editor = await this._getOrCreateSnippetEditor(ev.data.$snippet);
-        await editor.removeSnippet();
+        const snippetEditor = await this._getSnippetEditor(ev.data.$snippet);
+        await snippetEditor.removeSnippet();
         if (ev.data.onSuccess) {
             ev.data.onSuccess();
         }
@@ -2444,7 +2409,7 @@ continue;
      */
     _onSnippetOptionVisibilityUpdate: async function (ev) {
         if (!ev.data.show) {
-            this._disableAllEditorsWithMutex();
+            this._mutex.exec(this._disableAllSnippetEditors.bind(this));
         }
         await this._updateInvisibleDOM(); // Re-render to update status
     },

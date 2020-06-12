@@ -3,7 +3,7 @@ odoo.define('website.s_table_of_content_options', function (require) {
 
 const snippetOptions = require('web_editor.snippets.options');
 
-snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
@@ -85,7 +85,7 @@ snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionWidget.exte
     },
 });
 
-snippetOptions.registry.TableOfContentNavbar = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.TableOfContentNavbar = snippetOptions.SnippetOptionsWidget.extend({
 
     //--------------------------------------------------------------------------
     // Options
@@ -140,7 +140,7 @@ snippetOptions.registry.TableOfContentNavbar = snippetOptions.SnippetOptionWidge
     },
 });
 
-snippetOptions.registry.TableOfContentMainColumns = snippetOptions.SnippetOptionWidget.extend({
+snippetOptions.registry.TableOfContentMainColumns = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
