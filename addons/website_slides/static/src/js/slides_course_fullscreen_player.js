@@ -625,15 +625,14 @@ odoo.define('website_slides.fullscreen', function (require) {
                 return self._renderSlide();
             }).then(function() {
                 if (slide._autoSetDone && !session.is_website_user) {  // no useless RPC call
-                    /*const $iFrame = self.$el.find('.o_wslides_iframe_viewer');
+                    const $iFrame = self.$el.find('.o_wslides_iframe_viewer');
                     if ($iFrame.length) {
                         $iFrame.on('load', function () {
                            return self._setCompleted(slide.id);
                         });
                     } else {
                            return self._setCompleted(slide.id);
-                    }*/
-                    return self._setCompleted(slide.id);
+                    }
                 }
             });
         },
