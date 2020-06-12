@@ -206,9 +206,10 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
             $modal.find('header button.close').on('mouseup', function (ev) {
                 ev.stopPropagation();
             });
-            $modal.addClass('o_newsletter_modal');
+            let dataset = self.el.dataset;
+            $modal.addClass('o_newsletter_modal ' + dataset.layout);
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-            $modal.find('.modal-dialog').addClass('modal-dialog-centered');
+            $modal.find('.modal-dialog').addClass('modal-dialog-centered ' + dataset.modalSize);
             $modal.find('.modal-content').addClass('s_newsletter_popup_content');
             $modal.find('.js_subscribe').data('list-id', self.listID)
                   .find('input.js_subscribe_email').val(email);

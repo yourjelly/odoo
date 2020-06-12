@@ -1,5 +1,8 @@
 .o_newsletter_modal {
 
+    .modal-content {
+        position: absolute;
+    }
     .modal-header {
         padding: 0;
         border: none;
@@ -18,5 +21,15 @@
         @include o-bg-color(color-yiq(o-color('primary')), o-color('primary'), $with-extras: false);
         box-shadow: $box-shadow-sm;
         opacity: 1;
+    }
+    &.fixedTop {
+        .modal-content {
+           top: $o-navbar-height;
+        }
+    }
+    &.fixedBottom {
+        .modal-content {
+           bottom: 0;
+        }
     }
 }

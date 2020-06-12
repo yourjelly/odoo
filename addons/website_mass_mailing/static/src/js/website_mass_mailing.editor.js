@@ -211,6 +211,14 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     modalSize: function (previewMode, widgetValue, params) {
         this.$target[0].dataset.modalSize = widgetValue;
     },
+    /**
+    * Changes the newsletter Backdrop color.
+    *
+    * @see this.selectClass for parameters
+    */
+    colorChange: function (previewMode, widgetValue, params) {
+        this.$target[0].dataset.colorChange = widgetValue;
+    },
 
     //----------------------------------------------------------------------
     // Private
@@ -225,32 +233,11 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
                 return this._getMailingListID();
             case 'layout':
             case 'modalSize':
+            case 'colorChange':
                 return this.$target[0].dataset[methodName];
         }
         return this._super(...arguments);
     },
-
-    //--------------------------------------------------------------------------
-    // Public
-    //--------------------------------------------------------------------------
-
-    /**
-     * @override
-     */
-    updateUIVisibility: async function () {
-        await this._super(...arguments);
-        const dataset = this.$target[0].dataset;
-        this.$target.find('.o_newsletter_modal').addClass(dataset.layout);
-        this.$target.find('.modal-dialog').addClass(dataset.modalSize);
-    },
-});
-
-options.registry.SnippetNewsletterPopup = options.registry.SnippetPopup.extend({
-
-
-});
-options.registry.NewsletterPopupContent = options.registry.PopupContent.extend({
-
 });
 
 WysiwygMultizone.include({
