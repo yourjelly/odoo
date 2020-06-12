@@ -257,7 +257,8 @@
                                     <div class="dropdown-menu" t-att-id="'navToogleTagGroup%s' % tag_group.id">
                                         <t t-foreach="tag_group.tag_ids" t-as="tag">
                                             <a rel="nofollow" t-att-class="'dropdown-item %s' % ('active' if tag in search_tags else '')"
-                                                t-att-href="'/slides/all?%s' % keep_query('*', tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids))"
+                                                t-att-href="'/slides/all?%s' % keep_query('*',          
+                                                tags=str((search_tags - tag).ids if tag in search_tags else (tag | search_tags).ids)).replace('%5B','').replace('%2C+','/').replace('%5D','/')"
                                                 t-esc="tag.name"/>
                                         </t>
                                     </div>
