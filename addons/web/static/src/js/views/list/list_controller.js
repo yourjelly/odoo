@@ -213,20 +213,22 @@ var ListController = BasicController.extend({
     _addRecord: function (dataPointId) {
         var self = this;
         this._disableButtons();
-        return this.renderer.unselectRow().then(function () {
-            return self.model.addDefaultRecord(dataPointId, {
-                position: self.editable,
-            });
-        }).then(function (recordID) {
-            var state = self.model.get(self.handle);
-            self.renderer.updateState(state, {keepWidths: true})
-                .then(function () {
-                    self.renderer.editRecord(recordID);
-                })
-                .then(() => {
-                    self._updatePaging(state);
+        return this._forgetSampleData(() => {
+            return this.renderer.unselectRow().then(function () {
+                return self.model.addDefaultRecord(dataPointId, {
+                    position: self.editable,
                 });
-        }).then(this._enableButtons.bind(this)).guardedCatch(this._enableButtons.bind(this));
+            }).then(function (recordID) {
+                var state = self.model.get(self.handle);
+                self.renderer.updateState(state, {keepWidths: true})
+                    .then(function () {
+                        self.renderer.editRecord(recordID);
+                    })
+                    .then(() => {
+                        self._updatePaging(state);
+                    });
+            }).then(this._enableButtons.bind(this)).guardedCatch(this._enableButtons.bind(this));
+        }, true);
     },
     /**
      * Assign on the buttons create additionnal behavior to facilitate the work of the users doing input only using the keyboard
@@ -522,9 +524,9 @@ var ListController = BasicController.extend({
     /**
      * @override
      */
-    _shouldBounceOnClick() {
+    _shouldBounceOnClick(element) {
         const state = this.model.get(this.handle, {raw: true});
-        return !state.count;
+        return !state.count || state.isSample;
     },
     /**
      * Called when clicking on 'Archive' or 'Unarchive' in the sidebar.
@@ -650,7 +652,7 @@ var ListController = BasicController.extend({
      * @private
      * @param {MouseEvent} ev
      */
-    _onCreateRecord: function (ev) {
+    _onCreateRecord: async function (ev) {
         // we prevent the event propagation because we don't want this event to
         // trigger a click on the main bus, which would be then caught by the
         // list editable renderer and would unselect the newly created row
@@ -867,7 +869,7 @@ var ListController = BasicController.extend({
         }
         var self = this;
         this.model.setSort(state.id, ev.data.name).then(function () {
-            self.update({});
+            self.reload({});
         });
     },
     /**

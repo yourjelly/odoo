@@ -21,6 +21,7 @@ var qweb = core.qweb;
 var KanbanController = BasicController.extend({
     buttons_template: 'KanbanView.buttons',
     custom_events: _.extend({}, BasicController.prototype.custom_events, {
+        add_quick_create: '_onAddQuickCreate',
         quick_create_add_column: '_onAddColumn',
         quick_create_record: '_onQuickCreateRecord',
         resequence_columns: '_onResequenceColumn',
@@ -90,6 +91,12 @@ var KanbanController = BasicController.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    _addQuickCreate(groupId) {
+        this._forgetSampleData(async () => {
+            await this.update({ shouldUpdateControlPanel: false }, { reload: false });
+            return this.renderer.addQuickCreate(groupId);
+        }, true);
+    },
     /**
      * @override method comes from field manager mixin
      * @private
@@ -205,12 +212,13 @@ var KanbanController = BasicController.extend({
      */
     _shouldBounceOnClick(element) {
         const state = this.model.get(this.handle, {raw: true});
-        if (!state.count) {
+        if (!state.count || state.isSample) {
             const classesList = [
                 'o_kanban_view',
                 'o_kanban_group',
+                'o_kanban_header',
                 'o_column_quick_create',
-                'o_view_nocontent_smiling_face'
+                'o_view_nocontent_smiling_face',
             ];
             return classesList.some(c => element.classList.contains(c));
         }
@@ -266,6 +274,9 @@ var KanbanController = BasicController.extend({
                     });
             }).guardedCatch(this.reload.bind(this));
     },
+    _onAddQuickCreate(ev) {
+        this._addQuickCreate(ev.data.groupId);
+    },
     /**
      * @private
      * @param {OdooEvent} ev
@@ -309,16 +320,13 @@ var KanbanController = BasicController.extend({
      * @private
      */
     _onButtonNew: function () {
-        var self = this;
         var state = this.model.get(this.handle, {raw: true});
         var quickCreateEnabled = this.quickCreateEnabled && viewUtils.isQuickCreateEnabled(state);
         if (this.on_create === 'quick_create' && quickCreateEnabled && state.data.length) {
             // activate the quick create in the first column when the mutex is
             // unlocked, to ensure that there is no pending re-rendering that
             // would remove it (e.g. if we are currently adding a new column)
-            this.mutex.getUnlockedDef().then(function () {
-                self.renderer.addQuickCreate();
-            });
+            this.mutex.getUnlockedDef().then(this._addQuickCreate.bind(this, null));
         } else if (this.on_create && this.on_create !== 'quick_create') {
             // Execute the given action
             this.do_action(this.on_create, {
@@ -458,7 +466,7 @@ var KanbanController = BasicController.extend({
         const columnID = ev.target.db_id || ev.data.db_id;
         this.model.toggleGroup(columnID)
             .then(function (db_id) {
-                var data = self.model.get(db_id);
+                var data = self.model.get(db_id, { withSampleData: true });
                 var options = {
                     openQuickCreate: !!ev.data.openQuickCreate,
                 };

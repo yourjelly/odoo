@@ -244,7 +244,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
             }
             params.domain = this.controlPanelDomain.concat(this.searchPanelDomain);
         }
-        await Promise.all([this.update(params, {}), searchPanelUpdateProm]);
+        await Promise.all([this.update(params, { withSampleData: true }), searchPanelUpdateProm]);
         if (postponeRendering) {
             return this.renderer._render();
         }
@@ -261,7 +261,8 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @param {Object} params will be given to the model and to the renderer
      * @param {Object} [options]
      * @param {boolean} [options.reload=true] if true, the model will reload data
-     *
+     * @param {boolean} [options.withSampleData] if true, the state passed to the renderer will
+     *                                             contain sample data if any.
      * @returns {Promise}
      */
     update: async function (params, options = {}) {
@@ -270,12 +271,13 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
             this.handle = await this.dp.add(this.model.reload(this.handle, params));
         }
         const localState = this.renderer.getLocalState();
-        const state = this.model.get(this.handle);
         const promises = [
-            this.updateRendererState(state, params).then(() => {
-                this.renderer.setLocalState(localState);
-            }),
-            this._update(state, params),
+            this.updateRendererState(
+                this.model.get(this.handle, { withSampleData: options.withSampleData }), params
+            ).then(
+                () => this.renderer.setLocalState(localState)
+            ),
+            this._update(this.model.get(this.handle), params)
         ];
         await this.dp.add(Promise.all(promises));
         this.updateButtons();
@@ -409,7 +411,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @param {Object} [params.shouldUpdateControlPanel]
      * @returns {Promise}
      */
-    _update: function (state, params) {
+    _update: async function (state, params) {
         // AAB: update the control panel -> this will be moved elsewhere at some point
         if (!this.$buttons) {
             this.renderButtons();
@@ -423,7 +425,8 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
             promises.push(this.updateControlPanel());
         }
         this._pushState();
-        return Promise.all(promises);
+        await Promise.all(promises);
+        this.$el.toggleClass('o_sample_data', !!state.isSample);
     },
     /**
      * Can be used to update the key 'cp_content'. This method is called in start and _update methods.
@@ -520,6 +523,16 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
                 additional_context: _.extend({}, data.context)
             });
         }
+    },
+    /**
+     * @private
+     */
+    async _forgetSampleData(callback, mustReload) {
+        await this.model._forgetSampleData(this.handle, mustReload);
+        if (callback) {
+            await callback();
+        }
+        this.$el.removeClass('o_sample_data');
     },
     /**
      * Called either from the control panel to focus the controller

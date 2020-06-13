@@ -143,7 +143,7 @@ var KanbanModel = BasicModel.extend({
      * @see _readTooltipFields
      * @returns {Object}
      */
-    get: function () {
+    _get: function () {
         var result = this._super.apply(this, arguments);
         var dp = result && this.localData[result.id];
         if (dp) {

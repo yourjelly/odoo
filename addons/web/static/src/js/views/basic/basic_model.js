@@ -548,6 +548,22 @@ var BasicModel = AbstractModel.extend({
         this._sortList(list);
         this.localData[listID].orderedResIDs = list.res_ids;
     },
+    _cleanState(state) {
+        if (state.type === 'list') {
+            if (state.groupedBy.length) { // empty all groups
+                state.data.forEach(group => {
+                    group.data = [];
+                    group.count = 0;
+                    group.res_ids = [];
+                });
+            } else {
+                state.data = [];
+            }
+            state.count = 0;
+            state.res_ids = [];
+        }
+        return state;
+    },
     /**
      * The get method first argument is the handle returned by the load method.
      * It is optional (the handle can be undefined).  In some case, it makes
@@ -563,7 +579,7 @@ var BasicModel = AbstractModel.extend({
      * @param {boolean} [options.raw=false] if true, will not follow relations
      * @returns {Object}
      */
-    get: function (id, options) {
+    _get: function (id, options) {
         var self = this;
         options = options || {};
 
@@ -601,7 +617,7 @@ var BasicModel = AbstractModel.extend({
                         relDataPoint = this.localData[data[fieldName]];
                         data[fieldName] = relDataPoint ? relDataPoint.res_id : false;
                     } else {
-                        data[fieldName] = this.get(data[fieldName]) || false;
+                        data[fieldName] = this._get(data[fieldName]) || false;
                     }
                 } else if (field.type === 'reference') {
                     if (options.raw) {
@@ -610,7 +626,7 @@ var BasicModel = AbstractModel.extend({
                             relDataPoint.model + ',' + relDataPoint.res_id :
                             false;
                     } else {
-                        data[fieldName] = this.get(data[fieldName]) || false;
+                        data[fieldName] = this._get(data[fieldName]) || false;
                     }
                 } else if (field.type === 'one2many' || field.type === 'many2many') {
                     if (options.raw) {
@@ -625,7 +641,7 @@ var BasicModel = AbstractModel.extend({
                             data[fieldName] = data[fieldName] || [];
                         }
                     } else {
-                        data[fieldName] = this.get(data[fieldName]) || [];
+                        data[fieldName] = this._get(data[fieldName]) || [];
                     }
                 }
             }
@@ -687,7 +703,7 @@ var BasicModel = AbstractModel.extend({
             context: _.extend({}, element.context),
             count: element.count,
             data: _.map(element.data, function (elemID) {
-                return self.get(elemID, options);
+                return self._get(elemID, options);
             }),
             domain: element.domain.slice(0),
             fields: element.fields,
@@ -701,6 +717,7 @@ var BasicModel = AbstractModel.extend({
             id: element.id,
             isDirty: element.isDirty,
             isOpen: element.isOpen,
+            isSample: this.isSample,
             limit: element.limit,
             model: element.model,
             offset: element.offset,
@@ -789,7 +806,8 @@ var BasicModel = AbstractModel.extend({
      * @param {string} [params.recordID] an ID for an existing resource.
      * @returns {Promise<string>} resolves to a local id, or handle
      */
-    load: function (params) {
+    load: async function (params) {
+        await this._super(...arguments);
         params.type = params.type || (params.res_id !== undefined ? 'record' : 'list');
         // FIXME: the following seems only to be used by the basic_model_tests
         // so it should probably be removed and the tests should be adapted
@@ -960,7 +978,8 @@ var BasicModel = AbstractModel.extend({
      *   changes on the record before reloading it
      * @returns {Promise<string>} resolves to the id of the resource
      */
-    reload: function (id, options) {
+    reload: async function (id, options) {
+        await this._super(...arguments);
         return this.mutex.exec(this._reload.bind(this, id, options));
     },
     /**

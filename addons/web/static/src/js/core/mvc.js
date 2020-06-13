@@ -178,11 +178,13 @@ var Factory = Class.extend({
         var self = this;
         var model = this.getModel(parent);
         return Promise.all([this._loadData(model), ajax.loadLibs(this)]).then(function (result) {
-            var state = result[0];
+            const { state, handle } = result[0];
             var renderer = self.getRenderer(parent, state);
             var Controller = self.Controller || self.config.Controller;
+            const initialState = model.get(handle);
             var controllerParams = _.extend({
-                initialState: state,
+                initialState,
+                handle,
             }, self.controllerParams);
             var controller = new Controller(parent, model, renderer, controllerParams);
             model.setParent(controller);
@@ -226,8 +228,8 @@ var Factory = Class.extend({
      * @todo: get rid of loadParams (use modelParams instead)
      */
     _loadData: function (model) {
-        return model.load(this.loadParams).then(function () {
-            return model.get.apply(model, arguments);
+        return model.load(this.loadParams).then(function (handle) {
+            return { state: model.get(handle, { withSampleData: true }), handle };
         });
     },
 });
