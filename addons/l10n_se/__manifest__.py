@@ -1,22 +1,27 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 {
     "name": "Swedish - Accounting",
     "version": "1.0",
-    "author": "XCLUDE",
     "category": "Accounting/Localizations/Account Charts",
-    'description': """
-Swedish Accounting
-------------------
+    "summary": """Swedish chart of account EU BAS2020""",
+    "description": """
+This is the module to manage the accounting chart for Sweden in Odoo.
+==============================================================================
 
-This is the base module to manage the accounting chart for Sweden in Odoo.
-It also includes the invoice OCR payment reference handling.
+Install some swedish chart of accounts.
+    - Merge with XCLUDE CoA
+    - Upgraded to EU BAS 2020 for Aktiebolag K2
+
     """,
+    "author": "XCLUDE, Linserv AB",
+    "website": "https://www.linserv.se",
     "depends": ["account", "base_vat"],
     "data": [
-        "data/account_chart_template_before_accounts.xml",
+        "data/account_chart_template.xml",
         "data/account.account.template.csv",
-        "data/account_chart_template_after_accounts.xml",
+        "data/account_chart_template_post_data.xml",
         "data/account_tax_group.xml",
         "data/account_tax_report_data.xml",
         "data/account_tax_template.xml",
@@ -29,5 +34,7 @@ It also includes the invoice OCR payment reference handling.
     ],
     'demo': [
         'demo/demo_company.xml',
+        "data/menuitem_data.xml",
     ],
- }
+    "installable": True,
+}
