@@ -1,8 +1,5 @@
 .o_newsletter_modal {
 
-    .modal-content {
-        position: absolute;
-    }
     .modal-header {
         padding: 0;
         border: none;
@@ -23,13 +20,23 @@
         opacity: 1;
     }
     &.fixedTop {
-        .modal-content {
-           top: $o-navbar-height;
+        > .modal-dialog {
+            align-items: flex-start;
         }
     }
     &.fixedBottom {
-        .modal-content {
-           bottom: 0;
+        > .modal-dialog {
+            align-items: flex-end;
+        }
+    }
+    .s_newsletter_full {
+        padding: 0.5 !important;
+        &.modal-dialog {
+            max-width: 100%;
+            .modal-content {
+                width: 100%;
+                justify-content: center;
+            }
         }
     }
 }

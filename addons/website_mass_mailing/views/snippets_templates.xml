@@ -103,7 +103,7 @@
                 <we-button data-modal-size="modal-md" data-name="s_popup_size_md">Medium</we-button>
                 <we-button data-modal-size="modal-lg">Large</we-button>
                 <we-button data-modal-size="modal-xl">Big</we-button>
-                <we-button data-modal-size="s_popup_full" data-name="s_popup_size_full">Full</we-button>
+                <we-button data-modal-size="s_newsletter_full" data-name="s_newsletter_size_full">Full</we-button>
             </we-select>
             <we-colorpicker string="Backdrop Color" data-name="newsletter_bg_color_opt"
                 data-color-change=""
