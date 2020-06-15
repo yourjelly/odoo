@@ -504,7 +504,7 @@ var Wysiwyg = Widget.extend({
      */
     _saveModifiedImages: async function () {
         await this.editor.execBatch(async () => {
-            const defs = this._getEditable($('#wrapwrap')).map(async editableEl => {
+            const defs = _.map(this._getEditable($('#wrapwrap')), async editableEl => {
                 const {oeModel: resModel, oeId: resId} = editableEl.dataset;
                 const proms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
                     const isBackground = !el.matches('img');
