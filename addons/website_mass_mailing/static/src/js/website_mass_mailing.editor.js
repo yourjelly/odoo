@@ -129,7 +129,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     },
     selectStyle: function (previewMode, widgetValue, params) {
         debugger;
-        if (params.name == 'backdrop') {
+        if (params.name == 'Backdrop') {
             this.$target[0].dataset.backdropColor = widgetValue;
         } else {
             this.$target[0].dataset.textColor = widgetValue;   
@@ -150,8 +150,6 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             case 'delay':
                 return this.$target[0].dataset[methodName];
             case 'selectDataAttribute':
-                return this.$target[0].dataset[methodName];
-            case 'selectStyle':
                 return this.$target[0].dataset[methodName];
 
         }

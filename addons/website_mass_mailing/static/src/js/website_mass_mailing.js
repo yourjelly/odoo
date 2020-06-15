@@ -191,9 +191,15 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
             //$modal.find('.s_newsletter_popup_frame').addClass(dataset.modalSize);
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             $modal.find('.modal-dialog').addClass('modal-dialog-centered '+dataset.modalSize);
-            $modal[0].style.backgroundColor = dataset.backdropColor;
+            if (dataset.backdropColor) {
+
+                $modal[0].style.backgroundColor = dataset.backdropColor;
+            }
             debugger;
-            $modal.find('.s_newsletter_text')[0].style.color = dataset.textColor;
+            if (dataset.textColor) {
+
+                $modal.find('.s_newsletter_text')[0].style.color = dataset.textColor;
+            }
             $modal.find('.js_subscribe').data('list-id', self.listID)
                   .find('input.js_subscribe_email').val(email);
             self.trigger_up('widgets_start_request', {
