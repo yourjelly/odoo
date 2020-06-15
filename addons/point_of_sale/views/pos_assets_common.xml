@@ -38,6 +38,7 @@
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/OrderManagementScreen/ControlButtons/ReprintReceiptButton.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/OrderManagementScreen/OrderFetcher.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/OrderManagementScreen/OrderManagementScreen.js"></script>
+    <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/OrderManagementScreen/MobileOrderManagementScreen.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/OrderManagementScreen/OrderManagementControlPanel.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/OrderManagementScreen/OrderList.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/src/js/Screens/OrderManagementScreen/OrderRow.js"></script>

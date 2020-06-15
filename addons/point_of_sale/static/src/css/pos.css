@@ -2873,7 +2873,6 @@ td {
     border-radius: 20px;
     font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
     font-size: 13px;
-    width: 250px;
 }
 
 .order-management-screen .control-panel .search-box input:focus {
@@ -2893,7 +2892,13 @@ td {
     transition: all 150ms linear;
 }
 
-
 .order-management-screen .control-panel .button:hover {
     background: #efefef;
+}
+
+.order-management-screen .back-to-list {
+    font-size: large;
+    padding: 10px;
+    background-color: #6EC89B;
+    color: white;
 }

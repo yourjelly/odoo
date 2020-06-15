@@ -22,12 +22,11 @@ odoo.define('web.web_client', function (require) {
         window.addEventListener("resize", updateEnv);
     }
 
-    setupResponsivePlugin(owl.Component.env);
-
     async function startPosApp(webClient) {
         Registries.Component.freeze();
         const CompiledChrome = Registries.Component.get(Chrome);
         CompiledChrome.env = env;
+        setupResponsivePlugin(CompiledChrome.env)
         setupContexts(CompiledChrome);
         await env.session.is_bound;
         env.qweb.addTemplates(env.session.owlTemplates);
