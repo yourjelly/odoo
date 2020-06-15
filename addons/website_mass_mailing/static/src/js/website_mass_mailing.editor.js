@@ -119,16 +119,23 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     },
     backdropColor: function (previewMode, widgetValue, params) {
         debugger;
+        this.$target[0].dataset.backdropColor = widgetValue;
     },
-    updateUIVisibility: async function () {
-        await this._super(...arguments);
-        const dataset = this.$target[0].dataset;
-        this.$target.find('.o_newsletter_modal').addClass(dataset.layout);
-        this.$target.find('.s_newsletter_popup_frame').addClass(dataset.modalSize);
-        //this.$target.find()
+    display: function (previewMode, widgetValue, params) {
+        this.$target[0].dataset.display = widgetValue;
+    },
+    delay: function (previewMode, widgetValue, params) {
+        this.$target[0].dataset.delay = widgetValue;
+    },
+    selectStyle: function (previewMode, widgetValue, params) {
+        debugger;
+        if (params.name == 'backdrop') {
+            this.$target[0].dataset.backdropColor = widgetValue;
+        } else {
+            this.$target[0].dataset.textColor = widgetValue;   
+        }
     },
     _computeWidgetState: function (methodName, params) {
-            debugger;
         switch (methodName) {
             case 'selectMailingList':
                 return this._getMailingListID();
@@ -138,6 +145,15 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
                 return this.$target[0].dataset[methodName];
             case 'backdropColor':
                 return this.$target[0].dataset[methodName];
+            case 'display':
+                return this.$target[0].dataset[methodName];
+            case 'delay':
+                return this.$target[0].dataset[methodName];
+            case 'selectDataAttribute':
+                return this.$target[0].dataset[methodName];
+            case 'selectStyle':
+                return this.$target[0].dataset[methodName];
+
         }
         return this._super(...arguments);
     },

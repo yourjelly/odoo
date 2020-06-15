@@ -106,9 +106,9 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         var defs = [this._super.apply(this, arguments)];
         this.websiteID = this._getContext().website_id;
         this.listID = parseInt(this.$target.attr('data-list-id'));
-        if (!utils.get_cookie(this.listID)) {
-            this._bindPopup();
-        }
+        // if (!utils.get_cookie(this.listID)) {
+        //     this._bindPopup();
+        // }
         if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !self.editableMode)) {
             return Promise.all(defs);
         }
@@ -185,9 +185,15 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
                 utils.set_cookie(this.listID, true, nbDays * 24 * 60 * 60);
                 self._hidePopup();
             });
-            $modal.addClass('o_newsletter_modal');
+            let dataset = self.$el[0].dataset;
+            $modal.addClass('o_newsletter_modal '+dataset.layout);
+            //$modal.find('.o_newsletter_modal').addClass(dataset.layout);
+            //$modal.find('.s_newsletter_popup_frame').addClass(dataset.modalSize);
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-            $modal.find('.modal-dialog').addClass('modal-dialog-centered s_newsletter_popup_frame');
+            $modal.find('.modal-dialog').addClass('modal-dialog-centered '+dataset.modalSize);
+            $modal[0].style.backgroundColor = dataset.backdropColor;
+            debugger;
+            $modal.find('.s_newsletter_text')[0].style.color = dataset.textColor;
             $modal.find('.js_subscribe').data('list-id', self.listID)
                   .find('input.js_subscribe_email').val(email);
             self.trigger_up('widgets_start_request', {
@@ -211,6 +217,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         $(document).off('mouseleave.open_popup_event');
     },
     _bindPopup: function () {
+        debugger;
 
         let display = this.$target.data('display');
         let delay = this.$target.data('showAfter');
