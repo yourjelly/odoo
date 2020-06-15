@@ -1,11 +1,11 @@
-odoo.define('pos_restaurant.chrome', function(require) {
+odoo.define('pos_restaurant.chrome', function (require) {
     'use strict';
 
     const Chrome = require('point_of_sale.Chrome');
     const { onWillUnmount } = owl.hooks;
     const Registries = require('point_of_sale.Registries');
 
-    const PosResChrome = Chrome =>
+    const PosResChrome = (Chrome) =>
         class extends Chrome {
             /**
              * @override
@@ -43,7 +43,7 @@ odoo.define('pos_restaurant.chrome', function(require) {
              */
             _showSavedScreen(pos, newSelectedOrder) {
                 if (!newSelectedOrder) {
-                    this.showScreen('FloorScreen', { floor: pos.table.floor });
+                    this.showScreen('FloorScreen', { floor: pos.table ? pos.table.floor : null });
                 } else {
                     super._showSavedScreen(pos, newSelectedOrder);
                 }
@@ -67,7 +67,8 @@ odoo.define('pos_restaurant.chrome', function(require) {
                 }
             }
             _actionAfterIdle() {
-                this.showScreen('FloorScreen', { floor: this.env.pos.table.floor });
+                const table = this.env.pos.table;
+                this.showScreen('FloorScreen', { floor: table ? table.floor : null });
             }
             _shouldResetIdleTimer() {
                 return (

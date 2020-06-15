@@ -424,3 +424,9 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         for order in self.env['pos.order'].search([]):
             self.assertEqual(order.state, 'paid', "Validated order has payment of " + str(order.amount_paid) + " and total of " + str(order.amount_total))
+
+    def test_02_order_management(self):
+        self.main_pos_config.write({ 'manage_orders': True, 'module_account': True })
+        self.main_pos_config.open_session_cb(check_coa=False)
+        self.start_tour("/pos/web?config_id=%d" % self.main_pos_config.id, 'OrderManagementScreenTour', login="admin", step_delay=50)
+        # IMPROVEMENT: Check if the invoiced orders are truly in invoiced

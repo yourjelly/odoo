@@ -131,12 +131,17 @@ odoo.define('point_of_sale.tour.utils', function (require) {
         methods.exec._do = methods.do;
         methods.exec._check = methods.check;
         return {
-            do: new Proxy(methods.do, proxyHandler),
-            check: new Proxy(methods.check, proxyHandler),
-            exec: new Proxy(methods.exec, proxyHandler),
-            _do: methods.do,
-            _check: methods.check,
-            _exec: methods.exec,
+            Do,
+            Check,
+            Execute,
+            [name]: {
+                do: new Proxy(methods.do, proxyHandler),
+                check: new Proxy(methods.check, proxyHandler),
+                exec: new Proxy(methods.exec, proxyHandler),
+                _do: methods.do,
+                _check: methods.check,
+                _exec: methods.exec,
+            },
         };
     }
 

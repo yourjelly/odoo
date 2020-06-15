@@ -1,11 +1,17 @@
 odoo.define('point_of_sale.OrderSelector', function(require) {
     'use strict';
 
+    const { useContext } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
 
     // Previously OrderSelectorWidget
     class OrderSelector extends PosComponent {
+        constructor() {
+            super(...arguments);
+            // this is used in its template
+            this.chromeContext = useContext(this.env.chrome);
+        }
         mounted() {
             this.env.pos.get('orders').on('add remove change', () => this.render(), this);
             this.env.pos.on('change:selectedOrder', () => this.render(), this);

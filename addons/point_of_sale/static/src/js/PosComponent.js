@@ -53,6 +53,13 @@ odoo.define('point_of_sale.PosComponent', function (require) {
         setSyncStatus(status, pending) {
             this.trigger('set-sync-status', { status, pending });
         }
+        isRpcError(error) {
+            return (
+                !(error instanceof Error) &&
+                error.message &&
+                [100, 200, 404, -32098].includes(error.message.code)
+            );
+        }
     }
 
     return PosComponent;
