@@ -109,10 +109,9 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         if (!utils.get_cookie(this.listID)) {
             this._bindPopup();
         }
-        // if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !self.editableMode)) {
-        //     debugger;
-        //     return Promise.all(defs);
-        // }
+        if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !self.editableMode)) {
+            return Promise.all(defs);
+        }
         if (this.$target.data('content') && this.editableMode) {
             // To avoid losing user changes.
             this._dialogInit(this.$target.data('content'));

@@ -83,24 +83,24 @@
                 <we-button data-modal-size="modal-xl">Big</we-button>
                 <we-button data-modal-size="s_newsletter_full" data-name="s_newsletter_size_full">Full</we-button>
             </we-select>
+            <we-colorpicker string="Backdrop Color" data-select-style="true"
+                data-css-property="background-color" data-backdropColor="" data-color-prefix="bg-" data-no-preview="true"/>
         </div>
         <div data-js="newsletter_popup" data-selector=".o_newsletter_popup">
-            <we-colorpicker string="Backdrop Color" data-select-style="true"
-                data-css-property="background-color" data-color-prefix="bg-" data-no-preview="true"/>
-            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-apply-to=".s_newsletter_text" data-color-prefix="text-" data-no-preview="true"/>
-            <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
-                <we-button data-select-data-attribute="afterDelay" data-name="show_delay">Delay</we-button>
-                <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
-            </we-select>
-            <we-input string="Delay" data-select-data-attribute="" data-attribute-name="showAfter" data-unit="s" data-save-unit="ms" data-dependencies="show_delay"/>
+           <!--  <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-apply-to=".s_newsletter_text" data-color-prefix="text-" data-no-preview="true"/> -->
             <!-- <we-select string="Show on" data-no-preview="true">
                 <we-button data-move-block="moveToBody">This page</we-button>
                 <we-button data-move-block="moveToFooter">All pages</we-button>
             </we-select> -->
         </div>
-        <div data-js="newsletter_popup" data-selector=".o_newsletter_modal" data-exclude="#website_cookies_bar">
-            <t t-set="unit_popup_duration">days</t>
-            <we-input string="Hide For" title="Once the user closes the popup, it won't be shown again for that period of time." t-attf-data-select-data-attribute="7#{unit_popup_duration}" data-attribute-name="consentsDuration" t-att-data-unit="unit_popup_duration"/>
+        <div data-js="newsletter_popup" data-selector=".o_newsletter_popup" >
+          <!--   <we-select string="Display" data-no-preview="true" data-attribute-name="display" data-attribute-default-value="always">
+                <we-button data-select-data-attribute="afterDelay" data-no-preview="true"  data-name="show_delay">Delay</we-button>
+                <we-button  data-display="exit" data-select-data-attribute="mouseExit">On Exit</we-button>
+            </we-select>
+            <we-input string="Delay" data-no-preview="true" data-select-data-attribute="" data-attribute-name="showAfter" data-unit="s" data-save-unit="ms" data-dependencies="show_delay"/> -->
+            <!-- <t t-set="unit_popup_duration">days</t>
+            <we-input string="Hide For" data-no-preview="false" title="Once the user closes the popup, it won't be shown again for that period of time." t-attf-data-select-data-attribute="7#{unit_popup_duration}" data-attribute-name="consentsDuration" t-att-data-unit="unit_popup_duration"/> -->
         </div>
     </xpath>
 </template>

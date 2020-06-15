@@ -33,4 +33,9 @@
            bottom: 0;
         }
     }
+    &.s_newsletter_full {
+        .modal-content {
+            width: 100%;
+        }
+    }
 }
