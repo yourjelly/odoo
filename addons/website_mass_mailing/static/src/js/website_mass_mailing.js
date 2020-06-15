@@ -3,6 +3,7 @@ odoo.define('mass_mailing.website_integration', function (require) {
 
 var config = require('web.config');
 var core = require('web.core');
+const {ColorpickerWidget} = require('web.Colorpicker');
 var Dialog = require('web.Dialog');
 var utils = require('web.utils');
 var publicWidget = require('web.public.widget');
@@ -207,6 +208,11 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
                 ev.stopPropagation();
             });
             let dataset = self.el.dataset;
+            if (dataset.colorChange && ColorpickerWidget.isCSSColor(dataset.colorChange)) {
+                $modal[0].style.backgroundColor = dataset.colorChange;
+            } else if (dataset.colorChange && !ColorpickerWidget.isCSSColor(dataset.colorChange)) {
+                $modal.addClass('bg-' + dataset.colorChange);
+            }
             $modal.addClass('o_newsletter_modal ' + dataset.layout);
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             $modal.find('.modal-dialog').addClass('modal-dialog-centered ' + dataset.modalSize);

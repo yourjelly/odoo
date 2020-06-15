@@ -111,7 +111,7 @@
                 data-no-preview="true" data-dependencies="position_centered"/>
         </div>
         <div data-js="newsletter_popup" data-selector=".o_newsletter_popup" data-exclude="#website_cookies_bar">
-            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-apply-to=".s_newsletter_text" data-color-prefix="text-" data-no-preview="true"/>
+            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-apply-to=".s_text_block" data-color-prefix="text-" data-no-preview="true"/>
             <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
                 <we-button data-select-data-attribute="afterDelay" data-name="show_delay">Delay</we-button>
                 <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
