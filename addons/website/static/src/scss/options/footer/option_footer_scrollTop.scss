@@ -1,21 +1,21 @@
-#o_footer_scrolltop {
-    @include o-apply-colors('footer');
-    @include size(2rem);
-    box-sizing: content-box;
-    cursor: pointer;
+// #o_footer_scrolltop {
+//     @include o-apply-colors('footer');
+//     @include size(2rem);
+//     box-sizing: content-box;
+//     cursor: pointer;
 
-    .fa {
-        opacity: .8;
-    }
+//     .fa {
+//         opacity: .8;
+//     }
 
-    @include hover-focus {
-        .fa {
-            opacity: 1;
-        }
+//     @include hover-focus {
+//         .fa {
+//             opacity: 1;
+//         }
 
-        span {
-            background: currentColor;
-            opacity: .2;
-        }
-    }
-}
+//         span {
+//             background: currentColor;
+//             opacity: .2;
+//         }
+//     }
+// }

@@ -229,7 +229,7 @@ font[class*='bg-'] {
 // Icons
 .fa {
     font-family: "FontAwesome" !important;
-    $size: 3rem;
+    $size: 2.5rem;
 
     &.rounded-circle,
     &.rounded,
@@ -890,27 +890,25 @@ header#top.o_header_affixed {
     }
 }
 
+
 // Footer Templates
 #footer {
     @if o-website-value('footer-template') != 'products_contacts_about_us' {
         @if o-website-value('footer-template') == 'logo_about_us_below' {
-            .o_footer_logo {
-                margin-top: $spacer;
-                margin-bottom: $spacer;
-            }
-            .o_footer_about_us {
-                margin-bottom: $spacer;
-            }
+            // .o_footer_logo {
+            //     margin-top: $spacer;
+            //     margin-bottom: $spacer;
+            // }
+            // .o_footer_about_us {
+            //     margin-bottom: $spacer;
+            // }
         } @else if o-website-value('footer-template') == 'links_address_logo' {
-            &, p {
-                text-align: center;
-            }
-            &, ul, .o_footer_address, .o_footer_logo {
-                padding-top: $spacer;
-            }
-            li a {
-                text-transform: uppercase;
-            }
+            // &, p {
+            //     text-align: center;
+            // }
+            // &, ul, .o_footer_address, .o_footer_logo {
+            //     padding-top: $spacer;
+            // }
         }
     }
 }

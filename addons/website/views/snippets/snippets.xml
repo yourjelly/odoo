@@ -591,72 +591,122 @@
             data-excluded="theme, common, custom"/>
     </div>
 
+    <!-- Footer -->
     <div data-selector="#wrapwrap > footer"
          data-no-check="true"
          groups="website.group_website_designer">
-        <we-colorpicker string="Colors"
-                        data-customize-website-color="" data-color="footer"
-                        data-with-combinations="true"/>
-        <we-select string="Footer Template" data-variable="footer-template" data-reload="/">
-            <we-button id="option_template_footer_products_contacts_about_us"
-                       data-customize-website-views="website.footer_custom"
-                       data-customize-website-variable="products_contacts_about_us"
-                       string="Products - Contacts - About us"/>
-            <we-button id="option_template_footer_logo_about_us_below"
-                       data-customize-website-views="website.template_footer_logo_about_us_below"
-                       data-customize-website-variable="logo_about_us_below"
-                       string="Logo - About us"/>
-            <we-button id="option_template_footer_links_address_logo"
-                       data-customize-website-views="website.template_footer_links_address_logo"
-                       data-customize-website-variable="links_address_logo"
-                       string="Links - Address - Logo"/>
-            <we-button id="option_template_footer_name_logo_links_about_us"
-                       data-customize-website-views="website.template_footer_name_logo_links_about_us"
-                       data-customize-website-variable="name_logo_links_about_us"
-                       string="Name - Logo - Links - About us"/>
-            <we-button id="option_template_footer_logo_only"
-                       data-customize-website-views="website.template_footer_logo_only"
-                       data-customize-website-variable="logo_only"
-                       string="Logo only"/>
-            <we-button id="option_template_footer_address_logo"
-                       data-customize-website-views="website.template_footer_address_logo"
-                       data-customize-website-variable="address_logo"
-                       string="Address - Logo"/>
+
+        <!-- Layouts -->
+        <we-select string="Layout"
+            data-variable="footer-template"
+            data-reload="/">
+            <!-- Default -->
+            <we-button id="option_template_footer_default"
+                data-customize-website-views="website.footer_custom"
+                data-customize-website-variable="products_contacts_about_us"
+                data-trigger="website.option_footer_scrolltop, website.option_footer_scrolltop_center"
+                string="Default"/>
+            <!-- Descriptive -->
+            <we-button id="option_template_footer_descriptive"
+                data-customize-website-views="website.template_footer_logo_about_us_below"
+                data-customize-website-variable="logo_about_us_below"
+                string="Descriptive"/>
+            <we-button id="option_template_footer_centered"
+                data-customize-website-views="website.template_footer_links_address_logo"
+                data-customize-website-variable="links_address_logo"
+                string="Centered"/>
+            <we-button id="option_template_footer_links"
+                data-customize-website-views="website.template_footer_name_logo_links_about_us"
+                data-customize-website-variable="name_logo_links_about_us"
+                string="Links"/>
+            <we-button id="option_template_footer_minimalist"
+                data-customize-website-views="website.template_footer_logo_only"
+                data-customize-website-variable="logo_only"
+                string="Minimalist"/>
+            <we-button id="option_template_footer_contact"
+                data-customize-website-views="website.template_footer_address_logo"
+                data-customize-website-variable="address_logo"
+                string="Contact"/>
+            <we-button id="option_template_footer_call_to_action"
+                data-customize-website-views="website.template_footer_call_to_action"
+                data-customize-website-variable="footer_call_to_action"
+                string="Call-to-action"/>
+            <we-button id="option_template_footer_headline"
+                data-customize-website-views="website.template_footer_headline"
+                data-customize-website-variable="footer_headline"
+                string="Headline"/>
         </we-select>
+
+        <!-- Colors -->
+        <we-colorpicker id="option_footer_colors"
+            data-customize-website-color="" data-color="footer"
+            data-with-combinations="true"
+            string="Colors"/>
+    </div>
+
+    <!-- Borders & Shadows -->
+    <div data-js="Box" data-selector="#wrapwrap footer" data-target="#footer">
+        <t t-call="website.snippet_options_border"/>
+        <t t-call="website.snippet_options_shadow"/>
+    </div>
+
+    <div data-selector="#wrapwrap > footer"
+         data-no-check="true"
+         groups="website.group_website_designer">
+
+         <we-row/>
+        <!-- References -->
+        <we-checkbox id="opt_footer_references"
+            data-customize-website-views="website.opt_footer_references"
+            data-reload="/"
+            string="References"/>
+
+        <!-- Testimonials -->
+        <we-checkbox id="opt_footer_testimonials"
+            data-customize-website-views="website.opt_footer_testimonials"
+            data-reload="/"
+            string="Testimonials"/>
+
+        <!-- Call-to-Action -->
+        <we-checkbox id="opt_footer_call_to_action"
+            data-customize-website-views="website.opt_footer_call_to_action"
+            data-reload="/"
+            string="Call-to-Action"/>
+
         <we-row/>
-        <we-select string="Scroll Top Button" data-variable="footer-scrolltop" data-apply-to="#o_footer_scrolltop_wrapper > div" data-reload="/">
+
+        <!-- Scroll to Top -->
+        <we-select string="Scroll Top"
+            data-variable="footer-scrolltop"
+            groups="website.group_website_designer"
+            data-reload="/">
             <we-button id="option_footer_scrolltop_none"
-                       data-customize-website-views=""
-                       data-name="footer_scrolltop_none_opt"
-                       data-customize-website-variable=""
-                       string="None"/>
-            <we-button id="option_footer_scrolltop_center"
-                       data-name="footer_scrolltop_none_center"
-                       data-customize-website-views="website.option_footer_scrolltop, website.option_footer_scrolltop_center"
-                       data-customize-website-variable="footer_scrolltop_center"
-                       data-select-class="text-center"
-                       string="Center"/>
+                data-name="footer_scrolltop_none"
+                data-customize-website-variable=""
+                string="None"/>
             <we-button id="option_footer_scrolltop_left"
-                       data-name="footer_scrolltop_none_left"
-                       data-customize-website-views="website.option_footer_scrolltop, website.option_footer_scrolltop_center, website.option_footer_scrolltop_left"
-                       data-customize-website-variable="footer_scrolltop_left"
-                       data-select-class="text-left"
-                       string="Left"/>
+                data-name="footer_scrolltop_left"
+                data-customize-website-views="website.option_footer_scrolltop_assets, website.option_footer_scrolltop, website.option_footer_scrolltop_left"
+                string="Left"/>
+            <we-button id="option_footer_scrolltop_center"
+                data-name="footer_scrolltop_center"
+                data-customize-website-views="website.option_footer_scrolltop_assets, website.option_footer_scrolltop, website.option_footer_scrolltop_center"
+                string="Center"/>
             <we-button id="option_footer_scrolltop_right"
-                       data-name="footer_scrolltop_none_right"
-                       data-customize-website-views="website.option_footer_scrolltop, website.option_footer_scrolltop_center, website.option_footer_scrolltop_right"
-                       data-customize-website-variable="footer_scrolltop_right"
-                       data-select-class="text-right"
-                       string="Right"/>
+                data-name="footer_scrolltop_right"
+                data-customize-website-views="website.option_footer_scrolltop_assets, website.option_footer_scrolltop, website.option_footer_scrolltop_right"
+                string="Right"/>
         </we-select>
     </div>
 
+
+    <!-- Copyright -->
     <div data-selector=".o_footer_copyright"
-         data-no-check="true"
-         groups="website.group_website_designer">
+        data-no-check="true"
+        groups="website.group_website_designer">
         <we-colorpicker string="Colors"
-                        data-customize-website-color="" data-color="copyright"
-                        data-with-combinations="true"/>
+            data-customize-website-color="" data-color="copyright"
+            data-with-combinations="true"/>
     </div>
 
     <!-- Anchor Name -->
