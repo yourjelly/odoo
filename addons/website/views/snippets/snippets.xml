@@ -622,52 +622,93 @@
             data-excluded="theme, common, custom"/>
     </div>
 
+    <!-- Footer - Colors & Layouts -->
     <div data-selector="#wrapwrap > footer"
          data-no-check="true"
          groups="website.group_website_designer">
+
+        <!-- Colors -->
         <we-colorpicker string="Colors"
                         data-customize-website-color="" data-color="footer"
                         data-with-combinations="true"/>
-        <we-select string="Footer Template" data-variable="footer-template" data-reload="/">
-            <we-button id="option_template_footer_products_contacts_about_us"
-                       data-customize-website-views="website.footer_custom"
-                       data-customize-website-variable="products_contacts_about_us"
-                       string="Products - Contacts - About us"/>
-            <we-button id="option_template_footer_logo_about_us_below"
-                       data-customize-website-views="website.template_footer_logo_about_us_below"
-                       data-customize-website-variable="logo_about_us_below"
-                       string="Logo - About us"/>
-            <we-button id="option_template_footer_links_address_logo"
-                       data-customize-website-views="website.template_footer_links_address_logo"
-                       data-customize-website-variable="links_address_logo"
-                       string="Links - Address - Logo"/>
-            <we-button id="option_template_footer_name_logo_links_about_us"
-                       data-customize-website-views="website.template_footer_name_logo_links_about_us"
-                       data-customize-website-variable="name_logo_links_about_us"
-                       string="Name - Logo - Links - About us"/>
-            <we-button id="option_template_footer_logo_only"
-                       data-customize-website-views="website.template_footer_logo_only"
-                       data-customize-website-variable="logo_only"
-                       string="Logo only"/>
-            <we-button id="option_template_footer_address_logo"
-                       data-customize-website-views="website.template_footer_address_logo"
-                       data-customize-website-variable="address_logo"
-                       string="Address - Logo"/>
+
+        <!-- Layouts -->
+        <we-select string="Layout"
+            data-variable="footer-template"
+            data-reload="/">
+            <!-- Default -->
+            <we-button  id="option_template_footer_default"
+                        data-customize-website-views="website.footer_custom"
+                        data-customize-website-variable="default"
+                        data-trigger="website.option_footer_scrolltop, website.option_footer_scrolltop_center"
+                        string="Default"/>
+            <!-- Descriptive -->
+            <we-button  id="opt_template_footer_descriptive"
+                        data-customize-website-views="website.template_footer_descriptive"
+                        data-customize-website-variable="descriptive"
+                        string="Descriptive"/>
+            <!-- Centered -->
+            <we-button  id="opt_template_footer_centered"
+                        data-customize-website-views="website.template_footer_centered"
+                        data-customize-website-variable="centered"
+                        string="Centered"/>
+            <!-- Links -->
+            <we-button  id="opt_template_footer_links"
+                        data-customize-website-views="website.template_footer_links"
+                        data-customize-website-variable="links"
+                        string="Links"/>
+            <!-- Minimalist -->
+            <we-button  id="opt_template_footer_minimalist"
+                        data-customize-website-views="website.template_footer_minimalist"
+                        data-customize-website-variable="minimalist"
+                        string="Minimalist"/>
+            <!-- Contact -->
+            <we-button  id="opt_template_footer_contact"
+                        data-customize-website-views="website.template_footer_contact"
+                        data-customize-website-variable="contact"
+                        string="Contact"/>
+            <!-- Call to Action -->
+            <we-button  id="opt_template_footer_call_to_action"
+                        data-customize-website-views="website.template_footer_call_to_action"
+                        data-customize-website-variable="call_to_action"
+                        string="Call-to-action"/>
+            <!-- Headline -->
+            <we-button  id="opt_template_footer_headline"
+                        data-customize-website-views="website.template_footer_headline"
+                        data-customize-website-variable="headline"
+                        string="Headline"/>
         </we-select>
+    </div>
+
+    <!-- Footer - Borders & Shadows -->
+    <div data-js="Box"
+         data-selector="#wrapwrap > footer"
+         data-target="#footer"
+         data-no-check="true"
+         groups="website.group_website_designer">
+            <t t-call="website.snippet_options_border"/>
+            <t t-call="website.snippet_options_shadow"/>
+    </div>
+
+    <!-- Scroll to Top -->
+    <div data-selector="#wrapwrap > footer"
+         data-no-check="true"
+         groups="website.group_website_designer">
         <we-row string="Scroll Top Button">
             <we-checkbox data-name="footer_scrolltop_opt"
                          data-customize-website-views="website.option_footer_scrolltop"
                          data-customize-website-variable="false|true"
                          data-variable="footer-scrolltop"
                          data-reload="/"/>
-            <we-select data-dependencies="footer_scrolltop_opt" data-apply-to="#o_footer_scrolltop_wrapper > div">
-                <we-button string="Left" data-select-class="text-left"/>
-                <we-button string="Center" data-select-class="text-center"/>
-                <we-button string="Right" data-select-class="text-right"/>
+            <we-select data-dependencies="footer_scrolltop_opt" data-apply-to="#o_footer_scrolltop_wrapper">
+                <we-button string="Left" data-select-class="justify-content-start"/>
+                <we-button string="Center" data-select-class="justify-content-center"/>
+                <we-button string="Right" data-select-class="justify-content-end"/>
             </we-select>
         </we-row>
     </div>
 
+    <!-- Copyright -->
     <div data-selector=".o_footer_copyright"
          data-no-check="true"
          groups="website.group_website_designer">
