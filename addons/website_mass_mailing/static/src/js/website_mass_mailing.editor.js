@@ -189,6 +189,13 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     /**
      * @override
      */
+    onBuilt: async function () {
+        await this._super(...arguments);
+        this._assignUniqueID();
+    },
+    /**
+     * @override
+     */
     selectMailingList: async function (previewMode, widgetValue, params) {
         await this._super(...arguments);
         this.$target.data('quick-open', true);
@@ -217,8 +224,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     * @see this.selectClass for parameters
     */
     backdropColor: function (previewMode, widgetValue, params) {
-        const color = widgetValue ? widgetValue: 'var(--black-50)';
-        this.$target[0].dataset.backdropColor = color;
+        this.$target[0].dataset.backdropColor = widgetValue ? widgetValue: 'var(--black-50)';
     },
     /**
      * @see this.selectClass for parameters
@@ -226,11 +232,33 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     setBackdrop(previewMode, widgetValue, params) {
         this.backdropColor(previewMode, widgetValue, params);
     },
+    /**
+     * @see this.selectClass for parameters
+     */
+    consentsDuration(previewMode, widgetValue, params) {
+        this.$target[0].dataset.consentsDuration = widgetValue;
+    },
 
     //----------------------------------------------------------------------
     // Private
     //----------------------------------------------------------------------
 
+    /**
+     * Creates a unique ID.
+     *
+     * @private
+     */
+    _assignUniqueID: function () {
+        const listID = this._getMailingListID();
+        let content = 'newsletter popup';
+        this.mailingLists.forEach((list) => {
+            if (parseInt(list.dataset.selectMailingList) === listID) {
+                content = list.textContent;
+                return;
+            }
+        });
+        this.$target.attr('id', content + Date.now());
+    },
     /**
      * @override
      */
@@ -241,6 +269,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             case 'layout':
             case 'modalSize':
             case 'backdropColor':
+            case 'consentsDuration':
                 return this.$target[0].dataset[methodName];
         }
         return this._super(...arguments);

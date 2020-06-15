@@ -206,6 +206,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
             var $modal = self.massMailingPopup.$modal;
             $modal.find('header button.close').on('mouseup', function (ev) {
                 ev.stopPropagation();
+                self._onHideModal();
             });
             let dataset = self.el.dataset;
             if (dataset.backdropColor && ColorpickerWidget.isCSSColor(dataset.backdropColor)) {
@@ -216,7 +217,6 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
             $modal.addClass('o_newsletter_modal ' + dataset.layout);
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             $modal.find('.modal-dialog').addClass('modal-dialog-centered ' + dataset.modalSize);
-            $modal.find('.modal-content').addClass('s_newsletter_popup_content');
             $modal.find('.js_subscribe').data('list-id', self.listID)
                   .find('input.js_subscribe_email').val(email);
             self.trigger_up('widgets_start_request', {
@@ -238,6 +238,14 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         this.massMailingPopup.open();
         utils.set_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID), true);
         $(document).off('mouseleave.open_popup_event');
+    },
+    /**
+     * @private
+     */
+    _onHideModal: function () {
+        const nbDays = this.el.dataset.consentsDuration;
+        utils.set_cookie(this.$el.attr('id'), true, nbDays * 24 * 60 * 60);
+        this._popupAlreadyShown = true;
     },
 });
 });
