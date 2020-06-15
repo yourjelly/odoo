@@ -89,10 +89,7 @@
             <we-checkbox t-if="recaptcha_public_key" string="Show reCaptcha Policy" data-toggle-recaptcha-legal="" data-no-preview="true"/>
         </div>
         <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
-        <div data-js="newsletter_popup"
-            data-selector=".o_newsletter_popup">
-            <we-title>Change Newsletter</we-title>
-            <we-select data-name="mailing_list" data-no-preview="true"></we-select>
+        <t t-set="base_newsletter_popup_options">
             <we-select string="Position" data-no-preview="true">
                 <we-button data-layout="fixedTop" data-name="position_top">Top</we-button>
                 <we-button data-layout="modal" data-name="position_centered">Center</we-button>
@@ -105,24 +102,43 @@
                 <we-button data-modal-size="modal-xl">Big</we-button>
                 <we-button data-modal-size="s_newsletter_full" data-name="s_newsletter_size_full">Full</we-button>
             </we-select>
-            <we-colorpicker string="Backdrop Color" data-name="newsletter_bg_color_opt"
-                data-color-change=""
-                data-attribute-name="backgroundColor"
-                data-no-preview="true" data-dependencies="position_centered"/>
-        </div>
-        <div data-js="newsletter_popup" data-selector=".o_newsletter_popup" data-exclude="#website_cookies_bar">
-            <we-colorpicker string="Text Color" data-select-style="true" data-css-property="color" data-apply-to=".s_text_block" data-color-prefix="text-" data-no-preview="true"/>
+            <we-row string="Backdrop">
+                <we-colorpicker data-name="newsletter_backdrop_color_opt"
+                    data-backdrop-color=""
+                    data-attribute-name="backdropColor"
+                    data-no-preview="true" data-dependencies="newsletter_backdrop_opt"/>
+                <we-checkbox data-name="newsletter_backdrop_opt"
+                    data-select-class="s_newsletter_no_backdrop|"
+                    data-set-backdrop="true"
+                    data-no-preview="true"/>
+            </we-row>
+        </t>
+        <t t-set="extra_newsletter_popup_options">
+            <we-colorpicker string="Text Color" data-select-style="true"
+                data-css-property="color" data-apply-to=".s_text_block"
+                data-color-prefix="text-" data-no-preview="true"/>
             <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
                 <we-button data-select-data-attribute="afterDelay" data-name="show_delay">Delay</we-button>
                 <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
             </we-select>
-            <we-input string="Delay" data-select-data-attribute="" data-attribute-name="showAfter" data-unit="s" data-save-unit="ms" data-dependencies="show_delay"/>
+            <we-input string="Delay"
+                data-select-data-attribute=""
+                data-attribute-name="showAfter"
+                data-unit="s"
+                data-save-unit="ms"
+                data-dependencies="show_delay"/>
             <t t-set="unit_popup_duration">days</t>
             <we-input string="Hide For" title="Once the user closes the popup, it won't be shown again for that period of time." t-attf-data-select-data-attribute="7#{unit_popup_duration}" data-attribute-name="consentsDuration" t-att-data-unit="unit_popup_duration"/>
             <we-select string="Show on" data-no-preview="true">
                 <we-button data-move-block="moveToBody">This page</we-button>
                 <we-button data-move-block="moveToFooter">All pages</we-button>
             </we-select>
+        </t>
+        <div data-js="newsletter_popup" data-selector=".o_newsletter_popup" data-exclude="#website_cookies_bar">
+            <we-title>Change Newsletter</we-title>
+            <we-select data-name="mailing_list" data-no-preview="true"></we-select>
+            <t t-raw="base_newsletter_popup_options"/>
+            <t t-raw="extra_newsletter_popup_options"/>
         </div>
     </xpath>
 </template>

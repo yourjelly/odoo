@@ -216,8 +216,15 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     *
     * @see this.selectClass for parameters
     */
-    colorChange: function (previewMode, widgetValue, params) {
-        this.$target[0].dataset.colorChange = widgetValue;
+    backdropColor: function (previewMode, widgetValue, params) {
+        const color = widgetValue ? widgetValue: 'var(--black-50)';
+        this.$target[0].dataset.backdropColor = color;
+    },
+    /**
+     * @see this.selectClass for parameters
+     */
+    setBackdrop(previewMode, widgetValue, params) {
+        this.backdropColor(previewMode, widgetValue, params);
     },
 
     //----------------------------------------------------------------------
@@ -233,7 +240,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
                 return this._getMailingListID();
             case 'layout':
             case 'modalSize':
-            case 'colorChange':
+            case 'backdropColor':
                 return this.$target[0].dataset[methodName];
         }
         return this._super(...arguments);

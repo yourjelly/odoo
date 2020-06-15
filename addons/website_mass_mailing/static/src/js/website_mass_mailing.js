@@ -208,10 +208,10 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
                 ev.stopPropagation();
             });
             let dataset = self.el.dataset;
-            if (dataset.colorChange && ColorpickerWidget.isCSSColor(dataset.colorChange)) {
-                $modal[0].style.backgroundColor = dataset.colorChange;
-            } else if (dataset.colorChange && !ColorpickerWidget.isCSSColor(dataset.colorChange)) {
-                $modal.addClass('bg-' + dataset.colorChange);
+            if (dataset.backdropColor && ColorpickerWidget.isCSSColor(dataset.backdropColor)) {
+                $modal[0].style.backgroundColor = dataset.backdropColor;
+            } else if (dataset.backdropColor && !ColorpickerWidget.isCSSColor(dataset.backdropColor)) {
+                $modal.addClass('bg-' + dataset.backdropColor);
             }
             $modal.addClass('o_newsletter_modal ' + dataset.layout);
             $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
