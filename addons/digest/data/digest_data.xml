@@ -67,9 +67,9 @@
                             <table cellspacing="0" cellpadding="0" border="0" width="580" align="center" style="width:100%; max-width:580px;">
                                 <tr>
                                     <td class="mobile-w-75" style="text-align: left;">
-                                        <span class="font-16" style="color:#8F8F8F;font-weight:bold;font-size: 20px; line-height: 30px;" t-field="company.name"/>
+                                        <span class="font-12" style="color:#8F8F8F;font-weight:bold;font-size: 20px; line-height: 30px;" t-field="company.name"/>
                                         <br/>
-                                        <div class="font-18" style="color:#282f33;font-weight:bold;font-size: 25px; line-height: 35px; margin-right: 5px; display: inline-block; max-width: 500px;word-break: break-all;" t-esc="title"/>
+                                        <div class="font-12" style="color:#282f33;font-weight:bold;font-size: 25px; line-height: 35px; margin-right: 5px; display: inline-block; max-width: 500px;word-break: break-all;" t-esc="title"/>
                                         <div t-if="sub_title" class="font-18" style="color:#282f33;font-weight:bold;font-size: 25px; line-height: 35px; margin-right: 5px; display: inline-block; max-width: 500px;word-break: break-all;" t-esc="sub_title"/>
                                         <div class="font-12" style="color:#8F8F8F;font-size: 15px;display: inline-block;"><t t-esc="formatted_date"/></div>
                                     </td>
@@ -108,7 +108,7 @@
     <table t-if="kpi_data" cellspacing="0" cellpadding="0" align="center" border="0" bgcolor="#eeeeee" style="width:100%; font-family: Arial,Helvetica,Verdana,sans-serif;">
         <tr>
             <td align="center" valign="top">
-                <table bgcolor="#ffffff" cellspacing="0" cellpadding="0" width="650" align="center" border="0" style="border: 1px solid #eeeeee; border-bottom: none;width: 100%; max-width: 650px; padding:30px 30px">
+                <table bgcolor="#ffffff" cellspacing="0" cellpadding="0" width="650" align="center" border="0" style="border: 1px solid #eeeeee; border-bottom: none;width: 100%; max-width: 650px; padding:30px 30px 0 30px">
                     <tr t-foreach="kpi_data" t-as="kpi_info">
                         <td t-if="kpi_info.get('kpi_col1') or kpi_info.get('kpi_col2') or kpi_info.get('kpi_col3')">
                             <table cellspacing="0" cellpadding="0" border="0" width="580" align="center" style="width:100%; max-width:580px;">
@@ -117,7 +117,7 @@
                                         <span style="color:#282f33;font-size: 15px; font-weight: bold; line-height: 30px" t-esc="kpi_info['kpi_fullname']"/>
                                         <a t-if="kpi_info['kpi_action']" t-att-href="'/web#action=%s' % kpi_info['kpi_action']"
                                             style="float:right; background-color:#875A7B;margin-left: 5px; padding: 5px 12px 5px 12px; text-decoration: none; color: #ffffff; border-radius: 3px; font-size:13px; font-weight:bold; margin-bottom: 5px;">
-                                            View
+                                            Open report
                                         </a>
                                     </td>
                                 </tr>
@@ -154,11 +154,16 @@
                         </td>
                     </tr>
                 </table>
-                <table t-if="preferences" bgcolor="#ffffff" cellspacing="0" cellpadding="0" width="650" align="center" border="0" style="border-left: 1px solid #eeeeee; border-right: 1px solid #eeeeee; width: 100%; max-width: 650px; padding:30px 30px">
+                <table t-if="preferences" bgcolor="#ffffff" cellspacing="0" cellpadding="0" width="650" align="center" border="0" style="border-left: 1px solid #eeeeee; border-right: 1px solid #eeeeee; width: 100%; max-width: 650px; padding:0 30px 30px 30px">
                     <tr>
                         <td bgcolor="#fafafa" width="100%" style="padding-top: 20px; padding-bottom: 20px;" align="center">
                             <p t-foreach="preferences" t-as="preference" class="font-12" style="font-size: 15px; color: #6b6d70">
                                 <t t-raw="preference"/>
+                            </p>
+                            <p style="font-size: 11px; margin-top: 10px;">
+                                <strong>
+                                    Sent by <a href="https://www.odoo.com" style="text-decoration: none; color: #875A7B;">Odoo</a> - <a href="/web#view_type=form&amp;model=digest.digest&amp;id=${object.id}" target="_blank" style="color: #888888;">Unsubscribe</a>
+                                </strong>
                             </p>
                         </td>
                     </tr>
