@@ -37,6 +37,7 @@ const PopupWidget = publicWidget.Widget.extend({
      * @private
      */
     _bindPopup: function () {
+        debugger;
         const $main = this.$target.find('.s_popup_main');
 
         let display = $main.data('display');
