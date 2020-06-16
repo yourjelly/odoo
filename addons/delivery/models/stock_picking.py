@@ -29,15 +29,11 @@ class StockQuantPackage(models.Model):
                     weight += quant.quantity * quant.product_id.weight
             package.weight = weight
 
-    def _get_default_weight_uom(self):
-        return self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
-
     def _compute_weight_uom_name(self):
-        for package in self:
-            package.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
+        self.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
 
     weight = fields.Float(compute='_compute_weight', help="Total weight of all the products contained in the package.")
-    weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name', readonly=True, default=_get_default_weight_uom)
+    weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name')
     shipping_weight = fields.Float(string='Shipping Weight', help="Total weight of the package.")
 
 
@@ -68,12 +64,8 @@ class StockPicking(models.Model):
         for picking in self:
             picking.shipping_weight = picking.weight_bulk + sum([pack.shipping_weight for pack in picking.package_ids])
 
-    def _get_default_weight_uom(self):
-        return self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
-
     def _compute_weight_uom_name(self):
-        for package in self:
-            package.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
+        self.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
 
     carrier_price = fields.Float(string="Shipping Cost")
     delivery_type = fields.Selection(related='carrier_id.delivery_type', readonly=True)
@@ -81,7 +73,7 @@ class StockPicking(models.Model):
     weight = fields.Float(compute='_cal_weight', digits='Stock Weight', store=True, help="Total weight of the products in the picking.", compute_sudo=True)
     carrier_tracking_ref = fields.Char(string='Tracking Reference', copy=False)
     carrier_tracking_url = fields.Char(string='Tracking URL', compute='_compute_carrier_tracking_url')
-    weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name', readonly=True, default=_get_default_weight_uom)
+    weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name')
     package_ids = fields.Many2many('stock.quant.package', compute='_compute_packages', string='Packages')
     weight_bulk = fields.Float('Bulk Weight', compute='_compute_bulk_weight')
     shipping_weight = fields.Float("Weight for Shipping", compute='_compute_shipping_weight', help="Total weight of the packages and products which are not in a package. That's the weight used to compute the cost of the shipping.")

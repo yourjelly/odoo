@@ -209,8 +209,9 @@ class ProductTemplate(models.Model):
 
     def _set_template_price(self):
         if self._context.get('uom'):
+            uom = self.env['uom.uom'].browse(self._context['uom'])
             for template in self:
-                value = self.env['uom.uom'].browse(self._context['uom'])._compute_price(template.price, template.uom_id)
+                value = uom._compute_price(template.price, template.uom_id)
                 template.write({'list_price': value})
         else:
             self.write({'list_price': self.price})

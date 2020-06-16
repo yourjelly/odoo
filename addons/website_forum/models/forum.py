@@ -832,10 +832,13 @@ class Post(models.Model):
         return new_post
 
     def unlink_comment(self, message_id):
+        # VFE This looks like a wrong api multi support...
+        # add ensure_one and remove multi?
+        # See method usage
         result = []
+        user = self.env.user
+        comment = self.env['mail.message'].sudo().browse(message_id)
         for post in self:
-            user = self.env.user
-            comment = self.env['mail.message'].sudo().browse(message_id)
             if not comment.model == 'forum.post' or not comment.res_id == post.id:
                 result.append(False)
                 continue
@@ -975,8 +978,8 @@ class Vote(models.Model):
         if not self.env.is_admin():
             values.pop('user_id', None)
 
+        self._check_general_rights(values)
         for vote in self:
-            self._check_general_rights(values)
             if 'vote' in values:
                 if (values['vote'] == '1' or vote.vote == '-1' and values['vote'] == '0'):
                     upvote = True

@@ -103,14 +103,13 @@ class Attendee(models.Model):
             'tentative': '#FFFF00',
             'declined': 'red'
         }
-        rendering_context = dict(self._context)
-        rendering_context.update({
-            'colors': colors,
-            'ignore_recurrence': ignore_recurrence,
-            'action_id': self.env['ir.actions.act_window'].search([('view_id', '=', calendar_view.id)], limit=1).id,
-            'dbname': self._cr.dbname,
-            'base_url': self.env['ir.config_parameter'].sudo().get_param('web.base.url', default='http://localhost:8069'),
-        })
+        template_context = invitation_template.with_context(
+            colors=colors,
+            ignore_recurrence=ignore_recurrence,
+            action_id=self.env['ir.actions.act_window'].search([('view_id', '=', calendar_view.id)], limit=1).id,
+            dbname=self._cr.dbname,
+            base_url=self.env['ir.config_parameter'].sudo().get_param('web.base.url', default='http://localhost:8069'),
+        )
 
         for attendee in self:
             if attendee.email and attendee.partner_id != self.env.user.partner_id:
@@ -124,7 +123,7 @@ class Attendee(models.Model):
                                 'mimetype': 'text/calendar',
                                 'datas': base64.b64encode(ics_file)})
                     ]
-                body = invitation_template.with_context(rendering_context)._render_field(
+                body = template_context._render_field(
                     'body_html',
                     attendee.ids,
                     compute_lang=True,

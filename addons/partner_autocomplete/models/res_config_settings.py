@@ -9,8 +9,7 @@ class ResConfigSettings(models.TransientModel):
     partner_autocomplete_insufficient_credit = fields.Boolean('Insufficient credit', compute="_compute_partner_autocomplete_insufficient_credit")
 
     def _compute_partner_autocomplete_insufficient_credit(self):
-        for config in self:
-            config.partner_autocomplete_insufficient_credit = self.env['iap.account'].get_credits('partner_autocomplete') <= 0
+        self.partner_autocomplete_insufficient_credit = self.env['iap.account'].get_credits('partner_autocomplete') <= 0
 
     def redirect_to_buy_autocomplete_credit(self):
         Account = self.env['iap.account']

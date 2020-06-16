@@ -30,12 +30,13 @@ class Page(models.Model):
     arch = fields.Text(related='view_id.arch', readonly=False, depends_context=('website_id',))
 
     def _compute_homepage(self):
+        homepage = self.env['website'].get_current_website().homepage_id
         for page in self:
-            page.is_homepage = page == self.env['website'].get_current_website().homepage_id
+            page.is_homepage = page == homepage
 
     def _set_homepage(self):
+        website = self.env['website'].get_current_website()
         for page in self:
-            website = self.env['website'].get_current_website()
             if page.is_homepage:
                 if website.homepage_id != page:
                     website.write({'homepage_id': page.id})

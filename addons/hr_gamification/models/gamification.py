@@ -25,6 +25,7 @@ class GamificationBadge(models.Model):
 
     @api.depends('owner_ids.employee_id')
     def _compute_granted_employees_count(self):
+        # VFE TODO check if read_group would be useful ?
         for badge in self:
             badge.granted_employees_count = self.env['gamification.badge.user'].search_count([
                 ('badge_id', '=', badge.id),

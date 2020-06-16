@@ -22,5 +22,6 @@ class SnailmailLetterCancel(models.TransientModel):
                 ('model', '=', wizard.model)
             ])
             for letter in letters:
+                # Make cancel work in batch ?
                 letter.cancel()
         return {'type': 'ir.actions.act_window_close'}

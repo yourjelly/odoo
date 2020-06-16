@@ -243,6 +243,7 @@ class ProductionLot(models.Model):
     @api.depends('name')
     def _compute_purchase_order_ids(self):
         for lot in self:
+            # VFE TODO one search | keep search + filtered_domain
             stock_moves = self.env['stock.move.line'].search([
                 ('lot_id', '=', lot.id),
                 ('state', '=', 'done')

@@ -76,6 +76,7 @@ class HrEmployeeBase(models.AbstractModel):
             employee.remaining_leaves = value
 
     def _compute_allocation_count(self):
+        # VFE read_group ?
         for employee in self:
             allocations = self.env['hr.leave.allocation'].search([
                 ('employee_id', '=', employee.id),

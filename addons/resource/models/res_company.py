@@ -29,6 +29,8 @@ class ResCompany(models.Model):
         if not company.resource_calendar_id:
             company.sudo()._create_resource_calendar()
         # calendar created from form view: no company_id set because record was still not created
+        # VFE TODO verify this, IMO it is created
+        # Make create work in batch
         if not company.resource_calendar_id.company_id:
             company.resource_calendar_id.company_id = company.id
         return company

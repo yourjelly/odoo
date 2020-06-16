@@ -8,6 +8,8 @@ import re
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    # VFE FIXME what is this field used for ???
+    # Added recently but not present anywhere ...
     org_number = fields.Char(compute='_compute_org_number')
 
     @api.depends('vat')

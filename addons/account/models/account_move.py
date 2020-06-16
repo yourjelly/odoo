@@ -1779,8 +1779,8 @@ class AccountMove(models.Model):
         return res
 
     def unlink(self):
-        for move in self:
-            if move.posted_before and not self._context.get('force_delete'):
+        if not self._context.get('force_delete'):
+            if any(move.posted_before for move in self):
                 raise UserError(_("You cannot delete an entry which has been posted once."))
         self.line_ids.unlink()
         return super(AccountMove, self).unlink()

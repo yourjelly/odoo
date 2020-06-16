@@ -124,6 +124,7 @@ class ProductionLot(models.Model):
                 ('lot_id', '=', lot.id),
                 ('state', '=', 'done')
             ]).mapped('move_id')
+            # VFE TODO search+filtered_domain or one search ?
             stock_moves = stock_moves.search([('id', 'in', stock_moves.ids)]).filtered(
                 lambda move: move.picking_id.location_dest_id.usage == 'customer' and move.state == 'done')
             lot.sale_order_ids = stock_moves.mapped('sale_line_id.order_id')

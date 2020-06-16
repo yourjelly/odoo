@@ -88,6 +88,7 @@ class Job(models.Model):
             ('job_ids', '=', self.id)], order='sequence asc', limit=1)
 
     def _compute_new_application_count(self):
+        # VFE read_group ?
         for job in self:
             job.new_application_count = self.env["hr.applicant"].search_count(
                 [("job_id", "=", job.id), ("stage_id", "=", job._get_first_stage().id)]

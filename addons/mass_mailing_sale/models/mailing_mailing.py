@@ -20,6 +20,7 @@ class MassMailing(models.Model):
 
     @api.depends('mailing_domain')
     def _compute_sale_invoiced_amount(self):
+        # VFE TODO improve if displayed in multi records view
         for mass_mailing in self:
             if self.user_has_groups('sales_team.group_sale_salesman') and self.user_has_groups('account.group_account_invoice'):
                 domain = mass_mailing._get_sale_utm_domain() + [('state', 'not in', ['draft', 'cancel'])]

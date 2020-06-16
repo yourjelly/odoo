@@ -50,6 +50,8 @@ class AccountAnalyticLine(models.Model):
 
     def _compute_encoding_uom_id(self):
         for analytic_line in self:
+            # VFE FIXME shouldn't it be analytic_line.company_id.timesheet_encode_uom_id ???
+            # If not, refactor the compute to a self.encoding_uom_id = self.env.company.timesheet_encode_uom_id
             analytic_line.encoding_uom_id = self.env.company.timesheet_encode_uom_id
 
     @api.onchange('project_id')

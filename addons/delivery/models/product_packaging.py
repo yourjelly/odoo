@@ -40,9 +40,7 @@ class ProductPackaging(models.Model):
 
 
     def _compute_length_uom_name(self):
-        for packaging in self:
-            packaging.length_uom_name = self.env['product.template']._get_length_uom_name_from_ir_config_parameter()
+        self.length_uom_name = self.env['product.template']._get_length_uom_name_from_ir_config_parameter()
 
     def _compute_weight_uom_name(self):
-        for packaging in self:
-            packaging.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
+        self.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()

@@ -113,12 +113,12 @@ class Meeting(models.Model):
             'duration', 'user_id', 'interval',
             'count', 'rrule', 'recurrence_id', 'show_as'}
 
-    @api.model
-    def _get_display_time(self, start, stop, zduration, zallday):
+    def _get_display_time(self):
         """ Return date and time (from to from) based on duration with timezone in string. Eg :
                 1) if user add duration for 2 hours, return : August-23-2013 at (04-30 To 06-30) (Europe/Brussels)
                 2) if event all day ,return : AllDay, July-31-2013
         """
+        start, stop, zduration, zallday = self.start, self.stop, self.duration, self.allday
         timezone = self._context.get('tz') or self.env.user.partner_id.tz or 'UTC'
 
         # get date/time format according to context
@@ -289,7 +289,7 @@ class Meeting(models.Model):
 
     def _compute_display_time(self):
         for meeting in self:
-            meeting.display_time = self._get_display_time(meeting.start, meeting.stop, meeting.duration, meeting.allday)
+            meeting.display_time = meeting._get_display_time()
 
     @api.depends('allday', 'start', 'stop')
     def _compute_dates(self):
@@ -514,7 +514,7 @@ class Meeting(models.Model):
         self.ensure_one()
         if tz:
             self = self.with_context(tz=tz)
-        return self._get_display_time(self.start, self.stop, self.duration, self.allday)
+        return self._get_display_time()
 
     def action_open_calendar_event(self):
         if self.res_model and self.res_id:

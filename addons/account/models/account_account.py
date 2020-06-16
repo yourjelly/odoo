@@ -429,10 +429,11 @@ class AccountAccount(models.Model):
             else:
                 self.filtered(lambda r: r.reconcile)._toggle_reconcile_to_false()
 
-        if vals.get('currency_id'):
-            for account in self:
-                if self.env['account.move.line'].search_count([('account_id', '=', account.id), ('currency_id', 'not in', (False, vals['currency_id']))]):
-                    raise UserError(_('You cannot set a currency on this account as it already has some journal entries having a different foreign currency.'))
+        if vals.get('currency_id') and self.env['account.move.line'].search_count([
+            ('account_id', 'in', self.ids),
+            ('currency_id', 'not in', (False, vals['currency_id']))
+        ]):
+            raise UserError(_('You cannot set a currency on this account as it already has some journal entries having a different foreign currency.'))
 
         return super(AccountAccount, self).write(vals)
 

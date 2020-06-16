@@ -111,6 +111,10 @@ class AccountFiscalPosition(models.Model):
         zip_from = vals.get('zip_from')
         zip_to = vals.get('zip_to')
         if zip_from or zip_to:
+            # VFE FIXME does this have any sense at all???
+            # What about multi records edition ?
+            # Use one record for computation and enforce all records to have same pre-values
+            # or both values to be given...
             for rec in self:
                 vals['zip_from'], vals['zip_to'] = self._convert_zip_values(zip_from or rec.zip_from, zip_to or rec.zip_to)
         return super(AccountFiscalPosition, self).write(vals)

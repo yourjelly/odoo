@@ -10,8 +10,7 @@ class UtmCampaign(models.Model):
     crm_lead_count = fields.Integer('Leads/Opportunities count', groups='sales_team.group_sale_salesman', compute="_compute_crm_lead_count")
 
     def _compute_use_leads(self):
-        for campaign in self:
-            campaign.use_leads = self.env.user.has_group('crm.group_use_lead')
+        self.use_leads = self.env.user.has_group('crm.group_use_lead')
 
     def _compute_crm_lead_count(self):
         lead_data = self.env['crm.lead'].with_context(active_test=False).read_group([

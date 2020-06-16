@@ -15,10 +15,12 @@ class CrmTeam(models.Model):
     pos_order_amount_total = fields.Float(string="Session Sale Amount", compute='_compute_pos_order_amount_total')
 
     def _compute_pos_sessions_open_count(self):
+        # VFE TODO read_group if in multi-record view
         for team in self:
             team.pos_sessions_open_count = self.env['pos.session'].search_count([('config_id.crm_team_id', '=', team.id), ('state', '=', 'opened')])
 
     def _compute_pos_order_amount_total(self):
+        # VFE TODO read_group ?
         for team in self:
             team.pos_order_amount_total = sum(self.env['report.pos.order'].search(
                 [('session_id', 'in', team.pos_config_ids.mapped('session_ids').filtered(lambda s: s.state == 'opened').ids)]

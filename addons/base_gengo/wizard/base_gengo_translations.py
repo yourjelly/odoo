@@ -100,20 +100,20 @@ class BaseGengoTranslations(models.TransientModel):
         flag, gengo = self.gengo_authentication()
         if not flag:
             raise UserError(gengo)
+        supported_langs = self.env['ir.translation']._get_all_supported_languages()
         for wizard in self:
-            supported_langs = self.env['ir.translation']._get_all_supported_languages()
             language = self.env['ir.translation']._get_gengo_corresponding_language(wizard.lang_id.code)
             if language not in supported_langs:
                 raise UserError(_('This language is not supported by the Gengo translation services.'))
 
-            ctx = self.env.context.copy()
-            ctx['gengo_language'] = wizard.lang_id.id
             if wizard.sync_limit > 200 or wizard.sync_limit < 1:
                 raise UserError(_('The number of terms to sync should be between 1 to 200 to work with Gengo translation services.'))
+
+            wizard_ctx = wizard.with_context(gengo_language=wizard.lang_id.id)
             if wizard.sync_type in ['send', 'both']:
-                self.with_context(ctx)._sync_request(wizard.sync_limit)
+                wizard_ctx._sync_request(wizard.sync_limit)
             if wizard.sync_type in ['receive', 'both']:
-                self.with_context(ctx)._sync_response(wizard.sync_limit)
+                wizard_ctx._sync_response(wizard.sync_limit)
         return {'type': 'ir.actions.act_window_close'}
 
     @api.model

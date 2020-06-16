@@ -21,11 +21,12 @@ class MaintenanceEquipment(models.Model):
     @api.depends('employee_id', 'department_id', 'equipment_assign_to')
     def _compute_owner(self):
         for equipment in self:
-            equipment.owner_user_id = self.env.user.id
             if equipment.equipment_assign_to == 'employee':
                 equipment.owner_user_id = equipment.employee_id.user_id.id
             elif equipment.equipment_assign_to == 'department':
                 equipment.owner_user_id = equipment.department_id.manager_id.user_id.id
+            else:
+                equipment.owner_user_id = self.env.user.id
 
     @api.depends('equipment_assign_to')
     def _compute_equipment_assign(self):
