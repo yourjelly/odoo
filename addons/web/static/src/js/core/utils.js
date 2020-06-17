@@ -206,7 +206,7 @@ var diacriticsMap = {
 const patchMap = new WeakMap();
 
 /**
- * Helper function returning a extract handler to use on array elements to
+ * Helper function returning an extraction handler to use on array elements to
  * return a certain attribute or mutated form of the element.
  *
  * @param {string | function} criterion
