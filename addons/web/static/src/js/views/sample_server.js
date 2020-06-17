@@ -15,6 +15,16 @@ odoo.define('web.SampleServer', function (require) {
         return sampleTexts[(id - 1) % sampleTexts.length];
     }
 
+    /**
+     * Sample server class
+     *
+     * Represents a static instance of the server used when a RPC call sends
+     * empty values/groups while the attribute 'sample' is set to true on the
+     * view.
+     *
+     * This server will generate fake data and send them in the adequate format
+     * according to the route/method used in the RPC.
+     */
     class SampleServer {
 
         /**
@@ -223,7 +233,7 @@ odoo.define('web.SampleServer', function (require) {
                         } else if (fieldName === 'display_name') {
                             sample = SampleServer.SAMPLE_TEXTS;
                         } else {
-                            return `REF000${id}`;
+                            return `REF${String(id).padStart(4, '0')}`;
                         }
                         return getSampleFromId(id, sample);
                     } else if (fieldName.includes("email")) {
@@ -232,7 +242,7 @@ odoo.define('web.SampleServer', function (require) {
                             .toLowerCase();
                         return `${emailName}@sample.demo`;
                     } else if (fieldName.includes("phone")) {
-                        return `+1 555 754 000${id}`;
+                        return `+1 555 754 ${String(id).padStart(4, '0')}`;
                     } else if (fieldName.includes("url")) {
                         return `http://sample${id}.com`;
                     } else if (fieldName.includes("description") ||
@@ -341,9 +351,7 @@ odoo.define('web.SampleServer', function (require) {
          * @returns {Object[]} Object with keys groups and length
          */
         _mockReadGroup(params) {
-            if (!('lazy' in params)) {
-                params.lazy = true;
-            }
+            const lazy = 'lazy' in params ? params.lazy : true;
             const model = params.model;
             const fields = this.data[model].fields;
             const records = this.data[model].records;
@@ -351,7 +359,7 @@ odoo.define('web.SampleServer', function (require) {
             const normalizedGroupBys = [];
             let groupBy = [];
             if (params.groupBy.length) {
-                groupBy = params.lazy ? [params.groupBy[0]] : params.groupBy;
+                groupBy = lazy ? [params.groupBy[0]] : params.groupBy;
             }
             for (const groupBySpec of groupBy) {
                 let [fieldName, interval] = groupBySpec.split(':');
@@ -390,7 +398,7 @@ odoo.define('web.SampleServer', function (require) {
                 const records = groups[id];
                 const group = { __domain: [] };
                 let countKey = `__count`;
-                if (normalizedGroupBys.length && params.lazy) {
+                if (normalizedGroupBys.length && lazy) {
                     countKey = `${normalizedGroupBys[0].fieldName}_count`;
                 }
                 group[countKey] = records.length;
