@@ -253,6 +253,8 @@ $o-base-website-values-palette: (
     'google-fonts': null,
     'btn-primary-outline': false,
     'btn-secondary-outline': false,
+    'preheader-template': null, // null, 'magazine', 'icons' or 'image'
+    'preheader-height': 1vw, // Only used in 'image' preheader-template
     'header-template': 'logo_menu',
     'footer-template': 'products_contacts_about_us',
     'footer-effect': null, // null / 'slideout_slide_hover' / 'slideout_shadow'
