@@ -257,6 +257,7 @@ $o-base-website-values-palette: (
     'preheader-template': null, // null, 'magazine', 'icons' or 'image'
     'preheader-height': 1vw, // Only used in 'image' preheader-template
     'header-template': 'default', // 'default' / 'hamburger' / 'vertical'
+    'header-links-style': 'default', // 'default' / 'fill' / 'outline' / 'pills' / 'block' / 'border-bottom'
     'hamburger-type': 'default', // 'default' / 'off-canvas'
     'hamburger-position': 'right', // 'right' / 'left' / 'center'
     'footer-template': 'products_contacts_about_us',

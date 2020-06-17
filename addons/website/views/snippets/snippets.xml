@@ -580,6 +580,33 @@
                        data-img="/website/static/src/img/snippets_options/header_effect_fade_out.png"/>
         </we-select>
 
+        <we-select string="Navbar Links Style" data-variable="header-links-style" data-reload="/">
+            <we-button string="Default"
+                       data-name="option_header_navbar_links_default"
+                       data-customize-website-views=""
+                       data-customize-website-variable="default"/>
+            <we-button string="Fill"
+                       data-name="option_header_navbar_links_fill"
+                       data-customize-website-views="website.header_navbar_pills_style"
+                       data-customize-website-variable="fill"/>
+            <we-button string="Outline"
+                       data-name="option_header_navbar_links_outline"
+                       data-customize-website-views=""
+                       data-customize-website-variable="outline"/>
+            <we-button string="Pills"
+                       data-name="option_header_navbar_links_pills"
+                       data-customize-website-views="website.header_navbar_pills_style"
+                       data-customize-website-variable="pills"/>
+            <we-button string="Block"
+                       data-name="option_header_navbar_block"
+                       data-customize-website-views="website.header_navbar_pills_style"
+                       data-customize-website-variable="block"/>
+            <we-button string="Border Bottom"
+                       data-name="option_header_navbar_border_bottom"
+                       data-customize-website-views=""
+                       data-customize-website-variable="border-bottom"/>
+        </we-select>
+
         <we-select id="option_header_dropdown" string="Sub Menus" data-dependencies="!header_hamburger_opt" data-no-preview="true">
             <we-button data-select-class="o_hoverable_dropdown"
                        data-customize-website-views="website.header_hoverable_dropdown">On Hover</we-button>
