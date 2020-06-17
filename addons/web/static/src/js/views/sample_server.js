@@ -362,18 +362,18 @@ odoo.define('web.SampleServer', function (require) {
                 }
             }
             const groups = utils.groupBy(records, (record) => {
-                const vals = [];
+                const vals = {};
                 for (const gb of normalizedGroupBys) {
                     const { fieldName, type } = gb;
                     let value;
                     if (['date', 'datetime'].includes(type)) {
                         value = this._formatValue(record[fieldName], gb);
                     } else {
-                        value = JSON.stringify(record[fieldName]);
+                        value = record[fieldName];
                     }
-                    vals.push(`${fieldName}#${value}`);
+                    vals[fieldName] = value;
                 }
-                return vals.join(',');
+                return JSON.stringify(vals);
             });
             const measures = [];
             for (const measureSpec of params.fields) {
