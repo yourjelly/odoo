@@ -52,9 +52,8 @@ var AbstractModel = mvc.Model.extend({
     //--------------------------------------------------------------------------
 
     get(handle, options) {
-        options = options || {};
         let state;
-        if (options.withSampleData && this.isSample) {
+        if (options && options.withSampleData && this.isSample) {
             state = this.sampleModel.get(handle, options);
         } else {
             state = this._get(...arguments);
@@ -71,8 +70,7 @@ var AbstractModel = mvc.Model.extend({
         this.loadParams = params;
         let result = await this._load123(...arguments);
         if (this.useSampleData && this._isEmpty(result)) {
-            const sampleResult = await this.sampleModel._load123(...arguments);
-            result = this._remapHandleToSampleHandle(result, sampleResult);
+            await this.sampleModel._load123(...arguments);
             this.isSample = true;
         } else {
             this.isSample = false;
@@ -98,8 +96,7 @@ var AbstractModel = mvc.Model.extend({
         let result = await this._reload123(...arguments);
         if (this.useSampleData && this._isEmpty(result)) {
             // TODO: catch sampleModel Errors and disable useSampleData when thrown
-            const sampleResult = await this.sampleModel._reload123(handle, params);
-            result = this._remapHandleToSampleHandle(result, sampleResult);
+            await this.sampleModel._reload123(handle, params);
             this.isSample = true;
         } else {
             this.isSample = false;
@@ -107,8 +104,6 @@ var AbstractModel = mvc.Model.extend({
             this.useSampleData = false;
         }
         return result;
-    },
-    _remapHandleToSampleHandle(/* handle, sampleHandle */) {
     },
     /**
      * Processes date(time) and selection field values sent by the server.

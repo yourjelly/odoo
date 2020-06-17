@@ -164,6 +164,7 @@ var BasicModel = AbstractModel.extend({
         this.batchedRPCsRequests = [];
 
         this.localData = Object.create(null);
+        this.__id = 0;
         this._super.apply(this, arguments);
     },
 
@@ -547,34 +548,6 @@ var BasicModel = AbstractModel.extend({
         list = this._applyX2ManyOperations(list);
         this._sortList(list);
         this.localData[listID].orderedResIDs = list.res_ids;
-    },
-    _remapHandleToSampleHandle(handle, sampleHandle) {
-        const dataPoint = this.localData[handle];
-        const sampleDataPoint = this.sampleModel.localData[sampleHandle];
-        if (handle !== sampleHandle) {
-            dataPoint.id = sampleDataPoint.id;
-            this.localData[dataPoint.id] = dataPoint;
-            delete this.localData[handle];
-        }
-
-        if (dataPoint.type === 'list' && dataPoint.groupedBy.length && dataPoint.data.length) {
-            // here, we now that we have a 1-1 mapping between groups in the
-            // real datapoint and in the sample datapoint
-            for (let i = 0; i < dataPoint.data.length; i++) {
-                const groupHandle = dataPoint.data[i];
-                const sampleGroupHandle = sampleDataPoint.data[i];
-                if (groupHandle !== sampleGroupHandle) {
-                    const groupDataPoint = this.localData[groupHandle];
-                    const sampleGroupDataPoint = this.sampleModel.localData[sampleGroupHandle];
-                    groupDataPoint.id = sampleGroupDataPoint.id;
-                    groupDataPoint.parentID = dataPoint.id;
-                    this.localData[groupDataPoint.id] = groupDataPoint;
-                    delete this.localData[groupHandle];
-                }
-            }
-            dataPoint.data = sampleDataPoint.data.slice();
-        }
-        return dataPoint.id;
     },
     /**
      * The get method first argument is the handle returned by the load method.
@@ -4011,7 +3984,7 @@ var BasicModel = AbstractModel.extend({
             groupsCount: 0,
             groupsLimit: type === 'list' && params.groupsLimit || null,
             groupsOffset: 0,
-            id: _.uniqueId(params.modelName + '_'),
+            id: `${params.modelName}_${++this.__id}`,
             isOpen: params.isOpen,
             limit: type === 'record' ? 1 : (params.limit || Number.MAX_SAFE_INTEGER),
             loadMoreOffset: 0,

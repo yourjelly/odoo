@@ -92,20 +92,6 @@ var KanbanModel = BasicModel.extend({
                     return group;
                 };
                 const newGroup = createGroupDataPoint(self, parent);
-                // if (self.isSample) {
-                //     // if we are in sample mode, also generate the new group on the sample model
-                //     const sampleParent = self.sampleModel.localData[parentID];
-                //     const newSampleGroup = createGroupDataPoint(self.sampleModel, sampleParent);
-                //     sampleParent.data.push(newSampleGroup.id);
-                //     // force newGroup id to be newSampleGroup id (we need the ids of the
-                //     // datapoints in the main model and the sample model to coincide)
-                //     const newGroupId = newGroup.id;
-                //     if (newGroupId !== newSampleGroup.id) {
-                //         newGroup.id = newSampleGroup.id;
-                //         self.localData[newGroup.id] = newGroup;
-                //         delete self.localData[newGroupId];
-                //     }
-                // }
                 parent.data.push(newGroup.id);
                 return newGroup.id;
             });
