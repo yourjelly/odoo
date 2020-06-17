@@ -245,7 +245,8 @@ var KanbanController = BasicController.extend({
                 var ids = _.pluck(state.data, 'res_id').filter(_.isNumber);
                 return self._resequenceColumns(ids);
             }).then(function () {
-                return self.update({});
+                const state = self.model.get(self.handle, {raw: true});
+                return self.update({}, { reload: state.isSample });
             }).then(function () {
                 let quickCreateFolded = self.renderer.quickCreate.folded;
                 if (ev.data.foldQuickCreate ? !quickCreateFolded : quickCreateFolded) {
@@ -365,15 +366,12 @@ var KanbanController = BasicController.extend({
      * @param {OdooEvent} ev
      */
     _onDeleteColumn: function (ev) {
-        var self = this;
         var column = ev.target;
         var state = this.model.get(this.handle, {raw: true});
         var relatedModelName = state.fields[state.groupedBy[0]].relation;
         this.model
             .deleteRecords([column.db_id], relatedModelName)
-            .then(function () {
-                self.update({}, {reload: !column.isEmpty()});
-            });
+            .then(this.update.bind(this, {}, {}));
     },
     /**
      * @private

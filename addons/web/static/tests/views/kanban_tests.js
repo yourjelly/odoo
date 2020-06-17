@@ -4359,13 +4359,17 @@ QUnit.module('Views', {
             groupBy: ['product_id'],
             model: 'partner',
             View: KanbanView,
-            async mockRPC(route, { kwargs, method }) {
+            async mockRPC(route, { method }) {
                 const result = await this._super(...arguments);
                 if (method === 'web_read_group') {
-                    // Returns empty groups
-                    result.groups.forEach(group => {
-                        group[`${kwargs.groupby[0]}_count`] = 0;
+                    result.groups = this.data.product.records.map(r => {
+                        return {
+                            product_id: [r.id, r.display_name],
+                            product_id_count: 0,
+                            __domain: ['product_id', '=', r.id],
+                        };
                     });
+                    result.length = result.groups.length;
                 }
                 return result;
             },
@@ -4386,7 +4390,7 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('empty grouped kanban with sample data: fold/unfold a column', async function (assert) {
+    QUnit.skip('empty grouped kanban with sample data: fold/unfold a column', async function (assert) {
         assert.expect(8);
 
         const kanban = await createView({
@@ -4979,7 +4983,7 @@ QUnit.module('Views', {
         await testUtils.dom.click(kanban.$('.o_column_quick_create'));
         kanban.$('.o_column_quick_create input').val('new column');
         await testUtils.dom.click(kanban.$('.o_column_quick_create button.o_kanban_add'));
-
+        await testUtils.nextTick();
         assert.isVisible(kanban.$buttons.find('.o-kanban-button-new'),
             "Create button should now be visible");
         kanban.destroy();

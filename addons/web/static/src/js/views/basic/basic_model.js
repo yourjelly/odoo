@@ -165,8 +165,6 @@ var BasicModel = AbstractModel.extend({
 
         this.localData = Object.create(null);
         this._super.apply(this, arguments);
-
-        this.__id = 0;
     },
 
     //--------------------------------------------------------------------------
@@ -550,6 +548,34 @@ var BasicModel = AbstractModel.extend({
         this._sortList(list);
         this.localData[listID].orderedResIDs = list.res_ids;
     },
+    _remapHandleToSampleHandle(handle, sampleHandle) {
+        const dataPoint = this.localData[handle];
+        const sampleDataPoint = this.sampleModel.localData[sampleHandle];
+        if (handle !== sampleHandle) {
+            dataPoint.id = sampleDataPoint.id;
+            this.localData[dataPoint.id] = dataPoint;
+            delete this.localData[handle];
+        }
+
+        if (dataPoint.type === 'list' && dataPoint.groupedBy.length && dataPoint.data.length) {
+            // here, we now that we have a 1-1 mapping between groups in the
+            // real datapoint and in the sample datapoint
+            for (let i = 0; i < dataPoint.data.length; i++) {
+                const groupHandle = dataPoint.data[i];
+                const sampleGroupHandle = sampleDataPoint.data[i];
+                if (groupHandle !== sampleGroupHandle) {
+                    const groupDataPoint = this.localData[groupHandle];
+                    const sampleGroupDataPoint = this.sampleModel.localData[sampleGroupHandle];
+                    groupDataPoint.id = sampleGroupDataPoint.id;
+                    groupDataPoint.parentID = dataPoint.id;
+                    this.localData[groupDataPoint.id] = groupDataPoint;
+                    delete this.localData[groupHandle];
+                }
+            }
+            dataPoint.data = sampleDataPoint.data.slice();
+        }
+        return dataPoint.id;
+    },
     /**
      * The get method first argument is the handle returned by the load method.
      * It is optional (the handle can be undefined).  In some case, it makes
@@ -781,7 +807,15 @@ var BasicModel = AbstractModel.extend({
     },
     _isEmpty(result) {
         const dataPoint = this.localData[result];
-        return dataPoint.type === 'list' && dataPoint.count === 0;
+        if (dataPoint.type === 'list') {
+            const hasRecords = dataPoint.count === 0;
+            if (dataPoint.groupedBy.length) {
+                return dataPoint.data.length > 0 && hasRecords;
+            } else {
+                return hasRecords;
+            }
+        }
+        return false;
     },
     /**
      * Main entry point, the goal of this method is to fetch and process all
@@ -3977,7 +4011,7 @@ var BasicModel = AbstractModel.extend({
             groupsCount: 0,
             groupsLimit: type === 'list' && params.groupsLimit || null,
             groupsOffset: 0,
-            id: `${params.modelName}_${this.__id++}`,
+            id: _.uniqueId(params.modelName + '_'),
             isOpen: params.isOpen,
             limit: type === 'record' ? 1 : (params.limit || Number.MAX_SAFE_INTEGER),
             loadMoreOffset: 0,
