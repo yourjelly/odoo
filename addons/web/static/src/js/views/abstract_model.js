@@ -89,7 +89,6 @@ var AbstractModel = mvc.Model.extend({
      * @returns {Promise}
      */
     async reload(handle, params) {
-        this.isSample = false;
         if (this.useSampleData) {
             this.useSampleData = !this._haveParamsChanged(params);
         }

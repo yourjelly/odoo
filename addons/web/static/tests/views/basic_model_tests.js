@@ -2483,7 +2483,7 @@ odoo.define('web.basic_model_tests', function (require) {
             assert.equal(model.getActiveField(record), 'active', 'should have returned "active" field name');
         });
 
-        /** @todo unskip */ QUnit.skip('fetch sample data: concurrency', async function (assert) {
+        QUnit.test('fetch sample data: concurrency', async function (assert) {
             assert.expect(3);
 
             // Delete records and query res_id
@@ -2496,6 +2496,7 @@ odoo.define('web.basic_model_tests', function (require) {
                 data: this.data,
                 Model: BasicModel,
                 useSampleData: true,
+                SampleModel: BasicModel,
             }, this.params));
 
             const id = await model.load(this.params);
