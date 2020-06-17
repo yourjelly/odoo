@@ -26,15 +26,25 @@ var AbstractModel = mvc.Model.extend({
      * @param {Object} [params.fields]
      * @param {string} [params.modelName]
      * @param {boolean} [params.useSampleData=false]
+     * @param {boolean} [params.isSampleModel=false]
+     * @param {AbstractModel} [params.SampleModel]
      */
     init(parent, params = {}) {
         this._super(...arguments);
         this.useSampleData = params.useSampleData || false;
-        this.isSample = false;
         if (this.useSampleData) {
+            const sampleModelParams = Object.assign({}, params, {
+                isSampleModel: true,
+                SampleModel: null,
+                useSampleData: false,
+            });
+            this.sampleModel = new params.SampleModel(this, sampleModelParams);
+            this.sampleHandles = {};
+        }
+        if (params.isSampleModel) {
+            this.isSampleModel = true;
             this.sampleServer = new SampleServer(params.modelName, params.fields);
         }
-        window.model = this;
     },
 
     //--------------------------------------------------------------------------
@@ -43,18 +53,32 @@ var AbstractModel = mvc.Model.extend({
 
     get(handle, options) {
         options = options || {};
-        const state = this._get(...arguments);
-        if (state && state.isSample && !options.withSampleData) {
-            return this._cleanState(state);
+        let state;
+        if (options.withSampleData && this.isSample) {
+            state = this.sampleModel.get(handle, options);
+        } else {
+            state = this._get(...arguments);
+        }
+        if (state) {
+            state.isSample = this.isSample; // FIXME: should be in specific Models
         }
         return state;
     },
     /**
      * @override
      */
-    load(params) {
+    async load(params) {
         this.loadParams = params;
-        return this._super(...arguments);
+        let result = await this._load123(...arguments);
+        if (this.useSampleData && this._isEmpty(result)) {
+            await this.sampleModel._load123(...arguments);
+            this.isSample = true;
+        } else {
+            this.isSample = false;
+            this.sampleHandles = null;
+            this.useSampleData = false;
+        }
+        return result;
     },
     /**
      * When something changes, the data may need to be refetched.  This is the
@@ -65,12 +89,22 @@ var AbstractModel = mvc.Model.extend({
      * @param {Object} [params={}]
      * @returns {Promise}
      */
-    reload: function (handle, params) {
+    async reload(handle, params) {
         this.isSample = false;
         if (this.useSampleData) {
             this.useSampleData = !this._haveParamsChanged(params);
         }
-        return Promise.resolve();
+        let result = await this._reload123(...arguments);
+        if (this.useSampleData && this._isEmpty(result)) {
+            // TODO: catch sampleModel Errors and disable useSampleData when thrown
+            await this.sampleModel._reload123(handle, params);
+            this.isSample = true;
+        } else {
+            this.isSample = false;
+            this.sampleHandles = null;
+            this.useSampleData = false;
+        }
+        return result;
     },
     /**
      * Processes date(time) and selection field values sent by the server.
@@ -103,11 +137,17 @@ var AbstractModel = mvc.Model.extend({
 
     /**
      * @private
-     * @param {Object} state
-     * @returns {Object}
+     * @params {any} result, the value returned by a load or a reload
+     * @returns {boolean}
      */
-    _cleanState(state) {
-        return state;
+    _isEmpty(/* result */) {
+        return false;
+    },
+    async _load123() {
+        return Promise.resolve();
+    },
+    async _reload123() {
+        return Promise.resolve();
     },
 
     /**
@@ -157,30 +197,15 @@ var AbstractModel = mvc.Model.extend({
     },
 
     /**
-     * Override to invoke the SampleServer when necessary, to populate the
-     * result with fake data.
+     * Override to redirect all rpcs to the SampleServer if we are a SampleModel.
      *
-     * @private
      * @override
      */
-    async _rpc(params) {
-        let canMock = false;
-        if (this.useSampleData) {
-            canMock = this.sampleServer.canMock(params);
+    async _rpc() {
+        if (this.isSampleModel) {
+            return this.sampleServer.mockRpc(...arguments);
         }
-        let result;
-        if (!canMock || !this.isSample) {
-            result = await this._super(...arguments);
-        }
-        if (canMock) {
-            if (this.isSample || this.sampleServer.isEmpty(params, result)) {
-                this.isSample = true;
-                result = await this.sampleServer.mockRpc(params, result);
-            } else {
-                this.useSampleData = false;
-            }
-        }
-        return result;
+        return this._super(...arguments);
     },
 });
 

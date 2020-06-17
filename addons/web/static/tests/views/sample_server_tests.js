@@ -54,16 +54,6 @@ odoo.define('web.sample_server_tests', function (require) {
 
         QUnit.module("Basic behaviour");
 
-        QUnit.test("Basic instantiation", async function (assert) {
-            assert.expect(2);
-
-            const server = new SampleServer('hobbit', this.fields.hobbit);
-
-            // Data should not be generated yet
-            assert.deepEqual(server.data.hobbit.fields, this.fields.hobbit);
-            assert.deepEqual(server.data.hobbit.records, []);
-        });
-
         QUnit.test("Sample data: people type + all field names", async function (assert) {
             assert.expect(24);
 

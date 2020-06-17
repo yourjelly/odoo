@@ -52,6 +52,11 @@ odoo.define('web.SampleServer', function (require) {
                     };
                 }
             }
+            // On some models, empty grouped Kanban or List view still contain
+            // real (empty) groups. In this case, we re-use the result of the
+            // web_read_group rpc to tweak sample data s.t. those real groups
+            // contain sample records.
+            this.existingGroups = null;
             // Sample records generation is only done if necessary, so we delay
             // it to the first "mockRPC" call. These flags allow us to know if
             // the records have been generated or not.
@@ -75,59 +80,6 @@ odoo.define('web.SampleServer', function (require) {
         //---------------------------------------------------------------------
 
         /**
-         * Determines if the SampleServer can mock a call to a given method or
-         * route on a model.
-         * @param {Object} params
-         * @param {string} params.model
-         * @param {string} [params.method]
-         * @param {string} [params.route]
-         * @returns {boolean}
-         */
-        canMock(params) {
-            if (!(params.model in this.data)) {
-                return false;
-            }
-            switch (params.method || params.route) {
-                case '/web/dataset/search_read':
-                case 'web_read_group':
-                case 'read_group':
-                case 'read_progress_bar':
-                case 'read':
-                    return true;
-            }
-            return false;
-        }
-
-        /**
-         * Given a model method/server route, and the result of a request to
-         * that method/route, determines if the result is empty (there is no
-         * real data on the server).
-         * @param {Object} params
-         * @param {string} params.model
-         * @param {string} [params.method]
-         * @param {string} [params.route]
-         * @param {any} result, the result of the real call to the method/route
-         * @returns {boolean}
-         */
-        isEmpty(params, result) {
-            switch (params.method || params.route) {
-                case '/web/dataset/search_read':
-                    return result.length === 0;
-                case 'web_read_group': {
-                    const groupBy = params.groupBy[0];
-                    return result.groups.every(group => group[`${groupBy}_count`] === 0);
-                }
-                case 'read_group': {
-                    const length = result.length;
-                    return !length || (length === 1 && result[0].__count === 0);
-                }
-                case 'read_progress_bar':
-                    return Object.keys(result).length === 0;
-            }
-            return false;
-        }
-
-        /**
          * This is the main entry point of the SampleServer. Mocks a request to
          * the server with sample data.
          * @param {Object} params
@@ -136,6 +88,9 @@ odoo.define('web.SampleServer', function (require) {
          * @throws {Error} If called on a route/method we do not handle
          */
         async mockRpc(params, result) {
+            if (!(params.model in this.data)) {
+                throw new Error(`SampleServer: unknown model ${params.model}`);
+            }
             this._populateModels();
             switch (params.method || params.route) {
                 case '/web/dataset/search_read':
@@ -150,6 +105,11 @@ odoo.define('web.SampleServer', function (require) {
                     return this._mockRead(params);
             }
             throw new Error(`SampleServer: unimplemented route ${params.method || params.route}`);
+        }
+
+        setExistingGroups(groups) {
+            this.existingGroups = groups;
+            // this.existingGroups = this.existingGroups || groups;
         }
 
         //---------------------------------------------------------------------
@@ -478,13 +438,15 @@ odoo.define('web.SampleServer', function (require) {
          * @param {Object} [result] the result of a real call to web_read_group
          * @returns {{ groups: Object[], length: number }}
          */
-        _mockWebReadGroup(params, result) {
-            let groups = [];
-            if (result && result.groups.length) {
-                // there are (real) groups: populate them with sample records
-                groups = this._tweakExistingGroups(result.groups, params);
-            }
+        _mockWebReadGroup(params) {
             this.readGroupDone();
+            let groups;
+            if (this.existingGroups) {
+                this._tweakExistingGroups(params);
+                groups = this.existingGroups;
+            } else {
+                groups = this._mockReadGroup(params);
+            }
             return {
                 groups,
                 length: groups.length,
@@ -501,8 +463,9 @@ odoo.define('web.SampleServer', function (require) {
          * @param {string} params.model
          * @param {string[]} params.groupBy
          */
-        _populateExistingGroups(groups, params) {
+        _populateExistingGroups(params) {
             if (!this.existingGroupsPopulated) {
+                const groups = this.existingGroups;
                 this.groupsInfo = groups;
                 const groupBy = params.groupBy[0];
                 const values = groups.map(g => g[groupBy]);
@@ -557,9 +520,12 @@ odoo.define('web.SampleServer', function (require) {
          * @param {string[]} params.fields
          * @param {string[]} params.groupBy
          * @returns {Object[]} groups with count and aggregate values updated
+         *
+         * TODO: rename
          */
-        _tweakExistingGroups(groups, params) {
-            this._populateExistingGroups(groups, params);
+        _tweakExistingGroups(params) {
+            const groups = this.existingGroups;
+            this._populateExistingGroups(params);
 
             // update count and aggregates for each group
             const groupBy = params.groupBy[0].split(':')[0];
@@ -584,7 +550,6 @@ odoo.define('web.SampleServer', function (require) {
                     length: recordsInGroup.length,
                 };
             }
-            return groups;
         }
     }
 

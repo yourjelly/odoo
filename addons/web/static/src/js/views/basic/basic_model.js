@@ -165,6 +165,8 @@ var BasicModel = AbstractModel.extend({
 
         this.localData = Object.create(null);
         this._super.apply(this, arguments);
+
+        this.__id = 0;
     },
 
     //--------------------------------------------------------------------------
@@ -548,22 +550,6 @@ var BasicModel = AbstractModel.extend({
         this._sortList(list);
         this.localData[listID].orderedResIDs = list.res_ids;
     },
-    _cleanState(state) {
-        if (state.type === 'list') {
-            if (state.groupedBy.length) { // empty all groups
-                state.data.forEach(group => {
-                    group.data = [];
-                    group.count = 0;
-                    group.res_ids = [];
-                });
-            } else {
-                state.data = [];
-            }
-            state.count = 0;
-            state.res_ids = [];
-        }
-        return state;
-    },
     /**
      * The get method first argument is the handle returned by the load method.
      * It is optional (the handle can be undefined).  In some case, it makes
@@ -793,6 +779,10 @@ var BasicModel = AbstractModel.extend({
         }
         return true;
     },
+    _isEmpty(result) {
+        const dataPoint = this.localData[result];
+        return dataPoint.type === 'list' && dataPoint.count === 0;
+    },
     /**
      * Main entry point, the goal of this method is to fetch and process all
      * data (following relations if necessary) for a given record/list.
@@ -806,7 +796,7 @@ var BasicModel = AbstractModel.extend({
      * @param {string} [params.recordID] an ID for an existing resource.
      * @returns {Promise<string>} resolves to a local id, or handle
      */
-    load: async function (params) {
+    _load123: async function (params) {
         await this._super(...arguments);
         params.type = params.type || (params.res_id !== undefined ? 'record' : 'list');
         // FIXME: the following seems only to be used by the basic_model_tests
@@ -978,7 +968,7 @@ var BasicModel = AbstractModel.extend({
      *   changes on the record before reloading it
      * @returns {Promise<string>} resolves to the id of the resource
      */
-    reload: async function (id, options) {
+    _reload123: async function (id, options) {
         await this._super(...arguments);
         return this.mutex.exec(this._reload.bind(this, id, options));
     },
@@ -3987,7 +3977,7 @@ var BasicModel = AbstractModel.extend({
             groupsCount: 0,
             groupsLimit: type === 'list' && params.groupsLimit || null,
             groupsOffset: 0,
-            id: _.uniqueId(params.modelName + '_'),
+            id: `${params.modelName}_${this.__id++}`,
             isOpen: params.isOpen,
             limit: type === 'record' ? 1 : (params.limit || Number.MAX_SAFE_INTEGER),
             loadMoreOffset: 0,
@@ -4865,6 +4855,23 @@ var BasicModel = AbstractModel.extend({
         return this._load(element, loadOptions).then(function (result) {
             return result.id;
         });
+    },
+    /**
+     * Override to handle the case where we want sample data, and we in a grouped
+     * kanban or list view with real groups, but all groups are empty. In this
+     * case, we use the result of the web_read_group rpc to tweak the data in the
+     * SampleServer instance of the sampleServer (so that calls to that server
+     * will return the same groups).
+     *
+     * @override
+     */
+    async _rpc(params) {
+        const result = await this._super(...arguments);
+        if (this.sampleModel && params.method === 'web_read_group' && result.length) {
+            const sampleServer = this.sampleModel.sampleServer;
+            sampleServer.setExistingGroups(result.groups);
+        }
+        return result;
     },
     /**
      * Allows to save a value in the specialData cache associated to a given
