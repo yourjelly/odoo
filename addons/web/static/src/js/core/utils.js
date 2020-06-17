@@ -304,6 +304,40 @@ var utils = {
         });
     },
     /**
+     * Returns an object holding different groups defined by a given criterion
+     * or a default one. Each group is a subset of the original given list.
+     * The given criterion can either be:
+     * - a string: a property name on the list elements which value will be the
+     * group name,
+     * - a function: a handler that will return the group name from a given
+     * element.
+     *
+     * @param {any[]} list
+     * @param {string | (element: any) => string} criterion
+     * @returns {Object}
+     */
+    groupBy: function (list, criterion) {
+        let getter;
+        if (criterion) {
+            switch (typeof criterion) {
+                case 'string': getter = element => element[criterion]; break;
+                case 'function': getter = criterion; break;
+                default: throw new Error(`Expected criterion of type 'string' or 'function' and got '${typeof criterion}'`);
+            }
+        } else {
+            getter = element => element;
+        }
+        const groups = {};
+        for (const element of list) {
+            const group = getter(element);
+            if (!(group in groups)) {
+                groups[group] = [];
+            }
+            groups[group].push(element);
+        }
+        return groups;
+    },
+    /**
      * Returns a human readable number (e.g. 34000 -> 34k).
      *
      * @param {number} number
