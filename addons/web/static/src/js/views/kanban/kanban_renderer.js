@@ -98,6 +98,12 @@ var KanbanRenderer = BasicRenderer.extend({
     events:_.extend({}, BasicRenderer.prototype.events || {}, {
         'keydown .o_kanban_record' : '_onRecordKeyDown'
     }),
+    sampleDataTargets: [
+        '.o_kanban_counter',
+        '.o_kanban_record',
+        '.o_column_archive_records',
+        '.o_column_unarchive_records',
+    ],
 
     /**
      * @override
@@ -271,7 +277,7 @@ var KanbanRenderer = BasicRenderer.extend({
     },
     /**
      * Tries to give focus to the previous card, and returns true if successful
-     * 
+     *
      * @private
      * @param {DOMElement} currentColumn
      * @returns {boolean}

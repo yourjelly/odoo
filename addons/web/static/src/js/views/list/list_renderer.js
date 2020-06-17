@@ -50,6 +50,12 @@ var ListRenderer = BasicRenderer.extend({
         'keydown td': '_onKeyDown',
         'keydown th': '_onKeyDown',
     },
+    sampleDataTargets: [
+        '.o_data_row',
+        '.o_group_header',
+        '.o_list_table > tfoot',
+        '.o_list_table > thead .o_list_record_selector',
+    ],
     /**
      * @constructor
      * @param {Widget} parent

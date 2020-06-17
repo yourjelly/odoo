@@ -246,7 +246,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         }
         await Promise.all([this.update(params), searchPanelUpdateProm]);
         if (postponeRendering) {
-            return this.renderer._render();
+            return this.renderer.updateState(false);
         }
     },
     /**
