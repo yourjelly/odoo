@@ -165,15 +165,20 @@ var AbstractModel = mvc.Model.extend({
      * @override
      */
     async _rpc(params) {
-        let result = await this._super(...arguments);
+        let canMock = false;
         if (this.useSampleData) {
-            if (this.sampleServer.canMock(params)) {
-                if (this.isSample || this.sampleServer.isEmpty(params, result)) {
-                    this.isSample = true;
-                    result = await this.sampleServer.mockRpc(params, result);
-                } else {
-                    this.useSampleData = false;
-                }
+            canMock = this.sampleServer.canMock(params);
+        }
+        let result;
+        if (!canMock || !this.isSample) {
+            result = await this._super(...arguments);
+        }
+        if (canMock) {
+            if (this.isSample || this.sampleServer.isEmpty(params, result)) {
+                this.isSample = true;
+                result = await this.sampleServer.mockRpc(params, result);
+            } else {
+                this.useSampleData = false;
             }
         }
         return result;

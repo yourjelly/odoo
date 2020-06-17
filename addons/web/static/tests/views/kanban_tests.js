@@ -4218,8 +4218,8 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.test('empty grouped kanban with sample data', async function (assert) {
-        assert.expect(5);
+    QUnit.test('empty grouped kanban with sample data and many2many_tags', async function (assert) {
+        assert.expect(6);
 
         const kanban = await createView({
             View: KanbanView,
@@ -4230,7 +4230,10 @@ QUnit.module('Views', {
                     <field name="product_id"/>
                     <templates>
                         <t t-name="kanban-box">
-                            <div><field name="int_field"/></div>
+                            <div>
+                                <field name="int_field"/>
+                                <field name="category_ids" widget="many2many_tags"/>
+                            </div>
                         </t>
                     </templates>
                 </kanban>`,
@@ -4253,8 +4256,9 @@ QUnit.module('Views', {
         assert.containsN(kanban, '.o_kanban_group', 2, "there should be 2 'real' columns");
         assert.hasClass(kanban.$el, 'o_sample_data');
         assert.ok(kanban.$('.o_kanban_record').length >= 1, "there should be sample records");
+        assert.ok(kanban.$('.o_field_many2manytags .o_tag').length >= 1, "there should be tags");
 
-        assert.verifySteps(["web_read_group"]);
+        assert.verifySteps(["web_read_group"], "should not read the tags");
         kanban.destroy();
     });
 
