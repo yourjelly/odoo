@@ -4218,8 +4218,8 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
-    QUnit.only('empty grouped kanban with sample data', async function (assert) {
-        assert.expect(4);
+    QUnit.test('empty grouped kanban with sample data', async function (assert) {
+        assert.expect(5);
 
         const kanban = await createView({
             View: KanbanView,
@@ -4334,6 +4334,50 @@ QUnit.module('Views', {
         await kanban.reload({ domain: [['id', '<', 0]]});
         assert.doesNotHaveClass(kanban.$el, 'o_sample_data');
         assert.containsNone(kanban, '.o_kanban_record:not(.o_kanban_ghost)');
+
+        kanban.destroy();
+    });
+
+    /** @todo unskip */ QUnit.skip('empty grouped kanban with sample data: add a column', async function (assert) {
+        assert.expect(6);
+
+        const kanban = await createView({
+            arch: `
+                <kanban sample="1">
+                    <field name="product_id"/>
+                    <templates>
+                        <div t-name="kanban-box">
+                            <field name="foo"/>
+                        </div>
+                    </templates>
+                </kanban>`,
+            data: this.data,
+            groupBy: ['product_id'],
+            model: 'partner',
+            View: KanbanView,
+            async mockRPC(route, { kwargs, method }) {
+                const result = await this._super(...arguments);
+                if (method === 'web_read_group') {
+                    // Returns empty groups
+                    result.groups.forEach(group => {
+                        group[`${kwargs.groupby[0]}_count`] = 0;
+                    });
+                }
+                return result;
+            },
+        });
+
+        assert.hasClass(kanban, 'o_sample_data');
+        assert.containsN(kanban, '.o_kanban_group', 2);
+        assert.containsN(kanban, '.o_kanban_record', 16);
+
+        await testUtils.dom.click(kanban.el.querySelector('.o_kanban_add_column'));
+        await testUtils.fields.editInput(kanban.el.querySelector('.o_kanban_header input'), "Yoohoo");
+        await testUtils.dom.click(kanban.el.querySelector('.btn.o_kanban_add'));
+
+        assert.hasClass(kanban, 'o_sample_data');
+        assert.containsN(kanban, '.o_kanban_group', 3);
+        assert.containsN(kanban, '.o_kanban_record', 16);
 
         kanban.destroy();
     });
