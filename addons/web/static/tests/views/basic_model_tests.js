@@ -2482,5 +2482,42 @@ odoo.define('web.basic_model_tests', function (require) {
             var record = model.get(resultID);
             assert.equal(model.getActiveField(record), 'active', 'should have returned "active" field name');
         });
+
+        /** @todo unskip */ QUnit.only('fetch sample data: concurrency', async function (assert) {
+            assert.expect(3);
+
+            // Delete records and query res_id
+            for (const modelName in this.data) {
+                this.data[modelName].records = [];
+            }
+            delete this.params.res_id;
+
+            const model = await createModel(Object.assign({
+                data: this.data,
+                Model: BasicModel,
+                useSampleData: true,
+            }, this.params));
+
+            const id = await model.load(this.params);
+
+            const beforeReload = model.get(id);
+
+            const reloaded = model.reload(id, {});
+            const duringReload = model.get(id);
+
+            await reloaded;
+
+            const afterReload = model.get(id);
+
+            assert.strictEqual(beforeReload.isSample, true,
+                "Sample data flag must be true before reload"
+            );
+            assert.strictEqual(duringReload.isSample, true,
+                "Sample data flag must be true during reload"
+            );
+            assert.strictEqual(afterReload.isSample, true,
+                "Sample data flag must be true after reload"
+            );
+        });
     });
 });
