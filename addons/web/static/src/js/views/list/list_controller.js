@@ -869,7 +869,7 @@ var ListController = BasicController.extend({
         }
         var self = this;
         this.model.setSort(state.id, ev.data.name).then(function () {
-            self.reload({});
+            self.update({});
         });
     },
     /**

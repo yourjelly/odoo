@@ -244,7 +244,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
             }
             params.domain = this.controlPanelDomain.concat(this.searchPanelDomain);
         }
-        await Promise.all([this.update(params, { withSampleData: true }), searchPanelUpdateProm]);
+        await Promise.all([this.update(params), searchPanelUpdateProm]);
         if (postponeRendering) {
             return this.renderer._render();
         }
@@ -261,8 +261,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * @param {Object} params will be given to the model and to the renderer
      * @param {Object} [options]
      * @param {boolean} [options.reload=true] if true, the model will reload data
-     * @param {boolean} [options.withSampleData] if true, the state passed to the renderer will
-     *                                             contain sample data if any.
      * @returns {Promise}
      */
     update: async function (params, options = {}) {
@@ -273,7 +271,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         const localState = this.renderer.getLocalState();
         const promises = [
             this.updateRendererState(
-                this.model.get(this.handle, { withSampleData: options.withSampleData }), params
+                this.model.get(this.handle, { withSampleData: true }), params
             ).then(
                 () => this.renderer.setLocalState(localState)
             ),
