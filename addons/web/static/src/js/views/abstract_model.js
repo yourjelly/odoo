@@ -22,14 +22,13 @@ const SampleServer = require('web.SampleServer');
 var AbstractModel = mvc.Model.extend({
     /**
      * @param {Widget} parent
-     * @param {Object} params
-     * @param {Object} param.fields
-     * @param {string} param.modelName
+     * @param {Object} [params={}]
+     * @param {Object} [params.fields]
+     * @param {string} [params.modelName]
      * @param {boolean} [params.useSampleData=false]
      */
-    init(parent, params) {
+    init(parent, params = {}) {
         this._super(...arguments);
-        params = params || {};
         this.useSampleData = params.useSampleData || false;
         this.isSample = false;
         if (this.useSampleData) {
