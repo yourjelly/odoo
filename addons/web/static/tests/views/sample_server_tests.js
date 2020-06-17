@@ -467,8 +467,6 @@ odoo.define('web.sample_server_tests', function (require) {
                 result.reduce((acc, g) => acc + g.age, 0),
                 server.data.hobbit.records.reduce((acc, g) => acc + g.age, 0)
             );
-
-            console.log({ result, server });
         });
 
         QUnit.test("Send 'read_group' RPC: multiple groupBys and lazy", async function (assert) {
