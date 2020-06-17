@@ -222,7 +222,6 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         $(document).off('mouseleave.open_popup_event');
     },
     _bindPopup: function () {
-        debugger;
 
         let display = this.$target.data('display');
         let delay = this.$target.data('showAfter');

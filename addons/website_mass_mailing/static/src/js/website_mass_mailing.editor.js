@@ -96,7 +96,6 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         }
     },
     _refreshPublicWidgets: async function ($el) {
-        debugger;
         if (this.$el.find('.o_we_user_value_widget') && this.$target.find('.o_newsletter_modal').hasClass('modal_shown')) {
             return;
         }
@@ -150,8 +149,14 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
     },
     showAfter: function () {
     },
+    moveBlock: function (previewMode, widgetValue, params) {
+        const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
+        this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
+    },
     _computeWidgetState: function (methodName, params) {
         switch (methodName) {
+            case 'moveBlock':
+                return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
             case 'selectMailingList':
                 return this._getMailingListID();
             case 'layout':
