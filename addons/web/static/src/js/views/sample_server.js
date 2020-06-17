@@ -284,7 +284,7 @@ odoo.define('web.SampleServer', function (require) {
                 }
                 case "selection": {
                     const index = Math.floor(Math.random() * field.selection.length);
-                    return field.selection[index][0];  //TO CHECK: when activity_exception_decoration is set, it displays always on the list view "Warning" with the widget list_activity
+                    return field.selection[index][0];
                 }
                 default:
                     return false;
