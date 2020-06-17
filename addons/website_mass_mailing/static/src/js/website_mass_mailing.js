@@ -195,7 +195,6 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
 
                 $modal[0].style.backgroundColor = dataset.backdropColor;
             }
-            debugger;
             if (dataset.textColor) {
 
                 $modal.find('.s_newsletter_text')[0].style.color = dataset.textColor;

@@ -95,6 +95,21 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             $modal.modal('hide');
         }
     },
+    _refreshPublicWidgets: async function ($el) {
+        debugger;
+        if (this.$el.find('.o_we_user_value_widget') && this.$target.find('.o_newsletter_modal').hasClass('modal_shown')) {
+            return;
+        }
+        return new Promise((resolve, reject) => {
+            this.trigger_up('widgets_start_request', {
+                editableMode: true,
+                $target: $el || this.$target,
+                onSuccess: resolve,
+                onFailure: reject,
+            });
+        });
+    },
+
     /**
      * @override
      */
@@ -118,7 +133,6 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         this.$target[0].dataset.modalSize = widgetValue;
     },
     backdropColor: function (previewMode, widgetValue, params) {
-        debugger;
         this.$target[0].dataset.backdropColor = widgetValue;
     },
     display: function (previewMode, widgetValue, params) {
@@ -128,12 +142,13 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         this.$target[0].dataset.delay = widgetValue;
     },
     selectStyle: function (previewMode, widgetValue, params) {
-        debugger;
         if (params.name == 'Backdrop') {
             this.$target[0].dataset.backdropColor = widgetValue;
         } else {
             this.$target[0].dataset.textColor = widgetValue;   
         }
+    },
+    showAfter: function () {
     },
     _computeWidgetState: function (methodName, params) {
         switch (methodName) {
@@ -150,7 +165,9 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             case 'delay':
                 return this.$target[0].dataset[methodName];
             case 'selectDataAttribute':
-                return this.$target[0].dataset[methodName];
+                if (params.name == 'showAfter') {
+                    return 'showAfter';
+                }
 
         }
         return this._super(...arguments);
