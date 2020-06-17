@@ -24,12 +24,14 @@ snippetOptions.registry.Rating = snippetOptions.SnippetOptionsWidget.extend({
      *
      * @see this.selectClass for parameters
      */
-    setIcons: function (previewMode, widgetValue, params) {
+    setIcons: async function (previewMode, widgetValue, params) {
         this.iconType = widgetValue;
         this._renderIcons();
         this.$target[0].dataset.icon = widgetValue;
         delete this.$target[0].dataset.activeCustomIcon;
         delete this.$target[0].dataset.inactiveCustomIcon;
+
+        if (previewMode === false) await this._refreshTarget();
     },
     /**
      * Allows to select a font awesome icon with media dialog.
@@ -37,7 +39,7 @@ snippetOptions.registry.Rating = snippetOptions.SnippetOptionsWidget.extend({
      * @see this.selectClass for parameters
      */
     customIcon: async function (previewMode, widgetValue, params) {
-        return new Promise(resolve => {
+        await new Promise(resolve => {
             const dialog = new weWidgets.MediaDialog(
                 this,
                 {noImages: true, noDocuments: true, noVideos: true, mediaWidth: 1920},
@@ -66,24 +68,28 @@ snippetOptions.registry.Rating = snippetOptions.SnippetOptionsWidget.extend({
             });
             dialog.open();
         });
+
+        if (previewMode === false) await this._refreshTarget();
     },
     /**
      * Sets the number of active icons.
      *
      * @see this.selectClass for parameters
      */
-    activeIconsNumber: function (previewMode, widgetValue, params) {
+    activeIconsNumber: async function (previewMode, widgetValue, params) {
         this.nbActiveIcons = parseInt(widgetValue);
         this._createIcons();
+        if (previewMode === false) await this._refreshTarget();
     },
     /**
      * Sets the total number of icons.
      *
      * @see this.selectClass for parameters
      */
-    totalIconsNumber: function (previewMode, widgetValue, params) {
+    totalIconsNumber: async function (previewMode, widgetValue, params) {
         this.nbTotalIcons = Math.max(parseInt(widgetValue), 1);
         this._createIcons();
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
