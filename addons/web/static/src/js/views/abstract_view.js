@@ -75,7 +75,7 @@ var AbstractView = Factory.extend({
      * @param {Object} viewInfo.fields
      * @param {Object} viewInfo.fieldsInfo
      * @param {Object} params
-     * @param {string} params.modelName
+     * @param {string} [params.modelName]
      * @param {Object} [params.action={}]
      * @param {Object} [params.context={}]
      * @param {string} [params.controllerID]
