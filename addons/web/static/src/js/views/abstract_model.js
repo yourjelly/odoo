@@ -81,13 +81,7 @@ var AbstractModel = mvc.Model.extend({
     async load(params) {
         this.loadParams = params;
         let result = await this.__load(...arguments);
-        if (this.useSampleData && this._isEmpty(result)) {
-            await this.sampleModel.__load(...arguments);
-            this._isInSampleMode = true;
-        } else {
-            this._isInSampleMode = false;
-            this.useSampleData = false;
-        }
+        await this._applySamples(result, '__load', arguments);
         return result;
     },
     /**
@@ -104,14 +98,7 @@ var AbstractModel = mvc.Model.extend({
             this.useSampleData = !this._haveParamsChanged(params);
         }
         let result = await this.__reload(...arguments);
-        if (this.useSampleData && this._isEmpty(result)) {
-            // TODO: catch sampleModel Errors and disable useSampleData when thrown
-            await this.sampleModel.__reload(handle, params);
-            this._isInSampleMode = true;
-        } else {
-            this._isInSampleMode = false;
-            this.useSampleData = false;
-        }
+        await this._applySamples(result, '__reload', arguments);
         return result;
     },
     /**
@@ -143,6 +130,32 @@ var AbstractModel = mvc.Model.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * This function is called just after a load or a reload. If the sample data
+     * feature is activated (useSampleData), it checks if the result is empty,
+     * and if so, performs a new load (or reload), but on the sampleServer, to
+     * get sample data instead of an empty state. The sample state will then be
+     * accessible through get, by setting option 'withSampleData' to true.
+     * Note that if result isn't empty, the sample data feature is deactivated.
+     *
+     * @private
+     * @param {any} result the result of a load or a reload
+     * @param {string} method '__load' or '__reload'
+     * @param {any[]} args the args to pass to the specified method
+     */
+    async _applySamples(result, method, args) {
+        if (this.useSampleData && this._isEmpty(result)) {
+            if (method === '__load') {
+                await this.sampleModel.__load(...args);
+            } else {
+                await this.sampleModel.__reload(...args);
+            }
+            this._isInSampleMode = true;
+        } else {
+            this._isInSampleMode = false;
+            this.useSampleData = false;
+        }
+    },
     /**
      * This function can be overriden to determine if the result of a load or
      * a reload is empty. In the affirmative, we will fallback on the sampleServer
@@ -190,7 +203,6 @@ var AbstractModel = mvc.Model.extend({
             }
         }
     },
-
     /**
      * @private
      * @returns {Object}
@@ -198,7 +210,6 @@ var AbstractModel = mvc.Model.extend({
     _get() {
         return {};
     },
-
     /**
      * Determines whether or not the given params differ from the initial ones
      * (this.loadParams). This is used to deactivate the sample data feature as
@@ -221,7 +232,6 @@ var AbstractModel = mvc.Model.extend({
             return JSON.stringify(params.groupBy) !== JSON.stringify(this.loadParams.groupedBy);
         }
     },
-
     /**
      * Override to redirect all rpcs to the SampleServer if we are a SampleModel.
      *
