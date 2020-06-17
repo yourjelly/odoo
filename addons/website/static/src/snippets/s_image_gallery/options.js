@@ -14,43 +14,49 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
-    start: function () {
-        var self = this;
+    start: async function () {
+        const _super = this._super;
 
-        // The snippet should not be editable
-        this.$target.addClass('o_fake_not_editable').attr('contentEditable', false);
+        this._images = this.$('img').get();
 
-        // Make sure image previews are updated if images are changed
-        this.$target.on('save', 'img', function (ev) {
-            var $img = $(ev.currentTarget);
-            var index = self.$target.find('.carousel-item.active').index();
-            self.$('.carousel:first li[data-target]:eq(' + index + ')')
-                .css('background-image', 'url(' + $img.attr('src') + ')');
-        });
+        await this.wysiwyg.editor.execBatch(async () => {
+            // The snippet should not be editable
+            await this.editorHelpers.addClass(this.$target[0], 'o_fake_not_editable');
+            await this.editorHelpers.setAttribute(this.$target[0], 'contentEditable', false);
 
-        // When the snippet is empty, an edition button is the default content
-        // TODO find a nicer way to do that to have editor style
-        this.$target.on('click', '.o_add_images', function (e) {
-            e.stopImmediatePropagation();
-            self.addImages(false);
-        });
+            // Make sure image previews are updated if images are changed
+            this.$target.on('save', 'img', async (ev) => {
+                var $img = $(ev.currentTarget);
+                var index = this.$target.find('.carousel-item.active').index();
+                const $li = this.$('.carousel:first li[data-target]:eq(' + index + ')');
+                await this.editorHelpers.setStyle($li[0], 'background-image', 'url(' + $img.attr('src') + ')');
+            });
 
-        this.$target.on('dropped', 'img', function (ev) {
-            self.mode(null, self.getMode());
-            if (!ev.target.height) {
-                $(ev.target).one('load', function () {
-                    setTimeout(function () {
-                        self.trigger_up('cover_update');
+            // When the snippet is empty, an edition button is the default content
+            // TODO find a nicer way to do that to have editor style
+            this.$target.on('click', '.o_add_images', (e) => {
+                e.stopImmediatePropagation();
+                this.addImages(false);
+            });
+
+            this.$target.on('dropped', 'img', (ev) => {
+                this.mode(null, this.getMode());
+                if (!ev.target.height) {
+                    $(ev.target).one('load', function () {
+                        setTimeout(function () {
+                            this.trigger_up('cover_update');
+                        });
                     });
-                });
+                }
+            });
+
+            if (!this.$('> div:first-child img').length) {
+                // reset the images to show the "Add images" button.
+                this.removeAllImages()
             }
         });
 
-        if (this.$('> div:first-child > *:not(div)').length) {
-            self.mode(null, self.getMode());
-        }
-
-        return this._super.apply(this, arguments);
+        return _super.apply(this, arguments);
     },
     /**
      * @override
@@ -83,22 +89,26 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
      * @see this.selectClass for parameters
      */
     addImages: function (previewMode) {
-        var $container = this.$('> div:first-child');
+        var $container = this._getContainer();
         var dialog = new weWidgets.MediaDialog(this, {multiImages: true, onlyImages: true, mediaWidth: 1920});
         var lastImage = _.last(this._getImages());
         var index = lastImage ? this._getIndex(lastImage) : -1;
         return new Promise(resolve => {
-            dialog.on('save', this, function (attachments) {
-                for (var i = 0; i < attachments.length; i++) {
-                    $('<img/>', {
-                        class: 'img img-fluid',
-                        src: attachments[i].image_src,
-                        'data-index': ++index,
-                        alt: attachments[i].description || '',
-                    }).appendTo($container);
-                }
-                this.mode('reset', this.getMode());
-                this.trigger_up('cover_update');
+            dialog.on('save', this, async function (attachments) {
+                await this.wysiwyg.editor.execBatch(async () => {
+                    for (var i = 0; i < attachments.length; i++) {
+                        const $img = $('<img/>', {
+                            class: 'img img-fluid',
+                            src: attachments[i].image_src,
+                            'data-index': ++index,
+                            alt: attachments[i].description || '',
+                        });
+                        this._images.push($img[0])
+                        await this.editorHelpers.insertHtml($img[0].outerHTML, $container[0], 'INSIDE');
+                    }
+                    this.mode(false, this.getMode());
+                    this.trigger_up('cover_update');
+                });
             });
             dialog.on('closed', this, () => resolve());
             dialog.open();
@@ -110,11 +120,14 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
      *
      * @see this.selectClass for parameters
      */
-    columns: function (previewMode, widgetValue, params) {
-        const nbColumns = parseInt(widgetValue || '1');
-        this.$target.attr('data-columns', nbColumns);
+    columns: async function (previewMode, widgetValue, params) {
+        await this.wysiwyg.editor.execBatch(async () => {
+            const nbColumns = parseInt(widgetValue || '1');
 
-        this.mode(previewMode, this.getMode(), {}); // TODO improve
+            await this.editorHelpers.setAttribute(this.$target[0], `data-columns`, nbColumns);
+
+            this.mode(previewMode, this.getMode(), {}); // TODO improve
+        });
     },
     /**
      * Get the image target's layout mode (slideshow, masonry, grid or nomode).
@@ -137,89 +150,100 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * Displays the images with the "grid" layout.
      */
-    grid: function () {
-        var imgs = this._getImages();
-        var $row = $('<div/>', {class: 'row'});
-        var columns = this._getColumns();
-        var colClass = 'col-lg-' + (12 / columns);
-        var $container = this._replaceContent($row);
+    grid: async function () {
+        await this.wysiwyg.editor.execBatch(async () => {
+            var imgs = this._getImages();
+            var $row = $('<div/>', {class: 'row'});
+            var columns = this._getColumns();
+            var colClass = 'col-lg-' + (12 / columns);
+            const $container = this._getContainer().empty().append($row);
 
-        _.each(imgs, function (img, index) {
-            var $img = $(img);
-            var $col = $('<div/>', {class: colClass});
-            $col.append($img).appendTo($row);
-            if ((index + 1) % columns === 0) {
-                $row = $('<div/>', {class: 'row'});
-                $row.appendTo($container);
+            for (const index in imgs) {
+                var $img = $(imgs[index]);
+                var $col = $('<div/>', {class: colClass});
+                $col.append($img).appendTo($row);
+                if ((index + 1) % columns === 0) {
+                    $row = $('<div/>', {class: 'row'});
+                    $row.appendTo($container);
+                }
             }
+            await this._resetContent();
+            await this.editorHelpers.setStyle(this.$target[0], 'height', '');
         });
-        this.$target.css('height', '');
     },
     /**
      * Allows to changes the interval of automatic slideshow (not active in
      * edit mode).
      */
-    interval: function (previewMode, widgetValue) {
-        this.$target.find('.carousel:first').attr('data-interval', widgetValue || '0');
+    interval: async function (previewMode, widgetValue) {
+        const $carousel = this.$target.find('.carousel:first');
+        await this.editorHelpers.setAttribute($carousel[0], 'data-interval', widgetValue || '0');
     },
     /**
      * Displays the images with the "masonry" layout.
      */
-    masonry: function () {
-        var self = this;
-        var imgs = this._getImages();
-        var columns = this._getColumns();
-        var colClass = 'col-lg-' + (12 / columns);
-        var cols = [];
+    masonry: async function () {
+        await this.wysiwyg.editor.execBatch(async () => {
+            var self = this;
+            var imgs = this._getImages();
+            var columns = this._getColumns();
+            var colClass = 'col-lg-' + (12 / columns);
+            var cols = [];
 
-        var $row = $('<div/>', {class: 'row'});
-        this._replaceContent($row);
+            var $row = $('<div/>', {class: 'row'});
+            const $container = this._getContainer().empty().append($row);
 
-        // Create columns
-        for (var c = 0; c < columns; c++) {
-            var $col = $('<div/>', {class: 'col o_snippet_not_selectable ' + colClass});
-            $row.append($col);
-            cols.push($col[0]);
-        }
+            // Create columns
+            for (var c = 0; c < columns; c++) {
+                var $col = $('<div/>', {class: 'col o_snippet_not_selectable ' + colClass});
+                $row.append($col);
+                cols.push($col[0]);
+            }
 
-        // Dispatch images in columns by always putting the next one in the
-        // smallest-height column
-        while (imgs.length) {
-            var min = Infinity;
-            var $lowest;
-            _.each(cols, function (col) {
-                var $col = $(col);
-                var height = $col.is(':empty') ? 0 : $col.find('img').last().offset().top + $col.find('img').last().height() - self.$target.offset().top;
-                if (height < min) {
-                    min = height;
-                    $lowest = $col;
-                }
-            });
-            $lowest.append(imgs.shift());
-        }
+            // Dispatch images in columns by always putting the next one in the
+            // smallest-height column
+            while (imgs.length) {
+                var min = Infinity;
+                var $lowest;
+                _.each(cols, function (col) {
+                    var $col = $(col);
+                    var height = $col.is(':empty') ? 0 : $col.find('img').last().offset().top + $col.find('img').last().height() - self.$target.offset().top;
+                    if (height < min) {
+                        min = height;
+                        $lowest = $col;
+                    }
+                });
+                $lowest.append(imgs.shift());
+            }
+            await this._resetContent();
+        });
     },
     /**
      * Allows to change the images layout. @see grid, masonry, nomode, slideshow
      *
      * @see this.selectClass for parameters
      */
-    mode: function (previewMode, widgetValue, params) {
-        widgetValue = widgetValue || 'slideshow'; // FIXME should not be needed
-        this.$target.css('height', '');
-        this.$target
-            .removeClass('o_nomode o_masonry o_grid o_slideshow')
-            .addClass('o_' + widgetValue);
-        this[widgetValue]();
-        this.trigger_up('cover_update');
+    mode: async function (previewMode, widgetValue, params) {
+        // Only render when clicking on the option
+        if (previewMode !== false) {
+            return;
+        }
+        await this.wysiwyg.editor.execBatch(async () => {
+            widgetValue = widgetValue || 'slideshow'; // FIXME should not be needed
+            await this.editorHelpers.setStyle(this.$target[0], 'height', '');
+            await this.editorHelpers.removeClass(this.$target[0], ['o_nomode', 'o_masonry', 'o_grid o_slideshow']);
+            await this.editorHelpers.addClass(this.$target[0], 'o_' + widgetValue);
+            await this[widgetValue]();
+            this.trigger_up('cover_update');
+        });
     },
     /**
      * Displays the images with the standard layout: floating images.
      */
-    nomode: function () {
+    nomode: async function () {
         var $row = $('<div/>', {class: 'row'});
         var imgs = this._getImages();
 
-        this._replaceContent($row);
 
         _.each(imgs, function (img) {
             var wrapClass = 'col-lg-3';
@@ -229,6 +253,8 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
             var $wrap = $('<div/>', {class: wrapClass}).append(img);
             $row.append($wrap);
         });
+
+        await this._replaceContent($row);
     },
     /**
      * Allows to remove all images. Restores the snippet to the way it was when
@@ -236,59 +262,68 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
      *
      * @see this.selectClass for parameters
      */
-    removeAllImages: function (previewMode) {
-        var $addImg = $('<div>', {
+    removeAllImages: function () {
+        this._images = [];
+        const $addImg = $('<div>', {
             class: 'alert alert-info css_editable_mode_display text-center',
         });
-        var $text = $('<span>', {
+        const $text = $('<span>', {
             class: 'o_add_images',
             style: 'cursor: pointer;',
             text: _t(" Add Images"),
         });
-        var $icon = $('<i>', {
+        const $icon = $('<i>', {
             class: ' fa fa-plus-circle',
         });
-        this._replaceContent($addImg.append($icon).append($text));
+        this._replaceContent($addImg.append($icon).append($text), false);
     },
     /**
      * Displays the images with a "slideshow" layout.
      */
-    slideshow: function () {
-        var imgStyle = this.$el.find('.active[data-styling]').data('styling') || '';
-        var images = _.map(this._getImages(), img => ({
-            src: img.getAttribute('src'),
-            alt: img.getAttribute('alt'),
-        }));
-        var currentInterval = this.$target.find('.carousel:first').attr('data-interval');
-        var params = {
-            images: images,
-            index: 0,
-            title: "",
-            interval: currentInterval || this.$target.data('interval') || 0,
-            id: 'slideshow_' + new Date().getTime(),
-            userStyle: imgStyle,
-        },
-        $slideshow = $(qweb.render('website.gallery.slideshow', params));
-        this._replaceContent($slideshow);
-        _.each(this.$('img'), function (img, index) {
-            $(img).attr({contenteditable: true, 'data-index': index});
-        });
-        this.$target.css('height', Math.round(window.innerHeight * 0.7));
+    slideshow: async function () {
+        await this.wysiwyg.editor.execBatch(async () => {
+            const imgStyle = this.$el.find('.active[data-styling]').data('styling') || '';
+            const images = _.map(this._getImages(), img => ({
+                src: img.getAttribute('src'),
+                alt: img.getAttribute('alt'),
+            }));
+            const currentInterval = this.$target.find('.carousel:first').attr('data-interval');
+            const params = {
+                images: images,
+                index: 0,
+                title: "",
+                interval: currentInterval || this.$target.data('interval') || 0,
+                id: 'slideshow_' + new Date().getTime(),
+                userStyle: imgStyle,
+            };
+            const $slideshow = $(qweb.render('website.gallery.slideshow', params));
 
-        // Apply layout animation
-        this.$target.off('slide.bs.carousel').off('slid.bs.carousel');
-        this.$('li.fa').off('click');
+            _.each($slideshow.find('img'), function (img, index) {
+                $(img).attr({contenteditable: true, 'data-index': index});
+            });
+            await this._replaceContent($slideshow);
+            await this.editorHelpers.setStyle(this.$target[0], 'height', Math.round(window.innerHeight * 0.7));
+
+            // Apply layout animation
+            this.$target.off('slide.bs.carousel').off('slid.bs.carousel');
+            this.$('li.fa').off('click');
+        });
     },
     /**
      * Allows to change the style of the individual images.
      *
      * @see this.selectClass for parameters
      */
-    styling: function (previewMode, value) {
+    styling: async function (previewMode, value) {
         var classes = _.map(this.$el.find('[data-styling]'), function (el) {
             return $(el).data('styling');
         }).join(' ');
-        this.$('img').removeClass(classes).addClass(value);
+        await this.wysiwyg.editor.execBatch(async () => {
+            for (const img of this.$('img').toArray()) {
+                await this.editorHelpers.removeClass(img, classes);
+                await this.editorHelpers.addClass(img, value);
+            }
+        });
     },
 
     //--------------------------------------------------------------------------
@@ -300,35 +335,36 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
      *
      * @override
      */
-    notify: function (name, data) {
+    notify: async function (name, data) {
         this._super(...arguments);
         if (name === 'image_removed') {
             data.$image.remove(); // Force the removal of the image before reset
             this.mode('reset', this.getMode());
         } else if (name === 'image_index_request') {
-            var imgs = this._getImages();
-            var position = _.indexOf(imgs, data.$image[0]);
-            imgs.splice(position, 1);
+            const images = this._getImages(this.$('img').get());
+            const position = _.indexOf(images, data.$image[0]);
+            images.splice(position, 1);
             switch (data.position) {
                 case 'first':
-                    imgs.unshift(data.$image[0]);
+                    images.unshift(data.$image[0]);
                     break;
                 case 'prev':
-                    imgs.splice(position - 1, 0, data.$image[0]);
+                    images.splice(position - 1, 0, data.$image[0]);
                     break;
                 case 'next':
-                    imgs.splice(position + 1, 0, data.$image[0]);
+                    images.splice(position + 1, 0, data.$image[0]);
                     break;
                 case 'last':
-                    imgs.push(data.$image[0]);
+                    images.push(data.$image[0]);
                     break;
             }
-            _.each(imgs, function (img, index) {
+            _.each(images, function (img, index) {
                 // Note: there might be more efficient ways to do that but it is
                 // more simple this way and allows compatibility with 10.0 where
                 // indexes were not the same as positions.
                 $(img).attr('data-index', index);
             });
+            this._images = images;
             this.mode('reset', this.getMode());
         }
     },
@@ -396,11 +432,14 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
      * @private
      * @returns {DOMElement[]}
      */
-    _getImages: function () {
-        var imgs = this.$('img').get();
-        var self = this;
-        imgs.sort(function (a, b) {
-            return self._getIndex(a) - self._getIndex(b);
+    _getImages: function (imgs) {
+        if (!imgs) {
+            imgs = this._images.map((img) => {
+                return img.cloneNode();
+            });
+        }
+        imgs.sort((a, b) => {
+            this._getIndex(a) - this._getIndex(b);
         });
         return imgs;
     },
@@ -430,10 +469,36 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionsWidget.extend({
      * @param {jQuery} $content
      * @returns {jQuery} the main container of the snippet
      */
-    _replaceContent: function ($content) {
-        var $container = this.$('> div:first-child');
-        $container.empty().append($content);
+    _replaceContent: async function ($content, inEditor = true) {
+        var $container = this._getContainer();
+        $container.empty();
+        await this.wysiwyg.editor.execBatch(async () => {
+            this.editorHelpers.empty($container[0]);
+            if (inEditor) {
+                this.editorHelpers.insertHtml($content[0].outerHTML, $container[0], 'INSIDE');
+            } else {
+                $container.append($content);
+            }
+        });
         return $container;
+    },
+
+    /**
+     * Reset the content in the wysiwyg editor.
+     */
+    async _resetContent() {
+        const $container = this._getContainer();
+        const containerHTML = $container.html();
+        $container.empty();
+        await this.editorHelpers.empty($container[0]);
+        await this.editorHelpers.insertHtml(containerHTML, $container[0], 'INSIDE');
+    },
+
+    /**
+     * Get the container div.
+     */
+    _getContainer() {
+        return this.$('> div:first-child');
     },
 });
 
