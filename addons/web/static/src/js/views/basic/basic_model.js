@@ -796,6 +796,7 @@ var BasicModel = AbstractModel.extend({
      *
      * @todo document all params
      *
+     * @private
      * @param {any} params
      * @param {Object} [params.fieldsInfo={}] contains the fieldInfo of each field
      * @param {Object} params.fields contains the description of each field
@@ -803,7 +804,7 @@ var BasicModel = AbstractModel.extend({
      * @param {string} [params.recordID] an ID for an existing resource.
      * @returns {Promise<string>} resolves to a local id, or handle
      */
-    _load123: async function (params) {
+    __load: async function (params) {
         await this._super(...arguments);
         params.type = params.type || (params.res_id !== undefined ? 'record' : 'list');
         // FIXME: the following seems only to be used by the basic_model_tests
@@ -969,13 +970,14 @@ var BasicModel = AbstractModel.extend({
      * Reload all data for a given resource. At any time there is at most one
      * reload operation active.
      *
+     * @private
      * @param {string} id local id for a resource
      * @param {Object} [options]
      * @param {boolean} [options.keepChanges=false] if true, doesn't discard the
      *   changes on the record before reloading it
      * @returns {Promise<string>} resolves to the id of the resource
      */
-    _reload123: async function (id, options) {
+    __reload: async function (id, options) {
         await this._super(...arguments);
         return this.mutex.exec(this._reload.bind(this, id, options));
     },

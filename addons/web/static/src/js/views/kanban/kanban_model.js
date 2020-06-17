@@ -180,7 +180,7 @@ var KanbanModel = BasicModel.extend({
     /**
      * @override
      */
-    load: function (params) {
+    __load: function (params) {
         this.defaultGroupedBy = params.groupBy || [];
         params.groupedBy = (params.groupedBy && params.groupedBy.length) ? params.groupedBy : this.defaultGroupedBy;
         return this._super(params);
@@ -258,7 +258,7 @@ var KanbanModel = BasicModel.extend({
     /**
      * @override
      */
-    reload: function (id, options) {
+    __reload: function (id, options) {
         // if the groupBy is given in the options and if it is an empty array,
         // fallback on the default groupBy
         if (options && options.groupBy && !options.groupBy.length) {

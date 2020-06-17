@@ -83,14 +83,14 @@ var PurchaseListDashboardModel = ListModel.extend({
      * @override
      * @returns {Promise}
      */
-    load: function () {
+    __load: function () {
         return this._loadDashboard(this._super.apply(this, arguments));
     },
     /**
      * @override
      * @returns {Promise}
      */
-    reload: function () {
+    __reload: function () {
         return this._loadDashboard(this._super.apply(this, arguments));
     },
 

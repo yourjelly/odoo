@@ -80,9 +80,9 @@ var AbstractModel = mvc.Model.extend({
      */
     async load(params) {
         this.loadParams = params;
-        let result = await this._load123(...arguments);
+        let result = await this.__load(...arguments);
         if (this.useSampleData && this._isEmpty(result)) {
-            await this.sampleModel._load123(...arguments);
+            await this.sampleModel.__load(...arguments);
             this._isInSampleMode = true;
         } else {
             this._isInSampleMode = false;
@@ -103,10 +103,10 @@ var AbstractModel = mvc.Model.extend({
         if (this.useSampleData) {
             this.useSampleData = !this._haveParamsChanged(params);
         }
-        let result = await this._reload123(...arguments);
+        let result = await this.__reload(...arguments);
         if (this.useSampleData && this._isEmpty(result)) {
             // TODO: catch sampleModel Errors and disable useSampleData when thrown
-            await this.sampleModel._reload123(handle, params);
+            await this.sampleModel.__reload(handle, params);
             this._isInSampleMode = true;
         } else {
             this._isInSampleMode = false;
@@ -155,10 +155,24 @@ var AbstractModel = mvc.Model.extend({
     _isEmpty(/* result */) {
         return false;
     },
-    async _load123() {
+    /**
+     * To override to do the initial load of the data (this function is supposed
+     * to be called only once).
+     *
+     * @private
+     * @returns {Promise}
+     */
+    async __load() {
         return Promise.resolve();
     },
-    async _reload123() {
+    /**
+     * To override to reload data (this function may be called several times,
+     * once the initial load has been done).
+     *
+     * @private
+     * @returns {Promise}
+     */
+    async __reload() {
         return Promise.resolve();
     },
 
