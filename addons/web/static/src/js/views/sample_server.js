@@ -3,6 +3,17 @@ odoo.define('web.SampleServer', function (require) {
 
     const session = require('web.session');
 
+    /**
+     * Helper function returning the value from a list of sample strings
+     * corresponding to the given ID.
+     * @param {number} id
+     * @param {string[]} sampleTexts
+     * @returns {string}
+     */
+    function getSampleFromId(id, sampleTexts) {
+        return sampleTexts[(id - 1) % sampleTexts.length];
+    }
+
     class SampleServer {
 
         /**
@@ -213,9 +224,17 @@ odoo.define('web.SampleServer', function (require) {
                         } else {
                             return `REF000${id}`;
                         }
-                        return sample[(id - 1) % sample.length];
+                        return getSampleFromId(id, sample);
                     } else if (fieldName.includes("email")) {
-                        return `sample${id}@sample.demo`;
+                        let emailName;
+                        if (SampleServer.PEOPLE_MODELS.includes(modelName)) {
+                            emailName = getSampleFromId(id, SampleServer.SAMPLE_PEOPLE)
+                                .replace(/ /, ".")
+                                .toLowerCase();
+                        } else {
+                            emailName = `sample${id}`;
+                        }
+                        return `${emailName}@sample.demo`;
                     } else if (fieldName.includes("phone")) {
                         return `+1 555 754 000${id}`;
                     } else if (fieldName.includes("url")) {
@@ -491,7 +510,7 @@ odoo.define('web.SampleServer', function (require) {
                     });
                 }
                 for (const r of this.data[params.model].records) {
-                    const value = values[r.id % values.length];
+                    const value = getSampleFromId(r.id, values);
                     r[groupBy] = groupedByM2O ? value[0] : value;
                 }
                 this.existingGroupsPopulated = true;

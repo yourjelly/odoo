@@ -106,7 +106,9 @@ odoo.define('web.sample_server_tests', function (require) {
             // Basic fields
             assert.ok(SAMPLE_PEOPLE.includes(rec.display_name));
             assert.ok(SAMPLE_PEOPLE.includes(rec.name));
-            assertFormat('email', /sample\d@sample\.demo/);
+            assert.strictEqual(rec.email,
+                `${rec.display_name.replace(/ /, ".").toLowerCase()}@sample.demo`
+            );
             assertFormat('phone', /\+1 555 754 000\d/);
             assertFormat('url', /http:\/\/sample\d\.com/);
             assert.strictEqual(rec.alias, false);
