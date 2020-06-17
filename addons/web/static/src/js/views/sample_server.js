@@ -226,14 +226,9 @@ odoo.define('web.SampleServer', function (require) {
                         }
                         return getSampleFromId(id, sample);
                     } else if (fieldName.includes("email")) {
-                        let emailName;
-                        if (SampleServer.PEOPLE_MODELS.includes(modelName)) {
-                            emailName = getSampleFromId(id, SampleServer.SAMPLE_PEOPLE)
-                                .replace(/ /, ".")
-                                .toLowerCase();
-                        } else {
-                            emailName = `sample${id}`;
-                        }
+                        const emailName = getSampleFromId(id, SampleServer.SAMPLE_PEOPLE)
+                            .replace(/ /, ".")
+                            .toLowerCase();
                         return `${emailName}@sample.demo`;
                     } else if (fieldName.includes("phone")) {
                         return `+1 555 754 000${id}`;
