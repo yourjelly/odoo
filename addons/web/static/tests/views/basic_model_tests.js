@@ -2501,14 +2501,14 @@ odoo.define('web.basic_model_tests', function (require) {
 
             const id = await model.load(this.params);
 
-            const beforeReload = model.get(id);
+            const beforeReload = model.get(id, { withSampleData: true });
 
             const reloaded = model.reload(id, {});
-            const duringReload = model.get(id);
+            const duringReload = model.get(id, { withSampleData: true });
 
             await reloaded;
 
-            const afterReload = model.get(id);
+            const afterReload = model.get(id, { withSampleData: true });
 
             assert.strictEqual(beforeReload.isSample, true,
                 "Sample data flag must be true before reload"
