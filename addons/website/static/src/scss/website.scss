@@ -1004,6 +1004,67 @@ header {
     }
 }
 
+// Navbar Links Styles
+#top .navbar {
+    // Fill
+    @if o-website-value('header-navbar-links-style') == 'fill' {
+        padding-top: $navbar-padding-y * 1.25;
+        padding-bottom: $navbar-padding-y * 1.25;
+        .navbar-nav .nav-link {
+            padding-right: $nav-link-padding-x;
+            padding-left: $nav-link-padding-x;
+        }
+    }
+    // Pills
+    @else if o-website-value('header-navbar-links-style') == 'pills' {
+        padding-top: $navbar-padding-y * 1.25;
+        padding-bottom: $navbar-padding-y * 1.25;
+        .nav-link {
+            padding-right: $nav-link-padding-x * 1.5;
+            padding-left: $nav-link-padding-x * 1.5;
+            @include border-radius($badge-pill-border-radius);
+        }
+    }
+    // Outline
+    @else if o-website-value('header-navbar-links-style') == 'outline' {
+        padding-top: $navbar-padding-y * 1.25;
+        padding-bottom: $navbar-padding-y * 1.25;
+        .nav-link {
+            padding-right: $nav-link-padding-x * 1.5;
+            padding-left: $nav-link-padding-x * 1.5;
+            border: $border-width solid transparent;
+        }
+        .nav-link.active,
+        .show > .nav-link {
+            @include border-radius($nav-pills-border-radius);
+            border-color: currentColor;
+        }
+    }
+    // Block
+    @else if o-website-value('header-navbar-links-style') == 'block' {
+        padding-top: 0;
+        padding-bottom: 0;
+        .nav-link {
+            padding: $nav-link-padding-y * 2 $nav-link-padding-x * 1.5;
+            @include border-radius(0);
+        }
+    }
+    // Border Bottom
+    @else if o-website-value('header-navbar-links-style') == 'border-bottom' {
+        padding-top: 0;
+        padding-bottom: 0;
+        .nav-link {
+            padding: $nav-link-padding-y * 2 0;
+            margin: 0 $nav-link-padding-x;
+        }
+        .nav-link.active,
+        .show > .nav-link {
+            border-bottom: $nav-link-padding-y solid;
+            border-color: currentColor;
+        }
+    }
+}
+
 // Footer Templates
 #footer {
     @if o-website-value('footer-template') != 'products_contacts_about_us' {
