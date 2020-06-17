@@ -223,13 +223,17 @@ var Factory = Class.extend({
      *
      * @private
      * @param {Model} model a Model instance
+     * @param {Object} [options={}]
      * @returns {Promise<*>} a promise that resolves to the value returned by
      *   the get method from the model
      * @todo: get rid of loadParams (use modelParams instead)
      */
-    _loadData: function (model) {
+    _loadData: function (model, options={}) {
+        if (!('withSampleData' in options)) {
+            options.withSampleData = true;
+        }
         return model.load(this.loadParams).then(function (handle) {
-            return { state: model.get(handle, { withSampleData: true }), handle };
+            return { state: model.get(handle, options), handle };
         });
     },
 });
