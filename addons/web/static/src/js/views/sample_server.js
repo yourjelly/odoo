@@ -84,7 +84,7 @@ odoo.define('web.SampleServer', function (require) {
          * @param {string} params.model
          * @param {string} [params.method]
          * @param {string} [params.route]
-         * @param {any} result the result of the real call to the method/route
+         * @param {any} result, the result of the real call to the method/route
          * @returns {boolean}
          */
         isEmpty(params, result) {
@@ -109,7 +109,7 @@ odoo.define('web.SampleServer', function (require) {
          * This is the main entry point of the SampleServer. Mocks a request to
          * the server with sample data.
          * @param {Object} params
-         * @param {any} result the result of the real RPC
+         * @param {any} result, the result of the real RPC
          * @returns {Promise<any>} the result obtained with the sample data
          * @throws {Error} If called on a route/method we do not handle
          */
@@ -135,8 +135,9 @@ odoo.define('web.SampleServer', function (require) {
         //---------------------------------------------------------------------
 
         /**
-         * @param {Object[]} measures, of the form { fieldName, type }
+         * @param {Object[]} measures, each measure has the form { fieldName, type }
          * @param {Object[]} records
+         * @returns {Object}
          */
         _aggregateFields(measures, records) {
             const values = {};
@@ -225,9 +226,8 @@ odoo.define('web.SampleServer', function (require) {
                                fieldName.includes("subject")) {
                         const index = Math.floor(Math.random() * SampleServer.SAMPLE_TEXTS.length);
                         return SampleServer.SAMPLE_TEXTS[index];
-                    } else {
-                        return false;
                     }
+                    return false;
                 case "date":
                 case "datetime": {
                     const delta = Math.floor((Math.random() - Math.random()) * SampleServer.DATE_DELTA);
@@ -250,9 +250,8 @@ odoo.define('web.SampleServer', function (require) {
                 case "many2one":
                     if (field.relation === 'res.currency') {
                         return session.company_currency_id;
-                    } else {
-                        return this._getRandomSubRecordId();
                     }
+                    return this._getRandomSubRecordId();
                 case "one2many":
                 case "many2many": {
                     const ids = [this._getRandomSubRecordId(), this._getRandomSubRecordId()];
@@ -289,28 +288,31 @@ odoo.define('web.SampleServer', function (require) {
             const model = this.data[params.model];
             const ids = params.args[0];
             const fieldNames = params.args[1];
-            return model.records
-                .filter(r => ids.includes(r.id))
-                .map(r => {
-                    const record = { id: r.id };
-                    for (const fieldName of fieldNames) {
-                        const field = model.fields[fieldName];
-                        if (!field) {
-                            record[fieldName] = false; // unknown field
-                        } else if (field.type === 'many2one') {
-                            const relModel = this.data[field.relation];
-                            const relRecord = relModel.records.find(
-                                relR => r[fieldName] === relR.id
-                            );
-                            record[fieldName] = relRecord ?
-                                [relRecord.id, relRecord.display_name] :
-                                false;
-                        } else {
-                            record[fieldName] = r[fieldName];
-                        }
+            const records = [];
+            for (const r of model.records) {
+                if (!ids.includes(r.id)) {
+                    continue;
+                }
+                const record = { id: r.id };
+                for (const fieldName of fieldNames) {
+                    const field = model.fields[fieldName];
+                    if (!field) {
+                        record[fieldName] = false; // unknown field
+                    } else if (field.type === 'many2one') {
+                        const relModel = this.data[field.relation];
+                        const relRecord = relModel.records.find(
+                            relR => r[fieldName] === relR.id
+                        );
+                        record[fieldName] = relRecord ?
+                            [relRecord.id, relRecord.display_name] :
+                            false;
+                    } else {
+                        record[fieldName] = r[fieldName];
                     }
-                    return record;
-                });
+                }
+                records.push(record);
+            }
+            return records;
         }
 
         /**
@@ -321,7 +323,7 @@ odoo.define('web.SampleServer', function (require) {
          * @param {string[]} params.fields
          * @param {string[]} params.groupBy
          * @param {boolean} [params.lazy=true]
-         * @returns {Object} Object with keys groups and length
+         * @returns {Object[]} Object with keys groups and length
          */
         _mockReadGroup(params) {
             if (!('lazy' in params)) {
@@ -402,7 +404,7 @@ odoo.define('web.SampleServer', function (require) {
             const progress_bar = params.kwargs.progress_bar;
             const groupByField = this.data[params.model].fields[groupBy];
             const data = {};
-            this.data[params.model].records.forEach(record => {
+            for (const record of this.data[params.model].records) {
                 let groupByValue = record[groupBy];
                 if (groupByField.type === "many2one") {
                     const relatedRecords = this.data[groupByField.relation].records;
@@ -411,15 +413,15 @@ odoo.define('web.SampleServer', function (require) {
                 }
                 if (!(groupByValue in data)) {
                     data[groupByValue] = {};
-                    Object.keys(progress_bar.colors).forEach(key => {
+                    for (const key in progress_bar.colors) {
                         data[groupByValue][key] = 0;
-                    });
+                    }
                 }
                 const fieldValue = record[progress_bar.field];
                 if (fieldValue in data[groupByValue]) {
                     data[groupByValue][fieldValue]++;
                 }
-            });
+            }
             return data;
         }
 
@@ -450,7 +452,7 @@ odoo.define('web.SampleServer', function (require) {
          * with sample records.
          * @private
          * @param {Object} params
-         * @param {Object} [result] the result of an real call to web_read_group
+         * @param {Object} [result] the result of a real call to web_read_group
          * @returns {{ groups: Object[], length: number }}
          */
         _mockWebReadGroup(params, result) {
@@ -488,10 +490,10 @@ odoo.define('web.SampleServer', function (require) {
                         return { id: v[0], display_name: v[1] };
                     });
                 }
-                this.data[params.model].records.forEach(r => {
+                for (const r of this.data[params.model].records) {
                     const value = values[r.id % values.length];
                     r[groupBy] = groupedByM2O ? value[0] : value;
-                });
+                }
                 this.existingGroupsPopulated = true;
             }
         }
@@ -511,9 +513,9 @@ odoo.define('web.SampleServer', function (require) {
                         SampleServer.SUB_RECORDSET_SIZE;
                     for (let id = 1; id <= size; id++) {
                         const record = { id };
-                        fieldNames.forEach(fieldName => {
+                        for (const fieldName of fieldNames) {
                             record[fieldName] = this._generateFieldValue(modelName, fieldName, id);
-                        });
+                        }
                         model.records.push(record);
                     }
                 }
@@ -522,7 +524,7 @@ odoo.define('web.SampleServer', function (require) {
         }
 
         /**
-         * A real (web_)read_group call has been done, and it returned groups,
+         * A real (web_)read_group call has been done, and it has returned groups,
          * but they are all empty. This function updates the sample data such
          * that those group values exist and those groups contain sample records.
          * @private
@@ -541,7 +543,7 @@ odoo.define('web.SampleServer', function (require) {
             const groupByField = this.data[params.model].fields[groupBy];
             const groupedByM2O = groupByField.type === 'many2one';
             const records = this.data[params.model].records;
-            groups.forEach(g => {
+            for (const g of groups) {
                 const groupValue = groupedByM2O ? g[groupBy][0] : g[groupBy];
                 const recordsInGroup = records.filter(r => r[groupBy] === groupValue);
                 g[`${groupBy}_count`] = recordsInGroup.length;
@@ -558,8 +560,7 @@ odoo.define('web.SampleServer', function (require) {
                     }),
                     length: recordsInGroup.length,
                 };
-            });
-
+            }
             return groups;
         }
     }
