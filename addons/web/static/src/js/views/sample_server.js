@@ -2,6 +2,7 @@ odoo.define('web.SampleServer', function (require) {
     "use strict";
 
     const session = require('web.session');
+    const utils = require('web.utils');
 
     /**
      * Helper function returning the value from a list of sample strings
@@ -360,7 +361,7 @@ odoo.define('web.SampleServer', function (require) {
                     normalizedGroupBys.push(gb);
                 }
             }
-            const groups = _.groupBy(records, (record) => {
+            const groups = utils.groupBy(records, (record) => {
                 const vals = [];
                 for (const gb of normalizedGroupBys) {
                     const { fieldName, type } = gb;
