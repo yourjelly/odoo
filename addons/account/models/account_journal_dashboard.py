@@ -189,7 +189,7 @@ class account_journal(models.Model):
 
         if is_sample_data:
             for index in range(0, len(query_results)):
-                data[index]['type'] = 'o_sample_data'
+                data[index]['type'] = 'o_account_sample_data'
                 # we use unrealistic values for the sample data
                 data[index]['value'] = random.randint(0, 20)
                 graph_key = _('Sample data')
