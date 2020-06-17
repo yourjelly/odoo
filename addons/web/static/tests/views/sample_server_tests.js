@@ -5,11 +5,11 @@ odoo.define('web.sample_server_tests', function (require) {
     const session = require('web.session');
     const { mock } = require('web.test_utils');
 
-    const EXPECTED_RECORDSET_SIZE = SampleServer.MAIN_RECORDSET_SIZE;
-    const EXPECTED_SEARCH_READ_LIMIT = SampleServer.SEARCH_READ_LIMIT;
-    const EXPECTED_COUNTRIES = SampleServer.SAMPLE_COUNTRIES;
-    const EXPECTED_PEOPLE = SampleServer.SAMPLE_PEOPLE;
-    const EXPECTED_TEXTS = SampleServer.SAMPLE_TEXTS;
+    const {
+        MAIN_RECORDSET_SIZE, SEARCH_READ_LIMIT, // Limits
+        SAMPLE_COUNTRIES, SAMPLE_PEOPLE, SAMPLE_TEXTS, // Text values
+        MAX_COLOR_INT, MAX_FLOAT, MAX_INTEGER, MAX_MONETARY // Number values
+    } = SampleServer;
 
     QUnit.module("Sample Server", {
         beforeEach() {
@@ -104,21 +104,21 @@ odoo.define('web.sample_server_tests', function (require) {
             }
 
             // Basic fields
-            assert.ok(EXPECTED_PEOPLE.includes(rec.display_name));
-            assert.ok(EXPECTED_PEOPLE.includes(rec.name));
+            assert.ok(SAMPLE_PEOPLE.includes(rec.display_name));
+            assert.ok(SAMPLE_PEOPLE.includes(rec.name));
             assertFormat('email', /sample\d@sample\.demo/);
             assertFormat('phone', /\+1 555 754 000\d/);
             assertFormat('url', /http:\/\/sample\d\.com/);
             assert.strictEqual(rec.alias, false);
             assert.strictEqual(rec.active, true);
             assertFormat('is_alive', 'boolean');
-            assert.ok(EXPECTED_TEXTS.includes(rec.description));
+            assert.ok(SAMPLE_TEXTS.includes(rec.description));
             assertFormat('birthday', /\d{4}-\d{2}-\d{2}/);
             assertFormat('arrival_date', /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/);
-            assertBetween('height', 0, 100, 2);
-            assertBetween('color', 0, 8);
-            assertBetween('age', 0, 100);
-            assertBetween('salary', 0, 100000);
+            assertBetween('height', 0, MAX_FLOAT, 2);
+            assertBetween('color', 0, MAX_COLOR_INT);
+            assertBetween('age', 0, MAX_INTEGER);
+            assertBetween('salary', 0, MAX_MONETARY);
 
             const selectionValues = this.fields['res.users'].type.selection.map(
                 (sel) => sel[0]
@@ -130,10 +130,10 @@ odoo.define('web.sample_server_tests', function (require) {
             // Currently we expect the currency name to be a latin string, which
             // is not important; in most case we only need the ID. The following
             // assertion can be removed if needed.
-            assert.ok(EXPECTED_TEXTS.includes(rec.currency[1]));
+            assert.ok(SAMPLE_TEXTS.includes(rec.currency[1]));
 
             assert.strictEqual(typeof rec.manager_id[0], 'number');
-            assert.ok(EXPECTED_PEOPLE.includes(rec.manager_id[1]));
+            assert.ok(SAMPLE_PEOPLE.includes(rec.manager_id[1]));
 
             assert.ok([1, 2].includes(rec.managed_ids.length));
             assert.ok(rec.managed_ids.every(
@@ -158,7 +158,7 @@ odoo.define('web.sample_server_tests', function (require) {
                 fields: ['display_name'],
             });
 
-            assert.ok(EXPECTED_COUNTRIES.includes(records[0].display_name));
+            assert.ok(SAMPLE_COUNTRIES.includes(records[0].display_name));
         });
 
         QUnit.test("Sample data: any type", async function (assert) {
@@ -172,7 +172,7 @@ odoo.define('web.sample_server_tests', function (require) {
                 fields: ['display_name'],
             });
 
-            assert.ok(EXPECTED_TEXTS.includes(records[0].display_name));
+            assert.ok(SAMPLE_TEXTS.includes(records[0].display_name));
         });
 
         QUnit.test("Can mock", async function (assert) {
@@ -285,7 +285,7 @@ odoo.define('web.sample_server_tests', function (require) {
                 Object.keys(result.records[0]),
                 ['id', 'display_name']
             );
-            assert.strictEqual(result.length, EXPECTED_SEARCH_READ_LIMIT);
+            assert.strictEqual(result.length, SEARCH_READ_LIMIT);
             assert.ok(/\w+/.test(result.records[0].display_name),
                 "Display name has been mocked"
             );
@@ -306,7 +306,7 @@ odoo.define('web.sample_server_tests', function (require) {
                 Object.keys(result.records[0]),
                 ['id', 'name']
             );
-            assert.strictEqual(result.length, EXPECTED_SEARCH_READ_LIMIT);
+            assert.strictEqual(result.length, SEARCH_READ_LIMIT);
             assert.strictEqual(result.records[0].name, false,
                 `Field "name" doesn't exist => returns false`
             );
@@ -352,7 +352,7 @@ odoo.define('web.sample_server_tests', function (require) {
 
             assert.strictEqual(
                 result.groups.reduce((acc, g) => acc + g.profession_count, 0),
-                EXPECTED_RECORDSET_SIZE
+                MAIN_RECORDSET_SIZE
             );
             assert.ok(
                 result.groups.every((g) => g.profession_count === g.__data.length)
@@ -387,7 +387,7 @@ odoo.define('web.sample_server_tests', function (require) {
 
             assert.strictEqual(
                 result.groups.reduce((acc, g) => acc + g.profession_count, 0),
-                EXPECTED_RECORDSET_SIZE
+                MAIN_RECORDSET_SIZE
             );
             assert.ok(
                 result.groups.every((g) => g.profession_count === g.__data.length)
@@ -407,7 +407,7 @@ odoo.define('web.sample_server_tests', function (require) {
             });
 
             assert.deepEqual(result, [{
-                __count: EXPECTED_RECORDSET_SIZE,
+                __count: MAIN_RECORDSET_SIZE,
                 __domain: [],
             }]);
         });
@@ -433,7 +433,7 @@ odoo.define('web.sample_server_tests', function (require) {
 
             assert.strictEqual(
                 result.reduce((acc, g) => acc + g.profession_count, 0),
-                EXPECTED_RECORDSET_SIZE,
+                MAIN_RECORDSET_SIZE,
             );
         });
 
@@ -458,7 +458,7 @@ odoo.define('web.sample_server_tests', function (require) {
 
             assert.strictEqual(
                 result.reduce((acc, g) => acc + g.profession_count, 0),
-                EXPECTED_RECORDSET_SIZE,
+                MAIN_RECORDSET_SIZE,
             );
 
             assert.strictEqual(
@@ -544,7 +544,7 @@ odoo.define('web.sample_server_tests', function (require) {
 
             const server = new SampleServer('hobbit', this.fields.hobbit);
 
-            const amount = EXPECTED_RECORDSET_SIZE + 3;
+            const amount = MAIN_RECORDSET_SIZE + 3;
             const ids = new Array(amount).fill().map((_, i) => i + 1);
             const result = await server.mockRpc({
                 method: 'read',
@@ -554,7 +554,7 @@ odoo.define('web.sample_server_tests', function (require) {
                 ],
             });
 
-            assert.strictEqual(result.length, EXPECTED_RECORDSET_SIZE);
+            assert.strictEqual(result.length, MAIN_RECORDSET_SIZE);
         });
 
         // To be implemented if needed
