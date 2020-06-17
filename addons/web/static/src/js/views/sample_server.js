@@ -109,7 +109,6 @@ odoo.define('web.SampleServer', function (require) {
 
         setExistingGroups(groups) {
             this.existingGroups = groups;
-            // this.existingGroups = this.existingGroups || groups;
         }
 
         //---------------------------------------------------------------------
@@ -305,7 +304,7 @@ odoo.define('web.SampleServer', function (require) {
          *
          * @param {Object} params
          * @param {string} params.model
-         * @param {string[]} params.fields
+         * @param {string[]} [params.fields] defaults to the list of all fields
          * @param {string[]} params.groupBy
          * @param {boolean} [params.lazy=true]
          * @returns {Object[]} Object with keys groups and length
@@ -344,7 +343,7 @@ odoo.define('web.SampleServer', function (require) {
                 return JSON.stringify(vals);
             });
             const measures = [];
-            for (const measureSpec of params.fields) {
+            for (const measureSpec of (params.fields || Object.keys(fields))) {
                 const [fieldName, aggregateFunction] = measureSpec.split(':');
                 const { type } = fields[fieldName];
                 if (!params.groupBy.includes(fieldName) && type &&

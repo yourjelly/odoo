@@ -167,99 +167,6 @@ odoo.define('web.sample_server_tests', function (require) {
             assert.ok(SAMPLE_TEXTS.includes(records[0].display_name));
         });
 
-        QUnit.test("Can mock", async function (assert) {
-            assert.expect(4);
-
-            const server = new SampleServer('hobbit', this.fields.hobbit);
-
-            assert.ok(server.canMock({ model: 'hobbit', route: '/web/dataset/search_read' }));
-            assert.ok(server.canMock({ model: 'hobbit', method: 'read_group' }));
-            assert.notOk(server.canMock({ model: 'hobbit', method: 'write' }));
-            assert.notOk(server.canMock({ model: 'res.users', method: 'read_group' }));
-        });
-
-        QUnit.test("Is empty", async function (assert) {
-            assert.expect(9);
-
-            const server = new SampleServer('hobbit', this.fields.hobbit);
-
-            assert.strictEqual(server.isEmpty({ method: 'write' }, {}), false);
-
-            // search read
-            assert.strictEqual(
-                server.isEmpty(
-                    { route: '/web/dataset/search_read' },
-                    { records: [{}], length: 1 }
-                ),
-                false
-            );
-            assert.strictEqual(
-                server.isEmpty(
-                    { route: '/web/dataset/search_read' },
-                    { records: [], length: 0 }
-                ),
-                true
-            );
-
-            // web read group
-            assert.strictEqual(
-                server.isEmpty(
-                    {
-                        method: 'web_read_group',
-                        model: 'hobbit',
-                        groupBy: ['profession'],
-                    },
-                    { groups: [{ profession: 'adventurer', profession_count: 1 }] }
-                ),
-                false
-            );
-            assert.strictEqual(
-                server.isEmpty(
-                    {
-                        method: 'web_read_group',
-                        model: 'hobbit',
-                        groupBy: ['profession'],
-                    },
-                    { groups: [{ profession: 'adventurer', profession_count: 0 }] }
-                ),
-                true
-            );
-
-            // read group
-            assert.strictEqual(
-                server.isEmpty(
-                    {
-                        method: 'read_group',
-                        model: 'hobbit',
-                        groupBy: ['profession'],
-                    },
-                    [{ __count: 1 }]
-                ),
-                false
-            );
-            assert.strictEqual(
-                server.isEmpty(
-                    {
-                        method: 'read_group',
-                        model: 'hobbit',
-                        groupBy: ['profession'],
-                    },
-                    [{ __count: 0 }]
-                ),
-                true
-            );
-
-            // read progress bar
-            assert.strictEqual(
-                server.isEmpty({ method: 'read_progress_bar' }, { whatever: true }),
-                false
-            );
-            assert.strictEqual(
-                server.isEmpty({ method: 'read_progress_bar' }, {}),
-                true
-            );
-        });
-
         QUnit.module("RPC calls");
 
         QUnit.test("Send 'search_read' RPC: valid field names", async function (assert) {
@@ -308,6 +215,7 @@ odoo.define('web.sample_server_tests', function (require) {
             assert.expect(1);
 
             const server = new SampleServer('hobbit', this.fields.hobbit);
+            server.setExistingGroups([]);
 
             const result = await server.mockRpc({
                 method: 'web_read_group',
@@ -322,17 +230,17 @@ odoo.define('web.sample_server_tests', function (require) {
             assert.expect(6);
 
             const server = new SampleServer('hobbit', this.fields.hobbit);
+            const existingGroups = [
+                { profession: 'gardener', profession_count: 0 },
+                { profession: 'adventurer', profession_count: 0 },
+            ];
+            server.setExistingGroups(existingGroups);
 
             const result = await server.mockRpc({
                 method: 'web_read_group',
                 model: 'hobbit',
                 groupBy: ['profession'],
                 fields: [],
-            }, {
-                groups: [
-                    { profession: 'gardener', profession_count: 0 },
-                    { profession: 'adventurer', profession_count: 0 },
-                ],
             });
 
             assert.strictEqual(result.length, 2);
@@ -355,18 +263,18 @@ odoo.define('web.sample_server_tests', function (require) {
             assert.expect(7);
 
             const server = new SampleServer('hobbit', this.fields.hobbit);
+            const existingGroups = [
+                { profession: 'gardener', profession_count: 0 },
+                { profession: 'brewer', profession_count: 0 },
+                { profession: 'adventurer', profession_count: 0 },
+            ];
+            server.setExistingGroups(existingGroups);
 
             const result = await server.mockRpc({
                 method: 'web_read_group',
                 model: 'hobbit',
                 groupBy: ['profession'],
                 fields: [],
-            }, {
-                groups: [
-                    { profession: 'gardener', profession_count: 0 },
-                    { profession: 'brewer', profession_count: 0 },
-                    { profession: 'adventurer', profession_count: 0 },
-                ],
             });
 
             assert.strictEqual(result.length, 3);
