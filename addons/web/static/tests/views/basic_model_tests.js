@@ -1322,7 +1322,6 @@ odoo.define('web.basic_model_tests', function (require) {
                 assert.strictEqual(record.data.date, false,
                     "unset date field should be false");
             });
-
             model.destroy();
         });
 
