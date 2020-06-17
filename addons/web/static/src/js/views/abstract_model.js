@@ -39,7 +39,7 @@ var AbstractModel = mvc.Model.extend({
                 useSampleData: false,
             });
             this.sampleModel = new params.SampleModel(this, sampleModelParams);
-            this.sampleHandles = {};
+            this._isInSampleMode = false;
         }
         if (params.isSampleModel) {
             this.isSampleModel = true;
@@ -51,17 +51,29 @@ var AbstractModel = mvc.Model.extend({
     // Public
     //--------------------------------------------------------------------------
 
+    /**
+     * Override to call get on the sampleModel when necessary.
+     *
+     * @overrie
+     */
     get(handle, options) {
         let state;
-        if (options && options.withSampleData && this.isSample) {
+        if (options && options.withSampleData && this._isInSampleMode) {
             state = this.sampleModel.get(handle, options);
         } else {
             state = this._get(...arguments);
         }
-        if (state) {
-            state.isSample = this.isSample; // FIXME: should be in specific Models
-        }
         return state;
+    },
+    /**
+     * Under some conditions, the model is designed to generate sample data if
+     * there is no real data in database. This function returns a boolean which
+     * indicates the mode of the model: if true, we are in "sample" mode.
+     *
+     * @returns {boolean}
+     */
+    isInSampleMode() {
+        return !!this._isInSampleMode;
     },
     /**
      * @override
@@ -71,10 +83,9 @@ var AbstractModel = mvc.Model.extend({
         let result = await this._load123(...arguments);
         if (this.useSampleData && this._isEmpty(result)) {
             await this.sampleModel._load123(...arguments);
-            this.isSample = true;
+            this._isInSampleMode = true;
         } else {
-            this.isSample = false;
-            this.sampleHandles = null;
+            this._isInSampleMode = false;
             this.useSampleData = false;
         }
         return result;
@@ -96,10 +107,9 @@ var AbstractModel = mvc.Model.extend({
         if (this.useSampleData && this._isEmpty(result)) {
             // TODO: catch sampleModel Errors and disable useSampleData when thrown
             await this.sampleModel._reload123(handle, params);
-            this.isSample = true;
+            this._isInSampleMode = true;
         } else {
-            this.isSample = false;
-            this.sampleHandles = null;
+            this._isInSampleMode = false;
             this.useSampleData = false;
         }
         return result;
@@ -134,6 +144,10 @@ var AbstractModel = mvc.Model.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * This function can be overriden to determine if the result of a load or
+     * a reload is empty. In the affirmative, we will fallback on the sampleServer
+     * to generate sample data, instead of an empty state.
+     *
      * @private
      * @params {any} result, the value returned by a load or a reload
      * @returns {boolean}

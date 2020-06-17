@@ -245,8 +245,7 @@ var KanbanController = BasicController.extend({
                 var ids = _.pluck(state.data, 'res_id').filter(_.isNumber);
                 return self._resequenceColumns(ids);
             }).then(function () {
-                const state = self.model.get(self.handle, {raw: true});
-                return self.update({}, { reload: state.isSample });
+                return self.update({}, { reload: self.model.isInSampleMode() });
             }).then(function () {
                 let quickCreateFolded = self.renderer.quickCreate.folded;
                 if (ev.data.foldQuickCreate ? !quickCreateFolded : quickCreateFolded) {

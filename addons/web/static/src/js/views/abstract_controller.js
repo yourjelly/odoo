@@ -269,12 +269,11 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
             this.handle = await this.dp.add(this.model.reload(this.handle, params));
         }
         const localState = this.renderer.getLocalState();
+        const state = this.model.get(this.handle, { withSampleData: true });
         const promises = [
-            this.updateRendererState(
-                this.model.get(this.handle, { withSampleData: true }), params
-            ).then(
-                () => this.renderer.setLocalState(localState)
-            ),
+            this.updateRendererState(state, params).then(() => {
+                return this.renderer.setLocalState(localState);
+            }),
             this._update(this.model.get(this.handle), params)
         ];
         await this.dp.add(Promise.all(promises));
@@ -424,7 +423,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         }
         this._pushState();
         await Promise.all(promises);
-        this.$el.toggleClass('o_sample_data', !!state.isSample);
+        this.$el.toggleClass('o_sample_data', this.model.isInSampleMode());
     },
     /**
      * Can be used to update the key 'cp_content'. This method is called in start and _update methods.
