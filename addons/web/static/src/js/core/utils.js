@@ -205,6 +205,27 @@ var diacriticsMap = {
 
 const patchMap = new WeakMap();
 
+/**
+ * Helper function returning a extract handler to use on array elements to
+ * return a certain attribute or mutated form of the element.
+ *
+ * @param {string | function} criterion
+ * @returns {(element: any) => any}
+ */
+function getExtractorFrom(criterion) {
+    if (criterion) {
+        switch (typeof criterion) {
+            case 'string': return element => element[criterion];
+            case 'function': return criterion;
+            default: throw new Error(
+                `Expected criterion of type 'string' or 'function' and got '${typeof criterion}'`
+            );
+        }
+    } else {
+        return element => element;
+    }
+}
+
 var utils = {
 
     /**
@@ -313,23 +334,14 @@ var utils = {
      * element.
      *
      * @param {any[]} list
-     * @param {string | (element: any) => string} criterion
+     * @param {string | function} [criterion]
      * @returns {Object}
      */
     groupBy: function (list, criterion) {
-        let getter;
-        if (criterion) {
-            switch (typeof criterion) {
-                case 'string': getter = element => element[criterion]; break;
-                case 'function': getter = criterion; break;
-                default: throw new Error(`Expected criterion of type 'string' or 'function' and got '${typeof criterion}'`);
-            }
-        } else {
-            getter = element => element;
-        }
+        const extract = getExtractorFrom(criterion);
         const groups = {};
         for (const element of list) {
-            const group = getter(element);
+            const group = String(extract(element));
             if (!(group in groups)) {
                 groups[group] = [];
             }
@@ -690,22 +702,13 @@ var utils = {
      * - a function: a handler that will return the sortable primitive from a given element.
      *
      * @param {any[]} array
-     * @param {(string|function)} [criterion]
+     * @param {string | function} [criterion]
      */
     sortBy: function (array, criterion) {
-        let getter;
-        if (criterion) {
-            switch (typeof criterion) {
-                case 'string': getter = element => element[criterion]; break;
-                case 'function': getter = criterion; break;
-                default: throw new Error(`Expected criterion of type 'string' or 'function' and got '${typeof criterion}'`);
-            }
-        } else {
-            getter = element => element;
-        }
+        const extract = getExtractorFrom(criterion);
         return array.slice().sort((elA, elB) => {
-            const a = getter(elA);
-            const b = getter(elB);
+            const a = extract(elA);
+            const b = extract(elB);
             if (isNaN(a) && isNaN(b)) {
                 return a > b ? 1 : a < b ? -1 : 0;
             } else {
