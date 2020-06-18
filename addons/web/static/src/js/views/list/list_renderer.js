@@ -50,6 +50,12 @@ var ListRenderer = BasicRenderer.extend({
         'keydown td': '_onKeyDown',
         'keydown th': '_onKeyDown',
     },
+    sampleDataTargets: [
+        '.o_data_row',
+        '.o_group_header',
+        '.o_list_table > tfoot',
+        '.o_list_table > thead .o_list_record_selector',
+    ],
     /**
      * @constructor
      * @param {Widget} parent
@@ -100,7 +106,8 @@ var ListRenderer = BasicRenderer.extend({
      * @override
      */
     updateState: function (state, params) {
-        this.isGrouped = state.groupedBy.length > 0;
+        this._setState(state);
+        this.isGrouped = this.state.groupedBy.length > 0;
         this._processColumns(params.columnInvisibleFields || {});
         if (params.selectedRecords) {
             this.selection = params.selectedRecords;

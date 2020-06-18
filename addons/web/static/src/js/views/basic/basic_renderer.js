@@ -142,7 +142,7 @@ var BasicRenderer = AbstractRenderer.extend(WidgetAdapterMixin, {
      */
     confirmChange: function (state, id, fields, ev) {
         var self = this;
-        this.state = state;
+        this._setState(state);
         var record = this._getRecord(id);
         if (!record) {
             return this._render().then(_.constant([]));

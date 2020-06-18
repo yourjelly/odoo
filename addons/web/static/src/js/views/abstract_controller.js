@@ -97,7 +97,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         if (this.withControlPanel) {
             this._updateControlPanelProps(this.initialState);
             this._controlPanelWrapper = new ComponentWrapper(this, ControlPanel, this.controlPanelProps);
-            this._controlPanelWrapper.env.bus.on('focus-view', this, () => this.renderer.giveFocus());
+            this._controlPanelWrapper.env.bus.on('focus-view', this, () => this.giveFocus());
             promises.push(this._controlPanelWrapper.mount(this.el, { position: 'first-child' }));
         }
         await Promise.all(promises);
@@ -197,7 +197,9 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * Gives the focus to the renderer
      */
     giveFocus: function () {
-        this.renderer.giveFocus();
+        if (!this._isSample()) {
+            this.renderer.giveFocus();
+        }
     },
     /**
      * The use of this method is discouraged.  It is still snakecased, because
@@ -247,7 +249,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         }
         await Promise.all([this.update(params), searchPanelUpdateProm]);
         if (postponeRendering) {
-            return this.renderer._render();
+            return this.renderer.updateState(false, {});
         }
     },
     /**
@@ -325,6 +327,9 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      */
     _getActionMenuItems: function (state) {
         return null;
+    },
+    _isSample() {
+        return this.model.get(this.handle).isSample;
     },
     /**
      * This method is the way a view can notifies the outside world that

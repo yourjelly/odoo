@@ -246,10 +246,14 @@ var ListController = BasicController.extend({
                     break;
                 case $.ui.keyCode.DOWN:
                     e.preventDefault();
-                    self.renderer.giveFocus();
+                    self.giveFocus();
                     break;
                 case $.ui.keyCode.TAB:
-                    if (!e.shiftKey && e.target.classList.contains("btn-primary")) {
+                    if (
+                        !e.shiftKey &&
+                        e.target.classList.contains("btn-primary") &&
+                        !self._isSample()
+                    ) {
                         e.preventDefault();
                         $createButton.tooltip('show');
                     }

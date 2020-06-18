@@ -76,12 +76,6 @@ return AbstractRenderer.extend({
         this.$tooltip = null;
     },
     /**
-     * @override
-     */
-    updateState: function () {
-        return this._super.apply(this, arguments);
-    },
-    /**
      * Chart.js does not need the canvas to be in dom in order
      * to be able to work well. We could avoid the calls to on_attach_callback
      * and on_detach_callback.
