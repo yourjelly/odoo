@@ -447,66 +447,68 @@ var SnippetEditor = Widget.extend({
         this.toggleOverlay(false);
         this.toggleOptions(false);
 
-        await new Promise(resolve => {
-            this.trigger_up('call_for_each_child_snippet', {
-                $snippet: this.$snippetBlock,
-                callback: function (editor, $snippet) {
-                    for (var i in editor.snippetOptionInstances) {
-                        editor.snippetOptionInstances[i].onRemove();
-                    }
-                    resolve();
-                },
-            });
-        });
-
-        this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
-        var $parent = this.$snippetBlock.parent();
-        this.$snippetBlock.find('*').addBack().tooltip('dispose');
-        await this.editorHelpers.remove(this.$snippetBlock[0]);
-        this.$el.remove();
-
-        var node = $parent[0];
-        if (node && node.firstChild) {
-            if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
-                await this.editorHelpers.remove(node.firstChild);
-            }
-        }
-
-        if ($parent.closest(':data("snippet-editor")').length) {
-            var editor = $parent.data('snippet-editor');
-            while (!editor) {
-                var $nextParent = $parent.parent();
-                if (isEmptyAndRemovable($parent)) {
-                    await this.editorHelpers.remove(this.$parent[0]);
-                }
-                $parent = $nextParent;
-                editor = $parent.data('snippet-editor');
-            }
-            if (isEmptyAndRemovable($parent, editor)) {
-                // TODO maybe this should be part of the actual Promise being
-                // returned by the function ?
-                await new Promise((resolve)=> {
-                    setTimeout(() => editor.removeSnippet().then(resolve));
+        await this.wysiwyg.editor.execBatch(async () => {
+            await new Promise(resolve => {
+                this.trigger_up('call_for_each_child_snippet', {
+                    $snippet: this.$snippetBlock,
+                    callback: function (editor, $snippet) {
+                        for (var i in editor.snippetOptionInstances) {
+                            editor.snippetOptionInstances[i].onRemove();
+                        }
+                        resolve();
+                    },
                 });
-            }
-        }
+            });
 
-        await new Promise((resolve) => this.trigger_up('snippet_removed', {onFinish: resolve}));
-        this.destroy();
-        const childs = this.snippetMenu.getChildsSnippetBlock(this.$snippetBlock);
-        for (const child of childs) {
-            const snippetEditor = $(child).data('snippet-editor');
-            if (snippetEditor) {
-                snippetEditor.destroy();
-            }
-        }
-        $parent.trigger('content_changed');
+            this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
+            var $parent = this.$snippetBlock.parent();
+            this.$snippetBlock.find('*').addBack().tooltip('dispose');
+            await this.editorHelpers.remove(this.$snippetBlock[0]);
+            this.$el.remove();
 
-        function isEmptyAndRemovable($el, editor) {
-            editor = editor || $el.data('snippet-editor');
-            return $el.children().length === 0 && $el.text().trim() === ''
-                && !$el.hasClass('oe_structure') && (!editor || editor.isTargetParentEditable);
-        }
+            var node = $parent[0];
+            if (node && node.firstChild) {
+                if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
+                    await this.editorHelpers.remove(node.firstChild);
+                }
+            }
+
+            if ($parent.closest(':data("snippet-editor")').length) {
+                var editor = $parent.data('snippet-editor');
+                while (!editor) {
+                    var $nextParent = $parent.parent();
+                    if (isEmptyAndRemovable($parent)) {
+                        await this.editorHelpers.remove(this.$parent[0]);
+                    }
+                    $parent = $nextParent;
+                    editor = $parent.data('snippet-editor');
+                }
+                if (isEmptyAndRemovable($parent, editor)) {
+                    // TODO maybe this should be part of the actual Promise being
+                    // returned by the function ?
+                    await new Promise((resolve)=> {
+                        setTimeout(() => editor.removeSnippet().then(resolve));
+                    });
+                }
+            }
+
+            await new Promise((resolve) => this.trigger_up('snippet_removed', {onFinish: resolve}));
+            this.destroy();
+            const childs = this.snippetMenu.getChildsSnippetBlock(this.$snippetBlock);
+            for (const child of childs) {
+                const snippetEditor = $(child).data('snippet-editor');
+                if (snippetEditor) {
+                    snippetEditor.destroy();
+                }
+            }
+            $parent.trigger('content_changed');
+
+            function isEmptyAndRemovable($el, editor) {
+                editor = editor || $el.data('snippet-editor');
+                return $el.children().length === 0 && $el.text().trim() === ''
+                    && !$el.hasClass('oe_structure') && (!editor || editor.isTargetParentEditable);
+            }
+        });
     },
     /**
      * Displays/Hides the editor overlay.
