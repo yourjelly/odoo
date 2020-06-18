@@ -197,7 +197,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * Gives the focus to the renderer
      */
     giveFocus: function () {
-        if (!this._isSample()) {
+        if (!this.model.isInSampleMode()) {
             this.renderer.giveFocus();
         }
     },
@@ -249,7 +249,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         }
         await Promise.all([this.update(params), searchPanelUpdateProm]);
         if (postponeRendering) {
-            return this.renderer.updateState(false, {});
+            return this.updateRendererState(false, {});
         }
     },
     /**
@@ -327,9 +327,6 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      */
     _getActionMenuItems: function (state) {
         return null;
-    },
-    _isSample() {
-        return this.model.get(this.handle).isSample;
     },
     /**
      * This method is the way a view can notifies the outside world that

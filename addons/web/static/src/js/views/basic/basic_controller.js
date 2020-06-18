@@ -756,7 +756,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
                 await this.model.resequence(this.modelName, resIDs, this.handle, options);
                 this._updateControlPanel();
                 state = this.model.get(this.handle);
-                return this.renderer.updateState(state, { noRender: true });
+                return this.updateRendererState(state, { noRender: true });
             },
         });
     },
