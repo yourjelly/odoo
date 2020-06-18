@@ -96,6 +96,7 @@
         .o_kanban_counter,
         .o_kanban_record,
         .o_kanban_toggle_fold,
+        .o_column_folded,
         .o_column_archive_records,
         .o_column_unarchive_records {
             @include web_view_sample_data;
