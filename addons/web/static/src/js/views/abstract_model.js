@@ -131,8 +131,8 @@ var AbstractModel = mvc.Model.extend({
      * job for this method: reloading (only if necessary) all the data and
      * making sure that they are ready to be redisplayed.
      * Sometimes, we reload the data with the "same" params as the initial load
-     * (see '_haveParamsChanged'). When we do, if we were in "sample" mode, we
-     * call again the sample server after the reload if there is still no data
+     * params (see '_haveParamsChanged'). When we do, if we were in "sample" mode,
+     * we call again the sample server after the reload if there is still no data
      * to display. When the parameters change, we automatically leave "sample"
      * mode.
      *
