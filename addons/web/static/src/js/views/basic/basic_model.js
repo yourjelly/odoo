@@ -164,6 +164,12 @@ var BasicModel = AbstractModel.extend({
         this.batchedRPCsRequests = [];
 
         this.localData = Object.create(null);
+        // used to generate dataPoint ids. Note that the counter is set to 0 for
+        // each instance, and this is mandatory for the sample data feature to
+        // work: we need both the main model and the sample model to generate the
+        // same datapoint ids for their common data (groups, when there are real
+        // groups in database), so that we can easily do the mapping between
+        // real and sample data.
         this.__id = 0;
         this._super.apply(this, arguments);
     },
@@ -564,7 +570,7 @@ var BasicModel = AbstractModel.extend({
      * @param {boolean} [options.raw=false] if true, will not follow relations
      * @returns {Object}
      */
-    _get: function (id, options) {
+    __get: function (id, options) {
         var self = this;
         options = options || {};
 
@@ -602,7 +608,7 @@ var BasicModel = AbstractModel.extend({
                         relDataPoint = this.localData[data[fieldName]];
                         data[fieldName] = relDataPoint ? relDataPoint.res_id : false;
                     } else {
-                        data[fieldName] = this._get(data[fieldName]) || false;
+                        data[fieldName] = this.__get(data[fieldName]) || false;
                     }
                 } else if (field.type === 'reference') {
                     if (options.raw) {
@@ -611,7 +617,7 @@ var BasicModel = AbstractModel.extend({
                             relDataPoint.model + ',' + relDataPoint.res_id :
                             false;
                     } else {
-                        data[fieldName] = this._get(data[fieldName]) || false;
+                        data[fieldName] = this.__get(data[fieldName]) || false;
                     }
                 } else if (field.type === 'one2many' || field.type === 'many2many') {
                     if (options.raw) {
@@ -626,7 +632,7 @@ var BasicModel = AbstractModel.extend({
                             data[fieldName] = data[fieldName] || [];
                         }
                     } else {
-                        data[fieldName] = this._get(data[fieldName]) || [];
+                        data[fieldName] = this.__get(data[fieldName]) || [];
                     }
                 }
             }
@@ -688,7 +694,7 @@ var BasicModel = AbstractModel.extend({
             context: _.extend({}, element.context),
             count: element.count,
             data: _.map(element.data, function (elemID) {
-                return self._get(elemID, options);
+                return self.__get(elemID, options);
             }),
             domain: element.domain.slice(0),
             fields: element.fields,
