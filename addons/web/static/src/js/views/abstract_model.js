@@ -52,20 +52,16 @@ var AbstractModel = mvc.Model.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Override to call get on the sampleModel when we are in sample mode, and
-     * option 'withSampleData' is set to true.
+     * Override to call get on the sampleModel when necessary.
      *
-     * @override
-     * @param {any} _
-     * @param {Object} [options]
-     * @param {boolean} [options.withSampleData=false]
+     * @overrie
      */
-    get(_, options) {
+    get(handle, options) {
         let state;
         if (options && options.withSampleData && this._isInSampleMode) {
-            state = this.sampleModel.__get(...arguments);
+            state = this.sampleModel.get(handle, options);
         } else {
-            state = this.__get(...arguments);
+            state = this._get(...arguments);
         }
         return state;
     },
@@ -103,11 +99,11 @@ var AbstractModel = mvc.Model.extend({
      * job for this method: reloading (only if necessary) all the data and
      * making sure that they are ready to be redisplayed.
      *
-     * @param {any} _
+     * @param {any} handle
      * @param {Object} [params={}]
      * @returns {Promise}
      */
-    async reload(_, params) {
+    async reload(handle, params) {
         if (this._isInSampleMode && this._haveParamsChanged(params)) {
             this.leaveSampleMode();
         }

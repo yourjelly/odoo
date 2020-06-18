@@ -145,7 +145,7 @@ var KanbanModel = BasicModel.extend({
      * @see _readTooltipFields
      * @returns {Object}
      */
-    __get: function () {
+    _get: function () {
         var result = this._super.apply(this, arguments);
         var dp = result && this.localData[result.id];
         if (dp) {
@@ -258,18 +258,12 @@ var KanbanModel = BasicModel.extend({
     /**
      * @override
      */
-    reload: function (id, options) {
+    __reload: function (id, options) {
         // if the groupBy is given in the options and if it is an empty array,
         // fallback on the default groupBy
         if (options && options.groupBy && !options.groupBy.length) {
             options.groupBy = this.defaultGroupedBy;
         }
-        return this._super(id, options);
-    },
-    /**
-     * @override
-     */
-    __reload: function (id, options) {
         var def = this._super(id, options);
         if (options && options.loadMoreOffset) {
             return def;
