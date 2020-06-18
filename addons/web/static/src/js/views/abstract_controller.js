@@ -57,6 +57,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         this.activeActions = params.activeActions;
         this.controllerID = params.controllerID;
         this.initialState = params.initialState;
+        this.handle = null;
         this.bannerRoute = params.bannerRoute;
         this.actionViews = params.actionViews;
         this.viewType = params.viewType;

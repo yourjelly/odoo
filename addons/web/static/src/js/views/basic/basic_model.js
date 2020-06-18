@@ -564,7 +564,7 @@ var BasicModel = AbstractModel.extend({
      * @param {boolean} [options.raw=false] if true, will not follow relations
      * @returns {Object}
      */
-    _get: function (id, options) {
+    __get: function (id, options) {
         var self = this;
         options = options || {};
 
