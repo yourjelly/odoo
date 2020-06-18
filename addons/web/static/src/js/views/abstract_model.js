@@ -16,7 +16,7 @@ odoo.define('web.AbstractModel', function (require) {
  * The model is able to generate sample (fake) data when there is no actual data
  * in database.  This feature can be activated by instantiating the model with
  * param "useSampleData" set to true.  In this case, the model instantiates a
- * duplicated version of itself, parameterized to call a SampleServer (JS)
+ * duplicated version of itself, parametrized to call a SampleServer (JS)
  * instead of doing RPCs.  Here is how it works: the main model first load the
  * data normally (from database), and then checks whether the result is empty or
  * not.  If it is, it asks the sample model to load with the exact same params,
@@ -24,7 +24,7 @@ odoo.define('web.AbstractModel', function (require) {
  * but only if the (re)load params haven't changed: as soon as a param changes,
  * the "sample" mode is left, and it never enters it again in the future (in the
  * lifetime of the model instance).  To access those sample data from the outside,
- * 'get' must be called with option "withSampleData" set to true.  In this case,
+ * 'get' must be called with the option "withSampleData" set to true.  In this case,
  * if the main model is in "sample" mode, it redirects the call to the sample
  * model.
  */
@@ -46,7 +46,7 @@ var AbstractModel = mvc.Model.extend({
      *   from a SampleServer instead of doing RPCs
      * @param {AbstractModel} [params.SampleModel] the AbstractModel class
      *   to instantiate as sample model, if necessary (this model won't do any
-     *   rpc, but will rather call a SampleModel that will generate sample data)
+     *   rpc, but will rather call a SampleServer that will generate sample data)
      */
     init(parent, params = {}) {
         this._super(...arguments);
@@ -212,7 +212,7 @@ var AbstractModel = mvc.Model.extend({
     },
     /**
      * To override to reload data (this function may be called several times,
-     * once the initial load has been done).
+     * after the initial load has been done).
      *
      * @private
      * @returns {Promise}
@@ -247,7 +247,7 @@ var AbstractModel = mvc.Model.extend({
         }
     },
     /**
-     * Override to redirect all rpcs to the SampleServer if we are a SampleModel.
+     * Override to redirect all rpcs to the SampleServer if this.isSampleModel is true.
      *
      * @override
      */
