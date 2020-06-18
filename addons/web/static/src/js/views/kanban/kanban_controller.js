@@ -463,7 +463,7 @@ var KanbanController = BasicController.extend({
         const columnID = ev.target.db_id || ev.data.db_id;
         this.model.toggleGroup(columnID)
             .then(function (db_id) {
-                var data = self.model.get(db_id, { withSampleData: true });
+                var data = self.model.get(db_id);
                 var options = {
                     openQuickCreate: !!ev.data.openQuickCreate,
                 };

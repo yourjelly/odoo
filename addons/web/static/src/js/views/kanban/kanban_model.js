@@ -68,29 +68,26 @@ var KanbanModel = BasicModel.extend({
                 context: parent.context, // todo: combine with view context
             })
             .then(function (result) {
-                const createGroupDataPoint = (model, parent) => {
-                    var group = model._makeDataPoint({
-                        modelName: parent.model,
-                        context: parent.context,
-                        domain: parent.domain.concat([[groupBy, "=", result[0]]]),
-                        fields: parent.fields,
-                        fieldsInfo: parent.fieldsInfo,
-                        isOpen: true,
-                        limit: parent.limit,
-                        parentID: parent.id,
-                        openGroupByDefault: true,
-                        orderedBy: parent.orderedBy,
-                        value: result,
-                        viewType: parent.viewType,
-                    });
-                    if (parent.progressBar) {
-                        group.progressBarValues = _.extend({
-                            counts: {},
-                        }, parent.progressBar);
-                    }
-                    return group;
-                };
-                const newGroup = createGroupDataPoint(self, parent);
+                var newGroup = self._makeDataPoint({
+                    modelName: parent.model,
+                    context: parent.context,
+                    domain: parent.domain.concat([[groupBy,"=",result[0]]]),
+                    fields: parent.fields,
+                    fieldsInfo: parent.fieldsInfo,
+                    isOpen: true,
+                    limit: parent.limit,
+                    parentID: parent.id,
+                    openGroupByDefault: true,
+                    orderedBy: parent.orderedBy,
+                    value: result,
+                    viewType: parent.viewType,
+                });
+                if (parent.progressBar) {
+                    newGroup.progressBarValues = _.extend({
+                        counts: {},
+                    }, parent.progressBar);
+                }
+                // newGroup.is_open = true;
                 parent.data.push(newGroup.id);
                 return newGroup.id;
             });

@@ -101,7 +101,7 @@ var AbstractModel = mvc.Model.extend({
     /**
      * Disables the sample data (forever) on this model instance.
      */
-    async leaveSampleMode() {
+    leaveSampleMode() {
         if (this.useSampleModel) {
             this.useSampleModel = false;
             this._isInSampleMode = false;
