@@ -76,6 +76,16 @@ var AbstractModel = mvc.Model.extend({
         return !!this._isInSampleMode;
     },
     /**
+     * Disables the sample data (forever) on this model instance.
+     */
+    async leaveSampleMode() {
+        if (this.useSampleData) {
+            this.useSampleData = false;
+            this._isInSampleMode = false;
+            this.sampleModel.destroy();
+        }
+    },
+    /**
      * @override
      */
     async load(params) {
@@ -94,8 +104,8 @@ var AbstractModel = mvc.Model.extend({
      * @returns {Promise}
      */
     async reload(handle, params) {
-        if (this.useSampleData) {
-            this.useSampleData = !this._haveParamsChanged(params);
+        if (this._isInSampleMode && this._haveParamsChanged(params)) {
+            this.leaveSampleMode();
         }
         let result = await this.__reload(...arguments);
         await this._applySamples(result, '__reload', arguments);
@@ -152,8 +162,7 @@ var AbstractModel = mvc.Model.extend({
             }
             this._isInSampleMode = true;
         } else {
-            this._isInSampleMode = false;
-            this.useSampleData = false;
+            this.leaveSampleMode();
         }
     },
     /**
@@ -187,21 +196,6 @@ var AbstractModel = mvc.Model.extend({
      */
     async __reload() {
         return Promise.resolve();
-    },
-
-    /**
-     * @private
-     * @param {any} handle
-     * @param {boolean} mustReload
-     * @returns {Promise}
-     */
-    async _forgetSampleData(handle, mustReload) {
-        if (this.useSampleData) {
-            this.useSampleData = false;
-            if (mustReload) {
-                await this.reload(handle);
-            }
-        }
     },
     /**
      * @private

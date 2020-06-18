@@ -92,10 +92,10 @@ var KanbanController = BasicController.extend({
     //--------------------------------------------------------------------------
 
     _addQuickCreate(groupId) {
-        this._forgetSampleData(async () => {
+        this._removeSampleData(async () => {
             await this.update({ shouldUpdateControlPanel: false }, { reload: false });
             return this.renderer.addQuickCreate(groupId);
-        }, true);
+        });
     },
     /**
      * @override method comes from field manager mixin

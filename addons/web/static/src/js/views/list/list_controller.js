@@ -213,7 +213,7 @@ var ListController = BasicController.extend({
     _addRecord: function (dataPointId) {
         var self = this;
         this._disableButtons();
-        return this._forgetSampleData(() => {
+        return this._removeSampleData(() => {
             return this.renderer.unselectRow().then(function () {
                 return self.model.addDefaultRecord(dataPointId, {
                     position: self.editable,
@@ -228,7 +228,7 @@ var ListController = BasicController.extend({
                         self._updatePaging(state);
                     });
             }).then(this._enableButtons.bind(this)).guardedCatch(this._enableButtons.bind(this));
-        }, true);
+        });
     },
     /**
      * Assign on the buttons create additionnal behavior to facilitate the work of the users doing input only using the keyboard

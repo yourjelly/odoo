@@ -523,9 +523,12 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
     },
     /**
      * @private
+     * @param {function} callback function to execute before removing classname
+     * 'o_sample_data' (may be async). This allows to reload and/or rerender
+     * before removing the className, thus preventing the view from flickering.
      */
-    async _forgetSampleData(callback, mustReload) {
-        await this.model._forgetSampleData(this.handle, mustReload);
+    async _removeSampleData(callback) {
+        this.model.leaveSampleMode();
         if (callback) {
             await callback();
         }
