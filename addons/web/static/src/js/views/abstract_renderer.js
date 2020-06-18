@@ -9,29 +9,10 @@ odoo.define('web.AbstractRenderer', function (require) {
 
 var mvc = require('web.mvc');
 
-const FOCUSABLE_ELEMENTS = [
-    ':scope a',
-    ':scope button',
-    ':scope input',
-    ':scope textarea',
-    ':scope *[tabindex="0"]'
-].join(', ');
-
-/**
- * @param {Event} ev
- */
-function cancelEvent(ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
-    ev.stopImmediatePropagation();
-}
-
 /**
  * @class AbstractRenderer
  */
 return mvc.Renderer.extend({
-    sampleDataTargets: [],
-
     /**
      * @override
      * @param {string} [params.noContentHelp]
@@ -41,7 +22,6 @@ return mvc.Renderer.extend({
         this.arch = params.arch;
         this.noContentHelp = params.noContentHelp;
         this.withSearchPanel = params.withSearchPanel;
-        this.removeSampleModifiers = null;
     },
     /**
      * The rendering is asynchronous. The start
@@ -49,13 +29,12 @@ return mvc.Renderer.extend({
      *
      * @returns {Promise}
      */
-    async start() {
+    start: function () {
         this.$el.addClass(this.arch.attrs.class);
         if (this.withSearchPanel) {
             this.$el.addClass('o_renderer_with_searchpanel');
         }
-        await Promise.all([this._render(), this._super()]);
-        this._toggleSampleData();
+        return Promise.all([this._render(), this._super()]);
     },
     /**
      * Called each time the renderer is attached into the DOM.
@@ -107,20 +86,15 @@ return mvc.Renderer.extend({
      * Updates the state of the view. It retriggers a full rerender, unless told
      * otherwise (for optimization for example).
      *
-     * @param {any} [state=false]
-     * @param {Object} [params={}]
+     * @param {any} state
+     * @param {Object} params
      * @param {boolean} [params.noRender=false]
      *        if true, the method only updates the state without rerendering
      * @returns {Promise}
      */
-    async updateState(state = false, params = {}) {
-        if (state !== false) {
-            this.state = state;
-        }
-        if (!params.noRender) {
-            await this._render();
-            this._toggleSampleData();
-        }
+    updateState: function (state, params) {
+        this.state = state;
+        return params.noRender ? Promise.resolve() : this._render();
     },
 
     //--------------------------------------------------------------------------
@@ -136,64 +110,6 @@ return mvc.Renderer.extend({
      */
     _render: function () {
         return Promise.resolve();
-    },
-    /**
-     * POC
-     *
-     * In this function:
-     * - any event registered in the 'events' object will be prevented on all
-     * elements matching one of the selectors in the 'sampleDataTargets' object
-     * - any focusable element in these selected targets will be disabled by
-     * setting their 'tabindex' attribute to -1
-     *
-     * @private
-     */
-    _toggleSampleData() {
-        if (this.removeSampleModifiers) {
-            this.removeSampleModifiers();
-        }
-        if (this.state.isSample) {
-            const events = new Set();
-            for (const event in this.events) {
-                const eventName = event.split(/ /)[0];
-                events.add(eventName);
-            }
-            const rootEls = [];
-            for (const selector of this.sampleDataTargets) {
-                rootEls.push(...this.el.querySelectorAll(':scope ' + selector));
-            }
-            const focusableEls = new Set();
-            for (const root of rootEls) {
-                // Add event listeners
-                for (const event of events) {
-                    root.addEventListener(event, cancelEvent, true);
-                }
-                focusableEls.add(root);
-                for (const focusableEl of root.querySelectorAll(FOCUSABLE_ELEMENTS)) {
-                    focusableEls.add(focusableEl);
-                }
-            }
-            // Suppress tab indices
-            const originalTabindices = [];
-            focusableEls.forEach((focusableEl, i) => {
-                originalTabindices[i] = focusableEl.tabindex;
-                focusableEl.setAttribute('tabindex', -1);
-            });
-            this.removeSampleModifiers = () => {
-                // Remove event listeners
-                for (const root of rootEls) {
-                    for (const event of events) {
-                        root.removeEventListener(event, cancelEvent, true);
-                    }
-                }
-                // Restore tab indices
-                focusableEls.forEach((focusableEl, i) => {
-                    focusableEl.setAttribute('tabindex', originalTabindices[i]);
-                });
-            };
-        } else {
-            this.removeSampleModifiers = null;
-        }
     },
 });
 
