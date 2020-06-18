@@ -51,7 +51,7 @@ var Model = AbstractModel.extend({
     /**
      * get
      */
-    get: function () {
+    __get: function () {
         return this._state;
     },
     /**

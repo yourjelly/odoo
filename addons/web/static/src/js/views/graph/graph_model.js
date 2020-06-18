@@ -34,7 +34,7 @@ return AbstractModel.extend({
      * @override
      * @returns {Object}
      */
-    get: function () {
+    __get: function () {
         return _.extend({}, this.chart);
     },
     /**

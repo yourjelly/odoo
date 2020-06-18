@@ -497,7 +497,7 @@ var PivotModel = AbstractModel.extend({
      * @param {boolean} [options.raw=false]
      * @returns {Object}
      */
-    get: function (options) {
+    __get: function (options) {
         options = options || {};
         var raw = options.raw || false;
         var groupBys = this._getGroupBys();

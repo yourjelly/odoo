@@ -10,7 +10,6 @@ var BasicModel = require('web.BasicModel');
 var viewUtils = require('web.viewUtils');
 
 var KanbanModel = BasicModel.extend({
-
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------

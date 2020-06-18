@@ -15,7 +15,7 @@ odoo.define('web.AbstractModel', function (require) {
  *
  * The model is able to generate sample (fake) data when there is no actual data
  * in database.  This feature can be activated by instantiating the model with
- * param "useSampleData" set to true.  In this case, the model instantiates a
+ * param "useSampleModel" set to true.  In this case, the model instantiates a
  * duplicated version of itself, parametrized to call a SampleServer (JS)
  * instead of doing RPCs.  Here is how it works: the main model first load the
  * data normally (from database), and then checks whether the result is empty or
@@ -24,9 +24,9 @@ odoo.define('web.AbstractModel', function (require) {
  * but only if the (re)load params haven't changed: as soon as a param changes,
  * the "sample" mode is left, and it never enters it again in the future (in the
  * lifetime of the model instance).  To access those sample data from the outside,
- * 'get' must be called with the option "withSampleData" set to true.  In this case,
- * if the main model is in "sample" mode, it redirects the call to the sample
- * model.
+ * 'get' must be called with the the option "withSampleData" set to true.  In
+ * this case, if the main model is in "sample" mode, it redirects the call to the
+ * sample model.
  */
 
 var fieldUtils = require('web.field_utils');
@@ -40,29 +40,29 @@ var AbstractModel = mvc.Model.extend({
      * @param {Object} [params={}]
      * @param {Object} [params.fields]
      * @param {string} [params.modelName]
-     * @param {boolean} [params.useSampleData=false] if true, will generate
-     *   sample data when there is no "real" data in database
      * @param {boolean} [params.isSampleModel=false] if true, will fetch data
      *   from a SampleServer instead of doing RPCs
+     * @param {boolean} [params.useSampleModel=false] if true, will use a sample
+     *   model to generate sample data when there is no "real" data in database
      * @param {AbstractModel} [params.SampleModel] the AbstractModel class
-     *   to instantiate as sample model, if necessary (this model won't do any
-     *   rpc, but will rather call a SampleServer that will generate sample data)
+     *   to instantiate as sample model. This model won't do any rpc, but will
+     *   rather call a SampleServer that will generate sample data. This param
+     *   must be set when params.useSampleModel is true.
      */
     init(parent, params = {}) {
         this._super(...arguments);
-        this.useSampleData = params.useSampleData || false;
-        if (this.useSampleData) {
-            const sampleModelParams = Object.assign({}, params, {
-                isSampleModel: true,
-                SampleModel: null,
-                useSampleData: false,
-            });
-            this.sampleModel = new params.SampleModel(this, sampleModelParams);
-            this._isInSampleMode = false;
-        }
+        this.useSampleModel = params.useSampleModel || false;
         if (params.isSampleModel) {
             this.isSampleModel = true;
             this.sampleServer = new SampleServer(params.modelName, params.fields);
+        } else if (this.useSampleModel) {
+            const sampleModelParams = Object.assign({}, params, {
+                isSampleModel: true,
+                SampleModel: null,
+                useSampleModel: false,
+            });
+            this.sampleModel = new params.SampleModel(this, sampleModelParams);
+            this._isInSampleMode = false;
         }
     },
 
@@ -102,8 +102,8 @@ var AbstractModel = mvc.Model.extend({
      * Disables the sample data (forever) on this model instance.
      */
     async leaveSampleMode() {
-        if (this.useSampleData) {
-            this.useSampleData = false;
+        if (this.useSampleModel) {
+            this.useSampleModel = false;
             this._isInSampleMode = false;
             this.sampleModel.destroy();
         }
@@ -117,23 +117,24 @@ var AbstractModel = mvc.Model.extend({
      */
     async load(params) {
         this.loadParams = params;
-        let result = await this.__load(...arguments);
-        if (this.useSampleData && this._isEmpty(result)) {
+        let handle = await this.__load(...arguments);
+        if (this.useSampleModel && this._isEmpty(handle)) {
             await this.sampleModel.__load(...arguments);
             this._isInSampleMode = true;
         } else {
             this.leaveSampleMode();
         }
-        return result;
+        return handle;
     },
     /**
      * When something changes, the data may need to be refetched.  This is the
      * job for this method: reloading (only if necessary) all the data and
      * making sure that they are ready to be redisplayed.
-     * Sometimes, we reload the data with the exact same params as the initial
-     * load. When we do, if we were in "sample" mode, we call again the sample
-     * server after the reload if there is still no data to display. When the
-     * parameters change, we automatically leave "sample" mode.
+     * Sometimes, we reload the data with the "same" params as the initial load
+     * (see '_haveParamsChanged'). When we do, if we were in "sample" mode, we
+     * call again the sample server after the reload if there is still no data
+     * to display. When the parameters change, we automatically leave "sample"
+     * mode.
      *
      * @param {any} _
      * @param {Object} [params={}]
@@ -143,14 +144,14 @@ var AbstractModel = mvc.Model.extend({
         if (this._isInSampleMode && this._haveParamsChanged(params)) {
             this.leaveSampleMode();
         }
-        let result = await this.__reload(...arguments);
-        if (this.useSampleData && this._isEmpty(result)) {
+        let handle = await this.__reload(...arguments);
+        if (this.useSampleModel && this._isEmpty(handle)) {
             await this.sampleModel.__reload(...arguments);
             this._isInSampleMode = true;
         } else {
             this.leaveSampleMode();
         }
-        return result;
+        return handle;
     },
 
     //--------------------------------------------------------------------------
@@ -170,10 +171,10 @@ var AbstractModel = mvc.Model.extend({
      * data to prevent from having an empty state to display.
      *
      * @private
-     * @params {any} result, the value returned by a load or a reload
+     * @params {any} handle, the value returned by a load or a reload
      * @returns {boolean}
      */
-    _isEmpty(/* result */) {
+    _isEmpty(/* handle */) {
         return false;
     },
     /**
@@ -242,12 +243,13 @@ var AbstractModel = mvc.Model.extend({
                 }
             }
         }
-        if (this.useSampleData && 'groupBy' in params) {
+        if (this.useSampleModel && 'groupBy' in params) {
             return JSON.stringify(params.groupBy) !== JSON.stringify(this.loadParams.groupedBy);
         }
     },
     /**
-     * Override to redirect all rpcs to the SampleServer if this.isSampleModel is true.
+     * Override to redirect all rpcs to the SampleServer if this.isSampleModel
+     * is true.
      *
      * @override
      */

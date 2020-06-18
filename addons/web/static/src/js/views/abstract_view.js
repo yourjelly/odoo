@@ -166,9 +166,11 @@ var AbstractView = Factory.extend({
         this.modelParams = {
             fields: this.fields,
             modelName: params.modelName,
-            useSampleData: !!(this.arch.attrs.sample && JSON.parse(this.arch.attrs.sample)),
-            SampleModel: this.config.Model,
+            useSampleModel: !!(this.arch.attrs.sample && JSON.parse(this.arch.attrs.sample))
         };
+        if (this.modelParams.useSampleModel) {
+            this.modelParams.SampleModel = this.config.Model;
+        }
 
         var defaultOrder = this.arch.attrs.default_order;
         if (defaultOrder) {

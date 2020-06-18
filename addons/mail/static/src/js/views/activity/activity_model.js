@@ -18,7 +18,7 @@ const ActivityModel = BasicModel.extend({
      *
      * @override
      */
-    get: function () {
+    __get: function () {
         var result = this._super.apply(this, arguments);
         if (result && result.model === this.modelName && result.type === 'list') {
             _.extend(result, this.additionalData, {getKanbanActivityData: this.getKanbanActivityData});
