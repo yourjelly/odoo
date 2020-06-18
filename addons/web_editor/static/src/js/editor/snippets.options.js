@@ -1712,110 +1712,100 @@ const SnippetOptionsWidget = Widget.extend({
      * @returns {Promise|undefined}
      */
     selectStyle: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.editor.execBatch(async ()=>{
-            if (params.cssProperty === 'background-color' && this._onBackgroundColorUpdate) {
-                await this._onBackgroundColorUpdate(previewMode);
-            }
+        if (params.cssProperty === 'background-color') {
+            this.$target.trigger('background-color-event', previewMode);
+        }
 
-            const cssProps = weUtils.CSS_SHORTHANDS[params.cssProperty] || [params.cssProperty];
-            for (const cssProp of cssProps) {
-                // Always reset the inline style first to not put inline style on an
-                // element which already have this style through css stylesheets.
-                await this.editorHelpers.setStyle(this.$target[0], cssProp, '');
-            }
-            if (params.extraClass) {
-                await this.editorHelpers.removeClass(this.$target[0], params.extraClass);
-            }
+        const cssProps = weUtils.CSS_SHORTHANDS[params.cssProperty] || [params.cssProperty];
+        for (const cssProp of cssProps) {
+            // Always reset the inline style first to not put inline style on an
+            // element which already have this style through css stylesheets.
+            this.$target[0].style.setProperty(cssProp, '');
+        }
+        if (params.extraClass) {
+            this.$target.removeClass(params.extraClass);
+        }
 
-            // Only allow to use a color name as a className if we know about the
-            // other potential color names (to remove) and if we know about a prefix
-            // (otherwise we suppose that we should use the actual related color).
-            if (params.colorNames && params.colorPrefix) {
-                const classes = weUtils.computeColorClasses(params.colorNames, params.colorPrefix);
-                await this.editorHelpers.removeClass(this.$target[0], classes);
+        // Only allow to use a color name as a className if we know about the
+        // other potential color names (to remove) and if we know about a prefix
+        // (otherwise we suppose that we should use the actual related color).
+        if (params.colorNames && params.colorPrefix) {
+            const classes = weUtils.computeColorClasses(params.colorNames, params.colorPrefix);
+            this.$target[0].classList.remove(...classes);
 
-                if (weUtils.isColorCombinationName(widgetValue)) {
-                    // Those are the special color combinations classes. Just have
-                    // to add it (and adding the potential extra class) then leave.
-                    const classes = ['o_cc', `o_cc${widgetValue}`];
-                    if (params.extraClass) {
-                        classes.push(params.extraClass);
-                    }
-                    await this.editorHelpers.addClass(this.$target[0], classes);
+            if (weUtils.isColorCombinationName(widgetValue)) {
+                // Those are the special color combinations classes. Just have
+                // to add it (and adding the potential extra class) then leave.
+                this.$target[0].classList.add('o_cc', `o_cc${widgetValue}`, params.extraClass);
+                return;
+            }
+            if (params.colorNames.includes(widgetValue)) {
+                const originalCSSValue = window.getComputedStyle(this.$target[0])[cssProps[0]];
+                const className = params.colorPrefix + widgetValue;
+                this.$target[0].classList.add(className);
+                if (originalCSSValue !== window.getComputedStyle(this.$target[0])[cssProps[0]]) {
+                    // If applying the class did indeed changed the css
+                    // property we are editing, nothing more has to be done.
+                    // (except adding the extra class)
+                    this.$target.addClass(params.extraClass);
                     return;
                 }
+                // Otherwise, it means that class probably does not exist,
+                // we remove it and continue. Especially useful for some
+                // prefixes which only work with some color names but not all.
+                this.$target[0].classList.remove(className);
+            }
+        }
 
-                if (params.colorNames.includes(widgetValue)) {
-                    const originalCSSValue = window.getComputedStyle(this.$target[0])[cssProps[0]];
-                    const className = params.colorPrefix + widgetValue;
-                    await this.editorHelpers.addClass(this.$target[0], className);
-                    if (originalCSSValue !== window.getComputedStyle(this.$target[0])[cssProps[0]]) {
-                        // If applying the class did indeed changed the css
-                        // property we are editing, nothing more has to be done.
-                        // (except adding the extra class)
-                        await this.editorHelpers.addClass(this.$target[0], className);
-                    } else {
-                        // Otherwise, it means that class probably does not
-                        // exist, we remove it and continue. Especially useful
-                        // for some prefixes which only work with some color
-                        // names but not all.
-                        await this.editorHelpers.removeClass(this.$target[0], className);
-                    }
+        // At this point, the widget value is either a property/color name or
+        // an actual css property value. If it is a property/color name, we will
+        // apply a css variable as style value.
+        const htmlStyle = window.getComputedStyle(document.documentElement);
+        const htmlPropValue = htmlStyle.getPropertyValue('--' + widgetValue);
+        if (htmlPropValue) {
+            widgetValue = `var(--${widgetValue})`;
+        }
+
+        // replacing ', ' by ',' to prevent attributes with internal space separators from being split:
+        // eg: "rgba(55, 12, 47, 1.9) 47px" should be split as ["rgba(55,12,47,1.9)", "47px"]
+        const values = widgetValue.replace(/,\s/g, ',').split(/\s+/g);
+        while (values.length < cssProps.length) {
+            switch (values.length) {
+                case 1:
+                case 2: {
+                    values.push(values[0]);
+                    break;
+                }
+                case 3: {
+                    values.push(values[1]);
+                    break;
+                }
+                default: {
+                    values.push(values[values.length - 1]);
                 }
             }
+        }
 
-            // At this point, the widget value is either a property/color name or
-            // an actual css property value. If it is a property/color name, we will
-            // apply a css variable as style value.
-            const htmlStyle = window.getComputedStyle(document.documentElement);
-            const htmlPropValue = htmlStyle.getPropertyValue('--' + widgetValue);
-            if (htmlPropValue) {
-                widgetValue = `var(--${widgetValue})`;
-            }
+        const styles = window.getComputedStyle(this.$target[0]);
+        let hasUserValue = false;
+        for (let i = cssProps.length - 1; i > 0; i--) {
+            hasUserValue = applyCSS.call(this, cssProps[i], values.pop(), styles) || hasUserValue;
+        }
+        hasUserValue = applyCSS.call(this, cssProps[0], values.join(' '), styles) || hasUserValue;
 
-            // replacing ', ' by ',' to prevent attributes with internal space separators from being split:
-            // eg: "rgba(55, 12, 47, 1.9) 47px" should be split as ["rgba(55,12,47,1.9)", "47px"]
-            const values = widgetValue.replace(/,\s/g, ',').split(/\s+/g);
-            while (values.length < cssProps.length) {
-                switch (values.length) {
-                    case 1:
-                    case 2: {
-                        values.push(values[0]);
-                        break;
-                    }
-                    case 3: {
-                        values.push(values[1]);
-                        break;
-                    }
-                    default: {
-                        values.push(values[values.length - 1]);
-                    }
-                }
+        function applyCSS(cssProp, cssValue, styles) {
+            if (!weUtils.areCssValuesEqual(styles[cssProp], cssValue)) {
+                this.$target[0].style.setProperty(cssProp, cssValue, 'important');
+                return true;
             }
+            return false;
+        }
 
-            const styles = window.getComputedStyle(this.$target[0]);
-            let hasUserValue = false;
-            for (let i = cssProps.length - 1; i > 0; i--) {
-                hasUserValue = await applyCSS.call(this, cssProps[i], values.pop(), styles) || hasUserValue;
-            }
-            hasUserValue = await applyCSS.call(this, cssProps[0], values.join(' '), styles) || hasUserValue;
+        if (params.extraClass) {
+            this.$target.toggleClass(params.extraClass, hasUserValue);
+        }
 
-            async function applyCSS(cssProp, cssValue, styles) {
-                if (!weUtils.areCssValuesEqual(styles[cssProp], cssValue)) {
-                    await this.editorHelpers.setStyle(this.$target[0], cssProp, cssValue, true);
-                    return true;
-                }
-                return false;
-            }
-
-            if (params.extraClass) {
-                if (hasUserValue) {
-                    await this.editorHelpers.addClass(this.$target[0], params.extraClass);
-                } else {
-                    await this.editorHelpers.removeClass(this.$target[0], params.extraClass);
-                }
-            }
-        });
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
@@ -3213,11 +3203,11 @@ registry.background = SnippetOptionsWidget.extend({
         }
 
         if (widgetValue) {
-            await this.editorHelpers.setStyle(this.$target[0], 'background-image', `url('${widgetValue}')`);
-            await this.editorHelpers.addClass(this.$target[0], 'oe_img_bg');
+            this.$target.css('background-image', `url('${widgetValue}')`);
+            this.$target.addClass('oe_img_bg');
         } else {
-            await this.editorHelpers.setStyle(this.$target[0], 'background-image', '');
-            await this.editorHelpers.removeClass(this.$target[0], 'oe_img_bg');
+            this.$target.css('background-image', '');
+            this.$target.removeClass('oe_img_bg');
         }
 
         if (previewMode === 'reset') {
@@ -3233,6 +3223,8 @@ registry.background = SnippetOptionsWidget.extend({
             removeOnImageChangeAttrs.forEach(attr => delete this.$target[0].dataset[attr]);
             this.$target.trigger('background_changed', [previewMode]);
         }
+
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
