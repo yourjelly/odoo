@@ -109,9 +109,11 @@ var Controller = Widget.extend({
      * @param {Model} model
      * @param {Renderer} renderer
      * @param {Object} params
+     * @param {any} [params.handle=null]
      */
     init: function (parent, model, renderer, params) {
         this._super.apply(this, arguments);
+        this.handle = params.handle || null;
         this.model = model;
         this.renderer = renderer;
     },
