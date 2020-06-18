@@ -3843,6 +3843,45 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test("empty list with sample data: keyboard navigation", async function (assert) {
+        assert.expect(5);
+
+        const list = await createView({
+            arch: `
+                <tree sample="1">
+                    <field name="foo"/>
+                    <field name="bar"/>
+                    <field name="int_field"/>
+                </tree>`,
+            data: this.data,
+            domain: Domain.FALSE_DOMAIN,
+            model: 'foo',
+            View: ListView,
+        });
+
+        // From search bar
+        assert.hasClass(document.activeElement, 'o_searchview_input');
+
+        await testUtils.fields.triggerKeydown(document.activeElement, 'down');
+
+        assert.hasClass(document.activeElement, 'o_searchview_input');
+
+        // From 'Create' button
+        document.querySelector('.btn.o_list_button_add').focus();
+
+        assert.hasClass(document.activeElement, 'o_list_button_add');
+
+        await testUtils.fields.triggerKeydown(document.activeElement, 'down');
+
+        assert.hasClass(document.activeElement, 'o_list_button_add');
+
+        await testUtils.fields.triggerKeydown(document.activeElement, 'tab');
+
+        assert.containsNone(document.body, '.oe_tooltip_string');
+
+        list.destroy();
+    });
+
     QUnit.test("non empty list with sample data", async function (assert) {
         assert.expect(6);
 

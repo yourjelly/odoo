@@ -4180,6 +4180,41 @@ QUnit.module('Views', {
         kanban.destroy();
     });
 
+    QUnit.test('empty groupbed kanban with sample data: keyboard navigation', async function (assert) {
+        assert.expect(2);
+
+        const kanban = await createView({
+            arch: `
+                <kanban sample="1">
+                    <field name="product_id"/>
+                    <templates>
+                        <div t-name="kanban-box">
+                            <field name="foo"/>
+                        </div>
+                    </templates>
+                </kanban>`,
+            data: this.data,
+            groupBy: ['product_id'],
+            model: 'partner',
+            View: KanbanView,
+            async mockRPC(route, { kwargs, method }) {
+                const result = await this._super(...arguments);
+                if (method === 'web_read_group') {
+                    result.groups.forEach(g => g.product_id_count = 0);
+                }
+                return result;
+            },
+        });
+
+        assert.hasClass(document.activeElement, 'o_searchview_input');
+
+        await testUtils.fields.triggerKeydown(document.activeElement, 'down');
+
+        assert.hasClass(document.activeElement, 'o_searchview_input');
+
+        kanban.destroy();
+    });
+
     QUnit.test('empty kanban with sample data', async function (assert) {
         assert.expect(6);
 
