@@ -2495,7 +2495,7 @@ odoo.define('web.basic_model_tests', function (require) {
             const model = await createModel(Object.assign({
                 data: this.data,
                 Model: BasicModel,
-                useSampleData: true,
+                useSampleModel: true,
                 SampleModel: BasicModel,
             }, this.params));
 
