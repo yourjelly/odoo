@@ -76,7 +76,7 @@ def column_exists(cr, tablename, columnname):
 
 def create_column(cr, tablename, columnname, columntype, comment=None):
     """ Create a column with the given type. """
-    coldefault = (columntype.upper()=='BOOLEAN') and 'DEFAULT false' or ''
+    coldefault = (columntype.upper() == 'BOOL') and 'DEFAULT false' or ''
     cr.execute('ALTER TABLE "{}" ADD COLUMN "{}" {} {}'.format(tablename, columnname, columntype, coldefault))
     if comment:
         cr.execute('COMMENT ON COLUMN "{}"."{}" IS %s'.format(tablename, columnname), (comment,))
