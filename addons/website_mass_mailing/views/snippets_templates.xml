@@ -92,6 +92,61 @@
             data-selector=".o_newsletter_popup">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
         </div>
+        <t t-set="base_popup_options">
+            <we-select string="Position" data-no-widget-refresh="true"> <!-- When cookie configuration only display this for popup mode -->
+                <we-button data-select-class="s_popup_top" data-name="position_top">Top</we-button>
+                <we-button data-select-class="s_popup_middle" data-name="position_middle">Middle</we-button>
+                <we-button data-select-class="s_popup_bottom" data-name="position_bottom">Bottom</we-button>
+            </we-select>
+            <we-select string="Size" data-apply-to=".modal-dialog" data-name="s_popup_size_opt">
+                <we-button data-select-class="modal-sm">Small</we-button>
+                <we-button data-select-class="" data-name="s_popup_size_md">Medium</we-button>
+                <we-button data-select-class="modal-lg">Large</we-button>
+                <we-button data-select-class="modal-xl">Extra Large</we-button>
+                <we-button data-select-class="s_popup_size_full" data-name="s_popup_size_full">Full</we-button>
+            </we-select>
+            <we-row string="Backdrop">
+                <we-colorpicker data-dependencies="popup_backdrop_opt"
+                                data-select-style="true"
+                                data-css-property="background-color"
+                                data-color-prefix="bg-"
+                                data-css-compatible="true"/>
+                <we-checkbox data-name="popup_backdrop_opt"
+                             data-select-class="s_popup_no_backdrop|"
+                             data-set-backdrop="true"
+                             data-no-preview="true"/>
+            </we-row>
+        </t>
+        <t t-set="extra_popup_options">
+            <we-colorpicker string="Close Button Color"
+                            data-select-style="true"
+                            data-css-property="color"
+                            data-color-prefix="text-"
+                            data-apply-to=".s_popup_close"/>
+            <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
+                <we-button data-select-data-attribute="afterDelay" data-name="show_delay">Delay</we-button>
+                <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
+            </we-select>
+            <we-input string="Delay"
+                      data-select-data-attribute=""
+                      data-attribute-name="showAfter"
+                      data-unit="s"
+                      data-save-unit="ms"
+                      data-dependencies="show_delay"/>
+            <t t-set="unit_popup_duration">days</t>
+            <we-input string="Hide For" title="Once the user closes the popup, it won't be shown again for that period of time." t-attf-data-select-data-attribute="7#{unit_popup_duration}" data-attribute-name="consentsDuration" t-att-data-unit="unit_popup_duration"/>
+            <we-select string="Show on" data-no-preview="true">
+                <we-button data-move-block="moveToBody">This page</we-button>
+                <we-button data-move-block="moveToFooter">All pages</we-button>
+            </we-select>
+        </t>
+        <div data-js="SnippetPopup" data-selector=".o_newsletter_popup" data-exclude="#website_cookies_bar">
+            <t t-raw="base_popup_options"/>
+            <t t-raw="extra_popup_options"/>
+        </div>
+        <!-- <div data-js="SnippetPopup" data-selector=".s_popup#website_cookies_bar" data-target=".modal">
+            <t t-raw="base_popup_options"/>
+        </div> -->
     </xpath>
 </template>
 
