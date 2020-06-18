@@ -19,6 +19,7 @@ var KanbanModel = require('web.KanbanModel');
 var KanbanRenderer = require('web.KanbanRenderer');
 var KanbanView = require('web.KanbanView');
 var view_registry = require('web.view_registry');
+var SampleServer = require('web.SampleServer')
 
 var QWeb = core.qweb;
 
@@ -64,9 +65,17 @@ var PurchaseListDashboardModel = ListModel.extend({
     /**
      * @override
      */
-    init: function () {
+    init: function (parent, params) {
         this.dashboardValues = {};
         this._super.apply(this, arguments);
+        SampleServer.registry.add(
+            params.modelName, [
+                {
+                    name: 'retrieve_dashboard',
+                    result: {}
+                },
+            ]
+        );
     },
 
     /**

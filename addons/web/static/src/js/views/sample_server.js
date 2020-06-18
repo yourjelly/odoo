@@ -3,6 +3,7 @@ odoo.define('web.SampleServer', function (require) {
 
     const session = require('web.session');
     const utils = require('web.utils');
+    const Registry = require('web.Registry');
 
     /**
      * Helper function returning the value from a list of sample strings
@@ -103,6 +104,10 @@ odoo.define('web.SampleServer', function (require) {
                     return this._mockReadProgressBar(params);
                 case 'read':
                     return this._mockRead(params);
+            }
+            if (SampleServer.registry.contains(params.model)) {
+                const routes = SampleServer.registry.get(params.model);
+                return routes.find(route => [params.route, params.method].includes(route.name)).result;
             }
             throw new Error(`SampleServer: unimplemented route ${params.method || params.route}`);
         }
@@ -580,6 +585,8 @@ odoo.define('web.SampleServer', function (require) {
     SampleServer.PEOPLE_MODELS = [
         'res.users', 'res.partner', 'hr.employee', 'mail.followers', 'mailing.contact'
     ];
+
+    SampleServer.registry = new Registry();
 
     return SampleServer;
 });
