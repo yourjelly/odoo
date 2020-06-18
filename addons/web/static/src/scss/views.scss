@@ -46,9 +46,6 @@
 
     .o_nocontent_help {
         @include o-nocontent-empty;
-        border-radius: 100%;
-        background-color: #f9f9f9;
-        box-shadow: 0 0 120px 100px #f9f9f9;
 
         .o_view_nocontent_smiling_face:before {
             @extend %o-nocontent-init-image;
@@ -103,5 +100,10 @@
         .o_column_unarchive_records {
             @include web_view_sample_data;
         }
+    }
+    .o_nocontent_help {
+        border-radius: 100%;
+        background-color: #f9f9f9;
+        box-shadow: 0 0 120px 100px #f9f9f9;
     }
 }
