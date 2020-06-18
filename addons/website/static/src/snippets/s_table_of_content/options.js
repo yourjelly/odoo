@@ -7,19 +7,33 @@ snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionsWidget.ext
     /**
      * @override
      */
-    start: function () {
+    start: async function () {
         this.targetedElements = 'h1, h2';
         const $headings = this.$target.find(this.targetedElements);
         if ($headings.length > 0) {
             this.isAnimateScrolling = this.$target.find(this.targetedElements)[0].dataset.anchor === 'true' ? true : false;
-            this._generateNav();
         }
         // Generate the navbar if the content changes
         const targetNode = this.$target.find('.s_table_of_content_main')[0];
         const config = {attributes: false, childList: true, subtree: true, characterData: true};
-        this.observer = new MutationObserver(() => this._generateNav());
-        this.observer.observe(targetNode, config);
-        return this._super(...arguments);
+
+        const _super = this._super;
+
+        let timeout;
+
+        this.observer = new MutationObserver((mutations) => {
+            const isInTable = mutations.find((mutation) => $(mutation.target).closest('.s_table_of_content_main').length);
+            if (!isInTable) return;
+
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                this._generateNav();
+            }, 200);
+        });
+        this.observer.observe(this.$target[0], config);
+        await this._refreshTarget();
+        this._generateNav();
+        return _super(...arguments);
     },
     /**
      * @override
@@ -37,11 +51,13 @@ snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionsWidget.ext
      *
      * @see this.selectClass for parameters
      */
-    animateScrolling: function (previewMode, widgetValue, params) {
+    animateScrolling: async function (previewMode, widgetValue, params) {
         const $headings = this.$target.find(this.targetedElements);
         const anchorValue = widgetValue ? 'true' : '0';
         _.each($headings, el => el.dataset.anchor = anchorValue);
         this.isAnimateScrolling = !!widgetValue;
+
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
@@ -51,8 +67,9 @@ snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionsWidget.ext
     /**
      * @private
      */
-    _generateNav: function (ev) {
+    _generateNav: async function (ev) {
         const $nav = this.$target.find('.s_table_of_content_navbar');
+        if (!$nav.length) return;
         const $headings = this.$target.find(this.targetedElements);
         $nav.empty();
         _.each($headings, el => {
@@ -66,6 +83,11 @@ snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionsWidget.ext
             $el[0].dataset.anchor = this.isAnimateScrolling === true ? 'true' : '0';
         });
         $nav.find('a:first').addClass('active');
+        await this.wysiwyg.editor.execBatch(async () => {
+            const html = $nav[0].outerHTML;
+            $nav.empty();
+            await this.editorHelpers.replace($nav[0], html);
+        });
     },
     /**
      * @override
@@ -96,7 +118,7 @@ snippetOptions.registry.TableOfContentNavbar = snippetOptions.SnippetOptionsWidg
      *
      * @see this.selectClass for parameters
      */
-    navbarPosition: function (previewMode, widgetValue, params) {
+    navbarPosition: async function (previewMode, widgetValue, params) {
         const $navbar = this.$target;
         const $mainContent = this.$target.parent().find('.s_table_of_content_main');
         if (widgetValue === 'top' || widgetValue === 'left') {
@@ -115,6 +137,8 @@ snippetOptions.registry.TableOfContentNavbar = snippetOptions.SnippetOptionsWidg
             $navbar.find('.s_table_of_content_navbar').addClass('list-group-horizontal-md');
             $mainContent.removeClass('col-lg-9').addClass('col-lg-12');
         }
+
+        if (previewMode === false) await this._refreshTarget(this.$target.parent());
     },
 
     //--------------------------------------------------------------------------

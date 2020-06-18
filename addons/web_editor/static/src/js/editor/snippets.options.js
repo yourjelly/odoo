@@ -2332,17 +2332,17 @@ const SnippetOptionsWidget = Widget.extend({
     /**
      * Refresh the target in the wysiwyg.
      */
-    async _refreshTarget() {
+    async _refreshTarget($target = this.$target) {
         await this.wysiwyg.editor.execBatch(async () => {
-            const html = this.$target.html();
-            this.$target.html('');
-            const attributes = [...this.$target[0].attributes].reduce( (acc, attribute) => {
+            const html = $target.html();
+            $target.html('');
+            const attributes = [...$target[0].attributes].reduce( (acc, attribute) => {
                 acc[attribute.name] = attribute.value;
                 return acc
             }, {})
-            await this.editorHelpers.updateAttributes(this.$target[0], attributes);
-            await this.editorHelpers.empty(this.$target[0]);
-            await this.editorHelpers.insertHtml(html, this.$target[0], 'INSIDE');
+            await this.editorHelpers.updateAttributes($target[0], attributes);
+            await this.editorHelpers.empty($target[0]);
+            await this.editorHelpers.insertHtml(html, $target[0], 'INSIDE');
         });
     },
 
