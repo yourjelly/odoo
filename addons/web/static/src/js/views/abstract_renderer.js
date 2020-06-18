@@ -13,18 +13,10 @@ const FOCUSABLE_ELEMENTS = [
     ':scope a',
     ':scope button',
     ':scope input',
+    ':scope select',
     ':scope textarea',
     ':scope *[tabindex="0"]'
 ].join(', ');
-
-/**
- * @param {Event} ev
- */
-function cancelEvent(ev) {
-    ev.preventDefault();
-    ev.stopPropagation();
-    ev.stopImmediatePropagation();
-}
 
 /**
  * @class AbstractRenderer
@@ -162,22 +154,12 @@ return mvc.Renderer.extend({
             this.removeSampleModifiers();
         }
         if (this.state.isSample) {
-            const events = new Set();
-            for (const event in this.events) {
-                const eventName = event.split(/ /)[0];
-                events.add(eventName);
-            }
             const rootEls = [];
             for (const selector of this.sampleDataTargets) {
                 rootEls.push(...this.el.querySelectorAll(':scope ' + selector));
             }
-            const focusableEls = new Set();
+            const focusableEls = new Set(rootEls);
             for (const root of rootEls) {
-                // Add event listeners
-                for (const event of events) {
-                    root.addEventListener(event, cancelEvent, true);
-                }
-                focusableEls.add(root);
                 for (const focusableEl of root.querySelectorAll(FOCUSABLE_ELEMENTS)) {
                     focusableEls.add(focusableEl);
                 }
@@ -189,12 +171,6 @@ return mvc.Renderer.extend({
                 focusableEl.setAttribute('tabindex', -1);
             });
             this.removeSampleModifiers = () => {
-                // Remove event listeners
-                for (const root of rootEls) {
-                    for (const event of events) {
-                        root.removeEventListener(event, cancelEvent, true);
-                    }
-                }
                 // Restore tab indices
                 focusableEls.forEach((focusableEl, i) => {
                     focusableEl.setAttribute('tabindex', originalTabindices[i]);
