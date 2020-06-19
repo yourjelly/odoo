@@ -1135,19 +1135,19 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionsWidget.exten
      *
      * @see this.selectClass for parameters
      */
-    addSlide: function (previewMode) {
+    addSlide: async function (previewMode) {
         const $items = this.$carousel.find('.carousel-item');
         this.$controls.removeClass('d-none');
-        this.$indicators.append($('<li>', {
+        const $li = $('<li>', {
             'data-target': '#' + this.$target.attr('id'),
             'data-slide-to': $items.length,
-        }));
-        this.$indicators.append(' ');
+        });
+        await this.editorHelpers.insertHtml($li[0].outerHTML, this.$indicators[0], 'INSIDE');
+
         // Need to remove editor data from the clone so it gets its own.
         const $active = $items.filter('.active');
-        $active.clone(false)
-            .removeClass('active')
-            .insertAfter($active);
+        const $clone = $active.clone(false).removeClass('active');
+        await this.editorHelpers.insertHtml($clone[0].outerHTML, $active[0], 'AFTER');
         this.$carousel.carousel('next');
     },
     /**
@@ -1155,14 +1155,16 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionsWidget.exten
      *
      * @see this.selectClass for parameters.
      */
-    removeSlide: function (previewMode) {
+    removeSlide: async function (previewMode) {
         const $items = this.$carousel.find('.carousel-item');
         const newLength = $items.length - 1;
         if (!this.removing && newLength > 0) {
             const $toDelete = $items.filter('.active');
-            this.$carousel.one('active_slide_targeted.carousel_item_option', () => {
-                $toDelete.remove();
-                this.$indicators.find('li:last').remove();
+            this.$carousel.one('active_slide_targeted.carousel_item_option', async () => {
+                await this.wysiwyg.editor.execBatch(async () => {
+                    await this.editorHelpers.remove(this.$indicators.find('li:last')[0]);
+                    await this.editorHelpers.remove($toDelete[0]);
+                });
                 this.$controls.toggleClass('d-none', newLength === 1);
                 this.$carousel.trigger('content_changed');
                 this.removing = false;
@@ -1176,7 +1178,7 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionsWidget.exten
      *
      * @see this.selectClass for parameters
      */
-    slide: function (previewMode, widgetValue, params) {
+    slide: async function (previewMode, widgetValue, params) {
         switch (widgetValue) {
             case 'left':
                 this.$controls.filter('.carousel-control-prev')[0].click();
