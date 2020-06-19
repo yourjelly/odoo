@@ -252,7 +252,6 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         clearTimeout(this.timeout);
     },
     _bindPopup: function () {
-        debugger;
         const $main = this.$target.find('.modal');
 
         let display = $main.data('display');
@@ -273,7 +272,6 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         }
     },
     _showPopup: function () {
-        debugger;
         if (this._popupAlreadyShown) {
             return;
         }

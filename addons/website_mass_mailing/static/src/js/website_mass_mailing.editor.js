@@ -127,11 +127,10 @@ options.registry.newsletter_popup = options.Class.extend({
     _renderCustomXML: function (uiFragment) {
         this._getMailingListButtons().then((mailingLists) => {
             this.mailingLists = mailingLists;
-            const selectEl = this.$el.find('we-select[data-name="mailing_list"]');
+            const selectEl = this.$el.find('we-select[data-name="mailing_list"] we-select-menu');
             if (this.mailingLists.length && selectEl) {
-                this.mailingLists.forEach(option => selectEl.append(option));
+                this.mailingLists.forEach( option => selectEl.append(option.cloneNode(true)));
             }
-        });
     },
     _getMailingListButtons: function () {
         return rpc.query({
