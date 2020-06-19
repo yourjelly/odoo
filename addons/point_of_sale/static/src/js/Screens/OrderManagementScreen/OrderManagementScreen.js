@@ -14,6 +14,7 @@ odoo.define('point_of_sale.OrderManagementScreen', function (require) {
             super(...arguments);
             useListener('close-screen', this.close);
             useListener('set-numpad-mode', this._setNumpadMode);
+            useListener('select-line', this._updateNumberSelected);
             useListener('click-order', this._onClickOrder);
             useListener('next-page', this._onNextPage);
             useListener('prev-page', this._onPrevPage);
@@ -37,8 +38,7 @@ odoo.define('point_of_sale.OrderManagementScreen', function (require) {
             const cpEl = this.el.querySelector('.control-panel');
             const headerEl = this.el.querySelector('.order-row.header');
             const val = Math.trunc(
-                (flexContainer.offsetHeight - cpEl.offsetHeight - headerEl.offsetHeight) /
-                    headerEl.offsetHeight
+                (flexContainer.offsetHeight - cpEl.offsetHeight - headerEl.offsetHeight) / headerEl.offsetHeight
             );
             OrderFetcher.setNPerPage(val);
 
@@ -76,6 +76,7 @@ odoo.define('point_of_sale.OrderManagementScreen', function (require) {
         _onClickOrder({ detail: clickedOrder }) {
             if (!clickedOrder || clickedOrder.locked) {
                 this.orderManagementContext.selectedOrder = clickedOrder;
+                this._updateNumberSelected();
             } else {
                 this._setOrder(clickedOrder);
             }
@@ -89,6 +90,12 @@ odoo.define('point_of_sale.OrderManagementScreen', function (require) {
             } else {
                 this.env.pos.set_order(order);
             }
+        }
+        _updateNumberSelected() {
+            const orderlines = this.orderManagementContext.selectedOrder
+                ? this.orderManagementContext.selectedOrder.orderlines
+                : [];
+            this.orderManagementContext.numberSelectedLines = orderlines.filter((line) => line.selected).length;
         }
     }
     OrderManagementScreen.template = 'OrderManagementScreen';

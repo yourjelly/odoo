@@ -256,8 +256,8 @@ class PosOrder(models.Model):
     to_invoice = fields.Boolean('To invoice')
     is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
     return_order_ids = fields.One2many('pos.order', 'original_order_id', readonly=True, string='Return Orders', help='These are the return orders for the original order.')
-    original_order_id = fields.Many2one('pos.order', string='Returned Order', readonly=True, help='This is the order that is returned. It may have multiple return orders.')
-    returnlines = fields.One2many('pos.order.line', 'order_id', readonly=True, domain=[('is_return_line', '=', True)], help='Technical field to keep track of the lines that were returned.')
+    original_order_id = fields.Many2one('pos.order', string='Return From', readonly=True, help='This is the order that is returned. It may have multiple return orders.')
+    returnlines = fields.One2many('pos.order.line', 'order_id', domain=[('is_return_line', '=', True)], readonly=True, help='Technical field to keep track of the lines that were returned.')
 
     @api.depends('account_move')
     def _compute_is_invoiced(self):
@@ -580,8 +580,8 @@ class PosOrder(models.Model):
     @api.model
     def search_paid_order_ids(self, domain, limit, offset):
         """Search for 'paid' orders that satisfy the given domain, limit and offset."""
-        default_domain = ['!', '|', ('state', '=', 'draft'), ('state', '=', 'cancelled')]
-        real_domain = AND([domain, default_domain, [('original_order_id', '=', False)]])
+        default_domain = ['&', ('original_order_id', '=', False), '!', '|', ('state', '=', 'draft'), ('state', '=', 'cancelled')]
+        real_domain = AND([domain, default_domain])
         ids = self.search(AND([domain, default_domain]), limit=limit, offset=offset).ids
         totalCount = self.search_count(real_domain)
         return {'ids': ids, 'totalCount': totalCount}
@@ -658,6 +658,7 @@ class PosOrderLine(models.Model):
     pack_lot_ids = fields.One2many('pos.pack.operation.lot', 'pos_order_line_id', string='Lot/serial Number')
     product_uom_id = fields.Many2one('uom.uom', string='Product UoM', related='product_id.uom_id')
     currency_id = fields.Many2one('res.currency', related='order_id.currency_id')
+    is_return_line = fields.Boolean('Is a return line', default=False)
 
     @api.model
     def _prepare_refund_data(self, refund_order_id):

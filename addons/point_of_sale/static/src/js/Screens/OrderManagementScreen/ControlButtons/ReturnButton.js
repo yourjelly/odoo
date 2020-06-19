@@ -17,9 +17,11 @@ odoo.define('point_of_sale.ReturnButton', function (require) {
         get selectedOrder() {
             return this.orderManagementContext.selectedOrder;
         }
+        get numberSelectedLines() {
+            return this.orderManagementContext.numberSelectedLines;
+        }
         async _onClick() {
-            // create order with the correct lines
-            // TODO jcb: save originalOrderId to the saved json of the order.
+            // 1. create order with the correct lines
             const selectedOrderId = this.selectedOrder.backendId;
             const order =
                 this.env.pos.get('orders').find((order) => order.originalOrderId === selectedOrderId) ||
@@ -27,8 +29,17 @@ odoo.define('point_of_sale.ReturnButton', function (require) {
             if (!order.originalOrderId) {
                 this.env.pos.get('orders').add(order);
                 order.originalOrderId = selectedOrderId;
-                // TODO jcb: should be able to select the lines
-                order.returnlines.add(this.selectedOrder.orderlines.map((line) => line.clone()));
+                let linesToReturn = this.selectedOrder.orderlines.filter((line) => line.selected);
+                if (linesToReturn.length === 0) {
+                    linesToReturn = this.selectedOrder.orderlines;
+                }
+                order.returnlines.add(
+                    linesToReturn.map((line) => {
+                        const clone = line.clone();
+                        clone.is_return_line = true;
+                        return clone;
+                    })
+                );
                 const tempOrderlines = order.orderlines;
                 // replace orderlines with the returnlines (to be able to use total amount compute methods)
                 order.orderlines = order.returnlines;
@@ -38,12 +49,14 @@ odoo.define('point_of_sale.ReturnButton', function (require) {
                 order.add_product(this.env.pos.db.product_by_id[this.env.pos.config.return_product_id[0]], {
                     price: -totalAmount,
                 });
-                order.is_return_order = true;
             }
-            // set selected order
+            // 2. set selected order
             this.env.pos.set('selectedOrder', order);
-            // close the screen.
+            // 3. close the screen
             this.trigger('close-screen');
+        }
+        get text() {
+            return this.numberSelectedLines ? `Return Selected (${this.numberSelectedLines})` : 'Return';
         }
     }
     ReturnButton.template = 'ReturnButton';

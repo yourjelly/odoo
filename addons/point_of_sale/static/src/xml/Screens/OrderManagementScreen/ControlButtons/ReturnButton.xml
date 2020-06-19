@@ -5,7 +5,7 @@
         <div class="control-button">
             <i class="fa fa-retweet"></i>
             <span> </span>
-            <span>Return</span>
+            <span t-esc="text"/>
         </div>
     </t>
 

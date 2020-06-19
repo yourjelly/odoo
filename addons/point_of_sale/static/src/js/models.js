@@ -1775,7 +1775,8 @@ exports.Orderline = Backbone.Model.extend({
             product_id: this.get_product().id,
             tax_ids: [[6, false, _.map(this.get_applicable_taxes(), function(tax){ return tax.id; })]],
             id: this.id,
-            pack_lot_ids: pack_lot_ids
+            pack_lot_ids: pack_lot_ids,
+            is_return_line: this.is_return_line,
         };
     },
     //used to create a json of the ticket, to be sent to the printer

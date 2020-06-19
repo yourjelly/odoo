@@ -3,6 +3,7 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
 
     const PosComponent = require('point_of_sale.PosComponent');
     const Registries = require('point_of_sale.Registries');
+    const { useListener } = require('web.custom_hooks');
     const { format } = require('web.field_utils');
     const { round_precision: round_pr } = require('web.utils');
 
@@ -10,6 +11,10 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
      * @props {pos.order.line} line
      */
     class OrderlineDetails extends PosComponent {
+        constructor() {
+            super(...arguments);
+            useListener('select-line', this._onSelectLine);
+        }
         get line() {
             const line = this.props.line;
             const formatQty = (line) => {
@@ -45,6 +50,10 @@ odoo.define('point_of_sale.OrderlineDetails', function (require) {
         }
         get pricePerUnit() {
             return ` ${this.unit} at ${this.unitPrice} / ${this.unit}`;
+        }
+        _onSelectLine() {
+            this.props.line.selected = !this.props.line.selected;
+            this.render();
         }
     }
     OrderlineDetails.template = 'OrderlineDetails';

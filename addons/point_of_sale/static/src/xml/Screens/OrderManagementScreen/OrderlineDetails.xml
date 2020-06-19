@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="OrderlineDetails" owl="1">
-        <li class="orderline">
+        <li class="orderline" t-att-class="{ selected: props.line.selected }" t-on-click="trigger('select-line')">
             <span class="product-name">
                 <t t-esc="productName" />
             </span>

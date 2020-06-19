@@ -104,11 +104,13 @@ odoo.define('point_of_sale.OrderFetcher', function (require) {
                 const fetchedOrders = await this._fetchOrders(idsNotInCache);
                 // Cache these fetched orders so that next time, no need to fetch
                 // them again, unless invalidated. See `invalidateCache`.
-                fetchedOrders.forEach((order) => {
-                    this.cache[order.id] = new models.Order(
+                fetchedOrders.forEach((orderJson) => {
+                    const order = new models.Order(
                         {},
-                        { pos: this.comp.env.pos, json: order }
+                        { pos: this.comp.env.pos, json: orderJson }
                     );
+                    order.selected_orderline.selected = false;
+                    this.cache[orderJson.id] = order;
                 });
             }
             this.totalCount = totalCount;

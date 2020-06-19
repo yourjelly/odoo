@@ -18,7 +18,7 @@ odoo.define('point_of_sale.OrderDetails', function (require) {
             return this.env.pos.format_currency(this.order ? this.order.get_total_with_tax() : 0);
         }
         get tax() {
-            return this.env.pos.format_currency(this.order ? this.order.get_total_tax() : 0)
+            return this.env.pos.format_currency(this.order ? this.order.get_total_tax() : 0);
         }
     }
     OrderDetails.template = 'OrderDetails';
