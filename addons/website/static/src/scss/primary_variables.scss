@@ -259,7 +259,9 @@ $o-base-website-values-palette: (
     'btn-ripple': false,
     'preheader-template': null, // null, 'magazine', 'icons' or 'image'
     'preheader-height': 1vw, // Only used in 'image' preheader-template
-    'header-template': 'logo_menu',
+    'header-template': 'default', // 'default' / 'hamburger' / 'vertical'
+    'hamburger-type': 'default', // 'default' / 'off-canvas'
+    'hamburger-position': 'right', // 'right' / 'left' / 'center'
     'footer-template': 'products_contacts_about_us',
     'footer-scrolltop': false,
 );
