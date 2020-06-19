@@ -52,9 +52,9 @@
 
 <template id="s_newsletter_subscribe_popup" name="Newsletter Popup">
     <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0">
-        <div class="modal fade s_popup_middle"
+        <div class="modal s_popup_middle o_newsletter_modal"
             style="background-color: var(--black-50) !important;"
-             data-show-after="5000"
+             data-show-after="0"
              data-display="afterDelay"
              data-consents-duration="7"
              data-focus="false"
@@ -63,6 +63,7 @@
              role="dialog">
             <div class="modal-dialog d-flex">
                 <div class="modal-content oe_structure">
+                    <div class="close js_close_popup o_we_no_overlay o_not_editable">&amp;times;</div>
                     <section class="s_text_block oe_img_bg pt88 pb64" data-snippet="s_text_block"
                              style="background-image: url('/web/image/website.s_cover_default_image'); background-position: 0 100%;">
                         <div class="container s_allow_columns">

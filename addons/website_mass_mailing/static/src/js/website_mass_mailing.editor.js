@@ -104,7 +104,6 @@ options.registry.newsletter_popup = options.Class.extend({
         this.$target.on('hidden.bs.modal.newsletter_popup_option', () => {
             this.trigger_up('snippet_option_visibility_update', {show: false});
         });
-        this._renderCustomXML();
         return this._super(...arguments);
     },
     /**
@@ -112,8 +111,8 @@ options.registry.newsletter_popup = options.Class.extend({
      */
     onTargetShow: function () {
         // Open the modal
-        this.$target.data('quick-open', true);
-        return this._refreshPublicWidgets();
+        this.$target.find('.modal').modal('show');
+        $(document.body).children('.modal-backdrop:last').addClass('d-none');
     },
     /**
      * @override
@@ -135,7 +134,6 @@ options.registry.newsletter_popup = options.Class.extend({
         });
     },
     _getMailingListButtons: function () {
-        debugger;
         return rpc.query({
             model: 'mailing.list',
             method: 'name_search',
@@ -169,12 +167,10 @@ options.registry.newsletter_popup = options.Class.extend({
         this._super.apply(this, arguments);
     },
     moveBlock: function (previewMode, widgetValue, params) {
-        debugger;
         const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
         this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
     },
     setBackdrop(previewMode, widgetValue, params) {
-        debugger
         const color = widgetValue ? 'var(--black-50)' : '';
         this.$target[0].style.setProperty('background-color', color, 'important');
     },
@@ -201,7 +197,6 @@ options.registry.newsletter_popup = options.Class.extend({
      * @override
      */
     select_mailing_list: function () {
-        debugger;
         var self = this;
         return this._super.apply(this, arguments).then(function () {
             self.$target.data('quick-open', true);

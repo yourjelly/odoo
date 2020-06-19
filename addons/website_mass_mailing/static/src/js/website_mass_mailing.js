@@ -126,6 +126,10 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
 publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
     selector: ".o_newsletter_popup",
     disabledInEditableMode: false,
+    events: {
+        'click .close': '_onCloseClick',
+        'hide.bs.modal': '_onHideModal',
+    },
 
     /**
      * @override
@@ -242,6 +246,11 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
     //     utils.set_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID), true);
     //     $(document).off('mouseleave.open_popup_event');
     // },
+    destroy: function () {
+        this._super.apply(this, arguments);
+        $(document).off('mouseleave.open_popup');
+        clearTimeout(this.timeout);
+    },
     _bindPopup: function () {
         debugger;
         const $main = this.$target.find('.modal');
@@ -264,10 +273,22 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         }
     },
     _showPopup: function () {
+        debugger;
         if (this._popupAlreadyShown) {
             return;
         }
         this.$target.find('.modal').modal('show');
+    },
+    _onHideModal: function () {
+        const nbDays = this.$el.find('.modal').data('consentsDuration');
+        utils.set_cookie(this.$el.attr('id'), true, nbDays * 24 * 60 * 60);
+        this._popupAlreadyShown = true;
+    },
+    _onCloseClick: function () {
+        this._hidePopup();
+    },
+    _hidePopup: function () {
+        this.$target.find('.modal').modal('hide');
     },
 
 });
