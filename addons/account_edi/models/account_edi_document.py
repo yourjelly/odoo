@@ -43,7 +43,6 @@ class AccountEdiDocument(models.Model):
         """
         def _process(to_process):
             for key, vals in to_process.items():
-                edi_format, state = key
                 documents = vals['documents']
 
                 try:
