@@ -2140,8 +2140,6 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionsWidget.exten
                 anchor.title = _t("Scroll down to next section");
                 const arrow = document.createElement('i');
                 arrow.classList.add('fa', 'fa-angle-down', 'fa-3x');
-                // todo: remove this nbsp when the problem with empty inline will be fixed.
-                arrow.innerHTML = "&nbsp;";
                 anchor.appendChild(arrow);
                 this.$buttonTemplate = $(anchor);
             }
