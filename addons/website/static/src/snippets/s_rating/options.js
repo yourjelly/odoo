@@ -123,7 +123,7 @@ snippetOptions.registry.Rating = snippetOptions.SnippetOptionsWidget.extend({
     _createIcons: function () {
         const $activeIcons = this.$target.find('.s_rating_active_icons');
         const $inactiveIcons = this.$target.find('.s_rating_inactive_icons');
-        this.$target.find('.s_rating_icons i').remove();
+        this.$target.find('.s_rating_active_icons, .s_rating_inactive_icons').empty();
         for (let i = 0; i < this.nbTotalIcons; i++) {
             if (i < this.nbActiveIcons) {
                 $activeIcons.append('<i/> ');
