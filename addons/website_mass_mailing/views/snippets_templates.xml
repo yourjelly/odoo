@@ -51,54 +51,70 @@
 </template>
 
 <template id="s_newsletter_subscribe_popup" name="Newsletter Popup">
-    <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0"/>
-</template>
-
-<template id="s_newsletter_subscribe_popup_content" name="Newsletter Popup Content">
-    <section class="s_text_block oe_img_bg pt88 pb64" data-snippet="s_text_block"
-             style="background-image: url('/web/image/website.s_cover_default_image'); background-position: 0 100%;">
-        <div class="container s_allow_columns">
-            <h1 style="text-align: center;">Always <b>First</b>.</h1>
-            <p style="text-align: center;">Be the first to find out all the latest news,<br/> products, and trends.</p>
-        </div>
-    </section>
-    <section class="s_text_block" data-snippet="s_text_block">
-        <div class="container">
-            <div class="row s_nb_column_fixed">
-                <div class="col-lg-8 offset-lg-2 pt32 pb32">
-                    <t t-snippet-call="website_mass_mailing.s_newsletter_subscribe_form"/>
+    <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0">
+        <div class="modal fade s_popup_middle"
+            style="background-color: var(--black-50) !important;"
+             data-show-after="5000"
+             data-display="afterDelay"
+             data-consents-duration="7"
+             data-focus="false"
+             data-backdrop="false"
+             tabindex="-1"
+             role="dialog">
+            <div class="modal-dialog d-flex">
+                <div class="modal-content oe_structure">
+                    <section class="s_text_block oe_img_bg pt88 pb64" data-snippet="s_text_block"
+                             style="background-image: url('/web/image/website.s_cover_default_image'); background-position: 0 100%;">
+                        <div class="container s_allow_columns">
+                            <h1 style="text-align: center;">Always <b>First</b>.</h1>
+                            <p style="text-align: center;">Be the first to find out all the latest news,<br/> products, and trends.</p>
+                        </div>
+                    </section>
+                    <section class="s_text_block" data-snippet="s_text_block">
+                        <div class="container">
+                            <div class="row s_nb_column_fixed">
+                                <div class="col-lg-8 offset-lg-2 pt32 pb32">
+                                    <t t-snippet-call="website_mass_mailing.s_newsletter_subscribe_form"/>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</template>
+
+<template id="s_newsletter_subscribe_popup_content" name="Newsletter Popup Content">
 </template>
 
 <template id="newsletter_subscribe_options" name="Newsletter Subscribe Options" inherit_id="website.snippet_options">
     <xpath expr="//*[@t-set='so_snippet_addition_selector']" position="inside">, .o_newsletter_popup</xpath>
     <xpath expr="//div" position="after">
         <t t-set="selector" t-value="'.js_subscribe'"/>
-        <div data-js="mailing_list_subscribe"
+        <!-- <div data-js="mailing_list_subscribe"
             t-att-data-selector="selector"
             t-attf-data-exclude=".o_newsletter_modal #{selector}">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
-        </div>
+        </div> -->
         <div data-js="recaptchaSubscribe"
             t-att-data-selector="selector">
             <t t-set="recaptcha_public_key" t-value="request.env['ir.config_parameter'].sudo().get_param('recaptcha_public_key')"/>
             <we-checkbox t-if="recaptcha_public_key" string="Show reCaptcha Policy" data-toggle-recaptcha-legal="" data-no-preview="true"/>
         </div>
         <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
-        <div data-js="newsletter_popup"
+        <!-- <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
-        </div>
+        </div> -->
         <t t-set="base_popup_options">
-            <we-select string="Position" data-no-widget-refresh="true"> <!-- When cookie configuration only display this for popup mode -->
+            <we-select data-select_mailing_list="" data-no-preview="true"/>
+            <we-select string="Position" data-no-widget-refresh="true" > <!-- When cookie configuration only display this for popup mode -->
                 <we-button data-select-class="s_popup_top" data-name="position_top">Top</we-button>
                 <we-button data-select-class="s_popup_middle" data-name="position_middle">Middle</we-button>
                 <we-button data-select-class="s_popup_bottom" data-name="position_bottom">Bottom</we-button>
             </we-select>
-            <we-select string="Size" data-apply-to=".modal-dialog" data-name="s_popup_size_opt">
+            <we-select string="Size" data-no-widget-refresh="true" data-apply-to=".modal-dialog" data-name="s_popup_size_opt">
                 <we-button data-select-class="modal-sm">Small</we-button>
                 <we-button data-select-class="" data-name="s_popup_size_md">Medium</we-button>
                 <we-button data-select-class="modal-lg">Large</we-button>
@@ -110,6 +126,7 @@
                                 data-select-style="true"
                                 data-css-property="background-color"
                                 data-color-prefix="bg-"
+                                data-apply-to=".s_popup_middle"
                                 data-css-compatible="true"/>
                 <we-checkbox data-name="popup_backdrop_opt"
                              data-select-class="s_popup_no_backdrop|"
@@ -123,11 +140,12 @@
                             data-css-property="color"
                             data-color-prefix="text-"
                             data-apply-to=".s_popup_close"/>
-            <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
+            <we-select string="Display" data-no-widget-refresh="true" data-attribute-name="display" data-attribute-default-value="always">
                 <we-button data-select-data-attribute="afterDelay" data-name="show_delay">Delay</we-button>
                 <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
             </we-select>
             <we-input string="Delay"
+                    data-no-widget-refresh="true"
                       data-select-data-attribute=""
                       data-attribute-name="showAfter"
                       data-unit="s"

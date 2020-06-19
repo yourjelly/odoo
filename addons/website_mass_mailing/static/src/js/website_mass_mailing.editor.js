@@ -12,8 +12,6 @@ var _t = core._t;
 
 
 options.registry.mailing_list_subscribe = options.Class.extend({
-    popup_template_id: "editor_new_mailing_list_subscribe_button",
-    popup_title: _t("Add a Newsletter Subscribe Button"),
 
     //--------------------------------------------------------------------------
     // Options
@@ -99,9 +97,6 @@ options.registry.recaptchaSubscribe = options.Class.extend({
 });
 
 options.registry.newsletter_popup = options.registry.mailing_list_subscribe.extend({
-    popup_template_id: "editor_new_mailing_list_subscribe_popup",
-    popup_title: _t("Add a Newsletter Subscribe Popup"),
-
     /**
      * @override
      */
@@ -145,12 +140,28 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         }
         this._super.apply(this, arguments);
     },
+    moveBlock: function (previewMode, widgetValue, params) {
+        const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
+        this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
+    },
+    setBackdrop(previewMode, widgetValue, params) {
+        debugger
+        const color = widgetValue ? 'var(--black-50)' : '';
+        this.$target[0].style.setProperty('background-color', color, 'important');
+    },
     /**
      * @override
      */
     destroy: function () {
         this.$target.off('.newsletter_popup_option');
         this._super.apply(this, arguments);
+    },
+    _computeWidgetState: function (methodName, params) {
+        switch (methodName) {
+            case 'moveBlock':
+                return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
+        }
+        return this._super(...arguments);
     },
 
     //--------------------------------------------------------------------------

@@ -19,4 +19,7 @@
         box-shadow: $box-shadow-sm;
         opacity: 1;
     }
+    .s_popup_middle .modal-dialog {
+        align-items: center;
+    }
 }
