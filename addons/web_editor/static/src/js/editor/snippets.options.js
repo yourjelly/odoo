@@ -1685,7 +1685,11 @@ const SnippetOptionsWidget = Widget.extend({
      */
     selectDataAttribute: async function (previewMode, widgetValue, params) {
         const value = await this._selectAttributeHelper(widgetValue, params);
-        await this.editorHelpers.setAttribute(this.$target[0], `data-${params.attributeName}`, value);
+        if (previewMode) {
+            this.$target.attr(`data-${params.attributeName}`, value);
+        } else {
+            await this.editorHelpers.setAttribute(this.$target[0], `data-${params.attributeName}`, value);
+        }
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -1699,7 +1703,11 @@ const SnippetOptionsWidget = Widget.extend({
      */
     selectAttribute: async function (previewMode, widgetValue, params) {
         const value = await this._selectAttributeHelper(widgetValue, params);
-        await this.editorHelpers.setAttribute(this.$target[0], params.attributeName, value);
+        if (previewMode) {
+            this.$target.attr(params.attributeName, value);
+        } else {
+            await this.editorHelpers.setAttribute(this.$target[0], params.attributeName, value);
+        }
     },
     /**
      * Default option method which allows to select a value and set it on the
