@@ -90,6 +90,7 @@ var Wysiwyg = Widget.extend({
             const self = this;
             const _super = this._super;
             const elementToParse = document.createElement('div');
+            elementToParse.setAttribute('class', 'd-flex d-column o_editor_center');
             elementToParse.innerHTML = this.value;
 
             if (this.options.enableWebsite) {
