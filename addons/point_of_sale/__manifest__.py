@@ -57,6 +57,7 @@
         'static/src/xml/Screens/ClientListScreen/ClientListScreen.xml',
         'static/src/xml/Screens/OrderManagementScreen/ControlButtons/InvoiceButton.xml',
         'static/src/xml/Screens/OrderManagementScreen/ControlButtons/ReprintReceiptButton.xml',
+        'static/src/xml/Screens/OrderManagementScreen/ControlButtons/ReturnButton.xml',
         'static/src/xml/Screens/OrderManagementScreen/OrderManagementScreen.xml',
         'static/src/xml/Screens/OrderManagementScreen/MobileOrderManagementScreen.xml',
         'static/src/xml/Screens/OrderManagementScreen/OrderManagementControlPanel.xml',

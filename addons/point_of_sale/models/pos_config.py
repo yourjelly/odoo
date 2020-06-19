@@ -218,6 +218,7 @@ class PosConfig(models.Model):
     only_round_cash_method = fields.Boolean(string="Only apply rounding on cash")
     has_active_session = fields.Boolean(compute='_compute_current_session')
     show_allow_invoicing_alert = fields.Boolean(compute="_compute_show_allow_invoicing_alert")
+    return_product_id = fields.Many2one('product.product', string='Return Product', default=lambda self: self.env.ref('point_of_sale.product_product_return'), help='Used to create the orderline of the return.')
 
     @api.depends('use_pricelist', 'available_pricelist_ids')
     def _compute_allowed_pricelist_ids(self):

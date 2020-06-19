@@ -408,10 +408,12 @@ exports.PosModel = Backbone.Model.extend({
                 domain.unshift('&');
                 domain.push(['pos_categ_id', 'in', self.config.iface_available_categ_ids]);
             }
+            const extra_product_ids = [self.config.return_product_id[0]];
             if (self.config.iface_tipproduct){
-              domain.unshift(['id', '=', self.config.tip_product_id[0]]);
-              domain.unshift('|');
+              extra_product_ids.push(self.config.tip_product_id[0]);
             }
+            domain.unshift(['id', 'in', extra_product_ids]);
+            domain.unshift('|')
             return domain;
         },
         context: function(self){ return { display_default_code: false }; },
@@ -2398,6 +2400,7 @@ exports.Order = Backbone.Model.extend({
         this.to_invoice     = false;
         this.to_email       = false;
         this.orderlines     = new OrderlineCollection();
+        this.returnlines    = new OrderlineCollection();
         this.paymentlines   = new PaymentlineCollection();
         this.pos_session_id = this.pos.pos_session.id;
         this.employee       = this.pos.employee;
@@ -2550,6 +2553,8 @@ exports.Order = Backbone.Model.extend({
             fiscal_position_id: this.fiscal_position ? this.fiscal_position.id : false,
             server_id: this.server_id ? this.server_id : false,
             to_invoice: this.to_invoice ? this.to_invoice : false,
+            original_order_id: this.originalOrderId ? this.originalOrderId : false,
+            returnlines: this.returnlines.map(line => [0, 0, line.export_as_JSON()]),
         };
         if (!this.is_paid && this.user_id) {
             json.user_id = this.user_id;

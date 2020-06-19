@@ -39,6 +39,8 @@
                     <field string="User" name="user_id"/>
                     <field name="partner_id" context="{'res_partner_search_mode': 'customer'}" attrs="{'readonly': [('state','=','invoiced')]}"/>
                     <field name="fiscal_position_id" options="{'no_create': True}"/>
+                    <field name="return_order_ids" widget="many2many_tags" />
+                    <field name="original_order_id" />
                     <field name="invoice_group" invisible="1"/>
                 </group>
                 <notebook colspan="4">

@@ -49,6 +49,8 @@ class PosOrder(models.Model):
             'amount_return':  ui_order['amount_return'],
             'company_id': self.env['pos.session'].browse(ui_order['pos_session_id']).company_id.id,
             'to_invoice': ui_order['to_invoice'] if "to_invoice" in ui_order else False,
+            'original_order_id': ui_order['original_order_id'] if 'original_order_id' in ui_order else False,
+            'returnlines': [process_line(l) for l in ui_order['returnlines']] if ui_order['returnlines'] else False,
         }
 
     @api.model
@@ -253,6 +255,9 @@ class PosOrder(models.Model):
     session_move_id = fields.Many2one('account.move', string='Session Journal Entry', related='session_id.move_id', readonly=True, copy=False)
     to_invoice = fields.Boolean('To invoice')
     is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
+    return_order_ids = fields.One2many('pos.order', 'original_order_id', readonly=True, string='Return Orders', help='These are the return orders for the original order.')
+    original_order_id = fields.Many2one('pos.order', string='Returned Order', readonly=True, help='This is the order that is returned. It may have multiple return orders.')
+    returnlines = fields.One2many('pos.order.line', 'order_id', readonly=True, domain=[('is_return_line', '=', True)], help='Technical field to keep track of the lines that were returned.')
 
     @api.depends('account_move')
     def _compute_is_invoiced(self):
@@ -576,7 +581,7 @@ class PosOrder(models.Model):
     def search_paid_order_ids(self, domain, limit, offset):
         """Search for 'paid' orders that satisfy the given domain, limit and offset."""
         default_domain = ['!', '|', ('state', '=', 'draft'), ('state', '=', 'cancelled')]
-        real_domain = AND([domain, default_domain])
+        real_domain = AND([domain, default_domain, [('original_order_id', '=', False)]])
         ids = self.search(AND([domain, default_domain]), limit=limit, offset=offset).ids
         totalCount = self.search_count(real_domain)
         return {'ids': ids, 'totalCount': totalCount}
