@@ -132,7 +132,10 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
      */
     start: function () {
         var self = this;
-         this._showPopup();
+        this._popupAlreadyShown = !!utils.get_cookie(this.$el.attr('id'));
+        if (!this._popupAlreadyShown) {
+            this._bindPopup();
+        }
          return this._super(...arguments);
         // var defs = [this._super.apply(this, arguments)];
         // this.websiteID = this._getContext().website_id;
@@ -261,12 +264,11 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         }
     },
     _showPopup: function () {
-        // if (this._popupAlreadyShown) {
-        //     return;
-        // }
-        debugger;
+        if (this._popupAlreadyShown) {
+            return;
+        }
         this.$target.find('.modal').modal('show');
     },
-    
+
 });
 });

@@ -108,7 +108,7 @@
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
         </div> -->
         <t t-set="base_popup_options">
-            <we-select data-select_mailing_list="" data-no-preview="true"/>
+            <we-select data-name="mailing_list" data-no-preview="true"/>
             <we-select string="Position" data-no-widget-refresh="true" > <!-- When cookie configuration only display this for popup mode -->
                 <we-button data-select-class="s_popup_top" data-name="position_top">Top</we-button>
                 <we-button data-select-class="s_popup_middle" data-name="position_middle">Middle</we-button>
@@ -158,13 +158,13 @@
                 <we-button data-move-block="moveToFooter">All pages</we-button>
             </we-select>
         </t>
-        <div data-js="SnippetPopup" data-selector=".o_newsletter_popup" data-exclude="#website_cookies_bar">
+        <div data-js="newsletter_popup" data-selector=".o_newsletter_popup" data-exclude="#website_cookies_bar">
             <t t-raw="base_popup_options"/>
             <t t-raw="extra_popup_options"/>
         </div>
-        <!-- <div data-js="SnippetPopup" data-selector=".s_popup#website_cookies_bar" data-target=".modal">
+        <div data-js="newsletter_popup" data-selector=".o_newsletter_popup#website_cookies_bar" data-target=".modal">
             <t t-raw="base_popup_options"/>
-        </div> -->
+        </div>
     </xpath>
 </template>
 

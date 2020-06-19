@@ -96,7 +96,7 @@ options.registry.recaptchaSubscribe = options.Class.extend({
     },
 });
 
-options.registry.newsletter_popup = options.registry.mailing_list_subscribe.extend({
+options.registry.newsletter_popup = options.Class.extend({
     /**
      * @override
      */
@@ -104,6 +104,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         this.$target.on('hidden.bs.modal.newsletter_popup_option', () => {
             this.trigger_up('snippet_option_visibility_update', {show: false});
         });
+        this._renderCustomXML();
         return this._super(...arguments);
     },
     /**
@@ -124,6 +125,33 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
             $modal.modal('hide');
         }
     },
+    _renderCustomXML: function (uiFragment) {
+        this._getMailingListButtons().then((mailingLists) => {
+            this.mailingLists = mailingLists;
+            const selectEl = this.$el.find('we-select[data-name="mailing_list"]');
+            if (this.mailingLists.length && selectEl) {
+                this.mailingLists.forEach(option => selectEl.append(option));
+            }
+        });
+    },
+    _getMailingListButtons: function () {
+        debugger;
+        return rpc.query({
+            model: 'mailing.list',
+            method: 'name_search',
+            args: ['', [['is_public', '=', true]]],
+            context: this.options.recordInfo.context,
+        }).then((data) => {
+            // Create the buttons for the mailing list we-select
+            return Object.keys(data).map(key => {
+                const record = data[key];
+                const button = document.createElement('we-button');
+                button.dataset.selectMailingList = record[0];
+                button.textContent = record[1];
+                return button;
+            });
+        });
+    },
     /**
      * @override
      */
@@ -141,6 +169,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
         this._super.apply(this, arguments);
     },
     moveBlock: function (previewMode, widgetValue, params) {
+        debugger;
         const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
         this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
     },
@@ -172,6 +201,7 @@ options.registry.newsletter_popup = options.registry.mailing_list_subscribe.exte
      * @override
      */
     select_mailing_list: function () {
+        debugger;
         var self = this;
         return this._super.apply(this, arguments).then(function () {
             self.$target.data('quick-open', true);
