@@ -1825,7 +1825,7 @@ snippetOptions.registry.CookiesBar = snippetOptions.registry.SnippetPopup.extend
      *
      * @see this.selectClass for parameters
      */
-    selectLayout: function (previewMode, widgetValue, params) {
+    selectLayout: async function (previewMode, widgetValue, params) {
         let websiteId;
         this.trigger_up('context_get', {
             callback: function (ctx) {
@@ -1856,15 +1856,17 @@ snippetOptions.registry.CookiesBar = snippetOptions.registry.SnippetPopup.extend
             if ($currentLayoutEls.length) {
                 // save value before change, eg 'title' is not inside 'discrete' template
                 // but we want to preserve it in case of select another layout later
-                this.$savedSelectors[selector] = $currentLayoutEls;
+                this.$savedSelectors[selector] = $currentLayoutEls.clone();
             }
             const $savedSelector = this.$savedSelectors[selector];
             if ($newLayoutEl.length && $savedSelector && $savedSelector.length) {
-                $newLayoutEl.empty().append($savedSelector);
+                $newLayoutEl.empty().append($savedSelector.clone());
             }
         }
 
         $content.empty().append($template);
+
+        if (previewMode === false) await this._refreshTarget();
     },
 });
 
