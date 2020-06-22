@@ -89,29 +89,31 @@
 <template id="s_newsletter_subscribe_popup_content" name="Newsletter Popup Content">
 </template>
 
-<template id="newsletter_subscribe_options" name="Newsletter Subscribe Options" inherit_id="website.snippet_options">
-    <xpath expr="//*[@t-set='so_snippet_addition_selector']" position="inside">, .o_newsletter_popup</xpath>
+<template id="newsletter_subscribe_options" name="Newsletter Subscribe Options" inherit_id="website.s_popup_options">
+    <xpath expr="." position="inside">
+        <div>Hello</div>
+    </xpath>
+   <!--  <xpath expr="//*[@t-set='so_snippet_addition_selector']" position="inside">, .o_newsletter_popup</xpath>
     <xpath expr="//div" position="after">
-        <t t-set="selector" t-value="'.js_subscribe'"/>
+        <t t-set="selector" t-value="'.js_subscribe'"/> -->
         <!-- <div data-js="mailing_list_subscribe"
             t-att-data-selector="selector"
             t-attf-data-exclude=".o_newsletter_modal #{selector}">
             <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
         </div> -->
-        <div data-js="recaptchaSubscribe"
+        <!-- <div data-js="recaptchaSubscribe"
             t-att-data-selector="selector">
             <t t-set="recaptcha_public_key" t-value="request.env['ir.config_parameter'].sudo().get_param('recaptcha_public_key')"/>
             <we-checkbox t-if="recaptcha_public_key" string="Show reCaptcha Policy" data-toggle-recaptcha-legal="" data-no-preview="true"/>
         </div>
         <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
-        <!-- <div data-js="newsletter_popup"
+        <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
-            <we-button data-select_mailing_list="" data-no-preview="true">Change Newsletter</we-button>
+            <we-select data-name="mailing_list" data-no-widget-refresh="false" data-apply-to=".modal-content" data-select_mailing_list=""/>
         </div> -->
-        <t t-set="base_popup_options">
-            <we-select data-name="mailing_list" data-select_mailing_list="" data-no-preview="true"/>
-            <we-select string="Position" data-no-widget-refresh="true" > <!-- When cookie configuration only display this for popup mode -->
-                <we-button data-select-class="s_popup_top" data-name="position_top">Top</we-button>
+        <!-- <t t-set="base_popup_options">
+            <we-select string="Position" data-no-widget-refresh="true" > --> <!-- When cookie configuration only display this for popup mode -->
+        <!--         <we-button data-select-class="s_popup_top" data-name="position_top">Top</we-button>
                 <we-button data-select-class="s_popup_middle" data-name="position_middle">Middle</we-button>
                 <we-button data-select-class="s_popup_bottom" data-name="position_bottom">Bottom</we-button>
             </we-select>
@@ -165,8 +167,16 @@
         </div>
         <div data-js="newsletter_popup" data-selector=".o_newsletter_popup#website_cookies_bar" data-target=".modal">
             <t t-raw="base_popup_options"/>
-        </div>
-    </xpath>
+        </div> -->
+        <!-- <t t-extend="website.inherit_xml" t-name="abcd">
+            <t t-jquery="div" t-operation="after">
+                <div>Hello</div>
+            </t>
+        </t> -->
+   <!--  </xpath> -->
+    <!-- <xpath expr="//div" position="after">
+            <t t-call="website.s_popup_options"/>
+    </xpath> -->
 </template>
 
 <!-- Extend default mass_mailing snippets with website feature -->
