@@ -1685,10 +1685,10 @@ const SnippetOptionsWidget = Widget.extend({
      */
     selectDataAttribute: async function (previewMode, widgetValue, params) {
         const value = await this._selectAttributeHelper(widgetValue, params);
-        if (previewMode) {
-            this.$target.attr(`data-${params.attributeName}`, value);
-        } else {
-            await this.editorHelpers.setAttribute(this.$target[0], `data-${params.attributeName}`, value);
+        this.$target.attr(`data-${params.attributeName}`, value);
+        if (!previewMode) {
+            const attributeName = params.attributeName.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
+            await this.editorHelpers.setAttribute(this.$target[0], `data-${attributeName}`, value);
         }
     },
     /**
