@@ -1662,16 +1662,16 @@ const SnippetOptionsWidget = Widget.extend({
      * @returns {Promise|undefined}
      */
     selectClass: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.editor.execBatch(async ()=> {
-            for (const classNames of params.possibleValues) {
-                if (classNames) {
-                    await this.editorHelpers.removeClass(this.$target[0], classNames);
-                }
+        for (const classNames of params.possibleValues) {
+            if (classNames) {
+                this.$target[0].classList.remove(...classNames.trim().split(/\s+/g));
             }
-            if (widgetValue) {
-                await this.editorHelpers.addClass(this.$target[0], widgetValue);
-            }
-        });
+        }
+        if (widgetValue) {
+            this.$target[0].classList.add(...widgetValue.trim().split(/\s+/g));
+        }
+
+        if (previewMode === false) await this._refreshTarget();
     },
     /**
      * Default option method which allows to select a value and set it on the
