@@ -2246,7 +2246,7 @@ var SnippetsMenu = Widget.extend({
             .toggleClass('fa-eye', isVisible)
             .toggleClass('fa-eye-slash', !isVisible);
         if (isVisible) {
-            return this._activateSnippet();
+            return this._activateSnippet($snippet);
         } else {
             return this._disableAllSnippetEditors();
         }
