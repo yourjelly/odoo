@@ -1314,6 +1314,8 @@ snippetOptions.registry.layout_column = snippetOptions.SnippetOptionsWidget.exte
         } else if (previousNbColumns === 0) {
             this.trigger_up('activate_snippet', {$element: this.$('> .row').children().first()});
         }
+
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
