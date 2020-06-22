@@ -14,7 +14,7 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionsWidget.extend(
      *
      * @see this.selectClass for parameters
      */
-    display: function (previewMode, widgetValue, params) {
+    display: async function (previewMode, widgetValue, params) {
         // Classic
         this.$target.find('.s_blockquote_avatar').toggleClass('d-none', widgetValue !== 'classic');
 
@@ -37,6 +37,8 @@ snippetOptions.registry.Blockquote = snippetOptions.SnippetOptionsWidget.extend(
         // Minimalist
         this.$target.find('.s_blockquote_icon').toggleClass('d-none', widgetValue === 'minimalist');
         this.$target.find('footer').toggleClass('d-none', widgetValue === 'minimalist');
+
+        if (previewMode === false) await this._refreshTarget();
     },
 });
 });
