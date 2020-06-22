@@ -1438,7 +1438,7 @@ snippetOptions.registry.ul = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
-    selectClass: async function () {
+    selectClass: async function (previewMode) {
         await this._super.apply(this, arguments);
 
         this.trigger_up('widgets_stop_request', {
@@ -1462,6 +1462,8 @@ snippetOptions.registry.ul = snippetOptions.SnippetOptionsWidget.extend({
             .prepend('<a href="#" class="o_ul_toggle_next fa" />');
         $li.removeClass('o_open').next().addClass('o_close');
         this.$target.find('li').removeClass('o_open');
+
+        if (previewMode === false) await this._refreshTarget();
     },
 });
 
