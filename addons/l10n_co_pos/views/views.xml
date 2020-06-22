@@ -12,6 +12,16 @@
             <xpath expr="//field[@name='sequence_id']" position="attributes">
                 <attribute name="readonly">0</attribute>
             </xpath>
+            <xpath expr="//div[@id='company']" position="after">
+                <div class="col-12 col-lg-6 o_setting_box">
+                    <div class="o_setting_right_pane">
+                        <label for="pos_serial_number"/>
+                        <div class="content-group mt16">
+                            <field name="pos_serial_number"/>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
         </field>
     </record>
 
