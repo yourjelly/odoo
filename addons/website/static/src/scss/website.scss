@@ -146,13 +146,16 @@ $-font-numbers: (
         @include o-apply-colors('preheader');
 
         @if o-website-value('preheader-template') == 'icons' {
-            #o_preheader_contact .fa {
-                opacity: $o-theme-preheader-contact-fa-opacity;
-            }
-            .o_preheader_icons_btns_circle .fa {
-                width: $o-theme-preheader-icon-size;
-                height: $o-theme-preheader-icon-size;
-                line-height: $o-theme-preheader-icon-size;
+
+            .o_preheader_icons {
+                > a {
+                    width: $spacer * 2;
+                    height: $spacer * 2;
+                    line-height: $spacer * 2;
+                    margin-left: $spacer * .25;
+                    border: 0;
+                    padding: 0;
+                }
             }
         } @else if o-website-value('preheader-template') == 'image' {
             height: o-website-value('preheader-height');
