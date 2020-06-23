@@ -52,7 +52,7 @@
 
 <template id="s_newsletter_subscribe_popup" name="Newsletter Popup">
     <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0">
-        <div class="modal s_popup_middle o_newsletter_modal"
+        <div class="modal s_newsletter_popup_middle o_newsletter_modal"
             style="background-color: var(--black-50) !important;"
              data-show-after="0"
              data-display="afterDelay"
@@ -109,17 +109,17 @@
             <we-select data-name="mailing_list" data-no-widget-refresh="false" data-apply-to=".modal-content" data-select_mailing_list=""/>
         </div>
         <t t-set="base_popup_options">
-            <we-select string="Position" data-no-widget-refresh="true" > <!-- When cookie configuration only display this for popup mode -->
-                <we-button data-select-class="s_popup_top" data-name="position_top">Top</we-button>
+            <we-select string="Position"> <!-- When cookie configuration only display this for popup mode -->
+                <we-button data-select-class="s_newsletter_popup_top" data-name="position_top">Top</we-button>
                 <we-button data-select-class="s_newsletter_popup_middle" data-name="position_middle">Middle</we-button>
-                <we-button data-select-class="s_popup_bottom" data-name="position_bottom">Bottom</we-button>
+                <we-button data-select-class="s_newsletter_popup_bottom" data-name="position_bottom">Bottom</we-button>
             </we-select>
             <we-select string="Size" data-no-widget-refresh="true" data-apply-to=".modal-dialog" data-name="s_popup_size_opt">
                 <we-button data-select-class="modal-sm">Small</we-button>
                 <we-button data-select-class="" data-name="s_popup_size_md">Medium</we-button>
                 <we-button data-select-class="modal-lg">Large</we-button>
                 <we-button data-select-class="modal-xl">Extra Large</we-button>
-                <we-button data-select-class="s_popup_size_full" data-name="s_popup_size_full">Full</we-button>
+                <we-button data-select-class="s_newsletter_popup_size_full" data-name="s_popup_size_full">Full</we-button>
             </we-select>
             <we-row string="Backdrop">
                 <we-colorpicker data-dependencies="popup_backdrop_opt"
@@ -140,12 +140,11 @@
                             data-css-property="color"
                             data-color-prefix="text-"
                             data-apply-to=".s_popup_close"/>
-            <we-select string="Display" data-no-widget-refresh="true" data-attribute-name="display" data-attribute-default-value="always">
+            <we-select string="Display" data-attribute-name="display" data-attribute-default-value="always">
                 <we-button data-select-data-attribute="afterDelay" data-name="show_delay">Delay</we-button>
                 <we-button data-select-data-attribute="mouseExit">On Exit</we-button>
             </we-select>
             <we-input string="Delay"
-                    data-no-widget-refresh="true"
                       data-select-data-attribute=""
                       data-attribute-name="showAfter"
                       data-unit="s"

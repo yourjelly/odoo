@@ -1,6 +1,7 @@
 .o_newsletter_popup {
     .modal-content{
         height: 70%;
+        position: absolute;
     }
     .modal-header {
         padding: 0;
@@ -21,13 +22,17 @@
         box-shadow: $box-shadow-sm;
         opacity: 1;
     }
-    .s_newsletter_popup_middle {
-    }
-    .s_popup_top .modal-dialog {
-        align-items: flex-start;
-    }
-    .s_popup_bottom .modal-dialog {
-        align-items: flex-end;
-    }
 
+}
+.s_newsletter_popup_top,
+.s_newsletter_popup_bottom {
+    .modal-dialog {
+        margin-right: 0;
+    }
+}
+.s_newsletter_popup_top .modal-dialog {
+    align-items: flex-start;
+}
+.s_newsletter_popup_bottom .modal-dialog {
+    align-items: flex-end;
 }
