@@ -127,7 +127,7 @@ options.registry.newsletter_popup = options.Class.extend({
     _renderCustomXML: function (uiFragment) {
         this._getMailingListButtons().then((mailingLists) => {
             this.mailingLists = mailingLists;
-            const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"] we-select-menu');
+            const selectEl = this.$el[0].querySelector('we-select[data-name="mailing_list"] we-select-menu');
             if (this.mailingLists.length && selectEl) {
                 this.mailingLists.forEach( option => selectEl.append(option.cloneNode(true)));
             }
@@ -188,22 +188,19 @@ options.registry.newsletter_popup = options.Class.extend({
         this._super.apply(this, arguments);
     },
     _computeWidgetState: function (methodName, params) {
-        debugger;
         switch (methodName) {
             case 'moveBlock':
                 return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
-            case 'select_mailing_list':
-                return this._getMailingListID()
         }
         return this._super(...arguments);
     },
-    _getMailingListID: function () {
-        let listID = parseInt(this.$target.attr('data-list-id'));
-        if (!listID && this.mailingLists.length) {
-            listID = this.mailingLists[0].dataset.selectMailingList;
-        }
-        return listID;
-    },
+    // _getMailingListID: function () {
+    //     let listID = parseInt(this.$target.attr('data-list-id'));
+    //     if (!listID && this.mailingLists.length) {
+    //         listID = this.mailingLists[0].dataset.selectMailingList;
+    //     }
+    //     return listID;
+    // },
 
     //--------------------------------------------------------------------------
     // Options
@@ -213,7 +210,6 @@ options.registry.newsletter_popup = options.Class.extend({
      * @override
      */
     select_mailing_list: function () {
-        debugger;
         var self = this;
         return this._super.apply(this, arguments).then(function () {
             self.$target.data('quick-open', true);

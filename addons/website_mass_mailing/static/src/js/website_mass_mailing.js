@@ -278,7 +278,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         this.$target.find('.modal').modal('show');
     },
     _onHideModal: function () {
-        const nbDays = this.$el.find('.modal').data('consentsDuration');
+        const nbDays = this.$el.data('consentsDuration');
         utils.set_cookie(this.$el.attr('id'), true, nbDays * 24 * 60 * 60);
         this._popupAlreadyShown = true;
     },
