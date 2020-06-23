@@ -54,16 +54,16 @@
     <div class="o_newsletter_popup o_snippet_invisible" data-list-id="0">
         <div class="modal s_newsletter_popup_middle o_newsletter_modal"
             style="background-color: var(--black-50) !important;"
-             data-show-after="0"
+             data-show-after="2"
              data-display="afterDelay"
              data-consents-duration="7"
-             data-focus="false"
              data-backdrop="false"
+             data-focus="false"
              tabindex="-1"
              role="dialog">
             <div class="modal-dialog modal-dialog-centered d-flex">
                 <div class="modal-content oe_structure">
-                    <div class="close js_close_popup o_we_no_overlay o_not_editable">&amp;times;</div>
+                    <div class="close js_close_popup o_we_no_overlay text-center o_not_editable">&amp;times;</div>
                     <section class="s_text_block oe_img_bg pt88 pb64" data-snippet="s_text_block"
                              style="background-image: url('/web/image/website.s_cover_default_image'); background-position: 0 100%;">
                         <div class="container s_allow_columns">
@@ -106,7 +106,7 @@
         <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
         <div data-js="newsletter_popup"
             data-selector=".o_newsletter_popup">
-            <we-select data-name="mailing_list" data-no-widget-refresh="false" data-apply-to=".modal-content" data-select_mailing_list=""/>
+            <we-select data-name="mailing_list" data-apply-to=".modal-content" data-select_mailing_list=""/>
         </div>
         <t t-set="base_popup_options">
             <we-select string="Position"> <!-- When cookie configuration only display this for popup mode -->
@@ -114,7 +114,7 @@
                 <we-button data-select-class="s_newsletter_popup_middle" data-name="position_middle">Middle</we-button>
                 <we-button data-select-class="s_newsletter_popup_bottom" data-name="position_bottom">Bottom</we-button>
             </we-select>
-            <we-select string="Size" data-no-widget-refresh="true" data-apply-to=".modal-dialog" data-name="s_popup_size_opt">
+            <we-select string="Size" data-apply-to=".modal-dialog" data-name="s_popup_size_opt">
                 <we-button data-select-class="modal-sm">Small</we-button>
                 <we-button data-select-class="" data-name="s_popup_size_md">Medium</we-button>
                 <we-button data-select-class="modal-lg">Large</we-button>
@@ -148,6 +148,7 @@
                       data-select-data-attribute=""
                       data-attribute-name="showAfter"
                       data-unit="s"
+                      data-focus="true"
                       data-save-unit="ms"
                       data-dependencies="show_delay"/>
             <t t-set="unit_popup_duration">days</t>

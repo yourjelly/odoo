@@ -133,6 +133,9 @@ options.registry.newsletter_popup = options.Class.extend({
             }
         });
     },
+    onBuilt: function () {
+        this._assignUniqueID();
+    },
     _getMailingListButtons: function () {
         return rpc.query({
             model: 'mailing.list',
@@ -166,6 +169,9 @@ options.registry.newsletter_popup = options.Class.extend({
         }
         this._super.apply(this, arguments);
     },
+    _assignUniqueID: function () {
+        this.$target.closest('.o_newsletter_popup').attr('id', 'newsletter_Popup' + Date.now());
+    },
     moveBlock: function (previewMode, widgetValue, params) {
         const $container = $(widgetValue === 'moveToFooter' ? 'footer' : 'main');
         this.$target.closest('.o_newsletter_popup').prependTo($container.find('.oe_structure:o_editable').first());
@@ -188,12 +194,10 @@ options.registry.newsletter_popup = options.Class.extend({
                 return this.$target.closest('footer').length ? 'moveToFooter' : 'moveToBody';
             case 'select_mailing_list':
                 return this._getMailingListID()
-
         }
         return this._super(...arguments);
     },
     _getMailingListID: function () {
-        debugger;
         let listID = parseInt(this.$target.attr('data-list-id'));
         if (!listID && this.mailingLists.length) {
             listID = this.mailingLists[0].dataset.selectMailingList;

@@ -252,7 +252,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
         clearTimeout(this.timeout);
     },
     _bindPopup: function () {
-        const $main = this.$target.find('.modal');
+        const $main = this.$target;
 
         let display = $main.data('display');
         let delay = $main.data('showAfter');
@@ -262,7 +262,7 @@ publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
                 display = 'afterDelay';
                 delay = 5000;
             }
-            this.$('.modal').removeClass('s_popup_middle').addClass('s_popup_bottom');
+            this.$('.modal').removeClass('s_newsletter_popup_middle').addClass('s_newsletter_popup_bottom');
         }
 
         if (display === 'afterDelay') {
