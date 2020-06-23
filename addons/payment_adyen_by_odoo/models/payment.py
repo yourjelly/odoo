@@ -9,6 +9,7 @@ import hmac
 import hashlib
 
 from odoo import api, fields, models, _
+from odoo.http import request
 from odoo.tools.float_utils import float_round
 
 from odoo.addons.payment.models.payment_acquirer import ValidationError
@@ -74,7 +75,14 @@ class PaymentAcquirerAdyenOdoo(models.Model):
                 'value': self._odoo_by_adyen_to_minor_units(tx.amount, tx.currency_id),
                 'currency': tx.currency_id.name,
             },
+            "additionalData": {
+                "allow3DS2": True,
+            },
+            "channel": "web",
             'paymentMethod': adyen_data['paymentMethod'],
+            'browserInfo': adyen_data['browserInfo'],
+            'shopperIP': request.httprequest.remote_addr,
+            'origin': self.env['ir.config_parameter'].sudo().get_param('web.base.url'),
             'reference': tx.reference,
             'returnUrl': tx.return_url
         }
@@ -101,32 +109,8 @@ class PaymentAcquirerAdyenOdoo(models.Model):
     def _get_adyen_api_url(self):
         return 'https://checkout-test.adyen.com/v52'
 
-    @api.model
-    def stripe_s2s_form_process(self, data):
-        if 'card' in data and not data.get('card'):
-            # coming back from a checkout payment and iDeal (or another non-card pm)
-            # can't save the token if it's not a card
-            # note that in the case of a s2s payment, 'card' wont be
-            # in the data dict because we need to fetch it from the stripe server
-            _logger.info('unable to save card info from Stripe since the payment was not done with a card')
-            return self.env['payment.token']
-        last4 = data.get('card', {}).get('last4')
-        if not last4:
-            # PM was created with a setup intent, need to get last4 digits through
-            # yet another call -_-
-            acquirer_id = self.env['payment.acquirer'].browse(int(data['acquirer_id']))
-            pm = data.get('payment_method')
-            res = acquirer_id._stripe_request('payment_methods/%s' % pm, data=False, method='GET')
-            last4 = res.get('card', {}).get('last4', '****')
-
-        payment_token = self.env['payment.token'].sudo().create({
-            'acquirer_id': int(data['acquirer_id']),
-            'partner_id': int(data['partner_id']),
-            'stripe_payment_method': data.get('payment_method'),
-            'name': 'XXXXXXXXXXXX%s' % last4,
-            'acquirer_ref': data.get('customer')
-        })
-        return payment_token
+    def _adyen_form_validate(self, data):
+        print(data)
 
     def _get_feature_support(self):
         """Get advanced feature support by provider.

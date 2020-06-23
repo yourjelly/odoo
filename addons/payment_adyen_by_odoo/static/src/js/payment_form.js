@@ -50,14 +50,15 @@ PaymentForm.include({
     },
 
     _adyenSubmitPayment: async function(adyenState, adyenDropin) {
-        var $checkedRadio = this.$('input[type="radio"]:checked');
+        const self = this;
+        const $checkedRadio = this.$('input[type="radio"]:checked');
         const acquirerID = this.getAcquirerIdFromRadio($checkedRadio);
         const acquirerForm = this.el.querySelector(`#o_payment_add_token_acq_${acquirerID}`);
         const prepareTxUrl = this.el.querySelector('input[name="prepare_tx_url"]').value;
         const saveTokenInput = acquirerForm.querySelector('input[name="o_payment_form_save_token"]');
         const shouldSaveToken = saveTokenInput && saveTokenInput.checked;
         // this crappy hack will fetch the reference for the tx through an html form -_-
-        const txFormContent = await this._rpc({
+        return this._rpc({
             route: prepareTxUrl,
             params: {
                 acquirer_id: parseInt(acquirerID),
@@ -68,21 +69,38 @@ PaymentForm.include({
                 callback_method: this.options.callbackMethod,
                 order_id: this.options.orderId,
             },
+        }).then((txFormContent) => {
+            const txForm = document.createElement('form');
+            txForm.innerHTML = txFormContent;
+            const txReference = txForm.querySelector('input[name="reference"]').value;
+            const txSignature = txForm.querySelector('input[name="signature"]').value;
+            return this._rpc({
+                route: '/payment/adyen_by_odoo/submit_payment',
+                params: {
+                    adyen_data: adyenState.data,
+                    acquirer_id: acquirerID,
+                    tx_reference: txReference,
+                    tx_signature: txSignature,
+                },
+            });
+        }).then(async (result) => {
+            if (result.action) {
+                const auth_result = await this.adyenDropin.handleAction(result.action);
+            }
+        }).guardedCatch((error) => {
+            // We don't want to open the Error dialog since
+            // we already have a container displaying the error
+            if (error.event) {
+                error.event.preventDefault();
+            }
+            // if the rpc fails, pretty obvious
+            //this.enableButton(button);
+            this.displayError(
+                _t('Unable to save card'),
+                _t("We are not able to add your payment method at the moment. ") +
+                    this._parseError(error)
+            );
         });
-        const txForm = document.createElement('form');
-        txForm.innerHTML = txFormContent;
-        const txReference = txForm.querySelector('input[name="reference"]').value;
-        const txSignature = txForm.querySelector('input[name="signature"]').value;
-        const result = await this._rpc({
-            route: '/payment/adyen_by_odoo/submit_payment',
-            params: {
-                adyen_data: adyenState.data,
-                acquirer_id: acquirerID,
-                tx_reference: txReference,
-                tx_signature: txSignature,
-            },
-        });
-        return result;
     },
 
     /**
