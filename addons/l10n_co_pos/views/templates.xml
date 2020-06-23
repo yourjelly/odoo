@@ -7,4 +7,10 @@
         </xpath>
     </template>
 
+    <template id="report_saledetails" inherit_id="point_of_sale.report_saledetails">
+    	<xpath expr="//table/thead/tr" position="after">
+    		<tr>Hello</tr>
+    	</xpath>
+    </template>
+
 </odoo>
