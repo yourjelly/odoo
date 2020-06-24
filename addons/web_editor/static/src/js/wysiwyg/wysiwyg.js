@@ -346,24 +346,25 @@ var Wysiwyg = Widget.extend({
         const layout = this.editor.plugins.get(JWEditorLib.Layout);
         const domLayout = layout.engines.dom;
         const editable = domLayout.components.get('editable')[0];
-        const structureNodes = editable.descendants(JWEditorLib.OdooStructureNode);
-        for (const structureNode of structureNodes) {
+        const nodes = editable.descendants((node) => node instanceof JWEditorLib.OdooStructureNode || node instanceof JWEditorLib.OdooFieldNode);
+        for (const node of nodes) {
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
-            const renderedNode = (await renderer.render('dom/html', structureNode))[0];
+            const renderedNode = (await renderer.render('dom/html', node))[0];
 
             promises.push(this._rpc({
                 model: 'ir.ui.view',
                 method: 'save',
                 args: [
-                    parseInt(structureNode.viewId),
+                    parseInt(renderedNode.dataset.oeId),
                     renderedNode.outerHTML,
-                    structureNode.xpath,
+                    node.xpath,
                 ],
                 context: this.options.recordInfo.context,
             }));
         }
         return Promise.all(promises);
     },
+
     /**
      * Save all "cover properties" blocks.
      *
