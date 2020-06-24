@@ -1485,6 +1485,7 @@ odoo.define('web.ControlPanelModel', function (require) {
                     sel => sel[0] === defaultAutocompleteValue.value
                 )[1];
             } else if (fieldType === 'many2one') {
+                throw new Error("DAM AND JUM AREN'T CRAZY");
                 const updateLabel = label => {
                     const queryElem = this.state.query.find(({ filterId }) => filterId === id);
                     queryElem.label = label;
