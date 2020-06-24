@@ -343,27 +343,25 @@ var Wysiwyg = Widget.extend({
      */
     _saveViewBlocks: async function () {
         const promises = [];
-        await this.editor.execCustomCommand(async () => {
-            const layout = this.editor.plugins.get(JWEditorLib.Layout);
-            const domLayout = layout.engines.dom;
-            const editable = domLayout.components.get('editable')[0];
-            const structureNodes = editable.descendants(JWEditorLib.OdooStructureNode);
-            for (const structureNode of structureNodes) {
-                const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
-                const renderedNode = (await renderer.render('dom/html', structureNode))[0];
+        const layout = this.editor.plugins.get(JWEditorLib.Layout);
+        const domLayout = layout.engines.dom;
+        const editable = domLayout.components.get('editable')[0];
+        const structureNodes = editable.descendants(JWEditorLib.OdooStructureNode);
+        for (const structureNode of structureNodes) {
+            const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
+            const renderedNode = (await renderer.render('dom/html', structureNode))[0];
 
-                promises.push(this._rpc({
-                    model: 'ir.ui.view',
-                    method: 'save',
-                    args: [
-                        parseInt(structureNode.viewId),
-                        renderedNode.outerHTML,
-                        structureNode.xpath,
-                    ],
-                    context: this.options.recordInfo.context,
-                }));
-            }
-        });
+            promises.push(this._rpc({
+                model: 'ir.ui.view',
+                method: 'save',
+                args: [
+                    parseInt(structureNode.viewId),
+                    renderedNode.outerHTML,
+                    structureNode.xpath,
+                ],
+                context: this.options.recordInfo.context,
+            }));
+        }
         return Promise.all(promises);
     },
     /**
