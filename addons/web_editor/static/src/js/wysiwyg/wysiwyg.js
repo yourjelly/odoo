@@ -426,7 +426,7 @@ var Wysiwyg = Widget.extend({
         return rpcResult;
     },
     /**
-     * Save all "mega menu" blocks.
+     * Save all "mega menu" classes.
      *
      * @private
      */
