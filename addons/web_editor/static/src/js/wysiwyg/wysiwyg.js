@@ -138,6 +138,7 @@ var Wysiwyg = Widget.extend({
 
             this.editor.load(JWEditorLib.DevTools);
             await this.editor.start();
+            this._bindAfterStart();
 
             const layout = this.editor.plugins.get(JWEditorLib.Layout);
             const domLayout = layout.engines.dom;
@@ -322,6 +323,7 @@ var Wysiwyg = Widget.extend({
             // todo: make them work
             await this._saveViewBlocks();
             await this._saveCoverPropertiesBlocks();
+            await this._saveMegaMenuClasses();
         });
 
         this.trigger_up('edition_was_stopped');
@@ -428,26 +430,39 @@ var Wysiwyg = Widget.extend({
      *
      * @private
      */
-    _saveMegaMenuBlocks: async function () {
-        if (this.$el.data('oe-field') === 'mega_menu_content') {
+    _saveMegaMenuClasses: async function () {
+        const layout = this.editor.plugins.get(JWEditorLib.Layout);
+        const domLayout = layout.engines.dom;
+        const editable = domLayout.components.get('editable')[0];
+        const structureNodes = editable.descendants((node) => {
+            return node.modifiers.get(JWEditorLib.Attributes).get('data-oe-field') === 'mega_menu_content'
+        });
+        const promises = [];
+        for (const node of structureNodes) {
             // On top of saving the mega menu content like any other field
             // content, we must save the custom classes that were set on the
             // menu itself.
             // FIXME: normally removing the 'show' class should not be necessary here
             // TODO: check that editor classes are removed here as well
             let promises = [];
-            var classes = _.without(this.$el.attr('class').split(' '), 'dropdown-menu', 'o_mega_menu', 'show');
+            const items = node.modifiers.get(JWEditorLib.Attributes).classList.items();
+            var classes = _.without(items, 'dropdown-menu', 'o_mega_menu', 'show');
+
+            const itemId = node.modifiers.get(JWEditorLib.Attributes).get('data-oe-id');
+
             promises.push(this._rpc({
                 model: 'website.menu',
                 method: 'write',
                 args: [
-                    [parseInt(this.$el.data('oe-id'))],
+                    [parseInt(itemId)],
                     {
                         'mega_menu_classes': classes.join(' '),
                     },
                 ],
             }));
         }
+
+        await Promise.all(promises);
     },
     /**
      * Save all "newsletter" blocks.
@@ -657,6 +672,12 @@ var Wysiwyg = Widget.extend({
             .not('hr, br, input, textarea')
             .add('.o_editable');
     },
+    /**
+     * Additional binding after start.
+     *
+     * Meant to be overridden
+     */
+    _bindAfterStart() {},
 });
 
 return Wysiwyg;
