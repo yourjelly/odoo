@@ -52,7 +52,7 @@ class MrpStockReport(models.TransientModel):
 
     @api.model
     def get_lines(self, line_id=None, **kw):
-        context = dict(self.env.context)
+        context = self.env.context
         model = kw and kw['model_name'] or context.get('model')
         rec_id = kw and kw['model_id'] or context.get('active_id')
         level = kw and kw['level'] or 1
@@ -230,8 +230,7 @@ class MrpStockReport(models.TransientModel):
     def _get_html(self):
         result = {}
         rcontext = {}
-        context = dict(self.env.context)
-        rcontext['lines'] = self.with_context(context).get_lines()
+        rcontext['lines'] = self.get_lines()
         result['html'] = self.env.ref('stock.report_stock_inventory')._render(rcontext)
         return result
 

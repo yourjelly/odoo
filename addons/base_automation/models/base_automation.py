@@ -479,10 +479,9 @@ class BaseAutomation(models.Model):
 
             # retrieve all the records that satisfy the action's condition
             domain = []
-            context = dict(self._context)
             if action.filter_domain:
                 domain = safe_eval(action.filter_domain, eval_context)
-            records = self.env[action.model_name].with_context(context).search(domain)
+            records = self.env[action.model_name].search(domain)
 
             # determine when action should occur for the records
             if action.trg_date_id.name == 'date_action_last' and 'create_date' in records._fields:

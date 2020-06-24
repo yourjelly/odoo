@@ -212,9 +212,10 @@ class PurchaseOrder(models.Model):
         return super(PurchaseOrder, self).unlink()
 
     def copy(self, default=None):
-        ctx = dict(self.env.context)
-        ctx.pop('default_product_id', None)
-        self = self.with_context(ctx)
+        if 'default_product_id' in self.env.context:
+            ctx = dict(self.env.context)
+            ctx.pop('default_product_id', None)
+            self = self.with_context(ctx)
         new_po = super(PurchaseOrder, self).copy(default=default)
         for line in new_po.order_line:
             if line.product_id:

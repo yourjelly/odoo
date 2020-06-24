@@ -380,7 +380,6 @@ class View(models.Model):
     def _render(self, values=None, engine='ir.qweb', minimal_qcontext=False):
         """ Render the template. If website is enabled on request, then extend rendering context with website values. """
         self._handle_visibility(do_raise=True)
-        new_context = dict(self._context)
         if request and getattr(request, 'is_frontend', False):
 
             editable = request.website.is_publisher()
@@ -390,16 +389,14 @@ class View(models.Model):
             # in edit mode ir.ui.view will tag nodes
             if not translatable and not self.env.context.get('rendering_bundle'):
                 if editable:
-                    new_context = dict(self._context, inherit_branding=True)
+                    self = self.with_context(inherit_branding=True)
                 elif request.env.user.has_group('website.group_website_publisher'):
-                    new_context = dict(self._context, inherit_branding_auto=True)
+                    self = self.with_context(inherit_branding_auto=True)
             if values and 'main_object' in values:
                 if request.env.user.has_group('website.group_website_publisher'):
                     func = getattr(values['main_object'], 'get_backend_menu_id', False)
                     values['backend_menu_id'] = func and func() or self.env.ref('website.menu_website_configuration').id
 
-        if self._context != new_context:
-            self = self.with_context(new_context)
         return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
 
     @api.model
