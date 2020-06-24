@@ -529,7 +529,14 @@ class AccountPayment(models.Model):
                 journal = self.env['account.journal'].browse(vals['journal_id'])
                 vals['currency_id'] = journal.currency_id.id or journal.company_id.currency_id.id
 
-        payments = super().create(vals_list)
+        # Create journal entries manually because some fields are shared between both models but the ORM can't deal
+        # correctly with them. For example, 'partner_bank_id' in vals will be set on account.payment but not on the
+        # account.move.
+        move_vals_list = [{k: v for k, v in vals.items() if k in self.env['account.move']._fields} for vals in vals_list]
+        moves = self.env['account.move'].create(move_vals_list)
+
+        payment_vals_list = [{**vals, 'move_id': move.id} for vals, move in zip(vals_list, moves)]
+        payments = super(AccountPayment, self.with_context(skip_account_move_synchronization=True)).create(payment_vals_list)
 
         for i, pay in enumerate(payments):
             write_off_line_vals = write_off_line_vals_list[i]
@@ -643,7 +650,7 @@ class AccountPayment(models.Model):
 
         if not any(field_name in changed_fields for field_name in (
             'date', 'amount', 'payment_type', 'partner_type', 'payment_reference', 'is_internal_transfer',
-            'currency_id', 'partner_id', 'destination_account_id',
+            'currency_id', 'partner_id', 'destination_account_id', 'partner_bank_id',
         )):
             return
 
@@ -689,6 +696,7 @@ class AccountPayment(models.Model):
             pay.move_id.write({
                 'partner_id': pay.partner_id.id,
                 'currency_id': pay.currency_id.id,
+                'partner_bank_id': pay.partner_bank_id.id,
                 'line_ids': line_ids_commands,
             })
 
