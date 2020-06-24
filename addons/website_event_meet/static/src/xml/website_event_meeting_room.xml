@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="meeting_room_jitsi_modal">
+        <div class="o_wevent_meeting_room_jitsi_modal modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content border-0">
+                    <main class="modal-body p-0">
+                        <div class="o_wevent_jitsi_loading position-absolute w-100 text-center text-muted">
+                            <i class="fa fa-spin fa-spinner mr-3"/>
+                            <span>Loading your room...</span>
+                        </div>
+                    </main>
+                    <footer class="modal-footer">
+                        <button class="btn btn-primary" data-dismiss="modal" type="button">Close</button>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="create_meeting_room_modal">
+        <div class="modal fade o_wevent_create_meeting_room_modal" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content border-0">
+                    <main class="modal-body p-3">
+                        <form action="/event/create_meeting_room" class="text-dark" id="o_wevent_create_meeting_room_form" method="POST">
+                            <h2>Launch a new topic</h2>
+                            <div class="row m-2">
+                                <label class="col-4 mt-2 text-left">Room Topic</label>
+                                <input class="form-control col-8" maxlength="25" name="name" placeholder="Room Topic" required="1"/>
+                            </div>
+                            <div class="row m-2">
+                                <label class="col-4 mt-2 text-left">Short Summary</label>
+                                <input class="form-control col-8" maxlength="100" name="summary" placeholder="Short Summary" required="1"/>
+                            </div>
+                            <div class="row m-2">
+                                <label class="col-4 mt-2 text-left">Target People</label>
+                                <input class="form-control col-8" maxlength="25" name="audience" placeholder="Target People" required="1"/>
+                            </div>
+                            <div class="row m-2">
+                                <label class="col-4 mt-2 text-left">Language</label>
+                                <select class="form-control col-8" name="lang" required="1">
+                                    <option t-foreach="langs" t-as="language" t-att-value="language.code" t-esc="language.name"/>
+                                </select>
+                            </div>
+                            <div class="row m-2">
+                                <label class="col-4 mt-2 text-left">Capacity</label>
+                                <select class="form-control col-8" name="capacity" required="1">
+                                    <option value="4">4</option>
+                                    <option selected="selected" value="8">8</option>
+                                    <option value="12">12</option>
+                                    <option value="16">16</option>
+                                    <option value="20">20</option>
+                                </select>
+                            </div>
+                            <input name="event" t-att-value="event" type="hidden"/>
+                            <input name="csrf_token" t-att-value="csrf_token" type="hidden"/>
+                        </form>
+                    </main>
+                    <footer class="modal-footer">
+                        <button class="btn btn-primary" form="o_wevent_create_meeting_room_form" type="submit">Create</button>
+                        <button class="btn btn-primary" data-dismiss="modal" type="button">Discard</button>
+                    </footer>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

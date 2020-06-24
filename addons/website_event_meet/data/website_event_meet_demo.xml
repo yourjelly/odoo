@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="event_meeting_room_0" model="event.meeting_room">
+            <field name="name">Finance in Odoo</field>
+            <field name="summary">Accountant and CFO's willing to share their point of views.</field>
+            <field name="target_audience">accountant(s)</field>
+            <field name="max_capacity">12</field>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field eval="True" name="pinned"/>
+            <field name="event_id" ref="event.event_7"/>
+            <field name="participant_count">9</field>
+        </record>
+        <record id="event_meeting_room_1" model="event.meeting_room">
+            <field name="name">Developers meet Developers</field>
+            <field name="summary">Let's talk development on Odoo</field>
+            <field name="target_audience">developer(s)</field>
+            <field name="max_capacity">8</field>
+            <field name="lang_id" ref="base.lang_en"/>
+            <field eval="True" name="pinned"/>
+            <field name="event_id" ref="event.event_7"/>
+            <field name="participant_count">8</field>
+        </record>
+        <record id="event_meeting_room_2" model="event.meeting_room">
+            <field name="name">Discussions à propos de Javascript</field>
+            <field name="summary">On discute framework JS entre developpeurs.</field>
+            <field name="target_audience">développeur(s)</field>
+            <field name="max_capacity">8</field>
+            <field name="lang_id" ref="base.lang_fr"/>
+            <field eval="True" name="pinned"/>
+            <field name="event_id" ref="event.event_7"/>
+            <field name="participant_count">3</field>
+        </record>
+        <record id="event.event_7" model="event.event">
+            <field name="website_community" eval="True"/>
+        </record>
+    </data>
+</odoo>

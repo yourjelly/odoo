@@ -93,6 +93,7 @@ class Event(models.Model):
         ]
 
     def _update_website_menus(self):
+        print(self)
         for event in self:
             if event.menu_id and not event.website_menu:
                 event.menu_id.unlink()
