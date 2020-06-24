@@ -118,6 +118,18 @@ body.o_connected_user {
     }
 }
 
+// ANIMATIONS
+@keyframes fadeInDownSmall {
+    0% {
+        opacity: 0;
+        transform: translate(0, -5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
 // MODALS
 body .modal {
     &.o_technical_modal {
