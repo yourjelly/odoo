@@ -197,6 +197,9 @@ var KanbanModel = BasicModel.extend({
         const group = this.localData[groupID];
         let domain = group.domain;
         if (activeFilter) {
+            if (activeFilter === '__false') {
+                activeFilter = false;
+            }
             const activeFilterDomain = [[group.progressBarValues.field, '=', activeFilter]];
             domain = group.domain.concat(activeFilterDomain);
         }
