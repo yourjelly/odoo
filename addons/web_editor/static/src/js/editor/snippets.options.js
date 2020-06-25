@@ -164,6 +164,30 @@ const UserValueWidget = Widget.extend({
         $el.append(this.containerEl);
         return $el;
     },
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+        if (this.el.classList.contains('o_we_img_animate')) {
+            const buildImgExtensionSwitcher = (from, to) => {
+                const regex = new RegExp(`${from}$`, 'i');
+                return ev => {
+                    const img = ev.currentTarget;
+                    img.src = img.src.replace(regex, to);
+                };
+            };
+            this.$el.on('mouseenter.img_animate', 'img', buildImgExtensionSwitcher('png', 'gif'));
+            this.$el.on('mouseleave.img_animate', 'img', buildImgExtensionSwitcher('gif', 'png'));
+        }
+    },
+    /**
+     * @override
+     */
+    destroy() {
+        this.$el.off('.img_animate');
+        this._super(...arguments);
+    },
 
     //--------------------------------------------------------------------------
     // Public
@@ -740,22 +764,21 @@ const SelectUserValueWidget = UserValueWidget.extend({
             return;
         }
 
-        const activeWidget = this._userValueWidgets.find(widget => !widget.isPreviewed() && widget.isActive());
-        let value = "/";
-        let imgSrc = "";
-        if (activeWidget) {
-            value = activeWidget.el.dataset.selectLabel || activeWidget.el.textContent;
-            imgSrc = activeWidget.el.dataset.img;
+        if (this.menuTogglerImgEl) {
+            this.menuTogglerImgEl.remove();
         }
 
-        if (!imgSrc) {
-            this.menuTogglerEl.textContent = value;
+        const activeWidget = this._userValueWidgets.find(widget => !widget.isPreviewed() && widget.isActive());
+        const value = activeWidget && (activeWidget.el.dataset.selectLabel || activeWidget.el.textContent.trim()) || '';
+        const imgSrc = activeWidget && activeWidget.el.dataset.img;
+        if (value || !imgSrc) {
+            this.menuTogglerEl.textContent = value || "/";
         } else {
-            // If the we-select contains a data-img attribute
-            // we fill the we-toogler with an image instead of a text
-            const imgEl = document.createElement('img');
-            imgEl.src = imgSrc;
-            this.menuTogglerEl.appendChild(imgEl);
+            if (!this.menuTogglerImgEl) {
+                this.menuTogglerImgEl = document.createElement('img');
+            }
+            this.menuTogglerImgEl.src = imgSrc;
+            this.menuTogglerEl.appendChild(this.menuTogglerImgEl);
         }
     },
 
