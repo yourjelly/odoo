@@ -10,8 +10,10 @@ import pytz
 from odoo import api, exceptions, fields, models, _
 from odoo.osv import expression
 
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 from odoo.tools.misc import clean_context
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
+
 
 _logger = logging.getLogger(__name__)
 
@@ -168,7 +170,7 @@ class MailActivity(models.Model):
         ('overdue', 'Overdue'),
         ('today', 'Today'),
         ('planned', 'Planned')], 'State',
-        compute='_compute_state')
+        compute='_compute_state', search='_search_state')
     recommended_activity_type_id = fields.Many2one('mail.activity.type', string="Recommended Activity Type")
     previous_activity_type_id = fields.Many2one('mail.activity.type', string='Previous Activity Type', readonly=True)
     has_recommended_activities = fields.Boolean(
@@ -203,6 +205,12 @@ class MailActivity(models.Model):
             tz = record.user_id.sudo().tz
             date_deadline = record.date_deadline
             record.state = self._compute_state_from_date(date_deadline, tz)
+
+    def _search_state(self, operator, operand):
+        # FIXME: timezones must be taken into account...
+        op = '=' if operand == 'today' else '>' if operand == 'planned' else '<'
+        today = date.today().strftime(DEFAULT_SERVER_DATE_FORMAT)
+        return [('date_deadline', op, today)]
 
     @api.model
     def _compute_state_from_date(self, date_deadline, tz=False):
@@ -655,7 +663,7 @@ class MailActivityMixin(models.AbstractModel):
         ('overdue', 'Overdue'),
         ('today', 'Today'),
         ('planned', 'Planned')], string='Activity State',
-        compute='_compute_activity_state',
+        compute='_compute_activity_state', search='_search_activity_state',
         groups="base.group_user",
         help='Status based on activities\nOverdue: Due date is already passed\n'
              'Today: Activity date is today\nPlanned: Future activities.')
@@ -721,6 +729,11 @@ class MailActivityMixin(models.AbstractModel):
                 record.activity_state = 'planned'
             else:
                 record.activity_state = False
+
+    def _search_activity_state(self, operator, operand):
+        if operator == '=' and not operand:
+            return [('activity_ids', '=', False)]
+        return [('activity_ids.state', operator, operand)]
 
     @api.depends('activity_ids.date_deadline')
     def _compute_activity_date_deadline(self):
