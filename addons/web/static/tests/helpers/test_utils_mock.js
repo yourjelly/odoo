@@ -167,12 +167,44 @@ async function _getMockedOwlEnv(params, mockServer) {
  * @returns {function} a cleanUp function to restore everything, to call at the
  *   end of the test
  */
-function _mockGlobalObjects(params) {
+function _mockGlobalObjects(params, env) {
     // patch session
     let initialSession = Object.assign({}, session);
     session.getTZOffset = function () {
         return 0; // by default, but may be overridden in specific tests
     };
+    let busCore;
+    let generalListeners;
+    if (env && env.bus && env.bus !== core.bus) {
+        generalListeners = [{
+            el: document,
+            events: 'click,dblclick,keydown,keypress,keyup'.split(','),
+            handler: ev => env.bus.trigger(ev.type, ev),
+        }, {
+            el: window,
+            events: 'resize,scroll'.split(','),
+            handler: ev => env.bus.trigger(ev.type, ev),
+        }];
+        generalListeners.forEach(({ events , el , handler }) =>
+            events.forEach(evName =>
+                el.addEventListener(evName, handler)
+            )
+        );
+        // this is beurk
+        // redirection of some events to real core bus
+        const redirectEvents = [
+            'crash_manager_unhandledrejection',
+            'rpc_error',
+            'clear_cache',
+        ];
+        redirectEvents.forEach(evName =>
+            env.bus.on(evName, env.bus, ev =>
+                busCore.trigger(evName, ev)
+            )
+        );
+        busCore = core.bus;
+        core.bus = env.bus;
+    }
     if ('session' in params) {
         Object.assign(session, params.session);
     }
@@ -199,6 +231,15 @@ function _mockGlobalObjects(params) {
 
     // build the cleanUp function to restore everything at the end of the test
     function cleanUp() {
+        if (busCore) {
+            generalListeners.forEach(({ events , el , handler }) =>
+                events.forEach(evName =>
+                    el.removeEventListener(evName, handler)
+                )
+            );
+            core.bus = busCore;
+            env.bus.destroy();
+        }
         let key;
         if ('session' in params) {
             for (key in session) {
@@ -390,28 +431,26 @@ async function addMockEnvironmentOwl(Component, params, mockServer) {
         removeSrcAttribute(ev.target, rpc);
     });
 
-    // mock global objects for legacy widgets (session, config...)
-    const restoreMockedGlobalObjects = _mockGlobalObjects(params);
-
     // set the test env on owl Component
     const env = await _getMockedOwlEnv(params, mockServer);
     const originalEnv = Component.env;
     Component.env = makeTestEnvironment(env, mockServer.performRpc.bind(mockServer));
+    // mock global objects for legacy widgets (session, config...)
+    const restoreMockedGlobalObjects = _mockGlobalObjects(params, env);
 
     // while we have a mix between Owl and legacy stuff, some of them triggering
     // events on the env.bus (a new Bus instance especially created for the current
     // test), the others using core.bus, we have to ensure that events triggered
     // on env.bus are also triggered on core.bus (note that outside the testing
     // environment, both are the exact same instance of Bus)
-    const envBusTrigger = env.bus.trigger;
+/*    const envBusTrigger = env.bus.trigger;
     env.bus.trigger = function () {
         core.bus.trigger(...arguments);
         envBusTrigger.call(env.bus, ...arguments);
-    };
+    };*/
 
     // build the clean up function to call at the end of the test
     function cleanUp() {
-        env.bus.destroy();
         Object.keys(env.services).forEach(function (s) {
             var service = env.services[s];
             if (service.destroy && !service.isDestroyed()) {
