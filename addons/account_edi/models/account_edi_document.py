@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, fields, api, _
+from contextlib import contextmanager
 from psycopg2 import sql, OperationalError
 import logging
 
@@ -27,6 +28,19 @@ class AccountEdiDocument(models.Model):
         ),
     ]
 
+    @contextmanager
+    def _with_lock(self):
+        try:
+            # Prevents edi documents to be sent multiple times.
+            with self.env.cr.savepoint():
+                self._cr.execute('SELECT * FROM account_edi_document WHERE id IN %s FOR UPDATE NOWAIT', [tuple(self.ids)])
+                yield
+        except OperationalError as e:
+            if e.pgcode == '55P03':
+                _logger.debug('Another transaction already locked documents rows. Cannot process documents.')
+            else:
+                raise e
+
     def _post_or_cancel_synchronously(self):
         """ Post and cancel all the documents that need don't need a web-service.
         """
@@ -45,18 +59,9 @@ class AccountEdiDocument(models.Model):
             for key, vals in to_process.items():
                 documents = vals['documents']
 
-                try:
-                    # Prevents edi documents to be sent mutliple times.
-                    with self.env.cr.savepoint():
-                        self._cr.execute('SELECT * FROM account_edi_document WHERE id IN %s FOR UPDATE NOWAIT', [tuple(documents.ids)])
-
-                        edi_result = vals['method'](vals['param'])
-                        vals['postprocess'](documents, edi_result)
-                except OperationalError as e:
-                    if e.pgcode == '55P03':
-                        _logger.debug('Another transaction already locked documents rows. Cannot process documents.')
-                    else:
-                        raise e
+                with documents._with_lock():
+                    edi_result = vals['method'](vals['param'])
+                    vals['postprocess'](documents, edi_result)
 
         def _postprocess_post_edi_results(documents, edi_result):
             for document in documents:
