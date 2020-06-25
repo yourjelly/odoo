@@ -37,6 +37,29 @@ $.extend($.expr[':'], {
 });
 
 /**
+ * Get an array of all the selector tags and their position within their parents.
+ */
+function getQuerySelectorArray (el) {
+    const parent = el.parentElement;
+
+    const index = [...parent.children].indexOf(el) + 1;
+    const selector = `${el.tagName}:nth-child(${index})`;
+    if (parent === document.body) {
+        return [selector];
+    } else {
+        return [...getQuerySelectorArray(parent), selector];
+    }
+}
+
+/**
+ * Retrieve an absolute query selector of an element.
+ */
+function getQuerySelector(el) {
+    const array = getQuerySelectorArray(el);
+    return 'body ' + array.join(' > ');
+}
+
+/**
  * Component that provides smooth scroll behaviour on drag.
  *
  * Do not forget to call unsetDraggable to ensure proper resource clearing.
@@ -1157,6 +1180,7 @@ var SnippetsMenu = Widget.extend({
             if ($snippet.closest(this._notActivableElementsSelector).length) {
                 return;
             }
+            this._lastSnippetBlockActivated = getQuerySelector($snippet[0]);
             this._activateSnippet($snippet);
         });
 
@@ -1269,6 +1293,15 @@ var SnippetsMenu = Widget.extend({
      */
     getChildsSnippetBlock($snippetBlock) {
         return $snippetBlock.add(globalSelector.all($snippetBlock));
+    },
+    /**
+     * Activate the last snippet that has been activated
+     */
+    activateLastSnippetBlock() {
+        if (this._lastSnippetBlockActivated) {
+            const $lastSnippet = $(document.querySelector(this._lastSnippetBlockActivated))
+            this._activateSnippet($lastSnippet);
+        }
     },
 
     //--------------------------------------------------------------------------
