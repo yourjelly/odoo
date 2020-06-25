@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="website_event_track.event_track3" model="event.track">
+        <field name="wishlisted_by_default" eval="True"/>
+    </record>
+    <record id="website_event_track.event_track11" model="event.track">
+        <field name="wishlisted_by_default" eval="True"/>
+    </record>
+    <record id="website_event_track.event_track14" model="event.track">
+        <field name="wishlisted_by_default" eval="True"/>
+    </record>
+    <record id="website_event_track.event_track27" model="event.track">
+        <field name="wishlisted_by_default" eval="True"/>
+    </record>
+</odoo>

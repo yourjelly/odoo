@@ -16,6 +16,12 @@
         'website_event_track_live',
     ],
     'data': [
+        'security/ir.model.access.csv',
+        'data/event_track_demo.xml',
+        'views/assets.xml',
+        'views/event_track_wishlist_template.xml',
+        'views/event_track_template.xml',
+        'views/event_track_views.xml',
     ],
     'demo': [
     ],
