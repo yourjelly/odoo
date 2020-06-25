@@ -5,6 +5,7 @@ import logging
 
 from odoo import api, models
 from odoo.exceptions import AccessDenied
+from odoo.tools import topological_sort
 
 _logger = logging.getLogger(__name__)
 
@@ -16,7 +17,19 @@ class AutoVacuum(models.AbstractModel):
 
     @api.model
     def _gc_transient_models(self):
-        for mname in self.env:
+        # Sort transient models following foreign keys, so that if A has a
+        # foreign key to B, then A is processed before B (except for cycles).
+        # This reduces the cascading effects of the deletion.
+        has_fk_relation = {
+            model_name: [
+                field.comodel_name
+                for field_name, field in Model._fields.items()
+                if field.type == 'many2one'
+            ]
+            for model_name, Model in self.pool.items()
+            if Model.is_transient()
+        }
+        for mname in reversed(topological_sort(has_fk_relation)):
             model = self.env[mname]
             if model.is_transient():
                 try:
