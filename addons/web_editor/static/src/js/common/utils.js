@@ -167,6 +167,21 @@ function _computeColorClasses(colorNames, prefix = 'bg-') {
     }
     return classes;
 }
+/**
+ * Normalize a color in case it is a variable name so it can be used outside of
+ * css.
+ *
+ * @param {string} color the color to normalize into a css value
+ * @returns {string} the normalized color
+ */
+function normalizeColor(color) {
+    if (!ColorpickerWidget.isCSSColor(color)) {
+        const style = window.getComputedStyle(document.documentElement);
+        color = style.getPropertyValue('--' + color).trim();
+        color = ColorpickerWidget.normalizeCSSColor(color);
+    }
+    return color;
+}
 
 return {
     CSS_SHORTHANDS: CSS_SHORTHANDS,
@@ -178,5 +193,6 @@ return {
     areCssValuesEqual: _areCssValuesEqual,
     isColorCombinationName: _isColorCombinationName,
     computeColorClasses: _computeColorClasses,
+    normalizeColor,
 };
 });
