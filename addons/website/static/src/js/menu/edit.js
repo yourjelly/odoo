@@ -137,6 +137,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 data_res_id: context.website_id,
             }, value: $('#wrapwrap')[0].outerHTML,
             enableWebsite: true,
+            discardButton: true,
             saveButton: true,
             location: [document.getElementById('wrapwrap'), 'replace'],
         }, ['website.compiled_assets_wysiwyg']);

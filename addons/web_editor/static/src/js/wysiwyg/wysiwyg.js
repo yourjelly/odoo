@@ -1,9 +1,13 @@
 odoo.define('web_editor.wysiwyg', function (require) {
 'use strict';
+var Dialog = require('web.Dialog');
 var Widget = require('web.Widget');
 var JWEditorLib = require('web_editor.jabberwock');
 var SnippetsMenu = require('web_editor.snippet.editor').SnippetsMenu;
 var weWidgets = require('wysiwyg.widgets');
+
+var core = require('web.core');
+var _t = core._t;
 
 var summernoteCustomColors = require('web_editor.rte.summernote_custom_colors');
 // Used to track the wysiwyg that will contain an iframe
@@ -128,11 +132,13 @@ var Wysiwyg = Widget.extend({
                 customCommands: {
                     openMedia: {handler: this.openMediaDialog.bind(this)},
                     openLinkDialog: {handler: this.openLinkDialog.bind(this)},
+                    discardOdoo: {handler: this.discardEditions.bind(this)},
                     saveOdoo: {handler: this.saveToServer.bind(this)}
                 },
                 source: elementToParse,
                 location: this.options.location,
                 saveButton: this.options.saveButton,
+                discardButton: this.options.discardButton,
                 template: this.options.template,
             });
 
@@ -330,6 +336,18 @@ var Wysiwyg = Widget.extend({
         if (reload) {
             window.location.reload();
         }
+    },
+    discardEditions: async function () {
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            var confirm = Dialog.confirm(this, _t("If you discard the current edits, all unsaved changes will be lost. You can cancel to return to edit mode."), {
+                confirm_callback: resolve,
+            });
+            confirm.on('closed', self, reject);
+        }).then(function () {
+            window.onbeforeunload = null;
+            window.location.reload();
+        });
     },
 
     //--------------------------------------------------------------------------
