@@ -45,6 +45,7 @@ $-font-numbers: (
 
     --logo-height: #{$o-theme-navbar-logo-height};
     --fixed-logo-height: #{$o-theme-navbar-fixed-logo-height};
+    --sidebar-width: #{$o-theme-sidebar-width};
     --number-of-fonts: #{length($o-theme-fonts)};
 
     --number-of-color-palettes: #{length($o-color-palettes) - 1}; // -1 since the last one is the user customized one
@@ -788,6 +789,7 @@ $-transition-duration: 200ms;
 }
 
 $-off-canvas-hamburger: o-website-value('hamburger-type') == 'off-canvas';
+$-sidebar: o-website-value('header-template') == 'sidebar';
 $-hamburger-left: o-website-value('hamburger-position') == 'left';
 $-hamburger-center: o-website-value('hamburger-position') == 'center';
 
@@ -948,6 +950,66 @@ header {
                 background-image: linear-gradient(90deg, currentColor 20%, transparent);
             } @else {
                 background-image: linear-gradient(-90deg, currentColor 20%, transparent);
+            }
+        }
+    }
+}
+
+@if $-sidebar {
+    @include media-breakpoint-up(lg) {
+        #top {
+            position: fixed;
+            right: auto;
+            z-index: $zindex-fixed;
+            display: flex;
+            height: 100%;
+            transform: none !important;
+            .navbar:not(#o_preheader) {
+                width: $o-theme-sidebar-width;
+                align-items: start;
+                padding: $spacer;
+                .navbar-brand {
+                    max-width: 100%;
+                    padding: 0 0 $spacer 0;
+                }
+                #top_menu_container {
+                    flex-direction: column;
+                    align-items: start;
+                    padding: 0;
+                }
+                .navbar-nav {
+                    flex-direction: column;
+                }
+                .nav-link,
+                .dropdown-item {
+                    white-space: initial;
+                }
+                .dropdown-menu {
+                    position: relative;
+                }
+            }
+            & ~ main, & ~ footer {
+                margin-left: $o-theme-sidebar-width;
+            }
+        }
+        @if o-website-value('preheader-template') != 'none' {
+            body.editor_enable.editor_has_snippets #o_preheader {
+                margin-left: $o-we-sidebar-width
+            }
+            #o_preheader {
+                position: fixed;
+                right: 0;
+                left: $o-theme-sidebar-width;
+            }
+        }
+        @if index(('magazine', 'icons'), o-website-value('preheader-template')) {
+            #top ~ main {
+                // Header visibilities
+                padding-top: $spacer * 3 !important;
+            }
+        } @else if o-website-value('preheader-template') == 'image' {
+            #top ~ main {
+                padding-top: o-website-value('preheader-height');
             }
         }
     }

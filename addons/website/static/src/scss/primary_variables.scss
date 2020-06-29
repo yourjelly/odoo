@@ -239,6 +239,9 @@ $o-theme-generic-color-palettes: (
 // Website customizations
 //------------------------------------------------------------------------------
 
+$o-theme-preheader-contact-fa-opacity: 0.5;
+$o-theme-preheader-icon-size: 2rem;
+
 $o-base-website-values-palette: (
     'layout': 'full', // 'full' / 'boxed'
     'logo-height': null, // Default to navbar height (see portal)
@@ -257,7 +260,9 @@ $o-base-website-values-palette: (
     'btn-ripple': false,
     'preheader-template': null, // null, 'magazine', 'icons' or 'image'
     'preheader-height': 1vw, // Only used in 'image' preheader-template
-    'header-template': 'default', // 'default' / 'hamburger' / 'vertical'
+    'header-template': 'default', // 'default' / 'hamburger' / 'vertical' / 'sidebar'
+    'sidebar-width': 300px,
+    'header-links-style': 'default', // 'default' / 'fill' / 'outline' / 'pills' / 'block' / 'border-bottom'
     'hamburger-type': 'default', // 'default' / 'off-canvas'
     'hamburger-position': 'right', // 'right' / 'left' / 'center'
     'header-navbar-links-style': 'default',
