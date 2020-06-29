@@ -10,11 +10,7 @@ var ColorPaletteWidget = require('web_editor.ColorPalette').ColorPaletteWidget;
 const weUtils = require('web_editor.utils');
 const {
     normalizeColor,
-    setBgImage,
-    getBgImage,
     getBgImageSrc,
-    setBgShape,
-    getBgShapeSrc,
 } = weUtils;
 var weWidgets = require('wysiwyg.widgets');
 const {
@@ -3031,7 +3027,7 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
      */
     async _applyOptions() {
         await this._super(...arguments);
-        setBgImage(this.$target[0], {'background-image': `url('${this._getImg().getAttribute('src')}')`});
+        this.$target.css('background-image', `url('${this._getImg().getAttribute('src')}')`);
     },
     /**
      * Initializes this.img to an image with the background image url as src.
@@ -3043,14 +3039,9 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
         Object.entries(this.$target[0].dataset).forEach(([key, value]) => {
             this.img.dataset[key] = value;
         });
-        const src = getBgImageSrc(this.$target[0]) || '';
-        const url = new URL(src, window.location.origin);
+        const src = new URL(getBgImageSrc(this.$target[0]), window.location.origin);
         // Make URL relative because that is how image urls are stored in the database.
-        if (url && url.origin === window.location.origin) {
-            this.img.src = url.pathname;
-        } else {
-            this.img.src = '/';
-        }
+        this.img.src = src.origin === window.location.origin && src.pathname;
         return await this._super(...arguments);
     },
 
@@ -3083,7 +3074,7 @@ registry.background = SnippetOptionWidget.extend({
     start: function () {
         // Initialize background and events
         this.bindBackgroundEvents();
-        this.__customImageSrc = this._getSrcFromCssValue();
+        this.__customImageSrc = getBgImageSrc(this.$target[0]);
 
         return this._super(...arguments);
     },
@@ -3099,7 +3090,7 @@ registry.background = SnippetOptionWidget.extend({
      */
     background: async function (previewMode, widgetValue, params) {
         if (previewMode === true) {
-            this.__customImageSrc = this._getSrcFromCssValue();
+            this.__customImageSrc = getBgImageSrc(this.$target[0]);
         } else if (previewMode === 'reset') {
             widgetValue = this.__customImageSrc;
         } else {
@@ -3107,15 +3098,10 @@ registry.background = SnippetOptionWidget.extend({
         }
 
         if (widgetValue) {
-            const bg = {'background-image': `url("${widgetValue}")`};
-            if (!this.$target.hasClass('oe_img_bg')) {
-                bg['background-size'] = 'cover';
-                bg['background-repeat'] = 'no-repeat';
-            }
-            setBgImage(this.$target[0], bg);
+            this.$target.css('background-image', `url('${widgetValue}')`);
             this.$target.addClass('oe_img_bg');
         } else {
-            setBgImage(this.$target[0], {'background-image': 'none'});
+            this.$target.css('background-image', '');
             this.$target.removeClass('oe_img_bg');
         }
 
@@ -3156,7 +3142,7 @@ registry.background = SnippetOptionWidget.extend({
         this._super(...arguments);
         // TODO should be automatic for all options as equal to the start method
         this.bindBackgroundEvents();
-        this.__customImageSrc = this._getSrcFromCssValue();
+        this.__customImageSrc = getBgImageSrc(this.$target[0]);
     },
 
     //--------------------------------------------------------------------------
@@ -3164,21 +3150,12 @@ registry.background = SnippetOptionWidget.extend({
     //--------------------------------------------------------------------------
 
     /**
-     * Returns the background image's src.
-     *
-     * @private
-     * @returns {string}
-     */
-    _getSrcFromCssValue: function () {
-        return getBgImageSrc(this.$target[0]) || '';
-    },
-    /**
      * @override
      */
     _computeWidgetState: function (methodName) {
         switch (methodName) {
             case 'background':
-                return this._getSrcFromCssValue();
+                return getBgImageSrc(this.$target[0]);
         }
         return this._super(...arguments);
     },
@@ -3220,7 +3197,6 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
     async start() {
         await this._super(...arguments);
         this.initialShape = this._getShapeData();
-        this.initialShapeSrc = getBgShapeSrc(this.$target[0]);
     },
 
     //--------------------------------------------------------------------------
@@ -3288,11 +3264,9 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             shapeContainer.nextElementSibling.style.position = 'relative';
         }
         shapeContainer.className = `o_we_shape o_${shape.replace('/', '_')}`;
-        // Reset bg-shape so that the next setBgShape takes the bg-position of the class
-        setBgShape(shapeContainer, {'background-image': 'none'});
         if (color1 !== 'o-color-1' || color2 !== 'o-color-2') {
             // Custom colors, overwrite shape that is set by the class
-            setBgShape(shapeContainer, {'background-image': `url("${this._getShapeSrc()}")`});
+            $(shapeContainer).css('background-image', `url("${this._getShapeSrc()}")`);
         }
     },
     /**
@@ -3372,11 +3346,9 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     backgroundType: function (previewMode, widgetValue, params) {
-        setBgImage(this.$target[0], {
-                'background-position': '',
-                'background-size': widgetValue === 'cover' ? 'cover' : 'auto',
-                'background-repeat': widgetValue === 'cover' ? 'no-repeat' : 'repeat',
-            }, true);
+        this.$target.toggleClass('o_bg_img_opt_repeat', widgetValue === 'repeat-pattern');
+        this.$target.css('background-position', '');
+        this.$target.css('background-size', '');
     },
     /**
      * Saves current background position and enables overlay.
@@ -3388,11 +3360,10 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         await new Promise(resolve => {
             this.img = document.createElement('img');
             this.img.addEventListener('load', () => resolve());
-            this.img.src = this._getSrcFromCssValue();
+            this.img.src = getBgImageSrc(this.$target[0]);
         });
 
-        const bg = getBgImage(this.$target[0]);
-        const position = bg['background-position'].split(' ').map(v => parseInt(v));
+        const position = this.$target.css('background-position').split(' ').map(v => parseInt(v));
         // Convert % values to pixels (because mouse movement is in pixels)
         const delta = this._getBackgroundDelta();
         this.originalPosition = {
@@ -3407,8 +3378,11 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @override
      */
     selectStyle: function (previewMode, widgetValue, params) {
-        if (params.cssProperty === 'background-size') {
-            return setBgImage(this.$target[0], {'background-size': widgetValue});
+        if (params.cssProperty === 'background-size'
+                && !this.$target.hasClass('o_bg_img_opt_repeat')) {
+            // Disable the option when the image is in cover mode, otherwise
+            // the background-size: auto style may be forced.
+            return;
         }
         this._super(...arguments);
     },
@@ -3421,20 +3395,14 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @override
      */
     _computeVisibility: function () {
-        return this._super(...arguments) && !!getBgImage(this.$target[0]);
+        return this._super(...arguments) && !!getBgImageSrc(this.$target[0]);
     },
     /**
      * @override
      */
     _computeWidgetState: function (methodName, params) {
-        const bgImage = getBgImage(this.$target[0]);
-        switch (methodName) {
-            case 'backgroundType':
-                return (bgImage && bgImage['background-repeat'] === 'repeat') ? 'repeat-pattern' : 'cover';
-            case 'selectStyle':
-                if (params.cssProperty === 'background-size') {
-                    return bgImage ? bgImage['background-size'] : '';
-                }
+        if (methodName === 'backgroundType') {
+            return (this.$target.css('background-repeat') === 'repeat') ? 'repeat-pattern' : 'cover';
         }
         return this._super(...arguments);
     },
@@ -3535,22 +3503,13 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         window.setTimeout(() => $(document).on('click.bgposition', this._onDocumentClicked.bind(this)), 0);
     },
     /**
-     * Returns the background image's src.
-     *
-     * @private
-     * @returns {string}
-     */
-    _getSrcFromCssValue: function () {
-        return getBgImageSrc(this.$target[0]) || '';
-    },
-    /**
      * Returns the difference between the target's size and the background's
      * rendered size. Background position values in % are a percentage of this.
      *
      * @private
      */
     _getBackgroundDelta: function () {
-        const bgSize = getBgImage(this.$target[0])['background-size'];
+        const bgSize = this.$target.css('background-size');
         if (bgSize !== 'cover') {
             let [width, height] = bgSize.split(' ');
             if (width === 'auto' && (height === 'auto' || !height)) {
@@ -3618,7 +3577,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         percentPosition.left = isFinite(percentPosition.left) ? percentPosition.left : this.originalPosition.left;
         percentPosition.top = isFinite(percentPosition.top) ? percentPosition.top : this.originalPosition.top;
 
-        setBgImage(this.$bgDragger[0], {'background-position': `${percentPosition.left}% ${percentPosition.top}%`});
+        this.$bgDragger.css('background-position', `${percentPosition.left}% ${percentPosition.top}%`);
 
         function clamp(val, bounds) {
             // We sort the bounds because when one dimension of the rendered background is
