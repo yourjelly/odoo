@@ -183,162 +183,6 @@ function normalizeColor(color) {
     return color;
 }
 /**
- * Splits a CSS property into its respective parts, doesn't split between
- * parentheses. eg:
- *    splitCssValue("linear-gradient(to bottom, rgba(255,255,0,0.5), rgba(0,0,255,0.5)), url('/web/static/image.png')", ',')
- *    => ["linear-gradient(to bottom, rgba(255,255,0,0.5), rgba(0,0,255,0.5))", "url('/web/static/image.png')"]
- *
- * @param {string} cssValue the css property to split
- * @param {string} [delimiter=','] the delimiter on which to split
- */
-function splitCssValue(cssValue, delimiter = ',') {
-    const findClosingParen = (string, index) => {
-        let balance = 1;
-        while (balance !== 0 && ++index < string.length) {
-            switch (string[index]) {
-                case '(':
-                    balance++;
-                    break;
-                case ')':
-                    balance--;
-                    break;
-            }
-        }
-        return index;
-    };
-
-    const topLevelParens = [];
-    for (let index = 0; index < cssValue.length; index++) {
-        if (cssValue[index] === '(') {
-            const closing = findClosingParen(cssValue, index);
-            topLevelParens.push({start: index, stop: closing});
-            index = closing;
-        }
-    }
-
-    const inRanges = (index, ranges) => {
-        return ranges.some(range => index >= range.start && index <= range.stop);
-    };
-
-    const parts = [];
-    let i = 0;
-    let previousDelimiter = -1;
-    while (i < cssValue.length) {
-        const nextDelimiter = cssValue.indexOf(delimiter, i);
-        if (nextDelimiter < 0) {
-            parts.push(cssValue.substring(previousDelimiter + 1).trim());
-            break;
-        }
-        if (!inRanges(nextDelimiter, topLevelParens)) {
-            parts.push(cssValue.substring(previousDelimiter + 1, nextDelimiter).trim());
-            previousDelimiter = nextDelimiter;
-        }
-        i = nextDelimiter + 1;
-    }
-    return parts;
-}
-/**
- * Pads an array to a given length by repeating its contents.
- *     eg: padRepeat([1, 2, 3], 7) => [1, 2, 3, 1, 2, 3, 1]
- *
- * @param {Array} arr the array to pad
- * @param {Integer} length the length to which the array should be padded
- */
-function padRepeat(arr, length) {
-    // Pad empty arrays with empty strings.
-    if (arr.length === 0) {
-        arr = [''];
-    }
-    const ret = [];
-    while (ret.length < length) {
-        Array.prototype.push.apply(ret, arr.slice(0, length - ret.length));
-    }
-    return ret;
-}
-/**
- * Returns an array of an elements backgrounds with all their properties
- *
- * @param {HMTLElement} el the element whose backgrounds should be returned
- * @returns {Array} an array of background objects
- */
-function getBackgrounds(el) {
-    const $el = $(el);
-    const nbBackgrounds = splitCssValue($el.css('background-image')).length;
-    const backgroundComponents = [
-        'background-image',
-        'background-repeat',
-        'background-attachment',
-        'background-position',
-        'background-clip',
-        'background-origin',
-        'background-size',
-    ];
-    // cssValues: [
-    //     ["background-image", "url(...), linear-gradient(...)"],
-    //     ["background-repeat", "repeat, no-repeat"],
-    //     ...
-    // ]
-    const cssValues = Object.entries($el.css(backgroundComponents));
-    // splitProps: [
-    //     ["background-image", ["url(...)", "linear-gradient(..)"]],
-    //     ["background-repeat", ["rapeat", "no-repeat"]],
-    //     ...
-    // ]
-    // For why we use padRepeat, see https://www.w3.org/TR/css-backgrounds-3/#layering
-    const splitProps = cssValues.map(([propName, propValue]) => [propName, padRepeat(splitCssValue(propValue), nbBackgrounds)]);
-    // entriesArray: [
-    //     [["background-image", "url(...)"], ["background-repeat", "repeat"], ...],
-    //     [["background-image", "linear-gradient(...)"], ["background-repeat","no-repeat"], ...], ...
-    //     ...
-    // ]
-    const entriesArray = _.zip(...splitProps.map(([propName, subValues]) => subValues.map(subValue => [propName, subValue])));
-    // returned value: [
-    //     {"background-image": "url(...)", "background-repeat": "repeat", ...},
-    //     {"background-image": "linear-gradient(...)", "background-repeat": "no-repeat", ...},
-    //     ...
-    // ]
-    return entriesArray.map(entries => Object.fromEntries(entries));
-}
-/**
- * Replace one of an element's backgrounds.
- *
- * @param {HTMLElement} el the element whose background should be changed.
- * @param {Function} findFn the function used in find to identify which
- *    background to change.
- * @param {Function} insertMethod the Array method that should be used to insert
- *    a new background if one wasn't found with findFn.
- * @param {Object} background an object with all the background's non-default
- *    properties.
- *    @see getBackgrounds for the complete list.
- */
-function setBackground(el, findFn, insertMethod, background) {
-    const backgroundDefaults = {
-        'background-image': 'none',
-        'background-repeat': 'repeat',
-        'background-attachment': 'scroll',
-        'background-position': '0% 0%',
-        'background-clip': 'border-box',
-        'background-origin': 'padding-box',
-        'background-size': 'auto',
-    };
-    const backgrounds = getBackgrounds(el);
-    let currentBackground = backgrounds.find(bg => findFn(bg['background-image']));
-    if (!currentBackground) {
-        currentBackground = {};
-        insertMethod.call(backgrounds, currentBackground);
-    }
-    background = Object.assign({}, backgroundDefaults, currentBackground, background);
-    Object.assign(currentBackground, background);
-    const entries = backgrounds.filter(bg => bg['background-image'] !== 'none').map(bg => Object.entries(bg));
-    if (entries.length === 0) {
-        // No entries, need to override background properties with empty string
-        entries.push(Object.entries(backgroundDefaults).map(([propName]) => [propName, '']));
-    }
-    const cssValues = _.zip(...entries)
-        .map(propArray => [propArray[0][0], propArray.map(([, propValue]) => propValue).join(', ')]);
-    $(el).css(Object.fromEntries(cssValues));
-}
-/**
  * Parse a background-image's src.
  *
  * @param {string} string a css value in the form 'url("...")'
@@ -347,43 +191,13 @@ function setBackground(el, findFn, insertMethod, background) {
 function parseBgSrc(string) {
     const match = string.match(/^url\(['"](.*?)['"]\)$/);
     if (!match) {
-        return false;
+        return '';
     }
     return match[1];
 }
-/**
- * Parse a background shape's src.
- *
- * @param {string} string a css value in the form 'url("...")'
- * @returns {string} the src of the shape or false if not parsable/not a shape
- */
-function parseShapeSrc(string) {
-    const src = parseBgSrc(string);
-    const url = new URL(src, window.location.origin);
-    if (url.origin !== window.location.origin || !url.pathname.startsWith('/web_editor/shape/')) {
-        return false;
-    }
-    return url.pathname + url.search;
-}
 
-const isShapeSrc = string => !!parseShapeSrc(string);
-const isBgImageSrc = string => !!parseBgSrc(string) && !isShapeSrc(string);
-
-const setBgImage = (el, background, noInsert) => {
-    const insertMethod = !noInsert ? Array.prototype.push : () => undefined;
-    setBackground(el, isBgImageSrc, insertMethod, background);
-};
-const getBgImage = el => getBackgrounds(el).find(bg => isBgImageSrc(bg['background-image']));
 const getBgImageSrc = el => {
-    const bg = getBgImage(el);
-    return bg && parseBgSrc(bg['background-image']);
-};
-
-const setBgShape = (el, background) => setBackground(el, isShapeSrc, Array.prototype.unshift, background);
-const getBgShape = el => getBackgrounds(el).find(bg => isShapeSrc(bg['background-image']));
-const getBgShapeSrc = el => {
-    const bg = getBgShape(el);
-    return bg && parseShapeSrc(bg['background-image']);
+    return parseBgSrc($(el).css('background-image'));
 };
 
 return {
@@ -397,10 +211,6 @@ return {
     isColorCombinationName: _isColorCombinationName,
     computeColorClasses: _computeColorClasses,
     normalizeColor,
-    setBgShape,
-    setBgImage,
-    getBgImage,
     getBgImageSrc,
-    getBgShapeSrc,
 };
 });
