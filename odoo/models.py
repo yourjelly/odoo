@@ -2410,6 +2410,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             value = field.convert_to_column(value, self)
         else:
             value = None
+
+        #JKETODO"
+
         # Write value if non-NULL, except for booleans for which False means
         # the same as NULL - this saves us an expensive query on large tables.
         necessary = (value is not None) if field.type != 'boolean' else value

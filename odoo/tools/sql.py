@@ -119,6 +119,12 @@ def drop_not_null(cr, tablename, columnname):
     cr.execute('ALTER TABLE "{}" ALTER COLUMN "{}" DROP NOT NULL'.format(tablename, columnname))
     _schema.debug("Table %r: column %r: dropped constraint NOT NULL", tablename, columnname)
 
+def drop_default(cr, tablename, columnname):
+    """ Drop the DEFAULT value on the given column. """
+    cr.execute('ALTER TABLE "{}" ALTER COLUMN "{}" DROP DEFAULT'.format(tablename, columnname))
+    _schema.debug("Table %r: column %r: dropped constraint NOT NULL", tablename, columnname)
+    print("Table %r: column %r: dropped DEFAULT value", tablename, columnname)
+
 def constraint_definition(cr, tablename, constraintname):
     """ Return the given constraint's definition. """
     query = """

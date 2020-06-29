@@ -1148,6 +1148,11 @@ class Boolean(Field):
     def convert_to_export(self, value, record):
         return value
 
+    def update_db_column(self, model, column):
+        super(Boolean, self).update_db_column(model, column)
+        if self.default and self.default(model):
+            sql.drop_default(model._cr, model._table, self.name)
+
 
 class Integer(Field):
     """ Encapsulates an :class:`int`. """
