@@ -10,11 +10,11 @@
 <template id="compiled_assets_wysiwyg" name="Wysiwyg Editor" groups="base.group_user,base.group_portal">
     <t t-call-assets="web_editor.assets_wysiwyg"/>
 </template>
-<template id="web_editor.compiled_assets_wysiwyg_jabberwock" name="Jabberwock Wysiwyg Editor" groups="base.group_user,base.group_portal">
-    <t t-call-assets="web_editor.assets_wysiwyg_jabberwock"/>
+<template id="web_editor.compiled_assets_wysiwyg" name="Jabberwock Wysiwyg Editor" groups="base.group_user,base.group_portal">
+    <t t-call-assets="web_editor.assets_wysiwyg"/>
 </template>
 
-<template id="web_editor.assets_wysiwyg_base" name="Wysiwyg Editor Assets base">
+<template id="web_editor.assets_wysiwyg" name="Wysiwyg Editor Assets base">
     <!-- lib -->
 
     <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/cropperjs/cropper.css"/>
@@ -55,77 +55,8 @@
     <script type="text/javascript" src="/web_editor/static/src/js/editor/snippets.options.js"/>
 
     <!-- Launcher -->
-    <!-- todo: move to web_editor.assets_wysiwyg_jabberwock. Currently here because wysiwyg
-               depends on it. -->
     <script type="text/javascript" src="/web_editor/static/lib/jabberwock/jabberwock.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg.js"/>
-</template>
-
-<template id="web_editor.assets_wysiwyg_jabberwock" name="Jabberwock Wysiwyg Editor Assets">
-    <t t-call="web_editor.assets_wysiwyg_base" />
-</template>
-
-<template id="web_editor.assets_wysiwyg" name="Wysiwyg Editor Assets" >
-    <t t-call-assets="web_editor.assets_summernote"/>
-    <t t-call="web_editor.assets_wysiwyg_base" />
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/default_options.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/editor/editor.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/editor/rte.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/editor/rte.summernote.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_snippets.js"/>
-    <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_iframe.js"/>
-</template>
-
-<template id="assets_summernote" name="Summernote">
-    <script type="text/javascript">
-        (function () {
-            "use strict";
-            odoo.define('jquery', function () {return $;});
-
-            var uniqId = 0;
-            odoo.__define__ = window.define;
-            window.define = function (id) {
-                var args = Array.prototype.slice.call(arguments);
-                var factorie = args.pop();
-                var id = args[0];
-
-                if (id instanceof Array) {
-                    var name = "summernote_factorie_" + (++uniqId);
-                    odoo[name] = factorie;
-
-                    var head = '';
-                    var fn = 'var fn = odoo.'+name+';\ndelete odoo.'+name+';\n';
-                    fn += 'return fn(';
-                    for (var k=0; k&lt;id.length; k++) {
-                        head += 'var a'+(++uniqId)+' = require("'+id[k]+'");\n';
-                        fn += 'a'+uniqId+', ';
-                    }
-                    fn += 'null);';
-
-                    odoo.define(odoo.website_next_define, new Function('require', head + fn));
-                } else {
-                    odoo.define(id, factorie);
-                }
-            };
-        })();
-    </script>
-    <t t-set="summer_js_files" t-value="['core/async', 'core/func', 'core/agent', 'core/list',
-        'core/dom', 'core/key', 'core/range', 'editing/Bullet', 'editing/History', 'editing/Style',
-        'editing/Table', 'editing/Typing', 'module/Editor', 'module/Button', 'module/Clipboard',
-        'module/Codeview', 'module/DragAndDrop', 'module/Fullscreen', 'module/Handle',
-        'module/HelpDialog', 'module/ImageDialog', 'module/LinkDialog', 'module/Popover',
-        'module/Statusbar', 'module/Toolbar', 'Renderer', 'EventHandler', 'defaults', 'summernote']" />
-    <t t-foreach="summer_js_files" t-as="file">
-        <script>odoo.website_next_define = 'summernote/<t t-esc="file" />';</script>
-        <script type="text/javascript" t-attf-src="/web_editor/static/lib/summernote/src/js/{{ file }}.js"></script>
-    </t>
-    <script type="text/javascript" src="/web_editor/static/src/js/editor/summernote.js" />
-    <script type="text/javascript">
-        window.define = odoo.__define__;
-        delete odoo.__define__;
-        delete odoo.website_next_define;
-    </script>
-    <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/summernote/src/css/summernote.css"/>
 </template>
 
 <template id="_assets_primary_variables" inherit_id="web._assets_primary_variables">
@@ -151,7 +82,6 @@
         <script type="text/javascript" src="/web_editor/static/lib/vkbeautify/vkbeautify.0.99.00.beta.js"/>
         <script type="text/javascript" src="/web_editor/static/src/js/common/ace.js"/>
         <script type="text/javascript" src="/web_editor/static/src/js/common/utils.js"/>
-        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/root.js"/>
     </xpath>
 </template>
 
@@ -193,7 +123,6 @@
     </xpath>
     <xpath expr="//script[last()]" position="after">
         <script type="text/javascript" src="/web_editor/static/src/js/frontend/loader.js"/>
-        <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/default_options.js"/>
     </xpath>
 </template>
 

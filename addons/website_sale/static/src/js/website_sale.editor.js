@@ -54,11 +54,11 @@ odoo.define('website_sale.editor', function (require) {
 
 var snippetOptions = require('web_editor.snippets.options');
 var publicWidget = require('web.public.widget');
-const {Class: EditorMenuBar} = require('web_editor.editor');
+const Wysiwyg = require('web_editor.wysiwyg');
 const {qweb} = require('web.core');
 
-EditorMenuBar.include({
-    custom_events: Object.assign(EditorMenuBar.prototype.custom_events, {
+Wysiwyg.include({
+    custom_events: Object.assign(Wysiwyg.prototype.custom_events, {
         get_ribbons: '_onGetRibbons',
         get_ribbon_classes: '_onGetRibbonClasses',
         delete_ribbon: '_onDeleteRibbon',
@@ -345,8 +345,8 @@ snippetOptions.registry.WebsiteSaleGridLayout = snippetOptions.SnippetOptionsWid
 });
 
 snippetOptions.registry.WebsiteSaleProductsItem = snippetOptions.SnippetOptionsWidget.extend({
-    xmlDependencies: (snippetOptions.SnippetOptionWidget.prototype.xmlDependencies || []).concat(['/website_sale/static/src/xml/website_sale_utils.xml']),
-    events: _.extend({}, snippetOptions.SnippetOptionWidget.prototype.events || {}, {
+    xmlDependencies: (snippetOptions.SnippetOptionsWidget.prototype.xmlDependencies || []).concat(['/website_sale/static/src/xml/website_sale_utils.xml']),
+    events: _.extend({}, snippetOptions.SnippetOptionsWidget.prototype.events || {}, {
         'mouseenter .o_wsale_soptions_menu_sizes table': '_onTableMouseEnter',
         'mouseleave .o_wsale_soptions_menu_sizes table': '_onTableMouseLeave',
         'mouseover .o_wsale_soptions_menu_sizes td': '_onTableItemMouseEnter',

@@ -180,7 +180,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
 
         return Object.assign({}, this.nodeOptions, {
-            legacy: false,
             recordInfo: {
                 context: this.record.getContext(this.recordParams),
                 res_model: this.model,

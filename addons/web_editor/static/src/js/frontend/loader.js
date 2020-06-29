@@ -11,7 +11,6 @@ function waitTimeout(ms) {
     });
 }
 
-const loadedLib = new Set();
 /**
  * Load the assets and create a wysiwyg.
  *
@@ -19,15 +18,7 @@ const loadedLib = new Set();
  * @param {object} options The wysiwyg options
  */
 async function createWysiwyg(parent, options, additionnalAssets = []) {
-    const assetLib = options.legacy === false ?
-        'web_editor.compiled_assets_wysiwyg_jabberwock' :
-        'web_editor.compiled_assets_wysiwyg';
-    if (!loadedLib.has(assetLib)) {
-        // todo: find a better way to add additionnal assets
-        await ajax.loadLibs({assetLibs: [assetLib, ...additionnalAssets]});
-        loadedLib.add(assetLib);
-    }
-    await ajax.loadLibs({assetLibs: [assetLib]});
+    await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', ...additionnalAssets]});
     // todo: find why the service is not yet ready than remove this function
     await waitTimeout(1000);
     const Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];

@@ -129,7 +129,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         });
 
         const wysiwyg = await wysiwygLoader.createWysiwyg(this, {
-            legacy: false,
             snippets: 'website.snippets',
             recordInfo: {
                 context: context,
