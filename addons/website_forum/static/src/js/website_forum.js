@@ -138,7 +138,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                     res_model: 'forum.post',
                     res_id: +window.location.pathname.split('-').pop(),
                 },
-                value: textarea.value,
+                value: textarea.value.trim() ? textarea.value : '<p><br/></p>',
             };
             if (!hasFullEdit) {
                 options.plugins = {
