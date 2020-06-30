@@ -25,11 +25,32 @@ async function createWysiwyg(parent, options, additionnalAssets = []) {
     return new Wysiwyg(parent, options);
 }
 
-async function loadFromTextarea(parent, $textarea, options) {
-    const wysiwyg = await createWysiwyg(parent, options);
+async function loadFromTextarea(parent, textarea, options) {
+    const $textarea = $(textarea);
+    const wysiwyg = await createWysiwyg(parent, {
+        template: `<t-dialog><t t-zone="default"/></t-dialog>
+        <div class="d-flex flex-grow-1 flex-column" style="height: 200px">
+            <div class="o_toolbar">
+                <t t-zone="tools"/>
+            </div>
+            <div class="d-flex flex-grow-1 overflow-auto note-editing-area">
+                <t t-zone="main"/>
+            </div>
+            <div class="o_debug_zone">
+                <t t-zone="debug"/>
+            </div>
+        </div>`,
+        ...options
+    });
 
     const $wysiwygWrapper = $textarea.closest('.o_wysiwyg_wrapper');
     const $form = $textarea.closest('form');
+    $wysiwygWrapper.css({
+        'display': 'flex',
+        'flex-direction': 'column',
+        'flex-grow': '1 1 auto',
+        'height': 200,
+    });
 
     // hide and append the $textarea in $form so it's value will be send
     // through the form.
@@ -38,10 +59,10 @@ async function loadFromTextarea(parent, $textarea, options) {
 
     wysiwyg.attachTo($wysiwygWrapper);
 
-    $form.on('click', 'button[type=submit]', (e) => {
+    $form.on('click', 'button[type=submit]', async (e) => {
         // float-left class messes up the post layout OPW 769721
         $form.find('.note-editable').find('img.float-left').removeClass('float-left');
-        $textarea.val(wysiwyg.getValue());
+        $textarea.val(await wysiwyg.getValue());
     });
 
     return wysiwyg;

@@ -79,129 +79,114 @@ var Wysiwyg = Widget.extend({
      * @override
      */
     start: async function () {
-        if (this.options.legacy) {
-            this.$target.wrap('<odoo-wysiwyg-container>');
-            this.$el = this.$target.parent();
-            var options = this._editorOptions();
-            this.$target.summernote(options);
-            this.$editor = this.$('.note-editable:first');
-            this.$editor.data('wysiwyg', this);
-            this.$editor.data('oe-model', options.recordInfo.res_model);
-            this.$editor.data('oe-id', options.recordInfo.res_id);
-            $(document).on('mousedown', this._blur);
-            this._value = this.$target.html() || this.$target.val();
-            return this._super.apply(this, arguments);
-        } else {
-            const self = this;
-            const _super = this._super;
-            const elementToParse = document.createElement('div');
-            elementToParse.setAttribute('class', 'd-flex d-column o_editor_center');
-            elementToParse.innerHTML = this.value;
+        const self = this;
+        const _super = this._super;
+        const elementToParse = document.createElement('div');
+        const wrapperClass = this.options.wrapperClass || 'd-flex o_editor_center';
+        elementToParse.setAttribute('class', wrapperClass);
+        elementToParse.innerHTML = this.value;
 
-            if (this.options.enableWebsite) {
-                $(document.body).addClass('o_connected_user editor_enable editor_has_snippets');
-            }
-            const $mainSidebar = $('<div class="o_main_sidebar">');
-            const $snippetManipulators = $('<div id="oe_manipulators" />');
+        if (this.options.enableWebsite) {
+            $(document.body).addClass('o_connected_user editor_enable editor_has_snippets');
+        }
+        const $mainSidebar = $('<div class="o_main_sidebar">');
+        const $snippetManipulators = $('<div id="oe_manipulators" />');
 
-            this.editor = new JWEditorLib.OdooWebsiteEditor({
-                afterRender: async ()=> {
-                    const $wrapwrap = $('#wrapwrap');
-                    $wrapwrap.removeClass('o_editable'); // clean the dom before edition
-                    this._getEditable($wrapwrap).addClass('o_editable');
+        this.editor = new JWEditorLib.OdooWebsiteEditor({
+            afterRender: async ()=> {
+                const $wrapwrap = $('#wrapwrap');
+                $wrapwrap.removeClass('o_editable'); // clean the dom before edition
+                this._getEditable($wrapwrap).addClass('o_editable');
 
-                    // todo: change this quick fix
-                    const $firstDiv = $('.wrapwrap main>div');
-                    if ($firstDiv.length) {
-                        $firstDiv.find('.oe_structure').addClass('o_editable');
-                        $firstDiv.addClass('oe_structure o_editable note-air-editor note-editable');
+                // todo: change this quick fix
+                const $firstDiv = $('.wrapwrap main>div');
+                if ($firstDiv.length) {
+                    $firstDiv.find('.oe_structure').addClass('o_editable');
+                    $firstDiv.addClass('oe_structure o_editable note-air-editor note-editable');
 
-                        this.$editorMessageElements = $firstDiv
-                            // todo: translate message
-                            .attr('data-editor-message', 'DRAG BUILDING BLOCKS HERE');
-                    }
+                    this.$editorMessageElements = $firstDiv
+                        // todo: translate message
+                        .attr('data-editor-message', 'DRAG BUILDING BLOCKS HERE');
+                }
 
-                    // To see the dashed lines on empty editor, the first element must be empty.
-                    // As the jabberwock editor currently add <p><br/></p> when the editor is empty,
-                    // we need to remove it.
-                    if ($firstDiv.html() === '<br>') {
-                        $firstDiv.empty();
-                    }
-                },
-                snippetMenuElement: $mainSidebar[0],
-                snippetManipulators: $snippetManipulators[0],
-                customCommands: {
-                    openMedia: {handler: this.openMediaDialog.bind(this)},
-                    openLinkDialog: {handler: this.openLinkDialog.bind(this)},
-                    discardOdoo: {handler: this.discardEditions.bind(this)},
-                    saveOdoo: {handler: this.saveToServer.bind(this)}
-                },
-                source: elementToParse,
-                location: this.options.location,
-                saveButton: this.options.saveButton,
-                discardButton: this.options.discardButton,
-                template: this.options.template,
+                // To see the dashed lines on empty editor, the first element must be empty.
+                // As the jabberwock editor currently add <p><br/></p> when the editor is empty,
+                // we need to remove it.
+                if ($firstDiv.html() === '<br>') {
+                    $firstDiv.empty();
+                }
+            },
+            snippetMenuElement: $mainSidebar[0],
+            snippetManipulators: $snippetManipulators[0],
+            customCommands: {
+                openMedia: {handler: this.openMediaDialog.bind(this)},
+                openLinkDialog: {handler: this.openLinkDialog.bind(this)},
+                discardOdoo: {handler: this.discardEditions.bind(this)},
+                saveOdoo: {handler: this.saveToServer.bind(this)}
+            },
+            source: elementToParse,
+            location: this.options.location || [this.el, 'replace'],
+            saveButton: this.options.saveButton,
+            template: this.options.template,
+        });
+
+        this.editor.load(JWEditorLib.DevTools);
+        await this.editor.start();
+        this._bindAfterStart();
+
+        const layout = this.editor.plugins.get(JWEditorLib.Layout);
+        const domLayout = layout.engines.dom;
+        this.domLayout = domLayout;
+
+        const editableNVnode = domLayout.components.get('editable')[0];
+        this.editorEditable = domLayout.getDomNodes(editableNVnode)[0];
+
+        this.editorHelpers = this.editor.plugins.get(JWEditorLib.DomHelpers);
+
+        // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
+        const emptyClass = "oe_blank_wrap";
+        const targetNode = this.editorEditable.querySelector("#wrap");
+        if(targetNode) {
+            let mutationCallback = function () {
+                if (targetNode.textContent.trim() === '') {
+                    targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+                    targetNode.classList.add(emptyClass);
+                } else {
+                    targetNode.classList.remove(emptyClass);
+                }
+            };
+            const observer = new MutationObserver(mutationCallback);
+            observer.observe(targetNode, {childList: true});
+            // force check at editor startup
+            mutationCallback();
+        }
+
+        // todo: handle megamenu
+
+        if (this.options.snippets) {
+            this.editor.enableRender = false;
+            this.$webEditorToolbar = $('<div id="web_editor-toolbars">');
+
+            var $toolbarHandler = $('#web_editor-top-edit');
+            $toolbarHandler.append(this.$webEditorToolbar);
+
+            this.snippetsMenu = new SnippetsMenu(this, Object.assign({
+                $el: $(this.editorEditable),
+                selectorEditableArea: '.o_editable',
+                $snippetEditorArea: $snippetManipulators,
+                wysiwyg: this,
+                JWEditorLib: JWEditorLib,
+            }, this.options));
+            await this.snippetsMenu.appendTo($mainSidebar);
+            this.editor.enableRender = true;
+            this.editor.render();
+            this.snippetsMenu.$editor = $('#wrapwrap');
+
+            this.$el.on('content_changed', function (e) {
+                self.trigger_up('wysiwyg_change');
             });
-            if(config.isDebug()) { //debug mode
-                this.editor.load(JWEditorLib.DevTools);
-            }
-            await this.editor.start();
-            this._bindAfterStart();
-
-            const layout = this.editor.plugins.get(JWEditorLib.Layout);
-            const domLayout = layout.engines.dom;
-            this.domLayout = domLayout;
-
-            const editableNVnode = domLayout.components.get('editable')[0];
-            this.editorEditable = domLayout.getDomNodes(editableNVnode)[0];
-
-            this.editorHelpers = this.editor.plugins.get(JWEditorLib.DomHelpers);
-
-            // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
-            const emptyClass = "oe_blank_wrap";
-            const targetNode = this.editorEditable.querySelector("#wrap");
-            if(targetNode) {
-                let mutationCallback = function () {
-                    if (targetNode.textContent.trim() === '') {
-                        targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-                        targetNode.classList.add(emptyClass);
-                    } else {
-                        targetNode.classList.remove(emptyClass);
-                    }
-                };
-                const observer = new MutationObserver(mutationCallback);
-                observer.observe(targetNode, {childList: true});
-                // force check at editor startup
-                mutationCallback();
-            }
-
-            // todo: handle megamenu
-
-            if (this.options.snippets) {
-                this.editor.enableRender = false;
-                this.$webEditorToolbar = $('<div id="web_editor-toolbars">');
-
-                var $toolbarHandler = $('#web_editor-top-edit');
-                $toolbarHandler.append(this.$webEditorToolbar);
-
-                this.snippetsMenu = new SnippetsMenu(this, Object.assign({
-                    $el: $(this.editorEditable),
-                    selectorEditableArea: '.o_editable',
-                    $snippetEditorArea: $snippetManipulators,
-                    wysiwyg: this,
-                    JWEditorLib: JWEditorLib,
-                }, this.options));
-                await this.snippetsMenu.appendTo($mainSidebar);
-                this.editor.enableRender = true;
-                this.editor.render();
-                this.snippetsMenu.$editor = $('#wrapwrap');
-
-                this.$el.on('content_changed', function (e) {
-                    self.trigger_up('wysiwyg_change');
-                });
-            } else {
-                return _super.apply(this, arguments);
-            }
+        } else {
+            return _super.apply(this, arguments);
         }
     },
 
@@ -310,7 +295,7 @@ var Wysiwyg = Widget.extend({
      * @returns {String}
      */
     getValue: async function () {
-        return this.editor.getValue();
+        return (await this.editor.getValue()).innerHTML;
     },
     /**
      * @param {String} value

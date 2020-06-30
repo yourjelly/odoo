@@ -132,12 +132,13 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
                 minHeight: 80,
                 toolbar: toolbar,
                 styleWithSpan: false,
+                wrapperClass: 'note-editable flex-grow-1 ',
                 recordInfo: {
                     context: self._getContext(),
                     res_model: 'forum.post',
                     res_id: +window.location.pathname.split('-').pop(),
                 },
-                value: textarea.value,
+                value: textarea.value.trim() ? textarea.value : '<p><br/></p>',
             };
             if (!hasFullEdit) {
                 options.plugins = {
@@ -183,7 +184,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
         let $title = $form.find('input[name=post_name]');
         let $textarea = $form.find('textarea[name=content]');
         // It's not really in the textarea that the user write at first
-        let textareaContent = $form.find('.o_wysiwyg_wrapper .note-editable.panel-body').text().trim();
+        let textareaContent = $form.find('.note-editable').text().trim();
 
         if ($title.length && $title[0].required) {
             if ($title.val()) {
@@ -196,7 +197,7 @@ publicWidget.registry.websiteForum = publicWidget.Widget.extend({
 
         // Because the textarea is hidden, we add the red or green border to its container
         if ($textarea[0].required) {
-            let $textareaContainer = $form.find('.o_wysiwyg_wrapper .note-editor.panel.panel-default');
+            let $textareaContainer = $form.find('.note-editable');
             if (!textareaContent.length) {
                 $textareaContainer.addClass('border border-danger rounded-top');
                 validForm = false;

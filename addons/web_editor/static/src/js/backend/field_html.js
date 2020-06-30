@@ -90,8 +90,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             return _super();
         }
         this._isDirty = await this.wysiwyg.isDirty();
-        // todo: make this work
-        this._value = (await this.wysiwyg.getValue()).innerHTML;
+        this._value = (await this.wysiwyg.getValue());
         return _super();
     },
     /**
@@ -163,9 +162,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @returns {Object}
      */
     _getWysiwygOptions: function () {
-        const $wrapper = $('<div class="note-editable"></div>');
-        $wrapper.html(this.value || '<p><br/></p>');
-
         let main = '<t t-zone="main"/>';
         if (this.nodeOptions.cssEdit) {
             // wether to inject or not assets in an iframe
@@ -187,8 +183,9 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             },
             noAttachment: this.nodeOptions['no-attachment'],
             snippets: this.nodeOptions.snippets,
-            value: $wrapper[0].outerHTML,
+            value: this.value || '<p><br/></p>',
             location: [this.el, 'append'],
+            wrapperClass: 'note-editable',
             template: `<t-dialog><t t-zone="default"/></t-dialog><div class="d-flex flex-column">
                     <div class="d-flex flex-row overflow-auto">
                         <t t-zone="main_sidebar"/>
