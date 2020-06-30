@@ -388,6 +388,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
          *   (only relevant for form views)
          */
         async _onSwitchView(payload) {
+            // LPE FIXME: I think this is right to do, but tour crash
             await this._clearUncommittedChanges();
             const viewType = payload.view_type;
             const { action } = this._getMainActionDescriptors();
