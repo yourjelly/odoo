@@ -1,27 +1,25 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _
 from odoo.tools import float_is_zero
 from .test_sale_common import TestCommonSaleNoChart
-from odoo.tests import Form
+from odoo.tests import Form, tagged
 
 
+@tagged('post_install', '-at_install')
 class TestSaleToInvoice(TestCommonSaleNoChart):
 
     @classmethod
-    def setUpClass(cls):
-        super(TestSaleToInvoice, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
         cls.setUpClassicProducts()
-        cls.setUpAdditionalAccounts()
-        cls.setUpAccountJournal()
 
         # Create the SO with four order lines
         cls.sale_order = cls.env['sale.order'].with_context(tracking_disable=True).create({
-            'partner_id': cls.partner_customer_usd.id,
-            'partner_invoice_id': cls.partner_customer_usd.id,
-            'partner_shipping_id': cls.partner_customer_usd.id,
+            'partner_id': cls.partner_a.id,
+            'partner_invoice_id': cls.partner_a.id,
+            'partner_shipping_id': cls.partner_a.id,
             'pricelist_id': cls.pricelist_usd.id,
         })
         SaleOrderLine = cls.env['sale.order.line'].with_context(tracking_disable=True)
@@ -67,7 +65,7 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
             'active_model': 'sale.order',
             'active_ids': [cls.sale_order.id],
             'active_id': cls.sale_order.id,
-            'default_journal_id': cls.journal_sale.id,
+            'default_journal_id': cls.company_data['default_journal_sale'].id,
         }
 
     def test_downpayment(self):
@@ -80,7 +78,7 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
         payment = self.env['sale.advance.payment.inv'].with_context(self.context).create({
             'advance_payment_method': 'fixed',
             'fixed_amount': 100,
-            'deposit_account_id': self.account_income.id
+            'deposit_account_id': self.company_data['default_account_revenue'].id
         })
         payment.create_invoices()
 
@@ -94,7 +92,7 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
 
         # Let's do an invoice with refunds
         payment = self.env['sale.advance.payment.inv'].with_context(self.context).create({
-            'deposit_account_id': self.account_income.id
+            'deposit_account_id': self.company_data['default_account_revenue'].id
         })
         payment.create_invoices()
 
@@ -128,6 +126,7 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
 
         self.assertEqual(self.sol_serv_order.untaxed_amount_to_invoice, 297, "The untaxed amount to invoice is wrong")
         self.assertEqual(self.sol_serv_deliver.untaxed_amount_to_invoice, self.sol_serv_deliver.qty_delivered * self.sol_serv_deliver.price_reduce, "The untaxed amount to invoice should be qty deli * price reduce, so 4 * (180 - 36)")
+        self.sol_prod_deliver.qty_delivered = 2.0
         self.assertEqual(self.sol_prod_deliver.untaxed_amount_to_invoice, 140, "The untaxed amount to invoice should be qty deli * price reduce, so 4 * (180 - 36)")
 
         # Let's do an invoice with invoiceable lines
@@ -221,9 +220,9 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
         """ Test create and invoice with sections from the SO, and check qty invoice/to invoice, and the related amounts """
 
         sale_order = self.env['sale.order'].with_context(tracking_disable=True).create({
-            'partner_id': self.partner_customer_usd.id,
-            'partner_invoice_id': self.partner_customer_usd.id,
-            'partner_shipping_id': self.partner_customer_usd.id,
+            'partner_id': self.partner_a.id,
+            'partner_invoice_id': self.partner_a.id,
+            'partner_shipping_id': self.partner_a.id,
             'pricelist_id': self.pricelist_usd.id,
         })
 
@@ -253,7 +252,7 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
             'active_model': 'sale.order',
             'active_ids': [sale_order.id],
             'active_id': sale_order.id,
-            'default_journal_id': self.journal_sale.id,
+            'default_journal_id': self.company_data['default_journal_sale'].id,
         }
 
         # Let's do an invoice with invoiceable lines
@@ -269,9 +268,9 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
     def test_qty_invoiced(self):
         """Verify uom rounding is correctly considered during qty_invoiced compute"""
         sale_order = self.env['sale.order'].with_context(tracking_disable=True).create({
-            'partner_id': self.partner_customer_usd.id,
-            'partner_invoice_id': self.partner_customer_usd.id,
-            'partner_shipping_id': self.partner_customer_usd.id,
+            'partner_id': self.partner_a.id,
+            'partner_invoice_id': self.partner_a.id,
+            'partner_shipping_id': self.partner_a.id,
             'pricelist_id': self.pricelist_usd.id,
         })
 
@@ -295,7 +294,7 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
             'active_model': 'sale.order',
             'active_ids': [sale_order.id],
             'active_id': sale_order.id,
-            'default_journal_id': self.journal_sale.id,
+            'default_journal_id': self.company_data['default_journal_sale'].id,
         }
 
         # Let's do an invoice with invoiceable lines

@@ -1,69 +1,52 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.tests import tagged
 from odoo.tests import Form
-from odoo.tests.common import TransactionCase
 
 
-class TestOnchangeProductId(TransactionCase):
-    """Test that when an included tax is mapped by a fiscal position, the included tax must be
-    subtracted to the price of the product.
-    """
+@tagged('post_install', '-at_install')
+class TestOnchangeProductId(AccountTestInvoicingCommon):
 
-    def setUp(self):
-        super(TestOnchangeProductId, self).setUp()
-        self.fiscal_position_model = self.env['account.fiscal.position']
-        self.fiscal_position_tax_model = self.env['account.fiscal.position.tax']
-        self.tax_model = self.env['account.tax']
-        self.so_model = self.env['sale.order']
-        self.po_line_model = self.env['sale.order.line']
-        self.res_partner_model = self.env['res.partner']
-        self.product_tmpl_model = self.env['product.template']
-        self.product_model = self.env['product.product']
-        self.product_uom_model = self.env['uom.uom']
-        self.supplierinfo_model = self.env["product.supplierinfo"]
-        self.pricelist_model = self.env['product.pricelist']
+    def test_fiscal_position_mapping_tax_incl_to_tax_excl(self):
+        tax_price_include = self.env['account.tax'].create({
+            'name': 'tax_include',
+            'amount': 21.0,
+            'price_include': True,
+            'type_tax_use': 'sale',
+        })
+        tax_price_exclude = self.env['account.tax'].create({
+            'name': 'tax_include',
+            'amount': 10.0,
+            'type_tax_use': 'sale',
+        })
 
-    def test_onchange_product_id(self):
+        product = self.env['product.product'].create({
+            'name': 'product',
+            'list_price': 121.0,
+            'taxes_id': [(6, 0, tax_price_include.ids)],
+        })
 
-        uom_id = self.product_uom_model.search([('name', '=', 'Units')])[0]
-        pricelist = self.pricelist_model.search([('name', '=', 'Public Pricelist')])[0]
-
-        partner_id = self.res_partner_model.create(dict(name="George"))
-        tax_include_id = self.tax_model.create(dict(name="Include tax",
-                                                    amount='21.00',
-                                                    price_include=True,
-                                                    type_tax_use='sale'))
-        tax_exclude_id = self.tax_model.create(dict(name="Exclude tax",
-                                                    amount='0.00',
-                                                    type_tax_use='sale'))
-
-        product_tmpl_id = self.product_tmpl_model.create(dict(name="Voiture",
-                                                              list_price=121,
-                                                              taxes_id=[(6, 0, [tax_include_id.id])]))
-
-        product_id = product_tmpl_id.product_variant_id
-
-        fp_id = self.fiscal_position_model.create(dict(name="fiscal position", sequence=1))
-
-        fp_tax_id = self.fiscal_position_tax_model.create(dict(position_id=fp_id.id,
-                                                               tax_src_id=tax_include_id.id,
-                                                               tax_dest_id=tax_exclude_id.id))
+        fiscal_position = self.env['account.fiscal.position'].create({
+            'name': 'fiscal_position',
+            'tax_ids': [
+                (0, None, {
+                    'tax_src_id': tax_price_include.id,
+                    'tax_dest_id': tax_price_exclude.id,
+                }),
+            ],
+        })
 
         # Create the SO with one SO line and apply a pricelist and fiscal position on it
         order_form = Form(self.env['sale.order'].with_context(tracking_disable=True))
-        order_form.partner_id = partner_id
-        order_form.pricelist_id = pricelist
-        order_form.fiscal_position_id = fp_id
+        order_form.partner_id = self.partner_a
+        order_form.fiscal_position_id = fiscal_position
         with order_form.order_line.new() as line:
-            line.name = product_id.name
-            line.product_id = product_id
-            line.product_uom_qty = 1.0
-            line.product_uom = uom_id
+            line.product_id = product
         sale_order = order_form.save()
 
         # Check the unit price of SO line
-        self.assertEqual(100, sale_order.order_line[0].price_unit, "The included tax must be subtracted to the price")
+        self.assertEqual(100, sale_order.order_line.price_unit, "The included tax must be subtracted to the price")
 
     def test_pricelist_application(self):
         """ Test different prices are correctly applied based on dates """
@@ -71,7 +54,7 @@ class TestOnchangeProductId(TransactionCase):
             'name': 'Virtual Home Staging',
             'list_price': 100,
         })
-        partner = self.res_partner_model.create(dict(name="George"))
+        partner = self.env['res.partner'].create(dict(name="George"))
 
         christmas_pricelist = self.env['product.pricelist'].create({
             'name': 'Christmas pricelist',
@@ -121,7 +104,7 @@ class TestOnchangeProductId(TransactionCase):
             'name': 'Drawer Black',
             'list_price': 100,
         })
-        partner = self.res_partner_model.create(dict(name="George"))
+        partner = self.env['res.partner'].create(dict(name="George"))
         categ_unit_id = self.ref('uom.product_uom_categ_unit')
         goup_discount_id = self.ref('product.group_discount_per_so_line')
         self.env.user.write({'groups_id': [(4, goup_discount_id, 0)]})
@@ -175,7 +158,7 @@ class TestOnchangeProductId(TransactionCase):
             'name': 'Drawer Black',
             'list_price': 100,
         })
-        partner = self.res_partner_model.create(dict(name="George"))
+        partner = self.env['res.partner'].create(dict(name="George"))
         goup_discount_id = self.ref('product.group_discount_per_so_line')
         self.env.user.write({'groups_id': [(4, goup_discount_id, 0)]})
 
@@ -228,7 +211,7 @@ class TestOnchangeProductId(TransactionCase):
             'list_price': 100,
         })
         computer_case.list_price = 100
-        partner = self.res_partner_model.create(dict(name="George"))
+        partner = self.env['res.partner'].create(dict(name="George"))
         categ_unit_id = self.ref('uom.product_uom_categ_unit')
         other_currency = self.env['res.currency'].create({'name': 'other currency',
             'symbol': 'other'})

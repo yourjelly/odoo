@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
-from odoo import tests
-from odoo.addons.account.tests.common import AccountTestCommon
+from odoo.tests import tagged
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tools import mute_logger
 
-@tests.tagged('post_install', '-at_install')
-class TestSaleTransaction(AccountTestCommon):
+
+@tagged('post_install', '-at_install')
+class TestSaleTransaction(AccountTestInvoicingCommon):
+
     @classmethod
-    def setUpClass(cls):
-        super(TestSaleTransaction, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
+
+        cls.company_data['company'].country_id = cls.env.ref('base.us')
+
         cls.product = cls.env['product.product'].create({
             'invoice_policy': 'order',
             'name': 'Product A',
@@ -22,9 +27,7 @@ class TestSaleTransaction(AccountTestCommon):
                 }),
             ],
         })
-        cls.env.ref('payment.payment_acquirer_transfer').journal_id = cls.cash_journal
-        if not cls.env.user.company_id.country_id:
-            cls.env.user.company_id.country_id = cls.env.ref('base.us')
+        cls.env.ref('payment.payment_acquirer_transfer').journal_id = cls.company_data['default_journal_cash']
 
         cls.transaction = cls.order._create_payment_transaction({
             'acquirer_id': cls.env.ref('payment.payment_acquirer_transfer').id,

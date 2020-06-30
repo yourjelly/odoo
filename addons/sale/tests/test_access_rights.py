@@ -1,61 +1,61 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import tagged
-from .test_sale_common import TestCommonSaleNoChart
 
 
 @tagged('post_install', '-at_install')
-class TestAccessRights(TestCommonSaleNoChart):
+class TestAccessRights(AccountTestInvoicingCommon):
 
-    def setUp(self):
-        super(TestAccessRights, self).setUp()
+    @classmethod
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
-        Users = self.env['res.users'].with_context(no_reset_password=True)
+        Users = cls.env['res.users'].with_context(no_reset_password=True)
 
-        group_user = self.env.ref('sales_team.group_sale_salesman')
+        group_user = cls.env.ref('sales_team.group_sale_salesman')
         # Create a users
-        self.user_manager = Users.create({
+        cls.user_manager = Users.create({
             'name': 'Andrew Manager',
             'login': 'manager',
             'email': 'a.m@example.com',
-            'groups_id': [(6, 0, [self.env.ref('sales_team.group_sale_manager').id])]
+            'groups_id': [(6, 0, [cls.env.ref('sales_team.group_sale_manager').id])]
         })
-        self.user_salesperson = Users.create({
+        cls.user_salesperson = Users.create({
             'name': 'Mark User',
             'login': 'user',
             'email': 'm.u@example.com',
             'groups_id': [(6, 0, [group_user.id])]
         })
-        self.user_salesperson_1 = Users.create({
+        cls.user_salesperson_1 = Users.create({
             'name': 'Noemie User',
             'login': 'noemie',
             'email': 'n.n@example.com',
             'groups_id': [(6, 0, [group_user.id])]
         })
-        self.user_portal = Users.create({
+        cls.user_portal = Users.create({
             'name': 'Chell Gladys',
             'login': 'chell',
             'email': 'chell@gladys.portal',
-            'groups_id': [(6, 0, [self.env.ref('base.group_portal').id])]
+            'groups_id': [(6, 0, [cls.env.ref('base.group_portal').id])]
         })
-        self.user_employee = Users.create({
+        cls.user_employee = Users.create({
             'name': 'Bert Tartignole',
             'login': 'bert',
             'email': 'b.t@example.com',
-            'groups_id': [(6, 0, [self.env.ref('base.group_user').id])]
+            'groups_id': [(6, 0, [cls.env.ref('base.group_user').id])]
         })
 
         # Create a Sales Team
-        self.sales_channel = self.env['crm.team'].with_context(tracking_disable=True).create({
+        cls.sales_channel = cls.env['crm.team'].with_context(tracking_disable=True).create({
             'name': 'Test Channel',
         })
 
         # Create the SO with a specific salesperson
-        self.order = self.env['sale.order'].with_context(tracking_disable=True).create({
-            'partner_id': self.partner_customer_usd.id,
-            'user_id': self.user_salesperson.id
+        cls.order = cls.env['sale.order'].with_context(tracking_disable=True).create({
+            'partner_id': cls.partner_a.id,
+            'user_id': cls.user_salesperson.id
         })
 
     def test_access_sales_manager(self):
@@ -67,7 +67,7 @@ class TestAccessRights(TestCommonSaleNoChart):
         self.order.with_user(self.user_manager).write({'user_id': self.user_salesperson_1.id})
         # Manager can create the SO for other salesperson
         sale_order = SaleOrder.with_user(self.user_manager).create({
-            'partner_id': self.partner_customer_usd.id,
+            'partner_id': self.partner_a.id,
             'user_id': self.user_salesperson_1.id
         })
         self.assertIn(sale_order.id, SaleOrder.search([]).ids, 'Sales manager should be able to create the SO of other salesperson')
@@ -105,7 +105,7 @@ class TestAccessRights(TestCommonSaleNoChart):
         # Salesperson can't create the SO of other salesperson
         with self.assertRaises(AccessError):
             self.env['sale.order'].with_user(self.user_salesperson_1).create({
-                'partner_id': self.partner_customer_usd.id,
+                'partner_id': self.partner_a.id,
                 'user_id': self.user_salesperson.id
             })
         # Salesperson can't delete the SO
@@ -128,7 +128,7 @@ class TestAccessRights(TestCommonSaleNoChart):
         # Portal user can't create the SO
         with self.assertRaises(AccessError):
             self.env['sale.order'].with_user(self.user_portal).create({
-                'partner_id': self.partner_customer_usd.id,
+                'partner_id': self.partner_a.id,
             })
         # Portal user can't delete the SO which is in 'draft' or 'cancel' state
         self.order.action_cancel()
@@ -146,7 +146,7 @@ class TestAccessRights(TestCommonSaleNoChart):
         # Employee can't create the SO
         with self.assertRaises(AccessError):
             self.env['sale.order'].with_user(self.user_employee).create({
-                'partner_id': self.partner_customer_usd.id,
+                'partner_id': self.partner_a.id,
             })
         # Employee can't delete the SO
         with self.assertRaises(AccessError):

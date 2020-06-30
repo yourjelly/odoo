@@ -2,13 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from .test_sale_common import TestCommonSaleNoChart
+from odoo.tests import tagged
 
 
+@tagged('post_install', '-at_install')
 class TestSaleOrder(TestCommonSaleNoChart):
 
     @classmethod
-    def setUpClass(cls):
-        super(TestSaleOrder, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
         Pricelist = cls.env['product.pricelist']
         PricelistItem = cls.env['product.pricelist.item']
@@ -16,9 +18,7 @@ class TestSaleOrder(TestCommonSaleNoChart):
         SaleOrderLine = cls.env['sale.order.line'].with_context(tracking_disable=True)
 
         # set up accounts and products and journals
-        cls.setUpAdditionalAccounts()
         cls.setUpClassicProducts()
-        cls.setUpAccountJournal()
 
         # Create a product category
         cls.product_category_1 = cls.env['product.category'].create({
@@ -75,9 +75,9 @@ class TestSaleOrder(TestCommonSaleNoChart):
 
         # create a generic Sale Order with all classical products and empty pricelist
         cls.sale_order = SaleOrder.create({
-            'partner_id': cls.partner_customer_usd.id,
-            'partner_invoice_id': cls.partner_customer_usd.id,
-            'partner_shipping_id': cls.partner_customer_usd.id,
+            'partner_id': cls.partner_a.id,
+            'partner_invoice_id': cls.partner_a.id,
+            'partner_shipping_id': cls.partner_a.id,
             'pricelist_id': cls.pricelist_usd.id,
         })
         cls.sol_product_order = SaleOrderLine.create({

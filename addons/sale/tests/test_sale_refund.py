@@ -2,24 +2,23 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from .test_sale_common import TestCommonSaleNoChart
-from odoo.tests import Form
+from odoo.tests import Form, tagged
 
 
+@tagged('post_install', '-at_install')
 class TestSaleToInvoice(TestCommonSaleNoChart):
 
     @classmethod
-    def setUpClass(cls):
-        super(TestSaleToInvoice, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
         cls.setUpClassicProducts()
-        cls.setUpAdditionalAccounts()
-        cls.setUpAccountJournal()
 
         # Create the SO with four order lines
         cls.sale_order = cls.env['sale.order'].with_context(tracking_disable=True).create({
-            'partner_id': cls.partner_customer_usd.id,
-            'partner_invoice_id': cls.partner_customer_usd.id,
-            'partner_shipping_id': cls.partner_customer_usd.id,
+            'partner_id': cls.partner_a.id,
+            'partner_invoice_id': cls.partner_a.id,
+            'partner_shipping_id': cls.partner_a.id,
             'pricelist_id': cls.pricelist_usd.id,
         })
         SaleOrderLine = cls.env['sale.order.line'].with_context(tracking_disable=True)
@@ -68,7 +67,7 @@ class TestSaleToInvoice(TestCommonSaleNoChart):
             'active_model': 'sale.order',
             'active_ids': [cls.sale_order.id],
             'active_id': cls.sale_order.id,
-            'default_journal_id': cls.journal_sale.id,
+            'default_journal_id': cls.company_data['default_journal_sale'].id,
         }).create({
             'advance_payment_method': 'delivered'
         })

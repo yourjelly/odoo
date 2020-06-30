@@ -1,40 +1,33 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
-import odoo
+from odoo.tests import tagged
+from odoo.addons.sale.tests.test_sale_common import TestCommonSaleNoChart
 from odoo.exceptions import UserError, AccessError
-from odoo.tests import Form
 from odoo.tools import float_compare
 
-from .test_sale_common import TestCommonSaleNoChart
 
-
+@tagged('post_install', '-at_install')
 class TestSaleOrder(TestCommonSaleNoChart):
 
     @classmethod
-    def setUpClass(cls):
-        super(TestSaleOrder, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
         SaleOrder = cls.env['sale.order'].with_context(tracking_disable=True)
 
-        # set up users
         cls.setUpUsers()
+        cls.setUpClassicProducts()
         group_salemanager = cls.env.ref('sales_team.group_sale_manager')
         group_salesman = cls.env.ref('sales_team.group_sale_salesman')
         group_employee = cls.env.ref('base.group_user')
         cls.user_manager.write({'groups_id': [(6, 0, [group_salemanager.id, group_employee.id])]})
         cls.user_employee.write({'groups_id': [(6, 0, [group_salesman.id, group_employee.id])]})
 
-        # set up accounts and products and journals
-        cls.setUpAdditionalAccounts()
-        cls.setUpClassicProducts()
-        cls.setUpAccountJournal()
-
         # create a generic Sale Order with all classical products and empty pricelist
         cls.sale_order = SaleOrder.create({
-            'partner_id': cls.partner_customer_usd.id,
-            'partner_invoice_id': cls.partner_customer_usd.id,
-            'partner_shipping_id': cls.partner_customer_usd.id,
+            'partner_id': cls.partner_a.id,
+            'partner_invoice_id': cls.partner_a.id,
+            'partner_shipping_id': cls.partner_a.id,
             'pricelist_id': cls.pricelist_usd.id,
         })
         cls.sol_product_order = cls.env['sale.order.line'].create({
@@ -200,9 +193,9 @@ class TestSaleOrder(TestCommonSaleNoChart):
         })
         prod_gap = self.service_order
         so = self.env['sale.order'].create({
-            'partner_id': self.partner_customer_usd.id,
-            'partner_invoice_id': self.partner_customer_usd.id,
-            'partner_shipping_id': self.partner_customer_usd.id,
+            'partner_id': self.partner_a.id,
+            'partner_invoice_id': self.partner_a.id,
+            'partner_shipping_id': self.partner_a.id,
             'order_line': [(0, 0, {'name': prod_gap.name, 'product_id': prod_gap.id, 'product_uom_qty': 2, 'product_uom': prod_gap.uom_id.id, 'price_unit': prod_gap.list_price})],
             'pricelist_id': self.pricelist_usd.id,
         })
@@ -210,7 +203,7 @@ class TestSaleOrder(TestCommonSaleNoChart):
         so._create_analytic_account()
 
         inv = self.env['account.move'].with_context(default_move_type='in_invoice').create({
-            'partner_id': self.partner_customer_usd.id,
+            'partner_id': self.partner_a.id,
             'invoice_line_ids': [
                 (0, 0, {
                     'name': serv_cost.name,
@@ -266,68 +259,41 @@ class TestSaleOrder(TestCommonSaleNoChart):
 
     def test_so_create_multicompany(self):
         """Check that only taxes of the right company are applied on the lines."""
-
-        # Preparing test Data
-        company_1 = self.env.ref('base.main_company')
-        company_2 = self.env['res.company'].create({
-            'name': 'company 2',
-            'parent_id': company_1.id,
-        })
-
-        user_demo = self.env['res.users'].create({
-            'login': 'zizizmyuser',
-            'password': 'zizizmyuser',
-            'email': 'test@test.com',
-            'partner_id': self.env['res.partner'].create({'name': 'Zizizmypartner'}).id,
-            'company_ids': [(6, False, [company_1.id])],
-            'company_id': company_1.id,
-            'groups_id': [(6, 0, [
-                self.env.ref('base.group_user').id,
-                self.env.ref('base.group_partner_manager').id,
-                self.env.ref('sales_team.group_sale_manager').id])]})
-
-        user_demo.company_ids = (company_1 | company_2).ids
-        so_partner = self.env['res.partner'].create({'name': 'SO Partner'})
-        so_partner.write({
-            'property_account_position_id': False,
-        })
-
         tax_company_1 = self.env['account.tax'].create({
             'name': 'T1',
             'amount': 90,
-            'company_id': company_1.id,
+            'company_id': self.company_data['company'].id,
         })
 
         tax_company_2 = self.env['account.tax'].create({
             'name': 'T2',
             'amount': 90,
-            'company_id': company_2.id,
+            'company_id': self.company_data_2['company'].id,
         })
 
         product_shared = self.env['product.template'].create({
             'name': 'shared product',
             'invoice_policy': 'order',
             'taxes_id': [(6, False, [tax_company_1.id, tax_company_2.id])],
-            'property_account_income_id': self.account_receivable.id,
+            'property_account_income_id': self.company_data['default_account_revenue'].id,
         })
 
-        so_1 = self.env['sale.order'].with_user(user_demo.id).create({
+        so_1 = self.env['sale.order'].with_context(allowed_company_ids=self.company_data['company'].ids).create({
             'partner_id': self.env['res.partner'].create({'name': 'A partner'}).id,
-            'company_id': company_1.id,
-        })
-        so_1.write({
-            'order_line': [(0, False, {'product_id': product_shared.product_variant_id.id, 'order_id': so_1.id})],
+            'company_id': self.company_data['company'].id,
+            'order_line': [(0, False, {'product_id': product_shared.product_variant_id.id})],
         })
 
-        self.assertEqual(set(so_1.order_line.tax_id.ids), set([tax_company_1.id]),
-            'Only taxes from the right company are put by default')
+        self.assertEqual(so_1.order_line.tax_id, tax_company_1, 'Only taxes from the right company are put by default')
         so_1.action_confirm()
         # i'm not interested in groups/acls, but in the multi-company flow only
         # the sudo is there for that and does not impact the invoice that gets created
         # the goal here is to invoice in company 1 (because the order is in company 1) while being
         # 'mainly' in company 2 (through the context), the invoice should be in company 1
-        inv=so_1.sudo().with_context(allowed_company_ids=[company_2.id, company_1.id])._create_invoices()
-        self.assertEqual(inv.company_id, company_1, 'invoices should be created in the company of the SO, not the main company of the context')
+        inv=so_1.sudo()\
+            .with_context(allowed_company_ids=(self.company_data['company'] + self.company_data_2['company']).ids)\
+            ._create_invoices()
+        self.assertEqual(inv.company_id, self.company_data['company'], 'invoices should be created in the company of the SO, not the main company of the context')
 
     def test_group_invoice(self):
         """ Test that invoicing multiple sales order for the same customer works. """

@@ -2,6 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from collections import OrderedDict
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.account.tests.common import AccountTestCommon
 from odoo.addons.account.tests.common import AccountTestNoChartCommon, AccountTestNoChartCommonMultiCompany
 
@@ -88,7 +89,7 @@ class TestSaleCommon(AccountTestCommon):
         cls.partner = cls.env['res.partner'].create({'name': 'A test Partner'})
 
 
-class TestCommonSaleNoChart(AccountTestNoChartCommon):
+class TestCommonSaleNoChart(AccountTestInvoicingCommon):
     """ This class should be extended for test suite of sale flows with a minimal chart of accounting
         installed. This test suite should be executed at module installation.
         This class provides some method to generate testing data well configured, according to the minimal
@@ -96,8 +97,8 @@ class TestCommonSaleNoChart(AccountTestNoChartCommon):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(TestCommonSaleNoChart, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
         # create a pricelist
         cls.pricelist_usd = cls.env['product.pricelist'].create({
@@ -190,13 +191,6 @@ class TestCommonSaleNoChart(AccountTestNoChartCommon):
 
     @classmethod
     def setUpExpenseProducts(cls):
-        # Create an expense journal
-        user_type_expense = cls.env.ref('account.data_account_type_expenses')
-        cls.account_expense_for_products = cls.env['account.account'].create({
-            'code': 'EXP_PROD13',
-            'name': 'Expense - Test Purchase Account',
-            'user_type_id': user_type_expense.id
-        })
         # Expense Products
         cls.product_ordered_cost = cls.env['product.product'].create({
             'name': "Ordered at cost",
@@ -208,7 +202,7 @@ class TestCommonSaleNoChart(AccountTestNoChartCommon):
             'default_code': 'CONSU-ORDERED1',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_for_products.id,
+            'property_account_expense_id': cls.company_data['default_account_expense'].id,
         })
 
         cls.product_deliver_cost = cls.env['product.product'].create({
@@ -221,7 +215,7 @@ class TestCommonSaleNoChart(AccountTestNoChartCommon):
             'default_code': 'CONSU-DELI1',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_for_products.id,
+            'property_account_expense_id': cls.company_data['default_account_expense'].id,
         })
 
         cls.product_order_sales_price = cls.env['product.product'].create({
@@ -234,7 +228,7 @@ class TestCommonSaleNoChart(AccountTestNoChartCommon):
             'default_code': 'CONSU-ORDERED2',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_for_products.id,
+            'property_account_expense_id': cls.company_data['default_account_expense'].id,
         })
 
         cls.product_deliver_sales_price = cls.env['product.product'].create({
@@ -247,7 +241,7 @@ class TestCommonSaleNoChart(AccountTestNoChartCommon):
             'default_code': 'CONSU-DELI2',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_for_products.id,
+            'property_account_expense_id': cls.company_data['default_account_expense'].id,
         })
 
         cls.product_no_expense = cls.env['product.product'].create({
@@ -260,7 +254,33 @@ class TestCommonSaleNoChart(AccountTestNoChartCommon):
             'default_code': 'CONSU-NO',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_for_products.id,
+            'property_account_expense_id': cls.company_data['default_account_expense'].id,
+        })
+
+    @classmethod
+    def setUpUsers(cls):
+        """ Create 2 users: an employee and a manager. Both will have correct account configured
+            on their partner. Others access rigths should be given in extending test suites set up.
+        """
+        group_employee = cls.env.ref('base.group_user')
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True, 'mail_create_nolog': True})
+        cls.user_employee = Users.create({
+            'name': 'Tyrion Lannister Employee',
+            'login': 'tyrion',
+            'email': 'tyrion@example.com',
+            'notification_type': 'email',
+            'groups_id': [(6, 0, [group_employee.id])],
+            'property_account_payable_id': cls.company_data['default_account_payable'].id,
+            'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
+        })
+        cls.user_manager = Users.create({
+            'name': 'Daenerys Targaryen Manager',
+            'login': 'daenerys',
+            'email': 'daenerys@example.com',
+            'notification_type': 'email',
+            'groups_id': [(6, 0, [group_employee.id])],
+            'property_account_payable_id': cls.company_data['default_account_payable'].id,
+            'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
         })
 
 
@@ -270,11 +290,6 @@ class TestCommonSaleMultiCompanyNoChart(AccountTestNoChartCommonMultiCompany, Te
         This class provides some method to generate testing data well configured, according to the minimal
         chart of account, defined in `TestAccountNoChartCommon` class.
     """
-
-    @classmethod
-    def setUpClass(cls):
-        super(TestCommonSaleMultiCompanyNoChart, cls).setUpClass()
-        cls.setUpAdditionalAccounts()
 
     @classmethod
     def setUpClassicProducts(cls):
