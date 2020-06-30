@@ -527,10 +527,39 @@ var ListRenderer = BasicRenderer.extend({
         }
 
         if (node.tag === 'button_group') {
-            for (const buttonNode of node.children) {
+            /*for (const buttonNode of node.children) {
                 if (!this.columnInvisibleFields[buttonNode.attrs.name]) {
                     $td.append(this._renderButton(record, buttonNode));
                 }
+            }*/
+            // TODO: create div as per button size
+            if (node.children.length > 1) {
+                var $buttonDropdown = $('<div>', {
+                    class: 'dropdown',
+                });
+                var $a = $("<button>", {
+                    'class': "dropdown-toggle text-dark",
+                    'href': "#",
+                    'role': "button",
+                    'data-toggle': "dropdown",
+                    'aria-expanded': false,
+                }).html('');
+                $a.appendTo($buttonDropdown);
+                var $dropdown = $("<div>", {
+                    class: 'dropdown-menu  dropdown-menu-right',
+                    role: 'menu',
+                });
+
+                for (const buttonNode of node.children) {
+                    if (!this.columnInvisibleFields[buttonNode.attrs.name]) {
+                        // $td.append(this._renderButton(record, buttonNode));
+                         $dropdown.append($("<div>", {
+                            class: "dropdown-item",
+                        }).append(this._renderButton(record, buttonNode)));
+                    }
+                }
+                $dropdown.appendTo($buttonDropdown);
+                return $buttonDropdown;
             }
             return $td;
         } else if (node.tag === 'widget') {

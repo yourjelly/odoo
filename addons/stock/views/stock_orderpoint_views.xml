@@ -55,7 +55,7 @@
                 <field name="qty_on_hand" force_save="1"/>
                 <field name="qty_forecast" force_save="1"/>
                 <field name="json_lead_days_popover" optional="show" string=" " widget="popover_widget" attrs="{'invisible': [('id', '=', False)]}"/>
-                <field name="qty_to_order"/>
+                <field name="qty_to_order" optional="show"/>
                 <field name="product_uom_name" string="UoM" groups="uom.group_uom"/>
                 <field name="company_id" optional="hide" readonly="1" groups="base.group_multi_company"/>
                 <button name="action_replenish" string="Order" type="object" class="btn btn-sm btn-primary pt-0 pb-0 o_replenish_buttons"
