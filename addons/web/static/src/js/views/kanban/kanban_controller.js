@@ -271,16 +271,26 @@ var KanbanController = BasicController.extend({
         var self = this;
         var record = ev.data.record;
         var column = ev.target;
+        let savingDefResolve;
+        // LPE TO be checked: this is a write on the model, so literally
+        // a save. useful for not triggering the discardChange too early
+        this.savingDef = new Promise((resolve) => {
+            savingDefResolve = resolve;
+        });
         this.alive(this.model.moveRecord(record.db_id, column.db_id, this.handle))
             .then(function (column_db_ids) {
                 return self._resequenceRecords(column.db_id, ev.data.ids)
                     .then(function () {
+                        savingDefResolve();
                         _.each(column_db_ids, function (db_id) {
                             var data = self.model.get(db_id);
                             self.renderer.updateColumn(db_id, data);
                         });
                     });
-            }).guardedCatch(this.reload.bind(this));
+            }).guardedCatch(async () => {
+                await self.reload();
+                savingDefResolve();
+            });
     },
     /**
      * @private
