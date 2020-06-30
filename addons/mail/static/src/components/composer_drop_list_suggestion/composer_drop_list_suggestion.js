@@ -1,4 +1,4 @@
-odoo.define('mail/static/src/components/partner_mention_suggestion/partner_mention_suggestion.js', function (require) {
+odoo.define('mail/static/src/components/composer_drop_list_suggestion/composer_drop_list_suggestion.js', function (require) {
 'use strict';
 
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
@@ -9,7 +9,7 @@ const components = {
 
 const { Component } = owl;
 
-class PartnerMentionSuggestion extends Component {
+class ComposerDropListSuggestion extends Component {
 
     /**
      * @override
@@ -17,9 +17,9 @@ class PartnerMentionSuggestion extends Component {
     constructor(...args) {
         super(...args);
         useStore(props => {
-            const partner = this.env.models['mail.partner'].get(props.partnerLocalId);
+            const record = this.env.models[props.modelName].get(props.recordLocalId);
             return {
-               partner: partner ? partner.__state : undefined,
+               record: record ? record.__state : undefined,
             };
         });
     }
@@ -28,11 +28,24 @@ class PartnerMentionSuggestion extends Component {
     // Public
     //--------------------------------------------------------------------------
 
-    /**
-     * @returns {mail.partner}
-     */
-    get partner() {
-        return this.env.models['mail.partner'].get(this.props.partnerLocalId);
+    get isCannedResponse() {
+        return this.props.modelName === "mail.canned_response";
+    }
+
+    get isChannel() {
+        return this.props.modelName === "mail.thread";
+    }
+
+    get isCommand() {
+        return this.props.modelName === "mail.command";
+    }
+
+    get isPartner() {
+        return this.props.modelName === "mail.partner";
+    }
+
+    get record() {
+        return this.env.models[this.props.modelName].get(this.props.recordLocalId);
     }
 
     //--------------------------------------------------------------------------
@@ -44,10 +57,9 @@ class PartnerMentionSuggestion extends Component {
      * @param {Event} ev
      */
     _onClick(ev) {
-        // avoid following dummy href
         ev.preventDefault();
-        this.trigger('o-partner-mention-suggestion-clicked', {
-            partner: this.partner,
+        this.trigger('o-suggestion-clicked', {
+            record: this.record,
         });
     }
 
@@ -56,24 +68,26 @@ class PartnerMentionSuggestion extends Component {
      * @param {Event} ev
      */
     _onMouseOver(ev) {
-        this.trigger('o-partner-mention-suggestion-mouse-over', {
-            partner: this.partner,
+        this.trigger('o-suggestion-mouse-over', {
+            record: this.record,
         });
     }
+
 }
 
-Object.assign(PartnerMentionSuggestion, {
+Object.assign(ComposerDropListSuggestion, {
     components,
     defaultProps: {
         isActive: false,
     },
     props: {
         isActive: Boolean,
-        partnerLocalId: String,
+        modelName: String,
+        recordLocalId: String,
     },
-    template: 'mail.PartnerMentionSuggestion',
+    template: 'mail.ComposerDropListSuggestion',
 });
 
-return PartnerMentionSuggestion;
+return ComposerDropListSuggestion;
 
 });

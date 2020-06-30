@@ -262,6 +262,13 @@ class Composer extends Component {
     }
 
     /**
+     * @private
+     */
+    _onComposerSuggestionClicked() {
+        this.focus();
+    }
+
+    /**
      * Called when some files have been dropped in the dropzone.
      *
      * @private
@@ -304,7 +311,7 @@ class Composer extends Component {
      */
     _onKeydown(ev) {
         if (ev.key === 'Escape') {
-            if (isEventHandled(ev, 'ComposerTextInput.closeMentionSuggestions')) {
+            if (isEventHandled(ev, 'ComposerTextInput.closeSuggestions')) {
                 return;
             }
             if (isEventHandled(ev, 'Composer.closeEmojisPopover')) {

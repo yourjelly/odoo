@@ -220,8 +220,13 @@ MockServer.include({
             return this._mockMailMessageUnstarAll();
         }
         // res.partner methods
-        if (args.model === 'res.partner' && args.method === 'get_mention_suggestions') {
-            return this._mockResPartnerGetMentionSuggestions(args);
+        if (args.method === 'get_mention_suggestions') {
+            if (args.model === 'mail.channel') {
+                return this._mockMailChannelGetMentionSuggestions(args);
+            }
+            if (args.model === 'res.partner') {
+                return this._mockResPartnerGetMentionSuggestions(args);
+            }
         }
         if (args.model === 'res.partner' && args.method === 'im_search') {
             const name = args.args[0] || args.kwargs.search;
@@ -363,6 +368,8 @@ MockServer.include({
 
         const mailFailures = this._mockMailMessageMessageFetchFailed();
 
+        const shortcodes = this._getRecords('mail.shortcode', []);
+
         const starredCounter = this._getRecords('mail.message', [
             ['starred_partner_ids', 'in', this.currentPartnerId],
         ]).length;
@@ -373,7 +380,11 @@ MockServer.include({
                 channel_direct_message: directMessageInfos,
                 channel_private_group: privateGroupInfos,
             },
-            commands: [],
+            commands: [{
+                channel_types: ["channel", "chat"],
+                help: "List users in the current channel",
+                name: "who",
+            }],
             current_partner: currentPartnerFormat,
             current_user_id: this.currentUserId,
             mail_failures: mailFailures,
@@ -384,7 +395,7 @@ MockServer.include({
             needaction_inbox_counter,
             partner_root: partnerRootFormat,
             public_partner: publicPartnerFormat,
-            shortcodes: [],
+            shortcodes: shortcodes,
             starred_counter: starredCounter,
         };
     },
@@ -651,12 +662,22 @@ MockServer.include({
         }
         const partners = this._getRecords('res.partner', [['id', 'in', partners_to]]);
 
+        // // add main suggestions based on users
+        // let partnersFromUsers = [];
+        // for(let i = 0; i < this.data['res.partner'].records.length; i++) {
+        //     for(let j = 0; j < this.data['res.users'].records.length; j++) {
+        //         if(this.data['res.partner'].records[i].id === this.data['res.users'].records[j].partner_id) {
+        //             partnersFromUsers.push(this.data['res.partner'].records[i]);
+        //         }
+        //     }
+        // }
+        // const mainMatchingPartners = mentionSuggestionsFilter(partnersFromUsers, search, limit);
+
         // NOTE: this mock is not complete, which is done for simplicity.
         // Indeed if a chat already exists for the given partners, the server
         // is supposed to return this existing chat. But the mock is currently
         // always creating a new chat, because no test is relying on receiving
         // an existing chat.
-
         const id = this._mockCreate('mail.channel', {
             channel_type: 'chat',
             mass_mailing: false,
@@ -1393,6 +1414,56 @@ MockServer.include({
             ['channel_id', 'in', channel_ids || []],
         ]);
         this._mockUnlink(model, [followers.map(follower => follower.id)]);
+    },
+    /**
+     * Simulate the 'get_mention_suggestions' on 'mail.channel'.
+     *
+     * @private
+     * @returns {Array[]}
+     */
+    _mockMailChannelGetMentionSuggestions(args) {
+        const search = args.kwargs.search || '';
+        const limit = args.kwargs.limit || 8;
+
+        /**
+         * Returns the given list of channels after filtering it according to
+         * the logic of the Python method `get_mention_suggestions` for the
+         * given search term. The result is truncated to the given limit and
+         * formatted as expected by the original method.
+         *
+         * @param {Object[]} channels
+         * @param {string} search
+         * @param {integer} limit
+         * @returns {Object[]}
+         */
+        const mentionSuggestionsFilter = function (channels, search, limit) {
+            const matchingChannels = channels
+                .filter(channel => {
+                    // no search term is considered as return all
+                    if (!search) {
+                        return true;
+                    }
+                    // otherwise name or email must match search term
+                    if (channel.name && channel.name.includes(search)) {
+                        return true;
+                    }
+                    return false;
+                }).map(channel => {
+                    // expected format
+                    return {
+                        id: channel.id,
+                        name: channel.name,
+                        public: channel.public,
+                    };
+                });
+            // reduce results to max limit
+            matchingChannels.length = Math.min(matchingChannels.length, limit);
+            return matchingChannels;
+        };
+
+        const mentionSuggestions = mentionSuggestionsFilter(this.data['mail.channel'].records, search, limit);
+
+        return mentionSuggestions;
     },
     /**
      * Simulates `get_mention_suggestions` on `res.partner`.
