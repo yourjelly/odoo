@@ -3191,14 +3191,6 @@ registry.background = SnippetOptionWidget.extend({
  * Handles background shapes.
  */
 registry.BackgroundShape = SnippetOptionWidget.extend({
-    /**
-     * @override
-     */
-    async start() {
-        await this._super(...arguments);
-        this.initialShape = this._getShapeData();
-    },
-
     //--------------------------------------------------------------------------
     // Options
     //--------------------------------------------------------------------------
@@ -3208,7 +3200,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     shape(previewMode, widgetValue, params) {
-        this._markShape({shape: widgetValue});
+        this._markShape({shape: widgetValue, color1: undefined, color2: undefined});
         this._setBackground();
     },
     /**
@@ -3235,11 +3227,14 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @override
      */
     _computeWidgetState(methodName, params) {
-        const {color1, color2, shape} = this._getShapeData();
+        const {color1, color2, shape} = Object.assign(this._getDefaultColors(), this._getShapeData());
         switch (methodName) {
             case 'shape':
                 return shape;
             case 'color':
+                if (!shape) {
+                    return '';
+                }
                 return normalizeColor(params.colorNumber === '1' ? color1 : color2);
         }
         return this._super(...arguments);
@@ -3264,7 +3259,8 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             shapeContainer.nextElementSibling.style.position = 'relative';
         }
         shapeContainer.className = `o_we_shape o_${shape.replace('/', '_')}`;
-        if (color1 !== 'o-color-1' || color2 !== 'o-color-2') {
+        $(shapeContainer).css('background-image', '');
+        if (color1 || color2) {
             // Custom colors, overwrite shape that is set by the class
             $(shapeContainer).css('background-image', `url("${this._getShapeSrc()}")`);
         }
@@ -3275,7 +3271,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @private
      */
     _getShapeSrc() {
-        const {color1, color2, shape} = this._getShapeData();
+        const {color1, color2, shape} = Object.assign(this._getDefaultColors(), this._getShapeData());
         if (!shape) {
             return '';
         }
@@ -3289,22 +3285,54 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @param {Object} newData an object with the new data
      */
     _markShape(newData) {
-        const shapeData = Object.assign(this._getShapeData(), newData);
+        const defaultColors = this._getDefaultColors();
+        ['color1', 'color2'].forEach(col => {
+            // Empty string => 'reset' in color-picker, revert to default color
+            if (newData[col] === '') {
+                newData[col] = defaultColors[col];
+            }
+        });
+        const shapeData = Object.assign({}, defaultColors, this._getShapeData(), newData);
+        if (shapeData.color1 === defaultColors.color1 && shapeData.color2 === defaultColors.color2) {
+            shapeData.color1 = shapeData.color2 = undefined;
+        }
         this.$target[0].dataset.oeShapeData = JSON.stringify(shapeData);
     },
     /**
-     * Retrives current shape data from the target's dataset.
+     * Retrieves current shape data from the target's dataset.
      *
      * @private
      */
     _getShapeData() {
         const defaultData = {
             shape: '',
-            color1: 'o-color-1',
-            color2: 'o-color-2',
         };
         const json = this.$target[0].dataset.oeShapeData;
         return json ? JSON.parse(json) : defaultData;
+    },
+    /**
+     * Retrieves current shape data from the target's dataset.
+     *
+     * @private
+     */
+    _getDefaultColors() {
+        const $shapeContainer = this.$target.find('.o_we_shape')
+            .clone()
+            .addClass('d-none')
+            // Needs to be in document for bg-image class to take effect
+            .appendTo(document.body);
+        const shapeContainer = $shapeContainer[0];
+        $shapeContainer.css('background-image', '');
+        const shapeSrc = shapeContainer && getBgImageSrc(shapeContainer);
+        $shapeContainer.remove();
+        if (!shapeSrc) {
+            return {};
+        }
+        const matches = shapeSrc.match(/c1=(.*)&c2=(.*)$/);
+        return {
+            color1: decodeURIComponent(matches[1]),
+            color2: decodeURIComponent(matches[2]),
+        };
     },
 });
 

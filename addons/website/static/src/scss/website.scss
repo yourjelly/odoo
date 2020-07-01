@@ -972,12 +972,11 @@ header {
 }
 
 .o_we_shape {
-    // %23 is the url-encoded form of '#' which doesn't work as is in urls.
-    $c1: str-replace("#{map-get($o-color-palette, 'o-color-1')}", '#', '%23');
-    $c2: str-replace("#{map-get($o-color-palette, 'o-color-2')}", '#', '%23');
-
     @each $module, $shapes in $bg-shapes {
         @each $shape, $style in $shapes {
+            // %23 is the url-encoded form of '#' which doesn't work as is in urls.
+            $c1: str-replace("#{map-get($o-color-palette, map-get($style, c1))}", '#', '%23');
+            $c2: str-replace("#{map-get($o-color-palette, map-get($style, c2))}", '#', '%23');
             // eg: o_website_shape_bg_1
             &.o_#{$module}_#{$shape} {
                 background-image: url("/web_editor/shape/#{$module}/#{$shape}.svg?c1=#{$c1}&c2=#{$c2}");
