@@ -527,39 +527,40 @@ var ListRenderer = BasicRenderer.extend({
         }
 
         if (node.tag === 'button_group') {
+            // debugger;
             /*for (const buttonNode of node.children) {
                 if (!this.columnInvisibleFields[buttonNode.attrs.name]) {
                     $td.append(this._renderButton(record, buttonNode));
                 }
             }*/
-            // TODO: create div as per button size
-            if (node.children.length > 1) {
-                var $buttonDropdown = $('<div>', {
-                    class: 'dropdown',
-                });
-                var $a = $("<button>", {
-                    'class': "dropdown-toggle text-dark",
-                    'href': "#",
-                    'role': "button",
-                    'data-toggle': "dropdown",
-                    'aria-expanded': false,
-                }).html('');
-                $a.appendTo($buttonDropdown);
-                var $dropdown = $("<div>", {
-                    class: 'dropdown-menu  dropdown-menu-right',
-                    role: 'menu',
-                });
-
-                for (const buttonNode of node.children) {
-                    if (!this.columnInvisibleFields[buttonNode.attrs.name]) {
-                        // $td.append(this._renderButton(record, buttonNode));
-                         $dropdown.append($("<div>", {
+            var $buttonDropdown = $('<div>', {
+                    class: 'dropdown button_dropdown',
+                    style: 'position: fixed', 
+            });
+            var $a = $("<a>", {
+                'class': "dropdown-toggle btn-sm",
+                'href': "#",
+                'role': "button",
+                'data-toggle': "dropdown",
+                'aria-expanded': false,
+            }).html('');
+            $a.appendTo($buttonDropdown);
+            var $dropdown = $("<div>", {
+                class: 'dropdown-menu  dropdown-menu-right',
+                role: 'menu',
+            });
+            for (const buttonNode of node.children) {
+                if (!this.columnInvisibleFields[buttonNode.attrs.name]) {
+                    var $button = this._renderButton(record, buttonNode);
+                    if (!$button.hasClass('o_invisible_modifier')) {
+                        $dropdown.append($("<div>", {
                             class: "dropdown-item",
-                        }).append(this._renderButton(record, buttonNode)));
+                        }).append($button));
+
+                        $dropdown.appendTo($buttonDropdown);
+                        $buttonDropdown.appendTo($td);
                     }
                 }
-                $dropdown.appendTo($buttonDropdown);
-                return $buttonDropdown;
             }
             return $td;
         } else if (node.tag === 'widget') {
