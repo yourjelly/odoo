@@ -40,7 +40,7 @@ class AccountTestEdiCommon(AccountTestInvoicingCommon):
             self.assertEqual(node_dict['tag'], expected_node_dict['tag'])
 
             # Check attributes.
-            node_dict_attrib = {k: True if expected_node_dict['attrib'].get(k) == '___ignore___' else v
+            node_dict_attrib = {k: '___ignore___' if expected_node_dict['attrib'].get(k) == '___ignore___' else v
                                 for k, v in node_dict['attrib'].items()}
             expected_node_dict_attrib = {k: v for k, v in expected_node_dict['attrib'].items() if v != '___remove___'}
             self.assertDictEqual(
