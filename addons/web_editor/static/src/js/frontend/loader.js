@@ -27,6 +27,10 @@ async function createWysiwyg(parent, options, additionnalAssets = []) {
 
 async function loadFromTextarea(parent, textarea, options) {
     const $textarea = $(textarea);
+    const currentOptions = {...options};
+    if (!currentOptions.value || !currentOptions.value.trim()) {
+        currentOptions.value = '<p><br><p>';
+    }
     const wysiwyg = await createWysiwyg(parent, {
         template: `<t-dialog><t t-zone="default"/></t-dialog>
         <div class="d-flex flex-grow-1 flex-column" style="height: 200px">
@@ -40,7 +44,7 @@ async function loadFromTextarea(parent, textarea, options) {
                 <t t-zone="debug"/>
             </div>
         </div>`,
-        ...options
+        ...currentOptions
     });
 
     const $wysiwygWrapper = $textarea.closest('.o_wysiwyg_wrapper');
