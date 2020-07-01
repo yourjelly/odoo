@@ -12,7 +12,7 @@ publicWidget.registry['public_user_editor_test'] = publicWidget.Widget.extend({
      */
     start: async function () {
         await this._super(...arguments);
-        await wysiwygLoader.load(this, this.el, {});
+        await wysiwygLoader.loadFromTextarea(this, this.el, {});
     },
 });
 });

@@ -36,7 +36,7 @@ tour.register("snippet_version", {
     },
 }, {
     content: "Enter edit mode",
-    trigger: 'button[data-action="save"]',
+    trigger: 'button[name="save"]',
 }, {
     content: "Enter edit mode",
     extra_trigger: 'body:not(.editor_enable)',
