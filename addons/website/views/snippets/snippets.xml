@@ -302,6 +302,15 @@
             <we-colorpicker data-color="true" data-color-number="2" data-dependencies="!shape_none_opt"/>
             <we-select>
                 <we-button data-shape="" data-name="shape_none_opt">None</we-button>
+                <we-button data-shape="website/shape_border_waves">Border Waves - nmi</we-button>
+                <we-button data-shape="website/shape_border_triangles">Border Triangles - nmi</we-button>
+                <we-button data-shape="website/shape_bg_1_nmi">Shape 1 - nmi</we-button>
+                <we-button data-shape="website/shape_bg_2_nmi">Shape 2 - nmi</we-button>
+                <we-button data-shape="website/shape_bg_3_nmi">Shape 3 - nmi</we-button>
+                <we-button data-shape="website/shape_bg_4_nmi">Shape 4a - nmi</we-button>
+                <we-button data-shape="website/shape_bg_4b_nmi">Shape 4b - nmi</we-button>
+                <we-button data-shape="website/shape_bg_5_nmi">Shape 5 - nmi</we-button>
+                <we-button data-shape="website/shape_pattern_nmi">Pattern - nmi</we-button>
                 <we-button data-shape="website/shape_bg_1">Shape 1</we-button>
                 <we-button data-shape="website/shape_bg_2">Shape 2</we-button>
                 <we-button data-shape="website/shape_bg_3">Shape 3</we-button>
