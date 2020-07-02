@@ -1,10 +1,12 @@
 odoo.define('web_editor.wysiwyg', function (require) {
 'use strict';
+
 var Dialog = require('web.Dialog');
 var Widget = require('web.Widget');
 var JWEditorLib = require('web_editor.jabberwock');
 var SnippetsMenu = require('web_editor.snippet.editor').SnippetsMenu;
 var weWidgets = require('wysiwyg.widgets');
+var AttributeTranslateDialog = require('web_editor.wysiwyg.translate_attributes');
 
 var core = require('web.core');
 var _t = core._t;
@@ -37,6 +39,49 @@ var Wysiwyg = Widget.extend({
         this._super.apply(this, arguments);
         this.value = options.value || '';
         this.options = options;
+        this.JWEditorLib = JWEditorLib;
+        if (this.options.enableTranslation) {
+            this.options.snippets = null;
+            this.options.toolbarLayout = [];
+            this.options.customCommands = {
+                saveOdoo: {handler: this._onSaveTranslation.bind(this)}
+            };
+            this.options.mode = {
+                id: 'translate',
+                rules: [
+                    {
+                        selector: [],
+                        editable: false,
+                    },
+                    {
+                        selector: [this.JWEditorLib.ContainerNode],
+                        breakable: false,
+                    },
+                    {
+                        selector: [node => !!node.modifiers.find(this.JWEditorLib.OdooTranslationFormat)],
+                        editable: true,
+                    },
+                    {
+                        selector: [node => {
+                            const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
+                            return attributes && attributes.classList.has('o_not_editable');
+                        }, () => true],
+                        editable: false,
+                    },
+                ],
+            };
+        } else if (this.options.enableWebsite) {
+            this.options.plugins = [[this.JWEditorLib.OdooField]];
+            this.options.mode = {
+                id: 'edit',
+                rules: [
+                    {
+                        selector: [this.JWEditorLib.DividerNode],
+                        breakable: false,
+                    },
+                ],
+            };
+        }
     },
     /**
      * Load assets and color picker template then call summernote API
@@ -59,51 +104,51 @@ var Wysiwyg = Widget.extend({
         const wrapperClass = this.options.wrapperClass || 'd-flex o_editor_center';
         elementToParse.setAttribute('class', wrapperClass);
         elementToParse.innerHTML = this.value;
+        elementToParse.style.cssText = 'width: 100%;';
 
         if (this.options.enableWebsite) {
-            $(document.body).addClass('o_connected_user editor_enable editor_has_snippets');
+            $(document.body).addClass('o_connected_user editor_enable');
         }
+
         const $mainSidebar = $('<div class="o_main_sidebar">');
         const $snippetManipulators = $('<div id="oe_manipulators" />');
 
         this.editor = new JWEditorLib.OdooWebsiteEditor({
             afterRender: async ()=> {
                 const $wrapwrap = $('#wrapwrap');
-                $('#wrapwrap').data('wysiwyg', this);
                 $wrapwrap.removeClass('o_editable'); // clean the dom before edition
                 this._getEditable($wrapwrap).addClass('o_editable');
             },
             snippetMenuElement: $mainSidebar[0],
             snippetManipulators: $snippetManipulators[0],
-            customCommands: {
+            customCommands: Object.assign({
                 openMedia: {handler: this.openMediaDialog.bind(this)},
                 openLinkDialog: {handler: this.openLinkDialog.bind(this)},
                 discardOdoo: {handler: this.discardEditions.bind(this)},
                 saveOdoo: {handler: this.saveToServer.bind(this)}
-            },
+            }, this.options.customCommands),
             source: elementToParse,
-            location: this.options.location || [this.el, 'replace'],
+            location: this.options.location,
+            toolbarLayout: this.options.toolbarLayout,
             saveButton: this.options.saveButton,
+            discardButton: this.options.discardButton,
             template: this.options.template,
+            mode: this.options.mode,
         });
 
         this.editor.load(JWEditorLib.DevTools);
         await this.editor.start();
         this._bindAfterStart();
 
-        const layout = this.editor.plugins.get(JWEditorLib.Layout);
-        const domLayout = layout.engines.dom;
-        this.domLayout = domLayout;
-
-        const editableNVnode = domLayout.components.get('editable')[0];
-        this.editorEditable = domLayout.getDomNodes(editableNVnode)[0];
-
         this.editorHelpers = this.editor.plugins.get(JWEditorLib.DomHelpers);
+        const domLayout = this.editor.plugins.get(JWEditorLib.Layout).engines.dom;
+        this.vEditable = domLayout.components.get('editable')[0];
+        this.editorEditable = this.editorHelpers.getDomNodes(this.vEditable)[0];
 
         // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
         const emptyClass = "oe_blank_wrap";
         const targetNode = this.editorEditable.querySelector("#wrap");
-        if(this.options.enableWebsite && targetNode) {
+        if (this.options.enableWebsite && targetNode) {
             let mutationCallback = function () {
                 if (targetNode.textContent.trim() === '') {
                     targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
@@ -119,8 +164,12 @@ var Wysiwyg = Widget.extend({
         }
 
         // todo: handle megamenu
+        if (this.options.enableTranslation) {
+            this._setupTranslation();
+        }
 
         if (this.options.snippets) {
+            document.body.classList.add('editor_has_snippets');
             this.editor.enableRender = false;
             this.$webEditorToolbar = $('<div id="web_editor-toolbars">');
 
@@ -283,7 +332,7 @@ var Wysiwyg = Widget.extend({
         }
 
         await this._saveModifiedImages();
-        // todo: avoid redraw the editor if executing execCommand
+        // todo: avoid redraw the editor when calling execCommand
         await this.editor.execBatch(async ()=> {
             // todo: make them work
             await this._saveViewBlocks();
@@ -313,6 +362,132 @@ var Wysiwyg = Widget.extend({
     // Private
     //--------------------------------------------------------------------------
 
+
+    /**
+     * Gets jQuery cloned element with internal text nodes escaped for XML
+     * storage.
+     *
+     * @private
+     * @param {jQuery} $el
+     * @return {jQuery}
+     */
+    _getEscapedElement: function ($el) {
+        var escaped_el = $el.clone();
+        var to_escape = escaped_el.find('*').addBack();
+        to_escape = to_escape.not(to_escape.filter('object,iframe,script,style,[data-oe-model][data-oe-model!="ir.ui.view"]').find('*').addBack());
+        to_escape.contents().each(function () {
+            if (this.nodeType === 3) {
+                this.nodeValue = $('<div />').text(this.nodeValue).html();
+            }
+        });
+        return escaped_el;
+    },
+    /**
+     * Returns a translation object.
+     *
+     * @private
+     * @param {Node} node
+     * @returns {Object}
+     */
+    _getTranslationObject: function (node) {
+        var $node = $(node);
+        var id = +$node.data('oe-translation-id');
+        if (!id) {
+            id = $node.data('oe-model') + ',' + $node.data('oe-id') + ',' + $node.data('oe-field');
+        }
+        var translation = _.find(this.translations, function (translation) {
+            return translation.id === id;
+        });
+        if (!translation) {
+            this.translations.push(translation = {'id': id});
+        }
+        return translation;
+    },
+    /**
+     * @private
+     */
+    _markTranslatableNodes: function () {
+        const self = this;
+        const $editable = $(this.editorEditable);
+        $editable.prependEvent('click.translator', function (ev) {
+            if (ev.ctrlKey || !$(ev.target).is(':o_editable')) {
+                return;
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+        });
+
+        // attributes
+
+        this.$nodesToTranslateAttributes.each(function () {
+            var $node = $(this);
+            var translation = $node.data('translation');
+            _.each(translation, function (node) {
+                if (node) {
+                    var translation = self._getTranslationObject(node);
+                    translation.value = (translation.value ? translation.value : $node.html()).replace(/[ \t\n\r]+/, ' ');
+                    $node.attr('data-oe-translation-state', (translation.state || 'to_translate'));
+                }
+            });
+        });
+
+        this.$nodesToTranslateAttributes.prependEvent('mousedown.translator click.translator mouseup.translator', function (ev) {
+            if (ev.ctrlKey) {
+                return;
+            }
+            ev.preventDefault();
+            ev.stopPropagation();
+            if (ev.type !== 'mousedown') {
+                return;
+            }
+
+            new AttributeTranslateDialog(self, {
+                editor: self.editor,
+                editorHelpers: self.editorHelpers,
+            }, ev.target).open();
+        });
+    },
+    /**
+     * Return a promise resulting from a rpc to 'ir.ui.view' to save the given
+     * view to the given viewId.
+     *
+     * @param {JQuery} $elem
+     * @param {number} viewId
+     * @param {string} [xpath]
+     */
+    _saveViewTo($elem, viewId, xpath = null) {
+        const $escapedElement = this._getEscapedElement($elem);
+        return this._rpc({
+            model: 'ir.ui.view',
+            method: 'save',
+            args: [
+                viewId,
+                $escapedElement.prop('outerHTML'),
+                xpath,
+            ],
+            context: this.options.recordInfo.context,
+        });
+    },
+    /**
+     * Return a promise resulting from a rpc to 'ir.translation' to save the
+     * given view to the given translationId.
+     *
+     * @param {JQuery} $elem
+     * @param {number} translationId
+     * @param {string} [xpath]
+     */
+    _saveTranslationTo($elem, translationId) {
+        const $escapedElement = this._getEscapedElement($elem);
+        return this._rpc({
+            model: 'ir.translation',
+            method: 'save_html',
+            args: [
+                [translationId],
+                $escapedElement.html() || $escapedElement.text() || '',
+            ],
+            context: this.options.recordInfo.context,
+        });
+    },
     /**
      * Save all "view" blocks.
      *
@@ -320,25 +495,17 @@ var Wysiwyg = Widget.extend({
      */
     _saveViewBlocks: async function () {
         const promises = [];
-        const layout = this.editor.plugins.get(JWEditorLib.Layout);
-        const domLayout = layout.engines.dom;
-        const editable = domLayout.components.get('editable')[0];
-        const nodes = editable.descendants((node) => node instanceof JWEditorLib.OdooStructureNode || node instanceof JWEditorLib.OdooFieldNode);
+        const nodes = this.vEditable.descendants(node => {
+            return (
+                node instanceof JWEditorLib.OdooStructureNode ||
+                node instanceof JWEditorLib.OdooFieldNode
+            );
+        });
         for (const node of nodes) {
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
             const renderedNode = (await renderer.render('dom/html', node))[0];
             $(renderedNode).find('.o_snippet_editor_updated').addBack().removeClass('o_snippet_editor_updated');
-
-            promises.push(this._rpc({
-                model: 'ir.ui.view',
-                method: 'save',
-                args: [
-                    parseInt(renderedNode.dataset.oeId),
-                    renderedNode.outerHTML,
-                    node.xpath,
-                ],
-                context: this.options.recordInfo.context,
-            }));
+            promises.push(this._saveViewTo($(renderedNode), +renderedNode.dataset.oeId, node.xpath));
         }
         return Promise.all(promises);
     },
@@ -351,17 +518,14 @@ var Wysiwyg = Widget.extend({
     _saveCoverPropertiesBlocks: async function () {
         let rpcResult;
         await this.editor.execCustomCommand(async () => {
-            const layout = this.editor.plugins.get(JWEditorLib.Layout);
-            const domLayout = layout.engines.dom;
-            const editableNode = domLayout.components.get('editable')[0];
-            const covers = editableNode.descendants(node => {
+            const covers = this.vEditable.descendants(node => {
                 const attributes = node.modifiers.find(JWEditorLib.Attributes);
 
                 if (attributes && attributes.length && typeof attributes.get('class') === 'string') {
                     return attributes.classList.has('o_record_cover_container');
                 }
             });
-            const el = covers && covers[0] && domLayout.getDomNodes(covers[0])[0];
+            const el = covers && covers[0] && this.editorHelpers.getDomNodes(covers[0])[0];
             if (!el) {
                 console.warn('No cover found.');
                 return;
@@ -408,11 +572,8 @@ var Wysiwyg = Widget.extend({
      * @private
      */
     _saveMegaMenuClasses: async function () {
-        const layout = this.editor.plugins.get(JWEditorLib.Layout);
-        const domLayout = layout.engines.dom;
-        const editable = domLayout.components.get('editable')[0];
-        const structureNodes = editable.descendants((node) => {
-            return node.modifiers.get(JWEditorLib.Attributes).get('data-oe-field') === 'mega_menu_content'
+        const structureNodes = this.vEditable.descendants((node) => {
+            return node.modifiers.get(JWEditorLib.Attributes).get('data-oe-field') === 'mega_menu_content';
         });
         const promises = [];
         for (const node of structureNodes) {
@@ -449,11 +610,8 @@ var Wysiwyg = Widget.extend({
     _saveNewsletterBlocks: async function () {
         const defs = [];
         await this.editor.execCustomCommand(async () => {
-            const layout = this.editor.plugins.get(JWEditorLib.Layout);
-            const domLayout = layout.engines.dom;
-            const editableNode = domLayout.components.get('editable')[0];
             defs.push(this._super.apply(this, arguments));
-            const $popups = $(editableNode).find('.o_newsletter_popup');
+            const $popups = $(this.editorEditable).find('.o_newsletter_popup');
             for (const popup of $popups) {
                 const $popup = $(popup);
                 const content = $popup.data('content');
@@ -469,26 +627,6 @@ var Wysiwyg = Widget.extend({
             }
         });
         return Promise.all(defs);
-    },
-    /**
-     * Save all "translation" blocks.
-     *
-     * @private
-     * @param {JQuery} $el
-     * @param {Object} context
-     */
-    _saveTranslationBlocks: async function ($el, context) {
-        if ($el.data('oe-translation-id')) {
-            return this._rpc({
-                model: 'ir.translation',
-                method: 'save_html',
-                args: [
-                    [+$el.data('oe-translation-id')],
-                    this._getEscapedElement($el).html()
-                ],
-                context: context,
-            });
-        }
     },
     /**
      * Save all modified images.
@@ -525,6 +663,57 @@ var Wysiwyg = Widget.extend({
                 return Promise.all(proms);
             });
             await Promise.all(defs);
+        });
+    },
+    /**
+     * Initialize the editor for a translation.
+     *
+     * @private
+     */
+    _setupTranslation: function () {
+        const attrs = ['placeholder', 'title', 'alt'];
+        const nodesToTranslateAttributes = this.vEditable.descendants(node => {
+            const attributes = node.modifiers.find(JWEditorLib.Attributes);
+            return attributes && attributes.keys().some(key => attrs.includes(key));
+        });
+        const domNodesToTranslateAttributes = nodesToTranslateAttributes.flatMap(nodeToTranslateAttributes => {
+            return this.editorHelpers.getDomNodes(nodeToTranslateAttributes)[0];
+        });
+        this.$nodesToTranslateAttributes = $(domNodesToTranslateAttributes);
+        for (const attr of attrs) {
+            this.$nodesToTranslateAttributes.each(function () {
+                var $node = $(this);
+                var translation = $node.data('translation') || {};
+                var attributeTranslation = $node.attr(attr);
+                if (attributeTranslation) {
+                    var match = attributeTranslation.match(/<span [^>]*data-oe-translation-id="([0-9]+)"[^>]*>(.*)<\/span>/);
+                    var $translatedAttributeNode = $(attributeTranslation).addClass('d-none o_editable o_editable_translatable_attribute').appendTo('body');
+                    $translatedAttributeNode.data('$node', $node).data('attribute', attr);
+
+                    translation[attr] = $translatedAttributeNode[0];
+                    if (match) {
+                        $node.attr(attr, match[2]);
+                    }
+                }
+                var select2 = $node.data('select2');
+                if (select2) {
+                    select2.blur();
+                    $node.on('translate', function () {
+                        select2.blur();
+                    });
+                    $node = select2.container.find('input');
+                }
+                $node.addClass('o_translatable_attribute').data('translation', translation);
+            });
+        }
+        this.$attribute_translations = $('.o_editable_translatable_attribute');
+        this.translations = [];
+        this._markTranslatableNodes();
+
+        // We don't want the BS dropdown to close
+        // when clicking in a element to translate
+        $('.dropdown-menu').on('click', '.o_editable', function (ev) {
+            ev.stopPropagation();
         });
     },
     /**
@@ -628,6 +817,69 @@ var Wysiwyg = Widget.extend({
             mediaDialog.on('cancel', this, data.onCancel);
         }
         mediaDialog.open();
+    },
+    /**
+     * Save all translation blocks.
+     *
+     * @private
+     */
+    _onSaveTranslation: async function () {
+        const defs = [];
+        this.trigger_up('edition_will_stopped');
+        this.trigger_up('ready_to_save', {defs: defs});
+        await Promise.all(defs);
+
+        const promises = [];
+        // Get the nodes holding the `OdooTranslationFormats`. Only one
+        // node per format.
+        const translationIds = [];
+        const translationNodes = this.vEditable.descendants(descendant => {
+            const format = descendant.modifiers.find(JWEditorLib.OdooTranslationFormat);
+            const translationId = format && format.translationId;
+            if (!format || translationIds.includes(translationId)) {
+                return false;
+            } else if (translationId) {
+                translationIds.push(translationId);
+            }
+            // Only save editable nodes.
+            return this.editor.mode.is(descendant, 'editable');
+        });
+
+        // Save the odoo translation formats.
+        for (const translationNode of translationNodes) {
+            const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
+            const renderedNode = (await renderer.render('dom/html', translationNode))[0];
+            const translationFormat = translationNode.modifiers.find(JWEditorLib.OdooTranslationFormat);
+
+            let $renderedTranslation = $(renderedNode);
+            if (!$renderedTranslation.data('oe-translation-state')) {
+                $renderedTranslation = $renderedTranslation.find('[data-oe-translation-state]');
+            }
+
+            if (translationFormat.translationId) {
+                promises.push(this._saveTranslationTo($renderedTranslation, +translationFormat.translationId));
+            } else {
+                const attributes = translationFormat.modifiers.find(JWEditorLib.Attributes);
+                promises.push(this._saveViewTo(
+                    $renderedTranslation,
+                    attributes.get('data-oe-id'),
+                    attributes.get('data-oe-xpath')
+                ));
+            }
+        }
+
+        // Save attributes
+        for (const attribute_translation of this.$attribute_translations) {
+            const $attribute_translations = $(attribute_translation);
+            promises.push(this._saveTranslationTo(
+                $attribute_translations,
+                +$attribute_translations.data('oe-translation-id')
+            ));
+        }
+
+        await Promise.all(promises);
+        this.trigger_up('edition_was_stopped');
+        window.location.reload();
     },
     /**
      * Returns the editable areas on the page.

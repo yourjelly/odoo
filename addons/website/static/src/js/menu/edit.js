@@ -5,8 +5,45 @@ var core = require('web.core');
 var websiteNavbarData = require('website.navbar');
 var wysiwygLoader = require('web_editor.loader');
 var ajax = require('web.ajax');
-
+var Dialog = require('web.Dialog');
+var localStorage = require('web.local_storage');
 var _t = core._t;
+
+var localStorageNoDialogKey = 'website_translator_nodialog';
+
+var TranslatorInfoDialog = Dialog.extend({
+    template: 'website.TranslatorInfoDialog',
+    xmlDependencies: Dialog.prototype.xmlDependencies.concat(
+        ['/website/static/src/xml/translator.xml']
+    ),
+
+    /**
+     * @constructor
+     */
+    init: function (parent, options) {
+        this._super(parent, _.extend({
+            title: _t("Translation Info"),
+            buttons: [
+                {text: _t("Ok, never show me this again"), classes: 'btn-primary', close: true, click: this._onStrongOk.bind(this)},
+                {text: _t("Ok"), close: true}
+            ],
+        }, options || {}));
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * Called when the "strong" ok is clicked -> adapt localstorage to make sure
+     * the dialog is never displayed again.
+     *
+     * @private
+     */
+    _onStrongOk: function () {
+        localStorage.setItem(localStorageNoDialogKey, true);
+    },
+});
 
 /**
  * Adds the behavior when clicking on the 'edit' button (+ editor interaction)
@@ -16,6 +53,8 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     actions: _.extend({}, websiteNavbarData.WebsiteNavbarActionWidget.prototype.actions, {
         edit: '_startEditMode',
         on_save: '_onSave',
+        translate: '_startTranslateMode',
+        edit_master: '_goToMasterPage',
     }),
     custom_events: _.extend({}, websiteNavbarData.WebsiteNavbarActionWidget.custom_events || {}, {
         content_will_be_destroyed: '_onContentWillBeDestroyed',
@@ -41,8 +80,16 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             },
         });
         this._editorAutoStart = (context.editable && window.location.search.indexOf('enable_editor') >= 0);
-        var url = window.location.href.replace(/([?&])&*enable_editor[^&#]*&?/, '\$1');
-        window.history.replaceState({}, null, url);
+        this._mustEditTranslations = context.edit_translations;
+
+        if (this._mustEditTranslations) {
+            var url = window.location.href.replace(/([?&])&*edit_translations[^&#]*&?/, '\$1');
+            window.history.replaceState({}, null, url);
+            this._startTranslateMode();
+        } else {
+            var url = window.location.href.replace(/([?&])&*enable_editor[^&#]*&?/, '\$1');
+            window.history.replaceState({}, null, url);
+        }
     },
     /**
      * Auto-starts the editor if necessary or add the welcome message otherwise.
@@ -122,9 +169,34 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         return res;
     },
     /**
+     * Redirects the user to the same page in translation mode (or start the
+     * translator is translation mode is already enabled).
+     *
      * @private
+     * @returns {Promise}
      */
-    _createWysiwyg: async function () {
+    _startTranslateMode: async function () {
+        // Add class in navbar and hide the navbar.
+        this.trigger_up('edit_mode');
+
+        if (!this._mustEditTranslations) {
+            window.location.search += '&edit_translations';
+            return new Promise(function () {});
+        }
+
+        if (!localStorage.getItem(localStorageNoDialogKey)) {
+            new TranslatorInfoDialog(this).open();
+        }
+
+        this.wysiwyg = await this._createWysiwyg(true);
+
+        return this.wysiwyg.prependTo(document.body);
+    },
+    /**
+     * @private
+     * @param {boolean} [enableTranslation] true to create a translator wysiwyg.
+     */
+    _createWysiwyg: async function (enableTranslation = false) {
         var context;
         this.trigger_up('context_get', {
             callback: function (ctx) {
@@ -132,7 +204,8 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             },
         });
 
-        const wysiwyg = await wysiwygLoader.createWysiwyg(this, {
+        const params = {
+            legacy: false,
             snippets: 'website.snippets',
             recordInfo: {
                 context: context,
@@ -143,8 +216,12 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             discardButton: true,
             saveButton: true,
             location: [document.getElementById('wrapwrap'), 'replace'],
-        }, ['website.compiled_assets_wysiwyg']);
-        await ajax.loadLibs({assetLibs: ['website.compiled_assets_wysiwyg']});
+        };
+        params.enableTranslation = enableTranslation;
+
+        const assets = ['website.compiled_assets_wysiwyg'];
+        const wysiwyg = await wysiwygLoader.createWysiwyg(this, params, assets);
+        await ajax.loadLibs({assetLibs: assets});
         return wysiwyg;
     },
     /**
@@ -160,6 +237,27 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @todo improve the system to somehow declare required/optional actions
      */
     _onSave: function () {},
+    /**
+     * Redirects the user to the same page but in the original language and in
+     * edit mode.
+     *
+     * @private
+     * @returns {Promise}
+     */
+    _goToMasterPage: function () {
+        var current = document.createElement('a');
+        current.href = window.location.toString();
+        current.search += (current.search ? '&' : '?') + 'enable_editor=1';
+        // we are in translate mode, the pathname starts with '/<url_code/'
+        current.pathname = current.pathname.substr(current.pathname.indexOf('/', 1));
+
+        var link = document.createElement('a');
+        link.href = '/website/lang/default';
+        link.search += (link.search ? '&' : '?') + 'r=' + encodeURIComponent(current.pathname + current.search + current.hash);
+
+        window.location = link.href;
+        return new Promise(function () {});
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -292,5 +390,5 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     },
 });
 
-websiteNavbarData.websiteNavbarRegistry.add(EditPageMenu, '#edit-page-menu');
+websiteNavbarData.websiteNavbarRegistry.add(EditPageMenu, '#edit-page-menu,.o_menu_systray:has([data-action="translate"])');
 });
