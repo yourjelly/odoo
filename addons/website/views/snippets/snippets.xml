@@ -311,6 +311,7 @@
                 <we-button data-shape="website/shape_bg_4b_nmi">Shape 4b - nmi</we-button>
                 <we-button data-shape="website/shape_bg_5_nmi">Shape 5 - nmi</we-button>
                 <we-button data-shape="website/shape_pattern_nmi">Pattern - nmi</we-button>
+                <we-button data-shape="website/shape_pattern_2_nmi">Pattern 2 - nmi</we-button>
                 <we-button data-shape="website/shape_bg_1">Shape 1</we-button>
                 <we-button data-shape="website/shape_bg_2">Shape 2</we-button>
                 <we-button data-shape="website/shape_bg_3">Shape 3</we-button>
