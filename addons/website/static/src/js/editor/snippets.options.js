@@ -999,10 +999,15 @@ snippetOptions.registry.Carousel = snippetOptions.SnippetOptionsWidget.extend({
     /**
      * @override
      */
-    start: function () {
+    start: async function () {
         this.$target.carousel('pause');
         this.$indicators = this.$target.find('.carousel-indicators');
         this.$controls = this.$target.find('.carousel-control-prev, .carousel-control-next, .carousel-indicators');
+
+        // If not id has been attributed yet, do it now.
+        if (this.$target.attr('id') === 'myCarousel') {
+            this._assignUniqueID();
+        }
 
         // Prevent enabling the carousel overlay when clicking on the carousel
         // controls (indeed we want it to change the carousel slide then enable
@@ -1069,7 +1074,7 @@ snippetOptions.registry.Carousel = snippetOptions.SnippetOptionsWidget.extend({
      *
      * @private
      */
-    _assignUniqueID: function () {
+    _assignUniqueID: async function () {
         const id = 'myCarousel' + Date.now();
         this.$target.attr('id', id);
         this.$target.find('[data-target]').attr('data-target', '#' + id);
@@ -1081,6 +1086,7 @@ snippetOptions.registry.Carousel = snippetOptions.SnippetOptionsWidget.extend({
                 $el.attr('href', '#' + id);
             }
         });
+        await this._refreshTarget();
     },
 });
 
