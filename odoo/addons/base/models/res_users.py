@@ -1621,22 +1621,20 @@ class APIKeys(models.Model):
 
     def get_api_key(self, key):
         index = key[:INDEX_SIZE]
-        self.env.cr.execute('SELECT id, scope, key FROM res_users_apikeys WHERE index = %s', [index])
-        for [id, scope, current_key] in self.env.cr.fetchall():
+        self.env.cr.execute('SELECT id, key FROM res_users_apikeys WHERE index = %s', [index])
+        for [id, current_key] in self.env.cr.fetchall():
             if KEY_CRYPT_CONTEXT.verify(key, current_key):
-                return self.browse(id), scope
+                return self.browse(id)
 
     @api.model
-    def generate(self, name, scope=None):
+    def _generate(self, name, scope=None):
         # no need to clear the LRU when *adding* a key, only when removing
         k = binascii.hexlify(os.urandom(API_KEY_SIZE)).decode()
-        description = self.sudo()
         self.env.cr.execute("""
         INSERT INTO res_users_apikeys (name, user_id, scope, key, index)
         VALUES (%s, %s, %s, %s, %s)
         RETURNING id
         """, [name, self.env.user.id, scope, hash_api_key(k), k[:INDEX_SIZE]])
-        description.unlink()
         record_id = self.env.cr.fetchone()
         self.env['res.users.apikeys'].invalidate_cache(ids=record_id)
 
@@ -1653,7 +1651,9 @@ class APIKeyDescription(models.TransientModel):
         if not self.user_has_groups('base.group_user,base.group_portal'):
             raise AccessError(_("Only employees and portal users can create API keys"))
 
-        k = self.env['res.users.apikeys'].generate(self.name)
+        description = self.sudo()
+        k = self.env['res.users.apikeys']._generate(self.sudo().name)
+        description.unlink()
 
         return {
             'type': 'ir.actions.act_window',

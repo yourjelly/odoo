@@ -883,10 +883,10 @@ class Home(http.Controller):
         return parsed.replace(query=werkzeug.urls.url_encode(qs)).to_url()
 
     @http.route('/web/login', type='http', auth="none")
-    def web_login(self, redirect=None, app=None, scope=None, **kw):
+    def web_login(self, redirect=None, scope=None, **kw):
         ensure_db()
         request.params['login_success'] = False
-        if request.httprequest.method == 'GET' and redirect and request.session.uid:
+        if request.httprequest.method == 'GET' and redirect and request.session.uid: #and not scope:
             return http.redirect_with_hash(redirect)
 
         if not request.uid:
@@ -903,9 +903,8 @@ class Home(http.Controller):
             try:
                 uid = request.session.authenticate(request.session.db, request.params['login'], request.params['password'])
                 request.params['login_success'] = True
-                if app:
-                    #values['scopes'] = scope.split(',')
-                    return werkzeug.utils.redirect("/web/accept_scope?%s" % werkzeug.urls.url_encode({"redirect": redirect, "app": app, "scope": scope}))
+                #if scope:
+                #    return werkzeug.utils.redirect("/web/accept_scope?%s" % werkzeug.urls.url_encode({"redirect": redirect, "scope": scope}))
                 return http.redirect_with_hash(self._login_redirect(uid, redirect=redirect))
             except odoo.exceptions.AccessDenied as e:
                 request.uid = old_uid
@@ -930,13 +929,12 @@ class Home(http.Controller):
     # sid changes once connected, therefore csrf changes too.
     @http.route('/web/accept_scope', type='http', auth="user", methods=['GET'])
     def accept_scope(self, **values):
-        values['scopes'] = values['scope'].split(',')
         return request.render('web.app_auth', values)
 
     @http.route('/web/oauth', type='http', auth="user", methods=['POST'])
-    def web_oauth(self, redirect=None, app=None, scope=None, do="refuse", **kw):
+    def web_oauth(self, redirect=None, scope=None, do="refuse", **kw):
         if do == 'accept':
-            token = request.env['res.users.apikeys'].generate(app, scope)
+            token = request.env['res.users.apikeys']._generate(scope, scope) #name of the token, and the actual scope
             redirect = "%s?success=1&token=%s" % (redirect, token)
         else:
             redirect = redirect + "?success=0"
