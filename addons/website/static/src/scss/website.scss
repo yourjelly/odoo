@@ -1028,12 +1028,17 @@ $ribbon-padding: 100px;
 .o_we_shape {
     @each $module, $shapes in $bg-shapes {
         @each $shape, $style in $shapes {
-            // %23 is the url-encoded form of '#' which doesn't work as is in urls.
-            $c1: str-replace("#{map-get($o-color-palette, map-get($style, c1))}", '#', '%23');
-            $c2: str-replace("#{map-get($o-color-palette, map-get($style, c2))}", '#', '%23');
+            $url-params: '';
+            $colors: map-get($style, colors);
+            @for $i from 1 through length($colors) {
+                // %23 is the url-encoded form of '#' which doesn't work as is in urls.
+                $color: str-replace("#{map-get($o-color-palette, nth($colors, $i))}", '#', '%23');
+                $url-params: '#{$url-params}&c#{$i}=#{$color}';
+            }
+
             // eg: o_website_shape_bg_1
             &.o_#{$module}_#{$shape} {
-                background-image: url("/web_editor/shape/#{$module}/#{$shape}.svg?c1=#{$c1}&c2=#{$c2}");
+                background-image: url("/web_editor/shape/#{$module}/#{$shape}.svg?#{str-slice($url-params, 2)}");
                 background-position: map-get($style, position);
                 background-size: map-get($style, size);
             }

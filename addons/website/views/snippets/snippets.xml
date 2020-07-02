@@ -307,9 +307,7 @@
         t-att-data-selector="bg_selector"
         t-att-data-exclude="bg_exclude">
         <we-row string="Shape">
-            <we-colorpicker data-color="true" data-color-number="1" data-dependencies="!shape_none_opt"/>
-            <we-colorpicker data-color="true" data-color-number="2" data-dependencies="!shape_none_opt"/>
-            <we-select>
+            <we-select class="o_we_shape_menu">
                 <we-button data-shape="" data-name="shape_none_opt">None</we-button>
                 <we-button data-shape="website/shape_bg_1">Shape 1</we-button>
                 <we-button data-shape="website/shape_bg_2">Shape 2</we-button>
@@ -338,6 +336,10 @@
                 <we-button data-shape="website/shape_bg_pulse">Pulse</we-button>
             </we-select>
         </we-row>
+        <div class="o_we_shape_btn_content mx-auto position-relative border-dark"
+             style="width: 180px; height: 50px; background-image:url('/web_editor/static/src/img/transparent.png')">
+            <div class="o_we_shape"></div>
+        </div>
     </div>
 
     <!-- Background Image Size/Position -->

@@ -397,7 +397,7 @@ body.editor_enable.editor_has_snippets {
 
         // Buttons
         we-button.o_we_user_value_widget {
-            &.active {
+            &.active:not([data-shape]) {
                 @include we-icon-button('\f00c', $o-we-color-success);
             }
 

@@ -3214,8 +3214,18 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     shape(previewMode, widgetValue, params) {
-        this._markShape({shape: widgetValue, color1: undefined, color2: undefined});
+        if (previewMode === 'reset') {
+            this.$target[0].dataset.oeShapeData = this.prevShape;
+        } else {
+            if (previewMode === true) {
+                this.prevShape = this.$target[0].dataset.oeShapeData;
+            }
+            this._markShape({shape: widgetValue, colors: this._getDefaultColors()});
+        }
         this._setBackground();
+        if (!previewMode) {
+            return this._rerenderXML();
+        }
     },
     /**
      * Sets the current background shape's colors.
@@ -3228,7 +3238,11 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             if (previewMode === true) {
                 this.prevShape = this.$target[0].dataset.oeShapeData;
             }
-            this._markShape({[`color${params.colorNumber}`]: widgetValue});
+            const {colorNumber} = params;
+            const {colors: previousColors} = this._getShapeData();
+            const newColor = widgetValue || this._getDefaultColors()[colorNumber];
+            const newColors = Object.assign(previousColors, {[colorNumber]: newColor});
+            this._markShape({colors: newColors});
         }
         this._setBackground();
     },
@@ -3241,7 +3255,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @override
      */
     _computeWidgetState(methodName, params) {
-        const {color1, color2, shape} = Object.assign(this._getDefaultColors(), this._getShapeData());
+        const {shape, colors} = this._getShapeData();
         switch (methodName) {
             case 'shape':
                 return shape;
@@ -3249,9 +3263,29 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
                 if (!shape) {
                     return '';
                 }
-                return normalizeColor(params.colorNumber === '1' ? color1 : color2);
+                return normalizeColor(colors[params.colorNumber]);
         }
         return this._super(...arguments);
+    },
+    /**
+     * @override
+     */
+    _renderCustomXML(uiFragment) {
+        const colorPickers = this._getDefaultColors().map((_, i) => {
+            return $(`<we-colorpicker data-color="true" data-color-number="${i}">`)[0];
+        });
+        uiFragment.querySelector('we-row[string="Shape"]').prepend(...colorPickers);
+        const btnContentTemplate = uiFragment.querySelector('.o_we_shape_btn_content');
+        btnContentTemplate.remove();
+        uiFragment.querySelectorAll('we-button[data-shape]').forEach(el => {
+            const btnContent = btnContentTemplate.cloneNode(true);
+            btnContent.querySelector('.o_we_shape').classList.add(`o_${el.dataset.shape.replace('/', '_')}`);
+            const textHider = document.createElement('span');
+            textHider.classList.add('d-none');
+            textHider.append(...el.childNodes);
+            el.append(textHider, btnContent);
+        });
+        return uiFragment;
     },
     /**
      * Sets the background to the shape's color-configured url.
@@ -3259,7 +3293,8 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @private
      */
     _setBackground() {
-        const {color1, color2, shape} = this._getShapeData();
+        const json = this.$target[0].dataset.oeShapeData;
+        const {shape, colors} = json ? JSON.parse(json) : {};
         const target = this.$target[0];
         let shapeContainer = target.querySelector('.o_we_shape');
         if (!shape) {
@@ -3274,7 +3309,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         }
         shapeContainer.className = `o_we_shape o_${shape.replace('/', '_')}`;
         $(shapeContainer).css('background-image', '');
-        if (color1 || color2) {
+        if (colors) {
             // Custom colors, overwrite shape that is set by the class
             $(shapeContainer).css('background-image', `url("${this._getShapeSrc()}")`);
         }
@@ -3285,12 +3320,13 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @private
      */
     _getShapeSrc() {
-        const {color1, color2, shape} = Object.assign(this._getDefaultColors(), this._getShapeData());
+        const {shape, colors} = this._getShapeData();
         if (!shape) {
             return '';
         }
-        const [encodedCol1, encodedCol2] = [color1, color2].map(col => encodeURIComponent(normalizeColor(col)));
-        return `/web_editor/shape/${shape}.svg?c1=${encodedCol1}&c2=${encodedCol2}`;
+        const encodedColors = colors.map(col => encodeURIComponent(normalizeColor(col)));
+        const queryString = encodedColors.map((col, i) => `c${i}=${col}`).join('&');
+        return `/web_editor/shape/${shape}.svg?${queryString}`;
     },
     /**
      * Overwrites shape properties with the specified data.
@@ -3300,15 +3336,9 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      */
     _markShape(newData) {
         const defaultColors = this._getDefaultColors();
-        ['color1', 'color2'].forEach(col => {
-            // Empty string => 'reset' in color-picker, revert to default color
-            if (newData[col] === '') {
-                newData[col] = defaultColors[col];
-            }
-        });
-        const shapeData = Object.assign({}, defaultColors, this._getShapeData(), newData);
-        if (shapeData.color1 === defaultColors.color1 && shapeData.color2 === defaultColors.color2) {
-            shapeData.color1 = shapeData.color2 = undefined;
+        const shapeData = Object.assign(this._getShapeData(), newData);
+        if (shapeData.colors.every((color, i) => color === defaultColors[i])) {
+            shapeData.colors = undefined;
         }
         this.$target[0].dataset.oeShapeData = JSON.stringify(shapeData);
     },
@@ -3320,9 +3350,10 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
     _getShapeData() {
         const defaultData = {
             shape: '',
+            colors: this._getDefaultColors(),
         };
         const json = this.$target[0].dataset.oeShapeData;
-        return json ? JSON.parse(json) : defaultData;
+        return json ? Object.assign(defaultData, JSON.parse(json)) : defaultData;
     },
     /**
      * Retrieves current shape data from the target's dataset.
@@ -3340,13 +3371,10 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         const shapeSrc = shapeContainer && getBgImageSrc(shapeContainer);
         $shapeContainer.remove();
         if (!shapeSrc) {
-            return {};
+            return [];
         }
-        const matches = shapeSrc.match(/c1=(.*)&c2=(.*)$/);
-        return {
-            color1: decodeURIComponent(matches[1]),
-            color2: decodeURIComponent(matches[2]),
-        };
+        const url = new URL(shapeSrc, window.location.origin);
+        return [...url.searchParams.values()];
     },
 });
 

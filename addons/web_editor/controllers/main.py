@@ -495,7 +495,7 @@ class Web_Editor(http.Controller):
         return '%s?access_token=%s' % (attachment.image_src, attachment.access_token)
 
     @http.route(['/web_editor/shape/<module>/<filename>'], type='http', auth="public", website=True)
-    def background_shape(self, module, filename, c1='#445869', c2='#2DCBB2'):
+    def background_shape(self, module, filename, **kwargs):
         """
         Returns a color-customized background-shape.
         """
@@ -504,7 +504,12 @@ class Web_Editor(http.Controller):
             raise werkzeug.exceptions.NotFound()
 
         svg = open(shape_path, 'r').read()
-        svg = svg.replace('#445869', c1).replace('#2DCBB2', c2)
+        colors = (color for key, color in kwargs.items() if re.match('^c\d$', key))
+        replaced_colors = ['#445869', '#2DCBB2', '#DBDEF9']
+        for to_replace, color in zip(replaced_colors, colors):
+            #'#%s' % (str(i)*6)
+            svg = svg.replace(to_replace, color)
+
         # Allows better size-control from css.
         svg = svg.replace('<svg', '<svg preserveAspectRatio="none"')
         return request.make_response(svg, [

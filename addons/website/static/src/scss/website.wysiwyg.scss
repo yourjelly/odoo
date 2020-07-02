@@ -198,3 +198,7 @@ we-collapse {
     position: relative;
     padding: 0.3em 0.3em 0.3em 1em;
 }
+
+.o_we_shape_menu we-button[data-shape].active .o_we_shape {
+    border: 1px solid var(--success) !important;
+}
