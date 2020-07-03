@@ -640,36 +640,34 @@
                             <h5>Explore</h5>
                             <ul class="list-unstyled">
                                 <li class="list-item py-1"><a href="/">Home</a></li>
-                                <li class="list-item py-1"><a href="/">Our Company</a></li>
-                                <li class="list-item py-1"><a href="/">Case Studies</a></li>
-                                <li class="list-item py-1"><a href="/">Blog</a></li>
+                                <li class="list-item py-1"><a href="#">Our Company</a></li>
+                                <li class="list-item py-1"><a href="#">Case Studies</a></li>
+                                <li class="list-item py-1"><a href="#">Blog</a></li>
                             </ul>
                         </div>
                         <div class="col-lg-2 pb16">
                             <h5>Services</h5>
                             <ul class="list-unstyled">
-                                <li class="list-item py-1"><a href="/">Documentation</a></li>
-                                <li class="list-item py-1"><a href="/">Marketplace</a></li>
-                                <li class="list-item py-1"><a href="/">Design</a></li>
-                                <li class="list-item py-1"><a href="/">Resources</a></li>
+                                <li class="py-1"><a href="#">Documentation</a></li>
+                                <li class="py-1"><a href="#">Marketplace</a></li>
+                                <li class="py-1"><a href="#">Design</a></li>
+                                <li class="py-1"><a href="#">Resources</a></li>
                             </ul>
                         </div>
                         <div class="col-lg-2 pb16">
                             <h5>Follow us</h5>
                             <ul class="list-unstyled">
-                                <li class="list-item py-1"><i class="fa fa-1x fa-fw fa-facebook-square mr-2"/><a href="/">Facebook</a></li>
-                                <li class="list-item py-1"><i class="fa fa-1x fa-fw fa-twitter-square mr-2"/><a href="/">Twitter</a></li>
-                                <li class="list-item py-1"><i class="fa fa-1x fa-fw fa-linkedin-square mr-2"/><a href="/">Linkedin</a></li>
-                                <li class="list-item py-1"><i class="fa fa-1x fa-fw fa-instagram mr-2"/><a href="/">Instagram</a></li>
+                                <li class="py-1"><i class="fa fa-1x fa-fw fa-facebook-square mr-2"/><a href="/website/social/facebook" target="_blank">Facebook</a></li>
+                                <li class="py-1"><i class="fa fa-1x fa-fw fa-twitter-square mr-2"/><a href="/website/social/twitter" target="_blank">Twitter</a></li>
+                                <li class="py-1"><i class="fa fa-1x fa-fw fa-linkedin-square mr-2"/><a href="/website/social/linkedin" target="_blank">Linkedin</a></li>
+                                <li class="py-1"><i class="fa fa-1x fa-fw fa-instagram mr-2"/><a href="/website/social/instagram" target="_blank">Instagram</a></li>
                             </ul>
                         </div>
                         <div class="col-lg-3 pb16">
                             <h5>Get in touch</h5>
                             <ul class="list-unstyled">
-                                <li class="list-item py-1"><i class="fa fa-1x fa-fw fa-envelope mr-2"/><a href="mailto:info@yourcompany.com">info@yourcompany.com</a></li>
-                                <li class="list-item py-1"><i class="fa fa-1x fa-fw fa-phone mr-2"/><span class="o_force_ltr"><a href="tel:1 (650) 691-3277">+1 (650) 691-3277</a></span></li>
-                                <li class="list-item py-1"><span/></li>
-                                <li class="list-item py-1"></li>
+                                <li class="py-1"><i class="fa fa-1x fa-fw fa-envelope mr-2"/><a href="mailto:info@yourcompany.com">info@yourcompany.com</a></li>
+                                <li class="py-1"><i class="fa fa-1x fa-fw fa-phone mr-2"/><span class="o_force_ltr"><a href="tel:1 (650) 691-3277">+1 (650) 691-3277</a></span></li>
                             </ul>
                         </div>
                         <div class="col-lg-3 pb16">
