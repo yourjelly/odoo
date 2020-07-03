@@ -527,41 +527,36 @@ var ListRenderer = BasicRenderer.extend({
         }
 
         if (node.tag === 'button_group') {
-            // debugger;
             const $buttonDropdown = $('<div>', {
                     class: 'dropdown',
-                    style: 'position: fixed', 
             });
             const $a = $("<a>", {
-                'class': "dropdown-toggle",
+                'class': "dropdown-toggle p-2",
                 'href': "#",
                 'role': "button",
                 'data-toggle': "dropdown",
                 'aria-expanded': false,
-            }).html('');
+            });
             $a.appendTo($buttonDropdown);
+
+            const direction = _t.database.parameters.direction;
+            const dropdownMenuClass = direction === 'rtl' ? 'dropdown-menu-left' : 'dropdown-menu-right';
+
             const $dropdown = $("<div>", {
-                class: 'dropdown-menu  dropdown-menu-right',
-                role: 'menu',
+                class: 'dropdown-menu',
             });
             for (const buttonNode of node.children) {
                 if (!this.columnInvisibleFields[buttonNode.attrs.name]) {
                     const $button = this._renderButton(record, buttonNode);
                     if (!$button.hasClass('o_invisible_modifier')) {
+                        $td.css('overflow', 'visible');
                         $dropdown.append($("<div>", {
-                            class: "dropdown-item",
+                            class: "dropdown-item py-1 px-2",
                         }).append($button));
 
                         $dropdown.appendTo($buttonDropdown);
                         $buttonDropdown.appendTo($td);
                     }
-                }
-            }
-            for (const buttonNode of node.children) {
-                if (!this.columnInvisibleFields[buttonNode.attrs.name]) {
-                    $td.append(this._renderButton(record, buttonNode));
-                    $dropdown.appendTo($buttonDropdown);
-                    $buttonDropdown.appendTo($td)
                 }
             }
             return $td;
