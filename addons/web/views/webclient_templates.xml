@@ -256,6 +256,7 @@
 
         <!-- ACTION MANAGER -->
         <!-- ActionManager essentials -->
+        <script type="text/javascript" src="/web/static/src/js/action_manager/action_container.js"></script>
         <script type="text/javascript" src="/web/static/src/js/action_manager/action_manager.js"></script>
         <script type="text/javascript" src="/web/static/src/js/action_manager/action_adapter.js"></script>
         <script type="text/javascript" src="/web/static/src/js/action_manager/dialog_action.js"></script>

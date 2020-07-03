@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+<t t-name="web.ActionContainer" owl="1">
+    <t t-set="descriptor" t-value="getActionDescriptors()" />
+    <t t-if="!props.dialog and descriptor">
+        <div class="o_action_manager">
+                <!-- LPE FIXME: Bug in O<lCompat Adapter: when Comp doesn't have 
+                a concrete el, vnode.elm crashes when replacing comp instance
+                Try: switch view, do action => crash if o_action_manager is above
+                 -->
+            <ActionAdapter
+                t-props="descriptor"
+                t-key="descriptor.controller.jsID"
+                t-ref="actionRef"
+            />
+        </div>
+    </t>
+    <t t-elif="descriptor">
+        <OwlDialog t-ref="dialogRef"
+            contentClass="descriptor.controller.className"
+            target="'.o_dialogs'"
+            stopClicks="false"
+            title="descriptor.action.name"
+            t-on-dialog-closed.stop="_onDialogClosed"
+            t-key="descriptor.controller.jsID">
+
+            <ActionAdapter
+                t-if="descriptor"
+                t-props="descriptor"
+                t-key="descriptor.controller.jsID"
+                inDialog="true"
+                t-ref="actionRef"
+            />
+        </OwlDialog>
+    </t>
+</t>
+</templates>

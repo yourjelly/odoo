@@ -18,22 +18,24 @@ odoo.define('web.CloseActionPlugin', function (require) {
             return super.willHandle(...arguments);
         }
         handle(command) {
-            if (command.name === "_EXECUTE") {
-                const prepared = this._executeAction(...command.payload);
+            if (command.name === "executeAction") {
+                const { action , options } = this.pendingState; 
+                const prepared = this._executeAction(action, options);
                 const { controller , onCommit , doOwlReload} = prepared;
-                command.root.onCommit = onCommit;
-                command.addOutput({doOwlReload});
-                return this.pushControllers([controller]);
+                this.addToPendingState({
+                    onCommit, doOwlReload
+                });
+                return this.pushController(controller);
             }
             if (command.name === "_COMMIT") {
-                const [commandToCommit] = command.payload;
-                if (commandToCommit.onCommit) {
-                    commandToCommit.onCommit();
+                const { onCommit } = this.pendingState;
+                if (onCommit) {
+                    onCommit();
                 }
             }
         }
         _executeAction(action, options) {
-            const dialog = this.currentDialogController;
+            const dialog = this.controllers[this.currentDialogController];
             // I'm afraid this is mandatory
             // some legacy modals make their main controller
             // do weird stuff (like triggering onchanges)

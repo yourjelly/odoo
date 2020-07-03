@@ -17,8 +17,14 @@ odoo.define('web.ClientActionPlugin', function (require) {
             const { name } = command;
             switch (name) {
                 case "LOAD_STATE":
-                case "_RESTORE":
                     return true;
+                case "_RESTORE": {
+                    const [ action ] = command.payload || [];
+                    if (action && action.type === this.constructor.type) {
+                        return true;
+                    }
+                    break;
+                }
             }
             return super.willHandle(command);
         }
@@ -28,59 +34,60 @@ odoo.define('web.ClientActionPlugin', function (require) {
                 case "LOAD_STATE":
                     return this.loadState(...payload);
                 case "_RESTORE":
-                    return this.dispatch('_PUSH_CONTROLLERS', ...payload);
+                    return this.dispatch('pushController', ...payload);
             }
             return super.handle(...arguments);
         }
-    /**
-     * Executes actions of type 'ir.actions.client'.
-     *
-     * @param {Object} action the description of the action to execute
-     * @param {string} action.tag the key of the action in the action_registry
-     * @param {Object} options @see doAction for details
-     */
-    async executeAction(action, options) {
-        const ClientAction = action_registry.get(action.tag);
-        if (!ClientAction) {
-            console.error(`Could not find client action ${action.tag}`, action);
-            return Promise.reject();
-        } else {
-            const proto = ClientAction.prototype;
-            if (!(proto instanceof Component) && !(proto instanceof Widget)) {
-                // the client action might be a function, which is executed and
-                // whose returned value might be another action to execute
-                const nextAction = ClientAction(this.env, action);
-                if (nextAction) {
-                    action = nextAction;
-                    return this.doAction(action);
+        /**
+         * Executes actions of type 'ir.actions.client'.
+         *
+         * @param {Object} action the description of the action to execute
+         * @param {string} action.tag the key of the action in the action_registry
+         * @param {Object} options @see doAction for details
+         */
+        async executeAction(action, options) {
+            const ClientAction = action_registry.get(action.tag);
+            if (!ClientAction) {
+                console.error(`Could not find client action ${action.tag}`, action);
+                return Promise.reject();
+            } else {
+                const proto = ClientAction.prototype;
+                if (!(proto instanceof Component) && !(proto instanceof Widget)) {
+                    // the client action might be a function, which is executed and
+                    // whose returned value might be another action to execute
+                    const nextAction = ClientAction(this.env, action);
+                    if (nextAction) {
+                        action = nextAction;
+                        return this.doAction(action);
+                    }
+                    return;
                 }
-                return;
+            }
+            const params = Object.assign({}, options, {Component: ClientAction});
+            const controller = this.makeBaseController(action, params);
+            options.controllerID = controller.jsID;
+            controller.options = options;
+            action.id = action.id || action.tag;
+            return this.pushController(controller);
+        }
+        /**
+         * @override
+         */
+        loadState(state, options) {
+            if (typeof state.action === 'string' && action_registry.contains(state.action)) {
+                const action = {
+                    params: state,
+                    tag: state.action,
+                    type: 'ir.actions.client',
+                };
+                this.doAction(action, options);
+                return true;
             }
         }
-        const params = Object.assign({}, options, {Component: ClientAction});
-        const controller = this.makeBaseController(action, params);
-        options.controllerID = controller.jsID;
-        controller.options = options;
-        action.id = action.id || action.tag;
-        return this.pushControllers([controller]);
     }
-    /**
-     * @override
-     */
-    loadState(state, options) {
-        if (typeof state.action === 'string' && action_registry.contains(state.action)) {
-            const action = {
-                params: state,
-                tag: state.action,
-                type: 'ir.actions.client',
-            };
-            return this.doAction(action, options);
-        }
-    }
-}
-ClientActionPlugin.type = 'ir.actions.client';
+    ClientActionPlugin.type = 'ir.actions.client';
 
-ActionManager.registerPlugin(ClientActionPlugin);
+    ActionManager.registerPlugin(ClientActionPlugin);
 
-return ClientActionPlugin;
+    return ClientActionPlugin;
 });

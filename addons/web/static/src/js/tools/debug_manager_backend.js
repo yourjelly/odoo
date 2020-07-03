@@ -128,16 +128,10 @@ DebugManager.include({
     },
     async start() {
         await this._super(...arguments);
-        const amState = this.actionManager.getExternalState();
         this._updateCB = () => {
-            const { controllerStack, dialog } = amState;
-            let action, controller;
-            if (this.mode === 'main') {
-                ({ action,  controller } = controllerStack[controllerStack.length-1] || {});
-            } else {
-                ({ action,  controller } = dialog);
-            }
-            const component = ActionAdapter.getInstance(controller && controller.jsID);
+            const { main, dialog } = this.actionManager.activeDescriptors;
+            let action = this.mode === 'main' ? main.action : dialog.action; // LPE FIXME
+            const component = null; // LPE FIXME
             action = component ? action : null;
             this.update('action', action, component);
         };

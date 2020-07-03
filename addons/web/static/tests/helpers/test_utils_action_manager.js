@@ -5,7 +5,7 @@ const WebClient = require('web.WebClient');
 const testUtilsAsync = require('web.test_utils_async');
 
 async function doAction() {
-    WebClient.env.actionManager.dispatch('DO_ACTION', ...arguments);
+    WebClient.env.actionManager.dispatch('doAction', ...arguments);
     await testUtilsAsync.owlCompatibilityExtraNextTick();
     return testUtilsAsync.nextTick();
 }

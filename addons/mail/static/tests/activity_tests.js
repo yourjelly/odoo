@@ -267,7 +267,7 @@ QUnit.test('activity view: activity widget', async function (assert) {
     const actionManager = {};
     actionManager.dispatch = (cmdName, ...payload) => {
         const [ action ] = payload;
-        if (cmdName !== 'DO_ACTION') return;
+        if (cmdName !== 'doAction') return;
         if (action.serverGeneratedAction) {
             assert.step('serverGeneratedAction');
         } else if (action.res_model === 'mail.compose.message') {

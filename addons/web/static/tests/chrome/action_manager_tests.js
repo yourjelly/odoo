@@ -1122,6 +1122,7 @@ QUnit.module('ActionManager', {
         core.action_registry.add('HelloWorldTest', ClientAction);
 
         const webClient = await createWebClient({
+            debug:true,
             actions: this.actions,
             archs: this.archs,
             data: this.data,
@@ -1136,7 +1137,7 @@ QUnit.module('ActionManager', {
                 }
             }
         });
-
+        debugger;
         assert.strictEqual($(webClient.el).find('.o_client_action_test').text(),
             'Hello World', "should have correctly rendered the client action");
 
@@ -2115,13 +2116,9 @@ QUnit.module('ActionManager', {
                 }
                 return result;
             },
-            webClient: {
-                _getWindowHash() {
-                    return "#action=3&id=2&view_type=form";
-                },
-            },
         });
 
+        await doAction(3, { resID: 2, viewType: 'form'});
         assert.containsOnce(webClient, '.o_form_view',
             "should display the form view of action 4");
 

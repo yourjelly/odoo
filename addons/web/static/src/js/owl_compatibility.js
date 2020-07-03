@@ -283,7 +283,7 @@ odoo.define('web.OwlCompatibility', function (require) {
                     .then(payload.on_success);
             } else if (evType === 'do_action') {
                 const { action , options , on_success , on_fail } = payload;
-                return this.env.actionManager.dispatch('DO_ACTION', action, options, on_success ,on_fail);
+                return this.env.actionManager.dispatch('doAction', action, options, on_success ,on_fail);
             } else if (evType === 'switch_view') {
                 return this.env.actionManager.dispatch('SWITCH_VIEW', payload);
             } else if (evType === 'history_back') {

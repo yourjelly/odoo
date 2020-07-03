@@ -1253,6 +1253,7 @@ QUnit.module('Views', {
 
         var searchReads = 0;
         var list = await createView({
+            debug: true,
             View: ListView,
             model: 'foo',
             data: this.data,
@@ -1298,7 +1299,7 @@ QUnit.module('Views', {
         await cpHelpers.toggleFavoriteMenu(list);
         await cpHelpers.toggleMenuItem(list, "My second favorite");
 
-        list.destroy();
+        //list.destroy();
     });
 
     QUnit.test('many2one field rendering', async function (assert) {

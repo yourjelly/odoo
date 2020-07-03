@@ -82,7 +82,6 @@ odoo.define('web.WindowActionPlugin', function (require) {
                     lazyView = this._findMobileView(views, lazyView.multiRecord) || lazyView;
                 }
             }
-            const controllers = [];
             const baseControllerParams = Object.assign({}, options);
             if (lazyView) {
                 const controllerID = baseControllerParams.controllerID;
@@ -90,7 +89,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
                 this._createViewController(action, lazyView.type, {controllerState: options.controllerState}, baseControllerParams);
                 action.controller.options = options;
                 this.controllers[action.controller.jsID] = action.controller;
-                controllers.push(action.controller);
+                this.pushController(action.controller);
                 Object.assign(
                     baseControllerParams,
                     { index: action.controller.index + 1 , controllerID }
@@ -103,8 +102,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
             };
             this._createViewController(action, curView.type, viewOptions, baseControllerParams);
             action.controller.options = options;
-            controllers.push(action.controller);
-            return this.dispatch('_PUSH_CONTROLLERS', controllers);
+            return this.pushController(action.controller);
         }
         /**
          * @override
@@ -161,7 +159,8 @@ odoo.define('web.WindowActionPlugin', function (require) {
                 }
             }
             if (action) {
-                return this.doAction(action, options);
+                this.doAction(action, options);
+                return true;
             }
         }
         /**
@@ -369,7 +368,8 @@ odoo.define('web.WindowActionPlugin', function (require) {
                 });
             }
             this._createViewController(action, viewType, viewOptions, { index });
-            return this.pushControllers([action.controller]);
+            this.pushController(action.controller);
+            return true;
         }
 
         //--------------------------------------------------------------------------
@@ -389,7 +389,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
          */
         async _onSwitchView(payload) {
             // LPE FIXME: I think this is right to do, but tour crash
-            await this._clearUncommittedChanges();
+            await this._willSwitchAction();
             const viewType = payload.view_type;
             const { action } = this._getMainActionDescriptors();
             // TODO: find a way to save/restore state

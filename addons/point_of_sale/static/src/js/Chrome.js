@@ -2,6 +2,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
     'use strict';
 
     const { useState, useRef, useContext } = owl.hooks;
+    const ActionManager = require('web.ActionManager');
     const { configureGui } = require('point_of_sale.Gui');
     const { debounce } = owl.utils;
     const { loadCSS } = require('web.ajax');
@@ -36,6 +37,7 @@ odoo.define('point_of_sale.Chrome', function(require) {
             useListener('play-sound', this._onPlaySound);
             useListener('set-sync-status', this._onSetSyncStatus);
             NumberBuffer.activate();
+            ActionManager.useActionManager();
 
             this.chromeContext = useContext(contexts.chrome);
 
@@ -122,9 +124,9 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     env: this.env,
                     rpc: this.rpc.bind(this),
                     session: this.env.session,
-                    do_action: (...args) => {
-                        // LPE FIXME
-                        return this.env.actionManager.doAction(...args);
+                    do_action: async (...args) => {
+                        this.env.actionManager.dispatch('doAction', ...args);
+                        return this.env.actionManager.getActionPromise();
                     },
                     setLoadingMessage: this.setLoadingMessage.bind(this),
                     showLoadingSkip: this.showLoadingSkip.bind(this),

@@ -2,41 +2,30 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="web.WebClient" owl="1">
-        <t t-set="renderingInfo" t-value="rState"/>
-        <t t-set='dialog' t-value='renderingInfo.dialog' />
-        <t t-set="main" t-value="renderingInfo.main"/>
-        <body class="o_web_client" t-att-class="bodyClass"
+        <body class="o_web_client" t-att-class="getBodyClass()"
               t-on-push-state="_onPushState"
               t-on-set-title-part="_onSetTitlePart"
               t-on-warning="_onDisplayWarning"
               t-on-breadcrumb-clicked.stop="_onBreadcrumbClicked"
               t-on-execute-action.stop="_onExecuteAction"
               t-on-open-menu="_onOpenMenu">
-            <Menu t-if="!renderingInfo.fullscreen" t-ref="menu"
+            <Menu t-if="!actionManager.isFullScreen" t-ref="menu"
                 menus="menus"
-                menuID="renderingInfo.menuID"/>
+                menuID="menuID"/>
             <ComponentAdapter Component="LoadingWidget" widgetArgs="[]"/>
 
-            <div class="o_action_manager">
-                <!-- fixme: class below totally ignored -->
-                <ActionAdapter t-if="main" class="o_action"
-                    t-ref="currentMainComponent"
-                    t-key="main.controller.jsID"
-                    t-props="main"
-                />
-            </div>
-            <DialogAction t-if='dialog' t-key="dialog.controller.jsID"
-                contentClass="dialog.controller.className"
-                target="'.o_dialogs'"
-                stopClicks="false"
-                title="dialog.action.name"
-                t-on-dialog-closed="_onDialogClosed">
-                <ActionAdapter class="o_action"
-                    t-ref="currentDialogComponent"
-                    t-key="dialog.controller.jsID"
-                    t-props="dialog"
-                    inDialog=""/>
-            </DialogAction>
+            <t t-set="actionKeys" t-value="actionManager.actionKeys" />
+            <ActionContainer
+                  t-if="actionKeys.main"
+                  t-key="actionKeys.main"
+                  t-ref="mainRef"
+            />
+            <!-- DialogActionContainer ????? -->
+            <ActionContainer 
+                t-if="actionKeys.dialog"
+                t-key="actionKeys.dialog"
+                dialog="true"
+            />
             <div class="o_dialogs"/>
         </body>
     </t>

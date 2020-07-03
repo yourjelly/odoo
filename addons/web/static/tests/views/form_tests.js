@@ -556,7 +556,7 @@ QUnit.module('Views', {
             interceptsPropagate: {
                 do_action: function (ev) {
                     // LPE: FIXME
-                    webClient.actionManager.dispatch('DO_ACTION', ev.data.action);
+                    webClient.actionManager.dispatch('doAction', ev.data.action);
                 },
             },
             bus: bus,

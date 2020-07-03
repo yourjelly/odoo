@@ -9,69 +9,9 @@ odoo.define('web.ActionAdapter', function (require) {
      */
 
     const AbstractView = require('web.AbstractView');
-    const ActionManager = require('web.ActionManager');
     const { ComponentAdapter } = require('web.OwlCompatibility');
 
-    var dom = require('web.dom');
-
     class ActionAdapter extends ComponentAdapter {
-        // TODO: those static stuff are annoying, but
-        // somehow makes sense: the complexity of calling the
-        // right Action object if concentrated here
-        static registerInstance(instance) {
-            if (!this.controllerMap) {
-                this.controllerMap = new Map();
-                const actionManager = instance.actionManager;
-                actionManager.on('committed', this, payload => {
-                    const { controllerCleaned } = payload || {};
-                    if (controllerCleaned) {
-                        this.cleanInstances(controllerCleaned);
-                    }
-                });
-                actionManager.on('clear-uncommitted-changes', this, (resolve, reject) => {
-                    const { controllerStack } = actionManager.state; 
-                    const { controller } = controllerStack[controllerStack.length-1] || {};
-                    const component = this.getInstance(controller && controller.jsID);
-                    if (component) {
-                        return component.canBeRemoved().then(resolve).guardedCatch(reject);
-                    }
-                    resolve();
-                });
-            }
-            const jsID = instance.controller.jsID;
-            const previous = this.controllerMap.get(jsID);
-            this.controllerMap.set(jsID, instance);
-            if (previous) {
-                previous.destroy(true);
-            }
-        }
-        static cleanInstances(jsIDList) {
-            jsIDList.forEach(jsID => {
-                const componentToDestroy = this.controllerMap.get(jsID);
-                if (componentToDestroy) {
-                    componentToDestroy.destroy(true);
-                }
-            });
-        }
-        static unRegisterInstance(instance) {
-            const jsID = instance.controller.jsID;
-            const _inst = this.controllerMap.get(jsID);
-            if (_inst === instance) {
-                this.controllerMap.delete(instance.controller.jsID);
-            }
-            if (!this.controllerMap.size) {
-                instance.actionManager.off('committed', this);
-                instance.actionManager.off('clear-uncommitted-changes', this);
-                this.controllerMap = null;
-            }
-        }
-        static getInstance(jsID, includeZombies) {
-             const inst = this.controllerMap && this.controllerMap.get(jsID);
-             if (includeZombies) {
-                 return inst || null;
-             }
-             return inst && !inst.legacyZombie ? inst : null;
-        }
         constructor(parent, props) {
             const { action, controller } = props;
             props.Component = controller.Component;
@@ -82,72 +22,68 @@ odoo.define('web.ActionAdapter', function (require) {
             }
             this.action = action;
             this.controller = controller;
-            this.inDialog = 'inDialog' in this.props;
-            this.actionManager = ActionManager.useActionManager();
+            if (!this.inDialog) {
+                const { onMounted , onWillUnmount } = owl.hooks;
+                onMounted(() =>
+                    this.actionManager.on('will-switch-action', this, this._onWillSwitchAction)
+                );
+                onWillUnmount(() =>
+                    this.actionManager.off('will-switch-action', this)
+                );
+            }
+        }
+        get inDialog() {
+            return this.props.inDialog;
+        }
+        get actionManager() {
+            return this.env.actionManager;
         }
 
         //--------------------------------------------------------------------------
         // OWL Overrides
         //--------------------------------------------------------------------------
 
-        destroy(force) {
-            if (!this.inDialog && this.__owl__.isMounted && this.legacy && this.widget && !force) { // FIXME: do not detach twice?
-                // keep legacy stuff alive because some stuff
-                // are kept by AbstractModel (e.g.: orderedBy)
-                dom.detach([{widget: this.widget}]);
-                this.legacyZombie = true;
-                return;
-            }
-            return super.destroy();
-        }
-        mounted() {
-            this.constructor.registerInstance(this);
-            super.mounted(...arguments);
-        }
         patched() {
             if (this.legacy) {
                 this.widgetReloadProm = null;
-                if (this.legacyZombie) {
-                    if (this.widget && this.widget.on_attach_callback) {
-                        this.widget.on_attach_callback();
-                        console.log('attach', document.body.querySelector('.o_form_view'));
-                    }
-                    this.env.bus.trigger('DOM_updated');
-                    this.legacyZombie = false;
+                if (this.widget && this.widget.on_attach_callback) {
+                    this.widget.on_attach_callback();
+                    console.log('attach', document.body.querySelector('.o_form_view'));
                 }
+                this.env.bus.trigger('DOM_updated');
             }
-        }
-        async render() {
-            if (this.legacy && this.legacyZombie) {
-                return;
-            }
-            return super.render(...arguments);
         }
         shouldUpdate(nextProps) {
-            if (this.legacy) {
-                if (!this.inDialog && this.actionManager.state.dialog) {
-                    return false;
-                }
-                const activatingViewType = nextProps.controller.viewType;
-                let zombie = this.legacyZombie;
-                if (activatingViewType === this.widget.viewType) {
-                    zombie = false;
-                }
-                return !zombie;
+            if (this.inDialog || (!this.inDialog && this.actionManager.actionKeys.dialog)) {
+                return false;
             }
             return super.shouldUpdate(nextProps);
         }
         async willStart() {
             let prom;
             if (this.props.Component.prototype instanceof AbstractView) {
+                // LPE: fixme (future self)
+                // Those options being everywhere is hella annoying
                 const {action , controller } = this.props;
                 const viewDescr = action.views.find(view => view.type === controller.viewType);
-                const breadcrumbs = this.breadCrumbs;
+                const breadcrumbs = this.actionManager.getBreadCrumbs();
                 const viewParams = Object.assign(
                     {},
-                    { action: action, controllerState: action.controllerState },
+                    { action: action },
                     Object.assign(controller.viewOptions, { breadcrumbs }),
                 );
+                if (action.controllerState) {
+                    Object.assign(
+                        viewParams,
+                        { controllerState: action.controllerState },
+                    );
+                }
+                if (controller.ownedQueryParams) {
+                    Object.assign(
+                        viewParams,
+                        { ownedQueryParams: controller.ownedQueryParams },
+                    );
+                }
                 const view = new viewDescr.View(viewDescr.fieldsView, viewParams);
                 this.widget = await view.getController(this);
                 if (this.__owl__.isDestroyed) { // the action has been destroyed meanwhile
@@ -162,34 +98,12 @@ odoo.define('web.ActionAdapter', function (require) {
             }
             prom = prom || super.willStart();
             await prom;
-            if (this.widget && this.inDialog) {
-                this.env.bus.trigger('legacy-action', this.widget);
-            }
         }
 
 
         //--------------------------------------------------------------------------
         // Getters
         //--------------------------------------------------------------------------
-        get breadCrumbs() {
-            const breadCrumbs = [];
-            if (!this.inDialog) {
-                const { controllerStack } = this.actionManager.state;
-                for (let i=0; i<controllerStack.length; i++) {
-                    const elm = controllerStack[i];
-                    if (elm.controller.jsID === this.props.controller.jsID) {
-                        break;
-                    }
-                    const bc = this._getBreadCrumb(elm);
-                    if (bc === null) {
-                        break;
-                    }
-                    breadCrumbs.push(bc);
-                }
-            }
-            return breadCrumbs;
-        }
-
         get title() {
             if (this.legacy && this.widget) {
                 return this.widget.getTitle();
@@ -197,7 +111,7 @@ odoo.define('web.ActionAdapter', function (require) {
             return this.props.action.name;
         }
         get widgetArgs() {
-            const breadcrumbs = this.breadCrumbs;
+            const breadcrumbs = this.actionManager.getBreadCrumbs();
             const options = Object.assign(this.props.controller.options, { breadcrumbs });
             return [this.props.action, options];
         }
@@ -207,12 +121,8 @@ odoo.define('web.ActionAdapter', function (require) {
         //--------------------------------------------------------------------------
 
         async canBeRemoved() {
-            if (this.legacy && this.widget && !this.legacyZombie) {
+            if (this.legacy && this.widget) {
                 await this.widget.canBeRemoved();
-                if (this.widget.exportState) {
-                    const controllerState = this.widget.exportState();
-                    this.env.bus.trigger('legacy-export-state', { controllerState });
-                }
             }
         }
         /**
@@ -220,7 +130,7 @@ odoo.define('web.ActionAdapter', function (require) {
          *   instance, or null if this function is called too soon
          */
         getController() {
-            if (this.legacy && !this.legacyZombie) {
+            if (this.legacy) {
                 return this.widget;
             }
             return this.componentRef && this.componentRef.comp || null;
@@ -232,29 +142,33 @@ odoo.define('web.ActionAdapter', function (require) {
             return {}; // TODO
         }
         exportState() {
-            if (this.widget && this.widget.exportState) {
-                return this.widget.exportState();
+            if (this.widget) {
+                const state = {};
+                if (this.widget.exportState) {
+                    state.controllerState = this.widget.exportState();
+                }
+                if (this.widget.getOwnedQueryParams) {
+                    state.ownedQueryParams = this.widget.getOwnedQueryParams();
+                }
+                return state;
             }
             return this.getState();
         }
         async updateWidget(nextProps) {
-            const amState = this.actionManager.state;
+            const amState = this.actionManager.getRawState();
             if (this.widgetReloadProm || ('doOwlReload' in amState && !amState.doOwlReload)) {
                 return this.widgetReloadProm;
             }
             if (this.legacy === 'view') {
                 const { action , controller } = nextProps;
                 const controllerState = action.controllerState || {};
-                const breadcrumbs = this.breadCrumbs;
+                const breadcrumbs = this.actionManager.getBreadCrumbs();
                 const reloadParam = Object.assign(
                     {offset: 0},
                     controller.viewOptions,
                     controller.options,
                     { controllerState , breadcrumbs },
                 );
-                if (this.legacyZombie) {
-                    await this.widget.willRestore();
-                }
                 return this.widget.reload(reloadParam);
             }
             return super.updateWidget(...arguments);
@@ -263,13 +177,6 @@ odoo.define('web.ActionAdapter', function (require) {
         //--------------------------------------------------------------------------
         // Private
         //--------------------------------------------------------------------------
-        _getBreadCrumb({action, controller}) {
-            const component = this.constructor.getInstance(controller.jsID, true);
-            return {
-                controllerID: controller.jsID,
-                title: component && component.title || action.name,
-            };
-        }
         _reHookControllerMethods() {
             const self = this;
             const widget = this.widget;
@@ -298,20 +205,18 @@ odoo.define('web.ActionAdapter', function (require) {
                 });
             };
         }
-        _trigger_up(ev) {
-            const evType = ev.name;
-            // The legacy implementation forces us to export the current controller's state
-            // any time we are to leave it temporarily, that is, the current controller
-            // will stay in the breadcrumbs
-/*            if (!this.inDialog && this.legacy === 'view' && this.widget && ['switch_view', 'execute_action', 'do_action'].includes(evType)) {
-                const controllerState = this.widget.exportState();
-                this.env.bus.trigger('legacy-export-state', { controllerState });
-            }*/
-            return super._trigger_up(...arguments);
-        }
-        __destroy() {
-            this.constructor.unRegisterInstance(this);
-            return super.__destroy(...arguments);
+        async _onWillSwitchAction({resolve, reject}) {
+            const { controllerState , ownedQueryParams } = this.exportState();
+            this.actionManager.updateAction(this.controller.jsID, {
+                action: {
+                    controllerState
+                },
+                controller: {
+                    displayName: this.title,
+                    ownedQueryParams
+                }
+            });
+            return this.canBeRemoved().then(resolve).guardedCatch(reject);
         }
     }
     return  ActionAdapter;

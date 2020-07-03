@@ -9,18 +9,18 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         }
         willHandle({ name, payload }) {
             const handledCommands = [
-                '_EXECUTE',
+                'executeAction',
             ];
-            if (handledCommands.includes(name) &&
-                payload[0].type === this.constructor.type
-            ) {
-                return true;
+            if (handledCommands.includes(name)) {
+                const { action } = payload[0];
+                return action.type === this.constructor.type;
             }
             return false;
         }
         handle({name, payload}) {
-            if (name === '_EXECUTE') {
-                return this.executeAction(...payload);
+            if (name === 'executeAction') {
+                const { action , options } = this.pendingState;
+                return this.executeAction(action, options);
             }
         }
         beforeHandle(command) {}
@@ -59,6 +59,9 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         get rev() {
             return this.actionManager.rev;
         }
+        get pendingState() {
+            return this.actionManager.pendingState;
+        }
 
         //----------------------------------------------------------------------
         // Public
@@ -68,13 +71,15 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
             return this.actionManager._dispatch(...arguments);
         }
         doAction() {
-            return this.dispatch('DO_ACTION', ...arguments);
+            let [action, options, on_success, on_fail, previousPending] = arguments;
+            previousPending = this.pendingState;
+            return this.actionManager.dispatch('doAction', action, options, on_success, on_fail, previousPending);
         }
         makeBaseController() {
             return this.actionManager.makeBaseController(...arguments);
         }
-        pushControllers() {
-            return this.dispatch('_PUSH_CONTROLLERS', ...arguments);
+        pushController() {
+            return this.dispatch('pushController', ...arguments);
         }
         rpc() {
             return this.transactionAdd(this.env.services.rpc(...arguments));
@@ -82,8 +87,11 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         transactionAdd() {
             return this.actionManager._transaction.add(...arguments);
         }
-        _clearUncommittedChanges() {
-            return this.actionManager._clearUncommittedChanges();
+        _willSwitchAction() {
+            return this.actionManager._willSwitchAction();
+        }
+        addToPendingState(){
+            return this.actionManager.addToPendingState(...arguments);
         }
     }
     ActionAbstractPlugin.type = null;

@@ -178,12 +178,15 @@ var AbstractView = Factory.extend({
             this.modelParams.SampleModel = this.config.Model;
         }
 
-        var defaultOrder = this.arch.attrs.default_order;
-        if (defaultOrder) {
+        const defaultOrder = this.arch.attrs.default_order;
+        const givenOrder = params.ownedQueryParams && params.ownedQueryParams.orderedBy;
+        if (defaultOrder && !givenOrder) {
             this.loadParams.orderedBy = _.map(defaultOrder.split(','), function (order) {
                 order = order.trim().split(' ');
                 return {name: order[0], asc: order[1] !== 'desc'};
             });
+        } else if (givenOrder) {
+            this.loadParams.orderedBy = givenOrder;
         }
         if (params.searchQuery) {
             this._updateMVCParams(params.searchQuery);

@@ -35,13 +35,13 @@ class UserMenu extends owl.Component {
     _onMenuAccount() {
         this.rpc({route: '/web/session/account'}).then(url => {
             const action = { type: 'ir.actions.act_url', url };
-            this.env.actionManager.dispatch('DO_ACTION', action);
+            this.env.actionManager.dispatch('doAction', action);
         }).guardedCatch(() => {
             const action = {
                 type: 'ir.actions.act_url',
                 url: 'https://accounts.odoo.com/account'
             };
-            this.env.actionManager.dispatch('DO_ACTION', action);
+            this.env.actionManager.dispatch('doAction', action);
         });
     }
     _onMenuClicked(ev) {
@@ -60,7 +60,7 @@ class UserMenu extends owl.Component {
      */
     _onMenuLogout() {
         const action = 'logout';
-        this.env.actionManager.dispatch('DO_ACTION', action);
+        this.env.actionManager.dispatch('doAction', action);
     }
     /**
      * @private
@@ -71,7 +71,7 @@ class UserMenu extends owl.Component {
             method: "action_get"
         });
         action.res_id = this.env.session.uid;
-        this.env.actionManager.dispatch('DO_ACTION', action);
+        this.env.actionManager.dispatch('doAction', action);
     }
     /**
      * @private
