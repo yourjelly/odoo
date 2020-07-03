@@ -284,7 +284,7 @@ class TestCommonSaleNoChart(AccountTestInvoicingCommon):
         })
 
 
-class TestCommonSaleMultiCompanyNoChart(AccountTestNoChartCommonMultiCompany, TestCommonSaleNoChart):
+class TestCommonSaleMultiCompanyNoChart(TestCommonSaleNoChart):
     """ This class should be extended for test suite of sale flows with a minimal chart of accounting
         installed. This test suite should be executed at module installation.
         This class provides some method to generate testing data well configured, according to the minimal
@@ -295,13 +295,8 @@ class TestCommonSaleMultiCompanyNoChart(AccountTestNoChartCommonMultiCompany, Te
     def setUpClassicProducts(cls):
         super(TestCommonSaleMultiCompanyNoChart, cls).setUpClassicProducts()
         # Create an expense journal
-        user_type_income = cls.env.ref('account.data_account_type_direct_costs')
-        cls.account_income_product_company_B = cls.env['account.account'].create({
-            'code': 'INCOME_PROD111',
-            'name': 'Income - Test Account Company B',
-            'user_type_id': user_type_income.id,
-            'company_id': cls.company_B.id,
-        })
+        cls.account_income_product_company_B = cls.company_data_2['default_account_revenue']
+
         # Create category
         cls.product_category_company_B = cls.env['product.category'].create({
             'name': 'Product Category with Income account Company B',
@@ -373,7 +368,7 @@ class TestCommonSaleMultiCompanyNoChart(AccountTestNoChartCommonMultiCompany, Te
 
     @classmethod
     def setUpExpenseProducts(cls):
-        super(TestCommonSaleMultiCompanyNoChart, cls).setUpExpenseProducts()
+        super().setUpExpenseProducts()
         cls.product_ordered_cost_company_B = cls.env['product.product'].create({
             'name': "Ordered at cost",
             'standard_price': 8,
@@ -384,8 +379,8 @@ class TestCommonSaleMultiCompanyNoChart(AccountTestNoChartCommonMultiCompany, Te
             'default_code': 'CONSU-ORDERED1',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_company_B.id,
-            'company_id': cls.company_B.id,
+            'property_account_expense_id': cls.company_data_2['default_account_expense'].id,
+            'company_id': cls.company_data_2['company'].id,
         })
 
         cls.product_deliver_cost_company_B = cls.env['product.product'].create({
@@ -398,8 +393,8 @@ class TestCommonSaleMultiCompanyNoChart(AccountTestNoChartCommonMultiCompany, Te
             'default_code': 'CONSU-DELI1',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_company_B.id,
-            'company_id': cls.company_B.id,
+            'property_account_expense_id': cls.company_data_2['default_account_expense'].id,
+            'company_id': cls.company_data_2['company'].id,
         })
 
         cls.product_order_sales_price_company_B = cls.env['product.product'].create({
@@ -412,8 +407,8 @@ class TestCommonSaleMultiCompanyNoChart(AccountTestNoChartCommonMultiCompany, Te
             'default_code': 'CONSU-ORDERED2',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_company_B.id,
-            'company_id': cls.company_B.id,
+            'property_account_expense_id': cls.company_data_2['default_account_expense'].id,
+            'company_id': cls.company_data_2['company'].id,
         })
 
         cls.product_deliver_sales_price_company_B = cls.env['product.product'].create({
@@ -426,6 +421,39 @@ class TestCommonSaleMultiCompanyNoChart(AccountTestNoChartCommonMultiCompany, Te
             'default_code': 'CONSU-DELI2',
             'service_type': 'manual',
             'taxes_id': False,
-            'property_account_expense_id': cls.account_expense_company_B.id,
-            'company_id': cls.company_B.id,
+            'property_account_expense_id': cls.company_data_2['default_account_expense'].id,
+            'company_id': cls.company_data_2['company'].id,
         })
+
+    @classmethod
+    def setUpUsers(cls):
+        super().setUpUsers()
+        group_employee = cls.env.ref('base.group_user')
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True, 'mail_create_nolog': True})
+        cls.user_employee_company_B = Users.create({
+            'name': 'Gregor Clegane Employee',
+            'login': 'gregor',
+            'email': 'gregor@example.com',
+            'notification_type': 'email',
+            'groups_id': [(6, 0, [group_employee.id])],
+            'company_id': cls.company_data_2['company'].id,
+            'company_ids': [cls.company_data_2['company'].id],
+        })
+        cls.user_manager_company_B = Users.create({
+            'name': 'Cersei Lannister Manager',
+            'login': 'cersei',
+            'email': 'cersei@example.com',
+            'notification_type': 'email',
+            'groups_id': [(6, 0, [group_employee.id])],
+            'company_id': cls.company_data_2['company'].id,
+            'company_ids': [cls.company_data_2['company'].id, cls.company_data['company'].id],
+        })
+        cls.user_manager.write({
+            'company_ids': [(6, 0, [cls.company_data_2['company'].id, cls.company_data['company'].id])],
+        })
+        account_values_company_B = {
+            'property_account_payable_id': cls.company_data_2['default_account_payable'].id,
+            'property_account_receivable_id': cls.company_data_2['default_account_receivable'].id,
+        }
+        cls.user_manager_company_B.partner_id.write(account_values_company_B)
+        cls.user_employee_company_B.partner_id.write(account_values_company_B)

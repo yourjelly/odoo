@@ -22,12 +22,7 @@ class TestCommonSaleTimesheetNoChart(TestCommonSaleNoChart):
     def setUpServiceProducts(cls):
         """ Create Service product for all kind, with each tracking policy. """
         # Account and project
-        cls.account_sale = cls.env['account.account'].create({
-            'code': 'SERV-2020',
-            'name': 'Product Sales - (test)',
-            'reconcile': True,
-            'user_type_id': cls.env.ref('account.data_account_type_revenue').id,
-        })
+        cls.account_sale = cls.company_data['default_account_revenue']
         cls.analytic_account_sale = cls.env['account.analytic.account'].create({
             'name': 'Project for selling timesheet - AA',
             'code': 'AA-2030'
@@ -315,5 +310,5 @@ class TestCommonSaleTimesheetMultiCompanyNoChart(TestCommonSaleMultiCompanyNoCha
         cls.analytic_account_sale_company_B = cls.env['account.analytic.account'].create({
             'name': 'Project for selling timesheet Company B - AA',
             'code': 'AA-2030',
-            'company_id': cls.company_B.id,
+            'company_id': cls.company_data_2['company'].id,
         })
