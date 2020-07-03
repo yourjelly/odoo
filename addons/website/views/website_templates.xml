@@ -830,41 +830,44 @@
 <template id="template_footer_headline" inherit_id="website.layout" name="Headline" active="False">
     <xpath expr="//div[@id='footer']" position="replace">
         <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true" t-if="not no_footer">
-            <section class="s_text_block pt48 ">
+            <section class="s_text_block pt48">
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-3 pb24">
-                            <h4><b>Designed</b><br/> for Companies</h4>
+                            <h4><b>Designed</b> <br/>for Companies</h4>
                         </div>
-                        <div class="col-lg-5 pb24">
-                            <p class="lead">We are a team of passionate people whose goal is to improve everyone's life through disruptive products.</p>
+                        <div class="col-lg-9 pb24">
+                            <p class="lead">We are a team of passionate people whose goal is to improve everyone's life.<br/>Our services are designed for small to medium size companies.</p>
                         </div>
+                    </div>
+                </div>
+            </section>
+            <section class="s_text_block">
+                <div class="container">
+                    <div class="row align-items-center">
                         <div class="col-lg-3 pb24">
-                            <p class="lead">We build great products to solve your business problems.</p>
-                        </div>
-                        <div class="col-lg-3 pb24">
-                            <ul class="list-unstyled">
-                                <li class="list-item"><a href="/">Home</a></li>
-                                <li class="list-item"><a href="/contactus">Contact us</a></li>
+                            <ul class="pl-3 mb-0">
+                                <li><a href="/">Home</a></li>
+                                <li><a href="/contactus">Contact us</a></li>
                             </ul>
                         </div>
                         <div class="col-lg-6 pb24">
-                            <ul class="list-unstyled">
+                            <ul class="list-unstyled mb-0">
                                 <li><i class="fa fa-phone fa-fw mr-2"/><span class="o_force_ltr"><a href="tel:1 (650) 691-3277">1 (650) 691-3277</a></span></li>
                                 <li><i class="fa fa-envelope fa-fw mr-2"/><span><a href="mailto:info@yourcompany.example.com">info@yourcompany.example.com</a></span></li>
                             </ul>
                         </div>
-                        <div class="col-lg-3">
-                            <div class="s_share text-right">
+                        <div class="col-lg-3 pb24">
+                            <div class="s_share text-right" data-name="Social Media">
                                 <h4 class="s_share_title d-none">Share</h4>
                                 <a href="/website/social/facebook" class="s_share_facebook" target="_blank">
-                                    <i class="fa fa-facebook rounded-circle rounded shadow-sm"/>
+                                    <i class="fa fa-1x fa-facebook rounded-circle shadow-sm"/>
                                 </a>
                                 <a href="/website/social/twitter" class="s_share_twitter" target="_blank">
-                                    <i class="fa fa-twitter rounded-circle rounded shadow-sm"/>
+                                    <i class="fa fa-1x fa-twitter rounded-circle shadow-sm"/>
                                 </a>
                                 <a href="/website/social/instagram" class="s_share_instagram" target="_blank">
-                                    <i class="fa fa-instagram rounded-circle rounded shadow-sm"/>
+                                    <i class="fa fa-1x fa-instagram rounded-circle shadow-sm"/>
                                 </a>
                             </div>
                         </div>
