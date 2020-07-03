@@ -1,21 +1,39 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.addons.account.tests.common import AccountTestNoChartCommon, AccountTestNoChartCommonMultiCompany
+from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
-class TestExpenseCommon(AccountTestNoChartCommon):
+class TestExpenseCommon(AccountTestInvoicingCommon):
 
     @classmethod
-    def setUpClass(cls):
-        super(TestExpenseCommon, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
-        cls.setUpUsers()
-
-        # The user manager is only expense manager
+        group_employee = cls.env.ref('base.group_user')
         user_group_manager = cls.env.ref('hr_expense.group_hr_expense_manager')
-        cls.user_manager.write({
-            'groups_id': [(6, 0, [user_group_manager.id, cls.env.ref('base.group_user').id])],
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True, 'mail_create_nolog': True})
+        cls.user_employee = Users.create({
+            'name': 'Tyrion Lannister Employee',
+            'login': 'tyrion',
+            'email': 'tyrion@example.com',
+            'notification_type': 'email',
+            'groups_id': [(6, 0, [group_employee.id])],
+            'property_account_payable_id': cls.company_data['default_account_payable'].id,
+            'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
+            'company_id': cls.company_data['company'].id,
+            'company_ids': cls.company_data['company'].ids,
+        })
+        cls.user_manager = Users.create({
+            'name': 'Daenerys Targaryen Manager',
+            'login': 'daenerys',
+            'email': 'daenerys@example.com',
+            'notification_type': 'email',
+            'groups_id': [(6, 0, [user_group_manager.id, group_employee.id])],
+            'property_account_payable_id': cls.company_data['default_account_payable'].id,
+            'property_account_receivable_id': cls.company_data['default_account_receivable'].id,
+            'company_id': cls.company_data['company'].id,
+            'company_ids': cls.company_data['company'].ids,
         })
 
         # create employee
@@ -41,12 +59,7 @@ class TestExpenseCommon(AccountTestNoChartCommon):
         })
 
         # Expense reports
-        cls.journal = cls.env['account.journal'].create({
-            'name': 'Purchase Journal - Test',
-            'code': 'HRTPJ',
-            'type': 'purchase',
-            'company_id': cls.env.company.id,
-        })
+        cls.journal = cls.company_data['default_journal_purchase']
         cls.expense_sheet = cls.env['hr.expense.sheet'].create({
             'name': 'Expense for Johnny Employee',
             'employee_id': cls.employee.id,
@@ -122,22 +135,36 @@ class TestExpenseCommon(AccountTestNoChartCommon):
         })
 
 
-class TestExpenseMultiCompanyCommon(AccountTestNoChartCommonMultiCompany):
+class TestExpenseMultiCompanyCommon(TestExpenseCommon):
 
     @classmethod
-    def setUpClass(cls):
-        super(TestExpenseMultiCompanyCommon, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
-        cls.setUpAdditionalAccounts()
-        cls.setUpUsers()
-
-        # The user manager is only expense manager
+        group_employee = cls.env.ref('base.group_user')
         user_group_manager = cls.env.ref('hr_expense.group_hr_expense_manager')
-        cls.user_manager.write({
-            'groups_id': [(6, 0, [user_group_manager.id, cls.env.ref('base.group_user').id])],
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True, 'mail_create_nolog': True})
+        cls.user_employee_company_B = Users.create({
+            'name': 'Tyrion Lannister Employee',
+            'login': 'tyrion',
+            'email': 'tyrion@example.com',
+            'notification_type': 'email',
+            'groups_id': [(6, 0, [group_employee.id])],
+            'property_account_payable_id': cls.company_data_2['default_account_payable'].id,
+            'property_account_receivable_id': cls.company_data_2['default_account_receivable'].id,
+            'company_id': cls.company_data_2['company'].id,
+            'company_ids': cls.company_data_2['company'].ids,
         })
-        cls.user_manager_company_B.write({
-            'groups_id': [(6, 0, [user_group_manager.id, cls.env.ref('base.group_user').id])],
+        cls.user_manager_company_B = Users.create({
+            'name': 'Daenerys Targaryen Manager',
+            'login': 'daenerys',
+            'email': 'daenerys@example.com',
+            'notification_type': 'email',
+            'groups_id': [(6, 0, [user_group_manager.id, group_employee.id])],
+            'property_account_payable_id': cls.company_data_2['default_account_payable'].id,
+            'property_account_receivable_id': cls.company_data_2['default_account_receivable'].id,
+            'company_id': cls.company_data_2['company'].id,
+            'company_ids': cls.company_data_2['company'].ids,
         })
 
         # create employee
@@ -162,7 +189,7 @@ class TestExpenseMultiCompanyCommon(AccountTestNoChartCommonMultiCompany):
             'amount_type': 'percent',
             'type_tax_use': 'purchase',
             'price_include': True,
-            'company_id': cls.env.company.id
+            'company_id': cls.company_data['company'].id,
         })
         cls.tax_company_B = cls.env['account.tax'].create({
             'name': 'Expense 10%',
@@ -170,17 +197,17 @@ class TestExpenseMultiCompanyCommon(AccountTestNoChartCommonMultiCompany):
             'amount_type': 'percent',
             'type_tax_use': 'purchase',
             'price_include': True,
-            'company_id': cls.company_B.id
+            'company_id': cls.company_data_2['company'].id,
         })
 
         # Create analytic account
         cls.analytic_account = cls.env['account.analytic.account'].create({
             'name': 'Test Analytic Account for Expenses',
-            'company_id': cls.env.company.id,
+            'company_id': cls.company_data['company'].id,
         })
         cls.analytic_account_company_B = cls.env['account.analytic.account'].create({
             'name': 'Test Analytic Account for Expenses',
-            'company_id': cls.company_B.id,
+            'company_id': cls.company_data_2['company'].id,
         })
 
         # Expense reports
@@ -188,13 +215,13 @@ class TestExpenseMultiCompanyCommon(AccountTestNoChartCommonMultiCompany):
             'name': 'Purchase Journal - Test',
             'code': 'HRTPJ',
             'type': 'purchase',
-            'company_id': cls.env.company.id,
+            'company_id': cls.company_data['company'].id,
         })
         cls.journal_company_B = cls.env['account.journal'].create({
             'name': 'Purchase Journal Company B - Test',
             'code': 'HRTPJ',
             'type': 'purchase',
-            'company_id': cls.company_B.id,
+            'company_id': cls.company_data_2['company'].id,
         })
 
         cls.expense_sheet = cls.env['hr.expense.sheet'].create({
