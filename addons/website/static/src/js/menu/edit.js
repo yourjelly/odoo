@@ -212,6 +212,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             enableWebsite: true,
             discardButton: true,
             saveButton: true,
+            devicePreview: true,
             toolbarLayout: [
                 ['TableButton'],
                 ['OdooTextColorButton', 'OdooBackgroundColorButton'],
