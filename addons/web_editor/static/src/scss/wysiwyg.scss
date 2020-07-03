@@ -29,11 +29,20 @@ body.editor_enable {
     }
 }
 
-.wysiwyg_iframe,
-.note-editor {
-    border: $o-we-border-width solid $o-we-border-color;
-    margin: 0;
-    padding: 0;
+#web_editor-top-edit {
+    @include o-position-absolute(0, 0, auto, 0);
+    position: fixed;
+    z-index: $o-we-zindex;
+    height: var(--o-we-toolbar-height);
+    background-color: $o-we-bg;
+
+    .note-popover .popover {
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        border: none !important;
+        max-width: none;
+    }
 }
 // avoid popover bar over its opened modal
 .note-popover .popover {

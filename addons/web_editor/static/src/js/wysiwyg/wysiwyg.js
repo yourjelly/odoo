@@ -185,11 +185,6 @@ var Wysiwyg = Widget.extend({
     start: async function () {
         const self = this;
         const _super = this._super;
-        const elementToParse = document.createElement('div');
-        const wrapperClass = this.options.wrapperClass || 'd-flex o_editor_center';
-        elementToParse.setAttribute('class', wrapperClass);
-        elementToParse.innerHTML = this.value;
-        elementToParse.style.cssText = 'width: 100%;';
 
         if (this.options.enableWebsite) {
             $(document.body).addClass('o_connected_user editor_enable');
@@ -198,7 +193,7 @@ var Wysiwyg = Widget.extend({
         const $mainSidebar = $('<div class="o_main_sidebar">');
         const $snippetManipulators = $('<div id="oe_manipulators" />');
 
-        this.editor = new JWEditorLib.OdooWebsiteEditor({
+        this.editor = new JWEditorLib.OdooWebsiteEditor(Object.assign({}, this.options, {
             snippetMenuElement: $mainSidebar[0],
             snippetManipulators: $snippetManipulators[0],
             customCommands: Object.assign({
@@ -212,14 +207,9 @@ var Wysiwyg = Widget.extend({
                 transformImage: {handler: this.transformImage.bind(this)},
                 describeImage: {handler: this.describeImage.bind(this)},
             }, this.options.customCommands),
-            source: elementToParse,
+            source: this.value,
             location: this.options.location || [this.el, 'replace'],
-            toolbarLayout: this.options.toolbarLayout,
-            saveButton: this.options.saveButton,
-            discardButton: this.options.discardButton,
-            template: this.options.template,
-            mode: this.options.mode,
-        });
+        }));
 
         if (config.isDebug('assets') && JWEditorLib.DevTools) {
             this.editor.load(JWEditorLib.DevTools);
@@ -227,28 +217,29 @@ var Wysiwyg = Widget.extend({
         await this.editor.start();
         this._bindAfterStart();
 
-        const $wrapwrap = $('#wrapwrap');
-        $wrapwrap.removeClass('o_editable'); // clean the dom before edition
-        this._getEditable($wrapwrap).addClass('o_editable');
-
-        $wrapwrap.data('wysiwyg', this);
-
         this.$toolbar = $('jw-toolbar').detach();
 
         this.editorHelpers = this.editor.plugins.get(JWEditorLib.DomHelpers);
         const domLayout = this.editor.plugins.get(JWEditorLib.Layout).engines.dom;
-        this.vEditable = domLayout.components.editable[0];
-        this.editorEditable = this.editorHelpers.getDomNodes(this.vEditable)[0];
+        this.zoneMain = domLayout.root.firstDescendant(node => node.managedZones && node.managedZones.includes('main'));
+        this.editorEditable = this.editorHelpers.getDomNodes(this.zoneMain)[0] || this.editorHelpers.getDomNodes(this.zoneMain.parent)[0];
 
-        // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
-        const emptyClass = "oe_blank_wrap";
-        const targetNode = this.editorEditable.querySelector("#wrap");
-        if (this.options.enableWebsite && targetNode) {
-            if (targetNode.textContent.trim() === '' && !targetNode.querySelector('section, div')) {
-                targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-                targetNode.classList.add(emptyClass);
-            } else {
-                targetNode.classList.remove(emptyClass);
+        if (this.options.enableWebsite) {
+            const $wrapwrap = $('#wrapwrap');
+            $wrapwrap.removeClass('o_editable'); // clean the dom before edition
+            this._getEditable($wrapwrap).addClass('o_editable');
+            $wrapwrap.data('wysiwyg', this);
+
+            // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
+            const targetNode = this.editorEditable.querySelector("#wrap");
+            if (targetNode) {
+                const emptyClass = "oe_blank_wrap";
+                if (targetNode.textContent.trim() === '' && !targetNode.querySelector('section, div')) {
+                    targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+                    targetNode.classList.add(emptyClass);
+                } else {
+                    targetNode.classList.remove(emptyClass);
+                }
             }
         }
 
@@ -265,6 +256,7 @@ var Wysiwyg = Widget.extend({
 
             this.snippetsMenu = new SnippetsMenu(this, Object.assign({
                 $el: $(this.editorEditable),
+                snippets: this.options.snippets,
                 selectorEditableArea: '.o_editable',
                 $snippetEditorArea: $snippetManipulators,
                 wysiwyg: this,
@@ -272,11 +264,20 @@ var Wysiwyg = Widget.extend({
             }, this.options));
             await this.snippetsMenu.appendTo($mainSidebar);
 
-            this.snippetsMenu.$editor = $('#wrapwrap');
-
             this.$el.on('content_changed', function (e) {
                 self.trigger_up('wysiwyg_change');
             });
+
+            const onCommitCheckSnippets = (params) => {
+                if (params.commandNames.includes('undo') || params.commandNames.includes('redo')) {
+                    setTimeout(() => {
+                        // use setTimeout to reload snippets after the redraw
+                        this.snippetsMenu.trigger('reload_snippet_dropzones');
+                    });
+                }
+            };
+            this.editor.dispatcher.registerCommandHook('@commit', onCommitCheckSnippets);
+
         } else {
             return _super.apply(this, arguments);
         }
@@ -713,7 +714,7 @@ var Wysiwyg = Widget.extend({
      */
     _saveViewBlocks: async function () {
         const promises = [];
-        const nodes = this.vEditable.descendants(node => {
+        const nodes = this.zoneMain.descendants(node => {
             return (
                 node instanceof JWEditorLib.OdooStructureNode ||
                 node instanceof JWEditorLib.OdooFieldNode
@@ -739,7 +740,7 @@ var Wysiwyg = Widget.extend({
     _saveCoverPropertiesBlocks: async function (context) {
         let rpcResult;
         const wysiwygSaveCoverPropertiesBlocks = async () => {
-            const covers = this.vEditable.descendants(node => {
+            const covers = this.zoneMain.descendants(node => {
                 const attributes = node.modifiers.find(JWEditorLib.Attributes);
 
                 if (attributes && attributes.length && typeof attributes.get('class') === 'string') {
@@ -794,7 +795,7 @@ var Wysiwyg = Widget.extend({
      * @private
      */
     _saveMegaMenuClasses: async function () {
-        const structureNodes = this.vEditable.descendants((node) => {
+        const structureNodes = this.zoneMain.descendants((node) => {
             return node.modifiers.get(JWEditorLib.Attributes).get('data-oe-field') === 'mega_menu_content';
         });
         const promises = [];
@@ -896,7 +897,7 @@ var Wysiwyg = Widget.extend({
      */
     _setupTranslation: function () {
         const attrs = ['placeholder', 'title', 'alt'];
-        const nodesToTranslateAttributes = this.vEditable.descendants(node => {
+        const nodesToTranslateAttributes = this.zoneMain.descendants(node => {
             const attributes = node.modifiers.find(JWEditorLib.Attributes);
             return attributes && attributes.keys().some(key => attrs.includes(key));
         });
@@ -955,7 +956,7 @@ var Wysiwyg = Widget.extend({
         // Get the nodes holding the `OdooTranslationFormats`. Only one
         // node per format.
         const translationIds = [];
-        const translationNodes = this.vEditable.descendants(descendant => {
+        const translationNodes = this.zoneMain.descendants(descendant => {
             const format = descendant.modifiers.find(JWEditorLib.OdooTranslationFormat);
             const translationId = format && format.translationId;
             if (!format || translationIds.includes(translationId)) {

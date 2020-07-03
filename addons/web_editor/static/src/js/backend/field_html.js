@@ -45,11 +45,11 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      */
     willStart: async function () {
         await this._super();
-        this._onUpdateIframeId = 'onLoad_' + _.uniqueId('FieldHtml');
         if (this.nodeOptions.cssReadonly) {
             this.cssReadonly = await ajax.loadAsset(this.nodeOptions.cssReadonly);
         }
         if (this.nodeOptions.cssEdit) {
+            this.needShadow = true;
             this.cssEdit = await ajax.loadAsset(this.nodeOptions.cssEdit);
         }
     },
@@ -57,7 +57,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @override
      */
     destroy: function () {
-        delete window.top[this._onUpdateIframeId];
         if (this.$iframe) {
             this.$iframe.remove();
         }
@@ -90,7 +89,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             return _super();
         }
         this._isDirty = await this.wysiwyg.isDirty();
-        this._value = (await this.wysiwyg.getValue());
+        // todo: make this work
+        this._value = await this.wysiwyg.getValue(this.nodeOptions['style-inline'] ? 'text/mail' : 'text/html');
         return _super();
     },
     /**
@@ -150,7 +150,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @returns {$.Promise}
      */
     _createWysiwygIntance: async function () {
-        this.wysiwyg = await wysiwygLoader.createWysiwyg(this, this._getWysiwygOptions());
+        this.wysiwyg = await wysiwygLoader.createWysiwyg(this, await this._getWysiwygOptions());
         return this.wysiwyg.attachTo(this).then(() => {
             this._appendTranslateButton();
         });
@@ -161,18 +161,22 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
      * @private
      * @returns {Object}
      */
-    _getWysiwygOptions: function () {
+    _getWysiwygOptions: async function () {
         let main = '<t t-zone="main"/>';
-        if (this.nodeOptions.cssEdit) {
-            // wether to inject or not assets in an iframe
-            const style = [
+
+        if (this.needShadow) {
+            let style = '';
+            if (this.cssEdit) {
+                // wether to inject or not assets in an iframe
+                style = [
                     ...this.cssEdit.cssLibs.map(cssLib => '<link type="text/css" rel="stylesheet" href="' + cssLib + '"/>'),
                     ...this.cssEdit.cssContents.map(cssContent => {
                         const clean = cssContent.replace(/\/\*.*\*\//g, '');
                         return '<style type="text/css">' + clean + '</style>';
                     }),
                 ].join('');
-            main = '<jw-shadow style="width: 100%;">' + style + '\n<t t-zone="main"/></jw-shadow>';
+            }
+            main = '<t-shadow style="width: 100%;">' + style + '\n' + main + '</t-shadow>';
         }
 
         return Object.assign({}, this.nodeOptions, {
@@ -183,21 +187,23 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             },
             noAttachment: this.nodeOptions['no-attachment'],
             snippets: this.nodeOptions.snippets,
-            value: this.value || '<p><br/></p>',
+            value: this.value || '',
             location: [this.el, 'append'],
             wrapperClass: 'note-editable',
-            template: `
+            interface: `
                 <t-dialog><t t-zone="default"/></t-dialog>
                 <t-range><t t-zone="tools"/></t-range>
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-row overflow-auto">
-                        <t t-zone="main_sidebar"/>
-                        <div class="d-flex flex-column overflow-auto o_editor_center">
-                            <div class="d-flex overflow-auto note-editing-area">
-                                <t t-zone="snippetManipulators"/>
-                                ` + main + `
+                        <t t-zone="container">
+                            <t t-zone="main_sidebar"/>
+                            <div class="d-flex flex-column overflow-auto o_editor_center">
+                                <div class="d-flex overflow-auto note-editing-area">
+                                    <t t-zone="snippetManipulators"/>
+                                    ` + main + `
+                                </div>
                             </div>
-                        </div>
+                        </t>
                     </div>
                     <div class="o_debug_zone">
                         <t t-zone="debug"/>
