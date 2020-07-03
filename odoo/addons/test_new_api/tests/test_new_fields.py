@@ -1218,12 +1218,12 @@ class TestFields(TransactionCaseWithUserDemo):
         new_origin = Model.new({'name': 'Bar'}, origin=real_record)
         new_record = Model.new({'name': 'Baz'})
 
-        # non-computed non-stored field: default value
+        # non-computed non-stored field: default value on new record
         real_record = real_record.with_context(default_dummy='WTF')
         new_origin = new_origin.with_context(default_dummy='WTF')
         new_record = new_record.with_context(default_dummy='WTF')
-        self.assertEqual(real_record.dummy, 'WTF')
-        self.assertEqual(new_origin.dummy, 'WTF')
+        self.assertEqual(real_record.dummy, False)
+        self.assertEqual(new_origin.dummy, False)
         self.assertEqual(new_record.dummy, 'WTF')
 
         # non-computed stored field: origin or default if no origin

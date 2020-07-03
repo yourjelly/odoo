@@ -928,59 +928,71 @@ class Field(MetaField('DummyField', (object,), {})):
 
         try:
             value = env.cache.get(record, self)
+            return self.convert_to_record(value, record)
 
-        except KeyError:
-            if self.store and record.id:
-                # real record: fetch from database
-                recs = record._in_cache_without(self)
-                try:
-                    recs._fetch_field(self)
-                except AccessError:
-                    record._fetch_field(self)
-                if not env.cache.contains(record, self) and not record.exists():
-                    raise MissingError("\n".join([
-                        _("Record does not exist or has been deleted."),
-                        _("(Record: %s, User: %s)") % (record, env.uid),
-                    ]))
-                value = env.cache.get(record, self)
-
-            elif self.store and record._origin:
-                # new record with origin: fetch from origin
-                value = self.convert_to_cache(record._origin[self.name], record)
-                env.cache.set(record, self, value)
-
-            elif self.compute:
-                # non-stored field or new record without origin: compute
-                if env.is_protected(self, record):
-                    value = self.convert_to_cache(False, record, validate=False)
-                    env.cache.set(record, self, value)
-                else:
-                    recs = record if self.recursive else record._in_cache_without(self)
+        except CacheMiss:
+            if self.store:
+                if record.id:
+                    # real record: fetch from database
+                    recs = record._in_cache_without(self)
                     try:
-                        self.compute_value(recs)
-                    except (AccessError, MissingError):
-                        self.compute_value(record)
+                        recs._fetch_field(self)
+                    except AccessError:
+                        record._fetch_field(self)
+                    if not env.cache.contains(record, self) and not record.exists():
+                        raise MissingError("\n".join([
+                            _("Record does not exist or has been deleted."),
+                            _("(Record: %s, User: %s)") % (record, env.uid),
+                        ]))
                     value = env.cache.get(record, self)
+                    return self.convert_to_record(value, record)
 
-            elif self.type == 'many2one' and self.delegate and not record.id:
-                # parent record of a new record: new record, with the same
-                # values as record for the corresponding inherited fields
-                def is_inherited_field(name):
-                    field = record._fields[name]
-                    return field.inherited and field.related[0] == self.name
+                elif record._origin:
+                    # new record with origin: fetch from origin
+                    value = self.convert_to_cache(record._origin[self.name], record)
+                    env.cache.set(record, self, value)
+                    return self.convert_to_record(value, record)
 
-                parent = record.env[self.comodel_name].new({
-                    name: value
-                    for name, value in record._cache.items()
-                    if is_inherited_field(name)
-                })
-                value = self.convert_to_cache(parent, record)
-                env.cache.set(record, self, value)
+                elif self.type == 'many2one' and self.delegate:
+                    # parent record of a new record: new record, with the same
+                    # values as record for the corresponding inherited fields
+                    def is_inherited_field(name):
+                        field = record._fields[name]
+                        return field.inherited and field.related[0] == self.name
 
-            else:
-                # non-stored field or stored field on new record: default value
-                value = self.convert_to_cache(False, record, validate=False)
-                env.cache.set(record, self, value)
+                    parent = record.env[self.comodel_name].new({
+                        name: value
+                        for name, value in record._cache.items()
+                        if is_inherited_field(name)
+                    })
+                    value = self.convert_to_cache(parent, record)
+                    env.cache.set(record, self, value)
+                    return self.convert_to_record(value, record)
+
+            if self.compute and not env.is_protected(self, record):
+                # non-stored field or new record without origin: compute
+                recs = record if self.recursive else record._in_cache_without(self)
+                try:
+                    self.compute_value(recs)
+                except (AccessError, MissingError):
+                    self.compute_value(record)
+
+                try:
+                    value = env.cache.get(record, self)
+                except CacheMiss:
+                    if self.readonly:
+                        if isinstance(self.compute, str):
+                            msg = "%s.%s() did not assign field %r" % (record, self.compute, self.name)
+                        else:
+                            msg = "%s(%s) did not assign field %r" % (self.compute, record, self.name)
+                        raise ValueError(msg)
+                else:
+                    return self.convert_to_record(value, record)
+
+            # fallback to null (real record) or default value (new record)
+            value = self.convert_to_cache(False, record, validate=False)
+            env.cache.set(record, self, value)
+            if not record._origin:
                 defaults = record.default_get([self.name])
                 if self.name in defaults:
                     # The null value above is necessary to convert x2many field
@@ -991,7 +1003,7 @@ class Field(MetaField('DummyField', (object,), {})):
                     value = self.convert_to_cache(defaults[self.name], record)
                     env.cache.set(record, self, value)
 
-        return self.convert_to_record(value, record)
+            return self.convert_to_record(value, record)
 
     def mapped(self, records):
         """ Return the values of ``self`` for ``records``, either as a list

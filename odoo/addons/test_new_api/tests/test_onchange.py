@@ -528,6 +528,7 @@ class TestComputeOnchange(common.TransactionCase):
 
     def test_create(self):
         model = self.env['test_new_api.compute.onchange']
+        model_default_baz = model.with_context(default_baz="daz")
 
         # compute 'bar' and 'baz'
         record = model.create({'active': True, 'foo': "foo"})
@@ -539,6 +540,10 @@ class TestComputeOnchange(common.TransactionCase):
         self.assertEqual(record.bar, "foo")
         self.assertEqual(record.baz, "baz")
 
+        record = model_default_baz.create({'active': True, 'foo': "foo", 'bar': "bar"})
+        self.assertEqual(record.bar, "foo")
+        self.assertEqual(record.baz, "daz")
+
         # compute 'bar' and 'baz', but do not change its value
         record = model.create({'active': False, 'foo': "foo"})
         self.assertEqual(record.bar, "foo")
@@ -548,6 +553,10 @@ class TestComputeOnchange(common.TransactionCase):
         record = model.create({'active': False, 'foo': "foo", 'bar': "bar", 'baz': "baz"})
         self.assertEqual(record.bar, "foo")
         self.assertEqual(record.baz, "baz")
+
+        record = model_default_baz.create({'active': False, 'foo': "foo", 'bar': "bar"})
+        self.assertEqual(record.bar, "foo")
+        self.assertEqual(record.baz, "daz")
 
     def test_copy(self):
         Model = self.env['test_new_api.compute.onchange']
@@ -643,6 +652,9 @@ class TestComputeOnchange(common.TransactionCase):
 
     def test_set_new(self):
         model = self.env['test_new_api.compute.onchange']
+        model_default_baz = model.with_context(default_baz="daz")
+
+        # compute 'baz' and 'baz'
         record = model.new({'active': True, 'foo': "foo"})
         self.assertEqual(record.bar, "foo")
         self.assertEqual(record.baz, "foo")
@@ -659,10 +671,6 @@ class TestComputeOnchange(common.TransactionCase):
 
         # recompute 'baz', but do not change its value
         record.active = False
-        self.assertEqual(record.bar, "foo1")
-        self.assertEqual(record.baz, "baz2")
-
-        # recompute 'baz', but do not change its value
         record.foo = "foo3"
         self.assertEqual(record.bar, "foo3")
         self.assertEqual(record.baz, "baz2")
@@ -671,6 +679,35 @@ class TestComputeOnchange(common.TransactionCase):
         record.baz = "baz4"
         self.assertEqual(record.bar, "foo3")
         self.assertEqual(record.baz, "baz4")
+
+        # new record where 'baz' is not assigned by compute method
+        record = model.new({'active': False, 'foo': "foo"})
+        self.assertEqual(record.bar, "foo")
+        self.assertEqual(record.baz, False)
+
+        record = model_default_baz.new({'active': False, 'foo': "foo"})
+        self.assertEqual(record.bar, "foo")
+        self.assertEqual(record.baz, "daz")
+
+        # new record with origin where 'baz' is not assigned by compute method
+        origin = model.create({'foo': "foo1", 'baz': "baz"})
+        self.assertEqual(origin.active, False)
+        self.assertEqual(origin.foo, "foo1")
+        self.assertEqual(origin.bar, "foo1")
+        self.assertEqual(origin.baz, "baz")
+
+        record = model_default_baz.new({}, origin=origin)
+        record.foo = "foo2"
+        self.assertEqual(record.active, False)
+        self.assertEqual(record.foo, "foo2")
+        self.assertEqual(record.bar, "foo2")
+        self.assertEqual(record.baz, "baz")
+
+        record.active = True
+        record.foo = "foo3"
+        self.assertEqual(record.foo, "foo3")
+        self.assertEqual(record.bar, "foo3")
+        self.assertEqual(record.baz, "foo3")
 
     def test_onchange(self):
         form = common.Form(self.env['test_new_api.compute.onchange'])
