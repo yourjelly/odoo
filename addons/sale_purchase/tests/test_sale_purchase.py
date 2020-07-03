@@ -2,15 +2,16 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.exceptions import UserError, AccessError
-
+from odoo.tests import tagged
 from odoo.addons.sale_purchase.tests.common import TestCommonSalePurchaseNoChart
 
 
+@tagged('post_install', '-at_install')
 class TestSalePurchase(TestCommonSalePurchaseNoChart):
 
     @classmethod
-    def setUpClass(cls):
-        super(TestSalePurchase, cls).setUpClass()
+    def setUpClass(cls, chart_template_ref=None):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
         # set up users
         cls.setUpUsers()
@@ -20,17 +21,15 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         cls.user_employee.write({'groups_id': [(6, 0, [group_salesman.id])]})
 
         # set up accounts and products and journals
-        cls.setUpAdditionalAccounts()
-        cls.setUpAccountJournal()
         cls.setUpClassicProducts()
         cls.setUpServicePurchaseProducts()
 
         # create a generic Sale Order with 2 classical products and a purchase service
         SaleOrder = cls.env['sale.order'].with_context(tracking_disable=True)
         cls.sale_order_1 = SaleOrder.create({
-            'partner_id': cls.partner_customer_usd.id,
-            'partner_invoice_id': cls.partner_customer_usd.id,
-            'partner_shipping_id': cls.partner_customer_usd.id,
+            'partner_id': cls.partner_a.id,
+            'partner_invoice_id': cls.partner_a.id,
+            'partner_shipping_id': cls.partner_a.id,
             'pricelist_id': cls.pricelist_usd.id,
         })
         cls.sol1_service_deliver = cls.env['sale.order.line'].create({
@@ -62,9 +61,9 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         })
 
         cls.sale_order_2 = SaleOrder.create({
-            'partner_id': cls.partner_customer_usd.id,
-            'partner_invoice_id': cls.partner_customer_usd.id,
-            'partner_shipping_id': cls.partner_customer_usd.id,
+            'partner_id': cls.partner_a.id,
+            'partner_invoice_id': cls.partner_a.id,
+            'partner_shipping_id': cls.partner_a.id,
             'pricelist_id': cls.pricelist_usd.id,
         })
         cls.sol2_product_deliver = cls.env['sale.order.line'].create({
