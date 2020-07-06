@@ -1,7 +1,6 @@
 odoo.define('web_editor.wysiwyg', function (require) {
 'use strict';
 var Dialog = require('web.Dialog');
-var config = require('web.config');
 var Widget = require('web.Widget');
 var JWEditorLib = require('web_editor.jabberwock');
 var SnippetsMenu = require('web_editor.snippet.editor').SnippetsMenu;
@@ -10,31 +9,11 @@ var weWidgets = require('wysiwyg.widgets');
 var core = require('web.core');
 var _t = core._t;
 
-var summernoteCustomColors = require('web_editor.rte.summernote_custom_colors');
-// Used to track the wysiwyg that will contain an iframe
-var id = 0;
-
 var Wysiwyg = Widget.extend({
     defaultOptions: {
-        'legacy': true,
-        'focus': false,
-        'lang': 'odoo',
         'recordInfo': {
             'context': {},
         },
-        'toolbar': [
-            ['style', ['style']],
-            ['font', ['bold', 'italic', 'underline', 'clear']],
-            ['fontsize', ['fontsize']],
-            ['color', ['color']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['table', ['table']],
-            ['insert', ['link', 'picture']],
-            ['history', ['undo', 'redo']],
-        ],
-        'styleWithSpan': false,
-        'inlinemedia': ['p'],
-        'colors': summernoteCustomColors,
     },
 
     /**
@@ -56,7 +35,6 @@ var Wysiwyg = Widget.extend({
      **/
     init: function (parent, options) {
         this._super.apply(this, arguments);
-        this.id = ++id;
         this.value = options.value || '';
         this.options = options;
     },
@@ -67,10 +45,6 @@ var Wysiwyg = Widget.extend({
      * @override
      **/
     willStart: async function () {
-        if (this.options.legacy) {
-            const SummernoteManager = odoo.__DEBUG__.services['web_editor.rte.summernote'];
-            this._summernoteManager = new SummernoteManager(this);
-        }
         this.$target = this.$el;
         return this._super();
     },
