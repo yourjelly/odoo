@@ -434,6 +434,7 @@ snippetOptions.registry.WebsiteFormEditor = FormEditor.extend({
             data.$target.after(htmlField);
             this.trigger_up('activate_snippet', {
                 $element: $(htmlField),
+                saveTarget: true,
             });
         }
     },
@@ -1278,6 +1279,7 @@ snippetOptions.registry.AddFieldForm = FormEditor.extend({
         this.$target.find('.s_website_form_submit, .s_website_form_recaptcha').first().before(htmlField);
         this.trigger_up('activate_snippet', {
             $element: $(htmlField),
+            saveTarget: true,
         });
         if(previewMode === false) await this._refreshTarget();
     },

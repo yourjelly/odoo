@@ -2167,6 +2167,9 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _onActivateSnippet: function (ev) {
+        if (ev.data.saveTarget) {
+            this._lastSnippetBlockActivated = getQuerySelector(ev.data.$element[0]);
+        }
         this._activateSnippet(ev.data.$element, ev.data.previewMode, ev.data.ifInactiveOptions);
     },
     /**
