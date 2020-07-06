@@ -206,24 +206,21 @@ var Wysiwyg = Widget.extend({
     },
 
     openLinkDialog() {
-        return new Promise(async (resolve) => {
-            let linkInfo;
-            await this.editor.execCustomCommand(async () => {
-                const range = this.editor.selection.range;
-                const targettedLeaves = range.targetedNodes(node => !node.hasChildren());
-                const text = targettedLeaves.map(x => x.textContent).join('');
-                const inline = this.editor.plugins.get(JWEditorLib.Inline);
-                const modifiers = inline.getCurrentModifiers(range);
-                const linkFormat = modifiers.find(JWEditorLib.LinkFormat);
-                const attributes = modifiers.find(JWEditorLib.Attributes);
-                const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
-                linkInfo = {
-                    text: text,
-                    url: linkFormat && linkFormat.url || '',
-                    class: attributes && attributes.get('class') || '',
-                    target: linkFormatAttributes && linkFormatAttributes.get('target'),
-                };
-            });
+        return new Promise((resolve) => {
+            const range = this.editor.selection.range;
+            const targettedLeaves = range.targetedNodes(node => !node.hasChildren());
+            const text = targettedLeaves.map(x => x.textContent).join('');
+            const inline = this.editor.plugins.get(JWEditorLib.Inline);
+            const modifiers = inline.getCurrentModifiers(range);
+            const linkFormat = modifiers.find(JWEditorLib.LinkFormat);
+            const attributes = modifiers.find(JWEditorLib.Attributes);
+            const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
+            const linkInfo = {
+                text: text,
+                url: linkFormat && linkFormat.url || '',
+                class: attributes && attributes.get('class') || '',
+                target: linkFormatAttributes && linkFormatAttributes.get('target'),
+            };
             var linkDialog = new weWidgets.LinkDialog(this,
                 {
                     props: {
