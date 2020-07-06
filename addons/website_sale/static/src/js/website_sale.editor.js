@@ -261,10 +261,16 @@ publicWidget.registry.websiteSaleCurrency = publicWidget.Widget.extend({
      * @private
      */
     _onCurrencyValueClick: function (ev) {
-        const $target = $(ev.currentTarget);
         // Because of the Jabberwock Lib implementation and the way it capture the click event.
         // We have to trigger the selection on the next tick to make it work.
-        setTimeout($target.selectContent.bind($target));
+        const wysiwyg = $('#wrapwrap').data('wysiwyg');
+        ev.preventDefault();
+        ev.stopPropagation();
+        ev.stopImmediatePropagation();
+        wysiwyg.editor.execCustomCommand(async () => {
+            const nodes = wysiwyg.editorHelpers.getNodes(ev.currentTarget.parentElement);
+            wysiwyg.editor.selection.select(nodes[0]);
+        });
     },
 });
 

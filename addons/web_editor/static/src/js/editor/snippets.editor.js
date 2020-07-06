@@ -1207,13 +1207,19 @@ var SnippetsMenu = Widget.extend({
 
         // Auto-selects text elements with a specific class and remove this
         // on text changes
-        this.$document.on('click.snippets_menu', '.o_default_snippet_text', function (ev) {
-            const $target = $(ev.target);
-            $target.closest('.o_default_snippet_text').removeClass('o_default_snippet_text');
-            $target.removeClass('o_default_snippet_text');
-            // Because of the Jabberwock Lib implementation and the way it capture the click event.
-            // We have to trigger the selection on the next tick to make it work.
-            setTimeout($target.selectContent.bind($target));
+        this.$document.on('click.snippets_menu', '.o_default_snippet_text', (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            ev.stopImmediatePropagation();
+            this.wysiwyg.editor.execBatch(async () => {
+                await this.wysiwyg.editor.execCustomCommand(async () => {
+                    const $target = $(ev.target);
+                    const $defaultSnippetText = $target.closest('.o_default_snippet_text');
+                    await this.editorHelpers.removeClass($defaultSnippetText[0], 'o_default_snippet_text');
+                    const nodes = this.editorHelpers.getNodes($target[0]);
+                    this.wysiwyg.editor.selection.select(nodes[0]);
+                });
+            });
         });
 
         const $autoFocusEls = $('.o_we_snippet_autofocus');

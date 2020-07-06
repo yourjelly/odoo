@@ -69,6 +69,7 @@ var Wysiwyg = Widget.extend({
         this.editor = new JWEditorLib.OdooWebsiteEditor({
             afterRender: async ()=> {
                 const $wrapwrap = $('#wrapwrap');
+                $('#wrapwrap').data('wysiwyg', this);
                 $wrapwrap.removeClass('o_editable'); // clean the dom before edition
                 this._getEditable($wrapwrap).addClass('o_editable');
 
