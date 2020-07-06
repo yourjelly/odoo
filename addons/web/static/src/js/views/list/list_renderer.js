@@ -527,6 +527,7 @@ var ListRenderer = BasicRenderer.extend({
         }
 
         if (node.tag === 'button_group') {
+            // display buttons in dropdown
             const $buttonDropdown = $('<div>', {
                     class: 'dropdown',
             });
@@ -548,6 +549,7 @@ var ListRenderer = BasicRenderer.extend({
             for (const buttonNode of node.children) {
                 if (!this.columnInvisibleFields[buttonNode.attrs.name]) {
                     const $button = this._renderButton(record, buttonNode);
+                    // adding to 'td' if only button is visible
                     if (!$button.hasClass('o_invisible_modifier')) {
                         $td.css('overflow', 'visible');
                         $dropdown.append($("<div>", {
