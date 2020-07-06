@@ -27,25 +27,24 @@ async function createWysiwyg(parent, options, additionnalAssets = []) {
 
 async function loadFromTextarea(parent, textarea, options) {
     const $textarea = $(textarea);
-    const currentOptions = {...options};
+    const currentOptions = Object.assign({}, options);
     if (!currentOptions.value || !currentOptions.value.trim()) {
         currentOptions.value = '<p><br><p>';
     }
-    const wysiwyg = await createWysiwyg(parent, {
+    const wysiwyg = await createWysiwyg(parent, Object.assign({
         template: `<t-dialog><t t-zone="default"/></t-dialog>
-        <div class="d-flex flex-grow-1 flex-column" style="height: 200px">
-            <div class="o_toolbar">
-                <t t-zone="tools"/>
-            </div>
-            <div class="d-flex flex-grow-1 overflow-auto note-editing-area">
-                <t t-zone="main"/>
-            </div>
-            <div class="o_debug_zone">
-                <t t-zone="debug"/>
-            </div>
-        </div>`,
-        ...currentOptions
-    });
+            <div class="d-flex flex-grow-1 flex-column" style="height: 200px">
+                <div class="o_toolbar">
+                    <t t-zone="tools"/>
+                </div>
+                <div class="d-flex flex-grow-1 overflow-auto note-editing-area">
+                    <t t-zone="main"/>
+                </div>
+                <div class="o_debug_zone">
+                    <t t-zone="debug"/>
+                </div>
+            </div>`
+        }, currentOptions));
 
     const $wysiwygWrapper = $textarea.closest('.o_wysiwyg_wrapper');
     const $form = $textarea.closest('form');
