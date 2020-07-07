@@ -318,8 +318,7 @@ $o-theme-font-names: (
 // properties configuration + basic info (url, font-family).
 $o-theme-font-configs: () !default;
 
-// Maybe we want to deduce size from position (bot/top => 100% auto, left/right => auto 100%) ?
-// (module_name: (shape_filename: (position: X, size: Y, colors: (#AAA, #BBB)), ...), other_module: ...)
+// (module_name: (shape_filename: (position: X, size: Y, colors: ('o-color-a', [o-color-b], ...)), ...))
 $bg-shapes: (website: (
     shape_bg_1: (position: bottom, size: 100% auto, colors: ('o-color-1', 'o-color-2')),
     shape_bg_2: (position: top, size: 100% auto, colors: ('o-color-1', 'o-color-5')),

@@ -3215,7 +3215,11 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      */
     shape(previewMode, widgetValue, params) {
         if (previewMode === 'reset') {
-            this.$target[0].dataset.oeShapeData = this.prevShape;
+            if (this.prevShape) {
+                this.$target[0].dataset.oeShapeData = this.prevShape;
+            } else {
+                delete this.$target[0].dataset.oeShapeData;
+            }
         } else {
             if (previewMode === true) {
                 this.prevShape = this.$target[0].dataset.oeShapeData;
@@ -3233,7 +3237,11 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      */
     color(previewMode, widgetValue, params) {
         if (previewMode === 'reset') {
-            this.$target[0].dataset.oeShapeData = this.prevShape;
+            if (this.prevShape) {
+                this.$target[0].dataset.oeShapeData = this.prevShape;
+            } else {
+                delete this.$target[0].dataset.oeShapeData;
+            }
         } else {
             if (previewMode === true) {
                 this.prevShape = this.$target[0].dataset.oeShapeData;
