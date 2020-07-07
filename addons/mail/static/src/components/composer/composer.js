@@ -8,7 +8,9 @@ const components = {
     FileUploader: require('mail/static/src/components/file_uploader/file_uploader.js'),
     TextInput: require('mail/static/src/components/composer_text_input/composer_text_input.js'),
     ThreadTextualTypingStatus: require('mail/static/src/components/thread_textual_typing_status/thread_textual_typing_status.js'),
+    NotificationUndoMessage: require('mail/static/src/components/notification_undo_message/notification_undo_message.js')
 };
+const { ComponentWrapper } = require('web.OwlCompatibility');
 const useDragVisibleDropZone = require('mail/static/src/component_hooks/use_drag_visible_dropzone/use_drag_visible_dropzone.js');
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 const {
@@ -19,6 +21,7 @@ const mailUtils = require('mail.utils');
 
 const { Component } = owl;
 const { useRef } = owl.hooks;
+
 
 class Composer extends Component {
 
@@ -184,6 +187,9 @@ class Composer extends Component {
         // TODO: we might need to remove trigger and use the store to wait for the post rpc to be done
         // task-2252858
         this.trigger('o-message-posted');
+        const messages = this.composer.thread.messages;
+        this.NotificationUndoMessage = new ComponentWrapper(this, components.NotificationUndoMessage, {messageLocalId: messages[messages.length - 1].localId});
+        this.NotificationUndoMessage.mount(document.body);
     }
 
     /**

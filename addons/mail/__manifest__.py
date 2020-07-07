@@ -102,6 +102,7 @@
         'static/src/components/moderation_reject_dialog/moderation_reject_dialog.xml',
         'static/src/components/notification_group/notification_group.xml',
         'static/src/components/notification_list/notification_list.xml',
+        'static/src/components/notification_undo_message/notification_undo_message.xml',
         'static/src/components/notification_popover/notification_popover.xml',
         'static/src/components/partner_im_status_icon/partner_im_status_icon.xml',
         'static/src/components/partner_mention_suggestion/partner_mention_suggestion.xml',

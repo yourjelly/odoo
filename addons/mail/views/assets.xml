@@ -100,6 +100,7 @@
                 <script type="text/javascript" src="/mail/static/src/components/notification_group/notification_group.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/notification_list/notification_list.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/notification_popover/notification_popover.js"></script>
+                <script type="text/javascript" src="/mail/static/src/components/notification_undo_message/notification_undo_message.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/partner_mention_suggestion/partner_mention_suggestion.js"></script>
                 <script type="text/javascript" src="/mail/static/src/components/thread_icon/thread_icon.js"></script>
@@ -200,6 +201,7 @@
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_group/notification_group.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_list/notification_list.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_popover/notification_popover.scss"/>
+                <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/notification_undo_message/notification_undo_message.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/partner_im_status_icon/partner_im_status_icon.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/partner_mention_suggestion/partner_mention_suggestion.scss"/>
                 <link rel="stylesheet" type="text/scss" href="/mail/static/src/components/thread_icon/thread_icon.scss"/>
