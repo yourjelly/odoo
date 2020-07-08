@@ -340,6 +340,60 @@ QUnit.test('composer show/hide on log note/send message', async function (assert
     );
 });
 
+QUnit.test('undo sending message', async function (assert) {
+    assert.expect(4);
+
+    await this.start();
+    const chatter = this.env.models['mail.chatter'].create({
+        threadId: 100,
+        threadModel: 'res.partner',
+    });
+    await this.createChatterComponent({ chatter });
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_ChatterTopbar_buttonSendMessage`).length,
+        1,
+        "should have a send message button"
+    );
+
+    await afterNextRender(() =>
+        document.querySelector(`.o_ChatterTopbar_buttonSendMessage`).click()
+    );
+
+    let composerTextInputTextArea = document.querySelector(`.o_ComposerTextInput_textarea`);
+    composerTextInputTextArea.focus();
+    await afterNextRender(() =>
+        document.execCommand('insertText', false, 'Hello')
+    );
+
+    await afterNextRender(() =>
+        document.querySelector(`.o_Composer_buttonSend`).click()
+    );
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_notifiaction_message`).length,
+        1,
+        "should have undo notification Message"
+    );
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_MessageList_message`).length,
+        1,
+        "should have one message in chatter"
+    );
+
+    await afterNextRender(() =>
+        document.querySelector(`.o_notification_undo`).click()
+    );
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_MessageList_message`).length,
+        0,
+        "message should be deleted"
+    );
+
+});
+
 });
 });
 });
