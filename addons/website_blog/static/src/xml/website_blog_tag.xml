@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+<t t-name="website_blog.tagListItem">
+    <we-row t-attf-class="pt-1 mr-1 #{!isEditing and 'o_we_inline_tag' or ''}">
+        <we-button t-raw="tag.name" class="o_we_tag"/>
+        <we-button t-if="isEditing"
+                   class="fa fa-minus"
+                   t-att-data-remove-tag="isEditing and tag.id !== 0 and tag.id"
+                   t-att-data-discard-tag="isEditing and tag.id === 0 and tag.name"
+                   data-no-preview="true"/>
+    </we-row>
+</t>
+
+<t t-name="website_blog.tagSelectItem">
+    <we-button class="pt-1" t-att-data-add-tag="tag.id" data-no-preview="true">
+        <t t-raw="tag.name"/>
+    </we-button>
+</t>
+
+<t t-name="website_blog.tag_link">
+    <a href="#" t-attf-class="badge border #{tag.name}-#{tag.id}" t-esc="tag.name"/>
+</t>
+
+</templates>

@@ -7,4 +7,27 @@
     </xpath>
 </template>
 
+<template id="snippet_options" inherit_id="website.snippet_options" name="Blog snippet options">
+    <xpath expr="." position="inside">
+        <div data-js="BlogPostTagSelection" data-selector=".o_wblog_post_page_cover" data-target="#o_wblog_post_name">
+            <we-list class=".o_wblog_tag_list" data-name="tag_list">
+                <div class="d-flex">
+                    <we-title class="my-auto">Tag List</we-title>
+                    <div class="o_we_edit_tag_btn"><we-button class="fa fa-pencil o_we_edit_tag_btn" title="Edit" data-edit-tag-list="" data-no-preview="true"/></div>
+                    <div class="o_we_save_tag_btn d-none"><we-button class="fa fa-save" title="Save" data-save-tag-list="" data-no-preview="true"/></div>
+                </div>
+                <!-- Tags are filled in js -->
+            </we-list>
+            <div data-name="add_tag_opt" class="d-none">
+                <we-select string="Existing" data-no-preview="true">
+                    <!-- Tags are filled in js -->
+                </we-select>
+                <we-row>
+                    <we-input string="New tag" data-set-new-tag-name="" placeholder="Name"/>
+                    <we-button class="fa fa-plus" title="Confirm" data-confirm-new="" data-no-preview="true"/>
+                </we-row>
+            </div>
+        </div>
+    </xpath>
+</template>
 </odoo>
