@@ -189,9 +189,9 @@ class Composer extends Component {
         this.trigger('o-message-posted');
         if (this.composer.thread.model !== 'mail.channel' || this.composer.thread.mass_mailing === true) {
             const messages = this.composer.thread.messages;
-            debugger;
             this.NotificationUndoMessage = new ComponentWrapper(this, components.NotificationUndoMessage, {messageLocalId: messages[messages.length - 1].localId});
             this.NotificationUndoMessage.mount(document.body);
+            setTimeout(this.destroy.bind(this.NotificationUndoMessage), 3000);
         }
     }
 

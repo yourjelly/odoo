@@ -311,6 +311,18 @@ function factory(dependencies) {
             }));
         }
 
+        /**
+         * undo the sending message of thread.
+         */
+        async undoMessage() {
+            await this.env.services.rpc({
+                model: 'mail.message',
+                method: 'unlink',
+                args: [[this.id]],
+            });
+            this.delete();
+        }
+
         //----------------------------------------------------------------------
         // Private
         //----------------------------------------------------------------------
