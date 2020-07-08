@@ -2,10 +2,8 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.NotificationUndoMessage" owl="1">
-        <div>
-            <div class="o_NotificationUndoMessage"> Notification sent </div>
-            <button class="o_undo_message" string="undo"/>
-            <a href="#" class="o_notification_close fa fa-close"/>
+        <div class="faded_notification">
+            <div class="faded_notification"> Notification sent <a href="#" t-on-click.prevent="_onClickUndo">Undo</a> </div>
         </div>
     </t>
 
