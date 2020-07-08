@@ -11,5 +11,5 @@ class PosDetails(models.TransientModel):
     def generate_report(self):
         data = {'date_start': self.start_date, 'date_stop': self.end_date, 'config_ids': self.pos_config_ids.ids}
         if all(code == 'CO' for code in self.pos_config_ids.mapped('company_id.country_id.code')):
-            return self.env.ref('point_of_sale.sale_details_report').report_action([], data=data)
+            return self.env.ref('l10n_co_pos.sale_details_report').report_action([], data=data)
         return self.env.ref('point_of_sale.sale_details_report').report_action([], data=data)
