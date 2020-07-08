@@ -187,9 +187,12 @@ class Composer extends Component {
         // TODO: we might need to remove trigger and use the store to wait for the post rpc to be done
         // task-2252858
         this.trigger('o-message-posted');
-        const messages = this.composer.thread.messages;
-        this.NotificationUndoMessage = new ComponentWrapper(this, components.NotificationUndoMessage, {messageLocalId: messages[messages.length - 1].localId});
-        this.NotificationUndoMessage.mount(document.body);
+        if (this.composer.thread.model !== 'mail.channel' || this.composer.thread.mass_mailing === true) {
+            const messages = this.composer.thread.messages;
+            debugger;
+            this.NotificationUndoMessage = new ComponentWrapper(this, components.NotificationUndoMessage, {messageLocalId: messages[messages.length - 1].localId});
+            this.NotificationUndoMessage.mount(document.body);
+        }
     }
 
     /**
