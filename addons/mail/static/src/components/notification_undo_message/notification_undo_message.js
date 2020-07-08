@@ -6,13 +6,23 @@ odoo.define('mail/static/src/components/notification_undo_message/notification_u
 
     class NotificationUndoMessage extends Component {
 
+        //--------------------------------------------------------------------------
+        // Handlers
+        //--------------------------------------------------------------------------
+
+        /**
+         * Undo a sent message from chatter.
+         *
+         * @private
+         * @param {MouseEvent} ev
+         */
         async _onClickUndo(ev) {
             const message = this.env.models['mail.message'].get(this.props.messageLocalId);
-            message.undoMessage();
+            await message.undoMessage();
             this.destroy();
         }
 
-        _onClickClose() {
+        _onClickClose(ev) {
             this.destroy();
         }
 
