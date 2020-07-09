@@ -741,6 +741,110 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
     );
 });
 
+QUnit.test('Discuss: undo sending message of mass_mailing true', async function (assert) {
+    assert.expect(8);
+
+    Object.assign(this.data.initMessaging, {
+        channel_slots: {
+            channel_channel: [{
+                channel_type: "channel",
+                id: 20,
+                is_pinned: true,
+                name: "General",
+                mass_mailing: true,
+            }],
+        },
+    });
+    const self = this;
+    let messagesData = [];
+    await this.start({
+        discuss: {
+            params: {
+                default_active_id: 'mail.channel_20',
+            },
+        },
+        async mockRPC(route, args) {
+            if (args.method === 'message_fetch') {
+                return messagesData;
+            }
+            if (args.method === 'message_post') {
+                assert.step('message_post');
+                assert.strictEqual(
+                    args.args[0],
+                    20,
+                    "should post message to channel Id 20"
+                );
+                assert.strictEqual(
+                    args.kwargs.body,
+                    "A message",
+                    "should post with provided content in composer input"
+                );
+                // simulate receiving a new message
+                const data = {
+                    author_id: [3, "Admin"],
+                    body: args.kwargs.body,
+                    channel_ids: [20],
+                    date: "2019-04-20 11:00:00",
+                    id: 101,
+                    message_type: args.kwargs.message_type,
+                    model: 'mail.channel',
+                    subtype_xmlid: args.kwargs.subtype_xmlid,
+                    record_name: 'General',
+                    res_id: 20,
+                };
+                const notifications = [
+                    [['my-db', 'mail.channel', 20], data]
+                ];
+                messagesData.push(data);
+                self.widget.call('bus_service', 'trigger', 'notification', notifications);
+                return;
+            }
+            return this._super(...arguments);
+        },
+    });
+    assert.strictEqual(
+        document.querySelectorAll(`
+            .o_Discuss_thread .o_ThreadViewer_messageList .o_MessageList_message
+        `).length,
+        0,
+        "should have no messages"
+    );
+
+    // Write text in composer for #general
+    await afterNextRender(() => {
+        document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+        document.execCommand('insertText', false, "A message");
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('input'));
+    });
+    await afterNextRender(() =>
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }))
+    );
+    assert.verifySteps(['message_post']);
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_notifiaction_message`).length,
+        1,
+        "should have undo notification Message"
+    );
+    assert.strictEqual(
+        document.querySelectorAll(`.o_MessageList_message`).length,
+        1,
+        "should have one message in chatter"
+    );
+    await afterNextRender(() =>
+        document.querySelector(`.o_notification_undo`).click()
+    );
+
+    assert.strictEqual(
+        document.querySelectorAll(`.o_MessageList_message`).length,
+        0,
+        "message should be deleted"
+    );
+
+});
+
 QUnit.test('sidebar: chat rendering with unread counter', async function (assert) {
     assert.expect(5);
 
