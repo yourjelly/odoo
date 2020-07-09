@@ -13,7 +13,9 @@
             <div class="o_opacity_pointer" tabindex="-1"/>
         </div>
         <div class="o_color_picker_inputs">
-            <div t-if="widget.options.colorPreview" class="o_color_preview"/>
+            <div t-if="widget.options.colorPreview" class="o_color_preview_parent">
+                <span class="rounded-0 o_color_preview"/>
+            </div>
             <div class="o_hex_div"><input type="text" class="o_hex_input" data-color-method="hex" size="1"/>hex</div>
             <div class="o_rgba_div">
                 <input type="text" class="o_red_input" data-color-method="rgb" size="1"/>
