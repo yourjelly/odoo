@@ -69,16 +69,17 @@
                 display: block;
             }
         }
+        > * {
+            display: flex;
+        }
         .o_hex_div {
             width: 38%;
-            display: flex;
             border: 1px solid;
             margin-right: 2%;
         }
         .o_rgba_div {
             width: 60%;
             border: 1px solid;
-            display: flex;
         }
         input {
             width: 100%;
