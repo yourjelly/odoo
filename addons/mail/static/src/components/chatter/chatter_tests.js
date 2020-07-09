@@ -341,9 +341,16 @@ QUnit.test('composer show/hide on log note/send message', async function (assert
 });
 
 QUnit.test('undo sending message', async function (assert) {
-    assert.expect(4);
+    assert.expect(5);
 
-    await this.start();
+    await this.start({
+        async mockRPC(route, args){
+            if (args.method === 'unlink') {
+                assert.strictEqual(args.args[0][0], chatter.thread.messages[0].id, 'Should unlink 1 id message');
+            }
+            return this._super(...arguments);
+        },
+    });
     const chatter = this.env.models['mail.chatter'].create({
         threadId: 100,
         threadModel: 'res.partner',

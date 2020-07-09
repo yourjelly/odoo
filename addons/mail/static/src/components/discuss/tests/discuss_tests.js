@@ -741,8 +741,8 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
     );
 });
 
-QUnit.test('Discuss: undo sending message of mass_mailing true', async function (assert) {
-    assert.expect(8);
+QUnit.only('Discuss: undo sending message of mass_mailing true', async function (assert) {
+    assert.expect(9);
 
     Object.assign(this.data.initMessaging, {
         channel_slots: {
@@ -756,17 +756,13 @@ QUnit.test('Discuss: undo sending message of mass_mailing true', async function 
         },
     });
     const self = this;
-    let messagesData = [];
     await this.start({
         discuss: {
             params: {
                 default_active_id: 'mail.channel_20',
             },
         },
-        async mockRPC(route, args) {
-            if (args.method === 'message_fetch') {
-                return messagesData;
-            }
+        async mockRPC(route, args){
             if (args.method === 'message_post') {
                 assert.step('message_post');
                 assert.strictEqual(
@@ -795,9 +791,11 @@ QUnit.test('Discuss: undo sending message of mass_mailing true', async function 
                 const notifications = [
                     [['my-db', 'mail.channel', 20], data]
                 ];
-                messagesData.push(data);
                 self.widget.call('bus_service', 'trigger', 'notification', notifications);
                 return;
+            }
+            if (args.method === 'unlink') {
+                assert.strictEqual(args.args[0][0], 101, 'Should unlink 101 id message');
             }
             return this._super(...arguments);
         },
@@ -816,11 +814,9 @@ QUnit.test('Discuss: undo sending message of mass_mailing true', async function 
         document.execCommand('insertText', false, "A message");
         document.querySelector(`.o_ComposerTextInput_textarea`)
             .dispatchEvent(new window.KeyboardEvent('input'));
-    });
-    await afterNextRender(() =>
         document.querySelector(`.o_ComposerTextInput_textarea`)
             .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }))
-    );
+    });
     assert.verifySteps(['message_post']);
 
     assert.strictEqual(
