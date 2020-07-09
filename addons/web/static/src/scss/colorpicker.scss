@@ -69,16 +69,16 @@
                 display: block;
             }
         }
-        > * {
+        .o_hex_div {
             display: flex;
             align-items: baseline;
-        }
-        .o_hex_div {
             width: 38%;
             border: 1px solid;
             margin-right: 2%;
         }
         .o_rgba_div {
+            display: flex;
+            align-items: baseline;
             width: 60%;
             border: 1px solid;
         }
