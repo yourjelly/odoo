@@ -4,7 +4,7 @@
     <t t-name="mail.NotificationUndoMessage" owl="1">
         <div class="o_notifiaction_message">
             Message sent <a href="#" class="o_notification_undo" t-on-click.prevent="_onClickUndo">Undo</a>
-            <a href="#" class="o_notification_undo" t-on-click.prevent="_onClickClose">X</a>
+            <a href="#" class="o_notification_close" t-on-click.prevent="_onClickClose">X</a>
         </div>
     </t>
 
