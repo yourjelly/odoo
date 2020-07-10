@@ -1,4 +1,4 @@
-.o_notifiaction_message {
+.oNotificationMessage {
   position: fixed;
   min-width: 15rem;
   background-color: #333;
@@ -14,7 +14,7 @@
     margin-left: 1rem;
   }
 
-  &.showUpper {
+  &.oDiscussNotifiactionMessage {
     bottom: unset;
     top: 7rem;
     right: 2rem;

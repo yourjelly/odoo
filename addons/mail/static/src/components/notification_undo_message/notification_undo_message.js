@@ -6,6 +6,23 @@ odoo.define('mail/static/src/components/notification_undo_message/notification_u
 
     class NotificationUndoMessage extends Component {
 
+        constructor(...args) {
+            super(...args);
+
+            this.message = this.env.models['mail.message'].get(this.props.messageLocalId);
+        }
+
+        //--------------------------------------------------------------------------
+        // Getters
+        //--------------------------------------------------------------------------
+
+        get messageInDiscuss() {
+            return this.message.originThread.model === 'mail.channel' || this.message.originThread.composer.discussAsReplying;
+        }
+
+        get threadName() {
+            return this.message.originThread.composer.discussAsReplying ? this.message.originThread.name : '';
+        }
         //--------------------------------------------------------------------------
         // Handlers
         //--------------------------------------------------------------------------
@@ -17,8 +34,7 @@ odoo.define('mail/static/src/components/notification_undo_message/notification_u
          * @param {MouseEvent} ev
          */
         async _onClickUndo(ev) {
-            const message = this.env.models['mail.message'].get(this.props.messageLocalId);
-            await message.undoMessage();
+            await this.message.undoMessage();
             this.destroy();
         }
 
@@ -26,15 +42,10 @@ odoo.define('mail/static/src/components/notification_undo_message/notification_u
             this.destroy();
         }
 
-        get threadName() {
-            return this.props.threadName;
-        }
-
     }
 
     NotificationUndoMessage.props = {
         messageLocalId: String,
-        threadName: String,
     };
 
     NotificationUndoMessage.template = 'mail.NotificationUndoMessage';

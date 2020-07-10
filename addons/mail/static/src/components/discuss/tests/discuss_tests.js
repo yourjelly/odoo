@@ -741,7 +741,7 @@ QUnit.test('sidebar: basic chat rendering', async function (assert) {
     );
 });
 
-QUnit.only('Discuss: undo sending message of mass_mailing true', async function (assert) {
+QUnit.test('Discuss: undo sending message of mass_mailing true', async function (assert) {
     assert.expect(9);
 
     Object.assign(this.data.initMessaging, {
