@@ -72,24 +72,6 @@ var Wysiwyg = Widget.extend({
                 $('#wrapwrap').data('wysiwyg', this);
                 $wrapwrap.removeClass('o_editable'); // clean the dom before edition
                 this._getEditable($wrapwrap).addClass('o_editable');
-
-                // todo: change this quick fix
-                const $firstDiv = $('.wrapwrap main>div');
-                if ($firstDiv.length) {
-                    $firstDiv.find('.oe_structure').addClass('o_editable');
-                    $firstDiv.addClass('oe_structure o_editable note-air-editor note-editable');
-
-                    this.$editorMessageElements = $firstDiv
-                        // todo: translate message
-                        .attr('data-editor-message', 'DRAG BUILDING BLOCKS HERE');
-                }
-
-                // To see the dashed lines on empty editor, the first element must be empty.
-                // As the jabberwock editor currently add <p><br/></p> when the editor is empty,
-                // we need to remove it.
-                if ($firstDiv.html() === '<br>') {
-                    $firstDiv.empty();
-                }
             },
             snippetMenuElement: $mainSidebar[0],
             snippetManipulators: $snippetManipulators[0],
@@ -121,7 +103,7 @@ var Wysiwyg = Widget.extend({
         // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
         const emptyClass = "oe_blank_wrap";
         const targetNode = this.editorEditable.querySelector("#wrap");
-        if(targetNode) {
+        if(this.options.enableWebsite && targetNode) {
             let mutationCallback = function () {
                 if (targetNode.textContent.trim() === '') {
                     targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
