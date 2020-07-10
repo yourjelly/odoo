@@ -58,7 +58,7 @@
                                             <small t-elif="track_other.track_start_remaining"
                                                 class="badge badge-light">
                                                 In <span t-esc="track_other.track_start_remaining"
-                                                    t-options="{'widget': 'duration', 'digital': False, 'unit': 'minute', 'round': 'minute', 'format': 'narrow'}"/>
+                                                    t-options="{'widget': 'duration', 'digital': False, 'unit': 'second', 'round': 'minute', 'format': 'narrow'}"/>
                                             </small>
 
                                         </div>
@@ -84,7 +84,7 @@
         <p t-if="track.track_start_remaining" class="alert alert-warning">
             Starting in
             <span t-esc="track.track_start_remaining"
-                t-options="{'widget': 'duration', 'digital': True, 'unit': 'minute', 'round': 'minute'}"/>
+                t-options="{'widget': 'duration', 'digital': True, 'unit': 'second', 'round': 'minute'}"/>
         </p>
         <div class="d-flew align-items-bottom">
             <h5 class="m-0" t-esc="track.name"/>
