@@ -148,25 +148,28 @@
     <article t-att-class="'h-100 card border-0 shadow-sm o_wesponsor_card %s' % ('o_wesponsor_card_unpublished' if not sponsor.is_published else '')"
         itemscope="itemscope" itemtype="http://schema.org/Event">
         <div class="h-100 row no-gutters">
-            <header class="overflow-hidden bg-secondary col-12 rounded-top">
-                <t t-set="sponsor_image" t-value="website.image_url(sponsor, 'image_512')"/>
+            <t t-set="sponsor_image_url" t-value="sponsor.website_image_url"/>
+            <header t-att-class="'overflow-hidden col-12 rounded-top %s' % ('bg-secondary' if not sponsor_image_url else 'bg-light')">
 
                 <small t-if="not sponsor.is_published" class="o_wesponsor_card_header_badge bg-danger">
                     <i class="fa fa-ban mr-2"/>Unpublished
                 </small>
 
-                <div t-if="sponsor.image_512" class="card-img-top"
-                    t-attf-style="padding-top: 50%; background-image: url(#{sponsor_image}); background-size: cover; background-position:center">
+                <div t-if="sponsor_image_url" class="card-img-top o_wesponsor_bg_image"
+                    t-attf-style="padding-top: 50%; background-image: url(#{sponsor_image_url});">
                     <t t-call="website_event_track_exhibitor.event_exhibitor_widget_connect">
-                        <t t-set="_classes" t-value="'position-absolute h3 mt-2 mr-2'"/>
+                        <t t-set="_classes" t-value="'h3'"/>
                     </t>
+                    <img class="position-absolute mr-2 mt-2"
+                        style="right: 0; top: 0; max-height: 20px;"
+                        t-att-src="website.image_url(sponsor.partner_id.country_id, 'image')"
+                        t-att-alt="sponsor.partner_id.country_id.name"/>
                 </div>
                 <div t-else="" class="o_wesponsor_gradient card-img-top position-relative"
                     style="padding-top: 50%">
                     <t t-call="website_event_track_exhibitor.event_exhibitor_widget_connect">
-                        <t t-set="_classes" t-value="'position-absolute h3 mt-2 mr-2'"/>
+                        <t t-set="_classes" t-value="'h3'"/>
                     </t>
-                    <i class="fa fa-graduation-cap fa-2x mr-3 mb-3 position-absolute text-white-75" style="right:0; bottom: 0"/>
                 </div>
             </header>
             <div class="col-12">
@@ -174,10 +177,9 @@
                     <!-- Title -->
                     <h5 class="card-title mt-0 mb-0 text-truncate d-flex align-items-top">
                         <span t-field="sponsor.partner_name" itemprop="name"/>
-                        <img class="ml-auto"
-                            style="max-height: 20px;"
-                            t-att-src="website.image_url(sponsor.partner_id.country_id, 'image')"
-                            t-att-alt="sponsor.partner_id.country_id.name"/>
+                        <span t-if="sponsor.is_in_opening_hours and sponsor.chat_room_id"
+                            class="ml-auto badge badge-danger">Live
+                        </span>
                     </h5>
                     <!-- Catchy sentence -->
                     <span class="text-muted" t-esc="sponsor.subtitle"/>

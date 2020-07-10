@@ -47,7 +47,7 @@ class ExhibitorController(WebsiteEventTrackController):
         if searches.get('search'):
             search_domain = expression.AND([
                 search_domain,
-                [('name', 'ilike', searches['search'])]
+                ['|', ('name', 'ilike', searches['search']), ('website_description', 'ilike', searches['search'])]
             ])
 
         # search on countries
@@ -106,7 +106,7 @@ class ExhibitorController(WebsiteEventTrackController):
     # ------------------------------------------------------------
 
     @http.route(['/event/<model("event.event"):event>/exhibitor/<model("event.sponsor"):sponsor>'], type='http', auth="public", website=True, sitemap=False)
-    def event_exhibitor(self, event, sponsor):
+    def event_exhibitor(self, event, sponsor, **options):
         if not event.can_access_from_current_website():
             raise NotFound()
 
@@ -116,12 +116,15 @@ class ExhibitorController(WebsiteEventTrackController):
             raise Forbidden()
         sponsor = sponsor.sudo()
 
+        if 'widescreen' not in options and sponsor.chat_room_id and sponsor.is_in_opening_hours:
+            options['widescreen'] = True
+
         return request.render(
             "website_event_track_exhibitor.event_exhibitor_main",
-            self._event_exhibitor_get_values(event, sponsor)
+            self._event_exhibitor_get_values(event, sponsor, **options)
         )
 
-    def _event_exhibitor_get_values(self, event, sponsor):
+    def _event_exhibitor_get_values(self, event, sponsor, **options):
         # search for exhibitor list
         search_domain_base = self._get_event_sponsors_base_domain(event)
         search_domain_base = expression.AND([
@@ -144,6 +147,9 @@ class ExhibitorController(WebsiteEventTrackController):
             'sponsor': sponsor,
             # sidebar
             'sponsors_other': sponsors_other,
+            # options
+            'option_widescreen': options.get('widescreen', False),
+            'option_can_edit': request.env.user.has_group('event.group_event_manager'),
         }
 
     # ------------------------------------------------------------
