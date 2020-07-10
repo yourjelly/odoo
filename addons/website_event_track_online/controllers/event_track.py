@@ -25,24 +25,35 @@ class WebsiteEventTrackOnlineController(WebsiteEventTrackController):
 
         return track_sudo
 
-    @http.route("/event/track/toggle_wishlist", type="json", auth="public", website=True)
-    def track_wishlist_toggle(self, track_id, set_wishlisted):
-        """ Wishlist a track for current visitor. Track visitor is created or updated
+    @http.route("/event/track/toggle_reminder", type="json", auth="public", website=True)
+    def track_reminder_toggle(self, track_id, set_reminder_on):
+        """ Set a reminder a track for current visitor. Track visitor is created or updated
         if it already exists. Exception made if un-wishlisting and no track_visitor
         record found (should not happen unless manually done).
 
-        :param boolean set_wishlisted: if True, set as a wishlist, otherwise un-whichlist
-          track;
+        :param boolean set_reminder_on:
+          If True, set as a wishlist, otherwise un-wishlist track;
+          If the track is a Key Track (wishlisted_by_default):
+            if set_reminder_on = False, blacklist the track_partner
+            otherwise, un-blacklist the track_partner
         """
         track_sudo = self._can_access_track(track_id)
 
         visitor_sudo = request.env['website.visitor']._get_visitor_from_request(force_create=True)
         visitor_sudo._update_visitor_last_visit()
 
-        event_track_partner = track_sudo._get_event_track_visitors(visitor_sudo, force_create=set_wishlisted)
-        if not event_track_partner or event_track_partner.is_wishlisted == set_wishlisted:  # ignore if new state = old state
-            return {'error': 'ignored'}
+        force_create = set_reminder_on or track_sudo.wishlisted_by_default
 
-        event_track_partner.is_wishlisted = set_wishlisted
+        event_track_partner = track_sudo._get_event_track_visitors(visitor_sudo, force_create=force_create)
 
-        return {'wishlisted': set_wishlisted}
+        if not track_sudo.wishlisted_by_default:
+            if not event_track_partner or event_track_partner.is_wishlisted == set_reminder_on:  # ignore if new state = old state
+                return {'error': 'ignored'}
+            event_track_partner.is_wishlisted = set_reminder_on
+        else:
+            if not event_track_partner or event_track_partner.is_blacklisted != set_reminder_on:  # ignore if new state = old state
+                return {'error': 'ignored'}
+            event_track_partner.is_blacklisted = not set_reminder_on
+
+        return {'reminderOn': set_reminder_on}
+

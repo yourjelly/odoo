@@ -18,7 +18,7 @@
         <h3 class="mt0 mb0 d-flex">
             <a t-attf-href="/event/#{ slug(event) }/track/#{ slug(track) }" class="text-secondary"><span t-field="track.name"> </span></a>
             <small t-if="not track.website_published" class="badge badge-danger">unpublished</small>
-            <t t-call="website_event_track_online.track_widget_wishlist_star"/>
+            <t t-call="website_event_track_online.track_widget_reminder"/>
         </h3>
     </xpath>
 </template>
@@ -31,7 +31,7 @@
         <div class="d-flex">
             <h1 t-field="track.name"/>
             <div class="ml-2 pt-1">
-                <t t-call="website_event_track_online.track_widget_wishlist_star"/>
+                <t t-call="website_event_track_online.track_widget_reminder"/>
             </div>
         </div>
     </xpath>

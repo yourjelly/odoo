@@ -20,7 +20,7 @@
         'views/assets.xml',
         'views/event_sponsor_views.xml',
         'views/event_templates.xml',
-        'views/event_track_templates_wishlist.xml',
+        'views/event_track_templates_reminder.xml',
         'views/event_track_templates.xml',
         'views/event_track_views.xml',
         'views/event_track_tag_views.xml',

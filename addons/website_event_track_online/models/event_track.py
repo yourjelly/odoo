@@ -22,7 +22,7 @@ class Track(models.Model):
     event_track_visitor_ids = fields.One2many(
         'event.track.visitor', 'track_id', string="Track Visitors",
         groups="event.group_event_user")
-    is_wishlisted = fields.Boolean('Is Wishlisted', compute='_compute_is_wishlisted')
+    is_reminder_on = fields.Boolean('Is Reminder On', compute='_compute_is_reminder_on')
     wishlist_visitor_ids = fields.Many2many(
         'website.visitor', string="Visitor Wishlist",
         compute="_compute_wishlist_track_visitors", compute_sudo=True,
@@ -66,20 +66,14 @@ class Track(models.Model):
 
     @api.depends('event_track_visitor_ids.visitor_id', 'event_track_visitor_ids.partner_id')
     @api.depends_context('uid')
-    def _compute_is_wishlisted(self):
+    def _compute_is_reminder_on(self):
         current_visitor = self.env['website.visitor']._get_visitor_from_request(force_create=False)
         if self.env.user._is_public() and not current_visitor:
-            self.is_wishlisted = False
-        elif self.env.user._is_public():
-            wishlisted = self.env['event.track.visitor'].sudo().search([
-                ('track_id', 'in', self.ids),
-                ('visitor_id', '=', current_visitor.id),
-                ('is_wishlisted', '=', True)
-            ]).track_id
-            for track in self:
-                track.is_wishlisted = track in wishlisted
+            self.is_reminder_on = False
         else:
-            if current_visitor:
+            if self.env.user._is_public():
+                domain = [('visitor_id', '=', current_visitor.id)]
+            elif current_visitor:
                 domain = [
                     '|',
                     ('partner_id', '=', self.env.user.partner_id.id),
@@ -87,14 +81,25 @@ class Track(models.Model):
                 ]
             else:
                 domain = [('partner_id', '=', self.env.user.partner_id.id)]
-            wishlisted = self.env['event.track.visitor'].sudo().search(
+
+            event_track_visitors = self.env['event.track.visitor'].sudo().search_read(
                 expression.AND([
                     domain,
-                    ['&', ('track_id', 'in', self.ids), ('is_wishlisted', '=', True)]
-                ])
-            ).track_id
+                    [('track_id', 'in', self.ids)]
+                ]), fields=['track_id', 'is_wishlisted', 'is_blacklisted']
+            )
+
+            wishlist_map = {
+                track_visitor['track_id'][0]: {
+                    'is_wishlisted': track_visitor['is_wishlisted'],
+                    'is_blacklisted': track_visitor['is_blacklisted']
+                } for track_visitor in event_track_visitors
+            }
             for track in self:
-                track.is_wishlisted = track in wishlisted
+                if wishlist_map.get(track.id):
+                    track.is_reminder_on = wishlist_map.get(track.id)['is_wishlisted'] or (track.wishlisted_by_default and not wishlist_map[track.id]['is_blacklisted'])
+                else:
+                    track.is_reminder_on = track.wishlisted_by_default
 
     @api.depends('event_track_visitor_ids.visitor_id')
     def _compute_wishlist_track_visitors(self):

@@ -179,7 +179,7 @@
                         <span t-else="" class="badge badge-success">Done</span>
                         <span class="ml-auto"
                             t-if="option_tracks_wishlist"
-                            t-call="website_event_track_online.track_widget_wishlist_star"/>
+                            t-call="website_event_track_online.track_widget_reminder"/>
                     </span>
                 </li>
             </t>
@@ -206,13 +206,17 @@
                     <div t-if="track.image" class="card-img-top"
                         t-attf-style="padding-top: 50%; background-image: url(#{track_image_url}); background-size: cover; background-position:center">
                         <span t-if="option_tracks_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
-                            <t t-call="website_event_track_online.track_widget_wishlist_star"/>
+                            <t t-call="website_event_track_online.track_widget_reminder">
+                                <t t-set="reminder_light" t-value="True"/>
+                            </t>
                         </span>
                     </div>
                     <div t-else="" class="o_wesession_gradient card-img-top position-relative"
                         style="padding-top: 50%;">
                         <span t-if="option_tracks_wishlist" class="position-absolute h3 mt-2" style="right: 0; top: 0;">
-                            <t t-call="website_event_track_online.track_widget_wishlist_star"/>
+                            <t t-call="website_event_track_online.track_widget_reminder">
+                                <t t-set="reminder_light" t-value="True"/>
+                            </t>
                         </span>
                         <i class="fa fa-glass fa-2x mx-2 mb-3 position-absolute text-white-75" style="right:0; bottom: 0;"/>
                     </div>
