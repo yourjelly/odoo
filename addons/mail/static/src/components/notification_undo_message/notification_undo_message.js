@@ -26,10 +26,15 @@ odoo.define('mail/static/src/components/notification_undo_message/notification_u
             this.destroy();
         }
 
+        get threadName() {
+            return this.props.threadName;
+        }
+
     }
 
     NotificationUndoMessage.props = {
         messageLocalId: String,
+        threadName: String,
     };
 
     NotificationUndoMessage.template = 'mail.NotificationUndoMessage';

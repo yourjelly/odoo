@@ -2,8 +2,8 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.NotificationUndoMessage" owl="1">
-        <div class="o_notifiaction_message">
-            Message sent <span>in <t t-esc=""/></span>. <a href="#" t-on-click.prevent="_onClickUndo">Undo</a>
+        <div class="o_notifiaction_message" t-att-class="{'showUpper': threadName}">
+            Message sent<t t-if="threadName"> in "<t t-esc="threadName"/>"</t> <a href="#" t-on-click.prevent="_onClickUndo">Undo</a>
             <span class="fa fa-close" t-on-click.prevent="_onClickClose"/>
         </div>
     </t>
