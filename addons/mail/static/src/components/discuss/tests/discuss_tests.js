@@ -814,13 +814,15 @@ QUnit.test('Discuss: undo sending message of mass_mailing true', async function 
         document.execCommand('insertText', false, "A message");
         document.querySelector(`.o_ComposerTextInput_textarea`)
             .dispatchEvent(new window.KeyboardEvent('input'));
-        document.querySelector(`.o_ComposerTextInput_textarea`)
-            .dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter' }))
+    });
+
+    await afterNextRender(() => {
+        document.querySelector(`.o_Composer_buttonSend`).click();
     });
     assert.verifySteps(['message_post']);
 
     assert.strictEqual(
-        document.querySelectorAll(`.o_notifiaction_message`).length,
+        document.querySelectorAll(`.o_notification_message`).length,
         1,
         "should have undo notification Message"
     );
@@ -830,7 +832,7 @@ QUnit.test('Discuss: undo sending message of mass_mailing true', async function 
         "should have one message in chatter"
     );
     await afterNextRender(() =>
-        document.querySelector(`.o_notification_undo`).click()
+        document.querySelector(`.o_notification_message a`).click()
     );
 
     assert.strictEqual(

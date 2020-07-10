@@ -378,7 +378,7 @@ QUnit.test('undo sending message', async function (assert) {
     );
 
     assert.strictEqual(
-        document.querySelectorAll(`.o_notifiaction_message`).length,
+        document.querySelectorAll(`.o_notification_message`).length,
         1,
         "should have undo notification Message"
     );
@@ -390,7 +390,7 @@ QUnit.test('undo sending message', async function (assert) {
     );
 
     await afterNextRender(() =>
-        document.querySelector(`.o_notification_undo`).click()
+        document.querySelector(`.o_notification_message a`).click()
     );
 
     assert.strictEqual(

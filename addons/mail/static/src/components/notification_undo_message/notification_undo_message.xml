@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.NotificationUndoMessage" owl="1">
-        <div class="oNotificationMessage" t-att-class="{'oDiscussNotifiactionMessage': messageInDiscuss}">
+        <div class="o_notification_message" t-att-class="{'o_discuss_notifiaction_message': messageInDiscuss}">
             Message sent<t t-if="threadName"> in "<t t-esc="threadName"/>"</t> <a href="#" t-on-click.prevent="_onClickUndo">Undo</a>
             <span class="fa fa-close" t-on-click.prevent="_onClickClose"/>
         </div>
