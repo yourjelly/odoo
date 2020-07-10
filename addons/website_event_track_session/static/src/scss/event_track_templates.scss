@@ -9,16 +9,16 @@
         opacity: 0.8;
     }
 
-    /*
-     * MAIN PAGE: LIST
-     */
-
-    // Bg layouting
+    // BG color
     &.o_wesession_index_bg {
         @if (color('body') == $o-portal-default-body-bg) {
             @extend .bg-200;
         }
     }
+
+    /*
+     * MAIN PAGE: LIST
+     */
 
     // Tracks list
     .o_wesession_list_item {
@@ -30,9 +30,11 @@
         .card-body {
             padding: 1rem;
         }
+
         .card-footer {
             padding: 0.75rem 1rem;
         }
+
         .o_wesession_track_card_header_badge {
             position: absolute;
             bottom: 0;
@@ -50,13 +52,26 @@
      */
 
     .o_wesession_track_container {
+        @include media-breakpoint-up(md) {
+            &:not(.container) {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+        }
 
         // Left panel: other exhibitors
         .o_wesession_track_aside {
-            border: 1px solid $border-color;
 
-            @include media-breakpoint-up(md) {
-                border-top-width: 0;
+            .o_wesession_track_aside_tracks {
+                border: 1px solid $border-color;
+
+                @include media-breakpoint-up(md) {
+                    border-top-width: 0;
+                }
+
+                .o_wesession_track_aside_collapse.collapsed {
+                    transform: rotate(90deg);
+                }
             }
 
             // Navigation: keel layout simple

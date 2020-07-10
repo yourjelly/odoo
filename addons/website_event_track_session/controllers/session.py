@@ -2,14 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from ast import literal_eval
-from datetime import datetime
-from pytz import utc
 from werkzeug.exceptions import Forbidden, NotFound
 
 from odoo import exceptions, http
 from odoo.addons.website_event_track.controllers.main import WebsiteEventTrackController
 from odoo.http import request
 from odoo.osv import expression
+from odoo.tools import is_html_empty
 
 
 class WebsiteEventSessionController(WebsiteEventTrackController):
@@ -98,6 +97,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             'search_tags': search_tags,
             'tag_categories': tag_categories,
             # environment
+            'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
         }
 
@@ -106,7 +106,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
     # ------------------------------------------------------------
 
     @http.route(['/event/<model("event.event"):event>/track/<model("event.track"):track>'], type='http', auth="public", website=True, sitemap=False)
-    def event_track(self, event, track):
+    def event_track(self, event, track, **options):
         if not event.can_access_from_current_website():
             raise NotFound()
 
@@ -116,13 +116,12 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             raise Forbidden()
         track = track.sudo()
 
-        # if not event.can_access_from_current_website():
-        #     raise NotFound()
+        return request.render(
+            "website_event_track_session.event_track_main",
+            self._event_track_get_values(event, track, **options)
+        )
 
-        # track = track.sudo().with_context(tz=event.date_tz or 'UTC')
-        # values = {'track': track, 'event': track.event_id, 'main_object': track}
-        # return request.render("website_event_track.track_view", values)
-
+    def _event_track_get_values(self, event, track, **options):
         # search for tracks list
         search_domain_base = self._get_event_tracks_base_domain(event)
         search_domain_base = expression.AND([
@@ -131,7 +130,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         ])
         tracks_other = request.env['event.track'].sudo().search(search_domain_base)
 
-        values = {
+        return {
             'hostname': request.httprequest.host.split(':')[0],
             # event information
             'event': event,
@@ -139,10 +138,12 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             'track': track,
             # sidebar
             'tracks_other': tracks_other,
+            # options
+            'option_widescreen': options.get('widescreen', '0') != '0',
             # environment
+            'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
         }
-        return request.render("website_event_track_session.event_track_main", values)
 
     # ------------------------------------------------------------
     # TOOLS
