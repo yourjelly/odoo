@@ -249,6 +249,18 @@ var SnippetEditor = Widget.extend({
         this.$editable = $editable;
         this.$snippetBlock = $(snippetElement);
         this.$snippetBlock.data('snippet-editor', this);
+        // The following class is a hack. There is a possibility of the
+        // `$snippetBlock` to be destroyed at some point.
+        // For example: The method `_refreshTarget` of an "editor option" migth
+        // erase $snippetBlock that are children on the current "editor option".
+        // In that case, the editor of the child will be erased with the method
+        // `updateCurrentSnippetEditorOverlay` because it's target will not be
+        // present on the DOM.
+        // But because an editor has been previously created, it might need to
+        // be cleaned with `cleanForSave`.  Therfore we flag the $snippetBlock
+        // with "o_snippet_editor_updated" to recreate editor in order to be
+        // able to call `cleanForSave`.
+        this.$snippetBlock.addClass("o_snippet_editor_updated");
         this.$body = $(document.body);
         this.templateOptions = templateOptions;
         this.isTargetParentEditable = false;
@@ -576,6 +588,7 @@ var SnippetEditor = Widget.extend({
         this.trigger_up('update_customize_elements', {
             customize$Elements: show ? this._customize$Elements : [],
         });
+        const proms = [];
         this._customize$Elements.forEach(($el, i) => {
             const editor = $el.data('editor');
             const options = _.chain(editor.snippetOptionInstances).values().sortBy('__order')
@@ -585,12 +598,13 @@ var SnippetEditor = Widget.extend({
             if (show) {
                 // All onFocus before all updateUI as the onFocus of an option
                 // might affect another option (like updating the $target)
-                options.forEach(option => option.onFocus());
-                options.forEach(option => option.updateUI());
+                options.forEach(option => proms.push(option.onFocus()));
+                options.forEach(option => proms.push(option.updateUI()));
             } else {
-                options.forEach(option => option.onBlur());
+                options.forEach(option => proms.push(option.onBlur()));
             }
         });
+        return Promise.all(proms);
     },
     /**
      * @param {boolean} [show]
@@ -1262,7 +1276,9 @@ var SnippetsMenu = Widget.extend({
      * - Remove the 'contentEditable' attributes
      */
     cleanForSave: async function () {
+        await this._disableAllSnippetEditors();
         this.trigger_up('ready_to_clean_for_save');
+        await this._destroyEditors();
     },
     /**
      * Load snippets.
@@ -1555,14 +1571,14 @@ var SnippetsMenu = Widget.extend({
             for (const currentSnippetEditor of this.snippetEditors) {
                 currentSnippetEditor.toggleOverlay(false, previewMode);
                 if (!previewMode && !snippetEditorHierarchy.includes(currentSnippetEditor)) {
-                    currentSnippetEditor.toggleOptions(false);
+                    await currentSnippetEditor.toggleOptions(false);
                 }
             }
 
             // ... then enable the right snippet editor
             if (snippetEditor) {
                 snippetEditor.toggleOverlay(true, previewMode);
-                snippetEditor.toggleOptions(true);
+                await snippetEditor.toggleOptions(true);
             }
 
             enabledSnippetEditorsHierarchy = snippetEditorHierarchy;
@@ -1596,6 +1612,9 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _destroyEditors: async function () {
+        for (const snippetBlock of $(".o_snippet_editor_updated").toArray()) {
+            await this._activateSnippet($(snippetBlock));
+        }
         const proms = _.map(this.snippetEditors, async function (snippetEditor) {
             await snippetEditor.cleanForSave();
             snippetEditor.destroy();

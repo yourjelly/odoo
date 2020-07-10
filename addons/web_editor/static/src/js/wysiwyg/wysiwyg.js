@@ -345,6 +345,7 @@ var Wysiwyg = Widget.extend({
         for (const node of nodes) {
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
             const renderedNode = (await renderer.render('dom/html', node))[0];
+            $(renderedNode).find('.o_snippet_editor_updated').addBack().removeClass('o_snippet_editor_updated');
 
             promises.push(this._rpc({
                 model: 'ir.ui.view',

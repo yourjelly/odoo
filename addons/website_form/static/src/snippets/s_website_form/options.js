@@ -776,20 +776,10 @@ snippetOptions.registry.WebsiteFieldEditor = FieldEditor.extend({
     /**
      * @override
      */
-    cleanForSave: function () {
+    cleanForSave: async function () {
         this.$target[0].querySelectorAll('#editable_select').forEach(el => el.remove());
-        const select = this._getSelect();
-        if (select && this.listTable) {
-            select.style.display = '';
-            select.innerHTML = '';
-            // Rebuild the select from the we-list
-            this.listTable.querySelectorAll('input').forEach(el => {
-                const option = document.createElement('option');
-                option.textContent = el.value;
-                option.value = this._isFieldCustom() ? el.value : el.name;
-                select.appendChild(option);
-            });
-        }
+        this._renderSelect(true);
+        await this._refreshTarget();
     },
     /**
      * @override
@@ -996,6 +986,7 @@ snippetOptions.registry.WebsiteFieldEditor = FieldEditor.extend({
         [...htmlField.childNodes].forEach(node => this.$target[0].appendChild(node));
         [...htmlField.attributes].forEach(el => this.$target[0].removeAttribute(el.nodeName));
         [...htmlField.attributes].forEach(el => this.$target[0].setAttribute(el.nodeName, el.nodeValue));
+        this.$target.addClass('o_snippet_editor_updated');
     },
 
     /**
@@ -1181,6 +1172,7 @@ snippetOptions.registry.WebsiteFieldEditor = FieldEditor.extend({
                 option.textContent = el.value;
                 selectWrap.appendChild(option);
             });
+            this._renderSelect();
         }
     },
     /**
@@ -1211,6 +1203,20 @@ snippetOptions.registry.WebsiteFieldEditor = FieldEditor.extend({
      */
     _getSelect: function () {
         return this.$target[0].querySelector('select');
+    },
+    _renderSelect: function (show = false) {
+        const select = this._getSelect();
+        if (select && this.listTable) {
+            if (show) select.style.display = '';
+            select.innerHTML = '';
+            // Rebuild the select from the we-list
+            this.listTable.querySelectorAll('input').forEach(el => {
+                const option = document.createElement('option');
+                option.textContent = el.value;
+                option.value = this._isFieldCustom() ? el.value : el.name;
+                select.appendChild(option);
+            });
+        }
     },
 
     //--------------------------------------------------------------------------
