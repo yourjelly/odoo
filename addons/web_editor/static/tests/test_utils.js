@@ -490,7 +490,6 @@ var textInput = function (target, char) {
 return {
     wysiwygData: wysiwygData,
     createWysiwyg: createWysiwyg,
-    testKeyboard: testKeyboard,
     select: select,
     keydown: keydown,
     patch: patch,
