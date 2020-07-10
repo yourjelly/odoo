@@ -1150,3 +1150,45 @@ class TestMrpOrder(TestMrpCommon):
 
         # Check Mo is created or not
         self.assertTrue(mo, "Mo is created")
+
+    def test_serial_product_change_qty(self):
+        final_product = self.env['product.product'].create({
+            'name': 'final product',
+            'tracking': 'serial',
+            'type': 'product',
+        })
+        component_1 = self.env['product.product'].create({
+            'name': 'material 1',
+            'type': 'product',
+        })
+        component_2 = self.env['product.product'].create({
+            'name': 'material 2',
+            'type': 'product',
+        })
+        bom = self.env['mrp.bom'].create({
+            'product_id': final_product.id,
+            'product_tmpl_id': final_product.product_tmpl_id.id,
+            'bom_line_ids': [(0, 0, {'product_id': component_1.id}), (0, 0, {'product_id': component_2.id})],
+        })
+
+        mo_form = Form(self.env['mrp.production'])
+        mo_form.product_id = final_product
+        mo_form.bom_id = bom
+        mo = mo_form.save()
+        mo.action_confirm()
+
+        mo_form = Form(mo)
+        # any quantity should always be set to one unit for serial products
+        mo_form.qty_producing = 2
+        mo = mo_form.save()
+
+        self.assertEqual(mo.move_raw_ids[0].move_line_ids.qty_done, 1, "One move line with qty_done should have been created for the component 1")
+        self.assertEqual(mo.move_raw_ids[1].move_line_ids.qty_done, 1, "One move line with qty_done should have been created for the component 2")
+
+        mo_form = Form(mo)
+        mo_form.qty_producing = 2
+        mo = mo_form.save()
+
+        # We should not use the sum since there should be only one move line but it seems Form does not works with (2, id) c
+        self.assertEqual(sum(mo.move_raw_ids[0].move_line_ids.mapped('qty_done')), 1, "No changes should occure when trying to change the qunatity produced of a serial product")
+        self.assertEqual(sum(mo.move_raw_ids[1].move_line_ids.mapped('qty_done')), 1, "No changes should occure when trying to change the qunatity produced of a serial product")
