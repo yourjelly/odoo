@@ -4,7 +4,7 @@
         <field name="is_published">True</field>
         <field name="website_short_description">Wood Corner brings honesty and seriousness to wood industry while helping customers deal with trees, flowers and fungi.</field>
         <field name="website_description" type="html">
-<div><section class="s_text_image pt32 pb32 o_colored_level" data-snippet="s_image_text" data-name="Image - Text">
+<div><section class="s_text_image o_colored_level" data-snippet="s_image_text" data-name="Image - Text">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 pt16 pb16 o_colored_level">
@@ -25,7 +25,7 @@
         <field name="is_published">True</field>
         <field name="website_short_description">Deco Addict brings honesty and seriousness to wood industry while helping customers deal with trees, flowers and fungi.</field>
         <field name="website_description" type="html">
-<div><section class="s_three_columns bg-200 pt32 pb32 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Columns">
+<div><section class="s_three_columns bg-200 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Columns">
     <div class="container">
         <div class="row d-flex align-items-stretch">
             <div class="col-lg-6 s_col_no_bgcolor pt16 pb16">
@@ -55,7 +55,7 @@
         <field name="is_published">True</field>
         <field name="website_short_description">Gemini Furniture brings honesty and seriousness to wood industry while helping customers deal with trees, flowers and fungi.</field>
         <field name="website_description" type="html">
-<div><section class="s_text_image pt32 pb32 o_colored_level" data-snippet="s_image_text" data-name="Image - Text">
+<div><section class="s_text_image o_colored_level" data-snippet="s_image_text" data-name="Image - Text">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 pt16 pb16 o_colored_level">
@@ -76,7 +76,7 @@
         <field name="is_published">True</field>
         <field name="website_short_description">Ready Mat brings honesty and seriousness to wood industry while helping customers deal with trees, flowers and fungi.</field>
         <field name="website_description" type="html">
-<div><section class="s_three_columns bg-200 pt32 pb32 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Columns">
+<div><section class="s_three_columns bg-200 o_colored_level" data-vcss="001" data-snippet="s_three_columns" data-name="Columns">
     <div class="container">
         <div class="row d-flex align-items-stretch">
             <div class="col-lg-6 s_col_no_bgcolor pt16 pb16">
@@ -106,7 +106,7 @@
         <field name="is_published">True</field>
         <field name="website_short_description">Azure Interior brings honesty and seriousness to wood industry while helping customers deal with trees, flowers and fungi.</field>
         <field name="website_description" type="html">
-<div><section class="s_text_image pt32 pb32 o_colored_level" data-snippet="s_image_text" data-name="Image - Text">
+<div><section class="s_text_image o_colored_level" data-snippet="s_image_text" data-name="Image - Text">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 pt16 pb16 o_colored_level">
