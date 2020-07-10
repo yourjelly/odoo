@@ -28,6 +28,8 @@ class Event(models.Model):
     hour_to = fields.Float('End hour', default=18.0)
     is_in_opening_hours = fields.Boolean(
         'Within opening hours', compute='_compute_is_is_opening_hours')
+    show_countdown = fields.Boolean("Show Countdown", default=False,
+                                    help="Display a countdown on introduction page when event is not started yet.")
 
     @api.depends('date_begin', 'date_end')
     def _compute_time_data(self):

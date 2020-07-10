@@ -28,4 +28,24 @@
     </xpath>
 </template>
 
+<template id="event_countdown">
+    <t t-call="website_event.layout">
+        <section class="s_title pt48 pb48" data-vcss="001" data-snippet="s_title">
+            <div class="container">
+                <h1 class="text-center">Starts in</h1>
+            </div>
+        </section>
+        <section class="s_countdown pt48 pb48"
+            data-display="dhms" data-end-action="redirect" data-size="275"
+            t-att-data-end-time="datetime.datetime.now().timestamp() + int(remaining_time)"
+            t-att-data-redirect-url="redirect_url"
+            data-layout="circle" data-layout-background="none"
+            data-progress-bar-style="surrounded" data-progress-bar-weight="thin"
+            data-text-color="alpha" data-layout-background-color="400" data-progress-bar-color="alpha">
+            <div class="container">
+                <div class="s_countdown_canvas_wrapper text-center"/>
+            </div>
+        </section>
+    </t>
+</template>
 </odoo>
