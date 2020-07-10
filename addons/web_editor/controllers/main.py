@@ -504,11 +504,13 @@ class Web_Editor(http.Controller):
             raise werkzeug.exceptions.NotFound()
 
         svg = open(shape_path, 'r').read()
-        colors = (color for key, color in kwargs.items() if re.match('^c\d$', key))
-        replaced_colors = ['#445869', '#2DCBB2', '#DBDEF9']
-        for to_replace, color in zip(replaced_colors, colors):
-            #'#%s' % (str(i)*6)
-            svg = svg.replace(to_replace, color)
+        colors = ((color, match.group(1)) for key, color in kwargs.items() for match in [re.match('^c(\d)$', key)] if match)
+        #colors from the default color palette
+        replaced_colors = ['#3AADAA', '#7C6576', '#F6F6F6', '#FFFFFF', '#383E45']
+        for color, palette_number in colors:
+            # TODO: non-sequential replace to prevent replacing a previous color, case insensitive replace
+            to_replace = replaced_colors[int(palette_number) - 1]
+            svg = svg.replace(to_replace, tools.html_escape(color))
 
         # Allows better size-control from css.
         svg = svg.replace('<svg', '<svg preserveAspectRatio="none"')

@@ -3246,10 +3246,10 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
             if (previewMode === true) {
                 this.prevShape = this.$target[0].dataset.oeShapeData;
             }
-            const {colorNumber} = params;
+            const {colorName} = params;
             const {colors: previousColors} = this._getShapeData();
-            const newColor = widgetValue || this._getDefaultColors()[colorNumber];
-            const newColors = Object.assign(previousColors, {[colorNumber]: newColor});
+            const newColor = widgetValue || this._getDefaultColors()[colorName];
+            const newColors = Object.assign(previousColors, {[colorName]: newColor});
             this._markShape({colors: newColors});
         }
         this._setBackground();
@@ -3271,7 +3271,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
                 if (!shape) {
                     return '';
                 }
-                return normalizeColor(colors[params.colorNumber]);
+                return normalizeColor(colors[params.colorName]);
         }
         return this._super(...arguments);
     },
@@ -3279,8 +3279,8 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @override
      */
     _renderCustomXML(uiFragment) {
-        const colorPickers = this._getDefaultColors().map((_, i) => {
-            return $(`<we-colorpicker data-color="true" data-color-number="${i}">`)[0];
+        const colorPickers = Object.entries(this._getDefaultColors()).map(([colorName]) => {
+            return $(`<we-colorpicker data-color="true" data-color-name="${colorName}">`)[0];
         });
         uiFragment.querySelector('we-row[string="Shape"]').prepend(...colorPickers);
         const btnContentTemplate = uiFragment.querySelector('.o_we_shape_btn_content');
@@ -3332,8 +3332,11 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         if (!shape) {
             return '';
         }
-        const encodedColors = colors.map(col => encodeURIComponent(normalizeColor(col)));
-        const queryString = encodedColors.map((col, i) => `c${i}=${col}`).join('&');
+        const queryString = Object.entries(colors)
+            .map(([colorName, colorValue]) => {
+                const encodedCol = encodeURIComponent(normalizeColor(colorValue));
+                return `${colorName}=${encodedCol}`;
+            }).join('&');
         return `/web_editor/shape/${shape}.svg?${queryString}`;
     },
     /**
@@ -3345,8 +3348,11 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
     _markShape(newData) {
         const defaultColors = this._getDefaultColors();
         const shapeData = Object.assign(this._getShapeData(), newData);
-        if (shapeData.colors.every((color, i) => color === defaultColors[i])) {
-            shapeData.colors = undefined;
+        const areColorsDefault = Object.entries(shapeData.colors).every(([colorName, colorValue]) => {
+            return colorValue === defaultColors[colorName];
+        });
+        if (areColorsDefault) {
+            delete shapeData.colors;
         }
         this.$target[0].dataset.oeShapeData = JSON.stringify(shapeData);
     },
@@ -3379,10 +3385,10 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         const shapeSrc = shapeContainer && getBgImageSrc(shapeContainer);
         $shapeContainer.remove();
         if (!shapeSrc) {
-            return [];
+            return {};
         }
         const url = new URL(shapeSrc, window.location.origin);
-        return [...url.searchParams.values()];
+        return Object.fromEntries(url.searchParams.entries());
     },
 });
 

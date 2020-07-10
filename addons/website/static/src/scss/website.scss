@@ -1030,9 +1030,9 @@ $ribbon-padding: 100px;
         @each $shape, $style in $shapes {
             $url-params: '';
             $colors: map-get($style, colors);
-            @for $i from 1 through length($colors) {
+            @each $i in $colors {
                 // %23 is the url-encoded form of '#' which doesn't work as is in urls.
-                $color: str-replace("#{map-get($o-color-palette, nth($colors, $i))}", '#', '%23');
+                $color: str-replace("#{map-get($o-color-palette, "o-color-#{$i}")}", '#', '%23');
                 $url-params: '#{$url-params}&c#{$i}=#{$color}';
             }
 
