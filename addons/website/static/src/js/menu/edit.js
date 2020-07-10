@@ -52,9 +52,13 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     start: async function () {
         var def = this._super.apply(this, arguments);
 
+        // Ugly hack because there is dependency in website with some assets in
+        // wysiwyg. This must be cleaned.
+        const wysiwygLibPromise = ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg']});
+
         // If we auto start the editor, do not show a welcome message
         if (this._editorAutoStart) {
-            return Promise.all([def, this._startEditMode()]);
+            return Promise.all([def, wysiwygLibPromise, this._startEditMode()]);
         }
 
         // Check that the page is empty
