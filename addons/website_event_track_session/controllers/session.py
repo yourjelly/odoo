@@ -130,8 +130,10 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
         ])
         tracks_other = request.env['event.track'].sudo().search(search_domain_base)
 
+        option_widescreen = options.get('widescreen', False)
+        option_widescreen = bool(option_widescreen) if option_widescreen != '0' else False
+
         return {
-            'hostname': request.httprequest.host.split(':')[0],
             # event information
             'event': event,
             'main_object': track,
@@ -139,7 +141,7 @@ class WebsiteEventSessionController(WebsiteEventTrackController):
             # sidebar
             'tracks_other': tracks_other,
             # options
-            'option_widescreen': options.get('widescreen', '0') != '0',
+            'option_widescreen': option_widescreen,
             # environment
             'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
