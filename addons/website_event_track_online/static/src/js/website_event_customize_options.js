@@ -10,12 +10,10 @@ EventSpecificOptions.include({
         ]),
 
     events: _.extend({}, EventSpecificOptions.prototype.events, {
-        'change #display-location': '_onDisplayLocationChange',
         'change #display-agenda': '_onDisplayAgendaChange',
     }),
 
     start: function () {
-        this.$displayLocation = this.$('#display-location');
         this.$displayAgenda = this.$('#display-agenda');
         this._super.apply(this, arguments);
     },
@@ -40,15 +38,12 @@ EventSpecificOptions.include({
 
     _getCheckboxFields: function () {
         var fields = this._super();
-        fields = _.union(fields, ['menu_location', 'menu_agenda']);
+        fields = _.union(fields, ['menu_agenda']);
         return fields;
     },
 
     _getCheckboxFieldMatch: function (checkboxField) {
-        if (checkboxField === 'menu_location') {
-            return this.$displayLocation;
-        }
-        else if (checkboxField === 'menu_agenda') {
+        if (checkboxField === 'menu_agenda') {
             return this.$displayAgenda;
         }
         return this._super(checkboxField);
@@ -56,25 +51,10 @@ EventSpecificOptions.include({
 
     _initCheckboxCallback: function (rpcData) {
         this._super(rpcData);
-        if (rpcData[0]['menu_location']) {
-            var submenuInput = this._getCheckboxFieldMatch('menu_location');
-            submenuInput.attr('checked', 'checked');
-        }
         if (rpcData[0]['menu_agenda']) {
             var submenuInput = this._getCheckboxFieldMatch('menu_agenda');
             submenuInput.attr('checked', 'checked');
         }
-    },
-
-    _toggleDisplayLocation: function (val) {
-        var self = this;
-        this._rpc({
-            model: this.modelName,
-            method: 'toggle_menu_location',
-            args: [[this.eventId], val],
-        }).then(function () {
-            self._reloadEventPage();
-        });
     },
 
     _toggleDisplayAgenda: function (val) {
