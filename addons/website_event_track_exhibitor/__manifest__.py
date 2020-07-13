@@ -12,6 +12,7 @@
     'description': "",
     'depends': [
         'website_event_track_online',
+        'website_jitsi',
     ],
     'data': [
         'security/security.xml',
