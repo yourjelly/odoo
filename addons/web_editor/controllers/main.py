@@ -503,14 +503,24 @@ class Web_Editor(http.Controller):
         if not shape_path:
             raise werkzeug.exceptions.NotFound()
 
+        user_colors = []
+        for key, color in kwargs.items():
+            match = re.match('^c([12345])$', key)
+            if match:
+                user_colors.append([tools.html_escape(color), match.group(1)])
+
+        default_palette = {
+            '1': '#3AADAA',
+            '2': '#7C6576',
+            '3': '#F6F6F6',
+            '4': '#FFFFFF',
+            '5': '#383E45',
+        }
+        color_mapping = {default_palette[palette_number]: color for color, palette_number in user_colors}
+        # create a case-insensitive regex to match all the colors to replace, eg: '(?i)(#3AADAA)|(#7C6576)'
+        regex = '(?i)%s' % '|'.join('(%s)' % color for color in color_mapping.keys())
         svg = open(shape_path, 'r').read()
-        colors = ((color, match.group(1)) for key, color in kwargs.items() for match in [re.match('^c(\d)$', key)] if match)
-        #colors from the default color palette
-        replaced_colors = ['#3AADAA', '#7C6576', '#F6F6F6', '#FFFFFF', '#383E45']
-        for color, palette_number in colors:
-            # TODO: non-sequential replace to prevent replacing a previous color, case insensitive replace
-            to_replace = replaced_colors[int(palette_number) - 1]
-            svg = svg.replace(to_replace, tools.html_escape(color))
+        svg = re.sub(regex, lambda match: color_mapping[match.group().upper()], svg)
 
         # Allows better size-control from css.
         svg = svg.replace('<svg', '<svg preserveAspectRatio="none"')
