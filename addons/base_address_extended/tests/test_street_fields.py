@@ -30,25 +30,23 @@ class TestStreetFields(SavepointCase):
         us_id = self.env.ref('base.us').id
         mx_id = self.env.ref('base.mx').id
         ch_id = self.env.ref('base.ch').id
-        us_state = self.env.ref('base.state_us_1').id
-        mx_state = self.env.ref('base.state_mx_ags').id
         input_values = [
-            {'country_id': us_id, 'street': '40/2b Chaussee de Namur', 'state_id': us_state, 'zip': '1000'},
-            {'country_id': us_id, 'street': '40 Chaussee de Namur', 'state_id': us_state, 'zip': '1000'},
-            {'country_id': us_id, 'street': 'Chaussee de Namur', 'state_id': us_state, 'zip': '1000'},
-            {'country_id': mx_id, 'street': 'Av. Miguel Hidalgo y Costilla 601', 'state_id': mx_state, 'zip': '1000'},
-            {'country_id': ch_id, 'street': 'header Chaussee de Namur, 40 - 2b trailer', 'zip': '1000'},
-            {'country_id': ch_id, 'street': 'header Chaussee de Namur, 40 trailer', 'zip': '1000'},
-            {'country_id': ch_id, 'street': 'header Chaussee de Namur trailer', 'zip': '1000'},
+            {'country_id': us_id, 'street': '40/2b Chaussee de Namur'},
+            {'country_id': us_id, 'street': '40 Chaussee de Namur'},
+            {'country_id': us_id, 'street': 'Chaussee de Namur'},
+            {'country_id': mx_id, 'street': 'Av. Miguel Hidalgo y Costilla 601'},
+            {'country_id': ch_id, 'street': 'header Chaussee de Namur, 40 - 2b trailer'},
+            {'country_id': ch_id, 'street': 'header Chaussee de Namur, 40 trailer'},
+            {'country_id': ch_id, 'street': 'header Chaussee de Namur trailer'},
         ]
         expected = [
-            {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': '2b', 'zip': '1000'},
-            {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': False, 'zip': '1000'},
+            {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': '2b'},
+            {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': False},
             {'street_name': 'de Namur', 'street_number': 'Chaussee', 'street_number2': False},
-            {'street_name': 'Av.', 'street_number': 'Miguel Hidalgo y Costilla 601', 'street_number2': False, 'zip': '1000'},
-            {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': '2b', 'zip': '1000'},
-            {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': False, 'zip': '1000'},
-            {'street_name': 'Chaussee de Namur', 'street_number': False, 'street_number2': False, 'zip': '1000'}
+            {'street_name': 'Av.', 'street_number': 'Miguel Hidalgo y Costilla 601', 'street_number2': False},
+            {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': '2b'},
+            {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': False},
+            {'street_name': 'Chaussee de Namur', 'street_number': False, 'street_number2': False}
         ]
 
         # test street -> street values (compute)
@@ -72,12 +70,10 @@ class TestStreetFields(SavepointCase):
     def test_company_write(self):
         """ Will test the compute and inverse methods of street fields when updating partner records. """
         be_id = self.env.ref('base.be').id
-
         company = self.env['res.company'].create({
             'name': 'Test',
             'country_id': be_id,
-            'street': 'Chaussee de Namur, 40/2b',
-            'zip': '2000',
+            'street': 'Chaussee de Namur, 40/2b'
         })
         self.assertStreetVals(company, {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': '2b'})
 
@@ -86,7 +82,7 @@ class TestStreetFields(SavepointCase):
             {'street': 'Chaussee de Namur'},
             {'street_name': 'Chee de Namur', 'street_number': '40'},
             {'street_number2': '4'},
-            {'zip': '1000', 'state_id': self.env.ref('base.state_us_1').id, 'country_id': self.env.ref('base.us').id},
+            {'country_id': self.env.ref('base.us').id},
         ]
         expected = [
             {'street_name': 'Chaussee de Namur', 'street_number': '43', 'street_number2': False},
@@ -107,17 +103,14 @@ class TestStreetFields(SavepointCase):
         us_id = self.env.ref('base.us').id
         mx_id = self.env.ref('base.mx').id
         ch_id = self.env.ref('base.ch').id
-        us_state = self.env.ref('base.state_us_1').id
-        mx_state = self.env.ref('base.state_mx_ags').id
-
         input_values = [
-            {'country_id': us_id, 'street': '40/2b Chaussee de Namur', 'state_id': us_state, 'zip': '1000'},
-            {'country_id': us_id, 'street': '40 Chaussee de Namur', 'state_id': us_state, 'zip': '1000'},
-            {'country_id': us_id, 'street': 'Chaussee de Namur', 'state_id': us_state, 'zip': '1000'},
-            {'country_id': mx_id, 'street': 'Av. Miguel Hidalgo y Costilla 601', 'state_id': mx_state, 'zip': '1000'},
-            {'country_id': ch_id, 'street': 'header Chaussee de Namur, 40 - 2b trailer', 'zip': '1000'},
-            {'country_id': ch_id, 'street': 'header Chaussee de Namur, 40 trailer', 'zip': '1000'},
-            {'country_id': ch_id, 'street': 'header Chaussee de Namur trailer', 'zip': '1000'},
+            {'country_id': us_id, 'street': '40/2b Chaussee de Namur'},
+            {'country_id': us_id, 'street': '40 Chaussee de Namur'},
+            {'country_id': us_id, 'street': 'Chaussee de Namur'},
+            {'country_id': mx_id, 'street': 'Av. Miguel Hidalgo y Costilla 601'},
+            {'country_id': ch_id, 'street': 'header Chaussee de Namur, 40 - 2b trailer'},
+            {'country_id': ch_id, 'street': 'header Chaussee de Namur, 40 trailer'},
+            {'country_id': ch_id, 'street': 'header Chaussee de Namur trailer'},
         ]
         expected = [
             {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': '2b'},
@@ -150,8 +143,7 @@ class TestStreetFields(SavepointCase):
         partner = self.env['res.partner'].create({
             'name': 'Test',
             'country_id': be_id,
-            'street': 'Chaussee de Namur, 40/2b',
-            'zip': '1200',
+            'street': 'Chaussee de Namur, 40/2b'
         })
         self.assertStreetVals(partner, {'street_name': 'Chaussee de Namur', 'street_number': '40', 'street_number2': '2b'})
 
@@ -160,7 +152,7 @@ class TestStreetFields(SavepointCase):
             {'street': 'Chaussee de Namur'},
             {'street_name': 'Chee de Namur', 'street_number': '40'},
             {'street_number2': '4'},
-            {'zip': '1000', 'state_id': self.env.ref('base.state_us_1').id, 'country_id': self.env.ref('base.us').id},
+            {'country_id': self.env.ref('base.us').id},
         ]
         expected = [
             {'street_name': 'Chaussee de Namur', 'street_number': '43', 'street_number2': False},
