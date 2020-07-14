@@ -1,17 +1,21 @@
 odoo.define('hr_attendance.widget', function (require) {
-    "use strict";
+"use strict";
+    
+// var basic_fields = require('web.basic_fields');
+// var field_registry = require('web.field_registry');
 
-    var basic_fields = require('web.basic_fields');
-    var field_registry = require('web.field_registry');
+const basic_fields = require('web.basic_fields_owl');
+const field_registry = require('web.field_registry_owl');
 
-    var RelativeTime = basic_fields.FieldDateTime.extend({
-        _formatValue: function (val) {
+class RelativeTime extends owl.Component{
+
+        _formatValue(val) {
             if (!(val && val._isAMomentObject)) {
                 return;
             }
             return val.fromNow(true);
-        },
-    });
+        }
+    }
 
     field_registry.add('relative_time', RelativeTime);
 

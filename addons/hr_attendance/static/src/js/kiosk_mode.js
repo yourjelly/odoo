@@ -6,8 +6,13 @@ var ajax = require('web.ajax');
 var core = require('web.core');
 var Session = require('web.session');
 
-var QWeb = core.qweb;
+// const AbstractAction = require('web.AbstractAction');
+// const ajax = require('web.ajax');
+// const core = require('web.core');
+// const Session = require('web.session');
 
+var QWeb = core.qweb;
+// const QWeb = core.qweb;
 
 var KioskMode = AbstractAction.extend({
     events: {
@@ -17,6 +22,11 @@ var KioskMode = AbstractAction.extend({
             });
         },
     },
+
+// class KioskMode extends owl.Component{
+//     constructor(...args){
+//         super();
+//     }
 
     start: function () {
         var self = this;
@@ -30,7 +40,7 @@ var KioskMode = AbstractAction.extend({
             .then(function (companies){
                 self.company_name = companies[0].name;
                 self.company_image_url = self.session.url('/web/image', {model: 'res.company', id: self.session.company_id, field: 'logo',});
-                self.$el.html(QWeb.render("HrAttendanceKioskMode", {widget: self}));
+                self.el.innerHTML = QWeb.render("HrAttendanceKioskMode", {widget: self});
                 self.start_clock();
             });
         // Make a RPC call every day to keep the session alive
@@ -38,6 +48,18 @@ var KioskMode = AbstractAction.extend({
         return Promise.all([def, this._super.apply(this, arguments)]);
     },
 
+
+    // willStart()
+    // {
+
+    //     core.bus.on('barcode_scanned', this, this._onBarcodeScanned);
+    //     self.session = Session;
+    //     const def = this.env.services.rpc({
+    //         model:  'res.company',
+
+    //     })
+    // }
+    
     _onBarcodeScanned: function(barcode) {
         var self = this;
         core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
@@ -59,7 +81,8 @@ var KioskMode = AbstractAction.extend({
     },
 
     start_clock: function() {
-        this.clock_start = setInterval(function() {this.$(".o_hr_attendance_clock").text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'}));}, 500);
+        this.clock_start = setInterval((...args) => {
+this.el.querySelector(".o_hr_attendance_clock").innerText = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'});}, 500);
         // First clock refresh before interval to avoid delay
         this.$(".o_hr_attendance_clock").show().text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'}));
     },

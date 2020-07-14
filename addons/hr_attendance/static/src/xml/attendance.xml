@@ -54,13 +54,13 @@
         </div>
     </t>
 
-    <t t-name="HrAttendanceKioskConfirm">
+    <t t-name="HrAttendanceKioskConfirm" owl="1">
         <div class="o_hr_attendance_kiosk_mode_container o_home_menu_background">
             <span class="o_hr_attendance_kiosk_backdrop"/>
             <div class="o_hr_attendance_clock text-center"/>
             <div class="o_hr_attendance_kiosk_mode">
                 <t t-set="checked_in" t-value="widget.employee_state=='checked_in'"/>
-                <div class="o_hr_attendance_back_button">
+                <div class="o_hr_attendance_back_button" t-on-click="_back_button">
                     <span class="btn btn-secondary btn-lg d-block d-md-none"><i class="fa fa-chevron-left mr8"/> Go back</span>
                     <span class="btn btn-secondary d-none d-md-inline-block"><i class="fa fa-chevron-left" role="img" aria-label="Go back" title="Go back"/></span>
                 </div>
@@ -102,7 +102,7 @@
         </div>
     </t>
 
-    <t t-name="HrAttendanceGreetingMessage">
+    <t t-name="HrAttendanceGreetingMessage" owl="1">
         <div class="o_hr_attendance_kiosk_mode_container o_home_menu_background">
             <span class="o_hr_attendance_kiosk_backdrop"/>
             <div class="o_hr_attendance_clock text-center"/>

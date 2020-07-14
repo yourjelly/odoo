@@ -1,20 +1,29 @@
 odoo.define('hr_attendance.greeting_message', function (require) {
 "use strict";
 
-var AbstractAction = require('web.AbstractAction');
-var core = require('web.core');
+// var AbstractAction = require('web.AbstractAction');
+// var core = require('web.core');
 
-var _t = core._t;
+const AbstractAction = require('web.AbstractAction');
+const core = require('web.core');
 
+// var _t = core._t;
+const _t = core._t;
 
-var GreetingMessage = AbstractAction.extend({
-    contentTemplate: 'HrAttendanceGreetingMessage',
+// var GreetingMessage = AbstractAction.extend({
+   class GreetingMessage extends owl.Component{
+    constructor(...args){
+    // debugger;
+        super();
+    }
+    // contentTemplate = 'HrAttendanceGreetingMessage';
 
-    events: {
-        "click .o_hr_attendance_button_dismiss": function() { this.do_action(this.next_action, {clear_breadcrumbs: true}); },
-    },
+    // events {
+    //     "click .o_hr_attendance_button_dismiss": function() { this.do_action(this.next_action, {clear_breadcrumbs: true}); },
+    // }
 
-    init: function(parent, action) {
+    init (parent, action) {
+        // console.log("hr_attendance.greeting_message");
         var self = this;
         this._super.apply(this, arguments);
         this.activeBarcode = true;
@@ -58,9 +67,9 @@ var GreetingMessage = AbstractAction.extend({
 
         this.employee_name = action.employee_name;
         this.attendanceBarcode = action.barcode;
-    },
+    }
 
-    start: function() {
+    start(){
         if (this.attendance) {
             this.attendance.check_out ? this.farewell_message() : this.welcome_message();
         }
@@ -68,81 +77,82 @@ var GreetingMessage = AbstractAction.extend({
             core.bus.on('barcode_scanned', this, this._onBarcodeScanned);
         }
         return this._super.apply(this, arguments);
-    },
+    }
 
-    welcome_message: function() {
+    welcome_message() {
         var self = this;
         var now = this.attendance.check_in.clone();
         this.return_to_main_menu = setTimeout( function() { self.do_action(self.next_action, {clear_breadcrumbs: true}); }, 5000);
 
         if (now.hours() < 5) {
-            this.$('.o_hr_attendance_message_message').append(_t("Good night"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText == _t("Good night");
         } else if (now.hours() < 12) {
             if (now.hours() < 8 && Math.random() < 0.3) {
                 if (Math.random() < 0.75) {
-                    this.$('.o_hr_attendance_message_message').append(_t("The early bird catches the worm"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText == _t("The early bird catches the worm");
                 } else {
-                    this.$('.o_hr_attendance_message_message').append(_t("First come, first served"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText ==_t("First come, first served");
                 }
             } else {
-                this.$('.o_hr_attendance_message_message').append(_t("Good morning"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText == _t("Good morning");
             }
         } else if (now.hours() < 17){
-            this.$('.o_hr_attendance_message_message').append(_t("Good afternoon"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText ==_t("Good afternoon");
         } else if (now.hours() < 23){
-            this.$('.o_hr_attendance_message_message').append(_t("Good evening"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText == _t("Good evening");
         } else {
-            this.$('.o_hr_attendance_message_message').append(_t("Good night"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText == _t("Good night");
         }
         if(this.previous_attendance_change_date){
             var last_check_out_date = this.previous_attendance_change_date.clone();
             if(now - last_check_out_date > 24*7*60*60*1000){
-                this.$('.o_hr_attendance_random_message').html(_t("Glad to have you back, it's been a while!"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText == _t("Glad to have you back, it's been a while!");
             } else {
                 if(Math.random() < 0.02){
-                    this.$('.o_hr_attendance_random_message').html(_t("If a job is worth doing, it is worth doing well!"));
+            this.el.querySelector(".o_hr_attendance_message_message").innerText == _t("If a job is worth doing, it is worth doing well!");
                 }
             }
         }
-    },
+    }
 
-    farewell_message: function() {
+    farewell_message() {
         var self = this;
         var now = this.attendance.check_out.clone();
         this.return_to_main_menu = setTimeout( function() { self.do_action(self.next_action, {clear_breadcrumbs: true}); }, 5000);
-
         if(this.previous_attendance_change_date){
             var last_check_in_date = this.previous_attendance_change_date.clone();
             if(now - last_check_in_date > 1000*60*60*12){
-                this.$('.o_hr_attendance_warning_message').show().append(_t("<b>Warning! Last check in was over 12 hours ago.</b><br/>If this isn't right, please contact Human Resource staff"));
+                this.el.querySelector('.o_hr_attendance_warning_message').style.display = "block";
+                this.el.querySelector('.o_hr_attendance_warning_message').innerHTML = _t("<b>Warning! Last check in was over 12 hours ago.</b><br/>If this isn't right, please contact Human Resource staff");
                 clearTimeout(this.return_to_main_menu);
                 this.activeBarcode = false;
             } else if(now - last_check_in_date > 1000*60*60*8){
-                this.$('.o_hr_attendance_random_message').html(_t("Another good day's work! See you soon!"));
+                this.el.querySelector('.o_hr_attendance_warning_message').style.display = "block";
+                this.el.querySelector('.o_hr_attendance_random_message').innerHTML = _t("Another good day's work! See you soon!");
             }
         }
 
         if (now.hours() < 12) {
-            this.$('.o_hr_attendance_message_message').append(_t("Have a good day!"));
+            this.el.querySelector('.o_hr_attendance_message_message').innerText == _t("Have a good day!");
         } else if (now.hours() < 14) {
-            this.$('.o_hr_attendance_message_message').append(_t("Have a nice lunch!"));
+            this.el.querySelector('.o_hr_attendance_message_message').innerText == _t("Have a nice lunch!");
             if (Math.random() < 0.05) {
-                this.$('.o_hr_attendance_random_message').html(_t("Eat breakfast as a king, lunch as a merchant and supper as a beggar"));
+                this.el.querySelector('.o_hr_attendance_random_message').innerHTML = _t("Eat breakfast as a king, lunch as a merchant and supper as a beggar");
             } else if (Math.random() < 0.06) {
-                this.$('.o_hr_attendance_random_message').html(_t("An apple a day keeps the doctor away"));
+                this.el.querySelector('.o_hr_attendance_random_message').innerHTML = _t("An apple a day keeps the doctor away");
             }
         } else if (now.hours() < 17) {
-            this.$('.o_hr_attendance_message_message').append(_t("Have a good afternoon"));
+            this.el.querySelector('.o_hr_attendance_message_message').innerText == _t("Have a good afternoon");
         } else {
             if (now.hours() < 18 && Math.random() < 0.2) {
-                this.$('.o_hr_attendance_message_message').append(_t("Early to bed and early to rise, makes a man healthy, wealthy and wise"));
+                this.el.querySelector('.o_hr_attendance_message_message').innerText == _t("Early to bed and early to rise, makes a man healthy, wealthy and wise");
             } else {
-                this.$('.o_hr_attendance_message_message').append(_t("Have a good evening"));
+                this.el.querySelector('.o_hr_attendance_message_message').innerText == _t("Have a good evening");
             }
         }
-    },
+    }
 
-    _onBarcodeScanned: function(barcode) {
+    _onBarcodeScanned(barcode) {
         var self = this;
         if (this.attendanceBarcode !== barcode){
             if (this.return_to_main_menu) {  // in case of multiple scans in the greeting message view, delete the timer, a new one will be created.
@@ -165,16 +175,18 @@ var GreetingMessage = AbstractAction.extend({
                     setTimeout( function() { self.do_action(self.next_action, {clear_breadcrumbs: true}); }, 5000);
                 });
         }
-    },
+    }
 
-    destroy: function () {
+    destroy() {
         core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
         clearTimeout(this.return_to_main_menu);
         this._super.apply(this, arguments);
-    },
-});
+    }
+}
 
-core.action_registry.add('hr_attendance_greeting_message', GreetingMessage);
+GreetingMessage.template = "HrAttendanceGreetingMessage";
+const greeting_message = new GreetingMessage();
+core.action_registry.add('hr_attendance_greeting_message', greeting_message);
 
 return GreetingMessage;
 

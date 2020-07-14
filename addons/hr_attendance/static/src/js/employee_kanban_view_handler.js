@@ -1,4 +1,3 @@
-
 odoo.define('hr_attendance.employee_kanban_view_handler', function(require) {
 "use strict";
 
@@ -14,7 +13,7 @@ KanbanRecord.include({
      * @private
      */
     _openRecord: function () {
-        if (this.modelName === 'hr.employee' && this.$el.parents('.o_hr_employee_attendance_kanban').length) {
+        if (this.modelName === 'hr.employee' && this.el.closest(".o_hr_employee_attendance_kanban")) {
                                             // needed to diffentiate : check in/out kanban view of employees <-> standard employee kanban view
             var action = {
                 type: 'ir.actions.client',
