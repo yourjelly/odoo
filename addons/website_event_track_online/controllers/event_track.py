@@ -55,5 +55,9 @@ class WebsiteEventTrackOnlineController(WebsiteEventTrackController):
                 return {'error': 'ignored'}
             event_track_partner.is_blacklisted = not set_reminder_on
 
-        return {'reminderOn': set_reminder_on}
+        result = {'reminderOn': set_reminder_on}
+        if request.httprequest.cookies.get('visitor_uuid', '') != visitor_sudo.access_token:
+            result['visitor_uuid'] = visitor_sudo.access_token
+
+        return result
 
