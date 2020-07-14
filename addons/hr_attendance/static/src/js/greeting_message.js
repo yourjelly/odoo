@@ -1,28 +1,20 @@
 odoo.define('hr_attendance.greeting_message', function (require) {
 "use strict";
 
-// var AbstractAction = require('web.AbstractAction');
-// var core = require('web.core');
+var AbstractAction = require('web.AbstractAction');
+var core = require('web.core');
 
-const AbstractAction = require('web.AbstractAction');
-const core = require('web.core');
+var _t = core._t;
 
-// var _t = core._t;
-const _t = core._t;
 
-// var GreetingMessage = AbstractAction.extend({
-   class GreetingMessage extends owl.Component{
-    constructor(...args){
-    // debugger;
-        super();
-    }
-    // contentTemplate = 'HrAttendanceGreetingMessage';
+var GreetingMessage = AbstractAction.extend({
+    contentTemplate: 'HrAttendanceGreetingMessage',
 
-    // events {
-    //     "click .o_hr_attendance_button_dismiss": function() { this.do_action(this.next_action, {clear_breadcrumbs: true}); },
-    // }
+    events: {
+        "click .o_hr_attendance_button_dismiss": function() { this.do_action(this.next_action, {clear_breadcrumbs: true}); },
+    },
 
-    init (parent, action) {
+    init: function(parent, action) {
         // console.log("hr_attendance.greeting_message");
         var self = this;
         this._super.apply(this, arguments);
@@ -67,9 +59,9 @@ const _t = core._t;
 
         this.employee_name = action.employee_name;
         this.attendanceBarcode = action.barcode;
-    }
+    },
 
-    start(){
+    start: function() {
         if (this.attendance) {
             this.attendance.check_out ? this.farewell_message() : this.welcome_message();
         }
@@ -77,9 +69,9 @@ const _t = core._t;
             core.bus.on('barcode_scanned', this, this._onBarcodeScanned);
         }
         return this._super.apply(this, arguments);
-    }
+    },
 
-    welcome_message() {
+    welcome_message: function() {
         var self = this;
         var now = this.attendance.check_in.clone();
         this.return_to_main_menu = setTimeout( function() { self.do_action(self.next_action, {clear_breadcrumbs: true}); }, 5000);
@@ -113,9 +105,9 @@ const _t = core._t;
                 }
             }
         }
-    }
+    },
 
-    farewell_message() {
+    farewell_message: function() {
         var self = this;
         var now = this.attendance.check_out.clone();
         this.return_to_main_menu = setTimeout( function() { self.do_action(self.next_action, {clear_breadcrumbs: true}); }, 5000);
@@ -150,9 +142,9 @@ const _t = core._t;
                 this.el.querySelector('.o_hr_attendance_message_message').innerText == _t("Have a good evening");
             }
         }
-    }
+    },
 
-    _onBarcodeScanned(barcode) {
+    _onBarcodeScanned: function(barcode) {
         var self = this;
         if (this.attendanceBarcode !== barcode){
             if (this.return_to_main_menu) {  // in case of multiple scans in the greeting message view, delete the timer, a new one will be created.
@@ -175,18 +167,16 @@ const _t = core._t;
                     setTimeout( function() { self.do_action(self.next_action, {clear_breadcrumbs: true}); }, 5000);
                 });
         }
-    }
+    },
 
-    destroy() {
+    destroy: function () {
         core.bus.off('barcode_scanned', this, this._onBarcodeScanned);
         clearTimeout(this.return_to_main_menu);
         this._super.apply(this, arguments);
-    }
-}
+    },
+});
 
-GreetingMessage.template = "HrAttendanceGreetingMessage";
-const greeting_message = new GreetingMessage();
-core.action_registry.add('hr_attendance_greeting_message', greeting_message);
+core.action_registry.add('hr_attendance_greeting_message', GreetingMessage);
 
 return GreetingMessage;
 
