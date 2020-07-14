@@ -6,13 +6,7 @@ var ajax = require('web.ajax');
 var core = require('web.core');
 var Session = require('web.session');
 
-// const AbstractAction = require('web.AbstractAction');
-// const ajax = require('web.ajax');
-// const core = require('web.core');
-// const Session = require('web.session');
-
 var QWeb = core.qweb;
-// const QWeb = core.qweb;
 
 var KioskMode = AbstractAction.extend({
     events: {
@@ -22,11 +16,6 @@ var KioskMode = AbstractAction.extend({
             });
         },
     },
-
-// class KioskMode extends owl.Component{
-//     constructor(...args){
-//         super();
-//     }
 
     start: function () {
         var self = this;
@@ -47,18 +36,6 @@ var KioskMode = AbstractAction.extend({
         self._interval = window.setInterval(this._callServer.bind(this), (60*60*1000*24));
         return Promise.all([def, this._super.apply(this, arguments)]);
     },
-
-
-    // willStart()
-    // {
-
-    //     core.bus.on('barcode_scanned', this, this._onBarcodeScanned);
-    //     self.session = Session;
-    //     const def = this.env.services.rpc({
-    //         model:  'res.company',
-
-    //     })
-    // }
     
     _onBarcodeScanned: function(barcode) {
         var self = this;
@@ -82,9 +59,9 @@ var KioskMode = AbstractAction.extend({
 
     start_clock: function() {
         this.clock_start = setInterval((...args) => {
-this.el.querySelector(".o_hr_attendance_clock").innerText = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'});}, 500);
+        this.el.querySelector(".o_hr_attendance_clock").innerText = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'});}, 500);
         // First clock refresh before interval to avoid delay
-        this.$(".o_hr_attendance_clock").show().text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'}));
+        this.el.querySelector('.o_hr_attendance_clock').innerText = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'});
     },
 
     destroy: function () {
@@ -98,7 +75,6 @@ this.el.querySelector(".o_hr_attendance_clock").innerText = new Date().toLocaleT
         // Make a call to the database to avoid the auto close of the session
         return ajax.rpc("/hr_attendance/kiosk_keepalive", {});
     },
-
 });
 
 core.action_registry.add('hr_attendance_kiosk_mode', KioskMode);

@@ -52,6 +52,7 @@ QUnit.module('HR Attendance', {
         };
     },
 }, function () {
+    debugger;
     QUnit.module('My attendances (client action)');
 
     QUnit.test('simple rendering', async function (assert) {

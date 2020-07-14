@@ -69,16 +69,16 @@ var KioskConfirm = AbstractAction.extend({
         var self = this;
         this.getSession().user_has_group('hr_attendance.group_hr_attendance_use_pin').then(function(has_group){
             self.use_pin = has_group;
-            self.$el.html(QWeb.render("HrAttendanceKioskConfirm", {widget: self}));
+            self.el.innerHTML = QWeb.render("HrAttendanceKioskConfirm", {widget: self});
             self.start_clock();
         });
         return self._super.apply(this, arguments);
     },
 
     start_clock: function () {
-        this.clock_start = setInterval(function() {this.$(".o_hr_attendance_clock").text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'}));}, 500);
+        this.el.querySelector('.o_hr_attendance_clock').innerText = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'}); 500;
         // First clock refresh before interval to avoid delay
-        this.$(".o_hr_attendance_clock").show().text(new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'}));
+        this.el.querySelector('.o_hr_attendance_clock').innerText = new Date().toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit', second:'2-digit'});
     },
 
     destroy: function () {

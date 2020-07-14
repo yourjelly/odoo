@@ -6,7 +6,6 @@ var core = require('web.core');
 
 var _t = core._t;
 
-
 var GreetingMessage = AbstractAction.extend({
     contentTemplate: 'HrAttendanceGreetingMessage',
 
@@ -15,7 +14,6 @@ var GreetingMessage = AbstractAction.extend({
     },
 
     init: function(parent, action) {
-        // console.log("hr_attendance.greeting_message");
         var self = this;
         this._super.apply(this, arguments);
         this.activeBarcode = true;
@@ -115,12 +113,12 @@ var GreetingMessage = AbstractAction.extend({
             var last_check_in_date = this.previous_attendance_change_date.clone();
             if(now - last_check_in_date > 1000*60*60*12){
                 this.el.querySelector('.o_hr_attendance_warning_message').style.display = "block";
-                this.el.querySelector('.o_hr_attendance_warning_message').innerHTML = _t("<b>Warning! Last check in was over 12 hours ago.</b><br/>If this isn't right, please contact Human Resource staff");
+                this.el.querySelector('.o_hr_attendance_warning_message').innerText = _t("<b>Warning! Last check in was over 12 hours ago.</b><br/>If this isn't right, please contact Human Resource staff");
                 clearTimeout(this.return_to_main_menu);
                 this.activeBarcode = false;
             } else if(now - last_check_in_date > 1000*60*60*8){
                 this.el.querySelector('.o_hr_attendance_warning_message').style.display = "block";
-                this.el.querySelector('.o_hr_attendance_random_message').innerHTML = _t("Another good day's work! See you soon!");
+                this.el.querySelector('.o_hr_attendance_random_message').innerText = _t("Another good day's work! See you soon!");
             }
         }
 
@@ -129,9 +127,9 @@ var GreetingMessage = AbstractAction.extend({
         } else if (now.hours() < 14) {
             this.el.querySelector('.o_hr_attendance_message_message').innerText == _t("Have a nice lunch!");
             if (Math.random() < 0.05) {
-                this.el.querySelector('.o_hr_attendance_random_message').innerHTML = _t("Eat breakfast as a king, lunch as a merchant and supper as a beggar");
+                this.el.querySelector('.o_hr_attendance_random_message').innerText = _t("Eat breakfast as a king, lunch as a merchant and supper as a beggar");
             } else if (Math.random() < 0.06) {
-                this.el.querySelector('.o_hr_attendance_random_message').innerHTML = _t("An apple a day keeps the doctor away");
+                this.el.querySelector('.o_hr_attendance_random_message').innerText = _t("An apple a day keeps the doctor away");
             }
         } else if (now.hours() < 17) {
             this.el.querySelector('.o_hr_attendance_message_message').innerText == _t("Have a good afternoon");

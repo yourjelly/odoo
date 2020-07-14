@@ -5,7 +5,6 @@ var AbstractAction = require('web.AbstractAction');
 var core = require('web.core');
 var field_utils = require('web.field_utils');
 
-
 var MyAttendances = AbstractAction.extend({
     contentTemplate: 'HrAttendanceMyMainMenu',
     events: {
