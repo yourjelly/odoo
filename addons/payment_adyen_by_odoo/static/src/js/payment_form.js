@@ -10,8 +10,15 @@ var qweb = core.qweb;
 var _t = core._t;
 
 ajax.loadXML('/payment_adyen/static/src/xml/adyen_templates.xml', qweb);
+const html = document.documentElement;
+const locale = html.getAttribute('lang') || 'en-US';
 
 PaymentForm.include({
+    willStart: function () {
+        return this._super.apply(this, arguments).then(function () {
+            return ajax.loadJS("https://checkoutshopper-test.adyen.com/checkoutshopper/sdk/3.8.1/adyen.js");
+        })
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -28,16 +35,17 @@ PaymentForm.include({
         const paymentMethods = await this._rpc({
             route: '/payment/adyen_by_odoo/get_payment_methods',
             params: {
-                acquirer_id: formData.acquirer_id
+                acquirer_id: formData.acquirer_id,
+                shopperLocale: locale,
             },
         });
         const configuration = {
             paymentMethodsResponse: paymentMethods,
-            originKey: 'pub.v2.8015616193480340.aHR0cHM6Ly9vZG9vLnRlc3Q.ZZuuRYlkk49NWTCcs4JYnwK0x6pQoitDEQBIZXtz36A',
-            locale: 'fr',
+            originKey: 'pub.v2.8215940375760255.aHR0cHM6Ly9vZG9vLnRlc3Q.ucnpq2uUrMtawFwcFL4l5H15Fke_DkhMhrmwnUw7eWY',
+            locale: locale,
             environment: 'test',
             onSubmit: this._adyenSubmitPayment.bind(this),
-            onAdditionalDetails: (state, data) => {console.log(state, data)},
+            onAdditionalDetails: this._adyenAdditionalDetails.bind(this),
             showPayButton: false,
         };
         const checkout = new AdyenCheckout(configuration);
@@ -47,10 +55,11 @@ PaymentForm.include({
 
     _adyenRemovePaymentMethods: function () {
         this.adyenDropin = undefined;
+        this.adyenTxReference = undefined;
+        this.adyenTxSignature = undefined;
     },
 
     _adyenSubmitPayment: async function(adyenState, adyenDropin) {
-        const self = this;
         const $checkedRadio = this.$('input[type="radio"]:checked');
         const acquirerID = this.getAcquirerIdFromRadio($checkedRadio);
         const acquirerForm = this.el.querySelector(`#o_payment_add_token_acq_${acquirerID}`);
@@ -72,20 +81,59 @@ PaymentForm.include({
         }).then((txFormContent) => {
             const txForm = document.createElement('form');
             txForm.innerHTML = txFormContent;
-            const txReference = txForm.querySelector('input[name="reference"]').value;
-            const txSignature = txForm.querySelector('input[name="signature"]').value;
+            this.adyenTxReference = txForm.querySelector('input[name="reference"]').value;
+            this.adyenTxSignature = txForm.querySelector('input[name="signature"]').value;
             return this._rpc({
                 route: '/payment/adyen_by_odoo/submit_payment',
                 params: {
                     adyen_data: adyenState.data,
                     acquirer_id: acquirerID,
-                    tx_reference: txReference,
-                    tx_signature: txSignature,
+                    tx_reference: this.adyenTxReference,
+                    tx_signature: this.adyenTxSignature,
                 },
             });
         }).then(async (result) => {
             if (result.action) {
+                // further action needed (e.g. redirect or inline 3DS validation)
                 const auth_result = await this.adyenDropin.handleAction(result.action);
+            } else if (result.resultCode) {
+                // transaction has reached a final state
+                window.location = "/payment/process"
+            }
+        }).guardedCatch((error) => {
+            // We don't want to open the Error dialog since
+            // we already have a container displaying the error
+            if (error.event) {
+                error.event.preventDefault();
+            }
+            // if the rpc fails, pretty obvious
+            //this.enableButton(button);
+            this.displayError(
+                _t('Unable to save card'),
+                _t("We are not able to add your payment method at the moment. ") +
+                    this._parseError(error)
+            );
+            this.adyenDropin.setStatus('error', {'message': this._parseError(error)});
+        });
+    },
+
+    _adyenAdditionalDetails: async function (adyenState, adyenDropin) {
+        const $checkedRadio = this.$('input[type="radio"]:checked');
+        const acquirerID = this.getAcquirerIdFromRadio($checkedRadio);
+        return this._rpc({
+            route: '/payment/adyen_by_odoo/get_payment_details',
+            params: {
+                acquirer_id: acquirerID,
+                adyen_data: adyenState.data,
+                tx_reference: this.adyenTxReference,
+            },
+        }).then(async (result) => {
+            if (result.action) {
+                // possibly another action needed (usually 3DSv2)
+                const auth_result = await this.adyenDropin.handleAction(result.action);
+            } else if (result.resultCode) {
+                // transaction has reached a final state
+                window.location = "/payment/process"
             }
         }).guardedCatch((error) => {
             // We don't want to open the Error dialog since
@@ -134,6 +182,35 @@ PaymentForm.include({
 
         // first we check that the user has selected a adyen_by_odoo as s2s payment method
         if ($checkedRadio.length === 1 && $checkedRadio.data('provider') === 'adyen_by_odoo') {
+            let button;
+            if (ev.type === 'submit') {
+                button = $(ev.target).find('*[type="submit"]')[0]
+            } else {
+                button = ev.target;
+            }
+            this.disableButton(button);
+            return this.adyenDropin.submit();
+        } else {
+            return this._super.apply(this, arguments);
+        }
+    },
+
+    /**
+     * @override
+     */
+    addPmEvent: function (ev) {
+        ev.preventDefault();
+        var $checkedRadio = this.$('input[type="radio"]:checked');
+
+        // first we check that the user has selected a adyen_by_odoo as provider
+        if ($checkedRadio.length === 1 && $checkedRadio.data('provider') === 'adyen_by_odoo') {
+            let button;
+            if (ev.type === 'submit') {
+                button = $(ev.target).find('*[type="submit"]')[0]
+            } else {
+                button = ev.target;
+            }
+            this.disableButton(button);
             return this.adyenDropin.submit();
         } else {
             return this._super.apply(this, arguments);
