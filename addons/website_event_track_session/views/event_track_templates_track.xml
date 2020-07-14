@@ -49,7 +49,10 @@
             </div>
             <!-- TRACK DESCRIPTION -->
             <div class="mx-3 o_wesession_track_main_description">
-                <span class="h4" t-esc="track.name"/>
+                <div class="d-flex justify-content-between">
+                    <span class="h4" t-esc="track.name"/>
+                    <t t-call="website_event_track_online.track_widget_reminder"/>
+                </div>
                 <div class="text-muted">
                     <span t-field="track.date"
                         t-options='{"hide_seconds":"True", "format": "short"}'/>
