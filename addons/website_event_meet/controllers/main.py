@@ -2,10 +2,11 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-from werkzeug.exceptions import Forbidden
+from random import randint
+from werkzeug.exceptions import Forbidden, NotFound
 from werkzeug.utils import redirect
 
-from odoo import http
+from odoo import exceptions, http
 from odoo.http import request
 from odoo.addons.http_routing.models.ir_http import slug
 
@@ -14,6 +15,7 @@ _logger = logging.getLogger(__name__)
 
 
 class WebsiteEventMeetController(http.Controller):
+
     @http.route(["/event/<model('event.event'):event>/meeting_rooms"], type="http",
                 auth="public", website=True, sitemap=True)
     def event_meeting_rooms(self, event, lang=None, open_room_id=None):
@@ -44,6 +46,53 @@ class WebsiteEventMeetController(http.Controller):
         }
 
         return request.render("website_event_meet.template_meeting_rooms", values)
+
+    @http.route(["/event/<model('event.event'):event>/meeting_room/<model('event.meeting.room'):meeting_room>"], type="http",
+                auth="public", website=True, sitemap=True)
+    def event_meeting_room(self, event, meeting_room, **post):
+        """Display the meeting room frontend view.
+
+        :param event: Event for which we display the meeting rooms
+        :param meeting_room: Meeting Room to display
+        """
+        if not event.can_access_from_current_website() or meeting_room not in event.sudo().meeting_room_ids:
+            raise NotFound()
+
+        try:
+            meeting_room.check_access_rule('read')
+        except exceptions.AccessError:
+            raise Forbidden()
+            meeting_room = meeting_room.sudo()
+
+        return request.render(
+            "website_event_meet.event_meet_main",
+            self._event_meet_get_values(event, meeting_room)
+        )
+
+    def _event_meet_get_values(self, event, meeting_room):
+        # search for exhibitor list
+        meeting_rooms_other = request.env['event.meeting.room'].sudo().search([
+            ('event_id', '=', event.id), ('id', '!=', meeting_room.id)
+        ])
+        current_lang = meeting_room.room_lang_id
+
+        meeting_rooms_other = meeting_rooms_other.sorted(key=lambda room: (
+            room.room_lang_id == current_lang,
+            room.is_pinned,
+            randint(0, 20)
+        ), reverse=True)
+
+        return {
+            # event information
+            'event': event,
+            'main_object': event,
+            'meeting_room': meeting_room,
+            # sidebar
+            'meeting_rooms_other': meeting_rooms_other,
+            # options
+            'option_widescreen': True,
+            'option_can_edit': request.env.user.has_group('event.group_event_manager'),
+        }
 
     @http.route(["/event/create_meeting_room"], type="http", auth="public", methods=["POST"], website=True)
     def create_meeting_room(self, **post):
