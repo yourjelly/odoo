@@ -15,9 +15,7 @@ const ForecastWidgetField = AbstractField.extend({
             this.$el.html('');
         } else {
             this.$el.html(QWeb.render('stock.forecastWidget', forecastData));
-            if (! forecastData.reservedAvailability) {
-                this.$el.on('click', this._onOpenReport.bind(this));
-            }
+            this.$el.on('click', this._onOpenReport.bind(this));
         }
     },
 
