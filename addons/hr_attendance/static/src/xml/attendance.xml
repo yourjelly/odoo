@@ -122,7 +122,7 @@
                         <div class="o_hr_attendance_warning_message mt24 alert alert-warning" style="display:none" role="alert"/>
                     </t>
                     <t t-else="">
-                        <h1 class="mb0">Welcome<t t-esc="widget.employee_name"/>!</h1>
+                        <h1 class="mb0">Welcome <t t-esc="widget.employee_name"/>!</h1>
                         <h2 class="o_hr_attendance_message_message mt4 mb24"/>
                         <div class="alert alert-info h2 mt0" role="status">
                             Checked in at <b><t t-esc="widget.attendance.check_in_time"/></b>
