@@ -59,6 +59,7 @@
                         <t t-set="chat_room_id" t-value="meeting_room.chat_room_id.id"/>
                         <t t-set="auto_open" t-value="int(open_room_id == meeting_room.id)"/>
                         <t t-set="check_full" t-value="int(not is_event_manager)"/>
+                        <t t-set="default_username" t-value="default_username"/>
                     </t>
                     <div class="d-inline border p-2 bg-secondary" t-esc="meeting_room.room_lang_id.name"/>
                 </div>
