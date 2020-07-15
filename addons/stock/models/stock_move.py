@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
 from collections import defaultdict
 from datetime import datetime
 from itertools import groupby
@@ -12,7 +13,7 @@ from dateutil import relativedelta
 
 from odoo import SUPERUSER_ID, _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools.float_utils import float_compare, float_is_zero, float_round
+from odoo.tools.float_utils import float_compare, float_is_zero, float_repr, float_round
 
 PROCUREMENT_PRIORITIES = [('0', 'Not urgent'), ('1', 'Normal'), ('2', 'Urgent'), ('3', 'Very Urgent')]
 
@@ -178,6 +179,7 @@ class StockMove(models.Model):
     next_serial = fields.Char('First SN')
     next_serial_count = fields.Integer('Number of SN')
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Original Reordering Rule', check_company=True)
+    json_forecast = fields.Char('JSON data for the forecast widget', compute='_compute_json_forecast')
 
     @api.onchange('product_id', 'picking_type_id')
     def onchange_product(self):
@@ -386,6 +388,51 @@ class StockMove(models.Model):
             else:
                 total_availability = self.env['stock.quant']._get_available_quantity(move.product_id, move.location_id) if move.product_id else 0.0
                 move.availability = min(move.product_qty, total_availability)
+
+    @api.depends('product_id', 'picking_type_id', 'picking_id', 'reserved_availability')
+    def _compute_json_forecast(self):
+        self.json_forecast = False
+        if not any(self._ids):
+            # onchange
+            return
+        # compute
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
+        outgoing_unreserved_moves_per_warehouse = defaultdict(lambda: self.env['stock.move'])
+        for move in self:
+            picking_type = move.picking_type_id or move.picking_id.picking_type_id
+            is_unreserved = float_is_zero(move.reserved_availability, precision_rounding=move.product_uom.rounding)
+            if picking_type.code == "outgoing":
+                if is_unreserved:
+                    outgoing_unreserved_moves_per_warehouse[picking_type.warehouse_id] |= move
+                else:
+                    reserved_availability = float_repr(move.reserved_availability, precision)
+                    move.json_forecast = json.dumps({'reservedAvailability': reserved_availability})
+        if not outgoing_unreserved_moves_per_warehouse:
+            return
+
+        for warehouse, moves in outgoing_unreserved_moves_per_warehouse.items():
+            product_variant_ids = moves.product_id.ids
+            wh_location_ids = [loc['id'] for loc in self.env['stock.location'].search_read(
+                [('id', 'child_of', warehouse.view_location_id.id)],
+                ['id'],
+            )]
+            forecast_lines = self.env['report.stock.report_product_product_replenishment']\
+                ._get_report_lines(None, product_variant_ids, wh_location_ids)
+            for move in moves:
+                found = [l for l in forecast_lines if l["move_out"] == move and l["replenishment_filled"] is True]
+                if found:
+                    # The move is replenished but there's no expected date -> take from stock
+                    if found[0]["receipt_date_short"] is False:
+                        reserved_availability = float_repr(move.reserved_availability, precision)
+                        move.json_forecast = json.dumps({'reservedAvailability': reserved_availability})
+                    else:
+                        move.json_forecast = json.dumps({
+                            'expectedDate': found[0]["receipt_date_short"],
+                            'isLate': found[0]["is_late"],
+                            'replenishmentFilled': found[0]["replenishment_filled"]
+                        })
+                else:
+                    move.json_forecast = json.dumps({'expectedDate': None})
 
     @api.constrains('product_uom')
     def _check_uom(self):
