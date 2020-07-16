@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="stock.forecastWidget">
-        <span t-if="reservedAvailability" t-esc="reservedAvailability"/>
-        <t t-else="">
-            <span t-if="!expectedDate" style="color: red;">Not Available</span>
-            <span t-else="" t-att-style="'color: ' + isLate ? 'red,' : 'orange;'">Exp <t t-esc="expectedDate"/></span>
-        </t>
+        <span t-att-style="color ? 'color: ' + color : ''" t-esc="value"/>
         <button class="o_forecast_report_button btn btn-link o_icon_button ml-2" title="Forecasted Report">
             <i class="fa fa-fw fa-area-chart"/>
         </button>

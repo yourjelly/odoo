@@ -1,22 +1,46 @@
 odoo.define('stock.forecast_widget', function (require) {
 'use strict';
 
-const AbstractField = require('web.AbstractField');
+const basicFields = require('web.basic_fields');
 const fieldRegistry = require('web.field_registry');
 const core = require('web.core');
 const QWeb = core.qweb;
 
-const ForecastWidgetField = AbstractField.extend({
-    supportedFieldTypes: ['char'],
 
+const ForecastWidgetField = basicFields.FieldFloat.extend({
     _render: function () {
-        const forecastData = JSON.parse(this.value);
-        if (!forecastData) {
-            this.$el.html('');
+        const data = this.record.data;
+        const fieldExpectedDate = this.nodeOptions.date_expected;
+        const fieldExpectedQuantity = this.nodeOptions.qty_expected;
+        const forecastedDate = this.value;
+        const expectedDate = data[fieldExpectedDate];
+        const expectedQuantity = data[fieldExpectedQuantity];
+        const reservedAvailability = data.reserved_availability;
+
+        let color = 'orange';
+        if (!forecastedDate) {
+            this.formatType = 'float';
+            this.value = reservedAvailability;
+            if (this.value == expectedQuantity) {
+                color = false;
+            }
         } else {
-            this.$el.html(QWeb.render('stock.forecastWidget', forecastData));
-            this.$el.on('click', this._onOpenReport.bind(this));
+            if (forecastedDate > expectedDate) {
+                color = 'red';
+            }
         }
+        // Render the value as how it must be rended.
+        this._super(...arguments);
+
+        let text = this.$el.text();
+        if (forecastedDate) {
+            text = `Exp ${text}`;
+        }
+        this.$el.html(QWeb.render('stock.forecastWidget', {
+            color: color,
+            value: text,
+        }));
+        this.$el.on('click', this._onOpenReport.bind(this));
     },
 
     //--------------------------------------------------------------------------

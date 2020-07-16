@@ -44,6 +44,7 @@ class StockMove(models.Model):
         'Expected Date', default=fields.Datetime.now, index=True, required=True,
         states={'done': [('readonly', True)]},
         help="Scheduled date for the processing of this move")
+    date_forecast = fields.Datetime('Forecast Date', compute='_compute_date_forecast')
     product_id = fields.Many2one(
         'product.product', 'Product',
         check_company=True,
@@ -179,7 +180,6 @@ class StockMove(models.Model):
     next_serial = fields.Char('First SN')
     next_serial_count = fields.Integer('Number of SN')
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Original Reordering Rule', check_company=True)
-    json_forecast = fields.Char('JSON data for the forecast widget', compute='_compute_json_forecast')
 
     @api.onchange('product_id', 'picking_type_id')
     def onchange_product(self):
@@ -390,23 +390,18 @@ class StockMove(models.Model):
                 move.availability = min(move.product_qty, total_availability)
 
     @api.depends('product_id', 'picking_type_id', 'picking_id', 'reserved_availability')
-    def _compute_json_forecast(self):
-        self.json_forecast = False
+    def _compute_date_forecast(self):
+        self.date_forecast = False
         if not any(self._ids):
             # onchange
             return
         # compute
-        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         outgoing_unreserved_moves_per_warehouse = defaultdict(lambda: self.env['stock.move'])
         for move in self:
             picking_type = move.picking_type_id or move.picking_id.picking_type_id
             is_unreserved = float_is_zero(move.reserved_availability, precision_rounding=move.product_uom.rounding)
-            if picking_type.code == "outgoing":
-                if is_unreserved:
-                    outgoing_unreserved_moves_per_warehouse[picking_type.warehouse_id] |= move
-                else:
-                    reserved_availability = float_repr(move.reserved_availability, precision)
-                    move.json_forecast = json.dumps({'reservedAvailability': reserved_availability})
+            if picking_type.code == 'outgoing' and is_unreserved:
+                outgoing_unreserved_moves_per_warehouse[picking_type.warehouse_id] |= move
         if not outgoing_unreserved_moves_per_warehouse:
             return
 
@@ -419,20 +414,9 @@ class StockMove(models.Model):
             forecast_lines = self.env['report.stock.report_product_product_replenishment']\
                 ._get_report_lines(None, product_variant_ids, wh_location_ids)
             for move in moves:
-                found = [l for l in forecast_lines if l["move_out"] == move and l["replenishment_filled"] is True]
-                if found:
-                    # The move is replenished but there's no expected date -> take from stock
-                    if found[0]["receipt_date_short"] is False:
-                        reserved_availability = float_repr(move.reserved_availability, precision)
-                        move.json_forecast = json.dumps({'reservedAvailability': reserved_availability})
-                    else:
-                        move.json_forecast = json.dumps({
-                            'expectedDate': found[0]["receipt_date_short"],
-                            'isLate': found[0]["is_late"],
-                            'replenishmentFilled': found[0]["replenishment_filled"]
-                        })
-                else:
-                    move.json_forecast = json.dumps({'expectedDate': None})
+                found = [l for l in forecast_lines if l['move_out'] == move and l['replenishment_filled'] is True]
+                if found and found[0]['receipt_date_brut']:
+                    move.date_forecast = found[0]['receipt_date_brut']
 
     @api.constrains('product_uom')
     def _check_uom(self):
