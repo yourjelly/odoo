@@ -118,12 +118,10 @@ class PosOrder(models.AbstractModel):
                 } for (product, price_unit, discount), qty in products_sold.items()], key=lambda l: l['product_name'])
             }
             report_data.append(data)
-        import pdb
-        pdb.set_trace()
         return report_data
 
     def _get_report_values(self, docids, data=None):
         data = dict(data or {})
         configs = self.env['pos.config'].browse(data['config_ids'])
-        data.update(self.get_sale_details(data['date_start'], data['date_stop'], configs.ids))
+        data.update({'sale_details': self.get_sale_details(data['date_start'], data['date_stop'], configs.ids)})
         return data
