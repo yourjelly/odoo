@@ -45,17 +45,24 @@
             </div>
             <div class="mx-3">
                 <div t-if="sponsor.chat_room_id" class="d-flex flex-column mb-3">
-                    <div id="o_wsponsor_jitsi_iframe"/>
-                    <div class="d-flex flex-row-reverse">
-                        <t t-call="website_jitsi.chat_room_join_button">
-                            <t t-set="_classes" t-value="'d-none'"/>
-                            <t t-set="room_name" t-value="sponsor.room_name"/>
-                            <t t-set="chat_room_id" t-value="sponsor.chat_room_id.id"/>
-                            <t t-set="auto_open" t-value="1"/>
-                            <t t-set="attach_to" t-value="'#o_wsponsor_jitsi_iframe'"/>
-                            <t t-set="check_full" t-value="option_can_edit"/>
-                        </t>
-                    </div>
+                    <t t-if="sponsor.room_is_full">
+                        <div class="mt-4 col-12 alert alert-warning text-center" role="alert">
+                            <span>Oops! This room is full</span><br />Come back later to have a chat with us!
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div id="o_wsponsor_jitsi_iframe"/>
+                        <div class="d-flex flex-row-reverse">
+                            <t t-call="website_jitsi.chat_room_join_button">
+                                <t t-set="_classes" t-value="'d-none'"/>
+                                <t t-set="room_name" t-value="sponsor.room_name"/>
+                                <t t-set="chat_room_id" t-value="sponsor.chat_room_id.id"/>
+                                <t t-set="auto_open" t-value="1"/>
+                                <t t-set="attach_to" t-value="'#o_wsponsor_jitsi_iframe'"/>
+                                <t t-set="check_full" t-value="option_can_edit"/>
+                            </t>
+                        </div>
+                    </t>
                 </div>
                 <span class="h5 mb-0">About <t t-esc="sponsor.name"/></span>
                 <hr class="mt-2 pb-1 mb-1"/>               
