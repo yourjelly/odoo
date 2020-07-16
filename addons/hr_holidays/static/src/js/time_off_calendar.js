@@ -10,10 +10,8 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
 
     var _t = core._t;
     var QWeb = core.qweb;
-
     var TimeOffCalendarPopover = CalendarPopover.extend({
         template: 'hr_holidays.calendar.popover',
-
         init: function (parent, eventInfo) {
             this._super.apply(this, arguments);
             const state = this.event.extendedProps.record.state;
@@ -36,6 +34,7 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
             'click .btn-allocation': '_onNewAllocation',
         }),
 
+        
         //--------------------------------------------------------------------------
         // Public
         //--------------------------------------------------------------------------
@@ -49,7 +48,7 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
 
         renderButtons: function ($node) {
             this._super.apply(this, arguments);
-
+            // debugger;
             $(QWeb.render('hr_holidays.dashboard.calendar.button', {
                 time_off: _t('New Time Off Request'),
                 request: _t('New Allocation Request'),
@@ -58,6 +57,8 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
             if ($node) {
                 this.$buttons.appendTo($node);
             } else {
+                debugger;
+
                 this.$('.o_calendar_buttons').replaceWith(this.$buttons);
             }
         },
@@ -73,7 +74,6 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
          */
         _onNewTimeOff: function () {
             var self = this;
-
             this.do_action('hr_holidays.hr_leave_action_my_request', {
                 on_close: function () {
                     self.reload();
@@ -137,11 +137,13 @@ odoo.define('hr_holidays.dashboard.view_custo', function(require) {
                     context: self.context,
                 });
             }).then(function (result) {
-                self.$el.parent().find('.o_timeoff_container').remove();
+                debugger;
+                self.el.parentElement.querySelector('.o_timeoff_container').remove()
+                // self.$el.parent().find('.o_timeoff_container').remove();
                 var elem = QWeb.render('hr_holidays.dashboard_calendar_header', {
                     timeoffs: result,
                 });
-                self.$el.before(elem);
+                debugger;self.$el.before(elem);
             });
         },
     });

@@ -19,7 +19,7 @@
             <t t-foreach="widget.leavesPerType" t-as="leave_type">
                 <tr>
                     <td><t t-esc="leave_type.holiday_status_id[1]"/></td>
-                    <td  class="w-50"><t t-esc="leave_type.number_of_days"/> day(s)</td>
+                    <td class="w-50"><t t-esc="leave_type.number_of_days"/> day(s)</td>
                 </tr>
             </t>
         </tbody>
