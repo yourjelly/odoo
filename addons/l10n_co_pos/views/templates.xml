@@ -10,11 +10,12 @@
     <template id="l10n_co_pos.report_saledetails">
         <t t-set="company" t-value="env.company"/>
         <t t-call="web.html_container">
-        <t t-call="web.internal_layout">
-            <t t-foreach="sale_details" t-as="sale_detail">
+        <t t-foreach="sale_details" t-as="sale_detail">
+            <t t-call="web.internal_layout">
                 <div class="page">
 
                     <div class="text-center">
+                        <h2><t t-esc="sale_detail.get('pos_config').name"/></h2>
                         <h2>Sales Details</h2>
 
                         <strong><t t-esc="date_start" t-options="{'widget': 'datetime'}"/> - <t t-esc="date_stop" t-options="{'widget': 'datetime'}"/></strong>
@@ -54,11 +55,13 @@
                     <table  class="table table-sm">
                         <thead><tr>
                             <th>Name</th>
+                            <th>No. Transaction</th>
                             <th>Total</th>
                         </tr></thead>
                         <tbody>
                         <tr t-foreach='sale_detail.get("payments")' t-as='payment'>
                             <td><t t-esc="payment['name']" /></td>
+                            <td><t t-esc="payment['count']" /></td>
                             <td><t t-esc="payment['total']" t-options="{'widget': 'float', 'precision': sale_detail.get('currency_precision')}"/></td>
                         </tr>
                         </tbody>
@@ -85,7 +88,8 @@
                     <br/>
                     <br/>
 
-                    <strong>Total: <t t-esc='sale_detail.get("total_paid")' t-options="{'widget': 'float', 'precision': sale_detail.get('currency_precision')}"/></strong>
+                    <strong>Total: <t t-esc='sale_detail.get("total_paid")' t-options="{'widget': 'float', 'precision': sale_detail.get('currency_precision')}"/></strong><br/>
+                    <strong>Total number of Transactions: <t t-esc='sale_detail.get("total_payment_count")'/></strong>
 
                 </div>
             </t>

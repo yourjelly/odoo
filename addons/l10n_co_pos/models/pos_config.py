@@ -60,7 +60,7 @@ class PosOrder(models.AbstractModel):
         user_currency = self.env.company.currency_id
         report_data = []
         for config_id in config_ids:
-            new_domain = AND([domain.copy(), [('config_id', '=', config_id)]])
+            new_domain = AND([domain.copy(), [('config_id', '=', config_id.id)]])
             orders = self.env['pos.order'].search(new_domain)
             total = 0.0
             products_sold = {}
@@ -91,7 +91,7 @@ class PosOrder(models.AbstractModel):
             payment_ids = self.env["pos.payment"].search([('pos_order_id', 'in', orders.ids)]).ids
             if payment_ids:
                 self.env.cr.execute("""
-                    SELECT method.name, sum(amount) total
+                    SELECT method.name, sum(amount) total, count(payment.id)
                     FROM pos_payment AS payment,
                          pos_payment_method AS method
                     WHERE payment.payment_method_id = method.id
@@ -102,9 +102,11 @@ class PosOrder(models.AbstractModel):
             else:
                 payments = []
             data = {
+                'pos_config': config_id,
                 'currency_precision': user_currency.decimal_places,
                 'total_paid': user_currency.round(total),
                 'payments': payments,
+                'total_payment_count': sum(payment.get('count') for payment in payments),
                 'company_name': self.env.company.name,
                 'taxes': list(taxes.values()),
                 'products': sorted([{
@@ -123,5 +125,5 @@ class PosOrder(models.AbstractModel):
     def _get_report_values(self, docids, data=None):
         data = dict(data or {})
         configs = self.env['pos.config'].browse(data['config_ids'])
-        data.update({'sale_details': self.get_sale_details(data['date_start'], data['date_stop'], configs.ids)})
+        data.update({'sale_details': self.get_sale_details(data['date_start'], data['date_stop'], configs)})
         return data
