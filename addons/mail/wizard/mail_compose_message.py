@@ -290,6 +290,7 @@ class MailComposer(models.TransientModel):
                 blacklisted_rec_ids.extend([target['id'] for target in targets
                                             if target['email_normalized'] and target['email_normalized'] in blacklist])
 
+        author_id, email_from = self.env['mail.thread']._message_compute_author(None, self.email_from, raise_exception=False)
         for res_id in res_ids:
             # static wizard (mail.message) values
             mail_values = {
