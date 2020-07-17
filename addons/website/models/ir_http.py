@@ -13,7 +13,7 @@ import werkzeug.utils
 from functools import partial
 
 import odoo
-from odoo import api, models
+from odoo import api, models, tools
 from odoo import registry, SUPERUSER_ID
 from odoo.http import request
 from odoo.tools.safe_eval import safe_eval
@@ -23,6 +23,9 @@ from odoo.addons.http_routing.models.ir_http import ModelConverter, _guess_mimet
 from odoo.addons.portal.controllers.portal import _build_url_w_params
 
 logger = logging.getLogger(__name__)
+
+import time
+import threading
 
 
 def sitemap_qs2dom(qs, route, field='name'):
@@ -59,6 +62,32 @@ def get_request_website():
 
 class Http(models.AbstractModel):
     _inherit = 'ir.http'
+
+    @api.model
+    @tools.ormcache('path')
+    def url_rewrite(self, path):  # TO MOVE IN HTTP ROUTING
+        print('In url rewrite for %s' % path)
+        start = time.process_time()
+
+        new_url = False
+        req = request.httprequest
+        router = req.app.get_db_router(request.db).bind('')
+        try:
+            _ = router.match(path, method='POST')
+        except werkzeug.exceptions.MethodNotAllowed as e:
+            _ = router.match(path, method='GET')
+        except werkzeug.routing.RequestRedirect as e:
+            new_url = e.new_url[7:]  # remove scheme
+        except werkzeug.exceptions.NotFound as e:
+            new_url = path
+        except Exception as e:
+            raise e
+
+        end = time.process_time() - start
+        threading.current_thread().rewrite_hits += 1
+        threading.current_thread().rewrite_time += end
+
+        return new_url or path
 
     @classmethod
     def routing_map(cls, key=None):
