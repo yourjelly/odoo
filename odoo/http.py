@@ -1404,6 +1404,8 @@ class Root(object):
 
             current_thread = threading.current_thread()
             current_thread.url = httprequest.url
+            current_thread.rewrite_hits = 0
+            current_thread.rewrite_time = 0
             current_thread.query_count = 0
             current_thread.query_time = 0
             current_thread.perf_t0 = time.time()

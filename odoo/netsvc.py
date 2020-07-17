@@ -78,9 +78,14 @@ class PerfFilter(logging.Filter):
             perf_t0 = threading.current_thread().perf_t0
             remaining_time = time.time() - perf_t0 - query_time
             record.perf_info = '%s %s %s' % self.format_perf(query_count, query_time, remaining_time)
+
+            rewrite_hits = threading.current_thread().rewrite_hits
+            rewrite_time = threading.current_thread().rewrite_time
+            record.perf_info += ' %s %s' % (rewrite_hits, rewrite_time)
+
             delattr(threading.current_thread(), "query_count")
         else:
-            record.perf_info = "- - -"
+            record.perf_info = "- - - - -"
         return True
 
 class ColoredPerfFilter(PerfFilter):

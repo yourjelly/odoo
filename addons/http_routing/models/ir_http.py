@@ -16,7 +16,7 @@ except ImportError:
     slugify_lib = None
 
 import odoo
-from odoo import api, models, registry, exceptions
+from odoo import api, models, registry, exceptions, tools
 from odoo.addons.base.models.ir_http import RequestUID, ModelConverter
 from odoo.addons.base.models.qweb import QWebException
 from odoo.http import request
@@ -657,6 +657,11 @@ class IrHttp(models.AbstractModel):
     @api.model
     @tools.ormcache('path')
     def url_rewrite(self, path):
+        import time
+        import threading
+        print('In url rewrite for %s' % path)
+        start = time.process_time()
+
         new_url = False
         req = request.httprequest
         router = req.app.get_db_router(request.db).bind('')
@@ -670,5 +675,9 @@ class IrHttp(models.AbstractModel):
             new_url = path
         except Exception as e:
             raise e
+
+        end = time.process_time() - start
+        threading.current_thread().rewrite_hits += 1
+        threading.current_thread().rewrite_time += end
 
         return new_url or path
