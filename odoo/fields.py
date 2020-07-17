@@ -2349,12 +2349,18 @@ class _Relational(Field):
                 if self.comodel_name == "res.users":
                     # user needs access to current company (self.env.company)
                     return "[('company_ids', 'in', allowed_company_ids[0])]"
+                elif self.comodel_name == "res.partner":
+                    # Partners with internal users are allowed to avoid interferences with the `res_users` rules
+                    return "['|', ('partner_share', '=', False), ('company_id', 'in', [allowed_company_ids[0], False])]"
                 else:
                     return "[('company_id', 'in', [allowed_company_ids[0], False])]"
             else:
                 if self.comodel_name == "res.users":
                     # User allowed company ids = user.company_ids
                     return "['|', (not company_id, '=', True), ('company_ids', 'in', [company_id])]"
+                elif self.comodel_name == "res.partner":
+                    # Partners with internal users are allowed to avoid interferences with the `res_users` rules
+                    return "['|', ('partner_share', '=', False), ('company_id', 'in', [company_id, False])]"
                 else:
                     return "[('company_id', 'in', [company_id, False])]"
         return self.domain(env[self.model_name]) if callable(self.domain) else self.domain

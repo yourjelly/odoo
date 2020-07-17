@@ -3174,6 +3174,8 @@ Fields:
                         inconsistent_fields.add(name)
                         inconsistent_recs |= record
                 elif not (corecord.company_id <= company):
+                    if corecord._name == 'res.partner' and not corecord.partner_share:
+                        continue
                     inconsistent_fields.add(name)
                     inconsistent_recs |= record
             # The second part of the check (for property / company-dependent fields) verifies that the records
