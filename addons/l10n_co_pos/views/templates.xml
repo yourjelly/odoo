@@ -89,7 +89,9 @@
                     <br/>
 
                     <strong>Total: <t t-esc='sale_detail.get("total_paid")' t-options="{'widget': 'float', 'precision': sale_detail.get('currency_precision')}"/></strong><br/>
-                    <strong>Total number of Transactions: <t t-esc='sale_detail.get("total_payment_count")'/></strong>
+                    <strong>Total number of Transactions: <t t-esc='sale_detail.get("total_payment_count")'/></strong><br/>
+                    <strong>From: <t t-esc='sale_detail.get("first_ref")'/> to <t t-esc='sale_detail.get("last_ref")'/></strong><br/>
+                    <strong>POS Serial Number: <t t-esc='sale_detail.get("pos_config").pos_serial_number'/></strong>
 
                 </div>
             </t>

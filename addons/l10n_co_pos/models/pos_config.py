@@ -104,6 +104,8 @@ class PosOrder(models.AbstractModel):
             data = {
                 'pos_config': config_id,
                 'currency_precision': user_currency.decimal_places,
+                'first_ref': orders[0].name,
+                'last_ref': orders[-1].name,
                 'total_paid': user_currency.round(total),
                 'payments': payments,
                 'total_payment_count': sum(payment.get('count') for payment in payments),
