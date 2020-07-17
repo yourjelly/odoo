@@ -1,22 +1,30 @@
 odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
     "use strict";
 
-    var time = require('web.time');
-    var Widget = require('web.Widget');
-    var widget_registry = require('web.widget_registry');
+    // var time = require('web.time');
+    // var Widget = require('web.Widget');
+    // var widget_registry = require('web.widget_registry');
 
-    var LeaveStatsWidget = Widget.extend({
-        template: 'hr_holidays.leave_stats',
+    const time = require('web.time');
+    const Widget = require('web.Widget');
+    const widget_registry = require('web.widget_registry');
+
+    const field_registry = require('web.field_registry_owl');
+
+    const { Component } = owl;
+
+    class LeaveStatsWidget extends Component{
+        // template: 'hr_holidays.leave_stats',
 
         /**
          * @override
          * @param {Widget|null} parent
          * @param {Object} params
          */
-        init: function (parent, params) {
-            this._setState(params);
-            this._super(parent);
-        },
+        // init: function (parent, params) {
+        //     this._setState(params);
+        //     this._super(parent);
+        // },
 
         //--------------------------------------------------------------------------
         // Public
@@ -25,9 +33,9 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
         /**
          * @override to fetch data before rendering.
          */
-        willStart: function () {
+        willStart() {
             return Promise.all([this._super(), this._fetchLeaveTypesData(), this._fetchDepartmentLeaves()]);
-        },
+        }
 
         /**
          * Fetch new data if needed (according to updated fields) and re-render the widget.
@@ -35,7 +43,7 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
          * @param {Object} state
          * @returns {Promise}
          */
-        updateState: function (state) {
+        updateState(state) {
             var self = this;
             var to_await = [];
             var updatedFields = this._setState(state);
@@ -49,7 +57,7 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
             return Promise.all(to_await).then(function () {
                 self.renderElement();
             });
-        },
+        }
 
         //--------------------------------------------------------------------------
         // Private
@@ -60,7 +68,7 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
          * @param {Object} state
          * @returns {String[]} list of updated fields
          */
-        _setState: function (state) {
+        _setState(state) {
             var updatedFields = [];
             if (state.data.employee_id.res_id !== (this.employee && this.employee.res_id)) {
                 updatedFields.push('employee');
@@ -75,7 +83,7 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
                 this.date = state.data.date_from;
             }
             return updatedFields;
-        },
+        }
 
         /**
          * Fetch leaves taken by members of ``this.department`` in the
@@ -86,7 +94,7 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
          * @private
          * @returns {Promise}
          */
-        _fetchDepartmentLeaves: function () {
+        _fetchDepartmentLeaves(){
             if (!this.date || !this.department) {
                 this.departmentLeaves = null;
                 return Promise.resolve();
@@ -116,7 +124,7 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
                     });
                 });
             });
-        },
+        }
 
         /**
          * Fetch the number of leaves, grouped by leave type, taken by ``this.employee``
@@ -125,7 +133,7 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
          * @private
          * @returns {Promise}
          */
-        _fetchLeaveTypesData: function () {
+        _fetchLeaveTypesData() {
             if (!this.date || !this.employee) {
                 this.leavesPerType = null;
                 return Promise.resolve();
@@ -145,9 +153,9 @@ odoo.define('hr_holidays.LeaveStatsWidget', function (require) {
                 self.leavesPerType = data;
             });
         }
-    });
+    }
 
     widget_registry.add('hr_leave_stats', LeaveStatsWidget);
-
+    LeaveStatsWidget.template = "hr_holidays.leave_stats";
     return LeaveStatsWidget;
 });

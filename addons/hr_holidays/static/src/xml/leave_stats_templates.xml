@@ -51,7 +51,7 @@
         </table>
     </t>
 
-    <div t-name="hr_holidays.leave_stats" class="o_leave_stats">
+    <div t-name="hr_holidays.leave_stats" class="o_leave_stats" owl="1">
         <t t-if="widget.employee">
             <t t-if="widget.leavesPerType">
                 <t t-call="hr_holidays.leave_per_type"/>
