@@ -22,34 +22,36 @@
                     </div>
 
                     <!-- Orderlines -->
-                    <h3>Products</h3>
-                    <table  class="table table-sm">
-                        <thead><tr>
-                            <th>Product</th>
-                            <th>Quantity</th>
-                            <th>Price Unit</th>
-                        </tr></thead>
-                        <tbody>
-                        <tr t-foreach='sale_detail.get("products")' t-as='line'>
-                            <t t-set="internal_reference" t-value="line['code'] and '[%s] ' % line['code'] or ''" />
-                            <td><t t-esc="internal_reference" /><t t-esc="line['product_name']" /></td>
-                            <td>
-                                <t t-esc="line['quantity']" />
-                                <t t-if='line["uom"] != "Units"'>
-                                    <t t-esc='line["uom"]' /> 
+                    <t t-if="include_products">
+                        <h3>Products</h3>
+                        <table  class="table table-sm">
+                            <thead><tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price Unit</th>
+                            </tr></thead>
+                            <tbody>
+                            <tr t-foreach='sale_detail.get("products")' t-as='line'>
+                                <t t-set="internal_reference" t-value="line['code'] and '[%s] ' % line['code'] or ''" />
+                                <td><t t-esc="internal_reference" /><t t-esc="line['product_name']" /></td>
+                                <td>
+                                    <t t-esc="line['quantity']" />
+                                    <t t-if='line["uom"] != "Units"'>
+                                        <t t-esc='line["uom"]' />
+                                    </t>
+                                </td>
+                                <td>
+                                    <t t-esc='line["price_unit"]' />
+                                <t t-if='line["discount"] != 0'>
+                                    Disc: <t t-esc='line["discount"]' />%
                                 </t>
-                            </td>
-                            <td>
-                                <t t-esc='line["price_unit"]' />
-                            <t t-if='line["discount"] != 0'>
-                                Disc: <t t-esc='line["discount"]' />%
-                            </t>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
 
-                    <br/>
+                        <br/>
+                    </t>
 
                     <h3>Payments</h3>
                     <table  class="table table-sm">
@@ -90,7 +92,7 @@
 
                     <strong>Total: <t t-esc='sale_detail.get("total_paid")' t-options="{'widget': 'float', 'precision': sale_detail.get('currency_precision')}"/></strong><br/>
                     <strong>Total number of Transactions: <t t-esc='sale_detail.get("total_payment_count")'/></strong><br/>
-                    <strong>From: <t t-esc='sale_detail.get("first_ref")'/> to <t t-esc='sale_detail.get("last_ref")'/></strong><br/>
+                    <strong t-if='sale_detail.get("first_ref")'>From: <t t-esc='sale_detail.get("first_ref")'/> to <t t-esc='sale_detail.get("last_ref")'/><br/></strong>
                     <strong>POS Serial Number: <t t-esc='sale_detail.get("pos_config").pos_serial_number'/></strong>
 
                 </div>

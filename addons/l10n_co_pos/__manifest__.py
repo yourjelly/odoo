@@ -13,7 +13,8 @@
     ],
     'data': [
         'views/templates.xml',
-        'views/views.xml'
+        'views/views.xml',
+        'wizard/report_views.xml'
     ],
     'qweb': [
         'static/src/xml/pos.xml'
