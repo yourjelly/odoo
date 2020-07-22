@@ -42,7 +42,7 @@ _logger = logging.getLogger(__name__)
 # ast.Name(id: identifyer, ctx=ast.Param()), whereas in Python 3 they are
 # ast.arg(arg: identifier, annotation: expr?) provide a toplevel arg()
 # function which matches ast.arg producing the relevant ast.Name in Python 2.
-arg = getattr(ast, 'arg', lambda arg, annotation: ast.Name(id=arg, ctx=ast.Param()))
+arg = getattr(ast, 'arg', lambda arg, annotation: ast.NameConstant(arg))
 # also Python 3's arguments has grown *2* new mandatory arguments, kwonlyargs
 # and kw_defaults for keyword-only arguments and their default values (if any)
 # so add a shim for *that* based on the signature of Python 3 I guess?
@@ -79,7 +79,7 @@ class Contextifier(ast.NodeTransformer):
             # values.get(name)
             ast.Call(
                 func=ast.Attribute(
-                    value=ast.Name(id='values', ctx=ast.Load()),
+                    value=ast.NameConstant('values', ctx=ast.Load()),
                     attr='get',
                     ctx=ast.Load()
                 ),
@@ -414,7 +414,7 @@ class QWeb(object):
 
         # code = $code_lines.split(u"\n")
         astmod.body.insert(0, ast.Assign(
-            targets=[ast.Name(id='code', ctx=ast.Store())],
+            targets=[ast.NameConstant('code')],
             value=ast.Call(
                 func=ast.Attribute(
                     value=ast.Str(code_line),
@@ -429,7 +429,7 @@ class QWeb(object):
 
         # profiling = {}
         astmod.body.insert(0, ast.Assign(
-            targets=[ast.Name(id='profiling', ctx=ast.Store())],
+            targets=[ast.NameConstant('profiling')],
             value=ast.Dict(keys=[], values=[])
         ))
         astmod.body.insert(0, ast.parse("from time import time").body[0])
@@ -441,7 +441,7 @@ class QWeb(object):
             # profiling.setdefault($line_id, time() - $time)
             return ast.Expr(ast.Call(
                 func=ast.Attribute(
-                    value=ast.Name(id='profiling', ctx=ast.Load()),
+                    value=ast.NameConstant('profiling', ctx=ast.Load()),
                     attr='setdefault',
                     ctx=ast.Load()
                 ),
@@ -449,12 +449,12 @@ class QWeb(object):
                     ast.Num(line_id[0]),
                     ast.BinOp(
                         left=ast.Call(
-                            func=ast.Name(id='time', ctx=ast.Load()),
+                            func=ast.NameConstant('time', ctx=ast.Load()),
                             args=[],
                             keywords=[], starargs=None, kwargs=None
                         ),
                         op=ast.Sub(),
-                        right=ast.Name(id=time, ctx=ast.Load())
+                        right=ast.NameConstant(time, ctx=ast.Load())
                     )
                 ],
                 keywords=[], starargs=None, kwargs=None
@@ -468,9 +468,9 @@ class QWeb(object):
                 # $time = time()
                 profile_body.append(
                     ast.Assign(
-                        targets=[ast.Name(id=time, ctx=ast.Store())],
+                        targets=[ast.NameConstant(time)],
                         value=ast.Call(
-                            func=ast.Name(id='time', ctx=ast.Load()),
+                            func=ast.NameConstant('time', ctx=ast.Load()),
                             args=[],
                             keywords=[], starargs=None, kwargs=None
                         )
@@ -569,13 +569,13 @@ class QWeb(object):
     def _call_def(self, name, append='append', values='values'):
         # $name(self, append, values, options, log)
         return ast.Call(
-            func=ast.Name(id=name, ctx=ast.Load()),
+            func=ast.NameConstant(name, ctx=ast.Load()),
             args=[
-                ast.Name(id='self', ctx=ast.Load()),
-                ast.Name(id=append, ctx=ast.Load()) if isinstance(append, str) else append,
-                ast.Name(id=values, ctx=ast.Load()),
-                ast.Name(id='options', ctx=ast.Load()),
-                ast.Name(id='log', ctx=ast.Load()),
+                ast.NameConstant('self', ctx=ast.Load()),
+                ast.NameConstant(append, ctx=ast.Load()) if isinstance(append, str) else append,
+                ast.NameConstant(values, ctx=ast.Load()),
+                ast.NameConstant('options', ctx=ast.Load()),
+                ast.NameConstant('log', ctx=ast.Load()),
             ],
             keywords=[], starargs=None, kwargs=None
         )
@@ -584,7 +584,7 @@ class QWeb(object):
         assert isinstance(item, ast.expr)
         # append(ast item)
         return ast.Expr(ast.Call(
-            func=ast.Name(id='append', ctx=ast.Load()),
+            func=ast.NameConstant('append', ctx=ast.Load()),
             args=[item], keywords=[],
             starargs=None, kwargs=None
         ))
@@ -594,11 +594,11 @@ class QWeb(object):
         #     append(x)
         var = self._make_name()
         return ast.For(
-            target=ast.Name(id=var, ctx=ast.Store()),
+            target=ast.NameConstant(var),
             iter=items,
             body=[ast.Expr(ast.Call(
-                func=ast.Name(id='append', ctx=ast.Load()),
-                args=[ast.Name(id=var, ctx=ast.Load())], keywords=[],
+                func=ast.NameConstant('append', ctx=ast.Load()),
+                args=[ast.NameConstant(var, ctx=ast.Load())], keywords=[],
                 starargs=None, kwargs=None
             ))],
             orelse=[]
@@ -611,14 +611,14 @@ class QWeb(object):
                     op=ast.And(),
                     values=[
                         ast.Compare(
-                            left=ast.Name(id='content', ctx=ast.Load()),
+                            left=ast.NameConstant('content', ctx=ast.Load()),
                             ops=[ast.IsNot()],
-                            comparators=[ast.Name(id='None', ctx=ast.Load())]
+                            comparators=[ast.NameConstant('None', ctx=ast.Load())]
                         ),
                         ast.Compare(
-                            left=ast.Name(id='content', ctx=ast.Load()),
+                            left=ast.NameConstant('content', ctx=ast.Load()),
                             ops=[ast.IsNot()],
-                            comparators=[ast.Name(id='False', ctx=ast.Load())]
+                            comparators=[ast.NameConstant('False', ctx=ast.Load())]
                         )
                     ]
                 ),
@@ -642,7 +642,7 @@ class QWeb(object):
             # options['last_path_node'] = $path
             body = [ast.Assign(
                 targets=[ast.Subscript(
-                    value=ast.Name(id='log', ctx=ast.Load()),
+                    value=ast.NameConstant('log', ctx=ast.Load()),
                     slice=ast.Index(ast.Str('last_path_node')),
                     ctx=ast.Store())],
                 value=ast.Str(path)
@@ -695,7 +695,7 @@ class QWeb(object):
     def _values_var(self, varname, ctx):
         # # values[$varname]
         return ast.Subscript(
-            value=ast.Name(id='values', ctx=ast.Load()),
+            value=ast.NameConstant('values', ctx=ast.Load()),
             slice=ast.Index(varname),
             ctx=ctx
         )
@@ -711,26 +711,26 @@ class QWeb(object):
         #         append(u'"')
         return [
             ast.Assign(
-                targets=[ast.Name(id='t_attrs', ctx=ast.Store())],
+                targets=[ast.NameConstant('t_attrs')],
                 value=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
+                        value=ast.NameConstant('self', ctx=ast.Load()),
                         attr='_post_processing_att',
                         ctx=ast.Load()
                     ),
                     args=[
-                        ast.Name(id='tagName', ctx=ast.Load()),
-                        ast.Name(id='t_attrs', ctx=ast.Load()),
-                        ast.Name(id='options', ctx=ast.Load()),
+                        ast.NameConstant('tagName', ctx=ast.Load()),
+                        ast.NameConstant('t_attrs', ctx=ast.Load()),
+                        ast.NameConstant('options', ctx=ast.Load()),
                     ], keywords=[],
                     starargs=None, kwargs=None
                 )
             ),
             ast.For(
-                target=ast.Tuple(elts=[ast.Name(id='name', ctx=ast.Store()), ast.Name(id='value', ctx=ast.Store())], ctx=ast.Store()),
+                target=ast.Tuple(elts=[ast.NameConstant('name'), ast.NameConstant('value')]),
                 iter=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='t_attrs', ctx=ast.Load()),
+                        value=ast.NameConstant('t_attrs', ctx=ast.Load()),
                         attr='items',
                         ctx=ast.Load()
                         ),
@@ -741,12 +741,12 @@ class QWeb(object):
                     test=ast.BoolOp(
                         op=ast.Or(),
                         values=[
-                            ast.Name(id='value', ctx=ast.Load()),
+                            ast.NameConstant('value', ctx=ast.Load()),
                             ast.Call(
-                                func=ast.Name(id='isinstance', ctx=ast.Load()),
+                                func=ast.NameConstant('isinstance', ctx=ast.Load()),
                                 args=[
-                                    ast.Name(id='value', ctx=ast.Load()),
-                                    ast.Name(id='string_types', ctx=ast.Load())
+                                    ast.NameConstant('value', ctx=ast.Load()),
+                                    ast.NameConstant('string_types', ctx=ast.Load())
                                 ],
                                 keywords=[],
                                 starargs=None, kwargs=None
@@ -755,13 +755,13 @@ class QWeb(object):
                     ),
                     body=[
                         self._append(ast.Str(u' ')),
-                        self._append(ast.Name(id='name', ctx=ast.Load())),
+                        self._append(ast.NameConstant('name', ctx=ast.Load())),
                         self._append(ast.Str(u'="')),
                         self._append(ast.Call(
-                            func=ast.Name(id='escape', ctx=ast.Load()),
+                            func=ast.NameConstant('escape', ctx=ast.Load()),
                             args=[ast.Call(
-                                func=ast.Name(id='to_text', ctx=ast.Load()),
-                                args=[ast.Name(id='value', ctx=ast.Load())], keywords=[],
+                                func=ast.NameConstant('to_text', ctx=ast.Load()),
+                                args=[ast.NameConstant('value', ctx=ast.Load())], keywords=[],
                                 starargs=None, kwargs=None
                             )], keywords=[],
                             starargs=None, kwargs=None
@@ -894,15 +894,15 @@ class QWeb(object):
                 # self._get_dynamic_att($tag, $value, options, values)
                 nodes.append(ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
+                        value=ast.NameConstant('self', ctx=ast.Load()),
                         attr='_get_dynamic_att',
                         ctx=ast.Load()
                     ),
                     args=[
                         ast.Str(el.tag),
                         self._compile_expr(value),
-                        ast.Name(id='options', ctx=ast.Load()),
-                        ast.Name(id='values', ctx=ast.Load()),
+                        ast.NameConstant('options', ctx=ast.Load()),
+                        ast.NameConstant('values', ctx=ast.Load()),
                     ], keywords=[],
                     starargs=None, kwargs=None
                 ))
@@ -917,9 +917,9 @@ class QWeb(object):
                 body.append(
                     # t_attrs = OrderedDict()
                     ast.Assign(
-                        targets=[ast.Name(id='t_attrs', ctx=ast.Store())],
+                        targets=[ast.NameConstant('t_attrs')],
                         value=ast.Call(
-                            func=ast.Name(id='OrderedDict', ctx=ast.Load()),
+                            func=ast.NameConstant('OrderedDict', ctx=ast.Load()),
                             args=[],
                             keywords=[], starargs=None, kwargs=None
                         )
@@ -932,7 +932,7 @@ class QWeb(object):
                     # t_attrs[$name] = $value
                     body.append(ast.Assign(
                         targets=[ast.Subscript(
-                            value=ast.Name(id='t_attrs', ctx=ast.Load()),
+                            value=ast.NameConstant('t_attrs', ctx=ast.Load()),
                             slice=ast.Index(ast.Str(item[0])),
                             ctx=ast.Store()
                         )],
@@ -942,7 +942,7 @@ class QWeb(object):
                     # t_attrs.update($item)
                     body.append(ast.Expr(ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id='t_attrs', ctx=ast.Load()),
+                            value=ast.NameConstant('t_attrs', ctx=ast.Load()),
                             attr='update',
                             ctx=ast.Load()
                         ),
@@ -954,7 +954,7 @@ class QWeb(object):
         if attr_already_created:
             # tagName = $el.tag
             body.append(ast.Assign(
-                targets=[ast.Name(id='tagName', ctx=ast.Store())],
+                targets=[ast.NameConstant('tagName')],
                 value=ast.Str(el.tag))
             )
             body.extend(self._append_attributes())
@@ -1026,7 +1026,7 @@ class QWeb(object):
     def _compile_directive_set(self, el, options):
         body = []
         varname = el.attrib.pop('t-set')
-        varset = self._values_var(ast.Str(varname), ctx=ast.Store())
+        varset = self._values_var(ast.Str(varname))
 
         if 't-value' in el.attrib:
             value = self._compile_expr(el.attrib.pop('t-value'))
@@ -1040,24 +1040,24 @@ class QWeb(object):
                 return [
                     # content = []
                     ast.Assign(
-                        targets=[ast.Name(id='content', ctx=ast.Store())],
+                        targets=[ast.NameConstant('content')],
                         value=ast.List(elts=[], ctx=ast.Load())
                     ),
                     # set(self, $varset.append)
                     ast.Expr(self._call_def(
                         def_name,
                         append=ast.Attribute(
-                            value=ast.Name(id='content', ctx=ast.Load()),
+                            value=ast.NameConstant('content', ctx=ast.Load()),
                             attr='append',
                             ctx=ast.Load()
                         )
                     )),
                     # $varset = u''.join($varset)
                     ast.Assign(
-                        targets=[self._values_var(ast.Str(varname), ctx=ast.Store())],
+                        targets=[self._values_var(ast.Str(varname))],
                         value=ast.Call(
                             func=ast.Attribute(value=ast.Str(u''), attr='join', ctx=ast.Load()),
-                            args=[ast.Name(id='content', ctx=ast.Load())], keywords=[],
+                            args=[ast.NameConstant('content', ctx=ast.Load())], keywords=[],
                             starargs=None, kwargs=None
                         )
                     )
@@ -1068,7 +1068,7 @@ class QWeb(object):
 
         # $varset = $value
         return [ast.Assign(
-            targets=[self._values_var(ast.Str(varname), ctx=ast.Store())],
+            targets=[self._values_var(ast.Str(varname))],
             value=value
         )]
 
@@ -1132,7 +1132,7 @@ class QWeb(object):
             ast.If(
                 test=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
+                        value=ast.NameConstant('self', ctx=ast.Load()),
                         attr='user_has_groups',
                         ctx=ast.Load()
                     ),
@@ -1155,10 +1155,10 @@ class QWeb(object):
         # for x in foreach_iterator(values, $expr, $varname):
         #     $foreach(self, append, values, options)
         return [ast.For(
-            target=ast.Name(id=values, ctx=ast.Store()),
+            target=ast.NameConstant(values),
             iter=ast.Call(
-                func=ast.Name(id='foreach_iterator', ctx=ast.Load()),
-                args=[ast.Name(id='values', ctx=ast.Load()), expr, ast.Str(varname)],
+                func=ast.NameConstant('foreach_iterator', ctx=ast.Load()),
+                args=[ast.NameConstant('values', ctx=ast.Load()), expr, ast.Str(varname)],
                 keywords=[], starargs=None, kwargs=None
             ),
             body=[ast.Expr(self._call_def(def_name, values=values))],
@@ -1176,12 +1176,12 @@ class QWeb(object):
             #     content = escape(pycompat.to_text(content))
             content.append(self._if_content_is_not_Falsy([
                 ast.Assign(
-                    targets=[ast.Name(id='content', ctx=ast.Store())],
+                    targets=[ast.NameConstant('content')],
                     value=ast.Call(
-                        func=ast.Name(id='escape', ctx=ast.Load()),
+                        func=ast.NameConstant('escape', ctx=ast.Load()),
                         args=[ast.Call(
-                            func=ast.Name(id='to_text', ctx=ast.Load()),
-                            args=[ast.Name(id='content', ctx=ast.Load())], keywords=[],
+                            func=ast.NameConstant('to_text', ctx=ast.Load()),
+                            args=[ast.NameConstant('content', ctx=ast.Load())], keywords=[],
                             starargs=None, kwargs=None
                         )],
                         keywords=[],
@@ -1203,29 +1203,29 @@ class QWeb(object):
             return [
                 # value = t-(esc|raw)
                 ast.Assign(
-                    targets=[ast.Name(id='content', ctx=ast.Store())],
+                    targets=[ast.NameConstant('content')],
                     value=self._compile_expr0(expression)
                 ),
                 # t_attrs, content, force_display = self._get_widget(value, expression, tagName, field options, template options, values)
                 ast.Assign(
                     targets=[ast.Tuple(elts=[
-                        ast.Name(id='t_attrs', ctx=ast.Store()),
-                        ast.Name(id='content', ctx=ast.Store()),
-                        ast.Name(id='force_display', ctx=ast.Store())
-                    ], ctx=ast.Store())],
+                        ast.NameConstant('t_attrs'),
+                        ast.NameConstant('content'),
+                        ast.NameConstant('force_display')
+                    ])],
                     value=ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id='self', ctx=ast.Load()),
+                            value=ast.NameConstant('self', ctx=ast.Load()),
                             attr='_get_widget',
                             ctx=ast.Load()
                         ),
                         args=[
-                            ast.Name(id='content', ctx=ast.Load()),
+                            ast.NameConstant('content', ctx=ast.Load()),
                             ast.Str(expression),
                             ast.Str(el.tag),
                             field_options and self._compile_expr(field_options) or ast.Dict(keys=[], values=[]),
-                            ast.Name(id='options', ctx=ast.Load()),
-                            ast.Name(id='values', ctx=ast.Load()),
+                            ast.NameConstant('options', ctx=ast.Load()),
+                            ast.NameConstant('values', ctx=ast.Load()),
                         ],
                         keywords=[], starargs=None, kwargs=None
                     )
@@ -1236,18 +1236,18 @@ class QWeb(object):
             # t_attrs, content, force_display = OrderedDict(), t-(esc|raw), None
             ast.Assign(
                 targets=[ast.Tuple(elts=[
-                    ast.Name(id='t_attrs', ctx=ast.Store()),
-                    ast.Name(id='content', ctx=ast.Store()),
-                    ast.Name(id='force_display', ctx=ast.Store()),
-                ], ctx=ast.Store())],
+                    ast.NameConstant('t_attrs'),
+                    ast.NameConstant('content'),
+                    ast.NameConstant('force_display'),
+                ])],
                 value=ast.Tuple(elts=[
                     ast.Call(
-                        func=ast.Name(id='OrderedDict', ctx=ast.Load()),
+                        func=ast.NameConstant('OrderedDict', ctx=ast.Load()),
                         args=[],
                         keywords=[], starargs=None, kwargs=None
                     ),
                     self._compile_expr0(expression),
-                    ast.Name(id='None', ctx=ast.Load()),
+                    ast.NameConstant('None', ctx=ast.Load()),
                 ], ctx=ast.Load())
             )
         ]
@@ -1276,13 +1276,13 @@ class QWeb(object):
             # t_attrs, content, force_display = self._get_field(record, field_name, expression, tagName, field options, template options, values)
             ast.Assign(
                 targets=[ast.Tuple(elts=[
-                    ast.Name(id='t_attrs', ctx=ast.Store()),
-                    ast.Name(id='content', ctx=ast.Store()),
-                    ast.Name(id='force_display', ctx=ast.Store())
-                ], ctx=ast.Store())],
+                    ast.NameConstant('t_attrs'),
+                    ast.NameConstant('content'),
+                    ast.NameConstant('force_display')
+                ])],
                 value=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
+                        value=ast.NameConstant('self', ctx=ast.Load()),
                         attr='_get_field',
                         ctx=ast.Load()
                     ),
@@ -1292,8 +1292,8 @@ class QWeb(object):
                         ast.Str(expression),
                         ast.Str(node_name),
                         field_options and self._compile_expr(field_options) or ast.Dict(keys=[], values=[]),
-                        ast.Name(id='options', ctx=ast.Load()),
-                        ast.Name(id='values', ctx=ast.Load()),
+                        ast.NameConstant('options', ctx=ast.Load()),
+                        ast.NameConstant('values', ctx=ast.Load()),
                     ],
                     keywords=[], starargs=None, kwargs=None
                 )
@@ -1304,7 +1304,7 @@ class QWeb(object):
         # if force_display:
         #    display the tag without content
         orelse = [ast.If(
-            test=ast.Name(id='force_display', ctx=ast.Load()),
+            test=ast.NameConstant('force_display', ctx=ast.Load()),
             body=self._compile_tag(el, [], options, True) or [ast.Pass()],
             orelse=[],
         )]
@@ -1316,21 +1316,21 @@ class QWeb(object):
             orelse = [
                 # default_content = []
                 ast.Assign(
-                    targets=[ast.Name(id=default_content, ctx=ast.Store())],
+                    targets=[ast.NameConstant(default_content)],
                     value=ast.List(elts=[], ctx=ast.Load())
                 ),
                 # body_call_content(self, default_content.append, values, options)
                 ast.Expr(self._call_def(
                     self._create_def(options, body, prefix='body_call_content', lineno=el.sourceline),
                     append=ast.Attribute(
-                        value=ast.Name(id=default_content, ctx=ast.Load()),
+                        value=ast.NameConstant(default_content, ctx=ast.Load()),
                         attr='append',
                         ctx=ast.Load()
                     )
                 )),
                 # default_content = u''.join(default_content)
                 ast.Assign(
-                    targets=[ast.Name(id=default_content, ctx=ast.Store())],
+                    targets=[ast.NameConstant(default_content)],
                     value=ast.Call(
                         func=ast.Attribute(
                             value=ast.Str(u''),
@@ -1338,7 +1338,7 @@ class QWeb(object):
                             ctx=ast.Load()
                         ),
                         args=[
-                            ast.Name(id=default_content, ctx=ast.Load())
+                            ast.NameConstant(default_content, ctx=ast.Load())
                         ],
                         keywords=[], starargs=None, kwargs=None
                     )
@@ -1348,8 +1348,8 @@ class QWeb(object):
                 # elif force_display:
                 #    display the tag without content
                 ast.If(
-                    test=ast.Name(id=default_content, ctx=ast.Load()),
-                    body=self._compile_tag(el, [self._append(ast.Name(id=default_content, ctx=ast.Load()))], options, True) or [ast.Pass()],
+                    test=ast.NameConstant(default_content, ctx=ast.Load()),
+                    body=self._compile_tag(el, [self._append(ast.NameConstant(default_content, ctx=ast.Load()))], options, True) or [ast.Pass()],
                     orelse=orelse,
                 )
             ]
@@ -1364,8 +1364,8 @@ class QWeb(object):
         return [self._if_content_is_not_Falsy(
             body=self._compile_tag(el, [self._append(
                 ast.Call(
-                    func=ast.Name(id='to_text', ctx=ast.Load()),
-                    args=[ast.Name(id='content', ctx=ast.Load())], keywords=[],
+                    func=ast.NameConstant('to_text', ctx=ast.Load()),
+                    args=[ast.NameConstant('content', ctx=ast.Load())], keywords=[],
                     starargs=None, kwargs=None
                 )
             )], options, True),
@@ -1383,10 +1383,10 @@ class QWeb(object):
         content = [
             # values_copy = values.copy()
             ast.Assign(
-                targets=[ast.Name(id=_values, ctx=ast.Store())],
+                targets=[ast.NameConstant(_values)],
                 value=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='values', ctx=ast.Load()),
+                        value=ast.NameConstant('values', ctx=ast.Load()),
                         attr='copy',
                         ctx=ast.Load()
                     ),
@@ -1403,7 +1403,7 @@ class QWeb(object):
             # call_content = []
             content.append(
                 ast.Assign(
-                    targets=[ast.Name(id='call_content', ctx=ast.Store())],
+                    targets=[ast.NameConstant('call_content')],
                     value=ast.List(elts=[], ctx=ast.Load())
                 )
             )
@@ -1412,7 +1412,7 @@ class QWeb(object):
                 ast.Expr(self._call_def(
                     def_name,
                     append=ast.Attribute(
-                        value=ast.Name(id='call_content', ctx=ast.Load()),
+                        value=ast.NameConstant('call_content', ctx=ast.Load()),
                         attr='append',
                         ctx=ast.Load()
                     ),
@@ -1423,11 +1423,11 @@ class QWeb(object):
             content.append(
                 ast.Assign(
                     targets=[ast.Subscript(
-                        value=ast.Name(id=_values, ctx=ast.Load()),
+                        value=ast.NameConstant(_values, ctx=ast.Load()),
                         slice=ast.Index(ast.Num(0)),
                         ctx=ast.Store()
                     )],
-                    value=ast.Name(id='call_content', ctx=ast.Load())
+                    value=ast.NameConstant('call_content', ctx=ast.Load())
                 )
             )
         else:
@@ -1435,7 +1435,7 @@ class QWeb(object):
             content.append(
                 ast.Assign(
                     targets=[ast.Subscript(
-                        value=ast.Name(id=_values, ctx=ast.Load()),
+                        value=ast.NameConstant(_values, ctx=ast.Load()),
                         slice=ast.Index(ast.Num(0)),
                         ctx=ast.Store()
                     )],
@@ -1449,10 +1449,10 @@ class QWeb(object):
             content.append(
                 # options_ = options.copy()
                 ast.Assign(
-                    targets=[ast.Name(id=name_options, ctx=ast.Store())],
+                    targets=[ast.NameConstant(name_options)],
                     value=ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id='options', ctx=ast.Load()),
+                            value=ast.NameConstant('options', ctx=ast.Load()),
                             attr='copy',
                             ctx=ast.Load()
                         ),
@@ -1467,7 +1467,7 @@ class QWeb(object):
                     # options_.update(template options)
                     ast.Expr(ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id=name_options, ctx=ast.Load()),
+                            value=ast.NameConstant(name_options, ctx=ast.Load()),
                             attr='update',
                             ctx=ast.Load()
                         ),
@@ -1481,7 +1481,7 @@ class QWeb(object):
                         test=ast.Compare(
                             left=ast.Call(
                                 func=ast.Attribute(
-                                    value=ast.Name(id='options', ctx=ast.Load()),
+                                    value=ast.NameConstant('options', ctx=ast.Load()),
                                     attr='get',
                                     ctx=ast.Load()
                                 ),
@@ -1491,7 +1491,7 @@ class QWeb(object):
                             ops=[ast.NotEq()],
                             comparators=[ast.Call(
                                 func=ast.Attribute(
-                                    value=ast.Name(id=name_options, ctx=ast.Load()),
+                                    value=ast.NameConstant(name_options, ctx=ast.Load()),
                                     attr='get',
                                     ctx=ast.Load()
                                 ),
@@ -1501,17 +1501,17 @@ class QWeb(object):
                         ),
                         body=[
                             ast.Assign(
-                                targets=[ast.Name(id='self', ctx=ast.Store())],
+                                targets=[ast.NameConstant('self')],
                                 value=ast.Call(
                                     func=ast.Attribute(
-                                        value=ast.Name(id='self', ctx=ast.Load()),
+                                        value=ast.NameConstant('self', ctx=ast.Load()),
                                         attr='with_context',
                                         ctx=ast.Load()
                                     ),
                                     args=[],
                                     keywords=[ast.keyword('lang', ast.Call(
                                         func=ast.Attribute(
-                                            value=ast.Name(id=name_options, ctx=ast.Load()),
+                                            value=ast.NameConstant(name_options, ctx=ast.Load()),
                                             attr='get',
                                             ctx=ast.Load()
                                         ),
@@ -1536,7 +1536,7 @@ class QWeb(object):
                     if isinstance(key, pycompat.string_types):
                         keys.append(ast.Str(s=key))
                     elif key is None:
-                        keys.append(ast.Name(id='None', ctx=ast.Load()))
+                        keys.append(ast.NameConstant('None', ctx=ast.Load()))
                     values.append(ast.Str(s=value))
 
                 # {'nsmap': {None: 'xmlns def'}}
@@ -1549,7 +1549,7 @@ class QWeb(object):
                 content.append(
                     ast.Expr(ast.Call(
                         func=ast.Attribute(
-                            value=ast.Name(id=name_options, ctx=ast.Load()),
+                            value=ast.NameConstant(name_options, ctx=ast.Load()),
                             attr='update',
                             ctx=ast.Load()
                         ),
@@ -1565,20 +1565,20 @@ class QWeb(object):
             ast.Expr(ast.Call(
                 func=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
+                        value=ast.NameConstant('self', ctx=ast.Load()),
                         attr='compile',
                         ctx=ast.Load()
                     ),
                     args=[
                         self._compile_format(str(tmpl)),
-                        ast.Name(id=name_options, ctx=ast.Load()),
+                        ast.NameConstant(name_options, ctx=ast.Load()),
                     ],
                     keywords=[], starargs=None, kwargs=None
                 ),
                 args=[
-                    ast.Name(id='self', ctx=ast.Load()),
-                    ast.Name(id='append', ctx=ast.Load()),
-                    ast.Name(id=_values, ctx=ast.Load())
+                    ast.NameConstant('self', ctx=ast.Load()),
+                    ast.NameConstant('append', ctx=ast.Load()),
+                    ast.NameConstant(_values, ctx=ast.Load())
                 ],
                 keywords=[], starargs=None, kwargs=None
             ))
@@ -1627,7 +1627,7 @@ class QWeb(object):
     def _compile_strexpr(self, expr):
         # ensure result is unicode
         return ast.Call(
-            func=ast.Name(id='to_text', ctx=ast.Load()),
+            func=ast.NameConstant('to_text', ctx=ast.Load()),
             args=[self._compile_expr(expr)], keywords=[],
             starargs=None, kwargs=None
         )
@@ -1640,7 +1640,7 @@ class QWeb(object):
                     values=[
                         ast.Call(
                             func=ast.Attribute(
-                                value=ast.Name(id='values', ctx=ast.Load()),
+                                value=ast.NameConstant('values', ctx=ast.Load()),
                                 attr='get',
                                 ctx=ast.Load()
                             ),

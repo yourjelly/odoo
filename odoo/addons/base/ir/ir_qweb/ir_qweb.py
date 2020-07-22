@@ -156,23 +156,23 @@ class IrQWeb(models.AbstractModel, QWeb):
         sep = u'\n' + space.rsplit('\n').pop()
         return [
             ast.Assign(
-                targets=[ast.Name(id='nodes', ctx=ast.Store())],
+                targets=[ast.NameConstant('nodes')],
                 value=ast.Call(
                     func=ast.Attribute(
-                        value=ast.Name(id='self', ctx=ast.Load()),
+                        value=ast.NameConstant('self', ctx=ast.Load()),
                         attr='_get_asset_nodes',
                         ctx=ast.Load()
                     ),
                     args=[
                         ast.Str(el.get('t-call-assets')),
-                        ast.Name(id='options', ctx=ast.Load()),
+                        ast.NameConstant('options', ctx=ast.Load()),
                     ],
                     keywords=[
                         ast.keyword('css', self._get_attr_bool(el.get('t-css', True))),
                         ast.keyword('js', self._get_attr_bool(el.get('t-js', True))),
                         ast.keyword('debug', ast.Call(
                             func=ast.Attribute(
-                                value=ast.Name(id='values', ctx=ast.Load()),
+                                value=ast.NameConstant('values', ctx=ast.Load()),
                                 attr='get',
                                 ctx=ast.Load()
                             ),
@@ -180,45 +180,45 @@ class IrQWeb(models.AbstractModel, QWeb):
                             keywords=[], starargs=None, kwargs=None
                         )),
                         ast.keyword('async', self._get_attr_bool(el.get('async', False))),
-                        ast.keyword('values', ast.Name(id='values', ctx=ast.Load())),
+                        ast.keyword('values', ast.NameConstant('values', ctx=ast.Load())),
                     ],
                     starargs=None, kwargs=None
                 )
             ),
             ast.For(
                 target=ast.Tuple(elts=[
-                    ast.Name(id='index', ctx=ast.Store()),
+                    ast.NameConstant('index'),
                     ast.Tuple(elts=[
-                        ast.Name(id='tagName', ctx=ast.Store()),
-                        ast.Name(id='t_attrs', ctx=ast.Store()),
-                        ast.Name(id='content', ctx=ast.Store())
-                    ], ctx=ast.Store())
-                ], ctx=ast.Store()),
+                        ast.NameConstant('tagName'),
+                        ast.NameConstant('t_attrs'),
+                        ast.NameConstant('content')
+                    ])
+                ]),
                 iter=ast.Call(
-                    func=ast.Name(id='enumerate', ctx=ast.Load()),
-                    args=[ast.Name(id='nodes', ctx=ast.Load())],
+                    func=ast.NameConstant('enumerate', ctx=ast.Load()),
+                    args=[ast.NameConstant('nodes', ctx=ast.Load())],
                     keywords=[],
                     starargs=None, kwargs=None
                 ),
                 body=[
                     ast.If(
-                        test=ast.Name(id='index', ctx=ast.Load()),
+                        test=ast.NameConstant('index', ctx=ast.Load()),
                         body=[self._append(ast.Str(sep))],
                         orelse=[]
                     ),
                     self._append(ast.Str(u'<')),
-                    self._append(ast.Name(id='tagName', ctx=ast.Load())),
+                    self._append(ast.NameConstant('tagName', ctx=ast.Load())),
                 ] + self._append_attributes() + [
                     ast.If(
                         test=ast.BoolOp(
                             op=ast.And(),
                             values=[
-                                ast.UnaryOp(ast.Not(), ast.Name(id='content', ctx=ast.Load()), lineno=0, col_offset=0),
+                                ast.UnaryOp(ast.Not(), ast.NameConstant('content', ctx=ast.Load()), lineno=0, col_offset=0),
                                 ast.Compare(
-                                    left=ast.Name(id='tagName', ctx=ast.Load()),
+                                    left=ast.NameConstant('tagName', ctx=ast.Load()),
                                     ops=[ast.In()],
                                     comparators=[ast.Attribute(
-                                        value=ast.Name(id='self', ctx=ast.Load()),
+                                        value=ast.NameConstant('self', ctx=ast.Load()),
                                         attr='_void_elements',
                                         ctx=ast.Load()
                                     )]
@@ -229,12 +229,12 @@ class IrQWeb(models.AbstractModel, QWeb):
                         orelse=[
                             self._append(ast.Str(u'>')),
                             ast.If(
-                                test=ast.Name(id='content', ctx=ast.Load()),
-                                body=[self._append(ast.Name(id='content', ctx=ast.Load()))],
+                                test=ast.NameConstant('content', ctx=ast.Load()),
+                                body=[self._append(ast.NameConstant('content', ctx=ast.Load()))],
                                 orelse=[]
                             ),
                             self._append(ast.Str(u'</')),
-                            self._append(ast.Name(id='tagName', ctx=ast.Load())),
+                            self._append(ast.NameConstant('tagName', ctx=ast.Load())),
                             self._append(ast.Str(u'>')),
                         ]
                     )
@@ -422,10 +422,10 @@ class IrQWeb(models.AbstractModel, QWeb):
     def _get_attr_bool(self, attr, default=False):
         if attr:
             if attr is True:
-                return ast.Name(id='True', ctx=ast.Load())
+                return ast.NameConstant('True', ctx=ast.Load())
             attr = attr.lower()
             if attr in ('false', '0'):
-                return ast.Name(id='False', ctx=ast.Load())
+                return ast.NameConstant('False', ctx=ast.Load())
             elif attr in ('true', '1'):
-                return ast.Name(id='True', ctx=ast.Load())
-        return ast.Name(id=str(attr if attr is False else default), ctx=ast.Load())
+                return ast.NameConstant('True', ctx=ast.Load())
+        return ast.NameConstant(str(attr if attr is False else default), ctx=ast.Load())
