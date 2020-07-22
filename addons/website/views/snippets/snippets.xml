@@ -482,46 +482,31 @@
             <we-input data-customize-website-variable="null" data-variable="header-font-size" data-unit="px" data-save-unit="rem"/>
         </we-row>
 
-        <we-select string="Template" data-variable="header-template" data-reload="/">
-            <we-button title="Default"
-                       data-name="header_logo_menu_opt"
-                       data-customize-website-views=""
+        <we-select string="Layout" data-variable="header-template" data-reload="/">
+            <we-button string="Default"
                        data-customize-website-variable="'default'"
-                       data-img="/website/static/src/img/snippets_options/header_template_default.png"/>
-            <we-button title="Main menu [EDI-1]"
-                       string="Main [EDI-1]"
-                       data-name="header_main_opt"
-                       data-customize-website-views="website.template_header_main"
-                       data-customize-website-variable="'edi1'"/>
-            <we-button title="Main menu [EDI-2]"
-                       string="Main [EDI-2]"
-                       data-name="header_edi2_opt"
-                       data-customize-website-views="website.template_header_edi2"
-                       data-customize-website-variable="'edi2'"/>
-            <we-button title="Vertical [EDI-3]"
-                       string="Main [EDI-3]"
-                       data-name="header_edi3_opt"
-                       data-customize-website-views="website.template_header_edi3"
-                       data-customize-website-variable="'edi3'"/>
-            <we-button title="Vertical [EDI-4]"
-                       string="Main [EDI-4]"
-                       data-name="header_edi4_opt"
-                       data-customize-website-views="website.template_header_edi4"
-                       data-customize-website-variable="'edi4'"/>
-            <we-button title="Vertical [EDI-5]"
-                       data-name="header_vertical_opt"
-                       data-customize-website-views="website.template_header_vertical"
+                       data-customize-website-views=""/>
+            <we-button string="2"
+                       data-customize-website-variable="'2'"
+                       data-customize-website-views="website.template_header_2"/>
+            <we-button string="3"
+                       data-customize-website-variable="'3'"
+                       data-customize-website-views="website.template_header_3"/>
+            <we-button string="4"
+                       data-customize-website-variable="'4'"
+                       data-customize-website-views="website.template_header_4"/>
+            <we-button string="5"
+                       data-customize-website-variable="'5'"
+                       data-customize-website-views="website.template_header_5"/>
+            <we-button string="Vertical"
                        data-customize-website-variable="'vertical'"
-                       data-img="/website/static/src/img/snippets_options/header_template_vertical.png"/>
-            <we-button title="Hamburger menu [EDI-8]"
-                       data-name="header_hamburger_opt"
-                       data-customize-website-views="website.template_header_hamburger"
+                       data-customize-website-views="website.template_header_vertical"/>
+            <we-button string="Hamburger"
                        data-customize-website-variable="'hamburger'"
-                       data-img="/website/static/src/img/snippets_options/header_template_hamburger.png"/>
+                       data-customize-website-views="website.template_header_hamburger"/>
             <we-button string="Sidebar"
-                       data-name="header_sidebar_opt"
-                       data-customize-website-views="website.template_header_sidebar, website.no_autohide_menu"
-                       data-customize-website-variable="sidebar"/>
+                       data-customize-website-variable="'sidebar'"
+                       data-customize-website-views="website.template_header_sidebar, website.no_autohide_menu"/>
         </we-select>
         <we-input string="⌙ Width"
                   data-customize-website-variable="null"
@@ -541,12 +526,15 @@
                        data-customize-website-views="website.option_header_off_canvas"/>
         </we-select>
         <we-select string="⌙ Position" data-variable="hamburger-position" data-reload="/">
-            <we-button string="Right"
-                       data-customize-website-variable="'right'"/>
             <we-button string="Left"
-                       data-customize-website-variable="'left'"/>
+                       data-customize-website-variable="'left'"
+                       data-customize-website-views=""/>
             <we-button string="Center / Full"
-                       data-customize-website-variable="'center'"/>
+                       data-customize-website-variable="'center'"
+                       data-customize-website-views=""/>
+            <we-button string="Right"
+                       data-customize-website-variable="'right'"
+                       data-customize-website-views=""/>
         </we-select>
         <we-select string="⌙ Logo" data-dependencies="off_canvas_menu_opt" data-reload="/">
             <we-button string="Text" data-customize-website-views=""/>
@@ -605,28 +593,28 @@
         <we-select string="Navbar Links Style" data-variable="header-links-style" data-reload="/">
             <we-button string="Default"
                        data-name="option_header_navbar_links_default"
-                       data-customize-website-views=""
-                       data-customize-website-variable="'default'"/>
+                       data-customize-website-variable="'default'"
+                       data-customize-website-views=""/>
             <we-button string="Fill"
                        data-name="option_header_navbar_links_fill"
-                       data-customize-website-views="website.header_navbar_pills_style"
-                       data-customize-website-variable="'fill'"/>
+                       data-customize-website-variable="'fill'"
+                       data-customize-website-views="website.header_navbar_pills_style"/>
             <we-button string="Outline"
                        data-name="option_header_navbar_links_outline"
-                       data-customize-website-views=""
-                       data-customize-website-variable="'outline'"/>
+                       data-customize-website-variable="'outline'"
+                       data-customize-website-views=""/>
             <we-button string="Pills"
                        data-name="option_header_navbar_links_pills"
-                       data-customize-website-views="website.header_navbar_pills_style"
-                       data-customize-website-variable="'pills'"/>
+                       data-customize-website-variable="'pills'"
+                       data-customize-website-views="website.header_navbar_pills_style"/>
             <we-button string="Block"
                        data-name="option_header_navbar_block"
-                       data-customize-website-views="website.header_navbar_pills_style"
-                       data-customize-website-variable="'block'"/>
+                       data-customize-website-variable="'block'"
+                       data-customize-website-views="website.header_navbar_pills_style"/>
             <we-button string="Border Bottom"
                        data-name="option_header_navbar_border_bottom"
-                       data-customize-website-views=""
-                       data-customize-website-variable="'border-bottom'"/>
+                       data-customize-website-variable="'border-bottom'"
+                       data-customize-website-views=""/>
         </we-select>
 
         <we-select id="option_header_dropdown" string="Sub Menus" data-dependencies="!header_hamburger_opt" data-no-preview="true">

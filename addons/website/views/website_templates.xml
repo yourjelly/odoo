@@ -344,7 +344,7 @@
 </template>
 
 <!-- Header templates -->
-<template id="template_header_main" inherit_id="website.layout" name="Template Header EDI 1" active="False">
+<template id="template_header_2" inherit_id="website.layout" name="Template Header 2" active="False">
     <xpath expr="//header//ul[@id='top_menu']" position="after">
         <div class="oe_structure oe_empty">
             <section>
@@ -387,7 +387,7 @@
         </div>
     </xpath>
 </template>
-<template id="template_header_edi2" inherit_id="website.layout" name="Template EDI 2" active="False">
+<template id="template_header_3" inherit_id="website.layout" name="Template Header 3" active="False">
     <xpath expr="//header//ul[@id='top_menu']" position="after">
         <div class="oe_structure oe_empty">
             <section>
@@ -400,7 +400,7 @@
         </div>
     </xpath>
 </template>
-<template id="template_header_edi3" inherit_id="website.layout" name="Template Header edi3" active="False">
+<template id="template_header_4" inherit_id="website.layout" name="Template Header 4" active="False">
     <xpath expr="//header//ul[@id='top_menu']/t[@t-foreach='website.menu_id.child_id']" position="replace"/>
     <xpath expr="//header//button[hasclass('navbar-toggler')]" position="replace"/>
     <xpath expr="//header//div[@id='top_menu_collapse']" position="attributes">
@@ -440,7 +440,7 @@
         </div>
     </xpath>
 </template>
-<template id="template_header_edi4" inherit_id="website.layout" name="Template Header edi4" active="False">
+<template id="template_header_5" inherit_id="website.layout" name="Template Header 5" active="False">
     <xpath expr="//header//ul[@id='top_menu']/t[@t-foreach='website.menu_id.child_id']" position="replace"/>
     <xpath expr="//header//button[hasclass('navbar-toggler')]" position="replace"/>
     <xpath expr="//header//div[@id='top_menu_collapse']" position="attributes">
