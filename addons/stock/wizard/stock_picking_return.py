@@ -108,10 +108,6 @@ class ReturnPicking(models.TransientModel):
         return vals
 
     def _create_returns(self):
-        # TODO sle: the unreserve of the next moves could be less brutal
-        for return_move in self.product_return_moves.mapped('move_id'):
-            return_move.move_dest_ids.filtered(lambda m: m.state not in ('done', 'cancel'))._do_unreserve()
-
         # create new picking for returned products
         picking_type_id = self.picking_id.picking_type_id.return_picking_type_id.id or self.picking_id.picking_type_id.id
         new_picking = self.picking_id.copy({
