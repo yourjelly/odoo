@@ -19,14 +19,9 @@
                         <ul class="nav navbar-nav ml-auto text-right" id="top_menu">
                             <li class="nav-item divider" t-ignore="true" t-if="not user_id._is_public()"/>
                             <li class="nav-item dropdown" t-ignore="true" t-if="not user_id._is_public()">
-                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-                                    <b>
-                                        <span t-esc="user_id.name[:23] + '...' if user_id.name and len(user_id.name) &gt; 25 else user_id.name"/>
-                                    </b>
-                                </a>
-                                <div class="dropdown-menu js_usermenu" role="menu">
-                                    <a id="o_logout" class="dropdown-item" t-attf-href="/web/session/logout?redirect=/" role="menuitem">Logout</a>
-                                </div>
+                                <t t-call="portal.user_dropdown">
+                                    <t t-set="_classes" t-value="'nav-link'"/>
+                                </t>
                             </li>
                         </ul>
                     </div>
@@ -40,6 +35,17 @@
                 </div>
             </div>
         </xpath>
+    </template>
+
+    <template id="user_dropdown" name="Portal User Dropdown">
+        <a href="#" role="button" t-attf-class="dropdown-toggle #{_classes}" data-toggle="dropdown">
+            <!-- TODO: option -->
+            <i class="fa fa-1x fa-user d-none d-sm-inline-block d-lg-none mr-lg-1"/>
+            <b><span t-esc="user_id.name[:23] + '...' if user_id.name and len(user_id.name) &gt; 25 else user_id.name" class="d-sm-none d-lg-inline-block"/></b>
+        </a>
+        <div class="dropdown-menu js_usermenu" role="menu">
+            <a id="o_logout" class="dropdown-item" t-attf-href="/web/session/logout?redirect=/" role="menuitem">Logout</a>
+        </div>
     </template>
 
     <template id="portal_breadcrumbs" name="Portal Breadcrumbs">
@@ -431,7 +437,7 @@
         </ul>
     </template>
 
-    <template id="my_account_link" name="Link to frontend portal" inherit_id="portal.frontend_layout">
+    <template id="my_account_link" name="Link to frontend portal" inherit_id="portal.user_dropdown">
         <xpath expr="//a[@id='o_logout']" position="before">
             <a href="/my/home" role="menuitem" class="dropdown-item">My Account</a>
         </xpath>
