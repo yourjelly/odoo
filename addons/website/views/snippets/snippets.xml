@@ -460,12 +460,12 @@
                   data-step="0.1"/>
 
         <we-select string="Logo" data-reload="/">
-            <we-button data-customize-website-views="website.website_name">Text</we-button>
-            <we-button data-customize-website-views="website.layout_logo_show">Image</we-button>
-            <we-button data-customize-website-views="website.header_logo_none" data-name="header_logo_none_opt">None</we-button>
+            <we-button data-customize-website-views="website.header_brand_name">Text</we-button>
+            <we-button data-customize-website-views="website.header_brand_logo">Image</we-button>
+            <we-button data-customize-website-views="website.header_brand_none" data-name="header_brand_none">None</we-button>
         </we-select>
         <we-input string="⌙ Height"
-                  data-dependencies="!header_logo_none_opt"
+                  data-dependencies="!header_brand_none"
                   data-customize-website-variable="null"
                   data-variable="logo-height"
                   data-unit="px"

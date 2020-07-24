@@ -124,6 +124,11 @@
     <xpath expr="//header" position="attributes">
         <attribute name="data-name">Header</attribute>
     </xpath>
+
+    <xpath expr="//header//a[hasclass('navbar-brand')]" position="replace">
+        <t t-call="website.placeholder_header_brand"/>
+    </xpath>
+
     <xpath expr="//header/nav" position="attributes">
         <!-- Background now controlled by css configuration, using color combinations -->
         <attribute name="class" add="o_colored_level o_cc" remove="bg-light" separator=" "/>
@@ -207,12 +212,6 @@
     </xpath>
     <xpath expr="//body" position="inside">
         <t t-raw="website.custom_code_footer"/>
-    </xpath>
-</template>
-
-<template id="website_name" inherit_id="website.layout" name="Website Name" active="False">
-    <xpath expr="//header//a[hasclass('navbar-brand')]" position="replace">
-        <a class="navbar-brand" href="/">My Website</a>
     </xpath>
 </template>
 
@@ -687,33 +686,41 @@
     </xpath>
 </template>
 
-<template id="option_header_hamburger_center_logo" inherit_id="website.template_header_hamburger" name="Template Header Hamburger Center Logo" active="False">
+<!-- <template id="option_header_hamburger_center_logo" inherit_id="website.template_header_hamburger" name="Template Header Hamburger Center Logo" active="False">
     <xpath expr="//header//a[hasclass('navbar-brand')]" position="attributes">
         <attribute name="class" separator=" " add="mx-md-auto"/>
     </xpath>
+</template> -->
+
+<template id="placeholder_header_brand" name="Placeholder Header Brand"/>
+
+<template id="header_brand_name" inherit_id="website.placeholder_header_brand" name="Website Name" active="False">
+    <xpath expr="." position="inside">
+        <a href="/" t-attf-class="navbar-brand #{_classes}">My Website</a>
+    </xpath>
 </template>
 
-<template id="layout_logo_show" inherit_id="website.layout" name="Show Logo">
-    <xpath expr="//header//a[hasclass('navbar-brand')]" position="replace">
-        <a href="/" class="navbar-brand logo">
-            <span t-field="website.logo" t-options="{'widget': 'image'}" role="img" t-att-aria-label="'Logo of %s' % website.name" t-att-title="website.name" />
+<template id="header_brand_logo" inherit_id="website.placeholder_header_brand" name="Show Logo">
+    <xpath expr="." position="inside">
+        <a href="/" t-attf-class="navbar-brand logo #{_classes}">
+            <span t-field="website.logo" t-options="{'widget': 'image'}" role="img" t-att-aria-label="'Logo of %s' % website.name" t-att-title="website.name"/>
         </a>
     </xpath>
 </template>
 
-<template id="header_logo_none" inherit_id="website.layout" name="No Logo" active="False">
-    <xpath expr="//header//a[hasclass('navbar-brand')]" position="replace">
+<template id="header_brand_none" inherit_id="website.placeholder_header_brand" name="No Logo" active="False">
+    <xpath expr="." position="inside">
         <a href="/" class="navbar-brand d-none"/>
     </xpath>
 </template>
 
-<template id="option_header_off_canvas_logo_show" inherit_id="website.option_header_off_canvas" name="Show Logo (Off-Canvas)">
+<!-- <template id="option_header_off_canvas_logo_show" inherit_id="website.option_header_off_canvas" name="Show Logo (Off-Canvas)">
     <xpath expr="//header//a[hasclass('o_offcanvas_logo')]" position="replace">
         <a href="/" class="o_offcanvas_logo logo">
             <span t-field="website.logo" t-options="{'widget': 'image', 'style': 'max-width: 200px'}" role="img" t-att-aria-label="'Logo of %s' % website.name" t-att-title="website.name" />
         </a>
     </xpath>
-</template>
+</template> -->
 
 <template id="header_visibility_standard" inherit_id="website.layout" name="Header Visibility Standard">
     <xpath expr="//header" position="attributes">
