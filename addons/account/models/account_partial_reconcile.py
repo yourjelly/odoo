@@ -12,52 +12,69 @@ class AccountPartialReconcile(models.Model):
     # ==== Reconciliation fields ====
     debit_move_id = fields.Many2one(
         comodel_name='account.move.line',
-        index=True, required=True)
+        index=True,
+        required=True,
+    )
     credit_move_id = fields.Many2one(
         comodel_name='account.move.line',
-        index=True, required=True)
+        index=True,
+        required=True,
+    )
     full_reconcile_id = fields.Many2one(
         comodel_name='account.full.reconcile',
-        string="Full Reconcile", copy=False)
+        string="Full Reconcile",
+        copy=False,
+    )
 
     # ==== Currency fields ====
     company_currency_id = fields.Many2one(
         comodel_name='res.currency',
         string="Company Currency",
         related='company_id.currency_id',
-        help="Utility field to express amount currency")
+        help="Utility field to express amount currency",
+    )
     debit_currency_id = fields.Many2one(
         comodel_name='res.currency',
         store=True,
         compute='_compute_debit_currency_id',
-        string="Currency of the debit journal item.")
+        string="Currency of the debit journal item.",
+    )
     credit_currency_id = fields.Many2one(
         comodel_name='res.currency',
         store=True,
         compute='_compute_credit_currency_id',
-        string="Currency of the credit journal item.")
+        string="Currency of the credit journal item.",
+    )
 
     # ==== Amount fields ====
     amount = fields.Monetary(
         currency_field='company_currency_id',
-        help="Always positive amount concerned by this matching expressed in the company currency.")
+        help="Always positive amount concerned by this matching expressed in the company currency.",
+    )
     debit_amount_currency = fields.Monetary(
         currency_field='debit_currency_id',
-        help="Always positive amount concerned by this matching expressed in the debit line foreign currency.")
+        help="Always positive amount concerned by this matching expressed in the debit line foreign currency.",
+    )
     credit_amount_currency = fields.Monetary(
         currency_field='credit_currency_id',
-        help="Always positive amount concerned by this matching expressed in the credit line foreign currency.")
+        help="Always positive amount concerned by this matching expressed in the credit line foreign currency.",
+    )
 
     # ==== Other fields ====
     company_id = fields.Many2one(
         comodel_name='res.company',
-        string="Company", store=True, readonly=False,
-        related='debit_move_id.company_id')
+        string="Company",
+        store=True,
+        readonly=False,
+        related='debit_move_id.company_id',
+    )
     max_date = fields.Date(
-        string="Max Date of Matched Lines", store=True,
+        string="Max Date of Matched Lines",
+        store=True,
         compute='_compute_max_date',
         help="Technical field used to determine at which date this reconciliation needs to be shown on the "
-             "aged receivable/payable reports.")
+             "aged receivable/payable reports.",
+    )
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS

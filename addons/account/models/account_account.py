@@ -9,26 +9,38 @@ class AccountAccountType(models.Model):
     _description = "Account Type"
 
     name = fields.Char(string='Account Type', required=True, translate=True)
-    include_initial_balance = fields.Boolean(string="Bring Accounts Balance Forward", help="Used in reports to know if we should consider journal items from the beginning of time instead of from the fiscal year only. Account types that should be reset to zero at each new fiscal year (like expenses, revenue..) should not have this option set.")
-    type = fields.Selection([
-        ('other', 'Regular'),
-        ('receivable', 'Receivable'),
-        ('payable', 'Payable'),
-        ('liquidity', 'Liquidity'),
-    ], required=True, default='other',
-        help="The 'Internal Type' is used for features available on "\
-        "different types of accounts: liquidity type is for cash or bank accounts"\
-        ", payable/receivable is for vendor/customer accounts.")
-    internal_group = fields.Selection([
-        ('equity', 'Equity'),
-        ('asset', 'Asset'),
-        ('liability', 'Liability'),
-        ('income', 'Income'),
-        ('expense', 'Expense'),
-        ('off_balance', 'Off Balance'),
-    ], string="Internal Group",
+    include_initial_balance = fields.Boolean(
+        string="Bring Accounts Balance Forward",
+        help="Used in reports to know if we should consider journal items from the beginning "
+             "of time instead of from the fiscal year only. Account types that should be reset "
+             "to zero at each new fiscal year (like expenses, revenue..) should not have this option set.",
+    )
+    type = fields.Selection(
+        selection=[
+            ('other', 'Regular'),
+            ('receivable', 'Receivable'),
+            ('payable', 'Payable'),
+            ('liquidity', 'Liquidity'),
+        ],
         required=True,
-        help="The 'Internal Group' is used to filter accounts based on the internal group set on the account type.")
+        default='other',
+        help="The 'Internal Type' is used for features available on "
+             "different types of accounts: liquidity type is for cash or bank accounts"
+             ", payable/receivable is for vendor/customer accounts.",
+    )
+    internal_group = fields.Selection(
+        selection=[
+            ('equity', 'Equity'),
+            ('asset', 'Asset'),
+            ('liability', 'Liability'),
+            ('income', 'Income'),
+            ('expense', 'Expense'),
+            ('off_balance', 'Off Balance'),
+        ],
+        string="Internal Group",
+        required=True,
+        help="The 'Internal Group' is used to filter accounts based on the internal group set on the account type.",
+    )
     note = fields.Text(string='Description')
 
 
@@ -41,7 +53,7 @@ class AccountAccount(models.Model):
     @api.constrains('internal_type', 'reconcile')
     def _check_reconcile(self):
         for account in self:
-            if account.internal_type in ('receivable', 'payable') and account.reconcile == False:
+            if account.internal_type in ('receivable', 'payable') and account.reconcile is False:
                 raise ValidationError(_('You cannot have a receivable/payable account that is not reconcilable. (account code: %s)', account.code))
 
     @api.constrains('user_type_id')
@@ -55,26 +67,44 @@ class AccountAccount(models.Model):
                 raise ValidationError(_('You cannot have more than one account with "Current Year Earnings" as type. (accounts: %s)', [a.code for a in account_unaffected_earnings]))
 
     name = fields.Char(string="Account Name", required=True, index=True)
-    currency_id = fields.Many2one('res.currency', string='Account Currency',
-        help="Forces all moves for this account to have this account currency.")
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        string='Account Currency',
+        help="Forces all moves for this account to have this account currency.",
+    )
     code = fields.Char(size=64, required=True, index=True)
     deprecated = fields.Boolean(index=True, default=False)
     used = fields.Boolean(store=False, search='_search_used')
-    user_type_id = fields.Many2one('account.account.type', string='Type', required=True,
-        help="Account Type is used for information purpose, to generate country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.")
+    user_type_id = fields.Many2one(
+        comodel_name='account.account.type',
+        string='Type',
+        required=True,
+        help="Account Type is used for information purpose, to generate country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.",
+    )
     internal_type = fields.Selection(related='user_type_id.type', string="Internal Type", store=True, readonly=True)
     internal_group = fields.Selection(related='user_type_id.internal_group', string="Internal Group", store=True, readonly=True)
-    #has_unreconciled_entries = fields.Boolean(compute='_compute_has_unreconciled_entries',
-    #    help="The account has at least one unreconciled debit and credit since last time the invoices & payments matching was performed.")
-    reconcile = fields.Boolean(string='Allow Reconciliation', default=False,
-        help="Check this box if this account allows invoices & payments matching of journal items.")
-    tax_ids = fields.Many2many('account.tax', 'account_account_tax_default_rel',
-        'account_id', 'tax_id', string='Default Taxes',
+    reconcile = fields.Boolean(
+        string='Allow Reconciliation',
+        default=False,
+        help="Check this box if this account allows invoices & payments matching of journal items.",
+    )
+    tax_ids = fields.Many2many(
+        comodel_name='account.tax',
+        inverse_name='account_account_tax_default_rel',
+        column1='account_id',
+        column2='tax_id',
+        string='Default Taxes',
         check_company=True,
-        context={'append_type_to_tax_name': True})
+        context={'append_type_to_tax_name': True},
+    )
     note = fields.Text('Internal Notes')
-    company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True,
-        default=lambda self: self.env.company)
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        string='Company',
+        required=True,
+        readonly=True,
+        default=lambda self: self.env.company,
+    )
     tag_ids = fields.Many2many('account.account.tag', 'account_account_account_tag', string='Tags', help="Optional tags you may want to assign for custom reporting")
     group_id = fields.Many2one('account.group', compute='_compute_account_group', store=True)
     root_id = fields.Many2one('account.root', compute='_compute_account_root', store=True)

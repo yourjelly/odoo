@@ -2,11 +2,10 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_is_zero, float_repr, float_compare, date_utils, email_split, email_escape_char, email_re
+from odoo.tools import float_compare, date_utils, email_split, email_re
 from odoo.tools.misc import formatLang, format_date, get_lang
 
 from datetime import date, timedelta
-from itertools import groupby
 from itertools import zip_longest
 from hashlib import sha256
 from json import dumps
@@ -15,13 +14,14 @@ import ast
 import json
 import re
 
-#forbidden fields
+# forbidden fields
 INTEGRITY_HASH_MOVE_FIELDS = ('date', 'journal_id', 'company_id')
 INTEGRITY_HASH_LINE_FIELDS = ('debit', 'credit', 'account_id', 'partner_id')
 
 
 def calc_check_digits(number):
     """Calculate the extra digits that should be appended to the number to make it a valid number.
+
     Source: python-stdnum iso7064.mod_97_10.calc_check_digits
     """
     number_base10 = ''.join(str(int(x, 36)) for x in number)
@@ -119,22 +119,43 @@ class AccountMove(models.Model):
         return self.env.company.incoterm_id
 
     # ==== Business fields ====
-    name = fields.Char(string='Number', copy=False, compute='_compute_name', readonly=False, store=True, index=True, tracking=True)
+    name = fields.Char(
+        string='Number',
+        copy=False,
+        compute='_compute_name',
+        readonly=False,
+        store=True,
+        index=True,
+        tracking=True,
+    )
     highest_name = fields.Char(compute='_compute_highest_name')
     show_name_warning = fields.Boolean(store=False)
-    date = fields.Date(string='Date', required=True, index=True, readonly=True,
+    date = fields.Date(
+        string='Date',
+        required=True,
+        index=True,
+        readonly=True,
         states={'draft': [('readonly', False)]},
-        default=fields.Date.context_today)
+        default=fields.Date.context_today,
+    )
     ref = fields.Char(string='Reference', copy=False, tracking=True)
     narration = fields.Text(string='Terms and Conditions')
-    state = fields.Selection(selection=[
+    state = fields.Selection(
+        selection=[
             ('draft', 'Draft'),
             ('posted', 'Posted'),
             ('cancel', 'Cancelled'),
-        ], string='Status', required=True, readonly=True, copy=False, tracking=True,
-        default='draft')
+        ],
+        string='Status',
+        required=True,
+        readonly=True,
+        copy=False,
+        tracking=True,
+        default='draft',
+    )
     posted_before = fields.Boolean(help="Technical field for knowing if the move has been posted before", copy=False)
-    move_type = fields.Selection(selection=[
+    move_type = fields.Selection(
+        selection=[
             ('entry', 'Journal Entry'),
             ('out_invoice', 'Customer Invoice'),
             ('out_refund', 'Customer Credit Note'),
@@ -142,97 +163,214 @@ class AccountMove(models.Model):
             ('in_refund', 'Vendor Credit Note'),
             ('out_receipt', 'Sales Receipt'),
             ('in_receipt', 'Purchase Receipt'),
-        ], string='Type', required=True, store=True, index=True, readonly=True, tracking=True,
-        default="entry", change_default=True)
+        ],
+        string='Type',
+        required=True,
+        store=True,
+        index=True,
+        readonly=True,
+        tracking=True,
+        default="entry",
+        change_default=True)
     type_name = fields.Char('Type Name', compute='_compute_type_name')
-    to_check = fields.Boolean(string='To Check', default=False,
-        help='If this checkbox is ticked, it means that the user was not sure of all the related informations at the time of the creation of the move and that the move needs to be checked again.')
-    journal_id = fields.Many2one('account.journal', string='Journal', required=True, readonly=True,
-        states={'draft': [('readonly', False)]},
-        check_company=True, domain="[('id', 'in', suitable_journal_ids)]",
-        default=_get_default_journal)
-    suitable_journal_ids = fields.Many2many('account.journal', compute='_compute_suitable_journal_ids')
-    company_id = fields.Many2one(string='Company', store=True, readonly=True,
-        related='journal_id.company_id', change_default=True, default=lambda self: self.env.company)
-    company_currency_id = fields.Many2one(string='Company Currency', readonly=True,
-        related='journal_id.company_id.currency_id')
-    currency_id = fields.Many2one('res.currency', store=True, readonly=True, tracking=True, required=True,
-        states={'draft': [('readonly', False)]},
-        string='Currency',
-        default=_get_default_currency)
-    line_ids = fields.One2many('account.move.line', 'move_id', string='Journal Items', copy=True, readonly=True,
-        states={'draft': [('readonly', False)]})
-    partner_id = fields.Many2one('res.partner', readonly=True, tracking=True,
+    to_check = fields.Boolean(
+        string='To Check',
+        default=False,
+        help='If this checkbox is ticked, it means that the user was not sure of all the related informations at the time of the creation of the move and that the move needs to be checked again.',
+    )
+    journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Journal',
+        required=True,
+        readonly=True,
         states={'draft': [('readonly', False)]},
         check_company=True,
-        string='Partner', change_default=True)
-    commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity', store=True, readonly=True,
-        compute='_compute_commercial_partner_id')
+        domain="[('id', 'in', suitable_journal_ids)]",
+        default=_get_default_journal,
+    )
+    suitable_journal_ids = fields.Many2many('account.journal', compute='_compute_suitable_journal_ids')
+    company_id = fields.Many2one(
+        string='Company',
+        store=True,
+        readonly=True,
+        related='journal_id.company_id',
+        change_default=True,
+        default=lambda self: self.env.company,
+    )
+    company_currency_id = fields.Many2one(
+        string='Company Currency',
+        readonly=True,
+        related='journal_id.company_id.currency_id')
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        store=True,
+        readonly=True,
+        tracking=True,
+        required=True,
+        states={'draft': [('readonly', False)]},
+        string='Currency',
+        default=_get_default_currency,
+    )
+    line_ids = fields.One2many(
+        comodel_name='account.move.line',
+        inverse_name='move_id',
+        string='Journal Items',
+        copy=True,
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+    )
+    partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        readonly=True,
+        tracking=True,
+        states={'draft': [('readonly', False)]},
+        check_company=True,
+        string='Partner',
+        change_default=True,
+    )
+    commercial_partner_id = fields.Many2one(
+        comodel_name='res.partner',
+        string='Commercial Entity',
+        store=True,
+        readonly=True,
+        compute='_compute_commercial_partner_id',
+    )
     country_code = fields.Char(related='company_id.country_id.code', readonly=True)
-    user_id = fields.Many2one(string='User', related='invoice_user_id',
-        help='Technical field used to fit the generic behavior in mail templates.')
-    is_move_sent = fields.Boolean(readonly=True, default=False, copy=False,
-        help="It indicates that the invoice/payment has been sent.")
-    partner_bank_id = fields.Many2one('res.partner.bank', string='Recipient Bank',
+    user_id = fields.Many2one(
+        string='User',
+        related='invoice_user_id',
+        help='Technical field used to fit the generic behavior in mail templates.',
+    )
+    is_move_sent = fields.Boolean(
+        readonly=True,
+        default=False,
+        copy=False,
+        help="It indicates that the invoice/payment has been sent.",
+    )
+    partner_bank_id = fields.Many2one(
+        comodel_name='res.partner.bank',
+        string='Recipient Bank',
         help='Bank Account Number to which the invoice will be paid. A Company bank account if this is a Customer Invoice or Vendor Credit Note, otherwise a Partner bank account number.',
-        check_company=True)
-    payment_reference = fields.Char(string='Payment Reference', index=True, copy=False,
-        help="The payment reference to set on journal items.")
+        check_company=True,
+    )
+    payment_reference = fields.Char(
+        string='Payment Reference',
+        index=True,
+        copy=False,
+        help="The payment reference to set on journal items.",
+    )
     payment_id = fields.Many2one(
         comodel_name='account.payment',
-        string="Payment", copy=False, check_company=True)
+        string="Payment",
+        copy=False,
+        check_company=True,
+    )
     statement_line_id = fields.Many2one(
         comodel_name='account.bank.statement.line',
-        string="Statement Line", copy=False, check_company=True)
+        string="Statement Line",
+        copy=False,
+        check_company=True,
+    )
 
     # === Amount fields ===
-    amount_untaxed = fields.Monetary(string='Untaxed Amount', store=True, readonly=True, tracking=True,
+    amount_untaxed = fields.Monetary(
+        string='Untaxed Amount',
+        store=True,
+        readonly=True,
+        tracking=True,
         compute='_compute_amount')
-    amount_tax = fields.Monetary(string='Tax', store=True, readonly=True,
-        compute='_compute_amount')
-    amount_total = fields.Monetary(string='Total', store=True, readonly=True,
+    amount_tax = fields.Monetary(
+        string='Tax',
+        store=True,
+        readonly=True,
         compute='_compute_amount',
-        inverse='_inverse_amount_total')
-    amount_residual = fields.Monetary(string='Amount Due', store=True,
-        compute='_compute_amount')
-    amount_untaxed_signed = fields.Monetary(string='Untaxed Amount Signed', store=True, readonly=True,
-        compute='_compute_amount', currency_field='company_currency_id')
-    amount_tax_signed = fields.Monetary(string='Tax Signed', store=True, readonly=True,
-        compute='_compute_amount', currency_field='company_currency_id')
-    amount_total_signed = fields.Monetary(string='Total Signed', store=True, readonly=True,
-        compute='_compute_amount', currency_field='company_currency_id')
-    amount_residual_signed = fields.Monetary(string='Amount Due Signed', store=True,
-        compute='_compute_amount', currency_field='company_currency_id')
-    amount_by_group = fields.Binary(string="Tax amount by group",
+    )
+    amount_total = fields.Monetary(
+        string='Total',
+        store=True,
+        readonly=True,
+        compute='_compute_amount',
+        inverse='_inverse_amount_total',
+    )
+    amount_residual = fields.Monetary(
+        string='Amount Due',
+        store=True,
+        compute='_compute_amount',
+    )
+    amount_untaxed_signed = fields.Monetary(
+        string='Untaxed Amount Signed',
+        store=True,
+        readonly=True,
+        compute='_compute_amount',
+        currency_field='company_currency_id',
+    )
+    amount_tax_signed = fields.Monetary(
+        string='Tax Signed',
+        store=True,
+        readonly=True,
+        compute='_compute_amount',
+        currency_field='company_currency_id',
+    )
+    amount_total_signed = fields.Monetary(
+        string='Total Signed',
+        store=True,
+        readonly=True,
+        compute='_compute_amount',
+        currency_field='company_currency_id',
+    )
+    amount_residual_signed = fields.Monetary(
+        string='Amount Due Signed',
+        store=True,
+        compute='_compute_amount',
+        currency_field='company_currency_id',
+    )
+    amount_by_group = fields.Binary(
+        string="Tax amount by group",
         compute='_compute_invoice_taxes_by_group',
-        help='Edit Tax amounts if you encounter rouding issues.')
-    payment_state = fields.Selection(selection=[
-        ('not_paid', 'Not Paid'),
-        ('in_payment', 'In Payment'),
-        ('paid', 'Paid'),
-        ('partial', 'Partially Paid'),
-        ('reversed', 'Reversed'),
-        ('invoicing_legacy', 'Invoicing App Legacy')],
-        string="Payment Status", store=True, readonly=True, copy=False, tracking=True,
-        compute='_compute_amount')
+        help='Edit Tax amounts if you encounter rouding issues.',
+    )
+    payment_state = fields.Selection(
+        selection=[
+            ('not_paid', 'Not Paid'),
+            ('in_payment', 'In Payment'),
+            ('paid', 'Paid'),
+            ('partial', 'Partially Paid'),
+            ('reversed', 'Reversed'),
+            ('invoicing_legacy', 'Invoicing App Legacy')],
+        string="Payment Status",
+        store=True,
+        readonly=True,
+        copy=False,
+        tracking=True,
+        compute='_compute_amount',
+    )
 
     # ==== Cash basis feature fields ====
     tax_cash_basis_rec_id = fields.Many2one(
-        'account.partial.reconcile',
+        comodel_name='account.partial.reconcile',
         string='Tax Cash Basis Entry of',
         help="Technical field used to keep track of the tax cash basis reconciliation. "
-             "This is needed when cancelling the source: it will post the inverse journal entry to cancel that part too.")
+             "This is needed when cancelling the source: it will post the inverse journal entry to cancel that part too.",
+    )
     tax_cash_basis_move_id = fields.Many2one(
         comodel_name='account.move',
         string="Origin Tax Cash Basis Entry",
-        help="The journal entry from which this tax cash basis journal entry has been created.")
+        help="The journal entry from which this tax cash basis journal entry has been created.",
+    )
 
     # ==== Auto-post feature fields ====
-    auto_post = fields.Boolean(string='Post Automatically', default=False,
-        help='If this checkbox is ticked, this entry will be automatically posted at its date.')
+    auto_post = fields.Boolean(
+        string='Post Automatically',
+        default=False,
+        help='If this checkbox is ticked, this entry will be automatically posted at its date.',
+    )
 
     # ==== Reverse feature fields ====
-    reversed_entry_id = fields.Many2one('account.move', string="Reversal of", readonly=True, copy=False,
+    reversed_entry_id = fields.Many2one(
+        comodel_name='account.move',
+        string="Reversal of",
+        readonly=True,
+        copy=False,
         check_company=True)
     reversal_move_id = fields.One2many('account.move', 'reversed_entry_id')
 
@@ -241,69 +379,123 @@ class AccountMove(models.Model):
     # =========================================================
 
     # ==== Business fields ====
-    fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', readonly=True,
+    fiscal_position_id = fields.Many2one(
+        comodel_name='account.fiscal.position',
+        string='Fiscal Position',
+        readonly=True,
         states={'draft': [('readonly', False)]},
         check_company=True,
         domain="[('company_id', '=', company_id)]",
         help="Fiscal positions are used to adapt taxes and accounts for particular customers or sales orders/invoices. "
-             "The default value comes from the customer.")
-    invoice_user_id = fields.Many2one('res.users', copy=False, tracking=True,
+             "The default value comes from the customer.",
+    )
+    invoice_user_id = fields.Many2one(
+        comodel_name='res.users',
+        copy=False,
+        tracking=True,
         string='Salesperson',
-        default=lambda self: self.env.user)
-    invoice_date = fields.Date(string='Invoice/Bill Date', readonly=True, index=True, copy=False,
+        default=lambda self: self.env.user,
+    )
+    invoice_date = fields.Date(
+        string='Invoice/Bill Date',
+        readonly=True,
+        index=True,
+        copy=False,
         states={'draft': [('readonly', False)]},
-        default=_get_default_invoice_date)
-    invoice_date_due = fields.Date(string='Due Date', readonly=True, index=True, copy=False,
-        states={'draft': [('readonly', False)]})
-    invoice_origin = fields.Char(string='Origin', readonly=True, tracking=True,
-        help="The document(s) that generated the invoice.")
-    invoice_payment_term_id = fields.Many2one('account.payment.term', string='Payment Terms',
+        default=_get_default_invoice_date,
+    )
+    invoice_date_due = fields.Date(
+        string='Due Date',
+        readonly=True,
+        index=True,
+        copy=False,
+        states={'draft': [('readonly', False)]},
+    )
+    invoice_origin = fields.Char(
+        string='Origin',
+        readonly=True,
+        tracking=True,
+        help="The document(s) that generated the invoice.",
+    )
+    invoice_payment_term_id = fields.Many2one(
+        comodel_name='account.payment.term',
+        string='Payment Terms',
         check_company=True,
-        readonly=True, states={'draft': [('readonly', False)]})
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+    )
     # /!\ invoice_line_ids is just a subset of line_ids.
-    invoice_line_ids = fields.One2many('account.move.line', 'move_id', string='Invoice lines',
-        copy=False, readonly=True,
+    invoice_line_ids = fields.One2many(
+        comodel_name='account.move.line',
+        inverse_name='move_id',
+        string='Invoice lines',
+        copy=False,
+        readonly=True,
         domain=[('exclude_from_invoice_tab', '=', False)],
-        states={'draft': [('readonly', False)]})
-    invoice_incoterm_id = fields.Many2one('account.incoterms', string='Incoterm',
+        states={'draft': [('readonly', False)]},
+    )
+    invoice_incoterm_id = fields.Many2one(
+        comodel_name='account.incoterms',
+        string='Incoterm',
         default=_get_default_invoice_incoterm,
-        help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
+        help='International Commercial Terms are a series of predefined commercial terms used in international transactions.',
+    )
     display_qr_code = fields.Boolean(string="Display QR-code", related='company_id.qr_code')
-    qr_code_method = fields.Selection(string="Payment QR-code",
+    qr_code_method = fields.Selection(
+        string="Payment QR-code",
         selection=lambda self: self.env['res.partner.bank'].get_available_qr_methods_in_sequence(),
-        help="Type of QR-code to be generated for the payment of this invoice, when printing it. If left blank, the first available and usable method will be used.")
+        help="Type of QR-code to be generated for the payment of this invoice, when printing it. If left blank, the first available and usable method will be used.",
+    )
 
     # ==== Payment widget fields ====
-    invoice_outstanding_credits_debits_widget = fields.Text(groups="account.group_account_invoice,account.group_account_readonly",
-        compute='_compute_payments_widget_to_reconcile_info')
-    invoice_has_outstanding = fields.Boolean(groups="account.group_account_invoice,account.group_account_readonly",
-        compute='_compute_payments_widget_to_reconcile_info')
-    invoice_payments_widget = fields.Text(groups="account.group_account_invoice,account.group_account_readonly",
-        compute='_compute_payments_widget_reconciled_info')
+    invoice_outstanding_credits_debits_widget = fields.Text(
+        groups="account.group_account_invoice,account.group_account_readonly",
+        compute='_compute_payments_widget_to_reconcile_info',
+    )
+    invoice_has_outstanding = fields.Boolean(
+        groups="account.group_account_invoice,account.group_account_readonly",
+        compute='_compute_payments_widget_to_reconcile_info',
+    )
+    invoice_payments_widget = fields.Text(
+        groups="account.group_account_invoice,account.group_account_readonly",
+        compute='_compute_payments_widget_reconciled_info',
+    )
 
     # ==== Vendor bill fields ====
-    invoice_vendor_bill_id = fields.Many2one('account.move', store=False,
+    invoice_vendor_bill_id = fields.Many2one(
+        comodel_name='account.move',
+        store=False,
         check_company=True,
         string='Vendor Bill',
-        help="Auto-complete from a past bill.")
+        help="Auto-complete from a past bill.",
+    )
     invoice_source_email = fields.Char(string='Source Email', tracking=True)
     invoice_partner_display_name = fields.Char(compute='_compute_invoice_partner_display_info', store=True)
 
     # ==== Cash rounding fields ====
-    invoice_cash_rounding_id = fields.Many2one('account.cash.rounding', string='Cash Rounding Method',
-        readonly=True, states={'draft': [('readonly', False)]},
-        help='Defines the smallest coinage of the currency that can be used to pay by cash.')
+    invoice_cash_rounding_id = fields.Many2one(
+        comodel_name='account.cash.rounding',
+        string='Cash Rounding Method',
+        readonly=True,
+        states={'draft': [('readonly', False)]},
+        help='Defines the smallest coinage of the currency that can be used to pay by cash.',
+    )
 
     # ==== Display purpose fields ====
-    invoice_filter_type_domain = fields.Char(compute='_compute_invoice_filter_type_domain',
-        help="Technical field used to have a dynamic domain on journal / taxes in the form view.")
+    invoice_filter_type_domain = fields.Char(
+        compute='_compute_invoice_filter_type_domain',
+        help="Technical field used to have a dynamic domain on journal / taxes in the form view.",
+    )
     bank_partner_id = fields.Many2one('res.partner', help='Technical field to get the domain on the bank', compute='_compute_bank_partner_id')
-    invoice_has_matching_suspense_amount = fields.Boolean(compute='_compute_has_matching_suspense_amount',
+    invoice_has_matching_suspense_amount = fields.Boolean(
+        compute='_compute_has_matching_suspense_amount',
         groups='account.group_account_invoice,account.group_account_readonly',
-        help="Technical field used to display an alert on invoices if there is at least a matching amount in any supsense account.")
+        help="Technical field used to display an alert on invoices if there is at least a matching amount in any supsense account.",
+    )
     tax_lock_date_message = fields.Char(
         compute='_compute_tax_lock_date_message',
-        help="Technical field used to display a message when the invoice's accounting date is prior of the tax lock date.")
+        help="Technical field used to display a message when the invoice's accounting date is prior of the tax lock date.",
+    )
     # Technical field to hide Reconciled Entries stat button
     has_reconciled_entries = fields.Boolean(compute="_compute_has_reconciled_entries")
 
@@ -2702,56 +2894,98 @@ class AccountMoveLine(models.Model):
     _check_company_auto = True
 
     # ==== Business fields ====
-    move_id = fields.Many2one('account.move', string='Journal Entry',
-        index=True, required=True, readonly=True, auto_join=True, ondelete="cascade",
+    move_id = fields.Many2one(
+        comodel_name='account.move',
+        string='Journal Entry',
+        index=True,
+        required=True,
+        readonly=True,
+        auto_join=True,
+        ondelete="cascade",
         check_company=True,
-        help="The move of this entry line.")
+        help="The move of this entry line.",
+    )
     move_name = fields.Char(string='Number', related='move_id.name', store=True, index=True)
     date = fields.Date(related='move_id.date', store=True, readonly=True, index=True, copy=False, group_operator='min')
     ref = fields.Char(related='move_id.ref', store=True, copy=False, index=True, readonly=False)
     parent_state = fields.Selection(related='move_id.state', store=True, readonly=True)
     journal_id = fields.Many2one(related='move_id.journal_id', store=True, index=True, copy=False)
     company_id = fields.Many2one(related='move_id.company_id', store=True, readonly=True, default=lambda self: self.env.company)
-    company_currency_id = fields.Many2one(related='company_id.currency_id', string='Company Currency',
-        readonly=True, store=True,
-        help='Utility field to express amount currency')
+    company_currency_id = fields.Many2one(
+        related='company_id.currency_id',
+        string='Company Currency',
+        readonly=True,
+        store=True,
+        help='Utility field to express amount currency',
+    )
     country_id = fields.Many2one(comodel_name='res.country', related='move_id.company_id.country_id')
-    account_id = fields.Many2one('account.account', string='Account',
-        index=True, ondelete="cascade",
+    account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Account',
+        index=True,
+        ondelete="cascade",
         domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
         check_company=True,
-        tracking=True)
+        tracking=True,
+    )
     account_internal_type = fields.Selection(related='account_id.user_type_id.type', string="Internal Type", store=True, readonly=True)
     account_root_id = fields.Many2one(related='account_id.root_id', string="Account Root", store=True, readonly=True)
     sequence = fields.Integer(default=10)
     name = fields.Text(string='Label', tracking=True)
-    quantity = fields.Float(string='Quantity',
-        default=1.0, digits='Product Unit of Measure',
+    quantity = fields.Float(
+        string='Quantity',
+        default=1.0,
+        digits='Product Unit of Measure',
         help="The optional quantity expressed by this line, eg: number of product sold. "
-             "The quantity is not a legal requirement but is very useful for some reports.")
+             "The quantity is not a legal requirement but is very useful for some reports.",
+    )
     price_unit = fields.Float(string='Unit Price', digits='Product Price')
     discount = fields.Float(string='Discount (%)', digits='Discount', default=0.0)
     debit = fields.Monetary(string='Debit', default=0.0, currency_field='company_currency_id')
     credit = fields.Monetary(string='Credit', default=0.0, currency_field='company_currency_id')
-    balance = fields.Monetary(string='Balance', store=True,
+    balance = fields.Monetary(
+        string='Balance',
+        store=True,
         currency_field='company_currency_id',
         compute='_compute_balance',
-        help="Technical field holding the debit - credit in order to open meaningful graph views from reports")
-    cumulated_balance = fields.Monetary(string='Cumulated Balance', store=False,
+        help="Technical field holding the debit - credit in order to open meaningful graph views from reports",
+    )
+    cumulated_balance = fields.Monetary(
+        string='Cumulated Balance',
+        store=False,
         currency_field='company_currency_id',
         compute='_compute_cumulated_balance',
         help="Cumulated balance depending on the domain and the order chosen in the view.")
-    amount_currency = fields.Monetary(string='Amount in Currency', store=True, copy=True,
-        help="The amount expressed in an optional other currency if it is a multi-currency entry.")
-    price_subtotal = fields.Monetary(string='Subtotal', store=True, readonly=True,
-        currency_field='always_set_currency_id')
-    price_total = fields.Monetary(string='Total', store=True, readonly=True,
-        currency_field='always_set_currency_id')
+    amount_currency = fields.Monetary(
+        string='Amount in Currency',
+        store=True,
+        copy=True,
+        help="The amount expressed in an optional other currency if it is a multi-currency entry.",
+    )
+    price_subtotal = fields.Monetary(
+        string='Subtotal',
+        store=True,
+        readonly=True,
+        currency_field='always_set_currency_id',
+    )
+    price_total = fields.Monetary(
+        string='Total',
+        store=True,
+        readonly=True,
+        currency_field='always_set_currency_id',
+    )
     reconciled = fields.Boolean(compute='_compute_amount_residual', store=True)
-    blocked = fields.Boolean(string='No Follow-up', default=False,
-        help="You can check this box to mark this journal item as a litigation with the associated partner")
-    date_maturity = fields.Date(string='Due Date', index=True, tracking=True,
-        help="This field is used for payable and receivable journal entries. You can put the limit date for the payment of this line.")
+    blocked = fields.Boolean(
+        string='No Follow-up',
+        default=False,
+        help="You can check this box to mark this journal item as a litigation with the associated partner",
+    )
+    date_maturity = fields.Date(
+        string='Due Date',
+        index=True,
+        tracking=True,
+        help="This field is used for payable and receivable journal entries. You can put the limit date for the payment of this line.",
+    )
     currency_id = fields.Many2one('res.currency', string='Currency')
     partner_id = fields.Many2one('res.partner', string='Partner', ondelete='restrict')
     product_uom_id = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
@@ -2760,73 +2994,171 @@ class AccountMoveLine(models.Model):
 
     # ==== Origin fields ====
     reconcile_model_id = fields.Many2one('account.reconcile.model', string="Reconciliation Model", copy=False, readonly=True, check_company=True)
-    payment_id = fields.Many2one('account.payment', index=True, store=True,
+    payment_id = fields.Many2one(
+        comodel_name='account.payment',
+        index=True,
+        store=True,
         string="Originator Payment",
         related='move_id.payment_id',
-        help="The payment that created this entry")
-    statement_line_id = fields.Many2one('account.bank.statement.line', index=True, store=True,
+        help="The payment that created this entry",
+    )
+    statement_line_id = fields.Many2one(
+        comodel_name='account.bank.statement.line',
+        index=True,
+        store=True,
         string="Originator Statement Line",
         related='move_id.statement_line_id',
-        help="The statement line that created this entry")
-    statement_id = fields.Many2one(related='statement_line_id.statement_id', store=True, index=True, copy=False,
-        help="The bank statement used for bank reconciliation")
+        help="The statement line that created this entry",
+    )
+    statement_id = fields.Many2one(
+        related='statement_line_id.statement_id',
+        store=True,
+        index=True,
+        copy=False,
+        help="The bank statement used for bank reconciliation",
+    )
 
     # ==== Tax fields ====
     tax_ids = fields.Many2many('account.tax', string='Taxes', help="Taxes that apply on the base amount", check_company=True)
-    tax_line_id = fields.Many2one('account.tax', string='Originator Tax', ondelete='restrict', store=True,
-        compute='_compute_tax_line_id', help="Indicates that this journal item is a tax line")
-    tax_group_id = fields.Many2one(related='tax_line_id.tax_group_id', string='Originator tax group',
-        readonly=True, store=True,
-        help='technical field for widget tax-group-custom-field')
-    tax_base_amount = fields.Monetary(string="Base Amount", store=True, readonly=True,
-        currency_field='company_currency_id')
-    tax_exigible = fields.Boolean(string='Appears in VAT report', default=True, readonly=True,
+    tax_line_id = fields.Many2one(
+        comodel_name='account.tax',
+        string='Originator Tax',
+        ondelete='restrict',
+        store=True,
+        compute='_compute_tax_line_id',
+        help="Indicates that this journal item is a tax line",
+    )
+    tax_group_id = fields.Many2one(
+        related='tax_line_id.tax_group_id',
+        string='Originator tax group',
+        readonly=True,
+        store=True,
+        help='technical field for widget tax-group-custom-field',
+    )
+    tax_base_amount = fields.Monetary(
+        string="Base Amount",
+        store=True,
+        readonly=True,
+        currency_field='company_currency_id',
+    )
+    tax_exigible = fields.Boolean(
+        string='Appears in VAT report',
+        default=True,
+        readonly=True,
         help="Technical field used to mark a tax line as exigible in the vat report or not (only exigible journal items"
              " are displayed). By default all new journal items are directly exigible, but with the feature cash_basis"
-             " on taxes, some will become exigible only when the payment is recorded.")
-    tax_repartition_line_id = fields.Many2one(comodel_name='account.tax.repartition.line',
-        string="Originator Tax Repartition Line", ondelete='restrict', readonly=True,
+             " on taxes, some will become exigible only when the payment is recorded.",
+    )
+    tax_repartition_line_id = fields.Many2one(
+        comodel_name='account.tax.repartition.line',
+        string="Originator Tax Repartition Line",
+        ondelete='restrict',
+        readonly=True,
         check_company=True,
-        help="Tax repartition line that caused the creation of this move line, if any")
-    tax_tag_ids = fields.Many2many(string="Tags", comodel_name='account.account.tag', ondelete='restrict',
-        help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.", tracking=True)
-    tax_audit = fields.Char(string="Tax Audit String", compute="_compute_tax_audit", store=True,
-        help="Computed field, listing the tax grids impacted by this line, and the amount it applies to each of them.")
+        help="Tax repartition line that caused the creation of this move line, if any",
+    )
+    tax_tag_ids = fields.Many2many(
+        string="Tags",
+        comodel_name='account.account.tag',
+        ondelete='restrict',
+        help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.",
+        tracking=True,
+    )
+    tax_audit = fields.Char(
+        string="Tax Audit String",
+        compute="_compute_tax_audit",
+        store=True,
+        help="Computed field, listing the tax grids impacted by this line, and the amount it applies to each of them.",
+    )
 
     # ==== Reconciliation fields ====
-    amount_residual = fields.Monetary(string='Residual Amount', store=True,
+    amount_residual = fields.Monetary(
+        string='Residual Amount',
+        store=True,
         currency_field='company_currency_id',
         compute='_compute_amount_residual',
-        help="The residual amount on a journal item expressed in the company currency.")
-    amount_residual_currency = fields.Monetary(string='Residual Amount in Currency', store=True,
+        help="The residual amount on a journal item expressed in the company currency.",
+    )
+    amount_residual_currency = fields.Monetary(
+        string='Residual Amount in Currency',
+        store=True,
         compute='_compute_amount_residual',
-        help="The residual amount on a journal item expressed in its currency (possibly not the company currency).")
-    full_reconcile_id = fields.Many2one('account.full.reconcile', string="Matching", copy=False, index=True, readonly=True)
-    matched_debit_ids = fields.One2many('account.partial.reconcile', 'credit_move_id', string='Matched Debits',
-        help='Debit journal items that are matched with this journal item.', readonly=True)
-    matched_credit_ids = fields.One2many('account.partial.reconcile', 'debit_move_id', string='Matched Credits',
-        help='Credit journal items that are matched with this journal item.', readonly=True)
-    matching_number = fields.Char(string="Matching #", compute='_compute_matching_number', store=True, help="Matching number for this line, 'P' if it is only partially reconcile, or the name of the full reconcile if it exists.")
+        help="The residual amount on a journal item expressed in its currency (possibly not the company currency).",
+    )
+    full_reconcile_id = fields.Many2one(
+        comodel_name='account.full.reconcile',
+        string="Matching",
+        copy=False,
+        index=True,
+        readonly=True,
+    )
+    matched_debit_ids = fields.One2many(
+        comodel_name='account.partial.reconcile',
+        inverse_name='credit_move_id',
+        string='Matched Debits',
+        help='Debit journal items that are matched with this journal item.',
+        readonly=True,
+    )
+    matched_credit_ids = fields.One2many(
+        comodel_name='account.partial.reconcile',
+        inverse_name='debit_move_id',
+        string='Matched Credits',
+        help='Credit journal items that are matched with this journal item.',
+        readonly=True,
+    )
+    matching_number = fields.Char(
+        string="Matching #",
+        compute='_compute_matching_number',
+        store=True,
+        help="Matching number for this line, 'P' if it is only partially reconcile, or the name of the full reconcile if it exists.",
+    )
 
     # ==== Analytic fields ====
-    analytic_line_ids = fields.One2many('account.analytic.line', 'move_id', string='Analytic lines')
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account',
-        index=True, compute="_compute_analytic_account", store=True, readonly=False, check_company=True)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags',
-        compute="_compute_analytic_account", store=True, readonly=False, check_company=True)
+    analytic_line_ids = fields.One2many(
+        comodel_name='account.analytic.line',
+        inverse_name='move_id',
+        string='Analytic lines',
+    )
+    analytic_account_id = fields.Many2one(
+        comodel_name='account.analytic.account',
+        string='Analytic Account',
+        index=True,
+        compute="_compute_analytic_account",
+        store=True,
+        readonly=False,
+        check_company=True,
+    )
+    analytic_tag_ids = fields.Many2many(
+        comodel_name='account.analytic.tag',
+        string='Analytic Tags',
+        compute="_compute_analytic_account",
+        store=True,
+        readonly=False,
+        check_company=True,
+    )
 
     # ==== Onchange / display purpose fields ====
-    recompute_tax_line = fields.Boolean(store=False, readonly=True,
-        help="Technical field used to know on which lines the taxes must be recomputed.")
-    display_type = fields.Selection([
-        ('line_section', 'Section'),
-        ('line_note', 'Note'),
-    ], default=False, help="Technical field for UX purpose.")
+    recompute_tax_line = fields.Boolean(
+        store=False,
+        readonly=True,
+        help="Technical field used to know on which lines the taxes must be recomputed.",
+    )
+    display_type = fields.Selection(
+        selection=[
+            ('line_section', 'Section'),
+            ('line_note', 'Note'),
+        ],
+        default=False,
+        help="Technical field for UX purpose.",
+    )
     is_rounding_line = fields.Boolean(help="Technical field used to retrieve the cash rounding line.")
     exclude_from_invoice_tab = fields.Boolean(help="Technical field used to exclude some lines from the invoice_line_ids tab in the form view.")
-    always_set_currency_id = fields.Many2one('res.currency', string='Foreign Currency',
+    always_set_currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        string='Foreign Currency',
         compute='_compute_always_set_currency_id',
-        help="Technical field used to compute the monetary field. As currency_id is not a required field, we need to use either the foreign currency, either the company one.")
+        help="Technical field used to compute the monetary field. As currency_id is not a required field, we need to use either the foreign currency, either the company one.",
+    )
 
     _sql_constraints = [
         (

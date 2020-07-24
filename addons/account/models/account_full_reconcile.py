@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-from odoo import api, fields, models, _
+from odoo import fields, models, _
 
 
 class AccountFullReconcile(models.Model):
     _name = "account.full.reconcile"
     _description = "Full Reconcile"
 
-    name = fields.Char(string='Number', required=True, copy=False, default=lambda self: self.env['ir.sequence'].next_by_code('account.reconcile'))
+    name = fields.Char(
+        string='Number',
+        required=True,
+        copy=False,
+        default=lambda self: self.env['ir.sequence'].next_by_code('account.reconcile'),
+    )
     partial_reconcile_ids = fields.One2many('account.partial.reconcile', 'full_reconcile_id', string='Reconciliation Parts')
     reconciled_line_ids = fields.One2many('account.move.line', 'full_reconcile_id', string='Matched Journal Items')
     exchange_move_id = fields.Many2one('account.move')

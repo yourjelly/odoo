@@ -5,7 +5,6 @@ from odoo.tools.float_utils import float_round as round
 from odoo.exceptions import UserError, ValidationError
 
 import math
-import logging
 
 
 TYPE_TAX_USE = [
@@ -45,11 +44,31 @@ class AccountTax(models.Model):
         return self.env['account.tax.group'].search([], limit=1)
 
     name = fields.Char(string='Tax Name', required=True)
-    type_tax_use = fields.Selection(TYPE_TAX_USE, string='Tax Type', required=True, default="sale",
-        help="Determines where the tax is selectable. Note : 'None' means a tax can't be used by itself, however it can still be used in a group. 'adjustment' is used to perform tax adjustment.")
-    tax_scope = fields.Selection([('service', 'Services'), ('consu', 'Goods')], string="Tax Scope", help="Restrict the use of taxes to a type of product.")
-    amount_type = fields.Selection(default='percent', string="Tax Computation", required=True,
-        selection=[('group', 'Group of Taxes'), ('fixed', 'Fixed'), ('percent', 'Percentage of Price'), ('division', 'Percentage of Price Tax Included')],
+    type_tax_use = fields.Selection(
+        selection=TYPE_TAX_USE,
+        string='Tax Type',
+        required=True,
+        default="sale",
+        help="Determines where the tax is selectable. Note : 'None' means a tax can't be used by itself, however it can still be used in a group. 'adjustment' is used to perform tax adjustment.",
+    )
+    tax_scope = fields.Selection(
+        selection=[
+            ('service', 'Services'),
+            ('consu', 'Goods')
+        ],
+        string="Tax Scope",
+        help="Restrict the use of taxes to a type of product.",
+    )
+    amount_type = fields.Selection(
+        default='percent',
+        string="Tax Computation",
+        required=True,
+        selection=[
+            ('group', 'Group of Taxes'),
+            ('fixed', 'Fixed'),
+            ('percent', 'Percentage of Price'),
+            ('division', 'Percentage of Price Tax Included')
+        ],
         help="""
     - Group of Taxes: The tax is a set of sub taxes.
     - Fixed: The tax amount stays the same whatever the price.
@@ -59,39 +78,80 @@ class AccountTax(models.Model):
     - Percentage of Price Tax Included: The tax amount is a division of the price:
         e.g 180 / (1 - 10%) = 200 (not price included)
         e.g 200 * (1 - 10%) = 180 (price included)
-        """)
+        """,
+    )
     active = fields.Boolean(default=True, help="Set active to false to hide the tax without removing it.")
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, default=lambda self: self.env.company)
-    children_tax_ids = fields.Many2many('account.tax',
-        'account_tax_filiation_rel', 'parent_tax', 'child_tax',
+    children_tax_ids = fields.Many2many(
+        comodel_name='account.tax',
+        relation='account_tax_filiation_rel',
+        column1='parent_tax',
+        column2='child_tax',
         check_company=True,
-        string='Children Taxes')
-    sequence = fields.Integer(required=True, default=1,
-        help="The sequence field is used to define order in which the tax lines are applied.")
+        string='Children Taxes',
+    )
+    sequence = fields.Integer(
+        required=True,
+        default=1,
+        help="The sequence field is used to define order in which the tax lines are applied.",
+    )
     amount = fields.Float(required=True, digits=(16, 4), default=0.0)
     description = fields.Char(string='Label on Invoices')
-    price_include = fields.Boolean(string='Included in Price', default=False,
-        help="Check this if the price you use on the product and invoices includes this tax.")
-    include_base_amount = fields.Boolean(string='Affect Base of Subsequent Taxes', default=False,
-        help="If set, taxes which are computed after this one will be computed based on the price tax included.")
-    analytic = fields.Boolean(string="Include in Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
+    price_include = fields.Boolean(
+        string='Included in Price',
+        default=False,
+        help="Check this if the price you use on the product and invoices includes this tax.",
+    )
+    include_base_amount = fields.Boolean(
+        string='Affect Base of Subsequent Taxes',
+        default=False,
+        help="If set, taxes which are computed after this one will be computed based on the price tax included.",
+    )
+    analytic = fields.Boolean(
+        string="Include in Analytic Cost",
+        help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)",
+    )
     tax_group_id = fields.Many2one('account.tax.group', string="Tax Group", default=_default_tax_group, required=True)
     # Technical field to make the 'tax_exigibility' field invisible if the same named field is set to false in 'res.company' model
     hide_tax_exigibility = fields.Boolean(string='Hide Use Cash Basis Option', related='company_id.tax_exigibility', readonly=True)
     tax_exigibility = fields.Selection(
-        [('on_invoice', 'Based on Invoice'),
-         ('on_payment', 'Based on Payment'),
-        ], string='Tax Due', default='on_invoice',
+        selection=[
+            ('on_invoice', 'Based on Invoice'),
+            ('on_payment', 'Based on Payment'),
+        ],
+        string='Tax Due',
+        default='on_invoice',
         help="Based on Invoice: the tax is due as soon as the invoice is validated.\n"
-        "Based on Payment: the tax is due as soon as the payment of the invoice is received.")
-    cash_basis_transition_account_id = fields.Many2one(string="Cash Basis Transition Account",
+             "Based on Payment: the tax is due as soon as the payment of the invoice is received.",
+    )
+    cash_basis_transition_account_id = fields.Many2one(
+        string="Cash Basis Transition Account",
         check_company=True,
         domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
         comodel_name='account.account',
-        help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled ; at reconciliation, this amount cancelled on this account and put on the regular tax account.")
-    invoice_repartition_line_ids = fields.One2many(string="Repartition for Invoices", comodel_name="account.tax.repartition.line", inverse_name="invoice_tax_id", copy=True, help="Repartition when the tax is used on an invoice")
-    refund_repartition_line_ids = fields.One2many(string="Repartition for Refund Invoices", comodel_name="account.tax.repartition.line", inverse_name="refund_tax_id", copy=True, help="Repartition when the tax is used on a refund")
-    country_id = fields.Many2one(string='Country', comodel_name='res.country', related='company_id.country_id', help="Technical field used to restrict the domain of account tags for tax repartition lines created for this tax.")
+        help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled"
+             " ; at reconciliation, this amount cancelled on this account and put on the regular tax account.",
+    )
+    invoice_repartition_line_ids = fields.One2many(
+        string="Repartition for Invoices",
+        comodel_name="account.tax.repartition.line",
+        inverse_name="invoice_tax_id",
+        copy=True,
+        help="Repartition when the tax is used on an invoice",
+    )
+    refund_repartition_line_ids = fields.One2many(
+        string="Repartition for Refund Invoices",
+        comodel_name="account.tax.repartition.line",
+        inverse_name="refund_tax_id",
+        copy=True,
+        help="Repartition when the tax is used on a refund",
+    )
+    country_id = fields.Many2one(
+        string='Country',
+        comodel_name='res.country',
+        related='company_id.country_id',
+        help="Technical field used to restrict the domain of account tags for tax repartition lines created for this tax.",
+    )
 
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id, type_tax_use, tax_scope)', 'Tax names must be unique !'),
@@ -615,25 +675,68 @@ class AccountTaxRepartitionLine(models.Model):
     _order = 'sequence, repartition_type, id'
     _check_company_auto = True
 
-    factor_percent = fields.Float(string="%", required=True, help="Factor to apply on the account move lines generated from this repartition line, in percents")
-    factor = fields.Float(string="Factor Ratio", compute="_compute_factor", help="Factor to apply on the account move lines generated from this repartition line")
-    repartition_type = fields.Selection(string="Based On", selection=[('base', 'Base'), ('tax', 'of tax')], required=True, default='tax', help="Base on which the factor will be applied.")
-    account_id = fields.Many2one(string="Account",
+    factor_percent = fields.Float(
+        string="%",
+        required=True,
+        help="Factor to apply on the account move lines generated from this repartition line, in percents",
+    )
+    factor = fields.Float(
+        string="Factor Ratio",
+        compute="_compute_factor",
+        help="Factor to apply on the account move lines generated from this repartition line",
+    )
+    repartition_type = fields.Selection(
+        string="Based On",
+        selection=[('base', 'Base'), ('tax', 'of tax')],
+        required=True,
+        default='tax',
+        help="Base on which the factor will be applied.")
+    account_id = fields.Many2one(
+        string="Account",
         comodel_name='account.account',
         domain="[('deprecated', '=', False), ('company_id', '=', company_id), ('internal_type', 'not in', ('receivable', 'payable'))]",
         check_company=True,
-        help="Account on which to post the tax amount")
-    tag_ids = fields.Many2many(string="Tax Grids", comodel_name='account.account.tag', domain=[('applicability', '=', 'taxes')], copy=True)
-    invoice_tax_id = fields.Many2one(comodel_name='account.tax',
+        help="Account on which to post the tax amount",
+    )
+    tag_ids = fields.Many2many(
+        string="Tax Grids",
+        comodel_name='account.account.tag',
+        domain=[('applicability', '=', 'taxes')],
+        copy=True,
+    )
+    invoice_tax_id = fields.Many2one(
+        comodel_name='account.tax',
         check_company=True,
-        help="The tax set to apply this repartition on invoices. Mutually exclusive with refund_tax_id")
-    refund_tax_id = fields.Many2one(comodel_name='account.tax',
+        help="The tax set to apply this repartition on invoices. Mutually exclusive with refund_tax_id",
+    )
+    refund_tax_id = fields.Many2one(
+        comodel_name='account.tax',
         check_company=True,
-        help="The tax set to apply this repartition on refund invoices. Mutually exclusive with invoice_tax_id")
-    tax_id = fields.Many2one(comodel_name='account.tax', compute='_compute_tax_id')
-    country_id = fields.Many2one(string="Country", comodel_name='res.country', related='company_id.country_id', help="Technical field used to restrict tags domain in form view.")
-    company_id = fields.Many2one(string="Company", comodel_name='res.company', compute="_compute_company", store=True, help="The company this repartition line belongs to.")
-    sequence = fields.Integer(string="Sequence", default=1, help="The order in which display and match repartition lines. For refunds to work properly, invoice repartition lines should be arranged in the same order as the credit note repartition lines they correspond to.")
+        help="The tax set to apply this repartition on refund invoices. Mutually exclusive with invoice_tax_id",
+    )
+    tax_id = fields.Many2one(
+        comodel_name='account.tax',
+        compute='_compute_tax_id',
+    )
+    country_id = fields.Many2one(
+        string="Country",
+        comodel_name='res.country',
+        related='company_id.country_id',
+        help="Technical field used to restrict tags domain in form view.",
+    )
+    company_id = fields.Many2one(
+        string="Company",
+        comodel_name='res.company',
+        compute="_compute_company",
+        store=True,
+        help="The company this repartition line belongs to.",
+    )
+    sequence = fields.Integer(
+        string="Sequence",
+        default=1,
+        help="The order in which display and match repartition lines. For refunds to work properly, invoice repartition lines"
+             " should be arranged in the same order as the credit note repartition lines they correspond to.",
+    )
     use_in_tax_closing = fields.Boolean(string="Tax Closing Entry")
 
     @api.onchange('account_id')

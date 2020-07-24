@@ -8,10 +8,31 @@ class AccountTaxReport(models.Model):
     _description = 'Account Tax Report'
     _order = 'country_id, name'
 
-    name = fields.Char(string="Name", required=True, help="Name of this tax report")
-    country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True, default=lambda x: x.env.company.country_id.id, help="Country for which this report is available.")
-    line_ids = fields.One2many(string="Report Lines", comodel_name='account.tax.report.line', inverse_name='report_id', help="Content of this tax report")
-    root_line_ids = fields.One2many(string="Root Report Lines", comodel_name='account.tax.report.line', inverse_name='report_id', domain=[('parent_id', '=', None)], help="Subset of line_ids, containing the lines at the root of the report.")
+    name = fields.Char(
+        string="Name",
+        required=True,
+        help="Name of this tax report",
+    )
+    country_id = fields.Many2one(
+        string="Country",
+        comodel_name='res.country',
+        required=True,
+        default=lambda x: x.env.company.country_id.id,
+        help="Country for which this report is available.",
+    )
+    line_ids = fields.One2many(
+        string="Report Lines",
+        comodel_name='account.tax.report.line',
+        inverse_name='report_id',
+        help="Content of this tax report",
+    )
+    root_line_ids = fields.One2many(
+        string="Root Report Lines",
+        comodel_name='account.tax.report.line',
+        inverse_name='report_id',
+        domain=[('parent_id', '=', None)],
+        help="Subset of line_ids, containing the lines at the root of the report.",
+    )
 
     def write(self, vals):
         # Overridden so that we change the country _id of the existing tags

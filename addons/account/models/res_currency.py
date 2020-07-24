@@ -9,7 +9,11 @@ from odoo.exceptions import UserError
 class ResCurrency(models.Model):
     _inherit = 'res.currency'
 
-    display_rounding_warning = fields.Boolean(string="Display Rounding Warning", compute='_compute_display_rounding_warning', help="Technical field used to tell whether or not to display the warning informing a rounding factor change might be dangerous on res.currency's form view.")
+    display_rounding_warning = fields.Boolean(
+        string="Display Rounding Warning",
+        compute='_compute_display_rounding_warning',
+        help="Technical field used to tell whether or not to display the warning informing a rounding factor change might be dangerous on res.currency's form view.",
+    )
 
 
     @api.depends('rounding')
@@ -35,4 +39,3 @@ class ResCurrency(models.Model):
         """
         self.ensure_one()
         return bool(self.env['account.move.line'].search_count(['|', ('currency_id', '=', self.id), ('company_currency_id', '=', self.id)]))
-

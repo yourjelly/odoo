@@ -1,19 +1,24 @@
-import json
-from datetime import datetime, timedelta
-
-from babel.dates import format_datetime, format_date
-from odoo import models, api, _, fields
-from odoo.osv import expression
+# -*- coding: utf-8 -*-
+from odoo import models, fields, _
 from odoo.release import version
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DF
 from odoo.tools.misc import formatLang, format_date as odoo_format_date, get_lang
-import random
 
+import random
+from datetime import datetime, timedelta
+from babel.dates import format_datetime, format_date
 import ast
+import json
 
 
 class account_journal(models.Model):
     _inherit = "account.journal"
+
+    kanban_dashboard = fields.Text(compute='_kanban_dashboard')
+    kanban_dashboard_graph = fields.Text(compute='_kanban_dashboard_graph')
+    json_activity_data = fields.Text(compute='_get_json_activity_data')
+    show_on_dashboard = fields.Boolean(string='Show journal on dashboard', help="Whether this journal should be displayed on the dashboard or not", default=True)
+    color = fields.Integer("Color Index", default=0)
 
     def _kanban_dashboard(self):
         for journal in self:
@@ -66,12 +71,6 @@ class account_journal(models.Model):
                         act['name'] += ' (' + format_date(activity.get('date'), 'QQQ', locale=get_lang(self.env).code) + ')'
                 activities.append(act)
             journal.json_activity_data = json.dumps({'activities': activities})
-
-    kanban_dashboard = fields.Text(compute='_kanban_dashboard')
-    kanban_dashboard_graph = fields.Text(compute='_kanban_dashboard_graph')
-    json_activity_data = fields.Text(compute='_get_json_activity_data')
-    show_on_dashboard = fields.Boolean(string='Show journal on dashboard', help="Whether this journal should be displayed on the dashboard or not", default=True)
-    color = fields.Integer("Color Index", default=0)
 
     def _graph_title_and_key(self):
         if self.type in ['sale', 'purchase']:

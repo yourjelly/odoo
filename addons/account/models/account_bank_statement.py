@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
-from odoo.osv import expression
 from odoo.tools import float_is_zero
-from odoo.tools import float_compare, float_round, float_repr
-from odoo.tools.misc import formatLang, format_date
+from odoo.tools.misc import formatLang
 from odoo.exceptions import UserError, ValidationError
 
-import time
-import math
 import base64
-import re
 
 
 class AccountCashboxLine(models.Model):
@@ -204,25 +199,44 @@ class AccountBankStatement(models.Model):
             st.previous_statement_id = previous_statement.id
 
     name = fields.Char(string='Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True)
-    reference = fields.Char(string='External Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True, help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)")
+    reference = fields.Char(
+        string='External Reference',
+        states={'open': [('readonly', False)]},
+        copy=False,
+        readonly=True,
+        help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)",
+    )
     date = fields.Date(required=True, states={'confirm': [('readonly', True)]}, index=True, copy=False, default=fields.Date.context_today)
     date_done = fields.Datetime(string="Closed On")
     balance_start = fields.Monetary(string='Starting Balance', states={'confirm': [('readonly', True)]}, compute='_compute_starting_balance', readonly=False, store=True)
     balance_end_real = fields.Monetary('Ending Balance', states={'confirm': [('readonly', True)]}, compute='_compute_ending_balance', readonly=False, store=True)
-    state = fields.Selection(string='Status', required=True, readonly=True, copy=False, selection=[
+    state = fields.Selection(
+        string='Status',
+        required=True,
+        readonly=True,
+        copy=False,
+        selection=[
             ('open', 'New'),
             ('posted', 'Processing'),
             ('confirm', 'Validated'),
-        ], default='open',
+        ],
+        default='open',
         help="The current state of your bank statement:"
              "- New: Fully editable with draft Journal Entries."
              "- Processing: No longer editable with posted Journal entries, ready for the reconciliation."
-             "- Validated: All lines are reconciled. There is nothing left to process.")
+             "- Validated: All lines are reconciled. There is nothing left to process.",
+    )
     currency_id = fields.Many2one('res.currency', compute='_compute_currency', string="Currency")
     journal_id = fields.Many2one('account.journal', string='Journal', required=True, states={'confirm': [('readonly', True)]}, default=_default_journal, check_company=True)
     journal_type = fields.Selection(related='journal_id.type', help="Technical field used for usability purposes")
-    company_id = fields.Many2one('res.company', related='journal_id.company_id', string='Company', store=True, readonly=True,
-        default=lambda self: self.env.company)
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        related='journal_id.company_id',
+        string='Company',
+        store=True,
+        readonly=True,
+        default=lambda self: self.env.company,
+    )
 
     total_entry_encoding = fields.Monetary('Transactions Subtotal', compute='_end_balance', store=True, help="Total of transaction lines.")
     balance_end = fields.Monetary('Computed Balance', compute='_end_balance', store=True, help='Balance as calculated based on Opening Balance and transaction lines')
@@ -232,16 +246,21 @@ class AccountBankStatement(models.Model):
     move_line_ids = fields.One2many('account.move.line', 'statement_id', string='Entry lines', states={'confirm': [('readonly', True)]})
     move_line_count = fields.Integer(compute="_get_move_line_count")
 
-    all_lines_reconciled = fields.Boolean(compute='_compute_all_lines_reconciled',
-        help="Technical field indicating if all statement lines are fully reconciled.")
+    all_lines_reconciled = fields.Boolean(
+        compute='_compute_all_lines_reconciled',
+        help="Technical field indicating if all statement lines are fully reconciled.",
+    )
     user_id = fields.Many2one('res.users', string='Responsible', required=False, default=lambda self: self.env.user)
     cashbox_start_id = fields.Many2one('account.bank.statement.cashbox', string="Starting Cashbox")
     cashbox_end_id = fields.Many2one('account.bank.statement.cashbox', string="Ending Cashbox")
     is_difference_zero = fields.Boolean(compute='_is_difference_zero', string='Is zero', help="Check if difference is zero.")
     previous_statement_id = fields.Many2one('account.bank.statement', help='technical field to compute starting balance correctly', compute='_get_previous_statement', store=True)
-    is_valid_balance_start = fields.Boolean(string="Is Valid Balance Start", store=True,
+    is_valid_balance_start = fields.Boolean(
+        string="Is Valid Balance Start",
+        store=True,
         compute="_compute_is_valid_balance_start",
-        help="Technical field to display a warning message in case starting balance is different than previous ending balance")
+        help="Technical field to display a warning message in case starting balance is different than previous ending balance",
+    )
 
     def write(self, values):
         res = super(AccountBankStatement, self).write(values)
@@ -479,45 +498,66 @@ class AccountBankStatementLine(models.Model):
     # == Business fields ==
     move_id = fields.Many2one(
         comodel_name='account.move',
-        string='Journal Entry', required=True, readonly=True, ondelete='cascade',
-        check_company=True)
+        string='Journal Entry',
+        required=True,
+        readonly=True,
+        ondelete='cascade',
+        check_company=True,
+    )
     statement_id = fields.Many2one(
         comodel_name='account.bank.statement',
-        string='Statement', index=True, required=True, ondelete='cascade',
-        check_company=True)
+        string='Statement',
+        index=True,
+        required=True,
+        ondelete='cascade',
+        check_company=True,
+    )
 
     sequence = fields.Integer(index=True, help="Gives the sequence order when displaying a list of bank statement lines.", default=1)
     account_number = fields.Char(string='Bank Account Number', help="Technical field used to store the bank account number before its creation, upon the line's processing")
     partner_name = fields.Char(
         help="This field is used to record the third party name when importing bank statement in electronic format, "
-             "when the partner doesn't exist yet in the database (or cannot be found).")
+             "when the partner doesn't exist yet in the database (or cannot be found)."
+    )
     transaction_type = fields.Char(string='Transaction Type')
     payment_ref = fields.Char(string='Label', required=True)
     amount = fields.Monetary(currency_field='currency_id')
-    amount_currency = fields.Monetary(currency_field='foreign_currency_id',
-        help="The amount expressed in an optional other currency if it is a multi-currency entry.")
-    foreign_currency_id = fields.Many2one('res.currency', string='Foreign Currency',
-        help="The optional other currency if it is a multi-currency entry.")
-    amount_residual = fields.Float(string="Residual Amount",
+    amount_currency = fields.Monetary(
+        currency_field='foreign_currency_id',
+        help="The amount expressed in an optional other currency if it is a multi-currency entry.",
+    )
+    foreign_currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        string='Foreign Currency',
+        help="The optional other currency if it is a multi-currency entry.",
+    )
+    amount_residual = fields.Float(
+        string="Residual Amount",
         compute="_compute_is_reconciled",
         store=True,
-        help="The amount left to be reconciled on this statement line (signed according to its move lines' balance), expressed in its currency. This is a technical field use to speedup the application of reconciliation models.")
+        help="The amount left to be reconciled on this statement line (signed according to its move lines' balance), expressed in its currency. This is a technical field use to speedup the application of reconciliation models.",
+    )
     currency_id = fields.Many2one('res.currency', string='Journal Currency')
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string='Partner', ondelete='restrict',
         domain="['|', ('parent_id','=', False), ('is_company','=',True)]",
-        check_company=True)
+        check_company=True,
+    )
     payment_ids = fields.Many2many(
         comodel_name='account.payment',
         relation='account_payment_account_bank_statement_line_rel',
         string='Auto-generated Payments',
-        help="Payments generated during the reconciliation of this bank statement lines.")
+        help="Payments generated during the reconciliation of this bank statement lines.",
+    )
 
     # == Display purpose fields ==
-    is_reconciled = fields.Boolean(string='Is Reconciled', store=True,
+    is_reconciled = fields.Boolean(
+        string='Is Reconciled',
+        store=True,
         compute='_compute_is_reconciled',
-        help="Technical field indicating if the statement line is already reconciled.")
+        help="Technical field indicating if the statement line is already reconciled.",
+    )
     state = fields.Selection(related='statement_id.state', string='Status', readonly=True)
 
     # -------------------------------------------------------------------------

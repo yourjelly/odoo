@@ -53,21 +53,49 @@ class AccountAccountTemplate(models.Model):
     _order = "code"
 
     name = fields.Char(required=True, index=True)
-    currency_id = fields.Many2one('res.currency', string='Account Currency', help="Forces all moves for this account to have this secondary currency.")
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        string='Account Currency',
+        help="Forces all moves for this account to have this secondary currency.",
+    )
     code = fields.Char(size=64, required=True, index=True)
-    user_type_id = fields.Many2one('account.account.type', string='Type', required=True,
-        help="These types are defined according to your country. The type contains more information "\
-        "about the account and its specificities.")
-    reconcile = fields.Boolean(string='Allow Invoices & payments Matching', default=False,
-        help="Check this option if you want the user to reconcile entries in this account.")
+    user_type_id = fields.Many2one(
+        comodel_name='account.account.type',
+        string='Type',
+        required=True,
+        help="These types are defined according to your country. The type contains more information "
+             "about the account and its specificities.",
+    )
+    reconcile = fields.Boolean(
+        string='Allow Invoices & payments Matching',
+        default=False,
+        help="Check this option if you want the user to reconcile entries in this account.",
+    )
     note = fields.Text()
-    tax_ids = fields.Many2many('account.tax.template', 'account_account_template_tax_rel', 'account_id', 'tax_id', string='Default Taxes')
-    nocreate = fields.Boolean(string='Optional Create', default=False,
-        help="If checked, the new chart of accounts will not contain this by default.")
-    chart_template_id = fields.Many2one('account.chart.template', string='Chart Template',
+    tax_ids = fields.Many2many(
+        comodel_name='account.tax.template',
+        relation='account_account_template_tax_rel',
+        column1='account_id',
+        column2='tax_id',
+        string='Default Taxes',
+    )
+    nocreate = fields.Boolean(
+        string='Optional Create',
+        default=False,
+        help="If checked, the new chart of accounts will not contain this by default.",
+    )
+    chart_template_id = fields.Many2one(
+        comodel_name='account.chart.template',
+        string='Chart Template',
         help="This optional field allow you to link an account template to a specific chart template that may differ from the one its root parent belongs to. This allow you "
-            "to define chart templates that extend another and complete it with few new accounts (You don't need to define the whole structure that is common to both several times).")
-    tag_ids = fields.Many2many('account.account.tag', 'account_account_template_account_tag', string='Account tag', help="Optional tags you may want to assign for custom reporting")
+             "to define chart templates that extend another and complete it with few new accounts (You don't need to define the whole structure that is common to both several times).",
+    )
+    tag_ids = fields.Many2many(
+        comodel_name='account.account.tag',
+        relation='account_account_template_account_tag',
+        string='Account tag',
+        help="Optional tags you may want to assign for custom reporting",
+    )
 
     @api.depends('name', 'code')
     def name_get(self):
@@ -87,24 +115,40 @@ class AccountChartTemplate(models.Model):
     name = fields.Char(required=True)
     parent_id = fields.Many2one('account.chart.template', string='Parent Chart Template')
     code_digits = fields.Integer(string='# of Digits', required=True, default=6, help="No. of Digits to use for account code")
-    visible = fields.Boolean(string='Can be Visible?', default=True,
+    visible = fields.Boolean(
+        string='Can be Visible?',
+        default=True,
         help="Set this to False if you don't want this template to be used actively in the wizard that generate Chart of Accounts from "
-            "templates, this is useful when you want to generate accounts of this template only when loading its child template.")
+             "templates, this is useful when you want to generate accounts of this template only when loading its child template.",
+    )
     currency_id = fields.Many2one('res.currency', string='Currency', required=True)
     use_anglo_saxon = fields.Boolean(string="Use Anglo-Saxon accounting", default=False)
-    complete_tax_set = fields.Boolean(string='Complete Set of Taxes', default=True,
+    complete_tax_set = fields.Boolean(
+        string='Complete Set of Taxes',
+        default=True,
         help="This boolean helps you to choose if you want to propose to the user to encode the sale and purchase rates or choose from list "
-            "of taxes. This last choice assumes that the set of tax defined on this template is complete")
+             "of taxes. This last choice assumes that the set of tax defined on this template is complete",
+    )
     account_ids = fields.One2many('account.account.template', 'chart_template_id', string='Associated Account Templates')
-    tax_template_ids = fields.One2many('account.tax.template', 'chart_template_id', string='Tax Template List',
-        help='List of all the taxes that have to be installed by the wizard')
+    tax_template_ids = fields.One2many(
+        comodel_name='account.tax.template',
+        inverse_name='chart_template_id',
+        string='Tax Template List',
+        help='List of all the taxes that have to be installed by the wizard',
+    )
     bank_account_code_prefix = fields.Char(string='Prefix of the bank accounts', required=True)
     cash_account_code_prefix = fields.Char(string='Prefix of the main cash accounts', required=True)
     transfer_account_code_prefix = fields.Char(string='Prefix of the main transfer accounts', required=True)
-    income_currency_exchange_account_id = fields.Many2one('account.account.template',
-        string="Gain Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
-    expense_currency_exchange_account_id = fields.Many2one('account.account.template',
-        string="Loss Exchange Rate Account", domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)])
+    income_currency_exchange_account_id = fields.Many2one(
+        comodel_name='account.account.template',
+        string="Gain Exchange Rate Account",
+        domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)],
+    )
+    expense_currency_exchange_account_id = fields.Many2one(
+        comodel_name='account.account.template',
+        string="Loss Exchange Rate Account",
+        domain=[('internal_type', '=', 'other'), ('deprecated', '=', False)],
+    )
     account_journal_suspense_account_id = fields.Many2one('account.account.template', string='Journal Suspense Account')
     default_cash_difference_income_account_id = fields.Many2one('account.account.template', string="Cash Difference Income Account")
     default_cash_difference_expense_account_id = fields.Many2one('account.account.template', string="Cash Difference Expense Account")
@@ -126,7 +170,8 @@ class AccountChartTemplate(models.Model):
         domain=[('deprecated', '=', False)],
         string="Base Tax Received Account",
         help="Account that will be set on lines created in cash basis journal entry and used to keep track of the "
-             "tax base amount.")
+             "tax base amount.",
+    )
 
     @api.model
     def _prepare_transfer_account_template(self, prefix=None):
@@ -832,36 +877,83 @@ class AccountTaxTemplate(models.Model):
     chart_template_id = fields.Many2one('account.chart.template', string='Chart Template', required=True)
 
     name = fields.Char(string='Tax Name', required=True)
-    type_tax_use = fields.Selection(TYPE_TAX_USE, string='Tax Type', required=True, default="sale",
-        help="Determines where the tax is selectable. Note : 'None' means a tax can't be used by itself, however it can still be used in a group.")
-    tax_scope = fields.Selection([('service', 'Service'), ('consu', 'Consumable')], help="Restrict the use of taxes to a type of product.")
-    amount_type = fields.Selection(default='percent', string="Tax Computation", required=True,
-        selection=[('group', 'Group of Taxes'), ('fixed', 'Fixed'), ('percent', 'Percentage of Price'), ('division', 'Percentage of Price Tax Included')])
+    type_tax_use = fields.Selection(
+        selection=TYPE_TAX_USE,
+        string='Tax Type',
+        required=True,
+        default="sale",
+        help="Determines where the tax is selectable. Note : 'None' means a tax can't be used by itself, however it can still be used in a group.",
+    )
+    tax_scope = fields.Selection(
+        selection=[
+            ('service', 'Service'),
+            ('consu', 'Consumable'),
+        ],
+        help="Restrict the use of taxes to a type of product.",
+    )
+    amount_type = fields.Selection(
+        default='percent',
+        string="Tax Computation",
+        required=True,
+        selection=[
+            ('group', 'Group of Taxes'),
+            ('fixed', 'Fixed'),
+            ('percent', 'Percentage of Price'),
+            ('division', 'Percentage of Price Tax Included'),
+        ],
+    )
     active = fields.Boolean(default=True, help="Set active to false to hide the tax without removing it.")
     children_tax_ids = fields.Many2many('account.tax.template', 'account_tax_template_filiation_rel', 'parent_tax', 'child_tax', string='Children Taxes')
-    sequence = fields.Integer(required=True, default=1,
-        help="The sequence field is used to define order in which the tax lines are applied.")
+    sequence = fields.Integer(
+        required=True,
+        default=1,
+        help="The sequence field is used to define order in which the tax lines are applied.",
+    )
     amount = fields.Float(required=True, digits=(16, 4), default=0)
     description = fields.Char(string='Display on Invoices')
-    price_include = fields.Boolean(string='Included in Price', default=False,
-        help="Check this if the price you use on the product and invoices includes this tax.")
-    include_base_amount = fields.Boolean(string='Affect Subsequent Taxes', default=False,
-        help="If set, taxes which are computed after this one will be computed based on the price tax included.")
+    price_include = fields.Boolean(
+        string='Included in Price',
+        default=False,
+        help="Check this if the price you use on the product and invoices includes this tax.",
+    )
+    include_base_amount = fields.Boolean(
+        string='Affect Subsequent Taxes',
+        default=False,
+        help="If set, taxes which are computed after this one will be computed based on the price tax included.",
+    )
     analytic = fields.Boolean(string="Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
-    invoice_repartition_line_ids = fields.One2many(string="Repartition for Invoices", comodel_name="account.tax.repartition.line.template", inverse_name="invoice_tax_id", copy=True, help="Repartition when the tax is used on an invoice")
-    refund_repartition_line_ids = fields.One2many(string="Repartition for Refund Invoices", comodel_name="account.tax.repartition.line.template", inverse_name="refund_tax_id", copy=True, help="Repartition when the tax is used on a refund")
+    invoice_repartition_line_ids = fields.One2many(
+        string="Repartition for Invoices",
+        comodel_name="account.tax.repartition.line.template",
+        inverse_name="invoice_tax_id",
+        copy=True,
+        help="Repartition when the tax is used on an invoice",
+    )
+    refund_repartition_line_ids = fields.One2many(
+        string="Repartition for Refund Invoices",
+        comodel_name="account.tax.repartition.line.template",
+        inverse_name="refund_tax_id",
+        copy=True,
+        help="Repartition when the tax is used on a refund",
+    )
     tax_group_id = fields.Many2one('account.tax.group', string="Tax Group")
     tax_exigibility = fields.Selection(
-        [('on_invoice', 'Based on Invoice'),
-         ('on_payment', 'Based on Payment'),
-        ], string='Tax Due', default='on_invoice',
+        selection=[
+            ('on_invoice', 'Based on Invoice'),
+            ('on_payment', 'Based on Payment'),
+        ],
+        string='Tax Due',
+        default='on_invoice',
         help="Based on Invoice: the tax is due as soon as the invoice is validated.\n"
-        "Based on Payment: the tax is due as soon as the payment of the invoice is received.")
+        "Based on Payment: the tax is due as soon as the payment of the invoice is received.",
+    )
     cash_basis_transition_account_id = fields.Many2one(
         comodel_name='account.account.template',
         string="Cash Basis Transition Account",
         domain=[('deprecated', '=', False)],
-        help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled ; at reconciliation, this amount cancelled on this account and put on the regular tax account.")
+        help="Account used to transition the tax amount for cash basis taxes. It will contain the tax amount as long as the original invoice has not been reconciled"
+             " ; at reconciliation, this amount cancelled on this account and put on the regular tax account.",
+    )
 
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, type_tax_use, tax_scope, chart_template_id)', 'Tax names must be unique !'),
@@ -1111,75 +1203,121 @@ class AccountReconcileModelTemplate(models.Model):
     name = fields.Char(string='Button Label', required=True)
     sequence = fields.Integer(required=True, default=10)
 
-    rule_type = fields.Selection(selection=[
-        ('writeoff_button', 'Manually create a write-off on clicked button.'),
-        ('writeoff_suggestion', 'Suggest a write-off.'),
-        ('invoice_matching', 'Match existing invoices/bills.')
-    ], string='Type', default='writeoff_button', required=True)
-    auto_reconcile = fields.Boolean(string='Auto-validate',
-        help='Validate the statement line automatically (reconciliation based on your rule).')
+    rule_type = fields.Selection(
+        selection=[
+            ('writeoff_button', 'Manually create a write-off on clicked button.'),
+            ('writeoff_suggestion', 'Suggest a write-off.'),
+            ('invoice_matching', 'Match existing invoices/bills.')
+        ],
+        string='Type',
+        default='writeoff_button',
+        required=True,
+    )
+    auto_reconcile = fields.Boolean(
+        string='Auto-validate',
+        help='Validate the statement line automatically (reconciliation based on your rule).',
+    )
     to_check = fields.Boolean(string='To Check', default=False, help='This matching rule is used when the user is not certain of all the informations of the counterpart.')
 
     # ===== Conditions =====
-    match_journal_ids = fields.Many2many('account.journal', string='Journals',
+    match_journal_ids = fields.Many2many(
+        comodel_name='account.journal',
+        string='Journals',
         domain="[('type', 'in', ('bank', 'cash'))]",
-        help='The reconciliation model will only be available from the selected journals.')
-    match_nature = fields.Selection(selection=[
-        ('amount_received', 'Amount Received'),
-        ('amount_paid', 'Amount Paid'),
-        ('both', 'Amount Paid/Received')
-    ], string='Amount Nature', required=True, default='both',
+        help='The reconciliation model will only be available from the selected journals.',
+    )
+    match_nature = fields.Selection(
+        selection=[
+            ('amount_received', 'Amount Received'),
+            ('amount_paid', 'Amount Paid'),
+            ('both', 'Amount Paid/Received')
+        ],
+        string='Amount Nature',
+        required=True,
+        default='both',
         help='''The reconciliation model will only be applied to the selected transaction type:
         * Amount Received: Only applied when receiving an amount.
         * Amount Paid: Only applied when paying an amount.
-        * Amount Paid/Received: Applied in both cases.''')
-    match_amount = fields.Selection(selection=[
-        ('lower', 'Is Lower Than'),
-        ('greater', 'Is Greater Than'),
-        ('between', 'Is Between'),
-    ], string='Amount',
-        help='The reconciliation model will only be applied when the amount being lower than, greater than or between specified amount(s).')
+        * Amount Paid/Received: Applied in both cases.''',
+    )
+    match_amount = fields.Selection(
+        selection=[
+            ('lower', 'Is Lower Than'),
+            ('greater', 'Is Greater Than'),
+            ('between', 'Is Between'),
+        ],
+        string='Amount',
+        help='The reconciliation model will only be applied when the amount being lower than, greater than or between specified amount(s).',
+    )
     match_amount_min = fields.Float(string='Amount Min Parameter')
     match_amount_max = fields.Float(string='Amount Max Parameter')
-    match_label = fields.Selection(selection=[
-        ('contains', 'Contains'),
-        ('not_contains', 'Not Contains'),
-        ('match_regex', 'Match Regex'),
-    ], string='Label', help='''The reconciliation model will only be applied when the label:
+    match_label = fields.Selection(
+        selection=[
+            ('contains', 'Contains'),
+            ('not_contains', 'Not Contains'),
+            ('match_regex', 'Match Regex'),
+        ],
+        string='Label',
+        help='''The reconciliation model will only be applied when the label:
         * Contains: The proposition label must contains this string (case insensitive).
         * Not Contains: Negation of "Contains".
-        * Match Regex: Define your own regular expression.''')
+        * Match Regex: Define your own regular expression.''',
+    )
     match_label_param = fields.Char(string='Label Parameter')
-    match_note = fields.Selection(selection=[
-        ('contains', 'Contains'),
-        ('not_contains', 'Not Contains'),
-        ('match_regex', 'Match Regex'),
-    ], string='Note', help='''The reconciliation model will only be applied when the note:
+    match_note = fields.Selection(
+        selection=[
+            ('contains', 'Contains'),
+            ('not_contains', 'Not Contains'),
+            ('match_regex', 'Match Regex'),
+        ],
+        string='Note',
+        help='''The reconciliation model will only be applied when the note:
         * Contains: The proposition note must contains this string (case insensitive).
         * Not Contains: Negation of "Contains".
-        * Match Regex: Define your own regular expression.''')
+        * Match Regex: Define your own regular expression.''',
+    )
     match_note_param = fields.Char(string='Note Parameter')
-    match_transaction_type = fields.Selection(selection=[
-        ('contains', 'Contains'),
-        ('not_contains', 'Not Contains'),
-        ('match_regex', 'Match Regex'),
-    ], string='Transaction Type', help='''The reconciliation model will only be applied when the transaction type:
+    match_transaction_type = fields.Selection(
+        selection=[
+            ('contains', 'Contains'),
+            ('not_contains', 'Not Contains'),
+            ('match_regex', 'Match Regex'),
+        ],
+        string='Transaction Type',
+        help='''The reconciliation model will only be applied when the transaction type:
         * Contains: The proposition transaction type must contains this string (case insensitive).
         * Not Contains: Negation of "Contains".
-        * Match Regex: Define your own regular expression.''')
+        * Match Regex: Define your own regular expression.''',
+    )
     match_transaction_type_param = fields.Char(string='Transaction Type Parameter')
-    match_same_currency = fields.Boolean(string='Same Currency Matching', default=True,
+    match_same_currency = fields.Boolean(
+        string='Same Currency Matching',
+        default=True,
         help='Restrict to propositions having the same currency as the statement line.')
-    match_total_amount = fields.Boolean(string='Amount Matching', default=True,
-        help='The sum of total residual amount propositions matches the statement line amount.')
-    match_total_amount_param = fields.Float(string='Amount Matching %', default=100,
-        help='The sum of total residual amount propositions matches the statement line amount under this percentage.')
-    match_partner = fields.Boolean(string='Partner Is Set',
-        help='The reconciliation model will only be applied when a customer/vendor is set.')
-    match_partner_ids = fields.Many2many('res.partner', string='Restrict Partners to',
-        help='The reconciliation model will only be applied to the selected customers/vendors.')
-    match_partner_category_ids = fields.Many2many('res.partner.category', string='Restrict Partner Categories to',
-        help='The reconciliation model will only be applied to the selected customer/vendor categories.')
+    match_total_amount = fields.Boolean(
+        string='Amount Matching',
+        default=True,
+        help='The sum of total residual amount propositions matches the statement line amount.',
+    )
+    match_total_amount_param = fields.Float(
+        string='Amount Matching %',
+        default=100,
+        help='The sum of total residual amount propositions matches the statement line amount under this percentage.',
+    )
+    match_partner = fields.Boolean(
+        string='Partner Is Set',
+        help='The reconciliation model will only be applied when a customer/vendor is set.',
+    )
+    match_partner_ids = fields.Many2many(
+        comodel_name='res.partner',
+        string='Restrict Partners to',
+        help='The reconciliation model will only be applied to the selected customers/vendors.',
+    )
+    match_partner_category_ids = fields.Many2many(
+        comodel_name='res.partner.category',
+        string='Restrict Partner Categories to',
+        help='The reconciliation model will only be applied to the selected customer/vendor categories.',
+    )
 
     line_ids = fields.One2many('account.reconcile.model.line.template', 'model_id')
     decimal_separator = fields.Char(help="Every character that is nor a digit nor this separator will be removed from the matching string")
@@ -1191,13 +1329,22 @@ class AccountReconcileModelLineTemplate(models.Model):
 
     model_id = fields.Many2one('account.reconcile.model.template')
     sequence = fields.Integer(required=True, default=10)
-    account_id = fields.Many2one('account.account.template', string='Account', ondelete='cascade', domain=[('deprecated', '=', False)])
+    account_id = fields.Many2one(
+        comodel_name='account.account.template',
+        string='Account',
+        ondelete='cascade',
+        domain=[('deprecated', '=', False)],
+    )
     label = fields.Char(string='Journal Item Label')
-    amount_type = fields.Selection([
-        ('fixed', 'Fixed'),
-        ('percentage', 'Percentage of balance'),
-        ('regex', 'From label'),
-    ], required=True, default='percentage')
+    amount_type = fields.Selection(
+        selection=[
+            ('fixed', 'Fixed'),
+            ('percentage', 'Percentage of balance'),
+            ('regex', 'From label'),
+        ],
+        required=True,
+        default='percentage',
+    )
     amount_string = fields.Char(string="Amount")
     force_tax_included = fields.Boolean(string='Tax Included in Price', help='Force the tax to be managed as a price included tax.')
     tax_ids = fields.Many2many('account.tax.template', string='Taxes', ondelete='restrict')

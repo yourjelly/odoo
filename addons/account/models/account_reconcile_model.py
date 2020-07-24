@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from odoo import api, fields, models, _
-from odoo.tools import float_compare, float_is_zero
 from odoo.exceptions import UserError, ValidationError
+
 import re
 from math import copysign
-import itertools
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
+
 
 class AccountReconcileModelPartnerMapping(models.Model):
     _name = 'account.reconcile.model.partner.mapping'
@@ -19,7 +19,7 @@ class AccountReconcileModelPartnerMapping(models.Model):
     narration_regex = fields.Char(string="Find Text in Notes")
 
     @api.constrains('narration_regex', 'payment_ref_regex')
-    def validate_regex(self):
+    def _validate_regex(self):
         for record in self:
             if not (record.narration_regex or record.payment_ref_regex):
                 raise ValidationError(_("Please set at least one of the match texts to create a partner mapping."))
@@ -35,31 +35,82 @@ class AccountReconcileModelLine(models.Model):
     match_total_amount = fields.Boolean(related='model_id.match_total_amount')
     match_total_amount_param = fields.Float(related='model_id.match_total_amount_param')
     rule_type = fields.Selection(related='model_id.rule_type')
-    company_id = fields.Many2one(related='model_id.company_id', store=True, default=lambda self: self.env.company)
+    company_id = fields.Many2one(
+        related='model_id.company_id',
+        store=True,
+        default=lambda self: self.env.company,
+    )
     sequence = fields.Integer(required=True, default=10)
-    account_id = fields.Many2one('account.account', string='Account', ondelete='cascade',
+    account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Account',
+        ondelete='cascade',
         domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
-        required=True, check_company=True)
-    journal_id = fields.Many2one('account.journal', string='Journal', ondelete='cascade',
+        required=True,
+        check_company=True,
+    )
+    journal_id = fields.Many2one(
+        comodel_name='account.journal',
+        string='Journal',
+        ondelete='cascade',
         domain="[('type', '=', 'general'), ('company_id', '=', company_id)]",
-        help="This field is ignored in a bank statement reconciliation.", check_company=True)
+        help="This field is ignored in a bank statement reconciliation.",
+        check_company=True,
+    )
     label = fields.Char(string='Journal Item Label')
-    amount_type = fields.Selection([
-        ('fixed', 'Fixed'),
-        ('percentage', 'Percentage of balance'),
-        ('regex', 'From label'),
-    ], required=True, default='percentage')
-    show_force_tax_included = fields.Boolean(compute='_compute_show_force_tax_included', help='Technical field used to show the force tax included button')
-    force_tax_included = fields.Boolean(string='Tax Included in Price', help='Force the tax to be managed as a price included tax.')
-    amount = fields.Float(string="Float Amount", compute='_compute_float_amount', store=True, help="Technical shortcut to parse the amount to a float")
-    amount_string = fields.Char(string="Amount", default='100', required=True, help="""Value for the amount of the writeoff line
-    * Percentage: Percentage of the balance, between 0 and 100.
-    * Fixed: The fixed value of the writeoff. The amount will count as a debit if it is negative, as a credit if it is positive.
-    * From Label: There is no need for regex delimiter, only the regex is needed. For instance if you want to extract the amount from\nR:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\nYou could enter\nBRT: ([\d,]+)""")
-    tax_ids = fields.Many2many('account.tax', string='Taxes', ondelete='restrict', check_company=True)
-    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', ondelete='set null', check_company=True)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags', check_company=True,
-                                        relation='account_reconcile_model_analytic_tag_rel')
+    amount_type = fields.Selection(
+        selection=[
+            ('fixed', 'Fixed'),
+            ('percentage', 'Percentage of balance'),
+            ('regex', 'From label'),
+        ],
+        required=True,
+        default='percentage',
+    )
+    show_force_tax_included = fields.Boolean(
+        compute='_compute_show_force_tax_included',
+        help='Technical field used to show the force tax included button'
+    )
+    force_tax_included = fields.Boolean(
+        string='Tax Included in Price',
+        help='Force the tax to be managed as a price included tax.'
+    )
+    amount = fields.Float(
+        string="Float Amount",
+        compute='_compute_float_amount',
+        store=True,
+        help="Technical shortcut to parse the amount to a float"
+    )
+    amount_string = fields.Char(
+        string="Amount",
+        default='100',
+        required=True,
+        help="Value for the amount of the writeoff line\n"
+             "* Percentage: Percentage of the balance, between 0 and 100.\n"
+             "* Fixed: The fixed value of the writeoff. The amount will count as a debit if it is negative, as a credit if it is positive.\n"
+             "* From Label: There is no need for regex delimiter, only the regex is needed. For instance if you want to extract the amount from\n"
+             "R:9672938 10/07 AX 9415126318 T:5L:NA BRT: 3358,07 C:\n"
+             "You could enter\n"
+             r"BRT: ([\d,]+)",
+    )
+    tax_ids = fields.Many2many(
+        comodel_name='account.tax',
+        string='Taxes',
+        ondelete='restrict',
+        check_company=True,
+    )
+    analytic_account_id = fields.Many2one(
+        comodel_name='account.analytic.account',
+        string='Analytic Account',
+        ondelete='set null',
+        check_company=True,
+    )
+    analytic_tag_ids = fields.Many2many(
+        comodel_name='account.analytic.tag',
+        string='Analytic Tags',
+        check_company=True,
+        relation='account_reconcile_model_analytic_tag_rel',
+    )
 
     @api.onchange('tax_ids')
     def _onchange_tax_ids(self):
@@ -79,7 +130,7 @@ class AccountReconcileModelLine(models.Model):
         if self.amount_type == 'percentage':
             self.amount_string = '100'
         elif self.amount_type == 'regex':
-            self.amount_string = '([\d,]+)'
+            self.amount_string = r'([\d,]+)'
 
     @api.depends('amount_string')
     def _compute_float_amount(self):
@@ -114,94 +165,162 @@ class AccountReconcileModel(models.Model):
     sequence = fields.Integer(required=True, default=10)
     company_id = fields.Many2one(
         comodel_name='res.company',
-        string='Company', required=True, readonly=True,
-        default=lambda self: self.env.company)
-
-    rule_type = fields.Selection(selection=[
-        ('writeoff_button', 'Manually create a write-off on clicked button.'),
-        ('writeoff_suggestion', 'Suggest counterpart values.'),
-        ('invoice_matching', 'Match existing invoices/bills.'),
-    ], string='Type', default='writeoff_button', required=True)
-    auto_reconcile = fields.Boolean(string='Auto-validate',
-        help='Validate the statement line automatically (reconciliation based on your rule).')
-    to_check = fields.Boolean(string='To Check', default=False, help='This matching rule is used when the user is not certain of all the informations of the counterpart.')
+        string='Company',
+        required=True,
+        readonly=True,
+        default=lambda self: self.env.company,
+    )
+    rule_type = fields.Selection(
+        selection=[
+            ('writeoff_button', 'Manually create a write-off on clicked button.'),
+            ('writeoff_suggestion', 'Suggest counterpart values.'),
+            ('invoice_matching', 'Match existing invoices/bills.'),
+        ],
+        string='Type',
+        default='writeoff_button',
+        required=True,
+    )
+    auto_reconcile = fields.Boolean(
+        string='Auto-validate',
+        help='Validate the statement line automatically (reconciliation based on your rule).'
+    )
+    to_check = fields.Boolean(
+        string='To Check',
+        default=False,
+        help='This matching rule is used when the user is not certain of all the informations of the counterpart.',
+    )
 
     # ===== Conditions =====
-    match_journal_ids = fields.Many2many('account.journal', string='Journals',
+    match_journal_ids = fields.Many2many(
+        comodel_name='account.journal',
+        string='Journals',
         domain="[('type', 'in', ('bank', 'cash')), ('company_id', '=', company_id)]",
         check_company=True,
-        help='The reconciliation model will only be available from the selected journals.')
-    match_nature = fields.Selection(selection=[
-        ('amount_received', 'Amount Received'),
-        ('amount_paid', 'Amount Paid'),
-        ('both', 'Amount Paid/Received')
-    ], string='Amount Nature', required=True, default='both',
+        help='The reconciliation model will only be available from the selected journals.',
+    )
+    match_nature = fields.Selection(
+        selection=[
+            ('amount_received', 'Amount Received'),
+            ('amount_paid', 'Amount Paid'),
+            ('both', 'Amount Paid/Received')
+        ],
+        string='Amount Nature',
+        required=True,
+        default='both',
         help='''The reconciliation model will only be applied to the selected transaction type:
         * Amount Received: Only applied when receiving an amount.
         * Amount Paid: Only applied when paying an amount.
-        * Amount Paid/Received: Applied in both cases.''')
-    match_amount = fields.Selection(selection=[
-        ('lower', 'Is Lower Than'),
-        ('greater', 'Is Greater Than'),
-        ('between', 'Is Between'),
-    ], string='Amount',
-        help='The reconciliation model will only be applied when the amount being lower than, greater than or between specified amount(s).')
+        * Amount Paid/Received: Applied in both cases.''',
+    )
+    match_amount = fields.Selection(
+        selection=[
+            ('lower', 'Is Lower Than'),
+            ('greater', 'Is Greater Than'),
+            ('between', 'Is Between'),
+        ],
+        string='Amount',
+        help='The reconciliation model will only be applied when the amount being lower than, greater than or between specified amount(s).'
+    )
     match_amount_min = fields.Float(string='Amount Min Parameter')
     match_amount_max = fields.Float(string='Amount Max Parameter')
-    match_label = fields.Selection(selection=[
-        ('contains', 'Contains'),
-        ('not_contains', 'Not Contains'),
-        ('match_regex', 'Match Regex'),
-    ], string='Label', help='''The reconciliation model will only be applied when the label:
+    match_label = fields.Selection(
+        selection=[
+            ('contains', 'Contains'),
+            ('not_contains', 'Not Contains'),
+            ('match_regex', 'Match Regex'),
+        ],
+        string='Label',
+        help='''The reconciliation model will only be applied when the label:
         * Contains: The proposition label must contains this string (case insensitive).
         * Not Contains: Negation of "Contains".
-        * Match Regex: Define your own regular expression.''')
+        * Match Regex: Define your own regular expression.''',
+    )
     match_label_param = fields.Char(string='Label Parameter')
-    match_note = fields.Selection(selection=[
-        ('contains', 'Contains'),
-        ('not_contains', 'Not Contains'),
-        ('match_regex', 'Match Regex'),
-    ], string='Note', help='''The reconciliation model will only be applied when the note:
+    match_note = fields.Selection(
+        selection=[
+            ('contains', 'Contains'),
+            ('not_contains', 'Not Contains'),
+            ('match_regex', 'Match Regex'),
+        ],
+        string='Note',
+        help='''The reconciliation model will only be applied when the note:
         * Contains: The proposition note must contains this string (case insensitive).
         * Not Contains: Negation of "Contains".
-        * Match Regex: Define your own regular expression.''')
+        * Match Regex: Define your own regular expression.''',
+    )
     match_note_param = fields.Char(string='Note Parameter')
-    match_transaction_type = fields.Selection(selection=[
-        ('contains', 'Contains'),
-        ('not_contains', 'Not Contains'),
-        ('match_regex', 'Match Regex'),
-    ], string='Transaction Type', help='''The reconciliation model will only be applied when the transaction type:
+    match_transaction_type = fields.Selection(
+        selection=[
+            ('contains', 'Contains'),
+            ('not_contains', 'Not Contains'),
+            ('match_regex', 'Match Regex'),
+        ],
+        string='Transaction Type',
+        help='''The reconciliation model will only be applied when the transaction type:
         * Contains: The proposition transaction type must contains this string (case insensitive).
         * Not Contains: Negation of "Contains".
-        * Match Regex: Define your own regular expression.''')
+        * Match Regex: Define your own regular expression.''',
+    )
     match_transaction_type_param = fields.Char(string='Transaction Type Parameter')
-    match_same_currency = fields.Boolean(string='Same Currency Matching', default=True,
-        help='Restrict to propositions having the same currency as the statement line.')
-    match_total_amount = fields.Boolean(string='Amount Matching', default=True,
-        help='The sum of total residual amount propositions matches the statement line amount.')
-    match_total_amount_param = fields.Float(string='Amount Matching %', default=100,
-        help='The sum of total residual amount propositions matches the statement line amount under this percentage.')
-    match_partner = fields.Boolean(string='Partner Is Set',
-        help='The reconciliation model will only be applied when a customer/vendor is set.')
-    match_partner_ids = fields.Many2many('res.partner', string='Restrict Partners to',
-        help='The reconciliation model will only be applied to the selected customers/vendors.')
-    match_partner_category_ids = fields.Many2many('res.partner.category', string='Restrict Partner Categories to',
-        help='The reconciliation model will only be applied to the selected customer/vendor categories.')
+    match_same_currency = fields.Boolean(
+        string='Same Currency Matching',
+        default=True,
+        help='Restrict to propositions having the same currency as the statement line.',
+    )
+    match_total_amount = fields.Boolean(
+        string='Amount Matching',
+        default=True,
+        help='The sum of total residual amount propositions matches the statement line amount.',
+    )
+    match_total_amount_param = fields.Float(
+        string='Amount Matching %',
+        default=100,
+        help='The sum of total residual amount propositions matches the statement line amount under this percentage.',
+    )
+    match_partner = fields.Boolean(
+        string='Partner Is Set',
+        help='The reconciliation model will only be applied when a customer/vendor is set.',
+    )
+    match_partner_ids = fields.Many2many(
+        comodel_name='res.partner',
+        string='Restrict Partners to',
+        help='The reconciliation model will only be applied to the selected customers/vendors.',
+    )
+    match_partner_category_ids = fields.Many2many(
+        comodel_name='res.partner.category',
+        string='Restrict Partner Categories to',
+        help='The reconciliation model will only be applied to the selected customer/vendor categories.'
+    )
 
     line_ids = fields.One2many('account.reconcile.model.line', 'model_id')
-    partner_mapping_line_ids = fields.One2many(string="Partner Mapping Lines",
-                                               comodel_name='account.reconcile.model.partner.mapping',
-                                               inverse_name='model_id',
-                                               help="The mapping uses regular expressions.\n"
-                                                    "- To Match the text at the beginning of the line (in label or notes), simply fill in your text.\n"
-                                                    "- To Match the text anywhere (in label or notes), put your text between .*\n"
-                                                    "  e.g: .*N°48748 abc123.*")
+    partner_mapping_line_ids = fields.One2many(
+        string="Partner Mapping Lines",
+        comodel_name='account.reconcile.model.partner.mapping',
+        inverse_name='model_id',
+        help="The mapping uses regular expressions.\n"
+             "- To Match the text at the beginning of the line (in label or notes), simply fill in your text.\n"
+             "- To Match the text anywhere (in label or notes), put your text between .*\n"
+             "  e.g: .*N°48748 abc123.*",
+    )
 
-    past_months_limit = fields.Integer(string="Past Months Limit", default=18, help="Number of months in the past to consider entries from when applying this model.")
+    past_months_limit = fields.Integer(
+        string="Past Months Limit",
+        default=18,
+        help="Number of months in the past to consider entries from when applying this model.",
+    )
 
-    decimal_separator = fields.Char(default=lambda self: self.env['res.lang']._lang_get(self.env.user.lang).decimal_point, help="Every character that is nor a digit nor this separator will be removed from the matching string")
-    show_decimal_separator = fields.Boolean(compute='_compute_show_decimal_separator', help="Technical field to decide if we should show the decimal separator for the regex matching field.")
-    number_entries = fields.Integer(string='Number of entries related to this model', compute='_compute_number_entries')
+    decimal_separator = fields.Char(
+        default=lambda self: self.env['res.lang']._lang_get(self.env.user.lang).decimal_point,
+        help="Every character that is nor a digit nor this separator will be removed from the matching string",
+    )
+    show_decimal_separator = fields.Boolean(
+        compute='_compute_show_decimal_separator',
+        help="Technical field to decide if we should show the decimal separator for the regex matching field.",
+    )
+    number_entries = fields.Integer(
+        string='Number of entries related to this model',
+        compute='_compute_number_entries',
+    )
 
     def action_reconcile_stat(self):
         self.ensure_one()

@@ -33,96 +33,160 @@ class AccountPayment(models.Model):
     # == Business fields ==
     move_id = fields.Many2one(
         comodel_name='account.move',
-        string='Journal Entry', required=True, readonly=True, ondelete='cascade',
-        check_company=True)
+        string='Journal Entry',
+        required=True,
+        readonly=True,
+        ondelete='cascade',
+        check_company=True,
+    )
 
-    is_reconciled = fields.Boolean(string="Is Reconciled", store=True,
+    is_reconciled = fields.Boolean(
+        string="Is Reconciled",
+        store=True,
         compute='_compute_reconciliation_status',
-        help="Technical field indicating if the payment is already reconciled.")
-    is_matched = fields.Boolean(string="Is Matched With a Bank Statement", store=True,
+        help="Technical field indicating if the payment is already reconciled.",
+    )
+    is_matched = fields.Boolean(
+        string="Is Matched With a Bank Statement",
+        store=True,
         compute='_compute_reconciliation_status',
-        help="Technical field indicating if the payment has been matched with a statement line.")
-    partner_bank_id = fields.Many2one('res.partner.bank', string="Recipient Bank Account",
-        readonly=False, store=True,
+        help="Technical field indicating if the payment has been matched with a statement line.",
+    )
+    partner_bank_id = fields.Many2one(
+        comodel_name='res.partner.bank',
+        string="Recipient Bank Account",
+        readonly=False,
+        store=True,
         compute='_compute_partner_bank_id',
         domain="[('partner_id', '=', partner_id)]",
-        check_company=True)
-    is_internal_transfer = fields.Boolean(string="Is Internal Transfer",
-        readonly=False, store=True,
-        compute="_compute_is_internal_transfer")
-    qr_code = fields.Char(string="QR Code",
+        check_company=True,
+    )
+    is_internal_transfer = fields.Boolean(
+        string="Is Internal Transfer",
+        readonly=False,
+        store=True,
+        compute="_compute_is_internal_transfer",
+    )
+    qr_code = fields.Char(
+        string="QR Code",
         compute="_compute_qr_code",
-        help="QR-code report URL to use to generate the QR-code to scan with a banking app to perform this payment.")
+        help="QR-code report URL to use to generate the QR-code to scan with a banking app to perform this payment.",
+    )
 
     # == Payment methods fields ==
-    payment_method_id = fields.Many2one('account.payment.method', string='Payment Method',
-        readonly=False, store=True,
+    payment_method_id = fields.Many2one(
+        comodel_name='account.payment.method',
+        string='Payment Method',
+        readonly=False,
+        store=True,
         compute='_compute_payment_method_id',
         domain="[('id', 'in', available_payment_method_ids)]",
-        help="Manual: Get paid by cash, check or any other method outside of Odoo.\n"\
-        "Electronic: Get paid automatically through a payment acquirer by requesting a transaction on a card saved by the customer when buying or subscribing online (payment token).\n"\
-        "Check: Pay bill by check and print it from Odoo.\n"\
-        "Batch Deposit: Encase several customer checks at once by generating a batch deposit to submit to your bank. When encoding the bank statement in Odoo, you are suggested to reconcile the transaction with the batch deposit.To enable batch deposit, module account_batch_payment must be installed.\n"\
-        "SEPA Credit Transfer: Pay bill from a SEPA Credit Transfer file you submit to your bank. To enable sepa credit transfer, module account_sepa must be installed ")
-    available_payment_method_ids = fields.Many2many('account.payment.method',
-        compute='_compute_payment_method_fields')
+        help="Manual: Get paid by cash, check or any other method outside of Odoo.\n"
+             "Electronic: Get paid automatically through a payment acquirer by requesting a transaction on a card saved by the customer when buying or subscribing online (payment token).\n"
+             "Check: Pay bill by check and print it from Odoo.\n"
+             "Batch Deposit: Encase several customer checks at once by generating a batch deposit to submit to your bank. "
+             "When encoding the bank statement in Odoo, you are suggested to reconcile the transaction with the batch deposit. "
+             "To enable batch deposit, module account_batch_payment must be installed.\n"
+             "SEPA Credit Transfer: Pay bill from a SEPA Credit Transfer file you submit to your bank. To enable sepa credit transfer, module account_sepa must be installed ",
+    )
+    available_payment_method_ids = fields.Many2many(
+        comodel_name='account.payment.method',
+        compute='_compute_payment_method_fields',
+    )
     hide_payment_method = fields.Boolean(
         compute='_compute_payment_method_fields',
-        help="Technical field used to hide the payment method if the selected journal has only one available which is 'manual'")
+        help="Technical field used to hide the payment method if the selected journal has only one available which is 'manual'",
+    )
 
     # == Synchronized fields with the account.move.lines ==
     amount = fields.Monetary(currency_field='currency_id')
-    payment_type = fields.Selection([
-        ('outbound', 'Send Money'),
-        ('inbound', 'Receive Money'),
-    ], string='Payment Type', default='inbound', required=True)
-    partner_type = fields.Selection([
-        ('customer', 'Customer'),
-        ('supplier', 'Vendor'),
-    ], default='customer', tracking=True, required=True)
-    payment_reference = fields.Char(string="Payment Reference", copy=False,
-        help="Reference of the document used to issue this payment. Eg. check number, file name, etc.")
-    currency_id = fields.Many2one('res.currency', string='Currency', store=True, readonly=False,
+    payment_type = fields.Selection(
+        selection=[
+            ('outbound', 'Send Money'),
+            ('inbound', 'Receive Money'),
+        ],
+        string='Payment Type',
+        default='inbound',
+        required=True,
+    )
+    partner_type = fields.Selection(
+        selection=[
+            ('customer', 'Customer'),
+            ('supplier', 'Vendor'),
+        ],
+        default='customer',
+        tracking=True,
+        required=True,
+    )
+    payment_reference = fields.Char(
+        string="Payment Reference",
+        copy=False,
+        help="Reference of the document used to issue this payment. Eg. check number, file name, etc.",
+    )
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        string='Currency',
+        store=True,
+        readonly=False,
         compute='_compute_currency_id',
-        help="The payment's currency.")
+        help="The payment's currency.",
+    )
     partner_id = fields.Many2one(
         comodel_name='res.partner',
         string="Customer/Vendor",
-        store=True, readonly=False, ondelete='restrict',
+        store=True,
+        readonly=False,
+        ondelete='restrict',
         compute='_compute_partner_id',
         domain="['|', ('parent_id','=', False), ('is_company','=', True)]",
-        check_company=True)
+        check_company=True,
+    )
     destination_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Destination Account',
-        store=True, readonly=False,
+        store=True,
+        readonly=False,
         compute='_compute_destination_account_id',
         domain="[('user_type_id.type', 'in', ('receivable', 'payable')), ('company_id', '=', company_id)]",
         check_company=True,
-        help="The payment's currency.")
+        help="The payment's currency.",
+    )
 
     # == Stat buttons ==
-    reconciled_invoice_ids = fields.Many2many('account.move', string="Reconciled Invoices",
+    reconciled_invoice_ids = fields.Many2many(
+        comodel_name='account.move',
+        string="Reconciled Invoices",
         compute='_compute_stat_buttons_from_reconciliation',
-        help="Invoices whose journal items have been reconciled with these payments.")
-    reconciled_invoices_count = fields.Integer(string="# Reconciled Invoices",
-        compute="_compute_stat_buttons_from_reconciliation")
-    reconciled_statement_ids = fields.Many2many('account.move', string="Reconciled Statements",
+        help="Invoices whose journal items have been reconciled with these payments.",
+    )
+    reconciled_invoices_count = fields.Integer(
+        string="# Reconciled Invoices",
+        compute="_compute_stat_buttons_from_reconciliation",
+    )
+    reconciled_statement_ids = fields.Many2many(
+        comodel_name='account.move',
+        string="Reconciled Statements",
         compute='_compute_stat_buttons_from_reconciliation',
-        help="Statements matched to this payment")
-    reconciled_statements_count = fields.Integer(string="# Reconciled Statements",
-        compute="_compute_stat_buttons_from_reconciliation")
+        help="Statements matched to this payment",
+    )
+    reconciled_statements_count = fields.Integer(
+        string="# Reconciled Statements",
+        compute="_compute_stat_buttons_from_reconciliation",
+    )
 
     # == Display purpose fields ==
     payment_method_code = fields.Char(
         related='payment_method_id.code',
-        help="Technical field used to adapt the interface to the payment type selected.")
+        help="Technical field used to adapt the interface to the payment type selected.",
+    )
     show_partner_bank_account = fields.Boolean(
         compute='_compute_show_require_partner_bank',
-        help="Technical field used to know whether the field `partner_bank_id` needs to be displayed or not in the payments form views")
+        help="Technical field used to know whether the field `partner_bank_id` needs to be displayed or not in the payments form views",
+    )
     require_partner_bank_account = fields.Boolean(
         compute='_compute_show_require_partner_bank',
-        help="Technical field used to know whether the field `partner_bank_id` needs to be required or not in the payments form views")
+        help="Technical field used to know whether the field `partner_bank_id` needs to be required or not in the payments form views",
+    )
 
     _sql_constraints = [
         (
@@ -206,7 +270,7 @@ class AccountPayment(models.Model):
         if self.is_internal_transfer:
             if self.payment_type == 'inbound':
                 liquidity_line_name = _('Transfer to %s', self.journal_id.name)
-            else: # payment.payment_type == 'outbound':
+            else:  # payment.payment_type == 'outbound':
                 liquidity_line_name = _('Transfer from %s', self.journal_id.name)
         else:
             liquidity_line_name = self.payment_reference
@@ -437,13 +501,13 @@ class AccountPayment(models.Model):
             FROM account_payment payment
             JOIN account_move move ON move.id = payment.move_id
             JOIN account_move_line line ON line.move_id = move.id
-            JOIN account_partial_reconcile part ON 
-                part.debit_move_id = line.id 
-                OR 
+            JOIN account_partial_reconcile part ON
+                part.debit_move_id = line.id
+                OR
                 part.credit_move_id = line.id
-            JOIN account_move_line counterpart_line ON 
+            JOIN account_move_line counterpart_line ON
                 part.debit_move_id = counterpart_line.id
-                OR 
+                OR
                 part.credit_move_id = counterpart_line.id
             JOIN account_move invoice ON invoice.id = counterpart_line.move_id
             WHERE line.account_internal_type IN ('receivable', 'payable')
@@ -467,13 +531,13 @@ class AccountPayment(models.Model):
             JOIN account_journal journal ON journal.id = move.journal_id
             JOIN account_move_line line ON line.move_id = move.id
             JOIN account_account account ON account.id = line.account_id
-            JOIN account_partial_reconcile part ON 
-                part.debit_move_id = line.id 
-                OR 
+            JOIN account_partial_reconcile part ON
+                part.debit_move_id = line.id
+                OR
                 part.credit_move_id = line.id
-            JOIN account_move_line counterpart_line ON 
+            JOIN account_move_line counterpart_line ON
                 part.debit_move_id = counterpart_line.id
-                OR 
+                OR
                 part.credit_move_id = counterpart_line.id
             WHERE (account.id = journal.payment_debit_account_id OR account.id = journal.payment_credit_account_id)
                 AND line.id != counterpart_line.id

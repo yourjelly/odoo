@@ -20,21 +20,30 @@ class AccountFiscalPosition(models.Model):
 
     sequence = fields.Integer()
     name = fields.Char(string='Fiscal Position', required=True)
-    active = fields.Boolean(default=True,
-        help="By unchecking the active field, you may hide a fiscal position without deleting it.")
+    active = fields.Boolean(
+        default=True,
+        help="By unchecking the active field, you may hide a fiscal position without deleting it.",
+    )
     company_id = fields.Many2one(
         comodel_name='res.company',
         string='Company', required=True, readonly=True,
-        default=lambda self: self.env.company)
+        default=lambda self: self.env.company,
+    )
     account_ids = fields.One2many('account.fiscal.position.account', 'position_id', string='Account Mapping', copy=True)
     tax_ids = fields.One2many('account.fiscal.position.tax', 'position_id', string='Tax Mapping', copy=True)
     note = fields.Text('Notes', translate=True, help="Legal mentions that have to be printed on the invoices.")
     auto_apply = fields.Boolean(string='Detect Automatically', help="Apply automatically this fiscal position.")
     vat_required = fields.Boolean(string='VAT required', help="Apply only if partner has a VAT number.")
-    country_id = fields.Many2one('res.country', string='Country',
-        help="Apply only if delivery or invoicing country match.")
-    country_group_id = fields.Many2one('res.country.group', string='Country Group',
-        help="Apply only if delivery or invoicing country match the group.")
+    country_id = fields.Many2one(
+        comodel_name='res.country',
+        string='Country',
+        help="Apply only if delivery or invoicing country match.",
+    )
+    country_group_id = fields.Many2one(
+        comodel_name='res.country.group',
+        string='Country Group',
+        help="Apply only if delivery or invoicing country match the group.",
+    )
     state_ids = fields.Many2many('res.country.state', string='Federal States')
     zip_from = fields.Char(string='Zip Range From')
     zip_to = fields.Char(string='Zip Range To')
@@ -196,8 +205,12 @@ class AccountFiscalPositionTax(models.Model):
     _rec_name = 'position_id'
     _check_company_auto = True
 
-    position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position',
-        required=True, ondelete='cascade')
+    position_id = fields.Many2one(
+        comodel_name='account.fiscal.position',
+        string='Fiscal Position',
+        required=True,
+        ondelete='cascade',
+    )
     company_id = fields.Many2one('res.company', string='Company', related='position_id.company_id', store=True)
     tax_src_id = fields.Many2one('account.tax', string='Tax on Product', required=True, check_company=True)
     tax_dest_id = fields.Many2one('account.tax', string='Tax to Apply', check_company=True)
@@ -215,15 +228,27 @@ class AccountFiscalPositionAccount(models.Model):
     _rec_name = 'position_id'
     _check_company_auto = True
 
-    position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position',
-        required=True, ondelete='cascade')
+    position_id = fields.Many2one(
+        comodel_name='account.fiscal.position',
+        string='Fiscal Position',
+        required=True,
+        ondelete='cascade',
+    )
     company_id = fields.Many2one('res.company', string='Company', related='position_id.company_id', store=True)
-    account_src_id = fields.Many2one('account.account', string='Account on Product',
-        check_company=True, required=True,
-        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]")
-    account_dest_id = fields.Many2one('account.account', string='Account to Use Instead',
-        check_company=True, required=True,
-        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]")
+    account_src_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Account on Product',
+        check_company=True,
+        required=True,
+        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
+    )
+    account_dest_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Account to Use Instead',
+        check_company=True,
+        required=True,
+        domain="[('deprecated', '=', False), ('company_id', '=', company_id)]",
+    )
 
     _sql_constraints = [
         ('account_src_dest_uniq',
@@ -306,7 +331,6 @@ class ResPartner(models.Model):
         if not self.ids:
             return True
 
-        user_currency_id = self.env.company.currency_id.id
         all_partners_and_children = {}
         all_partner_ids = []
         for partner in self:
@@ -392,51 +416,99 @@ class ResPartner(models.Model):
             else:
                 partner.currency_id = self.env.company.currency_id
 
-    credit = fields.Monetary(compute='_credit_debit_get', search=_credit_search,
-        string='Total Receivable', help="Total amount this customer owes you.")
-    debit = fields.Monetary(compute='_credit_debit_get', search=_debit_search, string='Total Payable',
-        help="Total amount you have to pay to this vendor.")
+    credit = fields.Monetary(
+        compute='_credit_debit_get',
+        search=_credit_search,
+        string='Total Receivable',
+        help="Total amount this customer owes you.",
+    )
+    debit = fields.Monetary(
+        compute='_credit_debit_get',
+        search=_debit_search,
+        string='Total Payable',
+        help="Total amount you have to pay to this vendor.",
+    )
     debit_limit = fields.Monetary('Payable Limit')
-    total_invoiced = fields.Monetary(compute='_invoice_total', string="Total Invoiced",
-        groups='account.group_account_invoice,account.group_account_readonly')
-    currency_id = fields.Many2one('res.currency', compute='_get_company_currency', readonly=True,
-        string="Currency", help='Utility field to express amount currency')
+    total_invoiced = fields.Monetary(
+        compute='_invoice_total',
+        string="Total Invoiced",
+        groups='account.group_account_invoice,account.group_account_readonly',
+    )
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        compute='_get_company_currency',
+        readonly=True,
+        string="Currency",
+        help='Utility field to express amount currency',
+    )
     journal_item_count = fields.Integer(compute='_compute_journal_item_count', string="Journal Items")
-    property_account_payable_id = fields.Many2one('account.account', company_dependent=True,
+    property_account_payable_id = fields.Many2one(
+        comodel_name='account.account',
+        company_dependent=True,
         string="Account Payable",
         domain="[('internal_type', '=', 'payable'), ('deprecated', '=', False), ('company_id', '=', current_company_id)]",
         help="This account will be used instead of the default one as the payable account for the current partner",
-        required=True)
-    property_account_receivable_id = fields.Many2one('account.account', company_dependent=True,
+        required=True,
+    )
+    property_account_receivable_id = fields.Many2one(
+        comodel_name='account.account',
+        company_dependent=True,
         string="Account Receivable",
         domain="[('internal_type', '=', 'receivable'), ('deprecated', '=', False), ('company_id', '=', current_company_id)]",
         help="This account will be used instead of the default one as the receivable account for the current partner",
-        required=True)
-    property_account_position_id = fields.Many2one('account.fiscal.position', company_dependent=True,
+        required=True,
+    )
+    property_account_position_id = fields.Many2one(
+        comodel_name='account.fiscal.position',
+        company_dependent=True,
         string="Fiscal Position",
         domain="[('company_id', '=', current_company_id)]",
-        help="The fiscal position determines the taxes/accounts used for this contact.")
-    property_payment_term_id = fields.Many2one('account.payment.term', company_dependent=True,
+        help="The fiscal position determines the taxes/accounts used for this contact.",
+    )
+    property_payment_term_id = fields.Many2one(
+        comodel_name='account.payment.term',
+        company_dependent=True,
         string='Customer Payment Terms',
         domain="[('company_id', 'in', [current_company_id, False])]",
-        help="This payment term will be used instead of the default one for sales orders and customer invoices")
-    property_supplier_payment_term_id = fields.Many2one('account.payment.term', company_dependent=True,
+        help="This payment term will be used instead of the default one for sales orders and customer invoices",
+    )
+    property_supplier_payment_term_id = fields.Many2one(
+        comodel_name='account.payment.term',
+        company_dependent=True,
         string='Vendor Payment Terms',
         domain="[('company_id', 'in', [current_company_id, False])]",
-        help="This payment term will be used instead of the default one for purchase orders and vendor bills")
-    ref_company_ids = fields.One2many('res.company', 'partner_id',
-        string='Companies that refers to partner')
-    has_unreconciled_entries = fields.Boolean(compute='_compute_has_unreconciled_entries',
-        help="The partner has at least one unreconciled debit and credit since last time the invoices & payments matching was performed.")
+        help="This payment term will be used instead of the default one for purchase orders and vendor bills",
+    )
+    ref_company_ids = fields.One2many(
+        comodel_name='res.company',
+        inverse_name='partner_id',
+        string='Companies that refers to partner',
+    )
+    has_unreconciled_entries = fields.Boolean(
+        compute='_compute_has_unreconciled_entries',
+        help="The partner has at least one unreconciled debit and credit since last time the invoices & payments matching was performed.",
+    )
     last_time_entries_checked = fields.Datetime(
-        string='Latest Invoices & Payments Matching Date', readonly=True, copy=False,
+        string='Latest Invoices & Payments Matching Date',
+        readonly=True,
+        copy=False,
         help='Last time the invoices & payments matching was performed for this partner. '
              'It is set either if there\'s not at least an unreconciled debit and an unreconciled credit '
-             'or if you click the "Done" button.')
+             'or if you click the "Done" button.',
+    )
     invoice_ids = fields.One2many('account.move', 'partner_id', string='Invoices', readonly=True, copy=False)
     contract_ids = fields.One2many('account.analytic.account', 'partner_id', string='Partner Contracts', readonly=True)
     bank_account_count = fields.Integer(compute='_compute_bank_count', string="Bank")
-    trust = fields.Selection([('good', 'Good Debtor'), ('normal', 'Normal Debtor'), ('bad', 'Bad Debtor')], string='Degree of trust you have in this debtor', default='normal', company_dependent=True)
+    trust = fields.Selection(
+        selection=[
+            ('good', 'Good Debtor'),
+            ('normal', 'Normal Debtor'),
+            ('bad', 'Bad Debtor')
+        ],
+        string='Degree of trust you have in this debtor',
+        default='normal',
+        company_dependent=True,
+    )
     invoice_warn = fields.Selection(WARNING_MESSAGE, 'Invoice', help=WARNING_HELP, default="no-message")
     invoice_warn_msg = fields.Text('Message for Invoice')
     # Computed fields to order the partners as suppliers/customers according to the
