@@ -32,22 +32,20 @@ PaymentForm.include({
             console.warn('payment_form: unset partner_id when adding new token; things could go wrong');
         }
         const formData = this.getFormData(inputsForm);
-        const paymentMethods = await this._rpc({
-            route: '/payment/adyen_by_odoo/get_payment_methods',
+        const configuration = await this._rpc({
+            route: '/payment/adyen_by_odoo/dropin_configuration',
             params: {
                 acquirer_id: formData.acquirer_id,
-                shopperLocale: locale,
+                partner_id: this.options.partnerId,
             },
         });
-        const configuration = {
-            paymentMethodsResponse: paymentMethods,
-            originKey: 'pub.v2.8215940375760255.aHR0cHM6Ly9vZG9vLnRlc3Q.ucnpq2uUrMtawFwcFL4l5H15Fke_DkhMhrmwnUw7eWY',
+        // extra configuration for DropIn that has to be added in the frontend (handlers)
+        Object.assign(configuration, {
             locale: locale,
-            environment: 'test',
             onSubmit: this._adyenSubmitPayment.bind(this),
+            onError: this._adyenOnError.bind(this),
             onAdditionalDetails: this._adyenAdditionalDetails.bind(this),
-            showPayButton: false,
-        };
+        });
         const checkout = new AdyenCheckout(configuration);
         this.adyenDropin = await checkout.create('dropin').mount('#dropin-container');
         return true;
@@ -57,6 +55,10 @@ PaymentForm.include({
         this.adyenDropin = undefined;
         this.adyenTxReference = undefined;
         this.adyenTxSignature = undefined;
+    },
+
+    _adyenOnError: function () {
+        this.enableButton(this.adyenPayButton);
     },
 
     _adyenSubmitPayment: async function(adyenState, adyenDropin) {
@@ -107,13 +109,12 @@ PaymentForm.include({
                 error.event.preventDefault();
             }
             // if the rpc fails, pretty obvious
-            //this.enableButton(button);
+            this.enableButton(this.adyenPayButton);
             this.displayError(
                 _t('Unable to save card'),
                 _t("We are not able to add your payment method at the moment. ") +
                     this._parseError(error)
             );
-            this.adyenDropin.setStatus('error', {'message': this._parseError(error)});
         });
     },
 
@@ -142,7 +143,7 @@ PaymentForm.include({
                 error.event.preventDefault();
             }
             // if the rpc fails, pretty obvious
-            //this.enableButton(button);
+            this.enableButton(this.adyenPayButton);
             this.displayError(
                 _t('Unable to save card'),
                 _t("We are not able to add your payment method at the moment. ") +
@@ -188,6 +189,7 @@ PaymentForm.include({
             } else {
                 button = ev.target;
             }
+            this.adyenPayButton = button;
             this.disableButton(button);
             return this.adyenDropin.submit();
         } else {
