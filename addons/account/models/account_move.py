@@ -2338,10 +2338,11 @@ class AccountMove(models.Model):
                     to_write['line_ids'].append((1, line.id, {'name': to_write['payment_reference']}))
                 move.write(to_write)
 
+        root_user_id = self.env.ref("base.user_root").id
         for move in to_post:
             if move.is_sale_document() \
                     and move.journal_id.sale_activity_type_id \
-                    and (move.journal_id.sale_activity_user_id or move.invoice_user_id).id not in (self.env.ref('base.user_root').id, False):
+                    and (move.journal_id.sale_activity_user_id or move.invoice_user_id).id not in (root_user_id, False):
                 move.activity_schedule(
                     date_deadline=min((date for date in move.line_ids.mapped('date_maturity') if date), default=move.date),
                     activity_type_id=move.journal_id.sale_activity_type_id.id,
