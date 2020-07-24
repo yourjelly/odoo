@@ -134,12 +134,12 @@
     <xpath expr="//header//ul[@id='top_menu']" position="attributes">
         <attribute name="class" separator=" " add="o_menu_loading" remove="text-right ml-auto"/>
     </xpath>
-    <xpath expr="//header//ul[@id='top_menu']/li[hasclass('divider')]" position="attributes">
+    <!-- <xpath expr="//header//ul[@id='top_menu']/li[hasclass('divider')]" position="attributes">
         <attribute name="t-if">website.user_id != user_id</attribute>
     </xpath>
     <xpath expr="//header//ul[@id='top_menu']/li[hasclass('dropdown')]" position="attributes">
         <attribute name="t-if">website.user_id != user_id</attribute>
-    </xpath>
+    </xpath> -->
     <xpath expr="//header//ul[@id='top_menu']/li[hasclass('divider')]" position="before">
         <t t-foreach="website.menu_id.child_id" t-as="submenu">
             <t t-call="website.submenu">

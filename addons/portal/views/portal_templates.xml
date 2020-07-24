@@ -17,7 +17,12 @@
                     <div class="collapse navbar-collapse" id="top_menu_collapse">
                         <!-- FIXME We want menu to open to the right by default (except cases handled in JS) -->
                         <ul class="nav navbar-nav ml-auto text-right" id="top_menu">
-                            <li class="nav-item divider" t-ignore="true" t-if="not user_id._is_public()"/>
+                            <li class="nav-item divider"/>
+                            <li groups="base.group_public" class="nav-item">
+                                <t t-call="portal.placeholder_show_sign_in">
+                                    <t t-set="_classes" t-value="'nav-link'"/>
+                                </t>
+                            </li>
                             <li class="nav-item dropdown" t-ignore="true" t-if="not user_id._is_public()">
                                 <t t-call="portal.user_dropdown">
                                     <t t-set="_classes" t-value="'nav-link'"/>
@@ -108,14 +113,13 @@
         </t>
     </template>
 
-    <template id="portal_show_sign_in" inherit_id="portal.frontend_layout" name="Show Sign In">
-        <xpath expr="//ul[@id='top_menu']" position="inside">
-            <li class="nav-item divider" groups="base.group_public"/>
-            <li groups="base.group_public" class="nav-item">
-                <a t-attf-href="/web/login" class="nav-link">
-                    <b>Sign in</b>
-                </a>
-            </li>
+    <template id="placeholder_show_sign_in" name="Sign In PlaceHolder"/>
+
+    <template id="portal_show_sign_in" inherit_id="portal.placeholder_show_sign_in" name="Show Sign In" active="True">
+        <xpath expr="." position="inside">
+            <a t-attf-href="/web/login" t-attf-class="#{_classes}">
+                <b>Sign in</b>
+            </a>
         </xpath>
     </template>
 
