@@ -34,6 +34,14 @@
     </t>
 </template>
 
+<template id="events_activate_pwa" inherit_id="website_event.index" active="False" customize_show="True" name="PWA App for Events">
+    <xpath expr="//t[@t-call='website.layout']" position="before">
+        <t t-call="website.pwa_meta">
+            <t t-set="page_url" t-value="'/event'"/>
+        </t>
+    </xpath>
+</template>
+
 <!-- Index - OPTION - Sidebar -->
 <template id="opt_index_sidebar" inherit_id="website_event.index" active="False" customize_show="True" name="Show Sidebar">
     <xpath expr="//div[@id='o_wevent_index_main_col']" position="after">

@@ -18,7 +18,8 @@ import odoo
 
 from odoo import http, models, fields, _
 from odoo.http import request
-from odoo.tools import OrderedSet
+from odoo.tools import base64_to_image, file_open, image_fix_orientation, OrderedSet
+from odoo.modules.module import get_resource_path
 from odoo.addons.http_routing.models.ir_http import slug, slugify, _guess_mimetype
 from odoo.addons.web.controllers.main import Binary
 from odoo.addons.portal.controllers.portal import pager as portal_pager
@@ -224,6 +225,47 @@ class Website(Home):
         if not url:
             raise werkzeug.exceptions.NotFound()
         return request.redirect(url)
+
+    @http.route('/service_worker.js', type='http', auth='public', website=True, sitemap=False)
+    def serviceWorker(self, *kw, **kws):
+        # to allow maximum scope(so that it could work for multiple apps),
+        # file have to be served from root directory
+        service_worker_file = get_resource_path('website', 'static/src/js', 'service_worker.js')
+        with file_open(service_worker_file, 'rb') as service_worker:
+            return request.make_response(
+                service_worker.read(),
+                headers=[('Content-Type', 'application/javascript;charset=utf-8')]
+            )
+
+    @http.route([
+        '/pwa.manifest',
+        '/pwa.manifest/<string:page_url>',
+    ], type='http', auth='public', website=True, sitemap=False)
+    def manifest(self, page_url='', *kw, **kwargs):
+        current_website = request.website
+        icon_sizes = ['72x72', '96x96', '128x128', '144x144', '152x152', '192x192', '384x384', '512x512']
+        icon_url = '/web/image/website.pwa_icon/'
+        if current_website.logo:
+            website_logo_img = image_fix_orientation(base64_to_image(current_website.logo))
+            if website_logo_img.width >= 512 and website_logo_img.height >= 512 and website_logo_img.width == website_logo_img.height:
+                icon_url = '/web/image/website/%s/logo/' % current_website.id
+        return json.dumps({
+            "name": "%s %s" % (current_website.name, page_url.capitalize() if page_url else 'App'),
+            "short_name": "%s %s" % (current_website.name, page_url.capitalize() if page_url else 'App'),
+            "theme_color": "#62495B",
+            "background_color": "#62495B",
+            "display": "standalone",
+            "start_url": "/%s" % page_url,
+            "scope": "/%s" % page_url,
+            "icons": [
+                {
+                    'src': '%s%s' % (icon_url, size),
+                    'sizes': '%s' % size,
+                    'type': 'image/png'
+                } for size in icon_sizes
+            ],
+            "splash_pages": None,
+        })
 
     @http.route('/website/get_suggested_links', type='json', auth="user", website=True)
     def get_suggested_link(self, needle, limit=10):
