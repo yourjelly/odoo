@@ -211,8 +211,99 @@ const FontFamilyPickerUserValueWidget = SelectUserValueWidget.extend({
     },
 });
 
+const GPSPicker = InputUserValueWidget.extend({
+    /**
+     * @constructor
+     */
+    init() {
+        this._super(...arguments);
+        this._value = '(50.854975,4.3753899)';
+    },
+    /**
+     * @override
+     */
+    async willStart() {
+        await this._super(...arguments);
+        await new Promise(resolve => {
+            this.trigger_up('gmap_api_request', {
+                editableMode: true,
+                configureIfNecessary: true,
+                onSuccess: () => resolve(),
+            });
+        });
+        const geocoder = new google.maps.Geocoder();
+        const latlngStr = this._value.substring(1, this._value.length - 1).split(',', 2);
+        const latlng = {
+            lat: parseFloat(latlngStr[0]),
+            lng: parseFloat(latlngStr[1])
+        };
+        this._gmapPlace = await new Promise(resolve => {
+            geocoder.geocode(
+                {location: latlng},
+                (results, status) => {
+                    if (status !== "OK" || !results[0]) {
+                        return;
+                    }
+                    resolve(results[0]);
+                }
+            );
+        });
+    },
+    /**
+     * @override
+     */
+    async start() {
+        await this._super(...arguments);
+
+        this._gmapAutocomplete = new google.maps.places.Autocomplete(this.inputEl, {types: ['geocode']});
+        google.maps.event.addListener(this._gmapAutocomplete, 'place_changed', this._onPlaceChanged.bind(this));
+    },
+
+    //--------------------------------------------------------------------------
+    // Public
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    getMethodsParams: function (methodName) {
+        return Object.assign({gmapPlace: this._gmapPlace}, this._super(...arguments));
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _updateUI: async function () {
+        await this._super(...arguments);
+        this.inputEl.value = this._gmapPlace.formatted_address;
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @param {Event} ev
+     */
+    _onPlaceChanged(ev) {
+        const gmapPlace = this._gmapAutocomplete.getPlace();
+        if (gmapPlace && gmapPlace.geometry) {
+            this._gmapPlace = gmapPlace;
+            this._value = this._gmapPlace.geometry.location;
+            this._onUserValueChange(ev);
+        }
+        $('.pac-container').remove(); // FIXME
+    },
+});
+
 options.userValueWidgetsRegistry['we-urlpicker'] = UrlPickerUserValueWidget;
 options.userValueWidgetsRegistry['we-fontfamilypicker'] = FontFamilyPickerUserValueWidget;
+options.userValueWidgetsRegistry['we-gpspicker'] = GPSPicker;
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -640,6 +731,18 @@ options.registry.Theme = options.Class.extend({
     // Options
     //--------------------------------------------------------------------------
 
+    /**
+     * @see this.selectClass for parameters
+     */
+    async configureApiKey(previewMode, widgetValue, params) {
+        return new Promise(resolve => {
+            this.trigger_up('gmap_api_key_request', {
+                editableMode: true,
+                reconfigure: true,
+                onSuccess: () => resolve(),
+            });
+        });
+    },
     /**
      * @todo use scss customization instead (like for user colors)
      * @see this.selectClass for parameters

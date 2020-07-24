@@ -1,14 +1,13 @@
 odoo.define('website.root', function (require) {
 'use strict';
 
-var core = require('web.core');
+const ajax = require('web.ajax');
+const {qweb, _t} = require('web.core');
 var Dialog = require('web.Dialog');
 const KeyboardNavigationMixin = require('web.KeyboardNavigationMixin');
 const session = require('web.session');
 var publicRootData = require('web.public.root');
 require("web.zoomodoo");
-
-var _t = core._t;
 
 var websiteRootRegistry = publicRootData.publicRootRegistry;
 
@@ -20,8 +19,10 @@ var WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMixin, {
         'shown.bs.modal': '_onModalShown',
     }),
     custom_events: _.extend({}, publicRootData.PublicRoot.prototype.custom_events || {}, {
+        'gmap_api_request': '_onGMapAPIRequest',
+        'gmap_api_key_request': '_onGMapAPIKeyRequest',
         'ready_to_clean_for_save': '_onWidgetsStopRequest',
-        seo_object_request: '_onSeoObjectRequest',
+        'seo_object_request': '_onSeoObjectRequest',
     }),
 
     /**
@@ -91,6 +92,19 @@ var WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMixin, {
         }, this._super.apply(this, arguments));
     },
     /**
+     * @private
+     */
+    async _getGoogleMapApiKey() {
+        if (this._gmapAPIKey) {
+            return this._gmapAPIKey;
+        }
+        const data = await this._rpc({
+            route: '/website/google_maps_api_key',
+        });
+        this._gmapAPIKey = JSON.parse(data).google_maps_api_key || '';
+        return this._gmapAPIKey;
+    },
+    /**
      * @override
      */
     _getPublicWidgetsRegistry: function (options) {
@@ -101,6 +115,82 @@ var WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMixin, {
             });
         }
         return registry;
+    },
+    /**
+     * Depending of the demand, reconfigure they gmap key or configure it
+     * if not already defined.
+     *
+     * @private
+     * @param {boolean} [reconfigure=false]
+     * @param {boolean} [onlyIfUndefined=false]
+     */
+    async _configureGMapAPI({reconfigure, onlyIfUndefined}) { // FIXME should not be part of website_root since use website.editor.xml
+        let apiKey = await this._getGoogleMapApiKey();
+        if (!reconfigure && (apiKey || !onlyIfUndefined)) {
+            return apiKey;
+        }
+        const websiteId = this._getContext()['website_id'];
+        return new Promise(resolve => {
+            let newAPIKey;
+            const dialog = new Dialog(this, {
+                size: 'medium',
+                title: _t("Google Map API Key"),
+                buttons: [
+                    {text: _t("Save"), classes: 'btn-primary', close: true, click: async () => {
+                        newAPIKey = dialog.$('#api_key_input').val() || false;
+                        await this._rpc({
+                            model: 'website',
+                            method: 'write',
+                            args: [
+                                [websiteId],
+                                {google_maps_api_key: newAPIKey},
+                            ],
+                        });
+                    }},
+                    {text: _t("Cancel"), close: true}
+                ],
+                $content: $(qweb.render('website.s_google_map_modal', {
+                    apiKey: apiKey,
+                })),
+            });
+            dialog.on('closed', this, () => resolve(newAPIKey || apiKey));
+            dialog.open();
+        });
+    },
+    /**
+     * @private
+     * @param {boolean} [editableMode=false]
+     */
+    async _loadGMapAPI(editableMode) {
+        if (this._gmapAPILoading) {
+            return this._gmapAPILoading;
+        }
+        this._gmapAPILoading = new Promise(async resolve => {
+            const key = await this._getGoogleMapApiKey();
+
+            window.odoo_gmap_api_post_load = (async function odoo_gmap_api_post_load() {
+                await this._startWidgets(undefined, {editableMode: editableMode});
+                resolve(key);
+            }).bind(this);
+
+            if (!key) {
+                if (editableMode) {
+                    this.displayNotification({
+                        type: 'warning',
+                        sticky: true,
+                        message: $('<a/>', {
+                            href: "/web#action=website.action_website_configuration",
+                            text: _t("Cannot load google map, check your configuration !"),
+                        })[0].outerHTML,
+                    });
+                }
+                resolve(key);
+                this._gmapAPILoading = false;
+                return;
+            }
+            await ajax.loadJS(`https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places&callback=odoo_gmap_api_post_load&key=${key}`);
+        });
+        return this._gmapAPILoading;
     },
     /**
      * Toggles the fullscreen mode.
@@ -162,6 +252,33 @@ var WebsiteRoot = publicRootData.PublicRoot.extend(KeyboardNavigationMixin, {
             hash: encodeURIComponent(window.location.hash)
         };
         window.location.href = _.str.sprintf("/website/lang/%(lang)s?r=%(url)s%(hash)s", redirect);
+    },
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    async _onGMapAPIRequest(ev) {
+        ev.stopPropagation();
+        const editableMode = ev.data.editableMode;
+        await this._configureGMapAPI({
+            reconfigure: editableMode && ev.data.reconfigure,
+            onlyIfUndefined: editableMode && ev.data.configureIfNecessary,
+        });
+        const apiKey = await this._loadGMapAPI(editableMode);
+        ev.data.onSuccess(apiKey);
+    },
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    async _onGMapAPIKeyRequest(ev) {
+        ev.stopPropagation();
+        const editableMode = ev.data.editableMode;
+        const apiKey = await this._configureGMapAPI(ev.data.editableMode, {
+            reconfigure: editableMode && ev.data.reconfigure,
+            onlyIfUndefined: editableMode && ev.data.configureIfNecessary,
+        });
+        ev.data.onSuccess(apiKey);
     },
     /**
     /**
