@@ -770,11 +770,11 @@
     </xpath>
 </template>
 
-<template id="header_button" inherit_id="website.layout" name="Header Button" active="False">
-    <xpath expr="//ul[@id='top_menu']" position="inside">
-        <li class="nav-item align-self-md-center ml-1 o_header_menu_button">
-            <a href="/contactus" class="btn btn-primary">Contact us</a>
-        </li>
+<template id="placeholder_header_button" name="Header Button Placeholder"/>
+
+<template id="option_header_button" inherit_id="website.placeholder_header_button" name="Header Button Option" active="False">
+    <xpath expr="." position="inside">
+        <a href="#" t-attf-class="btn btn-primary #{_classes}">Button</a>
     </xpath>
 </template>
 
