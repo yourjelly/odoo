@@ -20,6 +20,10 @@ class PaymentAcquirer(models.Model):
         help='You can set here the communication type that will appear on sales orders.'
              'The communication will be given to the customer when they choose the payment method.')
 
+    @api.multi
+    def get_payment_acquirer(self, order):
+        return self
+
 
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'

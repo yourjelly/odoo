@@ -181,6 +181,7 @@ class CustomerPortal(CustomerPortal):
                 ['|', ('specific_countries', '=', False), ('country_ids', 'in', [order_sudo.partner_id.country_id.id])]
             ])
             acquirers = request.env['payment.acquirer'].sudo().search(domain)
+            acquirers = acquirers.get_payment_acquirer(order_sudo)
 
             values['acquirers'] = acquirers.filtered(lambda acq: (acq.payment_flow == 'form' and acq.view_template_id) or
                                                      (acq.payment_flow == 's2s' and acq.registration_view_template_id))
