@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models, tools, _
 
 class DecimalPrecision(models.Model):
     _name = 'decimal.precision'
@@ -12,6 +12,27 @@ class DecimalPrecision(models.Model):
     _sql_constraints = [
         ('name_uniq', 'unique (name)', """Only one value can be defined for each given usage!"""),
     ]
+
+    @api.onchange('digits')
+    def _onchange_digits(self):
+        all_uom = self.env['uom.uom'].search([])
+        accuracy_xml_id = self.env['ir.model.data'].search([('name','=','decimal_product_uom')])
+        if self._origin.id == accuracy_xml_id.res_id:
+            for uom in all_uom:
+                if 1.0 / 10.0**self.digits > uom.rounding:
+                    warning = {
+                            'title': _('Warning!'),
+                            'message':
+                                _(
+                                "You are setting a Decimal Accuracy less precise than"
+                                " the UOM '%s' (id=%s, precision=%s).\n"
+                                "This may cause issues in quant reservations.\n"
+                                "Please set a higher number of Digits."
+                                %(uom.name, str(uom.id), str(uom.rounding))
+                                )
+                            ,
+                        }
+                    return {'warning': warning}
 
     @api.model
     @tools.ormcache('application')

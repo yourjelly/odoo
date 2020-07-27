@@ -100,6 +100,20 @@ msgid "Usage"
 msgstr ""
 
 #. module: decimal_precision
+#: code:addons/decimal_precision/models/decimal_precision.py:24
+#, python-format
+msgid "Warning!"
+msgstr ""
+
+#. module: decimal_precision
+#: code:addons/decimal_precision/models/decimal_precision.py:31
+#, python-format
+msgid "You are setting a Decimal Accuracy less precise than the UOM '%s' (id=%s, precision=%s).\n"
+"This may cause issues in quant reservations.\n"
+"Please set a higher number of Digits."
+msgstr ""
+
+#. module: decimal_precision
 #: model:ir.model,name:decimal_precision.model_decimal_precision
 msgid "decimal.precision"
 msgstr ""
