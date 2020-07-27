@@ -24072,6 +24072,7 @@ msgid "Warning"
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/decimal_precision.py:0
 #: code:addons/base/models/res_config.py:0
 #, python-format
 msgid "Warning!"
@@ -24462,6 +24463,15 @@ msgstr ""
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_users_simple_form
 msgid "You are inviting a new user."
+msgstr ""
+
+#. module: base
+#: code:addons/base/models/decimal_precision.py:0
+#, python-format
+msgid ""
+"You are setting a Decimal Accuracy less precise than the UOM '%s' (id=%s, precision=%s).\n"
+"This may cause issues in quant reservations.\n"
+"Please set a higher number of Digits."
 msgstr ""
 
 #. module: base

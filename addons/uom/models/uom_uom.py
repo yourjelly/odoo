@@ -72,6 +72,21 @@ class UoM(models.Model):
         if self.uom_type == 'reference':
             self.factor = 1
 
+    @api.onchange('rounding')
+    def _onchange_rounding(self):
+        precision = self.env.ref('product.decimal_product_uom').digits
+        if self.rounding < 1.0 / 10.0**precision:
+            warning = {
+                    'title': _('Warning!'),
+                    'message':  _(
+                        "This rounding precision is higher than the Decimal Accuracy"
+                        " (%s digits).\nThis may cause issues in quant reservations.\n"
+                         "Please set a precision between %s and 1."
+                         %(str(precision), str(1.0 / 10.0**precision))
+                    ),
+                }
+            return {'warning': warning}
+
     @api.constrains('category_id', 'uom_type', 'active')
     def _check_category_reference_uniqueness(self):
         """ Force the existence of only one UoM reference per category
