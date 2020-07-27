@@ -194,6 +194,14 @@ msgid "The rounding precision must be greater than 0!"
 msgstr ""
 
 #. module: uom
+#: code:addons/uom/models/uom_uom.py:80
+#, python-format
+msgid "This rounding precision is higher than the Decimal Accuracy (%s digits).\n"
+"This may cause issues in quant reservations.\n"
+"Please set a precision between %s and 1."
+msgstr ""
+
+#. module: uom
 #: selection:uom.category,measure_type:0
 msgid "Time"
 msgstr ""
@@ -279,6 +287,12 @@ msgstr ""
 #: selection:uom.category,measure_type:0
 #: model:uom.category,name:uom.product_uom_categ_vol
 msgid "Volume"
+msgstr ""
+
+#. module: uom
+#: code:addons/uom/models/uom_uom.py:75
+#, python-format
+msgid "Warning!"
 msgstr ""
 
 #. module: uom
