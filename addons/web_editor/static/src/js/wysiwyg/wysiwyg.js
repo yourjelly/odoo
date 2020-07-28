@@ -51,22 +51,39 @@ var Wysiwyg = Widget.extend({
                 rules: [
                     {
                         selector: [],
-                        editable: false,
+                        properties: {
+                            editable: {
+                                value: false,
+                                cascading: true,
+                            },
+                        },
                     },
                     {
                         selector: [this.JWEditorLib.ContainerNode],
-                        breakable: false,
+                        properties: {
+                            breakable: { value: false },
+                        },
                     },
                     {
                         selector: [node => !!node.modifiers.find(this.JWEditorLib.OdooTranslationFormat)],
-                        editable: true,
+                        properties: {
+                            editable: {
+                                value: true,
+                                cascading: true,
+                            },
+                        },
                     },
                     {
                         selector: [node => {
                             const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
                             return attributes && attributes.classList.has('o_not_editable');
                         }, () => true],
-                        editable: false,
+                        properties: {
+                            editable: {
+                                value: false,
+                                cascading: true,
+                            },
+                        },
                     },
                 ],
             };
@@ -83,13 +100,17 @@ var Wysiwyg = Widget.extend({
                                 return isWrapper;
                             },
                         ],
-                        breakable: false,
-                        allowEmpty: true,
+                        properties: {
+                            breakable: { value: false },
+                            allowEmpty: { value: true },
+                        },
                     },
                     {
                         selector: [this.JWEditorLib.DividerNode],
-                        breakable: false,
-                        allowEmpty: false,
+                        properties: {
+                            breakable: { value: false },
+                            allowEmpty: { value: false },
+                        },
                     },
                     {
                         selector: [
@@ -103,8 +124,10 @@ var Wysiwyg = Widget.extend({
                                 return isCountdown || isPopup || isNewsletterPopup;
                             },
                             this.JWEditorLib.ContainerNode],
-                        allowEmpty: true,
-                    }
+                        properties: {
+                            allowEmpty: { value: true },
+                        },
+                    },
                 ],
             };
         }
