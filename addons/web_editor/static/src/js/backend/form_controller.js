@@ -12,21 +12,22 @@ FormController.include({
             // update res_id with the actual record id for the Attachment, when record going to save
             // this will required for showing attachment under the media dialog
             // because of the attachment already created with res_id = 0
-            const localData = this.model.get(this.handle);
+            const res_id = this.model.get(this.handle, {raw: true}).res_id;
             const wysiwygAttachmentsID = _.map(this.renderer.wysiwygAttachmentsID, (attachment) => {
                 return attachment.id;
             });
-            if (wysiwygAttachmentsID.length && localData.data.id){
-                this._rpc({
+            if (wysiwygAttachmentsID.length && res_id){
+                return this._rpc({
                     model: 'ir.attachment',
                     method: 'write',
                     args: [wysiwygAttachmentsID, {
-                        res_id: localData.data.id,
+                        res_id: res_id,
                     }],
                 }).then((result) => {
                     return changedFields;
                 });
             }
+            return changedFields;
         });
     },
 });
