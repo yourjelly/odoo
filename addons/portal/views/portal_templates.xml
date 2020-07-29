@@ -11,23 +11,20 @@
                     <a href="/" class="navbar-brand logo">
                         <img t-att-src="'/logo.png?company=%s' % res_company.id" t-att-alt="'Logo of %s' % res_company.name" t-att-title="res_company.name"/>
                     </a>
-                    <div class="collapse navbar-collapse" id="top_menu_collapse">
-                        <!-- FIXME We want menu to open to the right by default (except cases handled in JS) -->
-                        <ul class="nav navbar-nav ml-auto text-right" id="top_menu">
-                            <li class="nav-item divider"/>
-                            <li groups="base.group_public" class="nav-item">
-                                <t t-call="portal.placeholder_show_sign_in">
-                                    <t t-set="_classes" t-value="'nav-link'"/>
-                                </t>
-                            </li>
-                            <li class="nav-item dropdown" t-ignore="true" t-if="not user_id._is_public()">
-                                <t t-call="portal.user_dropdown">
-                                    <t t-set="_classes" t-value="'nav-link'"/>
-                                </t>
-                            </li>
-                        </ul>
-                    </div>
                     <t t-call="portal.navbar_toggler"/>
+                    <t t-call="portal.navbar_collapse">
+                        <t t-set="_classes" t-value="'ml-auto'"/>
+                        <li groups="base.group_public" class="nav-item">
+                            <t t-call="portal.placeholder_show_sign_in">
+                                <t t-set="_classes" t-value="'nav-link'"/>
+                            </t>
+                        </li>
+                        <li t-ignore="true" t-if="not user_id._is_public()" class="nav-item dropdown">
+                            <t t-call="portal.user_dropdown">
+                                <t t-set="_classes" t-value="'nav-link'"/>
+                            </t>
+                        </li>
+                    </t>
                 </div>
             </nav>
         </xpath>
@@ -44,6 +41,15 @@
         <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#top_menu_collapse">
             <span class="navbar-toggler-icon o_not_editable"/>
         </button>
+    </template>
+
+    <template id="navbar_collapse" name="Navbar Collapse">
+        <div id="top_menu_collapse" class="collapse navbar-collapse">
+            <!-- FIXME We want menu to open to the right by default (except cases handled in JS) -->
+            <ul id="top_menu" t-attf-class="nav navbar-nav #{_classes}">
+                <t t-raw="0"/>
+            </ul>
+        </div>
     </template>
 
     <template id="user_dropdown" name="Portal User Dropdown">
