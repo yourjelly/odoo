@@ -2158,6 +2158,8 @@ class AccountMove(models.Model):
             elif line_vals.get('tax_repartition_line_id'):
                 # Tax line.
                 invoice_repartition_line = self.env['account.tax.repartition.line'].browse(line_vals['tax_repartition_line_id'])
+                if not invoice_repartition_line in tax_repartition_lines_mapping:
+                    continue
                 refund_repartition_line = tax_repartition_lines_mapping[invoice_repartition_line]
 
                 # Find the right account.
