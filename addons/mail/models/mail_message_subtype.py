@@ -84,9 +84,9 @@ class MailMessageSubtype(models.Model):
                 all_ids += subtype.ids
                 if subtype.default:
                     def_ids += subtype.ids
-            elif subtype.relation_field:
-                parent[subtype.id] = subtype.parent_id.id
-                relation.setdefault(subtype.res_model, set()).add(subtype.relation_field)
+            # elif subtype.relation_field:
+            #     parent[subtype.id] = subtype.parent_id.id
+            #     relation.setdefault(subtype.res_model, set()).add(subtype.relation_field)
             if subtype.internal:
                 int_ids += subtype.ids
         return all_ids, def_ids, int_ids, parent, relation
