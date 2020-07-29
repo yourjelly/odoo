@@ -300,16 +300,17 @@ GROUP BY fol.id%s""" % (
 
         if check_existing and res_ids:
             for fid, rid, pid, cid, sids in self._get_subscription_data([(res_model, res_ids)], partner_ids or None, channel_ids or None):
-                if existing_policy != 'force':
+                if existing_policy != 'replace':
                     if pid:
                         doc_pids[rid].add(pid)
                     elif cid:
                         doc_cids[rid].add(cid)
                 data_fols[fid] = (rid, pid, cid, sids)
 
-            if existing_policy == 'force':
+            if existing_policy == 'replace':
                 self.sudo().browse(data_fols.keys()).unlink()
                 
+
 
         new, update = dict(), dict()
         for res_id in _res_ids:
