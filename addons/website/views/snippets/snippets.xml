@@ -485,7 +485,7 @@
         <we-select string="Layout" data-variable="header-template" data-reload="/">
             <we-button string="Default"
                        data-customize-website-variable="'default'"
-                       data-customize-website-views=""/>
+                       data-customize-website-views="website.template_header_default"/>
             <we-button string="2"
                        data-customize-website-variable="'2'"
                        data-customize-website-views="website.template_header_2"/>
