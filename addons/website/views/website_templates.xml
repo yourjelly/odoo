@@ -343,14 +343,10 @@
                     </t>
                 </t>
                 <!-- Cart -->
-                <li class="nav-item ml-3">
-                    <a href="/shop/cart" class="nav-link">
-                        <i class="fa fa-shopping-basket"/>
-                        <!-- Option -->
-                        <span class="d-none mx-1">Cart</span>
-                        <sup t-attf-class="my_cart_quantity badge badge-primary">0</sup>
-                    </a>
-                </li>
+                <t t-call="website.placeholder_header_cart">
+                    <t t-set="header_cart_text" t-value="false"/>
+                    <t t-set="header_cart_icon" t-value="true"/>
+                </t>
                 <li class="nav-item ml-3">
                     <a href="/shop/wishlist" class="nav-link">
                         <i class="fa fa-heart"/>
@@ -388,6 +384,7 @@
     </xpath>
 </template>
 
+<template id="placeholder_header_cart" name="Header Cart Placeholder"/>
 
 <template id="template_header_2" inherit_id="website.layout" name="Template Header 2" active="False">
     <xpath expr="//header//div[@id='top_menu_container']" position="replace">
