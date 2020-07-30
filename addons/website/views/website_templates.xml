@@ -131,9 +131,6 @@
     <xpath expr="//header//div[@id='top_menu_collapse']" position="attributes">
         <attribute name="class" separator=" " add="flex-grow-0"/>
     </xpath>
-    <xpath expr="//header//ul[@id='top_menu']" position="attributes">
-        <attribute name="class" separator=" " add="o_menu_loading" remove="text-right ml-auto"/>
-    </xpath>
     <xpath expr="//header//ul[@id='top_menu']/li[hasclass('dropdown')]" position="attributes">
         <attribute name="t-if">website.user_id != user_id</attribute>
     </xpath>
@@ -213,6 +210,18 @@
             <t t-set="_utm_medium" t-valuef="website"/>
         </t>
     </xpath>
+</template>
+
+<!-- Navbar -->
+<template id="navbar_toggler" name="Navbar Toggler">
+    <button type="button" t-attf-class="navbar-toggler #{_toggler_class}" data-toggle="collapse" data-target="#top_menu_collapse">
+        <span class="navbar-toggler-icon o_not_editable"/>
+    </button>
+</template>
+
+<template id="navbar_nav" name="Navbar Nav">
+    <!-- FIXME We want menu to open to the right by default (except cases handled in JS) -->
+    <ul t-raw="0" id="top_menu" t-attf-class="nav navbar-nav o_menu_loading #{_nav_class}"/>
 </template>
 
 <!-- PreHeader templates -->

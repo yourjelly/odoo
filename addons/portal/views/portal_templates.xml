@@ -6,31 +6,25 @@
             <attribute name="t-attf-class" add="#{'o_portal' if is_portal else ''}" separator=" "/>
         </xpath>
         <xpath expr="//div[@id='wrapwrap']/header/img" position="replace">
-            <nav class="navbar navbar-expand-md navbar-light bg-light">
-                <div id="top_menu_container" class="container">
+            <nav class="navbar navbar-expand navbar-light bg-light">
+                <div class="container">
                     <a href="/" class="navbar-brand logo">
                         <img t-att-src="'/logo.png?company=%s' % res_company.id" t-att-alt="'Logo of %s' % res_company.name" t-att-title="res_company.name"/>
                     </a>
-                    <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#top_menu_collapse">
-                        <span class="navbar-toggler-icon o_not_editable"/>
-                    </button>
-                    <div class="collapse navbar-collapse" id="top_menu_collapse">
-                        <!-- FIXME We want menu to open to the right by default (except cases handled in JS) -->
-                        <ul class="nav navbar-nav ml-auto text-right" id="top_menu">
-                            <li groups="base.group_public" class="nav-item">
-                                <t t-call="portal.placeholder_user_sign_in">
-                                    <t t-set="_classes" t-value="'nav-link'"/>
-                                </t>
-                            </li>
-                            <li t-ignore="true" t-if="not user_id._is_public()" class="nav-item dropdown">
-                                <t t-call="portal.user_dropdown">
-                                    <t t-set="_toggle" t-value="'nav-link'"/>
-                                    <t t-set="_user_name" t-value="true"/>
-                                    <t t-set="_dropdown_menu" t-value="'dropdown-menu-right'"/>
-                                </t>
-                            </li>
-                        </ul>
-                    </div>
+                    <ul class="nav navbar-nav ml-auto">
+                        <li groups="base.group_public" class="nav-item">
+                            <t t-call="portal.placeholder_user_sign_in">
+                                <t t-set="_classes" t-value="'nav-link'"/>
+                            </t>
+                        </li>
+                        <li t-ignore="true" t-if="not user_id._is_public()" class="nav-item dropdown">
+                            <t t-call="portal.user_dropdown">
+                                <t t-set="_toggle" t-value="'nav-link'"/>
+                                <t t-set="_user_name" t-value="true"/>
+                                <t t-set="_dropdown_menu" t-value="'dropdown-menu-right'"/>
+                            </t>
+                        </li>
+                    </ul>
                 </div>
             </nav>
         </xpath>
