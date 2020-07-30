@@ -265,9 +265,11 @@ class StockPickingBatch(models.Model):
                     ml.write({'product_uom_qty': quantity_left_todo, 'qty_done': 0.0})
                     new_move_line.write({'product_uom_qty': done_to_keep})
                     move_lines_to_pack |= new_move_line
-            move_lines_to_pack.write({
-                'result_package_id': package.id,
-            })
+            # if one move line is put in pack, then assign package to all move lines without a destination package
+            # for "cluster picking"
+            if move_lines_to_pack:
+                pickings_to_cluster = move_lines_to_pack.mapped('picking_id')
+                self.apply_cluster_picking(pickings_to_cluster.ids, package.id)
         return package
 
     # -------------------------------------------------------------------------
@@ -288,3 +290,10 @@ class StockPickingBatch(models.Model):
             return self.env.ref('stock_picking_batch.mt_batch_state')
         return super()._track_subtype(init_values)
 
+    def apply_cluster_picking(self, picking_ids, result_package_id):
+        if self.state not in ('done', 'cancel'):
+            picking_ids = self.picking_ids.browse(picking_ids)
+            move_lines_to_cluster = self.move_line_ids.filtered(lambda ml: ml.picking_id in picking_ids and not ml.result_package_id)
+            move_lines_to_cluster.write({
+                'result_package_id': result_package_id,
+            })
