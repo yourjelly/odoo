@@ -204,12 +204,6 @@
     </xpath>
 </template>
 
-<template id="website_name" inherit_id="website.layout" name="Website Name" active="False">
-    <xpath expr="//header//a[hasclass('navbar-brand')]" position="replace">
-        <a class="navbar-brand" href="/">My Website</a>
-    </xpath>
-</template>
-
 <template id="brand_promotion" inherit_id="web.brand_promotion" name="Brand Promotion">
     <xpath expr="//t[@t-call='web.brand_promotion_message']" position="replace">
         <t t-call="web.brand_promotion_message">
@@ -400,17 +394,19 @@
     </xpath>
 </template>
 
-<template id="layout_logo_show" inherit_id="website.layout" name="Show Logo">
-    <xpath expr="//header//a[hasclass('navbar-brand')]" position="replace">
-        <a href="/" class="navbar-brand logo">
-            <span t-field="website.logo" t-options="{'widget': 'image'}" role="img" t-att-aria-label="'Logo of %s' % website.name" t-att-title="website.name" />
+<template id="placeholder_header_brand" name="Placeholder Header Brand"/>
+
+<template id="option_header_brand_logo" inherit_id="website.placeholder_header_brand" name="Header Brand Logo" active="True">
+    <xpath expr="." position="inside">
+        <a href="/" t-attf-class="navbar-brand logo #{_link_class}">
+            <span t-field="website.logo" t-options="{'widget': 'image'}" role="img" t-att-aria-label="'Logo of %s' % website.name" t-att-title="website.name"/>
         </a>
     </xpath>
 </template>
 
-<template id="header_logo_none" inherit_id="website.layout" name="No Logo" active="False">
-    <xpath expr="//header//a[hasclass('navbar-brand')]" position="replace">
-        <a href="/" class="navbar-brand d-none"/>
+<template id="option_header_brand_name" inherit_id="website.placeholder_header_brand" name="Header Brand Name" active="False">
+    <xpath expr="." position="inside">
+        <a href="/" t-attf-class="navbar-brand #{_link_class}">My Website</a>
     </xpath>
 </template>
 
