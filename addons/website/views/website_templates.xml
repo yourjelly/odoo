@@ -466,11 +466,13 @@
     </xpath>
 </template>
 
-<template id="header_button" inherit_id="website.layout" name="Header Button" active="False">
-    <xpath expr="//ul[@id='top_menu']" position="inside">
-        <li class="nav-item align-self-md-center ml-1 o_header_menu_button">
-            <a href="/contactus" class="btn btn-primary">Contact us</a>
-        </li>
+<template id="placeholder_header_button" name="Placeholder Header Button"/>
+
+<template id="option_header_button" inherit_id="website.placeholder_header_button" name="Header Button" active="True">
+    <xpath expr="." position="inside">
+        <div id="oe_structure_header_button" class="oe_structure">
+            <a href="#" t-attf-class="#{_btn_class}">Button</a>
+        </div>
     </xpath>
 </template>
 
