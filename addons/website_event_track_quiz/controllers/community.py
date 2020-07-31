@@ -49,9 +49,10 @@ class WebsiteEventTrackQuizCommunityController(WebsiteEventCommunityController):
         position = 1
         for visitor_id, points in data_map.items():
             visitor = request.env['website.visitor'].sudo().browse(visitor_id)
-            if (searched_name and searched_name.lower() in visitor.name.lower()) or not searched_name:
+            if (searched_name and searched_name.lower() in visitor.display_name.lower()) or not searched_name:
                 leaderboard.append({'visitor': visitor, 'points': points, 'position': position})
             position = position + 1
+
         return {
             'top3_visitors': leaderboard[:3] if len(leaderboard) >= 3 else False,
             'visitors': leaderboard
