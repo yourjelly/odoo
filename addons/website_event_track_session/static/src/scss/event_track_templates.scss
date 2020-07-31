@@ -53,10 +53,24 @@
     .o_wevent_online_page_container {
         // Main panel: current track
         .o_wesession_track_main {
+            @include media-breakpoint-up(xl) {
+                max-width: calc(100% - 22rem);
+            }
+
+            @media screen and (min-width: 1400px) {
+                max-width: none;
+            }
         }
 
         // Left panel: other tracks
         .o_wesession_track_aside {
+            @include media-breakpoint-up(xl) {
+                min-width: 22rem;
+            }
+
+            @media screen and (min-width: 1400px) {
+                min-width: auto;
+            }
 
             // Navigation: keel layout simple
             .o_wesession_track_aside_nav {
