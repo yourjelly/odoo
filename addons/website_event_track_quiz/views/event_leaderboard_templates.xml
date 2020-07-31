@@ -12,7 +12,7 @@
                     </div>
                 </div>
                 <table class="table table-sm">
-                    <tr t-foreach="visitors" t-as="visitor" class="o_wprofile_pointer bg-white">
+                    <tr t-foreach="visitors" t-as="visitor" class="bg-white">
                         <t t-call="website_event_track_quiz.all_visitor_card"/>
                     </tr>
                 </table>
@@ -52,7 +52,7 @@
 </template>
 
 <template id="top3_visitor_card" name="Top 3 Visitor Card">
-    <div class="card w-100 text-center mb-2 border-bottom-0 o_wprofile_pointer">
+    <div class="card w-100 text-center mb-2 border-bottom-0">
         <div class="card-body">
             <div class="d-inline-block position-relative">
                 <img class="rounded-circle img-fluid"
