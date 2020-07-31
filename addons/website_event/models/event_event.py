@@ -148,10 +148,10 @@ class Event(models.Model):
     def _update_website_menus(self, menus_update_by_field=None):
         """ Synchronize event configuration and its menu entries for frontend.
 
-        :param menus_update_by_field: see ``_get_menus_update_by_field``"""
+        :param menus_update_by_field: see ``_get_menus_up_update_website_menu_entrydate_by_field``"""
         for event in self:
             if event.menu_id and not event.website_menu:
-                event.menu_id.unlink()
+                event.menu_id.sudo().unlink()
             elif event.website_menu and not event.menu_id:
                 root_menu = self.env['website.menu'].sudo().create({'name': event.name, 'website_id': event.website_id.id})
                 event.menu_id = root_menu
