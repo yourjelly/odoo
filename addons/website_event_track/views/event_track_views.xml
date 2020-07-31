@@ -143,6 +143,7 @@
                                 <field name="user_id" domain="[('share', '=', False)]"/>
                                 <field name="event_id"/>
                                 <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                <field name="color" widget="color_picker"/>
                             </group>
                         </group>
                         <notebook>
