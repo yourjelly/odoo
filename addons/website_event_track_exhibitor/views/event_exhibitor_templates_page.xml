@@ -140,7 +140,8 @@
                 <li t-foreach="sponsors_other" t-as="sponsor_other">
                     <a class="d-flex w-100 h-100 px-2 pt-2 pb-1 text-decoration-none"
                         t-att-href="sponsor_other.website_url">
-                        <img class="mr-2 o_wesponsor_aside_logo"
+                        <img t-if="sponsor_other.partner_id.country_id"
+                            class="mr-2 o_wesponsor_aside_logo"
                             t-att-src="website.image_url(sponsor_other.partner_id.country_id, 'image')"
                             t-att-alt="sponsor_other.partner_id.country_id.name"/>
                         <div class="flex-grow-1 overflow-auto">
