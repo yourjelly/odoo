@@ -86,7 +86,7 @@
                 <span t-else="" t-field="sponsor.partner_id.image_512" class="o_wevent_online_page_avatar"
                     t-options="{'widget': 'image', 'class': 'rounded-circle', 'max-width': '96'}"/>
             </div>
-            <div class="px-3 pt-3 d-flex flex-row position-relative">
+            <div class="px-3 pt-3 d-flex flex-row justify-content-between position-relative">
                 <div class="d-flex flex-column">
                     <div class="d-flex align-items-center">
                         <span t-field="sponsor.name" class="h4 mb-0"/>
@@ -110,7 +110,7 @@
                 </div>
                 <a t-if="sponsor.partner_id.country_id"
                     t-att-href="'/event/%s/exhibitors?countries=%s' % (slug(sponsor.event_id), [sponsor.partner_id.country_id.id])"
-                    t-attf-class="flex-grow-1 text-right d-none d-md-block #{'mr-5' if sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon' else ''}">
+                    t-attf-class="text-right d-none d-md-block #{'mr-5' if sponsor.sponsor_type_id.display_ribbon_style and sponsor.sponsor_type_id.display_ribbon_style != 'no_ribbon' else ''}">
                     <img class="img"
                         style="max-height: 36px;"
                         t-att-src="website.image_url(sponsor.partner_id.country_id, 'image')"
