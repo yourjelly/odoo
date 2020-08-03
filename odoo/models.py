@@ -5758,7 +5758,7 @@ Fields:
                         else:
                             if all([[x is not None and not x.store for x in y] for y in val.values()]):
                                 # optimization if all dependant fields are not stored
-                                records = self.env.cache.get_records(model, key)
+                                continue
                             else:
                                 try:
                                     records = self[invf.name]
@@ -5775,7 +5775,7 @@ Fields:
                     new_records = self.filtered(lambda r: not r.id)
                     real_records = self - new_records
                     records = model.browse()
-                    if real_records:
+                    if real_records and key.store:
                         records |= model.search([(key.name, 'in', real_records.ids)], order='id')
                     if new_records:
                         cache_records = self.env.cache.get_records(model, key)
