@@ -485,8 +485,8 @@
 
         <we-select string="Template" data-variable="header-template" data-reload="/">
             <we-button title="Default"
-                       data-name="header_logo_menu_opt"
-                       data-customize-website-views=""
+                       data-name="header_default_template"
+                       data-customize-website-views="website.template_header_default"
                        data-customize-website-variable="'default'"
                        data-img="/website/static/src/img/snippets_options/header_template_default.png"/>
             <we-button title="Hamburger menu"
