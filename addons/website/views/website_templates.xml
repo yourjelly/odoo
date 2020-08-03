@@ -707,12 +707,6 @@
     </xpath>
 </template>
 
-<template id="option_header_hamburger_center_logo" inherit_id="website.placeholder_header_brand" name="Template Header Hamburger Center Logo" active="False">
-    <xpath expr="//a" position="attributes">
-        <attribute name="t-attf-class" separator=" " add="mx-md-auto"/>
-    </xpath>
-</template>
-
 <template id="placeholder_header_brand" name="Placeholder Header Brand"/>
 
 <template id="option_header_brand_logo" inherit_id="website.placeholder_header_brand" name="Header Brand Logo" active="True">
