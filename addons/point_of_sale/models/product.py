@@ -14,9 +14,9 @@ class ProductTemplate(models.Model):
         help="Category used in the Point of Sale.")
 
     def unlink(self):
-        product_ctx = dict(self.env.context or {}, active_test=False)
-        if self.with_context(product_ctx).search_count([('id', 'in', self.ids), ('available_in_pos', '=', True)]):
-            if self.env['pos.session'].sudo().search_count([('state', '!=', 'closed')]):
+        # VFE perf to test
+        if self.filtered_domain([('available_in_pos', '=', True)]):
+            if self.env['pos.session'].sudo().search([('state', '!=', 'closed')], limit=1):
                 raise UserError(_('You cannot delete a product saleable in point of sale while a session is still opened.'))
         return super(ProductTemplate, self).unlink()
 
@@ -30,9 +30,9 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     def unlink(self):
-        product_ctx = dict(self.env.context or {}, active_test=False)
-        if self.env['pos.session'].sudo().search_count([('state', '!=', 'closed')]):
-            if self.with_context(product_ctx).search_count([('id', 'in', self.ids), ('product_tmpl_id.available_in_pos', '=', True)]):
+        # VFE perf to test
+        if any(product.available_in_pos for product in self): # or filtered_domain? or search_count ?
+            if self.env['pos.session'].search([('state', '!=', 'closed')], limit=1):
                 raise UserError(_('You cannot delete a product saleable in point of sale while a session is still opened.'))
         return super(ProductProduct, self).unlink()
 

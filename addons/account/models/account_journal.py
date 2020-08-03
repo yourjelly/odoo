@@ -364,11 +364,12 @@ class AccountJournal(models.Model):
         }
 
     def unlink(self):
-        bank_accounts = self.env['res.partner.bank'].browse()
-        for bank_account in self.mapped('bank_account_id'):
-            accounts = self.search([('bank_account_id', '=', bank_account.id)])
-            if accounts <= self:
-                bank_accounts += bank_account
+        # TODO test perf
+        shared_bank_accounts = self.search([
+            ('bank_account_id', 'in', self.bank_account_id.ids),
+            ('id', 'not in', self.ids),
+        ]).bank_account_id
+        bank_accounts = self.bank_account_id - shared_bank_accounts
         self.mapped('alias_id').sudo().unlink()
         ret = super(AccountJournal, self).unlink()
         bank_accounts.unlink()
