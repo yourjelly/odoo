@@ -227,8 +227,7 @@ class PosSession(models.Model):
         return res
 
     def unlink(self):
-        for session in self.filtered(lambda s: s.statement_ids):
-            session.statement_ids.unlink()
+        self.statement_ids.unlink()
         return super(PosSession, self).unlink()
 
     def login(self):

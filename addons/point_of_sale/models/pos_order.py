@@ -314,7 +314,7 @@ class PosOrder(models.Model):
             self.pricelist_id = self.partner_id.property_product_pricelist.id
 
     def unlink(self):
-        for pos_order in self.filtered(lambda pos_order: pos_order.state not in ['draft', 'cancel']):
+        if any(order.state not in ['draft', 'cancel'] for order in self):
             raise UserError(_('In order to delete a sale, it must be new or cancelled.'))
         return super(PosOrder, self).unlink()
 
