@@ -5756,10 +5756,14 @@ Fields:
                                     continue
                             records = model.browse(rec_ids)
                         else:
-                            try:
-                                records = self[invf.name]
-                            except MissingError:
-                                records = self.exists()[invf.name]
+                            if all([[x is not None and not x.store for x in y] for y in val.values()]):
+                                # optimization if all dependant fields are not stored
+                                continue
+                            else:
+                                try:
+                                    records = self[invf.name]
+                                except MissingError:
+                                    records = self.exists()[invf.name]
 
                         # TODO: find a better fix
                         if key.model_name == records._name:
