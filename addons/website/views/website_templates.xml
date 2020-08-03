@@ -488,6 +488,8 @@
 <!-- Shop -->
 <template id="placeholder_header_cart" name="Header Cart Placeholder"/>
 
+<template id="placeholder_header_wishlist" name="Header Wishlist Placeholder"/>
+
 <!-- Features template -->
 <template id="login_layout" inherit_id="web.login_layout" name="Website Login Layout" priority="20">
     <xpath expr="t" position="replace">
