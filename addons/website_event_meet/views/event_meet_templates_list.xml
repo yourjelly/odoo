@@ -149,16 +149,18 @@
 <!-- ============================================================ -->
 
 <template id="community_aside" name="Community: Aside">
-    <div t-if="event.meeting_room_allow_creation" class="d-none d-md-block col-md-4 p-0 mt-3">
-        <h1>Launch a new topic</h1>
-        <hr class="mt-2 mb-3"/>
-        <p>Want to create your own discussion room ?</p>
-        <p>Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic.</p>
-        <a href="#" role="button"  class="btn btn-primary o_wevent_create_room_button"
-            t-att-data-event-id="event.id"
-            t-att-data-default-lang-code="default_lang_code">
-            <span>Create a Room</span>
-        </a>
+    <div class="col-md-4 p-0 mt-3 o_wevent_community_aside">
+        <div class="d-none d-md-block mb-3" t-if="event.meeting_room_allow_creation">
+            <h1>Launch a new topic</h1>
+            <hr class="mt-2 mb-3"/>
+            <p>Want to create your own discussion room ?</p>
+            <p>Be sure you are ready to spend at least 10 minutes in the room if you want to initiate a new topic.</p>
+            <a href="#" role="button"  class="btn btn-primary o_wevent_create_room_button"
+                t-att-data-event-id="event.id"
+                t-att-data-default-lang-code="default_lang_code">
+                <span>Create a Room</span>
+            </a>
+        </div>
     </div>
 </template>
 
