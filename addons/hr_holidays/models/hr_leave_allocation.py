@@ -445,7 +445,7 @@ class HolidaysAllocation(models.Model):
     def unlink(self):
         state_description_values = {elem[0]: elem[1] for elem in self._fields['state']._description_selection(self.env)}
         for holiday in self.filtered(lambda holiday: holiday.state not in ['draft', 'cancel', 'confirm']):
-            raise UserError(_('You cannot delete an allocation request which is in %s state.') % (state_description_values.get(holiday.state),))
+            raise UserError(_('You cannot delete an allocation request which is in %s state.', state_description_values.get(holiday.state),))
         return super(HolidaysAllocation, self).unlink()
 
     def _get_mail_redirect_suggested_company(self):
@@ -595,7 +595,7 @@ class HolidaysAllocation(models.Model):
                     continue
                 manager = holiday.employee_id.parent_id or holiday.employee_id.department_id.manager_id
                 if (manager != current_employee) and not is_manager:
-                    raise UserError(_('You must be either %s\'s manager or time off manager to approve this time off') % (holiday.employee_id.name))
+                    raise UserError(_('You must be either %s\'s manager or time off manager to approve this time off', holiday.employee_id.name))
 
             if state == 'validate' and val_type == 'both':
                 if not is_officer:

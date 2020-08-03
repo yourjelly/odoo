@@ -495,7 +495,7 @@ class EventEvent(models.Model):
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         self.ensure_one()
-        default = dict(default or {}, name=_("%s (copy)") % (self.name))
+        default = dict(default or {}, name=_("%s (copy)", self.name))
         return super(EventEvent, self).copy(default)
 
     def _sync_required_computed(self, values):

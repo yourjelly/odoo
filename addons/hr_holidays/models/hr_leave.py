@@ -610,9 +610,9 @@ class HolidaysRequest(models.Model):
         for leave in self:
             if self.env.context.get('short_name'):
                 if leave.leave_type_request_unit == 'hour':
-                    res.append((leave.id, _("%s : %.2f hours") % (leave.name or leave.holiday_status_id.name, leave.number_of_hours_display)))
+                    res.append((leave.id, _("%s : %.2f hours", leave.name or leave.holiday_status_id.name, leave.number_of_hours_display)))
                 else:
-                    res.append((leave.id, _("%s : %.2f days") % (leave.name or leave.holiday_status_id.name, leave.number_of_days)))
+                    res.append((leave.id, _("%s : %.2f days", leave.name or leave.holiday_status_id.name, leave.number_of_days)))
             else:
                 if leave.holiday_type == 'company':
                     target = leave.mode_company_id.name
@@ -831,9 +831,9 @@ class HolidaysRequest(models.Model):
         self.ensure_one()
         calendar = self.employee_id.resource_calendar_id or self.env.company.resource_calendar_id
         if self.leave_type_request_unit == 'hour':
-            meeting_name = _("%s on Time Off : %.2f hour(s)") % (self.employee_id.name or self.category_id.name, self.number_of_hours_display)
+            meeting_name = _("%s on Time Off : %.2f hour(s)", self.employee_id.name or self.category_id.name, self.number_of_hours_display)
         else:
-            meeting_name = _("%s on Time Off : %.2f day(s)") % (self.employee_id.name or self.category_id.name, self.number_of_days)
+            meeting_name = _("%s on Time Off : %.2f day(s)", self.employee_id.name or self.category_id.name, self.number_of_days)
         meeting_values = {
             'name': meeting_name,
             'duration': self.number_of_days * (calendar.hours_per_day or HOURS_PER_DAY),
@@ -1086,7 +1086,7 @@ class HolidaysRequest(models.Model):
 
                     if (state == 'validate1' and val_type == 'both') or (state == 'validate' and val_type == 'manager') and holiday.holiday_type == 'employee':
                         if not is_officer and self.env.user != holiday.employee_id.leave_manager_id:
-                            raise UserError(_('You must be either %s\'s manager or Time off Manager to approve this leave') % (holiday.employee_id.name))
+                            raise UserError(_('You must be either %s\'s manager or Time off Manager to approve this leave', holiday.employee_id.name))
 
     # ------------------------------------------------------------
     # Activity methods

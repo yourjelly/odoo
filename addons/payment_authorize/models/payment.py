@@ -173,19 +173,15 @@ class TxAuthorize(models.Model):
         transaction record. """
         reference, trans_id, fingerprint = data.get('x_invoice_num'), data.get('x_trans_id'), data.get('x_SHA2_Hash') or data.get('x_MD5_Hash')
         if not reference or not trans_id or not fingerprint:
-            error_msg = _('Authorize: received data with missing reference (%s) or trans_id (%s) or fingerprint (%s)') % (reference, trans_id, fingerprint)
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
-        tx = self.search([('reference', '=', reference)])
-        if not tx or len(tx) > 1:
-            error_msg = 'Authorize: received data for reference %s' % (reference)
-            if not tx:
-                error_msg += '; no order found'
-            else:
-                error_msg += '; multiple order found'
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
-        return tx[0]
+            _logger.info(
+                'Authorize: received data with missing reference (%s) or trans_id (%s) or fingerprint (%s)',
+                reference, trans_id, fingerprint,
+            )
+            raise ValidationError(_(
+                'Authorize: received data with missing reference (%s) or trans_id (%s) or fingerprint (%s)',
+                reference, trans_id, fingerprint,
+            ))
+        return self.env['payment.transaction']._get_transaction_for_reference(reference, "Authorize")
 
     def _authorize_form_get_invalid_parameters(self, data):
         invalid_parameters = []

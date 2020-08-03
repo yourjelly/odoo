@@ -561,7 +561,11 @@ class ResCompany(models.Model):
             if len(moves) == all_moves_count:
                 rslt.update({'msg_cover': _('All entries are hashed.')})
             else:
-                rslt.update({'msg_cover': _('Entries are hashed from %s (%s)') % (start_move_info[0], format_date(self.env, start_move_info[2]))})
+                rslt.update({'msg_cover': _(
+                    'Entries are hashed from %(reference)s (%(date)s)',
+                    reference=start_move_info[0],
+                    date=format_date(self.env, start_move_info[2]),
+                )})
             results_by_journal['results'].append(rslt)
 
         return results_by_journal

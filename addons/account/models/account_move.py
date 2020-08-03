@@ -1587,7 +1587,10 @@ class AccountMove(models.Model):
         if query_res:
             ids = [res[0] for res in query_res]
             sums = [res[1] for res in query_res]
-            raise UserError(_("Cannot create unbalanced journal entry. Ids: %s\nDifferences debit - credit: %s") % (ids, sums))
+            raise UserError(_(
+                "Cannot create unbalanced journal entry. Ids: %(ids)s\nDifferences debit - credit: %(sums)s",
+                ids=ids, sums=sums,
+            ))
 
     def _check_fiscalyear_lock_date(self):
         for move in self:
@@ -3470,7 +3473,10 @@ class AccountMoveLine(models.Model):
             journal = line.move_id.journal_id
 
             if account.deprecated:
-                raise UserError(_('The account %s (%s) is deprecated.') % (account.name, account.code))
+                raise UserError(_(
+                    'The account %(name)s (%(code)s) is deprecated.',
+                    name=account.name, code=account.code,
+                ))
 
             account_currency = account.currency_id
             if account_currency and account_currency != line.company_currency_id and account_currency != line.currency_id:

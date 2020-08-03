@@ -94,14 +94,7 @@ class PaymentTransactionPayumoney(models.Model):
         if not reference or not pay_id or not shasign:
             raise ValidationError(_('PayUmoney: received data with missing reference (%s) or pay_id (%s) or shashign (%s)') % (reference, pay_id, shasign))
 
-        transaction = self.search([('reference', '=', reference)])
-
-        if not transaction:
-            error_msg = (_('PayUmoney: received data for reference %s; no order found') % (reference))
-            raise ValidationError(error_msg)
-        elif len(transaction) > 1:
-            error_msg = (_('PayUmoney: received data for reference %s; multiple orders found') % (reference))
-            raise ValidationError(error_msg)
+        transaction = self.env['payment.transaction']._get_transaction_for_reference(reference, "PayUmoney")
 
         #verify shasign
         shasign_check = transaction.acquirer_id._payumoney_generate_sign('out', data)

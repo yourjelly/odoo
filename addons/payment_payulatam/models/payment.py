@@ -83,14 +83,7 @@ class PaymentTransactionPayulatam(models.Model):
         if not reference or not txnid or not sign:
             raise ValidationError(_('PayU Latam: received data with missing reference (%s) or transaction id (%s) or sign (%s)') % (reference, txnid, sign))
 
-        transaction = self.search([('reference', '=', reference)])
-
-        if not transaction:
-            error_msg = (_('PayU Latam: received data for reference %s; no order found') % (reference))
-            raise ValidationError(error_msg)
-        elif len(transaction) > 1:
-            error_msg = (_('PayU Latam: received data for reference %s; multiple orders found') % (reference))
-            raise ValidationError(error_msg)
+        transaction = self.env['payment.transaction']._get_transaction_for_reference(reference, "PayU Latam")
 
         # verify shasign
         sign_check = transaction.acquirer_id._payulatam_generate_sign('out', data)

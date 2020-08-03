@@ -91,17 +91,20 @@ class AccountMove(models.Model):
 
         # <1.1.1.1>
         if not seller.country_id:
-            raise UserError(_("%s must have a country") % (seller.display_name))
+            raise UserError(_("%s must have a country", seller.display_name))
 
         # <1.1.1.2>
         if not seller.vat:
-            raise UserError(_("%s must have a VAT number") % (seller.display_name))
+            raise UserError(_("%s must have a VAT number", seller.display_name))
         elif len(seller.vat) > 30:
-            raise UserError(_("The maximum length for VAT number is 30. %s have a VAT number too long: %s.") % (seller.display_name, seller.vat))
+            raise UserError(_(
+                "The maximum length for VAT number is 30. %(seller)s has a VAT number too long: %(vat)s.",
+                seller=seller.display_name, vat=seller.vat,
+            ))
 
         # <1.2.1.2>
         if not seller.l10n_it_codice_fiscale:
-            raise UserError(_("%s must have a codice fiscale number") % (seller.display_name))
+            raise UserError(_("%s must have a codice fiscale number", seller.display_name))
 
         # <1.2.1.8>
         if not seller.l10n_it_tax_system:
@@ -109,34 +112,34 @@ class AccountMove(models.Model):
 
         # <1.2.2>
         if not seller.street and not seller.street2:
-            raise UserError(_("%s must have a street.") % (seller.display_name))
+            raise UserError(_("%s must have a street.", seller.display_name))
         if not seller.zip:
-            raise UserError(_("%s must have a post code.") % (seller.display_name))
+            raise UserError(_("%s must have a post code.", seller.display_name))
         if len(seller.zip) != 5 and seller.country_id.code == 'IT':
-            raise UserError(_("%s must have a post code of length 5.") % (seller.display_name))
+            raise UserError(_("%s must have a post code of length 5.", seller.display_name))
         if not seller.city:
-            raise UserError(_("%s must have a city.") % (seller.display_name))
+            raise UserError(_("%s must have a city.", seller.display_name))
         if not seller.country_id:
-            raise UserError(_("%s must have a country.") % (seller.display_name))
+            raise UserError(_("%s must have a country.", seller.display_name))
 
         if seller.l10n_it_has_tax_representative and not seller.l10n_it_tax_representative_partner_id.vat:
-            raise UserError(_("Tax representative partner %s of %s must have a tax number.") % (seller.l10n_it_tax_representative_partner_id.display_name, seller.display_name))
+            raise UserError(_("Tax representative partner %s of %s must have a tax number.", seller.l10n_it_tax_representative_partner_id.display_name, seller.display_name))
 
         # <1.4.1>
         if not buyer.vat and not buyer.l10n_it_codice_fiscale and buyer.country_id.code == 'IT':
-            raise UserError(_("The buyer, %s, or his company must have either a VAT number either a tax code (Codice Fiscale).") % (buyer.display_name))
+            raise UserError(_("The buyer, %s, or his company must have either a VAT number either a tax code (Codice Fiscale).", buyer.display_name))
 
         # <1.4.2>
         if not buyer.street and not buyer.street2:
-            raise UserError(_("%s must have a street.") % (buyer.display_name))
+            raise UserError(_("%s must have a street.", buyer.display_name))
         if not buyer.zip:
-            raise UserError(_("%s must have a post code.") % (buyer.display_name))
+            raise UserError(_("%s must have a post code.", buyer.display_name))
         if len(buyer.zip) != 5 and buyer.country_id.code == 'IT':
-            raise UserError(_("%s must have a post code of length 5.") % (buyer.display_name))
+            raise UserError(_("%s must have a post code of length 5.", buyer.display_name))
         if not buyer.city:
-            raise UserError(_("%s must have a city.") % (buyer.display_name))
+            raise UserError(_("%s must have a city.", buyer.display_name))
         if not buyer.country_id:
-            raise UserError(_("%s must have a country.") % (buyer.display_name))
+            raise UserError(_("%s must have a country.", buyer.display_name))
 
         # <2.2.1>
         for invoice_line in self.invoice_line_ids:
@@ -180,7 +183,11 @@ class AccountMove(models.Model):
                 })
 
             invoice.message_post(
-                body=(_("E-Invoice is generated on %s by %s") % (fields.Datetime.now(), self.env.user.display_name))
+                body=(_(
+                    "E-Invoice is generated on %(date)s by %(user)s",
+                    date=fields.Datetime.now(),
+                    user=self.env.user.display_name,
+                ))
             )
 
     def _export_as_xml(self):
@@ -281,11 +288,15 @@ class AccountMove(models.Model):
             return
 
         if self.l10n_it_send_state not in allowed_state:
-            raise UserError(_("%s isn't in a right state. It must be in a 'Not yet send' or 'Invalid' state.") % (self.display_name))
+            raise UserError(_("%s isn't in a right state. It must be in a 'Not yet send' or 'Invalid' state.", self.display_name))
 
         message = self.env['mail.message'].create({
-            'subject': _('Sending file: %s') % (self.l10n_it_einvoice_name),
-            'body': _('Sending file: %s to ES: %s') % (self.l10n_it_einvoice_name, self.env.company.l10n_it_address_recipient_fatturapa),
+            'subject': _('Sending file: %s', self.l10n_it_einvoice_name),
+            'body': _(
+                'Sending file: %(file)s to ES: %(address)s',
+                file=self.l10n_it_einvoice_name,
+                address=self.env.company.l10n_it_address_recipient_fatturapa
+            ),
             'author_id': self.env.user.partner_id.id,
             'email_from': self.env.company.l10n_it_address_send_fatturapa,
             'reply_to': self.env.company.l10n_it_address_send_fatturapa,
@@ -299,14 +310,16 @@ class AccountMove(models.Model):
         })
         try:
             mail_fattura.send(raise_exception=True)
-            self.message_post(
-                body=(_("Mail sent on %s by %s") % (fields.Datetime.now(), self.env.user.display_name))
-                )
+            self.message_post(body=(_(
+                "Mail sent on %(date)s by %(user)s",
+                date=fields.Datetime.now(),
+                user=self.env.user.display_name,
+            )))
             self.l10n_it_send_state = 'sent'
         except MailDeliveryException as error:
-            self.message_post(
-                body=(_("Error when sending mail with E-Invoice: %s") % (error.args[0]))
-                )
+            self.message_post(body=(_(
+                "Error when sending mail with E-Invoice: %s", error.args[0],
+            )))
             self.l10n_it_send_state = 'invalid'
 
     def _compose_info_message(self, tree, element_tags):

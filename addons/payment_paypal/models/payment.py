@@ -135,16 +135,7 @@ class TxPaypal(models.Model):
             raise ValidationError(error_msg)
 
         # find tx -> @TDENOTE use txn_id ?
-        txs = self.env['payment.transaction'].search([('reference', '=', reference)])
-        if not txs or len(txs) > 1:
-            error_msg = 'Paypal: received data for reference %s' % (reference)
-            if not txs:
-                error_msg += '; no order found'
-            else:
-                error_msg += '; multiple order found'
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
-        return txs[0]
+        return self.env['payment.transaction']._get_transaction_for_reference(reference, "Paypal")
 
     def _paypal_form_get_invalid_parameters(self, data):
         invalid_parameters = []

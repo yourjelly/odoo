@@ -115,10 +115,15 @@ class AccountMove(models.Model):
     def _onchange_afip_responsibility(self):
         if self.company_id.country_id == self.env.ref('base.ar') and self.l10n_latam_use_documents and self.partner_id \
            and not self.partner_id.l10n_ar_afip_responsibility_type_id:
-            return {'warning': {
-                'title': _('Missing Partner Configuration'),
-                'message': _('Please configure the AFIP Responsibility for "%s" in order to continue') % (
-                    self.partner_id.name)}}
+            return {
+                'warning': {
+                    'title': _('Missing Partner Configuration'),
+                    'message': _(
+                        'Please configure the AFIP Responsibility for "%s" in order to continue',
+                        self.partner_id.name,
+                    ),
+                }
+            }
 
     @api.onchange('partner_id')
     def _onchange_partner_journal(self):

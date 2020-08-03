@@ -726,6 +726,18 @@ class PaymentTransaction(models.Model):
             message = _('The transaction %s with %s for %s has been cancelled.')
         return message % tuple(message_vals)
 
+    def _get_transaction_for_reference(self, reference, acquirer=""):
+        # Because of the unicity constraint, there can only be one transaction by reference anyway
+        transaction = self.env['payment.transaction'].search([('reference', '=', reference)])
+        if not transaction:
+            _logger.info('%s: received data for reference %s; no order found', acquirer, reference)
+            raise ValidationError(_(
+                '%(acquirer)s: received data for reference %(reference)s; no order found',
+                acquirer=acquirer, reference=reference,
+            ))
+
+        return transaction
+
     def _log_payment_transaction_sent(self):
         '''Log the message saying the transaction has been sent to the remote server to be
         processed by the acquirer.

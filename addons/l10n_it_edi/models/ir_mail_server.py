@@ -191,10 +191,9 @@ class FetchmailServer(models.Model):
 
                     related_invoice.l10n_it_send_state = 'failed_delivery'
                     info = self._return_multi_line_xml(tree, ['//IdentificativoSdI', '//DataOraRicezione', '//MessageId', '//PecMessageId', '//Note'])
-                    related_invoice.message_post(
-                        body=(_("ES certify that it has received the invoice and that the file \
-                        could not be delivered to the addressee. <br/>%s") % (info))
-                    )
+                    related_invoice.message_post(body=_(
+                        "ES certify that it has received the invoice and that the file could not be delivered to the addressee."
+                    ) + "<br/>%s" % info)
 
     def _message_receipt_invoice(self, receipt_type, attachment):
         try:
@@ -221,9 +220,9 @@ class FetchmailServer(models.Model):
                 return
             related_invoice.l10n_it_send_state = 'delivered'
             info = self._return_multi_line_xml(tree, ['//IdentificativoSdI', '//DataOraRicezione', '//DataOraConsegna', '//Note'])
-            related_invoice.message_post(
-                body=(_("E-Invoice is delivery to the destinatory:<br/>%s") % (info))
-            )
+            related_invoice.message_post(body=_(
+                "E-Invoice is delivery to the destinatory:"
+            ) + "<br/>%s" % info)
 
         elif receipt_type == 'NS':
             # Rejection notice
@@ -237,9 +236,9 @@ class FetchmailServer(models.Model):
                 return
             related_invoice.l10n_it_send_state = 'invalid'
             error = self._return_error_xml(tree)
-            related_invoice.message_post(
-                body=(_("Errors in the E-Invoice :<br/>%s") % (error))
-            )
+            related_invoice.message_post(body=_(
+                "Errors in the E-Invoice:"
+            ) + "<br/>%s" % error)
             related_invoice.activity_schedule(
                 'mail.mail_activity_data_todo',
                 summary='Rejection notice',
@@ -295,9 +294,9 @@ class FetchmailServer(models.Model):
                                                 '//DataOraConsegna',
                                                 '//Note'
                                                ])
-            related_invoice.message_post(
-                body=(_("Outcome notice: %s<br/>%s") % (related_invoice.l10n_it_send_state, info))
-            )
+            related_invoice.message_post(body=_(
+                "Outcome notice: %s<br/>%s", related_invoice.l10n_it_send_state, info
+            ))
             if related_invoice.l10n_it_send_state == 'delivered_refused':
                 related_invoice.activity_schedule(
                     'mail.mail_activity_todo',

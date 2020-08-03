@@ -150,7 +150,7 @@ class Attendee(models.Model):
         """ Marks event invitation as Accepted. """
         for attendee in self:
             attendee.event_id.message_post(
-                body=_("%s has accepted invitation") % (attendee.common_name),
+                body=_("%s has accepted invitation", attendee.common_name),
                 subtype_xmlid="calendar.subtype_invitation")
         return self.write({'state': 'accepted'})
 
@@ -158,6 +158,6 @@ class Attendee(models.Model):
         """ Marks event invitation as Declined. """
         for attendee in self:
             attendee.event_id.message_post(
-                body=_("%s has declined invitation") % (attendee.common_name),
+                body=_("%s has declined invitation", attendee.common_name),
                 subtype_xmlid="calendar.subtype_invitation")
         return self.write({'state': 'declined'})

@@ -138,7 +138,7 @@ class HrEmployeePrivate(models.Model):
             return super(HrEmployeePrivate, self).read(fields, load=load)
         private_fields = set(fields).difference(self.env['hr.employee.public']._fields.keys())
         if private_fields:
-            raise AccessError(_('The fields "%s" you try to read is not available on the public employee profile.') % (','.join(private_fields)))
+            raise AccessError(_('The fields "%s" you try to read is not available on the public employee profile.', ','.join(private_fields)))
         return self.env['hr.employee.public'].browse(self.ids).read(fields, load=load)
 
     @api.model
@@ -228,7 +228,7 @@ class HrEmployeePrivate(models.Model):
             'active_model': 'hr.employee',
             'menu_id': self.env.ref('hr.menu_hr_root').id,
         })
-        employee._message_log(body=_('<b>Congratulations!</b> May I recommend you to setup an <a href="%s">onboarding plan?</a>') % (url))
+        employee._message_log(body=_('<b>Congratulations!</b> May I recommend you to setup an <a href="%s">onboarding plan?</a>', url))
         if employee.department_id:
             self.env['mail.channel'].sudo().search([
                 ('subscription_department_ids', 'in', employee.department_id.id)

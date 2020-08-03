@@ -85,7 +85,7 @@ class StockMove(models.Model):
         form_view = self.env.ref('mrp_subcontracting.mrp_subcontracting_move_form_view')
         ctx = dict(self._context, search_default_by_product=True, subcontract_move_id=self.id)
         return {
-            'name': _('Raw Materials for %s') % (self.product_id.display_name),
+            'name': _('Raw Materials for %s', self.product_id.display_name),
             'type': 'ir.actions.act_window',
             'res_model': 'stock.move',
             'views': [(tree_view.id, 'list'), (form_view.id, 'form')],

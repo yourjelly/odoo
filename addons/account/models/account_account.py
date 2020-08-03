@@ -357,13 +357,13 @@ class AccountAccount(models.Model):
             return super(AccountAccount, self).copy(default)
         try:
             default['code'] = (str(int(self.code) + 10) or '').zfill(len(self.code))
-            default.setdefault('name', _("%s (copy)") % (self.name or ''))
+            default.setdefault('name', _("%s (copy)", self.name or ''))
             while self.env['account.account'].search([('code', '=', default['code']),
                                                       ('company_id', '=', default.get('company_id', False) or self.company_id.id)], limit=1):
                 default['code'] = (str(int(default['code']) + 10) or '')
-                default['name'] = _("%s (copy)") % (self.name or '')
+                default['name'] = _("%s (copy)", self.name or '')
         except ValueError:
-            default['code'] = _("%s (copy)") % (self.code or '')
+            default['code'] = _("%s (copy)", self.code or '')
             default['name'] = self.name
         return super(AccountAccount, self).copy(default)
 

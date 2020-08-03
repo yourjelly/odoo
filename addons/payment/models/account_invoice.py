@@ -50,11 +50,15 @@ class AccountMove(models.Model):
             if acquirer_id:
                 acquirer = self.env['payment.acquirer'].browse(acquirer_id)
                 if payment_token and payment_token.acquirer_id != acquirer:
-                    raise ValidationError(_('Invalid token found! Token acquirer %s != %s') % (
-                    payment_token.acquirer_id.name, acquirer.name))
+                    raise ValidationError(_(
+                        'Invalid token found! Token acquirer %s != %s',
+                        payment_token.acquirer_id.name, acquirer.name,
+                    ))
                 if payment_token and payment_token.partner_id != partner:
-                    raise ValidationError(_('Invalid token found! Token partner %s != %s') % (
-                    payment_token.partner.name, partner.name))
+                    raise ValidationError(_(
+                        'Invalid token found! Token partner %s != %s',
+                        payment_token.partner.name, partner.name,
+                    ))
             else:
                 acquirer = payment_token.acquirer_id
 

@@ -58,10 +58,10 @@ def check_certificate():
                     if key[0] == b'CN':
                         cn = key[1].decode('utf-8')
                 if cn == 'OdooTempIoTBoxCertificate' or datetime.datetime.now() > cert_end_date:
-                    _logger.info(_('Your certificate %s must be updated') % (cn))
+                    _logger.info(_('Your certificate %s must be updated', cn))
                     load_certificate()
                 else:
-                    _logger.info(_('Your certificate %s is valid until %s') % (cn, cert_end_date))
+                    _logger.info(_('Your certificate %s is valid until %s', cn, cert_end_date))
         else:
             load_certificate()
 

@@ -22,7 +22,7 @@ class MailChannel(models.Model):
             msg = self._define_command_lead()['help']
         else:
             lead = self._convert_visitor_to_lead(partner, channel_partners, key)
-            msg = _('Created a new lead: <a href="#" data-oe-id="%s" data-oe-model="crm.lead">%s</a>') % (lead.id, html_escape(lead.name))
+            msg = _('Created a new lead:') + ' <a href="#" data-oe-id="%s" data-oe-model="crm.lead">%s</a>' % (lead.id, html_escape(lead.name))
         self._send_transient_message(partner, msg)
 
     def _convert_visitor_to_lead(self, partner, channel_partners, key):

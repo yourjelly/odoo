@@ -159,27 +159,20 @@ class PaymentTransaction(models.Model):
     def _alipay_form_get_tx_from_data(self, data):
         reference, txn_id, sign = data.get('reference'), data.get('trade_no'), data.get('sign')
         if not reference or not txn_id:
-            _logger.info('Alipay: received data with missing reference (%s) or txn_id (%s)' % (reference, txn_id))
-            raise ValidationError(_('Alipay: received data with missing reference (%s) or txn_id (%s)') % (reference, txn_id))
+            msg = 'Alipay: received data with missing reference (%(reference)s) or txn_id (%(txn_id)s)'
+            _logger.info(msg, reference=reference, txn_id=txn_id)
+            raise ValidationError(_(msg, reference=reference, txn_id=txn_id))
 
-        txs = self.env['payment.transaction'].search([('reference', '=', reference)])
-        if not txs or len(txs) > 1:
-            error_msg = _('Alipay: received data for reference %s') % (reference)
-            logger_msg = 'Alipay: received data for reference %s' % (reference)
-            if not txs:
-                error_msg += _('; no order found')
-                logger_msg += '; no order found'
-            else:
-                error_msg += _('; multiple order found')
-                logger_msg += '; multiple order found'
-            _logger.info(logger_msg)
-            raise ValidationError(error_msg)
+        txs = self.env['payment.transaction']._get_transaction_for_reference(reference, "Alipay")
 
         # verify sign
         sign_check = txs.acquirer_id._build_sign(data)
         if sign != sign_check:
-            _logger.info('Alipay: invalid sign, received %s, computed %s, for data %s' % (sign, sign_check, data))
-            raise ValidationError(_('Alipay: invalid sign, received %s, computed %s, for data %s') % (sign, sign_check, data))
+            _logger.info('Alipay: invalid sign, received %s, computed %s, for data %s', sign, sign_check, data)
+            raise ValidationError(_(
+                'Alipay: invalid sign, received %(received_sign)s, computed %(computed_sign)s, for data %(data)s',
+                received_sign=sign, computed_sign=sign_check, data=data,
+            ))
 
         return txs
 

@@ -27,7 +27,10 @@ class ResUsers(models.Model):
             if not password:
                 continue
             if len(password) < minlength:
-                failures.append(_(u"Passwords must have at least %d characters, got %d.") % (minlength, len(password)))
+                failures.append(_(
+                    u"Passwords must have at least %(minimum)d characters, got %(size)d.",
+                    minimum=minlength, size=len(password),
+                ))
 
         if failures:
             raise UserError(u'\n\n '.join(failures))

@@ -835,9 +835,15 @@ class Import(models.TransientModel):
                 # or datetime
                 line[index] = fmt(dt.strptime(v, d_fmt))
             except ValueError as e:
-                raise ValueError(_("Column %s contains incorrect values. Error in line %d: %s") % (name, num + 1, e))
+                raise ValueError(_(
+                    "Column %(name)s contains incorrect values. Error in line %(number)d: %(error)s",
+                    name=name, number=num + 1, error=e,
+                ))
             except Exception as e:
-                raise ValueError(_("Error Parsing Date [%s:L%d]: %s") % (name, num + 1, e))
+                raise ValueError(_(
+                    "Error Parsing Date [%(column)s:L%(line)d]: %(error)s",
+                    column=name, line=num + 1, error=e,
+                ))
 
     def _import_image_by_url(self, url, session, field, line_number):
         """ Imports an image by URL

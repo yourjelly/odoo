@@ -244,15 +244,7 @@ class PaymentTxOgone(models.Model):
             raise ValidationError(error_msg)
 
         # find tx -> @TDENOTE use paytid ?
-        tx = self.search([('reference', '=', reference)])
-        if not tx or len(tx) > 1:
-            error_msg = _('Ogone: received data for reference %s') % (reference)
-            if not tx:
-                error_msg += _('; no order found')
-            else:
-                error_msg += _('; multiple order found')
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
+        tx = self.env['payment.transaction']._get_transaction_for_reference(reference, "Ogone")
 
         # verify shasign
         shasign_check = tx.acquirer_id._ogone_generate_shasign('out', data)

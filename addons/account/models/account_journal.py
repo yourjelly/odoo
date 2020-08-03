@@ -323,8 +323,8 @@ class AccountJournal(models.Model):
     def copy(self, default=None):
         default = dict(default or {})
         default.update(
-            code=_("%s (copy)") % (self.code or ''),
-            name=_("%s (copy)") % (self.name or ''))
+            code=_("%s (copy)", self.code or ''),
+            name=_("%s (copy)", self.name or ''))
         return super(AccountJournal, self).copy(default)
 
     def _update_mail_alias(self, vals):
@@ -587,7 +587,7 @@ class AccountJournal(models.Model):
             for seq_field in sequence_fields:
                 if not journal[seq_field]:
                     vals = {
-                        'name': _('Securisation of %s - %s') % (seq_field, journal.name),
+                        'name': _('Securisation of %s - %s', seq_field, journal.name),
                         'code': 'SECUR%s-%s' % (journal.id, seq_field),
                         'implementation': 'no_gap',
                         'prefix': '',

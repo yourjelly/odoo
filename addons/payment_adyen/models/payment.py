@@ -209,20 +209,17 @@ class TxAdyen(models.Model):
     def _adyen_form_get_tx_from_data(self, data):
         reference, pspReference = data.get('merchantReference'), data.get('pspReference')
         if not reference or not pspReference:
-            error_msg = _('Adyen: received data with missing reference (%s) or missing pspReference (%s)') % (reference, pspReference)
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
+            _logger.info(
+                'Adyen: received data with missing reference (%s) or missing pspReference (%s)',
+                reference, pspReference,
+            )
+            raise ValidationError(_(
+                'Adyen: received data with missing reference (%s) or missing pspReference (%s)',
+                reference, pspReference,
+            ))
 
         # find tx -> @TDENOTE use pspReference ?
-        tx = self.env['payment.transaction'].search([('reference', '=', reference)])
-        if not tx or len(tx) > 1:
-            error_msg = _('Adyen: received data for reference %s') % (reference)
-            if not tx:
-                error_msg += _('; no order found')
-            else:
-                error_msg += _('; multiple order found')
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
+        tx = self.env['payment.transaction']._get_transaction_for_reference(reference, "Adyen")
 
         # verify shasign
         if len(tx.acquirer_id.adyen_skin_hmac_key) == 64:
@@ -230,9 +227,14 @@ class TxAdyen(models.Model):
         else:
             shasign_check = tx.acquirer_id._adyen_generate_merchant_sig('out', data)
         if to_text(shasign_check) != to_text(data.get('merchantSig')):
-            error_msg = _('Adyen: invalid merchantSig, received %s, computed %s') % (data.get('merchantSig'), shasign_check)
-            _logger.warning(error_msg)
-            raise ValidationError(error_msg)
+            _logger.warning(
+                'Adyen: invalid merchantSig, received %s, computed %s',
+                data.get('merchantSig'), shasign_check,
+            )
+            raise ValidationError(_(
+                'Adyen: invalid merchantSig, received %s, computed %s',
+                data.get('merchantSig'), shasign_check,
+            ))
 
         return tx
 

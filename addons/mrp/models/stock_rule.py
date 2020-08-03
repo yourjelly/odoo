@@ -18,9 +18,9 @@ class StockRule(models.Model):
     def _get_message_dict(self):
         message_dict = super(StockRule, self)._get_message_dict()
         source, destination, operation = self._get_message_values()
-        manufacture_message = _('When products are needed in <b>%s</b>, <br/> a manufacturing order is created to fulfill the need.') % (destination)
+        manufacture_message = _('When products are needed in <b>%s</b>, <br/> a manufacturing order is created to fulfill the need.', destination)
         if self.location_src_id:
-            manufacture_message += _(' <br/><br/> The components will be taken from <b>%s</b>.') % (source)
+            manufacture_message += '<br/><br/>' + _('The components will be taken from <b>%s</b>.', source)
         message_dict.update({
             'manufacture': manufacture_message
         })
@@ -43,7 +43,10 @@ class StockRule(models.Model):
         for procurement, rule in procurements:
             bom = self._get_matching_bom(procurement.product_id, procurement.company_id, procurement.values)
             if not bom:
-                msg = _('There is no Bill of Material of type manufacture or kit found for the product %s. Please define a Bill of Material for this product.') % (procurement.product_id.display_name,)
+                msg = _(
+                    'There is no Bill of Material of type manufacture or kit found for the product %s. Please define a Bill of Material for this product.',
+                    procurement.product_id.display_name,
+                )
                 errors.append((procurement, msg))
 
             productions_values_by_company[procurement.company_id.id].append(rule._prepare_mo_vals(*procurement, bom))

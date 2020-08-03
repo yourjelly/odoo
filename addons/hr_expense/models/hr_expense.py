@@ -274,8 +274,8 @@ class HrExpense(models.Model):
                     'email': '%s@%s' % (alias_record.alias_name, alias_record.alias_domain)
                 }
                 return '<p class="o_view_nocontent_smiling_face">%s</p><p class="oe_view_nocontent_alias">%s</p>' % (
-                    _('Add a new expense,'),
-                    _('or send receipts by email to %s.') % (link),)
+                    _('Add a new expense, or send receipt'),
+                    _('or send receipts by email to %s.', link),)
         return super(HrExpense, self).get_empty_list_help(help_message)
 
     # ----------------------------------------
@@ -372,7 +372,7 @@ class HrExpense(models.Model):
             account = self.product_id.product_tmpl_id.with_company(self.company_id)._get_product_accounts()['expense']
             if not account:
                 raise UserError(
-                    _("No Expense account found for the product %s (or for its category), please configure one.") % (self.product_id.name))
+                    _("No Expense account found for the product %s (or for its category), please configure one.", self.product_id.name))
         else:
             account = self.env['ir.property'].with_company(self.company_id)._get('property_account_expense_categ_id', 'product.category')
             if not account:
@@ -384,11 +384,11 @@ class HrExpense(models.Model):
         account_dest = self.env['account.account']
         if self.payment_mode == 'company_account':
             if not self.sheet_id.bank_journal_id.default_credit_account_id:
-                raise UserError(_("No credit account found for the %s journal, please configure one.") % (self.sheet_id.bank_journal_id.name))
+                raise UserError(_("No credit account found for the %s journal, please configure one.", self.sheet_id.bank_journal_id.name))
             account_dest = self.sheet_id.bank_journal_id.default_credit_account_id.id
         else:
             if not self.employee_id.sudo().address_home_id:
-                raise UserError(_("No Home Address found for the employee %s, please configure one.") % (self.employee_id.name))
+                raise UserError(_("No Home Address found for the employee %s, please configure one.", self.employee_id.name))
             partner = self.employee_id.sudo().address_home_id.with_company(self.company_id)
             account_dest = partner.property_account_payable_id.id or partner.parent_id.property_account_payable_id.id
         return account_dest
@@ -505,7 +505,7 @@ class HrExpense(models.Model):
             # create one more move line, a counterline for the total on payable account
             if expense.payment_mode == 'company_account':
                 if not expense.sheet_id.bank_journal_id.default_credit_account_id:
-                    raise UserError(_("No credit account found for the %s journal, please configure one.") % (expense.sheet_id.bank_journal_id.name))
+                    raise UserError(_("No credit account found for the %s journal, please configure one.", expense.sheet_id.bank_journal_id.name))
                 journal = expense.sheet_id.bank_journal_id
                 # create payment
                 payment_methods = journal.outbound_payment_method_ids if total_amount < 0 else journal.inbound_payment_method_ids

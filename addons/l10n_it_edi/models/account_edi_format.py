@@ -219,8 +219,7 @@ class AccountEdiFormat(models.Model):
                 for element in elements:
                     amount_total_import += float(element.text)
                 if amount_total_import:
-                    message_to_log.append(_("Total amount from the XML File: %s") % (
-                        amount_total_import))
+                    message_to_log.append(_("Total amount from the XML File: %s", amount_total_import))
 
                 # Bank account. <2.4.2.13>
                 if invoice_form.move_type not in ('out_invoice', 'in_refund'):
@@ -332,14 +331,18 @@ class AccountEdiFormat(models.Model):
                                     invoice_line_form.tax_ids.add(tax)
                                 else:
                                     if l10n_it_kind_exoneration:
-                                        message_to_log.append(_("Tax not found with percentage: %s and exoneration %s for the article: %s") % (
-                                            percentage,
-                                            l10n_it_kind_exoneration,
-                                            invoice_line_form.name))
+                                        message_to_log.append(_(
+                                            "Tax not found with percentage %(percentage)s and exoneration %(exoneration)s for the article: %(article)s",
+                                            percentage=percentage,
+                                            exoneration=l10n_it_kind_exoneration,
+                                            article=invoice_line_form.name,
+                                        ))
                                     else:
-                                        message_to_log.append(_("Tax not found with percentage: %s for the article: %s") % (
-                                            percentage,
-                                            invoice_line_form.name))
+                                        message_to_log.append(_(
+                                            "Tax not found with percentage %(percentage)s for the article: %(article)s"
+                                            percentage=percentage,
+                                            article=invoice_line_form.name,
+                                        ))
 
                             # Discount in cascade mode.
                             # if 3 discounts : -10% -50€ -20%

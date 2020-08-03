@@ -151,7 +151,7 @@ class AccountTax(models.Model):
     def _check_children_scope(self):
         for tax in self:
             if not tax._check_m2m_recursion('children_tax_ids'):
-                raise ValidationError(_("Recursion found for tax '%s'.") % (tax.name,))
+                raise ValidationError(_("Recursion found for tax '%s'.", tax.name))
             if not all(child.type_tax_use in ('none', tax.type_tax_use) for child in tax.children_tax_ids):
                 raise ValidationError(_('The application scope of taxes in a group must be either the same as the group or left empty.'))
             if not all(child.tax_scope == tax.tax_scope for child in tax.children_tax_ids):

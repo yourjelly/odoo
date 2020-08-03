@@ -74,18 +74,7 @@ class TransferPaymentTransaction(models.Model):
     @api.model
     def _transfer_form_get_tx_from_data(self, data):
         reference, amount, currency_name = data.get('reference'), data.get('amount'), data.get('currency_name')
-        tx = self.search([('reference', '=', reference)])
-
-        if not tx or len(tx) > 1:
-            error_msg = _('received data for reference %s') % (pprint.pformat(reference))
-            if not tx:
-                error_msg += _('; no order found')
-            else:
-                error_msg += _('; multiple order found')
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
-
-        return tx
+        return self.env['payment.transaction']._get_transaction_for_reference(reference, "Transfer")
 
     def _transfer_form_get_invalid_parameters(self, data):
         invalid_parameters = []

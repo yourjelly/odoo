@@ -332,7 +332,7 @@ class MassMailing(models.Model):
 
     def _action_view_traces_filtered(self, view_filter):
         action = self.env.ref('mass_mailing.mailing_trace_action').read()[0]
-        action['name'] = _('%s Traces') % (self.name)
+        action['name'] = _('%s Traces', self.name)
         action['context'] = {'search_default_mass_mailing_id': self.id,}
         filter_key = 'search_default_filter_%s' % (view_filter)
         action['context'][filter_key] = True

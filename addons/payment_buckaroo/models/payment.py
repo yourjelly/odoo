@@ -134,15 +134,7 @@ class TxBuckaroo(models.Model):
             _logger.info(error_msg)
             raise ValidationError(error_msg)
 
-        tx = self.search([('reference', '=', reference)])
-        if not tx or len(tx) > 1:
-            error_msg = _('Buckaroo: received data for reference %s') % (reference)
-            if not tx:
-                error_msg += _('; no order found')
-            else:
-                error_msg += _('; multiple order found')
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
+        tx = self.env['payment.transaction']._get_transaction_for_reference(reference, "Buckaroo")
 
         # verify shasign
         shasign_check = tx.acquirer_id._buckaroo_generate_digital_sign('out', origin_data)

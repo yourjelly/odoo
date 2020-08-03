@@ -792,7 +792,7 @@ class Lead(models.Model):
         meet_date = fields.Datetime.from_string(meeting_date)
         meeting_usertime = fields.Datetime.to_string(fields.Datetime.context_timestamp(self, meet_date))
         html_time = "<time datetime='%s+00:00'>%s</time>" % (meeting_date, meeting_usertime)
-        message = _("Meeting scheduled at '%s'<br> Subject: %s <br> Duration: %s hours") % (html_time, meeting_subject, duration)
+        message = _("Meeting scheduled at '%s'<br> Subject: %s <br> Duration: %s hours", html_time, meeting_subject, duration)
         return self.message_post(body=message)
 
     # ------------------------------------------------------------
@@ -1225,7 +1225,7 @@ class Lead(models.Model):
         if alias_record and alias_record.alias_domain and alias_record.alias_name:
             email = '%s@%s' % (alias_record.alias_name, alias_record.alias_domain)
             email_link = "<a href='mailto:%s'>%s</a>" % (email, email)
-            sub_title = _('Emails sent to %s automatically create opportunities.') % (email_link)
+            sub_title = _('Emails sent to %s automatically create opportunities.', email_link)
         return '<p class="o_view_nocontent_smiling_face">%s</p><p class="oe_view_nocontent_alias">%s</p>' % (help_title, sub_title)
 
     # ------------------------------------------------------------

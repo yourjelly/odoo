@@ -286,10 +286,17 @@ class Channel(models.Model):
         channel_info['is_pinned'] = False
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', partner.id), channel_info)
         if not self.email_send:
-            notification = _('<div class="o_mail_notification">left <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (self.id, self.name,)
+            notification = '<div class="o_mail_notification"> ' + _(
+                "left %(channel)s",
+                channel=self._get_redirect_html(),
+            ) + '</div>'
             # post 'channel left' message as root since the partner just unsubscribed from the channel
             self.sudo().message_post(body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id)
         return result
+
+    def _get_notification_html(self):
+        self.ensure_one()
+        return '<a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a>' % (self.id, self.name)
 
     def _notify_get_groups(self):
         """ All recipients of a message on a channel are considered as partners.
@@ -791,7 +798,10 @@ class Channel(models.Model):
                         'channel_name': channel.name,
                     }
                 else:
-                    notification = _('<div class="o_mail_notification">joined <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (channel.id, channel.name,)
+                    notification = '<div class="o_mail_notification">' + _(
+                        'joined %(channel)s',
+                        channel=channel._get_redirect_html(),
+                    ) + '</div>'
                 self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment", author_id=partner.id, notify_by_email=False)
 
         # broadcast the channel header to the added partner
@@ -867,7 +877,10 @@ class Channel(models.Model):
         self.ensure_one()
         added = self.action_follow()
         if added and self.channel_type == 'channel' and not self.email_send:
-            notification = _('<div class="o_mail_notification">joined <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (self.id, self.name,)
+            notification = notification = '<div class="o_mail_notification"> ' + _(
+                "joined %(channel)s",
+                channel=self._get_redirect_html(),
+            ) + '</div>'
             self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
 
         if added and self.moderation_guidelines:
@@ -892,7 +905,10 @@ class Channel(models.Model):
             'email_send': False,
             'channel_partner_ids': [(4, self.env.user.partner_id.id)]
         })
-        notification = _('<div class="o_mail_notification">created <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (new_channel.id, new_channel.name,)
+        notification = notification = '<div class="o_mail_notification"> ' + _(
+                "created %(channel)s",
+                channel=new_channel._get_redirect_html(),
+            ) + '</div>'
         new_channel.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
         channel_info = new_channel.channel_info('creation')[0]
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), channel_info)
@@ -986,7 +1002,10 @@ class Channel(models.Model):
         else:
             all_channel_partners = self.env['mail.channel.partner'].with_context(active_test=False)
             channel_partners = all_channel_partners.search([('partner_id', '!=', partner.id), ('channel_id', '=', self.id)])
-            msg = _("You are in a private conversation with <b>@%s</b>.") % (channel_partners[0].partner_id.name if channel_partners else _('Anonymous'))
+            msg = _(
+                "You are in a private conversation with <b>@%s</b>.",
+                channel_partners[0].partner_id.name if channel_partners else _('Anonymous'),
+            )
         msg += _("""<br><br>
             Type <b>@username</b> to mention someone, and grab his attention.<br>
             Type <b>#channel</b> to mention a channel.<br>

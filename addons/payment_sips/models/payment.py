@@ -157,16 +157,7 @@ class TxSips(models.Model):
             custom = json.loads(data.pop('returnContext', False) or '{}')
             reference = custom.get('reference')
 
-        payment_tx = self.search([('reference', '=', reference)])
-        if not payment_tx or len(payment_tx) > 1:
-            error_msg = _('Sips: received data for reference %s', reference)
-            if not payment_tx:
-                error_msg += _('; no order found')
-            else:
-                error_msg += _('; multiple order found')
-            _logger.error(error_msg)
-            raise ValidationError(error_msg)
-        return payment_tx
+        return self.env['payment.transaction']._get_transaction_for_reference(reference, "Sips")
 
     def _sips_form_get_invalid_parameters(self, data):
         invalid_parameters = []
