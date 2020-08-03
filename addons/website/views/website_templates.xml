@@ -678,6 +678,85 @@
     </xpath>
 </template>
 
+<template id="template_header_2" inherit_id="website.layout" name="Template Header 2" active="False">
+    <xpath expr="//header//nav" position="replace">
+        <nav class="navbar navbar-expand-lg navbar-light o_colored_level o_cc shadow-sm">
+            <div id="top_menu_container" class="container flex-wrap">
+                <!-- Brand -->
+                <t t-call="website.placeholder_header_brand"/>
+                <!-- Slogan -->
+                <div id="oe_structure_header_2_1" class="oe_structure ml-3 mr-auto">
+                    <h5 class="m-0" data-name="Slogan"><b>Slogan</b> for your website</h5>
+                </div>
+                <!-- Button -->
+                <t t-call="website.placeholder_header_button">
+                    <t t-set="_btn_class" t-value="'btn btn-primary ml-lg-auto'"/>
+                </t>
+                <!-- Separator -->
+                <div id="oe_structure_header_2_2" class="flex-grow-1 w-100 py-2">
+                    <div class="s_hr pt0 pb0" data-name="Separator">
+                        <hr class="w-100 mx-auto" style="border-top-width: 1px; border-top-style: solid; border-color: var(--200);"/>
+                    </div>
+                </div>
+                <!-- Navbar Toggler -->
+                <t t-call="website.navbar_toggler"/>
+                 <!-- Navbar Collapse -->
+                <div id="top_menu_collapse" class="collapse navbar-collapse">
+                    <t t-call="website.navbar_nav">
+                        <!-- <t t-set="_nav_class" t-value="'flex-grow-1'"/> -->
+                        <!-- Menu -->
+                        <t t-foreach="website.menu_id.child_id" t-as="submenu">
+                            <t t-call="website.submenu">
+                                <t t-set="item_class" t-value="'nav-item'"/>
+                                <t t-set="link_class" t-value="'nav-link'"/>
+                            </t>
+                        </t>
+                        <!-- AutoHideMenu -->
+                        <!-- <li class="divider d-none"/> -->
+                    </t>
+                </div>
+                <ul class="nav navbar-nav flex-row">
+                    <!-- Cart -->
+                    <li class="nav-item ml-lg-auto">
+                        <t t-call="website.placeholder_header_cart">
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_link_class" t-value="'nav-link'"/>
+                        </t>
+                    </li>
+                    <!-- Wishlist -->
+                    <li class="nav-item">
+                        <t t-call="website.placeholder_header_wishlist">
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_link_class" t-value="'nav-link ml-3'"/>
+                        </t>
+                    </li>
+                    <!-- Language Selector -->
+                    <li class="nav-item">
+                        <t t-call="website.language_selector">
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_toggle_class" t-value="'nav-link ml-3'"/>
+                        </t>
+                    </li>
+                    <!-- Sign In -->
+                    <li class="nav-item" groups="base.group_public">
+                        <t t-call="portal.placeholder_user_sign_in">
+                            <t t-set="_link_class" t-value="'nav-link ml-3'"/>
+                        </t>
+                    </li>
+                    <!-- User Dropdown -->
+                    <li t-ignore="true" t-if="website.user_id != user_id" class="dropdown nav-item ml-3">
+                        <t t-call="portal.user_dropdown">
+                            <t t-set="_toggle_class" t-value="'nav-link'"/>
+                            <t t-set="_icon" t-value="true"/>
+                        </t>
+                    </li>
+                </ul>
+
+            </div>
+        </nav>
+    </xpath>
+</template>
+
 <!-- Navbar Hamburger Options -->
 <template id="option_header_off_canvas" inherit_id="website.layout" name="Off-Canvas Header" active="False">
     <xpath expr="//header//ul[@id='top_menu']" position="attributes">
