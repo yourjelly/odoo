@@ -5758,7 +5758,7 @@ Fields:
                         else:
                             if all([[x is not None and not x.store for x in y] for y in val.values()]):
                                 # optimization if all dependant fields are not stored
-                                continue
+                                records = self.env.cache.get_records(model, key)
                             else:
                                 try:
                                     records = self[invf.name]
