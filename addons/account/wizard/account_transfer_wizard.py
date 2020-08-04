@@ -169,7 +169,7 @@ class AccountTransferWizard(models.TransientModel):
                         'debit_credit': balance < 0 and _('C') or _('D'),
                         'currency_symbol': self.company_id.currency_id.symbol,
                         'account_source_name': account.display_name,
-                        'link': self._format_move_link(move),
+                        'link': move._get_record_html_link(fname="name", raw_description=True),
                     }
 
         rslt += '</ul>'
@@ -186,10 +186,6 @@ class AccountTransferWizard(models.TransientModel):
                     'currency_symbol': self.company_id.currency_id.symbol,
                     'account_source_name': account.display_name,
                     'account_target_name': self.destination_account_id.display_name,
-                    'link': self._format_move_link(transfer_move),
+                    'link': transfer_move._get_record_html_link(fname="name", raw_description=True),
                 }
         return content and '<ul>' + content + '</ul>' or None
-
-    def _format_move_link(self, move):
-        move_link_format = "<a href=# data-oe-model=account.move data-oe-id=%(move_id)s>%(move_name)s</a>"
-        return move_link_format % {'move_id': move.id, 'move_name': move.name}

@@ -288,15 +288,11 @@ class Channel(models.Model):
         if not self.email_send:
             notification = '<div class="o_mail_notification"> ' + _(
                 "left %(channel)s",
-                channel=self._get_redirect_html(),
+                channel=self._get_record_html_link(fname="name"),
             ) + '</div>'
             # post 'channel left' message as root since the partner just unsubscribed from the channel
             self.sudo().message_post(body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id)
         return result
-
-    def _get_redirect_html(self):
-        self.ensure_one()
-        return '<a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a>' % (self.id, self.name)
 
     def _notify_get_groups(self):
         """ All recipients of a message on a channel are considered as partners.
@@ -791,17 +787,17 @@ class Channel(models.Model):
             channel.write({'channel_last_seen_partner_ids': [(0, 0, {'partner_id': partner_id}) for partner_id in partners_to_add.ids]})
             for partner in partners_to_add:
                 if partner.id != self.env.user.partner_id.id:
-                    notification = _('<div class="o_mail_notification">%(author)s invited %(new_partner)s to <a href="#" class="o_channel_redirect" data-oe-id="%(channel_id)s">#%(channel_name)s</a></div>') % {
-                        'author': self.env.user.display_name,
-                        'new_partner': partner.display_name,
-                        'channel_id': channel.id,
-                        'channel_name': channel.name,
-                    }
+                    notification = '<div class="o_mail_notification">%s</div>' % _(
+                        '%(author)s invited %(new_partner)s to %(channel)s',
+                        author=self.env.user.display_name,
+                        new_partner=partner.display_name,
+                        channel=channel._get_record_html_link("name"),
+                    )
                 else:
-                    notification = '<div class="o_mail_notification">' + _(
+                    notification = '<div class="o_mail_notification">%s</div>' % _(
                         'joined %(channel)s',
-                        channel=channel._get_redirect_html(),
-                    ) + '</div>'
+                        channel=channel._get_record_html_link("name"),
+                    )
                 self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment", author_id=partner.id, notify_by_email=False)
 
         # broadcast the channel header to the added partner
@@ -879,7 +875,7 @@ class Channel(models.Model):
         if added and self.channel_type == 'channel' and not self.email_send:
             notification = notification = '<div class="o_mail_notification"> ' + _(
                 "joined %(channel)s",
-                channel=self._get_redirect_html(),
+                channel=self._get_record_html_link(fname="name"),
             ) + '</div>'
             self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
 
@@ -1032,7 +1028,7 @@ class Channel(models.Model):
     def _execute_command_who(self, **kwargs):
         partner = self.env.user.partner_id
         members = [
-            '<a href="#" data-oe-id='+str(p.id)+' data-oe-model="res.partner">@'+p.name+'</a>'
+            partner._get_record_html_link("name")
             for p in self.channel_partner_ids[:30] if p != partner
         ]
         if len(members) == 0:

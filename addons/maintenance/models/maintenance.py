@@ -374,10 +374,8 @@ class MaintenanceRequest(models.Model):
             if not updated:
                 if request.equipment_id:
                     note = _(
-                        "Request planned for %s",
-                        '<a href="#" data-oe-model="%s" data-oe-id="%s">%s</a>' % (
-                            request.equipment_id._name, request.equipment_id.id, request.equipment_id.display_name,
-                        ),
+                        "Request planned for %(equipment)s",
+                        equipment=request.equipment_id._get_record_html_link("display_name"),
                     )
                 else:
                     note = False

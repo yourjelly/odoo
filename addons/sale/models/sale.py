@@ -486,15 +486,14 @@ class SaleOrder(models.Model):
             return
 
         filtered_self.activity_unlink(['sale.mail_act_sale_upsell'])
-        record_ref_html = "<a href='#' data-oe-model='%s' data-oe-id='%d'>%s</a>"
         for order in filtered_self:
             order.activity_schedule(
                 'sale.mail_act_sale_upsell',
                 user_id=order.user_id.id,
                 note=_(
                     "Upsell %(order)s for customer %(customer)s",
-                    order=record_ref_html % (order._name, order.id, order.name),
-                    customer=record_ref_html % (order.partner_id._name, order.partner_id.id, order.partner_id.display_name),
+                    order=order._get_record_html_link("name"),
+                    customer=order.partner_id._get_record_html_link("display_name"),
                 ),
             )
 

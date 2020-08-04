@@ -67,8 +67,9 @@ class AccountDebitNote(models.TransientModel):
             default_values = self._prepare_default_values(move)
             new_move = move.with_context(internal_type='debit_note').copy(default=default_values) # Context key is used for l10n_latam_invoice_document for ar/cl/pe
             move_msg = _(
-                "This debit note was created from:") + " <a href=# data-oe-model=account.move data-oe-id=%d>%s</a>" % (
-                       move.id, move.name)
+                "This debit note was created from: %(move)s",
+                move=move._get_record_html_link(fname="name", raw_description=True),
+            )
             new_move.message_post(body=move_msg)
             new_moves |= new_move
 

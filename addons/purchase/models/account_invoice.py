@@ -104,8 +104,8 @@ class AccountMove(models.Model):
             purchase = move.line_ids.mapped('purchase_line_id.order_id')
             if not purchase:
                 continue
-            refs = ["<a href=# data-oe-model=purchase.order data-oe-id=%s>%s</a>" % tuple(name_get) for name_get in purchase.name_get()]
-            message = _("This vendor bill has been created from: %s") % ','.join(refs)
+            refs = [order._get_record_html_link("display_name") for order in purchase]
+            message = _("This vendor bill has been created from: %s", ','.join(refs))
             move.message_post(body=message)
         return moves
 
@@ -119,8 +119,8 @@ class AccountMove(models.Model):
                 continue
             diff_purchases = new_purchases - old_purchases[i]
             if diff_purchases:
-                refs = ["<a href=# data-oe-model=purchase.order data-oe-id=%s>%s</a>" % tuple(name_get) for name_get in diff_purchases.name_get()]
-                message = _("This vendor bill has been modified from: %s") % ','.join(refs)
+                refs = [order._get_record_html_link("display_name") for order in diff_purchases]
+                message = _("This vendor bill has been modified from: %s", ','.join(refs))
                 move.message_post(body=message)
         return res
 

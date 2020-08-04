@@ -412,8 +412,9 @@ class PosOrder(models.Model):
                             .with_context(default_move_type=move_vals['move_type'])\
                             .create(move_vals)
             new_move.message_post(body=_(
-                "This invoice has been created from the point of sale session:",
-            ) + " <a href=# data-oe-model=pos.order data-oe-id=%d>%s</a>" % (order.id, order.name))
+                "This invoice has been created from the point of sale session: %(order)s",
+                order=order._get_record_html_link("name", raw_description=True)
+            ))
             order.write({'account_move': new_move.id, 'state': 'invoiced'})
             new_move.sudo().with_company(order.company_id).post()
             moves += new_move

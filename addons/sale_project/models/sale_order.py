@@ -138,9 +138,11 @@ class SaleOrderLine(models.Model):
                 line.sudo()._timesheet_service_generation()
                 # if the SO line created a task, post a message on the order
                 if line.task_id:
+                    # VFE TODO timesheet generation in batch + move order message post at task creation step.
                     line.order_id.message_post(body=_(
-                        "Task Created (%s): <a href=# data-oe-model=project.task data-oe-id=%d>%s</a>",
-                        line.product_id.name, line.task_id.id, line.task_id.name
+                        "Task Created (%(product)s): %(task)s",
+                        product=line.product_id.name,
+                        task=line.task_id._get_record_html_link("name"),
                     ))
         return lines
 
@@ -240,8 +242,9 @@ class SaleOrderLine(models.Model):
         self.write({'task_id': task.id})
         # post message on task
         task.message_post(body=_(
-            "This task has been created from: <a href=# data-oe-model=sale.order data-oe-id=%d>%s</a> (%s)",
-            self.order_id.id, self.order_id.name, self.product_id.name,
+            "This task has been created from: %(order)s (%(product)s)",
+            order=self.order_id._get_record_html_link("name"),
+            product=self.product_id.name,
         ))
         return task
 
