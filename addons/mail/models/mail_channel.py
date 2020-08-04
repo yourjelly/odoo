@@ -901,10 +901,10 @@ class Channel(models.Model):
             'email_send': False,
             'channel_partner_ids': [(4, self.env.user.partner_id.id)]
         })
-        notification = notification = '<div class="o_mail_notification"> ' + _(
-                "created %(channel)s",
-                channel=new_channel._get_redirect_html(),
-            ) + '</div>'
+        notification = notification = '<div class="o_mail_notification">%s</div>' % _(
+            "created %(channel)s",
+            channel=new_channel._get_record_html_link("name"),
+        )
         new_channel.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
         channel_info = new_channel.channel_info('creation')[0]
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), channel_info)
