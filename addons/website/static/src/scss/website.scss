@@ -140,30 +140,6 @@ $-seen-urls: ();
     }
 }
 
-@if o-website-value('preheader-template') {
-    #o_preheader {
-        @include o-apply-colors('preheader');
-
-        @if o-website-value('preheader-template') == 'icons' {
-
-            .o_preheader_icons > a {
-                width: $spacer * 2;
-                height: $spacer * 2;
-                margin-left: $spacer * .25;
-                border: 0;
-                padding: 0;
-            }
-        } @else if o-website-value('preheader-template') == 'image' {
-            height: o-website-value('preheader-height');
-        }
-
-        #wrapwrap.o_header_overlay & {
-            // Hide preheaders if menu is set as transparent
-            display: none;
-        }
-    }
-}
-
 .navbar {
     @if ($o-theme-navbar-font != $o-theme-font) {
         font-family: $o-theme-navbar-font;
@@ -964,12 +940,10 @@ header {
                 position: fixed;
                 z-index: $zindex-fixed;
                 display: flex;
-                // Important to define the width on the header itself as the
-                // preheader would stretch it over the content otherwise
                 width: o-website-value('sidebar-width');
                 transform: none !important;
 
-                .navbar:not(#o_preheader) {
+                .navbar {
                     width: 100%;
                     align-items: start;
                     padding: $spacer;
@@ -998,23 +972,6 @@ header {
         }
         body.o_connected_user #wrapwrap > header {
             top: $o-navbar-height;
-        }
-        @if o-website-value('preheader-template') {
-            #o_preheader {
-                position: fixed;
-                right: 0;
-                left: o-website-value('sidebar-width');
-            }
-            @if index(('magazine', 'icons'), o-website-value('preheader-template')) {
-                #wrapwrap > main {
-                    // Header visibilities
-                    padding-top: $spacer * 3 !important;
-                }
-            } @else if o-website-value('preheader-template') == 'image' {
-                #wrapwrap > main {
-                    padding-top: o-website-value('preheader-height');
-                }
-            }
         }
     }
 }

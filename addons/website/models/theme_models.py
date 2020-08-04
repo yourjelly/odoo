@@ -173,7 +173,6 @@ class Theme(models.AbstractModel):
                 'buttons-font': 'null',
                 'color-palettes-number': 'null',
                 'btn-ripple': 'null',
-                'preheader-template': 'null',
                 'header-template': 'null',
                 'footer-template': 'null',
                 'footer-scrolltop': 'null',
@@ -182,11 +181,6 @@ class Theme(models.AbstractModel):
 
         # Reinitialize effets
         self.disable_view('website.option_ripple_effect')
-
-        # Reinitialize preheader templates
-        self.disable_view('website.template_preheader_magazine')
-        self.disable_view('website.template_preheader_icons')
-        self.disable_view('website.template_preheader_image')
 
         # Reinitialize header templates
         self.disable_view('website.template_header_hamburger')

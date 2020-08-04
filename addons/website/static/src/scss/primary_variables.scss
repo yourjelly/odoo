@@ -5,7 +5,6 @@
 
 $o-base-color-palette: map-merge($o-base-color-palette, (
     'body': $o-portal-default-body-bg,
-    'preheader': null,
     'menu': 1, // o_cc1
     'footer': 5, // o_cc5
     'copyright': 'black-15',
@@ -258,8 +257,6 @@ $o-base-website-values-palette: (
     'navbar-font': null,
     'buttons-font': null,
 
-    'preheader-template': null, // null, 'magazine', 'icons' or 'image'
-    'preheader-height': 1vw, // Only used in 'image' preheader-template
     'header-template': 'default', // 'default' / 'hamburger' / 'vertical' / 'sidebar'
     'header-font-size': null, // Default to BS (normal font-size)
     'header-links-style': 'default', // 'default' / 'fill' / 'outline' / 'pills' / 'block' / 'border-bottom'
