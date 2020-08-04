@@ -5757,7 +5757,7 @@ Fields:
                             records = model.browse(rec_ids)
                         else:
                             if all([[x is not None and not x.store for x in y] for y in val.values()]):
-                                records = self.env.cache.get_records(model, key)
+                                records = self.env.cache.get_records(model, invf)
                             else:
                                 try:
                                     records = self[invf.name]
