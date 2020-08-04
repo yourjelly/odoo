@@ -5757,8 +5757,7 @@ Fields:
                             records = model.browse(rec_ids)
                         else:
                             if all([[x is not None and not x.store for x in y] for y in val.values()]):
-                                cache_records = self.env.cache.get_records(model, key)
-                                records |= cache_records.filtered(lambda r: set(r[key.name]._ids) & set(self._ids))
+                                records = self.env.cache.get_records(model, key)
                             else:
                                 try:
                                     records = self[invf.name]
@@ -5775,7 +5774,7 @@ Fields:
                     new_records = self.filtered(lambda r: not r.id)
                     real_records = self - new_records
                     records = model.browse()
-                    if real_records and key.store:
+                    if real_records:
                         records |= model.search([(key.name, 'in', real_records.ids)], order='id')
                     if new_records:
                         cache_records = self.env.cache.get_records(model, key)
