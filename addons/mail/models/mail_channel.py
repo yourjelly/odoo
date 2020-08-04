@@ -294,7 +294,7 @@ class Channel(models.Model):
             self.sudo().message_post(body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id)
         return result
 
-    def _get_notification_html(self):
+    def _get_redirect_html(self):
         self.ensure_one()
         return '<a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a>' % (self.id, self.name)
 
