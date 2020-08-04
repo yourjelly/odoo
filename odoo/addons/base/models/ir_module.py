@@ -377,7 +377,10 @@ class Module(models.Model):
             update_mods, ready_mods = self.browse(), self.browse()
             for dep in module.dependencies_id:
                 if dep.state == 'unknown':
-                    raise UserError(_("You try to install module '%s' that depends on module '%s'.\nBut the latter module is not available in your system.") % (module.name, dep.name,))
+                    raise UserError(_(
+                        "You try to install module '%(installed_module)s' that depends on module '%(dependency)s'.\nBut the latter module is not available in your system.",
+                        installed_module=module.name, dependency=dep.name,
+                    ))
                 if dep.depend_id.state == newstate:
                     ready_mods += dep.depend_id
                 else:
@@ -660,7 +663,7 @@ class Module(models.Model):
             module = todo[i]
             i += 1
             if module.state not in ('installed', 'to upgrade'):
-                raise UserError(_("Can not upgrade module '%s'. It is not installed.") % (module.name,))
+                raise UserError(_("Can not upgrade module '%s'. It is not installed.", module.name,))
             self.check_external_dependencies(module.name, 'to upgrade')
             for dep in Dependency.search([('name', '=', module.name)]):
                 if dep.module_id.state == 'installed' and dep.module_id not in todo:
@@ -672,7 +675,7 @@ class Module(models.Model):
         for module in todo:
             for dep in module.dependencies_id:
                 if dep.state == 'unknown':
-                    raise UserError(_('You try to upgrade the module %s that depends on the module: %s.\nBut this module is not available in your system.') % (module.name, dep.name,))
+                    raise UserError(_('You try to upgrade the module %s that depends on the module: %s.\nBut this module is not available in your system.', module.name, dep.name,))
                 if dep.state == 'uninstalled':
                     to_install += self.search([('name', '=', dep.name)]).ids
 

@@ -21,7 +21,10 @@ class StockRule(models.Model):
         message_dict = super(StockRule, self)._get_message_dict()
         dummy, destination, dummy = self._get_message_values()
         message_dict.update({
-            'buy': _('When products are needed in <b>%s</b>, <br/> a request for quotation is created to fulfill the need.') % (destination)
+            'buy': _(
+                'When products are needed in <b>%s</b>, <br/> a request for quotation is created to fulfill the need.',
+                destination,
+            )
         })
         return message_dict
 
@@ -67,7 +70,10 @@ class StockRule(models.Model):
             )[:1]
 
             if not supplier:
-                msg = _('There is no matching vendor price to generate the purchase order for product %s (no vendor defined, minimum quantity not reached, dates not valid, ...). Go on the product form and complete the list of vendors.') % (procurement.product_id.display_name)
+                msg = _(
+                    'There is no matching vendor price to generate the purchase order for product %s (no vendor defined, minimum quantity not reached, dates not valid, ...). Go on the product form and complete the list of vendors.',
+                    procurement.product_id.display_name,
+                )
                 errors.append((procurement, msg))
 
             partner = supplier.name

@@ -130,7 +130,10 @@ class TxBuckaroo(models.Model):
         data = normalize_keys_upper(data)
         reference, pay_id, shasign = data.get('BRQ_INVOICENUMBER'), data.get('BRQ_PAYMENT'), data.get('BRQ_SIGNATURE')
         if not reference or not pay_id or not shasign:
-            error_msg = _('Buckaroo: received data with missing reference (%s) or pay_id (%s) or shasign (%s)') % (reference, pay_id, shasign)
+            error_msg = _(
+                'Buckaroo: received data with missing reference (%s) or pay_id (%s) or shasign (%s)',
+                reference, pay_id, shasign,
+            )
             _logger.info(error_msg)
             raise ValidationError(error_msg)
 
@@ -139,7 +142,10 @@ class TxBuckaroo(models.Model):
         # verify shasign
         shasign_check = tx.acquirer_id._buckaroo_generate_digital_sign('out', origin_data)
         if shasign_check.upper() != shasign.upper():
-            error_msg = _('Buckaroo: invalid shasign, received %s, computed %s, for data %s') % (shasign, shasign_check, data)
+            error_msg = _(
+                'Buckaroo: invalid shasign, received %s, computed %s, for data %s',
+                shasign, shasign_check, data,
+            )
             _logger.info(error_msg)
             raise ValidationError(error_msg)
 

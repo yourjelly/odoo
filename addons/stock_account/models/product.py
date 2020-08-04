@@ -216,7 +216,10 @@ class ProductProduct(models.Model):
             svl_vals = {
                 'company_id': company_id.id,
                 'product_id': product.id,
-                'description': _('Product value manually modified (from %s to %s)') % (product.standard_price, new_price),
+                'description': _(
+                    'Product value manually modified (from %s to %s)',
+                    product.standard_price, new_price,
+                ),
                 'value': value,
                 'quantity': 0,
             }
@@ -546,7 +549,10 @@ class ProductProduct(models.Model):
             product = out_stock_valuation_layer.product_id
             expense_account = product._get_product_accounts()['expense']
             if not expense_account:
-                raise UserError(_('Please define an expense account for this product: "%s" (id:%d) - or for its category: "%s".') % (product.name, product.id, self.name))
+                raise UserError(_(
+                    'Please define an expense account for this product: "%s" (id:%d) - or for its category: "%s".',
+                    product.name, product.id, self.name,
+                ))
             if not product_accounts[product.id].get('stock_valuation'):
                 raise UserError(_('You don\'t have any stock valuation account defined on your product category. You must define one before processing this operation.'))
 

@@ -84,7 +84,10 @@ class ProductPricelist(models.Model):
     def _check_website_pricelist(self):
         for website in self.env['website'].search([]):
             if not website.pricelist_ids:
-                raise UserError(_("With this action, '%s' website would not have any pricelist available.") % (website.name))
+                raise UserError(_(
+                    "With this action, '%s' website would not have any pricelist available.",
+                    website.name,
+                ))
 
     def _is_available_on_website(self, website_id):
         """ To be able to be used on a website, a pricelist should either:

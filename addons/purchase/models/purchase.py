@@ -523,7 +523,10 @@ class PurchaseOrder(models.Model):
         move_type = self._context.get('default_move_type', 'in_invoice')
         journal = self.env['account.move'].with_context(default_move_type=move_type)._get_default_journal()
         if not journal:
-            raise UserError(_('Please define an accounting purchase journal for the company %s (%s).') % (self.company_id.name, self.company_id.id))
+            raise UserError(_(
+                'Please define an accounting purchase journal for the company %s (%s).',
+                self.company_id.name, self.company_id.id,
+            ))
 
         partner_invoice_id = self.partner_id.address_get(['invoice'])['invoice']
         invoice_vals = {
@@ -730,7 +733,7 @@ class PurchaseOrder(models.Model):
     def _create_update_date_activity(self, updated_dates):
         note = _('<p> %s modified receipt dates for the following products:</p>') % self.partner_id.name
         for line, date in updated_dates:
-            note += _('<p> &nbsp; - %s from %s to %s </p>') % (line.product_id.display_name, line.date_planned.date(), date.date())
+            note += _('<p> &nbsp; - %s from %s to %s </p>', line.product_id.display_name, line.date_planned.date(), date.date())
         activity = self.activity_schedule(
             'mail.mail_activity_data_warning',
             summary=_("Date Updated"),
@@ -744,7 +747,7 @@ class PurchaseOrder(models.Model):
 
     def _update_update_date_activity(self, updated_dates, activity):
         for line, date in updated_dates:
-            activity.note += _('<p> &nbsp; - %s from %s to %s </p>') % (line.product_id.display_name, line.date_planned.date(), date.date())
+            activity.note += _('<p> &nbsp; - %s from %s to %s </p>', line.product_id.display_name, line.date_planned.date(), date.date())
 
 
 class PurchaseOrderLine(models.Model):
@@ -906,7 +909,7 @@ class PurchaseOrderLine(models.Model):
         lines = super().create(vals_list)
         for line in lines:
             if line.product_id and line.order_id.state == 'purchase':
-                msg = _("Extra line with %s ") % (line.product_id.display_name,)
+                msg = _("Extra line with %s ", line.product_id.display_name)
                 line.order_id.message_post(body=msg)
         return lines
 
@@ -931,7 +934,10 @@ class PurchaseOrderLine(models.Model):
     def unlink(self):
         for line in self:
             if line.order_id.state in ['purchase', 'done']:
-                raise UserError(_('Cannot delete a purchase order line which is in state \'%s\'.') % (line.state,))
+                raise UserError(_(
+                    'Cannot delete a purchase order line which is in state \'%s\'.',
+                    line.state,
+                ))
         return super(PurchaseOrderLine, self).unlink()
 
     @api.model

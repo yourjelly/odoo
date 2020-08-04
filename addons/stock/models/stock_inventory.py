@@ -74,7 +74,7 @@ class Inventory(models.Model):
                 self.location_ids = warehouse.lot_stock_id
 
     def copy_data(self, default=None):
-        name = _("%s (copy)") % (self.name)
+        name = _("%s (copy)", self.name)
         default = dict(default or {}, name=name)
         return super(Inventory, self).copy_data(default)
 

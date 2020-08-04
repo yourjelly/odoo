@@ -81,7 +81,10 @@ class PaymentTransactionPayulatam(models.Model):
         transaction record. """
         reference, txnid, sign = data.get('referenceCode'), data.get('transactionId'), data.get('signature')
         if not reference or not txnid or not sign:
-            raise ValidationError(_('PayU Latam: received data with missing reference (%s) or transaction id (%s) or sign (%s)') % (reference, txnid, sign))
+            raise ValidationError(_(
+                'PayU Latam: received data with missing reference (%s) or transaction id (%s) or sign (%s)',
+                reference, txnid, sign,
+            ))
 
         transaction = self.env['payment.transaction']._get_transaction_for_reference(reference, "PayU Latam")
 

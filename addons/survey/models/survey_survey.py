@@ -316,7 +316,7 @@ class Survey(models.Model):
         return result
 
     def copy_data(self, default=None):
-        title = _("%s (copy)") % (self.title)
+        title = _("%s (copy)", self.title)
         default = dict(default or {}, title=title)
         return super(Survey, self).copy_data(default)
 

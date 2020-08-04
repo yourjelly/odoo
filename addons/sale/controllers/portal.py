@@ -235,7 +235,7 @@ class CustomerPortal(CustomerPortal):
         pdf = request.env.ref('sale.action_report_saleorder').sudo()._render_qweb_pdf([order_sudo.id])[0]
 
         _message_post_helper(
-            'sale.order', order_sudo.id, _('Order signed by %s') % (name,),
+            'sale.order', order_sudo.id, _('Order signed by %s', name),
             attachments=[('%s.pdf' % order_sudo.name, pdf)],
             **({'token': access_token} if access_token else {}))
 

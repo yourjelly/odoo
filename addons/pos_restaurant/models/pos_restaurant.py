@@ -26,7 +26,10 @@ class RestaurantFloor(models.Model):
             for floor in self:
                 for session in opened_session:
                     if floor in session.config_id.floor_ids:
-                        error_msg += _("Floor: %s - PoS Config: %s \n") % (floor.name, session.config_id.name)
+                        error_msg += _(
+                            "Floor: %s - PoS Config: %s \n",
+                            floor.name, session.config_id.name,
+                        )
             if confs:
                 raise UserError(error_msg)
         return super(RestaurantFloor, self).unlink()

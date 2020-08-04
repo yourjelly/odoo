@@ -600,7 +600,7 @@ class Channel(models.Model):
 
     def action_view_ratings(self):
         action = self.env.ref('website_slides.rating_rating_action_slide_channel').read()[0]
-        action['name'] = _('Rating of %s') % (self.name)
+        action['name'] = _('Rating of %s', self.name)
         action['domain'] = [('res_id', 'in', self.ids)]
         return action
 

@@ -423,9 +423,9 @@ class Website(models.Model):
         for view in views:
             dependencies.setdefault(view_key, [])
             dependencies[view_key].append({
-                'text': _('Template <b>%s (id:%s)</b> contains a link to this page') % (view.key or view.name, view.id),
+                'text': _('Template <b>%s (id:%s)</b> contains a link to this page', view.key or view.name, view.id),
                 'link': '/web#id=%s&view_type=form&model=ir.ui.view' % view.id,
-                'item': _('%s (id:%s)') % (view.key or view.name, view.id),
+                'item': _('%s (id:%s)', view.key or view.name, view.id),
             })
         # search for menu with link
         menu_search_dom = [('url', 'ilike', '%s' % url)] + website.website_domain()
@@ -490,8 +490,8 @@ class Website(models.Model):
         for view in views:
             dependencies.setdefault(view_key, [])
             dependencies[view_key].append({
-                'text': _('Template <b>%s (id:%s)</b> is calling this file') % (view.key or view.name, view.id),
-                'item': _('%s (id:%s)') % (view.key or view.name, view.id),
+                'text': _('Template <b>%s (id:%s)</b> is calling this file', view.key or view.name, view.id),
+                'item': _('%s (id:%s)', view.key or view.name, view.id),
                 'link': '/web#id=%s&view_type=form&model=ir.ui.view' % view.id,
             })
 

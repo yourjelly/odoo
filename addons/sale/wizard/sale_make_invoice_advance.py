@@ -106,7 +106,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
     def _get_advance_details(self, order):
         if self.advance_payment_method == 'percentage':
             amount = order.amount_untaxed * self.amount / 100
-            name = _("Down payment of %s%%") % (self.amount)
+            name = _("Down payment of %s%%", self.amount)
         else:
             amount = self.fixed_amount
             name = _('Down Payment')
@@ -131,7 +131,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
     def _prepare_so_line(self, order, analytic_tag_ids, tax_ids, amount):
         so_values = {
-            'name': _('Down Payment: %s') % (time.strftime('%m %Y'),),
+            'name': _('Down Payment: %s', time.strftime('%m %Y')),
             'price_unit': amount,
             'product_uom_qty': 0.0,
             'order_id': order.id,

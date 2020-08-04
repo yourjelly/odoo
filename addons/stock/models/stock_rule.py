@@ -226,7 +226,7 @@ class StockRule(models.Model):
         # `location_src_id` field.
         for procurement, rule in procurements:
             if not rule.location_src_id:
-                msg = _('No source location defined on stock rule: %s!') % (rule.name, )
+                msg = _('No source location defined on stock rule: %s!', rule.name)
                 raise ProcurementException([(procurement, msg)])
 
             if rule.procure_method == 'mts_else_mto':

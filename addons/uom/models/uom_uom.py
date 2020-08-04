@@ -79,9 +79,15 @@ class UoM(models.Model):
         """, (tuple(category_ids),))
         for uom_data in self._cr.dictfetchall():
             if uom_data['uom_count'] == 0:
-                raise ValidationError(_("UoM category %s should have a reference unit of measure. If you just created a new category, please record the 'reference' unit first.") % (self.env['uom.category'].browse(uom_data['category_id']).name,))
+                raise ValidationError(_(
+                    "UoM category %s should have a reference unit of measure. If you just created a new category, please record the 'reference' unit first.",
+                    self.env['uom.category'].browse(uom_data['category_id']).name,
+                ))
             if uom_data['uom_count'] > 1:
-                raise ValidationError(_("UoM category %s should only have one reference unit of measure.") % (self.env['uom.category'].browse(uom_data['category_id']).name,))
+                raise ValidationError(_(
+                    "UoM category %s should only have one reference unit of measure.",
+                    self.env['uom.category'].browse(uom_data['category_id']).name,
+                ))
 
     @api.constrains('category_id')
     def _validate_uom_category(self):
@@ -90,7 +96,10 @@ class UoM(models.Model):
                 ('category_id', '=', uom.category_id.id),
                 ('uom_type', '=', 'reference')])
             if len(reference_uoms) > 1:
-                raise ValidationError(_("UoM category %s should only have one reference unit of measure.") % (self.category_id.name))
+                raise ValidationError(_(
+                    "UoM category %s should only have one reference unit of measure.",
+                    self.category_id.name,
+                ))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -146,7 +155,10 @@ class UoM(models.Model):
         self.ensure_one()
         if self.category_id.id != to_unit.category_id.id:
             if raise_if_failure:
-                raise UserError(_('The unit of measure %s defined on the order line doesn\'t belong to the same category than the unit of measure %s defined on the product. Please correct the unit of measure defined on the order line or on the product, they should belong to the same category.') % (self.name, to_unit.name))
+                raise UserError(_(
+                    'The unit of measure %s defined on the order line doesn\'t belong to the same category than the unit of measure %s defined on the product. Please correct the unit of measure defined on the order line or on the product, they should belong to the same category.',
+                    self.name, to_unit.name,
+                ))
             else:
                 return qty
         amount = qty / self.factor

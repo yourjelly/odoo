@@ -92,14 +92,20 @@ class PaymentTransactionPayumoney(models.Model):
         pay_id = data.get('mihpayid')
         shasign = data.get('hash')
         if not reference or not pay_id or not shasign:
-            raise ValidationError(_('PayUmoney: received data with missing reference (%s) or pay_id (%s) or shashign (%s)') % (reference, pay_id, shasign))
+            raise ValidationError(_(
+                'PayUmoney: received data with missing reference (%s) or pay_id (%s) or shashign (%s)',
+                reference, pay_id, shasign,
+            ))
 
         transaction = self.env['payment.transaction']._get_transaction_for_reference(reference, "PayUmoney")
 
         #verify shasign
         shasign_check = transaction.acquirer_id._payumoney_generate_sign('out', data)
         if shasign_check.upper() != shasign.upper():
-            raise ValidationError(_('PayUmoney: invalid shasign, received %s, computed %s, for data %s') % (shasign, shasign_check, data))
+            raise ValidationError(_(
+                'PayUmoney: invalid shasign, received %s, computed %s, for data %s',
+                shasign, shasign_check, data,
+            ))
         return transaction
 
     def _payumoney_form_get_invalid_parameters(self, data):

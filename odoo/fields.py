@@ -940,7 +940,7 @@ class Field(MetaField('DummyField', (object,), {})):
                 if not env.cache.contains(record, self) and not record.exists():
                     raise MissingError("\n".join([
                         _("Record does not exist or has been deleted."),
-                        _("(Record: %s, User: %s)") % (record, env.uid),
+                        _("(Record: %s, User: %s)", record, env.uid),
                     ]))
                 value = env.cache.get(record, self)
 
@@ -1913,7 +1913,10 @@ class Binary(Field):
         try:
             return psycopg2.Binary(str(value).encode('ascii'))
         except UnicodeEncodeError:
-            raise UserError(_("ASCII characters are required for %s in %s") % (value, self.name))
+            raise UserError(_(
+                "ASCII characters are required for %s in %s",
+                value, self.name,
+            ))
 
     def convert_to_cache(self, value, record, validate=True):
         if isinstance(value, _BINARY):
@@ -3019,7 +3022,10 @@ class One2many(_RelationalMulti):
         if self.comodel_name in model.env:
             comodel = model.env[self.comodel_name]
             if self.inverse_name not in comodel._fields:
-                raise UserError(_("No inverse field %r found for %r") % (self.inverse_name, self.comodel_name))
+                raise UserError(_(
+                    "No inverse field %r found for %r",
+                    self.inverse_name, self.comodel_name,
+                ))
 
     def get_domain_list(self, records):
         comodel = records.env.registry[self.comodel_name]

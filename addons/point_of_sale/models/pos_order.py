@@ -411,8 +411,9 @@ class PosOrder(models.Model):
                             .with_company(order.company_id)\
                             .with_context(default_move_type=move_vals['move_type'])\
                             .create(move_vals)
-            message = _("This invoice has been created from the point of sale session: <a href=# data-oe-model=pos.order data-oe-id=%d>%s</a>") % (order.id, order.name)
-            new_move.message_post(body=message)
+            new_move.message_post(body=_(
+                "This invoice has been created from the point of sale session:",
+            ) + " <a href=# data-oe-model=pos.order data-oe-id=%d>%s</a>" % (order.id, order.name))
             order.write({'account_move': new_move.id, 'state': 'invoiced'})
             new_move.sudo().with_company(order.company_id).post()
             moves += new_move
@@ -530,7 +531,10 @@ class PosOrder(models.Model):
         if not client.get('email'):
             return False
 
-        message = _("<p>Dear %s,<br/>Here is your electronic ticket for the %s. </p>") % (client['name'], name)
+        message = _(
+            "<p>Dear %s,<br/>Here is your electronic ticket for the %s. </p>",
+            client['name'], name,
+        )
         filename = 'Receipt-' + name + '.jpg'
         receipt = self.env['ir.attachment'].create({
             'name': filename,

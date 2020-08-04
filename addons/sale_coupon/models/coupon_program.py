@@ -32,7 +32,7 @@ class CouponProgram(models.Model):
         message = {}
         applicable_programs = order._get_applicable_programs()
         if self.maximum_use_number != 0 and self.order_count >= self.maximum_use_number:
-            message = {'error': _('Promo code %s has been expired.') % (coupon_code)}
+            message = {'error': _('Promo code %s has been expired.', coupon_code)}
         elif not self._filter_on_mimimum_amount(order):
             message = {'error': _(
                 'A minimum of %(amount)s %(currency)s should be purchased to get the reward',

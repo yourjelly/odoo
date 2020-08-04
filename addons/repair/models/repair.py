@@ -327,7 +327,10 @@ class Repair(models.Model):
 
             journal = repair.env['account.move'].with_context(type='out_invoice')._get_default_journal()
             if not journal:
-                raise UserError(_('Please define an accounting sales journal for the company %s (%s).') % (company.name, company.id))
+                raise UserError(_(
+                    'Please define an accounting sales journal for the company %s (%s).',
+                    company.name, company.id,
+                ))
 
             if (partner_invoice.id, currency.id) not in grouped_invoices_vals:
                 grouped_invoices_vals[(partner_invoice.id, currency.id, company.id)] = []
@@ -647,7 +650,10 @@ class RepairLine(models.Model):
     @api.constrains('lot_id', 'product_id')
     def constrain_lot_id(self):
         for line in self.filtered(lambda x: x.product_id.tracking != 'none' and not x.lot_id):
-            raise ValidationError(_("Serial number is required for operation line with product '%s'") % (line.product_id.name))
+            raise ValidationError(_(
+                "Serial number is required for operation line with product '%s'",
+                line.product_id.name,
+            ))
 
     @api.depends('price_unit', 'repair_id', 'product_uom_qty', 'product_id', 'repair_id.invoice_method')
     def _compute_price_subtotal(self):

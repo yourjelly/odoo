@@ -267,7 +267,10 @@ class SaleOrderLine(models.Model):
             # determine vendor of the order (take the first matching company and product)
             suppliers = line.product_id._select_seller(quantity=line.product_uom_qty, uom_id=line.product_uom)
             if not suppliers:
-                raise UserError(_("There is no vendor associated to the product %s. Please define a vendor for this product.") % (line.product_id.display_name,))
+                raise UserError(_(
+                    "There is no vendor associated to the product %s. Please define a vendor for this product.",
+                    line.product_id.display_name,
+                ))
             supplierinfo = suppliers[0]
             partner_supplier = supplierinfo.name  # yes, this field is not explicit .... it is a res.partner !
 

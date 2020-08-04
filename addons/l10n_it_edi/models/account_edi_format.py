@@ -339,7 +339,7 @@ class AccountEdiFormat(models.Model):
                                         ))
                                     else:
                                         message_to_log.append(_(
-                                            "Tax not found with percentage %(percentage)s for the article: %(article)s"
+                                            "Tax not found with percentage %(percentage)s for the article: %(article)s",
                                             percentage=percentage,
                                             article=invoice_line_form.name,
                                         ))

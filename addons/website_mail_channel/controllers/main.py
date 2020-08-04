@@ -249,7 +249,8 @@ class MailGroup(http.Controller):
                 response.flatten()
                 return response
             except ValueError:
-                return _("The address %s is already unsubscribed or was never subscribed to any mailing list") % (
+                return _(
+                    "The address %s is already unsubscribed or was never subscribed to any mailing list",
                     partner.email
                 )
 

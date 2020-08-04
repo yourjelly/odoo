@@ -114,7 +114,7 @@ regex_private = re.compile(r'^(_.*|init)$')
 def check_method_name(name):
     """ Raise an ``AccessError`` if ``name`` is a private method name. """
     if regex_private.match(name):
-        raise AccessError(_('Private methods (such as %s) cannot be called remotely.') % (name,))
+        raise AccessError(_('Private methods (such as %s) cannot be called remotely.', name,))
 
 def same_name(f, g):
     """ Test whether functions ``f`` and ``g`` are identical or have the same name """
@@ -3189,7 +3189,7 @@ Fields:
             res = self._cr.fetchone()
             if res:
                 # mention the first one only to keep the error message readable
-                raise ValidationError(_('A document was modified since you last viewed it (%s:%d)') % (self._description, res[0]))
+                raise ValidationError(_('A document was modified since you last viewed it (%s:%d)', self._description, res[0]))
 
     def _check_company(self, fnames=None):
         """ Check the companies of the values of the given field names.
@@ -6313,11 +6313,11 @@ def itemgetter_tuple(items):
 
 def convert_pgerror_not_null(model, fields, info, e):
     if e.diag.table_name != model._table:
-        return {'message': _(u"Missing required value for the field '%s'") % (e.diag.column_name)}
+        return {'message': _(u"Missing required value for the field '%s'", e.diag.column_name)}
 
     field_name = e.diag.column_name
     field = fields[field_name]
-    message = _(u"Missing required value for the field '%s' (%s)") % (field['string'], field_name)
+    message = _(u"Missing required value for the field '%s' (%s)", field['string'], field_name)
     return {
         'message': message,
         'field': field_name,
@@ -6349,13 +6349,19 @@ def convert_pgerror_unique(model, fields, info, e):
     if len(ufields) == 1:
         field_name = ufields[0]
         field = fields[field_name]
-        message = _(u"The value for the field '%s' already exists (this is probably '%s' in the current model).") % (field_name, field['string'])
+        message = _(
+            u"The value for the field '%s' already exists (this is probably '%s' in the current model).",
+            field_name, field['string'],
+        )
         return {
             'message': message,
             'field': field_name,
         }
     field_strings = [fields[fname]['string'] for fname in ufields]
-    message = _(u"The values for the fields '%s' already exist (they are probably '%s' in the current model).") % (', '.join(ufields), ', '.join(field_strings))
+    message = _(
+        u"The values for the fields '%s' already exist (they are probably '%s' in the current model).",
+        ', '.join(ufields), ', '.join(field_strings),
+    )
     return {
         'message': message,
         # no field, unclear which one we should pick and they could be in any order

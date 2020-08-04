@@ -575,9 +575,9 @@ class IrModelFields(models.Model):
         for index, name in enumerate(names):
             field = model._fields.get(name)
             if field is None:
-                raise UserError(_("Unknown field name '%s' in related field '%s'") % (name, self.related))
+                raise UserError(_("Unknown field name '%s' in related field '%s'", name, self.related))
             if index < last and not field.relational:
-                raise UserError(_("Non-relational field name '%s' in related field '%s'") % (name, self.related))
+                raise UserError(_("Non-relational field name '%s' in related field '%s'", name, self.related))
             model = model[name]
         return field
 
@@ -587,9 +587,9 @@ class IrModelFields(models.Model):
             if rec.state == 'manual' and rec.related:
                 field = rec._related_field()
                 if field.type != rec.ttype:
-                    raise ValidationError(_("Related field '%s' does not have type '%s'") % (rec.related, rec.ttype))
+                    raise ValidationError(_("Related field '%s' does not have type '%s'", rec.related, rec.ttype))
                 if field.relational and field.comodel_name != rec.relation:
-                    raise ValidationError(_("Related field '%s' does not have comodel '%s'") % (rec.related, rec.relation))
+                    raise ValidationError(_("Related field '%s' does not have comodel '%s'", rec.related, rec.relation))
 
     @api.onchange('related')
     def _onchange_related(self):
@@ -610,16 +610,16 @@ class IrModelFields(models.Model):
                 continue
             for seq in record.depends.split(","):
                 if not seq.strip():
-                    raise UserError(_("Empty dependency in %r") % (record.depends))
+                    raise UserError(_("Empty dependency in %r", record.depends))
                 model = self.env[record.model]
                 names = seq.strip().split(".")
                 last = len(names) - 1
                 for index, name in enumerate(names):
                     field = model._fields.get(name)
                     if field is None:
-                        raise UserError(_("Unknown field %r in dependency %r") % (name, seq.strip()))
+                        raise UserError(_("Unknown field %r in dependency %r", name, seq.strip()))
                     if index < last and not field.relational:
-                        raise UserError(_("Non-relational field %r in dependency %r") % (name, seq.strip()))
+                        raise UserError(_("Non-relational field %r in dependency %r", name, seq.strip()))
                     model = model[name]
 
     @api.onchange('compute')
@@ -870,7 +870,7 @@ class IrModelFields(models.Model):
 
             if vals.get('ttype') == 'one2many':
                 if not self.search([('model_id', '=', vals['relation']), ('name', '=', vals['relation_field']), ('ttype', '=', 'many2one')]):
-                    raise UserError(_("Many2one %s on model %s does not exist!") % (vals['relation_field'], vals['relation']))
+                    raise UserError(_("Many2one %s on model %s does not exist!", vals['relation_field'], vals['relation']))
 
             self.clear_caches()                     # for _existing_field_data()
 

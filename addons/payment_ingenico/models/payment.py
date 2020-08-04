@@ -239,9 +239,14 @@ class PaymentTxOgone(models.Model):
         transaction record. Create a payment token if an alias is returned."""
         reference, pay_id, shasign, alias = data.get('orderID'), data.get('PAYID'), data.get('SHASIGN'), data.get('ALIAS')
         if not reference or not pay_id or not shasign:
-            error_msg = _('Ogone: received data with missing reference (%s) or pay_id (%s) or shasign (%s)') % (reference, pay_id, shasign)
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
+            _logger.info(
+                'Ogone: received data with missing reference (%s) or pay_id (%s) or shasign (%s)',
+                reference, pay_id, shasign,
+            )
+            raise ValidationError(_(
+                'Ogone: received data with missing reference (%s) or pay_id (%s) or shasign (%s)',
+                reference, pay_id, shasign,
+            ))
 
         # find tx -> @TDENOTE use paytid ?
         tx = self.env['payment.transaction']._get_transaction_for_reference(reference, "Ogone")
@@ -249,9 +254,14 @@ class PaymentTxOgone(models.Model):
         # verify shasign
         shasign_check = tx.acquirer_id._ogone_generate_shasign('out', data)
         if shasign_check.upper() != shasign.upper():
-            error_msg = _('Ogone: invalid shasign, received %s, computed %s, for data %s') % (shasign, shasign_check, data)
-            _logger.info(error_msg)
-            raise ValidationError(error_msg)
+            _logger.info(
+                'Ogone: invalid shasign, received %s, computed %s, for data %s',
+                shasign, shasign_check, data,
+            )
+            raise ValidationError(_(
+                'Ogone: invalid shasign, received %s, computed %s, for data %s',
+                shasign, shasign_check, data,
+            ))
 
         if not tx.acquirer_reference:
             tx.acquirer_reference = pay_id

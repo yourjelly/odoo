@@ -350,7 +350,7 @@ class Warehouse(models.Model):
         if not route:
             route = self.env['stock.location.route'].search([('name', 'like', route_name)], limit=1)
         if not route:
-            raise UserError(_('Can\'t find any generic route %s.') % (route_name))
+            raise UserError(_('Can\'t find any generic route %s.', route_name))
         return route
 
     def _get_global_route_rules_values(self):

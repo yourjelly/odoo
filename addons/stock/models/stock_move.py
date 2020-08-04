@@ -453,7 +453,7 @@ class StockMove(models.Model):
         if moves_error:
             user_warning = _('You cannot perform the move because the unit of measure has a different category as the product unit of measure.')
             for move in moves_error:
-                user_warning += _('\n\n%s --> Product UoM is %s (%s) - Move UoM is %s (%s)') % (move.product_id.display_name, move.product_id.uom_id.name, move.product_id.uom_id.category_id.name, move.product_uom.name, move.product_uom.category_id.name)
+                user_warning += _('\n\n%s --> Product UoM is %s (%s) - Move UoM is %s (%s)', move.product_id.display_name, move.product_id.uom_id.name, move.product_id.uom_id.category_id.name, move.product_uom.name, move.product_uom.category_id.name)
             user_warning += _('\n\nBlocking: %s') % ' ,'.join(moves_error.mapped('name'))
             raise UserError(user_warning)
 
@@ -559,7 +559,10 @@ class StockMove(models.Model):
         if not documents or not doc_orig:
             return
 
-        msg = _("The scheduled date has been automatically updated due to a delay on <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>.") % (doc_orig[0]._name, doc_orig[0].id, doc_orig[0].name)
+        msg = _(
+            "The scheduled date has been automatically updated due to a delay on <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>.",
+            doc_orig[0]._name, doc_orig[0].id, doc_orig[0].name,
+        )
         msg_subject = _("Scheduled date update due to delay on %s", doc_orig[0].name)
         # write the message on each document
         for doc in documents:

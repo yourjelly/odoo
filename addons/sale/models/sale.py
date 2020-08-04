@@ -486,13 +486,17 @@ class SaleOrder(models.Model):
             return
 
         filtered_self.activity_unlink(['sale.mail_act_sale_upsell'])
+        record_ref_html = "<a href='#' data-oe-model='%s' data-oe-id='%d'>%s</a>"
         for order in filtered_self:
             order.activity_schedule(
                 'sale.mail_act_sale_upsell',
                 user_id=order.user_id.id,
-                note=_("Upsell <a href='#' data-oe-model='%s' data-oe-id='%d'>%s</a> for customer <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>") % (
-                         order._name, order.id, order.name,
-                         order.partner_id._name, order.partner_id.id, order.partner_id.display_name))
+                note=_(
+                    "Upsell %(order)s for customer %(customer)s",
+                    order=record_ref_html % (order._name, order.id, order.name),
+                    customer=record_ref_html % (order.partner_id._name, order.partner_id.id, order.partner_id.display_name),
+                ),
+            )
 
     def copy_data(self, default=None):
         if default is None:
@@ -535,7 +539,10 @@ class SaleOrder(models.Model):
         self.ensure_one()
         journal = self.env['account.move'].with_context(default_move_type='out_invoice')._get_default_journal()
         if not journal:
-            raise UserError(_('Please define an accounting sales journal for the company %s (%s).') % (self.company_id.name, self.company_id.id))
+            raise UserError(_(
+                'Please define an accounting sales journal for the company %s (%s).',
+                self.company_id.name, self.company_id.id,
+            ))
 
         invoice_vals = {
             'ref': self.client_order_ref or '',
@@ -945,11 +952,15 @@ Reason(s) of this behavior could be:
             if acquirer_id:
                 acquirer = self.env['payment.acquirer'].browse(acquirer_id)
                 if payment_token and payment_token.acquirer_id != acquirer:
-                    raise ValidationError(_('Invalid token found! Token acquirer %s != %s') % (
-                    payment_token.acquirer_id.name, acquirer.name))
+                    raise ValidationError(_(
+                        'Invalid token found! Token acquirer %s != %s',
+                        payment_token.acquirer_id.name, acquirer.name,
+                    ))
                 if payment_token and payment_token.partner_id != partner:
-                    raise ValidationError(_('Invalid token found! Token partner %s != %s') % (
-                    payment_token.partner.name, partner.name))
+                    raise ValidationError(_(
+                        'Invalid token found! Token partner %s != %s',
+                        payment_token.partner.name, partner.name,
+                    ))
             else:
                 acquirer = payment_token.acquirer_id
 
@@ -1207,7 +1218,7 @@ class SaleOrderLine(models.Model):
         lines = super().create(vals_list)
         for line in lines:
             if line.product_id and line.order_id.state == 'sale':
-                msg = _("Extra line with %s ") % (line.product_id.display_name,)
+                msg = _("Extra line with %s ", line.product_id.display_name)
                 line.order_id.message_post(body=msg)
                 # create an analytic account if at least an expense product
                 if line.product_id.expense_policy not in [False, 'no'] and not line.order_id.analytic_account_id:

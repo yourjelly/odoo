@@ -203,7 +203,7 @@ class ResourceCalendar(models.Model):
         if default is None:
             default = {}
         if not default.get('name'):
-            default.update(name=_('%s (copy)') % (self.name))
+            default.update(name=_('%s (copy)', self.name))
         return super(ResourceCalendar, self).copy(default)
 
     @api.constrains('attendance_ids')
@@ -741,7 +741,7 @@ class ResourceResource(models.Model):
         if default is None:
             default = {}
         if not default.get('name'):
-            default.update(name=_('%s (copy)') % (self.name))
+            default.update(name=_('%s (copy)', self.name))
         return super(ResourceResource, self).copy(default)
 
     @api.onchange('company_id')

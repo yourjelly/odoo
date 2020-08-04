@@ -238,7 +238,10 @@ class StockQuant(models.Model):
     def check_quantity(self):
         for quant in self:
             if float_compare(quant.quantity, 1, precision_rounding=quant.product_uom_id.rounding) > 0 and quant.lot_id and quant.product_id.tracking == 'serial':
-                raise ValidationError(_('The serial number has already been assigned: \n Product: %s, Serial Number: %s') % (quant.product_id.display_name, quant.lot_id.name))
+                raise ValidationError(_(
+                    'The serial number has already been assigned: \n Product: %s, Serial Number: %s',
+                    quant.product_id.display_name, quant.lot_id.name,
+                ))
 
     @api.constrains('location_id')
     def check_location_id(self):
@@ -263,7 +266,7 @@ class StockQuant(models.Model):
             return 'in_date ASC NULLS FIRST, id'
         elif removal_strategy == 'lifo':
             return 'in_date DESC NULLS LAST, id desc'
-        raise UserError(_('Removal strategy %s not implemented.') % (removal_strategy,))
+        raise UserError(_('Removal strategy %s not implemented.', removal_strategy,))
 
     def _gather(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
         self.env['stock.quant'].flush(['location_id', 'owner_id', 'package_id', 'lot_id', 'product_id'])

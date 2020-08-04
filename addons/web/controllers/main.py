@@ -470,10 +470,10 @@ class HomeStaticTemplateHelpers(object):
                 parent_addon = addon
                 parent_name = original_template_name
             else:
-                raise ValueError(_('Module %s not loaded or inexistent, or templates of addon being loaded (%s) are misordered') % (parent_addon, addon))
+                raise ValueError(_('Module %s not loaded or inexistent, or templates of addon being loaded (%s) are misordered', parent_addon, addon))
 
         if parent_name not in self.template_dict[parent_addon]:
-            raise ValueError(_("No template found to inherit from. Module %s and template name %s") % (parent_addon, parent_name))
+            raise ValueError(_("No template found to inherit from. Module %s and template name %s", parent_addon, parent_name))
 
         return parent_addon, parent_name
 
@@ -505,7 +505,7 @@ class HomeStaticTemplateHelpers(object):
             if self.STATIC_INHERIT_DIRECTIVE in template_tree.attrib:
                 inherit_mode = template_tree.attrib.get(self.STATIC_INHERIT_MODE_DIRECTIVE, self.DEFAULT_MODE)
                 if inherit_mode not in [self.PRIMARY_MODE, self.EXTENSION_MODE]:
-                    raise ValueError(_("Invalid inherit mode. Module %s and template name %s") % (addon, template_name))
+                    raise ValueError(_("Invalid inherit mode. Module %s and template name %s", addon, template_name))
 
                 parent_addon, parent_name = self._get_parent_template(addon, template_tree)
 
@@ -533,7 +533,7 @@ class HomeStaticTemplateHelpers(object):
                     self.template_dict[parent_addon][parent_name] = inherited_template
             else:
                 if template_name in self.template_dict[addon]:
-                    raise ValueError(_("Template %s already exists in module %s") % (template_name, addon))
+                    raise ValueError(_("Template %s already exists in module %s", template_name, addon))
                 self.template_dict[addon][template_name] = template_tree
         return all_templates_tree
 
@@ -739,7 +739,7 @@ class ExportXlsxWriter:
         self.value = False
 
         if row_count > self.worksheet.xls_rowmax:
-            raise UserError(_('There are too many rows (%s rows, limit: %s) to export as Excel 2007-2013 (.xlsx) format. Consider splitting the export.') % (row_count, self.worksheet.xls_rowmax))
+            raise UserError(_('There are too many rows (%s rows, limit: %s) to export as Excel 2007-2013 (.xlsx) format. Consider splitting the export.', row_count, self.worksheet.xls_rowmax))
 
     def __enter__(self):
         self.write_header()
