@@ -286,7 +286,10 @@ class Channel(models.Model):
         channel_info['is_pinned'] = False
         self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', partner.id), channel_info)
         if not self.email_send:
-            notification = _('<div class="o_mail_notification">left <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (self.id, self.name,)
+            notification = '<div class="o_mail_notification">%s</div>' % _(
+                "left %(channel)s",
+                channel=self._get_record_html_link(fname="name"),
+            )
             # post 'channel left' message as root since the partner just unsubscribed from the channel
             self.sudo().message_post(body=notification, subtype_xmlid="mail.mt_comment", author_id=partner.id)
         return result
@@ -437,7 +440,7 @@ class Channel(models.Model):
         return True
 
     def _update_moderation_email(self, emails, status):
-        """ This method adds emails into either white or black of the channel list of emails 
+        """ This method adds emails into either white or black of the channel list of emails
             according to status. If an email in emails is already moderated, the method updates the email status.
             :param emails: list of email addresses to put in white or black list of channel.
             :param status: value is 'allow' or 'ban'. Emails are put in white list if 'allow', in black list if 'ban'.
@@ -785,14 +788,17 @@ class Channel(models.Model):
             channel.write({'channel_last_seen_partner_ids': [(0, 0, {'partner_id': partner_id}) for partner_id in partners_to_add.ids]})
             for partner in partners_to_add:
                 if partner.id != self.env.user.partner_id.id:
-                    notification = _('<div class="o_mail_notification">%(author)s invited %(new_partner)s to <a href="#" class="o_channel_redirect" data-oe-id="%(channel_id)s">#%(channel_name)s</a></div>') % {
-                        'author': self.env.user.display_name,
-                        'new_partner': partner.display_name,
-                        'channel_id': channel.id,
-                        'channel_name': channel.name,
-                    }
+                    notification = '<div class="o_mail_notification">%s</div>' % _(
+                        '%(author)s invited %(new_partner)s to %(channel)s',
+                        author=self.env.user.display_name,
+                        new_partner=partner.display_name,
+                        channel=channel._get_record_html_link("name"),
+                    )
                 else:
-                    notification = _('<div class="o_mail_notification">joined <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (channel.id, channel.name,)
+                    notification = '<div class="o_mail_notification">%s</div>' % _(
+                        'joined %(channel)s',
+                        channel=channel._get_record_html_link("name"),
+                    )
                 self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment", author_id=partner.id, notify_by_email=False)
 
         # broadcast the channel header to the added partner
@@ -868,7 +874,10 @@ class Channel(models.Model):
         self.ensure_one()
         added = self.action_follow()
         if added and self.channel_type == 'channel' and not self.email_send:
-            notification = _('<div class="o_mail_notification">joined <a href="#" class="o_channel_redirect" data-oe-id="%s">#%s</a></div>') % (self.id, self.name,)
+            notification = notification = '<div class="o_mail_notification">%s</div>' % _(
+                "joined %(channel)s",
+                channel=self._get_record_html_link(fname="name"),
+            )
             self.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
 
         if added and self.moderation_guidelines:
@@ -1014,7 +1023,7 @@ class Channel(models.Model):
     def _execute_command_who(self, **kwargs):
         partner = self.env.user.partner_id
         members = [
-            '<a href="#" data-oe-id='+str(p.id)+' data-oe-model="res.partner">@'+p.name+'</a>'
+            partner._get_record_html_link("name")
             for p in self.channel_partner_ids[:30] if p != partner
         ]
         if len(members) == 0:

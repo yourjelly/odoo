@@ -380,10 +380,6 @@ class AutomaticEntryWizard(models.TransientModel):
                 content += self._format_strings(transfer_format, transfer_move, balance) % account.display_name
         return content and '<ul>' + content + '</ul>' or None
 
-    def _format_move_link(self, move):
-        move_link_format = "<a href=# data-oe-model=account.move data-oe-id={move_id}>{move_name}</a>"
-        return move_link_format.format(move_id=move.id, move_name=move.name)
-
     def _format_strings(self, string, move, amount):
         return string.format(
             percent=self.percentage,
@@ -391,7 +387,7 @@ class AutomaticEntryWizard(models.TransientModel):
             id=move.id,
             amount=formatLang(self.env, abs(amount), currency_obj=self.company_id.currency_id),
             debit_credit=amount < 0 and _('C') or _('D'),
-            link=self._format_move_link(move),
+            link=move._get_record_html_link(fname="name"),
             date=format_date(self.env, move.date),
             new_date=self.date and format_date(self.env, self.date) or _('[Not set]'),
             account_target_name=self.destination_account_id.display_name,

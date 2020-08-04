@@ -22,10 +22,6 @@ class AccountPayment(models.Model):
         help="Note that tokens from acquirers set to only authorize transactions (instead of capturing the amount) are not available.")
     related_partner_ids = fields.Many2many('res.partner', compute='_compute_related_partners')
 
-    def _get_payment_chatter_link(self):
-        self.ensure_one()
-        return '<a href=# data-oe-model=account.payment data-oe-id=%d>%s</a>' % (self.id, self.name)
-
     @api.depends('partner_id.commercial_partner_id.child_ids')
     def _compute_related_partners(self):
         for p in self:

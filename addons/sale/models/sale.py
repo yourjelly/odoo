@@ -490,9 +490,12 @@ class SaleOrder(models.Model):
             order.activity_schedule(
                 'sale.mail_act_sale_upsell',
                 user_id=order.user_id.id,
-                note=_("Upsell <a href='#' data-oe-model='%s' data-oe-id='%d'>%s</a> for customer <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>") % (
-                         order._name, order.id, order.name,
-                         order.partner_id._name, order.partner_id.id, order.partner_id.display_name))
+                note=_(
+                    "Upsell %(order)s for customer %(customer)s",
+                    order=order._get_record_html_link("name"),
+                    customer=order.partner_id._get_record_html_link("display_name"),
+                ),
+            )
 
     def copy_data(self, default=None):
         if default is None:

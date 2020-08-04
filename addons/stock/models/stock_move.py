@@ -559,15 +559,18 @@ class StockMove(models.Model):
         if not documents or not doc_orig:
             return
 
-        msg = _("The scheduled date has been automatically updated due to a delay on <a href='#' data-oe-model='%s' data-oe-id='%s'>%s</a>.") % (doc_orig[0]._name, doc_orig[0].id, doc_orig[0].name)
+        msg = _(
+            "The scheduled date has been automatically updated due to a delay on %(stock_move)s.",
+            stock_move=doc_orig[0]._get_record_html_link("name"),
+        )
         msg_subject = _("Scheduled date update due to delay on %s", doc_orig[0].name)
+        odoobot_id = self.env['ir.model.data'].xmlid_to_res_id("base.partner_root")
         # write the message on each document
         for doc in documents:
             last_message = doc.message_ids[:1]
             # Avoids to write the exact same message multiple times.
             if last_message and last_message.subject == msg_subject:
                 continue
-            odoobot_id = self.env['ir.model.data'].xmlid_to_res_id("base.partner_root")
             doc.message_post(body=msg, author_id=odoobot_id, subject=msg_subject)
 
     def _delay_alert_check(self, new_date=None):

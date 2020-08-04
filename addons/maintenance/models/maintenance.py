@@ -373,8 +373,10 @@ class MaintenanceRequest(models.Model):
                 new_user_id=request.user_id.id or request.owner_user_id.id or self.env.uid)
             if not updated:
                 if request.equipment_id:
-                    note = _('Request planned for <a href="#" data-oe-model="%s" data-oe-id="%s">%s</a>') % (
-                        request.equipment_id._name, request.equipment_id.id, request.equipment_id.display_name)
+                    note = _(
+                        "Request planned for %(equipment)s",
+                        equipment=request.equipment_id._get_record_html_link("display_name"),
+                    )
                 else:
                     note = False
                 request.activity_schedule(

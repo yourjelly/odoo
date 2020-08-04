@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, api
+from odoo.tools import misc
 from lxml.builder import E
 
 
@@ -30,4 +31,16 @@ class BaseModel(models.AbstractModel):
     def _notify_email_header_dict(self):
         return {
             'X-Odoo-Objects': "%s-%s" % (self._name, self.id),
+        }
+
+    def _get_record_html_link(self, fname=None, description=None, raw_description=False):
+        # VFE FIXME move to orm ?
+        self.ensure_one()
+        description = description or self.get(fname or self._rec_name)
+        if not raw_description:
+            description = misc.html_escape(description)
+        return "<a href=# data-oe-model=%(model)s data-oe-id=%(rec_id)s>%(description)s</a>" % {
+            "model": self._name,
+            "rec_id": self.id,
+            "description": description,
         }
