@@ -1202,9 +1202,9 @@
     </xpath>
 </template>
 
-<template id="header_navbar_pills_style" inherit_id="website.layout" name="Navbar Links Style" active="False">
-    <xpath expr="//ul[hasclass('navbar-nav')]" position="attributes">
-        <attribute name="class" add="nav-pills" separator=" "/>
+<template id="header_navbar_pills_style" inherit_id="website.navbar_nav" name="Navbar Links Style" active="False">
+    <xpath expr="//ul[@id='top_menu']" position="attributes">
+        <attribute name="t-attf-class" add="nav-pills" separator=" "/>
     </xpath>
 </template>
 
