@@ -35,7 +35,8 @@ class BaseModel(models.AbstractModel):
 
     def _get_record_html_link(self, fname=None, description=None, raw_description=False):
         self.ensure_one()
-        description = description or self.get(fname or self._rec_name)
+        fname = fname or self._rec_name
+        description = description or self[fname]
         if not raw_description:
             description = misc.html_escape(description)
         return "<a href=# data-oe-model=%(model)s data-oe-id=%(rec_id)s>%(description)s</a>" % {
