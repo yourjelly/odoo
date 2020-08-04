@@ -1047,6 +1047,78 @@
     </xpath>
 </template>
 
+<template id="template_header_7" inherit_id="website.layout" name="Template Header 7" active="False">
+    <xpath expr="//header//nav" position="replace">
+        <!-- To test in Edit mode -->
+        <section id="o_preheader" class="oe_structure oe_img_bg" style="background-image: url('/web/image/website.o_preheader_default_image');">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <p><br/></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <nav class="navbar navbar-light navbar-expand-md o_colored_level o_cc">
+            <div id="top_menu_container" class="container">
+                <div class="w-25">
+                    <!-- Brand -->
+                    <t t-call="website.placeholder_header_brand"/>
+                </div>
+                <!-- Navbar Toggler -->
+                <!-- ?? Change order (1 to 4) for screen sizes lower than LG ?? -->
+                <t t-call="website.navbar_toggler"/>
+                <!-- Navbar Collapse -->
+                <div id="top_menu_collapse" class="collapse navbar-collapse">
+                    <t t-call="website.navbar_nav">
+                        <t t-set="_nav_class" t-value="'mx-lg-auto'"/>
+                        <!-- Menu -->
+                        <t t-foreach="website.menu_id.child_id" t-as="submenu">
+                            <t t-call="website.submenu">
+                                <t t-set="item_class" t-value="'nav-item'"/>
+                                <t t-set="link_class" t-value="'nav-link'"/>
+                            </t>
+                        </t>
+                        <!-- Cart -->
+                        <li class="nav-item ml-auto">
+                            <t t-call="website.placeholder_header_cart">
+                                <t t-set="_icon" t-value="true"/>
+                                <t t-set="_link_class" t-value="'nav-link ml-3'"/>
+                            </t>
+                        </li>
+                        <!-- Wishlist -->
+                        <li class="nav-item">
+                            <t t-call="website.placeholder_header_wishlist">
+                                <t t-set="_icon" t-value="true"/>
+                                <t t-set="_link_class" t-value="'nav-link ml-3'"/>
+                            </t>
+                        </li>
+                        <!-- Sign In -->
+                        <li groups="base.group_public" class="nav-item ml-3">
+                            <t t-call="portal.placeholder_user_sign_in">
+                                <t t-set="_classes" t-value="'nav-link'"/>
+                            </t>
+                        </li>
+                        <!-- User Dropdown -->
+                        <li t-ignore="true" t-if="website.user_id != user_id" class="dropdown nav-item ml-3">
+                            <t t-call="portal.user_dropdown">
+                                <t t-set="_toggle_class" t-value="'nav-link'"/>
+                                <t t-set="_user_name" t-value="true"/>
+                            </t>
+                        </li>
+                    </t>
+                </div>
+                <div class="w-25 text-right">
+                    <!-- Button -->
+                    <t t-call="website.placeholder_header_button">
+                        <t t-set="_btn_class" t-value="'btn btn-primary ml-5'"/>
+                    </t>
+                </div>
+            </div>
+        </nav>
+    </xpath>
+</template>
+
 <!-- Navbar Hamburger Options -->
 <template id="option_header_off_canvas" inherit_id="website.layout" name="Off-Canvas Header" active="False">
     <xpath expr="//header//ul[@id='top_menu']" position="attributes">
