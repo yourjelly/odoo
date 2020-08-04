@@ -159,9 +159,14 @@ class PaymentTransaction(models.Model):
     def _alipay_form_get_tx_from_data(self, data):
         reference, txn_id, sign = data.get('reference'), data.get('trade_no'), data.get('sign')
         if not reference or not txn_id:
-            msg = 'Alipay: received data with missing reference (%(reference)s) or txn_id (%(txn_id)s)'
-            _logger.info(msg, reference=reference, txn_id=txn_id)
-            raise ValidationError(_(msg, reference=reference, txn_id=txn_id))
+            _logger.info(
+                'Alipay: received data with missing reference (%(reference)s) or txn_id (%(txn_id)s)',
+                reference=reference, txn_id=txn_id,
+            )
+            raise ValidationError(_(
+                'Alipay: received data with missing reference (%(reference)s) or txn_id (%(txn_id)s)',
+                reference=reference, txn_id=txn_id,
+            ))
 
         txs = self.env['payment.transaction']._get_transaction_for_reference(reference, "Alipay")
 
