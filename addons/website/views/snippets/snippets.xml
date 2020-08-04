@@ -515,6 +515,10 @@
                        data-name="header_4_opt"
                        data-customize-website-views="website.template_header_4"
                        data-customize-website-variable="4"/>
+            <we-button string="5"
+                       data-name="header_5_opt"
+                       data-customize-website-views="website.template_header_5"
+                       data-customize-website-variable="5"/>
         </we-select>
         <we-input string="⌙ Width"
                   data-customize-website-variable="null"

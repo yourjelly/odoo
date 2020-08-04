@@ -195,6 +195,7 @@ class Theme(models.AbstractModel):
         self.disable_view('website.template_header_2')
         self.disable_view('website.template_header_3')
         self.disable_view('website.template_header_4')
+        self.disable_view('website.template_header_5')
 
         # Reinitialize footer templates
         self.enable_view('website.footer_custom')

@@ -924,6 +924,67 @@
     </xpath>
 </template>
 
+<template id="template_header_5" inherit_id="website.layout" name="Template Header 5" active="False">
+    <xpath expr="//header//nav" position="replace">
+        <nav class="navbar navbar-light navbar-expand-md o_colored_level o_cc2">
+            <div id="top_menu_container" class="container flex-wrap pt-2">
+                <!-- Brand -->
+                <t t-call="website.placeholder_header_brand"/>
+                <!-- Search -->
+                <div class="w-50 ml-3 mr-auto">
+                    <t t-call="website.website_search_box"/>
+                </div>
+                <!-- Cart -->
+                <i class="fa fa-1x fa-fw fa-shopping-cart rounded-circle shadow-sm mr-3"/>
+                <a href="/shop/cart" class="mr-5 small text-decoration-none">
+                    <span class="text-muted"><b>Cart</b></span><br/>
+                    <span class="dropdown-toggle">View items </span>
+                </a>
+                <!-- User -->
+                <i class="fa fa-1x fa-fw fa-user rounded-circle shadow-sm mr-3"/>
+                <a href="/shop/cart" class="small text-decoration-none">
+                    <span class="text-muted"><b>Mitchell Admin</b></span><br/>
+                    <span class="dropdown-toggle">My account </span>
+                </a>
+                <!-- Separator -->
+                <div class="flex-grow-1 w-100 pt-3 pb-1">
+                    <div class="s_hr pt0 pb0">
+                        <hr class="w-100 mx-auto" style="border-top-width: 1px; border-top-style: solid; border-color: var(--200);"/>
+                    </div>
+                </div>
+                <t t-call="website.navbar_nav">
+                    <t t-set="_classes" t-value="'mt-2'"/>
+                    <t t-foreach="website.menu_id.child_id" t-as="submenu">
+                        <t t-call="website.submenu">
+                            <t t-set="item_class" t-value="'nav-item'"/>
+                            <t t-set="link_class" t-value="'nav-link'"/>
+                        </t>
+                    </t>
+                </t>
+                <div class="d-flex align-items-center ml-auto mt-2">
+                    <!-- Social Icons -->
+                    <div class="s_share text-left" data-name="Social Media">
+                        <h4 class="s_share_title d-none">Follow us</h4>
+                        <a t-if="website.social_facebook" t-att-href="website.social_facebook" target="_blank" class="">
+                            <i class="fa fa-facebook"/>
+                        </a>
+                        <a t-if="website.social_twitter" t-att-href="website.social_twitter" target="_blank" class="">
+                            <i class="fa fa-twitter"/>
+                        </a>
+                        <a t-if="website.social_linkedin" t-att-href="website.social_linkedin" target="_blank" class="">
+                            <i class="fa fa-linkedin"/>
+                        </a>
+                    </div>
+                    <!-- Button -->
+                    <t t-call="website.placeholder_header_button">
+                        <t t-set="_btn_class" t-value="'btn btn-primary ml-5'"/>
+                    </t>
+                </div>
+            </div>
+        </nav>
+    </xpath>
+</template>
+
 <!-- Navbar Hamburger Options -->
 <template id="option_header_off_canvas" inherit_id="website.layout" name="Off-Canvas Header" active="False">
     <xpath expr="//header//ul[@id='top_menu']" position="attributes">
