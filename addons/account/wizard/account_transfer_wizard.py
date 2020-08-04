@@ -13,6 +13,8 @@ class AccountTransferWizard(models.TransientModel):
     _name = 'account.transfer.wizard'
     _description = "Account Transfer Wizard"
 
+    # VFE FIXME shouldn't some fields be required here ???
+
     move_line_ids = fields.One2many(string="Journal Items", comodel_name='account.move.line', compute="_retrieve_fields_from_context", help="Journal entries to transfer accounts from.")
     destination_account_id = fields.Many2one(string="To", comodel_name='account.account', help="Account to transfer to.")
     journal_id = fields.Many2one(string="Journal", comodel_name='account.journal', help="Journal where to create the transfer entry.")
@@ -99,8 +101,9 @@ class AccountTransferWizard(models.TransientModel):
             account_balance = sum(line.balance for line in lines)
             if not (currency or self.company_id.currency_id).is_zero(account_balance):
                 account_amount_currency = currency and currency.round(sum(line.amount_currency for line in lines)) or 0
+                name = _('Transfer to %s', self.destination_account_id.display_name) if self.destination_account_id else _("Transfer to Destination Account")
                 line_vals.append({
-                    'name': _('Transfer to %s') % (self.destination_account_id.display_name or _('Destination Account')),
+                    'name': name,
                     'debit': account_balance < 0 and self.company_id.currency_id.round(-account_balance) or 0,
                     'credit': account_balance > 0 and self.company_id.currency_id.round(account_balance) or 0,
                     'account_id': account.id,
