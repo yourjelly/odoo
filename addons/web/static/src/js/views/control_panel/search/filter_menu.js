@@ -16,9 +16,9 @@ var FilterMenu = DropdownMenu.extend({
         remove_proposition: '_onRemoveProposition',
     },
     events: _.extend({}, DropdownMenu.prototype.events, {
-        'click .o_add_custom_filter': '_onAddCustomFilterClick',
-        'click .o_add_condition': '_onAddCondition',
-        'click .o_apply_filter': '_onApplyClick',
+        'mousedown .o_add_custom_filter': '_onAddCustomFilterClick',
+        'mousedown .o_add_condition': '_onAddCondition',
+        'mousedown .o_apply_filter': '_onApplyClick',
     }),
     /**
      * @override

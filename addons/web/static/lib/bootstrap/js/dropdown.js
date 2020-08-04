@@ -93,8 +93,10 @@
     HIDDEN: "hidden" + EVENT_KEY,
     SHOW: "show" + EVENT_KEY,
     SHOWN: "shown" + EVENT_KEY,
-    CLICK: "click" + EVENT_KEY,
-    CLICK_DATA_API: "click" + EVENT_KEY + DATA_API_KEY,
+    MOUSEUP: "mouseup" + EVENT_KEY,
+    MOUSEUP_DATA_API: "mouseup" + EVENT_KEY + DATA_API_KEY,
+    MOUSEDOWN: "mousedown" + EVENT_KEY,
+    MOUSEDOWN_DATA_API: "mousedown" + EVENT_KEY + DATA_API_KEY,
     KEYDOWN_DATA_API: "keydown" + EVENT_KEY + DATA_API_KEY,
     KEYUP_DATA_API: "keyup" + EVENT_KEY + DATA_API_KEY
   };
@@ -305,11 +307,17 @@
     _proto._addEventListeners = function _addEventListeners() {
       var _this = this;
 
-      $(this._element).on(Event.CLICK, function (event) {
+      $(this._element).on(Event.MOUSEDOWN, function (event) {
         event.preventDefault();
         event.stopPropagation();
 
         _this.toggle();
+      });
+      $(this._element).on(Event.MOUSEUP, function (event) {debugger
+        event.preventDefault();
+        event.stopPropagation();
+
+        //_this.toggle();
       });
     };
 
@@ -567,7 +575,7 @@
    */
 
 
-  $(document).on(Event.KEYDOWN_DATA_API, Selector.DATA_TOGGLE, Dropdown._dataApiKeydownHandler).on(Event.KEYDOWN_DATA_API, Selector.MENU, Dropdown._dataApiKeydownHandler).on(Event.CLICK_DATA_API + " " + Event.KEYUP_DATA_API, Dropdown._clearMenus).on(Event.CLICK_DATA_API, Selector.DATA_TOGGLE, function (event) {
+  $(document).on(Event.KEYDOWN_DATA_API, Selector.DATA_TOGGLE, Dropdown._dataApiKeydownHandler).on(Event.KEYDOWN_DATA_API, Selector.MENU, Dropdown._dataApiKeydownHandler).on(Event.MOUSEDOWN_DATA_API + " " + Event.KEYUP_DATA_API, Dropdown._clearMenus).on(Event.MOUSEDOWN_DATA_API, Selector.MENU, function (event) {debugger
     event.preventDefault();
     event.stopPropagation();
 

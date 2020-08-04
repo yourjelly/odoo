@@ -10,9 +10,9 @@ var _t = core._t;
 var AddNewFavoriteMenu = Widget.extend({
     template: 'AddNewFavoriteMenu',
     events: _.extend({}, Widget.prototype.events, {
-        'click .o_save_favorite': '_onSaveFavoriteClick',
-        'click .o_add_favorite.o_menu_header': '_onMenuHeaderClick',
-        'click input[type="checkbox"]': '_onCheckboxClick',
+        'mousedown .o_save_favorite': '_onSaveFavoriteClick',
+        'mousedown .o_add_favorite.o_menu_header': '_onMenuHeaderClick',
+        'mousedown input[type="checkbox"]': '_onCheckboxClick',
         'keyup .o_save_name input': '_onKeyUp',
     }),
     /**
