@@ -16,7 +16,7 @@ var DropdownMenu = Widget.extend({
         'click .o_item_option': '_onOptionClick',
         'click span.o_trash_button': '_onTrashButtonClick',
         'hidden.bs.dropdown': '_onBootstrapClose',
-        'click .dropdown-item-text': '_onDropDownItemTextClick',
+        'mousedown .dropdown-item-text': '_onDropDownItemTextClick',
     },
 
     init: function (parent, items) {

@@ -313,11 +313,10 @@
 
         _this.toggle();
       });
-      $(this._element).on(Event.MOUSEUP, function (event) {debugger
+      $(this._element).on(Event.MOUSEUP, function (event) {
         event.preventDefault();
         event.stopPropagation();
 
-        //_this.toggle();
       });
     };
 
@@ -575,12 +574,12 @@
    */
 
 
-  $(document).on(Event.KEYDOWN_DATA_API, Selector.DATA_TOGGLE, Dropdown._dataApiKeydownHandler).on(Event.KEYDOWN_DATA_API, Selector.MENU, Dropdown._dataApiKeydownHandler).on(Event.MOUSEDOWN_DATA_API + " " + Event.KEYUP_DATA_API, Dropdown._clearMenus).on(Event.MOUSEDOWN_DATA_API, Selector.MENU, function (event) {debugger
+  $(document).on(Event.KEYDOWN_DATA_API, Selector.DATA_TOGGLE, Dropdown._dataApiKeydownHandler).on(Event.KEYDOWN_DATA_API, Selector.MENU, Dropdown._dataApiKeydownHandler).on(Event.MOUSEUP_DATA_API + Selector.DATA_TOGGLE).on(Event.MOUSEDOWN_DATA_API + " " + Event.KEYUP_DATA_API, Dropdown._clearMenus).on(Event.MOUSEDOWN_DATA_API, Selector.DATA_TOGGLE, function (event) {debugger
     event.preventDefault();
     event.stopPropagation();
 
     Dropdown._jQueryInterface.call($(this), 'toggle');
-  }).on(Event.CLICK_DATA_API, Selector.FORM_CHILD, function (e) {
+  }).on(Event.MOUSEUP_DATA_API, Selector.FORM_CHILD, function (e) {
     e.stopPropagation();
   });
   /**
