@@ -212,6 +212,57 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             enableWebsite: true,
             discardButton: true,
             saveButton: true,
+            toolbarLayout: [
+                ['OdooTextColorButton', 'OdooBackgroundColorButton'],
+                [
+                    [
+                        'ParagraphButton',
+                        'Heading1Button',
+                        'Heading2Button',
+                        'Heading3Button',
+                        'Heading4Button',
+                        'Heading5Button',
+                        'Heading6Button',
+                        'PreButton',
+                    ],
+                ],
+                ['FontSizeInput'],
+                [
+                    'BoldButton',
+                    'ItalicButton',
+                    'UnderlineButton',
+                    'RemoveFormatButton',
+                ],
+                ['AlignLeftButton', 'AlignCenterButton', 'AlignRightButton', 'AlignJustifyButton'],
+                ['OrderedListButton', 'UnorderedListButton', 'ChecklistButton'],
+                ['IndentButton', 'OutdentButton'],
+                ['OdooLinkButton'],
+                ['OdooMediaButton'],
+                ['OdooSaveButton', 'OdooDiscardButton'],
+                [
+                    [
+                        'OdooImagePaddingNoneActionable',
+                        'OdooImagePaddingSmallActionable',
+                        'OdooImagePaddingMediumActionable',
+                        'OdooImagePaddingLargeActionable',
+                        'OdooImagePaddingXLActionable',
+                    ],
+                ],
+                [
+                    'OdooImageRoundedActionable',
+                    'OdooImageRoundedCircleActionable',
+                    'OdooImageRoundedShadowActionable',
+                    'OdooImageRoundedThumbnailActionable',
+                ],
+                [
+                    'OdooImageWidthAutoActionable',
+                    'OdooImageWidth25Actionable',
+                    'OdooImageWidth50Actionable',
+                    'OdooImageWidth75Actionable',
+                    'OdooImageWidth100Actionable',
+                ],
+                ['OdooCropActionable', 'OdooTransformActionable'],
+            ],
             location: [document.getElementById('wrapwrap'), 'replace'],
         };
         params.enableTranslation = enableTranslation;

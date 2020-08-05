@@ -174,7 +174,9 @@ var Wysiwyg = Widget.extend({
                 openBackgroundColorPicker: {handler: this.toggleBackgroundColorPicker.bind(this)},
                 openLinkDialog: {handler: this.openLinkDialog.bind(this)},
                 discardOdoo: {handler: this.discardEditions.bind(this)},
-                saveOdoo: {handler: this.saveToServer.bind(this)}
+                saveOdoo: {handler: this.saveToServer.bind(this)},
+                cropImage: {handler: this.cropImage.bind(this)},
+                transformImage: {handler: this.transformImage.bind(this)},
             }, this.options.customCommands),
             source: elementToParse,
             location: this.options.location || [this.el, 'replace'],
