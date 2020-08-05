@@ -2029,6 +2029,12 @@ var SnippetsMenu = Widget.extend({
                 this.customizePanel.removeChild(this.customizePanel.firstChild);
             }
             $(this.customizePanel).append(content);
+
+            if (tab === this.tabs.OPTIONS) {
+                const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS />');
+                customizeBlock.append(this.wysiwyg.$toolbar)
+                $(this.customizePanel).append(customizeBlock);
+            }
         }
 
         this.$('#o_scroll').toggleClass('d-none', tab !== this.tabs.BLOCKS);

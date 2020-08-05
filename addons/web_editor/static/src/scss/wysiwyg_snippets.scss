@@ -263,7 +263,7 @@ body.editor_enable.editor_has_snippets {
             }
         }
 
-        we-button, we-toggler {
+        we-button, jw-button, we-toggler {
             cursor: pointer;
             @include o-text-overflow(block);
             padding: 0 $o-we-sidebar-content-field-clickable-spacing;
@@ -282,7 +282,17 @@ body.editor_enable.editor_has_snippets {
             &.active {
                 background: $o-we-sidebar-content-field-pressed-bg;
             }
+        }
 
+        jw-button {
+            display: inline-block;
+            box-sizing: border-box;
+            padding: 0 6px;
+            min-width: 28px;
+            text-align: center;
+        }
+
+        we-button, we-toggler {
             &.fa {
                 display: inline-block;
                 margin: 0 0 0 $o-we-sidebar-content-field-multi-spacing;
@@ -515,7 +525,7 @@ body.editor_enable.editor_has_snippets {
                     line-height: $o-we-sidebar-content-field-dropdown-item-height;
                 }
 
-                we-button {
+                we-button, jw-button {
                     @include we-icon-button('', $align: left); // Always a padding on the left
                     border: none;
                     background: none;
@@ -549,7 +559,7 @@ body.editor_enable.editor_has_snippets {
                 display: flex;
                 max-width: 100%;
 
-                we-button {
+                we-button, jw-button {
                     padding: 0 $o-we-sidebar-content-field-button-group-button-spacing;
 
                     &.active {
@@ -567,7 +577,7 @@ body.editor_enable.editor_has_snippets {
         }
 
         // Inputs
-        we-input.o_we_user_value_widget {
+        we-input.o_we_user_value_widget, we-toolbar input {
 
             > div {
                 flex: 0 1 auto;
