@@ -186,6 +186,7 @@ class Theme(models.AbstractModel):
         self.disable_view('website.template_header_hamburger')
         self.disable_view('website.template_header_vertical')
         self.disable_view('website.template_header_sidebar')
+        self.disable_view('website.template_header_1')
         self.disable_view('website.template_header_2')
         self.disable_view('website.template_header_3')
         self.disable_view('website.template_header_4')
