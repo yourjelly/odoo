@@ -656,7 +656,10 @@ class Channel(models.Model):
             if channel.id not in requested_cids:
                 activities += channel.activity_schedule(
                     'website_slides.mail_activity_data_access_request',
-                    note=_('<b>%s</b> is requesting access to this course.') % partner.name,
+                    note=_(
+                        '%(customer)s is requesting access to this course.',
+                        customer="<b>%s</b>" % partner.name,
+                    ),
                     user_id=channel.user_id.id,
                     request_partner_id=partner.id
                 )

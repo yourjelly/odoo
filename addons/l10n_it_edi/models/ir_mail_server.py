@@ -295,9 +295,10 @@ class FetchmailServer(models.Model):
                                                 '//DataOraConsegna',
                                                 '//Note'
                                                ])
-            related_invoice.message_post(
-                body=(_("Outcome notice: %s<br/>%s") % (related_invoice.l10n_it_send_state, info))
-            )
+            related_invoice.message_post(body=(
+                _("Outcome notice: %s", related_invoice.l10n_it_send_state)
+                + "<br/>%s" % info
+            ))
             if related_invoice.l10n_it_send_state == 'delivered_refused':
                 related_invoice.activity_schedule(
                     'mail.mail_activity_todo',

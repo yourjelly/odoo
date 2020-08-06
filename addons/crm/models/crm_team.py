@@ -133,12 +133,14 @@ class Team(models.Model):
             user_team_id = self.search([('id', '=', user_team_id)], limit=1).id
         else:
             user_team_id = self.search([], limit=1).id
-            action['help'] = _("""<p class='o_view_nocontent_smiling_face'>Add new opportunities</p><p>
-    Looks like you are not a member of a Sales Team. You should add yourself
-    as a member of one of the Sales Team.
-</p>""")
+            action['help'] = "<p class='o_view_nocontent_smiling_face'>%s</p><p>%s</p>" % (
+                _("Add new opportunities"),
+                _("Looks like you are not a member of a Sales Team. You should add yourself as a member of one of the Sales Team."),
+            )
             if user_team_id:
-                action['help'] += "<p>As you don't belong to any Sales Team, Odoo opens the first one by default.</p>"
+                action['help'] += "<p>%s</p>" % _(
+                    "As you don't belong to any Sales Team, Odoo opens the first one by default.",
+                )
 
         action_context = safe_eval(action['context'], {'uid': self.env.uid})
         if user_team_id:

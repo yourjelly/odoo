@@ -50,12 +50,16 @@ class L10nLatamDocumentType(models.Model):
         if not document_number:
             return False
 
-        msg = "'%s' " + _("is not a valid value for") + " '%s'.<br/>%s"
+        msg = _(
+            "%(doc_number)s is not a valid value for %(document)s.",
+            doc_number=document_number,
+            document=self.name,
+        ) + "<br/>%s"
 
         # Import Dispatch Number Validator
         if self.code in ['66', '67']:
             if len(document_number) != 16:
-                raise UserError(msg % (document_number, self.name, _('The number of import Dispatch must be 16 characters')))
+                raise UserError(msg % _('The number of import Dispatch must be 16 characters'))
             return document_number
 
         # Invoice Number Validator (For Eg: 123-123)
@@ -71,9 +75,9 @@ class L10nLatamDocumentType(models.Model):
                 failed = True
             document_number = '{:>05s}-{:>08s}'.format(pos, number)
         if failed:
-            raise UserError(msg % (document_number, self.name, _(
+            raise UserError(msg % _(
                 'The document number must be entered with a dash (-) and a maximum of 5 characters for the first part'
                 'and 8 for the second. The following are examples of valid numbers:\n* 1-1\n* 0001-00000001'
-                '\n* 00001-00000001')))
+                '\n* 00001-00000001'))
 
         return document_number

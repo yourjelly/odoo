@@ -174,7 +174,7 @@ class CrmLead(models.Model):
         return res_partner_ids
 
     def partner_interested(self, comment=False):
-        message = _('<p>I am interested by this lead.</p>')
+        message = "<p>%s</p>" % _('I am interested by this lead.')
         if comment:
             message += '<p>%s</p>' % html_escape(comment)
         for lead in self:

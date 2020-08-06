@@ -362,25 +362,28 @@ class AutomaticEntryWizard(models.TransientModel):
 
     # Transfer utils
     def _format_new_transfer_move_log(self, acc_transfer_per_move):
-        format = _("<li>{amount} ({debit_credit}) from {link}, <strong>%(account_source_name)s</strong></li>")
-        rslt = _("This entry transfers the following amounts to <strong>%(destination)s</strong> <ul>", destination=self.destination_account_id.display_name)
+        format = "<li>%s</li>" % _("{amount} ({debit_credit}) from {link}, <strong>%(account_source_name)s</strong>")
+        rslt = "%s <ul>" % _(
+            "This entry transfers the following amounts to <strong>%(account)s</strong>",
+            account=self.destination_account_id.display_name,
+        )
         for move, balances_per_account in acc_transfer_per_move.items():
             for account, balance in balances_per_account.items():
                 if account != self.destination_account_id:  # Otherwise, logging it here is confusing for the user
-                    rslt += self._format_strings(format, move, balance) % {'account_source_name': account.display_name}
+                    rslt += self._format_strings(format, move, balance, account)
 
         rslt += '</ul>'
         return rslt
 
     def _format_transfer_source_log(self, balances_per_account, transfer_move):
-        transfer_format = _("<li>{amount} ({debit_credit}) from <strong>%s</strong> were transferred to <strong>{account_target_name}</strong> by {link}</li>")
+        transfer_format = "<li>%s</li>" % _("{amount} ({debit_credit}) from <strong>%(account_source_name)s</strong> were transferred to <strong>{account_target_name}</strong> by {link}")
         content = ''
         for account, balance in balances_per_account.items():
             if account != self.destination_account_id:
-                content += self._format_strings(transfer_format, transfer_move, balance) % account.display_name
+                content += self._format_strings(transfer_format, transfer_move, balance, account)
         return content and '<ul>' + content + '</ul>' or None
 
-    def _format_strings(self, string, move, amount):
+    def _format_strings(self, string, move, amount, src_account=None):
         return string.format(
             percent=self.percentage,
             name=move.name,
@@ -391,4 +394,5 @@ class AutomaticEntryWizard(models.TransientModel):
             date=format_date(self.env, move.date),
             new_date=self.date and format_date(self.env, self.date) or _('[Not set]'),
             account_target_name=self.destination_account_id.display_name,
+            account_source_name=src_account.display_name if src_account else "",
         )

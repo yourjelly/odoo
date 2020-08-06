@@ -252,7 +252,7 @@ class WebsiteForm(http.Controller):
             # we create a mail.message to link them to the record
             if orphan_attachment_ids:
                 values = {
-                    'body': _('<p>Attached files : </p>'),
+                    'body': "<p>%s</p>" % _('Attached files:'),
                     'model': model_name,
                     'message_type': 'comment',
                     'no_auto_thread': False,

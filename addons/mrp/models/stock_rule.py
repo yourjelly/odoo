@@ -20,7 +20,7 @@ class StockRule(models.Model):
         source, destination, operation = self._get_message_values()
         manufacture_message = _('When products are needed in <b>%s</b>, <br/> a manufacturing order is created to fulfill the need.') % (destination)
         if self.location_src_id:
-            manufacture_message += _(' <br/><br/> The components will be taken from <b>%s</b>.') % (source)
+            manufacture_message += _('<br/><br/>The components will be taken from <b>%s</b>.', source)
         message_dict.update({
             'manufacture': manufacture_message
         })

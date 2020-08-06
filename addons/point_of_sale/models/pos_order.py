@@ -532,7 +532,7 @@ class PosOrder(models.Model):
         if not client.get('email'):
             return False
 
-        message = _("<p>Dear %s,<br/>Here is your electronic ticket for the %s. </p>") % (client['name'], name)
+        message = "<p>%s</p>" % _("Dear %s,<br/>Here is your electronic ticket for the %s.", client['name'], name)
         filename = 'Receipt-' + name + '.jpg'
         receipt = self.env['ir.attachment'].create({
             'name': filename,

@@ -88,9 +88,7 @@ class DeliveryCarrier(models.Model):
             'res_model': 'ir.module.module',
             'domain': [['name', '=like', 'delivery_%'], ['name', '!=', 'delivery_barcode']],
             'type': 'ir.actions.act_window',
-            'help': _('''<p class="o_view_nocontent">
-                    Buy Odoo Enterprise now to get more providers.
-                </p>'''),
+            'help': '<p class="o_view_nocontent">%s</p>' % _("Buy Odoo Enterprise now to get more providers."),
         }
 
     def available_carriers(self, partner):

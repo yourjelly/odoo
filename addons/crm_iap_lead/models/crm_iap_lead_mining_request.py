@@ -245,20 +245,18 @@ class CRMLeadMiningRequest(models.Model):
         self.ensure_one()
         action = self.env.ref('crm.crm_lead_all_leads').read()[0]
         action['domain'] = [('id', 'in', self.lead_ids.ids), ('type', '=', 'lead')]
-        action['help'] = _("""<p class="o_view_nocontent_empty_folder">
-            No leads found
-        </p><p>
-            No leads could be generated according to your search criteria
-        </p>""")
+        action['help'] = '<p class="o_view_nocontent_empty_folder">%s</p><p>%s</p>' % (
+            _("No leads found"),
+            _("No leads could be generated according to your search criteria."),
+        )
         return action
 
     def action_get_opportunity_action(self):
         self.ensure_one()
         action = self.env.ref('crm.crm_lead_opportunities').read()[0]
         action['domain'] = [('id', 'in', self.lead_ids.ids), ('type', '=', 'opportunity')]
-        action['help'] = _("""<p class="o_view_nocontent_empty_folder">
-            No opportunities found
-        </p><p>
-            No opportunities could be generated according to your search criteria
-        </p>""")
+        action['help'] = '<p class="o_view_nocontent_empty_folder">%s</p><p>%s</p>' % (
+            _("No opportunities found"),
+            _("No opportunities could be generated according to your search criteria."),
+        )
         return action

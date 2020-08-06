@@ -258,11 +258,11 @@ class PurchaseOrder(models.Model):
         """
         validated_picking = self.picking_ids.filtered(lambda p: p.state == 'done')
         if validated_picking:
-            activity.note += _("<p>Those dates couldn’t be modified accordingly on the receipt %s which had already been validated.</p>") % validated_picking[0].name
+            activity.note += "<p>%s</p>" % _("Those dates couldn’t be modified accordingly on the receipt %s which had already been validated.", validated_picking[0].name)
         elif not self.picking_ids:
-            activity.note += _("<p>Corresponding receipt not found.</p>")
+            activity.note += "<p>%s</p>" % _("Corresponding receipt not found.")
         else:
-            activity.note += _("<p>Those dates have been updated accordingly on the receipt %s.</p>") % self.picking_ids[0].name
+            activity.note += "<p>%s</p>" % _("Those dates have been updated accordingly on the receipt %s.", self.picking_ids[0].name)
 
     def _create_update_date_activity(self, updated_dates):
         activity = super()._create_update_date_activity(updated_dates)

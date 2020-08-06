@@ -728,9 +728,14 @@ class PurchaseOrder(models.Model):
             line._update_date_planned(date)
 
     def _create_update_date_activity(self, updated_dates):
-        note = _('<p> %s modified receipt dates for the following products:</p>') % self.partner_id.name
+        note = "<p>%s</p>" % _('%s modified receipt dates for the following products:', self.partner_id.name)
         for line, date in updated_dates:
-            note += _('<p> &nbsp; - %s from %s to %s </p>') % (line.product_id.display_name, line.date_planned.date(), date.date())
+            note += "<p> &nbsp; - %s</p>" % _(
+                '%(product)s from %(begin_date)s to %(end_date)s',
+                product=line.product_id.display_name,
+                begin_date=line.date_planned.date(),
+                end_date=date.date(),
+            )
         activity = self.activity_schedule(
             'mail.mail_activity_data_warning',
             summary=_("Date Updated"),
@@ -744,7 +749,12 @@ class PurchaseOrder(models.Model):
 
     def _update_update_date_activity(self, updated_dates, activity):
         for line, date in updated_dates:
-            activity.note += _('<p> &nbsp; - %s from %s to %s </p>') % (line.product_id.display_name, line.date_planned.date(), date.date())
+            activity.note += "<p> &nbsp; - %s</p>" % _(
+                '%(product)s from %(begin_date)s to %(end_date)s',
+                product=line.product_id.display_name,
+                begin_date=line.date_planned.date(),
+                end_date=date.date(),
+            )
 
 
 class PurchaseOrderLine(models.Model):
