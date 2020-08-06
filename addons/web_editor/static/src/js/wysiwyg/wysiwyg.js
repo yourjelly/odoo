@@ -226,22 +226,23 @@ var Wysiwyg = Widget.extend({
 
         if (this.options.snippets) {
             document.body.classList.add('editor_has_snippets');
-            this.editor.enableRender = false;
             this.$webEditorToolbar = $('<div id="web_editor-toolbars">');
 
             var $toolbarHandler = $('#web_editor-top-edit');
             $toolbarHandler.append(this.$webEditorToolbar);
 
-            this.snippetsMenu = new SnippetsMenu(this, Object.assign({
-                $el: $(this.editorEditable),
-                selectorEditableArea: '.o_editable',
-                $snippetEditorArea: $snippetManipulators,
-                wysiwyg: this,
-                JWEditorLib: JWEditorLib,
-            }, this.options));
-            await this.snippetsMenu.appendTo($mainSidebar);
-            this.editor.enableRender = true;
-            this.editor.render();
+
+            await this.editor.execCommand(async () => {
+                this.snippetsMenu = new SnippetsMenu(this, Object.assign({
+                    $el: $(this.editorEditable),
+                    selectorEditableArea: '.o_editable',
+                    $snippetEditorArea: $snippetManipulators,
+                    wysiwyg: this,
+                    JWEditorLib: JWEditorLib,
+                }, this.options));
+                await this.snippetsMenu.appendTo($mainSidebar);
+            });
+
             this.snippetsMenu.$editor = $('#wrapwrap');
 
             this.$el.on('content_changed', function (e) {
@@ -280,20 +281,18 @@ var Wysiwyg = Widget.extend({
             );
             linkDialog.open();
             linkDialog.on('save', this, async (params)=> {
-                    await this.editor.execBatch(async () =>{
+                    await this.editor.execCommand(async () =>{
                         const linkParams = {
                             url: params.url,
                             label: params.text,
                             target: params.isNewWindow ? '_blank' : '',
                         };
                         await this.editor.execCommand('link', linkParams);
-                        await this.editor.execCustomCommand(async () => {
-                            const nodes = this.editor.selection.range.targetedNodes(JWEditorLib.InlineNode);
-                            const links = nodes.map(node => node.modifiers.find(JWEditorLib.LinkFormat)).filter(f => f);
-                            for (const link of links) {
-                                link.modifiers.get(JWEditorLib.Attributes).set('class', params.classes);
-                            }
-                        });
+                        const nodes = this.editor.selection.range.targetedNodes(JWEditorLib.InlineNode);
+                        const links = nodes.map(node => node.modifiers.find(JWEditorLib.LinkFormat)).filter(f => f);
+                        for (const link of links) {
+                            link.modifiers.get(JWEditorLib.Attributes).set('class', params.classes);
+                        }
                     });
                 resolve();
             });
@@ -464,7 +463,7 @@ var Wysiwyg = Widget.extend({
      */
     async _saveContent() {
         await this._saveModifiedImages();
-        await this.editor.execBatch(async ()=> {
+        await this.editor.execCommand(async ()=> {
             await this._saveViewBlocks();
             await this._saveCoverPropertiesBlocks();
             await this._saveMegaMenuClasses();
@@ -627,7 +626,7 @@ var Wysiwyg = Widget.extend({
      */
     _saveCoverPropertiesBlocks: async function () {
         let rpcResult;
-        await this.editor.execCustomCommand(async () => {
+        await this.editor.execCommand(async () => {
             const covers = this.vEditable.descendants(node => {
                 const attributes = node.modifiers.find(JWEditorLib.Attributes);
 
@@ -719,7 +718,7 @@ var Wysiwyg = Widget.extend({
      */
     _saveNewsletterBlocks: async function () {
         const defs = [];
-        await this.editor.execCustomCommand(async () => {
+        await this.editor.execCommand(async () => {
             defs.push(this._super.apply(this, arguments));
             const $popups = $(this.editorEditable).find('.o_newsletter_popup');
             for (const popup of $popups) {
@@ -744,7 +743,7 @@ var Wysiwyg = Widget.extend({
      * @private
      */
     _saveModifiedImages: async function () {
-        await this.editor.execBatch(async () => {
+        await this.editor.execCommand(async () => {
             const defs = _.map(this._getEditable($('#wrapwrap')), async editableEl => {
                 const {oeModel: resModel, oeId: resId} = editableEl.dataset;
                 const proms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
@@ -1051,7 +1050,7 @@ Wysiwyg.setRange = async function (wysiwyg, startNode, startOffset, endNode, end
     endNode = endNode || startNode;
     endOffset = endOffset || startOffset-1;
 
-    await wysiwyg.editor.execCustomCommand(async () => {
+    await wysiwyg.editor.execCommand(async () => {
         const startVNode = wysiwyg.editorHelpers.getNodes(startNode);
         const endVNode = wysiwyg.editorHelpers.getNodes(endNode);
         wysiwyg.editor.selection.select(startVNode[startOffset], endVNode[endOffset]);

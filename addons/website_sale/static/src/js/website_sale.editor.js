@@ -268,7 +268,7 @@ publicWidget.registry.websiteSaleCurrency = publicWidget.Widget.extend({
         ev.stopPropagation();
         ev.stopImmediatePropagation();
         wysiwyg.editor.nextEventMutex(async () => {
-            wysiwyg.editor.execCustomCommand(async () => {
+            wysiwyg.editor.execCommand(async () => {
                 const nodes = wysiwyg.editorHelpers.getNodes(ev.currentTarget.parentElement);
                 wysiwyg.editor.selection.select(nodes[0]);
             });

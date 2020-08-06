@@ -19,7 +19,7 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
 
         this._images = this.$('img').get();
 
-        await this.wysiwyg.editor.execBatch(async () => {
+        await this.wysiwyg.editor.execCommand(async () => {
             // The snippet should not be editable
             await this.editorHelpers.addClass(this.$target[0], 'o_fake_not_editable');
             await this.editorHelpers.setAttribute(this.$target[0], 'contentEditable', 'false');

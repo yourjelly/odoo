@@ -1400,7 +1400,7 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
         if (!this.removing && newLength > 0) {
             const $toDelete = $items.filter('.active');
             this.$carousel.one('active_slide_targeted.carousel_item_option', async () => {
-                await this.wysiwyg.editor.execBatch(async () => {
+                await this.wysiwyg.editor.execCommand(async () => {
                     await this.editorHelpers.remove(this.$indicators.find('li:last')[0]);
                     await this.editorHelpers.remove($toDelete[0]);
                 });
@@ -2388,12 +2388,12 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      */
     background: async function (previewMode, widgetValue, params) {
         if (widgetValue === '') {
-            await this.wysiwyg.editor.execBatch(async ()=> {
+            await this.wysiwyg.editor.execCommand(async ()=> {
                 await this.editorHelpers.setStyle(this.$image[0], 'background-image', '');
                 await this.editorHelpers.removeClass(this.$target[0], 'o_record_has_cover');
             });
         } else {
-            await this.wysiwyg.editor.execBatch(async () => {
+            await this.wysiwyg.editor.execCommand(async () => {
                 await this.editorHelpers.setStyle(this.$image[0], 'background-image', `url('${widgetValue}')`);
                 await this.editorHelpers.addClass(this.$target[0], 'o_record_has_cover');
             });
@@ -2407,7 +2407,7 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      */
     filterValue: async function (previewMode, widgetValue, params) {
         if (!previewMode) {
-            await this.wysiwyg.editor.execBatch(async ()=> {
+            await this.wysiwyg.editor.execCommand(async ()=> {
                 await this.editor.execCommand('dom.setStyle', {
                     domNode: this.$filter[0],
                     name: 'opacity',
@@ -2548,7 +2548,7 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
         const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
         switch (widgetValue) {
             case 'prev':
-                await this.wysiwyg.editor.execBatch(async ()=> {
+                await this.wysiwyg.editor.execCommand(async ()=> {
                     if (this.$target.prev()[0]) {
                         await this.editorHelpers.moveBefore(this.$target.prev()[0], this.$target[0]);
                     }
@@ -2558,7 +2558,7 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
                 });
                 break;
             case 'next':
-                await this.wysiwyg.editor.execBatch(async ()=> {
+                await this.wysiwyg.editor.execCommand(async ()=> {
                     if (this.$target.next()[0]) {
                         await this.editorHelpers.moveAfter(this.$target.next()[0], this.$target[0]);
                     }
