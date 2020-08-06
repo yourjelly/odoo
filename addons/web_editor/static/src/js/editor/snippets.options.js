@@ -2498,7 +2498,7 @@ const SnippetOptionWidget = Widget.extend({
      * Refresh the target in the wysiwyg.
      */
     async _refreshTarget($target = this.$target) {
-        await this.wysiwyg.editor.execBatch(async () => {
+        await this.wysiwyg.editor.execCommand(async () => {
             const html = $target.html();
             $target.html('');
             const attributes = [...$target[0].attributes].reduce( (acc, attribute) => {
@@ -3462,7 +3462,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     backgroundType: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.editor.execBatch(async ()=> {
+        await this.wysiwyg.editor.execCommand(async ()=> {
             if (widgetValue === 'repeat-pattern') {
                 await this.editorHelpers.addClass(this.$target[0], 'o_bg_img_opt_repeat');
             } else {

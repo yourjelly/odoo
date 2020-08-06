@@ -63,7 +63,7 @@ snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionWidget.exte
             $el[0].dataset.anchor = 'true';
         });
         $nav.find('a:first').addClass('active');
-        await this.wysiwyg.editor.execBatch(async () => {
+        await this.wysiwyg.editor.execCommand(async () => {
             const html = $nav[0].outerHTML;
             $nav.empty();
             await this.editorHelpers.replace($nav[0], html);

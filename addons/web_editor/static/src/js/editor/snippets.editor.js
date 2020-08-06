@@ -319,7 +319,7 @@ var SnippetEditor = Widget.extend({
         this.toggleOverlay(false);
         this.toggleOptions(false);
 
-        await this.wysiwyg.editor.execBatch(async () => {
+        await this.wysiwyg.editor.execCommand(async () => {
             await new Promise(resolve => {
                 this.trigger_up('call_for_each_child_snippet', {
                     $snippet: this.$snippetBlock,
@@ -1081,17 +1081,13 @@ var SnippetsMenu = Widget.extend({
             ev.preventDefault();
             ev.stopPropagation();
             ev.stopImmediatePropagation();
-            this.wysiwyg.editor.execBatch(async () => {
-                await this.wysiwyg.editor.execCustomCommand(async () => {
-                    const $target = $(ev.target);
-                    const $defaultSnippetText = $target.closest('.o_default_snippet_text');
-                    await this.editorHelpers.removeClass($defaultSnippetText[0], 'o_default_snippet_text');
-                    const defaultSnippetNode = this.editorHelpers.getNodes($defaultSnippetText[0]);
-                    console.log("defaultSnippetNode:", defaultSnippetNode)
-                    const nodes = this.editorHelpers.getNodes($target[0]);
-                    console.log("nodes:", nodes)
-                    this.wysiwyg.editor.selection.select(nodes[0], nodes[nodes.length - 1]);
-                });
+            this.wysiwyg.editor.execCommand(async () => {
+                const $target = $(ev.target);
+                const $defaultSnippetText = $target.closest('.o_default_snippet_text');
+                await this.editorHelpers.removeClass($defaultSnippetText[0], 'o_default_snippet_text');
+                const defaultSnippetNode = this.editorHelpers.getNodes($defaultSnippetText[0]);
+                const nodes = this.editorHelpers.getNodes($target[0]);
+                this.wysiwyg.editor.selection.select(nodes[0], nodes[nodes.length - 1]);
             });
         });
 
@@ -1459,7 +1455,7 @@ var SnippetsMenu = Widget.extend({
      */
     _loadSnippetsTemplates: async function (invalidateCache) {
         return this._mutex.exec(async () => {
-            await this.options.wysiwyg.editor.execBatch(async () => {
+            await this.options.wysiwyg.editor.execCommand(async () => {
                 await this._destroyEditors();
                 const html = await this.loadSnippets(invalidateCache);
                 await this._computeSnippetTemplates(html);
@@ -1976,7 +1972,7 @@ var SnippetsMenu = Widget.extend({
                             const domLayout = layout.engines.dom;
                             const domNode = domLayout.getDomNodes(vNodes[0])[0];
 
-                            await jwEditor.execBatch(async () => {
+                            await jwEditor.execCommand(async () => {
                                 await self._disableUndroppableSnippets();
                             });
 
@@ -2459,7 +2455,7 @@ var SnippetsMenu = Widget.extend({
      */
     _insertSnippet: async function ($snippet) {
         let result;
-        await this.wysiwyg.editor.execCustomCommand(async () => {
+        await this.wysiwyg.editor.execCommand(async () => {
             const position = this._getRelativePosition($snippet[0]);
             if (!position) {
                 throw new Error("Could not find a place to insert the snippet.");
