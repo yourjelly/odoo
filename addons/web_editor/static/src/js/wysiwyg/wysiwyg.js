@@ -190,9 +190,9 @@ var Wysiwyg = Widget.extend({
             mode: this.options.mode,
         });
 
-        if (config.isDebug('assets')) {
-            this.editor.load(JWEditorLib.DevTools);
-        }
+        // if (config.isDebug('assets')) {
+        //     this.editor.load(JWEditorLib.DevTools);
+        // }
         await this.editor.start();
         this._bindAfterStart();
         $('#wrapwrap').data('wysiwyg', this);
