@@ -59,6 +59,11 @@ odoo.define('point_of_sale.ProductScreen', function(require) {
                 this.env.pos.add_new_order();
             }
             const product = event.detail;
+            await this.rpc({
+                model: 'pos.order',
+                method: 'notify_change',
+                args: [product.display_name],
+            });
             let price_extra = 0.0;
             let draftPackLotLines, weight, description, packLotLinesToEdit;
 

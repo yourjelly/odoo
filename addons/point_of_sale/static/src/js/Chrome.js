@@ -149,6 +149,13 @@ odoo.define('point_of_sale.Chrome', function(require) {
                     // Basically, preload the images in the background.
                     this._preloadImages();
                 });
+
+                this.env.services.bus_service.onNotification(null, (notifications) => {
+                    for (const [channel, message] of notifications) {
+                        console.log(`Channel: ${channel}\nMessage: ${message}`);
+                    }
+                });
+                this.env.services.bus_service.startPolling();
             } catch (error) {
                 let title = 'Unknown Error',
                     body;

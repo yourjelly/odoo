@@ -254,6 +254,10 @@ class PosOrder(models.Model):
     to_invoice = fields.Boolean('To invoice')
     is_invoiced = fields.Boolean('Is Invoiced', compute='_compute_is_invoiced')
 
+    @api.model
+    def notify_change(self, message):
+        self.env['bus.bus'].sendone('testposchannel', message)
+
     @api.depends('account_move')
     def _compute_is_invoiced(self):
         for order in self:
