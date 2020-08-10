@@ -964,6 +964,24 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
     </t>
 </template>
 
+<template id="yen">
+    <t t-call="website.layout">
+        Model A
+        <t t-call="website.pager">
+            <t t-set="pager" t-value="pagerA" />
+        </t>
+        <br/> <br/>
+        Model B
+        <t t-call="website.pager">
+            <t t-set="pager" t-value="pagerB" />
+        </t>
+        <br/> <br/>
+        Model C
+        <t t-call="website.pager">
+            <t t-set="pager" t-value="pagerC" />
+        </t>
+    </t>
+</template>
 <template id="list_website_pages" name="Website Pages Management">
   <t t-call="website.layout">
     <div id="wrap">

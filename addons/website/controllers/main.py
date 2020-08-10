@@ -65,6 +65,44 @@ class QueryURL(object):
 
 class Website(Home):
 
+    @http.route(
+        ['/yenth', '/yenth/<int:pageA>/<int:pageB>/<int:pageC>'],
+        type='http', auth="public", website=True)
+    def yen(self, pageA=1, pageB=1, pageC=1, **kw):
+
+        def convertURL(pager):
+            for k in ['page', 'page_first', 'page_start', 'page_previous', 'page_next', 'page_end', 'page_last']:
+                pager[k]['url'] = pager[k]['url'].split('/page/')[0].replace('[placeholder]', str(pager[k]['num']))
+            for p in pager['pages']:
+                p['url'] = p['url'].split('/page/')[0].replace('[placeholder]', str(p['num']))
+
+        pagerA = request.website.pager(
+            url="/yenth/[placeholder]/%d/%d" % (pageB, pageC),
+            total=200,
+            page=pageA,
+        )
+
+        pagerB = request.website.pager(
+            url="/yenth/%d/[placeholder]/%d" % (pageA, pageC),
+            total=200,
+            page=pageB,
+        )
+
+        pagerC = request.website.pager(
+            url="/yenth/%d/%d/[placeholder]" % (pageA, pageB),
+            total=200,
+            page=pageC,
+        )
+
+        convertURL(pagerA)
+        convertURL(pagerB)
+        convertURL(pagerC)
+
+        return request.render('website.yen', dict(pagerA=pagerA, pagerB=pagerB, pagerC=pagerC))
+
+
+
+
     @http.route('/', type='http', auth="public", website=True)
     def index(self, **kw):
         homepage = request.website.homepage_id
