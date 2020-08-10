@@ -9,27 +9,21 @@ body {
     // rtlcss for right-to-left text direction.
     direction: ltr;
 }
-body.o_connected_user {
-    padding-top: $o-navbar-height!important;
-
-    &.o_fullscreen_transition {
-        transition: padding 400ms ease 0s;
-
-        #oe_main_menu_navbar, #web_editor-top-edit, #oe_snippets {
-            transition: transform 400ms ease 0s !important;
-        }
+.o_main_sidebar {
+    transition: width 400ms ease 0s !important;
+    width: 0;
+    &.o_loaded {
+        width: $o-we-sidebar-width;
     }
+}
+body.o_connected_user {
     &.o_fullscreen {
-        padding-top: 0 !important;
-
-        &.editor_enable.editor_has_snippets {
-            padding-left: 0 !important;
-        }
-        #oe_main_menu_navbar, #web_editor-top-edit {
-            transform: translateY(-100%);
-        }
         #oe_snippets {
             transform: translateX(-100%);
+        }
+        .o_main_sidebar {
+            transition: width 400ms ease 0s !important;
+            width: 0;
         }
     }
 }
