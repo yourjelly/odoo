@@ -3,7 +3,7 @@
 
 {
     'name': 'Advanced Events',
-    'category': 'Marketing',
+    'category': 'Marketing/Events',
     'summary': 'Sponsors, Tracks, Agenda, Event News',
     'version': '1.0',
     'description': "",

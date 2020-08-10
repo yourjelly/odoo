@@ -3,7 +3,7 @@
 {
     'name': 'Questions on Events',
     'description': 'Questions on Events',
-    'category': 'Marketing',
+    'category': 'Marketing/Events',
     'version': '1.1',
     'depends': ['website_event'],
     'data': [
