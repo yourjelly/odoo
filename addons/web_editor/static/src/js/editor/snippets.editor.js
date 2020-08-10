@@ -874,6 +874,8 @@ var SnippetsMenu = Widget.extend({
         'mousedown': '_onMouseDown',
         'input .o_snippet_search_filter_input': '_onSnippetSearchInput',
         'click .o_snippet_search_filter_reset': '_onSnippetSearchResetClick',
+        'click .o_we_website_top_actions button[data-action=save]': '_onSaveClick',
+        'click .o_we_website_top_actions button[data-action=cancel]': '_onDiscardClick',
     },
     custom_events: {
         'activate_insertion_zones': '_onActivateInsertionZones',
@@ -2515,7 +2517,19 @@ var SnippetsMenu = Widget.extend({
             result = await this.editorHelpers.insertHtml(context, $snippet[0].outerHTML, position[0], position[1]);
         });
         return result;
-    }
+    },
+    /**
+     * On click on save button.
+     */
+    _onSaveClick: function() {
+        this.wysiwyg.saveToServer();
+    },
+    /**
+     * On click on discard button.
+     */
+    _onDiscardClick: function() {
+        this.wysiwyg.discardEditions();
+    },
 });
 
 return {
