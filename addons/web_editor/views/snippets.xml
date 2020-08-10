@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <template id="snippets" groups="base.group_user">
+    <form class="o_we_website_top_actions">
+        <button type="button" class="btn btn-primary" data-action="save" accesskey="s">Save</button>
+        <button type="button" class="btn btn-secondary" data-action="cancel" accesskey="j">Discard</button>
+    </form>
     <div id="snippets_menu">
         <button type="button" class="o_we_add_snippet_btn active" accesskey="1">
             Blocks

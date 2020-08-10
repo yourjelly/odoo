@@ -4,10 +4,6 @@
 
 // OVERRIDES FOR EDITOR WITH SNIPPETS
 body.editor_enable.editor_has_snippets {
-    #web_editor-top-edit .note-popover .popover {
-        left: $o-we-sidebar-width !important;
-    }
-
     .modal:not(.o_technical_modal) {
         // set z-index so customize options visible on dialog.
         z-index: $o-we-overlay-zindex - 1;
@@ -32,17 +28,6 @@ body.editor_enable.editor_has_snippets {
 @include media-breakpoint-down(md) {
     body.editor_enable.editor_has_snippets {
         padding-left: inherit !important;
-
-        #web_editor-top-edit {
-            position: initial !important;
-            height: initial !important;
-            top: initial !important;
-            left: initial !important;
-
-            .note-popover .popover {
-                left: 0 !important;
-            }
-        }
     }
 }
 
