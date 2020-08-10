@@ -4,7 +4,7 @@
 {
     'name': 'Employee Presence Control',
     'version': '1.0',
-    'category': 'Human Resources',
+    'category': 'Human Resources/Time Off',
     'description': """
 Control Employees Presence
 ==========================

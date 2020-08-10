@@ -3,7 +3,7 @@
 {
     'name': 'Fleet History',
     'version': '1.0',
-    'category': 'Human Resources',
+    'category': 'Human Resources/Fleet',
     'summary': 'Get history of driven cars by employees',
     'description': "",
     'depends': ['hr', 'fleet'],
