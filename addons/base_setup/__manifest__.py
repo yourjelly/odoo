@@ -3,7 +3,7 @@
 {
     'name': 'Initial Setup Tools',
     'version': '1.0',
-    'category': 'Hidden',
+    'category': 'Hidden/Tools',
     'description': """
 This module helps to configure the system at the installation of a new database.
 ================================================================================
@@ -28,5 +28,4 @@ Shows you a list of applications features to install from.
         'static/src/xml/res_config_invite_users.xml',
     ],
 
-    
 }
