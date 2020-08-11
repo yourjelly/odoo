@@ -471,24 +471,6 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
         $container.empty().append($content);
         return $container;
     },
-
-    /**
-     * Reset the content in the wysiwyg editor.
-     */
-    async _resetContent() {
-        const $container = this._getContainer();
-        const containerHTML = $container.html();
-        $container.empty();
-        await this.editorHelpers.empty($container[0]);
-        await this.editorHelpers.insertHtml(containerHTML, $container[0], 'INSIDE');
-    },
-
-    /**
-     * Get the container div.
-     */
-    _getContainer() {
-        return this.$('> div:first-child');
-    },
 });
 
 snippetOptions.registry.gallery_img = snippetOptions.SnippetOptionWidget.extend({
