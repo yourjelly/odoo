@@ -455,7 +455,7 @@
                        data-customize-website-variable="'vertical'"
                        data-img="/website/static/src/img/snippets_options/header_template_vertical.png"/>
             <we-button string="Sidebar"
-                       data-name="header_sidebar_opt"
+                       data-name="header_sidebar_template"
                        data-customize-website-views="website.template_header_sidebar, website.no_autohide_menu"
                        data-customize-website-variable="'sidebar'"/>
             <we-button string="2"
@@ -503,9 +503,9 @@
                   data-variable="sidebar-width"
                   data-unit="px"
                   data-save-unit="rem"
-                  data-dependencies="header_sidebar_opt"/>
+                  data-dependencies="header_sidebar_template"/>
 
-        <we-select string="Header Effect" data-dependencies="!header_sidebar_opt">
+        <we-select string="Header Effect" data-dependencies="!header_sidebar_template">
             <t t-set="header_effect_standard_label">Standard</t>
             <t t-set="header_effect_scroll_label">Scroll</t>
             <t t-set="header_effect_fixed_label">Fixed</t>
