@@ -445,7 +445,7 @@
                        data-customize-website-variable="'default'"
                        data-img="/website/static/src/img/snippets_options/header_template_default.png"/>
             <we-button title="Hamburger menu"
-                       data-name="header_hamburger_opt"
+                       data-name="header_hamburger_template"
                        data-customize-website-views="website.template_header_hamburger"
                        data-customize-website-variable="'hamburger'"
                        data-img="/website/static/src/img/snippets_options/header_template_hamburger.png"/>
@@ -490,7 +490,14 @@
             <we-button string="Center" data-select-class="mx-auto"/>
             <we-button string="Right" data-select-class="ml-auto"/>
         </we-select>
+
+        <!-- Header Hamburger Template - Options -->
+        <we-select string="⌙ Alignment" data-dependencies="header_hamburger_template" data-apply-to=".navbar-toggler">
+            <we-button string="Left" data-select-class="order-first mr-auto"/>
+            <we-button string="Center" data-select-class="mr-auto"/>
+            <we-button string="Right" data-select-class=""/>
         </we-select>
+
         <we-input string="⌙ Width"
                   data-customize-website-variable="null"
                   data-variable="sidebar-width"
