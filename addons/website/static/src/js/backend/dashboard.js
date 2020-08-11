@@ -256,8 +256,7 @@ var Dashboard = AbstractAction.extend({
         var self = this;
         if (this._isInDom) {
             _.each(this.graphs, function(e) {
-                var renderGraph = self.groups[e.group] &&
-                                    self.dashboards_data[e.name].summary.order_count;
+                var renderGraph = self.groups[e.group];
                 if (!self.chartIds[e.name]) {
                     self.chartIds[e.name] = _.uniqueId('chart_' + e.name);
                 }
