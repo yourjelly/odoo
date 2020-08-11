@@ -935,19 +935,13 @@
 </template>
 
 <template id="template_header_7" inherit_id="website.layout" name="Template Header 7" active="False">
+    <xpath expr="//header" position="attributes">
+        <attribute name="t-attf-class" add="bg-300" separator=" "/>
+    </xpath>
     <xpath expr="//header//nav" position="replace">
-        <!-- To test in Edit mode -->
-        <section id="o_preheader" class="oe_structure oe_img_bg" style="background-image: url('/web/image/website.o_preheader_default_image');">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <p><br/></p>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <nav class="navbar navbar-light navbar-expand-md o_colored_level o_cc">
+
             <div id="top_menu_container" class="container">
+        <nav class="navbar navbar-light navbar-expand-md o_colored_level o_cc rounded shadow-sm my-3">
                 <div class="w-25">
                     <!-- Brand -->
                     <t t-call="website.placeholder_header_brand"/>
@@ -998,11 +992,11 @@
                 <div class="w-25 text-right">
                     <!-- Button -->
                     <t t-call="website.placeholder_header_button">
-                        <t t-set="_btn_class" t-value="'btn btn-primary ml-5'"/>
+                        <t t-set="_btn_class" t-value="'btn btn-primary'"/>
                     </t>
                 </div>
-            </div>
         </nav>
+            </div>
     </xpath>
 </template>
 
