@@ -301,16 +301,12 @@ var Wysiwyg = Widget.extend({
         });
     },
     openMediaDialog() {
-        return new Promise((resolve)=>{
-            var mediaDialog = new weWidgets.MediaDialog(this,
-                {},
-            );
-            mediaDialog.open();
-            mediaDialog.on('save', this, async (element) => {
-                await this.editorHelpers.insertHtml(this.editor, element.outerHTML);
-                resolve();
-            });
-            mediaDialog.on('cancel', this, resolve);
+        var mediaDialog = new weWidgets.MediaDialog(this,
+            {},
+        );
+        mediaDialog.open();
+        mediaDialog.on('save', this, async (element) => {
+            await this.editorHelpers.insertHtml(this.editor, element.outerHTML);
         });
     },
     _setColor(colorpicker, setCommandId, unsetCommandId, color, $dropDownToToggle = undefined) {
