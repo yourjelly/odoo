@@ -199,7 +199,7 @@ var Wysiwyg = Widget.extend({
 
         this.editorHelpers = this.editor.plugins.get(JWEditorLib.DomHelpers);
         const domLayout = this.editor.plugins.get(JWEditorLib.Layout).engines.dom;
-        this.vEditable = domLayout.components.get('editable')[0];
+        this.vEditable = domLayout.components.editable[0];
         this.editorEditable = this.editorHelpers.getDomNodes(this.vEditable)[0];
 
         // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
