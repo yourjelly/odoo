@@ -792,15 +792,15 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
     pageOptionsSetValueCallbacks: {
         header_overlay: async function (value, wysiwyg) {
             if (value) {
-                await this.editorHelpers.addClass($('#wrapwrap')[0], 'o_header_overlay');
+                await this.editorHelpers.addClass(wysiwyg.editor, $('#wrapwrap')[0], 'o_header_overlay');
             } else {
-                await this.editorHelpers.removeClass($('#wrapwrap')[0], 'o_header_overlay');
+                await this.editorHelpers.removeClass(wysiwyg.editor, $('#wrapwrap')[0], 'o_header_overlay');
             }
         },
         header_color: async function (value, wysiwyg) {
-            await this.wysiwyg.editor.execCommand(async () => {
-                await this.editorHelpers.removeClass($('#wrapwrap > header')[0], this.value);
-                await this.editorHelpers.addClass($('#wrapwrap > header')[0], value);
+            await this.wysiwyg.editor.execCommand(async (context) => {
+                await this.editorHelpers.removeClass(context, $('#wrapwrap > header')[0], this.value);
+                await this.editorHelpers.addClass(context, $('#wrapwrap > header')[0], value);
             });
         },
         header_visible: function (value) {

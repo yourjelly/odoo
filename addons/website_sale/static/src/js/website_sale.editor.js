@@ -267,11 +267,9 @@ publicWidget.registry.websiteSaleCurrency = publicWidget.Widget.extend({
         ev.preventDefault();
         ev.stopPropagation();
         ev.stopImmediatePropagation();
-        wysiwyg.editor.nextEventMutex(async () => {
-            wysiwyg.editor.execCommand(async () => {
-                const nodes = wysiwyg.editorHelpers.getNodes(ev.currentTarget.parentElement);
-                wysiwyg.editor.selection.select(nodes[0]);
-            });
+        wysiwyg.editor.execCommand(async () => {
+            const nodes = wysiwyg.editorHelpers.getNodes(ev.currentTarget.parentElement);
+            wysiwyg.editor.selection.select(nodes[0]);
         });
     },
 });

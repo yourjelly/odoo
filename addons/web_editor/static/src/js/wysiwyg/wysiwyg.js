@@ -233,17 +233,14 @@ var Wysiwyg = Widget.extend({
             var $toolbarHandler = $('#web_editor-top-edit');
             $toolbarHandler.append(this.$webEditorToolbar);
 
-
-            await this.editor.execCommand(async () => {
-                this.snippetsMenu = new SnippetsMenu(this, Object.assign({
-                    $el: $(this.editorEditable),
-                    selectorEditableArea: '.o_editable',
-                    $snippetEditorArea: $snippetManipulators,
-                    wysiwyg: this,
-                    JWEditorLib: JWEditorLib,
-                }, this.options));
-                await this.snippetsMenu.appendTo($mainSidebar);
-            });
+            this.snippetsMenu = new SnippetsMenu(this, Object.assign({
+                $el: $(this.editorEditable),
+                selectorEditableArea: '.o_editable',
+                $snippetEditorArea: $snippetManipulators,
+                wysiwyg: this,
+                JWEditorLib: JWEditorLib,
+            }, this.options));
+            await this.snippetsMenu.appendTo($mainSidebar);
 
             this.snippetsMenu.$editor = $('#wrapwrap');
 
@@ -283,13 +280,13 @@ var Wysiwyg = Widget.extend({
             );
             linkDialog.open();
             linkDialog.on('save', this, async (params)=> {
-                    await this.editor.execCommand(async () =>{
+                    await this.editor.execCommand(async (context) =>{
                         const linkParams = {
                             url: params.url,
                             label: params.text,
                             target: params.isNewWindow ? '_blank' : '',
                         };
-                        await this.editor.execCommand('link', linkParams);
+                        await context.execCommand('link', linkParams);
                         const nodes = this.editor.selection.range.targetedNodes(JWEditorLib.InlineNode);
                         const links = nodes.map(node => node.modifiers.find(JWEditorLib.LinkFormat)).filter(f => f);
                         for (const link of links) {
@@ -308,7 +305,7 @@ var Wysiwyg = Widget.extend({
             );
             mediaDialog.open();
             mediaDialog.on('save', this, async (element) => {
-                await this.editorHelpers.insertHtml(element.outerHTML);
+                await this.editorHelpers.insertHtml(this.editor, element.outerHTML);
                 resolve();
             });
             mediaDialog.on('cancel', this, resolve);
@@ -454,6 +451,62 @@ var Wysiwyg = Widget.extend({
             window.location.reload();
         });
     },
+    cropImage: async function (params) {
+        const imageNodes = params.context.range.targetedNodes(JWEditorLib.ImageNode);
+        const imageNode = imageNodes.length === 1 && imageNodes[0];
+        if (imageNode) {
+            const domEngine = this.editor.plugins.get(JWEditorLib.Layout).engines.dom;
+            const $node = $(domEngine.getDomNodes(imageNode)[0]);
+            $node.off('image_cropped');
+            $node.on('image_cropped', () => this._updateAttributes($node[0]));
+            new weWidgets.ImageCropWidget(this, $node[0]).appendTo($('#wrap'));
+        }
+    },
+    _updateAttributes(node) {
+        const attributes = {}
+        for (const attr of node.attributes){
+            attributes[attr.name] = attr.value;
+        }
+        this.editorHelpers.updateAttributes(this.editor, node, attributes);
+    },
+    transformImage: async function (params) {
+        const imageNodes = params.context.range.targetedNodes(JWEditorLib.ImageNode);
+        const imageNode = imageNodes.length === 1 && imageNodes[0];
+        if (imageNode) {
+            const domEngine = this.editor.plugins.get(JWEditorLib.Layout).engines.dom;
+            const $node = $(domEngine.getDomNodes(imageNode)[0]);
+            this._transform($node);
+        }
+    },
+    _transform($image) {
+        if ($image.data('transfo-destroy')) {
+            $image.removeData('transfo-destroy');
+            return;
+        }
+
+        $image.transfo();
+
+        const mouseup = (event) => {
+            $('.note-popover button[data-event="transform"]').toggleClass('active', $image.is('[style*="transform"]'));
+        };
+        $(document).on('mouseup', mouseup);
+
+        const mousedown = (event) => {
+            if (!$(event.target).closest('.transfo-container').length) {
+                $image.transfo('destroy');
+                $(document).off('mousedown', mousedown).off('mouseup', mouseup);
+            }
+            if ($(event.target).closest('.note-popover').length) {
+                $image.data('transfo-destroy', true).attr('style', ($image.attr('style') || '').replace(/[^;]*transform[\w:]*;?/g, ''));
+            }
+            this._updateAttributes($image[0])
+        };
+        $(document).on('mousedown', mousedown);
+    },
+
+    getFormatInfo: function() {
+        return this.editor.plugins.get(JWEditorLib.Odoo).formatInfo;
+    },
 
     //--------------------------------------------------------------------------
     // Private
@@ -465,9 +518,9 @@ var Wysiwyg = Widget.extend({
      */
     async _saveContent() {
         await this._saveModifiedImages();
-        await this.editor.execCommand(async ()=> {
+        await this.editor.execCommand(async (context)=> {
             await this._saveViewBlocks();
-            await this._saveCoverPropertiesBlocks();
+            await this._saveCoverPropertiesBlocks(context);
             await this._saveMegaMenuClasses();
         });
     },
@@ -626,9 +679,9 @@ var Wysiwyg = Widget.extend({
      *
      * @private
      */
-    _saveCoverPropertiesBlocks: async function () {
+    _saveCoverPropertiesBlocks: async function (context) {
         let rpcResult;
-        await this.editor.execCommand(async () => {
+        await context.execCommand(async () => {
             const covers = this.vEditable.descendants(node => {
                 const attributes = node.modifiers.find(JWEditorLib.Attributes);
 
@@ -745,14 +798,14 @@ var Wysiwyg = Widget.extend({
      * @private
      */
     _saveModifiedImages: async function () {
-        await this.editor.execCommand(async () => {
+        await this.editor.execCommand(async (context) => {
             const defs = _.map(this._getEditable($('#wrapwrap')), async editableEl => {
                 const {oeModel: resModel, oeId: resId} = editableEl.dataset;
                 const proms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
                     const isBackground = !el.matches('img');
                     el.classList.remove('o_modified_image_to_save');
 
-                    await this.editorHelpers.removeClass(el, 'o_modified_image_to_save');
+                    await this.editorHelpers.removeClass(context, el, 'o_modified_image_to_save');
                     // Modifying an image always creates a copy of the original, even if
                     // it was modified previously, as the other modified image may be used
                     // elsewhere if the snippet was duplicated or was saved as a custom one.
@@ -765,10 +818,10 @@ var Wysiwyg = Widget.extend({
                         },
                     });
                     if (isBackground) {
-                        await this.editorHelpers.setStyle(el, 'background-image', `url('${newAttachmentSrc}')`);
-                        await this.editorHelpers.setAttribute(el, 'data-bgSrc', '');
+                        await this.editorHelpers.setStyle(context, el, 'background-image', `url('${newAttachmentSrc}')`);
+                        await this.editorHelpers.setAttribute(context, el, 'data-bgSrc', '');
                     } else {
-                        await this.editorHelpers.setAttribute(el, 'src', newAttachmentSrc);
+                        await this.editorHelpers.setAttribute(context, el, 'src', newAttachmentSrc);
                     }
                 });
                 return Promise.all(proms);
