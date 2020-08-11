@@ -26,7 +26,7 @@ snippetOptions.registry.Timeline = snippetOptions.SnippetOptionWidget.extend({
      */
     timelineCard: async function (previewMode, widgetValue, params) {
         const $timelineRow = this.$target.closest('.s_timeline_row');
-        await this.editorHelpers.toggleClass($timelineRow[0], 'flex-row-reverse flex-row');
+        await this.editorHelpers.toggleClass(this.wysiwyg.editor, $timelineRow[0], 'flex-row-reverse flex-row');
     },
 });
 });

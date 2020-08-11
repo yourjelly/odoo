@@ -1400,9 +1400,9 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
         if (!this.removing && newLength > 0) {
             const $toDelete = $items.filter('.active');
             this.$carousel.one('active_slide_targeted.carousel_item_option', async () => {
-                await this.wysiwyg.editor.execCommand(async () => {
-                    await this.editorHelpers.remove(this.$indicators.find('li:last')[0]);
-                    await this.editorHelpers.remove($toDelete[0]);
+                await this.wysiwyg.editor.execCommand(async (context) => {
+                    await this.editorHelpers.remove(context, this.$indicators.find('li:last')[0]);
+                    await this.editorHelpers.remove(context, $toDelete[0]);
                 });
                 this.$controls.toggleClass('d-none', newLength === 1);
                 this.$carousel.trigger('content_changed');
@@ -2254,18 +2254,15 @@ snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     async setShadow(previewMode, widgetValue, params) {
-        if (widgetValue) {
-            await this.editorHelpers.addClass(this.$target[0], params.shadowClass);
-        } else {
-            await this.editorHelpers.removeClass(this.$target[0], params.shadowClass);
-        }
+        this.$target.toggleClass(params.shadowClass, !!widgetValue);
         if (widgetValue) {
             const inset = widgetValue === 'inset' ? widgetValue : '';
             const values = this.$target.css('box-shadow').replace('inset', '') + ` ${inset}`;
-            await this.editorHelpers.setStyle(this.$target[0], 'box-shadow', values, true);
+            this.$target[0].style.setProperty('box-shadow', values, 'important');
         } else {
-            await this.editorHelpers.setStyle(this.$target[0], 'box-shadow', '');
+            this.$target.css('box-shadow', '');
         }
+        if (previewMode === false) await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
@@ -2388,14 +2385,14 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      */
     background: async function (previewMode, widgetValue, params) {
         if (widgetValue === '') {
-            await this.wysiwyg.editor.execCommand(async ()=> {
-                await this.editorHelpers.setStyle(this.$image[0], 'background-image', '');
-                await this.editorHelpers.removeClass(this.$target[0], 'o_record_has_cover');
+            await this.wysiwyg.editor.execCommand(async (context) => {
+                await this.editorHelpers.setStyle(context, this.$image[0], 'background-image', '');
+                await this.editorHelpers.removeClass(context, this.$target[0], 'o_record_has_cover');
             });
         } else {
-            await this.wysiwyg.editor.execCommand(async () => {
-                await this.editorHelpers.setStyle(this.$image[0], 'background-image', `url('${widgetValue}')`);
-                await this.editorHelpers.addClass(this.$target[0], 'o_record_has_cover');
+            await this.wysiwyg.editor.execCommand(async (context) => {
+                await this.editorHelpers.setStyle(context, this.$image[0], 'background-image', `url('${widgetValue}')`);
+                await this.editorHelpers.addClass(context, this.$target[0], 'o_record_has_cover');
             });
             const $defaultSizeBtn = this.$el.find('.o_record_cover_opt_size_default');
             $defaultSizeBtn.click();
@@ -2407,13 +2404,13 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      */
     filterValue: async function (previewMode, widgetValue, params) {
         if (!previewMode) {
-            await this.wysiwyg.editor.execCommand(async ()=> {
-                await this.editor.execCommand('dom.setStyle', {
+            await this.wysiwyg.editor.execCommand(async (context) => {
+                await context.execCommand('dom.setStyle', {
                     domNode: this.$filter[0],
                     name: 'opacity',
                     value: widgetValue || "0",
                 });
-                await this.editor.execCommand(parseFloat(widgetValue) !== 0 ? 'dom.addClass' : 'dom.removeClass', {
+                await context.execCommand(parseFloat(widgetValue) !== 0 ? 'dom.addClass' : 'dom.removeClass', {
                     domNode: this.$filter[0],
                     class: 'oe_black',
                 });
@@ -2548,22 +2545,22 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
         const $tabPane = isNavItem ? $(this.$target.find('.nav-link')[0].hash) : null;
         switch (widgetValue) {
             case 'prev':
-                await this.wysiwyg.editor.execCommand(async ()=> {
+                await this.wysiwyg.editor.execCommand(async (context) => {
                     if (this.$target.prev()[0]) {
-                        await this.editorHelpers.moveBefore(this.$target.prev()[0], this.$target[0]);
+                        await this.editorHelpers.moveBefore(context, this.$target.prev()[0], this.$target[0]);
                     }
                     if (isNavItem && $tabPane.prev()[0]) {
-                        await this.editorHelpers.moveBefore($tabPane.prev()[0], $tabPane[0]);
+                        await this.editorHelpers.moveBefore(context, $tabPane.prev()[0], $tabPane[0]);
                     }
                 });
                 break;
             case 'next':
-                await this.wysiwyg.editor.execCommand(async ()=> {
+                await this.wysiwyg.editor.execCommand(async (context) => {
                     if (this.$target.next()[0]) {
-                        await this.editorHelpers.moveAfter(this.$target.next()[0], this.$target[0]);
+                        await this.editorHelpers.moveAfter(context, this.$target.next()[0], this.$target[0]);
                     }
                     if (isNavItem && $tabPane.next()[0]) {
-                        await this.editorHelpers.moveAfter($tabPane.next()[0], $tabPane[0]);
+                        await this.editorHelpers.moveAfter(context, $tabPane.next()[0], $tabPane[0]);
                     }
                 });
                 break;
@@ -2591,7 +2588,7 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
         await this._super(...arguments);
         const $button = this._getButton();
         if ($button.length && this.el.offsetParent === null) {
-            await this.editorHelpers.remove($button[0]);
+            await this.editorHelpers.remove(this.wysiwyg.editor, $button[0]);
         }
     },
 
@@ -2622,9 +2619,9 @@ snippetOptions.registry.ScrollButton = snippetOptions.SnippetOptionWidget.extend
                 anchor.appendChild(arrow);
                 this.$buttonTemplate = $(anchor);
             }
-            await this.editorHelpers.insertHtml(this.$buttonTemplate[0].outerHTML, this.$target[0], 'INSIDE');
+            await this.editorHelpers.insertHtml(this.wysiwyg.editor, this.$buttonTemplate[0].outerHTML, this.$target[0], 'INSIDE');
         } else {
-            await this.editorHelpers.remove(this._getButton()[0]);
+            await this.editorHelpers.remove(this.wysiwyg.editor, this._getButton()[0]);
         }
     },
 
