@@ -221,16 +221,16 @@
                 <!-- Navbar Collapse -->
                 <div id="top_menu_collapse" class="collapse navbar-collapse">
                     <t t-call="website.navbar_nav">
-                        <t t-set="_nav_class" t-value="'ml-auto'"/>
                         <!-- Menu -->
                         <t t-foreach="website.menu_id.child_id" t-as="submenu">
                             <t t-call="website.submenu">
+                                <!-- Change var name to _item_class & _link_class -->
                                 <t t-set="item_class" t-value="'nav-item'"/>
                                 <t t-set="link_class" t-value="'nav-link'"/>
                             </t>
                         </t>
                         <!-- AutoHideMenu -->
-                        <li class="divider d-none"/>
+                        <!-- <li class="divider d-none"/> -->
                         <!-- Cart -->
                         <li class="nav-item">
                             <t t-call="website.placeholder_header_cart">
@@ -244,33 +244,34 @@
                                 <t t-set="_link_class" t-value="'nav-link ml-lg-3'"/>
                             </t>
                         </li>
-                        <!-- Sign In -->
-                        <li groups="base.group_public" class="nav-item">
-                            <t t-call="portal.placeholder_user_sign_in">
-                                <t t-set="_icon" t-value="true"/>
-                                <t t-set="_link_class" t-value="'nav-link ml-lg-3'"/>
-                            </t>
-                        </li>
                         <!-- User Dropdown -->
                         <li t-ignore="true" t-if="website.user_id != user_id" class="dropdown nav-item ml-lg-3">
                             <t t-call="portal.user_dropdown">
                                 <t t-set="_toggle_class" t-value="'nav-link'"/>
-                                <!-- <t t-set="_icon" t-value="true"/> -->
                                 <t t-set="_user_name" t-value="true"/>
+                                <t t-set="_user_name_class" t-value="'font-weight-bold'"/>
                             </t>
                         </li>
-                        <!-- Language Selector -->
-                        <t t-call="website.language_selector">
-                            <t t-set="_dropdown_class" t-value="'nav-item ml-lg-3'"/>
-                            <t t-set="_short_country" t-value="true"/>
-                            <t t-set="_toggle_class" t-value="'nav-link'"/>
-                        </t>
-                    </t>
-                    <!-- Button -->
-                    <t t-call="website.placeholder_header_button">
-                        <t t-set="_btn_class" t-value="'btn btn-primary mt-3 mt-lg-0 ml-lg-4'"/>
                     </t>
                 </div>
+                <ul class="nav navbar-nav">
+                    <!-- Language Selector -->
+                    <t t-call="website.language_selector">
+                        <t t-set="_dropdown_class" t-value="'nav-item ml-lg-3'"/>
+                        <t t-set="_icon" t-value="true"/>
+                        <t t-set="_toggle_class" t-value="'nav-link'"/>
+                    </t>
+                    <!-- Sign In -->
+                    <li groups="base.group_public" class="nav-item">
+                        <t t-call="portal.placeholder_user_sign_in">
+                            <t t-set="_link_class" t-value="'btn btn-outline-primary ml-lg-3'"/>
+                        </t>
+                    </li>
+                    <!-- Button -->
+                    <t t-call="website.placeholder_header_button">
+                        <t t-set="_btn_class" t-value="'btn btn-primary mt-3 mt-lg-0 ml-lg-3'"/>
+                    </t>
+                </ul>
             </div>
         </nav>
     </xpath>
@@ -561,60 +562,6 @@
         </nav>
     </xpath>
 </template>
-
-<template id="template_header_1" inherit_id="website.layout" name="Template Header 1" active="False">
-    <xpath expr="//header//nav" position="replace">
-        <nav class="navbar navbar-expand-lg navbar-light o_colored_level o_cc shadow-sm">
-            <div id="top_menu_container" class="container">
-                <!-- Left -->
-                <div class="w-25 d-flex"> <!--  Better solution than adding .d-flex?  -->
-                    <!-- Brand -->
-                    <t t-call="website.placeholder_header_brand"/>
-                </div>
-                <!-- ?? Change order (1 to 4) for screen sizes lower than LG ?? -->
-                <!-- Navbar Toggler -->
-                <t t-call="website.navbar_toggler"/>
-                <!-- ?? Keep the items centered ?? -->
-                <!-- Navbar Collapse -->
-                <div id="top_menu_collapse" class="collapse navbar-collapse">
-                    <t t-call="website.navbar_nav">
-                        <t t-set="_nav_class" t-value="'mx-lg-auto'"/>
-                        <!-- Menu -->
-                        <t t-foreach="website.menu_id.child_id" t-as="submenu">
-                            <t t-call="website.submenu">
-                                <t t-set="item_class" t-value="'nav-item'"/>
-                                <t t-set="link_class" t-value="'nav-link'"/>
-                            </t>
-                        </t>
-                    </t>
-                </div>
-                <div class="w-25 d-flex align-items-center justify-content-end">
-                    <!-- Sign In -->
-                    <div groups="base.group_public">
-                        <t t-call="portal.placeholder_user_sign_in"/>
-                    </div>
-                    <!-- User Dropdown -->
-                    <div t-ignore="true" t-if="website.user_id != user_id" class="dropdown">
-                        <t t-call="portal.user_dropdown">
-                            <t t-set="_toggle_class" t-value="'dropdown-menu-right'"/> <!--  Is it really working?  -->
-                            <t t-set="_icon" t-value="true"/>
-                        </t>
-                    </div>
-                    <!-- Language Selector -->
-                    <t t-call="website.language_selector">
-                        <t t-set="_toggle_class" t-value="'ml-4'"/>
-                        <t t-set="_country_flag" t-value="true"/>
-                    </t>
-                    <!-- Button -->
-                    <t t-call="website.placeholder_header_button">
-                        <t t-set="_btn_class" t-value="'btn btn-primary ml-4'"/>
-                    </t>
-                </div>
-            </div>
-        </nav>
-    </xpath>
-</template>
-
 
 <template id="template_header_2" inherit_id="website.layout" name="Template Header 2" active="False">
     <xpath expr="//header//nav" position="replace">
