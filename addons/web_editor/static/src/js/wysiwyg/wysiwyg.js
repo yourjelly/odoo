@@ -166,11 +166,6 @@ var Wysiwyg = Widget.extend({
         const $snippetManipulators = $('<div id="oe_manipulators" />');
 
         this.editor = new JWEditorLib.OdooWebsiteEditor({
-            afterRender: async () => {
-                const $wrapwrap = $('#wrapwrap');
-                $wrapwrap.removeClass('o_editable'); // clean the dom before edition
-                this._getEditable($wrapwrap).addClass('o_editable');
-            },
             snippetMenuElement: $mainSidebar[0],
             snippetManipulators: $snippetManipulators[0],
             customCommands: Object.assign({
@@ -195,7 +190,14 @@ var Wysiwyg = Widget.extend({
         // }
         await this.editor.start();
         this._bindAfterStart();
-        $('#wrapwrap').data('wysiwyg', this);
+
+        const $wrapwrap = $('#wrapwrap');
+        $wrapwrap.removeClass('o_editable'); // clean the dom before edition
+        this._getEditable($wrapwrap).addClass('o_editable');
+
+        $wrapwrap.data('wysiwyg', this);
+
+        this.$toolbar = $('jw-toolbar').detach();
 
         this.editorHelpers = this.editor.plugins.get(JWEditorLib.DomHelpers);
         const domLayout = this.editor.plugins.get(JWEditorLib.Layout).engines.dom;
