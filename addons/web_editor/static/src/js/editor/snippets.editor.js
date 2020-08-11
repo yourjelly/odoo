@@ -1648,7 +1648,6 @@ var SnippetsMenu = Widget.extend({
             return $target;
         };
         globalSelector.is = function ($from) {
-            console.log("from2", $from.get());
             for (var i = 0, len = selectors.length; i < len; i++) {
                 if (selectors[i].is($from)) {
                     return true;
