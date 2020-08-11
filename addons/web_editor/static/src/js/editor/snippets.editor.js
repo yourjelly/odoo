@@ -319,7 +319,7 @@ var SnippetEditor = Widget.extend({
         this.toggleOverlay(false);
         this.toggleOptions(false);
 
-        await this.wysiwyg.editor.execCommand(async () => {
+        await this.wysiwyg.editor.execCommand(async (context) => {
             await new Promise(resolve => {
                 this.trigger_up('call_for_each_child_snippet', {
                     $snippet: this.$snippetBlock,
@@ -335,13 +335,13 @@ var SnippetEditor = Widget.extend({
             this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
             var $parent = this.$snippetBlock.parent();
             this.$snippetBlock.find('*').addBack().tooltip('dispose');
-            await this.editorHelpers.remove(this.$snippetBlock[0]);
+            await this.editorHelpers.remove(context, this.$snippetBlock[0]);
             this.$el.remove();
 
             var node = $parent[0];
             if (node && node.firstChild) {
                 if (!node.firstChild.tagName && node.firstChild.textContent === ' ') {
-                    await this.editorHelpers.remove(node.firstChild);
+                    await this.editorHelpers.remove(context, node.firstChild);
                 }
             }
 
@@ -350,7 +350,7 @@ var SnippetEditor = Widget.extend({
                 while (!editor) {
                     var $nextParent = $parent.parent();
                     if (isEmptyAndRemovable($parent)) {
-                        await this.editorHelpers.remove(this.$parent[0]);
+                        await this.editorHelpers.remove(context, this.$parent[0]);
                     }
                     $parent = $nextParent;
                     editor = $parent.data('snippet-editor');
@@ -475,7 +475,7 @@ var SnippetEditor = Widget.extend({
 
         const $clonedContent = this.$snippetBlock.clone(false);
 
-        const vNodes = await this.editorHelpers.insertHtml($clonedContent[0].outerHTML, this.$snippetBlock[0], 'AFTER');
+        const vNodes = await this.editorHelpers.insertHtml(this.wysiwyg.editor, $clonedContent[0].outerHTML, this.$snippetBlock[0], 'AFTER');
         const $clone = $(this.editorHelpers.getDomNodes(vNodes)[0]);
 
         // todo: handle history undo in jabberwock
@@ -1081,10 +1081,10 @@ var SnippetsMenu = Widget.extend({
             ev.preventDefault();
             ev.stopPropagation();
             ev.stopImmediatePropagation();
-            this.wysiwyg.editor.execCommand(async () => {
+            this.wysiwyg.editor.execCommand(async (context) => {
                 const $target = $(ev.target);
                 const $defaultSnippetText = $target.closest('.o_default_snippet_text');
-                await this.editorHelpers.removeClass($defaultSnippetText[0], 'o_default_snippet_text');
+                await this.editorHelpers.removeClass(context, $defaultSnippetText[0], 'o_default_snippet_text');
                 ev.target.classList.remove('o_default_snippet_text');
                 const defaultSnippetNode = this.editorHelpers.getNodes($defaultSnippetText[0]);
                 const nodes = this.editorHelpers.getNodes($target[0]);
@@ -1456,10 +1456,10 @@ var SnippetsMenu = Widget.extend({
      */
     _loadSnippetsTemplates: async function (invalidateCache) {
         return this._mutex.exec(async () => {
-            await this.options.wysiwyg.editor.execCommand(async () => {
+            await this.options.wysiwyg.editor.execCommand(async (context) => {
                 await this._destroyEditors();
                 const html = await this.loadSnippets(invalidateCache);
-                await this._computeSnippetTemplates(html);
+                await this._computeSnippetTemplates(html, context);
             });
         });
     },
@@ -1600,7 +1600,7 @@ var SnippetsMenu = Widget.extend({
      * @private
      * @param {string} html
      */
-    _computeSnippetTemplates: async function (html) {
+    _computeSnippetTemplates: async function (html, context) {
         var self = this;
         var $html = $(html);
         var $scroll = $html.siblings('#o_scroll');
@@ -1744,7 +1744,7 @@ var SnippetsMenu = Widget.extend({
         this.$el.append(this.customizePanel);
         this.$el.append(this.invisibleDOMPanelEl);
         this._makeSnippetDraggable(this.$snippets);
-        await this._disableUndroppableSnippets();
+        await this._disableUndroppableSnippets(context);
 
         this.$el.addClass('o_loaded');
         $('body.editor_enable').addClass('editor_has_snippets');
@@ -1800,7 +1800,7 @@ var SnippetsMenu = Widget.extend({
      * @todo make them undraggable
      * @private
      */
-    _disableUndroppableSnippets: async function () {
+    _disableUndroppableSnippets: async function (context) {
         var self = this;
         var cache = {};
         for (const snippetDraggable of this.$snippets.toArray()) {
@@ -1820,9 +1820,9 @@ var SnippetsMenu = Widget.extend({
                 isEnabled = (cache[k]['drop-near'] || cache[k]['drop-in']);
             });
             if (isEnabled) {
-                await self.editorHelpers.removeClass(snippetDraggable, 'o_disabled');
+                await self.editorHelpers.removeClass(context, snippetDraggable, 'o_disabled');
             } else {
-                await self.editorHelpers.addClass(snippetDraggable, 'o_disabled');
+                await self.editorHelpers.addClass(context, snippetDraggable, 'o_disabled');
             }
         }
     },
@@ -1972,8 +1972,8 @@ var SnippetsMenu = Widget.extend({
                             const domLayout = layout.engines.dom;
                             const domNode = domLayout.getDomNodes(vNodes[0])[0];
 
-                            await jwEditor.execCommand(async () => {
-                                await self._disableUndroppableSnippets();
+                            await jwEditor.execCommand(async (context) => {
+                                await self._disableUndroppableSnippets(context);
                             });
 
                             await self._callForEachChildSnippet($(domNode), function (editor) {
@@ -2455,12 +2455,12 @@ var SnippetsMenu = Widget.extend({
      */
     _insertSnippet: async function ($snippet) {
         let result;
-        await this.wysiwyg.editor.execCommand(async () => {
+        await this.wysiwyg.editor.execCommand(async (context) => {
             const position = this._getRelativePosition($snippet[0]);
             if (!position) {
                 throw new Error("Could not find a place to insert the snippet.");
             }
-            result = await this.editorHelpers.insertHtml($snippet[0].outerHTML, position[0], position[1]);
+            result = await this.editorHelpers.insertHtml(context, $snippet[0].outerHTML, position[0], position[1]);
         });
         return result;
     }

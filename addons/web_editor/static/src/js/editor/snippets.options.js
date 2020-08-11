@@ -1813,12 +1813,14 @@ const SnippetOptionWidget = Widget.extend({
      * @returns {Promise|undefined}
      */
     selectDataAttribute: async function (previewMode, widgetValue, params) {
-        const value = await this._selectAttributeHelper(widgetValue, params);
-        this.$target.attr(`data-${params.attributeName}`, value);
-        if (!previewMode) {
-            const attributeName = params.attributeName.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
-            await this.editorHelpers.setAttribute(this.$target[0], `data-${attributeName}`, value);
-        }
+        this.wysiwyg.editor.execCommand( async (context) => {
+            const value = await this._selectAttributeHelper(widgetValue, params, context);
+            this.$target.attr(`data-${params.attributeName}`, value);
+            if (!previewMode) {
+                const attributeName = params.attributeName.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
+                await this.editorHelpers.setAttribute(context, this.$target[0], `data-${attributeName}`, value);
+            }
+        });
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -1835,7 +1837,7 @@ const SnippetOptionWidget = Widget.extend({
         if (previewMode) {
             this.$target.attr(params.attributeName, value);
         } else {
-            await this.editorHelpers.setAttribute(this.$target[0], params.attributeName, value);
+            await this.editorHelpers.setAttribute(this.wysiwyg.editor, this.$target[0], params.attributeName, value);
         }
     },
     /**
@@ -2476,7 +2478,7 @@ const SnippetOptionWidget = Widget.extend({
      * @param {Object} params
      * @returns {string|undefined}
      */
-    async _selectAttributeHelper(value, params) {
+    async _selectAttributeHelper(value, params, context) {
         if (!params.attributeName) {
             throw new Error('Attribute name missing');
         }
@@ -2487,9 +2489,9 @@ const SnippetOptionWidget = Widget.extend({
         }
         if (params.extraClass) {
             if (params.defaultValue === value) {
-                await this.editorHelpers.removeClass(this.$target[0], params.extraClass);
+                await this.editorHelpers.removeClass(context, this.$target[0], params.extraClass, context);
             } else {
-                await this.editorHelpers.addClass(this.$target[0], params.extraClass);
+                await this.editorHelpers.addClass(context, this.$target[0], params.extraClass, context);
             }
         }
         return value;
@@ -2498,16 +2500,16 @@ const SnippetOptionWidget = Widget.extend({
      * Refresh the target in the wysiwyg.
      */
     async _refreshTarget($target = this.$target) {
-        await this.wysiwyg.editor.execCommand(async () => {
+        await this.wysiwyg.editor.execCommand(async (context) => {
             const html = $target.html();
             $target.html('');
             const attributes = [...$target[0].attributes].reduce( (acc, attribute) => {
                 acc[attribute.name] = attribute.value;
                 return acc
             }, {})
-            await this.editorHelpers.updateAttributes($target[0], attributes);
-            await this.editorHelpers.empty($target[0]);
-            await this.editorHelpers.insertHtml(html, $target[0], 'INSIDE');
+            await this.editorHelpers.updateAttributes(context, $target[0], attributes);
+            await this.editorHelpers.empty(context, $target[0]);
+            await this.editorHelpers.insertHtml(context, html, $target[0], 'INSIDE');
         });
     },
 
@@ -2747,7 +2749,7 @@ registry.sizing = SnippetOptionWidget.extend({
                 $body.removeClass(cursor);
                 $handle.removeClass('o_active');
 
-                await self.editorHelpers.setAttribute(self.$target[0], 'class', self.$target.attr('class'));
+                await self.editorHelpers.setAttribute(self.wysiwyg.editor, self.$target[0], 'class', self.$target.attr('class'));
 
                 // Highlights the previews for a while
                 var $handlers = self.$overlay.find('.o_handle');
@@ -3462,14 +3464,14 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     backgroundType: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.editor.execCommand(async ()=> {
+        await this.wysiwyg.editor.execCommand(async (context)=> {
             if (widgetValue === 'repeat-pattern') {
-                await this.editorHelpers.addClass(this.$target[0], 'o_bg_img_opt_repeat');
+                await this.editorHelpers.addClass(context, this.$target[0], 'o_bg_img_opt_repeat');
             } else {
-                await this.editorHelpers.removeClass(this.$target[0], 'o_bg_img_opt_repeat');
+                await this.editorHelpers.removeClass(context, this.$target[0], 'o_bg_img_opt_repeat');
             }
-            await this.editorHelpers.setStyle(this.$target[0], 'background-position', '');
-            await this.editorHelpers.setStyle(this.$target[0], 'background-size', '');
+            await this.editorHelpers.setStyle(context, this.$target[0], 'background-position', '');
+            await this.editorHelpers.setStyle(context, this.$target[0], 'background-size', '');
         });
     },
     /**
@@ -3540,7 +3542,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         this.$overlayBackground = this.$overlayContent.find('.o_overlay_background');
 
         this.$backgroundOverlay.on('click', '.o_btn_apply', async () => {
-            await this.editorHelpers.setStyle(this.$target[0], 'background-position', this.$bgDragger.css('background-position'));
+            await this.editorHelpers.setStyle(context, this.$target[0], 'background-position', this.$bgDragger.css('background-position'));
             this._toggleBgOverlay(false);
         });
         this.$backgroundOverlay.on('click', '.o_btn_discard', () => {

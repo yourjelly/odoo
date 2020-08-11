@@ -19,17 +19,17 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
 
         this._images = this.$('img').get();
 
-        await this.wysiwyg.editor.execCommand(async () => {
+        await this.wysiwyg.editor.execCommand(async (context) => {
             // The snippet should not be editable
-            await this.editorHelpers.addClass(this.$target[0], 'o_fake_not_editable');
-            await this.editorHelpers.setAttribute(this.$target[0], 'contentEditable', 'false');
+            await this.editorHelpers.addClass(context, this.$target[0], 'o_fake_not_editable');
+            await this.editorHelpers.setAttribute(context, this.$target[0], 'contentEditable', 'false');
 
             // Make sure image previews are updated if images are changed
             this.$target.on('save', 'img', async (ev) => {
                 var $img = $(ev.currentTarget);
                 var index = this.$target.find('.carousel-item.active').index();
                 const $li = this.$('.carousel:first li[data-target]:eq(' + index + ')');
-                await this.editorHelpers.setStyle($li[0], 'background-image', 'url(' + $img.attr('src') + ')');
+                await this.editorHelpers.setStyle(context, $li[0], 'background-image', 'url(' + $img.attr('src') + ')');
             });
 
             // When the snippet is empty, an edition button is the default content

@@ -46,7 +46,7 @@ odoo.define('website_forum.tour_forum_question', function (require) {
         trigger: '.note-editable p',
         run: async () => {
             const wysiwyg = $('.note-editable').data('wysiwyg');
-            await wysiwyg.editorHelpers.insertHtml('First Answer', $('.note-editable p')[0], 'INSIDE');
+            await wysiwyg.editorHelpers.insertHtml(wysiwyg.editor, 'First Answer', $('.note-editable p')[0], 'INSIDE');
         },
     },
     {
