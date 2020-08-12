@@ -559,6 +559,10 @@
                        data-name="header_sidebar_opt"
                        data-customize-website-views="website.template_header_sidebar, website.no_autohide_menu"
                        data-customize-website-variable="'sidebar'"/>
+            <we-button string="2 Levels"
+                       data-name="header_1_opt"
+                       data-customize-website-views="website.template_header_1"
+                       data-customize-website-variable="'1'"/>
         </we-select>
 
         <!-- Header Default Template - Options -->

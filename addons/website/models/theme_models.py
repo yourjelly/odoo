@@ -192,6 +192,7 @@ class Theme(models.AbstractModel):
         self.disable_view('website.template_header_hamburger')
         self.disable_view('website.template_header_vertical')
         self.disable_view('website.template_header_sidebar')
+        self.disable_view('website.template_header_1')
 
         # Reinitialize footer templates
         self.enable_view('website.footer_custom')
