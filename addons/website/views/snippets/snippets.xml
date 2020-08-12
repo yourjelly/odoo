@@ -473,7 +473,7 @@
 
         <we-select string="Pre Header"
                    id="preheader_templates_select"
-                   data-dependencies="!header_transparent_opt"
+                   data-dependencies="header_6_template"
                    data-variable="preheader-template"
                    data-reload="/">
             <we-button id="option_template_preheader_none"
@@ -483,17 +483,17 @@
                        string="None"/>
             <we-button id="option_template_preheader_magazine"
                        data-name="preheader_magazine_opt"
-                       data-customize-website-views="website.template_preheader_magazine"
+                       data-customize-website-views="website.template_header_6_magazine"
                        data-customize-website-variable="'magazine'"
                        string="Magazine"/>
             <we-button id="option_template_preheader_icons"
                        data-name="preheader_icons_opt"
-                       data-customize-website-views="website.template_preheader_icons"
+                       data-customize-website-views="website.template_header_6_icons"
                        data-customize-website-variable="'icons'"
                        string="Icons"/>
             <we-button id="option_template_preheader_image"
                        data-name="preheader_image_opt"
-                       data-customize-website-views="website.template_preheader_image"
+                       data-customize-website-views="website.template_header_6_image"
                        data-customize-website-variable="'image'"
                        string="Image"/>
         </we-select>
@@ -579,6 +579,10 @@
                        data-name="header_5_opt"
                        data-customize-website-views="website.template_header_5"
                        data-customize-website-variable="5"/>
+            <we-button string="Topbar"
+                       data-name="header_6_opt"
+                       data-customize-website-views="website.template_header_6, website.template_header_6_image"
+                       data-customize-website-variable="6"/>
         </we-select>
 
         <!-- Header Default Template - Options -->
