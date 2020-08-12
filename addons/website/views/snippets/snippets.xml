@@ -567,6 +567,10 @@
                        data-name="header_2_opt"
                        data-customize-website-views="website.template_header_2"
                        data-customize-website-variable="'2'"/>
+            <we-button string="Search"
+                       data-name="header_3_opt"
+                       data-customize-website-views="website.template_header_3"
+                       data-customize-website-variable="3"/>
         </we-select>
 
         <!-- Header Default Template - Options -->
