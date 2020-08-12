@@ -261,21 +261,22 @@ var Wysiwyg = Widget.extend({
         const inline = this.editor.plugins.get(JWEditorLib.Inline);
         const modifiers = inline.getCurrentModifiers(range);
         const linkFormat = modifiers.find(JWEditorLib.LinkFormat);
-        const attributes = modifiers.find(JWEditorLib.Attributes);
         const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
-        const linkInfo = {
-            text: text,
-            url: linkFormat && linkFormat.url || '',
-            class: attributes && attributes.get('class') || '',
-            target: linkFormatAttributes && linkFormatAttributes.get('target'),
-        };
-        var linkDialog = new weWidgets.LinkDialog(this,
+        let classes = '';
+        const inlineNodes = range.targetedNodes(JWEditorLib.InlineNode);
+        for (const node of inlineNodes) {
+            const linkFormat = node.modifiers.find(JWEditorLib.LinkFormat);
+            const linkAttributes = linkFormat.modifiers.find(JWEditorLib.Attributes);
+            classes = linkAttributes.get('class');
+            break;
+        }
+        const linkDialog = new weWidgets.LinkDialog(this,
             {
                 props: {
-                    text: linkInfo.text,
-                    url: linkInfo.url,
-                    class: linkInfo.class,
-                    target: linkInfo.target,
+                    text: text,
+                    url: linkFormat && linkFormat.url || '',
+                    initialClassNames: classes,
+                    target: linkFormatAttributes && linkFormatAttributes.get('target'),
                 }
             },
         );
