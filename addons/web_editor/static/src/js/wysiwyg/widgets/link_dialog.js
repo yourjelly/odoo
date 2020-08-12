@@ -74,10 +74,10 @@ var LinkDialog = Dialog.extend({
     start: function () {
         const self = this;
         this.$('input.link-style').prop('checked', false).first().prop('checked', true);
-        if (this.props.className) {
+        if (this.props.initialClassNames) {
             this.$('input[name="link_style_color"], select[name="link_style_size"] > option, select[name="link_style_shape"] > option').each(function () {
                 var $option = $(this);
-                if ($option.val() && self.state.className.match(new RegExp('(^|btn-| |btn-outline-)' + $option.val()))) {
+                if ($option.val() && self.props.initialClassNames.match(new RegExp('(^|btn-| |btn-outline-)' + $option.val()))) {
                     if ($option.is("input")) {
                         $option.prop("checked", true);
                     } else {
