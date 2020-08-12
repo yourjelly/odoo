@@ -704,5 +704,9 @@
             <field name="name">Multi-website</field>
             <field name="category_id" ref="base.module_category_hidden"/>
         </record>
+
+        <record id="base.lang_ar" model="res.lang">
+            <field name="flag_image" type="base64" file="website/static/src/img/lang_flags/lang_ar.png"/>
+        </record>
     </data>
 </odoo>

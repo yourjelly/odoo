@@ -82,6 +82,7 @@
         'views/res_partner_views.xml',
         'wizard/base_language_install_views.xml',
         'wizard/website_robots.xml',
+        'views/res_lang_views.xml',
 
         # Old snippets
         'views/snippets/s_btn.xml',
