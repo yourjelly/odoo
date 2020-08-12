@@ -683,6 +683,10 @@ $-transition-duration: 200ms;
         transition: transform $-transition-duration;
     }
 
+    @if o-website-value('header-template') == 'boxed' {
+        background: transparent;
+    }
+
     &.o_header_is_scrolled {
         .navbar-brand {
             font-size: $o-theme-navbar-fixed-logo-height / $line-height-base;

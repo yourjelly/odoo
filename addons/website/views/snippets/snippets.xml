@@ -589,6 +589,9 @@
             <we-button data-name="header_minimalist_opt"
                        data-customize-website-views="website.template_header_minimalist"
                        data-customize-website-variable="'minimalist'">Minimalist</we-button>
+            <we-button data-name="header_boxed_opt"
+                       data-customize-website-views="website.template_header_boxed"
+                       data-customize-website-variable="'boxed'">Boxed</we-button>
         </we-select>
 
         <!-- Header Sidebar Template - Options -->
