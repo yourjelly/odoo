@@ -575,6 +575,10 @@
                        data-name="header_4_opt"
                        data-customize-website-views="website.template_header_4"
                        data-customize-website-variable="4"/>
+            <we-button string="Vertical - 1 Level"
+                       data-name="header_5_opt"
+                       data-customize-website-views="website.template_header_5"
+                       data-customize-website-variable="5"/>
         </we-select>
 
         <!-- Header Default Template - Options -->
