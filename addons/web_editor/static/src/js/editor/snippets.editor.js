@@ -364,7 +364,7 @@ var SnippetEditor = Widget.extend({
                 }
             }
 
-            await new Promise((resolve) => this.trigger_up('snippet_removed', {onFinish: resolve}));
+            await new Promise((resolve) => this.trigger_up('snippet_removed', {onFinish: resolve, context: context}));
             this.destroy();
             const childs = this.snippetMenu.getChildsSnippetBlock(this.$snippetBlock);
             for (const child of childs) {
@@ -2400,7 +2400,7 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _onSnippetRemoved: async function (ev) {
-        await this._disableUndroppableSnippets();
+        await this._disableUndroppableSnippets(ev.data.context);
         this._updateInvisibleDOM();
         ev.data.onFinish();
     },
