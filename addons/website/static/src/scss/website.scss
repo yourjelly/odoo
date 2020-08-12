@@ -927,6 +927,13 @@ header {
         }
     }
 }
+@if o-website-value('header-template') == 'centered_logo' {
+    header .o_header_centered_logo {
+        @include media-breakpoint-up(lg) {
+            width: 50%;
+        }
+    }
+}
 
 @if o-website-value('header-template') == 'sidebar' {
     @include media-breakpoint-up(lg) {
