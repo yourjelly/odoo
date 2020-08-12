@@ -563,6 +563,10 @@
                        data-name="header_1_opt"
                        data-customize-website-views="website.template_header_1"
                        data-customize-website-variable="'1'"/>
+            <we-button string="Slogan"
+                       data-name="header_2_opt"
+                       data-customize-website-views="website.template_header_2"
+                       data-customize-website-variable="'2'"/>
         </we-select>
 
         <!-- Header Default Template - Options -->
