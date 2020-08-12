@@ -571,6 +571,10 @@
                        data-name="header_3_opt"
                        data-customize-website-views="website.template_header_3"
                        data-customize-website-variable="3"/>
+            <we-button string="Ecommerce"
+                       data-name="header_4_opt"
+                       data-customize-website-views="website.template_header_4"
+                       data-customize-website-variable="4"/>
         </we-select>
 
         <!-- Header Default Template - Options -->
