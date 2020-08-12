@@ -978,23 +978,6 @@ header {
         body.o_connected_user #wrapwrap > header {
             top: $o-navbar-height;
         }
-        @if o-website-value('preheader-template') {
-            #o_preheader {
-                position: fixed;
-                right: 0;
-                left: o-website-value('sidebar-width');
-            }
-            @if index(('magazine', 'icons'), o-website-value('preheader-template')) {
-                #wrapwrap > main {
-                    // Header visibilities
-                    padding-top: $spacer * 3 !important;
-                }
-            } @else if o-website-value('preheader-template') == 'image' {
-                #wrapwrap > main {
-                    padding-top: o-website-value('preheader-height');
-                }
-            }
-        }
     }
 }
 

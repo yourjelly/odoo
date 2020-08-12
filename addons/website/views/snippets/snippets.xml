@@ -558,7 +558,7 @@
             <we-button string="Sidebar"
                        data-name="header_sidebar_opt"
                        data-customize-website-views="website.template_header_sidebar, website.no_autohide_menu"
-                       data-customize-website-variable="sidebar"/>
+                       data-customize-website-variable="'sidebar'"/>
         </we-select>
 
         <!-- Header Default Template - Options -->
