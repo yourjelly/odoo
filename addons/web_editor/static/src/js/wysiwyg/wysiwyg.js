@@ -255,49 +255,45 @@ var Wysiwyg = Widget.extend({
     },
 
     openLinkDialog() {
-        return new Promise((resolve) => {
-            const range = this.editor.selection.range;
-            const targettedLeaves = range.targetedNodes(node => !node.hasChildren());
-            const text = targettedLeaves.map(x => x.textContent).join('');
-            const inline = this.editor.plugins.get(JWEditorLib.Inline);
-            const modifiers = inline.getCurrentModifiers(range);
-            const linkFormat = modifiers.find(JWEditorLib.LinkFormat);
-            const attributes = modifiers.find(JWEditorLib.Attributes);
-            const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
-            const linkInfo = {
-                text: text,
-                url: linkFormat && linkFormat.url || '',
-                class: attributes && attributes.get('class') || '',
-                target: linkFormatAttributes && linkFormatAttributes.get('target'),
-            };
-            var linkDialog = new weWidgets.LinkDialog(this,
-                {
-                    props: {
-                        text: linkInfo.text,
-                        url: linkInfo.url,
-                        class: linkInfo.class,
-                        target: linkInfo.target,
-                    }
-                },
-            );
-            linkDialog.open();
-            linkDialog.on('save', this, async (params)=> {
-                    await this.editor.execCommand(async (context) =>{
-                        const linkParams = {
-                            url: params.url,
-                            label: params.text,
-                            target: params.isNewWindow ? '_blank' : '',
-                        };
-                        await context.execCommand('link', linkParams);
-                        const nodes = this.editor.selection.range.targetedNodes(JWEditorLib.InlineNode);
-                        const links = nodes.map(node => node.modifiers.find(JWEditorLib.LinkFormat)).filter(f => f);
-                        for (const link of links) {
-                            link.modifiers.get(JWEditorLib.Attributes).set('class', params.classes);
-                        }
-                    });
-                resolve();
+        const range = this.editor.selection.range;
+        const targettedLeaves = range.targetedNodes(node => !node.hasChildren());
+        const text = targettedLeaves.map(x => x.textContent).join('');
+        const inline = this.editor.plugins.get(JWEditorLib.Inline);
+        const modifiers = inline.getCurrentModifiers(range);
+        const linkFormat = modifiers.find(JWEditorLib.LinkFormat);
+        const attributes = modifiers.find(JWEditorLib.Attributes);
+        const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
+        const linkInfo = {
+            text: text,
+            url: linkFormat && linkFormat.url || '',
+            class: attributes && attributes.get('class') || '',
+            target: linkFormatAttributes && linkFormatAttributes.get('target'),
+        };
+        var linkDialog = new weWidgets.LinkDialog(this,
+            {
+                props: {
+                    text: linkInfo.text,
+                    url: linkInfo.url,
+                    class: linkInfo.class,
+                    target: linkInfo.target,
+                }
+            },
+        );
+        linkDialog.open();
+        linkDialog.on('save', this, async (params)=> {
+            await this.editor.execCommand(async (context) =>{
+                const linkParams = {
+                    url: params.url,
+                    label: params.text,
+                    target: params.isNewWindow ? '_blank' : '',
+                };
+                await context.execCommand('link', linkParams);
+                const nodes = this.editor.selection.range.targetedNodes(JWEditorLib.InlineNode);
+                const links = nodes.map(node => node.modifiers.find(JWEditorLib.LinkFormat)).filter(f => f);
+                for (const link of links) {
+                    link.modifiers.get(JWEditorLib.Attributes).set('class', params.classes);
+                }
             });
-            linkDialog.on('cancel', this, resolve);
         });
     },
     openMediaDialog() {
