@@ -568,6 +568,13 @@
             <we-button string="Right" data-select-class="ml-auto"/>
         </we-select>
 
+        <!-- Header Hamburger Template - Options -->
+        <we-select string="⌙ Alignment" data-dependencies="header_hamburger_opt" data-apply-to=".navbar-toggler">
+            <we-button string="Left" data-select-class="order-first mr-auto"/>
+            <we-button string="Center" data-select-class="mr-auto"/>
+            <we-button string="Right" data-select-class=""/>
+        </we-select>
+
         <we-input string="⌙ Width"
                   data-customize-website-variable="null"
                   data-variable="sidebar-width"
@@ -592,12 +599,6 @@
             <we-button data-customize-website-views="">Text</we-button>
             <we-button data-customize-website-views="website.option_header_off_canvas_logo_show">Image</we-button>
         </we-select>
-        <we-checkbox string="Center Main Logo"
-                     data-dependencies="header_hamburger_opt"
-                     data-apply-to=".navbar-brand"
-                     data-customize-website-views="website.option_header_hamburger_center_logo"
-                     data-select-class="mx-md-auto"
-                     data-no-preview="true"/>
 
         <we-select string="Header Effect" data-dependencies="!header_sidebar_opt">
             <t t-set="header_effect_standard_label">Standard</t>
