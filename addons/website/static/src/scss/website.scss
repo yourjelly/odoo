@@ -792,15 +792,10 @@ header {
         $-is-hamburger: o-website-value('header-template') == 'hamburger';
         $-is-vertical: o-website-value('header-template') == 'vertical';
         @include media-breakpoint-up(md) {
-            @if $-is-hamburger or $-is-vertical {
+            @if $-is-hamburger {
                 #top_menu_container {
                     padding-top: $spacer * 0.5;
                     padding-bottom: $spacer * 0.5;
-                }
-            }
-            @if $-is-vertical {
-                .navbar-brand {
-                    margin-bottom: $spacer;
                 }
             }
         }
