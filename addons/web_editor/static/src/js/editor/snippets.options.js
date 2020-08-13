@@ -1764,7 +1764,7 @@ const SnippetOptionWidget = Widget.extend({
      *
      * @constructor
      */
-    init: function (parent, $uiElements, $snippetBlock, $overlay, data, options) {
+    init: function (parent, $uiElements, getTarget, $overlay, data, options) {
         this._super.apply(this, arguments);
 
         this.$originalUIElements = $uiElements;
@@ -1779,15 +1779,16 @@ const SnippetOptionWidget = Widget.extend({
         this.className = 'snippet-option-' + this.data.optionName;
         this._userValueWidgets = [];
 
-        this.setTarget($snippetBlock);
+        this.getTarget = getTarget;
+        this.resetOptionTarget();
         this.ownerDocument = this.$target[0].ownerDocument;
 
     },
     /**
-     * Set the option target of `this` and all it's widget children.
+     * Reset the option target.
      */
-    setOptionTarget($snippetBlock) {
-        this.$target = $snippetBlock;
+    resetOptionTarget() {
+        this.$target = this.getTarget();
         for (const subWidget of this._userValueWidgets) {
             subWidget.setTarget(this.$target);
         }
