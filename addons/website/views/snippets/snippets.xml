@@ -528,38 +528,6 @@
          data-selector="#wrapwrap > header"
          data-no-check="true"
          groups="website.group_website_designer">
-        <we-checkbox string="Sign In" data-customize-website-views="portal.user_sign_in" data-reload="/"/>
-        <we-colorpicker string="Colors"
-                        data-customize-website-color="" data-color="menu"
-                        data-with-combinations="true"/>
-        <we-checkbox id="option_header_shadow" string="Shadow"
-                     data-customize-website-views="website.header_shadow"
-                     data-select-class="shadow"
-                     data-no-preview="true"/>
-
-        <we-select string="Brand" data-reload="/">
-            <we-button data-customize-website-views="" data-name="option_header_brand_none">None</we-button>
-            <we-button data-customize-website-views="website.option_header_brand_name">Text</we-button>
-            <we-button data-customize-website-views="website.option_header_brand_logo">Image</we-button>
-        </we-select>
-        <we-input string="⌙ Height"
-                  data-dependencies="!option_header_brand_none"
-                  data-customize-website-variable="null"
-                  data-variable="logo-height"
-                  data-unit="px"
-                  data-save-unit="rem"/>
-        <we-input string="⌙ Height (Scrolled)"
-                  data-name="option_logo_height_scrolled"
-                  data-customize-website-variable="null"
-                  data-variable="fixed-logo-height"
-                  data-unit="px"
-                  data-save-unit="rem"
-                  data-dependencies="!header_effect_scroll_opt"/>
-
-        <we-row string="Font">
-            <we-fontfamilypicker data-variable="navbar-font"/>
-            <we-input data-customize-website-variable="null" data-variable="header-font-size" data-unit="px" data-save-unit="rem"/>
-        </we-row>
 
         <we-select string="Template" data-variable="header-template" data-reload="/">
             <we-button title="Default"
@@ -636,7 +604,53 @@
             <we-button data-customize-website-views="website.option_header_off_canvas_logo_show">Image</we-button>
         </we-select>
 
-        <we-select id="header_visibilities_list" string="Header Visibility" data-dependencies="!header_sidebar_opt">
+        <we-row string="Font">
+            <we-fontfamilypicker data-variable="navbar-font"/>
+            <we-input data-customize-website-variable="null" data-variable="header-font-size" data-unit="px" data-save-unit="rem"/>
+        </we-row>
+
+        <we-colorpicker string="Colors"
+                        data-customize-website-color="" data-color="menu"
+                        data-with-combinations="true"/>
+    </div>
+
+    <!-- Footer - Borders & Shadows -->
+    <div data-js="Box"
+         id="option_header_shadow"
+         data-selector="#wrapwrap > header"
+         data-target="> nav"
+         data-no-check="true"
+         groups="website.group_website_designer">
+        <t t-call="website.snippet_options_border_widgets"/>
+        <t t-call="website.snippet_options_shadow_widgets"/>
+    </div>
+
+    <div data-js="Header"
+         id="so_header_theme"
+         data-selector="#wrapwrap > header"
+         data-no-check="true"
+         groups="website.group_website_designer">
+
+        <we-select string="Logo" data-reload="/">
+            <we-button data-customize-website-views="" data-name="option_header_brand_none">None</we-button>
+            <we-button data-customize-website-views="website.option_header_brand_name">Text</we-button>
+            <we-button data-customize-website-views="website.option_header_brand_logo">Image</we-button>
+        </we-select>
+        <we-input string="⌙ Height"
+                  data-dependencies="!option_header_brand_none"
+                  data-customize-website-variable="null"
+                  data-variable="logo-height"
+                  data-unit="px"
+                  data-save-unit="rem"/>
+        <we-input string="⌙ Height (Scrolled)"
+                  data-name="option_logo_height_scrolled"
+                  data-customize-website-variable="null"
+                  data-variable="fixed-logo-height"
+                  data-unit="px"
+                  data-save-unit="rem"
+                  data-dependencies="!header_effect_scroll_opt"/>
+
+        <we-select id="header_visibilities_list" string="Scroll Effect" data-dependencies="!header_sidebar_opt">
             <we-button id="option_header_visibility_standard"
                        data-name="header_visibility_standard_opt"
                        data-select-class="o_header_standard"
@@ -664,7 +678,7 @@
                        string="Fade Out"/>
         </we-select>
 
-        <we-select string="Navbar Links Style" data-variable="header-links-style" data-reload="/">
+        <we-select string="Menu Style" data-variable="header-links-style" data-reload="/">
             <we-button data-name="option_header_navbar_links_default"
                        data-customize-website-views=""
                        data-customize-website-variable="'default'">Default</we-button>
@@ -695,7 +709,7 @@
     <div data-js="TopMenuVisibility"
         data-selector="[data-main-object^='website.page('] #wrapwrap > header"
         data-no-check="true">
-        <we-select string="Visibility (On This Page)" id="option_header_visibility" data-no-preview="true">
+        <we-select string="Page Visibility" id="option_header_visibility" data-no-preview="true">
             <we-button data-name="regular_header_visibility_opt"
                        data-visibility="regular">Regular</we-button>
             <we-button data-visibility="transparent">Transparent</we-button>
@@ -712,6 +726,14 @@
             data-css-property="background-color"
             data-color-prefix="bg-"
             data-excluded="theme, common, custom"/>
+    </div>
+
+    <div data-js="Header"
+         id="so_header_theme"
+         data-selector="#wrapwrap > header"
+         data-no-check="true"
+         groups="website.group_website_designer">
+        <we-checkbox string="Sign In" data-customize-website-views="portal.user_sign_in" data-reload="/"/>
     </div>
 
     <!-- Footer - Colors & Layouts -->
