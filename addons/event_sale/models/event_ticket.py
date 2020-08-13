@@ -46,7 +46,7 @@ class EventTemplateTicket(models.Model):
     @api.depends('product_id', 'price')
     def _compute_price_reduce(self):
         for ticket in self:
-            product = ticket.product_id
+            product = ticket.sudo().product_id
             discount = product.lst_price and (product.lst_price - product.price) / product.lst_price or 0.0
             ticket.price_reduce = (1.0 - discount) * ticket.price
 

@@ -5,6 +5,7 @@ import babel.dates
 import re
 import werkzeug
 from werkzeug.datastructures import OrderedMultiDict
+from werkzeug.exceptions import NotFound
 
 from ast import literal_eval
 from collections import defaultdict
@@ -14,6 +15,7 @@ from dateutil.relativedelta import relativedelta
 from odoo import fields, http, _
 from odoo.addons.http_routing.models.ir_http import slug
 from odoo.addons.website.controllers.main import QueryURL
+from odoo.addons.event.controllers.main import EventController
 from odoo.http import request
 from odoo.osv import expression
 from odoo.tools.misc import get_lang, format_date
@@ -28,7 +30,7 @@ class WebsiteEventController(http.Controller):
     @http.route(['/event', '/event/page/<int:page>', '/events', '/events/page/<int:page>'], type='http', auth="public", website=True, sitemap=sitemap_event)
     def events(self, page=1, **searches):
         Event = request.env['event.event']
-        EventType = request.env['event.type']
+        SudoEventType = request.env['event.type'].sudo()
 
         searches.setdefault('search', '')
         searches.setdefault('date', 'all')
@@ -98,7 +100,7 @@ class WebsiteEventController(http.Controller):
                     current_date = date[1]
 
         if searches["type"] != 'all':
-            current_type = EventType.browse(int(searches['type']))
+            current_type = SudoEventType.browse(int(searches['type']))
             domain_search["type"] = [("event_type_id", "=", int(searches["type"]))]
 
         if searches["country"] != 'all' and searches["country"] != 'online':
@@ -299,6 +301,9 @@ class WebsiteEventController(http.Controller):
 
     @http.route(['/event/<model("event.event"):event>/registration/new'], type='json', auth="public", methods=['POST'], website=True)
     def registration_new(self, event, **post):
+        if not event.can_access_from_current_website():
+            raise werkzeug.exceptions.NotFound()
+
         tickets = self._process_tickets_form(event, post)
         availability_check = True
         if event.seats_limited:
@@ -361,7 +366,7 @@ class WebsiteEventController(http.Controller):
 
         urls = event._get_event_resource_urls()
         return request.render("website_event.registration_complete", {
-            'attendees': attendees,
+            'attendees': attendees.sudo(),
             'event': event,
             'google_url': urls.get('google_url'),
             'iCal_url': urls.get('iCal_url')
@@ -376,5 +381,7 @@ class WebsiteEventController(http.Controller):
                 pass
             else:
                 # perform a search to filter on existing / valid tags implicitely
-                tags = request.env['event.tag'].search([('id', 'in', tag_ids)])
+                tags = request.env['event.tag'].sudo().search([
+                    ('color', '!=', False), ('color', '!=', 0), ('id', 'in', tag_ids),
+                ])
         return tags
