@@ -560,7 +560,7 @@ var SnippetEditor = Widget.extend({
             const optionInstance = new (snippetOptions.registry[optionName] || snippetOptions.SnippetOptionWidget)(
                 this,
                 option.$el.children(),
-                option.base_target ? this.$snippetBlock.find(option.base_target).eq(0) : this.$snippetBlock,
+                () => option.base_target ? this.$snippetBlock.find(option.base_target).eq(0) : this.$snippetBlock,
                 this.$el,
                 _.extend({
                     optionName: optionName,
@@ -595,6 +595,18 @@ var SnippetEditor = Widget.extend({
             });
             $optionsSection.toggleClass('d-none', options.length === 0);
         });
+    },
+    /**
+     * Reset the options target in case the reference is outdated.
+     *
+     * This can happend with the method `_refreshTarget` on a `SnippetOption`.
+     *
+     * @private
+     */
+    _resetOptionsTarget() {
+        for (const snippetOption of Object.values(this.snippetOptionInstances)) {
+            snippetOption.resetOptionTarget();
+        }
     },
     /**
      * @private
@@ -1766,6 +1778,7 @@ var SnippetsMenu = Widget.extend({
     _getSnippetEditor: async function ($snippet) {
         var snippetEditor = $snippet.data('snippet-editor');
         if (snippetEditor) {
+            snippetEditor._resetOptionsTarget();
             return snippetEditor.__isStarted;
         }
 
