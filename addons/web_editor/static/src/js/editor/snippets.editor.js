@@ -604,6 +604,7 @@ var SnippetEditor = Widget.extend({
      * @private
      */
     _resetOptionsTarget() {
+        if (!this.snippetOptionInstances) return;
         for (const snippetOption of Object.values(this.snippetOptionInstances)) {
             snippetOption.resetOptionTarget();
         }
