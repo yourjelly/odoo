@@ -446,6 +446,10 @@ var Wysiwyg = Widget.extend({
             window.location.reload();
         });
     },
+    toggleMobilePreview: async function () {
+        const theme = document.querySelector('#mobile-preview') ? 'default' : 'mobile';
+        await this.editor.execCommand('changeTheme', { theme: theme });
+    },
     cropImage: async function (params) {
         const imageNodes = params.context.range.targetedNodes(JWEditorLib.ImageNode);
         const imageNode = imageNodes.length === 1 && imageNodes[0];
