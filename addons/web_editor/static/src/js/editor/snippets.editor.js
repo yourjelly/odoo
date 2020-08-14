@@ -889,6 +889,7 @@ var SnippetsMenu = Widget.extend({
         'click .o_snippet_search_filter_reset': '_onSnippetSearchResetClick',
         'click .o_we_website_top_actions button[data-action=save]': '_onSaveClick',
         'click .o_we_website_top_actions button[data-action=cancel]': '_onDiscardClick',
+        'click .o_we_website_top_actions button[data-action=mobile]': '_onMobilePreviewClick',
     },
     custom_events: {
         'activate_insertion_zones': '_onActivateInsertionZones',
@@ -2544,6 +2545,12 @@ var SnippetsMenu = Widget.extend({
      */
     _onDiscardClick: function() {
         this.wysiwyg.discardEditions();
+    },
+    /**
+     * On click on discard button.
+     */
+    _onMobilePreviewClick: function() {
+        this.wysiwyg.toggleMobilePreview();
     },
 });
 
