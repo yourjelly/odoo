@@ -27,6 +27,12 @@ class UtilPerf(HttpCase):
         self.url_open(url)
         return self.registry.test_cr.sql_log_count - sql_count - EXTRA_REQUEST
 
+    def _print_request(self, reqs):
+        import logging
+        logger = logging.getLogger(type(self).__module__)
+        for req in self.registry.test_cr.sql_log_queries[-reqs:]:
+            logger.warning(req)
+
 
 class TestStandardPerformance(UtilPerf):
     def test_10_perf_sql_img_controller(self):

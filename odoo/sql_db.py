@@ -231,6 +231,7 @@ class Cursor(BaseCursor):
         self.sql_log = _logger.isEnabledFor(logging.DEBUG)
 
         self.sql_log_count = 0
+        self.sql_log_queries = []
 
         # avoid the call of close() (by __del__) if an exception
         # is raised by any of the following initialisations
@@ -300,6 +301,10 @@ class Cursor(BaseCursor):
 
         # simple query count is always computed
         self.sql_log_count += 1
+        encoding = psycopg2.extensions.encodings[self.connection.encoding]
+        self.sql_log_queries.append(
+            self._obj.mogrify(query, params).decode(encoding, 'replace').replace('\n', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ')
+        )
         delay = (time.time() - now)
         if hasattr(threading.current_thread(), 'query_count'):
             threading.current_thread().query_count += 1
@@ -349,6 +354,7 @@ class Cursor(BaseCursor):
         process('from')
         process('into')
         self.sql_log_count = 0
+        self.sql_log_queries = []
         self.sql_log = False
 
     @check
