@@ -210,18 +210,12 @@ var Wysiwyg = Widget.extend({
         const emptyClass = "oe_blank_wrap";
         const targetNode = this.editorEditable.querySelector("#wrap");
         if (this.options.enableWebsite && targetNode) {
-            let mutationCallback = function () {
-                if (targetNode.textContent.trim() === '' && !targetNode.querySelector('section, div')) {
-                    targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-                    targetNode.classList.add(emptyClass);
-                } else {
-                    targetNode.classList.remove(emptyClass);
-                }
-            };
-            const observer = new MutationObserver(mutationCallback);
-            observer.observe(targetNode, {childList: true});
-            // force check at editor startup
-            mutationCallback();
+            if (targetNode.textContent.trim() === '' && !targetNode.querySelector('section, div')) {
+                targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+                targetNode.classList.add(emptyClass);
+            } else {
+                targetNode.classList.remove(emptyClass);
+            }
         }
 
         if (this.options.enableTranslation) {
