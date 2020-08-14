@@ -50,6 +50,9 @@ class QWeb(models.AbstractModel):
 
         atts = super(QWeb, self)._post_processing_att(tagName, atts, options)
 
+        if tagName == 'img' and 'loading' not in atts:
+            atts['loading'] = 'lazy'  # default is auto
+
         if options.get('inherit_branding') or options.get('rendering_bundle') or \
            options.get('edit_translations') or options.get('debug') or (request and request.session.debug):
             return atts
@@ -64,6 +67,7 @@ class QWeb(models.AbstractModel):
         name = self.URL_ATTRS.get(tagName)
         if request and name and name in atts:
             atts[name] = url_for(atts[name])
+
 
         if not website.cdn_activated:
             return atts
