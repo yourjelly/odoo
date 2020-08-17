@@ -960,6 +960,75 @@
     </xpath>
 </template>
 
+<template id="template_header_magazine" inherit_id="website.layout" name="Template Header Magazine" active="False">
+    <xpath expr="//header//nav" position="replace">
+        <div id="oe_structure_header_magazine_1" class="oe_structure"/>
+        <nav class="navbar navbar-light navbar-expand-lg o_colored_level o_cc shadow-sm">
+            <div id="top_menu_container" class="container">
+                <!-- Brand -->
+                <t t-call="website.placeholder_header_brand"/>
+                <!-- Navbar Toggler -->
+                <t t-call="website.navbar_toggler"/>
+                <!-- Navbar Collapse -->
+                <div id="top_menu_collapse" class="collapse navbar-collapse">
+                    <t t-call="website.navbar_nav">
+                        <t t-set="_nav_class" t-value="'ml-3 flex-grow-1'"/>
+                        <!-- Menu -->
+                        <t t-foreach="website.menu_id.child_id" t-as="submenu">
+                            <t t-call="website.submenu">
+                                <t t-set="item_class" t-value="'nav-item'"/>
+                                <t t-set="link_class" t-value="'nav-link'"/>
+                            </t>
+                        </t>
+                        <!-- Cart -->
+                        <t t-call="website.placeholder_header_cart">
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_item_class" t-value="'nav-item ml-lg-3'"/>
+                            <t t-set="_link_class" t-value="'nav-link'"/>
+                        </t>
+                        <!-- Wishlist -->
+                        <t t-call="website.placeholder_header_wishlist">
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_item_class" t-value="'nav-item ml-lg-2'"/>
+                            <t t-set="_link_class" t-value="'nav-link'"/>
+                        </t>
+                        <!-- Sign In -->
+                        <t t-call="portal.placeholder_user_sign_in">
+                            <t t-set="_item_class" t-value="'nav-item ml-lg-auto'"/>
+                            <t t-set="_link_class" t-value="'nav-link'"/>
+                        </t>
+                        <!-- User Dropdown -->
+                        <t t-ignore="true" t-if="website.user_id != user_id" t-call="portal.user_dropdown">
+                            <t t-set="_icon" t-value="true"/>
+                            <t t-set="_user_name" t-value="true"/>
+                            <t t-set="_item_class" t-value="'nav-item dropdown ml-lg-auto'"/>
+                            <t t-set="_link_class" t-value="'nav-link'"/>
+                        </t>
+                        <!-- Button -->
+                        <div id="oe_structure_header_magazine_2" class="oe_structure"/>
+                    </t>
+                </div>
+            </div>
+        </nav>
+    </xpath>
+</template>
+
+<template id="oe_structure_header_magazine_1" inherit_id="website.template_header_magazine">
+    <xpath expr="//*[hasclass('oe_structure')][@id='oe_structure_header_magazine_1']" position="replace">
+        <section id="o_preheader" class="oe_img_bg pt8 pb8" style="background-image: url('/web/image/website.header_magazine_1_default_image');">
+            <div class="container s_allow_columns">
+                <p class="mb-0"><br/></p>
+            </div>
+        </section>
+    </xpath>
+</template>
+
+<template id="oe_structure_header_magazine_2" inherit_id="website.template_header_magazine">
+    <xpath expr="//*[hasclass('oe_structure')][@id='oe_structure_header_magazine_2']" position="replace">
+        <a href="#" class="btn btn-primary mt-3 mt-lg-0 ml-lg-3">Button</a>
+    </xpath>
+</template>
+
 <!-- Navbar Hamburger Options -->
 <template id="option_header_off_canvas" inherit_id="website.navbar_nav" name="Off-Canvas Header" active="False">
     <xpath expr="//ul[@id='top_menu']" position="attributes">

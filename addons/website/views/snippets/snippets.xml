@@ -595,6 +595,9 @@
             <we-button data-name="header_centered_logo_opt"
                        data-customize-website-views="website.template_header_centered_logo"
                        data-customize-website-variable="'centered_logo'">Centered Logo</we-button>
+            <we-button data-name="header_magazine_opt"
+                       data-customize-website-views="website.template_header_magazine"
+                       data-customize-website-variable="'magazine'">Magazine</we-button>
         </we-select>
 
         <!-- Header Sidebar Template - Options -->
