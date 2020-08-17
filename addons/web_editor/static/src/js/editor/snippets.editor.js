@@ -2549,7 +2549,7 @@ var SnippetsMenu = Widget.extend({
      * On click on discard button.
      */
     _onMobilePreviewClick: function() {
-        this.wysiwyg.toggleMobilePreview();
+        this.wysiwyg.editor.execCommand('toggleDevicePreview', { device: 'mobile' });
     },
 });
 
