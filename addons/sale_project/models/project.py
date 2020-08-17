@@ -71,8 +71,6 @@ class ProjectTask(models.Model):
                     ))
 
     def unlink(self):
-        # import pdb
-        # pdb.set_trace()
         if any(task.sale_line_id for task in self):
             raise ValidationError(_('You have to unlink the task from the sale order item in order to delete it.'))
         return super().unlink()

@@ -208,18 +208,14 @@ class Task(models.Model):
         and allows the user to see timesheets entries to unlink.
         """
         tasks_with_timesheets = self.filtered(lambda t: t.timesheet_ids)
-        print("\n\n\n>>>>>", tasks_with_timesheets, "\n\n\n")
-        print("\n\n\n>>>>>", tasks_with_timesheets.ids, "\n\n\n")
         import pdb
         pdb.set_trace()
         if tasks_with_timesheets:
-            print("\n\n\n>>>>>", len(tasks_with_timesheets), "\n\n\n")
             if len(tasks_with_timesheets) > 1:
                 warning_msg = _("These tasks have some timesheet entries referencing them. Before removing these tasks, you have to remove these timesheet entries.")
             else:
                 warning_msg = _("This task has some timesheet entries referencing it. Before removing this task, you have to remove these timesheet entries.")
-        else:
-        #     if tasks_with_timesheets:
+        if not tasks_with_timesheets:
             raise RedirectWarning(
                 warning_msg, self.env.ref('hr_timesheet.timesheet_action_task').id,
                 _('See timesheet entries'), {'active_ids': tasks_with_timesheets.ids})
