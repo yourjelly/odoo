@@ -192,10 +192,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-row overflow-auto">
                         <t t-zone="main_sidebar"/>
-                        <div class="d-flex flex-column overflow-auto o_editor_center">                            
-                            <div class="o_toolbar">
-                                <t t-zone="tools"/>
-                            </div>
+                        <div class="d-flex flex-column overflow-auto o_editor_center">
                             <div class="d-flex overflow-auto note-editing-area">
                                 <t t-zone="snippetManipulators"/>
                                 ` + main + `
