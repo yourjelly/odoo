@@ -474,7 +474,7 @@ jw-toolbar {
     }
 
     select, option {
-        padding: 5px;
+        padding: 5px 10px;
     }
 
     option.label {
@@ -516,6 +516,24 @@ jw-toolbar {
             border-color: $o-we-sidebar-content-field-input-border-color;
         }
     }
+    jw-button {
+        width: 27px!important;
+        height: 27px;
+        padding: 7px;
+
+        &:hover {
+            background-color: rgb(241, 243, 244);
+            cursor: pointer;
+        }
+
+        &.active {
+            background: #e5e5e5;
+            -webkit-box-shadow: inset 0px 0px 5px #c1c1c1;
+            -moz-box-shadow: inset 0px 0px 5px #c1c1c1;
+            box-shadow: inset 0px 0px 5px #c1c1c1;
+            outline: none;
+        }
+    }
     .jw-primary-button {
         background-color: #00A09D;
         color: white;
@@ -527,5 +545,10 @@ jw-toolbar {
 }
 
 .o_web_client jw-toolbar {
-    background-color: #aaa;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    margin: -5px 5px 0 5px;
+    -webkit-box-shadow: 2px 2 5px 1px rgba(0,0,0,0.25);
+    -moz-box-shadow: 2px 2px 5px 1px rgba(0,0,0,0.25);
+    box-shadow: 2px 2px 5px 1px rgba(0,0,0,0.25);
 }
