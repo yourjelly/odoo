@@ -257,12 +257,11 @@ var Wysiwyg = Widget.extend({
         const linkFormat = modifiers.find(JWEditorLib.LinkFormat);
         const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
         let classes = '';
-        const inlineNodes = range.targetedNodes(JWEditorLib.InlineNode);
-        for (const node of inlineNodes) {
-            const linkFormat = node.modifiers.find(JWEditorLib.LinkFormat);
-            const linkAttributes = linkFormat.modifiers.find(JWEditorLib.Attributes);
-            classes = linkAttributes.get('class');
-            break;
+        const inlineNode = range.targetedNodes(JWEditorLib.InlineNode)[0];
+        if (inlineNode) {
+            const linkFormat = inlineNode.modifiers.find(JWEditorLib.LinkFormat);
+            const linkAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
+            classes = (linkAttributes && linkAttributes.get('class')) || '';
         }
         const linkDialog = new weWidgets.LinkDialog(this,
             {
