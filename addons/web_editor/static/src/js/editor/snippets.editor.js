@@ -1813,8 +1813,8 @@ var SnippetsMenu = Widget.extend({
                 };
                 isEnabled = (cache[k]['drop-near'] || cache[k]['drop-in']);
             });
-            self.wysiwyg.editor.execCommand(async (context) => {
-                const $icon = $snippet.find('.o_snippet_undroppable');
+            await context.execCommand(async (context) => {
+                const $icon = $snippetDraggable.find('.o_snippet_undroppable');
                 await self.editorHelpers.remove(context, $icon[0]);
                 if (isEnabled) {
                     await self.editorHelpers.removeClass(context, snippetDraggable, 'o_disabled');
@@ -1826,8 +1826,7 @@ var SnippetsMenu = Widget.extend({
                     const imgEl = document.createElement('img');
                     imgEl.classList.add('o_snippet_undroppable');
                     imgEl.src = '/web_editor/static/src/img/snippet_disabled.svg';
-                    $snippet.append(imgEl);
-                    await this.editorHelpers.insertHtml(context, imgEl.outerHTML, $snippet[0], 'INSIDE');
+                    await this.editorHelpers.insertHtml(context, imgEl.outerHTML, $snippetDraggable[0], 'INSIDE');
                 }
             });
         }
