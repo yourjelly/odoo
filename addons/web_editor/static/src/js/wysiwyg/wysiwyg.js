@@ -131,6 +131,20 @@ var Wysiwyg = Widget.extend({
                             allowEmpty: { value: true },
                         },
                     },
+                    {
+                        selector: [
+                            (node) => {
+                                const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
+                                return attributes && attributes.classList.has('o_header_standard');
+                            },
+                        ],
+                        properties: {
+                            editable: {
+                                value: false,
+                                cascading: true,
+                            },
+                        },
+                    },
                 ],
             };
         }
