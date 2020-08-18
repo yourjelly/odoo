@@ -238,7 +238,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                 ['IndentButton', 'OutdentButton'],
                 ['OdooLinkButton'],
                 ['OdooMediaButton'],
-                ['OdooSaveButton', 'OdooDiscardButton', 'ThemeButton'],
                 [
                     [
                         'OdooImagePaddingNoneActionable',
