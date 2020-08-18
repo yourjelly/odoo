@@ -295,12 +295,14 @@ var Wysiwyg = Widget.extend({
                     label: params.text,
                     target: params.isNewWindow ? '_blank' : '',
                 };
+                const rangeClone = new JWEditorLib.VRange(this.editor, JWEditorLib.VRange.clone(this.editor.selection.range));
                 await context.execCommand('link', linkParams);
-                const nodes = this.editor.selection.range.targetedNodes(JWEditorLib.InlineNode);
+                const nodes = rangeClone.targetedNodes(JWEditorLib.InlineNode);
                 const links = nodes.map(node => node.modifiers.find(JWEditorLib.LinkFormat)).filter(f => f);
                 for (const link of links) {
                     link.modifiers.get(JWEditorLib.Attributes).set('class', params.classes);
                 }
+                rangeClone.remove()
             });
         });
     },
