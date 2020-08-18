@@ -17,6 +17,8 @@ body {
     }
 }
 body.o_connected_user {
+    padding-top: $o-navbar-height!important;
+
     &.o_fullscreen {
         #oe_snippets {
             transform: translateX(-100%);
