@@ -217,7 +217,8 @@ class Task(models.Model):
                 warning_msg = _("These tasks have some timesheet entries referencing them. Before removing these tasks, you have to remove these timesheet entries.")
             else:
                 warning_msg = _("This task has some timesheet entries referencing it. Before removing this task, you have to remove these timesheet entries.")
-        if not tasks_with_timesheets:
+        # if not tasks_with_timesheets:
+        if tasks_with_timesheets.ids:
             raise RedirectWarning(
                 warning_msg, self.env.ref('hr_timesheet.timesheet_action_task').id, _('See timesheet entries'))
             # raise RedirectWarning(
