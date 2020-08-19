@@ -3,14 +3,6 @@ odoo.define('web_editor.loader', function (require) {
 
 var ajax = require('web.ajax');
 
-function waitTimeout(ms) {
-    return new Promise((resolve)=>{
-        setTimeout(() => {
-            resolve();
-        }, ms);
-    });
-}
-
 /**
  * Load the assets and create a wysiwyg.
  *
@@ -18,10 +10,20 @@ function waitTimeout(ms) {
  * @param {object} options The wysiwyg options
  */
 async function createWysiwyg(parent, options, additionnalAssets = []) {
-    await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', ...additionnalAssets]});
-    // todo: find why the service is not yet ready than remove this function
-    await waitTimeout(1000);
-    const Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
+    let Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
+    if (!Wysiwyg) {
+        await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', ...additionnalAssets]});
+        // Wait the loading of the service and his dependencies (use string to
+        // avoid parsing of require function).
+        const stringFunction = `return new Promise(resolve => {
+            odoo.define('web_editor.wysiwig.loaded', require => {
+                ` + 'require' + `('web_editor.wysiwyg');
+                resolve();
+            });
+        });`;
+        await new Function(stringFunction)();
+        Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
+    }
     return new Wysiwyg(parent, options);
 }
 
