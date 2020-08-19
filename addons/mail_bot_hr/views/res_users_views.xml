@@ -1,13 +1,23 @@
 <?xml version="1.0" ?>
 <odoo>
     <data>
-        <record id="view_users_form_inherit_mail_notification_alert_inherit" model="ir.ui.view">
+        <record id="res_users_form_view_simple_modif" model="ir.ui.view">
             <field name="name">res.users.preferences.form.simplified.inherit</field>
             <field name="model">res.users</field>
-            <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+            <field name="inherit_id" ref="hr.res_users_view_form_simple_modif"/>
+            <field name="mode">primary</field>
             <field name="arch" type="xml">
-                <!-- <xpath expr="//widget[@name='notification_alert']" position="replace"/> -->
                 <widget name="notification_alert" position="replace"/>
+            </field>
+        </record>
+        <record id="view_users_form_inherit_mail_notification_alert" model="ir.ui.view">
+            <field name="name">res.users.preferences.form.notification.alert</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="res_users_form_view_simple_modif"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='image_1920']" position="before">
+                    <widget name="notification_alert"/>
+                </xpath>
             </field>
         </record>
         <record id="res_users_view_form_profile" model="ir.ui.view">
