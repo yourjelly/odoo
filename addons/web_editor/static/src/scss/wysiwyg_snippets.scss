@@ -358,7 +358,7 @@ body.editor_enable.editor_has_snippets {
             width: $o-we-sidebar-content-available-room * .6;
         }
 
-        we-button, jw-button, we-toggler {
+        we-button, jw-button, we-toggler, input[type=text], input[type=number], select {
             @extend %we-generic-button;
         }
 
@@ -614,7 +614,7 @@ body.editor_enable.editor_has_snippets {
                     line-height: $o-we-sidebar-content-field-dropdown-item-height;
                 }
 
-                we-button, jw-button {
+                we-button, jw-button, input[type=text], input[type=number], select {
                     @include we-icon-button('', $align: left); // Always a padding on the left
                     border: none;
                     background: none;

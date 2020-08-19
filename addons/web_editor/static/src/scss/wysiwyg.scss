@@ -505,12 +505,13 @@ jw-toolbar {
         font-size: 0.67em;
         font-weight: bold;
     }
-    input[type=text], input[type=number] {
+    input[type=text], input[type=number], select {
         flex: 0 1 auto;
+        height: 27px;
+        vertical-align: middle;
         width: $o-we-sidebar-content-field-input-max-width;
         border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
         border-radius: $o-we-sidebar-content-field-border-radius;
-        background-color: $o-we-sidebar-content-field-input-bg;
 
         &:focus {
             border-color: $o-we-sidebar-content-field-input-border-color;
