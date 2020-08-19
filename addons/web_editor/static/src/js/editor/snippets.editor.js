@@ -319,7 +319,7 @@ var SnippetEditor = Widget.extend({
         this.toggleOverlay(false);
         this.toggleOptions(false);
 
-        await this.wysiwyg.editor.execCommand(async (context) => {
+        const removeSnippet = async (context) => {
             await new Promise(resolve => {
                 this.trigger_up('call_for_each_child_snippet', {
                     $snippet: this.$snippetBlock,
@@ -380,7 +380,8 @@ var SnippetEditor = Widget.extend({
                 return $el.children().length === 0 && $el.text().trim() === ''
                     && !$el.hasClass('oe_structure') && (!editor || editor.isTargetParentEditable);
             }
-        });
+        };
+        await this.wysiwyg.editor.execCommand(removeSnippet);
     },
     /**
      * Displays/Hides the editor overlay.
@@ -1095,7 +1096,7 @@ var SnippetsMenu = Widget.extend({
             ev.preventDefault();
             ev.stopPropagation();
             ev.stopImmediatePropagation();
-            this.wysiwyg.editor.execCommand(async (context) => {
+            const autoSelectDefaultText = async (context) => {
                 const $target = $(ev.target);
                 const $defaultSnippetText = $target.closest('.o_default_snippet_text');
                 await this.editorHelpers.removeClass(context, $defaultSnippetText[0], 'o_default_snippet_text');
@@ -1103,7 +1104,8 @@ var SnippetsMenu = Widget.extend({
                 const defaultSnippetNode = this.editorHelpers.getNodes($defaultSnippetText[0]);
                 const nodes = this.editorHelpers.getNodes($target[0]);
                 this.wysiwyg.editor.selection.select(nodes[0], nodes[nodes.length - 1]);
-            });
+            };
+            this.wysiwyg.editor.execCommand(autoSelectDefaultText);
         });
 
         const $autoFocusEls = $('.o_we_snippet_autofocus');
@@ -1470,11 +1472,12 @@ var SnippetsMenu = Widget.extend({
      */
     _loadSnippetsTemplates: async function (invalidateCache) {
         return this._mutex.exec(async () => {
-            await this.options.wysiwyg.editor.execCommand(async (context) => {
+            const loadSnippetsTemplates = async (context) => {
                 await this._destroyEditors();
                 const html = await this.loadSnippets(invalidateCache);
                 await this._computeSnippetTemplates(html, context);
-            });
+            };
+            await this.options.wysiwyg.editor.execCommand(loadSnippetsTemplates);
         });
     },
     /**
@@ -1813,7 +1816,7 @@ var SnippetsMenu = Widget.extend({
                 };
                 isEnabled = (cache[k]['drop-near'] || cache[k]['drop-in']);
             });
-            await context.execCommand(async (context) => {
+            const disableUndroppableSnippets = async (context) => {
                 const $icon = $snippetDraggable.find('.o_snippet_undroppable');
                 await self.editorHelpers.remove(context, $icon[0]);
                 if (isEnabled) {
@@ -1828,7 +1831,8 @@ var SnippetsMenu = Widget.extend({
                     imgEl.src = '/web_editor/static/src/img/snippet_disabled.svg';
                     await this.editorHelpers.insertHtml(context, imgEl.outerHTML, $snippetDraggable[0], 'INSIDE');
                 }
-            });
+            };
+            await context.execCommand(disableUndroppableSnippets);
         }
     },
     /**
@@ -2008,9 +2012,10 @@ var SnippetsMenu = Widget.extend({
                             const domLayout = layout.engines.dom;
                             const domNode = domLayout.getDomNodes(vNodes[0])[0];
 
-                            await jwEditor.execCommand(async (context) => {
+                            const disableUndroppableSnippets = async (context) => {
                                 await self._disableUndroppableSnippets(context);
-                            });
+                            };
+                            await jwEditor.execCommand(disableUndroppableSnippets);
 
                             await self._callForEachChildSnippet($(domNode), function (editor) {
                                 return editor.buildSnippet();
@@ -2524,13 +2529,14 @@ var SnippetsMenu = Widget.extend({
      */
     _insertSnippet: async function ($snippet) {
         let result;
-        await this.wysiwyg.editor.execCommand(async (context) => {
+        const insertSnippet = async (context) => {
             const position = this._getRelativePosition($snippet[0]);
             if (!position) {
                 throw new Error("Could not find a place to insert the snippet.");
             }
             result = await this.editorHelpers.insertHtml(context, $snippet[0].outerHTML, position[0], position[1]);
-        });
+        };
+        await this.wysiwyg.editor.execCommand(insertSnippet);
         return result;
     },
     /**

@@ -201,9 +201,9 @@ var Wysiwyg = Widget.extend({
             mode: this.options.mode,
         });
 
-        // if (config.isDebug('assets')) {
-        //     this.editor.load(JWEditorLib.DevTools);
-        // }
+        if (config.isDebug('assets')) {
+            this.editor.load(JWEditorLib.DevTools);
+        }
         await this.editor.start();
         this._bindAfterStart();
 
@@ -289,7 +289,7 @@ var Wysiwyg = Widget.extend({
         );
         linkDialog.open();
         linkDialog.on('save', this, async (params)=> {
-            await this.editor.execCommand(async (context) =>{
+            const onSaveLinkDialog = async (context) =>{
                 const linkParams = {
                     url: params.url,
                     label: params.text,
@@ -303,7 +303,8 @@ var Wysiwyg = Widget.extend({
                     link.modifiers.get(JWEditorLib.Attributes).set('class', params.classes);
                 }
                 rangeClone.remove()
-            });
+            };
+            await this.editor.execCommand(onSaveLinkDialog);
         });
     },
     openMediaDialog() {
@@ -522,11 +523,12 @@ var Wysiwyg = Widget.extend({
      */
     async _saveContent() {
         await this._saveModifiedImages();
-        await this.editor.execCommand(async (context)=> {
+        const wysiwygSaveContent = async (context)=> {
             await this._saveViewBlocks();
             await this._saveCoverPropertiesBlocks(context);
             await this._saveMegaMenuClasses();
-        });
+        };
+        await this.editor.execCommand(wysiwygSaveContent);
     },
     /**
      * Gets jQuery cloned element with internal text nodes escaped for XML
@@ -685,7 +687,7 @@ var Wysiwyg = Widget.extend({
      */
     _saveCoverPropertiesBlocks: async function (context) {
         let rpcResult;
-        await context.execCommand(async () => {
+        const wysiwygSaveCoverPropertiesBlocks = async () => {
             const covers = this.vEditable.descendants(node => {
                 const attributes = node.modifiers.find(JWEditorLib.Attributes);
 
@@ -731,7 +733,8 @@ var Wysiwyg = Widget.extend({
                     {'cover_properties': JSON.stringify(coverProps)}
                 ],
             });
-        });
+        };
+        await context.execCommand(saveCoverPropertiesBlocks);
         return rpcResult;
     },
     /**
@@ -777,7 +780,7 @@ var Wysiwyg = Widget.extend({
      */
     _saveNewsletterBlocks: async function () {
         const defs = [];
-        await this.editor.execCommand(async () => {
+        const wysiwygSaveNewsletterBlocks = async () => {
             defs.push(this._super.apply(this, arguments));
             const $popups = $(this.editorEditable).find('.o_newsletter_popup');
             for (const popup of $popups) {
@@ -793,7 +796,8 @@ var Wysiwyg = Widget.extend({
                     }));
                 }
             }
-        });
+        };
+        await this.editor.execCommand(wysiwygSaveNewsletterBlocks);
         return Promise.all(defs);
     },
     /**
@@ -802,7 +806,7 @@ var Wysiwyg = Widget.extend({
      * @private
      */
     _saveModifiedImages: async function () {
-        await this.editor.execCommand(async (context) => {
+        const wysiwygSaveModifiedImages = async (context) => {
             const defs = _.map(this._getEditable($('#wrapwrap')), async editableEl => {
                 const {oeModel: resModel, oeId: resId} = editableEl.dataset;
                 const proms = [...editableEl.querySelectorAll('.o_modified_image_to_save')].map(async el => {
@@ -831,7 +835,8 @@ var Wysiwyg = Widget.extend({
                 return Promise.all(proms);
             });
             await Promise.all(defs);
-        });
+        };
+        await this.editor.execCommand(wysiwygSaveModifiedImages);
     },
     /**
      * Initialize the editor for a translation.
@@ -1108,12 +1113,12 @@ Wysiwyg.getRange = function (node) {
 Wysiwyg.setRange = async function (wysiwyg, startNode, startOffset, endNode, endOffset) {
     endNode = endNode || startNode;
     endOffset = endOffset || startOffset-1;
-
-    await wysiwyg.editor.execCommand(async () => {
+    const wysiwygSetRange = async () => {
         const startVNode = wysiwyg.editorHelpers.getNodes(startNode);
         const endVNode = wysiwyg.editorHelpers.getNodes(endNode);
         wysiwyg.editor.selection.select(startVNode[startOffset], endVNode[endOffset]);
-    });
+    };
+    await wysiwyg.editor.execCommand(wysiwygSetRange);
 };
 
 return Wysiwyg;

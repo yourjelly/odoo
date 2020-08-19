@@ -19,7 +19,7 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
 
         this._images = this.$('img').get();
 
-        await this.wysiwyg.editor.execCommand(async (context) => {
+        const galleryStart = async (context) => {
             // The snippet should not be editable
             await this.editorHelpers.addClass(context, this.$target[0], 'o_fake_not_editable');
             await this.editorHelpers.setAttribute(context, this.$target[0], 'contentEditable', 'false');
@@ -54,7 +54,8 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
                 // reset the images to show the "Add images" button.
                 this.removeAllImages()
             }
-        });
+        };
+        await this.wysiwyg.editor.execCommand(galleryStart);
 
         const $container = this.$('> .container, > .container-fluid, > .o_container_small');
         if ($container.find('> *:not(div)').length) {

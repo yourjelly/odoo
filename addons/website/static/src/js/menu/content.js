@@ -798,10 +798,11 @@ var ContentMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             }
         },
         header_color: async function (value, wysiwyg) {
-            await this.wysiwyg.editor.execCommand(async (context) => {
+            const ContentMenuHeaderColor = async (context) => {
                 await this.editorHelpers.removeClass(context, $('#wrapwrap > header')[0], this.value);
                 await this.editorHelpers.addClass(context, $('#wrapwrap > header')[0], value);
-            });
+            };
+            await this.wysiwyg.editor.execCommand(ContentMenuHeaderColor);
         },
         header_visible: function (value) {
             $('#wrapwrap > header').toggleClass('d-none o_snippet_invisible', !value);

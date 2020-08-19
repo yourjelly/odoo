@@ -1923,14 +1923,15 @@ const SnippetOptionWidget = Widget.extend({
      * @returns {Promise|undefined}
      */
     selectDataAttribute: async function (previewMode, widgetValue, params) {
-        this.wysiwyg.editor.execCommand( async (context) => {
+        const selectDataAttribute = async (context) => {
             const value = await this._selectAttributeHelper(widgetValue, params, context);
             this.$target.attr(`data-${params.attributeName}`, value);
             if (!previewMode) {
                 const attributeName = params.attributeName.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
                 await this.editorHelpers.setAttribute(context, this.$target[0], `data-${attributeName}`, value);
             }
-        });
+        };
+        this.wysiwyg.editor.execCommand(selectDataAttribute);
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -2604,7 +2605,7 @@ const SnippetOptionWidget = Widget.extend({
      * Refresh the target in the wysiwyg.
      */
     async _refreshTarget($target = this.$target) {
-        await this.wysiwyg.editor.execCommand(async (context) => {
+        const refreshTarget = async (context) => {
             const html = $target.html();
             $target.html('');
             const attributes = [...$target[0].attributes].reduce( (acc, attribute) => {
@@ -2614,7 +2615,8 @@ const SnippetOptionWidget = Widget.extend({
             await this.editorHelpers.updateAttributes(context, $target[0], attributes);
             await this.editorHelpers.empty(context, $target[0]);
             await this.editorHelpers.insertHtml(context, html, $target[0], 'INSIDE');
-        });
+        };
+        await this.wysiwyg.editor.execCommand(refreshTarget);
     },
 
     //--------------------------------------------------------------------------
@@ -3934,7 +3936,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     backgroundType: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.editor.execCommand(async (context)=> {
+        const backgroundType = async (context)=> {
             if (widgetValue === 'repeat-pattern') {
                 await this.editorHelpers.addClass(context, this.$target[0], 'o_bg_img_opt_repeat');
             } else {
@@ -3942,7 +3944,8 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
             }
             await this.editorHelpers.setStyle(context, this.$target[0], 'background-position', '');
             await this.editorHelpers.setStyle(context, this.$target[0], 'background-size', '');
-        });
+        }
+        await this.wysiwyg.editor.execCommand(backgroundType);
     },
     /**
      * Saves current background position and enables overlay.

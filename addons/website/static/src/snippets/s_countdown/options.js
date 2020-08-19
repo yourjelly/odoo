@@ -21,7 +21,7 @@ snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
      * @see this.selectClass for parameters
      */
     endAction: async function (previewMode, widgetValue, params) {
-        await this.wysiwyg.editor.execCommand(async (context) => {
+        const countdownEndAction = async (context) => {
             await this.editorHelpers.setAttribute(context, this.$target[0], `data-end-action`, widgetValue);
             if (widgetValue === 'message') {
                 if (!this.$target.find('.s_countdown_end_message').length) {
@@ -35,7 +35,8 @@ snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
                 }
                 await this.editorHelpers.remove(context, $message[0]);
             }
-        });
+        };
+        await this.wysiwyg.editor.execCommand(countdownEndAction);
     },
     /**
     * Changes the countdown style.
@@ -46,12 +47,13 @@ snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
             switch (widgetValue) {
                 case 'circle':
                     if (!previewMode) {
-                        await this.editor.execCommand(async (context) => {
+                        const countdownLayoutCircle = async (context) => {
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-progress-bar-style', 'disappear');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-progress-bar-weight', 'thin');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-layout-background', 'none');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-layout', widgetValue);
-                        });
+                        };
+                        await this.editor.execCommand(countdownLayoutCircle);
                     } else {
                         this.$target[0].dataset.progressBarStyle = 'disappear';
                         this.$target[0].dataset.progressBarWeight = 'thin';
@@ -60,11 +62,12 @@ snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
                     break;
                 case 'boxes':
                     if (!previewMode) {
-                        await this.editor.execCommand(async (context) => {
+                        const countdownLayoutBoxes = async (context) => {
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-progress-bar-style', 'none');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-layout-background', 'plain');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-layout', widgetValue);
-                        });
+                        };
+                        await this.editor.execCommand(countdownLayoutBoxes);
                     } else {
                         this.$target[0].dataset.progressBarStyle = 'none';
                         this.$target[0].dataset.layoutBackground = 'plain';
@@ -72,11 +75,12 @@ snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
                     break;
                 case 'clean':
                     if (!previewMode) {
-                        await this.editor.execCommand(async (context) => {
+                        const countdownLayoutClean = async (context) => {
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-progress-bar-style', 'none');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-layout-background', 'none');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-layout', widgetValue);
-                        });
+                        };
+                        await this.editor.execCommand(countdownLayoutClean);
                     } else {
                         this.$target[0].dataset.progressBarStyle = 'none';
                         this.$target[0].dataset.layoutBackground = 'none';
@@ -84,15 +88,18 @@ snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
                     break;
                 case 'text':
                     if (!previewMode) {
-                        await this.editor.execCommand(async (context) => {
+                        const countdownLayoutText = async (context) => {
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-progress-bar-style', 'none');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-layout-background', 'none');
                             await this.editorHelpers.setAttribute(context, this.$target[0], 'data-layout', widgetValue);
-                        });
+                        };
+                        await this.editor.execCommand(countdownLayoutText);
                     } else {
                         this.$target[0].dataset.progressBarStyle = 'none';
                         this.$target[0].dataset.layoutBackground = 'none';
                     }
+                    break;
+                default:
                     break;
             }
             this.$target[0].dataset.layout = widgetValue;

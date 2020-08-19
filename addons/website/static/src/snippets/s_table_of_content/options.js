@@ -63,11 +63,12 @@ snippetOptions.registry.TableOfContent = snippetOptions.SnippetOptionWidget.exte
             $el[0].dataset.anchor = 'true';
         });
         $nav.find('a:first').addClass('active');
-        await this.wysiwyg.editor.execCommand(async (context) => {
+        const tableOfContentGenerateNav = async (context) => {
             const html = $nav[0].outerHTML;
             $nav.empty();
             await this.editorHelpers.replace(context, $nav[0], html);
-        });
+        };
+        await this.wysiwyg.editor.execCommand(tableOfContentGenerateNav);
     },
 });
 
