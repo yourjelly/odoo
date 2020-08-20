@@ -441,10 +441,10 @@
                 </t>
                 <!-- Navbar Collapse -->
                 <div id="top_menu_collapse" class="collapse navbar-collapse flex-wrap">
-                    <div class="oe_structure" id="oe_structure_header_vertical_3"/>
+                    <div class="oe_structure w-100" id="oe_structure_header_vertical_3"/>
                     <!-- Nav -->
                     <t t-call="website.navbar_nav">
-                        <t t-set="_nav_class" t-value="'nav-pills mx-auto mb-3 mb-lg-0 py-2'"/>
+                        <t t-set="_nav_class" t-value="'mx-auto mb-3 mb-lg-0'"/>
                         <!-- Menu -->
                         <t t-foreach="website.menu_id.child_id" t-as="submenu">
                             <t t-call="website.submenu">
@@ -461,7 +461,7 @@
                         <t t-call="portal.user_dropdown">
                             <t t-set="_user_name" t-value="True"/>
                             <t t-set="_item_class" t-value="'nav-item dropdown ml-lg-3'"/>
-                            <t t-set="_link_class" t-value="'nav-link'"/>
+                            <t t-set="_link_class" t-value="'nav-link font-weight-bold'"/>
                         </t>
                     </t>
                 </div>
@@ -510,7 +510,7 @@
 
 <template id="template_header_vertical_oe_structure_header_vertical_3" inherit_id="website.template_header_vertical" name="Template Header Vertical (oe_structure_header_vertical_3)">
     <xpath expr="//*[hasclass('oe_structure')][@id='oe_structure_header_vertical_3']" position="replace">
-        <div class="oe_structure" id="oe_structure_header_vertical_3">
+        <div class="oe_structure w-100" id="oe_structure_header_vertical_3">
             <section class="s_text_block" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
                     <div class="s_hr w-100 text-left pt0 pb0" data-name="Separator">
