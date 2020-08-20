@@ -246,16 +246,14 @@
                         </t>
                         <!-- Sign In -->
                         <t t-call="portal.placeholder_user_sign_in">
-                            <t t-set="_item_class" t-value="'nav-item ml-lg-2'"/>
-                            <t t-set="_link_class" t-value="'btn btn-outline-primary'"/>
+                            <t t-set="_item_class" t-value="'nav-item ml-lg-auto'"/>
+                            <t t-set="_link_class" t-value="'nav-link font-weight-bold'"/>
                         </t>
                         <!-- User Dropdown -->
                         <t t-call="portal.user_dropdown">
                             <t t-set="_user_name" t-value="true"/>
-                            <t t-set="_user_name_class" t-value="'font-weight-bold'"/>
                             <t t-set="_item_class" t-value="'nav-item dropdown ml-lg-auto'"/>
-                            <t t-set="_link_class" t-value="'nav-link'"/>
-                            <t t-set="_dropdown_menu_class" t-value="'dropdown-menu-right'"/>
+                            <t t-set="_link_class" t-value="'nav-link font-weight-bold'"/>
                         </t>
                     </t>
                 </div>
