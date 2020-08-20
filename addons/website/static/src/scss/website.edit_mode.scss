@@ -35,6 +35,13 @@ $-editor-messages-margin-x: 2%;
         -ms-user-select: auto;
         user-select: auto;
         cursor: text!important;
+        /* Contenteditable (webkit) bugs with nav keys around inline-blocks. The
+        following lines therefore restyle .btn to not be inline-blocks.
+        Note: that means that the style of .btn is slightly different in edit
+        mode than when saved. */
+        display: inline;
+        padding-top: 8px;
+        padding-bottom: 8px;
     }
     /* Summernote not Support for placeholder text https://github.com/summernote/summernote/issues/581 */
     &[placeholder]:empty:not(:focus):before {
