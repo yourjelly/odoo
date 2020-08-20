@@ -300,13 +300,13 @@
                 <ul class="nav navbar-nav navbar-expand">
                     <!-- Sign In -->
                     <t t-call="portal.placeholder_user_sign_in">
-                        <t t-set="_item_class" t-value="'nav-item ml-lg-3'"/>
+                        <t t-set="_item_class" t-value="'nav-item'"/>
                         <t t-set="_link_class" t-value="'nav-link'"/>
                     </t>
                     <!-- User Dropdown -->
                     <t t-call="portal.user_dropdown">
                         <t t-set="_icon" t-value="true"/>
-                        <t t-set="_item_class" t-value="'nav-item dropdown ml-4'"/>
+                        <t t-set="_item_class" t-value="'nav-item dropdown'"/>
                         <t t-set="_link_class" t-value="'nav-link'"/>
                         <t t-set="_dropdown_menu_class" t-value="'position-absolute dropdown-menu-right'"/>
                     </t>
@@ -375,7 +375,7 @@
                             </div>
                         </div>
                         <!-- Social -->
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 pb16">
                             <div class="s_share text-left no_icon_color" data-name="Social Media">
                                 <h4 class="s_share_title d-none">Follow us</h4>
                                 <a href="/website/social/facebook" class="s_share_facebook" target="_blank">
@@ -393,9 +393,11 @@
                             </div>
                         </div>
                         <!-- Contact -->
-                        <div class="col-lg-6 text-right ">
-                            <i class="fa fa-envelope fa-fw mr-2"/><span><a href="mailto:info@yourcompany.example.com">info@yourcompany.example.com</a></span>
-                            <i class="fa fa-phone fa-fw ml-4 mr-2"/><span class="o_force_ltr"><a href="tel:1 (650) 691-3277">1 (650) 691-3277</a></span>
+                        <div class="col-lg-4 text-lg-right pb16">
+                            <i class="fa fa-1x fa-fw fa-envelope mr-2"/><span><a href="mailto:info@yourcompany.example.com">info@yourcompany.example.com</a></span>
+                        </div>
+                        <div class="col-lg-2 text-lg-right pb16">
+                            <i class="fa fa-1x fa-fw fa-phone mr-2"/><span class="o_force_ltr"><a href="tel:1 (650) 691-3277">1 (650) 691-3277</a></span>
                         </div>
                     </div>
                 </div>
