@@ -25,7 +25,7 @@ publicWidget.registry.ProjectRatingImage = publicWidget.Widget.extend({
                 $rating.find('.rating_timeduration').text(duration);
                 return $rating.html();
             },
-        });
+        });debugger;
         return this._super.apply(this, arguments);
     },
 });
