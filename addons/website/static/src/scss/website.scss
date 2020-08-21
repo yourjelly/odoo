@@ -993,6 +993,55 @@ header {
             width: 50%;
         }
     }
+} @else if o-website-value('header-template') == 'hamburger-full' {
+    @include media-breakpoint-up(md) {
+        #wrapwrap {
+            $o-hamburger-full-navbar-height: $o-theme-navbar-logo-height + ($navbar-padding-y * 2);
+            > header {
+                .navbar-collapse .container {
+                    height: calc(100vh - #{$o-navbar-height} - #{$o-hamburger-full-navbar-height});
+                    transition: height .3s ease;
+                    .nav-link {
+                        padding-right: $nav-link-padding-x;
+                        padding-left: $nav-link-padding-x;
+                    }
+                    .dropdown-menu {
+                        position: absolute;
+                    }
+                }
+                &:not(.o_header_affixed) {
+                    position: fixed;
+                    top: 0;
+                    right: 0;
+                    bottom: auto;
+                    left: 0;
+                    z-index: $zindex-fixed;
+                }
+                &.o_header_affixed {
+                    transform: none !important;
+                }
+            }
+            > main {
+                > :first-child:not(#wrap):before {
+                    content: "";
+                    display: block;
+                    width: 100%;
+                    margin-top: $o-hamburger-full-navbar-height;
+                }
+                #wrap {
+                    > :first-child:before {
+                        content: "";
+                        display: block;
+                        width: 100%;
+                        margin-top: $o-hamburger-full-navbar-height;
+                    }
+                }
+            }
+        }
+        #oe_main_menu_navbar ~ #wrapwrap > header {
+            top: $o-navbar-height;
+        }
+    }
 }
 
 // Mega menu

@@ -582,6 +582,11 @@
                        data-customize-website-views="website.template_header_image"
                        data-customize-website-variable="'image'"
                        data-img="/website/static/src/img/snippets_options/header_template_image.svg"/>
+            <we-button title="Hamburger Full"
+                       data-name="header_hamburger_full_opt"
+                       data-customize-website-views="website.template_header_hamburger_full"
+                       data-customize-website-variable="'hamburger-full'"
+                       data-img="/website/static/src/img/snippets_options/header_template_hamburger_full.svg"/>
         </we-select>
 
         <!-- Header Sidebar Template - Options -->

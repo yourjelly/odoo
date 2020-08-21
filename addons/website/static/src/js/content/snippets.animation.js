@@ -978,6 +978,27 @@ registry.FooterSlideout = publicWidget.Widget.extend({
     },
 });
 
+registry.HeaderHambugerFull = publicWidget.Widget.extend({
+    selector: '.o_header_hamburger_full_toggler',
+    events: {
+        'click': '_onToggleClick',
+    },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     */
+    _onToggleClick: function () {
+        $('body').toggleClass('overflow-hidden');
+        setTimeout(function () {
+            $(window).trigger('scroll');
+        }, 100);
+    },
+});
+
 return {
     Widget: publicWidget.Widget,
     Animation: Animation,
