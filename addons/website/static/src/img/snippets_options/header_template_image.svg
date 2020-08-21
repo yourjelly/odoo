@@ -19,7 +19,7 @@
       <stop offset="100%" stop-color="#009989"/>
     </linearGradient>
   </defs>
-  <g fill="none" fill-rule="evenodd" class="header_template_magazine">
+  <g fill="none" fill-rule="evenodd" class="header_template_image">
     <g class="bg_top">
       <use fill="#000" fill-opacity=".14" xlink:href="#path-28"/>
       <use fill="url(#linearGradient-1)" fill-opacity=".3" xlink:href="#path-28"/>

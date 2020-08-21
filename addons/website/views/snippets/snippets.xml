@@ -577,11 +577,11 @@
                        data-customize-website-views="website.template_header_centered_logo"
                        data-customize-website-variable="'centered_logo'"
                        data-img="/website/static/src/img/snippets_options/header_template_centered_logo.svg"/>
-            <we-button title="Magazine"
-                       data-name="header_magazine_opt"
-                       data-customize-website-views="website.template_header_magazine"
-                       data-customize-website-variable="'magazine'"
-                       data-img="/website/static/src/img/snippets_options/header_template_magazine.svg"/>
+            <we-button title="Image"
+                       data-name="header_image_opt"
+                       data-customize-website-views="website.template_header_image"
+                       data-customize-website-variable="'image'"
+                       data-img="/website/static/src/img/snippets_options/header_template_image.svg"/>
         </we-select>
 
         <!-- Header Sidebar Template - Options -->

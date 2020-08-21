@@ -936,9 +936,9 @@
     </xpath>
 </template>
 
-<template id="template_header_magazine" inherit_id="website.layout" name="Template Header Magazine" active="False">
+<template id="template_header_image" inherit_id="website.layout" name="Template Header Image" active="False">
     <xpath expr="//header//nav" position="replace">
-        <div class="oe_structure" id="oe_structure_header_magazine_1"/>
+        <div class="oe_structure" id="oe_structure_header_image_1"/>
         <nav class="navbar navbar-light navbar-expand-lg o_colored_level o_cc shadow-sm">
             <div id="top_menu_container" class="container">
                 <!-- Brand -->
@@ -970,7 +970,7 @@
                         </t>
                         <!-- Button -->
                         <li class="nav-item">
-                            <div class="oe_structure" id="oe_structure_header_magazine_2"/>
+                            <div class="oe_structure" id="oe_structure_header_image_2"/>
                         </li>
                     </t>
                 </div>
@@ -979,11 +979,11 @@
     </xpath>
 </template>
 
-<template id="template_header_magazine_oe_structure_header_magazine_1" inherit_id="website.template_header_magazine" name="Template Header Magazine (oe_structure_header_magazine_1)">
-    <xpath expr="//*[hasclass('oe_structure')][@id='oe_structure_header_magazine_1']" position="replace">
-        <div class="oe_structure" id="oe_structure_header_magazine_1">
+<template id="template_header_image_oe_structure_header_image_1" inherit_id="website.template_header_image" name="Template Header image (oe_structure_header_image_1)">
+    <xpath expr="//*[hasclass('oe_structure')][@id='oe_structure_header_image_1']" position="replace">
+        <div class="oe_structure" id="oe_structure_header_image_1">
             <section class="s_cover oe_img_bg pt8 pb8" data-snippet="s_cover" data-name="Cover"
-                     style="background-image: url('/web/image/website.header_magazine_1_default_image');">
+                     style="background-image: url('/web/image/website.header_image_1_default_image');">
                 <div class="container s_allow_columns">
                     <p class="mb-0"><br/></p>
                 </div>
@@ -992,9 +992,9 @@
     </xpath>
 </template>
 
-<template id="template_header_magazine_oe_structure_header_magazine_2" inherit_id="website.template_header_magazine" name="Template Header Magazine (oe_structure_header_magazine_1)">
-    <xpath expr="//*[hasclass('oe_structure')][@id='oe_structure_header_magazine_2']" position="replace">
-        <div class="oe_structure" id="oe_structure_header_magazine_2">
+<template id="template_header_image_oe_structure_header_image_2" inherit_id="website.template_header_image" name="Template Header image (oe_structure_header_image_1)">
+    <xpath expr="//*[hasclass('oe_structure')][@id='oe_structure_header_image_2']" position="replace">
+        <div class="oe_structure" id="oe_structure_header_image_2">
             <section class="s_text_block" data-snippet="s_text_block" data-name="Text">
                 <div class="container">
                     <a href="#" class="btn btn-primary mt-3 mt-lg-0 ml-lg-3">Button</a>
