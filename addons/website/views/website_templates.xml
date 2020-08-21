@@ -543,7 +543,7 @@
                         </t>
                     </t>
                     <div class="oe_structure" id="oe_structure_header_sidebar_1"/>
-                    <ul class="nav navbar-nav flex-row small">
+                    <ul class="nav navbar-nav">
                         <!-- Sign In -->
                         <t t-call="portal.placeholder_user_sign_in">
                             <t t-set="_item_class" t-value="'nav-item'"/>
@@ -554,7 +554,8 @@
                             <t t-set="_icon" t-value="true"/>
                             <t t-set="_user_name" t-value="true"/>
                             <t t-set="_item_class" t-value="'nav-item dropup mr-auto'"/>
-                            <t t-set="_link_class" t-value="'btn-link'"/>
+                            <t t-set="_link_class" t-value="'nav-link'"/>
+                            <t t-set="_dropdown_menu_class" t-value="'position-absolute'"/>
                         </t>
                     </ul>
                 </div>
@@ -589,7 +590,7 @@
                         <hr class="w-100 mx-auto" style="border-top-width: 1px; border-top-style: solid; border-top-color: var(--400);"/>
                     </div>
                     <!-- Contact -->
-                    <small><i class="fa fa-envelope fa-fw mr-2"/><span><a href="mailto:info@yourcompany.example.com">info@yourcompany.example.com</a></span></small>
+                    <small><i class="fa fa-envelope fa-fw mr-2"/><span><a href="mailto:info@yourcompany.example.com">info@yourcompany.example.com</a></span></small><br/>
                     <small><i class="fa fa-phone fa-fw mr-2"/><span class="o_force_ltr"><a href="tel:1 (650) 691-3277">1 (650) 691-3277</a></span></small>
                     <!-- Separator -->
                     <div class="s_hr text-left pt16 pb16" data-name="Separator">
