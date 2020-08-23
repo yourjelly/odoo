@@ -1107,8 +1107,6 @@ var SnippetsMenu = Widget.extend({
                 const $target = $(ev.target);
                 const $defaultSnippetText = $target.closest('.o_default_snippet_text');
                 await this.editorHelpers.removeClass(context, $defaultSnippetText[0], 'o_default_snippet_text');
-                ev.target.classList.remove('o_default_snippet_text');
-                const defaultSnippetNode = this.editorHelpers.getNodes($defaultSnippetText[0]);
                 const nodes = this.editorHelpers.getNodes($target[0]);
                 this.wysiwyg.editor.selection.select(nodes[0], nodes[nodes.length - 1]);
             };
