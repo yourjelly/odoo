@@ -650,10 +650,7 @@
                     <div class="oe_title pr-0">
                         <h1 class="d-flex flex-row justify-content-between">
                             <field name="priority" widget="priority" class="mr-3"/>
-                            <field name="name" class="o_task_name text-truncate" placeholder="Task Title..." t-att-autofocus="'autofocus' if description_pad"/>
-                            <!-- <field name="description_pad" position="attributes">
-                                <attribute name="default_focus">1</attribute>
-                            </field> -->
+                            <field name="name" class="o_task_name text-truncate oe_highlight" placeholder="Task Title..."/>
                             <field name="kanban_state" widget="state_selection" class="ml-auto"/>
                         </h1>
                     </div>
@@ -685,9 +682,6 @@
                     <notebook>
                         <page name="description_page" string="Description">
                             <field name="description" type="html"/>
-                            <!-- <field name="description_pad" position="attributes">
-                                <attribute name="autofocus">false</attribute>
-                            </field> -->
                             <div class="oe_clear"/>
                         </page>
                         <page name="recurrence" string="Recurrence" attrs="{'invisible': [('recurring_task', '=', False)]}">
