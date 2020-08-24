@@ -2471,7 +2471,7 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
                         await this.editorHelpers.moveBefore(context, $tabPane.prev()[0], $tabPane[0]);
                     }
                 };
-                await this.wysiwyg.editor.execCommand(snippetMoveMoveSnippet);
+                await this.wysiwyg.editor.execCommand(snippetMoveMoveSnippetBefore);
                 break;
             case 'next':
                 const snippetMoveMoveSnippetAfter = async (context) => {
@@ -2482,7 +2482,7 @@ snippetOptions.registry.SnippetMove = snippetOptions.SnippetOptionWidget.extend(
                         await this.editorHelpers.moveAfter(context, $tabPane.next()[0], $tabPane[0]);
                     }
                 };
-                await this.wysiwyg.editor.execCommand(snippetMoveMoveSnippet);
+                await this.wysiwyg.editor.execCommand(snippetMoveMoveSnippetAfter);
                 break;
         }
         if (params.name === 'move_up_opt' || params.name === 'move_down_opt') {
