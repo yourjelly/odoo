@@ -26,7 +26,7 @@
             <field name="description" position="after">
                 <field name="use_pads" invisible="1"/>
                 <field name="description_pad" widget="pad" nolabel="1"
-                       attrs="{'invisible': [('use_pads', '=', False)], 'readonly': [('use_pads', '=', False)]}"/>
+                       attrs="{'invisible': [('use_pads', '=', False)], 'readonly': [('use_pads', '=', False)]}" default_focus="0"/>
             </field>
             <xpath expr="//div[@id='rating_settings']" position="after">
                 <div class="col-lg-6 o_setting_box" id="pad_settings">
