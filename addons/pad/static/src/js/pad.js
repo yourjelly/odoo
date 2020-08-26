@@ -180,10 +180,6 @@ var FieldPad = AbstractField.extend({
         this.$('.oe_pad_switch').toggleClass('fa-expand fa-compress');
         this.$el.parents('.o_touch_device').toggleClass('o_scroll_hidden');
     },
-
-    _onWindowFocusChange: function (focused) {
-        this._isTabFocused = focused;
-    },
 });
 
 fieldRegistry.add('pad', FieldPad);
