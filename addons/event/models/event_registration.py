@@ -126,7 +126,7 @@ class EventRegistration(models.Model):
 
         if vals.get('state') == 'open':
             # auto-trigger after_sub (on subscribe) mail schedulers, if needed
-            onsubscribe_schedulers = self.mapped('event_id.event_mail_ids').filtered(lambda s: s.interval_type == 'after_sub')
+            onsubscribe_schedulers = self.sudo().mapped('event_id.event_mail_ids').filtered(lambda s: s.interval_type == 'after_sub')
             onsubscribe_schedulers.execute()
 
         return ret

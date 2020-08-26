@@ -5,7 +5,7 @@
     <menuitem name="Events"
         id="event_main_menu"
         sequence="65"
-        groups="event.group_event_user"
+        groups="event.group_event_registration_desk"
         web_icon="event,static/description/icon.png"/>
 
     <!-- HEADER: EVENTS -->
@@ -13,7 +13,7 @@
         id="menu_event_event"
         sequence="1"
         parent="event.event_main_menu"
-        groups="event.group_event_user"/>
+        groups="event.group_event_registration_desk"/>
 
     <!-- HEADER: REPORTING -->
     <menuitem name="Reporting"
@@ -27,7 +27,7 @@
         id="menu_event_configuration"
         sequence="99"
         parent="event_main_menu"
-        groups="event.group_event_user"/>
+        groups="event.group_event_manager"/>
     <menuitem name="Event Templates"
         id="menu_event_type"
         sequence="1"
