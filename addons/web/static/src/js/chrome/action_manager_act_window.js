@@ -13,6 +13,36 @@ var core = require('web.core');
 var pyUtils = require('web.py_utils');
 var view_registry = require('web.view_registry');
 
+const utils = require("web.utils");
+
+const { ComponentWrapper } = require('web.OwlCompatibility');
+
+class ViewComponentWrapper extends ComponentWrapper {
+    constructor() {
+        super(...arguments);
+
+        function getValue(target, key) {
+            const value = target[key];
+            if (typeof value === "function") {
+                return value.bind(target);
+            }
+            return value;
+        }
+
+        return new Proxy(this, {
+            get(target, key) {
+                if (target[key]) {
+                    return getValue(target, key);
+                }
+                if (!target.componentRef.comp) {
+                    return undefined;
+                }
+                return getValue(target.componentRef.comp, key);
+            },
+        });
+    }
+}
+
 ActionManager.include({
     custom_events: _.extend({}, ActionManager.prototype.custom_events, {
         execute_action: '_onExecuteAction',
@@ -73,7 +103,6 @@ ActionManager.include({
                 this._closeDialog(true); // there may be a currently opened dialog, close it
                 var viewOptions = {currentId: state.id};
                 var viewType = state.view_type || currentController.viewType;
-                return this._switchController(currentAction, viewType, viewOptions);
             } else if (!core.action_registry.contains(state.action)) {
                 // the action to load isn't the current one, so execute it
                 var context = {};
@@ -188,27 +217,39 @@ ActionManager.include({
                 controllerID: controllerID,
             });
             var rejection;
-            var view = new viewDescr.Widget(viewDescr.fieldsView, viewOptions);
-            var def = new Promise(function (resolve, reject) {
-                rejection = reject;
-                view.getController(self).then(function (widget) {
-                    if (def.rejected) {
-                        // the promise has been rejected meanwhile, meaning that
-                        // the action has been removed, so simply destroy the widget
-                        widget.destroy();
-                    } else {
-                        controller.widget = widget;
-                        resolve(controller);
-                    }
-                }).guardedCatch(reject);
-            });
-            // Need to define an reject property to call it into _destroyWindowAction
-            def.reject = rejection;
-            def.guardedCatch(function () {
-                def.rejected = true;
-                delete self.controllers[controllerID];
-            });
-            action.controllers[viewType] = def;
+            let view;
+            if (utils.isComponent(viewDescr.Widget)) {
+                view = new ViewComponentWrapper(this, viewDescr.Widget, {
+                    fieldsView: viewDescr.fieldsView,
+                    viewOptions,
+                });
+
+                controller.widget = view;
+                action.controllers[viewType] = Promise.resolve(controller);
+            } else {
+                view = new viewDescr.Widget(viewDescr.fieldsView, viewOptions);
+
+                var def = new Promise(function (resolve, reject) {
+                    rejection = reject;
+                    view.getController(self).then(function (widget) {
+                        if (def.rejected) {
+                            // the promise has been rejected meanwhile, meaning that
+                            // the action has been removed, so simply destroy the widget
+                            widget.destroy();
+                        } else {
+                            controller.widget = widget;
+                            resolve(controller);
+                        }
+                    }).guardedCatch(reject);
+                });
+                // Need to define an reject property to call it into _destroyWindowAction
+                def.reject = rejection;
+                def.guardedCatch(function () {
+                    def.rejected = true;
+                    delete self.controllers[controllerID];
+                });
+                action.controllers[viewType] = def;
+            }
         } else {
             action.controllers[viewType] = Promise.resolve(controller);
         }
@@ -356,13 +397,14 @@ ActionManager.include({
             var key = parsedXML.documentElement.getAttribute('js_class');
             var View = view_registry.get(key || viewType);
             if (View) {
+                const isComp = utils.isComponent(View);
                 views.push({
-                    accessKey: View.prototype.accessKey || View.prototype.accesskey,
-                    displayName: View.prototype.display_name,
+                    accessKey: isComp ? View.accessKey : View.prototype.accessKey || View.prototype.accesskey,
+                    displayName: isComp ? View.displayName : View.prototype.display_name,
                     fieldsView: fieldsView,
-                    icon: View.prototype.icon,
-                    isMobileFriendly: View.prototype.mobile_friendly,
-                    multiRecord: View.prototype.multi_record,
+                    icon: isComp ? View.icon : View.prototype.icon,
+                    isMobileFriendly: isComp ? View.mobileFriendly : View.prototype.mobile_friendly,
+                    multiRecord: isComp ? View.multiRecord : View.prototype.multi_record,
                     type: viewType,
                     viewID: view[0],
                     Widget: View,

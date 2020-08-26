@@ -1,0 +1,23 @@
+
+                  ActionManager
+                        |
+                        |
+                  ViewController  -----------  Model/SearchModel
+                        |
+    +-------------------+-------------------+
+    |                   |                   |
+ControlPanel       SearchPanel             View
+
+
+View is just a renaming of the Renderer legacy
+
+ViewController is the unification of the View legacy and the Controller
+it serves to create the configuration of Model (+ load params), View,
+ControlPanel and SearchPanel.
+
+?. Drop MVC pattern?
+   View could have a hook to use models as we have components and not
+   widgets anymore.
+
+?. ViewController shouldn't have any logic/behaviour, just configuration of sub
+   components.

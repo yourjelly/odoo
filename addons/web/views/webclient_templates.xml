@@ -312,6 +312,10 @@
         <script type="text/javascript" src="/web/static/src/js/fields/abstract_field_owl.js"></script>
         <script type="text/javascript" src="/web/static/src/js/fields/basic_fields_owl.js"></script>
 
+        <script type="text/javascript" src="/web/static/src/js/views/poc/view.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/poc/view_controller.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/poc/pivot_view_controller.js"></script>
+
         <script type="text/javascript" src="/web/static/src/js/views/abstract_view.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/abstract_renderer.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/abstract_renderer_owl.js"></script>

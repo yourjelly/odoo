@@ -19,8 +19,10 @@ var framework = require('web.framework');
 var pyUtils = require('web.py_utils');
 var Widget = require('web.Widget');
 
+const { WidgetAdapterMixin } = require('web.OwlCompatibility');
+
 var _t = core._t;
-var ActionManager = Widget.extend({
+var ActionManager = Widget.extend(WidgetAdapterMixin, {
     className: 'o_action_manager',
     custom_events: {
         breadcrumb_clicked: '_onBreadcrumbClicked',
@@ -247,7 +249,7 @@ var ActionManager = Widget.extend({
      * @param {Object} controller
      */
     _appendController: function (controller) {
-        dom.append(this.$el, controller.widget.$el, {
+        dom.append(this.$el, controller.widget.el, {
             in_DOM: this.isInDOM,
             callbacks: [{widget: controller.widget}],
         });
@@ -851,7 +853,14 @@ var ActionManager = Widget.extend({
      */
     _startController: function (controller) {
         var fragment = document.createDocumentFragment();
-        return controller.widget.appendTo(fragment).then(function () {
+
+        let def;
+        if (controller.widget instanceof owl.Component) {
+            def = controller.widget.mount(fragment);
+        } else {
+            def = controller.widget.appendTo(fragment);
+        }
+        return def.then(function () {
             return controller;
         });
     },
@@ -910,7 +919,7 @@ var ActionManager = Widget.extend({
      * @param {Object} [ev.state={}]
      */
     _onPushState: function (ev) {
-        if (ev.target !== this) {
+        if (ev.target !== this || ev.data.__originalComponent) {
             ev.stopPropagation();
             this._pushState(ev.data.controllerID, ev.data.state);
         }
