@@ -430,6 +430,12 @@ ListRenderer.include({
         this.defs = defs;
         _.each(this.columns, function (node, colIndex) {
             var $td = $tds.eq(colIndex);
+
+            // Restrict to edit one2many field on multi_edit list view
+            if (self.state.fields[node.attrs.name].type === "one2many" && self.isInMultipleRecordEdition(recordID)) {
+                node.attrs.modifiers.readonly = true;
+            }
+
             var $newTd = self._renderBodyCell(record, node, colIndex, options);
 
             // Widgets are unregistered of modifiers data when they are

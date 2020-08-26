@@ -10528,6 +10528,38 @@ QUnit.module('Views', {
         list.destroy();
     });
 
+    QUnit.test('editable list view: multi edition with readonly O2M field', async function (assert) {
+        assert.expect(3);
+
+        var list = await createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: `<tree multi_edit="1">
+                        <field name="foo"/>
+                        <field name="o2m" widget="many2many_tags"/>
+                   </tree>`
+        });
+
+        // select a record
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_list_record_selector input'));
+
+        // edit a char field
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_data_cell:eq(0)'));
+        await testUtils.fields.editInput(list.$('.o_field_widget[name=foo]'), "xyz");
+        assert.strictEqual(list.$('.o_data_row:eq(0) .o_data_cell.o_list_char').text(), "xyz",
+            "the first row should be updated");
+
+        // check and click read only O2m field
+        await testUtils.dom.click(list.$('.o_data_row:eq(0) .o_many2many_tags_cell'));
+        assert.hasClass(list.$('.o_data_row:eq(0) .o_many2many_tags_cell div'), 'o_readonly_modifier',
+            "should have a read-only class");
+        assert.containsNone(list.$('.o_data_row:eq(0) .o_field_many2manytags input.ui-autocomplete-input'),
+            '.modal', "should not have input autocomplete field.");
+
+        list.destroy();
+    });
+
     QUnit.test('list view with field component: mounted and willUnmount calls', async function (assert) {
         // this test could be removed as soon as the list view will be written in Owl
         assert.expect(3);
