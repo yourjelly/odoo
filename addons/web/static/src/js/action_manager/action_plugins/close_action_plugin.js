@@ -50,7 +50,7 @@ odoo.define('web.CloseActionPlugin', function (require) {
             this.addToPendingState({
                 onCommit, doOwlReload
             });
-            return this.pushController(controller);
+            return this._pushController(controller);
         }
     }
     CloseActionPlugin.type = 'ir.actions.act_window_close';

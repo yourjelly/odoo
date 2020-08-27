@@ -3,15 +3,26 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
 
     const { Model } = require('web/static/src/js/model.js');
     const { decorate } = require('web.utils');
+
     // TODO: CLEAN ME
     class ActionAbstractPlugin extends Model.Extension {
+        static actionSpecificDecorator(func, ...args) {
+            if (this.type === args[0].type) {
+                return func(...args);
+            }
+        }
         constructor(config, parent) {
             super(config);
             this.actionManager = parent;
             this.env = config.env;
-            const asyncWrapper = this.actionManager.asyncWrapper.bind(this.actionManager);
-            decorate(this, 'executeAction', asyncWrapper);
-            decorate(this, '_restoreController', asyncWrapper);
+            this.asyncWrapper = this.actionManager.asyncWrapper.bind(this.actionManager);
+            decorate(this, 'executeAction', this.asyncWrapper);
+            decorate(this, '_restoreController', this.asyncWrapper);
+            decorate(this, 'rpc', this.asyncWrapper);
+            const actionSpecific = this.constructor.actionSpecificDecorator.bind(this.constructor);
+            decorate(this, 'executeAction', actionSpecific);
+            decorate(this, '_restoreController', actionSpecific);
+
         }
         //----------------------------------------------------------------------
         // API
@@ -19,23 +30,13 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         /**
          * @throws {Error} message: Plugin Error
          */
-        dispatch(method, ...args) {
-            if (method in ActionAbstractPlugin.prototype && args[0].type !== this.constructor.type) {
-                return;
-            }
-            return super.dispatch(...arguments);
-        }
         async executeAction(/*action, options*/) {
             throw new Error(`ActionAbstractPlugin for type ${this.type} doesn't implement executeAction.`);
         }
         async _restoreController() {
             await this.pendingState.__lastProm;
         }
-        loadState(/* state, options */) {}
-        /** Should unbind every listeners on actionManager
-         *  and env.bus at least
-         */
-
+        loadState(/* state, options */) {return;}
         //----------------------------------------------------------------------
         // Getters
         // Shorthands to ActionManager's state
@@ -69,14 +70,12 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         makeBaseController() {
             return this.actionManager.makeBaseController(...arguments);
         }
-        pushController() {
+        _pushController() {
+            this.actionManager.resetDispatch(this.pendingState);
             return this.actionManager.dispatch('pushController', ...arguments);
         }
         rpc() {
-            return this.transactionAdd(this.env.services.rpc(...arguments));
-        }
-        transactionAdd() {
-            return this.actionManager._transaction.add(...arguments);
+            return this.env.services.rpc(...arguments);
         }
         _willSwitchAction() {
             return this.actionManager._willSwitchAction();

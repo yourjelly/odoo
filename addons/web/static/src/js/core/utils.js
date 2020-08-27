@@ -269,10 +269,12 @@ var utils = {
     },
     decorate(obj, fnName, decorator) {
         const func = obj[fnName].bind(obj);
-        const decorated = (...args) => {
-            return decorator(func, ...args);
-        };
-        Object.defineProperty(obj, fnName, {value: decorated});
+        Object.defineProperty(obj, fnName, {
+            value: (...args) => {
+                return decorator(func, ...args);
+            },
+            writable: true,
+        });
     },
 
     /**

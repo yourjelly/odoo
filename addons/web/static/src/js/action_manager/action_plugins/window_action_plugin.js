@@ -9,8 +9,13 @@ odoo.define('web.WindowActionPlugin', function (require) {
     const ActionManager = require('web.ActionManager');
     const { action_registry } = require('web.core');
     const viewRegistry = require('web.view_registry');
+    const { decorate } = require('web.utils');
 
     class WindowActionPlugin extends ActionAbstractPlugin {
+        constructor() {
+            super(...arguments);
+            decorate(this, '_loadViews', this.asyncWrapper);
+        }
 
         //--------------------------------------------------------------------------
         // Public
@@ -28,7 +33,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
          * @returns {Promise} resolved when the action is appended to the DOM
          */
         async executeAction(action, options) {
-            const fieldsViews = await this.transactionAdd(this._loadViews(action));
+            const fieldsViews = await this._loadViews(action);
             const views = this._generateActionViews(action, fieldsViews);
             action._views = action.views; // save the initial attribute
             action.views = views;
@@ -61,7 +66,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
                 this._createViewController(action, lazyView.type, {controllerState: options.controllerState}, baseControllerParams);
                 action.controller.options = options;
                 this.controllers[action.controller.jsID] = action.controller;
-                this.pushController(action.controller);
+                this._pushController(action.controller);
                 Object.assign(
                     baseControllerParams,
                     { index: action.controller.index + 1 , controllerID }
@@ -74,7 +79,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
             };
             this._createViewController(action, curView.type, viewOptions, baseControllerParams);
             action.controller.options = options;
-            return this.pushController(action.controller);
+            return this._pushController(action.controller);
         }
         /**
          * @override
@@ -131,8 +136,10 @@ odoo.define('web.WindowActionPlugin', function (require) {
                 }
             }
             if (action) {
+                this.addToPendingState({
+                    stateLoaded: true,
+                });
                 this._doAction(action, options);
-                return true;
             }
         }
         /**
@@ -341,7 +348,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
                 });
             }
             this._createViewController(action, viewType, viewOptions, { index });
-            this.pushController(action.controller);
+            this._pushController(action.controller);
             return true;
         }
 

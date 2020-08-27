@@ -13,31 +13,6 @@ odoo.define('web.ClientActionPlugin', function (require) {
     const Widget = require('web.Widget');
 
     class ClientActionPlugin extends ActionAbstractPlugin {
-        willHandle(command) {
-            const { name } = command;
-            switch (name) {
-                case "LOAD_STATE":
-                    return true;
-                case "_RESTORE": {
-                    const [ action ] = command.payload || [];
-                    if (action && action.type === this.constructor.type) {
-                        return true;
-                    }
-                    break;
-                }
-            }
-            return super.willHandle(command);
-        }
-        handle(command) {
-            const { name , payload } = command;
-            switch (name) {
-                case "LOAD_STATE":
-                    return this.loadState(...payload);
-                case "_RESTORE":
-                    return this.dispatch('pushController', ...payload);
-            }
-            return super.handle(...arguments);
-        }
         /**
          * Executes actions of type 'ir.actions.client'.
          *
@@ -68,11 +43,11 @@ odoo.define('web.ClientActionPlugin', function (require) {
             options.controllerID = controller.jsID;
             controller.options = options;
             action.id = action.id || action.tag;
-            return this.pushController(controller);
+            return this._pushController(controller);
         }
         async _retoreController(action, controller) {
             await super._restoreController(...arguments);
-            this.dispatch('pushController', controller);
+            this._pushController(controller);
         }
         /**
          * @override
@@ -86,7 +61,9 @@ odoo.define('web.ClientActionPlugin', function (require) {
                 };
                 this.actionManager.resetDispatch();
                 this._doAction(action, options);
-                return true;
+                this.addToPendingState({
+                    stateLoaded: true,
+                });
             }
         }
     }

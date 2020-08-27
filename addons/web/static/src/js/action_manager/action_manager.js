@@ -15,7 +15,6 @@ odoo.define('web.ActionManager', function (require) {
         constructor(extensions, config) {
             super(...arguments);
             this.requestId = 0;
-            this._transaction = new TransactionalChain();
             // Before switching views, an event is triggered
             // containing the state of the current controller
             // TODO: convert to dispatch, or own events
@@ -43,6 +42,10 @@ odoo.define('web.ActionManager', function (require) {
         }
         _constructorExtensionParams() {
             return super._constructorExtensionParams(...arguments).concat([this]);
+        }
+        get(property) {
+            const prop = (this.pendingState || this.committedState)[property];
+            return prop || super.get(property);
         }
         dispatch() {
             if (!this.dispatching) {
@@ -160,26 +163,6 @@ odoo.define('web.ActionManager', function (require) {
             const controllerCleaned = this._cleanActions();
             return { controllerCleaned };
         }
-/*        handle(command) {
-            const { name, payload } = command;
-            switch (name) {
-                case "doAction":
-                    command.setNotify(true);
-                    return this.doAction(...payload);
-                case "EXECUTE_IN_FLOW":
-                    return this.executeInFlowAction(...payload);
-                case "pushController":
-                    command.setNotify(true);
-                    return this.pushController(...payload);
-                case "RESTORE_CONTROLLER":
-                    return this.restoreController(...payload);
-                case "executeAction": {
-                    // always render, because some actions may resolve to no node
-                    command.setNotify(true);
-                    this.addToPendingState(payload[0]);
-                }
-            }
-        }*/
         /**
          * Executes Odoo actions, given as an ID in database, an xml ID, a client
          * action tag or an action descriptor.
@@ -213,7 +196,8 @@ odoo.define('web.ActionManager', function (require) {
             on_success = on_success || (() => {console.log('SUCCESS', action);});
             on_fail = on_fail || (() => {});
             this._doAction(action, options);
-            this.loadAction().then(on_success).guardedCatch(on_fail);
+            this.loadAction();
+            this.getActionPromise().then(on_success).guardedCatch(on_fail);
         }
         _doAction(action, options) {
             const defaultOptions = {
@@ -262,7 +246,7 @@ odoo.define('web.ActionManager', function (require) {
                     active_ids: options.additional_context.active_ids,
                     active_model: options.additional_context.active_model,
                 });
-                action = await this._transaction.add(loadActionProm);
+                action = await this.asyncWrapper(loadActionProm);
             }
             // action.target 'main' is equivalent to 'current' except that it
             // also clears the breadcrumbs
@@ -346,7 +330,7 @@ odoo.define('web.ActionManager', function (require) {
 
             let action;
             try {
-                action = await this._transaction.add(prom);
+                action = await this.asyncWrapper(prom);
             } catch (e) {
                 // LPE FIXME: activate this
                 // this.handleError(e);

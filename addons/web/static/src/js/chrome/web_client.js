@@ -115,7 +115,7 @@ odoo.define('web.WebClient', function (require) {
             this.urlState = this._getUrlState();
             this._determineCompanyIds(this.urlState);
             // LPE decision: make this at mounted to allow visual feedback that odoo is loading ?
-            //return this._loadState(this.urlState);
+            return this._loadState(this.urlState);
         }
 
         getBodyClass() {
@@ -244,9 +244,10 @@ odoo.define('web.WebClient', function (require) {
             });
         }
         async _loadState(state) {
-            const stateLoaded = await this.actionManager.dispatch('LOAD_STATE',
+            this.actionManager.dispatch('loadState',
                 state, { menuID: state.menu_id }
             );
+            const stateLoaded = this.actionManager.get('stateLoaded');
             if (!stateLoaded) {
                 if ('menu_id' in state) {
                     const action = this.menus[state.menu_id].actionID;
