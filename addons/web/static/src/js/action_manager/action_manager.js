@@ -680,27 +680,31 @@ odoo.define('web.ActionManager', function (require) {
         asyncWrapper(fnOrProm, ...args) {
             const pendingState = this.pendingState;
             const { actionID, requestId } = this.pendingState;
+            const predicate = () => {
+                return this.pendingState && (
+                    requestId === this.pendingState.requestId &&
+                    actionID === this.pendingState.actionID
+                );
+            };
             this.pendingState.__lastProm = this.pendingState.promises[this.pendingState.promises.length-1];
             const prom = new Promise((resolve, reject) => {
                 let prom2;
                 if (fnOrProm instanceof Function) {
-                    prom2 = Promise.resolve().then(async () => {
+                    prom2 = Promise.resolve().then(() => {
                         this.pendingState = pendingState;
-                        return await fnOrProm(...args);
+                        return fnOrProm(...args);
                     });
                 } else {
                     prom2 = fnOrProm;
                 }
                 prom2.then(result => {
-                        if (requestId === this.pendingState.requestId &&
-                            actionID === this.pendingState.actionID) {
+                        if (predicate()) {
                             resolve(result);
                         }
                     })
-                    .guardedCatch(() => {
-                    if (requestId === this.pendingState.requestId &&
-                        actionID === this.pendingState.actionID) {
-                        reject(this.pendingState.hasDOMresult);
+                    .guardedCatch(error => {
+                    if (predicate()) {
+                        reject(error);
                     }
                 });
             });
