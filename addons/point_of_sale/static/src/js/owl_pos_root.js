@@ -9,8 +9,11 @@ odoo.define('point_of_sale.owlPosRoot', function (require) {
             // Pos needs to be able to print Invoices
             // this is the SOLE purpose of this actionManager
             // LPE FIXME
-            this.actionManager = new ActionManager(this.env);
-            this.env.actionManager = this.actionManager;
+            const amExtensions = {
+                'ir.actions.report': {},
+                'ir.actions.act_url': {},
+            };
+            this.env.actionManager = new ActionManager(amExtensions, {env: this.env});
             this.chromeRef = owl.hooks.useRef('chromeRef');
         }
         mounted() {
@@ -19,7 +22,7 @@ odoo.define('point_of_sale.owlPosRoot', function (require) {
             super.mounted();
             this.chromeRef.comp.start();
         }
-    };
+    }
     PosRoot.template = owl.tags.xml`
         <Chrome t-att-class="'o_action_manager'" t-ref="chromeRef"/>
     `;

@@ -234,8 +234,16 @@ odoo.define('web.ActionManager', function (require) {
                 options,
             });
         }
-        getActionPromise() {
-            return Promise.all(this.pendingState && this.pendingState.promises || []);
+        getActionPromise(promisesList) {
+            if (!promisesList) {
+                promisesList = this.pendingState && this.pendingState.promises || [];
+            }
+            const length = promisesList.length;
+            return Promise.all(promisesList).then(() => {
+                if (promisesList.length > length) {
+                    return this.getActionPromise(promisesList);
+                }
+            });
         }
         async loadAction() {
             if (!this.pendingState) {
