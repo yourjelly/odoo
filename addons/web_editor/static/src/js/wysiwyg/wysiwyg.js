@@ -145,6 +145,25 @@ var Wysiwyg = Widget.extend({
                             },
                         },
                     },
+                    {
+                        selector: [
+                            (node) => {
+                                const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
+                                return attributes && attributes.classList.has('o_header_standard');
+                            },
+                            (node) => {
+                                const linkFormat = node.modifiers.find(this.JWEditorLib.LinkFormat);
+                                const attributes = linkFormat && linkFormat.modifiers.find(this.JWEditorLib.Attributes);
+                                return attributes && attributes.classList.has('nav-link');
+                            },
+                        ],
+                        properties: {
+                            editable: {
+                                value: true,
+                                cascading: true,
+                            },
+                        },
+                    },
                 ],
             };
         }
