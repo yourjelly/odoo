@@ -218,6 +218,14 @@ odoo.define('web.ActionManager', function (require) {
                 options,
             });
         }
+        loadState() {
+            // LPE FIXME: it we don't do this, there is a actionContainer instanciated
+            // This is not what we want, this dipatch method is merely a special getter
+            // than *can* doAction......
+            this.addToPendingState({
+                actionID: null,
+            });
+        }
         getActionPromise(promisesList) {
             if (!promisesList) {
                 promisesList = this.pendingState && this.pendingState.promises || [];
