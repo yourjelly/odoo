@@ -5,6 +5,7 @@ odoo.define('bus.WebClient', function (require) {
     const WebClient = require('web.WebClient');
 
     const _t = core._t;
+    return;
 
     WebClient.include({
 

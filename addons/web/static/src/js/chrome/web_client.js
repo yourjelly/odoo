@@ -30,6 +30,16 @@ odoo.define('web.WebClient', function (require) {
 
             this.mainRef = useRef('mainRef');
             this.menu = useRef('menu');
+
+            const amExtensions = {
+                'ir.actions.act_window': {},
+                'ir.actions.act_window_close': {},
+                'ir.actions.client': {},
+                'ir.actions.server': {},
+                'ir.actions.report': {},
+                'ir.actions.act_url': {},
+            };
+            this.env.actionManager = new ActionManager(amExtensions, {env: this.env});
             ActionManager.useActionManager();
 
             // the state of the webclient contains information like the current
@@ -105,7 +115,7 @@ odoo.define('web.WebClient', function (require) {
             this.urlState = this._getUrlState();
             this._determineCompanyIds(this.urlState);
             // LPE decision: make this at mounted to allow visual feedback that odoo is loading ?
-            return this._loadState(this.urlState);
+            //return this._loadState(this.urlState);
         }
 
         getBodyClass() {
@@ -393,7 +403,7 @@ odoo.define('web.WebClient', function (require) {
          */
         _onBreadcrumbClicked(ev) {
             // TODO: it is pôssible now to put this in action_adapter
-            this.actionManager.dispatch('RESTORE_CONTROLLER', ev.detail.controllerID);
+            this.actionManager.dispatch('restoreController', ev.detail.controllerID);
         }
         /**
          * Whenever the connection is lost, we need to notify the user.
@@ -459,7 +469,7 @@ odoo.define('web.WebClient', function (require) {
          * @param {Object} ev.detail
          */
         _onExecuteAction(ev) {
-            this.actionManager.dispatch('EXECUTE_IN_FLOW', ev.detail);
+            this.actionManager.dispatch('executeFlowAction', ev.detail);
         }
         _onGenericClick(ev) {
             this._domCleaning();

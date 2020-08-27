@@ -193,8 +193,7 @@ odoo.define('web.ReportActionPlugin', function (require) {
         }
     }
     ReportActionPlugin.type = 'ir.actions.report';
-
-    ActionManager.registerPlugin(ReportActionPlugin);
+    ActionManager.registry.add('ir.actions.report', ReportActionPlugin, 20);
 
     return ReportActionPlugin;
 

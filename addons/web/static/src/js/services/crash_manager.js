@@ -96,7 +96,7 @@ var CrashManager = AbstractService.extend({
             'odoo.exceptions.ValidationError': _lt("Validation Error"),
         };
 
-        this.browserDetection = new BrowserDetection();
+        this.browserDetection = BrowserDetection;
         this._super.apply(this, arguments);
 
         // crash manager integration
@@ -149,7 +149,7 @@ var CrashManager = AbstractService.extend({
                 // In particular, Chrome formats the contents of Error.stack
                 // https://v8.dev/docs/stack-trace-api#compatibility
                 let traceback;
-                if (self.browserDetection.isBrowserChrome()) {
+                if (self.browserDetection.isBrowserChrome) {
                     traceback = ev.reason.stack;
                 } else {
                     traceback = `${_t("Error:")} ${ev.reason.message}\n${ev.reason.stack}`;

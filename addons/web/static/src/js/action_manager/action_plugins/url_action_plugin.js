@@ -41,8 +41,7 @@ odoo.define('web.UrlActionPlugin', function (require) {
         }
     }
     UrlActionPlugin.type = 'ir.actions.act_url';
-
-    ActionManager.registerPlugin(UrlActionPlugin);
+    ActionManager.registry.add('ir.actions.act_url', UrlActionPlugin, 20);
 
     return UrlActionPlugin;
 });

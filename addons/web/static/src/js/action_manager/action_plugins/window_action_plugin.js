@@ -11,34 +11,6 @@ odoo.define('web.WindowActionPlugin', function (require) {
     const viewRegistry = require('web.view_registry');
 
     class WindowActionPlugin extends ActionAbstractPlugin {
-        willHandle({name, payload}) {
-            switch (name) {
-                case "_RESTORE": {
-                    const [ action ] = payload || [];
-                    if (action && action.type === this.constructor.type) {
-                        return true;
-                    }
-                    break;
-                }
-                case "SWITCH_VIEW":
-                    return true;
-                case "LOAD_STATE":
-                    return true;
-            }
-            return super.willHandle(...arguments);
-        }
-        handle(command) {
-            const {name, payload} = command;
-            switch (name) {
-                case "_RESTORE":
-                    return this.restoreController(...payload);
-                case "SWITCH_VIEW":
-                    return this._onSwitchView(...payload);
-                case "LOAD_STATE":
-                    return this.loadState(...payload);
-            }
-            return super.handle(...arguments);
-        }
 
         //--------------------------------------------------------------------------
         // Public
@@ -159,7 +131,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
                 }
             }
             if (action) {
-                this.doAction(action, options);
+                this._doAction(action, options);
                 return true;
             }
         }
@@ -175,7 +147,8 @@ odoo.define('web.WindowActionPlugin', function (require) {
          * @override
          * @private
          */
-        restoreController(action, controller) {
+        async _restoreController(action, controller) {
+            await super._restoreController(...arguments);
             return this._switchController(action, controller.viewType);
         }
 
@@ -387,7 +360,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
          * @param {mode} [payload.mode] the mode to open, i.e. 'edit' or 'readonly'
          *   (only relevant for form views)
          */
-        async _onSwitchView(payload) {
+        async switchView(payload) {
             // LPE FIXME: I think this is right to do, but tour crash
             await this._willSwitchAction();
             const viewType = payload.view_type;
@@ -407,7 +380,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
         }
     }
     WindowActionPlugin.type = 'ir.actions.act_window';
-    ActionManager.registerPlugin(WindowActionPlugin);
+    ActionManager.registry.add('ir.actions.act_window', WindowActionPlugin, 20);
 
     return WindowActionPlugin;
 

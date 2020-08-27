@@ -270,7 +270,6 @@
         <script type="text/javascript" src="/web/static/src/js/action_manager/action_plugins/window_action_plugin.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/chrome/action_mixin.js"/>
-        <script type="text/javascript" src="/web/static/src/js/core/browser_detection.js"></script>
         <script type="text/javascript" src="/web/static/src/js/chrome/keyboard_navigation.js"></script>
         <script type="text/javascript" src="/web/static/src/js/chrome/web_client.js"></script>
         <script type="text/javascript" src="/web/static/src/js/web_client_class.js"></script>

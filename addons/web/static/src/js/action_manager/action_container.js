@@ -21,8 +21,8 @@ odoo.define('web.ActionContainer', function (require) {
         }
         async willStart() {
             await super.willStart(...arguments);
-            const hasDom = await this.actionManager.getActionPromise();
-            if (hasDom === false) {
+            await this.actionManager.getActionPromise();
+            if (this.actionManager.hasDOMresult === false) {
                 this.destroy();
             }
         }

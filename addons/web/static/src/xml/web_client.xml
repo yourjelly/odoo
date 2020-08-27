@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
 
-    <t t-name="web.WebClient" owl="1">
+    <t t-name="web.WebClient" owl="1" t-debug="1">
         <body class="o_web_client" t-att-class="getBodyClass()"
               t-on-push-state="_onPushState"
               t-on-set-title-part="_onSetTitlePart"

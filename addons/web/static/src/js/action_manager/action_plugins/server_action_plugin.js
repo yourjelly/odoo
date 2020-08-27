@@ -28,12 +28,11 @@ odoo.define('web.ServerActionPlugin', function (require) {
                 },
             });
             action = action || { type: 'ir.actions.act_window_close' };
-            return this.doAction(action, options);
+            return this._doAction(action, options);
         }
     }
     ServerActionPlugin.type = 'ir.actions.server';
-
-    ActionManager.registerPlugin(ServerActionPlugin);
+    ActionManager.registry.add('ir.actions.server', ServerActionPlugin, 20);
 
     return ServerActionPlugin;
 });

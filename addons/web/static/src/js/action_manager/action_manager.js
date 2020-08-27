@@ -1,126 +1,20 @@
 odoo.define('web.ActionManager', function (require) {
     "use strict";
 
-    const ActionAbstractPlugin = require('web.ActionAbstractPlugin');
     const Context = require('web.Context');
     const { action_registry } = require('web.core');
-    const { Model, useModel } = require('web.model');
+    const { Model, useModel } = require('web/static/src/js/model.js');
+    const Registry = require("web.Registry");
 
     var pyUtils = require('web.py_utils');
     const { TransactionalChain } = require('web.concurrency');
-
     const { core } = owl;
+    const { decorate } = require('web.utils');
 
-    class HotPluginAbleModel extends Model {
-        // TODO: doc ALL!!!
-        // TODO: check type of PLugin ???
-        static registerPlugin(Plugin) {
-            this.Plugins = this.Plugins || [];
-            this.Plugins.push(Plugin);
-            if (this.instanceBus) {
-                this.instanceBus.trigger('plugin-registered', Plugin);
-            }
-        }
-        constructor(env) {
+    class ActionManager extends Model {
+        constructor(extensions, config) {
             super(...arguments);
-            this.env = env;
-            this.plugins = [];
-            const instance = this;
-            const _bus = this.constructor.instanceBus || new core.EventBus();
-            this.constructor.instanceBus = _bus;
-            _bus.on('plugin-registered', null, Plugin => {
-                instance.instanciatePlugin.call(instance, Plugin);
-            });
-
-            this.constructor.Plugins.forEach(P => this.instanciatePlugin(P));
-        }
-        cancelPreviousCommand() {
-            if (this.currentCommand) {
-                this.currentCommand.stopped = true;
-            }
-            this.currentCommand = null;
-        }
-        getHandlers(/* command */) {/* return handlers */}
-        async _process(command, handlers) {
-            const handled = [];
-            for (const h of handlers) {
-                handled.push(h.handle(command));
-            }
-            const results = await Promise.all(handled);
-
-            return results.find(r => r !== undefined);
-        }
-        _prepareCommand(commandString, ...args) {
-            return {
-                name: commandString,
-                payload: args,
-                rev: this.rev,
-                setNotify(bool) {
-                    const comm =  this.root ? this.root : this;
-                    comm.triggerNotify = bool;
-                }
-            };
-        }
-        /**
-         * Exposed public dispatch: initiates a transaction
-         */
-        async dispatch(commandString, ...args) {
-            const command = this._prepareCommand(...arguments);
-
-            const handlers = this.getHandlers(command);
-            handlers.forEach(h => h.beforeHandle(command));
-            if (command.stopped) {
-                return false;
-            }
-            this.cancelPreviousCommand();
-            this.currentCommand = command;
-
-            let results;
-            try {
-                results = await this._process(command, handlers);
-            } catch (e) {
-                this.handleError(e);
-            }
-            if (command.triggerNotify) {
-                await Promise.resolve().then(() => {
-                    if (command.rev === this.rev && !command.stopped) {
-                        this._notifyComponents();
-                    }
-                });
-            }
-            return results;
-        }
-        /**
-         * To be used by plugins or self
-         * Doesn't initiate a transaction
-         * MUST be used inside one though
-         */
-        async _dispatch(commandString, ...args) {
-            const command = this._prepareCommand(...arguments);
-
-            const handlers = this.getHandlers(command);
-            handlers.forEach(h => h.beforeHandle(command));
-            if (command.stopped) {
-                return false;
-            }
-            command.root = this.currentCommand;
-            return this._process(command, handlers);
-        }
-        instanciatePlugin(Plugin) {
-            // TODO: clean API of generic Plugin
-            const plugin = new Plugin(this, this.env);
-            this.plugins.push(plugin);
-        }
-        handleError(error) {
-            if (!(error && error.message && error.message.startsWith('Plugin Error'))) {
-                throw error;
-            }
-        }
-    }
-
-    class ActionManager extends HotPluginAbleModel {
-        constructor() {
-            super(...arguments);
+            this.requestId = 0;
             this._transaction = new TransactionalChain();
             // Before switching views, an event is triggered
             // containing the state of the current controller
@@ -137,18 +31,38 @@ odoo.define('web.ActionManager', function (require) {
             // instance of the controller's widget)
             this.controllers = {};
 
-            this.requestId = 0;
             this.committedState = {
                 controllerStack: [],
                 dialog: null,
             };
             this.pendingState = null;
+            const asyncWrapper = this.asyncWrapper.bind(this);
+            decorate(this, 'executeFlowAction', asyncWrapper);
+            decorate(this, 'restoreController', asyncWrapper);
+            decorate(this, 'loadAction', asyncWrapper);
         }
-        cancelPreviousCommand() {
-            this._transaction.add(Promise.resolve());
+        _constructorExtensionParams() {
+            return super._constructorExtensionParams(...arguments).concat([this]);
+        }
+        dispatch() {
+            if (!this.dispatching) {
+                this.requestId++;
+                this.pendingState = null;
+            }
+            this.addToPendingState(this.__pendingState);
+            this.__pendingState = null;
+            return super.dispatch(...arguments);
+        }
+        _dispatch(method, ...args) {
+            if (method in this) {
+                this[method](...args);
+            } 
+            return super._dispatch(...arguments);
+        }
+        resetDispatch(pendingState) {
+            this.dispatching = false;
             this.pendingState = null;
-            this.requestId++;
-            super.cancelPreviousCommand();
+            this.__pendingState = pendingState;
         }
         get activeDescriptors() {
             const stack = this.currentStack;
@@ -168,6 +82,9 @@ odoo.define('web.ActionManager', function (require) {
             return this.pendingState &&
                 this.pendingState.controllerStack ||
                 this.committedState.controllerStack;
+        }
+        get hasDOMresult() {
+            return this.pendingState && this.pendingState.hasDOMresult;
         }
         get isFullScreen() {
             return this.currentStack.some((ctID) => {
@@ -206,37 +123,14 @@ odoo.define('web.ActionManager', function (require) {
                 this.pendingState,
             );
         }
-        getHandlers(command) {
-            const exclusives = [
-                'EXECUTE_IN_FLOW',
-                'pushController', 'RESTORE_CONTROLLER',
-                '_ROLLBACK',
-            ];
-            const handlers = [[50 , this]];
-            if (!exclusives.includes(command.name)) {
-                this.plugins.forEach(h => {
-                    const willHandle = h.willHandle(command);
-                    if (willHandle) {
-                        const priority = parseInt(willHandle) ? willHandle : 50;
-                        handlers.push([priority , h]);
-                    }
-                });
-            }
-            handlers.sort((a, b) => {
-                return a[0] - b[0];
-            });
-            return handlers.map(el => el[1]);
-        }
         //--------------------------------------------------------------------------
         // Main API
         //--------------------------------------------------------------------------
-        beforeHandle(){/* */}
-        commit() {
-            if (!this.pendingState) {
+        commit(pendingState) {
+            if (!pendingState) {
                 return;
             }
-            this._dispatch('_COMMIT');
-            const { controllerStack, dialog } = this.pendingState;
+            const { controllerStack, dialog } = pendingState;
             if (!controllerStack && !dialog) {
                 return;
             }
@@ -264,10 +158,9 @@ odoo.define('web.ActionManager', function (require) {
             }
             this.committedState.controllerStack = controllerStack;
             const controllerCleaned = this._cleanActions();
-            this.cancelPreviousCommand();
             return { controllerCleaned };
         }
-        handle(command) {
+/*        handle(command) {
             const { name, payload } = command;
             switch (name) {
                 case "doAction":
@@ -286,7 +179,7 @@ odoo.define('web.ActionManager', function (require) {
                     this.addToPendingState(payload[0]);
                 }
             }
-        }
+        }*/
         /**
          * Executes Odoo actions, given as an ID in database, an xml ID, a client
          * action tag or an action descriptor.
@@ -313,15 +206,14 @@ odoo.define('web.ActionManager', function (require) {
          *   executed (e.g. if doAction has been called to execute another action
          *   before this one was complete).
          */
-        doAction(action, options, on_success, on_fail, previousPending) {
+        doAction(action, options, on_success, on_fail) {
             // Calling on_success and on_fail is necessary for legacy
             // compatibility. Some widget may need to do stuff when a report
             // has been printed
             on_success = on_success || (() => {console.log('SUCCESS', action);});
             on_fail = on_fail || (() => {});
-            this.addToPendingState(previousPending || {});
             this._doAction(action, options);
-            this._prepareActionPromise().then(on_success).guardedCatch(on_fail);
+            this.loadAction().then(on_success).guardedCatch(on_fail);
         }
         _doAction(action, options) {
             const defaultOptions = {
@@ -343,29 +235,7 @@ odoo.define('web.ActionManager', function (require) {
             });
         }
         getActionPromise() {
-            return this.pendingState && this.pendingState.actionPromise;
-        }
-        _prepareActionPromise() {
-            let actionDone;
-            this.pendingState.actionPromise = new Promise((resolve, reject) => {
-                this.pendingState.loaded = false;
-                const { actionID , requestId } = this.pendingState;
-                actionDone = this.loadAction()
-                    .then(() => {
-                        if (requestId === this.pendingState.requestId &&
-                            actionID === this.pendingState.actionID) {
-                            this.pendingState.loaded = true;
-                            resolve(this.pendingState.hasDOMresult);
-                        }
-                    })
-                    .guardedCatch(error => {
-                        if (requestId === this.pendingState.requestId &&
-                            actionID === this.pendingState.actionID) {
-                            reject(error);
-                        }
-                    });
-            });
-            return actionDone;
+            return Promise.all(this.pendingState && this.pendingState.promises || []);
         }
         async loadAction() {
             if (!this.pendingState) {
@@ -398,7 +268,8 @@ odoo.define('web.ActionManager', function (require) {
             if (action.target !== 'new') {
                 await this._willSwitchAction();
             }
-            return this.dispatch('executeAction', this.pendingState);
+            this.resetDispatch(this.pendingState);
+            return this.dispatch('executeAction', action, options);
         }
         /**
          * Handler for event 'execute_action', which is typically called when a
@@ -417,7 +288,7 @@ odoo.define('web.ActionManager', function (require) {
          * @param {function} [params.on_fail]
          * @param {function} [params.on_success]
          */
-        async executeInFlowAction(params) {
+        async executeFlowAction(params) {
             const actionData = params.action_data;
             const env = params.env;
             const context = new Context(env.context, actionData.context || {});
@@ -543,20 +414,28 @@ odoo.define('web.ActionManager', function (require) {
             if (!controllerID) {
                 controllerID = this.currentStack[this.currentStack.length - 1];
             }
-            await this._willSwitchAction();
             const { action, controller } = this.getFullDescriptorsFromControllerID(controllerID);
+            await this._willSwitchAction();
             if (action) {
                 if (controller.onReverseBreadcrumb) {
                     await controller.onReverseBreadcrumb();
                 }
             }
-            return this._dispatch('_RESTORE', action, controller);
+            this.resetDispatch(this.pendingState);
+            this.dispatch('_restoreController', action, controller);
         }
-        rollBack() {
-            if (!this.pendingState)  {
+        finalizeTransaction(mode) {
+            const pendingState = this.pendingState;
+            this.resetDispatch();
+            this.dispatching = true;
+            this.dispatch(mode, pendingState);
+            this.resetDispatch();
+        }
+        rollBack(pendingState) {
+            if (!pendingState)  {
                 return;
             }
-            const {controllerStack, dialog } = this.pendingState;
+            const {controllerStack, dialog } = pendingState;
             if (!controllerStack && !dialog) {
                 return;
             }
@@ -576,7 +455,6 @@ odoo.define('web.ActionManager', function (require) {
                 // usecase: make a default_get crash during a do_action
                 //this.restoreController();
             }
-            this.cancelPreviousCommand();
         }
 
         //--------------------------------------------------------------------------
@@ -595,6 +473,7 @@ odoo.define('web.ActionManager', function (require) {
             this.controllers[controllerID] = newController;
             return newController;
         }
+
         rpc() {
             return this.env.services.rpc(...arguments);
         }
@@ -772,19 +651,16 @@ odoo.define('web.ActionManager', function (require) {
             } else {
                 const length = this.currentStack.length;
                 if (length > 1) {
-                    this.dispatch('RESTORE_CONTROLLER', this.currentStack[length - 2]);
+                    this.dispatch('restoreController', this.currentStack[length - 2]);
                 }
             }
         }
-        _prepareCommand() {
-            const cmd = super._prepareCommand(...arguments);
-            cmd.requestId = this.requestId;
-            return cmd;
-        }
         addToPendingState(...objs) {
             const pendingState = this.pendingState || {
-                hasDOMresult: false,
+                actionID: `__dummy__${this.requestId}`,
                 requestId: this.requestId,
+                hasDOMresult: false,
+                promises: [],
             };
             this.pendingState = Object.assign(
                 pendingState,
@@ -800,6 +676,36 @@ odoo.define('web.ActionManager', function (require) {
             if (controller) {
                 Object.assign(controller, data.controller);
             }
+        }
+        asyncWrapper(fnOrProm, ...args) {
+            const pendingState = this.pendingState;
+            const { actionID, requestId } = this.pendingState;
+            this.pendingState.__lastProm = this.pendingState.promises[this.pendingState.promises.length-1];
+            const prom = new Promise((resolve, reject) => {
+                let prom2;
+                if (fnOrProm instanceof Function) {
+                    prom2 = Promise.resolve().then(async () => {
+                        this.pendingState = pendingState;
+                        return await fnOrProm(...args);
+                    });
+                } else {
+                    prom2 = fnOrProm;
+                }
+                prom2.then(result => {
+                        if (requestId === this.pendingState.requestId &&
+                            actionID === this.pendingState.actionID) {
+                            resolve(result);
+                        }
+                    })
+                    .guardedCatch(() => {
+                    if (requestId === this.pendingState.requestId &&
+                        actionID === this.pendingState.actionID) {
+                        reject(this.pendingState.hasDOMresult);
+                    }
+                });
+            });
+            this.pendingState.promises.push(prom);
+            return prom;
         }
     }
     ActionManager.nextID = 1;
@@ -822,7 +728,7 @@ odoo.define('web.ActionManager', function (require) {
             const componentId = __owl__.id;
             const transactionEndFn = commandName => {
                 if (mapping[componentId] === actionManager.rev) {
-                    return actionManager[commandName]();
+                    return actionManager.finalizeTransaction(commandName);
                 }
             };
             const { onPatched, onMounted } = owl.hooks;
@@ -843,6 +749,7 @@ odoo.define('web.ActionManager', function (require) {
             // TODO: clean bindings from component
         }
     }
+    ActionManager.registry = new Registry(null);
 
     ActionManager.useActionManager = useActionManager;
 

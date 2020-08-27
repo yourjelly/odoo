@@ -276,11 +276,14 @@ odoo.define("web/static/src/js/model.js", function (require) {
             const get = this.__get.bind(this, Extension.name);
             const trigger = this.trigger.bind(this);
             const config = Object.assign({ get, trigger }, this.config, extensionConfig);
-            const extension = new Extension(config);
+            const extension = new Extension(...this._constructorExtensionParams(config));
             if (!(Extension.layer in this.extensions)) {
                 this.extensions[Extension.layer] = [];
             }
             this.extensions[Extension.layer].push(extension);
+        }
+        _constructorExtensionParams(...params) {
+            return params;
         }
 
         /**
@@ -295,9 +298,7 @@ odoo.define("web/static/src/js/model.js", function (require) {
         dispatch(method, ...args) {
             const isInitialDispatch = !this.dispatching;
             this.dispatching = true;
-            for (const extension of this.extensions.flat()) {
-                extension.dispatch(method, ...args);
-            }
+            this._dispatch(method, ...args);
             if (!isInitialDispatch) {
                 return;
             }
@@ -314,6 +315,11 @@ odoo.define("web/static/src/js/model.js", function (require) {
                     this._notifyComponents();
                 }
             });
+        }
+        _dispatch(method, ...args) {
+            for (const extension of this.extensions.flat()) {
+                extension.dispatch(method, ...args);
+            }
         }
 
         /**

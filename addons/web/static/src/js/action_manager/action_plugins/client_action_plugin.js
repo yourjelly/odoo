@@ -70,6 +70,10 @@ odoo.define('web.ClientActionPlugin', function (require) {
             action.id = action.id || action.tag;
             return this.pushController(controller);
         }
+        async _retoreController(action, controller) {
+            await super._restoreController(...arguments);
+            this.dispatch('pushController', controller);
+        }
         /**
          * @override
          */
@@ -80,14 +84,14 @@ odoo.define('web.ClientActionPlugin', function (require) {
                     tag: state.action,
                     type: 'ir.actions.client',
                 };
-                this.doAction(action, options);
+                this.actionManager.resetDispatch();
+                this._doAction(action, options);
                 return true;
             }
         }
     }
     ClientActionPlugin.type = 'ir.actions.client';
-
-    ActionManager.registerPlugin(ClientActionPlugin);
+    ActionManager.registry.add('ir.actions.client', ClientActionPlugin, 20);
 
     return ClientActionPlugin;
 });

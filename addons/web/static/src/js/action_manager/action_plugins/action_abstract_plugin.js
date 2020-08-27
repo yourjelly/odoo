@@ -1,44 +1,40 @@
 odoo.define('web.ActionAbstractPlugin', function (require) {
     "use_strict";
 
+    const { Model } = require('web/static/src/js/model.js');
+    const { decorate } = require('web.utils');
     // TODO: CLEAN ME
-    class ActionAbstractPlugin {
-        constructor(actionManager, env) {
-            this.actionManager = actionManager;
-            this.env = env;
+    class ActionAbstractPlugin extends Model.Extension {
+        constructor(config, parent) {
+            super(config);
+            this.actionManager = parent;
+            this.env = config.env;
+            const asyncWrapper = this.actionManager.asyncWrapper.bind(this.actionManager);
+            decorate(this, 'executeAction', asyncWrapper);
+            decorate(this, '_restoreController', asyncWrapper);
         }
-        willHandle({ name, payload }) {
-            const handledCommands = [
-                'executeAction',
-            ];
-            if (handledCommands.includes(name)) {
-                const { action } = payload[0];
-                return action.type === this.constructor.type;
-            }
-            return false;
-        }
-        handle({name, payload}) {
-            if (name === 'executeAction') {
-                const { action , options } = this.pendingState;
-                return this.executeAction(action, options);
-            }
-        }
-        beforeHandle(command) {}
-        afterHandle(command) {}
         //----------------------------------------------------------------------
         // API
         //----------------------------------------------------------------------
         /**
          * @throws {Error} message: Plugin Error
          */
+        dispatch(method, ...args) {
+            if (method in ActionAbstractPlugin.prototype && args[0].type !== this.constructor.type) {
+                return;
+            }
+            return super.dispatch(...arguments);
+        }
         async executeAction(/*action, options*/) {
             throw new Error(`ActionAbstractPlugin for type ${this.type} doesn't implement executeAction.`);
+        }
+        async _restoreController() {
+            await this.pendingState.__lastProm;
         }
         loadState(/* state, options */) {}
         /** Should unbind every listeners on actionManager
          *  and env.bus at least
          */
-        destroy() {}
 
         //----------------------------------------------------------------------
         // Getters
@@ -67,19 +63,14 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         // Public
         // Normalized shorthands to ActionManager's methods
         //----------------------------------------------------------------------
-        dispatch() {
-            return this.actionManager._dispatch(...arguments);
-        }
-        doAction() {
-            let [action, options, on_success, on_fail, previousPending] = arguments;
-            previousPending = this.pendingState;
-            return this.actionManager.dispatch('doAction', action, options, on_success, on_fail, previousPending);
+        _doAction() {
+            return this.actionManager.dispatch('doAction', ...arguments);
         }
         makeBaseController() {
             return this.actionManager.makeBaseController(...arguments);
         }
         pushController() {
-            return this.dispatch('pushController', ...arguments);
+            return this.actionManager.dispatch('pushController', ...arguments);
         }
         rpc() {
             return this.transactionAdd(this.env.services.rpc(...arguments));

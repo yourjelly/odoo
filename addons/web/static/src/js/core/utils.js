@@ -267,6 +267,14 @@ var utils = {
     confine: function (val, min, max) {
         return Math.max(min, Math.min(max, val));
     },
+    decorate(obj, fnName, decorator) {
+        const func = obj[fnName].bind(obj);
+        const decorated = (...args) => {
+            return decorator(func, ...args);
+        };
+        Object.defineProperty(obj, fnName, {value: decorated});
+    },
+
     /**
      * @param {number} value
      * @param {integer} decimals

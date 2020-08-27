@@ -10,31 +10,13 @@ odoo.define('web.CloseActionPlugin', function (require) {
     const ActionManager = require('web.ActionManager');
 
     class CloseActionPlugin extends ActionAbstractPlugin {
-        willHandle({name}) {
-            switch (name) {
-                case '_COMMIT':
-                    return true;
-            }
-            return super.willHandle(...arguments);
-        }
-        handle(command) {
-            if (command.name === "executeAction") {
-                const { action , options } = this.pendingState; 
-                const prepared = this._executeAction(action, options);
-                const { controller , onCommit , doOwlReload} = prepared;
-                this.addToPendingState({
-                    onCommit, doOwlReload
-                });
-                return this.pushController(controller);
-            }
-            if (command.name === "_COMMIT") {
-                const { onCommit } = this.pendingState;
-                if (onCommit) {
-                    onCommit();
-                }
+        commit(pendingState) {
+            const { onCommit } = pendingState || {};
+            if (onCommit) {
+                onCommit();
             }
         }
-        _executeAction(action, options) {
+        executeAction(action, options) {
             const dialog = this.controllers[this.currentDialogController];
             // I'm afraid this is mandatory
             // some legacy modals make their main controller
@@ -65,16 +47,14 @@ odoo.define('web.CloseActionPlugin', function (require) {
                 controller.options = controller.options || {};
                 controller.options.on_success = options.on_success;
             }
-            return {
-                onCommit,
-                controller,
-                doOwlReload,
-            };
+            this.addToPendingState({
+                onCommit, doOwlReload
+            });
+            return this.pushController(controller);
         }
     }
     CloseActionPlugin.type = 'ir.actions.act_window_close';
-
-    ActionManager.registerPlugin(CloseActionPlugin);
+    ActionManager.registry.add('ir.actions.act_window_close', CloseActionPlugin, 20);
 
     return CloseActionPlugin;
 });
