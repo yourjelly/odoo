@@ -136,7 +136,7 @@ odoo.define('web.ReportActionPlugin', function (require) {
                 report_name: action.report_name,
                 report_url: urls.html,
             });
-            return this.doAction('report.client_action', clientActionOptions);
+            return this._doAction('report.client_action', clientActionOptions);
         }
         /**
          * Generates an object containing the report's urls (as value) for every
@@ -186,7 +186,7 @@ odoo.define('web.ReportActionPlugin', function (require) {
             await this._downloadReport(reportUrls[type]);
             if (action.close_on_report_download) {
                 const closeAction = { type: 'ir.actions.act_window_close' };
-                return this.doAction(closeAction, { on_close: options.on_close });
+                return this._doAction(closeAction, { on_close: options.on_close });
             } else {
                 return options.on_close();
             }

@@ -54,7 +54,11 @@ odoo.define('web.ActionManager', function (require) {
             }
             this.addToPendingState(this.__pendingState);
             this.__pendingState = null;
-            return super.dispatch(...arguments);
+            try {
+                return super.dispatch(...arguments);
+            } catch (error) {
+                this.handleError(error);
+            }
         }
         _dispatch(method, ...args) {
             if (method in this) {
@@ -66,6 +70,14 @@ odoo.define('web.ActionManager', function (require) {
             this.dispatching = false;
             this.pendingState = null;
             this.__pendingState = pendingState;
+        }
+        handleError(error) {
+            if (error && error.name) {
+                if (error.message.startsWith('Plugin Error')) {
+                    return;
+                }
+                throw error;
+            }
         }
         get activeDescriptors() {
             const stack = this.currentStack;
@@ -197,7 +209,7 @@ odoo.define('web.ActionManager', function (require) {
             on_fail = on_fail || (() => {});
             this._doAction(action, options);
             this.loadAction();
-            this.getActionPromise().then(on_success).guardedCatch(on_fail);
+            this.getActionPromise(this.pendingState.promises, options).then(on_success).guardedCatch(on_fail);
         }
         _doAction(action, options) {
             const defaultOptions = {
@@ -226,16 +238,22 @@ odoo.define('web.ActionManager', function (require) {
                 actionID: null,
             });
         }
-        getActionPromise(promisesList) {
+        getActionPromise(promisesList, options) {
             if (!promisesList) {
                 promisesList = this.pendingState && this.pendingState.promises || [];
             }
             const length = promisesList.length;
-            return Promise.all(promisesList).then(() => {
+            let prom = Promise.all(promisesList).then(() => {
                 if (promisesList.length > length) {
                     return this.getActionPromise(promisesList);
                 }
             });
+            if (options) {
+                let { on_success , on_fail } = options;
+                const settle = func => !this.pendingState.hasDOMresult && func ? func() : null;
+                prom = prom.then(() => settle(on_success)).guardedCatch(() => settle(on_fail));
+            }
+            return prom;
         }
         async loadAction() {
             if (!this.pendingState) {
@@ -702,10 +720,10 @@ odoo.define('web.ActionManager', function (require) {
                             resolve(result);
                         }
                     })
-                    .guardedCatch(error => {
-                    if (predicate()) {
-                        reject(error);
-                    }
+                    .catch(error => {
+                        if (predicate()) {
+                            reject(error);
+                        }
                 });
             });
             this.pendingState.promises.push(prom);
@@ -743,14 +761,16 @@ odoo.define('web.ActionManager', function (require) {
                 transactionEndFn('commit');
             });
             const catchError = component.catchError;
-            component.catchError = function() {
-                if (catchError) {
-                    catchError.call(component, ...arguments);
-                }
+            component.catchError = function () {
                 transactionEndFn('rollBack');
-                //actionManager.dispatch('RESTORE_CONTROLLER');
+                try {
+                    if (catchError) {
+                        catchError.call(component, ...arguments);
+                    }
+                } catch (e) {
+                    actionManager.handleError(e);
+                }
             };
-            // TODO: clean bindings from component
         }
     }
     ActionManager.registry = new Registry(null);

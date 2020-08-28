@@ -467,6 +467,7 @@
                 t-att-data-backdrop="'' + props.backdrop"
                 t-ref="modal"
                 t-on-close_dialog.stop="_close"
+                t-on-close-dialog.stop="_close"
                 t-on-click="_onBackdropClick"
                 >
                 <div class="modal-dialog" t-att-class="size">

@@ -15,6 +15,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
         constructor() {
             super(...arguments);
             decorate(this, '_loadViews', this.asyncWrapper);
+            decorate(this, 'switchView', this.asyncWrapper);
         }
 
         //--------------------------------------------------------------------------

@@ -32,8 +32,7 @@ odoo.define('web.ClientActionPlugin', function (require) {
                     // whose returned value might be another action to execute
                     const nextAction = ClientAction(this.env, action);
                     if (nextAction) {
-                        action = nextAction;
-                        return this.doAction(action);
+                        return this.doAction(nextAction);
                     }
                     return;
                 }

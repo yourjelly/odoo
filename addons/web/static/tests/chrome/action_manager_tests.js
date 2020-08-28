@@ -1920,7 +1920,7 @@ QUnit.module('ActionManager', {
         ]);
         await loadState(webClient, {action:999, view_type: 'form'});
         assert.verifySteps([
-             '/web/dataset/call_kw/partner/default_get',
+             '/web/dataset/call_kw/partner/onchange',
         ]);
         assert.containsOnce(webClient, '.o_form_view.o_form_editable');
         assert.containsN(webClient, '.breadcrumb-item', 2);
@@ -5180,7 +5180,7 @@ QUnit.module('ActionManager', {
             },
         ];
 
-        const actionManager = await createActionManager({
+        const webClient = await createWebClient({
             actions,
             archs: {
                 "partner,false,form": `
@@ -5211,12 +5211,12 @@ QUnit.module('ActionManager', {
             },
         });
 
-        await actionManager.doAction(4);
+        await testUtils.actionManager.doAction(4);
         await testUtils.dom.click(`button[name="5"]`);
         assert.strictEqual($(".modal").length, 1, "It should display a modal");
         await testUtils.dom.click(`button[name="some_method"]`);
         assert.strictEqual($(".modal").length, 0, "It should have closed the modal");
-        actionManager.destroy();
+        webClient.destroy();
     });
 
     QUnit.test('footer buttons are updated when having another action in target "new"', async function (assert) {
@@ -5991,7 +5991,7 @@ QUnit.module('ActionManager', {
         assert.containsOnce(webClient, '.o_form_view.o_form_editable');
 
         await testUtils.fields.editInput($(webClient.el).find('input[name=foo]'), 'val');
-        webClient.env.actionManager._clearUncommittedChanges();
+        webClient.env.actionManager._willSwitchAction();
         await nextTick();
         await testUtils.owlCompatibilityExtraNextTick();
 
@@ -6000,7 +6000,7 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click($('.modal .modal-footer .btn-primary'));
         await testUtils.owlCompatibilityExtraNextTick();
 
-        webClient.env.actionManager._clearUncommittedChanges();
+        webClient.env.actionManager._willSwitchAction();
         await nextTick();
         await testUtils.owlCompatibilityExtraNextTick();
 
