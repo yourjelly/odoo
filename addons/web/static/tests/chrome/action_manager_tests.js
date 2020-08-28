@@ -3,6 +3,7 @@ odoo.define('web.action_manager_tests', function (require) {
 
 const ActionManager = require('web.ActionManager');
 const AbstractAction = require('web.AbstractAction');
+const ActionAdapter = require('web.ActionAdapter');
 const AbstractStorageService = require('web.AbstractStorageService');
 const BasicFields = require('web.basic_fields');
 const { CrashManager } = require('web.CrashManager');
@@ -685,19 +686,23 @@ QUnit.module('ActionManager', {
 
         var left = 0;
         var top = 0;
+
+        ActionAdapter.patch('actionManagerTestScroll', T =>
+            class actionManagerTestScroll extends T {
+                _getScrollPosition () {
+                    return { top, left };
+                }
+                _scrollTo (to) {
+                    assert.step('scrollTo left ' + to.left + ', top ' + to.top);
+                }
+            }
+        );
+
         const webClient = await createWebClient({
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            webClient: {
-                _getScrollPosition: function () {
-                    return { top, left };
-                },
-                _scrollTo: function (to) {
-                    assert.step('scrollTo left ' + to.left + ', top ' + to.top);
-                },
-            },
         });
 
         // execute a first action and simulate a scroll
@@ -722,6 +727,7 @@ QUnit.module('ActionManager', {
             'scrollTo left 50, top 100', // restore scroll position of action 3
         ]);
 
+        ActionAdapter.unpatch('actionManagerTestScroll');
         webClient.destroy();
     });
 
@@ -5220,6 +5226,7 @@ QUnit.module('ActionManager', {
         await testUtils.dom.click(`button[name="5"]`);
         assert.strictEqual($(".modal").length, 1, "It should display a modal");
         await testUtils.dom.click(`button[name="some_method"]`);
+        await nextTick();
         assert.strictEqual($(".modal").length, 0, "It should have closed the modal");
         webClient.destroy();
     });

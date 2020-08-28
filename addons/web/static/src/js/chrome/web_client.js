@@ -105,11 +105,6 @@ odoo.define('web.WebClient', function (require) {
             super.patched();
             this._wcUpdated();
         }
-        willPatch() {
-            super.willPatch();
-            /* const scrollPosition = this._getScrollPosition();
-            this._storeScrollPosition(scrollPosition);*/
-        }
         async willStart() {
             await this._loadMenus();
             this.urlState = this._getUrlState();
@@ -117,7 +112,6 @@ odoo.define('web.WebClient', function (require) {
             // LPE decision: make this at mounted to allow visual feedback that odoo is loading ?
             return this._loadState(this.urlState);
         }
-
         getBodyClass() {
             return {
                 o_fullscreen: this.actionManager.isFullScreen,
@@ -182,20 +176,6 @@ odoo.define('web.WebClient', function (require) {
                 menuID = null;
             }
             return { actionID , menuID };
-        }
-        /**
-         * Returns the left and top scroll positions of the main scrolling area
-         * (i.e. the '.o_content' div in desktop).
-         *
-         * @private
-         * @returns {Object} with keys left and top
-         */
-        _getScrollPosition() {
-            var scrollingEl = this.el.getElementsByClassName('o_content')[0];
-            return {
-                left: scrollingEl ? scrollingEl.scrollLeft : 0,
-                top: scrollingEl ? scrollingEl.scrollTop : 0,
-            };
         }
         /**
          * @private
@@ -379,10 +359,6 @@ odoo.define('web.WebClient', function (require) {
                 }
                 // keep cids in hash
                 //this._determineCompanyIds(state);
-                const scrollPosition = main.controller.scrollPosition;
-                if (scrollPosition) {
-                    this._scrollTo(scrollPosition);
-                }
             }
             const menuID = this.menuID;
             if (menuID) {

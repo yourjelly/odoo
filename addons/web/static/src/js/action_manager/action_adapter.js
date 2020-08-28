@@ -10,6 +10,7 @@ odoo.define('web.ActionAdapter', function (require) {
 
     const AbstractView = require('web.AbstractView');
     const { ComponentAdapter } = require('web.OwlCompatibility');
+    const patchMixin = require('web.patchMixin');
 
     class ActionAdapter extends ComponentAdapter {
         constructor(parent, props) {
@@ -23,10 +24,12 @@ odoo.define('web.ActionAdapter', function (require) {
             this.action = action;
             this.controller = controller;
             if (!this.inDialog) {
-                const { onMounted , onWillUnmount } = owl.hooks;
-                onMounted(() =>
-                    this.actionManager.on('will-switch-action', this, this._onWillSwitchAction)
-                );
+                const { onMounted , onPatched, onWillUnmount } = owl.hooks;
+                onMounted(() => {
+                    this.actionManager.on('will-switch-action', this, this._onWillSwitchAction);
+                    this._setScrollPosition();
+                });
+                onPatched(() => this._setScrollPosition());
                 onWillUnmount(() =>
                     this.actionManager.off('will-switch-action', this)
                 );
@@ -205,19 +208,49 @@ odoo.define('web.ActionAdapter', function (require) {
                 });
             };
         }
+        /**
+         * Returns the left and top scroll positions of the main scrolling area
+         * (i.e. the '.o_content' div in desktop).
+         *
+         * @private
+         * @returns {Object} with keys left and top
+         */
+        _getScrollPosition() {
+            var scrollingEl = this.el.getElementsByClassName('o_content')[0];
+            return {
+                left: scrollingEl ? scrollingEl.scrollLeft : 0,
+                top: scrollingEl ? scrollingEl.scrollTop : 0,
+            };
+        }
+        _scrollTo(scrollPosition) {
+            const scrollingEl = this.el.getElementsByClassName('o_content')[0];
+            if (!scrollingEl) {
+                return;
+            }
+            scrollingEl.scrollTop = scrollPosition.top || 0;
+            scrollingEl.scrollLeft = scrollPosition.left || 0;
+        }
+        _setScrollPosition() {
+            const scrollPosition = this.props.controller.scrollPosition;
+            if (this.props.controller.scrollPosition) {
+                this._scrollTo(scrollPosition);
+            }
+        }
         async _onWillSwitchAction({resolve, reject}) {
             const { controllerState , ownedQueryParams } = this.exportState();
+            const scrollPosition = this._getScrollPosition();
             this.actionManager.updateAction(this.controller.jsID, {
                 action: {
                     controllerState
                 },
                 controller: {
                     displayName: this.title,
-                    ownedQueryParams
+                    ownedQueryParams,
+                    scrollPosition,
                 }
             });
             return this.canBeRemoved().then(resolve).guardedCatch(reject);
         }
     }
-    return  ActionAdapter;
+    return  patchMixin(ActionAdapter);
 });
