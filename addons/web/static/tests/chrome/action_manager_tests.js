@@ -602,9 +602,8 @@ QUnit.module('ActionManager', {
 
         webClient.destroy();
     });
-    // LPE FIXME: this test is not finished
-    // the title is correct though
-    QUnit.skip('client actions can have breadcrumbs', async function (assert) {
+
+    QUnit.test('client actions can have breadcrumbs', async function (assert) {
         assert.expect(4);
 
         var ClientAction = AbstractAction.extend({
@@ -615,6 +614,7 @@ QUnit.module('ActionManager', {
             },
             start() {
                 this.$el.addClass('o_client_action_test');
+                return this._super.apply(this, arguments);
             },
         });
         core.action_registry.add('ClientAction', ClientAction);
@@ -627,6 +627,7 @@ QUnit.module('ActionManager', {
             },
             start() {
                 this.$el.addClass('o_client_action_test_2');
+                return this._super.apply(this, arguments);
             },
         });
         core.action_registry.add('ClientAction2', ClientAction2);
@@ -636,7 +637,6 @@ QUnit.module('ActionManager', {
             archs: this.archs,
             data: this.data,
             menus: this.menus,
-            debug: true,
         });
         await doAction('ClientAction');
         assert.containsOnce(webClient.el, '.breadcrumb-item');
@@ -652,7 +652,7 @@ QUnit.module('ActionManager', {
             'No time for sweetness'
         );
 
-        //webClient.destroy();
+        webClient.destroy();
         delete core.action_registry.map.ClientAction;
         delete core.action_registry.map.ClientAction2;
     });
