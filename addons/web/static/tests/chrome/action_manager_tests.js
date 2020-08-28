@@ -1103,8 +1103,13 @@ QUnit.module('ActionManager', {
             },
         });
 
-        assert.strictEqual(webClient.el.querySelector('.o_action_manager').textContent, '',
-            "should display nothing");
+        // LPE FIXME: Bug in O<lCompat Adapter: when Comp doesn't have
+        //a concrete el, vnode.elm crashes when replacing comp instance
+        // Try: switch view, do action => crash if o_action_manager is above
+        // See action_container.xml
+        //assert.strictEqual(webClient.el.querySelector('.o_action_manager').textContent, '',
+        //    "should display nothing");
+        assert.containsNone(webClient, '.o_action_manager');
         assert.verifySteps([]);
 
         webClient.destroy();
@@ -3873,7 +3878,7 @@ QUnit.module('ActionManager', {
             menus: this.menus,
             mockRPC: function (route, args) {
                 const result = this._super.apply(this, arguments);
-                if (args.method === 'default_get') {
+                if (args.method === 'onchange') {
                     // delay the opening of the dialog
                     return Promise.resolve(def).then(() => result);
                 }
@@ -5736,12 +5741,14 @@ QUnit.module('ActionManager', {
         core.action_registry.add('slowAction', ClientAction);
 
         const webClient = await createWebClient({
+            debug: true,
             actions: this.actions,
             archs: this.archs,
             data: this.data,
             menus: this.menus,
         });
         doAction('slowAction');
+        await testUtils.nextMicrotaskTick();
         doAction(4);
         slowWillStartDef.resolve();
         await nextTick();

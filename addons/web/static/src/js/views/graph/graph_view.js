@@ -147,7 +147,14 @@ var GraphView = AbstractView.extend({
         this.rendererParams.title = this.arch.attrs.title; // TODO: use attrs.string instead
         this.rendererParams.disableLinking = !!JSON.parse(this.arch.attrs.disable_linking || '0');
 
-        this.loadParams.mode = this.arch.attrs.type || 'bar';
+        let mode;
+        const ctx = this.loadParams.context;
+        if (ctx) {
+            mode = ctx.graph_mode;
+            measure = ctx.graph_measure || measure;
+            groupBys = ctx.graph_groupbys || groupBys;
+        }
+        this.loadParams.mode = mode || this.arch.attrs.type || 'bar';
         this.loadParams.orderBy = this.arch.attrs.order;
         this.loadParams.measure = measure || '__count__';
         this.loadParams.groupBys = groupBys;

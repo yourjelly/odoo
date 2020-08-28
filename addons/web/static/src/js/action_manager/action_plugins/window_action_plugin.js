@@ -86,7 +86,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
          * @override
          */
         loadState(state, options) {
-            let action;
+            let action, stateLoaded;
             if (state.action) {
                 const mainDescriptors = this._getMainActionDescriptors();
                 const currentAction = mainDescriptors.action;
@@ -97,7 +97,8 @@ odoo.define('web.WindowActionPlugin', function (require) {
                     // this._closeDialog(true); // there may be a currently opened dialog, close it // FIXME
                     var viewOptions = {currentId: state.id};
                     var viewType = state.view_type || currentController.viewType;
-                    return this._switchController(currentAction, viewType, viewOptions);
+                    this._switchController(currentAction, viewType, viewOptions);
+                    stateLoaded = true;
                 } else if (!action_registry.contains(state.action)) {
                     // the action to load isn't the current one, so execute it
                     var context = {};
@@ -136,12 +137,11 @@ odoo.define('web.WindowActionPlugin', function (require) {
                     options.viewType = state.view_type;
                 }
             }
+            stateLoaded = stateLoaded || !!action;
             if (action) {
-                this.addToPendingState({
-                    stateLoaded: true,
-                });
                 this._doAction(action, options);
             }
+            this.addToPendingState({ stateLoaded });
         }
         /**
          * Overrides to handle the case where the controller to restore is from an

@@ -179,7 +179,7 @@ var AbstractView = Factory.extend({
         }
 
         const defaultOrder = this.arch.attrs.default_order;
-        const givenOrder = params.ownedQueryParams && params.ownedQueryParams.orderedBy;
+        const givenOrder = params.context && params.context.orderedBy;
         if (defaultOrder && !givenOrder) {
             this.loadParams.orderedBy = _.map(defaultOrder.split(','), function (order) {
                 order = order.trim().split(' ');

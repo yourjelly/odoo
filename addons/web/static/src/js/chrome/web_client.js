@@ -130,7 +130,7 @@ odoo.define('web.WebClient', function (require) {
             // to actually do anything *during* our rendering
             // i.e.: before the webClient is fully in the dom and fully patched
             const { isMounted , currentFiber } = this.__owl__;
-            return isMounted && currentFiber && !currentFiber.isCompleted;
+            return isMounted && currentFiber && !currentFiber.isCompleted && !currentFiber.isRendered;
         }
 
         //--------------------------------------------------------------------------
@@ -245,7 +245,7 @@ odoo.define('web.WebClient', function (require) {
         }
         async _loadState(state) {
             this.actionManager.dispatch('loadState',
-                state, { menuID: state.menu_id }
+                state, { menuID: state.menu_id , clear_breadcrumbs: true }
             );
             const stateLoaded = this.actionManager.get('stateLoaded');
             if (!stateLoaded) {

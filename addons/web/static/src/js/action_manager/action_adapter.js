@@ -81,7 +81,7 @@ odoo.define('web.ActionAdapter', function (require) {
                 if (controller.ownedQueryParams) {
                     Object.assign(
                         viewParams,
-                        { ownedQueryParams: controller.ownedQueryParams },
+                        controller.ownedQueryParams,
                     );
                 }
                 const view = new viewDescr.View(viewDescr.fieldsView, viewParams);

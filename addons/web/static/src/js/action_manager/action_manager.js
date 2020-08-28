@@ -418,7 +418,8 @@ odoo.define('web.ActionManager', function (require) {
             if (this.env.device.isMobile && actionData.mobile) {
                 options = Object.assign({}, options, actionData.mobile);
             }
-            action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
+            // LPE Fixme: @AAB why injecting searchPanelDefaultFilters ?
+            // action.flags = Object.assign({}, action.flags, { searchPanelDefaultNoFilter: true });
             this.dispatch('doAction', action, options);
         }
         /**
@@ -696,21 +697,18 @@ odoo.define('web.ActionManager', function (require) {
             }
         }
         asyncWrapper(fnOrProm, ...args) {
-            const pendingState = this.pendingState;
             const { actionID, requestId } = this.pendingState;
-            const predicate = () => {
-                return this.pendingState && (
+            const predicate = () =>
+                this.pendingState && (
                     requestId === this.pendingState.requestId &&
                     actionID === this.pendingState.actionID
-                );
-            };
+            );
             this.pendingState.__lastProm = this.pendingState.promises[this.pendingState.promises.length-1];
             const prom = new Promise((resolve, reject) => {
                 let prom2;
                 if (fnOrProm instanceof Function) {
                     prom2 = Promise.resolve().then(() => {
-                        this.pendingState = pendingState;
-                        return fnOrProm(...args);
+                        return predicate() ? fnOrProm(...args) : Promise.reject();
                     });
                 } else {
                     prom2 = fnOrProm;
