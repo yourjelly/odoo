@@ -14,6 +14,22 @@ PaymentForm.include({
     //--------------------------------------------------------------------------
 
     /**
+     * Displays the error and re-enables the acquirer form so the user
+     * can try again.
+     *
+     * @private
+     * @param {jQueryElement} acquirerForm the s2s form for this Authorize acquirer
+     * @param {HTMLElement} button the button the user clicked to pay
+     * @param {string} message the error to display to the user
+     * @returns {Object} optionally returns an error Dialog object
+     */
+    _authorizeHandleError: function (acquirerForm, button, message) {
+        acquirerForm.removeClass('d-none');
+        this.enableButton(button);
+        return this.displayError(_t('Server Error'), message);
+    },
+
+    /**
      * called when clicking on pay now or add payment event to create token for credit card/debit card.
      *
      * @private
@@ -50,17 +66,19 @@ PaymentForm.include({
                 var errorMessage = "";
                 _.each(response.messages.message, function (message) {
                     errorMessage += message.code + ": " + message.text;
-                })
-                acquirerForm.removeClass('d-none');
-                self.enableButton(button);
-                return self.displayError(_t('Server Error'), errorMessage);
+                });
+                return self._authorizeHandleError(acquirerForm, button, errorMessage);
             }
 
             self._rpc({
                 route: formData.data_set,
                 params: formData
             }).then (function (data) {
-                if (addPmEvent) {
+                if (data.error) {
+                    var errorMessage = _t("We are not able to add your payment method at the moment.") +
+                        data.error;
+                    self._authorizeHandleError(acquirerForm, button, errorMessage);
+                } else if (addPmEvent) {
                     if (formData.return_url) {
                         window.location = formData.return_url;
                     } else {
@@ -73,13 +91,9 @@ PaymentForm.include({
             }).guardedCatch(function (error) {
                 // if the rpc fails, pretty obvious
                 error.event.preventDefault();
-                acquirerForm.removeClass('d-none');
-                self.enableButton(button);
-                self.displayError(
-                    _t('Server Error'),
-                    _t("We are not able to add your payment method at the moment.") +
-                        self._parseError(error)
-                );
+                var errorMessage = _t("We are not able to add your payment method at the moment.") +
+                    self._parseError(error);
+                self._authorizeHandleError(acquirerForm, button, errorMessage);
             });
         };
 
