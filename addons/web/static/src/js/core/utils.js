@@ -270,9 +270,7 @@ var utils = {
     decorate(obj, fnName, decorator) {
         const func = obj[fnName].bind(obj);
         Object.defineProperty(obj, fnName, {
-            value: (...args) => {
-                return decorator(func, ...args);
-            },
+            value: (...args) => decorator(func, ...args),
             writable: true,
         });
     },
