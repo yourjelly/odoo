@@ -249,8 +249,8 @@ odoo.define('web.ActionManager', function (require) {
                 }
             });
             if (options) {
-                let { on_success , on_fail } = options;
-                const settle = func => !this.pendingState.hasDOMresult && func ? func() : null;
+                const { on_success , on_fail } = options;
+                const settle = func => !(this.pendingState && this.pendingState.hasDOMresult) && func ? func() : null;
                 prom = prom.then(() => settle(on_success)).guardedCatch(() => settle(on_fail));
             }
             return prom;
