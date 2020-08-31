@@ -33,7 +33,8 @@ odoo.define('point_of_sale.main', function (require) {
         PosRoot.components = { Chrome: Registries.Component.get(Chrome) };
         await env.session.is_bound;
         env.qweb.addTemplates(env.session.owlTemplates);
-        env.bus = new owl.core.EventBus();
+        // LPE FIXME: this is annoying because of tour_manager
+        //env.bus = new owl.core.EventBus();
         await owl.utils.whenReady();
         await posRoot.mount(document.body);
         AbstractService.prototype.deployServices(posRoot.env);
