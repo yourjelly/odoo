@@ -9,5 +9,7 @@ odoo.define("bus.tour", function (require) {
     tour.register("bundle_changed_notification", {
         test: true,
         url: '/web',
-    });
+    }, [{
+        trigger: '.o_web_client'
+    }]);
 });

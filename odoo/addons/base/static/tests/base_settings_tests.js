@@ -416,10 +416,10 @@ QUnit.module('base_settings_tests', {
             },
         });
 
-        await testUtills.actionManager.doAction(1);
+        await testUtils.actionManager.doAction(1);
         assert.strictEqual(webClient.$('.breadcrumb').text(), 'First action');
 
-        await webClient.doAction(2);
+        await testUtils.actionManager.doAction(2);
         assert.strictEqual(webClient.$('.breadcrumb').text(), 'First actionNew');
 
         loadViewsDef = testUtils.makeTestPromise();
