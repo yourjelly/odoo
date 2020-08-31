@@ -551,7 +551,7 @@ odoo.define('web.search_bar_tests', function (require) {
                         <field name="ref"/>
                     </search>`,
             });
-            const actionManager = await createActionManager({
+            const webClient = await createWebClient({
                 actions: this.actions,
                 archs,
                 data: this.data,
@@ -563,18 +563,18 @@ odoo.define('web.search_bar_tests', function (require) {
 
                 }
             });
-            await actionManager.doAction(1);
+            await testUtils.actionManager.doAction(1);
 
-            await cpHelpers.editSearch(actionManager, "ref");
-            await cpHelpers.validateSearch(actionManager);
+            await cpHelpers.editSearch(webClient, "ref");
+            await cpHelpers.validateSearch(webClient);
 
-            assert.containsN(actionManager, ".o_data_row", 5);
+            assert.containsN(webClient, ".o_data_row", 5);
 
-            await cpHelpers.removeFacet(actionManager, 0);
-            await cpHelpers.editSearch(actionManager, "ref002");
-            await cpHelpers.validateSearch(actionManager);
+            await cpHelpers.removeFacet(webClient, 0);
+            await cpHelpers.editSearch(webClient, "ref002");
+            await cpHelpers.validateSearch(webClient);
 
-            assert.containsOnce(actionManager, ".o_data_row");
+            assert.containsOnce(webClient, ".o_data_row");
 
             assert.verifySteps([
                 '[]',
@@ -583,7 +583,7 @@ odoo.define('web.search_bar_tests', function (require) {
                 '[["ref","ilike","ref002"]]',
             ]);
 
-            actionManager.destroy();
+            webClient.destroy();
         });
     });
 });

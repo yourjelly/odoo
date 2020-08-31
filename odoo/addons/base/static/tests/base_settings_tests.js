@@ -5,6 +5,7 @@ var testUtils = require('web.test_utils');
 var view_registry = require('web.view_registry');
 
 var createView = testUtils.createView;
+const createWebClient = testUtils.createWebClient;
 var BaseSettingsView = view_registry.get('base_settings');
 
 
@@ -402,7 +403,7 @@ QUnit.module('base_settings_tests', {
         };
 
         let loadViewsDef;
-        const actionManager = await createActionManager({
+        const webClient = await createWebClient({
             actions: actions,
             archs: archs,
             data: this.data,
@@ -415,21 +416,21 @@ QUnit.module('base_settings_tests', {
             },
         });
 
-        await actionManager.doAction(1);
-        assert.strictEqual(actionManager.$('.breadcrumb').text(), 'First action');
+        await testUtills.actionManager.doAction(1);
+        assert.strictEqual(webClient.$('.breadcrumb').text(), 'First action');
 
-        await actionManager.doAction(2);
-        assert.strictEqual(actionManager.$('.breadcrumb').text(), 'First actionNew');
+        await webClient.doAction(2);
+        assert.strictEqual(webClient.$('.breadcrumb').text(), 'First actionNew');
 
         loadViewsDef = testUtils.makeTestPromise();
-        await testUtils.dom.click(actionManager.$('button[name="3"]'));
-        assert.strictEqual(actionManager.$('.breadcrumb').text(), 'First actionNew');
+        await testUtils.dom.click(webClient.$('button[name="3"]'));
+        assert.strictEqual(webClient.$('.breadcrumb').text(), 'First actionNew');
 
         loadViewsDef.resolve();
         await testUtils.nextTick();
-        assert.strictEqual(actionManager.$('.breadcrumb').text(), 'First actionNewOther action');
+        assert.strictEqual(webClient.$('.breadcrumb').text(), 'First actionNewOther action');
 
-        actionManager.destroy();
+        webClient.destroy();
     });
 });
 });

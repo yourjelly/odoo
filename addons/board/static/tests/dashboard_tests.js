@@ -1053,7 +1053,7 @@ QUnit.test('correctly save the time ranges of a reporting view in comparison mod
 
     this.data.partner.fields.date = { string: 'Date', type: 'date', sortable: true };
 
-    const actionManager = await createActionManager({
+    const webClient = await createWebClient({
         data: this.data,
         archs: {
             'partner,false,pivot': '<pivot><field name="foo"/></pivot>',
@@ -1076,7 +1076,7 @@ QUnit.test('correctly save the time ranges of a reporting view in comparison mod
         },
     });
 
-    await actionManager.doAction({
+    await testUtils.actionManager.doAction({
         id: 1,
         res_model: 'partner',
         type: 'ir.actions.act_window',
@@ -1084,23 +1084,23 @@ QUnit.test('correctly save the time ranges of a reporting view in comparison mod
     });
 
     // filter on July 2020
-    await cpHelpers.toggleFilterMenu(actionManager);
-    await cpHelpers.toggleMenuItem(actionManager, 'Date');
-    await cpHelpers.toggleMenuItemOption(actionManager, 'Date', 'July');
+    await cpHelpers.toggleFilterMenu(webClient);
+    await cpHelpers.toggleMenuItem(webClient, 'Date');
+    await cpHelpers.toggleMenuItemOption(webClient, 'Date', 'July');
 
     // compare July 2020 to June 2020
-    await cpHelpers.toggleComparisonMenu(actionManager);
-    await cpHelpers.toggleMenuItem(actionManager, 0);
+    await cpHelpers.toggleComparisonMenu(webClient);
+    await cpHelpers.toggleMenuItem(webClient, 0);
 
     // add the view to the dashboard
-    await cpHelpers.toggleFavoriteMenu(actionManager);
+    await cpHelpers.toggleFavoriteMenu(webClient);
 
     await testUtils.dom.click($('.o_add_to_board > button'));
     await testUtils.fields.editInput($('.o_add_to_board input'), 'a name');
     await testUtils.dom.click($('.o_add_to_board div button'));
 
     unpatchDate();
-    actionManager.destroy();
+    webClient.destroy();
 });
 
 QUnit.test('correctly display the time range descriptions of a reporting view in comparison mode', async function (assert) {
