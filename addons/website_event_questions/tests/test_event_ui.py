@@ -53,6 +53,7 @@ class TestUi(tests.HttpCase):
         registrations = self.env['event.registration'].search([
             ('email', 'in', ['attendee-a@gmail.com', 'attendee-b@gmail.com'])
         ])
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n...........",len(registrations))
         self.assertEqual(len(registrations), 2)
         first_registration = registrations.filtered(lambda reg: reg.email == 'attendee-a@gmail.com')
         second_registration = registrations.filtered(lambda reg: reg.email == 'attendee-b@gmail.com')
