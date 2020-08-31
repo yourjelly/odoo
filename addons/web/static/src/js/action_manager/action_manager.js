@@ -19,6 +19,12 @@ odoo.define('web.ActionManager', function (require) {
             // containing the state of the current controller
             // TODO: convert to dispatch, or own events
             this.env.bus.on('history-back', this, this._onHistoryBack);
+            // LPE FIXME: since actionManager is in env; only rely on it
+            // and not on the bus anymore
+            this.env.bus.on('do-action', this, payload => {
+                const { action , options , on_success, on_fail } = payload;
+                this.dispatch('doAction', action, options, on_success, on_fail);
+            });
 
             // handled by the ActionManager (either stacked in the current window,
             // or opened in dialogs)
