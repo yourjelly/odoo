@@ -2,12 +2,13 @@ odoo.define('bus.WebClient', function (require) {
     "use strict";
 
     const core = require('web.core');
+    const { onMounted , onWillUnmount } = owl.hooks;
     const WebClient = require('web.WebClient');
 
     const _t = core._t;
-    return;
 
-    WebClient.include({
+    WebClient.patch('bus.WebClient', T =>
+        class WebClientBus extends T {
 
         //----------------------------------------------------------------------
         // Public
@@ -18,25 +19,27 @@ odoo.define('bus.WebClient', function (require) {
          *
          * @override
          */
-        async start() {
+        constructor() {
+            super(...arguments);
             this._assetsChangedNotificationId = null;
             this._assets = {};
-            await this._super(...arguments);
-        },
-        /**
-         * Assigns handler to bus notification
-         *
-         * @override
-         */
-        show_application() {
-            const shown = this._super(...arguments);
-            document.querySelectorAll('*[data-asset-xmlid]').forEach(el => {
-                this._assets[el.getAttribute('data-asset-xmlid')] = el.getAttribute('data-asset-version');
+            // Assign handler to bus notification
+            onMounted(() => {
+                document.querySelectorAll('*[data-asset-xmlid]').forEach(el => {
+                    this._assets[el.getAttribute('data-asset-xmlid')] = el.getAttribute('data-asset-version');
+                });
+                const busService = this.env.services.bus_service;
+                if (busService) {
+                    busService.onNotification(this, this._onNotification);
+                    busService.addChannel('bundle_changed');
+                }
             });
-            this.call('bus_service', 'onNotification', this, this._onNotification);
-            this.call('bus_service', 'addChannel', 'bundle_changed');
-            return shown;
-        },
+            onWillUnmount(() => {
+                if (this.env.services.bus_service) {
+                    this.env.services.bus_service.off('notification', this);
+                }
+            });
+        }
 
         //----------------------------------------------------------------------
         // Private
@@ -54,7 +57,7 @@ odoo.define('bus.WebClient', function (require) {
                 // We wait until things settle down
                 clearTimeout(this._bundleNotifTimerID);
                 this._bundleNotifTimerID = setTimeout(() => {
-                    this._assetsChangedNotificationId = this.call('notification', 'notify', {
+                    this._assetsChangedNotificationId = this._displayNotification({
                         title: _t('Refresh'),
                         message: _t('The page appears to be out of date.'),
                         sticky: true,
@@ -71,7 +74,7 @@ odoo.define('bus.WebClient', function (require) {
                     });
                 }, this._getBundleNotificationDelay());
             }
-        },
+        }
         /**
          * Computes a random delay to avoid hammering the server
          * when bundles change with all the users reloading
@@ -82,7 +85,7 @@ odoo.define('bus.WebClient', function (require) {
          */
         _getBundleNotificationDelay() {
             return 10000 + Math.floor(Math.random()*50) * 1000;
-        },
+        }
 
         //--------------------------------------------------------------------------
         // Handlers

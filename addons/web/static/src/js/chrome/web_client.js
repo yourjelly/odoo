@@ -13,6 +13,7 @@ odoo.define('web.WebClient', function (require) {
     const LegacyDialog = require('web.Dialog');
     const WarningDialog = require('web.CrashManager').WarningDialog;
     const KeyboardNavigation = require('web.KeyboardNavigation');
+    const patchMixin = require('web.patchMixin');
 
     const { hooks } = owl;
     const { useRef, useExternalListener } = hooks;
@@ -550,6 +551,6 @@ odoo.define('web.WebClient', function (require) {
     WebClient.components = { Menu, DialogAction, ComponentAdapter , ActionContainer };
     WebClient.template = 'web.WebClient';
 
-    return WebClient;
+    return patchMixin(WebClient);
 
 });

@@ -1,8 +1,9 @@
 odoo.define('web.bus_tests', function (require) {
 "use strict";
 
-var BusService = require('bus.BusService');
 var AbstractStorageService = require('web.AbstractStorageService');
+let BusService = require('bus.BusService');
+const NotificationService = require('web.NotificationService');
 var RamStorage = require('web.RamStorage');
 var testUtils = require('web.test_utils');
 var Widget = require('web.Widget');
@@ -309,6 +310,40 @@ QUnit.module('Bus', {
 
         parentMaster.destroy();
         parentSlave.destroy();
+    });
+
+    QUnit.test('webClient handles bundle_change notification', async function (assert) {
+        assert.expect(4);
+
+        const webClient = await testUtils.createWebClient({
+            services: {
+                bus_service: BusService,
+                notification: NotificationService.extend({
+                    notify: function () {
+                        assert.step('notify');
+                        return this._super.apply(this, arguments);
+                    },
+                }),
+            },
+            webClient: {
+                _getBundleNotificationDelay() {
+                    return 0;
+                }
+            }
+        });
+
+        webClient.env.services.bus_service.trigger(
+            'notification',
+            [[['db_name', 'bundle_changed'], ['web.assets_backend', 'hash']]]
+        );
+        await testUtils.nextTick();
+        assert.verifySteps(['notify']);
+        assert.containsOnce(webClient, '.o_notification_title');
+        assert.strictEqual(
+            webClient.el.querySelector('.o_notification_buttons').textContent.trim(),
+            'Refresh'
+        );
+        webClient.destroy();
     });
 });
 });
