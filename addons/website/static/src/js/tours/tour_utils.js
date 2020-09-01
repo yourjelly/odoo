@@ -42,7 +42,7 @@ function dragNDrop(snippet, position = "bottom") {
 function clickOnText(snippet, element, position = "bottom") {
     return {
         trigger: `#wrapwrap .${snippet.id} ${element}`,
-        content: _t("<b>Click on a text</b> to start editing it. <i>It's that easy to edit your content!</i>"),
+        content: _t("<b>Click on a text</b> to start editing it."),
         position: position,
         run: "text",
         consumeEvent: "input",
@@ -103,7 +103,7 @@ function addMedia(position = "right") {
 function clickOnSnippet(snippet, position = "bottom") {
     return {
         trigger: `#wrapwrap .${snippet.id}`,
-        content: _t("<b>Click on a snippet</b> to access its options menu. <i>It's that easy to edit your content!</i>"),
+        content: _t("<b>Click on a snippet</b> to access its options menu."),
         position: position,
         run: "click",
     };
