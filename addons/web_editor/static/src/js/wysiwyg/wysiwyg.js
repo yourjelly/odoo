@@ -284,17 +284,33 @@ var Wysiwyg = Widget.extend({
 
     openLinkDialog() {
         const range = this.editor.selection.range;
-        const targettedLeaves = range.targetedNodes(node => !node.hasChildren());
-        const text = targettedLeaves.map(x => x.textContent).join('');
+        const Link = JWEditorLib.Link;
+
+        let targetedLeaves = [];
+        const previousNode = range.start.previousSibling();
+        const nextNode = range.start.nextSibling();
+        const node = previousNode && Link.isLink(previousNode) ? previousNode : nextNode;
+        let currentLink;
+        if (!node || !Link.isLink(node)) {
+            if (range.isCollapsed()) {
+                targetedLeaves = range.targetedNodes();
+            } else {
+                targetedLeaves = range.selectedNodes();
+                targetedLeaves = targetedLeaves.filter(node => !targetedLeaves.includes(node.parent));
+            }
+        } else {
+            currentLink = node.modifiers.find(JWEditorLib.LinkFormat);
+            const sameLink = Link.isLink.bind(Link, currentLink);
+            targetedLeaves = node.adjacents(sameLink);
+        }
+        const text = targetedLeaves.map(x => x.textContent).join('');
         const inline = this.editor.plugins.get(JWEditorLib.Inline);
         const modifiers = inline.getCurrentModifiers(range);
         const linkFormat = modifiers && modifiers.find(JWEditorLib.LinkFormat);
         const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
         let classes = '';
-        const inlineNode = range.targetedNodes(JWEditorLib.InlineNode)[0];
-        if (inlineNode) {
-            const linkFormat = inlineNode.modifiers.find(JWEditorLib.LinkFormat);
-            const linkAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
+        if (currentLink) {
+            const linkAttributes = currentLink.modifiers.find(JWEditorLib.Attributes);
             classes = (linkAttributes && linkAttributes.get('class')) || '';
         }
         const linkDialog = new weWidgets.LinkDialog(this,
@@ -309,7 +325,12 @@ var Wysiwyg = Widget.extend({
         );
         linkDialog.open();
         linkDialog.on('save', this, async (params)=> {
-            const onSaveLinkDialog = async (context) =>{
+            const onSaveLinkDialog = async (context) => {
+                for (const targetedLeaf of targetedLeaves) {
+                    if (targetedLeaf instanceof JWEditorLib.InlineNode) {
+                        targetedLeaf.remove();
+                    }
+                }
                 const linkParams = {
                     url: params.url,
                     label: params.text,
