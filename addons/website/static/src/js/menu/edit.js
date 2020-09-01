@@ -57,23 +57,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             return Promise.all([def, this._startEditMode()]);
         }
 
-        // Check that the page is empty
-        var $wrap = this._targetForEdition().filter('#wrapwrap.homepage').find('#wrap');
-
-        if ($wrap.length && $wrap.html().trim() === '') {
-            // If readonly empty page, show the welcome message
-            this.$welcomeMessage = $(core.qweb.render('website.homepage_editor_welcome_message'));
-            this.$welcomeMessage.addClass('o_homepage_editor_welcome_message');
-            this.$welcomeMessage.css('min-height', $wrap.parent('main').height() - ($wrap.outerHeight(true) - $wrap.height()));
-            $wrap.empty().append(this.$welcomeMessage);
-        }
-
-        setTimeout(function () {
-            if ($('.o_tooltip.o_animated').length) {
-                $('.o_tooltip_container').addClass('show');
-            }
-        }, 1000); // ugly hack to wait that tooltip is loaded
-
         return def;
     },
 
