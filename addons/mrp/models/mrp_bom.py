@@ -416,7 +416,9 @@ class MrpByProduct(models.Model):
     product_qty = fields.Float(
         'Quantity',
         default=1.0, digits='Product Unit of Measure', required=True)
-    product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', required=True)
+    product_uom_id = fields.Many2one('uom.uom', 'Unit of Measure', required=True,
+        domain="[('category_id', '=', product_uom_category_id)]")
+    product_uom_category_id = fields.Many2one('uom.category', related='product_id.uom_id.category_id')
     bom_id = fields.Many2one('mrp.bom', 'BoM', ondelete='cascade')
     allowed_operation_ids = fields.Many2many('mrp.routing.workcenter', compute='_compute_allowed_operation_ids')
     operation_id = fields.Many2one(
