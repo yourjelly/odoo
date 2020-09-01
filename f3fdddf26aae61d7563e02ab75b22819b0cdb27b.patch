@@ -1,0 +1,52 @@
+From f3fdddf26aae61d7563e02ab75b22819b0cdb27b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9my=20Voet=20=28ryv=29?= <ryv@odoo.com>
+Date: Fri, 28 Aug 2020 16:37:25 +0200
+Subject: [PATCH] [FIX] mrp: force the UoM in case of serial number tracking
+
+In case of manufacturing a product tracked by serial number,
+there is no reason to be able to make it with a different UoM of
+the product (which lead to rouding issue).
+Then when we confirm the MO in this case, the UoM and quantity
+will be converted to product UoM.
+
+PR #56000
+---
+ addons/mrp/models/mrp_production.py | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/addons/mrp/models/mrp_production.py b/addons/mrp/models/mrp_production.py
+index 3a22aaec486dc..be8281a023937 100644
+--- a/addons/mrp/models/mrp_production.py
++++ b/addons/mrp/models/mrp_production.py
+@@ -1056,6 +1056,17 @@ def action_confirm(self):
+                 production.consumption = production.bom_id.consumption
+             if not production.move_raw_ids:
+                 raise UserError(_("Add some materials to consume before marking this MO as to do."))
++            # In case of Serial number tracking, force the UoM to the UoM of product
++            if production.product_tracking == 'serial' and production.product_uom_id != production.product_id.uom_id:
++                production.write({
++                    'product_qty': production.product_uom_id._compute_quantity(production.product_qty, production.product_id.uom_id),
++                    'product_uom_id': production.product_id.uom_id
++                })
++                for move_finish in production.move_finished_ids.filtered(lambda m: m.product_id == production.product_id):
++                    move_finish.write({
++                        'product_uom_qty': move_finish.product_uom._compute_quantity(move_finish.product_uom_qty, move_finish.product_id.uom_id),
++                        'product_uom': move_finish.product_id.uom_id
++                    })
+             production.move_raw_ids._adjust_procure_method()
+             (production.move_raw_ids | production.move_finished_ids)._action_confirm()
+             production.workorder_ids._action_confirm()
+@@ -1312,12 +1323,7 @@ def _post_inventory(self, cancel_backorder=False):
+             finish_moves = order.move_finished_ids.filtered(lambda m: m.product_id == order.product_id and m.state not in ('done', 'cancel'))
+             # the finish move can already be completed by the workorder.
+             if not finish_moves.quantity_done:
+-                if order.product_tracking == 'serial':
+-                    uom = order.product_id.uom_id
+-                    finish_moves.quantity_done = order.product_uom_id._compute_quantity(order.qty_producing, uom, round='HALF-UP')
+-                    finish_moves.move_line_ids.product_uom_id = uom
+-                else:
+-                    finish_moves.quantity_done = float_round(order.qty_producing - order.qty_produced, precision_rounding=order.product_uom_id.rounding, rounding_method='HALF-UP')
++                finish_moves.quantity_done = float_round(order.qty_producing - order.qty_produced, precision_rounding=order.product_uom_id.rounding, rounding_method='HALF-UP')
+                 finish_moves.move_line_ids.lot_id = order.lot_producing_id
+             order._cal_price(moves_to_do)
+ 
