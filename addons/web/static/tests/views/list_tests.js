@@ -1299,7 +1299,7 @@ QUnit.module('Views', {
         await cpHelpers.toggleFavoriteMenu(list);
         await cpHelpers.toggleMenuItem(list, "My second favorite");
 
-        //list.destroy();
+        list.destroy();
     });
 
     QUnit.test('many2one field rendering', async function (assert) {
