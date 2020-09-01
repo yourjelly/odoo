@@ -68,7 +68,7 @@ function changeIcon(snippet, index = 0, position = "bottom") {
     };
 }
 
-function choseImage(index = 0, position = "top") {
+function chooseImage(index = 0, position = "top") {
     return {
         trigger: `#editor-media-image .o_we_images .o_existing_attachment_cell:eq(${index})`,
         content: _t("<b>Select the image</b> you want."),
@@ -77,7 +77,7 @@ function choseImage(index = 0, position = "top") {
     };
 }
 
-function choseIcon(icon, position = "top") {
+function chooseIcon(icon, position = "top") {
     return {
         trigger: `#editor-media-icon .font-icons-icons span.${icon}`,
         content: _t("<b>Select the image</b> you want."),
@@ -132,7 +132,7 @@ function changeBackgroundColor(position = "bottom") {
     };
 }
 
-function choseBackgroundColor(position = "bottom") {
+function chooseBackgroundColor(position = "bottom") {
     return {
         trigger: ".o_we_customize_panel .o_we_so_color_palette button[data-color='3']",
         content: _t("Now, <b>click</b> on this color to change the background color."),
@@ -243,11 +243,11 @@ return {
     clickOnSnippet,
     changeImage,
     changeIcon,
-    choseImage,
-    choseIcon,
+    chooseImage,
+    chooseIcon,
     addMedia,
     changeBackgroundColor,
-    choseBackgroundColor,
+    chooseBackgroundColor,
     clickOnAnOption,
     changeAnOption,
     changePaddingSize,
