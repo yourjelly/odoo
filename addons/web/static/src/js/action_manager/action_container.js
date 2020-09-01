@@ -26,6 +26,9 @@ odoo.define('web.ActionContainer', function (require) {
                 this.destroy();
             }
         }
+        async willUpdateProps() {
+            return this.actionManager.getActionPromise();
+        }
         mounted() {
             this._replaceDialogFooter();
         }
