@@ -201,7 +201,7 @@ function deleteColumn(position = "left") {
 
 function goToOptions(position = "bottom") {
     return {
-        trigger: '.o_we_customize_theme_btnn',
+        trigger: '.o_we_customize_theme_btn',
         content: _t("Go to the Options tab"),
         position: position,
         run: "click",
