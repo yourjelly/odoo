@@ -428,6 +428,7 @@ QUnit.module('base_settings_tests', {
 
         loadViewsDef.resolve();
         await testUtils.nextTick();
+        await testUtils.owlCompatibilityExtraNextTick();
         assert.strictEqual(webClient.$('.breadcrumb').text(), 'First actionNewOther action');
 
         webClient.destroy();
