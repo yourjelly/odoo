@@ -7,6 +7,7 @@
                 <!-- LPE FIXME: Bug in O<lCompat Adapter: when Comp doesn't have 
                 a concrete el, vnode.elm crashes when replacing comp instance
                 Try: switch view, do action => crash if o_action_manager is above
+                WILL BE FIXED BY: https://github.com/odoo/owl/pull/726
                  -->
             <ActionAdapter
                 t-props="descriptor"
