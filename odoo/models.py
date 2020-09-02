@@ -5848,11 +5848,28 @@ Fields:
                 process(method_res)
             return
 
-    def pre_onchange(self, changed_fields):
+    def _perform_onchanges(self, nametree, snapshot0, todo, field_onchange):
         self.ensure_one()
 
-    def post_onchange(self, changed_fields):
-        self.ensure_one()
+        result = {'warnings': OrderedSet()}
+        done = set()
+
+        # process names in order
+        while todo:
+            # apply field-specific onchange methods
+            for name in todo:
+                if field_onchange.get(name):
+                    self._onchange_eval(name, field_onchange[name], result)
+                done.add(name)
+
+            # determine which fields to process for the next pass
+            todo = [
+                name
+                for name in nametree
+                if name not in done and snapshot0.has_changed(name)
+            ]
+
+        return done, result
 
     def onchange(self, values, field_name, field_onchange):
         """ Perform an onchange on the given field.
@@ -6052,7 +6069,6 @@ Fields:
 
         # determine which field(s) should be triggered an onchange
         todo = list(names or nametree)
-        done = set()
 
         # dummy assignment: trigger invalidations on the record
         for name in todo:
@@ -6065,26 +6081,7 @@ Fields:
                 continue
             record[name] = value
 
-        result = {'warnings': OrderedSet()}
-
-        record.pre_onchange(names)
-
-        # process names in order
-        while todo:
-            # apply field-specific onchange methods
-            for name in todo:
-                if field_onchange.get(name):
-                    record._onchange_eval(name, field_onchange[name], result)
-                done.add(name)
-
-            # determine which fields to process for the next pass
-            todo = [
-                name
-                for name in nametree
-                if name not in done and snapshot0.has_changed(name)
-            ]
-
-        record.post_onchange(done)
+        done, result = record._perform_onchanges(nametree, snapshot0, todo, field_onchange)
 
         # make the snapshot with the final values of record
         snapshot1 = Snapshot(record, nametree)

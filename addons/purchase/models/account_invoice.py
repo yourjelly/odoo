@@ -23,7 +23,7 @@ class AccountMove(models.Model):
             return [ref for ref in self.ref.split(', ') if ref and ref not in vendor_refs] + vendor_refs
         return vendor_refs
 
-    def pre_onchange(self, changed_fields):
+    def _pre_onchange(self, changed_fields):
         # OVERRIDE
         # Load from either an old purchase order, either an old vendor bill.
         # When setting a 'purchase.bill.union' in 'purchase_vendor_bill_id':
@@ -40,7 +40,7 @@ class AccountMove(models.Model):
                 changed_fields.append('purchase_id')
             self.purchase_vendor_bill_id = False
 
-        res = super().pre_onchange(changed_fields)
+        res = super()._pre_onchange(changed_fields)
 
         if 'purchase_id' in changed_fields:
             # Copy data from PO
