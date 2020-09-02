@@ -282,7 +282,6 @@ odoo.define('web.test_utils_create', function (require) {
         const destroy = controlPanel.destroy;
         controlPanel.destroy = function () {
             controlPanel.destroy = destroy;
-            cleanUp();
             parent.destroy();
         };
         controlPanel.getQuery = () => parent.searchModel.get('query');
