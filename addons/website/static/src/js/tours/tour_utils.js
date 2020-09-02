@@ -4,6 +4,39 @@ odoo.define("website.tour_utils", function (require) {
 const core = require("web.core");
 const _t = core._t;
 
+
+
+
+/**
+
+const snippets = [
+    {
+        id: 's_cover',
+        name: 'Cover',
+    },
+    {
+        id: 's_text_image',
+        name: 'Text - Image',
+    }
+];
+
+tour.register("themename_tour", {
+    url: "/",
+    saveAs: "homepage",
+}, [
+    wTourUtils.dragNDrop(snippets[0]),
+    wTourUtils.clickOnText(snippets[0], 'h1'),
+    wTourUtils.changeAnOption('colorFilter', 'span.o_we_color_preview', 'color filter'),
+    wTourUtils.selectHeader(),
+    wTourUtils.changeAnOption('HeaderTemplate', '[data-name="header_alignment_opt"]', 'alignment'),
+    wTourUtils.goBackToBlocks(),
+    wTourUtils.dragNDrop(snippets[1]),
+    wTourUtils.changeImage(snippets[1]),
+    wTourUtils.chooseBackgroundColor(),
+    wTourUtils.clickOnSave(),
+]);
+**/
+
 /**
  * Click on the top right edit button
  * @param {*} position Where the purple arrow will show up
@@ -134,26 +167,28 @@ function changeBackgroundColor(position = "bottom") {
 
 function chooseBackgroundColor(position = "bottom") {
     return {
-        trigger: ".o_we_customize_panel .o_we_so_color_palette button[data-color='3']",
+        trigger: ".o_we_customize_panel .o_we_so_color_palette button[data-color]",
+        //trigger: ".o_we_customize_panel .o_we_so_color_palette button[data-color][data-color!='1']",
         content: _t("Now, <b>click</b> on this color to change the background color."),
         position: position,
         run: "click",
     };
 }
 
-function clickOnAnOption(name, position = "bottom") {
+function changeAnOption(optionName, weName = '', optionTooltipLabel = '', position = "bottom") {
+    const option_block = `we-customizeblock-option[class='snippet-option-${optionName}']`
     return {
-        trigger: `.o_we_user_value_widget:contains('${name}') we-toggler`,
-        content: _t(`<b>Click</b> on this option to change the ${name}.`),
+        trigger: `${option_block} ${weName}, ${option_block} [title='${weName}']`,
+        content: _t(`<b>Click</b> on this option to change the ${optionTooltipLabel} of the block.`),
         position: position,
         run: "click",
     };
 }
 
-function changeAnOption(name, option, position = "bottom") {
+function selectHeader(position = "bottom") {
     return {
-        trigger: `.o_we_user_value_widget:contains('${name}') we-select-menu we-button:contains('${option}')`,
-        content: _t(`<b>Select</b> the ${option}.`),
+        trigger: `header#top`,
+        content: _t(`<b>Click</b> on this header to configure it.`),
         position: position,
         run: "click",
     };
@@ -248,13 +283,13 @@ return {
     addMedia,
     changeBackgroundColor,
     chooseBackgroundColor,
-    clickOnAnOption,
     changeAnOption,
     changePaddingSize,
     selectSnippetColumn,
     changeColumnSize,
     deleteColumn,
     goToOptions,
+    selectHeader,
 };
 
 });
