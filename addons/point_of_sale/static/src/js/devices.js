@@ -607,7 +607,7 @@ var BarcodeReader = core.Class.extend({
                         self.remote_active = 0;
                         return;
                     }
-                    setTimeout(waitforbarcode,5000);
+                    waitforbarcode();
                 });
         }
         waitforbarcode();
