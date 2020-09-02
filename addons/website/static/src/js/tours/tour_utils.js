@@ -60,7 +60,7 @@ function dragNDrop(snippet, position = "bottom") {
         trigger: `#oe_snippets .oe_snippet[name="${snippet.name}"] .oe_snippet_thumbnail`,
         extra_trigger: "body.editor_enable.editor_has_snippets",
         moveTrigger: '.oe_drop_zone',
-        content: _t(`Drag the <i>${snippet.name}</i> block and drop it in your page.`),
+        content: _t(`Drag the <b>${snippet.name}</b> building block and drop it just after the previous one.`),
         position: position,
         run: "drag_and_drop #wrap",
     };
@@ -75,7 +75,7 @@ function dragNDrop(snippet, position = "bottom") {
 function clickOnText(snippet, element, position = "bottom") {
     return {
         trigger: `#wrapwrap .${snippet.id} ${element}`,
-        content: _t("<b>Click on a text</b> to start editing it."),
+        content: _t("Even if this title is cool, you can change it. <b>Click on a text</b> to start editing it."),
         position: position,
         run: "text",
         consumeEvent: "input",
@@ -86,7 +86,7 @@ function clickOnText(snippet, element, position = "bottom") {
 function changeImage(snippet, position = "bottom") {
     return {
         trigger: `#wrapwrap .${snippet.id} img`,
-        content: _t("<b>Double click on an image</b> to change it."),
+        content: _t("<b>Double click on an image</b> to change it with one of our choice."),
         position: position,
         run: "dblclick",
     };
@@ -95,7 +95,7 @@ function changeImage(snippet, position = "bottom") {
 function changeIcon(snippet, index = 0, position = "bottom") {
     return {
         trigger: `#wrapwrap .${snippet.id} i:eq(${index})`,
-        content: _t("<b>Double click on an icon</b> to change it."),
+        content: _t("<b>Double click on an icon</b> to change it with one of our choice."),
         position: position,
         run: "dblclick",
     };
@@ -113,7 +113,7 @@ function chooseImage(index = 0, position = "top") {
 function chooseIcon(icon, position = "top") {
     return {
         trigger: `#editor-media-icon .font-icons-icons span.${icon}`,
-        content: _t("<b>Select the image</b> you want."),
+        content: _t("<b>Select the icon</b> you want."),
         position: position,
         run: "click",
     };
@@ -150,7 +150,7 @@ function clickOnSnippet(snippet, position = "bottom") {
 function changeBackground(snippet, position = "bottom") {
     return {
         trigger: ".o_we_customize_panel .o_we_edit_image",
-        content: _t("Customize any block through this menu. Try to change the background image of this block."),
+        content: _t("<b>Customize</b> any block through this menu. Try to change the background image of this block."),
         position: position,
         run: "click",
     };
@@ -159,7 +159,7 @@ function changeBackground(snippet, position = "bottom") {
 function changeBackgroundColor(position = "bottom") {
     return {
         trigger: ".o_we_customize_panel .o_we_color_preview",
-        content: _t("Customize any block through this menu. Try to change the background color of this block."),
+        content: _t("<b>Customize</b> any block through this menu. Try to change the background color of this block."),
         position: position,
         run: "click",
     };
@@ -250,7 +250,7 @@ function goToOptions(position = "bottom") {
 function goBackToBlocks(position = "bottom") {
     return {
         trigger: '.o_we_add_snippet_btn',
-        content: _t("Go back to the blocks menu."),
+        content: _t("Go back to the Blocks tab."),
         position: position,
         run: "click",
     };
@@ -263,7 +263,7 @@ function goBackToBlocks(position = "bottom") {
 function clickOnSave(position = "bottom") {
     return {
         trigger: "button[data-action=save]",
-        content: _t("Click the <b>Save</b> button."),
+        content: _t("You did great here. It's time to <b>Save</b> your work."),
         position: position,
     };
 }
