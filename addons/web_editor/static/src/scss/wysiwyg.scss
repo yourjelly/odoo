@@ -597,3 +597,22 @@ jw-toolbar {
 jw-follow-range {
     z-index: 1050;
 }
+
+.oe_absolute_dropdown {
+    border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+    border-radius: $o-we-sidebar-content-field-border-radius;
+    background-color: $o-we-sidebar-content-field-clickable-bg;
+    color: $o-we-sidebar-content-field-clickable-color;
+
+    padding-left: 0;
+    padding-right: 0;
+
+    a {
+        padding: 0 10px;
+        color: white;
+    }
+
+    .dropdown-menu a {
+        display: block;
+    }
+}
