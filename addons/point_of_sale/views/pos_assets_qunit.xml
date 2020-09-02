@@ -2,6 +2,7 @@
 <odoo>
 
 <template id="point_of_sale.qunit_suite_assets">
+    <script type="text/javascript" src="/web/static/tests/main_tests.js"></script>
     <t t-call-assets="point_of_sale.pos_assets_backend" t-js="false"/>
 
     <link type="text/css" rel="stylesheet" href="/web/static/lib/qunit/qunit-2.9.1.css"/>
