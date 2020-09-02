@@ -63,7 +63,9 @@ class AccountEdiTestCommon(AccountTestInvoicingCommon):
     def assert_generated_file_equal(self, invoice, expected_values, applied_xpath=None):
         invoice.action_post()
         invoice.edi_document_ids._process_documents_web_services()  # synchronous are called in post, but there's no CRON in tests for asynchronous
-        attachment = invoice.edi_document_ids.filtered(lambda d: d.edi_format_id == self.edi_format).attachment_id
+        attachment = invoice._get_edi_attachment(self.edi_format)
+        if not attachment:
+            raise ValueError('No attachment was generated after posting EDI')
         xml_content = base64.b64decode(attachment.with_context(bin_size=False).datas)
         current_etree = self.get_xml_tree_from_string(xml_content)
         expected_etree = self.get_xml_tree_from_string(expected_values)

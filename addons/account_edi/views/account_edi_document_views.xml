@@ -5,9 +5,13 @@
             <field name="name">Account.edi.document.tree</field>
             <field name="model">account.edi.document</field>
             <field name="arch" type="xml">
-                <tree create="false" delete="false" edit="false">
+                <tree create="false" delete="false" edit="false"
+                      decoration-info="error_level == 'info'"
+                      decoration-warning="error_level == 'warning'"
+                      decoration-danger="error_level== 'error'">
                     <field name="edi_format_name" />
                     <field name="error" />
+                    <field name="error_level" invisible="1" />
                 </tree>
             </field>
         </record>

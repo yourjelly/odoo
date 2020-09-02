@@ -12,14 +12,17 @@ class AccountMove(models.Model):
         comodel_name='account.edi.document',
         inverse_name='move_id')
     edi_state = fields.Selection(
-        selection=[('to_send', 'To Send'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'), ('cancelled', 'Cancelled')],
+        selection=[('to_send', 'To Process'), ('sent', 'Sent'), ('to_cancel', 'To Cancel'), ('cancelled', 'Cancelled')],
         string="Electronic invoicing",
         store=True,
         compute='_compute_edi_state',
         help='The aggregated state of all the EDIs of this move')
-    edi_error_count = fields.Integer(
-        compute='_compute_edi_error_count',
+    edi_error_header = fields.Text(
+        compute='_compute_edi_error',
         help='How many EDIs are in error for this move ?')
+    edi_blocked = fields.Integer(
+        compute='_compute_edi_error',
+        help='Technical field to know if how many documents has an error of level "error"')
     edi_web_services_to_process = fields.Text(
         compute='_compute_edi_web_services_to_process',
         help="Technical field to display the documents that will be processed by the CRON")
@@ -41,19 +44,32 @@ class AccountMove(models.Model):
             else:
                 move.edi_state = False
 
-    @api.depends('edi_document_ids.error')
-    def _compute_edi_error_count(self):
+    @api.depends('edi_document_ids.error', 'edi_document_ids.error_level')
+    def _compute_edi_error(self):
         for move in self:
-            move.edi_error_count = len(move.edi_document_ids.filtered(lambda d: d.error))
+            move.edi_blocked = 0
+
+            errors = move.edi_document_ids.filtered(lambda d: d.error)
+            levels = self.env['account.edi.document']._fields['error_level'].selection
+            strings = []
+            for level, string in levels:
+                err = len(errors.filtered(lambda d: d.error_level == level))
+                if err:
+                    strings.append(_('%s %s', err, string))
+                    if level == 'error':
+                        move.edi_blocked = err
+
+            move.edi_error_header = ', '.join(strings)
 
     @api.depends(
         'edi_document_ids',
         'edi_document_ids.state',
+        'edi_document_ids.error_level',
         'edi_document_ids.edi_format_id',
         'edi_document_ids.edi_format_id.name')
     def _compute_edi_web_services_to_process(self):
         for move in self:
-            to_process = move.edi_document_ids.filtered(lambda d: d.state in ['to_send', 'to_cancel'])
+            to_process = move.edi_document_ids.filtered(lambda d: d.state in ['to_send', 'to_cancel'] and d.error_level != 'error')
             format_web_services = to_process.edi_format_id.filtered(lambda f: f._needs_web_services())
             move.edi_web_services_to_process = ', '.join(f.name for f in format_web_services)
 
@@ -111,6 +127,7 @@ class AccountMove(models.Model):
                         existing_edi_document.write({
                             'state': 'to_send',
                             'error': False,
+                            'error_level': False,
                         })
                     else:
                         edi_document_vals_list.append({
@@ -122,9 +139,11 @@ class AccountMove(models.Model):
                     existing_edi_document.write({
                         'state': False,
                         'error': False,
+                        'error_level': False,
                     })
 
         self.env['account.edi.document'].create(edi_document_vals_list)
+        self.edi_document_ids._check_move_configuration()
         self.edi_document_ids._process_documents_no_web_services()
 
     def _post(self, soft=True):
@@ -152,6 +171,7 @@ class AccountMove(models.Model):
                         })
 
         self.env['account.edi.document'].create(edi_document_vals_list)
+        posted.edi_document_ids._check_move_configuration()
         posted.edi_document_ids._process_documents_no_web_services()
         return posted
 
@@ -160,8 +180,8 @@ class AccountMove(models.Model):
         # Set the electronic document to be canceled and cancel immediately for synchronous formats.
         res = super().button_cancel()
 
-        self.edi_document_ids.filtered(lambda doc: doc.attachment_id).write({'state': 'to_cancel', 'error': False})
-        self.edi_document_ids.filtered(lambda doc: not doc.attachment_id).write({'state': 'cancelled', 'error': False})
+        self.edi_document_ids.filtered(lambda doc: doc.attachment_id).write({'state': 'to_cancel', 'error': False, 'error_level': False})
+        self.edi_document_ids.filtered(lambda doc: not doc.attachment_id).write({'state': 'cancelled', 'error': False, 'error_level': False})
         self.edi_document_ids._process_documents_no_web_services()
 
         return res
@@ -177,7 +197,7 @@ class AccountMove(models.Model):
 
         res = super().button_draft()
 
-        self.edi_document_ids.write({'state': False, 'error': False})
+        self.edi_document_ids.write({'state': False, 'error': False, 'error_level': False})
 
         return res
 
@@ -198,7 +218,13 @@ class AccountMove(models.Model):
             if is_move_marked:
                 move.message_post(body=_("A cancellation of the EDI has been requested."))
 
-        to_cancel_documents.write({'state': 'to_cancel', 'error': False})
+        to_cancel_documents.write({'state': 'to_cancel', 'error': False, 'error_level': False})
+
+    def _get_edi_document(self, edi_format):
+        return self.edi_document_ids.filtered(lambda d: d.edi_format_id == edi_format)
+
+    def _get_edi_attachment(self, edi_format):
+        return self._get_edi_document(edi_format).attachment_id
 
     ####################################################
     # Import Electronic Document
@@ -242,7 +268,11 @@ class AccountMove(models.Model):
     ####################################################
 
     def action_process_edi_web_services(self):
-        self.edi_document_ids.filtered(lambda d: d.state in ('to_send', 'to_cancel'))._process_documents_web_services()
+        self.edi_document_ids.filtered(lambda d: d.state in ('to_send', 'to_cancel') and d.error != 'error')._process_documents_web_services()
+
+    def action_retry_edi_documents_error(self):
+        self.edi_document_ids.filtered(lambda d: d.error_level == 'error').write({'error': False, 'error_level': False})
+        self.action_process_edi_web_services()
 
 
 class AccountMoveLine(models.Model):
