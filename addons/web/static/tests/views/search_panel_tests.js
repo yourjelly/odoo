@@ -2465,7 +2465,9 @@ QUnit.module('Views', {
         assert.containsN(webClient, '.o_kanban_record:not(.o_kanban_ghost)', 4);
 
         await testUtils.dom.click(webClient.$(".o_kanban_record:nth(0)"));
+        await testUtils.owlCompatibilityExtraNextTick();
         await testUtils.dom.click(webClient.$(".breadcrumb-item:nth(0)"));
+        await testUtils.owlCompatibilityExtraNextTick();
 
         assert.verifySteps([
             '[]', // initial search_read
