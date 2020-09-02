@@ -64,6 +64,7 @@ odoo.define('website_blog.editor', function (require) {
 require('web.dom_ready');
 const {qweb, _t} = require('web.core');
 const snippetOptions = require('web_editor.snippets.options');
+require('website.editor.snippets.options');
 var Wysiwyg = require('web_editor.wysiwyg');
 
 if (!$('.website_blog').length) {
@@ -73,7 +74,7 @@ if (!$('.website_blog').length) {
 const NEW_TAG_PREFIX = 'new-blog-tag-';
 
 Wysiwyg.include({
-    custom_events: Object.assign({}, WysiwygMultizone.prototype.custom_events, {
+    custom_events: Object.assign({}, Wysiwyg.prototype.custom_events, {
         'set_blog_post_updated_tags': '_onSetBlogPostUpdatedTags',
     }),
 
@@ -188,7 +189,7 @@ snippetOptions.registry.CoverProperties.include({
 });
 
 snippetOptions.registry.BlogPostTagSelection = snippetOptions.SnippetOptionWidget.extend({
-    xmlDependencies: (snippetOptions.registryprototype.xmlDependencies || [])
+    xmlDependencies: (snippetOptions.SnippetOptionWidget.prototype.xmlDependencies || [])
         .concat(['/website_blog/static/src/xml/website_blog_tag.xml']),
 
     /**
