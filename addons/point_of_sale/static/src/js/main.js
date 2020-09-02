@@ -28,6 +28,8 @@ odoo.define('point_of_sale.main', function (require) {
 
     const posRoot = new PosRoot(null);
 
+    AbstractService.prototype.deployServices(posRoot.env);
+
     async function startPosApp() {
         Registries.Component.freeze();
         PosRoot.components = { Chrome: Registries.Component.get(Chrome) };
@@ -37,7 +39,6 @@ odoo.define('point_of_sale.main', function (require) {
         //env.bus = new owl.core.EventBus();
         await owl.utils.whenReady();
         await posRoot.mount(document.body);
-        AbstractService.prototype.deployServices(posRoot.env);
     }
 
     startPosApp();
