@@ -508,13 +508,14 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
             </div>
         `;
 
-        const [chair1, chair2] = Parent.env.pos.db.search_product_in_category(0, 'Office Chair');
-        // patch chair2 to have tracking
-        chair2.tracking = 'serial';
+        const [product1] = Parent.env.pos.db.search_product_in_category(0, 'Whiteboard Pen');
+        const [product2] = Parent.env.pos.db.search_product_in_category(0, 'Corner Desk Right Sit');
+        // patch product2 to have tracking
+        product2.tracking = 'serial';
 
         // 1. Test orderline without lot icon
 
-        let parent = new Parent(chair1);
+        let parent = new Parent(product1);
         await parent.mount(testUtils.prepareTarget());
 
         let line = parent.el.querySelector('li.orderline');
@@ -528,7 +529,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
 
         // 2. Test orderline with lot icon
 
-        parent = new Parent(chair2);
+        parent = new Parent(product2);
         await parent.mount(testUtils.prepareTarget());
 
         line = parent.el.querySelector('li.orderline');
@@ -563,7 +564,8 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
             </div>
         `;
 
-        const [chair1, chair2] = Parent.env.pos.db.search_product_in_category(0, 'Office Chair');
+        const [product1] = Parent.env.pos.db.search_product_in_category(0, 'Whiteboard Pen');
+        const [product2] = Parent.env.pos.db.search_product_in_category(0, 'Corner Desk Right Sit');
 
         let parent = new Parent();
         await parent.mount(testUtils.prepareTarget());
@@ -574,7 +576,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
 
         // add line to the current order
         const order1 = parent.env.pos.get_order();
-        order1.add_product(chair1);
+        order1.add_product(product1);
         await testUtils.nextTick();
         assert.ok(parent.el.querySelector('.summary'));
         assert.notOk(parent.el.querySelector('.order-empty'));
@@ -586,7 +588,7 @@ odoo.define('point_of_sale.tests.ProductScreen', function (require) {
         assert.ok(parent.el.querySelector('.order-empty'));
 
         // add line to the current order
-        order2.add_product(chair2);
+        order2.add_product(product2);
         await testUtils.nextTick();
         assert.ok(parent.el.querySelector('.summary'));
         assert.notOk(parent.el.querySelector('.order-empty'));

@@ -60,4 +60,10 @@
         </xpath>
     </template>
 
+    <template id="pos_restaurant.mock_data" inherit_id="point_of_sale.mock_data">
+        <xpath expr="." position="inside">
+            <script type="text/javascript" src="/pos_restaurant/static/tests/unit/test_mock_data.js"></script>
+        </xpath>
+    </template>
+
 </odoo>

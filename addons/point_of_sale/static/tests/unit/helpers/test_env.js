@@ -8,14 +8,17 @@ odoo.define('point_of_sale.test_env', async function (require) {
      * makeTestEnvironment of web.
      */
 
+    const Registries = require('point_of_sale.Registries');
     const makeTestEnvironment = require('web.test_env');
     const env = require('web.env');
     const models = require('point_of_sale.models');
+    const PosMockData = require('point_of_sale.test_mock_data');
+    const posMockData = new (Registries.Class.get(PosMockData))();
 
     await env.session.is_bound;
     const pos = new models.PosModel({
-        rpc: env.services.rpc,
-        session: env.session,
+        rpc: async (params) => posMockData.getData(params.model),
+        session: Object.assign({}, env.session, { rpc: async () => ({ server_version_info: ['dummy_version'] }) }),
         do_action: async () => {},
         setLoadingMessage: () => {},
         setLoadingProgress: () => {},
