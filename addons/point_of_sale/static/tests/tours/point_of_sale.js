@@ -409,8 +409,7 @@ odoo.define('point_of_sale.tour.acceptance', function (require) {
         run: function () {},
     }]);
 
-    // LPE FIXME
-    steps = steps.concat(finish_order_invoiced());
+    steps = steps.concat(finish_order());
 
     // test opw-672118 orderline subtotal rounding
     steps = steps.concat(add_product_to_order('Desk Organizer'));
