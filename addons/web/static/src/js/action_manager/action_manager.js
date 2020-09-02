@@ -596,8 +596,13 @@ odoo.define('web.ActionManager', function (require) {
         _willSwitchAction() {
             //return Promise.resolve();
             if (this.currentStack.length && !this.currentDialogController) {
+                const eventType = 'will-switch-action';
+                const subscriptions = this.subscriptions[eventType];
+                if (!subscriptions || !subscriptions.length) {
+                    return;
+                }
                 return new Promise((resolve, reject) => {
-                    this.trigger('will-switch-action', {resolve, reject});
+                    this.trigger(eventType, {resolve, reject});
                 });
             }
         }
