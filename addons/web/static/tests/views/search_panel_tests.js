@@ -2464,8 +2464,8 @@ QUnit.module('Views', {
         assert.containsN(webClient, '.o_search_panel_filter_value input:checked', 2);
         assert.containsN(webClient, '.o_kanban_record:not(.o_kanban_ghost)', 4);
 
-        await testUtils.dom.click(actionManager.$(".o_kanban_record:nth(0)"));
-        await testUtils.dom.click(actionManager.$(".breadcrumb-item:nth(0)"));
+        await testUtils.dom.click(webClient.$(".o_kanban_record:nth(0)"));
+        await testUtils.dom.click(webClient.$(".breadcrumb-item:nth(0)"));
 
         assert.verifySteps([
             '[]', // initial search_read
@@ -2518,8 +2518,10 @@ QUnit.module('Views', {
     QUnit.test('after onExecuteAction, selects "All" as default category value', async function (assert) {
         assert.expect(4);
 
-        // LPE FIXME
-        var Storage = RamStorage.extend({
+        // LPE FIXME: localStorage should be something in env
+        // either service, or in env.browser
+
+/*        var Storage = RamStorage.extend({
             getItem: function (key) {
                 assert.step('getItem ' + key);
                 return 3; // 'asustek'
@@ -2530,7 +2532,7 @@ QUnit.module('Views', {
         });
         var RamStorageService = AbstractStorageService.extend({
             storage: new Storage(),
-        });
+        });*/
 
         var webClient = await createWebClient({
             actions: this.actions,

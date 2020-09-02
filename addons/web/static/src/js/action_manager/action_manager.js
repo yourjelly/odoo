@@ -7,8 +7,6 @@ odoo.define('web.ActionManager', function (require) {
     const Registry = require("web.Registry");
 
     var pyUtils = require('web.py_utils');
-    const { TransactionalChain } = require('web.concurrency');
-    const { core } = owl;
     const { decorate } = require('web.utils');
 
     class ActionManager extends Model {
