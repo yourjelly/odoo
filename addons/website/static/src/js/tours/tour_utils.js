@@ -150,10 +150,10 @@ function clickOnAnOption(name, position = "bottom") {
     };
 }
 
-function changeAnOption(name, option, position = "bottom") {
+function changeAnOption(name, position = "bottom") {
     return {
-        trigger: `.o_we_user_value_widget:contains('${name}') we-select-menu we-button:contains('${option}')`,
-        content: _t(`<b>Select</b> the ${option}.`),
+        trigger: `.o_we_user_value_widget[title='${name}']`,
+        content: _t(`<b>Click</b> on this option to change the ${name} of the block.`),
         position: position,
         run: "click",
     };
