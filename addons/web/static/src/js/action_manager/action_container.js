@@ -5,6 +5,7 @@ odoo.define('web.ActionContainer', function (require) {
 
     const ActionAdapter = require('web.ActionAdapter');
     const OwlDialog = require('web.OwlDialog');
+    const patchMixin = require('web.patchMixin');
 
     class ActionContainer extends Component {
         constructor() {
@@ -51,6 +52,6 @@ odoo.define('web.ActionContainer', function (require) {
     ActionContainer.components  = { ActionAdapter , OwlDialog };
 
     return {
-        ActionContainer,
+        ActionContainer: patchMixin(ActionContainer),
     };
 });

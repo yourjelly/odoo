@@ -9,6 +9,7 @@ odoo.define('web.ActionAdapter', function (require) {
      */
 
     const AbstractView = require('web.AbstractView');
+    const ActionManager = require('web.ActionManager');
     const { ComponentAdapter } = require('web.OwlCompatibility');
     const patchMixin = require('web.patchMixin');
 
@@ -34,6 +35,10 @@ odoo.define('web.ActionAdapter', function (require) {
                     this.actionManager.off('will-switch-action', this)
                 );
             }
+            ActionManager.useCommitCallBack(
+                this.inDialog ? 'dialogAction' : 'mainAction',
+                () => ({ comp: this, action: props.action })
+            );
         }
         get inDialog() {
             return this.props.inDialog;

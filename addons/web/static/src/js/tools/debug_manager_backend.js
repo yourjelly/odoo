@@ -1,9 +1,7 @@
 odoo.define('web.DebugManager.Backend', function (require) {
 "use strict";
 
-const ActionAdapter = require('web.ActionAdapter');
-const ActionManager = require('web.ActionManager'); 
-const DialogAction = require('web.DialogAction');
+const { ActionContainer } = require('web.ActionContainer');
 var DebugManager = require('web.DebugManager');
 var dialogs = require('web.view_dialogs');
 var startClickEverywhere = require('web.clickEverywhere');
@@ -128,12 +126,10 @@ DebugManager.include({
     },
     async start() {
         await this._super(...arguments);
-        this._updateCB = () => {
-            const { main, dialog } = this.actionManager.activeDescriptors;
-            let action = this.mode === 'main' ? main.action : dialog.action; // LPE FIXME
-            const component = null; // LPE FIXME
-            action = component ? action : null;
-            this.update('action', action, component);
+        this._updateCB = payload => {
+            const key = `${this.mode}Action`;
+            const { comp , action } = payload[key] || {};
+            this.update('action', action, comp);
         };
         // FIXME: this won't work, probably when switching back to the home menu
         this.actionManager.on('committed', this, this._updateCB);
@@ -777,19 +773,25 @@ DebugManager.deploy = function () {
     SystrayMenu.Items.push(DebugManager);
 
     // dialog (deployed in the header of action dialogs)
-    utils.patch(DialogAction, 'DialogActionDebug', {
-        async willStart() {
-            await this._super(...arguments);
-            this.debugManager = new DebugManagerAdapter(this, {
-                inDialog: true,
-            });
-            await this.debugManager.mount(document.createDocumentFragment());
-        },
-        mounted() {
-            this.dialog.comp.headerRef.el.prepend(this.debugManager.el);
-            this._super(...arguments);
-        },
-    });
+    ActionContainer.patch('ActionContainerDebug', T =>
+        class ActionContainerDebug extends T {
+            async willStart() {
+                await super.willStart(...arguments);
+                if (this.props.dialog) {
+                    this.debugManager = new DebugManagerAdapter(this, {
+                        inDialog: true,
+                    });
+                    await this.debugManager.mount(document.createDocumentFragment());
+                }
+            }
+            mounted() {
+                if (this.props.dialog) {
+                    this.dialogRef.comp.headerRef.el.prepend(this.debugManager.el);
+                }
+                super.mounted(...arguments);
+            }
+        }
+    );
 };
 DebugManager.undeploy = function () {
     // main
@@ -799,7 +801,10 @@ DebugManager.undeploy = function () {
     }
 
     // dialog
-    utils.unpatch(DialogAction, 'DialogActionDebug');
+    try {
+        ActionContainer.unpatch('ActionContainerDebug');
+    } catch (e) {} // already unpatched
+
 };
 
 if (config.isDebug()) {

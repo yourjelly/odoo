@@ -222,7 +222,7 @@ QUnit.module('DebugManager', {
                     }
                     if (route === '/web/dataset/search_read') {
                         assert.deepEqual(args.domain,
-                            [['res_model', '=', 'partner'], ['res_id', '=', 1]]);
+                            ['&', ['res_model', '=', 'partner'], ['res_id', '=', 1]]);
                         assert.deepEqual(args.context, {
                             bin_size: true,
                             default_res_model: "partner",

@@ -176,8 +176,14 @@ odoo.define('web.ActionManager', function (require) {
                 controller.options.on_success = null;
             }
             this.committedState.controllerStack = controllerStack;
-            const controllerCleaned = this._cleanActions();
-            return { controllerCleaned };
+            this._cleanActions();
+            const committedValue = {};
+            if (this.__commitCallBacks) {
+                Object.entries(this.__commitCallBacks).forEach(([key, cb]) => {
+                    committedValue[key] = cb();
+                });
+            }
+            this.trigger('committed', committedValue);
         }
         /**
          * Executes Odoo actions, given as an ID in database, an xml ID, a client
@@ -778,6 +784,22 @@ odoo.define('web.ActionManager', function (require) {
     ActionManager.registry = new Registry(null);
 
     ActionManager.useActionManager = useActionManager;
+    ActionManager.useCommitCallBack = (key, callback) => {
+        const component = owl.Component.current;
+        const actionManager = component.env.actionManager;
+        if (!actionManager) {
+            return;
+        }
+        const callbacks = actionManager.__commitCallBacks || {};
+        actionManager.__commitCallBacks = callbacks;
+        owl.hooks.onMounted(() => {
+            if (key in callbacks) {
+                throw new Error('Pas Glop');
+            }
+            callbacks[key] = callback;
+        });
+        owl.hooks.onWillUnmount(() => delete callbacks[key]);
+    };
 
     return ActionManager;
 
