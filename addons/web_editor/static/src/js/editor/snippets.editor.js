@@ -40,11 +40,11 @@ $.extend($.expr[':'], {
  * Get an array of all the selector tags and their position within their parents.
  */
 function getQuerySelectorArray (el) {
-    const parent = el.parentElement;
+    const parent = el.parentNode;
 
     const index = [...parent.children].indexOf(el) + 1;
     const selector = `${el.tagName}:nth-child(${index})`;
-    if (parent === document.body) {
+    if (parent === document.body || parent.nodeType === el.DOCUMENT_FRAGMENT_NODE || parent.nodeType === el.DOCUMENT_NODE) {
         return [selector];
     } else {
         return [...getQuerySelectorArray(parent), selector];
@@ -1035,30 +1035,8 @@ var SnippetsMenu = Widget.extend({
 
         core.bus.on('deactivate_snippet', this, this._onDeactivateSnippet);
 
-        var lastElement;
-        this.$document.on('click.snippets_menu', '*', ev => {
-            var srcElement = ev.target || (ev.originalEvent && (ev.originalEvent.target || ev.originalEvent.originalTarget)) || ev.srcElement;
-            if (!srcElement || lastElement === srcElement) {
-                return;
-            }
-            lastElement = srcElement;
-            _.defer(function () {
-                lastElement = false;
-            });
-            var $snippet = $(srcElement);
-            if (!$snippet.closest('we-button, we-toggler, .o_we_color_preview').length) {
-                this._closeWidgets();
-            }
-            if (!$snippet.closest('body > *').length) {
-                return;
-            }
-            if ($snippet.closest(this._notActivableElementsSelector).length) {
-                return;
-            }
-            this._lastSnippetBlockActivated = getQuerySelector($snippet[0]);
-            this._activateSnippet($snippet);
-        });
-
+        this.$window.on('mousedown.snippets_menu', this._onSnippetMouseDown.bind(this));
+        this.$window.on('mousedown-iframe.snippets_menu', this._onSnippetMouseDown.bind(this));
 
         // Adapt overlay covering when the window is resized / content changes
         var throttledCoverUpdate = _.throttle(() => {
@@ -1802,6 +1780,7 @@ var SnippetsMenu = Widget.extend({
     _disableUndroppableSnippets: async function () {
         var self = this;
         var cache = {};
+
         for (const snippetDraggable of this.$snippets.toArray()) {
             var $snippetDraggable = $(snippetDraggable);
             var $snippetTemplate = $snippetDraggable.find('.oe_snippet_body');
@@ -1811,7 +1790,6 @@ var SnippetsMenu = Widget.extend({
                 if (isEnabled || !($snippetTemplate.is(option.base_selector) && !$snippetTemplate.is(option.base_exclude))) {
                     return;
                 }
-
                 cache[k] = cache[k] || {
                     'drop-near': option['drop-near'] ? option['drop-near'].all().length : 0,
                     'drop-in': option['drop-in'] ? option['drop-in'].all().length : 0
@@ -2301,17 +2279,37 @@ var SnippetsMenu = Widget.extend({
      *
      * @private
      */
-    _onMouseDown: function () {
-        const $blockedArea = $('#wrapwrap'); // TODO should get that element another way
-        $blockedArea.addClass('o_we_no_pointer_events');
-        const reenable = () => $blockedArea.removeClass('o_we_no_pointer_events');
+    _onMouseDown: function (ev) {
+        this.$editor.addClass('o_we_no_pointer_events');
+        const reenable = () => this.$editor.removeClass('o_we_no_pointer_events');
         // Use a setTimeout fallback to avoid locking the editor if the mouseup
         // is fired over an element which stops propagation for example.
-        const enableTimeoutID = setTimeout(() => reenable(), 5000);
-        $(document).one('mouseup', () => {
+        const enableTimeoutID = setTimeout(reenable, 5000);
+        $(window).one('mouseup', () => {
             clearTimeout(enableTimeoutID);
             reenable();
         });
+    },
+    _onSnippetMouseDown: function (ev) {
+        const el = this.editorHelpers.elementFromPoint(ev.clientX, ev.clientY);
+
+        const editable = el && el.closest('.note-editable');
+
+        if (!editable || !this.$editor.is(editable) || this.lastElement === el) {
+            return;
+        }
+        this.lastElement = el;
+        setTimeout(() => {this.lastElement = false;});
+
+        var $snippet = $(el);
+        if (!$snippet.closest('we-button, we-toggler, .o_we_color_preview').length) {
+            this._closeWidgets();
+        }
+        if ($snippet.closest(this._notActivableElementsSelector).length) {
+            return;
+        }
+        this._lastSnippetBlockActivated = getQuerySelector($snippet[0]);
+        this._activateSnippet($snippet);
     },
     /**
      * @private
