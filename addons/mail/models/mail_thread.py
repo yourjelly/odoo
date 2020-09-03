@@ -1302,9 +1302,14 @@ class MailThread(models.AbstractModel):
         if fallback_model:
             # no route found for a matching reference (or reply), so parent is invalid
             message_dict.pop('parent_id', None)
+            fallback_alias = None
+            #Take the alias of the server
+            server_user = self.env.context.get('server_user', False)
+            if server_user:
+                fallback_alias = Alias.search([('alias_name', '=', server_user.split('@')[0].lower())], limit=1)
             route = self.message_route_verify(
                 message, message_dict,
-                (fallback_model, thread_id, custom_values, self._uid, None),
+                (fallback_model, thread_id, custom_values, self._uid, fallback_alias),
                 update_author=True, assert_model=True)
             if route:
                 _logger.info(

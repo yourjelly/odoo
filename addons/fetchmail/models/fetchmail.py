@@ -162,6 +162,7 @@ class FetchmailServer(models.Model):
             _logger.info('start checking for new emails on %s server %s', server.type, server.name)
             additionnal_context['fetchmail_server_id'] = server.id
             additionnal_context['server_type'] = server.type
+            additionnal_context['server_user'] = server.user
             count, failed = 0, 0
             imap_server = None
             pop_server = None
