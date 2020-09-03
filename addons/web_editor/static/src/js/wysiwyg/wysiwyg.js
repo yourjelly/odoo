@@ -305,8 +305,7 @@ var Wysiwyg = Widget.extend({
             targetedLeaves = node.adjacents(sameLink);
         }
         const text = targetedLeaves.map(x => x.textContent).join('');
-        const inline = this.editor.plugins.get(JWEditorLib.Inline);
-        const modifiers = inline.getCurrentModifiers(range);
+        const modifiers = range.modifiers;
         const linkFormat = modifiers && modifiers.find(JWEditorLib.LinkFormat);
         const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
         let classes = '';
