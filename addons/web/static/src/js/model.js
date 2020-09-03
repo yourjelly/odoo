@@ -416,7 +416,8 @@ odoo.define("web/static/src/js/model.js", function (require) {
          * @returns {Promise}
          */
         async _loadExtensions(params) {
-            for (let layer = 0; layer < this.extensions.length; layer++) {
+            const extensionLayers = Object.keys(this.extensions).sort();
+            for (const layer of extensionLayers) {
                 await Promise.all(this.extensions[layer].map(
                     (extension) => extension.callLoad(params)
                 ));

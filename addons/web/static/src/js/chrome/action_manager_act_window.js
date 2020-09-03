@@ -17,7 +17,7 @@ const utils = require("web.utils");
 
 const { ComponentWrapper } = require('web.OwlCompatibility');
 
-class ViewComponentWrapper extends ComponentWrapper {
+class ActionComponentWrapper extends ComponentWrapper {
     constructor() {
         super(...arguments);
 
@@ -219,7 +219,7 @@ ActionManager.include({
             var rejection;
             let view;
             if (utils.isComponent(viewDescr.Widget)) {
-                view = new ViewComponentWrapper(this, viewDescr.Widget, {
+                view = new ActionComponentWrapper(this, viewDescr.Widget, {
                     fieldsView: viewDescr.fieldsView,
                     viewOptions,
                 });

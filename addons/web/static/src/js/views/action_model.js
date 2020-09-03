@@ -4,12 +4,11 @@ odoo.define("web/static/src/js/views/action_model.js", function (require) {
     const Domain = require("web.Domain");
     const { FACET_ICONS } = require("web.searchUtils");
     const { Model } = require("web/static/src/js/model.js");
-    const { parseArch } = require("web.viewUtils");
+    const parseArch = require("poc.arch_parser");
     const pyUtils = require("web.py_utils");
     const Registry = require("web.Registry");
 
     const isNotNull = (value) => value !== null && value !== undefined;
-    const isObject = (obj) => typeof obj === "object" && obj !== null;
 
     /**
      * @extends Model.Extension
@@ -208,12 +207,7 @@ odoo.define("web/static/src/js/views/action_model.js", function (require) {
                 archs.search = "<search/>";
             }
             for (const key in archs) {
-                const { attrs, children } = parseArch(archs[key]);
-                const objectChildren = children.filter(isObject);
-                parsedArchs[key] = {
-                    attrs,
-                    children: objectChildren,
-                };
+                parsedArchs[key] = parseArch(archs[key]);
             }
             const archInfo = {};
             for (const key of this.registry.keys()) {

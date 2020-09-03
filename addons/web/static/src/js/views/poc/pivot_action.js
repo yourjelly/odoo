@@ -1,7 +1,7 @@
-odoo.define("poc.PivotViewController", function (require) {
+odoo.define("poc.PivotAction", function (require) {
     "use strict";
 
-    const ViewController = require("poc.ViewController");
+    const Action = require("poc.Action");
     const PivotRenderer = require("web.PivotRenderer");
     const PivotModel = require("web.PivotModel");
     const { _lt } = require("web.core");
@@ -9,7 +9,7 @@ odoo.define("poc.PivotViewController", function (require) {
     const { useListener } = require("web.custom_hooks");
 
 
-    class PivotViewController extends ViewController {
+    class PivotAction extends Action {
         constructor() {
             super(...arguments);
 
@@ -20,20 +20,19 @@ odoo.define("poc.PivotViewController", function (require) {
             useListener("groupby_menu_selection", this._onGroupByMenuSelection);
         }
 
-        extractParams(params) {
-
+        extractParams() {
             const activeMeasures = []; // Store the defined active measures
             const colGroupBys = []; // Store the defined group_by used on cols
             const rowGroupBys = []; // Store the defined group_by used on rows
             const measures = {}; // All the available measures
             const groupableFields = {}; // The fields which can be used to group data
             const widgets = {}; // Wigdets defined in the arch
-            const additionalMeasures = params.additionalMeasures || [];
+            const additionalMeasures = this.props.viewOptions.additionalMeasures || [];
 
             this.fields.__count = { string: this.env._t("Count"), type: "integer" };
 
             //Compute the measures and the groupableFields
-            Object.keys(this.fields).forEach(name => {
+            for (const name of Object.keys(this.fields)) {
                 const field = this.fields[name];
                 if (name !== 'id' && field.store === true) {
                     if (['integer', 'float', 'monetary'].includes(field.type) || additionalMeasures.includes(name)) {
@@ -43,23 +42,24 @@ odoo.define("poc.PivotViewController", function (require) {
                         groupableFields[name] = field;
                     }
                 }
-            });
+            }
             measures.__count = { string: this.env._t("Count"), type: "integer" };
 
-
-            this.arch.children.forEach(field => {
-                let name = field.attributes.name;
+            for (const field of this.arch.children) {
+                let name = field.get("name").raw;
 
                 // Remove invisible fields from the measures
-                if (field.attributes.invisible && py.eval(field.attributes.invisible)) {
+                if (field.get("invisible").pyEval) {
                     delete measures[name];
-                    return;
+                    continue;
                 }
-                if (field.attributes.interval) {
-                    name += ':' + field.attributes.interval;
+                const interval = field.get("interval");
+                if (interval.isNotNull) {
+                    name += ':' + interval.raw;
                 }
-                if (field.attributes.widget) {
-                    widgets[name] = field.attributes.widget;
+                const widget = field.get("widget");
+                if (widget.isNotNull) {
+                    widgets[name] = widget.raw;
                 }
                 // add active measures to the measure list.  This is very rarely
                 // necessary, but it can be useful if one is working with a
@@ -68,49 +68,50 @@ odoo.define("poc.PivotViewController", function (require) {
                 // the measure should be allowed.  However, be careful if you define
                 // a measure in your pivot view: non stored functional fields will
                 // probably not work (their aggregate will always be 0).
-                if (field.attributes.type === 'measure' && !(name in measures)) {
+                const type = field.get("type").raw;
+                if (type === 'measure' && !(name in measures)) {
                     measures[name] = this.fields[name];
                 }
-                if (field.attributes.string && name in measures) {
-                    measures[name].string = field.attributes.string;
+                const string = field.get("string");
+                if (string.isNotNull && name in measures) {
+                    measures[name].string = string.raw;
                 }
-                if (field.attributes.type === 'measure' || 'operator' in field.attributes) {
+                if (type === 'measure' || field.get("operator").exists) {
                     activeMeasures.push(name);
                     measures[name] = this.fields[name];
                 }
-                if (field.attributes.type === 'col') {
+                if (type === 'col') {
                     colGroupBys.push(name);
                 }
-                if (field.attributes.type === 'row') {
+                if (type === 'row') {
                     rowGroupBys.push(name);
                 }
-            });
-            if ((!activeMeasures.length) || this.arch.attributes.display_quantity) {
-                activeMeasures.splice(0, 0, '__count');
+            }
+            if (!activeMeasures.length || this.arch.get("display_quantity").exists) {
+                activeMeasures.unshift('__count');
             }
 
-            this.loadParams.measures = activeMeasures;
-            this.loadParams.colGroupBys = this.env.device.isMobile ? [] : colGroupBys;
-            this.loadParams.rowGroupBys = rowGroupBys;
-            this.loadParams.fields = this.fields;
-            this.loadParams.default_order = params.default_order || this.arch.attributes.default_order;
-            this.loadParams.groupableFields = groupableFields;
+            this.config.load.measures = activeMeasures;
+            this.config.load.colGroupBys = this.env.device.isMobile ? [] : colGroupBys;
+            this.config.load.rowGroupBys = rowGroupBys;
+            this.config.load.fields = this.fields;
+            this.config.load.default_order = this.props.viewOptions.default_order || this.arch.get("default_order").raw;
+            this.config.load.groupableFields = groupableFields;
 
-            const disableLinking = !!(this.arch.attributes.disable_linking &&
-                                        JSON.stringify(this.arch.attributes.disable_linking));
+            const disableLinking = this.arch.get("disable_linking").exists;
 
-            this.rendererParams.widgets = widgets;
-            this.rendererParams.disableLinking = disableLinking;
+            this.config.view.widgets = widgets;
+            this.config.view.disableLinking = disableLinking;
             
             this.disableLinking = disableLinking;
-            this.title = params.title || this.arch.attributes.string || this.env._t("Untitled");
+            this.title = this.props.viewOptions.title || this.arch.get("string").raw || this.env._t("Untitled");
             this.measures = measures;
 
             // retrieve form and list view ids from the action to open those views
             // when a data cell of the pivot view is clicked
             this.views = [
-                _findView(params.actionViews, 'list'),
-                _findView(params.actionViews, 'form'),
+                _findView(this.actionViews, 'list'),
+                _findView(this.actionViews, 'form'),
             ];
 
             function _findView(views, viewType) {
@@ -129,7 +130,7 @@ odoo.define("poc.PivotViewController", function (require) {
             const group = {
                 rowValues: groupId[0],
                 colValues: groupId[1],
-                type: type
+                type
             };
 
             const state = this.model.get({ raw: true });
@@ -205,16 +206,16 @@ odoo.define("poc.PivotViewController", function (require) {
             this.update({}, { reload: false });
         }
     }
-    Object.assign(PivotViewController, {
+    Object.assign(PivotAction, {
         display_name: _lt("Pivot"),
         viewType: "pivot",
         icon: 'fa-table',
         searchMenuTypes: ['filter', 'groupBy', 'comparison', 'favorite'],
     });
-    Object.assign(PivotViewController.components, {
+    Object.assign(PivotAction.components, {
         View: PivotRenderer,
         Model: PivotModel,
     });
 
-    return PivotViewController;
+    return PivotAction;
 });

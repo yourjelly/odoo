@@ -34,6 +34,7 @@ odoo.define('web.PivotRenderer', function (require) {
          */
         constructor() {
             super(...arguments);
+
             this.sampleDataTargets = ['table'];
             this.state = useState({
                 activeNodeHeader: {

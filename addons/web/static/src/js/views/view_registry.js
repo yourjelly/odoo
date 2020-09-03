@@ -33,7 +33,7 @@ var PivotView = require('web.PivotView');
 var CalendarView = require('web.CalendarView');
 var view_registry = require('web.view_registry');
 
-const PivotViewController = require('poc.PivotViewController');
+const PivotAction = require('poc.PivotAction');
 
 view_registry
     .add('form', FormView)
@@ -41,7 +41,7 @@ view_registry
     .add('kanban', KanbanView)
     .add('graph', GraphView)
     .add('pivot', PivotView)
-    .add('pivot', PivotViewController)
+    .add('pivot', PivotAction)
     .add('calendar', CalendarView)
     ;
 

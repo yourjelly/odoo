@@ -157,8 +157,9 @@ var AbstractView = Factory.extend({
         var currentId = controllerState.currentId || params.currentId;
         this.loadParams = {
             context: params.context,
-            count: params.count || ((this.controllerParams.ids !== undefined) &&
-                   this.controllerParams.ids.length) || 0,
+            // FIXME: this.controllerParams.ids does not exists -> useless
+            count: params.count || /*((this.controllerParams.ids !== undefined) &&
+                   this.controllerParams.ids.length) ||*/ 0,
             domain: params.domain,
             modelName: params.modelName,
             res_id: currentId,

@@ -2,7 +2,7 @@
                   ActionManager
                         |
                         |
-                  ViewController  -----------  Model/SearchModel
+                      Action  -----------  Model/SearchModel
                         |
     +-------------------+-------------------+
     |                   |                   |
@@ -11,13 +11,38 @@ ControlPanel       SearchPanel             View
 
 View is just a renaming of the Renderer legacy
 
-ViewController is the unification of the View legacy and the Controller
-it serves to create the configuration of Model (+ load params), View,
+Action is the unification of the View legacy and the Controller
+it serves to initialize Model (+ load params), View,
 ControlPanel and SearchPanel.
 
 ?. Drop MVC pattern?
    View could have a hook to use models as we have components and not
    widgets anymore.
 
-?. ViewController shouldn't have any logic/behaviour, just configuration of sub
-   components.
+?. Action shouldn't have any logic/behaviour, just configuration/initialization
+   of sub components.
+
+
+┌ Action -----------------------------------------------------------------------------------┐
+| ┌ Control Panel ─────────────────────┬──────────────────────────────────────────────────┐ |
+| │ ┌ Breadcrumbs ───────────────────┐ │ ┌ Search View ─────────────────────────────────┐ │ |
+| │ │ [1] / [2]                      │ │ │ [3] [ ================ 4 ================= ] │ │ |
+| │ └────────────────────────────────┘ │ └──────────────────────────────────────────────┘ │ |
+| ├────────────────────────────────────┼──────────────────────────────────────────────────┤ |
+| │ ┌ ViewController ┐ ┌ ActionMenus ┐ │ ┌ Search Menus ─────┐ ┌ Pager ┐┌ View switcher ┐ │ |
+| │ │ [5]            │ │ [6]         │ │ │ [7] [8] [9] [10]  │ │ [11]  ││ [12]          │ │ |
+| │ └────────────────┘ └─────────────┘ │ └───────────────────┘ └───────┘└───────────────┘ │ |
+| └────────────────────────────────────┴──────────────────────────────────────────────────┘ |
+| ┌ View ─────────────────────────────────────────────────────────────────────────────────┐ |
+| │                                                                                       │ |
+| │  ...                                                                                  │ |
+| │                                                                                       │ |
+| │                                                                                       │ |
+| │                                                                                       │ |
+| └───────────────────────────────────────────────────────────────────────────────────────┘ |
+└-------------------------------------------------------------------------------------------┘
+
+[5] Buttons = Component ViewController
+  - Can communicate with the view model (useModel)
+
+
