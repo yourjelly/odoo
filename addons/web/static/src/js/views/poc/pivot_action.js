@@ -2,11 +2,18 @@ odoo.define("poc.PivotAction", function (require) {
     "use strict";
 
     const Action = require("poc.Action");
-    const PivotRenderer = require("web.PivotRenderer");
+    // const PivotRenderer = require("web.PivotRenderer");
     const PivotModel = require("web.PivotModel");
     const { _lt } = require("web.core");
     const { GROUPABLE_TYPES } = require("web.searchUtils");
     const { useListener } = require("web.custom_hooks");
+
+
+    class PivotRenderer extends owl.Component {
+    }
+    PivotRenderer.template = owl.tags.xml/*xml*/`
+        <div>??</div>
+    `;
 
 
     class PivotAction extends Action {

@@ -133,18 +133,23 @@ odoo.define("poc.Action", function (require) {
         get searchQuery() {
             return this.props.viewOptions.searchQuery;
         }
+        get controlPanelFieldsView() {
+            return this.action.controlPanelFieldsView || {};
+        }
+        get domain() {
+            return this.props.viewOptions.domain || [];
+        }
+
+        get viewProps() {
+            return Object.assign({}, this.configs.view, this.state);
+        }
 
         constructor(parent, { fieldsView, viewOptions }) {
             super(...arguments);
 
-            console.log(fieldsView, viewOptions);
-
             this._dropPrevious = new DropPrevious();
 
             this.state = useState({});
-            useSubEnv({
-                viewModel: null,
-            });
 
             const archs = {
                 // search
@@ -158,7 +163,11 @@ odoo.define("poc.Action", function (require) {
                 archs.search = this.action.controlPanelFieldsView.arch;
             }
             this.archInfo = ActionModel.extractArchInfo(archs, this.viewType);
-            this.arch = this.archInfo[this.viewType] || fieldsView.arch;
+            if (this.viewType in this.archInfo) {
+                this.arch = this.archInfo[this.viewType];
+            } else {
+                this.arch = this.archInfo[this.viewType] = fieldsView.arch;
+            }
 
             this.activeActions = {
                 edit: this.arch.get("edit").boolean,
@@ -168,103 +177,47 @@ odoo.define("poc.Action", function (require) {
             };
             this.bannerRoute = this.arch.get("banner_route").raw;
 
-            const controllerState = viewOptions.controllerState || {};
-            const currentId = controllerState.currentId || viewOptions.currentId;
+            this.configs = {
+                model: {},
+                view: {},
+                controlPanel: {},
+                searchPanel: {},
 
-            const useSampleModel = "useSampleModel" in viewOptions ?
-                viewOptions.useSampleModel : this.arch.get("sample").boolean;
-
-            this.config = {
-                model: {
-                    fields: this.fields,
-                    modelName: this.modelName,
-                    useSampleModel,
-                },
-                load: {
-                    context: this.context,
-                    count: viewOptions.count || (this.ids !== undefined && this.ids.length) || 0,
-                    domain: viewOptions.domain || [],
-                    modelName: this.modelName,
-                    res_id: currentId,
-                    res_ids: controllerState.resIds || viewOptions.ids || (currentId ? [currentId] : undefined),
-                },
-                view: {
-                    arch: this.arch,
-                    isEmbedded: this.isEmbedded,
-                    noContentHelp: this.noContentHelp,
-                },
-                // controlPanel: {},
-                // searchPanel: {},
+                load: {},
             };
-
-            if (useSampleModel) {
-                this.config.model.SampleModel = this.constructor.components.Model;
-            }
-            const defaultOrder = this.arch.get("default_order");
-            if (defaultOrder.exists) {
-                this.config.load.orderedBy = defaultOrder.list(",").map((order) => {
-                    order = order.trim().split(' ');
-                    return {name: order[0], asc: order[1] !== 'desc'};
-                });
-            }
-            if (this.searchQuery) {
-                this._updateMVCParams(this.searchQuery);
-            }
 
             this.buildConfigs();
 
-            const searchModelParams = Object.assign({}, this.props.viewOptions, { action: this.action });
-            if (this.withControlPanel || this.withSearchPanel) {
-                const { fields, favoriteFilters } = this.action.controlPanelFieldsView || {};
-                const controlPanelInfo = this.archInfo[this.constructor.components.ControlPanel.modelExtension];
-                const searchPanelInfo = this.archInfo[this.constructor.components.SearchPanel.modelExtension];
-                Object.assign(searchModelParams, {
-                    fields,
-                    favoriteFilters,
-                    controlPanelInfo,
-                    searchPanelInfo,
-                });
+            this.model = this._createModel();
+            // FIXME: Don't pass searchModel by props, get it from env instead
+            if (this.configs.controlPanel) {
+                this.configs.controlPanel.searchModel = this.model;
             }
-            const searchModel = this._createSearchModel(searchModelParams);
-            this.searchModel = searchModel;
-            if (this.config.controlPanel) {
-                this.config.controlPanel.searchModel = searchModel;
-            }
-            if (this.config.searchPanel) {
-                this.config.searchPanel.searchModel = searchModel;
+            if (this.configs.searchPanel) {
+                this.configs.searchPanel.searchModel = this.model;
             }
 
-            Object.assign(this.config.controlPanel, {
-                title: this.getTitle(),
+            useSubEnv({
+                model: this.model,
             });
-
-            this.model = new ModelAdapter(this.env, this.constructor.components.Model, this.config.model);
-            this.env.viewModel = this.model;
         }
 
         async willStart() {
-            await this.searchModel.load();
-            this._updateMVCParams(this.searchModel.get("query"));
-
-            const { state, handle } = await this._loadData();
-            Object.assign(this.state, state);
-            this.initialState = this.model.get(handle);
-            this.handle = handle;
+            await this.model.load();
+            await this.model.isReady();
 
             await super.willStart();
         }
         mounted() {
             super.mounted(...arguments);
 
-            this.searchModel.on('search', this, this._onSearch);
+            this.model.on('search', this, this._onSearch);
             this._pushState();
         }
 
-        get viewProps() {
-            return Object.assign({}, this.config.view, this.state);
-        }
-
         async update(params, options={}) {
+            return;
+
             const shouldReload = 'reload' in options ? options.reload : true;
             if (shouldReload) {
                 this.handle = await this._dropPrevious.add(this.model.reload(this.handle, params));
@@ -273,93 +226,157 @@ odoo.define("poc.Action", function (require) {
             Object.assign(this.state, state);
         }
 
-        buildConfigs() {}
-
-        _updateMVCParams(searchQuery) {
-            Object.assign(this.config.load, {
-                context: searchQuery.context,
-                domain: searchQuery.domain,
-                groupedBy: searchQuery.groupBy,
-                orderedBy: Array.isArray(searchQuery.orderedBy) && searchQuery.orderedBy.length ?
-                                searchQuery.orderedBy :
-                                this.config.load.orderedBy
-            });
-            if (searchQuery.timeRanges) {
-                this.config.load.timeRanges = searchQuery.timeRanges;
-                this.config.view.timeRanges = searchQuery.timeRanges;
+        buildConfigs() {
+            this.buildLoadConfig();
+            this.buildModelConfig();
+            this.buildViewConfig();
+            if (this.withControlPanel) {
+                this.buildControlPanelConfig();
+            }
+            if (this.withSearchPanel) {
+                this.buildSearchPanelConfig();
             }
         }
-        _createSearchModel(params, extraExtensions) {
-            // Search model + common components
-            const { fields, favoriteFilters, controlPanelInfo, searchPanelInfo } = params;
-            const extensions = Object.assign({}, extraExtensions);
-            const importedState = params.controllerState || {};
+        buildLoadConfig() {
+            const controllerState = this.props.viewOptions.controllerState || {};
+            const currentId = controllerState.currentId || this.props.viewOptions.currentId;
 
-            // Control panel params
+            Object.assign(this.configs.model, {
+                context: this.context,
+                count: this.props.viewOptions.count || 0,
+                domain: this.domain,
+                modelName: this.modelName,
+                res_id: currentId,
+                res_ids: controllerState.resIds || this.props.viewOptions.ids || (currentId ? [currentId] : undefined),
+            });
+
+            const defaultOrder = this.arch.get("default_order");
+            if (defaultOrder.exists) {
+                this.configs.load.orderedBy = defaultOrder.list(",").map((order) => {
+                    order = order.trim().split(' ');
+                    return {name: order[0], asc: order[1] !== 'desc'};
+                });
+            }
+        }
+        buildModelConfig() {
+            const useSampleModel = "useSampleModel" in this.props.viewOptions ?
+                this.props.viewOptions.useSampleModel :
+                this.arch.get("sample").boolean;
+
+            Object.assign(this.configs.model, {
+                fields: this.fields,
+                modelName: this.modelName,
+                useSampleModel,
+                context: this.context,
+            });
+
+            if (useSampleModel) {
+                this.configs.model.SampleModel = this.constructor.components.Model;
+            }
+        }
+        buildViewConfig() {
+            Object.assign(this.configs.view, {
+                arch: this.arch,
+                isEmbedded: this.isEmbedded,
+                noContentHelp: this.noContentHelp,
+            });
+        }
+        buildControlPanelConfig() {
+            Object.assign(this.configs.controlPanel, {
+                action: this.action,
+                breadcrumbs: this.props.viewOptions.breadcrumbs,
+                fields: this.controlPanelFieldsView.fields,
+                searchMenuTypes: this.searchMenuTypes,
+                view: this.props.fieldsView,
+                views: this.actionViews.filter(
+                    v => v.multiRecord === this.constructor.multiRecord
+                ),
+                withBreadcrumbs: this.withBreadcrumbs,
+                withSearchBar: this.withSearchBar,
+                title: this.getTitle(),
+            });
+        }
+        buildSearchPanelConfig() {
+            const controllerState = this.props.viewOptions.controllerState || {};
+
+            this.configs.searchPanel.importedState = controllerState.importedState.searchPanel;
+            if (searchPanelInfo.attributes.class) {
+                this.configs.searchPanel.className = searchPanelInfo.attributes.class;
+            }
+        }
+
+        buildModelExtensions() {
+            const extensions = {};
+
             if (this.withControlPanel) {
-                // Control panel (Model)
                 const ControlPanelComponent = this.constructor.components.ControlPanel;
+                const controlPanelInfo = this.archInfo[ControlPanelComponent.modelExtension];
                 extensions[ControlPanelComponent.modelExtension] = {
-                    actionId: params.action.id,
-                    // control initialization
-                    activateDefaultFavorite: params.activateDefaultFavorite,
+                    actionId: this.action.id,
+                    activateDefaultFavorite: !this.context.active_id && !this.context.active_ids,
                     archNodes: controlPanelInfo.children,
-                    dynamicFilters: params.dynamicFilters,
-                    favoriteFilters,
-                    withSearchBar: params.withSearchBar,
-                };
-                // Control panel (Component)
-                this.config.controlPanel = {
-                    action: params.action,
-                    breadcrumbs: params.breadcrumbs,
-                    fields,
-                    searchMenuTypes: this.searchMenuTypes,
-                    view: this.fieldsView,
-                    views: params.action.views && params.action.views.filter(
-                        v => v.multiRecord === this.constructor.multiRecord
-                    ),
-                    withBreadcrumbs: params.withBreadcrumbs,
-                    withSearchBar: params.withSearchBar,
+                    dynamicFilters: this.props.viewOptions.dynamicFilters,
+                    favoriteFilters: this.controlPanelFieldsView.favoriteFilters,
+                    withSearchBar: this.withSearchBar,
                 };
             }
-    
-            // Search panel params
+
             if (this.withSearchPanel) {
-                // Search panel (Model)
                 const SearchPanelComponent = this.constructor.components.SearchPanel;
+                const searchPanelInfo = this.archInfo[SearchPanelComponent.modelExtension];
                 extensions[SearchPanelComponent.modelExtension] = {
                     archNodes: searchPanelInfo.children,
                 };
-
-                // Search panel (Component)
-                const searchPanelProps = {
-                    importedState: importedState.searchPanel,
-                };
-                if (searchPanelInfo.attributes.class) {
-                    searchPanelProps.className = searchPanelInfo.attributes.class;
-                }
-                this.config.searchPanel = searchPanelProps;
             }
 
-            const searchModel = new ActionModel(extensions, {
+            return extensions;
+        }
+
+        _createModel() {
+            const controllerState = this.props.viewOptions.controllerState || {};
+            const importedState = controllerState.importedState || {};
+
+            return new ActionModel(this.buildModelExtensions(), {
                 env: this.env,
                 modelName: this.modelName,
-                context: Object.assign({}, this.config.load.context),
-                domain: this.config.load.domain,
+                context: Object.assign({}, this.configs.model.context),
+                domain: this.domain,
                 importedState: importedState.searchModel,
                 searchMenuTypes: this.searchMenuTypes,
-                searchQuery: params.searchQuery,
-                fields,
+                searchQuery: this.props.viewOptions.searchQuery,
+                fields: this.controlPanelFieldsView.fields,
             });
-
-            return searchModel;
         }
+
         async _loadData(options = {}) {
             options.withSampleData = 'withSampleData' in options ? options.withSampleData : true;
-            const handle = await this.model.load(this.config.load);
+            const handle = await this.model.load(this.configs.load);
             return { state: this.model.get(handle, options), handle };
         }
+        _pushState() {
+            this.trigger('push_state', {
+                controllerID: this.controllerId,
+                state: this.getState(),
+            });
+        }
 
+        _onSwitchView(ev) {
+            ev.detail.controllerID = this.controllerId;
+        }
+        _onSearch(searchQuery) {
+            this.update(searchQuery);
+        }
+
+        // compatibility
+        willRestore() {
+            return Promise.resolve();
+        }
+        reload() {
+            return Promise.resolve();
+        }
+        getState() {
+            return {};
+        }
         async canBeRemoved() {
             return true;
         }
@@ -376,27 +393,6 @@ odoo.define("poc.Action", function (require) {
         getTitle() {
             return this.displayName || this.arch.get("string").raw;
         }
-        getState() {
-            return {};
-        }
-        _pushState() {
-            this.trigger('push_state', {
-                controllerID: this.controllerId,
-                state: this.getState(),
-            });
-        }
-        willRestore() {
-            return Promise.resolve();
-        }
-        reload() {
-            return Promise.resolve();
-        }
-        _onSwitchView(ev) {
-            ev.detail.controllerID = this.controllerId;
-        }
-        _onSearch(searchQuery) {
-            this.update(searchQuery);
-        }
     }
 
     Action.components = {
@@ -404,9 +400,6 @@ odoo.define("poc.Action", function (require) {
         ControlPanel,
         SearchPanel,
         View,
-    };
-
-    Action.defaultProps = {
     };
 
     Object.assign(Action, {
