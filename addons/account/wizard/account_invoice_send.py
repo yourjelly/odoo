@@ -9,63 +9,53 @@ from odoo.tools.misc import get_lang
 
 class AccountInvoiceSend(models.TransientModel):
     _name = 'account.invoice.send'
-    _inherits = {'mail.compose.message':'composer_id'}
+    _inherit = ['mail.compose.message']
     _description = 'Account Invoice Send'
 
+    model = fields.Char(default='account.move')
     is_email = fields.Boolean('Email', default=lambda self: self.env.company.invoice_is_email)
     invoice_without_email = fields.Text(compute='_compute_invoice_without_email', string='invoice(s) that will not be sent')
     is_print = fields.Boolean('Print', default=lambda self: self.env.company.invoice_is_print)
     printed = fields.Boolean('Is Printed', default=False)
     invoice_ids = fields.Many2many('account.move', 'account_move_account_invoice_send_rel', string='Invoices')
-    composer_id = fields.Many2one('mail.compose.message', string='Composer', required=True, ondelete='cascade')
-    template_id = fields.Many2one(
-        'mail.template', 'Use template', index=True,
-        domain="[('model', '=', 'account.move')]"
-        )
+    composition_mode = fields.Selection(compute='_compute_composition_mode', store=True, readonly=False)
+    attachment_ids = fields.Many2many(
+        relation='acc_invoice_send_ir_attachments_rel')
+    partner_ids = fields.Many2many(relation='acc_invoice_send_res_partner_rel')
 
     @api.model
     def default_get(self, fields):
         res = super(AccountInvoiceSend, self).default_get(fields)
+
         res_ids = self._context.get('active_ids')
+        if 'invoice_ids' in fields:
+            invoices = self.env['account.move'].browse(res_ids).filtered(lambda move: move.is_invoice(include_receipts=True))
+            if not invoices:
+                raise UserError(_("You can only send invoices."))
 
-        invoices = self.env['account.move'].browse(res_ids).filtered(lambda move: move.is_invoice(include_receipts=True))
-        if not invoices:
-            raise UserError(_("You can only send invoices."))
+            # VFE TODO enforce one company for all invoices?
+            # if len(invoices.company_id) > 1:
+            #     raise UserError(_("You cannot send invoices from multiple companies together."))
 
-        composer = self.env['mail.compose.message'].create({
-            'composition_mode': 'comment' if len(res_ids) == 1 else 'mass_mail',
-        })
-        res.update({
-            'invoice_ids': res_ids,
-            'composer_id': composer.id,
-        })
+            # VFE FIXME shouldn't we use the filtered invoices as invoice_ids of the wizard?
+            res['invoice_ids'] = res_ids
+
+        if 'composition_mode' in fields:
+            res['composition_mode'] = 'comment' if len(res_ids) == 1 else 'mass_mail'
+
         return res
 
-    @api.onchange('invoice_ids')
+    @api.depends('invoice_ids')
     def _compute_composition_mode(self):
         for wizard in self:
-            wizard.composer_id.composition_mode = 'comment' if len(wizard.invoice_ids) == 1 else 'mass_mail'
-
-    @api.onchange('template_id')
-    def onchange_template_id(self):
-        for wizard in self:
-            if wizard.composer_id:
-                wizard.composer_id.template_id = wizard.template_id.id
-                wizard._compute_composition_mode()
-                wizard.composer_id.onchange_template_id_wrapper()
+            wizard.composition_mode = 'comment' if len(wizard.invoice_ids) == 1 else 'mass_mail'
 
     @api.onchange('is_email')
     def onchange_is_email(self):
         if self.is_email:
-            if not self.composer_id:
-                res_ids = self._context.get('active_ids')
-                self.composer_id = self.env['mail.compose.message'].create({
-                    'composition_mode': 'comment' if len(res_ids) == 1 else 'mass_mail',
-                    'template_id': self.template_id.id
-                })
-            self.composer_id.onchange_template_id_wrapper()
+            self.onchange_template_id_wrapper()
 
-    @api.onchange('is_email')
+    @api.depends('is_email')
     def _compute_invoice_without_email(self):
         for wizard in self:
             if wizard.is_email and len(wizard.invoice_ids) > 1:
@@ -86,7 +76,7 @@ class AccountInvoiceSend(models.TransientModel):
     def _send_email(self):
         if self.is_email:
             # with_context : we don't want to reimport the file we just exported.
-            self.composer_id.with_context(no_new_invoice=True, mail_notify_author=self.env.user.partner_id in self.composer_id.partner_ids).send_mail()
+            self.with_context(no_new_invoice=True, mail_notify_author=self.env.user.partner_id in self.composer_id.partner_ids).send_mail()
             if self.env.context.get('mark_invoice_as_sent'):
                 #Salesman send posted invoice, without the right to write
                 #but they should have the right to change this flag
@@ -113,7 +103,7 @@ class AccountInvoiceSend(models.TransientModel):
             for lang in (set(langs) or [default_lang]):
                 active_ids_lang = active_records.filtered(lambda r: r.partner_id.lang == lang).ids
                 self_lang = self.with_context(active_ids=active_ids_lang, lang=lang)
-                self_lang.onchange_template_id()
+                self_lang.onchange_template_id_wrapper()
                 self_lang._send_email()
         else:
             self._send_email()
@@ -123,8 +113,7 @@ class AccountInvoiceSend(models.TransientModel):
 
     def save_as_template(self):
         self.ensure_one()
-        self.composer_id.save_as_template()
-        self.template_id = self.composer_id.template_id.id
+        self.save_as_template()
         action = _reopen(self, self.id, self.model, context=self._context)
         action.update({'name': _('Send Invoice')})
         return action
