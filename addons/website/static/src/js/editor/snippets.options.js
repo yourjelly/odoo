@@ -1528,7 +1528,7 @@ snippetOptions.registry.Parallax = snippetOptions.SnippetOptionWidget.extend({
      * @override
      */
     async start() {
-        this.parallaxEl = this.$target.find('> .s_parallax_bg')[0] || null;
+        this.getParallaxEl = () => this.$target.find('> .s_parallax_bg')[0] || null;
         this._updateBackgroundOptions();
 
         this.$target.on('content_changed.ParallaxOption', this._onExternalUpdate.bind(this));
@@ -1578,20 +1578,21 @@ snippetOptions.registry.Parallax = snippetOptions.SnippetOptionWidget.extend({
         this.$target.toggleClass('parallax', isParallax);
         this.$target.toggleClass('s_parallax_is_fixed', widgetValue === '1');
         this.$target.toggleClass('s_parallax_no_overflow_hidden', (widgetValue === '0' || widgetValue === '1'));
+        const parallaxEl = this.getParallaxEl();
         if (isParallax) {
-            if (!this.parallaxEl) {
-                this.parallaxEl = document.createElement('span');
-                this.parallaxEl.classList.add('s_parallax_bg');
-                this.$target.prepend(this.parallaxEl);
+            if (!parallaxEl) {
+                const newParallaxEl = document.createElement('span');
+                newParallaxEl.classList.add('s_parallax_bg');
+                this.$target.prepend(newParallaxEl);
             }
         } else {
-            if (this.parallaxEl) {
-                this.parallaxEl.remove();
-                this.parallaxEl = null;
+            if (parallaxEl) {
+                parallaxEl.remove();
             }
         }
 
         this._updateBackgroundOptions();
+        await this._refreshTarget();
     },
 
     //--------------------------------------------------------------------------
@@ -1632,8 +1633,11 @@ snippetOptions.registry.Parallax = snippetOptions.SnippetOptionWidget.extend({
     _updateBackgroundOptions() {
         this.trigger_up('option_update', {
             optionNames: ['BackgroundImage', 'BackgroundPosition', 'BackgroundOptimize'],
-            name: 'target',
-            data: this.parallaxEl ? $(this.parallaxEl) : this.$target,
+            name: 'setTargetDependency',
+            data: () => {
+                const parallaxEl = this.getParallaxEl();
+                return parallaxEl ? $(parallaxEl) : this.$target
+            },
         });
     },
 

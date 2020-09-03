@@ -1840,7 +1840,7 @@ const SnippetOptionWidget = Widget.extend({
      * Reset the option target.
      */
     resetOptionTarget() {
-        this.$target = this.getTarget();
+        this.setTarget(this.getTarget());
         for (const subWidget of this._userValueWidgets) {
             subWidget.setTarget(this.$target);
         }
@@ -1983,7 +1983,7 @@ const SnippetOptionWidget = Widget.extend({
                 await this.editorHelpers.setAttribute(context, this.$target[0], `data-${attributeName}`, value);
             }
         };
-        this.wysiwyg.editor.execCommand(selectDataAttribute);
+        return this.wysiwyg.editor.execCommand(selectDataAttribute);
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -2154,8 +2154,9 @@ const SnippetOptionWidget = Widget.extend({
      * @returns {Promise}
      */
     notify: function (name, data) {
-        if (name === 'target') {
-            this.setTarget(data);
+        if (name === 'setTargetDependency') {
+            this._targetDependency = data;
+            this.setTarget();
         }
     },
     /**
@@ -2170,7 +2171,11 @@ const SnippetOptionWidget = Widget.extend({
      * @returns {Promise}
      */
     setTarget: function ($target) {
-        this.$target = $target;
+        if (this._targetDependency) {
+            this.$target = this._targetDependency();
+        } else {
+            this.$target = $target;
+        }
     },
     /**
      * Updates the UI. For widget update, @see _computeWidgetState.
@@ -3661,8 +3666,11 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
     setTarget: function () {
         // When we change the target of this option we need to transfer the
         // background-image from the old target to the new one.
-        const oldBgURL = getBgImageURL(this.$target);
-        this._setBackground('');
+        let oldBgURL;
+        if (this.$target) {
+            oldBgURL = getBgImageURL(this.$target);
+            this._setBackground('');
+        }
         this._super(...arguments);
         if (oldBgURL) {
             this._setBackground(oldBgURL);
@@ -4125,7 +4133,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         this.$overlayBackground = this.$overlayContent.find('.o_overlay_background');
 
         this.$backgroundOverlay.on('click', '.o_btn_apply', async () => {
-            await this.editorHelpers.setStyle(context, this.$target[0], 'background-position', this.$bgDragger.css('background-position'));
+            await this.editorHelpers.setStyle(this.wysiwyg.editor, this.$target[0], 'background-position', this.$bgDragger.css('background-position'));
             this._toggleBgOverlay(false);
         });
         this.$backgroundOverlay.on('click', '.o_btn_discard', () => {
