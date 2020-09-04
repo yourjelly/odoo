@@ -16,9 +16,9 @@ const ForecastWidgetField = AbstractField.extend({
         } else {
             // Don't display the graph button for non-storable products or if was explicited.
             forecastData.hideReportButton = this.recordData.product_type !== 'product';
-            if (forecastData.reservedAvailability) {
-                forecastData.reservedAvailability = parseFloat(forecastData.reservedAvailability);
-            }
+            // if (forecastData.reservedAvailability) {
+            //     forecastData.reservedAvailability = parseFloat(forecastData.reservedAvailability);
+            // }
             this.$el.html(QWeb.render('stock.forecastWidget', forecastData));
             this.$el.on('click', this._onOpenReport.bind(this));
         }
