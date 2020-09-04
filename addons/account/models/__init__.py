@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from . import account_orm_mixin
 from . import sequence_mixin
 from . import partner
 from . import res_partner_bank

@@ -23,7 +23,7 @@ class AccountMove(models.Model):
             return [ref for ref in self.ref.split(', ') if ref and ref not in vendor_refs] + vendor_refs
         return vendor_refs
 
-    def _pre_onchange(self, changed_fields):
+    def _perform_onchanges(self, nametree, onchange_snapshot0, todo, field_onchange):
         # OVERRIDE
         # Load from either an old purchase order, either an old vendor bill.
         # When setting a 'purchase.bill.union' in 'purchase_vendor_bill_id':
@@ -31,18 +31,13 @@ class AccountMove(models.Model):
         # * If it's a purchase order, 'purchase_id' is set and this method will load lines.
         # /!\ All this not-stored fields must be empty at the end of this function.
 
-        if 'purchase_vendor_bill_id' in changed_fields:
-            if self.purchase_vendor_bill_id.vendor_bill_id:
-                self.invoice_vendor_bill_id = self.purchase_vendor_bill_id.vendor_bill_id
-                changed_fields.append('invoice_vendor_bill_id')
-            elif self.purchase_vendor_bill_id.purchase_order_id:
-                self.purchase_id = self.purchase_vendor_bill_id.purchase_order_id
-                changed_fields.append('purchase_id')
-            self.purchase_vendor_bill_id = False
+        if self.purchase_vendor_bill_id.vendor_bill_id:
+            self.invoice_vendor_bill_id = self.purchase_vendor_bill_id.vendor_bill_id
+        elif self.purchase_vendor_bill_id.purchase_order_id:
+            self.purchase_id = self.purchase_vendor_bill_id.purchase_order_id
+        self.purchase_vendor_bill_id = False
 
-        res = super()._pre_onchange(changed_fields)
-
-        if 'purchase_id' in changed_fields:
+        if self.purchase_id:
             # Copy data from PO
             invoice_vals = self.purchase_id.with_company(self.purchase_id.company_id)._prepare_invoice()
             self.update({k: v for k, v in invoice_vals.items() if k in (
@@ -52,10 +47,10 @@ class AccountMove(models.Model):
             # Copy purchase lines.
             po_lines = self.purchase_id.order_line - self.line_ids.mapped('purchase_line_id')
             for line in po_lines.filtered(lambda l: not l.display_type):
-                copied_vals = line._prepare_account_move_line()
-                copied_vals['move_id'] = self.id
-                new_line = self.env['account.move.line'].new(copied_vals)
-                new_line.post_new(copied_vals)
+                self.env['account.move.line'].new({
+                    **line._prepare_account_move_line(),
+                    'move_id': self.id,
+                })
 
             # Compute invoice_origin.
             origins = set(self.line_ids.mapped('purchase_line_id.order_id.name'))
@@ -71,7 +66,7 @@ class AccountMove(models.Model):
 
             self.purchase_id = False
 
-        return res
+        return super()._perform_onchanges(nametree, onchange_snapshot0, todo, field_onchange)
 
     @api.onchange('partner_id', 'company_id')
     def _onchange_partner_id(self):
