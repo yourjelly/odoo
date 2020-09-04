@@ -1308,9 +1308,10 @@ class MailThread(models.AbstractModel):
             if server_user:
                 fallback_alias = Alias.search([('alias_name', '=', server_user.split('@')[0].lower())], limit=1)
             if fallback_alias:
-                route = (fallback_alias.alias_model_id.model, fallback_alias.alias_force_thread_id, safe_eval(fallback_alias.alias_defaults), self._uid, fallback_alias)
-            else:
-                route = (fallback_model, thread_id, custom_values, self._uid, None)
+                fallback_model = fallback_alias.alias_model_id.model
+                thread_id = fallback_alias.alias_force_thread_id
+                custom_values = safe_eval(fallback_alias.alias_defaults)
+            route = (fallback_model, thread_id, custom_values, self._uid, fallback_alias or None)
             route = self.message_route_verify(
                 message, message_dict, route,
                 update_author=True, assert_model=True)
