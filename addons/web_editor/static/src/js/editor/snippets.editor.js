@@ -2044,10 +2044,15 @@ var SnippetsMenu = Widget.extend({
             $(this.customizePanel).append(content);
 
             if (tab === this.tabs.OPTIONS) {
+                const $toolbar = this.wysiwyg.$toolbar;
+                // Determine if the toolbar is in image or text mode
+                // We cannot use is(":visible") because the toolbar is detach from the DOM
+                const isImageMode = $toolbar.find('input[name=font-size]').css('display') === 'none';
+                const titleText = isImageMode ? _t("Image Formatting") : _t("Text Formatting")
                 const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS />');
-                const title = "<we-title><span>" +  _t("Text Formatting") + "</span></we-title>";
+                const title = "<we-title><span>" + titleText + "</span></we-title>";
                 customizeBlock.append(title);
-                customizeBlock.append(this.wysiwyg.$toolbar);
+                customizeBlock.append($toolbar);
                 $(this.customizePanel).append(customizeBlock);
             }
         }
