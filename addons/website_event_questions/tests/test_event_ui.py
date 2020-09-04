@@ -3,7 +3,7 @@
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import fields, tests
+from odoo import fields, tests ,http
 
 
 @tests.tagged('post_install', '-at_install')
@@ -50,10 +50,12 @@ class TestUi(tests.HttpCase):
 
         self.start_tour("/", 'test_tickets_questions', login="portal")
 
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n........self.env..true or flase...........",self.env['event.registration'])
         registrations = self.env['event.registration'].search([
             ('email', 'in', ['attendee-a@gmail.com', 'attendee-b@gmail.com'])
         ])
         self.assertEqual(len(registrations), 2)
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n.........",len(registrations))
         first_registration = registrations.filtered(lambda reg: reg.email == 'attendee-a@gmail.com')
         second_registration = registrations.filtered(lambda reg: reg.email == 'attendee-b@gmail.com')
         self.assertEqual(first_registration.name, 'Attendee A')
@@ -88,3 +90,4 @@ class TestUi(tests.HttpCase):
         self.assertEqual(first_registration_answers.filtered(
             lambda answer: answer.question_id.title == 'How did you learn about this event?'
         ).value_answer_id.name, 'A friend')
+

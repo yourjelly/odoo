@@ -288,6 +288,7 @@ var PublicRoot = publicWidget.RootWidget.extend(ServiceProviderMixin, {
      * @private
      */
     _onWebsiteFormSubmit: function (ev) {
+        console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n...........",ev)
         var $buttons = $(ev.currentTarget).find('button[type="submit"], a.a-submit');
         _.each($buttons, function (btn) {
             var $btn = $(btn);

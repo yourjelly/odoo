@@ -385,6 +385,9 @@ class WebRequest(object):
         return self.session.db if not self.disable_db else None
 
     def csrf_token(self, time_limit=3600):
+
+        # print("\n\n\n\n\n\n\n\n\n\n............in csrf_token")
+        # print("\n\n\n\n\n\n\n\n\n\n............in csrf_token time_limit",time_limit)
         """ Generates and returns a CSRF token for the current session
 
         :param time_limit: the CSRF token should only be valid for the
@@ -396,34 +399,46 @@ class WebRequest(object):
         """
         token = self.session.sid
         max_ts = '' if not time_limit else int(time.time() + time_limit)
+        # print("\n\n\n\n\n\n\n\n\n\n............in csrf_token max_ts create",max_ts)
+        # print("\n\n\n\n\n\n\n\n\n\n............in csrf_token token session id",token)
         msg = '%s%s' % (token, max_ts)
+        # print("\n\n\n\n\n\n\n\n\n\n............in csrf_token func msg",msg)
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         assert secret, "CSRF protection requires a configured database secret"
         hm = hmac.new(secret.encode('ascii'), msg.encode('utf-8'), hashlib.sha1).hexdigest()
         return '%so%s' % (hm, max_ts)
 
     def validate_csrf(self, csrf):
+        print("\n\n\n\n\n\n\n\n........in validate_csrf csrf -:",csrf)
         if not csrf:
+            # print("\n\n\n\n\n\n\n\n..........in validate_csrf 1st false in validate_csrf")
             return False
 
         try:
             hm, _, max_ts = str(csrf).rpartition('o')
         except UnicodeEncodeError:
+            # print("\n\n\n\n\n\n\n\n..........in validate_csrf 2nd false in validate_csrf")
             return False
 
         if max_ts:
             try:
                 if int(max_ts) < int(time.time()):
+                    # print("\n\n\n\n\n\n\n\n..........in validate_csrf 3rd false in validate_csrf")
                     return False
             except ValueError:
+                # print("\n\n\n\n\n\n\n\n..........in validate_csrf 4rth false in validate_csrf")
                 return False
 
         token = self.session.sid
 
         msg = '%s%s' % (token, max_ts)
+        print("\n\n\n\n\n\n\n\n..........in validate_csrf  token for varification  :::--->",token)
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         assert secret, "CSRF protection requires a configured database secret"
         hm_expected = hmac.new(secret.encode('ascii'), msg.encode('utf-8'), hashlib.sha1).hexdigest()
+        print("\n\n\n\n\n\n\n\n..........in validate_csrf  hm vale :::--->", hm)
+        print("\n\n\n\n\n\n\n\n..........in validate_csrf  hm_expected vale :::--->", hm_expected)
+        print("\n\n\n\n\n\n\n\n..........in validate_csrf consteq(hm, hm_expected) :::--->",consteq(hm, hm_expected))
         return consteq(hm, hm_expected)
 
 def route(route=None, **kw):
@@ -775,6 +790,7 @@ class HttpRequest(WebRequest):
             return e
 
     def dispatch(self):
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n........in dispatch.....",self.__dict__)
         if request.httprequest.method == 'OPTIONS' and request.endpoint and request.endpoint.routing.get('cors'):
             headers = {
                 'Access-Control-Max-Age': 60 * 60 * 24,
@@ -782,9 +798,9 @@ class HttpRequest(WebRequest):
             }
             return Response(status=200, headers=headers)
 
-        if request.httprequest.method not in ('GET', 'HEAD', 'OPTIONS', 'TRACE') \
-                and request.endpoint.routing.get('csrf', True): # csrf checked by default
+        if request.httprequest.method not in ('GET', 'HEAD', 'OPTIONS', 'TRACE') and request.endpoint.routing.get('csrf', True): # csrf checked by default
             token = self.params.pop('csrf_token', None)
+            print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n........in dispatch token.....",token)
             if not self.validate_csrf(token):
                 if token is not None:
                     _logger.warning("CSRF validation failed on path '%s'",
@@ -1013,18 +1029,26 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
                 HTTP_HOST=wsgienv['HTTP_HOST'],
                 REMOTE_ADDR=wsgienv['REMOTE_ADDR'],
             )
+            print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n.......coming inside authenticate ",uid)
             uid = odoo.registry(db)['res.users'].authenticate(db, login, password, env)
+            print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n.......coming inside  authenticate affter....",uid)
         else:
             security.check(db, uid, password)
+        
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n.......coming inside authenticate ",uid)
         self.rotate = True
         self.db = db
         self.uid = uid
         self.login = login
         self.session_token = uid and security.compute_session_token(self, request.env)
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n.......coming inside authenticate ",self.session_token)
         request.uid = uid
         request.disable_db = False
 
-        if uid: self.get_context()
+        if uid:
+            self.get_context()
+            print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n.......coming inside authenticate ",self.context)
+
         return uid
 
     def check_security(self):
@@ -1043,6 +1067,7 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
             raise SessionExpiredException("Session expired")
 
     def logout(self, keep_db=False):
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n..........checking logout....")
         for k in list(self):
             if not (keep_db and k == 'db') and k != 'debug':
                 del self[k]
@@ -1050,6 +1075,7 @@ class OpenERPSession(werkzeug.contrib.sessions.Session):
         self.rotate = True
 
     def _default_values(self):
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n..........checking _default_values from init....")
         self.setdefault("db", None)
         self.setdefault("uid", None)
         self.setdefault("login", None)

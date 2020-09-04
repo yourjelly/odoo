@@ -347,6 +347,7 @@ class WebsiteEventController(http.Controller):
         return list(registrations.values())
 
     def _create_attendees_from_registration_post(self, event, registration_data):
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n..........registration_data...",registration_data)
         registrations_to_create = []
         for registration_values in registration_data:
             registration_values['event_id'] = event.id
@@ -358,6 +359,7 @@ class WebsiteEventController(http.Controller):
 
     @http.route(['''/event/<model("event.event"):event>/registration/confirm'''], type='http', auth="public", methods=['POST'], website=True)
     def registration_confirm(self, event, **post):
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n..........post...",post)
         if not event.can_access_from_current_website():
             raise werkzeug.exceptions.NotFound()
 
