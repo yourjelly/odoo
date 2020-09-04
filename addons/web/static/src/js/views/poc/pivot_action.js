@@ -3,7 +3,6 @@ odoo.define("poc.PivotAction", function (require) {
 
     const Action = require("poc.Action");
     // const PivotRenderer = require("web.PivotRenderer");
-    const PivotModel = require("web.PivotModel");
     const { _lt } = require("web.core");
     const { GROUPABLE_TYPES } = require("web.searchUtils");
     const { useListener } = require("web.custom_hooks");
@@ -20,11 +19,11 @@ odoo.define("poc.PivotAction", function (require) {
         constructor() {
             super(...arguments);
 
-            useListener("closed_header_click", this._onClosedHeaderClicked);
-            useListener("open_view", this._onOpenView);
-            useListener("opened_header_click", this._onOpenedHeaderClicked);
-            useListener("sort_rows", this._onSortRows);
-            useListener("groupby_menu_selection", this._onGroupByMenuSelection);
+            // useListener("closed_header_click", this._onClosedHeaderClicked);
+            // useListener("open_view", this._onOpenView);
+            // useListener("opened_header_click", this._onOpenedHeaderClicked);
+            // useListener("sort_rows", this._onSortRows);
+            // useListener("groupby_menu_selection", this._onGroupByMenuSelection);
         }
 
         extractParams() {
@@ -221,7 +220,6 @@ odoo.define("poc.PivotAction", function (require) {
     });
     Object.assign(PivotAction.components, {
         View: PivotRenderer,
-        Model: PivotModel,
     });
 
     return PivotAction;

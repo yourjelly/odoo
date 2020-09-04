@@ -1,19 +1,15 @@
 odoo.define("poc.Action", function (require) {
     "use strict";
 
-    const AbstractModel = require("web.AbstractModel");
     const ActionModel = require("web/static/src/js/views/action_model.js");
     const { DropPrevious } = require("web.concurrency");
     const ControlPanel = require("web.ControlPanel");
     const SearchPanel = require("web/static/src/js/views/search_panel.js");
     const View = require("web.AbstractRendererOwl");
-    const parseArch = require("poc.arch_parser");
+    const ViewController = require("poc.ViewController");
 
     const {
         Component,
-        core: {
-            EventBus,
-        },
         hooks: {
             useState,
             useSubEnv,
@@ -22,60 +18,6 @@ odoo.define("poc.Action", function (require) {
             xml,
         },
     } = owl;
-
-    class ModelAdapter extends EventBus {
-        constructor(env, Model, params) {
-            super();
-            this.env = env;
-            this.model = new Model(this, params);
-
-            return new Proxy(this, {
-                get(target, key) {
-                    const value = target.model[key];
-                    if (typeof value === "function") {
-                        return value.bind(target.model);
-                    }
-                    return value;
-                },
-            });
-        }
-
-        _trigger_up(ev) {
-            const evType = ev.name;
-            const payload = ev.data;
-
-            if (evType === 'call_service') {
-                let args = payload.args || [];
-                if (payload.service === 'ajax' && payload.method === 'rpc') {
-                    // ajax service uses an extra 'target' argument for rpc
-                    args = args.concat(ev.target);
-                }
-                const service = this.env.services[payload.service];
-                const result = service[payload.method].apply(service, args);
-                payload.callback(result);
-            } else if (evType === 'get_session') {
-                if (payload.callback) {
-                    payload.callback(this.env.session);
-                }
-            } else if (evType === 'load_views') {
-                const params = {
-                    model: payload.modelName,
-                    context: payload.context,
-                    views_descr: payload.views,
-                };
-                this.env.dataManager
-                    .load_views(params, payload.options || {})
-                    .then(payload.on_success);
-            } else if (evType === 'load_filters') {
-                return this.env.dataManager
-                    .load_filters(payload)
-                    .then(payload.on_success);
-            } else {
-                payload.__targetWidget = ev.target;
-                this.trigger(evType.replace(/_/g, '-'), payload);
-            }
-        }
-    }
 
     class Action extends Component {
         get viewType() {
@@ -270,9 +212,9 @@ odoo.define("poc.Action", function (require) {
                 context: this.context,
             });
 
-            if (useSampleModel) {
-                this.configs.model.SampleModel = this.constructor.components.Model;
-            }
+            // if (useSampleModel) {
+            //     this.configs.model.SampleModel = this.constructor.components.Model;
+            // }
         }
         buildViewConfig() {
             Object.assign(this.configs.view, {
@@ -329,6 +271,8 @@ odoo.define("poc.Action", function (require) {
                 };
             }
 
+            extensions[this.viewType] = this.configs.model;
+
             return extensions;
         }
 
@@ -382,7 +326,7 @@ odoo.define("poc.Action", function (require) {
         }
         exportState() {
             const exported = {
-                searchModel: this.searchModel.exportState(),
+                searchModel: this.model.exportState(),
             };
             if (this.withSearchPanel) {
                 // const searchPanel = this._searchPanelWrapper.componentRef.comp;
@@ -396,10 +340,10 @@ odoo.define("poc.Action", function (require) {
     }
 
     Action.components = {
-        Model: AbstractModel,
         ControlPanel,
         SearchPanel,
         View,
+        ViewController,
     };
 
     Object.assign(Action, {
@@ -427,7 +371,11 @@ odoo.define("poc.Action", function (require) {
     Action.template = xml/*xml*/`
         <div class="o_view_controller" t-on-switch-view="_onSwitchView">
             <t t-if="withControlPanel">
-                <ControlPanel t-props="config.controlPanel"/>
+                <ControlPanel t-props="configs.controlPanel">
+                    <t t-set-slot="buttons">
+                        <ViewController />
+                    </t>
+                </ControlPanel>
             </t>
             <View t-props="viewProps"/>
         </div>
