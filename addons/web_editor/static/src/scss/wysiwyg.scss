@@ -470,7 +470,13 @@ jw-toolbar {
 
     jw-group {
         display: inline-block;
-        margin: 5px;
+        margin: 5px 0;
+        &>*:first-child{
+            margin-left:5px;
+        }
+        &>*:first-child{
+            margin-right:5px;
+        }
     }
     jw-group jw-separator {
         margin-top: 0;
