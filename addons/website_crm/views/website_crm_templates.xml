@@ -16,6 +16,7 @@
                     <section class="s_website_form" data-vcss="001" data-snippet="s_website_form">
                         <div class="container">
                             <form id="contactus_form" action="/website_form/" method="post" enctype="multipart/form-data" data-model_name="crm.lead" data-success-mode="redirect" data-success-page="/contactus-thank-you" class="o_mark_required" data-mark="*" data-editable-form="false">
+                                <t t-set="user" t-value="user_id and not user_id._is_public() and user_id or False"/>
                                 <div class="s_website_form_rows row s_col_no_bgcolor">
                                     <div class="form-group col-12 s_website_form_field s_website_form_required" data-type="char" data-name="Field">
                                         <div class="row s_col_no_resize s_col_no_bgcolor">
@@ -24,7 +25,7 @@
                                                 <span class="s_website_form_mark"> *</span>
                                             </label>
                                             <div class="col-sm">
-                                                <input id="opportunity1" type="text" class="form-control s_website_form_input" name="contact_name" required=""/>
+                                                <input id="opportunity1" type="text" class="form-control s_website_form_input" name="contact_name" required="" t-att-value="user and user.partner_id.name or ''"/>
                                             </div>
                                         </div>
                                     </div>
@@ -34,7 +35,7 @@
                                                 <span class="s_website_form_label_content">Phone Number</span>
                                             </label>
                                             <div class="col-sm">
-                                                <input id="opportunity2" type="tel" class="form-control s_website_form_input" name="phone" />
+                                                <input id="opportunity2" type="tel" class="form-control s_website_form_input" name="phone" t-att-value="user and user.partner_id.phone or ''"/>
                                             </div>
                                         </div>
                                     </div>
@@ -45,7 +46,7 @@
                                                 <span class="s_website_form_mark"> *</span>
                                             </label>
                                             <div class="col-sm">
-                                                <input id="opportunity3" type="text" class="form-control s_website_form_input" name="email_from" required="" />
+                                                <input id="opportunity3" type="text" class="form-control s_website_form_input" name="email_from" required="" t-att-value="user and user.partner_id.email or ''"/>
                                             </div>
                                         </div>
                                     </div>
@@ -55,7 +56,7 @@
                                                 <span class="s_website_form_label_content">Your Company</span>
                                             </label>
                                             <div class="col-sm">
-                                                <input id="opportunity4" type="text" class="form-control s_website_form_input" name="partner_name" />
+                                                <input id="opportunity4" type="text" class="form-control s_website_form_input" name="partner_name" t-att-value="user and user.company_id.name or ''" />
                                             </div>
                                         </div>
                                     </div>
