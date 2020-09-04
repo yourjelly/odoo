@@ -7,13 +7,6 @@ var session = require('web.session');
 var TourManager = require('web_tour.TourManager');
 const { ComponentAdapter } = require('web.OwlCompatibility');
 
-let serviceProvider;
-if (!rootWidget || rootWidget instanceof owl.Component) {
-    serviceProvider = new ComponentAdapter(null, { Component: owl.Component} ); // dummy component as props
-} else {
-    serviceProvider = rootWidget;
-}
-
 const untrackedClassnames = ["o_tooltip", "o_tooltip_content", "o_tooltip_overlay"];
 
 /**
@@ -27,6 +20,14 @@ const untrackedClassnames = ["o_tooltip", "o_tooltip_content", "o_tooltip_overla
  * @property {Array} _log
  */
 return session.is_bound.then(function () {
+    let serviceProvider;
+    if (!rootWidget || rootWidget instanceof owl.Component) {
+        // dummy component as props
+        serviceProvider = new ComponentAdapter(null, { Component: owl.Component} );
+    } else {
+        serviceProvider = rootWidget;
+    }
+
     var defs = [];
     // Load the list of consumed tours and the tip template only if we are admin, in the frontend,
     // tours being only available for the admin. For the backend, the list of consumed is directly

@@ -9,6 +9,7 @@ var utils = require('web_tour.utils');
 var TourStepUtils = require('web_tour.TourStepUtils');
 var RainbowMan = require('web.RainbowMan');
 var RunningTourActionHelper = require('web_tour.RunningTourActionHelper');
+var ServicesMixin = require('web.ServicesMixin');
 var session = require('web.session');
 var Tip = require('web_tour.Tip');
 
@@ -24,7 +25,7 @@ var get_first_visible_element = utils.get_first_visible_element;
 var do_before_unload = utils.do_before_unload;
 var get_jquery_element_from_selector = utils.get_jquery_element_from_selector;
 
-return core.Class.extend(mixins.EventDispatcherMixin, {
+return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     init: function(parent, consumed_tours) {
         mixins.EventDispatcherMixin.init.call(this);
         this.setParent(parent);
