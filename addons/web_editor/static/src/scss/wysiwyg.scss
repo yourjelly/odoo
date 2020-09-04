@@ -555,12 +555,37 @@ jw-toolbar {
 }
 
 .o_web_client jw-toolbar {
-    background-color: #fff;
-    border: 1px solid #ced4da;
+    background-color: #444444;
+    color: #dddddd;
+    border-radius: 30px;
     margin: -5px 5px 0 5px;
-    -webkit-box-shadow: 2px 2 5px 1px rgba(0,0,0,0.25);
-    -moz-box-shadow: 2px 2px 5px 1px rgba(0,0,0,0.25);
-    box-shadow: 2px 2px 5px 1px rgba(0,0,0,0.25);
+    padding: 0 5px 0 5px;
+
+    jw-group {
+        margin: 2px;
+    }
+    jw-button {
+        line-height: normal;
+        border-radius: 6px;
+        &:hover {
+            background-color: #777777;
+        }
+        &.active {
+            background-color: #686767;
+            -webkit-box-shadow: inset 0px 0px 5px #777777;
+            -moz-box-shadow: inset 0px 0px 5px #777777;
+            box-shadow: inset 0px 0px 5px #777777;
+        }
+    }
+    &:before {
+        border-color: transparent transparent #444444 transparent;
+        border-width: 9px;
+        left: 30%;
+        bottom: 109%;
+        border-style: solid;
+        content: '';
+        position: absolute;
+    }
 }
 
 jw-follow-range {
