@@ -349,6 +349,8 @@ var Wysiwyg = Widget.extend({
         });
     },
     openMediaDialog(params) {
+        // avoid circular reference
+        delete params.context
         let mediaDialog = new weWidgets.MediaDialog(this, params);
         mediaDialog.open();
         mediaDialog.on('save', this, async (element) => {
