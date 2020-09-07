@@ -52,7 +52,7 @@ class IoTboxHomepage(web.Home):
         self.updating = threading.Lock()
 
     def clean_partition(self):
-        subprocess.check_call(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/upgrade.sh; cleanup'])
+        subprocess.check_call(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/hw_drivers/configuration/upgrade.sh; cleanup'])
 
     def get_six_terminal(self):
         terminal_id = helpers.read_file_first_line('odoo-six-payment-terminal.conf')
@@ -162,7 +162,7 @@ class IoTboxHomepage(web.Home):
         else:
                 persistent = ""
 
-        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_wifi.sh'), essid, password, persistent])
+        subprocess.check_call([get_resource_path('hw_drivers', 'configuration/connect_to_wifi.sh'), essid, password, persistent])
         server = helpers.get_odoo_server_url()
         res_payload = {
             'message': 'Connecting to ' + essid,
@@ -213,7 +213,7 @@ class IoTboxHomepage(web.Home):
             url = helpers.get_odoo_server_url()
             token = helpers.get_token()
         reboot = 'reboot'
-        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, iotname, token, reboot])
+        subprocess.check_call([get_resource_path('hw_drivers', 'configuration/connect_to_server.sh'), url, iotname, token, reboot])
         return 'http://' + helpers.get_ip() + ':8069'
 
     @http.route('/steps', type='http', auth='none', cors='*', csrf=False)
@@ -234,7 +234,7 @@ class IoTboxHomepage(web.Home):
             token = token.split('|')[1]
         else:
             url = ''
-        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server_wifi.sh'), url, iotname, token, essid, password, persistent])
+        subprocess.check_call([get_resource_path('hw_drivers', 'configuration/connect_to_server_wifi.sh'), url, iotname, token, essid, password, persistent])
         return url
 
     # Set server address
@@ -309,7 +309,7 @@ class IoTboxHomepage(web.Home):
     @http.route('/hw_proxy/perform_upgrade', type='http', auth='none')
     def perform_upgrade(self):
         self.updating.acquire()
-        os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/posbox_update.sh')
+        os.system('/home/pi/odoo/addons/hw_drivers/configuration/iotbox_update.sh')
         self.updating.release()
         return 'SUCCESS'
 
@@ -320,7 +320,7 @@ class IoTboxHomepage(web.Home):
     @http.route('/hw_proxy/perform_flashing_create_partition', type='http', auth='none')
     def perform_flashing_create_partition(self):
         try:
-            response = subprocess.check_output(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/upgrade.sh; create_partition']).decode().split('\n')[-2]
+            response = subprocess.check_output(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/hw_drivers/configuration/upgrade.sh; create_partition']).decode().split('\n')[-2]
             if response in ['Error_Card_Size', 'Error_Upgrade_Already_Started']:
                 raise Exception(response)
             return Response('success', status=200)
@@ -333,7 +333,7 @@ class IoTboxHomepage(web.Home):
     @http.route('/hw_proxy/perform_flashing_download_raspbian', type='http', auth='none')
     def perform_flashing_download_raspbian(self):
         try:
-            response = subprocess.check_output(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/upgrade.sh; download_raspbian']).decode().split('\n')[-2]
+            response = subprocess.check_output(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/hw_drivers/configuration/upgrade.sh; download_raspbian']).decode().split('\n')[-2]
             if response == 'Error_Raspbian_Download':
                 raise Exception(response)
             return Response('success', status=200)
@@ -347,7 +347,7 @@ class IoTboxHomepage(web.Home):
     @http.route('/hw_proxy/perform_flashing_copy_raspbian', type='http', auth='none')
     def perform_flashing_copy_raspbian(self):
         try:
-            response = subprocess.check_output(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/upgrade.sh; copy_raspbian']).decode().split('\n')[-2]
+            response = subprocess.check_output(['sudo', 'bash', '-c', '. /home/pi/odoo/addons/hw_drivers/configuration/upgrade.sh; copy_raspbian']).decode().split('\n')[-2]
             if response == 'Error_Iotbox_Download':
                 raise Exception(response)
             return Response('success', status=200)

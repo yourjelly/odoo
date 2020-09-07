@@ -21,14 +21,14 @@ function connect () {
 	# make network choice persistent
 	if [ -n "${ESSID}" ] ; then
 		if [ -n "${PERSIST}" ] ; then
-			logger -t posbox_connect_to_wifi "Making network selection permanent"
+			logger -t iotbox_connect_to_wifi "Making network selection permanent"
 			sudo mount -o remount,rw /
 			echo "${ESSID}" > ${PERSISTENT_WIFI_NETWORK_FILE}
 			echo "${PASSWORD}" >> ${PERSISTENT_WIFI_NETWORK_FILE}
 			sudo mount -o remount,ro /
 		fi
 	else
-		logger -t posbox_connect_to_wifi "Reading configuration from ${PERSISTENT_WIFI_NETWORK_FILE}"
+		logger -t iotbox_connect_to_wifi "Reading configuration from ${PERSISTENT_WIFI_NETWORK_FILE}"
 		ESSID=$(head -n 1 "${PERSISTENT_WIFI_NETWORK_FILE}" | tr -d '\n')
 		PASSWORD=$(tail -n 1 "${PERSISTENT_WIFI_NETWORK_FILE}" | tr -d '\n')
 	fi
@@ -36,7 +36,7 @@ function connect () {
 	echo "${ESSID}" > ${CURRENT_WIFI_NETWORK_FILE}
 	echo "${PASSWORD}" >> ${CURRENT_WIFI_NETWORK_FILE}
 
-	logger -t posbox_connect_to_wifi "Connecting to ${ESSID}"
+	logger -t iotbox_connect_to_wifi "Connecting to ${ESSID}"
 	sudo service hostapd stop
 	sudo killall nginx
 	sudo service nginx restart
@@ -66,15 +66,15 @@ function connect () {
 
 
 	if [ ${TIMEOUT_RETURN} -eq 124 ] && [ -z "${NO_AP}" ] ; then
-		logger -t posbox_connect_to_wifi "Failed to connect, forcing Posbox AP"
-		sudo /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh "force" &
+		logger -t iotbox_connect_to_wifi "Failed to connect, forcing IoTBox AP"
+		sudo /home/pi/odoo/addons/hw_drivers/configuration/wireless_ap.sh "force" &
 	else
 		if [ ${TIMEOUT_RETURN} -ne 124 ] ; then
 			rm -f "${LOST_WIFI_FILE}"
 		fi
 
 		if [ ! -f "${LOST_WIFI_FILE}" ] ; then
-			logger -t posbox_connect_to_wifi "Restarting odoo"
+			logger -t iotbox_connect_to_wifi "Restarting odoo"
 			sudo service odoo restart
 		fi
 
@@ -82,8 +82,8 @@ function connect () {
 			touch "${LOST_WIFI_FILE}"
 		fi
 
-		logger -t posbox_connect_to_wifi "Starting wifi keep alive script"
-		/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/keep_wifi_alive.sh &
+		logger -t iotbox_connect_to_wifi "Starting wifi keep alive script"
+		/home/pi/odoo/addons/hw_drivers/configuration/keep_wifi_alive.sh &
 	fi
 }
 

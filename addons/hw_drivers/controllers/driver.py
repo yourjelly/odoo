@@ -73,7 +73,7 @@ class DriverController(http.Controller):
                 enterprise_code = credential[3]
                 helpers.add_credential(db_uuid, enterprise_code)
             try:
-                subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
+                subprocess.check_call([get_resource_path('hw_drivers', 'configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
                 manager.send_alldevices()
                 image = get_resource_path('hw_drivers', 'static/img', 'True.jpg')
                 helpers.odoo_restart(3)

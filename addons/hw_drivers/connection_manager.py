@@ -55,7 +55,7 @@ class ConnectionManager(Thread):
             helpers.add_credential(db_uuid, enterprise_code)
 
         # Save DB URL and token
-        subprocess.check_call([get_resource_path('point_of_sale', 'tools/posbox/configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
+        subprocess.check_call([get_resource_path('hw_drivers', 'configuration/connect_to_server.sh'), url, '', token, 'noreboot'])
         # Notify the DB, so that the kanban view already shows the IoT Box
         manager.send_alldevices()
         # Restart to checkout the git branch, get a certificate, load the IoT handlers...

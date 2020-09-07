@@ -13,13 +13,13 @@ sleep 5
 
 # if there is no wired ip, attempt to start an AP through wireless interface
 if [ -z "${WIRED_IP}" ] ; then
-	logger -t posbox_wireless_ap "No wired IP"
+	logger -t iotbox_wireless_ap "No wired IP"
 
 	if [ -f "${WIFI_NETWORK_FILE}" ] && [ -z "${FORCE_HOST_AP}" ] ; then
-		logger -t posbox_wireless_ap "Loading persistently saved setting"
-		/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh &
+		logger -t iotbox_wireless_ap "Loading persistently saved setting"
+		/home/pi/odoo/addons/hw_drivers/configuration/connect_to_wifi.sh &
 	else
-		logger -t posbox_wireless_ap "Starting AP"
+		logger -t iotbox_wireless_ap "Starting AP"
 
 		SSID=$(grep -oP '(?<=ssid=).*' /etc/hostapd/hostapd.conf)
 
@@ -40,7 +40,7 @@ if [ -z "${WIRED_IP}" ] ; then
 		service nginx stop
 		# We start nginx in another configuration than the default one with https
 		# as it needs to do redirect instead in case the IoT Box acts as an ap
-		nginx -c /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/nginx_ap.conf
+		nginx -c /etc/nginx/access_point/nginx_ap.conf
 
 		service odoo restart
 	fi

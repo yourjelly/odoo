@@ -98,7 +98,7 @@ def check_git_branch():
                     subprocess.check_call(["rm", "-rf", "/home/pi/odoo/addons/hw_drivers/iot_handlers/interfaces/*"])
                     subprocess.check_call(git + ['branch', '-m', db_branch])
                     subprocess.check_call(git + ['remote', 'set-branches', 'origin', db_branch])
-                    os.system('/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/posbox_update.sh')
+                    os.system('/home/pi/odoo/addons/hw_drivers/configuration/iotbox_update.sh')
                     subprocess.check_call(["sudo", "mount", "-o", "remount,ro", "/"])
                     subprocess.check_call(["sudo", "mount", "-o", "remount,rw", "/root_bypass_ramdisks/etc/cups"])
 
