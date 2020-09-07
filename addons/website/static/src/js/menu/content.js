@@ -446,16 +446,14 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
     /**
      * @constructor
      */
-    init: function (parent, options, editable, data) {
+    init: function (parent, options) {
+        const props = _.extend({
+            needLabel: true,
+        }, options.props);
+
         this._super(parent, _.extend({
             title: _t("Add a menu item"),
-        }, options || {}), editable, _.extend({
-            needLabel: true,
-            text: data.name || '',
-            isNewWindow: data.new_window,
-        }, data || {}));
-
-        this.menuType = data.menuType;
+        }, options || {}, { props: props }));
     },
     /**
      * @override
@@ -471,7 +469,7 @@ var MenuEntryDialog = weWidgets.LinkDialog.extend({
         this.$('label[for="o_link_dialog_label_input"]').text(_t("Menu Label"));
 
         // Auto add '#' URL and hide the input if for mega menu
-        if (this.menuType === 'mega') {
+        if (this.props.menuType === 'mega') {
             var $url = this.$('input[name="url"]');
             $url.val('#').trigger('change');
             $url.closest('.form-group').addClass('d-none');
@@ -677,8 +675,8 @@ var EditMenuDialog = weWidgets.Dialog.extend({
      */
     _onAddMenuButtonClick: function (ev) {
         var menuType = ev.currentTarget.dataset.type;
-        var dialog = new MenuEntryDialog(this, {}, null, {
-            menuType: menuType,
+        var dialog = new MenuEntryDialog(this, {
+            props: { menuType: menuType },
         });
         dialog.on('save', this, link => {
             var newMenu = {
@@ -725,9 +723,12 @@ var EditMenuDialog = weWidgets.Dialog.extend({
         var menuID = $menu.data('menu-id');
         var menu = this.flat[menuID];
         if (menu) {
-            var dialog = new MenuEntryDialog(this, {}, null, _.extend({
+            const props = _.extend({
                 menuType: menu.fields['is_mega_menu'] ? 'mega' : undefined,
-            }, menu.fields));
+            }, menu.fields);
+            props.text = props.name;
+            props.isNewWindow = props.new_window;
+            const dialog = new MenuEntryDialog(this, { props: props });
             dialog.on('save', this, link => {
                 _.extend(menu.fields, {
                     'name': link.text,

@@ -61,7 +61,7 @@ var LinkDialog = Dialog.extend({
                 .replace(allBtnShapes, ' ');
 
         this.state = {
-            needLabel: !this.props.text,
+            needLabel: !this.props.text || this.props.needLabel,
             text: this.props.text,
             className: cleanClassNames,
             url: this.props.url,
