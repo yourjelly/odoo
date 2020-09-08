@@ -103,6 +103,9 @@ odoo.define("web/static/src/js/views/action_model.js", function (require) {
             switch (property) {
                 case "domain": return [this.config.domain, ...results];
                 case "context": return [this.config.context, ...results];
+
+                // just for poc
+                case "query": return this.get("query");
             }
             return results;
         }

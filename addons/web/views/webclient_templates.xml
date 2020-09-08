@@ -315,8 +315,10 @@
         <script type="text/javascript" src="/web/static/src/js/views/poc/arch_parser.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/poc/action.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/poc/pivot_action.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/poc/view_model.js"></script>
-        <script type="text/javascript" src="/web/static/src/js/views/poc/pivot_model.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/poc/pivot_view.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/poc/view_model_extension.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/poc/view_model_extension_adapter.js"></script>
+        <script type="text/javascript" src="/web/static/src/js/views/poc/pivot_model_extension.js"></script>
         <script type="text/javascript" src="/web/static/src/js/views/poc/view_controller.js"></script>
 
         <script type="text/javascript" src="/web/static/src/js/views/abstract_view.js"></script>

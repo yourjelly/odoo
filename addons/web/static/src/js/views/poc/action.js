@@ -42,7 +42,10 @@ odoo.define("poc.Action", function (require) {
             return this.props.viewOptions.isEmbedded || false;
         }
         get fields() {
-            return this.props.fieldsView.viewFields;
+            return Object.assign({},
+                this.props.fieldsView.viewFields,
+                this.props.fieldsView.fields,
+            );
         }
 
         get userContext() {
@@ -86,8 +89,9 @@ odoo.define("poc.Action", function (require) {
             return Object.assign({}, this.configs.view, this.state);
         }
 
-        constructor(parent, { fieldsView, viewOptions }) {
+        constructor(parent, { fieldsView }) {
             super(...arguments);
+            console.log(this);
 
             this._dropPrevious = new DropPrevious();
 
@@ -122,6 +126,7 @@ odoo.define("poc.Action", function (require) {
             this.configs = {
                 model: {},
                 view: {},
+                viewController: {},
                 controlPanel: {},
                 searchPanel: {},
 
@@ -152,25 +157,18 @@ odoo.define("poc.Action", function (require) {
         }
         mounted() {
             super.mounted(...arguments);
-
-            this.model.on('search', this, this._onSearch);
             this._pushState();
         }
 
-        async update(params, options={}) {
-            return;
-
-            const shouldReload = 'reload' in options ? options.reload : true;
-            if (shouldReload) {
-                this.handle = await this._dropPrevious.add(this.model.reload(this.handle, params));
-            }
-            const state = this.model.get(this.handle, { withSampleData: true });
-            Object.assign(this.state, state);
+        willUpdateProps() {
+            console.log("update action")
+            return super.willUpdateProps(...arguments);
         }
 
         buildConfigs() {
             this.buildLoadConfig();
             this.buildModelConfig();
+            this.buildViewControllerConfig();
             this.buildViewConfig();
             if (this.withControlPanel) {
                 this.buildControlPanelConfig();
@@ -183,7 +181,7 @@ odoo.define("poc.Action", function (require) {
             const controllerState = this.props.viewOptions.controllerState || {};
             const currentId = controllerState.currentId || this.props.viewOptions.currentId;
 
-            Object.assign(this.configs.model, {
+            Object.assign(this.configs.load, {
                 context: this.context,
                 count: this.props.viewOptions.count || 0,
                 domain: this.domain,
@@ -221,7 +219,10 @@ odoo.define("poc.Action", function (require) {
                 arch: this.arch,
                 isEmbedded: this.isEmbedded,
                 noContentHelp: this.noContentHelp,
+                modelName: this.modelName,
             });
+        }
+        buildViewControllerConfig() {
         }
         buildControlPanelConfig() {
             Object.assign(this.configs.controlPanel, {
@@ -271,7 +272,10 @@ odoo.define("poc.Action", function (require) {
                 };
             }
 
-            extensions[this.viewType] = this.configs.model;
+            extensions[this.viewType] = {
+                init: this.configs.model,
+                load: this.configs.load,
+            };
 
             return extensions;
         }
@@ -288,15 +292,10 @@ odoo.define("poc.Action", function (require) {
                 importedState: importedState.searchModel,
                 searchMenuTypes: this.searchMenuTypes,
                 searchQuery: this.props.viewOptions.searchQuery,
-                fields: this.controlPanelFieldsView.fields,
+                fields: this.fields,
             });
         }
 
-        async _loadData(options = {}) {
-            options.withSampleData = 'withSampleData' in options ? options.withSampleData : true;
-            const handle = await this.model.load(this.configs.load);
-            return { state: this.model.get(handle, options), handle };
-        }
         _pushState() {
             this.trigger('push_state', {
                 controllerID: this.controllerId,
@@ -306,9 +305,6 @@ odoo.define("poc.Action", function (require) {
 
         _onSwitchView(ev) {
             ev.detail.controllerID = this.controllerId;
-        }
-        _onSearch(searchQuery) {
-            this.update(searchQuery);
         }
 
         // compatibility
@@ -373,7 +369,7 @@ odoo.define("poc.Action", function (require) {
             <t t-if="withControlPanel">
                 <ControlPanel t-props="configs.controlPanel">
                     <t t-set-slot="buttons">
-                        <ViewController />
+                        <ViewController t-props="configs.viewController"/>
                     </t>
                 </ControlPanel>
             </t>

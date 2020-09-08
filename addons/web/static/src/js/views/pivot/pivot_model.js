@@ -792,11 +792,6 @@ var PivotModel = AbstractModel.extend({
      * @returns {Object} with keys colGroupBys and rowGroupBys
      */
     _getGroupBys: function () {
-        console.log({
-            colGroupBys: this.data.colGroupBys.concat(this.data.expandedColGroupBys),
-            rowGroupBys: this.data.rowGroupBys.concat(this.data.expandedRowGroupBys),
-        });
-
         return {
             colGroupBys: this.data.colGroupBys.concat(this.data.expandedColGroupBys),
             rowGroupBys: this.data.rowGroupBys.concat(this.data.expandedRowGroupBys),
