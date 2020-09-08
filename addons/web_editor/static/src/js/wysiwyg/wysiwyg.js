@@ -233,13 +233,7 @@ var Wysiwyg = Widget.extend({
             // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
             const targetNode = this.editorEditable.querySelector("#wrap");
             if (targetNode) {
-                const emptyClass = "oe_blank_wrap";
-                if (targetNode.textContent.trim() === '' && !targetNode.querySelector('section, div')) {
-                    targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-                    targetNode.classList.add(emptyClass);
-                } else {
-                    targetNode.classList.remove(emptyClass);
-                }
+                targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             }
         }
 
