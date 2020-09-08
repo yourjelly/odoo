@@ -2039,6 +2039,7 @@ const SnippetOptionWidget = Widget.extend({
                 // Those are the special color combinations classes. Just have
                 // to add it (and adding the potential extra class) then leave.
                 this.$target[0].classList.add('o_cc', `o_cc${widgetValue}`, params.extraClass);
+                if (previewMode === false) await this._refreshTarget();
                 return;
             }
             if (params.colorNames.includes(widgetValue)) {
@@ -2050,6 +2051,7 @@ const SnippetOptionWidget = Widget.extend({
                     // property we are editing, nothing more has to be done.
                     // (except adding the extra class)
                     this.$target.addClass(params.extraClass);
+                    if (previewMode === false) await this._refreshTarget();
                     return;
                 }
                 // Otherwise, it means that class probably does not exist,
