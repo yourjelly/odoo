@@ -10,7 +10,12 @@ odoo.define("poc.ViewModelExtensionAdapter", function (require) {
             this.currentFacets = null;
             this.currentDomain = null;
 
-            this.legacyModel = new LegacyModel(this, this.config.init);
+            const modelParams = Object.assign({},
+                this.config.init,
+                { SampleModel: LegacyModel },
+            );
+
+            this.legacyModel = new LegacyModel(this, modelParams);
             this.promise = null;
             this.handle = null;
             this.state = null;
@@ -68,6 +73,7 @@ odoo.define("poc.ViewModelExtensionAdapter", function (require) {
                     }
                     return this.state;
                 }
+                case "isInSampleMode": return this.legacyModel.isInSampleMode();
             }
         }
 

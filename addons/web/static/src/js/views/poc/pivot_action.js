@@ -2,7 +2,7 @@ odoo.define("poc.PivotAction", function (require) {
     "use strict";
 
     const Action = require("poc.Action");
-    const PivotRenderer = require("poc.PivotView");
+    const PivotView = require("poc.PivotView");
     const { _lt } = require("web.core");
     const { GROUPABLE_TYPES } = require("web.searchUtils");
 
@@ -18,10 +18,11 @@ odoo.define("poc.PivotAction", function (require) {
             const groupableFields = {}; // The fields which can be used to group data
             const widgets = {}; // Wigdets defined in the arch
             const additionalMeasures = this.props.viewOptions.additionalMeasures || [];
+            const fields = this.fields;
 
             //Compute the measures and the groupableFields
-            for (const name of Object.keys(this.fields)) {
-                const field = this.fields[name];
+            for (const name of Object.keys(fields)) {
+                const field = fields[name];
                 if (name !== 'id' && field.store === true) {
                     if (['integer', 'float', 'monetary'].includes(field.type) || additionalMeasures.includes(name)) {
                         measures[name] = field;
@@ -31,7 +32,7 @@ odoo.define("poc.PivotAction", function (require) {
                     }
                 }
             }
-            measures.__count = this.fields.__count;
+            measures.__count = fields.__count;
 
             for (const field of this.arch.children) {
                 let name = field.get("name").raw;
@@ -58,15 +59,15 @@ odoo.define("poc.PivotAction", function (require) {
                 // probably not work (their aggregate will always be 0).
                 const type = field.get("type").raw;
                 if (type === 'measure' && !(name in measures)) {
-                    measures[name] = this.fields[name];
+                    measures[name] = fields[name];
                 }
                 const string = field.get("string");
                 if (string.isNotNull && name in measures) {
                     measures[name].string = string.raw;
                 }
-                if (type === 'measure' || field.get("operator").exists) {
+                if (type === 'measure' || field.has("operator")) {
                     activeMeasures.push(name);
-                    measures[name] = this.fields[name];
+                    measures[name] = fields[name];
                 }
                 if (type === 'col') {
                     colGroupBys.push(name);
@@ -75,19 +76,19 @@ odoo.define("poc.PivotAction", function (require) {
                     rowGroupBys.push(name);
                 }
             }
-            if (!activeMeasures.length || this.arch.get("display_quantity").exists) {
+            if (!activeMeasures.length || this.arch.has("display_quantity")) {
                 activeMeasures.splice(0, 0, '__count');
             }
 
             this.configs.load.measures = activeMeasures;
             this.configs.load.colGroupBys = this.env.device.isMobile ? [] : colGroupBys;
             this.configs.load.rowGroupBys = rowGroupBys;
-            this.configs.load.fields = this.fields;
+            this.configs.load.fields = fields;
             this.configs.load.default_order = this.props.viewOptions.default_order || this.arch.get("default_order").raw;
             this.configs.load.groupableFields = groupableFields;
 
             this.configs.view.widgets = widgets;
-            this.configs.view.disableLinking = this.arch.get("disable_linking").exists;
+            this.configs.view.disableLinking = this.arch.has("disable_linking");
             
             this.configs.view.title = this.props.viewOptions.title || this.arch.get("string").raw || this.env._t("Untitled");
             this.configs.viewController.measures = measures;
@@ -121,7 +122,7 @@ odoo.define("poc.PivotAction", function (require) {
         searchMenuTypes: ['filter', 'groupBy', 'comparison', 'favorite'],
     });
     Object.assign(PivotAction.components, {
-        View: PivotRenderer,
+        View: PivotView,
     });
 
     return PivotAction;

@@ -2,7 +2,6 @@ odoo.define("poc.Action", function (require) {
     "use strict";
 
     const ActionModel = require("web/static/src/js/views/action_model.js");
-    const { DropPrevious } = require("web.concurrency");
     const ControlPanel = require("web.ControlPanel");
     const SearchPanel = require("web/static/src/js/views/search_panel.js");
     const View = require("web.AbstractRendererOwl");
@@ -11,7 +10,6 @@ odoo.define("poc.Action", function (require) {
     const {
         Component,
         hooks: {
-            useState,
             useSubEnv,
         },
         tags: {
@@ -85,22 +83,13 @@ odoo.define("poc.Action", function (require) {
             return this.props.viewOptions.domain || [];
         }
 
-        get viewProps() {
-            return Object.assign({}, this.configs.view, this.state);
-        }
-
         constructor(parent, { fieldsView }) {
             super(...arguments);
-            console.log(this);
-
-            this._dropPrevious = new DropPrevious();
-
-            this.state = useState({});
 
             const archs = {
                 // search
                 // [this.viewType]
-                // [embeddedViewType]
+                // [embeddedViewType]?
             };
             if (typeof fieldsView.arch === "string") {
                 archs[this.viewType] = fieldsView.arch;
@@ -160,11 +149,6 @@ odoo.define("poc.Action", function (require) {
             this._pushState();
         }
 
-        willUpdateProps() {
-            console.log("update action")
-            return super.willUpdateProps(...arguments);
-        }
-
         buildConfigs() {
             this.buildLoadConfig();
             this.buildModelConfig();
@@ -209,10 +193,6 @@ odoo.define("poc.Action", function (require) {
                 useSampleModel,
                 context: this.context,
             });
-
-            // if (useSampleModel) {
-            //     this.configs.model.SampleModel = this.constructor.components.Model;
-            // }
         }
         buildViewConfig() {
             Object.assign(this.configs.view, {
@@ -223,6 +203,9 @@ odoo.define("poc.Action", function (require) {
             });
         }
         buildViewControllerConfig() {
+            Object.assign(this.configs.viewController, {
+                arch: this.arch,
+            });
         }
         buildControlPanelConfig() {
             Object.assign(this.configs.controlPanel, {
@@ -373,7 +356,7 @@ odoo.define("poc.Action", function (require) {
                     </t>
                 </ControlPanel>
             </t>
-            <View t-props="viewProps"/>
+            <View t-props="configs.view"/>
         </div>
     `;
 
