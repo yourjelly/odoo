@@ -43,7 +43,8 @@ $-editor-messages-margin-x: 2%;
         user-select: auto;
         cursor: text!important;
     }
-    /* Summernote not Support for placeholder text https://github.com/summernote/summernote/issues/581 */
+    /* The placeholder text will only be visible before the 1st edition,
+       after edition JW will add a br in empty boxes and break this selector */
     &[placeholder]:empty:not(:focus):before {
         content: attr(placeholder);
         opacity: 0.3;

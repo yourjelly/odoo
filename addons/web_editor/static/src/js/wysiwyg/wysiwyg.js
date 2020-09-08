@@ -235,6 +235,15 @@ var Wysiwyg = Widget.extend({
             if (targetNode) {
                 targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             }
+
+            const allEmptyOEditable = $("#wrap .o_editable");
+            allEmptyOEditable.each(function(){
+               const _this = $(this)
+               if(_this.text().trim() === '') {
+                   // ensure a visualy empty .o_editable doesn't have whitespaces or <br> in it
+                   _this.empty();
+               }
+            });
         }
 
         if (this.options.enableTranslation) {
