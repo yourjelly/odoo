@@ -1056,6 +1056,7 @@ var SnippetsMenu = Widget.extend({
             this.snippetEditors.forEach(editor => {
                 editor.toggleOverlayVisibility(true);
             });
+            throttledCoverUpdate();
         }, 250));
 
         // Hide the active overlay when scrolling.
