@@ -2356,8 +2356,6 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
     init: function () {
         this._super.apply(this, arguments);
 
-        this.$image = this.$target.find('.o_record_cover_image');
-        this.$filter = this.$target.find('.o_record_cover_filter');
     },
     /**
      * @override
@@ -2378,27 +2376,24 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      * @see this.selectClass for parameters
      */
     background: async function (previewMode, widgetValue, params) {
+        this._findElements();
         if (widgetValue === '') {
-            const coverPropertiesBackgroud = async (context) => {
-                await this.editorHelpers.setStyle(context, this.$image[0], 'background-image', '');
-                await this.editorHelpers.removeClass(context, this.$target[0], 'o_record_has_cover');
-            };
-            await this.wysiwyg.editor.execCommand(coverPropertiesBackgroud);
+            this.$image.css('background-image', '');
+            this.$target.removeClass('o_record_has_cover');
         } else {
-            const coverPropertiesBackgroudUrl = async (context) => {
-                await this.editorHelpers.setStyle(context, this.$image[0], 'background-image', `url('${widgetValue}')`);
-                await this.editorHelpers.addClass(context, this.$target[0], 'o_record_has_cover');
-            };
-            await this.wysiwyg.editor.execCommand(coverPropertiesBackgroud);
+            this.$image.css('background-image', `url('${widgetValue}')`);
+            this.$target.addClass('o_record_has_cover');
             const $defaultSizeBtn = this.$el.find('.o_record_cover_opt_size_default');
             $defaultSizeBtn.click();
             $defaultSizeBtn.closest('we-select').click();
         }
+        if (previewMode === false) await this._refreshTarget();
     },
     /**
      * @see this.selectClass for parameters
      */
     filterValue: async function (previewMode, widgetValue, params) {
+        this._findElements();
         if (!previewMode) {
             const  coverPropertiesFilterValue = async (context) => {
                 await context.execCommand('dom.setStyle', {
@@ -2451,6 +2446,7 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
      * @override
      */
     _computeWidgetState: function (methodName, params) {
+        this._findElements();
         switch (methodName) {
             case 'filterValue': {
                 return parseFloat(this.$filter.css('opacity')).toFixed(1);
@@ -2474,6 +2470,11 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
         }
         return this._super(...arguments);
     },
+
+    _findElements: function() {
+        this.$image = this.$target.find('.o_record_cover_image');
+        this.$filter = this.$target.find('.o_record_cover_filter');
+    }
 });
 
 snippetOptions.registry.ContainerWidth = snippetOptions.SnippetOptionWidget.extend({
