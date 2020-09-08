@@ -47,6 +47,7 @@
 
     <!-- Launcher -->
     <script type="text/javascript" src="/web_editor/static/lib/jabberwock/jabberwock.js"/>
+    <link rel="stylesheet" type="text/css" href="/web_editor/static/lib/jabberwock/jabberwock.css"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg_translate_attributes.js"/>
     <script type="text/javascript" src="/web_editor/static/src/js/wysiwyg/wysiwyg.js"/>
 </template>
