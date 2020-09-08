@@ -393,7 +393,11 @@ class WebRequest(object):
         :returns: ASCII token string
         """
         token = self.session.sid
-        max_ts = '' if not time_limit else int(time.time() + time_limit)
+        if not time_limit:
+            # no limit, use timestamp as salt, e.g. to mitigate BREACH
+            max_ts = f"x{int(time.time())}"
+        else:
+            max_ts = int(time.time() + time_limit)
         msg = '%s%s' % (token, max_ts)
         secret = self.env['ir.config_parameter'].sudo().get_param('database.secret')
         assert secret, "CSRF protection requires a configured database secret"
@@ -409,7 +413,8 @@ class WebRequest(object):
         except UnicodeEncodeError:
             return False
 
-        if max_ts:
+        # if max_ts begins with "x" it's only a salt
+        if max_ts and max_ts[:1] != 'x':
             try:
                 if int(max_ts) < int(time.time()):
                     return False
