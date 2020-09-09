@@ -733,10 +733,11 @@ var Wysiwyg = Widget.extend({
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
             const renderedNode = (await renderer.render('dom/html', node))[0];
             $(renderedNode).find('.o_snippet_editor_updated').addBack().removeClass('o_snippet_editor_updated');
-            //if ($(renderedNode).find('.card-header')) {
-               //throw new Error('do not save') ;
-            //}
-            promises.push(this._saveViewTo($(renderedNode), +renderedNode.dataset.oeId, node.xpath));
+            let $saveNode = $(renderedNode).find('[data-oe-expression]');
+            if ($saveNode.length === 0) {
+                $saveNode = $(renderedNode)
+            }
+            promises.push(this._saveViewTo($saveNode, +$saveNode[0].dataset.oeId, node.xpath));
         }
         return Promise.all(promises);
     },
