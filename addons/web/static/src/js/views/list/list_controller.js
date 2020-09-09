@@ -300,7 +300,9 @@ var ListController = BasicController.extend({
                 );
                 this.do_notify(false, msg);
             }
-            this.reload();
+            await this.reload();
+            if (this.withSearchPanel)
+                this._searchPanel._notifyDomainUpdated();
         };
         if (this.confirmOnDelete) {
             Dialog.confirm(this, _t("Are you sure you want to delete these records ?"), {
@@ -553,6 +555,8 @@ var ListController = BasicController.extend({
             resIds = this.model.localIdsToResIds(this.selectedRecords);
         }
         await this._archive(resIds, archive);
+        if (this.withSearchPanel)
+            this._searchPanel._notifyDomainUpdated();
         if (displayNotif) {
             const msg = _.str.sprintf(
                 _t("Of the %d records selected, only the first %d have been archived/unarchived."),

@@ -528,7 +528,10 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
      * @param {string[]} ids list of deleted ids (basic model local handles)
      */
     _onDeletedRecords: function (ids) {
-        this.update({});
+        this.update({}).then(() => {
+            if (this.withSearchPanel)
+                this._searchPanel._notifyDomainUpdated();
+        });
     },
     /**
      * Saves the record whose ID is given, if necessary. Automatically leaves
