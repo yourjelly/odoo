@@ -152,9 +152,14 @@ var Wysiwyg = Widget.extend({
                                 return attributes && attributes.classList.has('o_header_standard');
                             },
                             (node) => {
+                                const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
                                 const linkFormat = node.modifiers.find(this.JWEditorLib.LinkFormat);
-                                const attributes = linkFormat && linkFormat.modifiers.find(this.JWEditorLib.Attributes);
-                                return attributes && attributes.classList.has('nav-link');
+                                const linkAttributes = linkFormat && linkFormat.modifiers.find(this.JWEditorLib.Attributes);
+
+                                const hasNavLink = linkAttributes && (linkAttributes.classList.has('nav-link'));
+                                const hasContainer = attributes && attributes.classList.has('container');
+
+                                return hasNavLink || hasContainer;
                             },
                         ],
                         properties: {
