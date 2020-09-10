@@ -192,7 +192,7 @@
      */
     function testViewSwitch(viewType){
         var timeLimit=5000;
-        if (viewType === 'map') timeLimit = 20000;
+        if (viewType === 'map') timeLimit = 60000;
         console.log("Testing view switch: ", viewType);
         // timeout to avoid click debounce
         setTimeout(function() {
