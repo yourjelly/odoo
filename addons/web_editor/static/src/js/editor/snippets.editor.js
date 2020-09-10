@@ -963,7 +963,7 @@ var SnippetsMenu = Widget.extend({
 
         this.selectorEditableArea = options.selectorEditableArea;
         this.$editor = options.$el;
-        this.$body = this.$editor.closest('body');
+        this.$body = $(document.body);
 
         this.wysiwyg = options.wysiwyg;
 
