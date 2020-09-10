@@ -67,9 +67,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
      * @override
      */
     _renderEdit: function () {
-        if (this.value) {
-            this.nodeOptions['style-inline'] = true;
-        }
         if (!this.value) {
             this.value = this.recordData[this.nodeOptions['inline-field']];
         }

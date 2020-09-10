@@ -465,8 +465,8 @@ var Wysiwyg = Widget.extend({
      * @param {jQueryElement} [options.$layout]
      * @returns {String}
      */
-    getValue: async function () {
-        return this.editor.getValue('text/html');
+    getValue: async function (format) {
+        return this.editor.getValue(format || 'text/html');
     },
     /**
      * @param {String} value
