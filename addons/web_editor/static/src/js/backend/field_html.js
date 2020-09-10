@@ -30,7 +30,7 @@ var jinjaRegex = /(^|\n)\s*%\s(end|set\s)/;
  */
 var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
     description: _lt("Html"),
-    className: 'oe_form_field oe_form_field_html',
+    className: 'oe_form_field oe_form_field_html d-flex',
     supportedFieldTypes: ['html'],
 
     custom_events: {
@@ -89,6 +89,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             return _super();
         }
         this._isDirty = await this.wysiwyg.isDirty();
+        debugger
         // todo: make this work
         this._value = await this.wysiwyg.getValue(this.nodeOptions['style-inline'] ? 'text/mail' : 'text/html');
         return _super();
@@ -193,12 +194,12 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             interface: `
                 <t-dialog><t t-zone="default"/></t-dialog>
                 <t-range><t t-zone="tools"/></t-range>
-                <div class="d-flex flex-column">
+                <div class="d-flex flex-column flex-grow-1">
                     <div class="d-flex flex-row overflow-auto">
                         <t t-zone="container">
                             <t t-zone="main_sidebar"/>
                             <div class="d-flex flex-column overflow-auto o_editor_center">
-                                <div class="d-flex overflow-auto note-editing-area">
+                                <div class="d-flex overflow-auto note-editing-area d-flex flex-grow-1">
                                     <t t-zone="snippetManipulators"/>
                                     ` + main + `
                                 </div>

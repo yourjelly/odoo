@@ -1,4 +1,7 @@
 .o_field_widget.o_mail_body {
+    height: 55vh;
+    display: flex;
+
     .o_mail_theme_selector {
         position: absolute;
         flex: 1 1 auto;
