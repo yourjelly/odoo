@@ -737,7 +737,9 @@ var Wysiwyg = Widget.extend({
             if ($saveNode.length === 0) {
                 $saveNode = $(renderedNode)
             }
-            promises.push(this._saveViewTo($saveNode, +$saveNode[0].dataset.oeId, node.xpath));
+            if ($saveNode[0].dataset.oeId) {
+                promises.push(this._saveViewTo($saveNode, +$saveNode[0].dataset.oeId, node.xpath));
+            }
         }
         return Promise.all(promises);
     },
