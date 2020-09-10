@@ -191,6 +191,8 @@
      * @returns {Promise} a promise that wait for the view to be loaded
      */
     function testViewSwitch(viewType){
+        var timeLimit=5000;
+        if (viewType === 'map') timeLimit = 10000;
         console.log("Testing view switch: ", viewType);
         // timeout to avoid click debounce
         setTimeout(function() {
@@ -200,7 +202,7 @@
         },250);
         var waitViewSwitch = waitForCondition(function(){
             return $('.o_action_manager> .o_action.o_view_controller').data('view-type') === viewType;
-        });
+        }, timeLimit);
         return waitViewSwitch.then(function() {
             return testFilters();
         });
@@ -252,10 +254,10 @@
      * @param {function} stopCondition a function that returns a boolean
      * @returns {Promise} that is rejected if the timeout is exceeded
      */
-    function waitForCondition(stopCondition) {
+    function waitForCondition(stopCondition, tl=5000) {
         var prom = new Promise(function (resolve, reject) {
             var interval = 250;
-            var timeLimit = 5000;
+            var timeLimit = tl;
 
             function checkCondition() {
                 if (stopCondition()) {
