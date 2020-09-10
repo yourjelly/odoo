@@ -1158,7 +1158,7 @@ var SnippetsMenu = Widget.extend({
      */
     updateCurrentSnippetEditorOverlay: function () {
         for (const snippetEditor of this.snippetEditors) {
-            if (snippetEditor.$snippetBlock.closest('body').length) {
+            if (snippetEditor.$snippetBlock.closest('body, .note-editable').length) {
                 snippetEditor.cover();
                 continue;
             }
