@@ -466,7 +466,7 @@ var Wysiwyg = Widget.extend({
      * @returns {String}
      */
     getValue: async function () {
-        return (await this.editor.getValue()).innerHTML;
+        return this.editor.getValue('text/html');
     },
     /**
      * @param {String} value
