@@ -48,7 +48,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
 
         const isDirty = this._isDirty;
         const changes = {};
-        changes[this.nodeOptions['inline-field']] = this.wysiwyg.getValue('text/mail');
+        changes[this.nodeOptions['inline-field']] = await this.wysiwyg.getValue('text/mail');
 
         self.trigger_up('field_changed', {
             dataPointID: self.dataPointID,
