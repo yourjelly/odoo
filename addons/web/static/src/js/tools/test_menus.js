@@ -192,7 +192,7 @@
      */
     function testViewSwitch(viewType){
         var timeLimit=5000;
-        if (viewType === 'map') timeLimit = 10000;
+        if (viewType === 'map') timeLimit = 20000;
         console.log("Testing view switch: ", viewType);
         // timeout to avoid click debounce
         setTimeout(function() {
@@ -258,6 +258,7 @@
         var prom = new Promise(function (resolve, reject) {
             var interval = 250;
             var timeLimit = tl;
+            console.log('timeLimit:' , timeLimit);
 
             function checkCondition() {
                 if (stopCondition()) {
