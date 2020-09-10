@@ -13,6 +13,8 @@ var config = require('web.config');
 var core = require('web.core');
 var _t = core._t;
 
+const faZoomClassRegex = RegExp('fa-[0-9]x');
+
 var Wysiwyg = Widget.extend({
     defaultOptions: {
         'recordInfo': {
@@ -357,9 +359,25 @@ var Wysiwyg = Widget.extend({
         });
     },
     openMediaDialog(params) {
+        const nodes = params.context.range.selectedNodes();
+        const node = nodes[0];
+        let $fontAwesomeNode;
+
+        if (nodes.length === 1 && node instanceof JWEditorLib.FontAwesomeNode) {
+            // TODO: we use previousSibling because getDomNodes return the wrong
+            //       node. change the line when the getDomNodes is fixed in
+            //       jabberwock.
+            const $originalFontAwesome = this.editorHelpers.getDomNodes(node)[0].previousSibling;
+            $fontAwesomeNode = $($originalFontAwesome).clone();
+            params.htmlClass = [...$fontAwesomeNode[0].classList].filter((className) => {
+                return !className.startsWith('fa') || faZoomClassRegex.test(className);
+            }).join(' ');
+        }
+
         // avoid circular reference
         delete params.context;
-        let mediaDialog = new weWidgets.MediaDialog(this, params);
+
+        let mediaDialog = new weWidgets.MediaDialog(this, params, $fontAwesomeNode);
         mediaDialog.open();
         mediaDialog.on('save', this, async (element) => {
             if(params.htmlClass) element.className += " " + params.htmlClass;
