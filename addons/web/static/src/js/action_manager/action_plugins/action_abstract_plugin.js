@@ -7,7 +7,7 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
     // TODO: CLEAN ME
     class ActionAbstractPlugin extends Model.Extension {
         static actionSpecificDecorator(func, ...args) {
-            if (this.type === args[0].type) {
+            if (!this.type || this.type === args[0].type) {
                 return func(...args);
             }
         }
@@ -33,9 +33,7 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         async executeAction(/*action, options*/) {
             throw new Error(`ActionAbstractPlugin for type ${this.type} doesn't implement executeAction.`);
         }
-        async _restoreController() {
-            await this.pendingState.__lastProm;
-        }
+        async _restoreController() {}
         loadState(/* state, options */) {return;}
         //----------------------------------------------------------------------
         // Getters

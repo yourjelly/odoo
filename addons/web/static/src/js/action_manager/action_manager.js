@@ -52,6 +52,9 @@ odoo.define('web.ActionManager', function (require) {
             if (property in state) {
                 return state[property];
             }
+            if (property in this) {
+                return this[property];
+            }
             return super.get(property);
         }
         dispatch() {

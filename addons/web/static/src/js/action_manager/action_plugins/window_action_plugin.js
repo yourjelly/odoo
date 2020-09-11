@@ -156,7 +156,7 @@ odoo.define('web.WindowActionPlugin', function (require) {
          * @private
          */
         async _restoreController(action, controller) {
-            await super._restoreController(...arguments);
+            //await super._restoreController(...arguments);
             return this._switchController(action, controller.viewType);
         }
 
