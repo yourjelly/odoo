@@ -23,14 +23,14 @@
                 <PrezzoUnitario t-esc="format_monetary(taxes['total_excluded'], currency)"/>
                 <ScontoMaggiorazione t-if="line.discount != 0">
                     <!-- [2.2.1.10] -->
-                    <Tipo t-esc="discount_type(line.discount)"/>
+                    <Tipo t-esc="'SC' if line.discount > 0 else 'MG'"/>
                     <Percentuale t-esc="format_numbers(abs(line.discount))"/>
                 </ScontoMaggiorazione>
                 <PrezzoTotale t-esc="format_monetary(line.price_subtotal, currency)"/>
                 <!-- without tax, must include any discounts and any extra charge-->
                 <AliquotaIVA t-if="line.tax_ids.amount_type == 'percent'" t-esc="format_numbers(line.tax_ids.amount)"/>
                 <AliquotaIVA t-if="line.tax_ids.amount_type != 'percent'" t-esc="'0.00'"/>
-                <Natura t-if="line.tax_ids.l10n_it_has_exoneration" t-esc="line.tax_ids.l10n_it_kind_exoneration"/>
+                <Natura t-if="line.tax_ids.l10n_it_exoneration" t-esc="line.tax_ids.l10n_it_exoneration"/>
             </DettaglioLinee>
         </template>
 
@@ -85,7 +85,7 @@
                             <!--1.2.4-->
                             <Ufficio t-esc="record.company_id.l10n_it_eco_index_office.code"/>
                             <NumeroREA t-esc="record.company_id.l10n_it_eco_index_number"/>
-                            <CapitaleSociale t-if="record.company_id.l10n_it_eco_index_share_capital != 0" t-esc="format_numbers_two(record.company_id.l10n_it_eco_index_share_capital)"/>
+                            <CapitaleSociale t-if="record.company_id.l10n_it_eco_index_share_capital != 0" t-esc="'%.02f' % record.company_id.l10n_it_eco_index_share_capital"/>
                             <SocioUnico t-if="record.company_id.l10n_it_eco_index_sole_shareholder != 'NO'" t-esc="record.company_id.l10n_it_eco_index_sole_shareholder"/>
                             <StatoLiquidazione t-esc="record.company_id.l10n_it_eco_index_liquidation_state"/>
                         </IscrizioneREA>
@@ -162,11 +162,11 @@
                             <DatiRiepilogo>
                                 <!--2.2.2-->
                                 <AliquotaIVA t-esc="format_numbers(tax_line.tax_line_id.amount)"/>
-                                <Natura t-if="tax_line.tax_line_id.l10n_it_has_exoneration" t-esc="tax_line.tax_line_id.l10n_it_kind_exoneration"/>
+                                <Natura t-if="tax_line.tax_line_id.l10n_it_exoneration" t-esc="tax_line.tax_line_id.l10n_it_exoneration"/>
                                 <ImponibileImporto t-esc="format_monetary(tax_line.tax_base_amount, currency)"/>
                                 <Imposta t-esc="format_monetary(tax_line.price_unit, currency)"/>
-                                <EsigibilitaIVA t-if="not tax_line.tax_line_id.l10n_it_has_exoneration or tax_line.tax_line_id.l10n_it_kind_exoneration=='N6'" t-esc="tax_line.tax_line_id.l10n_it_vat_due_date"/>
-                                <RiferimentoNormativo t-if="tax_line.tax_line_id.l10n_it_has_exoneration" t-esc="tax_line.tax_line_id.l10n_it_law_reference"/>
+                                <EsigibilitaIVA t-if="not tax_line.tax_line_id.l10n_it_exoneration or tax_line.tax_line_id.l10n_it_exoneration=='N6'" t-esc="tax_line.tax_line_id.l10n_it_vat_due_date"/>
+                                <RiferimentoNormativo t-if="tax_line.tax_line_id.l10n_it_exoneration" t-esc="tax_line.tax_line_id.l10n_it_law_reference"/>
                             </DatiRiepilogo>
                         </t>
 
@@ -178,7 +178,7 @@
                             <t t-set="company_bank_account" t-value="record.partner_bank_id"/>
                             <ModalitaPagamento t-if="company_bank_account">MP05</ModalitaPagamento>
                             <DataScadenzaPagamento t-esc="format_date(record.invoice_date_due)"/>
-                            <ImportoPagamento t-esc="format_numbers_two(record.amount_total)"/>
+                            <ImportoPagamento t-esc="'%.02f' % record.amount_total"/>
                             <IstitutoFinanziario t-if="company_bank_account.bank_id" t-esc="company_bank_account.bank_id.name[:80]"/>
                             <IBAN t-if="company_bank_account.acc_type == 'iban'" t-esc="company_bank_account.sanitized_acc_number"/>
                             <BIC t-if="company_bank_account.acc_type == 'bank' and company_bank_account.bank_id.bic" t-esc="company_bank_account.bank_id.bic"/>

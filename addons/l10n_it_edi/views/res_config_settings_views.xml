@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.l10n_it_edi</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@id='invoicing_settings']" position="after">
+                    <h2 attrs="{'invisible': [('country_code', '!=', 'IT')]}">Italian Electronic Invoicing</h2>
+                    <div class="row mt16 o_settings_container" id="l10n_mx_it_settings" attrs="{'invisible': [('country_code', '!=', 'IT')]}">
+                        <div class="col-12 col-lg-6 o_setting_box" title="Configure your FatturaPA credentials here.">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">FatturaPA Configuration</span>
+                                <div class="text-muted">
+                                    Configure your FatturaPA credentials here
+                                </div>
+                                <div class="content-group">
+                                    <div class="row">
+                                        <label for="l10n_it_edi_test_mode" class="col-lg-3 o_light_label"/>
+                                        <field name="l10n_it_edi_test_mode"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

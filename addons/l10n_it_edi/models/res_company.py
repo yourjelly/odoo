@@ -41,6 +41,7 @@ class ResCompany(models.Model):
         help="Enter Government PEC-mail address. Ex: sdi01@pec.fatturapa.it")
     l10n_it_address_send_fatturapa = fields.Char(string="Company PEC-mail",
         help="Enter your company PEC-mail address. Ex: yourcompany@pec.mail.it")
+    l10n_it_edi_test_mode = fields.Boolean(string='Test mode', default=True)
 
 
     # Economic and Administrative Index

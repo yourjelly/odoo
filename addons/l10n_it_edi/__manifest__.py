@@ -6,7 +6,7 @@
     'version': '0.3',
     'depends': [
         'l10n_it',
-        'fetchmail',
+        'fetchmail', #TODO remove this
         'account_edi'
     ],
     'author': 'Odoo',
@@ -20,7 +20,8 @@ E-invoice implementation
         'data/account_edi_data.xml',
         'data/invoice_it_template.xml',
         'views/l10n_it_view.xml',
-        ],
+        'views/res_config_settings_views.xml',
+    ],
     'demo': [
         'data/account_invoice_demo.xml',
     ],

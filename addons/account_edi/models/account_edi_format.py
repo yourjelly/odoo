@@ -402,16 +402,35 @@ class AccountEdiFormat(models.Model):
         element = xml_element.xpath(xpath, namespaces=namespaces)
         return element[0].text if element else None
 
-    def _retrieve_partner(self, name=None, phone=None, mail=None, vat=None):
+    def _retrieve_company(self, name=None, vat=None):
+        '''Search all companies and find one that matches one of the parameters.
+
+        :param name:    The name of the company.
+        :param vat:     The vat number of the company.
+        :returns:       A company or an empty recordset if not found.
+        '''
+        domains = []
+        for value, domain in (
+            (name, [('name', 'ilike', name)]),
+            (vat, [('vat', 'like', vat)]),
+        ):
+            if value is not None:
+                domains.append(domain)
+
+        domain = expression.OR(domains)
+        return self.env['res.company'].search(domain, limit=1)
+
+    def _retrieve_partner(self, name=None, phone=None, mail=None, vat=None, others=None):
         '''Search all partners and find one that matches one of the parameters.
 
         :param name:    The name of the partner.
         :param phone:   The phone or mobile of the partner.
         :param mail:    The mail of the partner.
         :param vat:     The vat number of the partner.
+        :param others:  A list of additionnal domains.
         :returns:       A partner or an empty recordset if not found.
         '''
-        domains = []
+        domains = others or []
         for value, domain in (
             (name, [('name', 'ilike', name)]),
             (phone, expression.OR([[('phone', '=', phone)], [('mobile', '=', phone)]])),
@@ -445,7 +464,7 @@ class AccountEdiFormat(models.Model):
         domain = expression.OR(domains)
         return self.env['product.product'].search(domain, limit=1)
 
-    def _retrieve_tax(self, amount, type_tax_use):
+    def _retrieve_tax(self, amount, type_tax_use, amount_type='percent', others=None):
         '''Search all taxes and find one that matches all of the parameters.
 
         :param amount:          The amount of the tax.
@@ -454,8 +473,10 @@ class AccountEdiFormat(models.Model):
         '''
         domains = [
             [('amount', '=', float(amount))],
-            [('type_tax_use', '=', type_tax_use)]
+            [('type_tax_use', '=', type_tax_use)],
+            [('amount_type', '=', amount_type)]
         ]
+        domains.extend(others or [])
 
         return self.env['account.tax'].search(expression.AND(domains), order='sequence ASC', limit=1)
 
