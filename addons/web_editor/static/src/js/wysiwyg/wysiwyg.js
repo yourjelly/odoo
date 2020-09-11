@@ -244,8 +244,8 @@ var Wysiwyg = Widget.extend({
             const allEmptyOEditable = $("#wrap .o_editable");
             allEmptyOEditable.each(function(){
                const _this = $(this)
-               if(_this.text().trim() === '') {
-                   // ensure a visualy empty .o_editable doesn't have whitespaces or <br> in it
+               if(_this.text().trim() === '' && _this.find("*:not(br)").length === 0) {
+                   // ensure a visually empty .o_editable doesn't have whitespaces or <br> in it
                    _this.empty();
                }
             });
