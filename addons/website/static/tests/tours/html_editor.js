@@ -21,7 +21,7 @@ tour.register('html_editor_multiple_templates', {
         },
         {
             content: "save the page",
-            trigger: ".o_toolbar button[name=save]",
+            trigger: "button[name=save]",
         },
         // 2. Edit generic view
         {
