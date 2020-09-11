@@ -48,8 +48,11 @@ odoo.define('web.ActionManager', function (require) {
             return super._constructorExtensionParams(...arguments).concat([this]);
         }
         get(property) {
-            const prop = (this.pendingState || this.committedState)[property];
-            return prop || super.get(property);
+            const state = this.pendingState || this.committedState;
+            if (property in state) {
+                return state[property];
+            }
+            return super.get(property);
         }
         dispatch() {
             if (!this.dispatching) {
@@ -151,6 +154,7 @@ odoo.define('web.ActionManager', function (require) {
             }
             const { controllerStack, dialog } = pendingState;
             if (!controllerStack && !dialog) {
+                this._triggerCommitted();
                 return;
             }
             let action, controller;
@@ -177,6 +181,9 @@ odoo.define('web.ActionManager', function (require) {
             }
             this.committedState.controllerStack = controllerStack;
             this._cleanActions();
+            this._triggerCommitted();
+        }
+        _triggerCommitted() {
             const committedValue = {};
             if (this.__commitCallBacks) {
                 Object.entries(this.__commitCallBacks).forEach(([key, cb]) => {

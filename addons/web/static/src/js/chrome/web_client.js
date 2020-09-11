@@ -334,8 +334,8 @@ odoo.define('web.WebClient', function (require) {
         _wcUpdated() {
             const state = {};
             const { main, dialog } = this.actionManager.activeDescriptors;
-            if (main) {
-                const mainComponent = this.mainRef.comp.actionRef.comp;
+            const mainComponent = this.mainRef.comp && this.mainRef.comp.actionRef.comp;
+            if (main && mainComponent) {
                 Object.assign(state, mainComponent.getState());
                 state.action = main.action.id;
                 let active_id = null;
