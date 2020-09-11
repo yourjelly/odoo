@@ -30,7 +30,7 @@ tour.register('test_reset_page_view_complete_flow_part1', {
         },
         {
             content: "save the page",
-            trigger: ".o_toolbar button[name=save]",
+            trigger: ".o_we_website_top_actions button[name=save]",
         },
         // 2. Edit that COW'd view in the HTML editor to break it.
         {
