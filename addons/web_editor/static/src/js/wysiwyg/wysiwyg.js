@@ -487,12 +487,13 @@ var Wysiwyg = Widget.extend({
             await this.snippetsMenu.cleanForSave();
         }
 
-        await this._saveContent();
-
-        this.trigger_up('edition_was_stopped');
-        if (reload) {
-            window.location.reload();
-        }
+        return this._saveContent()
+            .then(() => {
+                this.trigger_up('edition_was_stopped');
+                if (reload) window.location.reload();
+            }).catch(error => {
+                console.error('Impossible to save.', error);
+            });
     },
     discardEditions: async function () {
         var self = this;
@@ -583,13 +584,21 @@ var Wysiwyg = Widget.extend({
      * the page.
      */
     async _saveContent() {
-        await this._saveModifiedImages();
-        const wysiwygSaveContent = async (context)=> {
-            await this._saveViewBlocks();
-            await this._saveCoverPropertiesBlocks(context);
-            await this._saveMegaMenuClasses();
-        };
-        await this.editor.execCommand(wysiwygSaveContent);
+        return new Promise((resolve, reject) => {
+            const wysiwygSaveContent = async (context)=> {
+                await this._saveModifiedImages(context);
+                await this._saveViewBlocks();
+                await this._saveCoverPropertiesBlocks(context);
+                await this._saveMegaMenuClasses();
+            };
+            this.editor.execCommand(wysiwygSaveContent).then(params => {
+                if (params && params.error) {
+                    reject(params.error.message);
+                } else {
+                    resolve();
+                }
+            });
+        });
     },
     /**
      * Gets jQuery cloned element with internal text nodes escaped for XML
@@ -737,7 +746,9 @@ var Wysiwyg = Widget.extend({
             if ($saveNode.length === 0) {
                 $saveNode = $(renderedNode)
             }
-            promises.push(this._saveViewTo($saveNode, +$saveNode[0].dataset.oeId, node.xpath));
+            const promise = this._saveViewTo($saveNode, +$saveNode[0].dataset.oeId, node.xpath);
+            promise.catch(() => { console.error('Fail to save:', $saveNode[0]); });
+            promises.push(promise);
         }
         return Promise.all(promises);
     },
@@ -867,7 +878,7 @@ var Wysiwyg = Widget.extend({
      *
      * @private
      */
-    _saveModifiedImages: async function () {
+    _saveModifiedImages: async function (context) {
         const wysiwygSaveModifiedImages = async (context) => {
             const defs = _.map(this._getEditable($('#wrapwrap')), async editableEl => {
                 const {oeModel: resModel, oeId: resId} = editableEl.dataset;
@@ -898,7 +909,7 @@ var Wysiwyg = Widget.extend({
             });
             await Promise.all(defs);
         };
-        await this.editor.execCommand(wysiwygSaveModifiedImages);
+        return context.execCommand(wysiwygSaveModifiedImages);
     },
     /**
      * Initialize the editor for a translation.

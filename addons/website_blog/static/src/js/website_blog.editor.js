@@ -94,9 +94,9 @@ Wysiwyg.include({
      * @override
      */
     async _saveContent() {
-        const ret = await this._super(...arguments);
-        await this._saveBlogTags();
-        return ret;
+        return this._super(...arguments).then(() => {
+            return this._saveBlogTags();
+        });
     },
 
     //--------------------------------------------------------------------------
