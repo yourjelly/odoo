@@ -48,9 +48,9 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         if (this.nodeOptions.cssReadonly) {
             this.cssReadonly = await ajax.loadAsset(this.nodeOptions.cssReadonly);
         }
-        if (this.nodeOptions.cssEdit) {
+        if (this.nodeOptions.cssEdit || this.nodeOptions['style-inline']) {
             this.needShadow = true;
-            this.cssEdit = await ajax.loadAsset(this.nodeOptions.cssEdit);
+            this.cssEdit = await ajax.loadAsset(this.nodeOptions.cssEdit || 'web_editor.assets_edit_html_field');
         }
     },
     /**
@@ -89,7 +89,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             return _super();
         }
         this._isDirty = await this.wysiwyg.isDirty();
-        debugger
         // todo: make this work
         this._value = await this.wysiwyg.getValue(this.nodeOptions['style-inline'] ? 'text/mail' : 'text/html');
         return _super();
