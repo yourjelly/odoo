@@ -1154,6 +1154,15 @@ var SnippetsMenu = Widget.extend({
         return this._defLoadSnippets;
     },
     /**
+     * Get the editable area.
+     *
+     * @returns {JQuery}
+     */
+    getEditableArea: function () {
+        return this.$editor.find(this.selectorEditableArea)
+            .add(this.$editor.filter(this.selectorEditableArea));
+    },
+    /**
      * Updates the cover dimensions of the current snippet editor.
      */
     updateCurrentSnippetEditorOverlay: function () {
@@ -1570,11 +1579,11 @@ var SnippetsMenu = Widget.extend({
             };
         } else {
             functions.closest = function ($from, parentNode) {
-                var editors = self.$editor.get();
+                var snippetEditors = self.getEditableArea().get();
                 return $from.closest(selector, parentNode).filter(function () {
                     var node = this;
                     while (node.parentNode) {
-                        if (editors.indexOf(node) !== -1) {
+                        if (snippetEditors.indexOf(node) !== -1) {
                             return true;
                         }
                         node = node.parentNode;
