@@ -47,6 +47,9 @@ odoo.define('web.ActionAbstractPlugin', function (require) {
         get controllers() {
             return this.actionManager.controllers;
         }
+        get committedState() {
+            return this.actionManager.committedState;
+        }
         get currentStack() {
             return this.actionManager.currentStack;
         }
