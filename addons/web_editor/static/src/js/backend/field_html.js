@@ -90,7 +90,11 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         }
         this._isDirty = await this.wysiwyg.isDirty();
         // todo: make this work
-        this._value = await this.wysiwyg.getValue(this.nodeOptions['style-inline'] ? 'text/mail' : 'text/html');
+        const promise = this.wysiwyg.getValue(this.nodeOptions['style-inline'] ? 'text/mail' : 'text/html');
+        promise.catch(error => {
+            console.error(error);
+        });
+        this._value = await promise;
         return _super();
     },
     /**
