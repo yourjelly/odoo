@@ -47,7 +47,7 @@ class TestExpenses(TestExpenseCommon):
         })
 
         # Check expense sheet values.
-        self.assertRecordValues(expense_sheet, [{'state': 'draft', 'total_amount': 1725.0}])
+        self.assertRecordValues(expense_sheet, [{'state': 'draft', 'total_amount': 2012.5}])
 
         expense_sheet.action_submit_sheet()
         expense_sheet.approve_expense_sheets()
@@ -104,7 +104,7 @@ class TestExpenses(TestExpenseCommon):
                 'debit': 750.0,
                 'credit': 0.0,
                 'amount_currency': 1500.0,
-                'account_id': self.company_data['default_account_expense'].id,
+                'account_id': self.product_b.property_account_expense_id.id,
                 'product_id': self.product_b.id,
                 'currency_id': self.currency_data['currency'].id,
                 'tax_line_id': False,
@@ -115,7 +115,7 @@ class TestExpenses(TestExpenseCommon):
                 'debit': 1000.0,
                 'credit': 0.0,
                 'amount_currency': 1000.0,
-                'account_id': self.company_data['default_account_expense'].id,
+                'account_id': self.product_a.property_account_expense_id.id,
                 'product_id': self.product_a.id,
                 'currency_id': self.company_data['currency'].id,
                 'tax_line_id': False,

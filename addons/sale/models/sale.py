@@ -36,21 +36,13 @@ class SaleOrder(models.Model):
     def _get_default_require_payment(self):
         return self.env.company.portal_confirmation_pay
 
-    @api.depends('order_line.price_total')
+    @api.depends('order_line.price_subtotal', 'order_line.price_tax', 'order_line.price_total')
     def _amount_all(self):
-        """
-        Compute the total amounts of the SO.
-        """
         for order in self:
-            amount_untaxed = amount_tax = 0.0
-            for line in order.order_line:
-                amount_untaxed += line.price_subtotal
-                amount_tax += line.price_tax
-            order.update({
-                'amount_untaxed': amount_untaxed,
-                'amount_tax': amount_tax,
-                'amount_total': amount_untaxed + amount_tax,
-            })
+            diff_taxes = order.order_line._compute_diff_taxes()
+            order.amount_untaxed = diff_taxes.get('amount_untaxed', 0.0)
+            order.amount_tax = diff_taxes.get('amount_tax', 0.0)
+            order.amount_total = diff_taxes.get('amount_total', 0.0)
 
     @api.depends('order_line.invoice_lines')
     def _get_invoiced(self):
@@ -111,11 +103,6 @@ class SaleOrder(models.Model):
     def _default_note(self):
         return self.env['ir.config_parameter'].sudo().get_param('account.use_invoice_terms') and self.env.company.invoice_terms or ''
 
-    @api.model
-    def _get_default_team(self):
-        return self.env['crm.team']._get_default_team_id()
-
-    @api.onchange('fiscal_position_id')
     def _compute_tax_id(self):
         """
         Trigger the recompute of the taxes if the fiscal position is changed on the SO.
@@ -224,8 +211,10 @@ class SaleOrder(models.Model):
         "The default value comes from the customer.")
     company_id = fields.Many2one('res.company', 'Company', required=True, index=True, default=lambda self: self.env.company)
     team_id = fields.Many2one(
-        'crm.team', 'Sales Team',
-        change_default=True, default=_get_default_team, check_company=True,  # Unrequired company
+        comodel_name='crm.team',
+        string='Sales Team',
+        store=True, readonly=False, change_default=True, check_company=True,  # Unrequired company
+        compute='_compute_team_id',
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
 
     signature = fields.Image('Signature', help='Signature received through the portal.', copy=False, attachment=True, max_width=1024, max_height=1024)
@@ -383,18 +372,19 @@ class SaleOrder(models.Model):
             values['team_id'] = self.env['crm.team']._get_default_team_id(domain=['|', ('company_id', '=', self.company_id.id), ('company_id', '=', False)],user_id=user_id)
         self.update(values)
 
-    @api.onchange('user_id')
-    def onchange_user_id(self):
-        if self.user_id:
-            self.team_id = self.env['crm.team']._get_default_team_id(user_id=self.user_id.id)
+    @api.depends('user_id')
+    def _compute_team_id(self):
+        for order in self:
+            if order.user_id.sale_team_id:
+                order.team_id = order.user_id.sale_team_id
+            else:
+                order.team_id = self.env['crm.team']._get_default_team_id(user_id=order.user_id.id)
 
     @api.onchange('partner_id')
     def onchange_partner_id_warning(self):
         if not self.partner_id:
             return
         warning = {}
-        title = False
-        message = False
         partner = self.partner_id
 
         # If partner has no warning, check its company
@@ -1069,6 +1059,7 @@ Reason(s) of this behavior could be:
 
 class SaleOrderLine(models.Model):
     _name = 'sale.order.line'
+    _inherit = ['account.business.line.mixin']
     _description = 'Sales Order Line'
     _order = 'order_id, sequence, id'
     _check_company_auto = True
@@ -1108,22 +1099,6 @@ class SaleOrderLine(models.Model):
         self.ensure_one()
         order_date = fields.Datetime.from_string(self.order_id.date_order if self.order_id.state in ['sale', 'done'] else fields.Datetime.now())
         return order_date + timedelta(days=self.customer_lead or 0.0)
-
-    @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
-    def _compute_amount(self):
-        """
-        Compute the amounts of the SO line.
-        """
-        for line in self:
-            price = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
-            taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.product_uom_qty, product=line.product_id, partner=line.order_id.partner_shipping_id)
-            line.update({
-                'price_tax': sum(t.get('amount', 0.0) for t in taxes.get('taxes', [])),
-                'price_total': taxes['total_included'],
-                'price_subtotal': taxes['total_excluded'],
-            })
-            if self.env.context.get('import_file', False) and not self.env.user.user_has_groups('account.group_account_manager'):
-                line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
 
     @api.depends('product_id', 'order_id.state', 'qty_invoiced', 'qty_delivered')
     def _compute_product_updatable(self):
@@ -1182,6 +1157,16 @@ class SaleOrderLine(models.Model):
         for line in self:
             line.price_reduce_taxexcl = line.price_subtotal / line.product_uom_qty if line.product_uom_qty else 0.0
 
+    @api.constrains('display_type', 'product_id', 'price_unit', 'product_uom_qty', 'product_uom')
+    def _check_required_fields(self):
+        for line in self:
+            if line.display_type in ('line_section', 'line_note'):
+                if line.product_id or line.price_unit or line.product_uom_qty or line.product_uom or line.customer_lead:
+                    raise ValidationError(_("Forbidden values on non-accountable sale order line"))
+            else:
+                if not line.product_uom:
+                    raise ValidationError(_("Missing required fields on accountable sale order line"))
+
     def _compute_tax_id(self):
         for line in self:
             line = line.with_company(line.company_id)
@@ -1190,27 +1175,8 @@ class SaleOrderLine(models.Model):
             taxes = line.product_id.taxes_id.filtered(lambda t: t.company_id == line.env.company)
             line.tax_id = fpos.map_tax(taxes, line.product_id, line.order_id.partner_shipping_id)
 
-    @api.model
-    def _prepare_add_missing_fields(self, values):
-        """ Deduce missing required fields from the onchange """
-        res = {}
-        onchange_fields = ['name', 'price_unit', 'product_uom', 'tax_id']
-        if values.get('order_id') and values.get('product_id') and any(f not in values for f in onchange_fields):
-            line = self.new(values)
-            line.product_id_change()
-            for field in onchange_fields:
-                if field not in values:
-                    res[field] = line._fields[field].convert_to_write(line[field], line)
-        return res
-
     @api.model_create_multi
     def create(self, vals_list):
-        for values in vals_list:
-            if values.get('display_type', self.default_get(['display_type'])['display_type']):
-                values.update(product_id=False, price_unit=0, product_uom_qty=0, product_uom=False, customer_lead=0)
-
-            values.update(self._prepare_add_missing_fields(values))
-
         lines = super().create(vals_list)
         for line in lines:
             if line.product_id and line.order_id.state == 'sale':
@@ -1220,15 +1186,6 @@ class SaleOrderLine(models.Model):
                 if line.product_id.expense_policy not in [False, 'no'] and not line.order_id.analytic_account_id:
                     line.order_id._create_analytic_account()
         return lines
-
-    _sql_constraints = [
-        ('accountable_required_fields',
-            "CHECK(display_type IS NOT NULL OR (product_id IS NOT NULL AND product_uom IS NOT NULL))",
-            "Missing required fields on accountable sale order line."),
-        ('non_accountable_null_fields',
-            "CHECK(display_type IS NULL OR (product_id IS NULL AND price_unit = 0 AND product_uom_qty = 0 AND product_uom IS NULL AND customer_lead = 0))",
-            "Forbidden values on non-accountable sale order line"),
-    ]
 
     def _update_line_quantity(self, values):
         orders = self.mapped('order_id')
@@ -1273,7 +1230,10 @@ class SaleOrderLine(models.Model):
         return result
 
     order_id = fields.Many2one('sale.order', string='Order Reference', required=True, ondelete='cascade', index=True, copy=False)
-    name = fields.Text(string='Description', required=True)
+    name = fields.Text(
+        string='Description',
+        store=True, readonly=False,
+        compute='_compute_name')
     sequence = fields.Integer(string='Sequence', default=10)
 
     invoice_lines = fields.Many2many('account.move.line', 'sale_order_line_invoice_rel', 'order_line_id', 'invoice_line_id', string='Invoice Lines', copy=False)
@@ -1283,14 +1243,34 @@ class SaleOrderLine(models.Model):
         ('to invoice', 'To Invoice'),
         ('no', 'Nothing to Invoice')
         ], string='Invoice Status', compute='_compute_invoice_status', store=True, readonly=True, default='no')
-    price_unit = fields.Float('Unit Price', required=True, digits='Product Price', default=0.0)
+    price_unit = fields.Float(
+        string='Unit Price',
+        store=True, readonly=False,
+        compute='_compute_price_unit',
+        digits='Product Price')
 
-    price_subtotal = fields.Monetary(compute='_compute_amount', string='Subtotal', readonly=True, store=True)
-    price_tax = fields.Float(compute='_compute_amount', string='Total Tax', readonly=True, store=True)
-    price_total = fields.Monetary(compute='_compute_amount', string='Total', readonly=True, store=True)
+    price_subtotal = fields.Monetary(
+        string='Subtotal',
+        store=True,
+        compute='_compute_amount',
+        currency_field='currency_id')
+    price_tax = fields.Float(
+        string='Total Tax',
+        store=True,
+        compute='_compute_amount',
+        currency_field='currency_id')
+    price_total = fields.Monetary(
+        string='Total',
+        store=True,
+        compute='_compute_amount',
+        currency_field='currency_id')
 
     price_reduce = fields.Float(compute='_get_price_reduce', string='Price Reduce', digits='Product Price', readonly=True, store=True)
-    tax_id = fields.Many2many('account.tax', string='Taxes', domain=['|', ('active', '=', False), ('active', '=', True)])
+    tax_id = fields.Many2many(
+        comodel_name='account.tax',
+        string='Taxes',
+        store=True, readonly=False,
+        compute='_compute_tax_ids')
     price_reduce_taxinc = fields.Monetary(compute='_get_price_reduce_tax', string='Price Reduce Tax inc', readonly=True, store=True)
     price_reduce_taxexcl = fields.Monetary(compute='_get_price_reduce_notax', string='Price Reduce Tax excl', readonly=True, store=True)
 
@@ -1303,8 +1283,17 @@ class SaleOrderLine(models.Model):
         'product.template', string='Product Template',
         related="product_id.product_tmpl_id", domain=[('sale_ok', '=', True)])
     product_updatable = fields.Boolean(compute='_compute_product_updatable', string='Can Edit Product', readonly=True, default=True)
-    product_uom_qty = fields.Float(string='Quantity', digits='Product Unit of Measure', required=True, default=1.0)
-    product_uom = fields.Many2one('uom.uom', string='Unit of Measure', domain="[('category_id', '=', product_uom_category_id)]")
+    product_uom_qty = fields.Float(
+        string='Quantity',
+        store=True, readonly=False,
+        compute='_compute_quantity',
+        digits='Product Unit of Measure')
+    product_uom = fields.Many2one(
+        comodel_name='uom.uom',
+        string='Unit of Measure',
+        store=True, readonly=False,
+        compute='_compute_product_uom_id',
+        domain="[('category_id', '=', product_uom_category_id)]")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', readonly=True)
     product_uom_readonly = fields.Boolean(compute='_compute_product_uom_readonly')
     product_custom_attribute_value_ids = fields.One2many('product.attribute.custom.value', 'sale_order_line_id', string="Custom Values", copy=True)
@@ -1322,8 +1311,18 @@ class SaleOrderLine(models.Model):
              "  - Analytic From expenses: the quantity is the quantity sum from posted expenses\n"
              "  - Timesheet: the quantity is the sum of hours recorded on tasks linked to this sale line\n"
              "  - Stock Moves: the quantity comes from confirmed pickings\n")
-    qty_delivered = fields.Float('Delivered Quantity', copy=False, compute='_compute_qty_delivered', inverse='_inverse_qty_delivered', compute_sudo=True, store=True, digits='Product Unit of Measure', default=0.0)
-    qty_delivered_manual = fields.Float('Delivered Manually', copy=False, digits='Product Unit of Measure', default=0.0)
+    qty_delivered = fields.Float(
+        string='Delivered Quantity',
+        store=True, readonly=False, copy=False, compute_sudo=True,
+        compute='_compute_qty_delivered',
+        default=0.0,
+        digits='Product Unit of Measure')
+    qty_delivered_manual = fields.Float(
+        string='Delivered Manually',
+        store=True, readonly=False, copy=False, compute_sudo=True,
+        compute='_compute_qty_delivered_manual',
+        default=0.0,
+        digits='Product Unit of Measure')
     qty_to_invoice = fields.Float(
         compute='_get_to_invoice_qty', string='To Invoice Quantity', store=True, readonly=True,
         digits='Product Unit of Measure')
@@ -1357,6 +1356,141 @@ class SaleOrderLine(models.Model):
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+
+    # -------------------------------------------------------------------------
+    # INHERIT account.business.line.mixin
+    # -------------------------------------------------------------------------
+
+    def _get_product(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.product_id
+
+    def _get_product_uom(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.product_uom
+
+    def _get_taxes(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.tax_id
+
+    def _get_price_unit(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.price_unit
+
+    def _get_quantity(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.product_uom_qty
+
+    def _get_discount(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.discount
+
+    def _get_partner(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.partner_id
+
+    def _get_company(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.company_id
+
+    def _get_currency(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.currency_id or self.order_id.company_id.currency_id
+
+    def _get_analytic_account(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.analytic_account_id
+
+    def _get_analytic_tags(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.analytic_tag_ids
+
+    def _get_date(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.date_order or fields.Date.context_today(self)
+
+    def _get_fiscal_position(self):
+        # OVERRIDE
+        self.ensure_one()
+        return self.order_id.fiscal_position_id
+
+    def _get_document_type(self):
+        # OVERRIDE
+        return 'sale'
+
+    # -------------------------------------------------------------------------
+    # BUSINESS CODE
+    # -------------------------------------------------------------------------
+
+    @api.depends('product_id')
+    def _compute_name(self):
+        for line in self:
+            if line.display_type in ('line_section', 'line_note'):
+                line.name = line.name
+            elif line.product_id:
+                product = line._get_product().with_context(lang=line._get_partner().lang)
+                line.name = line.get_sale_order_line_multiline_description_sale(product)
+            else:
+                line.name = line.name
+
+    @api.depends('product_id', 'product_uom')
+    def _compute_price_unit(self):
+        for line in self:
+            if line.display_type in ('line_section', 'line_note'):
+                line.price_unit = 0.0
+            elif line.product_id and line.order_id.pricelist_id and line.order_id.partner_id:
+                product = line.product_id.with_context(
+                    lang=get_lang(self.env, line.order_id.partner_id.lang).code,
+                    partner=line.order_id.partner_id,
+                    quantity=line.product_uom_qty,
+                    date=line.order_id.date_order,
+                    pricelist=line.order_id.pricelist_id.id,
+                    uom=line.product_uom.id
+                )
+                line.price_unit = self.env['account.tax']._fix_tax_included_price_company(line._get_display_price(product), product.taxes_id, line.tax_id, line.company_id)
+            else:
+                line.price_unit = line._get_default_product_price_unit()
+
+    @api.depends('display_type')
+    def _compute_quantity(self):
+        for line in self:
+            if line.display_type in ('line_section', 'line_note'):
+                line.product_uom_qty = 0.0
+            else:
+                line.product_uom_qty = 1.0
+
+    @api.depends('product_id')
+    def _compute_product_uom_id(self):
+        for line in self:
+            if line.display_type in ('line_section', 'line_note'):
+                line.product_uom = False
+            else:
+                line.product_uom = line._get_default_product_uom()
+
+    @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id')
+    def _compute_amount(self):
+        for line in self:
+            diff_taxes = line._compute_diff_taxes()
+            line.price_subtotal = diff_taxes.get('amount_untaxed', 0.0)
+            line.price_tax = diff_taxes.get('amount_tax', 0.0)
+            line.price_total = diff_taxes.get('amount_total', 0.0)
+
+    @api.depends('product_id')
+    def _compute_tax_ids(self):
+        for line in self:
+            line.tax_id = line._get_default_product_taxes()
 
     @api.depends('state')
     def _compute_product_uom_readonly(self):
@@ -1436,12 +1570,8 @@ class SaleOrderLine(models.Model):
 
         return result
 
-    @api.onchange('qty_delivered')
-    def _inverse_qty_delivered(self):
-        """ When writing on qty_delivered, if the value should be modify manually (`qty_delivered_method` = 'manual' only),
-            then we put the value in `qty_delivered_manual`. Otherwise, `qty_delivered_manual` should be False since the
-            delivered qty is automatically compute by other mecanisms.
-        """
+    @api.depends('qty_delivered_method')
+    def _compute_qty_delivered_manual(self):
         for line in self:
             if line.qty_delivered_method == 'manual':
                 line.qty_delivered_manual = line.qty_delivered
@@ -1563,8 +1693,9 @@ class SaleOrderLine(models.Model):
 
     @api.onchange('product_id')
     def product_id_change(self):
-        if not self.product_id:
+        if not self.product_id or self.display_type in ('line_section', 'line_note'):
             return
+
         valid_values = self.product_id.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids
         # remove the is_custom values that don't belong to this template
         for pacv in self.product_custom_attribute_value_ids:
@@ -1576,35 +1707,13 @@ class SaleOrderLine(models.Model):
             if ptav._origin not in valid_values:
                 self.product_no_variant_attribute_value_ids -= ptav
 
-        vals = {}
-        if not self.product_uom or (self.product_id.uom_id.id != self.product_uom.id):
-            vals['product_uom'] = self.product_id.uom_id
-            vals['product_uom_qty'] = self.product_uom_qty or 1.0
+        product = self.product_id.with_context(lang=get_lang(self.env, self.order_id.partner_id.lang).code)
 
-        product = self.product_id.with_context(
-            lang=get_lang(self.env, self.order_id.partner_id.lang).code,
-            partner=self.order_id.partner_id,
-            quantity=vals.get('product_uom_qty') or self.product_uom_qty,
-            date=self.order_id.date_order,
-            pricelist=self.order_id.pricelist_id.id,
-            uom=self.product_uom.id
-        )
-
-        vals.update(name=self.get_sale_order_line_multiline_description_sale(product))
-
-        self._compute_tax_id()
-
-        if self.order_id.pricelist_id and self.order_id.partner_id:
-            vals['price_unit'] = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
-        self.update(vals)
-
-        title = False
-        message = False
         result = {}
         warning = {}
         if product.sale_line_warn != 'no-message':
             title = _("Warning for %s", product.name)
-            message = product.sale_line_warn_msg
+            message = self.product_id.sale_line_warn_msg
             warning['title'] = title
             warning['message'] = message
             result = {'warning': warning}
@@ -1766,7 +1875,8 @@ class SaleOrderLine(models.Model):
         return product.get_product_multiline_description_sale() + self._get_sale_order_line_multiline_description_variants()
 
     def _get_sale_order_line_multiline_description_variants(self):
-        """When using no_variant attributes or is_custom values, the product
+        """
+        When using no_variant attributes or is_custom values, the product
         itself is not sufficient to create the description: we need to add
         information about those special attributes and values.
 

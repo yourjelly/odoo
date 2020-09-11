@@ -124,22 +124,35 @@
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only"/>
                         <h1>
-                            <field name="name" placeholder="e.g. Lunch with Customer"/>
+                            <field name="name"
+                                   attrs="{'readonly': [('state', 'not in', ('draft', 'reported', 'refused'))]}"
+                                   placeholder="e.g. Lunch with Customer"/>
                         </h1>
                     </div>
                     <group>
                         <group>
                             <field name="is_editable" invisible="1"/>
                             <field name="is_ref_editable" invisible="1"/>
-                            <field name="product_id" required="1" context="{'default_can_be_expensed': 1, 'tree_view_ref': 'hr_expense.product_product_expense_tree_view'}"
-                                   widget="many2one_barcode"
-                            />
-                            <field name="unit_amount" required="1" widget="monetary" options="{'currency_field': 'currency_id', 'field_digits': True}"/>
+                            <field name="product_id"
+                                   required="1"
+                                   context="{'default_can_be_expensed': 1, 'tree_view_ref': 'hr_expense.product_product_expense_tree_view'}"
+                                   attrs="{'readonly': [('state', 'not in', ('draft', 'reported', 'refused'))]}"
+                                   widget="many2one_barcode"/>
+                            <field name="unit_amount"
+                                   required="1"
+                                   widget="monetary"
+                                   attrs="{'readonly': [('state', 'not in', ('draft', 'reported', 'refused'))]}"
+                                   options="{'currency_field': 'currency_id', 'field_digits': True}"/>
                             <field name="product_uom_category_id" invisible="1"/>
                             <label for="quantity"/>
                             <div class="o_row">
                                 <field name="quantity" class="oe_inline"/>
-                                <field name="product_uom_id" required="1" widget="selection" class="oe_inline" groups="uom.group_uom"/>
+                                <field name="product_uom_id"
+                                       required="1"
+                                       widget="selection"
+                                       class="oe_inline"
+                                       attrs="{'readonly': [('state', 'not in', ('draft', 'reported', 'refused'))]}"
+                                       groups="uom.group_uom"/>
                             </div>
                             <field name="tax_ids" widget="many2many_tags" groups="account.group_account_readonly" attrs="{'readonly': [('is_editable', '=', False)]}" context="{'default_company_id': company_id}"/>
                             <field name="total_amount" widget='monetary' options="{'currency_field': 'currency_id'}"/>

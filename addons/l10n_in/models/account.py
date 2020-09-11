@@ -45,11 +45,3 @@ class AccountTax(models.Model):
     _inherit = 'account.tax'
 
     l10n_in_reverse_charge = fields.Boolean("Reverse charge", help="Tick this if this tax is reverse charge. Only for Indian accounting")
-
-    def get_grouping_key(self, invoice_tax_val):
-        """ Returns a string that will be used to group account.invoice.tax sharing the same properties"""
-        key = super(AccountTax, self).get_grouping_key(invoice_tax_val)
-        if self.company_id.country_id.code == 'IN':
-            key += "-%s-%s"% (invoice_tax_val.get('l10n_in_product_id', False),
-                invoice_tax_val.get('l10n_in_uom_id', False))
-        return key

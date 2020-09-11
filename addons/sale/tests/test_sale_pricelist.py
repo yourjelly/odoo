@@ -121,8 +121,16 @@ class TestSaleOrder(TestSaleCommon):
         self.sale_order.write({'pricelist_id': self.pricelist_discount_incl.id})
         # Trigger onchange to reset discount, unit price, subtotal, ...
         for line in self.sale_order.order_line:
-            line.product_id_change()
+            line._compute_price_unit()
             line._onchange_discount()
+
+        self.assertRecordValues(self.sale_order.order_line, [
+            {'price_unit': 211.0,   'product_uom_qty': 2.0, 'discount': 0.0,    'tax_id': []},
+            {'price_unit': 144.0,   'product_uom_qty': 2.0, 'discount': 0.0,    'tax_id': []},
+            {'price_unit': 81.0,    'product_uom_qty': 2.0, 'discount': 0.0,    'tax_id': []},
+            {'price_unit': 70.0,    'product_uom_qty': 2.0, 'discount': 0.0,    'tax_id': []},
+        ])
+
         # Check that pricelist of the SO has been applied on the sale order lines or not
         for line in self.sale_order.order_line:
             if line.product_id == self.company_data['product_order_no']:
@@ -145,8 +153,15 @@ class TestSaleOrder(TestSaleCommon):
         self.sale_order.write({'pricelist_id': self.pricelist_discount_excl.id})
         # Trigger onchange to reset discount, unit price, subtotal, ...
         for line in self.sale_order.order_line:
-            line.product_id_change()
+            line._compute_price_unit()
             line._onchange_discount()
+
+        self.assertRecordValues(self.sale_order.order_line, [
+            {'price_unit': 235.0,   'product_uom_qty': 2.0, 'discount': 10.0,   'tax_id': []},
+            {'price_unit': 180.0,   'product_uom_qty': 2.0, 'discount': 0.0,    'tax_id': []},
+            {'price_unit': 90.0,    'product_uom_qty': 2.0, 'discount': 20.0,   'tax_id': []},
+            {'price_unit': 55.0,    'product_uom_qty': 2.0, 'discount': 10.0,   'tax_id': []},
+        ])
 
         # Check pricelist of the SO apply or not on order lines where pricelist contains formula that add 15% on the cost price
         for line in self.sale_order.order_line:

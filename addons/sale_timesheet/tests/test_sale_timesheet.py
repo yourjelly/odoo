@@ -188,8 +188,6 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
             'price_unit': self.product_delivery_timesheet3.list_price,
             'order_id': sale_order.id,
         })
-        so_line_deliver_global_project.product_id_change()
-        so_line_deliver_task_project.product_id_change()
 
         # confirm SO
         sale_order.action_confirm()
@@ -222,7 +220,7 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
 
         # invoice SO
         invoice1 = sale_order._create_invoices()
-        self.assertTrue(float_is_zero(invoice1.amount_total - so_line_deliver_global_project.price_unit * 10.5, precision_digits=2), 'Sale: invoice generation on timesheets product is wrong')
+        self.assertRecordValues(invoice1, [{'amount_total': so_line_deliver_global_project.price_unit * 10.5}])
         self.assertEqual(timesheet1.timesheet_invoice_id, invoice1, "The timesheet1 should not be linked to the invoice 1, as we are in delivered quantity (even if invoice is in draft")
         with self.assertRaises(UserError):  # We can not modify timesheet linked to invoice (even draft ones)
             timesheet1.write({'unit_amount': 42})

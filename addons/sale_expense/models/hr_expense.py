@@ -14,7 +14,6 @@ class Expense(models.Model):
         domain="[('state', '=', 'sale'), ('company_id', '=', company_id)]",
         help="If the product has an expense policy, it will be reinvoiced on this sales order")
     can_be_reinvoiced = fields.Boolean("Can be reinvoiced", compute='_compute_can_be_reinvoiced')
-    analytic_account_id = fields.Many2one(compute='_compute_analytic_account_id', store=True, readonly=False)
 
     @api.depends('product_id.expense_policy')
     def _compute_can_be_reinvoiced(self):
@@ -28,19 +27,8 @@ class Expense(models.Model):
 
     @api.depends('sale_order_id')
     def _compute_analytic_account_id(self):
-        for expense in self.filtered('sale_order_id'):
-            expense.analytic_account_id = expense.sale_order_id.sudo().analytic_account_id  # `sudo` required for normal employee without sale access rights
-
-    def action_move_create(self):
-        """ When posting expense, if the AA is given, we will track cost in that
-            If a SO is set, this means we want to reinvoice the expense. But to do so, we
-            need the analytic entries to be generated, so a AA is required to reinvoice. So,
-            we ensure the AA if a SO is given.
-        """
-        for expense in self.filtered(lambda expense: expense.sale_order_id and not expense.analytic_account_id):
-            if not expense.sale_order_id.analytic_account_id:
-                expense.sale_order_id._create_analytic_account()
-            expense.write({
-                'analytic_account_id': expense.sale_order_id.analytic_account_id.id
-            })
-        return super(Expense, self).action_move_create()
+        super()._compute_analytic_account_id()
+        for expense in self:
+            if expense.sale_order_id:
+                # `sudo` required for normal employee without sale access rights
+                expense.analytic_account_id = expense.sale_order_id.sudo().analytic_account_id

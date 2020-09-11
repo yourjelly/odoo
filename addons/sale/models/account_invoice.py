@@ -13,7 +13,11 @@ class AccountMove(models.Model):
         return self.env['crm.team']._get_default_team_id()
 
     team_id = fields.Many2one(
-        'crm.team', string='Sales Team', default=_get_invoice_default_sale_team,
+        comodel_name='crm.team',
+        string='Sales Team',
+        store=True, readonly=False,
+        compute='_compute_team_id',
+        default=_get_invoice_default_sale_team,
         domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     partner_shipping_id = fields.Many2one(
         comodel_name='res.partner',
@@ -47,10 +51,13 @@ class AccountMove(models.Model):
             downpayment_lines.unlink()
         return res
 
-    @api.onchange('invoice_user_id')
-    def onchange_user_id(self):
-        if self.invoice_user_id and self.invoice_user_id.sale_team_id:
-            self.team_id = self.invoice_user_id.sale_team_id
+    @api.depends('user_id')
+    def _compute_team_id(self):
+        for invoice in self:
+            if invoice.user_id.sale_team_id:
+                invoice.team_id = invoice.user_id.sale_team_id
+            else:
+                invoice.team_id = self.env['crm.team']._get_default_team_id(user_id=invoice.user_id.id)
 
     def _reverse_moves(self, default_values_list=None, cancel=False):
         # OVERRIDE

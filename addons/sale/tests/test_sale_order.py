@@ -268,9 +268,11 @@ class TestSaleOrder(TestSaleCommon):
 
             self.assertEqual(float_compare(line.price_subtotal, price, precision_digits=2), 0)
 
-        self.assertEqual(self.sale_order.amount_total,
-                          self.sale_order.amount_untaxed + self.sale_order.amount_tax,
-                          'Taxes should be applied')
+        self.assertRecordValues(self.sale_order, [{
+            'amount_untaxed': 1156.36,
+            'amount_tax': 115.64,
+            'amount_total': 1272.0,
+        }])
 
     def test_so_create_multicompany(self):
         """Check that only taxes of the right company are applied on the lines."""

@@ -56,23 +56,6 @@ class AccountMove(models.Model):
             return self.env.ref('l10n_in.state_in_ot')
         return partner.state_id
 
-
-    @api.model
-    def _get_tax_grouping_key_from_tax_line(self, tax_line):
-        # OVERRIDE to group taxes also by product.
-        res = super()._get_tax_grouping_key_from_tax_line(tax_line)
-        res['product_id'] = tax_line.product_id.id
-        return res
-
-    @api.model
-    def _get_tax_grouping_key_from_base_line(self, base_line, tax_vals):
-        # OVERRIDE to group taxes also by product.
-        res = super()._get_tax_grouping_key_from_base_line(base_line, tax_vals)
-        res.update({
-            'product_id': base_line.product_id.id,
-        })
-        return res
-
     @api.model
     def _get_tax_key_for_group_add_base(self, line):
         tax_key = super(AccountMove, self)._get_tax_key_for_group_add_base(line)
