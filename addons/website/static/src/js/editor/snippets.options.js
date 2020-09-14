@@ -760,6 +760,8 @@ snippetOptions.registry.BackgroundVideo = snippetOptions.SnippetOptionWidget.ext
             delete target.dataset.bgVideoSrc;
         }
         await this._refreshPublicWidgets();
+
+        await this._refreshTarget();
     },
 });
 
