@@ -53,7 +53,7 @@
                                     <field name="mobile_phone" widget="phone"/>
                                     <field name="work_phone" widget="phone"/>
                                     <field name="work_email" widget="email"/>
-                                    <field name="work_location"/>
+                                    <field name="work_location_id"/>
                                 </group>
                                 <group>
                                     <field name="department_id"/>

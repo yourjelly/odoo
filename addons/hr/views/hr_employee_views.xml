@@ -89,7 +89,7 @@
                                 <field name="mobile_phone" widget="phone"/>
                                 <field name="work_phone" widget="phone"/>
                                 <field name="work_email" widget="email"/>
-                                <field name="work_location"/>
+                                <field name="work_location_id"/>
                                 <field name="company_id" groups="base.group_multi_company"/>
                             </group>
                             <group>
