@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="app_store_icon_qr_code">
+        <div class="text-center">
+            <t t-if="widget.url">
+                <h3>Scan this QR code to get the Awesome app:</h3><br/><br/>
+                <img class="border border-dark rounded" t-att-src="widget.url"/>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="base_setup.AppStoreIcon" owl="1">
+        <div class="o_app_store_icon">
+            <a href="http://www.odoo.com/page/timesheet?platform=chrome" target="_blank">
+                <img alt="Google Chrome Store" class="img img-fluid h-100" src="project/static/src/img/chrome_store.png"/>
+            </a>
+            <img alt="Apple App Store" name="apple_app_store" class="img img-fluid h-100" style="cursor: pointer;" src="project/static/src/img/app_store.png" t-on-click="_onclickAppStore()"/>
+            <img alt="Google Play Store" name="google_play_store" class="img img-fluid h-100" style="cursor: pointer;" src="project/static/src/img/play_store.png" t-on-click="_onclickAppStore()"/>
+        </div>
+    </t>
+</templates>

@@ -3,6 +3,20 @@
         font-size: 95%;
         font-weight: 500;
     }
+
+    #about {
+
+        .o_app_store_icon {
+            a {
+                display: none;
+            }
+
+            img {
+                height: 60px !important;
+                margin-right: 5px;
+            }
+        }
+    }
 }
 
 .o_doc_link {

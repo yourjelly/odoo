@@ -2,3 +2,19 @@
     border: none;
     padding-left: 0px;
 }
+.o_setting_right_pane {
+
+   .o_app_store_icon {
+        margin-top: 8px;
+
+        img {
+            margin-right: 8px;
+        }
+        @include media-breakpoint-down(sm) {
+            img {
+                display: flex;
+                margin-top: 2px;
+            }
+        }
+    }
+}

@@ -1,4 +1,4 @@
-odoo.define('hr_timesheet.qr_code_action', function (require) {
+odoo.define('base_setup.qr_code_action', function (require) {
     "use strict";
 
 const AbstractAction = require('web.AbstractAction');
@@ -6,8 +6,8 @@ const core = require('web.core');
 const config = require('web.config');
 
 const QRModalAction = AbstractAction.extend({
-    template: 'hr_timesheet_qr_code',
-    xmlDependencies: ['/hr_timesheet/static/src/xml/qr_modal_template.xml'],
+    template: 'app_store_icon_qr_code',
+    xmlDependencies: ['/base_setup/static/src/xml/qr_modal_template.xml'],
 
     init: function(parent, action){
         this._super.apply(this, arguments);
@@ -20,5 +20,5 @@ const QRModalAction = AbstractAction.extend({
     },
 });
 
-core.action_registry.add('timesheet_qr_code_modal', QRModalAction);
+core.action_registry.add('app_store_icon_qr_code_modal', QRModalAction);
 });
