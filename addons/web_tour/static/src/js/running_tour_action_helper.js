@@ -138,8 +138,8 @@ var RunningTourActionHelper = core.Class.extend({
 
         values.$element.trigger($.Event("mouseenter"));
         values.$element.trigger($.Event("mousedown", {which: 1, pageX: elementCenter.left, pageY: elementCenter.top, clientX: elementCenter.left - window.pageXOffset, clientY: elementCenter.top - window.pageYOffset}));
-        values.$element.trigger($.Event("mousemove", {which: 1, pageX: toCenter.left, pageY: toCenter.top, clientX: toCenter.left, clientY: toCenter.top}));
-        values.$element.trigger($.Event("mouseup", {which: 1, pageX: toCenter.left, pageY: toCenter.top, clientX: toCenter.left, clientY: toCenter.top}));
+        values.$element.trigger($.Event("mousemove", {which: 1, pageX: toCenter.left, pageY: toCenter.top, clientX: elementCenter.left - window.pageXOffset, clientY: elementCenter.top - window.pageYOffset}));
+        values.$element.trigger($.Event("mouseup", {which: 1, pageX: toCenter.left, pageY: toCenter.top, clientX: elementCenter.left - window.pageXOffset, clientY: elementCenter.top - window.pageYOffset}));
      },
     _keydown: function (values, keyCodes) {
         while (keyCodes.length) {
