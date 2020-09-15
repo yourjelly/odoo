@@ -6,7 +6,6 @@ var FormView = require('web.FormView');
 var testUtils = require('web.test_utils');
 var weTestUtils = require('web_editor.test_utils');
 var core = require('web.core');
-var loader = require('web_editor.loader');
 var Wysiwyg = require('web_editor.wysiwyg');
 var MediaDialog = require('wysiwyg.widgets.MediaDialog');
 var FieldHtml = require('web_editor.field.html');
@@ -136,9 +135,7 @@ QUnit.module('web_editor', {}, function () {
 
             form.destroy();
         });
-
-        // TODO : need to be checked and fixed to pass with new JW editor
-        QUnit.skip('check if required field is set', async function (assert) {
+        QUnit.test('check if required field is set', async function (assert) {
             assert.expect(1);
 
             var form = await testUtils.createView({
@@ -207,17 +204,19 @@ QUnit.module('web_editor', {}, function () {
                 "should select the text");
 
             async function openColorpicker() {
-                const $colorpickerButton = $field.find('jw-toolbar button[name=backgroundcolorpicker]');
+                const $colorpickerButton = $('jw-toolbar jw-button[name=backgroundcolorpicker]');
                 await testUtils.dom.click($colorpickerButton);
             }
 
-            await testUtils.nextTick();;
+            await testUtils.nextTick();
+            await new Promise(resolve => setTimeout(resolve, 100));
             await openColorpicker();
-            await testUtils.nextTick();;
-            assert.ok($field.find('.jw-dropdown-backgroundcolor .dropdown-menu').is(':visible'),
+            await testUtils.nextTick();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            assert.ok($('.jw-dropdown-backgroundcolor .dropdown-menu').is(':visible'),
                 "should display the color picker");
 
-            await testUtils.dom.click($field.find('.jw-dropdown-backgroundcolor .o_we_color_btn[style="background-color:#00FFFF;"]'));
+            await testUtils.dom.click($('.jw-dropdown-backgroundcolor .o_we_color_btn[style="background-color:#00FFFF;"]'));
             assert.ok(!$field.find('.o_colorpicker_container').is(':visible'),
                 "should close the color picker");
 
@@ -300,10 +299,11 @@ QUnit.module('web_editor', {}, function () {
             });
 
             var pText = $field.find('.note-editable p').first().contents()[0];
-            Wysiwyg.setRange(wysiwyg, pText, 1);
-            await testUtils.nextTick();;
-            await testUtils.dom.click($field.find('jw-toolbar button.fa-file-image-o'));
-            await testUtils.nextTick();;
+            await Wysiwyg.setRange(wysiwyg, pText, 1, pText, 3);
+            await testUtils.nextTick();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await testUtils.dom.click($('jw-toolbar jw-button[name=media]'));
+            await testUtils.nextTick();
 
             // load static xml file (dialog, media dialog, unsplash image widget)
             await defMediaDialog;
@@ -355,9 +355,10 @@ QUnit.module('web_editor', {}, function () {
 
             var pText = $field.find('.note-editable p').first().contents()[0];
 
-            Wysiwyg.setRange(wysiwyg, pText, 1);
-            await testUtils.nextTick();;
-            await testUtils.dom.click($field.find('jw-toolbar button.fa-file-image-o'));
+            await Wysiwyg.setRange(wysiwyg, pText, 1, pText, 3);
+            await testUtils.nextTick();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            await testUtils.dom.click($('jw-toolbar jw-button[name=media]'));
             await testUtils.nextTick();;
 
             // load static xml file (dialog, media dialog, unsplash image widget)
@@ -367,7 +368,7 @@ QUnit.module('web_editor', {}, function () {
             await testUtils.dom.click($('.modal #editor-media-icon .font-icons-icon.fa-glass'));
 
             assert.strictEqual($field.find('.note-editable').html(),
-                '<p>t​<span class="fa fa-glass"></span>​oto toto toto</p><p>tata</p>',
+                '<p>t​<span class="fa fa-glass"></span>​ toto toto</p><p>tata</p>',
                 "should have the image in the dom");
 
             testUtils.mock.unpatch(MediaDialog);
@@ -389,7 +390,7 @@ QUnit.module('web_editor', {}, function () {
                 mockRPC: function (route, args) {
                     if (args.method === "write") {
                         assert.strictEqual(args.args[1].body,
-                            '<p>t<span style="background-color: #00FFFF;">oto toto </span>toto</p><p>tata</p>',
+                            '<p>t<span style="background-color:#00FFFF;">oto toto </span>toto</p><p>tata</p>',
                             "should save the content");
 
                     }
@@ -407,15 +408,16 @@ QUnit.module('web_editor', {}, function () {
             // text is selected
 
             async function openColorpicker() {
-                const $colorpickerButton = $field.find('jw-toolbar button[name=backgroundcolorpicker]');
+                const $colorpickerButton = $('jw-toolbar jw-button[name=backgroundcolorpicker]');
                 await testUtils.dom.click($colorpickerButton);
             }
 
-            await testUtils.nextTick();;
+            await testUtils.nextTick();
+            await new Promise(resolve => setTimeout(resolve, 100));
             await openColorpicker();
-            await testUtils.nextTick();;
+            await testUtils.nextTick();
 
-            await testUtils.dom.click($field.find('jw-toolbar .o_we_color_btn[style="background-color:#00FFFF;"]'));
+            await testUtils.dom.click($('jw-toolbar .o_we_color_btn[style="background-color:#00FFFF;"]'));
 
             await testUtils.form.clickSave(form);
 

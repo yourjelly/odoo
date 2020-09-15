@@ -422,7 +422,8 @@ var Wysiwyg = Widget.extend({
     },
     async toggleTextColorPicker() {
         // event.target equal the current toggle button clicked.
-        const $textColorDropdown = $(event.target).parent();
+        // window.event can be undefined during Qunit test
+        const $textColorDropdown = event ? $(event.target).parent() : $(".jw-dropdown-textcolor");
         await this.initColorPicker(
             $textColorDropdown,
             "colorText",
@@ -432,7 +433,8 @@ var Wysiwyg = Widget.extend({
     },
     async toggleBackgroundColorPicker() {
         // event.target equal the current toggle button clicked.
-        const $backgroundColorDropdown = $(event.target).parent();
+        // window.event can be undefined during Qunit test
+        const $backgroundColorDropdown = event ? $(event.target).parent() : $(".jw-dropdown-backgroundcolor");
         await this.initColorPicker(
             $backgroundColorDropdown,
             "colorBackground",

@@ -296,7 +296,7 @@ async function createWysiwyg() {
     var parent = new Widget();
     await testUtils.mock.addMockEnvironment(parent, params);
 
-    var wysiwygOptions = _.extend(this._getWysiwygOptions(), params.wysiwygOptions, {
+    var wysiwygOptions = _.extend(this._getWysiwygOptions(), await this._getWysiwygOptions(), {
         recordInfo: {
             context: {},
             res_model: 'module.test',
