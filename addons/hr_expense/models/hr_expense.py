@@ -104,7 +104,6 @@ class HrExpense(models.Model):
 
     @api.depends('sheet_id', 'sheet_id.account_move_id', 'sheet_id.state')
     def _compute_state(self):
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         for expense in self:
             if not expense.sheet_id or expense.sheet_id.state == 'draft':
                 expense.state = "draft"
@@ -550,7 +549,6 @@ class HrExpense(models.Model):
             'draft': {
                 'description': _('to report'),
                 'amount': list(),
-                'color': 'alert-info',
             },
             'reported': {
                 'description': _('under validation'),

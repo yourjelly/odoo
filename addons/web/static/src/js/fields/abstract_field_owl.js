@@ -4,7 +4,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
     const field_utils = require('web.field_utils');
     const { useListener } = require('web.custom_hooks');
 
-    const { onMounted, onPatched } = owl.hooks;
+    const { onMounted, onPatched, onWillUnmount, onWillStart } = owl.hooks;
 
     /**
      * This file defines the Owl version of the AbstractField. Specific fields
@@ -60,6 +60,7 @@ odoo.define('web.AbstractFieldOwl', function (require) {
          * @param {string} [props.options.viewType=default]
          */
         constructor() {
+            // debugger;
             super(...arguments);
 
             this._isValid = true;
@@ -69,9 +70,34 @@ odoo.define('web.AbstractFieldOwl', function (require) {
 
             useListener('keydown', this._onKeydown);
             useListener('navigation-move', this._onNavigationMove);
-            onMounted(() => this._applyDecorations());
-            onPatched(() => this._applyDecorations());
+            // function _applyDecorations() {
+            //     for (const dec of this.attrs.decorations || []) {
+            //         const isToggled = py.PY_isTrue(
+            //             py.evaluate(dec.expression, this.record.evalContext)
+            //         );
+            //         const className = this._getClassFromDecoration(dec.name);
+            //         this.el.classList.toggle(className, isToggled);
+            //     }
+            // }
+            // this._applyDecorations();
+            // onWillStart(() => this._applyDecorations());
+            // onMounted(() => this._applyDecorations());
+            // onPatched(() => this._applyDecorations());
+            // onWillUnmount(() => this._applyDecorations());
         }
+        mounted() {
+            for (const dec of this.attrs.decorations || []) {
+                const isToggled = py.PY_isTrue(
+                    py.evaluate(dec.expression, this.record.evalContext)
+                );
+                const className = this._getClassFromDecoration(dec.name);
+                this.el.classList.toggle(className, isToggled);
+            }
+        }
+
+        // patched() {
+        //     this._applyDecorations();
+        // }
         /**
          * Hack: studio tries to find the field with a selector base on its
          * name, before it is mounted into the DOM. Ideally, this should be
@@ -420,15 +446,16 @@ odoo.define('web.AbstractFieldOwl', function (require) {
          *
          * @private
          */
-        _applyDecorations() {
-            for (const dec of this.attrs.decorations || []) {
-                const isToggled = py.PY_isTrue(
-                    py.evaluate(dec.expression, this.record.evalContext)
-                );
-                const className = this._getClassFromDecoration(dec.name);
-                this.el.classList.toggle(className, isToggled);
-            }
-        }
+        // _applyDecorations() {
+        //     // debugger;
+        //     for (const dec of this.attrs.decorations || []) {
+        //         const isToggled = py.PY_isTrue(
+        //             py.evaluate(dec.expression, this.record.evalContext)
+        //         );
+        //         const className = this._getClassFromDecoration(dec.name);
+        //         this.el.classList.toggle(className, isToggled);
+        //     }
+        // }
         /**
          * Converts the value from the field to a string representation.
          *
