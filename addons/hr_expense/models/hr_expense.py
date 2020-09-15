@@ -132,8 +132,8 @@ class HrExpense(models.Model):
             if expense.company_currency_id:
                 date_expense = expense.date
                 amount = expense.currency_id._convert(
-                    expense.total_amount, expense.company_currency_id,
-                    expense.company_id, date_expense or fields.Date.today())
+                    expense.total_amount, expense.currency_id,
+                    self.env.company, date_expense or fields.Date.today())
             expense.total_amount_company = amount
 
     def _compute_attachment_number(self):
