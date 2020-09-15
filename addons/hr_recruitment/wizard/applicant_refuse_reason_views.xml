@@ -16,7 +16,7 @@
                 </form>
             </field>
         </record>
-
+<!-- 
         <record id="applicant_get_refuse_reason_action" model="ir.actions.act_window">
             <field name="name">Refuse Reason</field>
             <field name="type">ir.actions.act_window</field>
@@ -24,5 +24,5 @@
             <field name="view_mode">form</field>
             <field name="view_id" ref="applicant_get_refuse_reason_view_form"/>
             <field name="target">new</field>
-        </record>
+        </record> -->
 </odoo>
