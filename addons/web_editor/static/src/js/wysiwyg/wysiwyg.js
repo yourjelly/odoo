@@ -101,7 +101,7 @@ var Wysiwyg = Widget.extend({
                         selector: [
                             (node) => {
                                 const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
-                                const isWrapper = attributes && attributes.get('id') === 'wrap' ;
+                                const isWrapper = attributes && attributes.classList.has('oe_structure') ;
                                 return isWrapper;
                             },
                         ],
@@ -244,9 +244,9 @@ var Wysiwyg = Widget.extend({
             $wrapwrap.data('wysiwyg', this);
 
             // add class when page content is empty to show the "DRAG BUILDING BLOCKS HERE" block
-            const targetNode = this.editorEditable.querySelector("#wrap");
-            if (targetNode) {
-                targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+            const $targetNode = $(this.editorEditable).find(".oe_structure");
+            if ($targetNode.length) {
+                $targetNode.attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             }
         }
 
