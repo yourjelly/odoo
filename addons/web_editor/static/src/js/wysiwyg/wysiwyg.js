@@ -134,6 +134,12 @@ var Wysiwyg = Widget.extend({
                         },
                     },
                     {
+                        selector: [this.JWEditorLib.OdooFieldNode],
+                        properties: {
+                            allowEmpty: { value: true },
+                        },
+                    },
+                    {
                         selector: [
                             (node) => {
                                 const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
@@ -242,15 +248,6 @@ var Wysiwyg = Widget.extend({
             if (targetNode) {
                 targetNode.setAttribute('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
             }
-
-            const allEmptyOEditable = $("#wrap .o_editable");
-            allEmptyOEditable.each(function(){
-               const _this = $(this)
-               if(_this.text().trim() === '' && _this.find("*:not(br)").length === 0) {
-                   // ensure a visually empty .o_editable doesn't have whitespaces or <br> in it
-                   _this.empty();
-               }
-            });
         }
 
         if (this.options.enableTranslation) {
