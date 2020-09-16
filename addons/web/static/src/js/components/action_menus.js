@@ -55,7 +55,11 @@ odoo.define('web.ActionMenus', function (require) {
                     props: getProps(this.props),
                 })
             );
-            return [...callbackActions, ...formattedActions, ...registryActions];
+            console.log("callbackActions", callbackActions);
+            console.log("formattedActions", formattedActions);
+            console.log("registryActions", registryActions);
+            
+            return [...callbackActions, ...registryActions];
         }
 
         /**

@@ -427,6 +427,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
         if (this.$buttons) {
             this.controlPanelProps.cp_content.$buttons = this.$buttons;
         }
+        console.log(">>>>>>>>.",this._getActionMenuItems(state));
         Object.assign(this.controlPanelProps, {
             actionMenus: this._getActionMenuItems(state),
             pager: this._getPagingInfo(state),
