@@ -29,7 +29,6 @@ var ReportAction = AbstractAction.extend({
 
         // Extra info that will be useful to build a qweb-pdf action.
         this.report_name = options.report_name;
-        this.report_file = options.report_file;
         this.data = options.data || {};
         this.context = options.context || {};
     },
@@ -116,7 +115,6 @@ var ReportAction = AbstractAction.extend({
             'type': 'ir.actions.report',
             'report_type': 'qweb-pdf',
             'report_name': this.report_name,
-            'report_file': this.report_file,
             'data': this.data,
             'context': this.context,
             'display_name': this.title,

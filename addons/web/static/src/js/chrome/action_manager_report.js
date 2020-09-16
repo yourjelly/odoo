@@ -145,7 +145,6 @@ ActionManager.include({
             data: action.data,
             display_name: action.display_name,
             name: action.name,
-            report_file: action.report_file,
             report_name: action.report_name,
             report_url: urls.html,
         });

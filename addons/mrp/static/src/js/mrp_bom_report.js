@@ -133,7 +133,6 @@ var MrpBomReport = stock_report_generic.extend({
             'type': 'ir.actions.report',
             'report_type': 'qweb-pdf',
             'report_name': reportname,
-            'report_file': 'mrp.report_bom_structure',
         };
         return this.do_action(action).then(function (){
             framework.unblockUI();

@@ -250,7 +250,6 @@ var GeneratePriceList = AbstractAction.extend(StandaloneFieldManagerMixin, {
             type: 'ir.actions.report',
             report_type: 'qweb-pdf',
             report_name: reportName,
-            report_file: 'product.report_pricelist',
         });
     },
     /**

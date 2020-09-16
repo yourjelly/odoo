@@ -25,7 +25,6 @@ Index: foo/openacademy/reports.xml
 +        <field name="model">openacademy.session</field>
 +        <field name="report_type">qweb-pdf</field>
 +        <field name="report_name">openacademy.report_session_view</field>
-+        <field name="report_file">openacademy.report_session</field>
 +        <field name="binding_model_id" ref="model_openacademy_session"/>
 +        <field name="binding_type">report</field>
 +    </record>

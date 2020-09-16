@@ -273,7 +273,6 @@ form: module.record_id""" % (xml_id,)
         for field, dest in (('attachment', 'attachment'),
                             ('attachment_use', 'attachment_use'),
                             ('usage', 'usage'),
-                            ('file', 'report_file'),
                             ('report_type', 'report_type'),
                             ('parser', 'parser'),
                             ('print_report_name', 'print_report_name'),

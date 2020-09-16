@@ -757,7 +757,6 @@
         <field name="model">res.company</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">web.preview_internalreport</field>
-        <field name="report_file">web.preview_internalreport</field>
         <field name="binding_model_id" ref="model_res_company"/>
         <field name="binding_type">report</field>
     </record>
@@ -766,7 +765,6 @@
         <field name="model">res.company</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">web.preview_externalreport</field>
-        <field name="report_file">web.preview_externalreport</field>
         <field name="binding_model_id" ref="model_res_company"/>
         <field name="binding_type">report</field>
     </record>

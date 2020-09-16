@@ -6,7 +6,6 @@
             <field name="model">hr.holidays.summary.dept</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">hr_holidays.report_holidayssummary</field>
-            <field name="report_file">hr_holidays.report_holidayssummary</field>
         </record>
 
         <record id="action_report_holidayssummary" model="ir.actions.report">
@@ -18,7 +17,6 @@
             <field name="model">hr.leave.allocation</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">hr_holidays.report_holidayssummary</field>
-            <field name="report_file">hr_holidays.report_holidayssummary</field>
         </record>
 
         <record id="action_report_holidayssummary" model="ir.actions.report">

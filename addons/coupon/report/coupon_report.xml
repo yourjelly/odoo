@@ -6,7 +6,6 @@
             <field name="model">coupon.coupon</field>
             <field name="report_type">qweb-pdf</field>
             <field name="report_name">coupon.report_coupon_i18n</field>
-            <field name="report_file">coupon.report_coupon_i18n</field>
             <field name="binding_model_id" ref="model_coupon_coupon"/>
             <field name="binding_type">report</field>
         </record>
