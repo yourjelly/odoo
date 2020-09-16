@@ -46,12 +46,7 @@ var Wysiwyg = Widget.extend({
         this.colorPickers = [];
         this.JWEditorLib = JWEditorLib;
         if (this.options.enableTranslation) {
-            this.options.snippets = null;
-            this.options.toolbarLayout = [];
-            this.options.customCommands = {
-                saveOdoo: {handler: this._onSaveTranslation.bind(this)}
-            };
-            this.options.mode = {
+            this._modeConfig = {
                 id: 'translate',
                 rules: [
                     {
@@ -93,8 +88,7 @@ var Wysiwyg = Widget.extend({
                 ],
             };
         } else if (this.options.enableWebsite) {
-            this.options.plugins = [[this.JWEditorLib.OdooField]];
-            this.options.mode = {
+            this._modeConfig = {
                 id: 'edit',
                 rules: [
                     {
@@ -206,22 +200,25 @@ var Wysiwyg = Widget.extend({
         const $mainSidebar = $('<div class="o_main_sidebar">');
         const $snippetManipulators = $('<div id="oe_manipulators" />');
 
+        const customCommands = {
+            openMedia: { handler: this.openMediaDialog.bind(this) },
+            openTextColorPicker: { handler: this.toggleTextColorPicker.bind(this) },
+            openBackgroundColorPicker: { handler: this.toggleBackgroundColorPicker.bind(this) },
+            openLinkDialog: { handler: this.openLinkDialog.bind(this) },
+            discardOdoo: { handler: this.discardEditions.bind(this) },
+            saveOdoo: { handler: this.options.enableTranslation ? this.saveToServer.bind(this) : this._onSaveTranslation.bind(this) },
+            cropImage: { handler: this.cropImage.bind(this) },
+            transformImage: { handler: this.transformImage.bind(this) },
+            describeImage: { handler: this.describeImage.bind(this) },
+        };
         this.editor = new JWEditorLib.OdooWebsiteEditor(Object.assign({}, this.options, {
             snippetMenuElement: $mainSidebar[0],
             snippetManipulators: $snippetManipulators[0],
-            customCommands: Object.assign({
-                openMedia: {handler: this.openMediaDialog.bind(this)},
-                openTextColorPicker: {handler: this.toggleTextColorPicker.bind(this)},
-                openBackgroundColorPicker: {handler: this.toggleBackgroundColorPicker.bind(this)},
-                openLinkDialog: {handler: this.openLinkDialog.bind(this)},
-                discardOdoo: {handler: this.discardEditions.bind(this)},
-                saveOdoo: {handler: this.saveToServer.bind(this)},
-                cropImage: {handler: this.cropImage.bind(this)},
-                transformImage: {handler: this.transformImage.bind(this)},
-                describeImage: {handler: this.describeImage.bind(this)},
-            }, this.options.customCommands),
+            customCommands: Object.assign(customCommands, this.options.customCommands),
+            plugins: this.options.enableWebsite ? [[this.JWEditorLib.OdooField]] : [],
             source: this.value,
             location: this.options.location || [this.el, 'replace'],
+            mode: this._modeConfig,
         }));
 
         if (config.isDebug('assets') && JWEditorLib.DevTools) {
@@ -268,6 +265,7 @@ var Wysiwyg = Widget.extend({
                 $snippetEditorArea: $snippetManipulators,
                 wysiwyg: this,
                 JWEditorLib: JWEditorLib,
+                onlyStyleTab: this.options.enableTranslation,
             }, this.options));
             await this.snippetsMenu.appendTo($mainSidebar);
 

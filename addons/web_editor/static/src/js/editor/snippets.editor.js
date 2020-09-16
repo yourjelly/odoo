@@ -2054,16 +2054,10 @@ var SnippetsMenu = Widget.extend({
             $(this.customizePanel).append(content);
 
             if (tab === this.tabs.OPTIONS) {
-                const $toolbar = this.wysiwyg.$toolbar;
                 // Determine if the toolbar is in image or text mode
                 // We cannot use is(":visible") because the toolbar is detach from the DOM
-                const isImageMode = $toolbar.find('input[name=font-size]').css('display') === 'none';
-                const titleText = isImageMode ? _t("Image Formatting") : _t("Text Formatting")
-                const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS />');
-                const title = "<we-title><span>" + titleText + "</span></we-title>";
-                customizeBlock.append(title);
-                customizeBlock.append($toolbar);
-                $(this.customizePanel).append(customizeBlock);
+                const isImage = this.wysiwyg.$toolbar.find('input[name=font-size]').css('display') === 'none';
+                this._addJabberwockToolbar(isImage);
             }
         }
 
@@ -2074,6 +2068,20 @@ var SnippetsMenu = Widget.extend({
         this.$('.o_we_add_snippet_btn').toggleClass('active', tab === this.tabs.BLOCKS);
         this.$('.o_we_customize_snippet_btn').toggleClass('active', tab === this.tabs.OPTIONS)
                                              .prop('disabled', tab !== this.tabs.OPTIONS);
+
+    },
+
+    /**
+     * Add the jabberwock toolbar.
+     */
+    _addJabberwockToolbar(isImage = false) {
+        const $toolbar = this.wysiwyg.$toolbar;
+        const titleText = isImage ? _t("Image Formatting") : _t("Text Formatting");
+        const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS />');
+        const title = "<we-title><span>" + titleText + "</span></we-title>";
+        customizeBlock.append(title);
+        customizeBlock.append($toolbar);
+        $(this.customizePanel).append(customizeBlock);
     },
 
     //--------------------------------------------------------------------------
