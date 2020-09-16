@@ -15,7 +15,7 @@ access_account_reconcile_model_template,account.reconcile.model.template,model_a
 access_account_reconcile_model_line_template,account.reconcile.model.line.template,model_account_reconcile_model_line_template,account.group_account_manager,1,1,1,1
 access_account_group_template,account.group.template,model_account_group_template,account.group_account_manager,1,1,1,1
 
-access_res_currency_account_manager,res.currency account manager,base.model_res_currency,group_account_manager,1,1,1,1
+access_res_currency_account_manager,res.currency account manager,base.model_res_currency,group_account_manager,1,1,0,0
 access_res_currency_rate_account_manager,res.currency.rate account manager,base.model_res_currency_rate,group_account_manager,1,1,1,1
 
 access_account_invoice_report_readonly,account.invoice.report_user,model_account_invoice_report,account.group_account_readonly,1,0,0,0
