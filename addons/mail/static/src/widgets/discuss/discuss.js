@@ -64,12 +64,23 @@ const DiscussWidget = AbstractAction.extend({
         await this._super(...arguments);
         this.env = Component.env;
         await this.env.messagingCreatedPromise;
-        const initActiveId = this.options.active_id ||
+        let initActiveId = this.options.active_id ||
             (this.action.context && this.action.context.active_id) ||
             (this.action.params && this.action.params.default_active_id) ||
             'mail.box_inbox';
         this.discuss = this.env.messaging.discuss;
-        this.discuss.update({ initActiveId });
+        const data = { initActiveId };
+        if (this.env.messaging.device.isMobile && typeof initActiveId === 'number') {
+            // Avoid crash for notification url: https://<Odoo_domain>/web#action=mail.action_discuss&active_id=1&menu_id=93
+            const { model, channel_type } = this.env.models['mail.thread'].findFromIdentifyingData({
+                id: initActiveId,
+                model: this.action.res_model,
+            });
+            data.activeMobileNavbarTabId = channel_type;
+            data.initActiveId = `${model}_${initActiveId}`;
+        }
+
+        this.discuss.update(data);
     },
     /**
      * @override {web.AbstractAction}

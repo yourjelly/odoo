@@ -268,6 +268,10 @@ class Discuss extends Component {
         }
         this.discuss.clearReplyingToMessage();
         this.discuss.update({ activeMobileNavbarTabId: ev.detail.tabId });
+        // useful when come from notification url
+        if (ev.detail.tabId === 'mailbox') {
+            this.env.models['mail.thread'].get('mail.thread_mail.box_inbox').open();
+        }
     }
 
     /**
