@@ -78,7 +78,7 @@ class TestIrAttachment(TransactionCase):
         # remove access to linked record a1
         rule = self.env['ir.rule'].create({
             'name': 'test_rule', 'domain_force': "[('id', '!=', %s)]" % a1.id,
-            'model_id': self.env.ref('base.model_ir_attachment').id,
+            'model_id': self.env["ir.model"]._get_id("ir.attachment"),
         })
         a2.invalidate_cache(ids=a2.ids)
 

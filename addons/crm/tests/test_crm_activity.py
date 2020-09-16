@@ -129,7 +129,7 @@ class TestCrmMailActivity(TestCrmCommon):
             'activity_type_id': self.activity_type_1.id,
             'note': 'Content of the activity to log',
             'res_id': self.lead_1.id,
-            'res_model_id': self.env.ref('crm.model_crm_lead').id,
+            'res_model_id': self.env["ir.model"]._get_id("crm.lead"),
         })
         activity._onchange_activity_type_id()
         self.assertEqual(self.lead_1.activity_type_id, self.activity_type_1)

@@ -18,7 +18,7 @@ class test_domain(common.TransactionCase):
         # Existing rows/tuples will be undefined/empty
         self.env['ir.model.fields'].create({
             'name': 'x_bool_new_undefined',
-            'model_id': self.env.ref('test_new_api.model_domain_bool').id,
+            'model_id': self.env["ir.model"]._get_id("domain.bool"),
             'field_description': 'A new boolean column',
             'ttype': 'boolean'
         })

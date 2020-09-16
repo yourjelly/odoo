@@ -171,13 +171,13 @@ class TestACL(TransactionCaseWithUserDemo):
 class TestIrRule(TransactionCaseWithUserDemo):
 
     def test_ir_rule(self):
-        model_res_partner = self.env.ref('base.model_res_partner')
+        model_res_partner_id = self.env["ir.model"]._get_id("res.partner")
         group_user = self.env.ref('base.group_user')
 
         # create an ir_rule for the Employee group with an blank domain
         rule1 = self.env['ir.rule'].create({
             'name': 'test_rule1',
-            'model_id': model_res_partner.id,
+            'model_id': model_res_partner_id,
             'domain_force': False,
             'groups': [(6, 0, group_user.ids)],
         })
@@ -200,7 +200,7 @@ class TestIrRule(TransactionCaseWithUserDemo):
         # create another ir_rule for the Employee group (to test multiple rules)
         rule2 = self.env['ir.rule'].create({
             'name': 'test_rule2',
-            'model_id': model_res_partner.id,
+            'model_id': model_res_partner_id,
             'domain_force': False,
             'groups': [(6, 0, group_user.ids)],
         })
@@ -222,7 +222,7 @@ class TestIrRule(TransactionCaseWithUserDemo):
         # create another ir_rule for the Employee group (to test multiple rules)
         rule3 = self.env['ir.rule'].create({
             'name': 'test_rule3',
-            'model_id': model_res_partner.id,
+            'model_id': model_res_partner_id,
             'domain_force': False,
             'groups': [(6, 0, group_user.ids)],
         })

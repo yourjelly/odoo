@@ -12,7 +12,7 @@ class CalendarEvent(models.Model):
     def default_get(self, fields):
         if self.env.context.get('default_applicant_id'):
             self = self.with_context(
-                default_res_model_id=self.env.ref('hr_recruitment.model_hr_applicant').id,
+                default_res_model_id=self.env["ir.model"]._get_id("hr.applicant"),
                 default_res_id=self.env.context['default_applicant_id']
             )
 

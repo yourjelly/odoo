@@ -227,7 +227,7 @@ class CrmLead(models.Model):
                     })
                 else:
                     self.env['mail.activity'].sudo().create({
-                        'res_model_id': self.env.ref('crm.model_crm_lead').id,
+                        'res_model_id': self.env["ir.model"]._get_id("crm.lead"),
                         'res_id': lead.id,
                         'user_id': self.env.user.id,
                         'activity_type_id': values['activity_type_id'],

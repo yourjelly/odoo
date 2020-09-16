@@ -1020,7 +1020,7 @@ class Survey(models.Model):
             'domain': "['&', ('survey_id', '=', %s), ('scoring_success', '=', True)]" % self.id,
             'computation_mode': 'count',
             'display_mode': 'boolean',
-            'model_id': self.env.ref('survey.model_survey_user_input').id,
+            'model_id': self.env["ir.model"]._get_id("survey.user_input"),
             'condition': 'higher',
             'batch_mode': True,
             'batch_distinctive_field': self.env.ref('survey.field_survey_user_input__partner_id').id,

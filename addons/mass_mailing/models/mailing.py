@@ -108,7 +108,7 @@ class MassMailing(models.Model):
     mailing_model_id = fields.Many2one(
         'ir.model', string='Recipients Model', ondelete='cascade', required=True,
         domain=[('model', 'in', MASS_MAILING_BUSINESS_MODELS)],
-        default=lambda self: self.env.ref('mass_mailing.model_mailing_list').id)
+        default=lambda self: self.env["ir.model"]._get_id("mailing.list"))
     mailing_model_name = fields.Char(
         string='Recipients Model Name', related='mailing_model_id.model',
         readonly=True, related_sudo=True)

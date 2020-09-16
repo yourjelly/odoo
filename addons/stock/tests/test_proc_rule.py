@@ -321,5 +321,5 @@ class TestProcRuleLoad(TransactionCase):
         for index in [50, 99, 150, 199]:
             self.assertTrue(self.env['mail.activity'].search([
                 ('res_id', '=', products[index].product_tmpl_id.id),
-                ('res_model_id', '=', self.env.ref('product.model_product_template').id)
+                ('res_model_id', '=', self.env["ir.model"]._get_id("product.template"))
             ]))

@@ -446,7 +446,7 @@ class StockWarehouseOrderpoint(models.Model):
             for orderpoint, error_msg in orderpoints_exceptions:
                 existing_activity = self.env['mail.activity'].search([
                     ('res_id', '=', orderpoint.product_id.product_tmpl_id.id),
-                    ('res_model_id', '=', self.env.ref('product.model_product_template').id),
+                    ('res_model_id', '=', self.env["ir.model"]._get_id("product.template")),
                     ('note', '=', error_msg)])
                 if not existing_activity:
                     orderpoint.product_id.product_tmpl_id.activity_schedule(

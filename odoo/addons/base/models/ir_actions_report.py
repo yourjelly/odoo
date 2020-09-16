@@ -167,8 +167,8 @@ class IrActionsReport(models.Model):
     def create_action(self):
         """ Create a contextual action for each report. """
         for report in self:
-            model = self.env['ir.model']._get(report.model)
-            report.write({'binding_model_id': model.id, 'binding_type': 'report'})
+            model_id = self.env['ir.model']._get_id(report.model)
+            report.write({'binding_model_id': model_id, 'binding_type': 'report'})
         return True
 
     def unlink_action(self):

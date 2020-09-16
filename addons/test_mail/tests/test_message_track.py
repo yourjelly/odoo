@@ -182,7 +182,7 @@ class TestTracking(TestMailCommon):
         mail_template = self.env['mail.template'].create({
             'name': 'SPECIAL CONTENT UNLOCKED',
             'subject': 'SPECIAL CONTENT UNLOCKED',
-            'model_id': self.env.ref('test_mail.model_mail_test_container').id,
+            'model_id': self.env["ir.model"]._get_id("mail.test.container"),
             'auto_delete': True,
             'body_html': '''<div>WOOP WOOP</div>''',
         })

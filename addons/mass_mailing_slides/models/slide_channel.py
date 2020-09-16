@@ -16,7 +16,7 @@ class Course(models.Model):
             view_mode='form',
             target='current',
             context=dict(
-                default_mailing_model_id=self.env.ref('base.model_res_partner').id,
+                default_mailing_model_id=self.env["ir.model"]._get_id("res.partner"),
                 default_mailing_domain=domain,
             ),
         )

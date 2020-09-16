@@ -73,7 +73,7 @@ class TestActivityRights(TestActivityCommon):
             with self.assertRaises(exceptions.UserError):
                 activity = self.env['mail.activity'].create({
                     'activity_type_id': self.env.ref('test_mail.mail_act_test_todo').id,
-                    'res_model_id': self.env.ref('test_mail.model_mail_test_activity').id,
+                    'res_model_id': self.env["ir.model"]._get_id("mail.test.activity"),
                     'res_id': self.test_record.id,
                     'user_id': self.user_employee.id,
                 })
@@ -158,8 +158,9 @@ class TestActivityFlow(TestActivityCommon):
             'summary': 'Email Summary',
         })
         call_activity_type = ActivityType.create({'name': 'call'})
-        with Form(self.env['mail.activity'].with_context(default_res_model_id=self.env.ref('base.model_res_partner'))) as ActivityForm:
-            ActivityForm.res_model_id = self.env.ref('base.model_res_partner')
+        Activity = self.env['mail.activity'].with_context(default_res_model_id=self.env["ir.model"]._get("res.partner"))
+        with Form(Activity) as ActivityForm:
+            ActivityForm.res_model_id = self.env["ir.model"]._get("res.partner")
 
             ActivityForm.activity_type_id = call_activity_type
             # activity summary should be empty
@@ -186,7 +187,7 @@ class TestActivityFlow(TestActivityCommon):
         activity = Activity.create({
             'summary': 'Test',
             'activity_type_id': 1,
-            'res_model_id': self.env.ref('base.model_res_partner').id,
+            'res_model_id': self.env["ir.model"]._get_id("res.partner"),
             'res_id': partner.id,
         })
 

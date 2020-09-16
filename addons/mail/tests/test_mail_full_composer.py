@@ -13,7 +13,7 @@ class TestMailFullComposer(HttpCase):
             'partner_to': '${object.id}',
             'lang': '${object.lang}',
             'auto_delete': True,
-            'model_id': self.ref('base.model_res_partner'),
+            'model_id': self.env["ir.model"]._get_id("res.partner"),
         })
         testuser = self.env['res.users'].create({
             'email': 'testuser@testuser.com',

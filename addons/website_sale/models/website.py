@@ -22,11 +22,11 @@ class Website(models.Model):
     salesperson_id = fields.Many2one('res.users', string='Salesperson')
 
     def _get_default_website_team(self):
-        try:
-            team = self.env.ref('sales_team.salesteam_website_sales')
-            return team if team.active else None
-        except ValueError:
-            return None
+        team = self.env.ref('sales_team.salesteam_website_sales', raise_if_not_found=False)
+        return team if team and team.active else None
+
+    def _default_recovery_mail_template(self):
+        return self.env.ref('website_sale.mail_template_sale_cart_recovery', raise_if_not_found=False)
 
     salesteam_id = fields.Many2one('crm.team',
         string='Sales Team',
@@ -35,12 +35,6 @@ class Website(models.Model):
                                     string='Price list available for this Ecommerce/Website')
     all_pricelist_ids = fields.One2many('product.pricelist', 'website_id', string='All pricelists',
                                         help='Technical: Used to recompute pricelist_ids')
-
-    def _default_recovery_mail_template(self):
-        try:
-            return self.env.ref('website_sale.mail_template_sale_cart_recovery').id
-        except ValueError:
-            return False
 
     cart_recovery_mail_template_id = fields.Many2one('mail.template', string='Cart Recovery Email', default=_default_recovery_mail_template, domain="[('model', '=', 'sale.order')]")
     cart_abandoned_delay = fields.Float("Abandoned Delay", default=1.0)

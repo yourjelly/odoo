@@ -16,13 +16,13 @@ class TestSMSSchedule(TestEventCommon, SMSCase):
 
         cls.sms_template_sub = cls.env['sms.template'].create({
             'name': 'Test subscription',
-            'model_id': cls.env.ref('event.model_event_registration').id,
+            'model_id': cls.env["ir.model"]._get_id("event.registration"),
             'body': '${object.event_id.organizer_id.name} registration confirmation.',
             'lang': '${object.partner_id.lang}'
         })
         cls.sms_template_rem = cls.env['sms.template'].create({
             'name': 'Test reminder',
-            'model_id': cls.env.ref('event.model_event_registration').id,
+            'model_id': cls.env["ir.model"]._get_id("event.registration"),
             'body': '${object.event_id.organizer_id.name} reminder',
             'lang': '${object.partner_id.lang}'
         })

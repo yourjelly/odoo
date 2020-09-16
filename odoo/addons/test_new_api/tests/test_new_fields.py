@@ -149,7 +149,7 @@ class TestFields(TransactionCaseWithUserDemo):
         self.user_demo.flush()
         self.env['ir.model.fields'].create({
             'name': 'x_bool_false_computed',
-            'model_id': self.env.ref('test_new_api.model_test_new_api_message').id,
+            'model_id': self.env["ir.model"]._get_id("test_new_api.message"),
             'field_description': 'A boolean computed to false',
             'compute': "for r in self: r['x_bool_false_computed'] = False",
             'store': False,
@@ -163,7 +163,7 @@ class TestFields(TransactionCaseWithUserDemo):
         self.env["ir.model.fields"].create(
             {
                 "name": "x_computed_custom_valid_depends",
-                "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
+                "model_id": self.env["ir.model"]._get_id("test_new_api.foo"),
                 "state": "manual",
                 "field_description": "A compute with a valid depends",
                 "compute": "for r in self: r['x_computed_custom_valid_depends'] = False",
@@ -175,7 +175,7 @@ class TestFields(TransactionCaseWithUserDemo):
         self.env["ir.model.fields"].create(
             {
                 "name": "x_computed_custom_valid_transitive_depends",
-                "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
+                "model_id": self.env["ir.model"]._get_id("test_new_api.foo"),
                 "state": "manual",
                 "field_description": "A compute with a valid transitive depends",
                 "compute": "for r in self: r['x_computed_custom_valid_transitive_depends'] = False",
@@ -187,7 +187,7 @@ class TestFields(TransactionCaseWithUserDemo):
         self.env["ir.model.fields"].create(
             {
                 "name": "x_computed_custom_invalid_depends",
-                "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
+                "model_id": self.env["ir.model"]._get_id("test_new_api.foo"),
                 "state": "manual",
                 "field_description": "A compute with an invalid depends",
                 "compute": "for r in self: r['x_computed_custom_invalid_depends'] = False",
@@ -199,7 +199,7 @@ class TestFields(TransactionCaseWithUserDemo):
         self.env["ir.model.fields"].create(
             {
                 "name": "x_computed_custom_invalid_transitive_depends",
-                "model_id": self.env.ref("test_new_api.model_test_new_api_foo").id,
+                "model_id": self.env["ir.model"]._get_id("test_new_api.foo"),
                 "state": "manual",
                 "field_description": "A compute with an invalid transitive depends",
                 "compute": "for r in self: r['x_computed_custom_invalid_transitive_depends'] = False",

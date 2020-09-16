@@ -16,9 +16,11 @@ class BaseAutomationTest(TransactionCaseWithUserDemo):
         self.user_root = self.env.ref('base.user_root')
         self.user_admin = self.env.ref('base.user_admin')
 
+        automation_model_id = self.env["ir.model"]._get_id("base.automation.lead.test")
+
         self.test_mail_template_automation = self.env['mail.template'].create({
             'name': 'Template Automation',
-            'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+            'model_id': automation_model_id,
             'body_html': """&lt;div&gt;Email automation&lt;/div&gt;""",
         })
 
@@ -26,7 +28,7 @@ class BaseAutomationTest(TransactionCaseWithUserDemo):
         self.env['base.automation'].create([
             {
                 'name': 'Base Automation: test rule on create',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'model_id': automation_model_id,
                 'state': 'code',
                 'code': "records.write({'user_id': %s})" % (self.user_demo.id),
                 'trigger': 'on_create',
@@ -34,7 +36,7 @@ class BaseAutomationTest(TransactionCaseWithUserDemo):
                 'filter_domain': "[('state', '=', 'draft')]",
             }, {
                 'name': 'Base Automation: test rule on write',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'model_id': automation_model_id,
                 'state': 'code',
                 'code': "records.write({'user_id': %s})" % (self.user_demo.id),
                 'trigger': 'on_write',
@@ -43,7 +45,7 @@ class BaseAutomationTest(TransactionCaseWithUserDemo):
                 'filter_pre_domain': "[('state', '=', 'open')]",
             }, {
                 'name': 'Base Automation: test rule on recompute',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'model_id': automation_model_id,
                 'state': 'code',
                 'code': "records.write({'user_id': %s})" % (self.user_demo.id),
                 'trigger': 'on_write',
@@ -51,7 +53,7 @@ class BaseAutomationTest(TransactionCaseWithUserDemo):
                 'filter_domain': "[('employee', '=', True)]",
             }, {
                 'name': 'Base Automation: test recursive rule',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'model_id': automation_model_id,
                 'state': 'code',
                 'code': """
 record = model.browse(env.context['active_id'])
@@ -61,14 +63,14 @@ if 'partner_id' in env.context['old_values'][record.id]:
                 'active': True,
             }, {
                 'name': 'Base Automation: test rule on secondary model',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_line_test').id,
+                'model_id':  self.env["ir.model"]._get_id("base.automation.line.test"),
                 'state': 'code',
                 'code': "records.write({'user_id': %s})" % (self.user_demo.id),
                 'trigger': 'on_create',
                 'active': True,
             }, {
                 'name': 'Base Automation: test rule on write check context',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'model_id': automation_model_id,
                 'state': 'code',
                 'code': """
 record = model.browse(env.context['active_id'])
@@ -78,7 +80,7 @@ if 'user_id' in env.context['old_values'][record.id]:
                 'active': True,
             }, {
                 'name': 'Base Automation: test rule with trigger',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'model_id': automation_model_id,
                 'trigger_field_ids': [(4, self.env.ref('test_base_automation.field_base_automation_lead_test__state').id)],
                 'state': 'code',
                 'code': """
@@ -88,7 +90,7 @@ record['name'] = record.name + 'X'""",
                 'active': True,
             }, {
                 'name': 'Base Automation: test send an email',
-                'model_id': self.env.ref('test_base_automation.model_base_automation_lead_test').id,
+                'model_id': automation_model_id,
                 'template_id': self.test_mail_template_automation.id,
                 'trigger_field_ids': [(4, self.env.ref('test_base_automation.field_base_automation_lead_test__deadline').id)],
                 'state': 'email',
