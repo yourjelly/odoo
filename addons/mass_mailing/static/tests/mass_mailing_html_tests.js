@@ -35,15 +35,24 @@ QUnit.module('field html', {
                 }],
             },
         });
-        testUtils.mock.patch(loader, {
-            createWysiwyg: () =>{
-                return {
-                    attachTo: async () => {},
-                    focus: async () => {},
+        testUtils.mock.patch(ajax, {
+            loadAsset: function (xmlId) {
+                if (xmlId === 'web_editor.compiled_assets_wysiwyg') {
+                    return Promise.resolve({
+                        jsLibs: [],
+                        cssLibs: [],
+                        cssContents: []
+                    });
                 }
+                if (xmlId === 'template.assets') {
+                    return Promise.resolve({
+                        cssLibs: [],
+                        cssContents: ['body {background-color: red;}']
+                    });
+                }
+                throw 'Wrong template';
             },
         });
-        weTestUtils.patch();
     },
     afterEach: function () {
         testUtils.mock.unpatch(ajax);
@@ -76,7 +85,7 @@ QUnit.test('save arch and html', async function (assert) {
     var $fieldReadonly = form.$('.oe_form_field[name="body_html"]');
     var $fieldEdit = form.$('.oe_form_field[name="body_arch"]');
 
-    assert.strictEqual($fieldReadonly.css('display'), 'block', "should display the readonly mode");
+    assert.strictEqual($fieldReadonly.css('display'), 'flex', "should display the readonly mode");
     assert.strictEqual($fieldEdit.css('display'), 'none', "should hide the edit mode");
 
     await testUtils.form.clickEdit(form);
@@ -85,7 +94,7 @@ QUnit.test('save arch and html', async function (assert) {
     $fieldEdit = form.$('.oe_form_field[name="body_arch"]');
 
     assert.strictEqual($fieldReadonly.css('display'), 'none', "should hide the readonly mode");
-    assert.strictEqual($fieldEdit.css('display'), 'block', "should display the edit mode");
+    assert.strictEqual($fieldEdit.css('display'), 'flex', "should display the edit mode");
 
     form.destroy();
 });
