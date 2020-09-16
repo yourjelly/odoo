@@ -22,6 +22,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
     events: {
         'click .o_we_show_themes_btn': '_onShowThemesClick',
         'click .o_mail_theme_selector a': '_onChangeThemeClick',
+        'mouseenter .o_mail_theme_selector a': '_onChangeThemeMouseEnter',
+        'mouseleave .o_mail_theme_selector a': '_onChangeThemeMouseLeave',
     },
 
     /**
@@ -322,17 +324,38 @@ var MassMailingFieldHtml = FieldHtml.extend({
      */
     _onChangeThemeClick: function (ev) {
         ev.preventDefault();
-        const theme = $(ev.currentTarget).data('id');
+        const themeId = $(ev.target.closest('a')).data('id');
+        const theme = this.wysiwyg.options.themes.find(theme => theme.id === themeId);
         const layoutPlugin = this.wysiwyg.editor.plugins.get(this.wysiwyg.JWEditorLib.Layout)
         const domEngine = layoutPlugin.engines.dom;
         const themeNode = domEngine.components.main[0].firstDescendant(node => node.themeName);
-        if (theme !== themeNode.themeName) {
-            const changeTheme = (params) => {
-                themeNode.themeName = theme;
+        if (themeId !== themeNode.themeName) {
+            const changeTheme = () => {
+                themeNode.themeName = themeId;
             };
             this.wysiwyg.editor.execCommand(changeTheme);
         }
         this._closeThemes();
+    },
+    /**
+     * @private
+     */
+    _onChangeThemeMouseEnter: function (ev) {
+        const themeId = $(ev.target.closest('a')).data('id');
+        const theme = this.wysiwyg.options.themes.find(theme => theme.id === themeId);
+        const $layout = $(this.el.querySelector('jw-shadow::shadow /deep/ .o_layout'));
+        $layout.attr('class', 'o_layout o_' + theme.data.name + '_theme');
+    },
+    /**
+     * @private
+     */
+    _onChangeThemeMouseLeave: function (ev) {
+        const layoutPlugin = this.wysiwyg.editor.plugins.get(this.wysiwyg.JWEditorLib.Layout)
+        const domEngine = layoutPlugin.engines.dom;
+        const themeNode = domEngine.components.main[0].firstDescendant(node => node.themeName);
+        const theme = this.wysiwyg.options.themes.find(theme => theme.id === themeNode.themeName);
+        const $layout = $(this.el.querySelector('jw-shadow::shadow /deep/ .o_layout'));
+        $layout.attr('class', 'o_layout o_' + theme.data.name + '_theme');
     },
     /**
      * @private

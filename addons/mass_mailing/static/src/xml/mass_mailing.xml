@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <div t-name="mass_mailing.theme_selector" class="o_mail_theme_selector d-none">
         <t t-foreach="themes" t-as="theme" t-if="theme.data">
-            <a t-att-data-id="theme.id" t-attf-class="o_{{theme.id}}_theme" role="menuitem" href="#">
+            <a t-att-data-id="theme.id" t-attf-class="o_{{theme.data.name}}_theme" role="menuitem" href="#">
                 <div class="o_thumb small"  t-attf-style="background-image: url(#{theme.data.img}_small.png)"/>
                 <div class="o_thumb large" t-attf-style="background-image: url(#{theme.data.img}_large.png)"/>
                 <div class="o_thumb logo" t-attf-style="background-image: url(#{theme.data.img}_logo.png)"/>
