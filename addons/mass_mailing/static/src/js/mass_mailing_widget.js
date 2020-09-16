@@ -6,6 +6,7 @@ var core = require('web.core');
 var FieldHtml = require('web_editor.field.html');
 var fieldRegistry = require('web.field_registry');
 
+var QWeb = core.qweb;
 var _t = core._t;
 
 
@@ -17,6 +18,11 @@ var MassMailingFieldHtml = FieldHtml.extend({
     custom_events: _.extend({}, FieldHtml.prototype.custom_events, {
         snippets_loaded: '_onSnippetsLoaded',
     }),
+
+    events: {
+        'click .o_we_show_themes_btn': '_onShowThemesClick',
+        'click .o_mail_theme_selector a': '_onChangeThemeClick',
+    },
 
     /**
      * @override
@@ -205,15 +211,17 @@ var MassMailingFieldHtml = FieldHtml.extend({
             };
             themes.push({
                 id: themeId,
+                data: data,
                 label: data.name,
                 render(editor) {
+                    const parserPlugin = editor.plugins.get(self.wysiwyg.JWEditorLib.Parser);
                     if (nowrap) {
-                        return editor.plugins.get(self.wysiwyg.JWEditorLib.Parser).parse('text/html',
+                        return parserPlugin.parse('text/html',
                         '<div class="o_layout oe_structure" contenteditable="true"><t-placeholder/></div>');
                     } else {
                         // This wrapper structure is the only way to have a responsive
                         // and centered fixed-width content column on all mail clients
-                        return editor.plugins.get(self.wysiwyg.JWEditorLib.Parser).parse('text/html',
+                        return parserPlugin.parse('text/html',
                         '<div class="o_layout o_' + data.name + '_theme">' +
                             '<table class="o_mail_wrapper">' +
                                 '<tr>' +
@@ -286,6 +294,13 @@ var MassMailingFieldHtml = FieldHtml.extend({
         }
         return {value: value, themeId: themeId};
     },
+    /**
+     * @private
+     */
+    _closeThemes: function () {
+        this.$el.find('#o_scroll, .o_snippet_search_filter').removeClass('d-none');
+        this.$el.find('.o_mail_theme_selector').addClass('d-none');
+    },
 
     //--------------------------------------------------------------------------
     // Handler
@@ -297,12 +312,40 @@ var MassMailingFieldHtml = FieldHtml.extend({
      */
     _onSnippetsLoaded: function () {
         this.$el.find("#email_designer_themes").remove();
+       const $themes = $(QWeb.render('mass_mailing.theme_selector', {themes: this.wysiwyg.options.themes}));
+       this.$el.find('#oe_snippets').append($themes);
+       const $button = $('<button type="button" class="o_we_show_themes_btn"><span>' + _t('Select a theme') + '</span></button>');
+       this.$el.find('#snippets_menu').append($button);
+    },
+    /**
+     * @private
+     */
+    _onChangeThemeClick: function (ev) {
+        ev.preventDefault();
+        const theme = $(ev.currentTarget).data('id');
+        const layoutPlugin = this.wysiwyg.editor.plugins.get(this.wysiwyg.JWEditorLib.Layout)
+        const domEngine = layoutPlugin.engines.dom;
+        const themeNode = domEngine.components.main[0].firstDescendant(node => node.themeName);
+        if (theme !== themeNode.themeName) {
+            const changeTheme = (params) => {
+                themeNode.themeName = theme;
+            };
+            this.wysiwyg.editor.execCommand(changeTheme);
+        }
+        this._closeThemes();
+    },
+    /**
+     * @private
+     */
+    _onShowThemesClick: function () {
+        this.$el.find('#o_scroll, .o_snippet_search_filter, .o_mail_theme_selector').toggleClass('d-none');
+        this.$el.one('click', '.o_we_add_snippet_btn, .o_we_customize_snippet_btn',  () => this._closeThemes());
     },
     /**
      * @override
      * @param {MouseEvent} ev
      */
-    _onTranslate: function (ev) {
+    _onTranslate: function () {
         this.trigger_up('translate', {
             fieldName: this.nodeOptions['inline-field'],
             id: this.dataPointID,

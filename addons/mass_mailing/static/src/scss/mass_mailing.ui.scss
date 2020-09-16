@@ -3,183 +3,35 @@
     display: flex;
 
     .o_mail_theme_selector {
-        position: absolute;
-        flex: 1 1 auto;
         overflow: auto;
-        width: 230px;
 
         > a {
             height: $o-we-toolbar-height;
+            width: 90%;
             line-height: $o-we-toolbar-height;
             border-radius: 0;
-            background-color: $o-we-sidebar-bg;
+            background-color: $o-we-color;
             color: $o-we-color;
-            display: flex;
             justify-content: center;
             align-items: center;
             box-shadow: none !important;
     
-            &:hover, &:focus, &:active {
-                color: #4e525b;
-            }
-    
-            i {
-                margin-right: 10px;
-            }
-        }
-    
-        &.show > a {
-            color: white;
-            background-color: $o-we-color;
-        }
-    
-        .dropdown-menu {
-            position: absolute;
-            bottom: -2px;
-            top: -3px !important;
-            left: -5px !important;
-            right: -2px !important;
-            margin: 0;
-            border-radius: 0;
-            overflow: auto;
-            background-color: $o-we-sidebar-bg;
-            z-index: 1050;
-    
-            &.show {
-                bottom: 31px !important;
-                top: 30px !important;
-                right: 3px !important;
-            }
-    
-            .dropdown-item {
-                padding: 10px 10px;
-                &:first-child {
-                    display: none;
-                }
-    
-                .o_thumb {
-                    display: none;
-                    background-size: cover;
-                    padding-top: 50%;
-                    border: 1px solid $o-we-border-color;
-    
-                    &.logo {
-                        display: block;
-                    }
-                }
-    
-    
-                &:hover {
-                    background-color: $o-we-sidebar-bg;
-    
-                    .o_thumb {
-                        border: 1px solid black;
-                    }
-                }
-    
-                &.selected .o_thumb {
-                    border: 2px solid $o-brand-odoo;
-                    background-color: $o-we-sidebar-bg;
-                }
-            }
-        }
-    }
-    
-    &.o_force_mail_theme_choice {
-        max-height: 600px;
-        overflow: hidden;
+            .o_thumb {
+                display: none;
+                background-size: cover;
+                padding-top: 45%;
+                width: 90%;
+                margin: 10px auto;
+                border: 1px solid $o-we-border-color;
 
-        .o_main_sidebar {
-            width: 100%;
-        }
+                &.logo {
+                    display: block;
+                }
+            }
 
-        #oe_snippets {
-            width: 100%;
-        }
-    
-        .o_mail_theme_selector {
-            width: 100%;
-            height: 100%;
-
-            .dropdown-toggle {
+            &:first-child {
                 display: none;
             }
-
-            .dropdown-menu {
-                display: block;
-
-                .dropdown-item {
-                    margin: 0;
-                    float: left;
-                    clear: none;
-                    width: 100%;
-                    max-width: 25%;
-                    transition: all 0.3s ease 0s;
-
-                    &:first-child {
-                        display: block;
-                    }
-
-                    .o_thumb {
-                        display: none;
-                        padding-top: 107%;
-                        border: 1px solid #4e525b;
-                        border-top: 1px solid $o-we-border-color;
-                        box-shadow: 0 5px 10px rgba(black, 0.8);
-                        will-change: transform;
-                        backface-visibility: hidden;
-                        transition: all 0.3s ease 0s;
-
-                        &.small {
-                            display: block;
-                        }
-
-                        @media screen and (min-width: 900px) {
-                            &.small {
-                                display: none;
-                            }
-                            &.large {
-                                display: block;
-                            }
-                        }
-                    }
-
-                    &:hover {
-                        background-color: $o-we-color;
-
-                        .o_thumb {
-                            box-shadow: 0 5px 30px 1px rgba(black, 0.6);
-                        }
-                    }
-
-                    &.o_mass_mailing_themes_upgrade .o_thumb {
-                        position: relative;
-                        display: block;
-                        border: 1px dashed white;
-                        opacity: 0.2;
-
-                        > .fa {
-                            @include o-position-absolute(0, 0, 0, 0);
-                            text-align: center;
-                            font-size: 50px;
-                            color: white;
-
-                            &::before {
-                                vertical-align: middle;
-                            }
-                            &::after {
-                                content: "";
-                                display: inline-block;
-                                height: 100%;
-                                vertical-align: middle;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .o_editor_center {
-            display: none !important;
         }
     }
 }
