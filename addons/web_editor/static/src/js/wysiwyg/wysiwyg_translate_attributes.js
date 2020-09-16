@@ -46,14 +46,17 @@ var AttributeTranslateDialog = Dialog.extend({
      * Apply the attributes changes in the VDocument.
      */
     applyAttributeChanges: function () {
-        for (const attributeName of Object.keys(this.translation)) {
-            const domNode = this.translation[attributeName];
-            const nodes = this.editorHelpers.getNodes(this.node);
-            for (const node of nodes) {
-                node.modifiers.get(JWEditorLib.Attributes).set(attributeName, domNode.textContent);
+        const attributeChange = () => {
+            for (const attributeName of Object.keys(this.translation)) {
+                const domNode = this.translation[attributeName];
+                const nodes = this.editorHelpers.getNodes(this.node);
+                for (const node of nodes) {
+                    node.modifiers.get(JWEditorLib.Attributes).set(attributeName, domNode.textContent);
+                }
             }
+            this.close();
         }
-        this.close();
+        this.editor.execCommand(attributeChange);
     }
 });
 

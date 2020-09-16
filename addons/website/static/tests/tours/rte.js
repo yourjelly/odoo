@@ -43,12 +43,16 @@ tour.register('rte_translator', {
 }, {
     content: "change content",
     trigger: '#wrap',
-    run: function () {
-        $("#wrap p:first").replaceWith('<p>Write one or <font style="background-color: yellow;">two paragraphs <b>describing</b></font> your product or\
-                <font style="color: rgb(255, 0, 0);">services</font>. To be successful your content needs to be\
-                useful to your <a href="/999">readers</a>.</p> <input placeholder="test translate placeholder"/>\
-                <p>&lt;b&gt;&lt;/b&gt; is an HTML&nbsp;tag &amp; is empty</p>');
-        $("#wrap img").attr("title", "test translate image title");
+    run: async function () {
+        const wysiwyg = $('#wrapwrap').data('wysiwyg');
+        await wysiwyg.editor.execCommand(async (params)=> {
+            await wysiwyg.editorHelpers.replace(params, document.querySelector('#wrap p'),
+                    '<p>Write one or <font style="background-color: yellow;">two paragraphs <b>describing</b></font> your product or\
+                    <font style="color: rgb(255, 0, 0);">services</font>. To be successful your content needs to be\
+                    useful to your <a href="/999">readers</a>.</p> <input placeholder="test translate placeholder"/>\
+                    <p>&lt;b&gt;&lt;/b&gt; is an HTML&nbsp;tag &amp; is empty</p>');
+            await wysiwyg.editorHelpers.setAttribute(params, document.querySelectorAll("#wrap img"), "title", "test translate image title");
+        });
     }
 }, {
     content: "save",
@@ -93,8 +97,10 @@ tour.register('rte_translator', {
 }, {
     content: "click on input",
     trigger: '#wrap input:first',
-    extra_trigger: '#wrap .o_dirty font:first:contains(translated french text)',
-    run: 'click',
+    extra_trigger: '#wrap font:contains(translated french text)',
+    run: function (action_helper) {
+        $('#wrap input:first').mousedown();
+    },
 }, {
     content: "translate placeholder",
     trigger: 'input:first',
@@ -108,7 +114,7 @@ tour.register('rte_translator', {
     trigger: 'button[data-action=save]',
 }, {
     content: "check: content is translated",
-    trigger: '#wrap p font:first:contains(translated french text)',
+    trigger: '#wrap p font:contains(translated french text)',
     extra_trigger: 'body:not(.o_wait_reload):not(:has(.note-editor)) a[data-action="edit_master"]',
     run: function () {}, // it's a check
 }, {
@@ -153,7 +159,7 @@ tour.register('rte_translator', {
 }, {
     content: "save new change",
     trigger: 'button[data-action=save]',
-    extra_trigger: '#wrap.o_dirty p u',
+    extra_trigger: '#wrap p u',
 
     }, {
     content : "click language dropdown",
