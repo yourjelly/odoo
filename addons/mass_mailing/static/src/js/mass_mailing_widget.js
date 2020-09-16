@@ -236,22 +236,6 @@ var MassMailingFieldHtml = FieldHtml.extend({
                     }
                 },
             });
-            // $theme.data("img");
-
-            // const imagesInfo = $theme.data("imagesInfo");
-            // _.each(imagesInfo, function (info) {
-            //     info = _.defaults(info, imagesInfo.all, {
-            //         module: "mass_mailing",
-            //         format: "jpg",
-            //     });
-            // });
-
-            // get_image_info: function (filename) {
-            //     if (imagesInfo[filename]) {
-            //         return imagesInfo[filename];
-            //     }
-            //     return imagesInfo.all;
-            // }
         });
 
         // Add the templates and themes as options.
@@ -303,6 +287,40 @@ var MassMailingFieldHtml = FieldHtml.extend({
         this.$el.find('#o_scroll, .o_snippet_search_filter').removeClass('d-none');
         this.$el.find('.o_mail_theme_selector').addClass('d-none');
     },
+    /**
+     * @private
+     */
+    _previewUpdateTheme: function (themeId) {
+        const theme = this.wysiwyg.options.themes.find(theme => theme.id === themeId);
+        const $layout = $(this.el.querySelector('jw-shadow::shadow /deep/ .o_layout'));
+        $layout.attr('class', 'o_layout o_' + theme.data.name + '_theme');
+
+        const themeName = theme.data.name;
+        const imagesInfo = theme.data.imagesInfo;
+        $layout.find('img').each(function () {
+            const $img = $(this);
+            let src = $img.attr('src');
+
+            const isLogo = src.includes('logo.');
+            let moduleName = 'mass_mailing';
+            let format = 'jpg';
+            if (imagesInfo.logo && imagesInfo.logo.module && isLogo) {
+                moduleName = imagesInfo.logo.module;
+            } else if (imagesInfo.all && imagesInfo.all.module) {
+                moduleName = imagesInfo.all.module;
+            }
+            if (imagesInfo.logo && imagesInfo.logo.format && isLogo) {
+                format = imagesInfo.logo.format;
+            } else if (imagesInfo.all && imagesInfo.all.format) {
+                format = imagesInfo.all.format;
+            }
+
+            src = src.replace(
+                /^\/[^\/]+\/(.+)\/theme_[^/]+\/(.*)\.\w+$/,
+                '/' + moduleName + '/$1/theme_' + themeName + '/$2.' + format);
+            $img.attr('src', src);
+        });
+    },
 
     //--------------------------------------------------------------------------
     // Handler
@@ -332,6 +350,34 @@ var MassMailingFieldHtml = FieldHtml.extend({
         if (themeId !== themeNode.themeName) {
             const changeTheme = () => {
                 themeNode.themeName = themeId;
+
+                const themeName = theme.data.name;
+                const imagesInfo = theme.data.imagesInfo;
+                const imageNodes = themeNode.descendants(this.wysiwyg.JWEditorLib.ImageNode);
+
+                for (const imageNode of imageNodes) {
+                    const attributes = imageNode.modifiers.get(this.wysiwyg.JWEditorLib.Attributes);
+                    let src = attributes.get('src');
+
+                    const isLogo = src.includes('logo.');
+                    let moduleName = 'mass_mailing';
+                    let format = 'jpg';
+                    if (imagesInfo.logo && imagesInfo.logo.module && isLogo) {
+                        moduleName = imagesInfo.logo.module;
+                    } else if (imagesInfo.all && imagesInfo.all.module) {
+                        moduleName = imagesInfo.all.module;
+                    }
+                    if (imagesInfo.logo && imagesInfo.logo.format && isLogo) {
+                        format = imagesInfo.logo.format;
+                    } else if (imagesInfo.all && imagesInfo.all.format) {
+                        format = imagesInfo.all.format;
+                    }
+
+                    src = src.replace(
+                        /^\/[^\/]+\/(.+)\/theme_[^/]+\/(.*)\.\w+$/,
+                        '/' + moduleName + '/$1/theme_' + themeName + '/$2.' + format);
+                    attributes.set('src', src);
+                }
             };
             this.wysiwyg.editor.execCommand(changeTheme);
         }
@@ -342,9 +388,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
      */
     _onChangeThemeMouseEnter: function (ev) {
         const themeId = $(ev.target.closest('a')).data('id');
-        const theme = this.wysiwyg.options.themes.find(theme => theme.id === themeId);
-        const $layout = $(this.el.querySelector('jw-shadow::shadow /deep/ .o_layout'));
-        $layout.attr('class', 'o_layout o_' + theme.data.name + '_theme');
+        this._previewUpdateTheme(themeId);
     },
     /**
      * @private
@@ -353,9 +397,8 @@ var MassMailingFieldHtml = FieldHtml.extend({
         const layoutPlugin = this.wysiwyg.editor.plugins.get(this.wysiwyg.JWEditorLib.Layout)
         const domEngine = layoutPlugin.engines.dom;
         const themeNode = domEngine.components.main[0].firstDescendant(node => node.themeName);
-        const theme = this.wysiwyg.options.themes.find(theme => theme.id === themeNode.themeName);
-        const $layout = $(this.el.querySelector('jw-shadow::shadow /deep/ .o_layout'));
-        $layout.attr('class', 'o_layout o_' + theme.data.name + '_theme');
+        this._previewUpdateTheme(themeNode.themeName);
+
     },
     /**
      * @private
