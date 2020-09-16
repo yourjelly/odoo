@@ -198,6 +198,7 @@ const UserValueWidget = Widget.extend({
         this._userValueWidgets = [];
         this._value = '';
         this.$target = $target;
+        this._previewTriggerDelay = 150; // TODO Maybe the option instantiating the widget can give that value instead of tweaking it per widget
     },
     /**
      * @override
@@ -590,7 +591,12 @@ const UserValueWidget = Widget.extend({
      */
     _onUserValuePreview: function (ev) {
         if (this._handleNotifierEvent(ev)) {
-            this.notifyValueChange(true);
+            // Delay the preview notification so that it can be canceled if the
+            // reset notification is triggered just after.
+            this._previewEventTimeout = setTimeout(() => {
+                this._previewEventTimeout = null;
+                this.notifyValueChange(true);
+            }, this._previewTriggerDelay);
         }
     },
     /**
@@ -602,7 +608,14 @@ const UserValueWidget = Widget.extend({
      */
     _onUserValueReset: function (ev) {
         if (this._handleNotifierEvent(ev)) {
-            this.notifyValueChange('reset');
+            if (this._previewEventTimeout) {
+                // A preview notification was scheduled and not done, just
+                // cancel it and do not trigger the reset notification
+                clearTimeout(this._previewEventTimeout);
+                this._previewEventTimeout = null;
+            } else {
+                this.notifyValueChange('reset');
+            }
         }
     },
 });
@@ -1179,6 +1192,13 @@ const ColorpickerUserValueWidget = SelectUserValueWidget.extend({
         'enter_key_color_colorpicker': '_onEnterKey'
     }),
 
+    /**
+     * @constructor
+     */
+    init() {
+        this._super(...arguments);
+        this._previewTriggerDelay = 0;
+    },
     /**
      * @override
      */
