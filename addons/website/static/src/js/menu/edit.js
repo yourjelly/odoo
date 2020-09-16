@@ -444,7 +444,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
      * @param {function} ev.data.onFailure
      */
     _onSnippetRequestSave: function (ev) {
-        this.wysiwyg.saveToServer(false).then(ev.data.onSuccess, ev.data.onFailure);
+        this.wysiwyg.saveToServer(undefined, false).then(ev.data.onSuccess, ev.data.onFailure);
     },
 });
 

@@ -206,7 +206,7 @@ var Wysiwyg = Widget.extend({
             openBackgroundColorPicker: { handler: this.toggleBackgroundColorPicker.bind(this) },
             openLinkDialog: { handler: this.openLinkDialog.bind(this) },
             discardOdoo: { handler: this.discardEditions.bind(this) },
-            saveOdoo: { handler: this.options.enableTranslation ? this.saveToServer.bind(this) : this._onSaveTranslation.bind(this) },
+            saveOdoo: { handler: this.saveContent.bind(this) },
             cropImage: { handler: this.cropImage.bind(this) },
             transformImage: { handler: this.transformImage.bind(this) },
             describeImage: { handler: this.describeImage.bind(this) },
@@ -379,6 +379,13 @@ var Wysiwyg = Widget.extend({
             await this.editorHelpers.insertHtml(this.editor, element.outerHTML);
         });
     },
+    async saveContent(context = this.editor) {
+        if (this.options.enableTranslation) {
+            await this._onSaveTranslation(context);
+        } else {
+            await this.saveToServer(context);
+        }
+    },
     _setColor(colorpicker, setCommandId, unsetCommandId, color, $dropDownToToggle = undefined) {
         if(color === "") {
             this.editor.execCommand(unsetCommandId);
@@ -492,7 +499,7 @@ var Wysiwyg = Widget.extend({
     setValue: function (value, options) {
         this._value = value;
     },
-    saveToServer: async function (reload = true) {
+    saveToServer: async function (context = this.editor, reload = true) {
         const defs = [];
         this.trigger_up('edition_will_stopped');
         this.trigger_up('ready_to_save', {defs: defs});
@@ -502,7 +509,7 @@ var Wysiwyg = Widget.extend({
             await this.snippetsMenu.cleanForSave();
         }
 
-        return this._saveContent()
+        return this._saveWebsiteContent(context)
             .then(() => {
                 this.trigger_up('edition_was_stopped');
                 if (reload) window.location.reload();
@@ -598,7 +605,7 @@ var Wysiwyg = Widget.extend({
      * Save after any cleaning has been done and before reloading
      * the page.
      */
-    async _saveContent() {
+    async _saveWebsiteContent(context = this.editor) {
         return new Promise((resolve, reject) => {
             const wysiwygSaveContent = async (context)=> {
                 await this._saveModifiedImages(context);
@@ -606,7 +613,7 @@ var Wysiwyg = Widget.extend({
                 await this._saveCoverPropertiesBlocks(context);
                 await this._saveMegaMenuClasses();
             };
-            this.editor.execCommand(wysiwygSaveContent).then(params => {
+            context.execCommand(wysiwygSaveContent).then(params => {
                 if (params && params.error) {
                     reject(params.error.message);
                 } else {
@@ -986,7 +993,7 @@ var Wysiwyg = Widget.extend({
      *
      * @private
      */
-    _onSaveTranslation: async function () {
+    _onSaveTranslation: async function (context) {
         const defs = [];
         this.trigger_up('edition_will_stopped');
         this.trigger_up('ready_to_save', {defs: defs});
@@ -995,23 +1002,26 @@ var Wysiwyg = Widget.extend({
         const promises = [];
         // Get the nodes holding the `OdooTranslationFormats`. Only one
         // node per format.
-        const translationIds = [];
-        const translationNodes = this.zoneMain.descendants(descendant => {
-            const format = descendant.modifiers.find(JWEditorLib.OdooTranslationFormat);
-            const translationId = format && format.translationId;
-            if (!format || translationIds.includes(translationId)) {
-                return false;
-            } else if (translationId) {
-                translationIds.push(translationId);
-            }
-            // Only save editable nodes.
-            return this.editor.mode.is(descendant, 'editable');
-        });
+        const translationNodes = {};
+        const getTranslationNodes = () => {
+           this.zoneMain.descendants(descendant => {
+                const format = descendant.modifiers.find(JWEditorLib.OdooTranslationFormat);
+                const translationId = format && format.translationId;
+                if (translationId && this.editor.mode.is(descendant, 'editable')) {
+                    translationNodes[translationId] = translationNodes[translationId] || new JWEditorLib.ContainerNode();
+                    translationNodes[translationId].append(descendant.clone());
+                }
+            });
+        }
+        await context.execCommand(getTranslationNodes);
 
         // Save the odoo translation formats.
-        for (const translationNode of translationNodes) {
+        for (const id of Object.keys(translationNodes)) {
+            const containerNode = translationNodes[id];
+            const translationNode = containerNode.children()[0];
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
-            const renderedNode = (await renderer.render('dom/html', translationNode))[0];
+
+            const renderedNode = (await renderer.render('dom/html', containerNode))[0].firstChild;
             const translationFormat = translationNode.modifiers.find(JWEditorLib.OdooTranslationFormat);
 
             let $renderedTranslation = $(renderedNode);
