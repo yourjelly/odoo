@@ -315,7 +315,7 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
             await this.mode('reset', this.getMode());
         } else if (name === 'image_index_request') {
             const images = this._getImages(this.$('img').get());
-            const position = _.indexOf(images, data.$image[0]);
+            let position = _.indexOf(images, data.$image[0]);
             images.splice(position, 1);
             switch (data.position) {
                 case 'first':
@@ -331,7 +331,7 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
                     images.push(data.$image[0]);
                     break;
             }
-            position = imgs.indexOf(data.$image[0]);
+            position = images.indexOf(data.$image[0]);
             _.each(images, function (img, index) {
                 // Note: there might be more efficient ways to do that but it is
                 // more simple this way and allows compatibility with 10.0 where
@@ -347,16 +347,17 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
                 this.$target.find('.carousel-indicators li').removeClass('active');
                 this.$target.find('.carousel-indicators li[data-slide-to="' + position + '"]').addClass('active');
                 this.trigger_up('activate_snippet', {
-                    $snippet: this.$target.find('.carousel-item.active img'),
+                    $element: this.$target.find('.carousel-item.active img'),
                     ifInactiveOptions: true,
                 });
                 $carousel.addClass('slide');
             } else {
                 this.trigger_up('activate_snippet', {
-                    $snippet: data.$image,
+                    $element: data.$image,
                     ifInactiveOptions: true,
                 });
             }
+            await this._refreshTarget();
         }
     },
 
