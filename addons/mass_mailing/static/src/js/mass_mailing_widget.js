@@ -24,6 +24,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         'click .o_mail_theme_selector a': '_onChangeThemeClick',
         'mouseenter .o_mail_theme_selector a': '_onChangeThemeMouseEnter',
         'mouseleave .o_mail_theme_selector a': '_onChangeThemeMouseLeave',
+        'click .o_we_fullscreen_btn': '_onFullScreenClick',
     },
 
     /**
@@ -332,10 +333,9 @@ var MassMailingFieldHtml = FieldHtml.extend({
      */
     _onSnippetsLoaded: function () {
         this.$el.find("#email_designer_themes").remove();
-       const $themes = $(QWeb.render('mass_mailing.theme_selector', {themes: this.wysiwyg.options.themes}));
-       this.$el.find('#oe_snippets').append($themes);
-       const $button = $('<button type="button" class="o_we_show_themes_btn"><span>' + _t('Select a theme') + '</span></button>');
-       this.$el.find('#snippets_menu').append($button);
+        this.$el.find('#oe_snippets').append($(QWeb.render('mass_mailing.theme_selector', {themes: this.wysiwyg.options.themes})));
+        this.$el.find('#snippets_menu').append($('<button type="button" class="o_we_show_themes_btn"><span>' + _t('Select a theme') + '</span></button>'));
+        this.$el.find('#oe_snippets').before($('<button type="button" class="o_we_fullscreen_btn"><span class="fa fa-expand"></span></button>'));
     },
     /**
      * @private
@@ -398,7 +398,18 @@ var MassMailingFieldHtml = FieldHtml.extend({
         const domEngine = layoutPlugin.engines.dom;
         const themeNode = domEngine.components.main[0].firstDescendant(node => node.themeName);
         this._previewUpdateTheme(themeNode.themeName);
-
+    },
+    /**
+     * @private
+     */
+    _onFullScreenClick: function (ev) {
+        if (this.el.classList.contains('jw-fullscreen')) {
+           document.body.classList.remove('jw-fullscreen');
+           this.el.classList.remove('jw-fullscreen');
+        } else {
+           document.body.classList.add('jw-fullscreen');
+           this.el.classList.add('jw-fullscreen');
+        }
     },
     /**
      * @private
