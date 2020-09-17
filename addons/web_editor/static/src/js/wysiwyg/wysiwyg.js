@@ -1000,28 +1000,37 @@ var Wysiwyg = Widget.extend({
         await Promise.all(defs);
 
         const promises = [];
-        // Get the nodes holding the `OdooTranslationFormats`. Only one
-        // node per format.
-        const translationNodes = {};
+        const translationContainers = {};
         const getTranslationNodes = () => {
-           this.zoneMain.descendants(descendant => {
+            let previousTranslationId;
+            this.zoneMain.descendants(descendant => {
                 const format = descendant.modifiers.find(JWEditorLib.OdooTranslationFormat);
                 const translationId = format && format.translationId;
                 if (translationId && this.editor.mode.is(descendant, 'editable')) {
-                    translationNodes[translationId] = translationNodes[translationId] || new JWEditorLib.ContainerNode();
-                    translationNodes[translationId].append(descendant.clone());
+                    translationContainers[translationId] = translationContainers[translationId] || [];
+                    const containers = translationContainers[translationId];
+                    if (previousTranslationId !== translationId) {
+                        containers.push(new JWEditorLib.ContainerNode());
+                    }
+                    const lastContainer = containers[containers.length-1];
+                    lastContainer.append(descendant.clone());
                 }
+                previousTranslationId = translationId;
             });
         }
         await context.execCommand(getTranslationNodes);
 
         // Save the odoo translation formats.
-        for (const id of Object.keys(translationNodes)) {
-            const containerNode = translationNodes[id];
-            const translationNode = containerNode.children()[0];
+        for (const id of Object.keys(translationContainers)) {
+            const containers = translationContainers[id];
+            // todo: check that all container render the same way otherwise
+            // inform the user that there is conflict between the same
+            // traduction.
+            const lastContainer = containers[containers.length-1];
+            const translationNode = lastContainer.children()[0];
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
 
-            const renderedNode = (await renderer.render('dom/html', containerNode))[0].firstChild;
+            const renderedNode = (await renderer.render('dom/html', lastContainer))[0].firstChild;
             const translationFormat = translationNode.modifiers.find(JWEditorLib.OdooTranslationFormat);
 
             let $renderedTranslation = $(renderedNode);
