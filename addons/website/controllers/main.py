@@ -158,8 +158,7 @@ class Website(Home):
 
             pages = 0
             locs = request.website.sudo(user=request.website.user_id.id).enumerate_pages()
-            site_map_key_param = "sitemap.url_%s" % current_website.id
-            url_root = http.request.env["ir.config_parameter"].sudo().get_param(site_map_key_param) or http.request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            url_root = current_website.domain or http.request.env["ir.config_parameter"].sudo().get_param("web.base.url")
             while True:
                 values = {
                     'locs': islice(locs, 0, LOC_PER_SITEMAP),
