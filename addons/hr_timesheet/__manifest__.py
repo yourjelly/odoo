@@ -45,5 +45,6 @@ up a management by affair.
     'installable': True,
     'application': False,
     'auto_install': False,
+    'uninstall_hook': 'unlink_task_timesheets',
     'post_init_hook': 'create_internal_project',
 }

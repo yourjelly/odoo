@@ -36,3 +36,25 @@ def create_internal_project(cr, registry):
         'project_id': task.project_id.id,
         'task_id': task.id,
     } for task in project_ids.task_ids.filtered(lambda t: t.company_id in admin.employee_ids.company_id)])
+
+
+def unlink_task_timesheets(cr, registry):
+
+    # Original code from project/models/analytic_account.py that raises the error
+    # projects = self.env['project.project'].search([('analytic_account_id', 'in', self.ids)])
+    # has_tasks = self.env['project.task'].search_count([('project_id', 'in', projects.ids)])
+    # if has_tasks:
+    #     raise UserError(_('Please remove existing tasks in the project linked to the accounts you want to delete.'))
+
+    # -> Remove analytic accounts from projects instead of unlinking timesheets from tasks?
+    # for project in projects:
+    #     project.write({"analytic_account_id": False})
+
+    # Unlink timesheets from tasks
+    env = api.Environment(cr, SUPERUSER_ID, {})
+    for task in env["project.task"].search([("timesheet_ids", "!=", False)]):
+        task.write({'timesheet_ids': [(5, 0, 0)]})
+    # TODO: 1. Is the search domain needed? More efficient than writing on all tasks?
+    #       2. Can this be shortened to avoid the loop? Like
+    #          env["project.task"].write({'timesheet_ids': [(5, None, None)]})
+    breakpoint()
