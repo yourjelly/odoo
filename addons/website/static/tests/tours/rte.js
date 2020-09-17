@@ -4,6 +4,7 @@ odoo.define('website.tour.rte', function (require) {
 var ajax = require('web.ajax');
 var session = require('web.session');
 var tour = require('web_tour.tour');
+var Wysiwyg = require('web_editor.wysiwyg');
 
 var domReady = new Promise(function (resolve) {
     $(resolve);
@@ -78,19 +79,20 @@ tour.register('rte_translator', {
 }, {
     content: "translate text",
     trigger: '#wrap p font:first',
-    run: function (action_helper) {
-        action_helper.text('translated french text');
-        // Wysiwyg.setRange(this.$anchor.contents()[0], 22);
+    run: async function (action_helper) {
+        const wysiwyg = $('#wrapwrap').data('wysiwyg');
+        await wysiwyg.editorHelpers.text(wysiwyg.editor, document.querySelector('#wrap p font'), 'translated french text');
         this.$anchor.trigger($.Event( "keyup", {key: '_', keyCode: 95}));
         this.$anchor.trigger('input');
     },
 }, {
     content: "translate text with special char",
     trigger: '#wrap input + p span:first',
-    run: function (action_helper) {
+    run: async function (action_helper) {
         action_helper.click();
-        this.$anchor.prepend('&lt;{translated}&gt;');
-        // Wysiwyg.setRange(this.$anchor.contents()[0], 0);
+        const element = document.querySelector('#wrap input + p span');
+        const wysiwyg = $('#wrapwrap').data('wysiwyg');
+        await wysiwyg.editorHelpers.text(wysiwyg.editor, element, '<{translated}>' + element.innerText);
         this.$anchor.trigger($.Event( "keyup", {key: '_', keyCode: 95}));
         this.$anchor.trigger('input');
     },
@@ -149,13 +151,14 @@ tour.register('rte_translator', {
         mousedown.initMouseEvent('mousedown', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, el);
         el.dispatchEvent(mousedown);
         var mouseup = document.createEvent('MouseEvents');
-        Wysiwyg.setRange(el.childNodes[2], 6, el.childNodes[2], 13);
+        const wysiwyg = $('#wrapwrap').data('wysiwyg');
+        Wysiwyg.setRange(wysiwyg, el.childNodes[2], 6, el.childNodes[2], 13);
         mouseup.initMouseEvent('mouseup', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, el);
         el.dispatchEvent(mouseup);
     },
 }, {
     content: "underline",
-    trigger: '.note-air-popover button[data-event="underline"]',
+    trigger: 'jw-toolbar jw-button[name="underline"]',
 }, {
     content: "save new change",
     trigger: 'button[data-action=save]',
