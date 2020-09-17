@@ -128,7 +128,7 @@ cp -v "${QEMU_ARM_STATIC}" "${MOUNT_POINT}/usr/bin/"
 
 # 'overlay' the overwrite directory onto the mounted image filesystem
 cp -av "${OVERWRITE_FILES_BEFORE_INIT_DIR}"/* "${MOUNT_POINT}"
-chroot "${MOUNT_POINT}" /bin/bash -c "sudo /etc/init_posbox_image.sh"
+chroot "${MOUNT_POINT}" /bin/bash -c "sudo /etc/init_iotbox_image.sh"
 
 # copy iotbox version
 mkdir -pv "${MOUNT_POINT}"/var/odoo

@@ -1,0 +1,6 @@
+iotbox.img
+*raspbian*.img
+raspbian.img.zip
+root_mount/*
+ngrok
+!.*
