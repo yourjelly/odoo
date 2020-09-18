@@ -268,6 +268,7 @@ var CrossTabBus = Longpolling.extend({
             this._isMasterTab = true;
             this.startPolling();
             this.trigger('become_master');
+            document.title = "[M] " + document.title;
 
             //removing master peer from queue
             delete peers[newMaster];
