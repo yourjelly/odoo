@@ -146,7 +146,7 @@ class Node(object):
         node.depth = self.depth + 1
         if node not in self.children:
             self.children.append(node)
-        for attr in ('init', 'update', 'demo'):
+        for attr in ('update', 'demo'):
             if hasattr(self, attr):
                 setattr(node, attr, True)
         self.children.sort(key=lambda x: x.name)
@@ -154,7 +154,7 @@ class Node(object):
 
     def __setattr__(self, name, value):
         super(Node, self).__setattr__(name, value)
-        if name in ('init', 'update', 'demo'):
+        if name in ('update', 'demo'):
             tools.config[name][self.name] = 1
             for child in self.children:
                 setattr(child, name, value)
