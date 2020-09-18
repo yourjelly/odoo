@@ -931,6 +931,28 @@ header {
                         content: none;
                     }
                 }
+
+                .dropdown-menu .dropdown-item {
+
+                    &, h6 {
+                        color: color-yiq(o-color('menu'));
+
+                        @include hover {
+                            background-color: color-yiq(o-color('menu'));
+                            color: o-color('menu');
+                        }
+                        @include hover-focus {
+                            background-color: color-yiq(o-color('menu'));
+                            color: o-color('menu');
+                        }
+                    }
+
+                    &:active {
+                        background-color: o-color('o-color-1');
+                        color: o-color('menu');
+                    }
+                }
+
                 .dropdown-menu {
                     display: block;
                     padding-top:0;
