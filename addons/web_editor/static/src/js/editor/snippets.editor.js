@@ -958,6 +958,7 @@ var SnippetsMenu = Widget.extend({
             this.options.snippets = 'web_editor.snippets';
         }
         this.snippetEditors = [];
+        this._enabledSnippetEditorsHierarchy = [];
 
         this._mutex = new concurrency.Mutex();
 
@@ -1419,8 +1420,6 @@ var SnippetsMenu = Widget.extend({
             return;
         }
 
-        let enabledSnippetEditorsHierarchy = [];
-
         return this._mutex.exec(async () => {
             let snippetEditor;
             // Take the first parent of the provided DOM (or itself) which
@@ -1431,7 +1430,7 @@ var SnippetsMenu = Widget.extend({
                     snippetEditor = await this._getSnippetEditor($snippet);
                 }
             }
-            if (ifInactiveOptions && enabledSnippetEditorsHierarchy.includes(snippetEditor)) {
+            if (ifInactiveOptions && this._enabledSnippetEditorsHierarchy.includes(snippetEditor)) {
                 return snippetEditor;
             }
 
@@ -1457,7 +1456,7 @@ var SnippetsMenu = Widget.extend({
                 await snippetEditor.toggleOptions(true);
             }
 
-            enabledSnippetEditorsHierarchy = snippetEditorHierarchy;
+            this._enabledSnippetEditorsHierarchy = snippetEditorHierarchy;
             return snippetEditor;
         });
     },
