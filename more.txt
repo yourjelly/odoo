@@ -1,0 +1,1724 @@
+############ 0 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 177, in _dispatch
+    with reg.cursor() as cr:
+  File "/home/xdo/osrc/master/odoo/odoo/modules/registry.py", line 664, in cursor
+    return TestCursor(self.test_cr, self.test_lock)
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 494, in __init__
+    self._cursor.execute('SAVEPOINT "%s"' % self._savepoint)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SAVEPOINT "test_cursor_4"
+############ 1 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 179, in _dispatch
+    request.website_routing = env['website'].get_current_website().id
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 143, in __exit__
+    self.commit()
+  File "<decorator-gen-10>", line 2, in commit
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 510, in commit
+    self._cursor.execute('SAVEPOINT "%s"' % self._savepoint)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SAVEPOINT "test_cursor_4"
+############ 2 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 179, in _dispatch
+    request.website_routing = env['website'].get_current_website().id
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 144, in __exit__
+    self.close()
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 499, in close
+    self._cursor.execute('ROLLBACK TO SAVEPOINT "%s"' % self._savepoint)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+ROLLBACK TO SAVEPOINT "test_cursor_4"
+############ 3 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 450, in _dispatch
+    cls._authenticate(func)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 127, in _authenticate
+    getattr(cls, "_auth_method_%s" % auth_method)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 134, in _auth_method_public
+    env = api.Environment(request.cr, SUPERUSER_ID, request.context)
+  File "/usr/lib/python3/dist-packages/werkzeug/local.py", line 347, in __getattr__
+    return getattr(self._get_current_object(), name)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 230, in cr
+    self._cr = self.registry.cursor()
+  File "/home/xdo/osrc/master/odoo/odoo/modules/registry.py", line 664, in cursor
+    return TestCursor(self.test_cr, self.test_lock)
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 494, in __init__
+    self._cursor.execute('SAVEPOINT "%s"' % self._savepoint)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SAVEPOINT "test_cursor_5"
+############ 4 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 463, in _dispatch
+    cls._add_dispatch_parameters(func)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 212, in _add_dispatch_parameters
+    if website_company_id in request.env.user.company_ids.ids:
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/res_users.py", line 447, in _read
+    super(Users, self)._read(fields)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3118, in _read
+    field.read(fetched)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 3427, in read
+    records._cr.execute(query, where_params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+ SELECT res_company_users_rel.user_id, res_company_users_rel.cid FROM res_company_users_rel, "res_company"
+                    WHERE 1=1 AND res_company_users_rel.user_id IN (4) AND res_company_users_rel.cid = res_company.id
+                     ORDER BY "res_company"."sequence" ,"res_company"."name"    OFFSET 0
+                
+############ 5 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 346, in checked_call
+    result = self.endpoint(*a, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 911, in __call__
+    return self.method(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 530, in response_wrap
+    response = f(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 160, in blog
+    blogs = Blog.search(request.website.website_domain(), order="create_date asc, id asc")
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 1673, in search
+    return res if count else self.browse(res)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 4875, in browse
+    if not ids:
+  File "/home/xdo/osrc/master/odoo/odoo/osv/query.py", line 156, in __bool__
+    return bool(self._result)
+  File "/home/xdo/osrc/master/odoo/odoo/tools/func.py", line 26, in __get__
+    value = self.fget(obj)
+  File "/home/xdo/osrc/master/odoo/odoo/osv/query.py", line 149, in _result
+    self._cr.execute(query_str, params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "blog_blog".id FROM "blog_blog" WHERE (("blog_blog"."active" = true) AND (("blog_blog"."website_id" in (1)) OR "blog_blog"."website_id" IS NULL)) ORDER BY  "blog_blog"."create_date" ASC,"blog_blog"."id" ASC 
+############ 6 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 346, in checked_call
+    result = self.endpoint(*a, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 911, in __call__
+    return self.method(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 530, in response_wrap
+    response = f(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 174, in blog
+    values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page, search=search)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 100, in _prepare_blog_values
+    first_post = BlogPost.search(domain + [('website_published', '=', True)], order="post_date desc, id asc", limit=1)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 1673, in search
+    return res if count else self.browse(res)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 4875, in browse
+    if not ids:
+  File "/home/xdo/osrc/master/odoo/odoo/osv/query.py", line 156, in __bool__
+    return bool(self._result)
+  File "/home/xdo/osrc/master/odoo/odoo/tools/func.py", line 26, in __get__
+    value = self.fget(obj)
+  File "/home/xdo/osrc/master/odoo/odoo/osv/query.py", line 149, in _result
+    self._cr.execute(query_str, params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "blog_post".id FROM "blog_post" WHERE (((("blog_post"."active" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL)) AND ("blog_post"."post_date" <= '2020-09-18 13:02:12')) AND (("blog_post"."is_published" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL))) AND (("blog_post"."is_published" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL)) ORDER BY  "blog_post"."post_date" DESC,"blog_post"."id" ASC  LIMIT 1
+############ 7 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 346, in checked_call
+    result = self.endpoint(*a, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 911, in __call__
+    return self.method(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 530, in response_wrap
+    response = f(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 174, in blog
+    values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page, search=search)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 108, in _prepare_blog_values
+    posts = BlogPost.search(domain, offset=offset, limit=self._blog_post_per_page, order="is_published desc, post_date desc, id asc")
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 1673, in search
+    return res if count else self.browse(res)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 4875, in browse
+    if not ids:
+  File "/home/xdo/osrc/master/odoo/odoo/osv/query.py", line 156, in __bool__
+    return bool(self._result)
+  File "/home/xdo/osrc/master/odoo/odoo/tools/func.py", line 26, in __get__
+    value = self.fget(obj)
+  File "/home/xdo/osrc/master/odoo/odoo/osv/query.py", line 149, in _result
+    self._cr.execute(query_str, params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "blog_post".id FROM "blog_post" WHERE ((("blog_post"."active" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL)) AND ("blog_post"."post_date" <= '2020-09-18 13:02:12')) AND (("blog_post"."is_published" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL)) ORDER BY  COALESCE("blog_post"."is_published", false) DESC,"blog_post"."post_date" DESC,"blog_post"."id" ASC  LIMIT 12
+############ 8 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 346, in checked_call
+    result = self.endpoint(*a, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 911, in __call__
+    return self.method(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 530, in response_wrap
+    response = f(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 174, in blog
+    values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page, search=search)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 109, in _prepare_blog_values
+    total = BlogPost.search_count(domain)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 1649, in search_count
+    res = self.search(args, count=True)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 1672, in search
+    res = self._search(args, offset=offset, limit=limit, order=order, count=count)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 4424, in _search
+    self._cr.execute(query_str, params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT count(1) FROM "blog_post" WHERE ((("blog_post"."active" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL)) AND ("blog_post"."post_date" <= '2020-09-18 13:02:12')) AND (("blog_post"."is_published" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL))
+############ 9 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 346, in checked_call
+    result = self.endpoint(*a, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 911, in __call__
+    return self.method(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 530, in response_wrap
+    response = f(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 174, in blog
+    values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page, search=search)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 118, in _prepare_blog_values
+    all_tags = blog and blogs.all_tags()[blog.id] or blogs.all_tags(join=True)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/models/website_blog.py", line 71, in all_tags
+    self._cr.execute(req, [tuple(self.ids)])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+
+            SELECT
+                p.blog_id, count(*), r.blog_tag_id
+            FROM
+                blog_post_blog_tag_rel r
+                    join blog_post p on r.blog_post_id=p.id
+            WHERE
+                p.blog_id in (1, 2)
+            GROUP BY
+                p.blog_id,
+                r.blog_tag_id
+            ORDER BY
+                count(*) DESC
+        
+############ 10 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 346, in checked_call
+    result = self.endpoint(*a, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 911, in __call__
+    return self.method(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 530, in response_wrap
+    response = f(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 174, in blog
+    values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page, search=search)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 119, in _prepare_blog_values
+    tag_category = sorted(all_tags.mapped('category_id'), key=lambda category: category.name.upper())
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5163, in mapped
+    recs = recs._fields[name].mapped(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1037, in mapped
+    self.__get__(first(remaining), type(remaining))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "blog_tag"."id" as "id", COALESCE("blog_tag__name"."value", "blog_tag"."name") as "name", "blog_tag"."category_id" as "category_id", COALESCE("blog_tag__website_meta_title"."value", "blog_tag"."website_meta_title") as "website_meta_title", COALESCE("blog_tag__website_meta_description"."value", "blog_tag"."website_meta_description") as "website_meta_description", COALESCE("blog_tag__website_meta_keywords"."value", "blog_tag"."website_meta_keywords") as "website_meta_keywords", "blog_tag"."website_meta_og_img" as "website_meta_og_img", COALESCE("blog_tag__seo_name"."value", "blog_tag"."seo_name") as "seo_name", "blog_tag"."create_uid" as "create_uid", "blog_tag"."create_date" as "create_date", "blog_tag"."write_uid" as "write_uid", "blog_tag"."write_date" as "write_date" FROM "blog_tag" LEFT JOIN "ir_translation" AS "blog_tag__name" ON ("blog_tag"."id" = "blog_tag__name"."res_id" AND "blog_tag__name"."type" = 'model' AND "blog_tag__name"."name" = 'blog.tag,name' AND "blog_tag__name"."lang" = 'en_US' AND "blog_tag__name"."value" != '') LEFT JOIN "ir_translation" AS "blog_tag__website_meta_title" ON ("blog_tag"."id" = "blog_tag__website_meta_title"."res_id" AND "blog_tag__website_meta_title"."type" = 'model' AND "blog_tag__website_meta_title"."name" = 'blog.tag,website_meta_title' AND "blog_tag__website_meta_title"."lang" = 'en_US' AND "blog_tag__website_meta_title"."value" != '') LEFT JOIN "ir_translation" AS "blog_tag__website_meta_description" ON ("blog_tag"."id" = "blog_tag__website_meta_description"."res_id" AND "blog_tag__website_meta_description"."type" = 'model' AND "blog_tag__website_meta_description"."name" = 'blog.tag,website_meta_description' AND "blog_tag__website_meta_description"."lang" = 'en_US' AND "blog_tag__website_meta_description"."value" != '') LEFT JOIN "ir_translation" AS "blog_tag__website_meta_keywords" ON ("blog_tag"."id" = "blog_tag__website_meta_keywords"."res_id" AND "blog_tag__website_meta_keywords"."type" = 'model' AND "blog_tag__website_meta_keywords"."name" = 'blog.tag,website_meta_keywords' AND "blog_tag__website_meta_keywords"."lang" = 'en_US' AND "blog_tag__website_meta_keywords"."value" != '') LEFT JOIN "ir_translation" AS "blog_tag__seo_name" ON ("blog_tag"."id" = "blog_tag__seo_name"."res_id" AND "blog_tag__seo_name"."type" = 'model' AND "blog_tag__seo_name"."name" = 'blog.tag,seo_name' AND "blog_tag__seo_name"."lang" = 'en_US' AND "blog_tag__seo_name"."value" != '') WHERE "blog_tag".id IN (1, 2, 3, 4, 5)
+############ 11 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 346, in checked_call
+    result = self.endpoint(*a, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 911, in __call__
+    return self.method(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 530, in response_wrap
+    response = f(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 174, in blog
+    values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page, search=search)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 131, in _prepare_blog_values
+    'nav_list': self.nav_list(),
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 40, in nav_list
+    groupby=["post_date"], orderby="post_date desc")
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 2328, in _read_group_raw
+    self._cr.execute(query, where_clause_params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+
+            SELECT min("blog_post".id) AS id, count("blog_post".id) AS "post_date_count" , date_trunc('month', "blog_post"."post_date"::timestamp) as "post_date" 
+            FROM "blog_post"
+            WHERE (("blog_post"."active" = true) AND ("blog_post"."post_date" <= '2020-09-18 13:02:12')) AND (("blog_post"."is_published" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL))
+            GROUP BY date_trunc('month', "blog_post"."post_date"::timestamp)
+            ORDER BY "post_date" desc
+            
+            
+        
+############ 12 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 346, in checked_call
+    result = self.endpoint(*a, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 911, in __call__
+    return self.method(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 530, in response_wrap
+    response = f(*args, **kw)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 174, in blog
+    values = self._prepare_blog_values(blogs=blogs, blog=blog, date_begin=date_begin, date_end=date_end, tags=tag, state=state, page=page, search=search)
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 131, in _prepare_blog_values
+    'nav_list': self.nav_list(),
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/controllers/main.py", line 40, in nav_list
+    groupby=["post_date"], orderby="post_date desc")
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 2342, in _read_group_raw
+    result = [self._read_group_format_result(d, annotated_groupbys, groupby, domain) for d in data]
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 2342, in <listcomp>
+    result = [self._read_group_format_result(d, annotated_groupbys, groupby, domain) for d in data]
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 2121, in _read_group_format_result
+    locale = get_lang(self.env).code
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "res_lang"."id" as "id", "res_lang"."name" as "name", "res_lang"."code" as "code", "res_lang"."iso_code" as "iso_code", "res_lang"."url_code" as "url_code", "res_lang"."active" as "active", "res_lang"."direction" as "direction", "res_lang"."date_format" as "date_format", "res_lang"."time_format" as "time_format", "res_lang"."week_start" as "week_start", "res_lang"."grouping" as "grouping", "res_lang"."decimal_point" as "decimal_point", "res_lang"."thousands_sep" as "thousands_sep", "res_lang"."create_uid" as "create_uid", "res_lang"."create_date" as "create_date", "res_lang"."write_uid" as "write_uid", "res_lang"."write_date" as "write_date" FROM "res_lang" WHERE "res_lang".id IN (1)
+############ 13 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 380, in _render
+    self._handle_visibility(do_raise=True)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 353, in _handle_visibility
+    if self.visibility and not request.env.user.has_group('website.group_website_designer'):
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "ir_ui_view"."id" as "id", "ir_ui_view"."name" as "name", "ir_ui_view"."model" as "model", "ir_ui_view"."key" as "key", "ir_ui_view"."priority" as "priority", "ir_ui_view"."arch_fs" as "arch_fs", "ir_ui_view"."arch_updated" as "arch_updated", "ir_ui_view"."arch_prev" as "arch_prev", "ir_ui_view"."inherit_id" as "inherit_id", "ir_ui_view"."field_parent" as "field_parent", "ir_ui_view"."mode" as "mode", "ir_ui_view"."active" as "active", "ir_ui_view"."type" as "type", "ir_ui_view"."customize_show" as "customize_show", COALESCE("ir_ui_view__website_meta_title"."value", "ir_ui_view"."website_meta_title") as "website_meta_title", COALESCE("ir_ui_view__website_meta_description"."value", "ir_ui_view"."website_meta_description") as "website_meta_description", COALESCE("ir_ui_view__website_meta_keywords"."value", "ir_ui_view"."website_meta_keywords") as "website_meta_keywords", "ir_ui_view"."website_meta_og_img" as "website_meta_og_img", COALESCE("ir_ui_view__seo_name"."value", "ir_ui_view"."seo_name") as "seo_name", "ir_ui_view"."website_id" as "website_id", "ir_ui_view"."track" as "track", "ir_ui_view"."visibility" as "visibility", "ir_ui_view"."theme_template_id" as "theme_template_id", "ir_ui_view"."create_uid" as "create_uid", "ir_ui_view"."create_date" as "create_date", "ir_ui_view"."write_uid" as "write_uid", "ir_ui_view"."write_date" as "write_date" FROM "ir_ui_view" LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_title" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_title"."res_id" AND "ir_ui_view__website_meta_title"."type" = 'model' AND "ir_ui_view__website_meta_title"."name" = 'ir.ui.view,website_meta_title' AND "ir_ui_view__website_meta_title"."lang" = 'en_US' AND "ir_ui_view__website_meta_title"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_description" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_description"."res_id" AND "ir_ui_view__website_meta_description"."type" = 'model' AND "ir_ui_view__website_meta_description"."name" = 'ir.ui.view,website_meta_description' AND "ir_ui_view__website_meta_description"."lang" = 'en_US' AND "ir_ui_view__website_meta_description"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_keywords" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_keywords"."res_id" AND "ir_ui_view__website_meta_keywords"."type" = 'model' AND "ir_ui_view__website_meta_keywords"."name" = 'ir.ui.view,website_meta_keywords' AND "ir_ui_view__website_meta_keywords"."lang" = 'en_US' AND "ir_ui_view__website_meta_keywords"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__seo_name" ON ("ir_ui_view"."id" = "ir_ui_view__seo_name"."res_id" AND "ir_ui_view__seo_name"."type" = 'model' AND "ir_ui_view__seo_name"."name" = 'ir.ui.view,seo_name' AND "ir_ui_view__seo_name"."lang" = 'en_US' AND "ir_ui_view__seo_name"."value" != '') WHERE "ir_ui_view".id IN (860)
+############ 14 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1699, in _render
+    qcontext = dict() if minimal_qcontext else self._prepare_qcontext()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 435, in _prepare_qcontext
+    res_company=request.website.company_id.sudo(),
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "website"."id" as "id", "website"."name" as "name", "website"."domain" as "domain", "website"."company_id" as "company_id", "website"."default_lang_id" as "default_lang_id", "website"."auto_redirect_lang" as "auto_redirect_lang", "website"."cookies_bar" as "cookies_bar", "website"."social_twitter" as "social_twitter", "website"."social_facebook" as "social_facebook", "website"."social_github" as "social_github", "website"."social_linkedin" as "social_linkedin", "website"."social_youtube" as "social_youtube", "website"."social_instagram" as "social_instagram", "website"."has_social_default_image" as "has_social_default_image", "website"."google_analytics_key" as "google_analytics_key", "website"."google_management_client_id" as "google_management_client_id", "website"."google_management_client_secret" as "google_management_client_secret", "website"."google_search_console" as "google_search_console", "website"."google_maps_api_key" as "google_maps_api_key", "website"."user_id" as "user_id", "website"."cdn_activated" as "cdn_activated", "website"."cdn_url" as "cdn_url", "website"."cdn_filters" as "cdn_filters", "website"."homepage_id" as "homepage_id", "website"."custom_code_head" as "custom_code_head", "website"."custom_code_footer" as "custom_code_footer", "website"."theme_id" as "theme_id", "website"."specific_user_account" as "specific_user_account", "website"."auth_signup_uninvited" as "auth_signup_uninvited", "website"."channel_id" as "channel_id", "website"."create_uid" as "create_uid", "website"."create_date" as "create_date", "website"."write_uid" as "write_uid", "website"."write_date" as "write_date" FROM "website" WHERE "website".id IN (1)
+############ 15 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "<template>", line 17, in body_call_content_353
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "blog_post"."id" as "id", COALESCE("blog_post__name"."value", "blog_post"."name") as "name", COALESCE("blog_post__subtitle"."value", "blog_post"."subtitle") as "subtitle", "blog_post"."author_id" as "author_id", "blog_post"."author_name" as "author_name", "blog_post"."active" as "active", "blog_post"."blog_id" as "blog_id", "blog_post"."teaser_manual" as "teaser_manual", "blog_post"."create_date" as "create_date", "blog_post"."published_date" as "published_date", "blog_post"."post_date" as "post_date", "blog_post"."create_uid" as "create_uid", "blog_post"."write_date" as "write_date", "blog_post"."write_uid" as "write_uid", "blog_post"."visits" as "visits", "blog_post"."website_id" as "website_id", "blog_post"."message_main_attachment_id" as "message_main_attachment_id", COALESCE("blog_post__website_meta_title"."value", "blog_post"."website_meta_title") as "website_meta_title", COALESCE("blog_post__website_meta_description"."value", "blog_post"."website_meta_description") as "website_meta_description", COALESCE("blog_post__website_meta_keywords"."value", "blog_post"."website_meta_keywords") as "website_meta_keywords", "blog_post"."website_meta_og_img" as "website_meta_og_img", COALESCE("blog_post__seo_name"."value", "blog_post"."seo_name") as "seo_name", "blog_post"."cover_properties" as "cover_properties", "blog_post"."is_published" as "is_published" FROM "blog_post" LEFT JOIN "ir_translation" AS "blog_post__name" ON ("blog_post"."id" = "blog_post__name"."res_id" AND "blog_post__name"."type" = 'model' AND "blog_post__name"."name" = 'blog.post,name' AND "blog_post__name"."lang" = 'en_US' AND "blog_post__name"."value" != '') LEFT JOIN "ir_translation" AS "blog_post__subtitle" ON ("blog_post"."id" = "blog_post__subtitle"."res_id" AND "blog_post__subtitle"."type" = 'model' AND "blog_post__subtitle"."name" = 'blog.post,subtitle' AND "blog_post__subtitle"."lang" = 'en_US' AND "blog_post__subtitle"."value" != '') LEFT JOIN "ir_translation" AS "blog_post__website_meta_title" ON ("blog_post"."id" = "blog_post__website_meta_title"."res_id" AND "blog_post__website_meta_title"."type" = 'model' AND "blog_post__website_meta_title"."name" = 'blog.post,website_meta_title' AND "blog_post__website_meta_title"."lang" = 'en_US' AND "blog_post__website_meta_title"."value" != '') LEFT JOIN "ir_translation" AS "blog_post__website_meta_description" ON ("blog_post"."id" = "blog_post__website_meta_description"."res_id" AND "blog_post__website_meta_description"."type" = 'model' AND "blog_post__website_meta_description"."name" = 'blog.post,website_meta_description' AND "blog_post__website_meta_description"."lang" = 'en_US' AND "blog_post__website_meta_description"."value" != '') LEFT JOIN "ir_translation" AS "blog_post__website_meta_keywords" ON ("blog_post"."id" = "blog_post__website_meta_keywords"."res_id" AND "blog_post__website_meta_keywords"."type" = 'model' AND "blog_post__website_meta_keywords"."name" = 'blog.post,website_meta_keywords' AND "blog_post__website_meta_keywords"."lang" = 'en_US' AND "blog_post__website_meta_keywords"."value" != '') LEFT JOIN "ir_translation" AS "blog_post__seo_name" ON ("blog_post"."id" = "blog_post__seo_name"."res_id" AND "blog_post__seo_name"."type" = 'model' AND "blog_post__seo_name"."name" = 'blog.post,seo_name' AND "blog_post__seo_name"."lang" = 'en_US' AND "blog_post__seo_name"."value" != '') WHERE (("blog_post"."is_published" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL)) AND "blog_post".id IN (1, 3, 2, 6, 5, 4, 7)
+############ 16 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "<template>", line 17, in body_call_content_353
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 94, in slug
+    identifier, name = value.id, getattr(value, 'seo_name', False) or value.display_name
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "blog_blog"."id" as "id", COALESCE("blog_blog__name"."value", "blog_blog"."name") as "name", COALESCE("blog_blog__subtitle"."value", "blog_blog"."subtitle") as "subtitle", "blog_blog"."active" as "active", "blog_blog"."message_main_attachment_id" as "message_main_attachment_id", COALESCE("blog_blog__website_meta_title"."value", "blog_blog"."website_meta_title") as "website_meta_title", COALESCE("blog_blog__website_meta_description"."value", "blog_blog"."website_meta_description") as "website_meta_description", COALESCE("blog_blog__website_meta_keywords"."value", "blog_blog"."website_meta_keywords") as "website_meta_keywords", "blog_blog"."website_meta_og_img" as "website_meta_og_img", COALESCE("blog_blog__seo_name"."value", "blog_blog"."seo_name") as "seo_name", "blog_blog"."cover_properties" as "cover_properties", "blog_blog"."website_id" as "website_id", "blog_blog"."create_uid" as "create_uid", "blog_blog"."create_date" as "create_date", "blog_blog"."write_uid" as "write_uid", "blog_blog"."write_date" as "write_date" FROM "blog_blog" LEFT JOIN "ir_translation" AS "blog_blog__name" ON ("blog_blog"."id" = "blog_blog__name"."res_id" AND "blog_blog__name"."type" = 'model' AND "blog_blog__name"."name" = 'blog.blog,name' AND "blog_blog__name"."lang" = 'en_US' AND "blog_blog__name"."value" != '') LEFT JOIN "ir_translation" AS "blog_blog__subtitle" ON ("blog_blog"."id" = "blog_blog__subtitle"."res_id" AND "blog_blog__subtitle"."type" = 'model' AND "blog_blog__subtitle"."name" = 'blog.blog,subtitle' AND "blog_blog__subtitle"."lang" = 'en_US' AND "blog_blog__subtitle"."value" != '') LEFT JOIN "ir_translation" AS "blog_blog__website_meta_title" ON ("blog_blog"."id" = "blog_blog__website_meta_title"."res_id" AND "blog_blog__website_meta_title"."type" = 'model' AND "blog_blog__website_meta_title"."name" = 'blog.blog,website_meta_title' AND "blog_blog__website_meta_title"."lang" = 'en_US' AND "blog_blog__website_meta_title"."value" != '') LEFT JOIN "ir_translation" AS "blog_blog__website_meta_description" ON ("blog_blog"."id" = "blog_blog__website_meta_description"."res_id" AND "blog_blog__website_meta_description"."type" = 'model' AND "blog_blog__website_meta_description"."name" = 'blog.blog,website_meta_description' AND "blog_blog__website_meta_description"."lang" = 'en_US' AND "blog_blog__website_meta_description"."value" != '') LEFT JOIN "ir_translation" AS "blog_blog__website_meta_keywords" ON ("blog_blog"."id" = "blog_blog__website_meta_keywords"."res_id" AND "blog_blog__website_meta_keywords"."type" = 'model' AND "blog_blog__website_meta_keywords"."name" = 'blog.blog,website_meta_keywords' AND "blog_blog__website_meta_keywords"."lang" = 'en_US' AND "blog_blog__website_meta_keywords"."value" != '') LEFT JOIN "ir_translation" AS "blog_blog__seo_name" ON ("blog_blog"."id" = "blog_blog__seo_name"."res_id" AND "blog_blog__seo_name"."type" = 'model' AND "blog_blog__seo_name"."name" = 'blog.blog,seo_name' AND "blog_blog__seo_name"."lang" = 'en_US' AND "blog_blog__seo_name"."value" != '') WHERE "blog_blog".id IN (1, 2)
+############ 17 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_posts_loop_427
+  File "<template>", line 90, in foreach_426
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_cover_image_436
+  File "<template>", line 7, in body_call_content_434
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_author_441
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1982, in compute_value
+    super().compute_value(records)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/addons/mail/models/mail_thread.py", line 410, in _compute_field_value
+    return super()._compute_field_value(field)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3995, in _compute_field_value
+    field.compute(self)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 542, in _compute_related
+    record[self.name] = self._process_related(value[self.related_field.name])
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5573, in __getitem__
+    return self._fields[key].__get__(self, type(self))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3118, in _read
+    field.read(fetched)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1995, in read
+    for att in records.env['ir.attachment'].sudo().search(domain)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 1673, in search
+    return res if count else self.browse(res)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 4875, in browse
+    if not ids:
+  File "/home/xdo/osrc/master/odoo/odoo/osv/query.py", line 156, in __bool__
+    return bool(self._result)
+  File "/home/xdo/osrc/master/odoo/odoo/tools/func.py", line 26, in __get__
+    value = self.fget(obj)
+  File "/home/xdo/osrc/master/odoo/odoo/osv/query.py", line 149, in _result
+    self._cr.execute(query_str, params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "ir_attachment".id FROM "ir_attachment" WHERE ((("ir_attachment"."res_model" = 'res.partner') AND ("ir_attachment"."res_field" = 'image_128')) AND ("ir_attachment"."res_id" in (3,7))) ORDER BY  "ir_attachment"."id" DESC 
+############ 18 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_posts_loop_427
+  File "<template>", line 90, in foreach_426
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_cover_image_436
+  File "<template>", line 7, in body_call_content_434
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_author_441
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1982, in compute_value
+    super().compute_value(records)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/addons/mail/models/mail_thread.py", line 410, in _compute_field_value
+    return super()._compute_field_value(field)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3995, in _compute_field_value
+    field.compute(self)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 542, in _compute_related
+    record[self.name] = self._process_related(value[self.related_field.name])
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5573, in __getitem__
+    return self._fields[key].__get__(self, type(self))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3118, in _read
+    field.read(fetched)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1995, in read
+    for att in records.env['ir.attachment'].sudo().search(domain)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1995, in <dictcomp>
+    for att in records.env['ir.attachment'].sudo().search(domain)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1982, in compute_value
+    super().compute_value(records)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_attachment.py", line 198, in _compute_datas
+    attach.datas = base64.b64encode(attach.raw or b'')
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1982, in compute_value
+    super().compute_value(records)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_attachment.py", line 203, in _compute_raw
+    if attach.store_fname:
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_attachment.py", line 502, in _read
+    return super(IrAttachment, self)._read(fields)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "ir_attachment"."id" as "id", "ir_attachment"."name" as "name", "ir_attachment"."description" as "description", "ir_attachment"."res_model" as "res_model", "ir_attachment"."res_field" as "res_field", "ir_attachment"."res_id" as "res_id", "ir_attachment"."company_id" as "company_id", "ir_attachment"."type" as "type", "ir_attachment"."url" as "url", "ir_attachment"."public" as "public", "ir_attachment"."store_fname" as "store_fname", "ir_attachment"."file_size" as "file_size", "ir_attachment"."checksum" as "checksum", "ir_attachment"."mimetype" as "mimetype", "ir_attachment"."original_id" as "original_id", "ir_attachment"."website_id" as "website_id", "ir_attachment"."key" as "key", "ir_attachment"."theme_template_id" as "theme_template_id", "ir_attachment"."create_uid" as "create_uid", "ir_attachment"."create_date" as "create_date", "ir_attachment"."write_uid" as "write_uid", "ir_attachment"."write_date" as "write_date" FROM "ir_attachment" WHERE "ir_attachment".id IN (163, 16)
+############ 19 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_posts_loop_427
+  File "<template>", line 90, in foreach_426
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_teaser_451
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 380, in _get_field
+    content = converter.record_to_html(record, field_name, field_options)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb_fields.py", line 127, in record_to_html
+    value = record[field_name]
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5573, in __getitem__
+    return self._fields[key].__get__(self, type(self))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/addons/mail/models/mail_thread.py", line 410, in _compute_field_value
+    return super()._compute_field_value(field)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/models/website_blog.py", line 165, in _compute_teaser
+    content = html2plaintext(blog_post.content).replace('\n', ' ')
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "blog_post"."id" as "id", "blog_post"."content" as "content" FROM "blog_post" WHERE (("blog_post"."is_published" = true) AND (("blog_post"."website_id" in (1)) OR "blog_post"."website_id" IS NULL)) AND "blog_post".id IN (1, 3, 2, 6, 5, 4, 7)
+############ 20 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_posts_loop_427
+  File "<template>", line 90, in foreach_426
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_teaser_451
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 380, in _get_field
+    content = converter.record_to_html(record, field_name, field_options)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb_fields.py", line 127, in record_to_html
+    value = record[field_name]
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5573, in __getitem__
+    return self._fields[key].__get__(self, type(self))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/addons/mail/models/mail_thread.py", line 410, in _compute_field_value
+    return super()._compute_field_value(field)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website_blog/models/website_blog.py", line 165, in _compute_teaser
+    content = html2plaintext(blog_post.content).replace('\n', ' ')
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3105, in _read
+    translate = field.get_trans_func(fetched)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1402, in get_trans_func
+    rec_src_trans = records.env['ir.translation']._get_terms_translations(self, records)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_translation.py", line 386, in _get_terms_translations
+    self._cr.execute(query, params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+ SELECT * FROM ir_translation
+                    WHERE lang='en_US' AND type='model_terms' AND name='blog.post,content' AND res_id IN (1, 2, 3, 4, 5, 6, 7) 
+############ 21 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_posts_loop_427
+  File "<template>", line 90, in foreach_426
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_teaser_451
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3118, in _read
+    field.read(fetched)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 3427, in read
+    records._cr.execute(query, where_params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+ SELECT blog_post_blog_tag_rel.blog_post_id, blog_post_blog_tag_rel.blog_tag_id FROM blog_post_blog_tag_rel, "blog_tag" LEFT JOIN "ir_translation" AS "blog_tag__name" ON ("blog_tag"."id" = "blog_tag__name"."res_id" AND "blog_tag__name"."type" = 'model' AND "blog_tag__name"."name" = 'blog.tag,name' AND "blog_tag__name"."lang" = 'en_US' AND "blog_tag__name"."value" != '')
+                    WHERE 1=1 AND blog_post_blog_tag_rel.blog_post_id IN (1, 3, 2, 6, 5, 4, 7) AND blog_post_blog_tag_rel.blog_tag_id = blog_tag.id
+                     ORDER BY COALESCE("blog_tag__name"."value", "blog_tag"."name")    OFFSET 0
+                
+############ 22 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_posts_loop_427
+  File "<template>", line 90, in foreach_426
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_info_456
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 380, in _get_field
+    content = converter.record_to_html(record, field_name, field_options)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb_fields.py", line 128, in record_to_html
+    return False if value is False else record.env[self._name].value_to_html(value, options=options)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb_fields.py", line 244, in value_to_html
+    value = fields.Datetime.context_timestamp(self, value)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1809, in context_timestamp
+    tz_name = record._context.get('tz') or record.env.user.tz
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3995, in _compute_field_value
+    field.compute(self)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 530, in _compute_related
+    values = [first(value[name]) for value in values]
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 530, in <listcomp>
+    values = [first(value[name]) for value in values]
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5573, in __getitem__
+    return self._fields[key].__get__(self, type(self))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/res_users.py", line 447, in _read
+    super(Users, self)._read(fields)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "res_users"."id" as "id", "res_users"."partner_id" as "partner_id", "res_users"."login" as "login", "res_users"."signature" as "signature", "res_users"."active" as "active", "res_users"."action_id" as "action_id", "res_users"."share" as "share", "res_users"."company_id" as "company_id", "res_users"."notification_type" as "notification_type", "res_users"."odoobot_failed" as "odoobot_failed", "res_users"."livechat_username" as "livechat_username", "res_users"."website_id" as "website_id", "res_users"."odoobot_state" as "odoobot_state", "res_users"."create_uid" as "create_uid", "res_users"."create_date" as "create_date", "res_users"."write_uid" as "write_uid", "res_users"."write_date" as "write_date" FROM "res_users" WHERE "res_users".id IN (4)
+############ 23 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "<template>", line 2, in body_call_content_366
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_posts_loop_427
+  File "<template>", line 90, in foreach_426
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_post_info_456
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 380, in _get_field
+    content = converter.record_to_html(record, field_name, field_options)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb_fields.py", line 128, in record_to_html
+    return False if value is False else record.env[self._name].value_to_html(value, options=options)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb_fields.py", line 244, in value_to_html
+    value = fields.Datetime.context_timestamp(self, value)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1809, in context_timestamp
+    tz_name = record._context.get('tz') or record.env.user.tz
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3995, in _compute_field_value
+    field.compute(self)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 542, in _compute_related
+    record[self.name] = self._process_related(value[self.related_field.name])
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5573, in __getitem__
+    return self._fields[key].__get__(self, type(self))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "res_partner"."id" as "id", "res_partner"."name" as "name", "res_partner"."display_name" as "display_name", "res_partner"."date" as "date", "res_partner"."title" as "title", "res_partner"."parent_id" as "parent_id", "res_partner"."ref" as "ref", "res_partner"."lang" as "lang", "res_partner"."tz" as "tz", "res_partner"."vat" as "vat", "res_partner"."website" as "website", "res_partner"."comment" as "comment", "res_partner"."credit_limit" as "credit_limit", "res_partner"."active" as "active", "res_partner"."employee" as "employee", "res_partner"."function" as "function", "res_partner"."type" as "type", "res_partner"."street" as "street", "res_partner"."street2" as "street2", "res_partner"."zip" as "zip", "res_partner"."city" as "city", "res_partner"."state_id" as "state_id", "res_partner"."country_id" as "country_id", "res_partner"."partner_latitude" as "partner_latitude", "res_partner"."partner_longitude" as "partner_longitude", "res_partner"."mobile" as "mobile", "res_partner"."is_company" as "is_company", "res_partner"."industry_id" as "industry_id", "res_partner"."company_id" as "company_id", "res_partner"."color" as "color", "res_partner"."partner_share" as "partner_share", "res_partner"."commercial_partner_id" as "commercial_partner_id", "res_partner"."commercial_company_name" as "commercial_company_name", "res_partner"."company_name" as "company_name", "res_partner"."message_main_attachment_id" as "message_main_attachment_id", "res_partner"."email_normalized" as "email_normalized", "res_partner"."message_bounce" as "message_bounce", "res_partner"."email" as "email", "res_partner"."phone" as "phone", "res_partner"."user_id" as "user_id", "res_partner"."phone_sanitized" as "phone_sanitized", "res_partner"."partner_gid" as "partner_gid", "res_partner"."additional_info" as "additional_info", COALESCE("res_partner__website_meta_title"."value", "res_partner"."website_meta_title") as "website_meta_title", COALESCE("res_partner__website_meta_description"."value", "res_partner"."website_meta_description") as "website_meta_description", COALESCE("res_partner__website_meta_keywords"."value", "res_partner"."website_meta_keywords") as "website_meta_keywords", "res_partner"."website_meta_og_img" as "website_meta_og_img", COALESCE("res_partner__seo_name"."value", "res_partner"."seo_name") as "seo_name", "res_partner"."website_id" as "website_id", "res_partner"."is_published" as "is_published", COALESCE("res_partner__website_short_description"."value", "res_partner"."website_short_description") as "website_short_description", "res_partner"."create_uid" as "create_uid", "res_partner"."create_date" as "create_date", "res_partner"."write_uid" as "write_uid", "res_partner"."write_date" as "write_date" FROM "res_partner" LEFT JOIN "ir_translation" AS "res_partner__website_meta_title" ON ("res_partner"."id" = "res_partner__website_meta_title"."res_id" AND "res_partner__website_meta_title"."type" = 'model' AND "res_partner__website_meta_title"."name" = 'res.partner,website_meta_title' AND "res_partner__website_meta_title"."lang" = 'en_US' AND "res_partner__website_meta_title"."value" != '') LEFT JOIN "ir_translation" AS "res_partner__website_meta_description" ON ("res_partner"."id" = "res_partner__website_meta_description"."res_id" AND "res_partner__website_meta_description"."type" = 'model' AND "res_partner__website_meta_description"."name" = 'res.partner,website_meta_description' AND "res_partner__website_meta_description"."lang" = 'en_US' AND "res_partner__website_meta_description"."value" != '') LEFT JOIN "ir_translation" AS "res_partner__website_meta_keywords" ON ("res_partner"."id" = "res_partner__website_meta_keywords"."res_id" AND "res_partner__website_meta_keywords"."type" = 'model' AND "res_partner__website_meta_keywords"."name" = 'res.partner,website_meta_keywords' AND "res_partner__website_meta_keywords"."lang" = 'en_US' AND "res_partner__website_meta_keywords"."value" != '') LEFT JOIN "ir_translation" AS "res_partner__seo_name" ON ("res_partner"."id" = "res_partner__seo_name"."res_id" AND "res_partner__seo_name"."type" = 'model' AND "res_partner__seo_name"."name" = 'res.partner,seo_name' AND "res_partner__seo_name"."lang" = 'en_US' AND "res_partner__seo_name"."value" != '') LEFT JOIN "ir_translation" AS "res_partner__website_short_description" ON ("res_partner"."id" = "res_partner__website_short_description"."res_id" AND "res_partner__website_short_description"."type" = 'model' AND "res_partner__website_short_description"."name" = 'res.partner,website_short_description' AND "res_partner__website_short_description"."lang" = 'en_US' AND "res_partner__website_short_description"."value" != '') WHERE "res_partner".id IN (4)
+############ 24 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_index_467
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_web_frontend_layout_552
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "res_company"."id" as "id", "res_company"."name" as "name", "res_company"."sequence" as "sequence", "res_company"."parent_id" as "parent_id", "res_company"."partner_id" as "partner_id", "res_company"."report_header" as "report_header", COALESCE("res_company__report_footer"."value", "res_company"."report_footer") as "report_footer", "res_company"."currency_id" as "currency_id", "res_company"."email" as "email", "res_company"."phone" as "phone", "res_company"."company_registry" as "company_registry", "res_company"."paperformat_id" as "paperformat_id", "res_company"."external_report_layout_id" as "external_report_layout_id", "res_company"."base_onboarding_company_state" as "base_onboarding_company_state", "res_company"."font" as "font", "res_company"."primary_color" as "primary_color", "res_company"."secondary_color" as "secondary_color", "res_company"."social_twitter" as "social_twitter", "res_company"."social_facebook" as "social_facebook", "res_company"."social_github" as "social_github", "res_company"."social_linkedin" as "social_linkedin", "res_company"."social_youtube" as "social_youtube", "res_company"."social_instagram" as "social_instagram", "res_company"."resource_calendar_id" as "resource_calendar_id", "res_company"."partner_gid" as "partner_gid", "res_company"."snailmail_color" as "snailmail_color", "res_company"."snailmail_cover" as "snailmail_cover", "res_company"."snailmail_duplex" as "snailmail_duplex", "res_company"."create_uid" as "create_uid", "res_company"."create_date" as "create_date", "res_company"."write_uid" as "write_uid", "res_company"."write_date" as "write_date" FROM "res_company" LEFT JOIN "ir_translation" AS "res_company__report_footer" ON ("res_company"."id" = "res_company__report_footer"."res_id" AND "res_company__report_footer"."type" = 'model' AND "res_company__report_footer"."name" = 'res.company,report_footer' AND "res_company__report_footer"."lang" = 'en_US' AND "res_company__report_footer"."value" != '') WHERE "res_company".id IN (1)
+############ 25 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_index_467
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_web_frontend_layout_552
+  File "<template>", line 289, in body_call_content_528
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/website.py", line 151, in _compute_menu
+    if menu.parent_id and menu.parent_id in menus:
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "website_menu"."id" as "id", COALESCE("website_menu__name"."value", "website_menu"."name") as "name", "website_menu"."url" as "url", "website_menu"."page_id" as "page_id", "website_menu"."new_window" as "new_window", "website_menu"."sequence" as "sequence", "website_menu"."website_id" as "website_id", "website_menu"."parent_id" as "parent_id", "website_menu"."parent_path" as "parent_path", "website_menu"."mega_menu_content" as "mega_menu_content", "website_menu"."mega_menu_classes" as "mega_menu_classes", "website_menu"."theme_template_id" as "theme_template_id", "website_menu"."create_uid" as "create_uid", "website_menu"."create_date" as "create_date", "website_menu"."write_uid" as "write_uid", "website_menu"."write_date" as "write_date" FROM "website_menu" LEFT JOIN "ir_translation" AS "website_menu__name" ON ("website_menu"."id" = "website_menu__name"."res_id" AND "website_menu__name"."type" = 'model' AND "website_menu__name"."name" = 'website.menu,name' AND "website_menu__name"."lang" = 'en_US' AND "website_menu__name"."value" != '') WHERE (("website_menu"."id" not in (SELECT "website_menu_id" FROM "res_groups_website_menu_rel" where "website_menu_id" is not null)) OR ("website_menu"."id" in (SELECT "website_menu_id" FROM "res_groups_website_menu_rel" WHERE "res_groups_id" IN (12, 10)))) AND "website_menu".id IN (4, 5, 10, 6)
+############ 26 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_index_467
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_web_frontend_layout_552
+  File "<template>", line 289, in body_call_content_528
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/website.py", line 151, in _compute_menu
+    if menu.parent_id and menu.parent_id in menus:
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3105, in _read
+    translate = field.get_trans_func(fetched)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1402, in get_trans_func
+    rec_src_trans = records.env['ir.translation']._get_terms_translations(self, records)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_translation.py", line 386, in _get_terms_translations
+    self._cr.execute(query, params)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+ SELECT * FROM ir_translation
+                    WHERE lang='en_US' AND type='model_terms' AND name='website.menu,mega_menu_content' AND res_id IN (4, 6, 5, 10) 
+############ 27 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_index_467
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_web_frontend_layout_552
+  File "<template>", line 289, in body_call_content_528
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/website.py", line 154, in _compute_menu
+    menus.mapped('is_visible')
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5163, in mapped
+    recs = recs._fields[name].mapped(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1037, in mapped
+    self.__get__(first(remaining), type(remaining))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/website_menu.py", line 115, in _compute_visible
+    (not menu.page_id.sudo().is_visible or
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/website_page.py", line 54, in _compute_visible
+    page.is_visible = page.website_published and (
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/mixins.py", line 218, in _compute_website_published
+    record.website_published = record.is_published and (not record.website_id or record.website_id.id == current_website_id)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "website_page"."id" as "id", "website_page"."url" as "url", "website_page"."view_id" as "view_id", "website_page"."website_indexed" as "website_indexed", "website_page"."date_publish" as "date_publish", "website_page"."cache_time" as "cache_time", "website_page"."cache_key_expr" as "cache_key_expr", "website_page"."header_overlay" as "header_overlay", "website_page"."header_color" as "header_color", "website_page"."header_visible" as "header_visible", "website_page"."footer_visible" as "footer_visible", "website_page"."website_id" as "website_id", "website_page"."theme_template_id" as "theme_template_id", "website_page"."is_published" as "is_published", "website_page"."create_uid" as "create_uid", "website_page"."create_date" as "create_date", "website_page"."write_uid" as "write_uid", "website_page"."write_date" as "write_date" FROM "website_page" WHERE "website_page".id IN (3, 2)
+############ 28 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 512, in _dispatch
+    result = super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_http.py", line 237, in _dispatch
+    result = request.dispatch()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 805, in dispatch
+    r = self._call_function(**self.params)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 358, in _call_function
+    return checked_call(self.db, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/service/model.py", line 94, in wrapper
+    return f(dbname, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 349, in checked_call
+    result.flatten()
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1241, in flatten
+    self.response.append(self.render())
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1234, in render
+    return env["ir.ui.view"]._render_template(self.template, self.qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1694, in _render_template
+    return self.browse(self.get_view_id(template))._render(values, engine)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 401, in _render
+    return super(View, self)._render(values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_ui_view.py", line 28, in _render
+    return super(IrUiView, self)._render(values=values, engine=engine, minimal_qcontext=minimal_qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_ui_view.py", line 1702, in _render
+    return self.env[engine]._render(self.id, qcontext)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/ir_qweb.py", line 55, in _render
+    result = super(IrQWeb, self)._render(id_or_xml_id, values=values, **context)
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 257, in _render
+    self.compile(template, options)(self, body.append, values or {})
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_blog_post_short_368
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_website_blog_index_467
+  File "/home/xdo/osrc/master/odoo/odoo/addons/base/models/qweb.py", line 329, in _compiled_fn
+    return compiled(self, append, new, options, log)
+  File "<template>", line 1, in template_web_frontend_layout_552
+  File "<template>", line 289, in body_call_content_528
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 2397, in __get__
+    return super().__get__(records, owner)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/website.py", line 154, in _compute_menu
+    menus.mapped('is_visible')
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 5163, in mapped
+    recs = recs._fields[name].mapped(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1037, in mapped
+    self.__get__(first(remaining), type(remaining))
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 963, in __get__
+    self.compute_value(recs)
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 1102, in compute_value
+    records._compute_field_value(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3993, in _compute_field_value
+    getattr(self, field.compute)()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/website_menu.py", line 116, in _compute_visible
+    (not menu.page_id.view_id._handle_visibility(do_raise=False) and
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_ui_view.py", line 353, in _handle_visibility
+    if self.visibility and not request.env.user.has_group('website.group_website_designer'):
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "ir_ui_view"."id" as "id", "ir_ui_view"."name" as "name", "ir_ui_view"."model" as "model", "ir_ui_view"."key" as "key", "ir_ui_view"."priority" as "priority", "ir_ui_view"."arch_fs" as "arch_fs", "ir_ui_view"."arch_updated" as "arch_updated", "ir_ui_view"."arch_prev" as "arch_prev", "ir_ui_view"."inherit_id" as "inherit_id", "ir_ui_view"."field_parent" as "field_parent", "ir_ui_view"."mode" as "mode", "ir_ui_view"."active" as "active", "ir_ui_view"."type" as "type", "ir_ui_view"."customize_show" as "customize_show", COALESCE("ir_ui_view__website_meta_title"."value", "ir_ui_view"."website_meta_title") as "website_meta_title", COALESCE("ir_ui_view__website_meta_description"."value", "ir_ui_view"."website_meta_description") as "website_meta_description", COALESCE("ir_ui_view__website_meta_keywords"."value", "ir_ui_view"."website_meta_keywords") as "website_meta_keywords", "ir_ui_view"."website_meta_og_img" as "website_meta_og_img", COALESCE("ir_ui_view__seo_name"."value", "ir_ui_view"."seo_name") as "seo_name", "ir_ui_view"."website_id" as "website_id", "ir_ui_view"."track" as "track", "ir_ui_view"."visibility" as "visibility", "ir_ui_view"."theme_template_id" as "theme_template_id", "ir_ui_view"."create_uid" as "create_uid", "ir_ui_view"."create_date" as "create_date", "ir_ui_view"."write_uid" as "write_uid", "ir_ui_view"."write_date" as "write_date" FROM "ir_ui_view" LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_title" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_title"."res_id" AND "ir_ui_view__website_meta_title"."type" = 'model' AND "ir_ui_view__website_meta_title"."name" = 'ir.ui.view,website_meta_title' AND "ir_ui_view__website_meta_title"."lang" = 'en_US' AND "ir_ui_view__website_meta_title"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_description" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_description"."res_id" AND "ir_ui_view__website_meta_description"."type" = 'model' AND "ir_ui_view__website_meta_description"."name" = 'ir.ui.view,website_meta_description' AND "ir_ui_view__website_meta_description"."lang" = 'en_US' AND "ir_ui_view__website_meta_description"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_keywords" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_keywords"."res_id" AND "ir_ui_view__website_meta_keywords"."type" = 'model' AND "ir_ui_view__website_meta_keywords"."name" = 'ir.ui.view,website_meta_keywords' AND "ir_ui_view__website_meta_keywords"."lang" = 'en_US' AND "ir_ui_view__website_meta_keywords"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__seo_name" ON ("ir_ui_view"."id" = "ir_ui_view__seo_name"."res_id" AND "ir_ui_view__seo_name"."type" = 'model' AND "ir_ui_view__seo_name"."name" = 'ir.ui.view,seo_name' AND "ir_ui_view__seo_name"."lang" = 'en_US' AND "ir_ui_view__seo_name"."value" != '') WHERE "ir_ui_view".id IN (493, 491)
+############ 29 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 181, in _dispatch
+    response = super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/auth_signup/models/ir_http.py", line 19, in _dispatch
+    return super(Http, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/web_editor/models/ir_http.py", line 21, in _dispatch
+    return super(IrHttp, cls)._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/http_routing/models/ir_http.py", line 515, in _dispatch
+    if request.is_frontend and cook_lang != request.lang.code and hasattr(result, 'set_cookie'):
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "res_lang"."id" as "id", "res_lang"."name" as "name", "res_lang"."code" as "code", "res_lang"."iso_code" as "iso_code", "res_lang"."url_code" as "url_code", "res_lang"."active" as "active", "res_lang"."direction" as "direction", "res_lang"."date_format" as "date_format", "res_lang"."time_format" as "time_format", "res_lang"."week_start" as "week_start", "res_lang"."grouping" as "grouping", "res_lang"."decimal_point" as "decimal_point", "res_lang"."thousands_sep" as "thousands_sep", "res_lang"."create_uid" as "create_uid", "res_lang"."create_date" as "create_date", "res_lang"."write_uid" as "write_uid", "res_lang"."write_date" as "write_date" FROM "res_lang" WHERE "res_lang".id IN (1)
+############ 30 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1464, in dispatch
+    result = ir_http._dispatch()
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 184, in _dispatch
+    cls._register_website_track(response)
+  File "/home/xdo/osrc/master/odoo/addons/website/models/ir_http.py", line 155, in _register_website_track
+    if view and view.track:
+  File "/home/xdo/osrc/master/odoo/odoo/fields.py", line 940, in __get__
+    recs._fetch_field(self)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3023, in _fetch_field
+    self._read(fnames)
+  File "/home/xdo/osrc/master/odoo/odoo/models.py", line 3090, in _read
+    cr.execute(query_str, params + [sub_ids])
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SELECT "ir_ui_view"."id" as "id", "ir_ui_view"."name" as "name", "ir_ui_view"."model" as "model", "ir_ui_view"."key" as "key", "ir_ui_view"."priority" as "priority", "ir_ui_view"."arch_fs" as "arch_fs", "ir_ui_view"."arch_updated" as "arch_updated", "ir_ui_view"."arch_prev" as "arch_prev", "ir_ui_view"."inherit_id" as "inherit_id", "ir_ui_view"."field_parent" as "field_parent", "ir_ui_view"."mode" as "mode", "ir_ui_view"."active" as "active", "ir_ui_view"."type" as "type", "ir_ui_view"."customize_show" as "customize_show", COALESCE("ir_ui_view__website_meta_title"."value", "ir_ui_view"."website_meta_title") as "website_meta_title", COALESCE("ir_ui_view__website_meta_description"."value", "ir_ui_view"."website_meta_description") as "website_meta_description", COALESCE("ir_ui_view__website_meta_keywords"."value", "ir_ui_view"."website_meta_keywords") as "website_meta_keywords", "ir_ui_view"."website_meta_og_img" as "website_meta_og_img", COALESCE("ir_ui_view__seo_name"."value", "ir_ui_view"."seo_name") as "seo_name", "ir_ui_view"."website_id" as "website_id", "ir_ui_view"."track" as "track", "ir_ui_view"."visibility" as "visibility", "ir_ui_view"."theme_template_id" as "theme_template_id", "ir_ui_view"."create_uid" as "create_uid", "ir_ui_view"."create_date" as "create_date", "ir_ui_view"."write_uid" as "write_uid", "ir_ui_view"."write_date" as "write_date" FROM "ir_ui_view" LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_title" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_title"."res_id" AND "ir_ui_view__website_meta_title"."type" = 'model' AND "ir_ui_view__website_meta_title"."name" = 'ir.ui.view,website_meta_title' AND "ir_ui_view__website_meta_title"."lang" = 'en_US' AND "ir_ui_view__website_meta_title"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_description" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_description"."res_id" AND "ir_ui_view__website_meta_description"."type" = 'model' AND "ir_ui_view__website_meta_description"."name" = 'ir.ui.view,website_meta_description' AND "ir_ui_view__website_meta_description"."lang" = 'en_US' AND "ir_ui_view__website_meta_description"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__website_meta_keywords" ON ("ir_ui_view"."id" = "ir_ui_view__website_meta_keywords"."res_id" AND "ir_ui_view__website_meta_keywords"."type" = 'model' AND "ir_ui_view__website_meta_keywords"."name" = 'ir.ui.view,website_meta_keywords' AND "ir_ui_view__website_meta_keywords"."lang" = 'en_US' AND "ir_ui_view__website_meta_keywords"."value" != '') LEFT JOIN "ir_translation" AS "ir_ui_view__seo_name" ON ("ir_ui_view"."id" = "ir_ui_view__seo_name"."res_id" AND "ir_ui_view__seo_name"."type" = 'model' AND "ir_ui_view__seo_name"."name" = 'ir.ui.view,seo_name' AND "ir_ui_view__seo_name"."lang" = 'en_US' AND "ir_ui_view__seo_name"."value" != '') WHERE "ir_ui_view".id IN (860)
+############ 31 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1468, in dispatch
+    response = self.get_response(httprequest, result, explicit_session)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 278, in __exit__
+    self._cr.commit()
+  File "<decorator-gen-10>", line 2, in commit
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 510, in commit
+    self._cursor.execute('SAVEPOINT "%s"' % self._savepoint)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+SAVEPOINT "test_cursor_5"
+############ 32 ############
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 1468, in dispatch
+    response = self.get_response(httprequest, result, explicit_session)
+  File "/home/xdo/osrc/master/odoo/odoo/http.py", line 284, in __exit__
+    self._cr.close()
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 499, in close
+    self._cursor.execute('ROLLBACK TO SAVEPOINT "%s"' % self._savepoint)
+  File "<decorator-gen-3>", line 2, in execute
+  File "/home/xdo/osrc/master/odoo/odoo/sql_db.py", line 96, in check
+    return f(self, *args, **kwargs)
+
+--------------------------------
+ROLLBACK TO SAVEPOINT "test_cursor_5"

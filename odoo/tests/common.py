@@ -25,6 +25,7 @@ import sys
 import tempfile
 import threading
 import time
+import traceback
 import unittest
 import difflib
 import werkzeug.urls
@@ -613,6 +614,29 @@ class TransactionCase(BaseCase):
         """ Patch the order of the given model (name), and prepare cleanup. """
         self.patch(type(self.env[model]), '_order', order)
 
+    def record_queries(self):
+        self.cr.on_execute = record_query  # need cleanup? 
+
+    def export_queries(self):
+        export_queries(self.cr, '%s:%s.%s.json' % (self.test_module, self.test_class, self._testMethodName))
+
+
+def record_query(cursor, query, params, *args):
+    if not hasattr(cursor, 'recorded_queries'):
+        cursor.recorded_queries = []
+    trace = traceback.format_stack()
+    query = cursor._obj.mogrify(query, params).decode('utf-8', 'replace')
+    cursor.recorded_queries.append((trace, query))
+
+
+def export_queries(cursor, file_name):
+    otc = odoo.tools.config
+    queries_folder = os.path.join(otc['screenshots'], get_db_name(), 'queries')
+    if not os.path.isdir(queries_folder):
+        os.makedirs(queries_folder)
+    with open(os.path.join(queries_folder, file_name), 'w+') as f:
+        json.dump(cursor.recorded_queries, f)
+
 
 class SingleTransactionCase(BaseCase):
     """ TestCase in which all test methods are run in the same transaction,
@@ -1025,6 +1049,9 @@ class ChromeBrowser():
     def _save_screencast(self, prefix='failed'):
         # could be encododed with something like that
         #  ffmpeg -framerate 3 -i frame_%05d.png  output.mp4
+        if not self.screencasts_dir:
+            return
+
         if not self.screencast_frames:
             self._logger.debug('No screencast frames to encode')
             return None

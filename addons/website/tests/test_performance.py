@@ -26,7 +26,9 @@ class UtilPerf(HttpCase):
         self.url_open(url)
 
         sql_count = self.registry.test_cr.sql_log_count
+        self.record_queries()
         self.url_open(url)
+        self.export_queries()
         return self.registry.test_cr.sql_log_count - sql_count - EXTRA_REQUEST
 
 

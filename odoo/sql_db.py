@@ -251,6 +251,8 @@ class Cursor(BaseCursor):
 
         self.cache = {}
 
+        self.on_execute = None
+
     def __build_dict(self, row):
         return {d.name: row[i] for i, d in enumerate(self._obj.description)}
     def dictfetchone(self):
@@ -297,6 +299,10 @@ class Cursor(BaseCursor):
         # simple query count is always computed
         self.sql_log_count += 1
         delay = (time.time() - now)
+
+        if self.on_execute:
+            self.on_execute(self, query, params, delay)
+
         if hasattr(threading.current_thread(), 'query_count'):
             threading.current_thread().query_count += 1
             threading.current_thread().query_time += delay
