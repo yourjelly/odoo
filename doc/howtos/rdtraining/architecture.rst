@@ -70,7 +70,7 @@ Business objects
 Static web data
     Images, CSS or JavaScript files used by the web interface or website
 
-None of these elements is mandatory: some modules may only add data files (e.g. contry-specific
+None of these elements is mandatory: some modules may only add data files (e.g. country-specific
 accounting configuration), while others adds business objects. During this training, we will
 create business objects, object views and data files. Web controllers and static web data
 are the topic of advanced trainings.
