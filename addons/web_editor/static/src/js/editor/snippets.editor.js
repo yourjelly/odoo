@@ -158,7 +158,7 @@ var SnippetEditor = Widget.extend({
                     },
                 },
             });
-            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, $().getScrollingElement(), smoothScrollOptions);
+            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, this.$editor, smoothScrollOptions);
         } else {
             this.$('.o_overlay_move_options').addClass('d-none');
             $customize.find('.oe_snippet_clone').addClass('d-none');
@@ -1895,7 +1895,7 @@ var SnippetsMenu = Widget.extend({
                 right: false,
             }, options.scrollBoundaries),
             jQueryDraggableOptions: Object.assign({
-                appendTo: this.$body,
+                appendTo: this.$editor,
                 cursor: 'move',
                 greedy: true,
                 scroll: false,
@@ -1937,6 +1937,7 @@ var SnippetsMenu = Widget.extend({
 
         const smoothScrollOptions = this._getScrollOptions({
             jQueryDraggableOptions: {
+                iframeFix: true,
                 distance: 0,
                 handle: '.oe_snippet_thumbnail:not(.o_we_already_dragging)',
                 helper: function () {
@@ -1946,9 +1947,8 @@ var SnippetsMenu = Widget.extend({
                     );
                     return dragSnip;
                 },
-                start: function () {
+                start: function (ev, ui) {
                     self.$el.find('.oe_snippet_thumbnail').addClass('o_we_already_dragging');
-
                     dropped = false;
                     $snippet = $(this);
                     var $baseBody = $snippet.find('.oe_snippet_body');
@@ -2003,6 +2003,19 @@ var SnippetsMenu = Widget.extend({
 
                     const prom = new Promise(resolve => dragAndDropResolve = () => resolve());
                     self._mutex.exec(() => prom);
+
+                    let $el = self.$editor;
+                    if ($el[0].ownerDocument !== document) {
+                        $el = $($el[0].ownerDocument.defaultView.frameElement);
+                        if ($el) {
+                            const offset = $el.offset();
+                            const style = window.getComputedStyle($el[0]);
+                            ui.helper.css({
+                                marginTop: (- offset.top - parseInt(style.borderTop)) + 'px',
+                                marginLeft: (- offset.left - parseInt(style.borderLeft)) + 'px',
+                            });
+                        }
+                    }
                 },
                 stop: async function (ev, ui) {
                     $snippetToInsert.removeClass('oe_snippet_body');
@@ -2064,7 +2077,7 @@ var SnippetsMenu = Widget.extend({
                 }
             },
         });
-        this.draggableComponent = new SmoothScrollOnDrag(this, $snippets, $().getScrollingElement(), smoothScrollOptions);
+        this.draggableComponent = new SmoothScrollOnDrag(this, $snippets, this.$editor, smoothScrollOptions);
     },
     /**
      * Adds the 'o_default_snippet_text' class on nodes which contain only
