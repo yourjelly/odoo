@@ -1968,7 +1968,7 @@ const SnippetOptionWidget = Widget.extend({
             this.$target[0].classList.add(...widgetValue.trim().split(/\s+/g));
         }
 
-        if (previewMode === false) await this._refreshTarget();
+        if (previewMode === false) await this._updateChangesInWysiwyg();
     },
     /**
      * Default option method which allows to select a value and set it on the
@@ -2045,7 +2045,7 @@ const SnippetOptionWidget = Widget.extend({
                 // Those are the special color combinations classes. Just have
                 // to add it (and adding the potential extra class) then leave.
                 this.$target[0].classList.add('o_cc', `o_cc${widgetValue}`, params.extraClass);
-                if (previewMode === false) await this._refreshTarget();
+                if (previewMode === false) await this._updateChangesInWysiwyg();
                 return;
             }
             if (params.colorNames.includes(widgetValue)) {
@@ -2057,7 +2057,7 @@ const SnippetOptionWidget = Widget.extend({
                     // property we are editing, nothing more has to be done.
                     // (except adding the extra class)
                     this.$target.addClass(params.extraClass);
-                    if (previewMode === false) await this._refreshTarget();
+                    if (previewMode === false) await this._updateChangesInWysiwyg();
                     return;
                 }
                 // Otherwise, it means that class probably does not exist,
@@ -2114,7 +2114,7 @@ const SnippetOptionWidget = Widget.extend({
             this.$target.toggleClass(params.extraClass, hasUserValue);
         }
 
-        if (previewMode === false) await this._refreshTarget();
+        if (previewMode === false) await this._updateChangesInWysiwyg();
     },
 
     //--------------------------------------------------------------------------
@@ -2689,7 +2689,7 @@ const SnippetOptionWidget = Widget.extend({
     /**
      * Refresh the target in the wysiwyg.
      */
-    async _refreshTarget($target = this.$target) {
+    async _updateChangesInWysiwyg($target = this.$target) {
         const refreshTarget = async (context) => {
             const html = $target.html();
             $target.html('');
@@ -3691,7 +3691,7 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
             this.$target.trigger('background_changed', [previewMode]);
         }
 
-        if (previewMode === false) await this._refreshTarget();
+        if (previewMode === false) await this._updateChangesInWysiwyg();
     },
     /**
      * Changes the main color of dynamic SVGs.
@@ -3977,7 +3977,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         // Custom colors, overwrite shape that is set by the class
         $(shapeContainer).css('background-image', colors ? `url("${this._getShapeSrc()}")` : '');
 
-        if (previewMode === false) await this._refreshTarget();
+        if (previewMode === false) await this._updateChangesInWysiwyg();
     },
     /**
      * Overwrites shape properties with the specified data.
