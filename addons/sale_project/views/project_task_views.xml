@@ -4,7 +4,7 @@
     <record id="project_project_view_tree_inherit_sale_project" model="ir.ui.view">
         <field name="name">project.project.tree.inherit.sale.project</field>
         <field name="model">project.project</field>
-        <field name="inherit_id" ref="project.view_project"/>
+        <field name="inherit_id" ref="project.project_project_view_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='analytic_account_id']" position="after">
                 <field name="sale_order_id" optional="hide" widget="sale_order_many2one"/>
@@ -17,7 +17,7 @@
         <field name="name">project.task.view.inherit</field>
         <field name="model">project.task</field>
         <field name="groups_id" eval="[(4, ref('base.group_user'))]"/>
-        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="inherit_id" ref="project.project_task_view_form"/>
         <field name="arch" type="xml">
             <div name="button_box" position="inside">
                 <button class="d-none d-md-inline oe_stat_button"
@@ -51,7 +51,7 @@
     <record id="project_task_view_search" model="ir.ui.view">
         <field name="name">project.task.search.inherit</field>
         <field name="model">project.task</field>
-        <field name="inherit_id" ref="project.view_task_search_form"/>
+        <field name="inherit_id" ref="project.project_task_view_search"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='stage_id']" position="before">
                 <field name="sale_order_id" string="Sale Order" filter_domain="['|', ('sale_order_id', 'ilike', self), ('sale_line_id', 'ilike', self)]"/>

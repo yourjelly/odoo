@@ -3,7 +3,7 @@
     <record id="view_task_form2_inherit_pad_project" model="ir.ui.view">
         <field name="name">project.task.form.inherit</field>
         <field name="model">project.task</field>
-        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="inherit_id" ref="project.project_task_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='description']" position="attributes">
                 <attribute name="attrs">{'invisible': [('use_pad', '=', True)], 'readonly': [('use_pad', '=', True)]}</attribute>
@@ -18,7 +18,7 @@
     <record id="project_project_view_form" model="ir.ui.view">
         <field name="name">project.project.view.form</field>
         <field name="model">project.project</field>
-        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="inherit_id" ref="project.project_project_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='description']" position="attributes">
                 <attribute name="attrs">{'invisible': [('use_pads', '=', True)], 'readonly': [('use_pads', '=', True)]}</attribute>

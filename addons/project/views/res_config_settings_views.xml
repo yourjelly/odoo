@@ -44,7 +44,7 @@
                                     </div>
                                     <div class="content-group" attrs="{'invisible': [('group_project_rating', '=', False)]}">
                                         <div class="mt8">
-                                            <button name="%(project.open_task_type_form)d" icon="fa-arrow-right" type="action" string="Set a Rating Email Template on Stages" class="btn-link"/>
+                                            <button name="%(project.project_task_type_action_all_stages)d" icon="fa-arrow-right" type="action" string="Set a Rating Email Template on Stages" class="btn-link"/>
                                         </div>
                                     </div>
                                 </div>
@@ -100,6 +100,6 @@
             <field name="context">{'module' : 'project'}</field>
         </record>
 
-        <menuitem id="project_config_settings_menu_action" name="Settings" parent="menu_project_config"
+        <menuitem id="project_config_settings_menu_action" name="Settings" parent="project_project_menu_config"
             sequence="0" action="project_config_settings_action" groups="base.group_system"/>
 </odoo>

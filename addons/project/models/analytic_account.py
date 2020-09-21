@@ -33,7 +33,7 @@ class AccountAnalyticAccount(models.Model):
         return super(AccountAnalyticAccount, self).unlink()
 
     def action_view_projects(self):
-        kanban_view_id = self.env.ref('project.view_project_kanban').id
+        kanban_view_id = self.env.ref('project.project_project_view_kanban').id
         result = {
             "type": "ir.actions.act_window",
             "res_model": "project.project",

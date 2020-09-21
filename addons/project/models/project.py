@@ -462,7 +462,7 @@ class Project(models.Model):
 
     def action_view_tasks(self):
         action = self.with_context(active_id=self.id, active_ids=self.ids) \
-            .env.ref('project.act_project_project_2_project_task_all') \
+            .env.ref('project.project_task_action_view_all_project_tasks') \
             .sudo().read()[0]
         action['display_name'] = self.name
         return action

@@ -33,7 +33,7 @@
         <record id="project_invoice_form" model="ir.ui.view">
             <field name="name">Inherit project form : Invoicing Data</field>
             <field name="model">project.project</field>
-            <field name="inherit_id" ref="project.edit_project"/>
+            <field name="inherit_id" ref="project.project_project_view_form"/>
             <field name="priority">24</field>
             <field name="arch" type="xml">
                 <div name="button_box" position="inside">
@@ -72,7 +72,7 @@
         <record model="ir.ui.view" id="view_task_form2_inherited">
             <field name="name">project.task.form.inherited</field>
             <field name="model">project.task</field>
-            <field name="inherit_id" ref="project.view_task_form2" />
+            <field name="inherit_id" ref="project.project_task_view_form" />
             <field name="groups_id" eval="[(6,0, (ref('hr_timesheet.group_hr_timesheet_user'),))]"/>
             <field name="arch" type="xml">
                 <xpath expr="//notebook/page[@name='description_page']" position="after">
@@ -202,7 +202,7 @@
         <record id="view_task_tree2_inherited" model="ir.ui.view">
             <field name="name">project.task.tree.inherited</field>
             <field name="model">project.task</field>
-            <field name="inherit_id" ref="project.view_task_tree2" />
+            <field name="inherit_id" ref="project.project_task_view_tree" />
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
                 <field name="company_id" position="after">
@@ -220,7 +220,7 @@
         <record id="view_project_kanban_inherited" model="ir.ui.view">
             <field name="name">project.project.timesheet.kanban.inherited</field>
             <field name="model">project.project</field>
-            <field name="inherit_id" ref="project.view_project_kanban"/>
+            <field name="inherit_id" ref="project.project_project_view_kanban"/>
             <field name="priority">24</field>
             <field name="arch" type="xml">
                 <field name="partner_id" position="after">
@@ -242,7 +242,7 @@
         <record id="view_task_kanban_inherited_progress" model="ir.ui.view">
             <field name="name">project.task.timesheet.kanban.inherited.progress</field>
             <field name="model">project.task</field>
-            <field name="inherit_id" ref="project.view_task_kanban"/>
+            <field name="inherit_id" ref="project.view_tproject_task_view_kanbanask_kanban"/>
             <field name="arch" type="xml">
                 <templates position="before">
                     <field name="progress" />
@@ -269,7 +269,7 @@
         <record id="project_task_view_search" model="ir.ui.view">
             <field name="name">project.task.view.search.inherit.sale.timesheet.enterprise</field>
             <field name="model">project.task</field>
-            <field name="inherit_id" ref="project.view_task_search_form"/>
+            <field name="inherit_id" ref="project.project_task_view_search"/>
             <field name="arch" type="xml">
                 <xpath expr="//filter[@name='late']" position='after'>
                     <filter string="Tasks in Overtime" name="overtime" domain="[('overtime', '&gt;', 0)]"/>

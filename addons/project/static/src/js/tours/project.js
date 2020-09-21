@@ -11,12 +11,12 @@ tour.register('project_tour', {
     url: "/web",
     rainbowManMessage: "Congratulations, you are now a master of project management.",
 }, [tour.stepUtils.showAppsMenuItem(), {
-    trigger: '.o_app[data-menu-xmlid="project.menu_main_pm"]',
+    trigger: '.o_app[data-menu-xmlid="project.project_project_menu_main_pm"]',
     content: _t('Want a better way to <b>manage your projects</b>? <i>It starts here.</i>'),
     position: 'right',
     edition: 'community',
 }, {
-    trigger: '.o_app[data-menu-xmlid="project.menu_main_pm"]',
+    trigger: '.o_app[data-menu-xmlid="project.project_project_menu_main_pm"]',
     content: _t('Want a better way to <b>manage your projects</b>? <i>It starts here.</i>'),
     position: 'bottom',
     edition: 'enterprise',

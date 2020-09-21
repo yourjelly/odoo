@@ -427,9 +427,9 @@ class Project(models.Model):
         num_projects = len(self)
         if num_projects == 1:
             action_data = _to_action_data('project.project', res_id=self.id,
-                                          views=[[self.env.ref('project.edit_project').id, 'form']])
+                                          views=[[self.env.ref('project.project_project_view_form').id, 'form']])
         else:
-            action_data = _to_action_data(action=self.env.ref('project.open_view_project_all_config'),
+            action_data = _to_action_data(action=self.env.ref('project.project_project_action_view_all_config'),
                                           domain=[('id', 'in', self.ids)])
 
         stat_buttons.append({
@@ -457,7 +457,7 @@ class Project(models.Model):
             'count': sum(self.mapped('task_count')),
             'icon': 'fa fa-tasks',
             'action': _to_action_data(
-                action=self.env.ref('project.action_view_task'),
+                action=self.env.ref('project.project_task_action_view_user_tasks'),
                 domain=tasks_domain,
                 context=tasks_context
             )
@@ -467,7 +467,7 @@ class Project(models.Model):
             'count': self.env['project.task'].search_count(late_tasks_domain),
             'icon': 'fa fa-tasks',
             'action': _to_action_data(
-                action=self.env.ref('project.action_view_task'),
+                action=self.env.ref('project.project_task_action_view_user_tasks'),
                 domain=late_tasks_domain,
                 context=tasks_context,
             ),
@@ -477,7 +477,7 @@ class Project(models.Model):
             'count': self.env['project.task'].search_count(overtime_tasks_domain),
             'icon': 'fa fa-tasks',
             'action': _to_action_data(
-                action=self.env.ref('project.action_view_task'),
+                action=self.env.ref('project.project_task_action_view_user_tasks'),
                 domain=overtime_tasks_domain,
                 context=tasks_context,
             ),

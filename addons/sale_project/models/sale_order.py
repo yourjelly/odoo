@@ -57,22 +57,22 @@ class SaleOrder(models.Model):
     def action_view_task(self):
         self.ensure_one()
 
-        list_view_id = self.env.ref('project.view_task_tree2').id
-        form_view_id = self.env.ref('project.view_task_form2').id
+        list_view_id = self.env.ref('project.project_task_view_tree').id
+        form_view_id = self.env.ref('project.project_task_view_form').id
 
         action = {'type': 'ir.actions.act_window_close'}
 
         task_projects = self.tasks_ids.mapped('project_id')
         if len(task_projects) == 1 and len(self.tasks_ids) > 1:  # redirect to task of the project (with kanban stage, ...)
             action = self.with_context(active_id=task_projects.id).env.ref(
-                'project.act_project_project_2_project_task_all').read()[0]
+                'project.project_task_action_view_all_project_tasks').read()[0]
             action['domain'] = [('id', 'in', self.tasks_ids.ids)]
             if action.get('context'):
                 eval_context = self.env['ir.actions.actions']._get_eval_context()
                 eval_context.update({'active_id': task_projects.id})
                 action['context'] = safe_eval(action['context'], eval_context)
         else:
-            action = self.env["ir.actions.actions"]._for_xml_id("project.action_view_task")
+            action = self.env["ir.actions.actions"]._for_xml_id("project.project_task_action_view_user_tasks")
             action['context'] = {}  # erase default context to avoid default filter
             if len(self.tasks_ids) > 1:  # cross project kanban task
                 action['views'] = [[False, 'kanban'], [list_view_id, 'tree'], [form_view_id, 'form'], [False, 'graph'], [False, 'calendar'], [False, 'pivot']]
@@ -86,8 +86,8 @@ class SaleOrder(models.Model):
 
     def action_view_project_ids(self):
         self.ensure_one()
-        view_form_id = self.env.ref('project.edit_project').id
-        view_kanban_id = self.env.ref('project.view_project_kanban').id
+        view_form_id = self.env.ref('project.project_project_view_form').id
+        view_kanban_id = self.env.ref('project.project_project_view_kanban').id
         action = {
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', self.project_ids.ids)],

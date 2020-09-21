@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="task_type_search" model="ir.ui.view">
-        <field name="name">project.task.type.search</field>
+
+    <!-- Views -->
+    <record id="project_task_type_view_search" model="ir.ui.view">
+        <field name="name">project.task.type.view.search</field>
         <field name="model">project.task.type</field>
         <field name="arch" type="xml">
             <search string="Tasks Stages">
@@ -11,8 +13,8 @@
         </field>
     </record>
 
-    <record id="task_type_edit" model="ir.ui.view">
-        <field name="name">project.task.type.form</field>
+    <record id="project_task_type_view_form" model="ir.ui.view">
+        <field name="name">project.task.type.view.form</field>
         <field name="model">project.task.type</field>
         <field name="arch" type="xml">
             <form string="Task Stage" delete="0">
@@ -66,8 +68,8 @@
         </field>
     </record>
 
-    <record id="task_type_tree" model="ir.ui.view">
-        <field name="name">project.task.type.tree</field>
+    <record id="project_task_type_view_tree" model="ir.ui.view">
+        <field name="name">project.task.type.view.tree</field>
         <field name="model">project.task.type</field>
         <field name="arch" type="xml">
             <tree string="Task Stage" delete="0" sample="1">
@@ -83,7 +85,7 @@
         </field>
     </record>
 
-    <record id="view_project_task_type_kanban" model="ir.ui.view">
+    <record id="project_task_type_view_kanban" model="ir.ui.view">
         <field name="name">project.task.type.kanban</field>
         <field name="model">project.task.type</field>
         <field name="arch" type="xml">
@@ -110,11 +112,12 @@
         </field>
     </record>
 
-    <record id="open_task_type_form" model="ir.actions.act_window">
+    <!-- Actions -->
+    <record id="project_task_type_action_all_stages" model="ir.actions.act_window">
         <field name="name">Stages</field>
         <field name="res_model">project.task.type</field>
         <field name="view_mode">tree,kanban,form</field>
-        <field name="view_id" ref="task_type_tree"/>
+        <field name="view_id" ref="project.project_task_type_view_tree"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
             Create a new stage in the task pipeline
@@ -127,12 +130,12 @@
         </field>
     </record>
 
-    <record id="open_task_type_form_domain" model="ir.actions.act_window">
+    <record id="project_task_type_action_project_stages" model="ir.actions.act_window">
         <field name="name">Stages</field>
         <field name="res_model">project.task.type</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="domain">[('project_ids','=', project_id)]</field>
-        <field name="view_id" ref="task_type_tree"/>
+        <field name="view_id" ref="project.project_task_type_view_tree"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
             Create a new stage in the task pipeline
@@ -145,7 +148,7 @@
         </field>
     </record>
 
-    <record id="unlink_task_type_action" model="ir.actions.server">
+    <record id="project_task_type_action_unlink" model="ir.actions.server">
         <field name="name">Delete</field>
         <field name="model_id" ref="project.model_project_task_type"/>
         <field name="binding_model_id" ref="project.model_project_task_type"/>
