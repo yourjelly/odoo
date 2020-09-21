@@ -8,6 +8,7 @@ odoo.define('web.ActionManager', function (require) {
 
     var pyUtils = require('web.py_utils');
     const { decorate } = require('web.utils');
+    const isNotNull = (val) => val !== null && val !== undefined;
 
     class ActionManager extends Model {
         constructor(extensions, config) {
@@ -47,13 +48,26 @@ odoo.define('web.ActionManager', function (require) {
         _constructorExtensionParams() {
             return super._constructorExtensionParams(...arguments).concat([this]);
         }
-        get(property) {
+        _getForThis(property) {
             const state = this.pendingState || this.committedState;
             if (property in state) {
                 return state[property];
             }
             if (property in this) {
                 return this[property];
+            }
+        }
+        __get(excluded, property, ...args) {
+            const forThis = this._getForThis(property);
+            if (isNotNull(forThis)) {
+                return typeof forThis === 'function' ? forThis(...args) : forThis;
+            }
+            return super.__get(...arguments);
+        }
+        get(property) {
+            const forThis = this._getForThis(property);
+            if (isNotNull(forThis)) {
+                return forThis;
             }
             return super.get(property);
         }
