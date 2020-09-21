@@ -393,8 +393,8 @@ var Wysiwyg = Widget.extend({
                 if(!color) color = "#000";
                 if(!bgColor) bgColor = "rgba(255,255,255,0)";
 
-                this.$toolbar.find(".jw-dropdown-textcolor>jw-button").css("background-color", color);
-                this.$toolbar.find(".jw-dropdown-backgroundcolor>jw-button").css("background-color", bgColor);
+                this.$toolbar.find(".jw-dropdown-textcolor>jw-button").css("color", color);
+                this.$toolbar.find(".jw-dropdown-backgroundcolor>jw-button").css("color", bgColor);
             }
             this.editor.dispatcher.registerCommandHook('setSelection', onSelectionUpdateColorPreview);
             this.editor.dispatcher.registerCommandHook('@commit', onCommitCheckSnippets);

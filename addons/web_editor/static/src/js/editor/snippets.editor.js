@@ -2198,16 +2198,16 @@ var SnippetsMenu = Widget.extend({
         this._currentJabberwockToolbarMode = toolbarMode;
         const $toolbar = this.wysiwyg.$toolbar;
 
-        let titleText = _t("Text Formatting");
+        let titleText = _t("Text Tools");
         switch (toolbarMode) {
             case "image":
-                titleText = _t("Image Formatting");
+                titleText = _t("Image Tools");
                 break;
             case "video":
-                titleText = _t("Video Formatting");
+                titleText = _t("Video Tools");
                 break;
             case "picto":
-                titleText = _t("Icon Formatting");
+                titleText = _t("Icon Tools");
                 break;
         }
         const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS id="o_we_jw_toolbar_container"/>');

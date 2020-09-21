@@ -289,6 +289,16 @@ body.editor_enable.editor_has_snippets {
     }
 }
 
+%we-generic-input-container {
+    border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+    border-radius: $o-we-sidebar-content-field-border-radius;
+    background-color: $o-we-sidebar-content-field-input-bg;
+
+    &:focus, &:focus-within {
+        border-color: $o-we-sidebar-content-field-input-border-color;
+    }
+}
+
 // SNIPPET PANEL
 #oe_snippets {
     @include o-w-preserve-btn;
@@ -459,6 +469,7 @@ body.editor_enable.editor_has_snippets {
 
     > .o_we_customize_panel {
         position: relative;
+        flex-grow: 1;
 
         @mixin we-icon-button($icon, $color: $o-we-sidebar-content-field-control-item-color, $align: right) {
             @extend %we-icon-button;
@@ -480,30 +491,8 @@ body.editor_enable.editor_has_snippets {
             width: $o-we-sidebar-content-available-room * .6;
         }
 
-        we-button, jw-button, we-toggler, input[type=text], input[type=number], select {
+        we-button, we-toggler {
             @extend %we-generic-button;
-        }
-
-        jw-button {
-            display: inline-block;
-            box-sizing: border-box;
-            padding: 3px 6px 0;
-            min-width: 28px;
-            text-align: center;
-        }
-        .jw-dropdown{
-            border-radius: 18px;
-            border: 1px solid #000;
-            background-image: url('/web/static/src/img/transparent.png');
-            background-size: 10px auto;
-            jw-button{
-                border: 2px solid #fff;
-                border-radius: 18px;
-                background-color: rgba(255,255,255,0);
-                &:after, &:before{
-                    display:none;
-                }
-            }
         }
 
         jw-select {
@@ -551,16 +540,6 @@ body.editor_enable.editor_has_snippets {
             }
             &[aria-pressed="true"] > jw-group {
                 display: block;
-            }
-        }
-
-        jw-group {
-            select {
-                min-width: fit-content;
-                display: inline-block;
-            }
-            input {
-                display: inline-block !important;
             }
         }
 
@@ -837,7 +816,7 @@ body.editor_enable.editor_has_snippets {
                     line-height: $o-we-sidebar-content-field-dropdown-item-height;
                 }
 
-                we-button, jw-button, input[type=text], input[type=number], select {
+                we-button {
                     @include we-icon-button('', $align: left); // Always a padding on the left
                     border: none;
                     background: none;
@@ -923,7 +902,7 @@ body.editor_enable.editor_has_snippets {
                 display: flex;
                 max-width: 100%;
 
-                we-button, jw-button {
+                we-button {
                     padding: 0 $o-we-sidebar-content-field-button-group-button-spacing;
                     border-radius: 0;
 
@@ -958,13 +937,7 @@ body.editor_enable.editor_has_snippets {
             > div {
                 flex: 0 1 auto;
                 width: $o-we-sidebar-content-field-input-max-width;
-                border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
-                border-radius: $o-we-sidebar-content-field-border-radius;
-                background-color: $o-we-sidebar-content-field-input-bg;
-
-                &:focus-within {
-                    border-color: $o-we-sidebar-content-field-input-border-color;
-                }
+                @extend %we-generic-input-container;
 
                 > we-button { // for input-group
                     border: none;
@@ -1219,6 +1192,201 @@ body.editor_enable.editor_has_snippets {
 
                 > * {
                     flex: 1 1 auto; // Needed for colorpicker...
+                }
+            }
+        }
+
+
+        //----------------------------------------------------------------------
+        // jw-toolbar
+        //----------------------------------------------------------------------
+
+        jw-toolbar {
+            $jw-item-height: 26px;
+            $jw-columns-gap: 3px;
+
+            display: flex;
+            flex-wrap: wrap;
+            padding: $jw-columns-gap*2 0;
+
+            jw-button, select, input[type=text], input[type=number] {
+                line-height: $jw-item-height !important;
+                height: $jw-item-height;
+            }
+
+            jw-button, select {
+                @extend %we-generic-button;
+            }
+
+            select {
+                width: auto;
+            }
+
+            input[type=text], input[type=number] { //, select {
+                @extend %we-generic-input-container;
+                padding: 0 4px;
+                max-width: 100%;
+                color: inherit;
+
+                &::placeholder {
+                    color: $o-we-sidebar-content-field-control-item-color;
+                }
+
+                &:focus {
+                    outline: none;
+                }
+            }
+
+            input[type=number] {
+                width: 6.5ch;
+                padding-right: 0;
+                font-family: $o-we-sidebar-content-field-input-font-family;
+            }
+
+            jw-group {
+                display: inline-flex;
+                flex-grow: 1;
+                margin: 0 0 $jw-columns-gap*2;
+
+                // Achieve a "button-group effect" for siblings buttons.
+                > jw-button:first-of-type, > div:first-of-type jw-button {
+                    @include border-left-radius($o-we-sidebar-content-field-border-radius);
+                }
+                > jw-button:last-of-type, > div:last-of-type jw-button {
+                    @include border-right-radius($o-we-sidebar-content-field-border-radius);
+                    border-width: $o-we-sidebar-content-field-border-width;
+                }
+
+                // Ugly way to achieve columns' gap with the current implementation.
+                // Ideally,when all children are 'display:none', the parent jw-group
+                // should be hidden too.
+                > jw-button:first-of-type {
+                    &:not([style*='none']) {
+                        margin-left: $jw-columns-gap;
+                    }
+                }
+                > jw-button:last-of-type {
+                    &:not([style*='none']) {
+                        margin-right: $jw-columns-gap;
+                    }
+                }
+                > select,  > input {
+                    margin: 0 $jw-columns-gap;
+                }
+            }
+
+            jw-button, .jw-dropdown {
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+
+                &.active {
+                    box-shadow: none;
+                }
+            }
+
+            jw-button {
+                padding: 0 5px;
+                border-radius: 0;
+                border-width: 1px 0 1px 1px;
+            }
+
+            jw-group[name="textColor"] {
+                jw-button {
+                    flex-direction: column;
+                    line-height: $jw-item-height * .5!important;
+
+                    &:before {
+                        font-size: 0.9em;
+                        color: $o-we-sidebar-content-field-clickable-color;
+                    }
+
+                    &:hover, &:active, &:focus {
+                        &:before {
+                            color: $o-we-sidebar-content-field-pressed-color;
+                        }
+                    }
+
+                    &:after {
+                        display: block;
+                        margin: 2px;
+                        border: 0;
+                        padding: 2px 0 0 0;
+                        width: 100%;
+                        background-color: currentColor;
+                        box-shadow: 0 0 0 1px rgba(#fff, .2);
+                    }
+                }
+            }
+
+            jw-group[name="fontStyle"] > jw-button, jw-group[name="textColor"] jw-button {
+                padding: 0 7px;
+            }
+
+            jw-group[name="textAlign"], jw-group[name="mediaAlign"] {
+                flex-direction: column;
+                margin: 0 $jw-columns-gap;
+                position: relative;
+
+                > jw-button {
+                    margin: 0 !important;
+                    padding: 0 20px;
+                    line-height: 24px !important;
+                }
+
+                &:before {
+                    // Create a placeholder button visible
+                    // when no align is active only.
+                    @extend %we-generic-button;
+                    content: "\f036 \00a0 \00a0 \f0d7";
+                    width: 42px;
+                    height: $jw-item-height;
+                    font: #{$o-we-sidebar-font-size}/#{$jw-item-height - 1} "FontAwesome" !important;
+                }
+
+                &:not(:hover) {
+                    > jw-button.active {
+                        position: absolute;
+                        border-radius: $o-we-sidebar-content-field-border-radius;
+                        border-width: 1px;
+
+                        &:after {
+                            @include o-caret-down();
+                            margin-left: 4px;
+                        }
+                    }
+
+                    jw-button:not(.active) {
+                        display: none;
+                    }
+                }
+
+                &:hover > jw-button {
+                    border-width: $o-we-sidebar-content-field-border-width $o-we-sidebar-content-field-border-width 0 $o-we-sidebar-content-field-border-width;
+                    border-radius: 0;
+                    margin: 0;
+
+                    &:first-child {
+                        @include border-top-radius($o-we-sidebar-content-field-border-radius);
+                        @include o-position-absolute(0);
+                    }
+
+                    &:nth-child(2) {
+                        @include o-position-absolute($jw-item-height);
+                    }
+
+                    &:nth-child(3) {
+                        @include o-position-absolute($jw-item-height*2);
+                    }
+
+                    &:nth-child(4) {
+                        @include o-position-absolute($jw-item-height*3);
+                    }
+
+                    &:last-child {
+                        @include border-bottom-radius($o-we-sidebar-content-field-border-radius);
+                        border-width: $o-we-sidebar-content-field-border-width;
+                    }
                 }
             }
         }
