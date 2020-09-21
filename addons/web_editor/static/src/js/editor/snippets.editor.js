@@ -2138,7 +2138,7 @@ var SnippetsMenu = Widget.extend({
      */
     _addJabberwockToolbar(isImage = false) {
         const $toolbar = this.wysiwyg.$toolbar;
-        const titleText = isImage ? _t("Image Formatting") : _t("Text Formatting");
+        const titleText = isImage ? _t("Image Tools") : _t("Text Tools");
         const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS />');
         const $title = $("<we-title><span>" + titleText + "</span></we-title>");
         if (!isImage) {
