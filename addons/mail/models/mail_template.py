@@ -130,27 +130,27 @@ class MailTemplate(models.Model):
         base_lang_code = None
         if '_' in lang_code:
             base_lang_code = lang_code.split('_')[0]
-        self._get_translation_data(get_module_resource(module_name, 'i18n', base_lang_code + '.po'), lang, xml_id)
+            self._get_translation_data(get_module_resource(module_name, 'i18n', base_lang_code + '.po'), lang, xml_id)
         self._get_translation_data(get_module_resource(module_name, 'i18n', lang_code + '.po'), lang, xml_id)
 
     def reset_mail_template(self):
         for template in self:
-            model, xml_id = template.get_external_id().get(template.id).split('.')
-            info = odoo.modules.module.load_information_from_description_file(model)
+            module, xml_id = template.get_external_id().get(template.id).split('.')
+            info = odoo.modules.module.load_information_from_description_file(module)
             for dfile in [k for k in info.get('data') if os.path.splitext(k)[1].lower() == '.xml' in k]:
-                pathname = os.path.join(model, dfile)
-                ext = os.path.splitext(pathname)[1].lower()
+                path = os.path.join(module, dfile)
+                ext = os.path.splitext(path)[1].lower()
                 if ext == '.xml':
-                    with file_open(pathname, 'rb') as fp:
+                    with file_open(path, 'rb') as fp:
                         doc = etree.parse(fp)
                         for rec in doc.xpath("//record[@id='"+xml_id+"']"):
-                            obj = xml_import(self.env.cr, model, {}, mode='init', xml_filename=pathname)
+                            obj = xml_import(self.env.cr, module, {}, mode='init', xml_filename=path)
                             obj._tag_record(rec)
-                            self._override_translation_term(self.env.lang, model, xml_id)
+                            self._override_translation_term(self.env.lang, module, xml_id)
         return {
-                'type': 'ir.actions.client',
-                'tag': 'reload',
-            }
+            'type': 'ir.actions.client',
+            'tag': 'reload',
+        }
 
     def _get_inherited_module(self, module):
         info = odoo.modules.module.load_information_from_description_file(module)
