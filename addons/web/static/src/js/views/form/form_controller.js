@@ -468,7 +468,7 @@ var FormController = BasicController.extend({
             });
         }
         var attrs = ev.data.attrs;
-        self.reset_template = attrs.options.reset ? Boolean(attrs.options.reset): false;
+        self.reset_template = attrs.options && attrs.options.reset ? Boolean(attrs.options.reset): false;
         if (attrs.confirm) {
             def = new Promise(function (resolve, reject) {
                 Dialog.confirm(this, attrs.confirm, {

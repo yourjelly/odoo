@@ -97,7 +97,7 @@ class MailTemplate(models.Model):
                 term.write({
                     'value': term.src
                 })
-        if trans_file:
+        elif trans_file:
             with file_open(trans_file, mode='rb') as fileobj:
                 fileformat = os.path.splitext(trans_file)[-1][1:].lower()
                 reader = TranslationFileReader(fileobj, fileformat=fileformat)
@@ -111,10 +111,7 @@ class MailTemplate(models.Model):
                                          'comments', 'imd_model', 'imd_name', 'module'))
                     dic['lang'] = lang
                     dic.update(row)
-                    # # do not import empty values
-                    if not dic['value']:
-                        return
-                    if dic['imd_name'] == xml_id:
+                    if dic['value'] and dic['imd_name'] == xml_id:
                         self.env['ir.translation']._set_ids(
                             dic['name'], 'model', lang, self._ids, dic['value'], dic['src'],
                         )
