@@ -52,9 +52,6 @@ def unlink_task_timesheets(cr, registry):
 
     # Unlink timesheets from tasks
     env = api.Environment(cr, SUPERUSER_ID, {})
-    for task in env["project.task"].search([("timesheet_ids", "!=", False)]):
-        task.write({'timesheet_ids': [(5, 0, 0)]})
-    # TODO: 1. Is the search domain needed? More efficient than writing on all tasks?
-    #       2. Can this be shortened to avoid the loop? Like
-    #          env["project.task"].write({'timesheet_ids': [(5, None, None)]})
-    breakpoint()
+    # tasks = env["project.task"].search([("timesheet_ids", "!=", False)])
+    # timesheets = tasks.mapped('timesheet_ids')
+    # timesheets.unlink()
