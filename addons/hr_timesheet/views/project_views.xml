@@ -1,78 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-        <record id="project_project_view_form_simplified_inherit_timesheet" model="ir.ui.view">
-            <field name="name">project.project.view.form.simplified.inherit.timesheet</field>
-            <field name="model">project.project</field>
-            <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
-            <field name="priority">24</field>
-            <field name="arch" type="xml">
-                <field name="user_id" position="after">
-                    <field name="allow_timesheets"/>
-                </field>
+    <record id="project_project_view_form_simplified" model="ir.ui.view">
+        <field name="name">project.project.view.form.simplified.inherit.hr.timesheet</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_form_simplified"/>
+        <field name="priority">24</field>
+        <field name="arch" type="xml">
+            <field name="user_id" position="after">
+                <field name="allow_timesheets"/>
             </field>
-        </record>
+        </field>
+    </record>
 
-        <record id="project_invoice_form" model="ir.ui.view">
-            <field name="name">Inherit project form : Invoicing Data</field>
-            <field name="model">project.project</field>
-            <field name="inherit_id" ref="project.project_project_view_form"/>
-            <field name="priority">24</field>
-            <field name="arch" type="xml">
-                <div name="button_box" position="inside">
-                    <button class="oe_stat_button" name="%(act_hr_timesheet_line_by_project)d" type="action" icon="fa-calendar" attrs="{'invisible': [('allow_timesheets', '=', False)]}" groups="hr_timesheet.group_hr_timesheet_user">
-                        <div class="o_field_widget o_stat_info">
-                            <div class="oe_inline">
-                                <span class="o_stat_value mr-1">
-                                    <field name="total_timesheet_time" widget="statinfo" nolabel="1"/>
-                                </span>
-                                <span class="o_stat_value">
-                                    <field name="timesheet_encode_uom_id" class="o_stat_text" options="{'no_open' : True}"/>
-                                </span>
-                            </div>
-                            <span class="o_stat_text">Recorded</span>
+    <record id="project_project_view_form" model="ir.ui.view">
+        <field name="name">project.project.view.form.inherit.hr.timesheet</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_form"/>
+        <field name="priority">24</field>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button class="oe_stat_button" name="%(act_hr_timesheet_line_by_project)d" type="action" icon="fa-calendar" attrs="{'invisible': [('allow_timesheets', '=', False)]}" groups="hr_timesheet.group_hr_timesheet_user">
+                    <div class="o_field_widget o_stat_info">
+                        <div class="oe_inline">
+                            <span class="o_stat_value mr-1">
+                                <field name="total_timesheet_time" widget="statinfo" nolabel="1"/>
+                            </span>
+                            <span class="o_stat_value">
+                                <field name="timesheet_encode_uom_id" class="o_stat_text" options="{'no_open' : True}"/>
+                            </span>
                         </div>
-                    </button>
-                </div>
-                <xpath expr="//div[@id='rating_settings']/.." position="before">
-                    <div class="row mt16 o_settings_container">
-                        <div class="col-lg-6 o_setting_box"  id="timesheet_settings">
-                            <div class="o_setting_left_pane">
-                                <field name="allow_timesheets"/>
-                            </div>
-                            <div class="o_setting_right_pane">
-                                <label for="allow_timesheets" string="Timesheets"/>
-                                <div class="text-muted">
-                                    Log time on tasks
-                                </div>
+                        <span class="o_stat_text">Recorded</span>
+                    </div>
+                </button>
+            </div>
+            <xpath expr="//div[@id='rating_settings']/.." position="before">
+                <div class="row mt16 o_settings_container">
+                    <div class="col-lg-6 o_setting_box"  id="timesheet_settings">
+                        <div class="o_setting_left_pane">
+                            <field name="allow_timesheets"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="allow_timesheets" string="Timesheets"/>
+                            <div class="text-muted">
+                                Log time on tasks
                             </div>
                         </div>
                     </div>
-                </xpath>
-            </field>
-        </record>
+                </div>
+            </xpath>
+        </field>
+    </record>
 
-        <record id="view_project_kanban_inherited" model="ir.ui.view">
-            <field name="name">project.project.timesheet.kanban.inherited</field>
-            <field name="model">project.project</field>
-            <field name="inherit_id" ref="project.project_project_view_kanban"/>
-            <field name="priority">24</field>
-            <field name="arch" type="xml">
-                <field name="partner_id" position="after">
-                    <field name="allow_timesheets" invisible="1"/>
-                </field>
-                <xpath expr="//div[hasclass('o_project_kanban_boxes')]" position="inside">
-                    <a t-if="record.allow_timesheets.raw_value" class="o_project_kanban_box o_project_timesheet_box" name="%(act_hr_timesheet_line_by_project)d" type="action" groups="hr_timesheet.group_hr_timesheet_user">
-                        <div>
-                            <span class="o_label">Timesheets</span>
-                        </div>
-                    </a>
-                </xpath>
-                <xpath expr="//a[@name='action_view_account_analytic_line']" position="attributes">
-                    <attribute name="t-if">record.analytic_account_id.raw_value and !record.allow_timesheets.raw_value</attribute>
-                </xpath>
+    <record id="project_project_view_kanban" model="ir.ui.view">
+        <field name="name">project.project.view.kanban.inherit.hr.timesheet</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_kanban"/>
+        <field name="priority">24</field>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="allow_timesheets" invisible="1"/>
             </field>
-        </record>
-
-    </data>
+            <xpath expr="//div[hasclass('o_project_kanban_boxes')]" position="inside">
+                <a t-if="record.allow_timesheets.raw_value" class="o_project_kanban_box o_project_timesheet_box" name="%(act_hr_timesheet_line_by_project)d" type="action" groups="hr_timesheet.group_hr_timesheet_user">
+                    <div>
+                        <span class="o_label">Timesheets</span>
+                    </div>
+                </a>
+            </xpath>
+            <xpath expr="//a[@name='action_view_account_analytic_line']" position="attributes">
+                <attribute name="t-if">record.analytic_account_id.raw_value and !record.allow_timesheets.raw_value</attribute>
+            </xpath>
+        </field>
+    </record>
 </odoo>
