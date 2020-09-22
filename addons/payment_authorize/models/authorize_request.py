@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import json
 import logging
 import requests
@@ -7,13 +8,12 @@ from uuid import uuid4
 
 from odoo import _
 from odoo.exceptions import UserError
-
-from odoo.addons.payment.models.payment_acquirer import _partner_split_name
+from odoo.addons.payment.utils import split_partner_name
 
 _logger = logging.getLogger(__name__)
 
 
-class AuthorizeAPI():
+class AuthorizeAPI:
     """Authorize.net Gateway API integration.
 
     This class allows contacting the Authorize.net API with simple operation
@@ -84,8 +84,8 @@ class AuthorizeAPI():
                     'paymentProfiles': {
                         'customerType': 'business' if partner.is_company else 'individual',
                         'billTo': {
-                            'firstName': '' if partner.is_company else _partner_split_name(partner.name)[0],
-                            'lastName':  _partner_split_name(partner.name)[1],
+                            'firstName': '' if partner.is_company else split_partner_name(partner.name)[0],
+                            'lastName':  split_partner_name(partner.name)[1],
                             'address': (partner.street or '' + (partner.street2 if partner.street2 else '')) or None,
                             'city': partner.city,
                             'state': partner.state_id.name or None,

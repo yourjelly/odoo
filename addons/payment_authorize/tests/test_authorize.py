@@ -4,6 +4,7 @@ import time
 from werkzeug import urls
 from lxml import objectify
 
+from addons.payment_authorize.models.authorize_request import AuthorizeAPI
 import odoo
 from odoo.addons.payment.models.payment_acquirer import ValidationError
 from odoo.addons.payment.tests.common import PaymentAcquirerCommon
@@ -196,7 +197,13 @@ class AuthorizeS2s(AuthorizeCommon):
             'authorize_transaction_key': '',
             'authorize_login': '',
         })
-        self.assertTrue(authorize.authorize_test_credentials, 'Authorize.net: s2s authentication failed')
+
+        def authorize_test_credentials(authorize):
+            authorize.ensure_one()
+            transaction = AuthorizeAPI(authorize.acquirer_id)
+            return transaction.test_authenticate()
+
+        self.assertTrue(authorize_test_credentials(authorize), 'Authorize.net: s2s authentication failed')
 
         # create payment meethod
         payment_token = self.env['payment.token'].create({

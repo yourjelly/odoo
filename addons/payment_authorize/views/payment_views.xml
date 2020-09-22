@@ -13,7 +13,7 @@
                         <label for="authorize_client_key"/>
                         <div>
                             <field name="authorize_client_key" password="True"/>
-                            <button class="oe_link" icon="fa-refresh" type="object" name="action_client_secret" string="Generate Client Key" />
+                            <button class="oe_link" icon="fa-refresh" type="object" name="authorize_action_client_secret" string="Generate Client Key" />
                         </div>
                         <a colspan="2" href="https://www.odoo.com/documentation/user/online/ecommerce/shopper_experience/authorize.html" target="_blank">How to get paid with Authorize.Net</a>
                     </group>
@@ -27,9 +27,12 @@
             <field name="inherit_id" ref="payment.payment_token_form_view"/>
             <field name="arch" type="xml">
                 <xpath expr='//field[@name="acquirer_ref"]' position='after'>
-                    <field name="authorize_profile" attrs="{'invisible':['|', ('provider', '!=', 'authorize'), ('save_token', '=', 'none')]}"/>
+                    <!-- TODO save_token has been removed by anv refactoring -->
+                    <!--  <field name="authorize_profile" attrs="{'invisible':['|', ('provider', '!=', 'authorize'), ('save_token', '=', 'none')]}"/> -->
+                    <field name="authorize_profile" attrs="{'invisible':[('provider', '!=', 'authorize')]}"/>
                     <field name="provider" invisible='1'/>
-                    <field name="save_token" invisible='1'/>
+                    <!-- TODO save_token has been removed by anv refactoring -->
+                    <!--  <field name="save_token" invisible='1'/> -->
                 </xpath>
             </field>
         </record>

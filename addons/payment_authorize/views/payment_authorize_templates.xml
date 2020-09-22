@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <template id="authorize_form">
-            <div>
+        <template id="authorize_redirect_template">
+            <form t-att-action="tx_url" method="post">
                 <input type="hidden" name="data_set" t-att-data-action-url="tx_url" data-remove-me=""/>
                 <input type="hidden" name='x_login' t-att-value='x_login'/>
                 <input type="hidden" name='x_fp_hash' t-att-value='x_fp_hash'/>
@@ -41,7 +41,7 @@
                 <input type="hidden" name='x_ship_to_phone' t-att-value='phone'/>
                 <input type="hidden" name='x_ship_to_email' t-att-value="email"/>
                 <input type="hidden" name='x_ship_to_state' t-att-value="state"/>
-            </div>
+            </form>
         </template>
 
         <template id="payment_authorize_redirect" name="Payment Authorize">
