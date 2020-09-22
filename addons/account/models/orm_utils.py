@@ -51,7 +51,10 @@ class OrmUtils:
                         record_id = command[1]
 
                         if number == 0:
-                            self.env[field.comodel_name].new(command[2])
+                            self.env[field.comodel_name].new({
+                                **command[2],
+                                field.inverse_name: record.id,
+                            })
                         elif number == 1:
                             updated_line = record[fieldname].filtered(lambda record: str(record.id) == str(record_id))
                             updated_line.update(command[2])

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="menu_action_out_invoice_type"
+                  parent="account.menu_finance_receivables"
+                  action="action_out_invoice_type"
+                  sequence="1000"/>
+        <menuitem id="menu_action_out_refund_type"
+                  parent="account.menu_finance_receivables"
+                  action="action_out_refund_type"
+                  sequence="2000"/>
+        <menuitem id="menu_action_out_receipt_type"
+                  parent="account.menu_finance_receivables"
+                  action="action_out_receipt_type"
+                  groups="account.group_sale_receipts"
+                  sequence="3000"/>
+        <menuitem id="menu_action_in_invoice_type"
+                  parent="account.menu_finance_payables"
+                  action="action_in_invoice_type"
+                  sequence="1000"/>
+        <menuitem id="menu_action_in_refund_type"
+                  parent="account.menu_finance_payables"
+                  action="action_in_refund_type"
+                  sequence="2000"/>
+        <menuitem id="menu_action_in_receipt_type"
+                  parent="account.menu_finance_payables"
+                  action="action_in_receipt_type"
+                  groups="account.group_purchase_receipts"
+                  sequence="3000"/>
+    </data>
+</odoo>

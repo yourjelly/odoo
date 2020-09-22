@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="action_out_invoice_type" model="ir.actions.act_window">
+            <field name="name">Invoices</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="view_account_invoice_tree"/>
+            <field name="search_view_id" ref="view_account_invoice_search"/>
+            <field name="domain">[('invoice_type', '=', 'out_invoice')]</field>
+            <field name="context">{'default_invoice_type': 'out_invoice'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a customer invoice
+              </p><p>
+                Create invoices, register payments and keep track of the discussions with your customers.
+              </p>
+            </field>
+        </record>
+
+        <record id="action_out_refund_type" model="ir.actions.act_window">
+            <field name="name">Credit Notes</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="view_account_invoice_tree"/>
+            <field name="search_view_id" ref="view_account_invoice_search"/>
+            <field name="domain">[('invoice_type', '=', 'out_refund')]</field>
+            <field name="context">{'default_invoice_type': 'out_refund'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a credit note
+              </p><p>
+                Note that the easiest way to create a credit note is to do it directly
+                from the customer invoice.
+              </p>
+            </field>
+        </record>
+
+        <record id="action_in_invoice_type" model="ir.actions.act_window">
+            <field name="name">Bills</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="view_account_invoice_tree"/>
+            <field name="search_view_id" ref="view_account_invoice_search"/>
+            <field name="domain">[('invoice_type', '=', 'in_invoice')]</field>
+            <field name="context">{'default_invoice_type': 'in_invoice'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a vendor bill
+              </p><p>
+                Create invoices, register payments and keep track of the discussions with your vendors.
+              </p>
+            </field>
+        </record>
+
+        <record id="action_in_refund_type" model="ir.actions.act_window">
+            <field name="name">Refunds</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="view_account_invoice_tree"/>
+            <field name="search_view_id" ref="view_account_invoice_search"/>
+            <field name="domain">[('invoice_type', '=', 'in_refund')]</field>
+            <field name="context">{'default_invoice_type': 'in_refund'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a vendor credit note
+              </p><p>
+                Note that the easiest way to create a vendor credit note it to do it directly from the vendor bill.
+              </p>
+            </field>
+        </record>
+
+        <record id="action_out_receipt_type" model="ir.actions.act_window">
+            <field name="name">Receipts</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="view_account_invoice_tree"/>
+            <field name="search_view_id" ref="view_account_invoice_search"/>
+            <field name="domain">[('invoice_type', '=', 'out_receipt')]</field>
+            <field name="context">{'default_invoice_type': 'out_receipt'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a new sales receipt
+              </p><p>
+                When the sale receipt is confirmed, you can record the customer
+                payment related to this sales receipt.
+              </p>
+            </field>
+        </record>
+
+        <record id="action_in_receipt_type" model="ir.actions.act_window">
+            <field name="name">Receipts</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="view_account_invoice_tree"/>
+            <field name="search_view_id" ref="view_account_invoice_search"/>
+            <field name="domain">[('invoice_type', '=', 'in_receipt')]</field>
+            <field name="context">{'default_invoice_type': 'in_receipt'}</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Register a new purchase receipt
+              </p><p>
+                When the purchase receipt is confirmed, you can record the
+                vendor payment related to this purchase receipt.
+              </p>
+            </field>
+        </record>
+
+    </data>
+</odoo>

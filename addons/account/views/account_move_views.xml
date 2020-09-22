@@ -714,7 +714,6 @@
                                 <field name="invoice_line_ids"
                                        widget="section_and_note_one2many"
                                        on_change="1"
-                                       context="{'default_partner_id': commercial_partner_id, 'default_currency_id': currency_id or company_currency_id}">
                                        mode="tree,kanban">
                                     <tree editable="bottom" string="Journal Items" default_order="sequence, date desc, move_name desc, id">
                                         <control>

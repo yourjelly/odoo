@@ -179,7 +179,7 @@ class AccountMove(models.Model):
         compute='_compute_amount', currency_field='company_currency_id')
     amount_by_group = fields.Binary(string="Tax amount by group",
         compute='_compute_invoice_taxes_by_group',
-        help='Edit Tax amounts if you encounter rouding issues.')
+        help='Edit Tax amounts if you encounter rounding issues.')
     payment_state = fields.Selection(selection=[
         ('not_paid', 'Not Paid'),
         ('in_payment', 'In Payment'),
@@ -342,7 +342,7 @@ class AccountMove(models.Model):
 
         base_lines = self.line_ids.filtered(lambda line: not line.tax_repartition_line_id and line.tax_ids)
         tax_lines = self.line_ids.filtered('tax_repartition_line_id')
-        diff_taxes = (base_lines + tax_lines)._compute_diff_taxes()
+        diff_taxes = base_lines._compute_diff_taxes(tax_lines=tax_lines)
         line_ids_commands = []
 
         # Create new tax lines from scratch.

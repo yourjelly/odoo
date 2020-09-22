@@ -355,16 +355,13 @@ class AccountBusinessLineMixin(models.AbstractModel):
             'tax_tag_ids': [(6, 0, self._get_tags().ids)],
         }
 
-    def _compute_diff_taxes(self):
+    def _compute_diff_taxes(self, tax_lines=[]):
         def _serialize_python_dictionary(dict):
             return '-'.join(str(v) for v in dict.values())
 
-        if not self:
-            return {}
-
         res = {
             'tax_line_to_add': [],
-            'tax_line_to_delete': self.env[self[0]._name],
+            'tax_line_to_delete': self.env[tax_lines._name] if tax_lines else [],
             'tax_line_to_update': [],
             'base_line_to_update': [],
             'amount_untaxed': 0.0,
@@ -374,8 +371,6 @@ class AccountBusinessLineMixin(models.AbstractModel):
         encountered_currency_ids = set()
 
         # 1
-
-        tax_lines = self.filtered(lambda line: line._get_tax_repartition_line())
 
         existing_tax_line_map = {}
         for line in tax_lines:
