@@ -72,16 +72,26 @@ class SaleOrderLine(models.Model):
         registrations linked to this line. This method update existing registrations
         and create new one for missing one. """
         RegistrationSudo = self.env['event.registration'].sudo()
+        print("\n\n\n\n\n\n\n...........self.ids",self.ids)
         registrations = RegistrationSudo.search([('sale_order_line_id', 'in', self.ids)])
+        for check in registrations:
+            print("\n\n\n\n\n...check...",check.sale_order_line_id.id)
+        print("\n\n\n\n\n\n\n...........registrations",registrations)
         registrations_vals = []
         for so_line in self.filtered('event_id'):
+            print("\n\n\n\n\n\n\n.....so_line",so_line)
+
             existing_registrations = registrations.filtered(lambda self: self.sale_order_line_id.id == so_line.id)
+            print("\n\n\n\n\n\n\n.....existing_registrations",existing_registrations)
             if confirm:
                 existing_registrations.filtered(lambda self: self.state not in ['open', 'cancel']).action_confirm()
             if mark_as_paid:
                 existing_registrations.filtered(lambda self: not self.is_paid)._action_set_paid()
             if cancel_to_draft:
                 existing_registrations.filtered(lambda self: self.state == 'cancel').action_set_draft()
+
+            print("\n\n\n\n\n\n\n.....so_line.product_uom_qty",so_line.product_uom_qty)
+            print("\n\n\n\n\n\n\n.....len(existing_registrations)",len(existing_registrations))
 
             for count in range(int(so_line.product_uom_qty) - len(existing_registrations)):
                 values = {
@@ -94,6 +104,8 @@ class SaleOrderLine(models.Model):
                 registrations_vals.append(values)
 
         if registrations_vals:
+            print("\n\n\n\n\n\n\n\n\n\n....registrations_vals",registrations_vals)
+            print("\n\n\n\n\n\n\n\n\n\n....registrations_vals len",len(registrations_vals))
             RegistrationSudo.create(registrations_vals)
         return True
 

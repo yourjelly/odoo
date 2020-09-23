@@ -51,10 +51,12 @@ class RegistrationEditor(models.TransientModel):
         return res
 
     def action_make_registration(self):
+        print("\n\n\n\n\n.....coming in action_make_registration check length",len(self.event_registration_ids))
         self.ensure_one()
         registrations_to_create = []
         for registration_line in self.event_registration_ids:
             values = registration_line.get_registration_data()
+            print("\n\n\n\n\n\n\n\n....values",values)
             if registration_line.registration_id:
                 registration_line.registration_id.write(values)
             else:
@@ -93,5 +95,6 @@ class RegistrationEditorLine(models.TransientModel):
             'mobile': self.mobile or self.editor_id.sale_order_id.partner_id.mobile,
             'email': self.email or self.editor_id.sale_order_id.partner_id.email,
             'sale_order_id': self.editor_id.sale_order_id.id,
-            'sale_order_line_id': self.sale_order_line_id.id,
+            # 'sale_order_line_id': self.sale_order_line_id.id,
+            'sale_order_line_id': self.editor_id.sale_order_id.order_line.id,
         }
