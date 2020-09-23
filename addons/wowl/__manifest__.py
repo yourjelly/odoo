@@ -1,3 +1,5 @@
+
+
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
@@ -14,5 +16,7 @@ Odoo Web core module written in Owl.
     'data': [
         'views/templates.xml',
     ],
-    'qweb': [],
+    'qweb': [
+        'static/src/components'
+    ],
 }

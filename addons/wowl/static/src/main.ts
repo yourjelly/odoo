@@ -1,12 +1,19 @@
 import { WebClient } from "./components/WebClient";
 import * as owl from "@odoo/owl";
 
-const { whenReady } = owl.utils;
+const { whenReady, loadFile } = owl.utils;
 
-// Setup code
-function setup() {
-  const root = new WebClient();
-  root.mount(document.body);
-}
+(async () => {
+  // Setup code
+  function setup() {
+    const root = new WebClient();
+    root.mount(document.body);
+  }
 
-whenReady(setup);
+  const templates = await loadFile("/wowl/templates/abc");
+  const qweb = new owl.QWeb();
+  qweb.addTemplates(templates);
+  owl.Component.env = { qweb };
+
+  return whenReady(setup);
+})();
