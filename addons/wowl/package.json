@@ -1,0 +1,22 @@
+{
+  "name": "wowl",
+  "version": "0.0.1",
+  "description": "Odoo Web Client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "tsc -w",
+    "prettier": "prettier static/src --write"
+  },
+  "author": "",
+  "license": "",
+  "devDependencies": {
+    "prettier": "^2.1.2",
+    "typescript": "^4.0.3"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "endOfLine": "auto"
+  }
+}
