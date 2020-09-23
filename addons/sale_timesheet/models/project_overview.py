@@ -520,8 +520,8 @@ class Project(models.Model):
                         )
                     })
 
-        ts_tree = self.env.ref('hr_timesheet.hr_timesheet_line_tree')
-        ts_form = self.env.ref('hr_timesheet.hr_timesheet_line_form')
+        ts_tree = self.env.ref('hr_timesheet.account_analytic_line_view_tree')
+        ts_form = self.env.ref('hr_timesheet.account_analytic_line_view_form')
         if self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day'):
             timesheet_label = [_('Days'), _('Recorded')]
         else:

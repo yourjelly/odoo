@@ -19,28 +19,28 @@
         <record model="ir.actions.act_window.view" id="act_hr_timesheet_report_pivot">
             <field name="sequence" eval="5"/>
             <field name="view_mode">pivot</field>
-            <field name="view_id" ref="hr_timesheet.view_hr_timesheet_line_pivot"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_pivot"/>
             <field name="act_window_id" ref="act_hr_timesheet_report"/>
         </record>
 
         <record id="timesheet_action_view_report_by_employee_graph" model="ir.actions.act_window.view">
             <field name="sequence" eval="6"/>
             <field name="view_mode">graph</field>
-            <field name="view_id" ref="hr_timesheet.view_hr_timesheet_line_graph"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_graph"/>
             <field name="act_window_id" ref="act_hr_timesheet_report"/>
         </record>
 
         <record model="ir.actions.act_window.view" id="act_hr_timesheet_report_tree">
             <field name="sequence" eval="10"/>
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_tree"/>
             <field name="act_window_id" ref="act_hr_timesheet_report"/>
         </record>
 
         <record model="ir.actions.act_window.view" id="act_hr_timesheet_report_form">
             <field name="sequence" eval="15"/>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="hr_timesheet.hr_timesheet_line_form"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_form"/>
             <field name="act_window_id" ref="act_hr_timesheet_report"/>
         </record>
 
@@ -62,28 +62,28 @@
         <record id="timesheet_action_view_report_by_project_pivot" model="ir.actions.act_window.view">
             <field name="sequence" eval="5"/>
             <field name="view_mode">pivot</field>
-            <field name="view_id" ref="hr_timesheet.view_hr_timesheet_line_pivot"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_pivot"/>
             <field name="act_window_id" ref="timesheet_action_report_by_project"/>
         </record>
 
         <record id="timesheet_action_view_report_by_project_graph" model="ir.actions.act_window.view">
             <field name="sequence" eval="6"/>
             <field name="view_mode">graph</field>
-            <field name="view_id" ref="hr_timesheet.view_hr_timesheet_line_graph"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_graph"/>
             <field name="act_window_id" ref="timesheet_action_report_by_project"/>
         </record>
 
         <record id="timesheet_action_view_report_by_project_tree" model="ir.actions.act_window.view">
             <field name="sequence" eval="10"/>
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_tree"/>
             <field name="act_window_id" ref="timesheet_action_report_by_project"/>
         </record>
 
         <record id="timesheet_action_view_report_by_project_form" model="ir.actions.act_window.view">
             <field name="sequence" eval="15"/>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="hr_timesheet.hr_timesheet_line_form"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_form"/>
             <field name="act_window_id" ref="timesheet_action_report_by_project"/>
         </record>
 
@@ -105,28 +105,28 @@
         <record id="timesheet_action_view_report_by_task_pivot" model="ir.actions.act_window.view">
             <field name="sequence" eval="5"/>
             <field name="view_mode">pivot</field>
-            <field name="view_id" ref="hr_timesheet.view_hr_timesheet_line_pivot"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_pivot"/>
             <field name="act_window_id" ref="timesheet_action_report_by_task"/>
         </record>
 
         <record id="timesheet_action_view_report_by_task_graph" model="ir.actions.act_window.view">
             <field name="sequence" eval="6"/>
             <field name="view_mode">graph</field>
-            <field name="view_id" ref="hr_timesheet.view_hr_timesheet_line_graph"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_graph"/>
             <field name="act_window_id" ref="timesheet_action_report_by_task"/>
         </record>
 
         <record id="timesheet_action_view_report_by_task_tree" model="ir.actions.act_window.view">
             <field name="sequence" eval="10"/>
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_tree"/>
             <field name="act_window_id" ref="timesheet_action_report_by_task"/>
         </record>
 
         <record id="timesheet_action_view_report_by_task_form" model="ir.actions.act_window.view">
             <field name="sequence" eval="15"/>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="hr_timesheet.hr_timesheet_line_form"/>
+            <field name="view_id" ref="hr_timesheet.account_analytic_line_view_form"/>
             <field name="act_window_id" ref="timesheet_action_report_by_task"/>
         </record>
 

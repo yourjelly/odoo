@@ -39,7 +39,7 @@
     <record id="timesheet_view_tree_sale" model="ir.ui.view">
         <field name="name">account.analytic.line.view.tree.with.allow.billable</field>
         <field name="model">account.analytic.line</field>
-        <field name="inherit_id" ref="hr_timesheet.timesheet_view_tree_user"/>
+        <field name="inherit_id" ref="hr_timesheet.account_analytic_line_view_tree_with_user"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='user_id']" position="after">
                 <field name="non_allow_billable" optional="hide"/>
@@ -60,14 +60,14 @@
     <record id="timesheet_action_from_sales_order_tree" model="ir.actions.act_window.view">
         <field name="sequence" eval="4"/>
         <field name="view_mode">tree</field>
-        <field name="view_id" ref="hr_timesheet.timesheet_view_tree_user"/>
+        <field name="view_id" ref="hr_timesheet.account_analytic_line_view_tree_with_user"/>
         <field name="act_window_id" ref="timesheet_action_from_sales_order"/>
     </record>
 
     <record id="timesheet_action_from_sales_order_form" model="ir.actions.act_window.view">
         <field name="sequence" eval="5"/>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="hr_timesheet.timesheet_view_form_user"/>
+        <field name="view_id" ref="hr_timesheet.account_analytic_line_view_form_with_user"/>
         <field name="act_window_id" ref="timesheet_action_from_sales_order"/>
     </record>
 
@@ -107,7 +107,7 @@
     <record id="timesheet_action_view_report_by_billing_rate_graph" model="ir.actions.act_window.view">
         <field name="sequence" eval="6"/>
         <field name="view_mode">graph</field>
-        <field name="view_id" ref="hr_timesheet.view_hr_timesheet_line_graph"/>
+        <field name="view_id" ref="hr_timesheet.account_analytic_line_view_graph"/>
         <field name="act_window_id" ref="timesheet_action_billing_report"/>
     </record>
 
