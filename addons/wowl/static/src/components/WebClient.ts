@@ -1,6 +1,4 @@
-import { Component, tags } from "@odoo/owl";
-
-const { xml } = tags;
+import { Component } from "@odoo/owl";
 
 export class WebClient extends Component {
   static template = "wowl.WebClient";
