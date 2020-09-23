@@ -300,6 +300,7 @@ class StockQuant(models.Model):
         self.env['stock.quant'].flush(['location_id', 'owner_id', 'package_id', 'lot_id', 'product_id'])
         self.env['product.product'].flush(['virtual_available'])
         removal_strategy = self._get_removal_strategy(product_id, location_id)
+        removal_strategy = 'fifo'
         removal_strategy_order = self._get_removal_strategy_order(removal_strategy)
         domain = [
             ('product_id', '=', product_id.id),

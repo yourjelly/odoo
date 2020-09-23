@@ -1377,6 +1377,8 @@ class StockMove(models.Model):
         assigned_moves.write({'state': 'assigned'})
         self.mapped('picking_id')._check_entire_pack()
 
+        print("partially_available :", len(partially_available_moves), " - Assigned :", len(assigned_moves))
+
     def _action_cancel(self):
         if any(move.state == 'done' and not move.scrapped for move in self):
             raise UserError(_('You cannot cancel a stock move that has been set to \'Done\'.'))

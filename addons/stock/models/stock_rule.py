@@ -482,7 +482,12 @@ class ProcurementGroup(models.Model):
     @api.model
     def _run_scheduler_tasks(self, use_new_cursor=False, company_id=False):
         # Minimum stock rules
+        start = datetime.now()
+        print("Orderpoint Start", start)
+
         self.sudo()._procure_orderpoint_confirm(use_new_cursor=use_new_cursor, company_id=company_id)
+
+        print("Orderpoint Finish", (datetime.now() - start).total_seconds())
 
         # Search all confirmed stock_moves and try to assign them
         domain = self._get_moves_to_assign_domain()
@@ -492,9 +497,14 @@ class ProcurementGroup(models.Model):
         moves_to_assign = self.env['stock.move'].search(domain, limit=None,
             order='priority desc, date_expected asc')
         for moves_chunk in split_every(3000, moves_to_assign.ids):
+            start = datetime.now()
+            print("Assign Start", len(moves_chunk), start)
+            
             self.env['stock.move'].browse(moves_chunk)._action_assign()
             if use_new_cursor:
                 self._cr.commit()
+
+            print("Assign Finished", (datetime.now() - start).total_seconds())
 
         # Merge duplicated quants
         self.env['stock.quant']._quant_tasks()
