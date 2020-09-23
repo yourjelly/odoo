@@ -1,5 +1,4 @@
-console.log(abc("hello wowl"));
+import { abcde } from "./utils";
 
-function abc(s: string): string {
-  return s.concat(s);
-}
+console.log(abcde("hello"));
+

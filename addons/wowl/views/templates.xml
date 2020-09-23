@@ -5,7 +5,7 @@
         <html>
             <head>
                 <meta charset="utf-8"/>
-                <script type="text/javascript" src="/wowl/static/dist/main.js"></script>
+                <script type="text/javascript" src="/wowl/static/dist/wowl.js"></script>
             </head>
             <body >
                 Hello world
