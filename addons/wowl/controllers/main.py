@@ -20,7 +20,11 @@ CONTENT_MAXAGE = http.STATIC_CACHE_LONG  # menus, translations, static qweb
 class WowlClient(http.Controller):
     @http.route('/wowl', type='http', auth="none")
     def root(self):
-        return request.render('wowl.root')
+        qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=[], debug=request.session.debug)
+        context = {
+            "qweb": qweb_checksum
+        }
+        return request.render('wowl.root', qcontext=context)
 
     @http.route('/wowl/templates/<string:unique>', type='http', auth="none", cors="*")
     def templates(self, unique, mods=None, db=None):
@@ -154,11 +158,6 @@ class HomeStaticTemplateHelpers(object):
             if re.match(COMMENT_PATTERN, comment.text.strip()):
                 comment.getparent().remove(comment)
 
-    def _manifest_glob(self):
-        '''Proxy for manifest_glob
-        Usefull to make 'self' testable'''
-        return manifest_glob('qweb', self.addons, self.db)
-
     def _read_addon_file(self, file_path):
         """Reads the content of a file given by file_path
         Usefull to make 'self' testable
@@ -207,7 +206,7 @@ class HomeStaticTemplateHelpers(object):
         addon = 'wowl'
         manifest = http.addons_manifest.get(addon, None)
         addons_path = os.path.join(manifest['addons_path'], '')[:-1]
-        folderList = manifest.get('qweb', [])
+        folderList = manifest.get('owl_qweb', [])
         files = [file
             for x in folderList
             for file in glob.glob(os.path.normpath(os.path.join(addons_path, addon, x)) + '/**/*.xml', recursive=True)
@@ -223,13 +222,3 @@ class HomeStaticTemplateHelpers(object):
     def get_qweb_templates(cls, addons, db=None, debug=False):
         return cls(addons, db, debug=debug)._get_qweb_templates()[0]
 
-
-# OrderedDict([('base', []), ('web', ['/home/odoo/Coding/odoo/addons/web/static/src/xml/base.xml', '/home/odoo/Coding/odoo/addons/web/static/src/xml/chart.xml',                        
-# '/home/odoo/Coding/odoo/addons/web/static/src/xml/fields.xml', '/home/odoo/Coding/odoo/addons/web/static/src/xml/file_upload_progress_bar.xml',                                       
-# '/home/odoo/Coding/odoo/addons/web/static/src/xml/file_upload_progress_card.xml', '/home/odoo/Coding/odoo/addons/web/static/src/xml/kanban.xml',                                      
-# '/home/odoo/Coding/odoo/addons/web/static/src/xml/menu.xml', '/home/odoo/Coding/odoo/addons/web/static/src/xml/notification.xml',                                                     
-# '/home/odoo/Coding/odoo/addons/web/static/src/xml/pivot.xml', '/home/odoo/Coding/odoo/addons/web/static/src/xml/rainbow_man.xml',                                                     
-# '/home/odoo/Coding/odoo/addons/web/static/src/xml/report.xml', '/home/odoo/Coding/odoo/addons/web/static/src/xml/search_panel.xml',                                                   
-# '/home/odoo/Coding/odoo/addons/web/static/src/xml/web_calendar.xml']), ('auth_totp', []), ('base_import',                                                                             
-# ['/home/odoo/Coding/odoo/addons/base_import/static/src/xml/base_import.xml']), ('odoo_referral', ['/home/odoo/Coding/odoo/addons/odoo_referral/static/src/xml/systray.xml']),         
-# ('web_editor', ['/home/odoo/Coding/odoo/addons/web_editor/static/src/xml/backend.xml', '/home/odoo/Coding/odoo/addons/web_editor/static/src/xml/wysiwyg_colorpicker.xml',   

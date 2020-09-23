@@ -5,7 +5,13 @@
         <html>
             <head>
                 <meta charset="utf-8"/>
+                <title t-esc="title or 'WOWL'"/>
+                <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/src/img/favicon.ico'"/>
+
                 <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
+                <script>
+                    window.qwebCheckSum = '<t t-esc="qweb"/>';
+                </script>
                 <script type="text/javascript" src="/wowl/static/dist/wowl.js"></script>
             </head>
             <body />
