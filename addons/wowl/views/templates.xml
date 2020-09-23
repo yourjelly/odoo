@@ -9,6 +9,7 @@
                 <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/src/img/favicon.ico'"/>
 
                 <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
+                <script type="text/javascript" src="/wowl/static/livereload.js"></script>
                 <script>
                     window.qwebCheckSum = '<t t-esc="qweb"/>';
                 </script>
