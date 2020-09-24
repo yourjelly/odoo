@@ -17,12 +17,34 @@ from odoo.http import request
 CONTENT_MAXAGE = http.STATIC_CACHE_LONG  # menus, translations, static qweb
 
 
+def get_files(key):
+    """
+    Helper method to get pathnames to files referenced in wowl addon's manifest file.
+    :param key the key to read in the manifest (typically 'owl_qweb' or 'style')
+    :return: list of pathnames
+    """
+    addon = 'wowl'
+    ext = '.scss' if key == 'style' else '.xml'
+    manifest = http.addons_manifest.get(addon, None)
+    addons_path = os.path.join(manifest['addons_path'], '')[:-1]
+    local_paths = manifest.get(key, [])
+
+    def get_glob_path(local_path):
+        return os.path.normpath(os.path.join(addons_path, addon, local_path)) + '/**/*' + ext
+
+    return [file if key == 'owl_qweb' else file[len(addons_path):]
+            for local_path in local_paths
+            for file in glob.glob(get_glob_path(local_path), recursive=True)
+            ]
+
+
 class WowlClient(http.Controller):
     @http.route('/wowl', type='http', auth="none")
     def root(self):
         qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=[], debug=request.session.debug)
         context = {
-            "qweb": qweb_checksum
+            "qweb": qweb_checksum,
+            "scssFiles": get_files('style'),
         }
         return request.render('wowl.root', qcontext=context)
 
@@ -203,14 +225,7 @@ class HomeStaticTemplateHelpers(object):
 
         :rtype: (str, str)
         """
-        addon = 'wowl'
-        manifest = http.addons_manifest.get(addon, None)
-        addons_path = os.path.join(manifest['addons_path'], '')[:-1]
-        folderList = manifest.get('owl_qweb', [])
-        files = [file
-            for x in folderList
-            for file in glob.glob(os.path.normpath(os.path.join(addons_path, addon, x)) + '/**/*.xml', recursive=True)
-        ]
+        files = get_files('owl_qweb')
         content, checksum = self._concat_xml(OrderedDict([('wowl', files)]))
         return content, checksum
 
@@ -221,4 +236,3 @@ class HomeStaticTemplateHelpers(object):
     @classmethod
     def get_qweb_templates(cls, addons, db=None, debug=False):
         return cls(addons, db, debug=debug)._get_qweb_templates()[0]
-

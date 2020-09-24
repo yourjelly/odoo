@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <template id="assets">
+        <!-- insert all scss files -->
+        <t t-foreach="scssFiles" t-as="scssFile">
+            <link rel="stylesheet" type="text/scss" t-att-href="scssFile"/>
+        </t>
+
+        <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
+        <script type="text/javascript" src="/wowl/static/livereload.js"></script>
+        <script type="text/javascript" src="/wowl/static/dist/app.js"></script>
+    </template>
+
     <template id="wowl.root">
         <html>
             <head>
@@ -8,12 +19,12 @@
                 <title t-esc="title or 'WOWL'"/>
                 <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/src/img/favicon.ico'"/>
 
-                <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
-                <script type="text/javascript" src="/wowl/static/livereload.js"></script>
                 <script>
                     window.qwebCheckSum = '<t t-esc="qweb"/>';
                 </script>
-                <script type="text/javascript" src="/wowl/static/dist/app.js"></script>
+
+                <t t-call-assets="wowl.assets" t-js="False"/>
+                <t t-call-assets="wowl.assets" t-css="False"/>
             </head>
             <body />
         </html>
