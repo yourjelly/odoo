@@ -313,6 +313,10 @@ def model(method):
     method._api = 'model'
     return method
 
+def extends(method):
+    method._is_extension = True
+    return method
+
 
 _create_logger = logging.getLogger(__name__ + '.create')
 

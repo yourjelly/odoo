@@ -991,6 +991,7 @@ class AccountMove(models.Model):
         # Override needed for COGS
         return self.line_ids
 
+    @api.extends
     def onchange(self, values, field_name, field_onchange):
         # OVERRIDE
         # As the dynamic lines in this model are quite complex, we need to ensure some computations are done exactly
@@ -1739,6 +1740,7 @@ class AccountMove(models.Model):
             invoice.write(values)
         return True
 
+    @api.extends
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         default = dict(default or {})
@@ -1747,6 +1749,7 @@ class AccountMove(models.Model):
         return super(AccountMove, self).copy(default)
 
     @api.model_create_multi
+    @api.extends
     def create(self, vals_list):
         # OVERRIDE
         if any('state' in vals and vals.get('state') == 'posted' for vals in vals_list):
@@ -1755,6 +1758,7 @@ class AccountMove(models.Model):
         vals_list = self._move_autocomplete_invoice_lines_create(vals_list)
         return super(AccountMove, self).create(vals_list)
 
+    @api.extends
     def write(self, vals):
         for move in self:
             if (move.restrict_mode_hash_table and move.state == "posted" and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
@@ -1806,6 +1810,7 @@ class AccountMove(models.Model):
 
         return res
 
+    @api.extends
     def unlink(self):
         for move in self:
             if move.posted_before and not self._context.get('force_delete'):
@@ -1813,6 +1818,7 @@ class AccountMove(models.Model):
         self.line_ids.unlink()
         return super(AccountMove, self).unlink()
 
+    @api.extends
     @api.depends('name', 'state')
     def name_get(self):
         result = []

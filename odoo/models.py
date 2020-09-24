@@ -540,6 +540,24 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             })
             check_parent = cls._build_model_check_parent
 
+        extension_methods = {
+            method_name for method_name in dir(cls)
+            if getattr(cls, method_name, None)
+            and not method_name.startswith('__')
+            and callable(getattr(cls, method_name))
+            and getattr(getattr(cls, method_name), '_is_extension', None)
+        } - set(dir(BaseModel))
+        new_methods = {
+            method_name for method_name in dir(cls)
+            if getattr(cls, method_name, None)
+            and not method_name.startswith('__')
+            and callable(getattr(cls, method_name))
+            and not getattr(getattr(cls, method_name), '_is_extension', None)
+        } - set(dir(BaseModel))
+        # if name == 'account.move':
+        #     print()
+        #     print(extension_methods)
+        #     print(new_methods)
         # determine all the classes the model should inherit from
         bases = LastOrderedSet([cls])
         for parent in parents:
@@ -554,6 +572,18 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 bases.add(parent_class)
                 ModelClass._inherit_module[parent] = cls._module
                 parent_class._inherit_children.add(name)
+            parent_class_methods = {
+                method_name for method_name in dir(cls)
+                if callable(getattr(cls, method_name))
+                and not method_name.startswith('__')
+            }
+            if new_methods & parent_class_methods:
+                if name == 'account.move':
+                    print('was not a new method', cls, new_methods & parent_class_methods)
+            extension_methods -= parent_class_methods
+        if extension_methods:
+            if name == 'account.move':
+                print('these are not extensions', cls, extension_methods)
 
         ModelClass.__bases__ = tuple(bases)
 
@@ -1973,7 +2003,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     def _read_group_prepare(self, orderby, aggregated_fields, annotated_groupbys, query):
         """
         Prepares the GROUP BY and ORDER BY terms for the read_group method. Adds the missing JOIN clause
-        to the query if order should be computed against m2o field. 
+        to the query if order should be computed against m2o field.
         :param orderby: the orderby definition in the form "%(field)s %(order)s"
         :param aggregated_fields: list of aggregated fields in the query
         :param annotated_groupbys: list of dictionaries returned by _read_group_process_groupby
@@ -2070,9 +2100,9 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return {
             'field': split[0],
             'groupby': gb,
-            'type': field_type, 
+            'type': field_type,
             'display_format': display_formats[gb_function or 'month'] if temporal else None,
-            'interval': time_intervals[gb_function or 'month'] if temporal else None,                
+            'interval': time_intervals[gb_function or 'month'] if temporal else None,
             'tz_convert': tz_convert,
             'qualified_field': qualified_field,
         }
@@ -2097,8 +2127,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
     @api.model
     def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
         """
-            Helper method to format the data contained in the dictionary data by 
-            adding the domain corresponding to its values, the groupbys in the 
+            Helper method to format the data contained in the dictionary data by
+            adding the domain corresponding to its values, the groupbys in the
             context and by properly formatting the date/datetime values.
 
         :param data: a single group
@@ -2177,10 +2207,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 The possible aggregation functions are the ones provided by PostgreSQL
                 (https://www.postgresql.org/docs/current/static/functions-aggregate.html)
                 and 'count_distinct', with the expected meaning.
-        :param list groupby: list of groupby descriptions by which the records will be grouped.  
+        :param list groupby: list of groupby descriptions by which the records will be grouped.
                 A groupby description is either a field (then it will be grouped by that field)
                 or a string 'field:groupby_function'.  Right now, the only functions supported
-                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for 
+                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for
                 date/datetime fields.
         :param int offset: optional number of records to skip
         :param int limit: optional max number of records to return
@@ -2188,7 +2218,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                              overriding the natural sort ordering of the
                              groups, see also :py:meth:`~osv.osv.osv.search`
                              (supported only for many2one fields currently)
-        :param bool lazy: if true, the results are only grouped by the first groupby and the 
+        :param bool lazy: if true, the results are only grouped by the first groupby and the
                 remaining groupbys are put in the __context key.  If false, all the groupbys are
                 done in one call.
         :return: list of dictionaries(one dictionary for each record) containing:
@@ -2345,7 +2375,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             # Right now, read_group only fill results in lazy mode (by default).
             # If you need to have the empty groups in 'eager' mode, then the
             # method _read_group_fill_results need to be completely reimplemented
-            # in a sane way 
+            # in a sane way
             result = self._read_group_fill_results(
                 domain, groupby_fields[0], groupby[len(annotated_groupbys):],
                 aggregated_fields, count_field, result, read_group_order=order,
@@ -3889,7 +3919,7 @@ Fields:
             # that this limit is well managed by PostgreSQL.
             # In INSERT queries, we inject integers (small) and larger data (TEXT blocks for
             # example).
-            # 
+            #
             # The problem then becomes: how to "estimate" the right size of the batch to have
             # good performance?
             #
@@ -6201,7 +6231,7 @@ Fields:
         field_generators = self._populate_factories()
         if not field_generators:
             return self.browse() # maybe create an automatic generator?
-            
+
         records_batches = []
         generator = populate.chain_factories(field_generators, self._name)
         while record_count <= min_size or not complete:
