@@ -1,4 +1,4 @@
-import { WebClient } from "./components/WebClient";
+import { WebClient } from "./components/WebClient/WebClient";
 import * as owl from "@odoo/owl";
 
 const { whenReady, loadFile } = owl.utils;
