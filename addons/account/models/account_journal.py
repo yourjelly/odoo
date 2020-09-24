@@ -669,35 +669,33 @@ class AccountJournal(models.Model):
         :param domain:  An additional domain to be applied on the account.move.line model.
         :return:        The balance expressed in the journal's currency.
         '''
-        self.ensure_one()
-        self.env['account.move.line'].check_access_rights('read')
-
-        if not self.default_account_id:
-            return 0.0
-
         domain = (domain or []) + [
             ('account_id', 'in', tuple(self.default_account_id.ids)),
             ('display_type', 'not in', ('line_section', 'line_note')),
             ('move_id.state', '!=', 'cancel'),
         ]
-        query = self.env['account.move.line']._where_calc(domain)
-        tables, where_clause, where_params = query.get_sql()
+        read_by_account = {
+            r['account_id'][0]: r
+            for r in self.env['account.move.line'].read_group(
+                domain=domain,
+                fields=['balance', 'amount_currency'],
+                groupby=['account_id'],
+            )
+        }
 
-        query = '''
-            SELECT
-                COUNT(account_move_line.id) AS nb_lines,
-                COALESCE(SUM(account_move_line.balance), 0.0),
-                COALESCE(SUM(account_move_line.amount_currency), 0.0)
-            FROM ''' + tables + '''
-            WHERE ''' + where_clause + '''
-        '''
-        self._cr.execute(query, where_params)
-
-        company_currency = self.company_id.currency_id
-        journal_currency = self.currency_id if self.currency_id and self.currency_id != company_currency else False
-
-        nb_lines, balance, amount_currency = self._cr.fetchone()
-        return amount_currency if journal_currency else balance, nb_lines
+        res = {}
+        for journal in self:
+            if journal.default_account_id:
+                read = read_by_account[journal.default_account_id.id]
+                company_currency = journal.company_id.currency_id
+                journal_currency = journal.currency_id if journal.currency_id and journal.currency_id != company_currency else False
+                res[journal.id] = (
+                    read['amount_currency'] if journal_currency else read['balance'],
+                    read['account_id_count'],
+                )
+            else:
+                res[journal.id] = (0.0, 0)
+        return res
 
     def _get_journal_outstanding_payments_account_balance(self, domain=None, date=None):
         ''' Get the outstanding payments balance of the current journal by filtering the journal items using the
@@ -710,13 +708,9 @@ class AccountJournal(models.Model):
         :param date:    The date to be used when performing the currency conversions.
         :return:        The balance expressed in the journal's currency.
         '''
-        self.ensure_one()
-        self.env['account.move.line'].check_access_rights('read')
         conversion_date = date or fields.Date.context_today(self)
 
         accounts = self.payment_debit_account_id + self.payment_credit_account_id
-        if not accounts:
-            return 0.0
 
         domain = (domain or []) + [
             ('account_id', 'in', tuple(accounts.ids)),
@@ -724,43 +718,42 @@ class AccountJournal(models.Model):
             ('move_id.state', '!=', 'cancel'),
             ('reconciled', '=', False),
         ]
-        query = self.env['account.move.line']._where_calc(domain)
-        tables, where_clause, where_params = query.get_sql()
 
-        self._cr.execute('''
-            SELECT
-                COUNT(account_move_line.id) AS nb_lines,
-                account_move_line.currency_id,
-                account.reconcile AS is_account_reconcile,
-                SUM(account_move_line.amount_residual) AS amount_residual,
-                SUM(account_move_line.balance) AS balance,
-                SUM(account_move_line.amount_residual_currency) AS amount_residual_currency,
-                SUM(account_move_line.amount_currency) AS amount_currency
-            FROM ''' + tables + '''
-            JOIN account_account account ON account.id = account_move_line.account_id
-            WHERE ''' + where_clause + '''
-            GROUP BY account_move_line.currency_id, account.reconcile
-        ''', where_params)
+        read_by_account = {
+            r['account_id'][0]: r
+            for r in self.env['account.move.line'].read_group(
+                domain=domain,
+                fields=['currency_id', 'amount_residual', 'balance', 'amount_residual_currency', 'amount_currency'],
+                groupby=['account_id', 'currency_id'],
+                lazy=False,
+            )
+        }
 
-        company_currency = self.company_id.currency_id
-        journal_currency = self.currency_id if self.currency_id and self.currency_id != company_currency else False
-        balance_currency = journal_currency or company_currency
+        res = {}
+        for journal in self:
+            company_currency = journal.company_id.currency_id
+            journal_currency = journal.currency_id if journal.currency_id and journal.currency_id != company_currency else False
+            balance_currency = journal_currency or company_currency
 
-        total_balance = 0.0
-        nb_lines = 0
-        for res in self._cr.dictfetchall():
-            nb_lines += res['nb_lines']
+            total_balance = 0.0
+            nb_lines = 0
+            for account in (journal.payment_debit_account_id, journal.payment_credit_account_id):
+                read = read_by_account.get(account.id)
+                if not read:
+                    continue
+                nb_lines += read['__count']
 
-            amount_currency = res['amount_residual_currency'] if res['is_account_reconcile'] else res['amount_currency']
-            balance = res['amount_residual'] if res['is_account_reconcile'] else res['balance']
+                amount_currency = read['amount_residual_currency'] if account.reconcile else read['amount_currency']
+                balance = read['amount_residual'] if account.reconcile else read['balance']
 
-            if res['currency_id'] and journal_currency and res['currency_id'] == journal_currency.id:
-                total_balance += amount_currency
-            elif journal_currency:
-                total_balance += company_currency._convert(balance, balance_currency, self.company_id, conversion_date)
-            else:
-                total_balance += balance
-        return total_balance, nb_lines
+                if read['currency_id'] and journal_currency and read['currency_id'] == journal_currency.id:
+                    total_balance += amount_currency
+                elif journal_currency:
+                    total_balance += company_currency._convert(balance, balance_currency, journal.company_id, conversion_date)
+                else:
+                    total_balance += balance
+            res[journal.id] = (total_balance, nb_lines)
+        return res
 
     def _get_last_bank_statement(self, domain=None):
         ''' Retrieve the last bank statement created using this journal.
@@ -769,5 +762,5 @@ class AccountJournal(models.Model):
         '''
         self.ensure_one()
         last_statement_domain = (domain or []) + [('journal_id', '=', self.id)]
-        last_st_line = self.env['account.bank.statement.line'].search(last_statement_domain, order='date desc, id desc', limit=1)
+        last_st_line = self.env['account.bank.statement.line']#.search(last_statement_domain, order='date desc, id desc', limit=1)
         return last_st_line.statement_id

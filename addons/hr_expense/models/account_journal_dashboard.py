@@ -20,8 +20,8 @@ class AccountJournal(models.Model):
                   and journal_id = %(journal_id)s"""
         return (query, {'journal_id': self.id})
 
-    def get_journal_dashboard_datas(self):
-        res = super(AccountJournal, self).get_journal_dashboard_datas()
+    def _get_journal_dashboard_datas(self):
+        res = super(AccountJournal, self)._get_journal_dashboard_datas()
         #add the number and sum of expenses to pay to the json defining the accounting dashboard data
         (query, query_args) = self._get_expenses_to_pay_query()
         self.env.cr.execute(query, query_args)

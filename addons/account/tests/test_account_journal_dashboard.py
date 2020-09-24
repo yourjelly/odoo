@@ -4,6 +4,7 @@ from freezegun import freeze_time
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
 
+
 @tagged('post_install', '-at_install')
 class TestAccountJournalDashboard(AccountTestInvoicingCommon):
 
@@ -40,7 +41,7 @@ class TestAccountJournalDashboard(AccountTestInvoicingCommon):
         })
 
         # Check Draft
-        dashboard_data = journal.get_journal_dashboard_datas()
+        dashboard_data = journal._get_journal_dashboard_datas()[journal.id]
 
         self.assertEqual(dashboard_data['number_draft'], 2)
         self.assertIn('68.42', dashboard_data['sum_draft'])
@@ -51,7 +52,7 @@ class TestAccountJournalDashboard(AccountTestInvoicingCommon):
         # Check Both
         invoice.action_post()
 
-        dashboard_data = journal.get_journal_dashboard_datas()
+        dashboard_data = journal._get_journal_dashboard_datas()[journal.id]
         self.assertEqual(dashboard_data['number_draft'], 1)
         self.assertIn('-13.30', dashboard_data['sum_draft'])
 
@@ -61,7 +62,7 @@ class TestAccountJournalDashboard(AccountTestInvoicingCommon):
         # Check waiting payment
         refund.action_post()
 
-        dashboard_data = journal.get_journal_dashboard_datas()
+        dashboard_data = journal._get_journal_dashboard_datas()[journal.id]
         self.assertEqual(dashboard_data['number_draft'], 0)
         self.assertIn('0.00', dashboard_data['sum_draft'])
 
@@ -69,7 +70,6 @@ class TestAccountJournalDashboard(AccountTestInvoicingCommon):
         self.assertIn('68.42', dashboard_data['sum_waiting'])
 
         # Check partial
-        receivable_account = refund.line_ids.mapped('account_id').filtered(lambda a: a.internal_type == 'receivable')
         payment = self.env['account.payment'].create({
             'amount': 10.0,
             'payment_type': 'outbound',
@@ -82,13 +82,13 @@ class TestAccountJournalDashboard(AccountTestInvoicingCommon):
             .filtered(lambda line: line.account_internal_type == 'receivable')\
             .reconcile()
 
-        dashboard_data = journal.get_journal_dashboard_datas()
+        dashboard_data = journal._get_journal_dashboard_datas()[journal.id]
         self.assertEqual(dashboard_data['number_draft'], 0)
         self.assertIn('0.00', dashboard_data['sum_draft'])
 
         self.assertEqual(dashboard_data['number_waiting'], 2)
         self.assertIn('78.42', dashboard_data['sum_waiting'])
 
-        dashboard_data = journal.get_journal_dashboard_datas()
+        dashboard_data = journal._get_journal_dashboard_datas()[journal.id]
         self.assertEqual(dashboard_data['number_late'], 2)
         self.assertIn('78.42', dashboard_data['sum_late'])

@@ -108,14 +108,14 @@ class AccountJournal(models.Model):
             bank_journal._create_check_sequence()
             bank_journal.outbound_payment_method_ids += check_method
 
-    def get_journal_dashboard_datas(self):
+    def _get_journal_dashboard_datas(self):
         domain_checks_to_print = [
             ('journal_id', '=', self.id),
             ('payment_method_id.code', '=', 'check_printing'),
             ('state', '=', 'posted')
         ]
         return dict(
-            super(AccountJournal, self).get_journal_dashboard_datas(),
+            super(AccountJournal, self)._get_journal_dashboard_datas(),
             num_checks_to_print=self.env['account.payment'].search_count(domain_checks_to_print),
         )
 
