@@ -14,5 +14,8 @@ You can track your vendors, customers and other contacts.
     'data': [
         'views/contact_views.xml',
     ],
+    'demo': [
+        'data/res_record_message_demo.xml',
+    ],
     'application': True,
 }

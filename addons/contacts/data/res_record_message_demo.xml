@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<odoo>
+	<function id="model_data_search" model="ir.model.data" name="search">
+		<value model="ir.model.data" eval="[('module', '=', 'base'), ('model', '=', 'res.partner')]"></value>
+	</function>
+	<function model="mail.message" name="create">
+		<value model="mail.message" eval="dict({'model':'res.partner','res_id':ref('contacts.model_data_search').res_id,'body':'Contact created'})"></value>
+	</function>
+</odoo>
