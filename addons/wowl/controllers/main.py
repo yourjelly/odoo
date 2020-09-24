@@ -8,6 +8,7 @@ import io
 import os
 import re
 
+import werkzeug
 from collections import OrderedDict
 from lxml import etree
 
@@ -40,13 +41,26 @@ def get_files(key):
 
 class WowlClient(http.Controller):
     @http.route('/wowl', type='http', auth="none")
-    def root(self):
-        qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=[], debug=request.session.debug)
-        context = {
-            "qweb": qweb_checksum,
-            "scssFiles": get_files('style'),
-        }
-        return request.render('wowl.root', qcontext=context)
+    def wowl(self, **kw):
+        if not request.session.uid:
+            return werkzeug.utils.redirect('/web/login', 303)
+        if kw.get('redirect'):
+            return werkzeug.utils.redirect(kw.get('redirect'), 303)
+
+        request.uid = request.session.uid
+        try:
+            qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=[], debug=request.session.debug)
+            context = {
+                "qweb": qweb_checksum,
+                "session_info": request.env['ir.http'].session_info(),
+                "scssFiles": get_files('style'),
+            }
+            response = request.render('wowl.root', qcontext=context)
+            response.headers['X-Frame-Options'] = 'DENY'
+            return response
+        except AccessError:
+            return werkzeug.utils.redirect('/web/login?error=access')
+
 
     @http.route('/wowl/templates/<string:unique>', type='http', auth="none", cors="*")
     def templates(self, unique, mods=None, db=None):

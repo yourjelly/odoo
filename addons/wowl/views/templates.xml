@@ -20,7 +20,10 @@
                 <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/src/img/favicon.ico'"/>
 
                 <script>
-                    window.qwebCheckSum = '<t t-esc="qweb"/>';
+                    window.odoo = {
+                        session_info: <t t-raw="json.dumps(session_info)"/>,
+                        templates_checksum: '<t t-esc="qweb"/>'
+                    };
                 </script>
 
                 <t t-call-assets="wowl.assets" t-js="False"/>

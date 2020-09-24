@@ -3,7 +3,12 @@ import * as owl from "@odoo/owl";
 
 const { whenReady, loadFile } = owl.utils;
 
-declare const qwebCheckSum: string;
+interface Odoo {
+  session_info: any;
+  templates_checksum: string;
+}
+
+declare const odoo: Odoo;
 
 (async () => {
   // Setup code
@@ -12,7 +17,7 @@ declare const qwebCheckSum: string;
     root.mount(document.body);
   }
 
-  const templatesUrl = `/wowl/templates/${qwebCheckSum}`;
+  const templatesUrl = `/wowl/templates/${odoo.templates_checksum}`;
   const templates = await loadFile(templatesUrl);
   const qweb = new owl.QWeb();
   qweb.addTemplates(templates);
