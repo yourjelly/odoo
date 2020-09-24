@@ -261,11 +261,40 @@ class StockQuant(models.Model):
 
     @api.model
     def _get_removal_strategy_order(self, removal_strategy):
+        # TODO in master: put required in_date and use only ORM for gather
         if removal_strategy == 'fifo':
             return 'in_date ASC NULLS FIRST, id'
         elif removal_strategy == 'lifo':
             return 'in_date DESC NULLS LAST, id desc'
         raise UserError(_('Removal strategy %s not implemented.') % (removal_strategy,))
+
+    def _gather_multi(self, product_ids, location_ids, lot_ids=None, package_ids=None, owner_ids=None, strict=False, removal_strategy=None):
+        """ Will need to filter after to respect domain
+        """
+        self.env['stock.quant'].flush(['location_id', 'owner_id', 'package_id', 'lot_id', 'product_id'])
+        self.env['product.product'].flush(['virtual_available'])
+        removal_strategy = 'fifo'
+        removal_strategy_order = self._get_removal_strategy_order(removal_strategy)
+        domain = [('product_id', 'in', product_ids.ids)]
+        if not strict:
+            domain = expression.AND([[('location_id', 'child_of', location_ids.ids)], domain])
+        else:
+            domain = expression.AND([[('lot_id', 'in', (lot_ids and lot_ids.ids or []) + [False])], domain])
+            domain = expression.AND([[('package_id', 'in', (package_ids and package_ids.ids or []) + [False])], domain])
+            domain = expression.AND([[('owner_id', 'in', (owner_ids and owner_ids.ids or []) + [False])], domain])
+            domain = expression.AND([[('location_id', 'in', location_ids.ids)], domain])
+
+        # Copy code of _search for special NULLS FIRST/LAST order
+        self.check_access_rights('read')
+        query = self._where_calc(domain)
+        self._apply_ir_rules(query, 'read')
+        from_clause, where_clause, where_clause_params = query.get_sql()
+        where_str = where_clause and (" WHERE %s" % where_clause) or ''
+        query_str = 'SELECT "%s".id FROM ' % self._table + from_clause + where_str + " ORDER BY " + removal_strategy_order
+        self._cr.execute(query_str, where_clause_params)
+        res = self._cr.fetchall()
+        # No uniquify list necessary as auto_join is not applied anyways...
+        return self.browse([x[0] for x in res])
 
     def _gather(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False):
         self.env['stock.quant'].flush(['location_id', 'owner_id', 'package_id', 'lot_id', 'product_id'])
@@ -302,7 +331,7 @@ class StockQuant(models.Model):
         return self.browse([x[0] for x in res])
 
     @api.model
-    def _get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, allow_negative=False):
+    def _get_available_quantity(self, product_id, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, allow_negative=False, quants=None):
         """ Return the available quantity, i.e. the sum of `quantity` minus the sum of
         `reserved_quantity`, for the set of quants sharing the combination of `product_id,
         location_id` if `strict` is set to False or sharing the *exact same characteristics*
@@ -318,10 +347,17 @@ class StockQuant(models.Model):
         In the last ones, `strict` should be set to `True`, as we work on a specific set of
         characteristics.
 
+        The optional `quants` param is expected when the quants have been previously calculated so we can avoid
+        unnecessary costly repeat queries.
+
         :return: available quantity as a float
         """
         self = self.sudo()
-        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+
+        if not quants:
+            quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+        quants = quants.sudo()
+
         rounding = product_id.uom_id.rounding
         if product_id.tracking == 'none':
             available_quantity = sum(quants.mapped('quantity')) - sum(quants.mapped('reserved_quantity'))
@@ -437,7 +473,7 @@ class StockQuant(models.Model):
         return self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=False, allow_negative=True), fields.Datetime.from_string(in_date)
 
     @api.model
-    def _update_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=False):
+    def _update_reserved_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, strict=False, quants=None):
         """ Increase the reserved quantity, i.e. increase `reserved_quantity` for the set of quants
         sharing the combination of `product_id, location_id` if `strict` is set to False or sharing
         the *exact same characteristics* otherwise. Typically, this method is called when reserving
@@ -446,17 +482,22 @@ class StockQuant(models.Model):
         anything from the stock, so we disable the flag. When editing a move line, we naturally
         enable the flag, to reflect the reservation according to the edition.
 
+        The optional `quants` param is expected when the quants have been previously calculated so we can avoid
+        unnecessary costly repeat queries.
+
         :return: a list of tuples (quant, quantity_reserved) showing on which quant the reservation
             was done and how much the system was able to reserve on it
         """
         self = self.sudo()
         rounding = product_id.uom_id.rounding
-        quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+        if not quants:
+            quants = self._gather(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+        quants = quants.sudo()
         reserved_quants = []
 
         if float_compare(quantity, 0, precision_rounding=rounding) > 0:
             # if we want to reserve
-            available_quantity = self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict)
+            available_quantity = self._get_available_quantity(product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, quants=quants)
             if float_compare(quantity, available_quantity, precision_rounding=rounding) > 0:
                 raise UserError(_('It is not possible to reserve more products of %s than you have in stock.') % product_id.display_name)
         elif float_compare(quantity, 0, precision_rounding=rounding) < 0:
