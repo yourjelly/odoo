@@ -46,6 +46,10 @@ odoo.define("web/static/src/js/views/search_panel.js", function (require) {
             }
         }
 
+        // willUnmount() {
+        //     $(this.el).remove();
+        // }
+
         async willUpdateProps() {
             this._updateActiveValues();
         }
