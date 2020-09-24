@@ -17,20 +17,25 @@ wss.on("connection", (ws) => {
   });
 });
 
-function notifySockets() {
+function notifySockets(message) {
   for (let ws of openSockets) {
-    ws.send("refresh");
+    ws.send(message);
   }
 }
 
-// File watcher
-chokidar.watch("static", { ignored: /.*\.ts$/ }).on("all", debounce(notifySockets, 200));
-
-// Helper
-function debounce(fn, delay) {
+function makeNotifier() {
   let timeout = null;
-  return () => {
+  let onlyCSS = true;
+  return (_type, file) => {
+    onlyCSS = onlyCSS && file.endsWith("css");
     clearTimeout(timeout);
-    timeout = setTimeout(fn, delay);
+    setTimeout(() => {
+      const msg = onlyCSS ? "refresh:css" : "refresh";
+      onlyCSS = true;
+      notifySockets(msg);
+    }, 300);
   };
 }
+
+// File watcher
+chokidar.watch("static", { ignored: /.*\.ts$/ }).on("all", makeNotifier());

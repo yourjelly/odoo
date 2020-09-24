@@ -9,7 +9,7 @@
     "build": "npm run build:js && npm run build:bundle",
     "dev": "npm-run-all build --parallel \"build:* -- --watch\" livereload",
     "livereload": "node livereload-server.js",
-    "prettier": "prettier static/src --write",
+    "prettier": "prettier static/src static/tests doc --write",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
