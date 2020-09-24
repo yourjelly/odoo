@@ -24,7 +24,7 @@ function notifySockets() {
 }
 
 // File watcher
-chokidar.watch("static/src").on("all", debounce(notifySockets, 20));
+chokidar.watch("static", { ignored: /.*\.ts$/ }).on("all", debounce(notifySockets, 200));
 
 // Helper
 function debounce(fn, delay) {

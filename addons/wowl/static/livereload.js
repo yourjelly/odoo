@@ -2,7 +2,7 @@
   let delay = 1000;
 
   function startLiveReload() {
-    const ws = new WebSocket("ws://localhost:8070");
+    const ws = new WebSocket(`ws://${location.hostname}:8070`);
     let isOpen = false;
     ws.onopen = function () {
       delay = 1000;
