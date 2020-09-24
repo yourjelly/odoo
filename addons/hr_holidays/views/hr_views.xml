@@ -13,6 +13,17 @@
        <field name="search_view_id" ref="hr.view_employee_filter"/>
    </record>
 
+    <record id="planning_slot_view_search" model="ir.ui.view">
+        <field name="name">planning.slot.search.view.inherit</field>
+        <field name="model">planning.slot</field>
+        <field name="inherit_id" ref="planning.planning_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='manager_id']" position="after">
+                <filter name="is_absent" string="Absent Today" domain="[('is_absent', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+
     <!--Hr Department Inherit Kanban view-->
     <record id="hr_department_view_kanban" model="ir.ui.view">
         <field name="name">hr.department.kanban.inherit</field>

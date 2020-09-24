@@ -6,6 +6,10 @@ import datetime
 from odoo import api, fields, models
 from odoo.tools.float_utils import float_round
 
+class PlanningSlot(models.AbstractModel):
+    _inherit = "planning.slot"
+
+    is_absent = fields.Boolean(related='employee_id.is_absent')
 
 class HrEmployeeBase(models.AbstractModel):
     _inherit = "hr.employee.base"
