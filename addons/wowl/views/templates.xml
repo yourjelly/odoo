@@ -13,7 +13,7 @@
                 <script>
                     window.qwebCheckSum = '<t t-esc="qweb"/>';
                 </script>
-                <script type="text/javascript" src="/wowl/static/dist/wowl.js"></script>
+                <script type="text/javascript" src="/wowl/static/dist/app.js"></script>
             </head>
             <body />
         </html>
