@@ -13,6 +13,7 @@ from collections import OrderedDict
 from lxml import etree
 
 from odoo import http
+from odoo.exceptions import AccessError
 from odoo.http import request
 
 CONTENT_MAXAGE = http.STATIC_CACHE_LONG  # menus, translations, static qweb
@@ -71,6 +72,9 @@ class WowlClient(http.Controller):
             ('Cache-Control', 'public, max-age=' + str(CONTENT_MAXAGE))
         ])
 
+    @http.route('/wowl/tests', type='http', auth="user")
+    def test_suite(self, **kw):
+        return request.render('wowl.qunit_suite')
 
 class HomeStaticTemplateHelpers(object):
     """
