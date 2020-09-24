@@ -50,9 +50,10 @@ class WowlClient(http.Controller):
         request.uid = request.session.uid
         try:
             qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=[], debug=request.session.debug)
+            session_info = request.env['ir.http'].session_info()
+            session_info['qweb'] = qweb_checksum
             context = {
-                "qweb": qweb_checksum,
-                "session_info": request.env['ir.http'].session_info(),
+                "session_info": session_info,
                 "scssFiles": get_files('style'),
             }
             response = request.render('wowl.root', qcontext=context)
