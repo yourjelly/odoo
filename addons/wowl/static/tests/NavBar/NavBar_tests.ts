@@ -1,16 +1,18 @@
 import { NavBar } from "../../src/components/NavBar/NavBar";
 import * as QUnit from "qunit";
 import { makeTestEnv } from "../test_env";
+import { mount } from "../helpers";
 
-QUnit.module("NavBar", () => {
-  QUnit.test("can be rendered", async (assert) => {
-    assert.expect(1);
-    const env = await makeTestEnv();
-    NavBar.env = env;
+let target: HTMLElement;
+QUnit.module("Navbar", {
+  beforeEach() {
+    target = document.querySelector("#qunit-fixture") as HTMLElement;
+  },
+});
 
-    const webClient = new NavBar(null);
-    const fixture = document.querySelector("#qunit-fixture") as HTMLElement;
-    await webClient.mount(fixture);
-    assert.strictEqual(fixture.innerText, "NavBar");
-  });
+QUnit.test("can be rendered", async (assert) => {
+  assert.expect(1);
+  const env = await makeTestEnv();
+  await mount(NavBar, { env, target });
+  assert.strictEqual(target.innerText, "NavBar");
 });

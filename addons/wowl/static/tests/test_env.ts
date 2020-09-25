@@ -5,7 +5,7 @@ import { OdooEnv, Services } from "../src/env";
 let templates: string;
 let browser: Env["browser"];
 
-const templatesUrl = `/wowl/templates/tests`;
+const templatesUrl = `/wowl/templates/${new Date().getTime()}`;
 
 export async function makeTestEnv(): Promise<OdooEnv> {
   const qweb = new owl.QWeb();
