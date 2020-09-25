@@ -5,6 +5,7 @@ import copy
 import glob
 import hashlib
 import io
+import json
 import os
 import re
 
@@ -15,6 +16,7 @@ from lxml import etree
 from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
+from odoo.tools import ustr
 
 CONTENT_MAXAGE = http.STATIC_CACHE_LONG  # menus, translations, static qweb
 
@@ -50,6 +52,8 @@ class WowlClient(http.Controller):
 
         request.uid = request.session.uid
         try:
+            # LPE Fixme: this cannot be ORM cached (class outside ORM realm) but we could impl
+            # a cache if necessary (just like load_menus)
             qweb_checksum = HomeStaticTemplateHelpers.get_qweb_templates_checksum(addons=[], debug=request.session.debug)
             session_info = request.env['ir.http'].session_info()
             session_info['qweb'] = qweb_checksum
@@ -63,6 +67,23 @@ class WowlClient(http.Controller):
         except AccessError:
             return werkzeug.utils.redirect('/web/login?error=access')
 
+    @http.route('/wowl/load_menus/<string:unique>', type='http', auth='user', methods=['GET'])
+    def load_menus(self, unique):
+        """
+        Loads the menus for the webclient
+        Method ir.ui.menu.load_menus is ORM cached, and has been done at the first /web request
+        :param unique: this parameters is not used, but mandatory: it is used by the HTTP stack to make a unique request
+        :return: the menus (including the images in Base64)
+        """
+        menus = request.env["ir.ui.menu"].load_menus_flat(request.session.debug)
+        body = json.dumps(menus, default=ustr)
+        response = request.make_response(body, [
+            # this method must specify a content-type application/json instead of using the default text/html set because
+            # the type of the route is set to HTTP, but the rpc is made with a get and expects JSON
+            ('Content-Type', 'application/json'),
+            ('Cache-Control', 'public, max-age=' + str(CONTENT_MAXAGE)),
+        ])
+        return response
 
     @http.route('/wowl/templates/<string:unique>', type='http', auth="none", cors="*")
     def templates(self, unique, mods=None, db=None):
@@ -75,6 +96,7 @@ class WowlClient(http.Controller):
     @http.route('/wowl/tests', type='http', auth="user")
     def test_suite(self, **kw):
         return request.render('wowl.qunit_suite')
+
 
 class HomeStaticTemplateHelpers(object):
     """

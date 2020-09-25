@@ -11,7 +11,10 @@
         """
 Odoo Web core module written in Owl.
         """,
-    'depends': ['base'],
+    'depends': [
+        'base',
+        'web'  # LPE temporary: we call some assets defined there
+    ],
     'auto_install': True,
     'data': [
         'views/templates.xml',

@@ -1,10 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <header t-name="wowl.NavBar" owl="1">
-        <nav>
-            NavBar
-        </nav>
-    </header>
+  <header t-name="wowl.NavBar" owl="1">
+    <nav class="o_main_navbar">
+      <t t-call="web.AppsMenu"/>
+      <a class="o_menu_brand" role="button"/>
+      <ul class="o_menu_sections" role="menu"/>
+      <ul class="o_menu_systray" role="menu"/>
+    </nav>
+  </header>
+
+<ul t-name="web.AppsMenu" class="o_menu_apps" owl="1">
+    <li class="dropdown">
+        <a class="full" data-toggle="dropdown" data-display="static" href="#">
+            <i class="fa fa-th-large"/>
+        </a>
+        <div class="dropdown-menu" role="menu">
+            <t t-foreach="apps" t-as="app">
+                <a role="menuitem" href="#" class="dropdown-item o_app"
+                    t-att-data-menu-id="app.id"
+                    t-att-data-menu-xmlid="app.xmlid"
+                    t-att-data-action-id="app.actionID"
+                    t-on-click.prevent="trigger('open-menu', { menuID: app.id })">
+                        <t t-esc="app.name"/>
+                </a>
+            </t>
+        </div>
+    </li>
+</ul>
 
 </templates>

@@ -1,4 +1,9 @@
+interface CacheHashes {
+  load_menus: string,
+}
+
 export interface SessionInfo {
+  cache_hashes: CacheHashes,
   qweb: string;
 }
 
