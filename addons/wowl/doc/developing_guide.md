@@ -83,3 +83,21 @@ above, they should be imported in the `main.ts` file to be included in the
 test suite.
 
 To run the test suite, one needs to open the `/wowl/tests` route in a browser.
+
+## Common issues
+
+### System limit for file watchers
+
+It may happen that you encounter an error while running some commands such as
+`npm run dev`, related to file watchers:
+
+```
+    ENOSPC: System limit for number of file watchers reached...
+```
+
+This is probably caused by the livereload features, that needs to watch the
+file system. Also, note that odoo started in `dev=all` mode also has its own
+watchers.
+
+The only solution in that case is to increase the os limit. See
+https://howchoo.com/node/node-increase-file-watcher-system-limit for more info.
