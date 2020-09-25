@@ -1947,7 +1947,8 @@ var SnippetsMenu = Widget.extend({
                 },
                 start: function (ev, ui) {
                     self.$el.find('.oe_snippet_thumbnail').addClass('o_we_already_dragging');
-                    var $baseBody = this.find('.oe_snippet_body');
+                    var $snippet = this;
+                    var $baseBody = $snippet.find('.oe_snippet_body');
 
                     if (dragStarted) {
                         // If the previous drop are not finished, the position of the current snippet can be wrong.
@@ -1964,10 +1965,14 @@ var SnippetsMenu = Widget.extend({
                     for (const option of self.templateOptions) {
                         if ($baseBody.is(option.base_selector) && !$baseBody.is(option.base_exclude)) {
                             if (option['drop-near']) {
-                                $selectorSiblings = $selectorSiblings.add(option['drop-near'].all());
+                                $selectorSiblings = $selectorSiblings.add(option['drop-near'].all()).filter(function () {
+                                    return !$snippet[0].contains(this);
+                                });
                             }
                             if (option['drop-in']) {
-                                $selectorChildren = $selectorChildren.add(option['drop-in'].all());
+                                $selectorChildren = $selectorChildren.add(option['drop-in'].all()).filter(function () {
+                                    return !$snippet[0].contains(this);
+                                });
                             }
                         }
                     }
@@ -2003,7 +2008,7 @@ var SnippetsMenu = Widget.extend({
                         }
                     }
 
-                    this.data('to-insert', $snippetToInsert);
+                    $snippet.data('to-insert', $snippetToInsert);
                 },
                 stop: async function (ev, ui) {
                     const $snippetToInsert = this.data('to-insert');
@@ -2036,7 +2041,7 @@ var SnippetsMenu = Widget.extend({
                             $parent.prepend($snippetToInsert);
                         }
 
-                        await self._scrollToSnippet($snippetToInsert, scrollValue);
+                        self._scrollToSnippet($snippetToInsert, scrollValue);
 
                         _.defer(async () => {
                             self.trigger_up('snippet_dropped', {$target: $snippetToInsert});
@@ -2075,6 +2080,7 @@ var SnippetsMenu = Widget.extend({
                     dropped = true;
                     scrollValue = $(droppable).offset().top;
                     const $snippetToInsert = this.data('to-insert');
+                    debugger;
                     $(droppable).after($snippetToInsert).addClass('d-none');
                     $snippetToInsert.removeClass('oe_snippet_body');
                 }
