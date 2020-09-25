@@ -310,6 +310,7 @@ var KanbanRenderer = BasicRenderer.extend({
      * @param {string} [options.inlineStyle]
      */
     _renderGhostDivs: function (fragment, nbDivs, options) {
+        debugger;
         var ghostDefs = [];
         for (var $ghost, i = 0; i < nbDivs; i++) {
             $ghost = $('<div>').addClass('o_kanban_record o_kanban_ghost');
@@ -394,6 +395,7 @@ var KanbanRenderer = BasicRenderer.extend({
      * @param {DocumentFragment} fragment
      */
     _renderUngrouped: function (fragment) {
+        debugger;
         var self = this;
         var KanbanRecord = this.config.KanbanRecord;
         var kanbanRecord;
@@ -440,6 +442,7 @@ var KanbanRenderer = BasicRenderer.extend({
      * @private
      */
     _renderView: function () {
+        debugger;
         var self = this;
 
         // render the kanban view
@@ -469,6 +472,7 @@ var KanbanRenderer = BasicRenderer.extend({
      * @private
      */
     _toggleNoContentHelper: function (remove) {
+        debugger;
         var displayNoContentHelper =
             !remove &&
             !this._hasContent() &&

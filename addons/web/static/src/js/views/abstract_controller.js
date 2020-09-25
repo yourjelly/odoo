@@ -130,6 +130,7 @@ var AbstractController = mvc.Controller.extend(ActionMixin, {
      * Called each time the controller is detached from the DOM.
      */
     on_detach_callback: function () {
+        debugger;
         ActionMixin.on_detach_callback.call(this);
         this.searchModel.off('search', this);
         if (this.withControlPanel) {

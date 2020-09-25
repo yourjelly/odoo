@@ -40,6 +40,7 @@ odoo.define("web/static/src/js/views/search_panel.js", function (require) {
         }
 
         mounted() {
+            debugger;
             this._updateGroupHeadersChecked();
             if (this.hasImportedState) {
                 this.el.scroll({ top: this.scrollTop });
@@ -164,6 +165,7 @@ odoo.define("web/static/src/js/views/search_panel.js", function (require) {
         }
 
         _updateActiveValues() {
+            debugger;
             for (const section of this.model.get("sections")) {
                 if (section.type === "category") {
                     this.state.active[section.id] = section.activeValueId;
