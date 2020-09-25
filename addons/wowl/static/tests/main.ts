@@ -1,3 +1,5 @@
+import "./Action/Action_tests";
+import "./NavBar/NavBar_tests";
 import "./WebClient/WebClient_tests";
 import * as owl from "@odoo/owl";
 

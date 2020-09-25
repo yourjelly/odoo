@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <header t-name="wowl.NavBar" owl="1">
+        <nav>
+            NavBar
+        </nav>
+    </header>
+
+</templates>

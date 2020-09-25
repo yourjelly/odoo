@@ -7,6 +7,6 @@ QUnit.module("Web Client", () => {
     const webClient = new WebClient(null);
     const fixture = document.querySelector("#qunit-fixture") as HTMLElement;
     await webClient.mount(fixture);
-    assert.strictEqual(fixture.innerText, "Hello World");
+    assert.strictEqual(fixture.innerText, "NavBar\nHello WebClient\nHello Action");
   });
 });
