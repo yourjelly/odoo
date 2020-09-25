@@ -15839,12 +15839,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
                 }
                 const domVisible = element.style.display !== 'none';
                 if (visible !== domVisible) {
-                    if (visible) {
-                        element.style.display = 'inline-block';
-                    }
-                    else {
-                        element.style.display = 'none';
-                    }
+                    element.style.display = visible ? '' : 'none';
                 }
             }
         }
@@ -15913,12 +15908,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
                     .every(n => n.visible && !n.visible(editor));
                 const domInvisible = element.style.display === 'none';
                 if (invisible !== domInvisible) {
-                    if (invisible) {
-                        element.style.display = 'none';
-                    }
-                    else {
-                        element.style.display = 'inline-block';
-                    }
+                    element.style.display = invisible ? 'none' : '';
                 }
             }
         }
@@ -16060,12 +16050,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
                 }
                 const domVisible = element.style.display !== 'none';
                 if (visible !== domVisible) {
-                    if (visible) {
-                        element.style.display = 'inline-block';
-                    }
-                    else {
-                        element.style.display = 'none';
-                    }
+                    element.style.display = visible ? '' : 'none';
                 }
             }
         }
@@ -20178,7 +20163,7 @@ odoo.define('web_editor.jabberwock', (function(require) {
             const visible = isInTextualContext(editor);
             if (visible !== domVisible) {
                 if (visible) {
-                    input.style.display = 'inline-block';
+                    input.style.display = '';
                 }
                 else {
                     input.style.setProperty('display', 'none', 'important');
