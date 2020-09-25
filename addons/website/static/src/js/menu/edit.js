@@ -195,10 +195,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             },
         });
 
-        const websiteToolbar = [
-            ['TableButton'],
-            ['OdooTextColorButton', 'OdooBackgroundColorButton'],
-            [
+        const websiteToolbar = {
+            textColor: ['OdooTextColorButton', 'OdooBackgroundColorButton'],
+            textFormat: [
                 [
                     'ParagraphButton',
                     'Heading1Button',
@@ -210,23 +209,24 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                     'PreButton',
                 ],
             ],
-            ['FontSizeInput'],
-            [
+            fontSize:  ['FontSizeInput'],
+            fontStyle: [
                 'BoldButton',
                 'ItalicButton',
                 'UnderlineButton',
             ],
-            ['AlignLeftButton', 'AlignCenterButton', 'AlignRightButton', 'AlignJustifyButton'],
-            [
+            textAlign: ['AlignLeftButton', 'AlignCenterButton', 'AlignRightButton', 'AlignJustifyButton'],
+            mediaAlign: [
                 'OdooMediaAlignLeftActionable',
                 'OdooMediaAlignCenterActionable',
                 'OdooMediaAlignRightActionable',
             ],
-            ['OrderedListButton', 'UnorderedListButton', 'ChecklistButton'],
-            ['IndentButton', 'OutdentButton'],
-            ['OdooLinkButton', 'UnlinkButton'],
-            ['OdooMediaButton'],
-            [
+            lists:   ['OrderedListButton', 'UnorderedListButton', 'ChecklistButton'],
+            indent:  ['IndentButton', 'OutdentButton'],
+            links:   ['OdooLinkButton', 'UnlinkButton'],
+            table:   ['TableButton'],
+            media:   ['OdooMediaButton'],
+            padding: [
                 [
                     'OdooImagePaddingNoneActionable',
                     'OdooImagePaddingSmallActionable',
@@ -235,21 +235,21 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                     'OdooImagePaddingXLActionable',
                 ],
             ],
-            [
+            mediaRadius: [
                 'OdooMediaRoundedActionable',
                 'OdooMediaRoundedCircleActionable',
                 'OdooMediaRoundedShadowActionable',
                 'OdooMediaRoundedThumbnailActionable',
                 'OdooIconSpinThumbnailActionable',
             ],
-            [
+            imgSize: [
                 'OdooImageWidthAutoActionable',
                 'OdooImageWidth25Actionable',
                 'OdooImageWidth50Actionable',
                 'OdooImageWidth75Actionable',
                 'OdooImageWidth100Actionable',
             ],
-            [
+            iconSize: [
                 [
                     'OdooIconSize1xButton',
                     'OdooIconSize2xButton',
@@ -258,9 +258,9 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
                     'OdooIconSize5xButton',
                 ],
             ],
-            ['OdooCropActionable', 'OdooTransformActionable'],
-            ['OdooDescriptionActionable'],
-        ]
+            imgCrop: ['OdooCropActionable', 'OdooTransformActionable'],
+            imgDescription: ['OdooDescriptionActionable'],
+        }
         const translationToolbar = [
             ['OdooTextColorButton', 'OdooBackgroundColorButton'],
             ['FontSizeInput'],
