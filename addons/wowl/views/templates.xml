@@ -17,7 +17,7 @@
             <head>
                 <meta charset="utf-8"/>
                 <title t-esc="title or 'WOWL'"/>
-                <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/src/img/favicon.ico'"/>
+                <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/img/favicon.ico'"/>
 
                 <script>
                     window.odoo = {
@@ -50,7 +50,7 @@
             <head>
                 <meta charset="utf-8"/>
                 <title t-esc="'WOWL Tests'"/>
-                <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/src/img/favicon.ico'"/>
+                <link type="image/x-icon" rel="shortcut icon" t-att-href="x_icon or '/wowl/static/img/favicon.ico'"/>
 
                 <t t-call-assets="wowl.test_assets" t-js="False"/>
                 <t t-call-assets="wowl.test_assets" t-css="False"/>
