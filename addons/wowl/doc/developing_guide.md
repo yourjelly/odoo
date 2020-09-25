@@ -101,3 +101,17 @@ watchers.
 
 The only solution in that case is to increase the os limit. See
 https://howchoo.com/node/node-increase-file-watcher-system-limit for more info.
+
+### File in browser does not match TS code
+
+A common situation arise when one write some typescript code, then notice that
+the javascript code executed on the browser is not the same. There are two
+probable causes for this issue:
+
+1. the typescript code was not built because we forgot to run the command
+   `npm run build`, or because we don't have a `npm run dev` command running.
+   In that case, the solution is simple: just run one of these commands.
+
+2. there is an error in the typescript code, in which case the typescript
+   compiler simply do not output a JS file, and the previous file simply remains
+   Obviously, the solution is then to fix the typescript error.
