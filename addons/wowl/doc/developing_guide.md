@@ -24,6 +24,15 @@ WARNING: the first and most common error is to run commands in the root of the
 odoo project. This will not work! The configuration files are located in the
 `addons/wowl` folder, and each command should be run inside that path!
 
+### Setup your IDE
+
+The addon `wowl` is written in typescript. If you're using Sublime Text, install
+the TypeScript package from https://www.typescriptlang.org/ to enable type
+checking.
+
+WARNING: other TypeScript packages may conflict with this one, so if it isn't
+working well, make sure no other is installed.
+
 ## Main scripts
 
 - `npm run build`: build all the assets, which includes the following steps:
@@ -40,8 +49,8 @@ odoo project. This will not work! The configuration files are located in the
   - start a livereload server (port 8070, hardcoded) to make sure that each
     connected browser is refreshed whenever necessary
 
-- `npm run prettier`: autoformat all the typescript and scss files located in
-  `static/src`, `static/tests` and `doc`.
+- `npm run prettier`: autoformat all the typescript, scss and markdown files
+  located in `static/src`, `static/tests` and `doc`.
 
 ## Templates
 
@@ -63,14 +72,14 @@ to javascript, then bundled). The bundler (rollup) will start with the `main.ts`
 files (in `src/` and in `tests/`) and use that as a starting point, then bundle
 all their dependencies.
 
-So, they are detected automatically, but a file need to be imported somewhere to
+So, they are detected automatically, but a file needs to be imported somewhere to
 be present in the final `app.js` or `app_test.js`.
 
 ## Styles
 
 Styles are handled in an unusual way for Odoo: there is a new `style` key in
 the manifest, that works like the `owl_qweb` key for templates. This key describes
-a list of files or folder. Then, each `scss` files that can be found is added
+a list of files or folders. Then, each `scss` file that can be found is added
 in a dynamic asset bundle.
 
 The main benefit is that we don't have to manually add all these scss files each
@@ -95,7 +104,7 @@ It may happen that you encounter an error while running some commands such as
     ENOSPC: System limit for number of file watchers reached...
 ```
 
-This is probably caused by the livereload features, that needs to watch the
+This is probably caused by the livereload features, that need to watch the
 file system. Also, note that odoo started in `dev=all` mode also has its own
 watchers.
 
@@ -104,7 +113,7 @@ https://howchoo.com/node/node-increase-file-watcher-system-limit for more info.
 
 ### File in browser does not match TS code
 
-A common situation arise when one write some typescript code, then notice that
+A common situation arises when one writes some typescript code, then notices that
 the javascript code executed on the browser is not the same. There are two
 probable causes for this issue:
 
@@ -113,5 +122,5 @@ probable causes for this issue:
    In that case, the solution is simple: just run one of these commands.
 
 2. there is an error in the typescript code, in which case the typescript
-   compiler simply do not output a JS file, and the previous file simply remains
+   compiler simply does not output a JS file, and the previous file simply remains.
    Obviously, the solution is then to fix the typescript error.
