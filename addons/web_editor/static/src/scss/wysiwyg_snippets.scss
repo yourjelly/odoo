@@ -227,6 +227,16 @@ body.editor_enable.editor_has_snippets {
     }
 }
 
+%we-generic-input-container {
+    border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+    border-radius: $o-we-sidebar-content-field-border-radius;
+    background-color: $o-we-sidebar-content-field-input-bg;
+
+    &:focus, &:focus-within {
+        border-color: $o-we-sidebar-content-field-input-border-color;
+    }
+}
+
 // SNIPPET PANEL
 #oe_snippets {
     @include o-w-preserve-btn;
@@ -838,13 +848,7 @@ body.editor_enable.editor_has_snippets {
             > div {
                 flex: 0 1 auto;
                 width: $o-we-sidebar-content-field-input-max-width;
-                border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
-                border-radius: $o-we-sidebar-content-field-border-radius;
-                background-color: $o-we-sidebar-content-field-input-bg;
-
-                &:focus-within {
-                    border-color: $o-we-sidebar-content-field-input-border-color;
-                }
+                @extend %we-generic-input-container;
 
                 > we-button { // for input-group
                     border: none;
