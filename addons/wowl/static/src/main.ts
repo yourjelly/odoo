@@ -1,4 +1,5 @@
 import { WebClient } from "./components/WebClient/WebClient";
+import { makeEnv } from "./env";
 import * as owl from "@odoo/owl";
 
 const { whenReady, loadFile } = owl.utils;
@@ -22,9 +23,7 @@ declare const odoo: Odoo;
 
   const templatesUrl = `/wowl/templates/${odoo.session_info.qweb}`;
   const templates = await loadFile(templatesUrl);
-  const qweb = new owl.QWeb();
-  qweb.addTemplates(templates);
-  owl.Component.env = { qweb };
+  owl.Component.env = makeEnv(templates);
 
   return whenReady(setup);
 })();
