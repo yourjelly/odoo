@@ -7,8 +7,4 @@ export class WebClient extends Component {
   static components = { Action, NavBar };
   static template = "wowl.WebClient";
   rpc = useService("rpc");
-
-  willStart() {
-    return this.rpc();
-  }
 }
