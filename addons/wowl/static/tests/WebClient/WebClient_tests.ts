@@ -12,7 +12,7 @@ QUnit.module("Web Client", {
 
 QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
-  const env = await makeTestEnv();
+  const env = makeTestEnv();
   await mount(WebClient, { env, target });
   assert.strictEqual(target.innerText, "NavBar\nHello WebClient\nHello Action");
 });

@@ -5,13 +5,12 @@ import { OdooEnv, Services } from "../src/env";
 let templates: string;
 let browser: Env["browser"];
 
-const templatesUrl = `/wowl/templates/${new Date().getTime()}`;
+export function setTemplates(xml: string) {
+  templates = xml;
+}
 
-export async function makeTestEnv(): Promise<OdooEnv> {
+export function makeTestEnv(): OdooEnv {
   const qweb = new owl.QWeb();
-  if (!templates) {
-    templates = await owl.utils.loadFile(templatesUrl);
-  }
   if (!browser) {
     const c = new owl.Component();
     const baseEnv = c.env;

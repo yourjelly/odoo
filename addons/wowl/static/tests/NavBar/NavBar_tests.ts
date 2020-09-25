@@ -12,7 +12,7 @@ QUnit.module("Navbar", {
 
 QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
-  const env = await makeTestEnv();
+  const env = makeTestEnv();
   await mount(NavBar, { env, target });
   assert.strictEqual(target.innerText, "NavBar");
 });

@@ -12,8 +12,7 @@ QUnit.module("Action", {
 
 QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
-  const env = await makeTestEnv();
+  const env = makeTestEnv();
   await mount(Action, { env, target });
-
   assert.strictEqual(target.innerText, "Hello Action");
 });
