@@ -27,7 +27,29 @@ export function useService<T extends keyof Services>(serviceName: T): Services[T
 export const serviceRegistry = new Registry<Service>();
 
 export function deployServices(env: OdooEnv, registry: Registry<Service>) {
-  for (let service of registry.getAll()) {
-    env.services[service.name] = service.start?.(env);
+  const services = env.services;
+  const toBeDeployed = new Set(registry.getAll());
+  let service: Service | null = null;
+
+  while ((service = findNext())) {
+    toBeDeployed.delete(service);
+    const value = service.start(env);
+    services[service.name] = value;
+  }
+  if (toBeDeployed.size) {
+    throw new Error("Some services could not be deployed");
+  }
+
+  function findNext(): Service | null {
+    for (let s of toBeDeployed) {
+      if (s.dependencies) {
+        if (s.dependencies.every((d) => d in services)) {
+          return s;
+        }
+      } else {
+        return s;
+      }
+    }
+    return null;
   }
 }

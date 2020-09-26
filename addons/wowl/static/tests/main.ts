@@ -1,8 +1,11 @@
-import "./Action/Action_tests";
-import "./NavBar/NavBar_tests";
-import "./WebClient/WebClient_tests";
 import * as owl from "@odoo/owl";
 import { setTemplates } from "./helpers";
+
+// import here every test suite files
+import "./Action/Action_tests";
+import "./NavBar/NavBar_tests";
+import "./services_tests";
+import "./WebClient/WebClient_tests";
 
 const { whenReady, loadFile } = owl.utils;
 
