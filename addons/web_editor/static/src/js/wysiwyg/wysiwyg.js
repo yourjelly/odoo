@@ -329,67 +329,116 @@ var Wysiwyg = Widget.extend({
         }
     },
 
-    openLinkDialog() {
+    async openLinkDialog(params) {
         const range = this.editor.selection.range;
         const Link = JWEditorLib.Link;
 
-        let targetedLeaves = [];
         const previousNode = range.start.previousSibling();
         const nextNode = range.start.nextSibling();
         const node = previousNode && Link.isLink(previousNode) ? previousNode : nextNode;
-        let currentLink;
-        if (!node || !Link.isLink(node)) {
-            if (range.isCollapsed()) {
-                targetedLeaves = range.targetedNodes();
+        const currentLink = node && Link.isLink(node) && node.modifiers.find(JWEditorLib.LinkFormat);
+
+        let text = '';
+        const images = [];
+        const domSelection = this.editorEditable.ownerDocument.getSelection();
+        if (domSelection.rangeCount) {
+            let domRange = domSelection.getRangeAt(0);
+            const ancestor = domRange.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ?
+                domRange.commonAncestorContainer : domRange.commonAncestorContainer.parentNode;
+
+            let container;
+            if (domSelection.isCollapsed && currentLink) {
+                // If colapse in a link, select all the link.
+                container = ancestor.closest('a');
+                const nodes = this.editorHelpers.getNodes(container);
+                await params.context.execCommand('setSelection', {
+                    vSelection: {
+                        anchorNode: nodes[0],
+                        anchorPosition: 'BEFORE',
+                        focusNode: nodes[nodes.length - 1],
+                        focusPosition: 'AFTER',
+                        direction: 'FORWARD',
+                    },
+                });
             } else {
-                targetedLeaves = range.selectedNodes();
-                targetedLeaves = targetedLeaves.filter(node => !targetedLeaves.includes(node.parent));
+                // If a selection exists, create a text value with \n to split each block (for the preview)
+                domRange = domSelection.getRangeAt(0);
+                container = document.createElement('w-clone');
+                container.appendChild(domRange.cloneContents());
+                ancestor.appendChild(container);
             }
-        } else {
-            currentLink = node.modifiers.find(JWEditorLib.LinkFormat);
-            const sameLink = Link.isLink.bind(Link, currentLink);
-            targetedLeaves = node.adjacents(sameLink);
+
+            const blocks = [''];
+            let domNode = container && container.firstChild;
+            if (domNode) {
+                while (domNode.childNodes && domNode.childNodes.length) {
+                    domNode = domNode.childNodes[0];
+                }
+                while (domNode && domNode !== container) {
+                    if (domNode.nodeName === 'IMG' || domNode.classList && domNode.classList.contains('fa')) {
+                        images.push(domNode.outerHTML);
+                        blocks[blocks.length - 1] += '[IMG]';
+                    } else if (domNode.classList && domNode.classList.contains('media_iframe_video')) {
+                        blocks.push('');
+                    } else if (domNode.nodeType === Node.ELEMENT_NODE && window.getComputedStyle(domNode).display === 'block') {
+                        blocks.push('');
+                    } else if (domNode.nodeType === Node.TEXT_NODE) {
+                        blocks[blocks.length - 1] += domNode.textContent;
+                    }
+
+                    if (domNode.childNodes && domNode.childNodes.length) {
+                        domNode = domNode.childNodes[0];
+                    } else if (domNode.nextSibling) {
+                        domNode = domNode.nextSibling;
+                    } else {
+                        while (domNode && !domNode.nextSibling && domNode !== container) {
+                            domNode = domNode.parentNode;
+                        }
+                        domNode = domNode && domNode !== container && domNode.nextSibling;
+                    }
+                }
+                text = blocks.filter(str => str.length).join('\n');
+            }
+
+            if (!domSelection.isCollapsed) {
+                container.remove();
+            }
         }
-        const text = targetedLeaves.map(x => x.textContent).join('');
+
         const modifiers = range.modifiers;
         const linkFormat = modifiers && modifiers.find(JWEditorLib.LinkFormat);
-        const linkFormatAttributes = linkFormat && linkFormat.modifiers.find(JWEditorLib.Attributes);
         let classes = '';
+        let target;
         if (currentLink) {
             const linkAttributes = currentLink.modifiers.find(JWEditorLib.Attributes);
             classes = (linkAttributes && linkAttributes.get('class')) || '';
+            target = linkAttributes && linkAttributes.get('target');
         }
         const linkDialog = new weWidgets.LinkDialog(this,
             {
                 props: {
                     text: text,
+                    images: images,
                     url: linkFormat && linkFormat.url || '',
                     initialClassNames: classes,
-                    target: linkFormatAttributes && linkFormatAttributes.get('target'),
-                }
+                    target: target,
+                },
             },
         );
         linkDialog.open();
         linkDialog.on('save', this, async (params)=> {
             const onSaveLinkDialog = async (context) => {
-                for (const targetedLeaf of targetedLeaves) {
-                    if (targetedLeaf instanceof JWEditorLib.InlineNode) {
-                        targetedLeaf.remove();
-                    }
-                }
                 const linkParams = {
                     url: params.url,
-                    label: params.text,
+                    label: range.isCollapsed() && params.text,
                     target: params.isNewWindow ? '_blank' : '',
                 };
-                const rangeClone = new JWEditorLib.VRange(this.editor, JWEditorLib.VRange.clone(this.editor.selection.range));
+                const nodes = range.targetedNodes(JWEditorLib.InlineNode);
                 await context.execCommand('link', linkParams);
-                const nodes = rangeClone.targetedNodes(JWEditorLib.InlineNode);
                 const links = nodes.map(node => node.modifiers.find(JWEditorLib.LinkFormat)).filter(f => f);
                 for (const link of links) {
                     link.modifiers.get(JWEditorLib.Attributes).set('class', params.classes);
                 }
-                rangeClone.remove()
             };
             await this.editor.execCommand(onSaveLinkDialog);
         });
