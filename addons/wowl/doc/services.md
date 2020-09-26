@@ -1,0 +1,103 @@
+# Services
+
+## Overview
+
+The Odoo web client is organized in _components_. It is common for a component
+to have a need to perform tasks or obtain some information outside of itself.
+
+For example:
+
+- performing an RPC
+- displaying a notification
+- asking the web client to change the current action/view
+- ...
+
+These kind of features are represented in the web client under the name _service_.
+A service is basically a piece of code that is started with the web client, and
+available to the interface (and to other services).
+
+## Defining a service
+
+A service needs to follow the following interface:
+
+```ts
+interface Service {
+  name: string;
+  dependencies?: string[];
+  start(env: OdooEnv): any;
+}
+```
+
+The name is simply a short unique string representing the service, such as `rpc`.
+It may define some `dependencies`. In that case, the dependent services will be
+started first, and ready when the current service is started.
+
+Finally, the `start` method is the most important: it will be executed as soon
+as the service infrastructure is deployed (so, even before the web client is
+instantiated), and the return value of the `start` method will be the value of
+the service.
+
+TODO: explain how a service can access a dependent service.
+
+Once a service is defined, it needs then to be registered to the `serviceRegistry`,
+to make sure it is properly deployed when the application is started.
+
+```ts
+serviceRegistry.add(myService.name, myService);
+```
+
+For example, imagine that we want to provide a service that manage a counter.
+It could be defined like this:
+
+```js
+const counterService = {
+  name: "counter",
+  start(env) {
+    let value = 0;
+    return {
+      getValue() {
+        return value;
+      },
+      increment() {
+        value++;
+      },
+    };
+  },
+};
+serviceRegistry.add(counterService.name, counterService);
+```
+
+## Using a service
+
+To use a service, a component needs to call the `useService` hook. This will
+return a reference to the service value, that can then be used by the component.
+
+For example:
+
+```js
+class MyComponent extends Component {
+    rpc = useService('rpc');
+
+    async willStart() {
+        this.someValue = await this.rpc(...);
+    }
+}
+```
+
+## RPC service
+
+The RPC service is necessary to properly send a request to the server.
+
+TODO: complete this!
+
+## Notification service
+
+TODO
+
+## Router service
+
+TODO
+
+## ActionManager service
+
+TODO

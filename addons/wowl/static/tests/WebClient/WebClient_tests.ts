@@ -1,12 +1,12 @@
-import { WebClient } from "../../src/components/WebClient/WebClient";
 import * as QUnit from "qunit";
-import { mount, makeTestEnv, OdooEnv } from "../helpers";
+import { WebClient } from "../../src/components/WebClient/WebClient";
+import { getFixture, makeTestEnv, mount, OdooEnv } from "../helpers";
 
 let target: HTMLElement;
 let env: OdooEnv;
 QUnit.module("Web Client", {
   beforeEach() {
-    target = document.querySelector("#qunit-fixture") as HTMLElement;
+    target = getFixture();
     env = makeTestEnv();
   },
 });

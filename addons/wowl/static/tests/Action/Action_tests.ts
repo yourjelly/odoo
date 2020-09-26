@@ -1,13 +1,13 @@
 import { Action } from "../../src/components/Action/Action";
 import * as QUnit from "qunit";
-import { mount, makeTestEnv, OdooEnv } from "../helpers";
+import { mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
 
 let target: HTMLElement;
 let env: OdooEnv;
 
 QUnit.module("Action", {
   beforeEach() {
-    target = document.querySelector("#qunit-fixture") as HTMLElement;
+    target = getFixture();
     env = makeTestEnv();
   },
 });

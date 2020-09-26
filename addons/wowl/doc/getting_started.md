@@ -1,4 +1,4 @@
-# How to develop on the Web Client
+# Getting Started
 
 The addon `wowl` is a self-contained web project: it has a `package.json` file
 (which makes it a proper `npm` application), a `tsconfig.json` (to configure
@@ -7,7 +7,7 @@ typescript), a `rollup.config.js` (to configure the Rollup bundler).
 It has typescript supports, xml templates detection, can run tests written in
 typescript, it features a livereload server, and more.
 
-## Getting started
+## Initial setup
 
 The first and essential task is to install the dependencies defined in the project:
 to do that, one need to do the following:
@@ -24,7 +24,7 @@ WARNING: the first and most common error is to run commands in the root of the
 odoo project. This will not work! The configuration files are located in the
 `addons/wowl` folder, and each command should be run inside that path!
 
-### Setup your IDE
+### Configure your IDE
 
 The addon `wowl` is written in typescript. If you're using Sublime Text, install
 the TypeScript package from https://www.typescriptlang.org/ to enable type
@@ -92,6 +92,19 @@ above, they should be imported in the `main.ts` file to be included in the
 test suite.
 
 To run the test suite, one needs to open the `/wowl/tests` route in a browser.
+
+## Livereload
+
+The WOWL addon provides a livereload feature: once activated, a browser tab will
+refresh itself automatically whenever some static assets was modified.
+
+The `npm` script `npm run livereload` (also executed by `npm run dev` will start
+a node application that listen on a specific port. The client code will open a
+websocket and attempt to connect to the livereload server. If it manages to do
+this, you will see the message `[livereload] connection established` in your
+browser console.
+
+Note that it works also for the unit [tests](#tests).
 
 ## Common issues
 

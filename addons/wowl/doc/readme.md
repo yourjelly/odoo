@@ -1,5 +1,10 @@
 # Web Client
 
-## Table of Content
+## Working on the WOWL project
 
-- [How to develop on the Web Client](developing_guide.md)
+- [Getting Started](getting_started.md)
+- [Writing tests](writing_tests.md)
+
+## Reference
+
+- [Services](services.md)

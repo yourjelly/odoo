@@ -35,3 +35,7 @@ export function makeTestEnv(services?: Registry<Service>): OdooEnv {
   const env = makeEnv(templates, services);
   return env;
 }
+
+export function getFixture(): HTMLElement {
+  return document.querySelector("#qunit-fixture") as HTMLElement;
+}

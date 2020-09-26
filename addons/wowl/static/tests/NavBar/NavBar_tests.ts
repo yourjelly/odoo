@@ -1,13 +1,13 @@
 import { NavBar } from "../../src/components/NavBar/NavBar";
 import * as QUnit from "qunit";
-import { mount, makeTestEnv, OdooEnv } from "../helpers";
+import { mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
 
 let target: HTMLElement;
 let env: OdooEnv;
 
 QUnit.module("Navbar", {
   beforeEach() {
-    target = document.querySelector("#qunit-fixture") as HTMLElement;
+    target = getFixture();
     env = makeTestEnv();
   },
 });
