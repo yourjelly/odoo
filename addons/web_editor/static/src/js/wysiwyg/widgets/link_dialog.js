@@ -61,8 +61,9 @@ var LinkDialog = Dialog.extend({
                 .replace(allBtnShapes, ' ');
 
         this.state = {
-            needLabel: !this.props.text || this.props.needLabel,
+            needLabel: !this.props.text || !this.props.text.length || this.props.needLabel,
             text: this.props.text,
+            images: this.props.images,
             className: cleanClassNames,
             url: this.props.url,
             isNewWindow: this.props.isNewWindow,
@@ -119,6 +120,7 @@ var LinkDialog = Dialog.extend({
         }
 
         this.final_data = {
+            needLabel: this.state.needLabel,
             text: data.label,
             url: data.url,
             isNewWindow: data.isNewWindow,
@@ -146,7 +148,15 @@ var LinkDialog = Dialog.extend({
             href: data.url && data.url.length ? data.url : '#',
             class: `${data.classes.replace(/float-\w+/, '')} o_btn_preview`,
         };
-        this.$("#link-preview").attr(attrs).html((data.label && data.label.length) ? data.label : data.url);
+        const $preview = this.$("#link-preview");
+        const $a = $preview.find('a:first');
+        $a.siblings().remove();
+
+        const labels = (data.label && data.label.length) ? data.label.split('\n') : [data.url];
+
+        for (const label of labels) {
+            $preview.append($a.clone().attr(attrs).html(label));
+        }
     },
     /**
      * Get the link's data (url, label and styles).
@@ -157,11 +167,14 @@ var LinkDialog = Dialog.extend({
     _getData: function () {
         var $url = this.$('input[name="url"]');
         var url = $url.val();
-        var label = this.$('input[name="label"]').val() || url;
-
-        if (label && this.state.images) {
+        var label = this.state.text;
+        if (this.needLabel) {
+            label = this.$('input[name="label"]').val() || url || '';
+            label = label.replace('<', "&lt;").replace('>', "&gt;");
+        }
+        if (this.state.images) {
             for (var i = 0; i < this.state.images.length; i++) {
-                label = label.replace('<', "&lt;").replace('>', "&gt;").replace(/\[IMG\]/, this.data.images[i].outerHTML);
+                label = label.replace(/\[IMG\]/, this.state.images[i]);
             }
         }
 
