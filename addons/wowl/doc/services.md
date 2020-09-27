@@ -84,6 +84,10 @@ class MyComponent extends Component {
 }
 ```
 
+Note: IF the value of the service is a function (for example, like the `rpc`
+service), then the `useService` hook will bind it to the current component. This
+means that the code for the service can actually access the component reference.
+
 ## RPC service
 
 The RPC service is necessary to properly send a request to the server.

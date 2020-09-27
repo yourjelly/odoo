@@ -108,6 +108,17 @@ Note that it works also for the unit [tests](#tests).
 
 ## Common issues
 
+### My new code is not executed
+
+This commonly happens when one add a new typescript file into the source code.
+This file is properly compiled in JS, but then is not included in the main
+bundle `app.js`.
+
+The reason is that the way files are bundled is by starting at `main.js`, then
+following all its dependencies (and dependencies of dependencies, ...) to
+include them. If your new file is not imported anywhere, it will not be included
+in the final bundle.
+
 ### System limit for file watchers
 
 It may happen that you encounter an error while running some commands such as
