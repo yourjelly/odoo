@@ -42,6 +42,10 @@ export class Registry<T> {
     return Object.values(this.content);
   }
 
+  getEntries(): [string, T][] {
+    return Object.entries(this.content);
+  }
+
   /**
    * Remove an item from the registry
    */

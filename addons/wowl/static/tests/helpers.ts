@@ -1,7 +1,8 @@
 import { Component } from "@odoo/owl";
 import { makeEnv, OdooEnv } from "../src/env";
+import { Registries } from "../src/registries";
 import { Registry } from "../src/registry";
-import type { Service } from "../src/services";
+import { Type } from "../src/types";
 
 export { OdooEnv } from "../src/env";
 
@@ -10,14 +11,12 @@ interface MountParameters {
   target: HTMLElement;
 }
 
-class A {}
-
-export async function mount<T extends typeof A>(
+export async function mount<T extends Type<Component>>(
   C: T,
   params: MountParameters
 ): Promise<InstanceType<T>> {
   ((C as any) as typeof Component).env = params.env;
-  const component: Component = new (C as any)(null);
+  const component: Component = new C(null);
   await component.mount(params.target);
   return component as any;
 }
@@ -28,12 +27,18 @@ export function setTemplates(xml: string) {
   templates = xml;
 }
 
-export function makeTestEnv(services?: Registry<Service>): OdooEnv {
-  if (!services) {
-    services = new Registry();
-  }
-  const env = makeEnv(templates, services);
-  return env;
+interface TestEnvParam {
+  services?: Registries["services"];
+  Components?: Registries["Components"];
+}
+
+export function makeTestEnv(params: TestEnvParam = {}): OdooEnv {
+  let registries: Registries = {
+    services: params.services || new Registry(),
+    Components: params.Components || new Registry(),
+  };
+
+  return makeEnv(templates, registries);
 }
 
 export function getFixture(): HTMLElement {
