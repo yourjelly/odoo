@@ -5,6 +5,7 @@ import { setTemplates } from "./helpers";
 import "./Action/Action_tests";
 import "./NavBar/NavBar_tests";
 import "./services_tests";
+import "./router_tests";
 import "./WebClient/WebClient_tests";
 
 const { whenReady, loadFile } = owl.utils;
