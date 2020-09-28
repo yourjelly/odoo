@@ -2,6 +2,7 @@ import * as QUnit from "qunit";
 import { deployServices, Service } from "../../src/services";
 import { Registry } from "../../src/core/registry";
 import { OdooEnv } from "../../src/env";
+import { makeDeferred } from "../helpers";
 
 let registry: Registry<Service>;
 let env: OdooEnv;
@@ -20,8 +21,24 @@ QUnit.test("can deploy a service", async (assert) => {
       return 17;
     },
   });
-  deployServices(env, registry);
+  await deployServices(env, registry);
   assert.strictEqual(env.services.test, 17);
+});
+
+QUnit.test("can deploy an asynchronous service", async (assert) => {
+  const def = makeDeferred();
+  registry.add("test", {
+    name: "test",
+    deploy() {
+      debugger;
+      return def;
+    },
+  });
+  deployServices(env, registry);
+  assert.strictEqual(env.services.test, undefined);
+  def.resolve(15);
+  await Promise.resolve();
+  assert.strictEqual(env.services.test, 15);
 });
 
 QUnit.test("can deploy a service with a dependency", async (assert) => {
@@ -39,11 +56,12 @@ QUnit.test("can deploy a service with a dependency", async (assert) => {
     },
   });
 
-  deployServices(env, registry);
+  await deployServices(env, registry);
   assert.verifySteps(["appa", "aang"]);
 });
 
 QUnit.test("throw an error if missing dependency", async (assert) => {
+  assert.expect(1);
   registry.add("aang", {
     dependencies: ["appa"],
     name: "aang",
@@ -51,6 +69,9 @@ QUnit.test("throw an error if missing dependency", async (assert) => {
       assert.step("aang");
     },
   });
-
-  assert.throws(() => deployServices(env, registry));
+  try {
+    await deployServices(env, registry);
+  } catch (e) {
+    assert.ok(true);
+  }
 });

@@ -10,7 +10,7 @@ export interface OdooEnv extends Env {
   bus: EventBus;
 }
 
-export function makeEnv(templates: string, registries: Registries): OdooEnv {
+export async function makeEnv(templates: string, registries: Registries): Promise<OdooEnv> {
   const c = new owl.Component();
   const baseEnv = c.env;
   const qweb = new owl.QWeb();
@@ -24,6 +24,6 @@ export function makeEnv(templates: string, registries: Registries): OdooEnv {
     services: {} as any,
   };
 
-  deployServices(env, registries.services);
+  await deployServices(env, registries.services);
   return env;
 }

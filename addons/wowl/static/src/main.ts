@@ -14,7 +14,7 @@ declare const odoo: Odoo;
   const templates = await loadFile(templatesUrl);
 
   // prepare env
-  const env = makeEnv(templates, registries);
+  const env = await makeEnv(templates, registries);
 
   // start web client
   owl.Component.env = env;

@@ -4,8 +4,8 @@ import { setTemplates } from "./helpers";
 // import here every test suite files
 import "./components/action_tests";
 import "./components/navbar_tests";
-import "./services_tests";
 import "./services/router_tests";
+import "./services/services_tests";
 import "./components/webclient_tests";
 
 const { whenReady, loadFile } = owl.utils;

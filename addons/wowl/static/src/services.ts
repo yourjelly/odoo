@@ -6,11 +6,19 @@ import { Registry } from "./core/registry";
 import type { rpcService } from "./services/rpc";
 import type { menusService } from "./services/menus";
 import type { notificationService } from "./services/notifications";
+import type { userService } from "./services/user";
+import { routerService } from "./services/router";
 
+type Unwrap<T> = T extends Promise<infer U> ? U : T;
+type ServiceType<T extends (...args: any[]) => any> = Unwrap<ReturnType<T>>;
+
+// type Val<T> =
 export interface Services {
-  rpc: ReturnType<typeof rpcService["deploy"]>;
-  menus: ReturnType<typeof menusService["deploy"]>;
-  notifications: ReturnType<typeof notificationService["deploy"]>;
+  rpc: ServiceType<typeof rpcService["deploy"]>;
+  menus: ServiceType<typeof menusService["deploy"]>;
+  notifications: ServiceType<typeof notificationService["deploy"]>;
+  user: ServiceType<typeof userService["deploy"]>;
+  router: ServiceType<typeof routerService["deploy"]>;
 
   [key: string]: any;
 }
@@ -18,7 +26,7 @@ export interface Services {
 export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-  deploy: (env: OdooEnv) => T;
+  deploy: ((env: OdooEnv) => Promise<T>) | ((env: OdooEnv) => T);
 }
 
 export function useService<T extends keyof Services>(serviceName: T): Services[T] {
@@ -32,14 +40,17 @@ export function useService<T extends keyof Services>(serviceName: T): Services[T
 
 export const serviceRegistry = new Registry<Service<any>>();
 
-export function deployServices(env: OdooEnv, registry: Registry<Service<any>>) {
+export async function deployServices(
+  env: OdooEnv,
+  registry: Registry<Service<any>>
+): Promise<void> {
   const services = env.services;
   const toBeDeployed = new Set(registry.getAll());
   let service: Service | null = null;
 
   while ((service = findNext())) {
     toBeDeployed.delete(service);
-    const value = service.deploy(env);
+    const value = await service.deploy(env);
     services[service.name] = value;
   }
   if (toBeDeployed.size) {

@@ -8,7 +8,7 @@
 // let _loadMenus;
 // let menus;
 // QUnit.module("Navbar", {
-//   beforeEach() {
+//   async beforeEach() {
 //     const menusService = registries.services.menusService;
 //     _loadMenus = menusService._loadMenus;
 //     menus = [
@@ -18,7 +18,7 @@
 //     menusService._loadMenus = async () => menus;
 
 //     target = getFixture();
-//     env = makeTestEnv();
+//     env = await makeTestEnv();
 //   },
 // });
 

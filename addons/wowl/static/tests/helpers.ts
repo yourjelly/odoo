@@ -32,7 +32,7 @@ interface TestEnvParam {
   Components?: Registries["Components"];
 }
 
-export function makeTestEnv(params: TestEnvParam = {}): OdooEnv {
+export function makeTestEnv(params: TestEnvParam = {}): Promise<OdooEnv> {
   let registries: Registries = {
     services: params.services || new Registry(),
     Components: params.Components || new Registry(),
@@ -43,4 +43,17 @@ export function makeTestEnv(params: TestEnvParam = {}): OdooEnv {
 
 export function getFixture(): HTMLElement {
   return document.querySelector("#qunit-fixture") as HTMLElement;
+}
+
+interface Deferred<T> extends Promise<T> {
+  resolve: (value: T) => void;
+}
+
+export function makeDeferred<T>(): Deferred<T> {
+  let resolve;
+  let prom = new Promise((_r) => {
+    resolve = _r;
+  }) as Deferred<T>;
+  prom.resolve = resolve as any;
+  return prom;
 }

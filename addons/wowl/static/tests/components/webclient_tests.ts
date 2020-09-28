@@ -10,9 +10,9 @@ const { xml } = tags;
 let target: HTMLElement;
 let env: OdooEnv;
 QUnit.module("Web Client", {
-  beforeEach() {
+  async beforeEach() {
     target = getFixture();
-    env = makeTestEnv();
+    env = await makeTestEnv();
   },
 });
 
@@ -31,7 +31,7 @@ QUnit.test("can render a main component", async (assert) => {
   const componentRegistry: Registries["Components"] = new Registry();
   componentRegistry.add("mycomponent", MyComponent);
 
-  env = makeTestEnv({ Components: componentRegistry });
+  env = await makeTestEnv({ Components: componentRegistry });
   await mount(WebClient, { env, target });
   assert.ok(target.querySelector(".chocolate"));
 });

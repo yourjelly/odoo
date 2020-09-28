@@ -6,9 +6,9 @@ let target: HTMLElement;
 let env: OdooEnv;
 
 QUnit.module("Action", {
-  beforeEach() {
+  async beforeEach() {
     target = getFixture();
-    env = makeTestEnv();
+    env = await makeTestEnv();
   },
 });
 
