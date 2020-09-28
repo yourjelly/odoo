@@ -1207,8 +1207,8 @@ var SnippetsMenu = Widget.extend({
      */
     activateLastSnippetBlock() {
         if (this._lastSnippetBlockActivated) {
-            const $lastSnippet = $(document.querySelector(this._lastSnippetBlockActivated))
-            this._activateSnippet($lastSnippet);
+            const $lastSnippet = $(document.querySelector(this._lastSnippetBlockActivated));
+            this._activateSnippet($lastSnippet, this._lastSnippetBlockActivatedPreview);
         }
     },
 
@@ -2262,6 +2262,7 @@ var SnippetsMenu = Widget.extend({
         if (ev.data.saveTarget) {
             this._lastSnippetBlockActivated = getQuerySelector(ev.data.$element[0]);
         }
+        this._lastSnippetBlockActivatedPreview = ev.data.savePreview && ev.data.previewMode;
         this._activateSnippet(ev.data.$element, ev.data.previewMode, ev.data.ifInactiveOptions);
     },
     /**
@@ -2487,6 +2488,7 @@ var SnippetsMenu = Widget.extend({
             return;
         }
         this._lastSnippetBlockActivated = getQuerySelector($snippet[0]);
+        this._lastSnippetBlockActivatedPreview = false;
         this._activateSnippet($snippet);
     },
     /**
