@@ -5,10 +5,13 @@ import { Registry } from "./core/registry";
 // add here each service type to have better typing for useService
 import type { rpcService } from "./services/rpc";
 import type { menusService } from "./services/menus";
+import type { notificationService } from "./services/notifications";
 
 export interface Services {
   rpc: ReturnType<typeof rpcService["deploy"]>;
   menus: ReturnType<typeof menusService["deploy"]>;
+  notifications: ReturnType<typeof notificationService["deploy"]>;
+
   [key: string]: any;
 }
 
