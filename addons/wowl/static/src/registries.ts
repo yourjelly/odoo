@@ -3,6 +3,7 @@ import { menusService } from "./MenusService";
 import { Registry } from "./registry";
 import { routerService } from "./router";
 import { rpcService } from "./rpc";
+import { userService } from "./user";
 import { Service } from "./services";
 import { Type } from "./types";
 
@@ -13,10 +14,11 @@ import { Type } from "./types";
 // needs.
 const serviceRegistry: Registry<Service> = new Registry();
 
-serviceRegistry
-  .add(rpcService.name, rpcService)
-  .add(routerService.name, routerService)
-  .add(menusService.name, menusService);
+const services = [rpcService, routerService, userService, menusService];
+
+for (let service of services) {
+  serviceRegistry.add(service.name, service);
+}
 
 // Main Components
 //
