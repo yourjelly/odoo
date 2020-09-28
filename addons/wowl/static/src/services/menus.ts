@@ -4,7 +4,7 @@ import { Service } from "../services";
 
 interface Menu {
   id: number | string;
-  children: any[];
+  children: number[];
   name: string;
 }
 
@@ -12,56 +12,55 @@ interface MenuTree extends Menu {
   childrenTree?: MenuTree[];
 }
 
-interface MenuData {
+export interface MenuData {
   [id: number]: Menu;
   [key: string]: Menu;
 }
 
-declare const odoo: Odoo;
-
-export class MenuRepository {
-  loadMenusUrl = `/wowl/load_menus/${odoo.session_info.cache_hashes.load_menus}`;
-  loadMenusPromise?: Promise<MenuData>;
-  menusData: MenuData = {};
-  env: OdooEnv;
-  constructor(env: OdooEnv) {
-    this.env = env;
-  }
-  async _loadMenus(): Promise<MenuData> {
-    return this.env.browser.fetch(this.loadMenusUrl).then(async (res) => {
-      if (!res.ok) {
-        throw new Error("Error while fetching menus");
-      }
-      return JSON.parse(await res.text());
-    });
-  }
-  async loadMenus(reload: boolean = false): Promise<MenuData> {
-    if (!this.loadMenusPromise || reload) {
-      this.loadMenusPromise = this._loadMenus();
-      this.menusData = await this.loadMenusPromise;
-    }
-    return this.loadMenusPromise;
-  }
-  get(menuID: keyof MenuData): Menu {
-    return this.menusData[menuID];
-  }
-  get apps(): Menu[] {
-    return this.get("root").children.map((mid: Menu["id"]) => this.get(mid));
-  }
-  getMenusAsTree(menuID: keyof MenuData): MenuTree {
-    const menu = this.get(menuID) as MenuTree;
-    if (!menu.childrenTree) {
-      menu.childrenTree = menu.children.map((mid: Menu["id"]) => this.getMenusAsTree(mid));
-    }
-    return menu;
-  }
+interface MenuService {
+  getAll(): Menu[],
+  getApps(): Menu[],
+  getMenu(menuID: keyof MenuData): Menu,
+  getMenuAsTree(menuID: keyof MenuData): MenuTree,
 }
 
-export const menusService: Service<MenuRepository> = {
+const loadMenusUrl = `/wowl/load_menus`;
+async function fetchLoadMenus(env: OdooEnv, url: string): Promise<MenuData> {
+  const res = await env.browser.fetch(url);
+  if (!res.ok) {
+    throw new Error("Error while fetching menus");
+  }
+  return res.json();
+}
+
+async function makeMenus(env: OdooEnv, loadMenusHash: string): Promise<MenuService> {
+  const menusData: MenuData = await fetchLoadMenus(env, `${loadMenusUrl}/${loadMenusHash}`);
+  const menuService: MenuService = {
+    getAll(): Menu[] {
+      return Object.values(menusData);
+    },
+    getApps(): Menu[] {
+      return this.getMenu("root").children.map((mid: Menu["id"]) => this.getMenu(mid));
+    },
+    getMenu(menuID: keyof MenuData): Menu {
+      return menusData[menuID];
+    },
+    getMenuAsTree(menuID: keyof MenuData): MenuTree {
+      const menu = this.getMenu(menuID) as MenuTree;
+      if (!menu.childrenTree) {
+        menu.childrenTree = menu.children.map((mid: Menu["id"]) => this.getMenuAsTree(mid));
+      }
+      return menu;
+    }
+  };
+  return menuService;
+}
+export const menusService: Service<MenuService> = {
   name: "menus",
-  async deploy(env: OdooEnv): Promise<MenuRepository> {
-    const repo = new MenuRepository(env);
-    repo.loadMenus();
-    return repo;
+  async deploy(env: OdooEnv, odooGlobal?: Odoo): Promise<MenuService> {
+    const cacheHashes = ((odooGlobal ? odooGlobal.session_info.cache_hashes : {}) || {}) as any;
+    const loadMenusHash = cacheHashes.load_menus || new Date().getTime().toString();
+    delete cacheHashes.load_menus;
+    return makeMenus(env, loadMenusHash);
   },
 };

@@ -1,29 +1,42 @@
-// import { NavBar } from "../../src/components/NavBar/NavBar";
-// import * as QUnit from "qunit";
-// import { mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
-// import { registries } from "../../src/registries";
+import { NavBar } from "../../src/components/navbar/navbar";
+import * as QUnit from "qunit";
+import { mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
+import { MenuData , menusService } from "./../../src/services/menus";
+import { Registry } from "./../../src/core/registry";
+import { Service } from "./../../src/services";
 
-// let target: HTMLElement;
-// let env: OdooEnv;
-// let _loadMenus;
-// let menus;
-// QUnit.module("Navbar", {
-//   async beforeEach() {
-//     const menusService = registries.services.menusService;
-//     _loadMenus = menusService._loadMenus;
-//     menus = [
-//       { id: "root", children: [1], name: "root" },
-//       { id: 1, children: [1], name: "App0" },
-//     ];
-//     menusService._loadMenus = async () => menus;
+let target: HTMLElement;
+let env: OdooEnv;
+let menus: MenuData;
+let services: Registry<Service>;
+let browser: Partial<OdooEnv["browser"]>;
 
-//     target = getFixture();
-//     env = await makeTestEnv();
-//   },
-// });
 
-// QUnit.test("can be rendered", async (assert) => {
-//   assert.expect(1);
-//   await mount(NavBar, { env, target });
-//   assert.strictEqual(target.innerText, "NavBar");
-// });
+QUnit.module("Navbar", {
+  async beforeEach() {
+    services = new Registry();
+    services.add(menusService.name, menusService);
+    menus = {
+      root: { id: "root", children: [1], name: "root" },
+      1: { id: 1, children: [], name: "App0" },
+    };
+    target = getFixture();
+    browser = {
+      fetch: (input: any) : Promise<Response> => {
+        let blobBody = {};
+        if (typeof input === 'string' && input.includes('load_menus')) {
+          blobBody = menus;
+        }
+        const blob = new Blob([JSON.stringify(blobBody)], {type : 'application/json'});
+        return Promise.resolve(new Response(blob, {status: 200}));
+      }
+    };
+    env = await makeTestEnv({ browser, services });
+  },
+});
+
+QUnit.test("can be rendered", async (assert) => {
+  assert.expect(1);
+  const navbar = await mount(NavBar, { env, target });
+  assert.containsOnce(navbar.el!, '.o_menu_apps a[role="menuitem"]', "1 app present");
+});

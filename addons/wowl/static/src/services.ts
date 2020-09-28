@@ -1,5 +1,6 @@
 import { Component } from "@odoo/owl";
 import { OdooEnv } from "./env";
+import { Odoo } from "./types";
 import { Registry } from "./core/registry";
 
 // add here each service type to have better typing for useService
@@ -25,7 +26,7 @@ export interface Services {
 export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-  deploy: ((env: OdooEnv) => Promise<T>) | ((env: OdooEnv) => T);
+  deploy: ((env: OdooEnv, odooGlobal?: Odoo) => Promise<T>) | ((env: OdooEnv, odooGlobal?: Odoo) => T);
 }
 
 export function useService<T extends keyof Services>(serviceName: T): Services[T] {
@@ -41,7 +42,8 @@ export const serviceRegistry = new Registry<Service<any>>();
 
 export async function deployServices(
   env: OdooEnv,
-  registry: Registry<Service<any>>
+  registry: Registry<Service<any>>,
+  odooGlobal?: Odoo,
 ): Promise<void> {
   const services = env.services;
   const toBeDeployed = new Set(registry.getAll());
@@ -49,7 +51,7 @@ export async function deployServices(
 
   while ((service = findNext())) {
     toBeDeployed.delete(service);
-    const value = await service.deploy(env);
+    const value = await service.deploy(env, odooGlobal);
     services[service.name] = value;
   }
   if (toBeDeployed.size) {

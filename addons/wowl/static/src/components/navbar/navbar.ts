@@ -7,7 +7,4 @@ export class NavBar extends Component {
   };
   static template = "wowl.NavBar";
   menuRepo = useService("menus");
-  async willStart(): Promise<any> {
-    await this.menuRepo.loadMenus();
-  }
 }

@@ -3,6 +3,7 @@ import { Env } from "@odoo/owl/dist/types/component/component";
 import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import type { Registries } from "./registries";
 import { deployServices, Services } from "./services";
+import type { Odoo } from "./types";
 
 type Browser = Env["browser"];
 export interface OdooBrowser extends Browser {
@@ -20,7 +21,8 @@ export interface OdooEnv extends Env {
 export async function makeEnv(
   templates: string,
   registries: Registries,
-  browser: OdooBrowser
+  browser: OdooBrowser,
+  odooGlobal?: Odoo
 ): Promise<OdooEnv> {
   const qweb = new owl.QWeb();
   qweb.addTemplates(templates);
@@ -33,6 +35,6 @@ export async function makeEnv(
     services: {} as any,
   };
 
-  await deployServices(env, registries.services);
+  await deployServices(env, registries.services, odooGlobal);
   return env;
 }
