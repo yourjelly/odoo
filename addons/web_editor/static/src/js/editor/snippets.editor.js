@@ -129,7 +129,7 @@ var SnippetEditor = Widget.extend({
 
         this.isTargetParentEditable = this.$snippetBlock.parent().is(':o_editable');
         this.isTargetMovable = this.isTargetParentEditable && this.isTargetMovable;
-        this.isTargetRemovable = this.isTargetParentEditable && !this.$target.parent().is('[data-oe-type="image"]');
+        this.isTargetRemovable = this.isTargetParentEditable && !this.$snippetBlock.parent().is('[data-oe-type="image"]');
 
         // Initialize move/clone/remove buttons
         if (this.isTargetMovable) {
