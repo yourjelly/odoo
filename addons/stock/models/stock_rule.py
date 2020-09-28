@@ -464,6 +464,9 @@ class ProcurementGroup(models.Model):
 
         # Search all confirmed stock_moves and try to assign them
         domain = self._get_moves_to_assign_domain()
+        if company_id:
+            domain = expression.AND([[('company_id', '=', company_id)], domain])
+
         moves_to_assign = self.env['stock.move'].search(domain, limit=None,
             order='priority desc, date_expected asc')
         for moves_chunk in split_every(100, moves_to_assign.ids):
