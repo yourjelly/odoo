@@ -510,10 +510,6 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.assertEqual(copies[4].name, 'XMISC/2019/00003')
         self.assertEqual(copies[5].name, 'XMISC/2019/00004')
 
-        # Can't have twice the same name
-        with self.assertRaises(ValidationError):
-            copies[0].name = 'XMISC/2019/00001'
-
         # Lets remove the order by date
         copies[0].name = 'XMISC/2019/10001'
         copies[1].name = 'XMISC/2019/10002'
