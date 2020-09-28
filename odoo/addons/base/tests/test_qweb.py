@@ -613,6 +613,7 @@ class TestQWeb(TransactionCase):
         loader = FileSystemLoader(path)
         qweb = self.env['ir.qweb']
         for template in loader:
+            print("LOADER", path, template)
             if not template or template.startswith('_'):
                 continue
             param = doc.find('params[@id="{}"]'.format(template))

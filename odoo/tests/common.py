@@ -529,6 +529,7 @@ class TransactionCase(BaseCase):
         self.registry = odoo.registry(get_db_name())
         self.addCleanup(self.registry.reset_changes)
         self.addCleanup(self.registry.clear_caches)
+        self.addCleanup(self.registry._clear_cache_longterm)
 
         #: current transaction's cursor
         self.cr = self.cursor()
@@ -563,6 +564,7 @@ class SingleTransactionCase(BaseCase):
         cls.registry = odoo.registry(get_db_name())
         cls.addClassCleanup(cls.registry.reset_changes)
         cls.addClassCleanup(cls.registry.clear_caches)
+        cls.addClassCleanup(cls.registry._clear_cache_longterm)
 
         cls.cr = cls.registry.cursor()
         cls.addClassCleanup(cls.cr.close)
@@ -597,6 +599,7 @@ class SavepointCase(SingleTransactionCase):
         self.addCleanup(envs.clear)
 
         self.addCleanup(self.registry.clear_caches)
+        self.addCleanup(self.registry._clear_cache_longterm)
         self.addCleanup(self.env.clear)
 
         self._savepoint_id = next(savepoint_seq)

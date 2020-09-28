@@ -27,6 +27,7 @@ class ormcache_counter(object):
 
 # statistic counters dictionary, maps (dbname, modelname, method) to counter
 STAT = defaultdict(ormcache_counter)
+STAT_LONGTERM = defaultdict(ormcache_counter)
 
 
 class ormcache(object):
@@ -124,6 +125,25 @@ class ormcache_context(ormcache):
         self.key = unsafe_eval(code)
 
 
+class cache_longterm(ormcache):
+    """Long-term LRU cache decorator, using a dedicated cache
+
+    The long-term cache is meant to hold data that is more expensive to compute
+    and should only be invalidated ve ry infrequently.
+    """
+    def lru(self, model):
+        counter = STAT_LONGTERM[(model.pool.db_name, model._name, self.method)]
+        return model.pool.cache_longterm, (model._name, self.method), counter
+
+    def clear(self, model, *args):
+        """ Clear the registry cache """
+        model.pool._clear_cache_longterm()
+
+
+class cache_longterm_context(ormcache_context, cache_longterm):
+    pass
+
+
 class ormcache_multi(ormcache):
     """ This LRU cache decorator is a variant of :class:`ormcache`, with an
     extra parameter ``multi`` that gives the name of a parameter. Upon call, the
@@ -204,21 +224,27 @@ def log_ormcache_stats(sig=None, frame=None):
     me = threading.currentThread()
     me_dbname = getattr(me, 'dbname', 'n/a')
 
-    for dbname, reg in sorted(Registry.registries.items()):
-        # set logger prefix to dbname
-        me.dbname = dbname
+    def _log_cache_stats(cache, stats, suffix=None):
         entries = defaultdict(int)
         # beware: we use .keys() on purpose here (reg.cache is not a real dict)
-        for key in reg.cache.keys():
+        for key in cache.keys():
             entries[key[:2]] += 1
         # show entries sorted by model name, method name
         for key in sorted(entries, key=lambda key: (key[0], key[1].__name__)):
             model, method = key
-            stat = STAT[(dbname, model, method)]
+            stat = stats[(dbname, model, method)]
             _logger.info(
-                "%6d entries, %6d hit, %6d miss, %6d err, %4.1f%% ratio, for %s.%s",
+                "%6d entries, %6d hit, %6d miss, %6d err, %4.1f%% ratio, for %s.%s%s",
                 entries[key], stat.hit, stat.miss, stat.err, stat.ratio, model, method.__name__,
+                suffix or '',
             )
+
+    for dbname, reg in sorted(Registry.registries.items()):
+        # set logger prefix to dbname
+        me.dbname = dbname
+        # show entries sorted by model name, method name
+        _log_cache_stats(reg.cache, STAT)
+        _log_cache_stats(reg.cache_longterm, STAT_LONGTERM, suffix="(LT)")
 
     me.dbname = me_dbname
 

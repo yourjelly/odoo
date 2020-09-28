@@ -465,7 +465,8 @@ actual arch.
             values['arch_prev'] = values.get('arch_base') or values.get('arch_db') or values.get('arch')
             values.update(self._compute_defaults(values))
 
-        self.clear_caches()
+        self.pool.clear_caches()
+        self.pool._clear_cache_longterm()
         return super(View, self).create(vals_list)
 
     def write(self, vals):
@@ -480,7 +481,8 @@ actual arch.
         if custom_view:
             custom_view.unlink()
 
-        self.clear_caches()
+        self.pool.clear_caches()
+        self.pool._clear_cache_longterm()
         if 'arch_db' in vals and not self.env.context.get('no_save_prev'):
             vals['arch_prev'] = self.arch_db
 
@@ -503,6 +505,7 @@ actual arch.
         # if in uninstall mode and has children views, emulate an ondelete cascade
         if self.env.context.get('_force_unlink', False) and self.inherit_children_ids:
             self.inherit_children_ids.unlink()
+        self.pool._clear_cache_longterm()
         return super(View, self).unlink()
 
     @api.returns('self', lambda value: value.id)

@@ -103,9 +103,10 @@ class IrQWeb(models.AbstractModel, QWeb):
     # apply ormcache_context decorator unless in dev mode...
     @tools.conditional(
         'xml' not in tools.config['dev_mode'],
-        tools.ormcache('id_or_xml_id', 'tuple(options.get(k) for k in self._get_template_cache_keys())'),
+        tools.cache_longterm('id_or_xml_id', 'tuple(options.get(k) for k in self._get_template_cache_keys())'),
     )
     def compile(self, id_or_xml_id, options):
+        _logger.debug("compiling qweb template %s", id_or_xml_id)
         try:
             id_or_xml_id = int(id_or_xml_id)
         except:
@@ -290,9 +291,10 @@ class IrQWeb(models.AbstractModel, QWeb):
         # in non-xml-debug mode we want assets to be cached forever, and the admin can force a cache clear
         # by restarting the server after updating the source code (or using the "Clear server cache" in debug tools)
         'xml' not in tools.config['dev_mode'],
-        tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', keys=("website_id",)),
+        tools.cache_longterm_context('xmlid', 'options.get("lang", "en_US")', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', keys=("website_id",)),
     )
     def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
+        _logger.debug("retrieving asset bundle %s", xmlid)
         files, remains = self._get_asset_content(xmlid, options)
         asset = self.get_asset_bundle(xmlid, files, env=self.env)
         remains = [node for node in remains if (css and node[0] == 'link') or (js and node[0] != 'link')]
@@ -302,7 +304,7 @@ class IrQWeb(models.AbstractModel, QWeb):
         asset_nodes = self._get_asset_nodes(xmlid, options, js=False)
         return [node[1]['href'] for node in asset_nodes if node[0] == 'link']
 
-    @tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', keys=("website_id",))
+    @tools.cache_longterm_context('xmlid', 'options.get("lang", "en_US")', keys=("website_id",))
     def _get_asset_content(self, xmlid, options):
         options = dict(options,
             inherit_branding=False, inherit_branding_auto=False,
