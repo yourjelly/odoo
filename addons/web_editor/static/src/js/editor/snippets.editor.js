@@ -1023,6 +1023,7 @@ var SnippetsMenu = Widget.extend({
 
         if (this.options.onlyStyleTab) {
             await this._loadSnippetsTemplates();
+            this.$el.find('.o_we_website_top_actions').removeClass('d-none');
             this.$('.o_snippet_search_filter').addClass('d-none');
             this.$('#o_scroll').addClass('d-none');
             this.$('#snippets_menu button').removeClass('active').prop('disabled', true);
