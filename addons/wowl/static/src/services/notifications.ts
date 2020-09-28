@@ -1,5 +1,5 @@
 import { Component, tags, useState } from "@odoo/owl";
-import { Notification as NotificationComponent } from "../components/Notification/Notification";
+import { Notification as NotificationComponent } from "../components/notification/notification";
 
 interface NotificationAPI {
   displayNotification: (text: string) => void;

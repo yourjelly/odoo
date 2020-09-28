@@ -1,5 +1,5 @@
 import * as owl from "@odoo/owl";
-import { WebClient } from "./components/WebClient/WebClient";
+import { WebClient } from "./components/webclient/webClient";
 import { makeEnv } from "./env";
 import { registries } from "./registries";
 import { Odoo } from "./types";
