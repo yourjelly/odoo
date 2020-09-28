@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import type { MenuRepository } from "./../../services/MenusService";
+import type { MenuRepository } from "../../services/menus";
 import { useService } from "./../../services";
 
 export class NavBar extends Component {

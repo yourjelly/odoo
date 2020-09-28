@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { menusService } from "./services/MenusService";
+import { menusService } from "./services/menus";
 import { NotificationManager, notificationService } from "./services/notifications";
 import { Registry } from "./core/registry";
 import { routerService } from "./services/router";
