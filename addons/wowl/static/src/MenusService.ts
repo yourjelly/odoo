@@ -35,7 +35,7 @@ export class MenuRepository {
       return JSON.parse(await res.text());
     });
   }
-  async loadMenus(reload: boolean = false): Promise<void> {
+  async loadMenus(reload: boolean = false): Promise<MenuData> {
     if (!this.loadMenusPromise || reload) {
       this.loadMenusPromise = this._loadMenus();
       this.menusData = await this.loadMenusPromise;
