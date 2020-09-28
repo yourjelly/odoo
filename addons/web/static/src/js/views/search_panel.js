@@ -42,13 +42,14 @@ odoo.define("web/static/src/js/views/search_panel.js", function (require) {
         mounted() {
             debugger;
             this._updateGroupHeadersChecked();
+            // this.env.bus.on('save-customer', this._updateGroupHeadersChecked);
             if (this.hasImportedState) {
                 this.el.scroll({ top: this.scrollTop });
             }
         }
 
         // willUnmount() {
-        //     $(this.el).remove();
+        //     this.env.bus.off('save-customer', this);
         // }
 
         async willUpdateProps() {
