@@ -1,7 +1,7 @@
 import * as QUnit from "qunit";
-import { deployServices, Service } from "../src/services";
-import { Registry } from "../src/core/registry";
-import { OdooEnv } from "../src/env";
+import { deployServices, Service } from "../../src/services";
+import { Registry } from "../../src/core/registry";
+import { OdooEnv } from "../../src/env";
 
 let registry: Registry<Service>;
 let env: OdooEnv;

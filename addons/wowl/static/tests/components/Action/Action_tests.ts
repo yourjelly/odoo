@@ -1,6 +1,6 @@
-import { Action } from "../../src/components/Action/Action";
+import { Action } from "../../../src/components/Action/Action";
 import * as QUnit from "qunit";
-import { mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
+import { mount, makeTestEnv, OdooEnv, getFixture } from "../../helpers";
 
 let target: HTMLElement;
 let env: OdooEnv;

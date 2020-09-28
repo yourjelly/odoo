@@ -2,11 +2,11 @@ import * as owl from "@odoo/owl";
 import { setTemplates } from "./helpers";
 
 // import here every test suite files
-import "./Action/Action_tests";
-import "./NavBar/NavBar_tests";
+import "./components/Action/Action_tests";
+import "./components/NavBar/NavBar_tests";
 import "./services_tests";
-import "./router_tests";
-import "./WebClient/WebClient_tests";
+import "./services/router_tests";
+import "./components/WebClient/WebClient_tests";
 
 const { whenReady, loadFile } = owl.utils;
 

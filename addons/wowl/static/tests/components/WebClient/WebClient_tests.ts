@@ -1,9 +1,9 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
-import { WebClient } from "../../src/components/WebClient/WebClient";
-import { Registries } from "../../src/registries";
-import { Registry } from "../../src/core/registry";
-import { getFixture, makeTestEnv, mount, OdooEnv } from "../helpers";
+import { WebClient } from "../../../src/components/WebClient/WebClient";
+import { Registries } from "../../../src/registries";
+import { Registry } from "../../../src/core/registry";
+import { getFixture, makeTestEnv, mount, OdooEnv } from "../../helpers";
 
 const { xml } = tags;
 

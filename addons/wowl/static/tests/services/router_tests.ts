@@ -1,5 +1,5 @@
 import * as QUnit from "qunit";
-import { parseHash, parseSearchQuery, Route, routeToUrl } from "../src/services/router";
+import { parseHash, parseSearchQuery, Route, routeToUrl } from "../../src/services/router";
 
 QUnit.module("Router");
 
