@@ -25,7 +25,6 @@ class AccountMove(models.Model):
     @api.depends('l10n_latam_document_type_id')
     def _compute_name(self):
         """ Change the way that the use_document moves name is computed:
-
         * If move use document but does not have document type selected then name = '/' to do not show the name.
         * If move use document and are numbered manually do not compute name at all (will be set manually)
         * If move use document and is in draft state and has not been posted before we restart name to '/' (this is
@@ -122,14 +121,36 @@ class AccountMove(models.Model):
         for rec in self.filtered(lambda x: x.l10n_latam_use_documents and (not x.name or x.name == '/')):
             if rec.move_type in ('in_receipt', 'out_receipt'):
                 raise UserError(_('We do not accept the usage of document types on receipts yet. '))
-        return super()._post(soft)
+        return super()._post(soft=soft)
 
-    @api.constrains('name', 'journal_id', 'state')
-    def _check_unique_sequence_number(self):
-        """ This uniqueness verification is only valid for customer invoices, and vendor bills that does not use
-        documents. A new constraint method _check_unique_vendor_number has been created just for validate for this purpose """
-        vendor = self.filtered(lambda x: x.is_purchase_document() and x.l10n_latam_use_documents)
-        return super(AccountMove, self - vendor)._check_unique_sequence_number()
+    @api.constrains('name', 'move_type', 'partner_id', 'journal_id', 'invoice_date')
+    def _check_duplicate_supplier_reference(self):
+        # The constraint doesn't depend on the date like it is the case in general
+        latam_bills = self.filtered(lambda x: x.is_purchase_document() and x.l10n_latam_use_documents)
+        if latam_bills:
+            self.env["account.move"].flush([
+                "name", "move_type", "company_id", "partner_id", "commercial_partner_id",
+            ])
+            self.env["res.partner"].flush(["commercial_partner_id"])
+
+            self._cr.execute('''
+                SELECT move2.id
+                FROM account_move move
+                JOIN res_partner partner ON partner.id = move.partner_id
+                INNER JOIN account_move move2 ON
+                    move2.name = move.name
+                    AND move2.company_id = move.company_id
+                    AND move2.commercial_partner_id = partner.commercial_partner_id
+                    AND move2.move_type = move.move_type
+                    AND move2.id != move.id
+                WHERE move.id IN %s
+            ''', [tuple(latam_bills.ids)])
+            duplicated_moves = self.browse([r[0] for r in self._cr.fetchall()])
+            if duplicated_moves:
+                raise ValidationError(_('Duplicated vendor bill detected. You probably encoded twice the same vendor bill/credit note:\n%s') % "\n".join(
+                    duplicated_moves.mapped(lambda m: "%(partner)s - %(name)s" % {'name': m.name, 'partner': m.partner_id.display_name})
+                ))
+        return super(AccountMove, self - latam_bills)._check_duplicate_supplier_reference()
 
     @api.constrains('state', 'l10n_latam_document_type_id')
     def _check_l10n_latam_documents(self):
@@ -217,21 +238,9 @@ class AccountMove(models.Model):
             ) for group, amounts in res]
         super(AccountMove, self - move_with_doc_type)._compute_invoice_taxes_by_group()
 
-    @api.constrains('name', 'partner_id', 'company_id', 'posted_before')
-    def _check_unique_vendor_number(self):
-        """ The constraint _check_unique_sequence_number is valid for customer bills but not valid for us on vendor
-        bills because the uniqueness must be per partner """
-        for rec in self.filtered(
-                lambda x: x.name and x.name != '/' and x.is_purchase_document() and x.l10n_latam_use_documents):
-            domain = [
-                ('move_type', '=', rec.move_type),
-                # by validating name we validate l10n_latam_document_type_id
-                ('name', '=', rec.name),
-                ('company_id', '=', rec.company_id.id),
-                ('id', '!=', rec.id),
-                ('commercial_partner_id', '=', rec.commercial_partner_id.id),
-                # allow to have to equal if they are cancelled
-                ('state', '!=', 'cancel'),
-            ]
-            if rec.search(domain):
-                raise ValidationError(_('Vendor bill number must be unique per vendor and company.'))
+    _sql_constraints = [
+        ('unique_name',
+         """EXCLUDE (name WITH =, journal_id WITH =, move_type WITH =)
+              WHERE (state = 'posted' AND name != '/' and (l10n_latam_document_type_id is NULL or move_type not in ('in_refund', 'in_receipt', 'in_invoice')))""",
+         'Posted Journal Entries\' numbers must be unique by journal.'),
+    ]
