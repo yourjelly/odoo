@@ -4286,6 +4286,8 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
         this.trigger_up('activate_snippet', {
             $element: this.$target,
             previewMode: true,
+            saveTarget: true,
+            savePerview: true,
         });
         this.trigger_up('block_preview_overlays');
 
