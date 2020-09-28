@@ -2,10 +2,13 @@ import { Component } from "@odoo/owl";
 import { OdooEnv } from "./env";
 import { Registry } from "./core/registry";
 
+// add here each service type to have better typing for useService
 import type { rpcService } from "./services/rpc";
+import type { menusService } from "./services/menus";
 
 export interface Services {
   rpc: ReturnType<typeof rpcService["deploy"]>;
+  menus: ReturnType<typeof menusService["deploy"]>;
   [key: string]: any;
 }
 
