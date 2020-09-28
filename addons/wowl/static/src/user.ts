@@ -23,7 +23,7 @@ declare const odoo: Odoo;
 
 export const userService = {
   name: "user",
-  start(): UserService {
+  deploy(): UserService {
     const info = odoo.session_info;
     const { user_context, username, is_admin, partner_id, user_companies } = info;
     let context: Context = {

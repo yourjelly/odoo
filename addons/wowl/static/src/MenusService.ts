@@ -59,7 +59,7 @@ export class MenuRepository {
 
 export const menusService = {
   name: "menusService",
-  start(env: OdooEnv): MenuRepository {
+  deploy(env: OdooEnv): MenuRepository {
     const repo = new MenuRepository(env);
     repo.loadMenus();
     return repo;

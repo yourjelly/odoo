@@ -16,7 +16,7 @@ QUnit.module("deployServices", {
 QUnit.test("can deploy a service", async (assert) => {
   registry.add("test", {
     name: "test",
-    start() {
+    deploy() {
       return 17;
     },
   });
@@ -28,13 +28,13 @@ QUnit.test("can deploy a service with a dependency", async (assert) => {
   registry.add("aang", {
     dependencies: ["appa"],
     name: "aang",
-    start() {
+    deploy() {
       assert.step("aang");
     },
   });
   registry.add("appa", {
     name: "appa",
-    start() {
+    deploy() {
       assert.step("appa");
     },
   });
@@ -47,7 +47,7 @@ QUnit.test("throw an error if missing dependency", async (assert) => {
   registry.add("aang", {
     dependencies: ["appa"],
     name: "aang",
-    start() {
+    deploy() {
       assert.step("aang");
     },
   });

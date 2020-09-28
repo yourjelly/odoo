@@ -5,14 +5,14 @@ import { Registry } from "./registry";
 import type { rpcService } from "./rpc";
 
 export interface Services {
-  rpc: ReturnType<typeof rpcService["start"]>;
+  rpc: ReturnType<typeof rpcService["deploy"]>;
   [key: string]: any;
 }
 
 export interface Service {
   name: string;
   dependencies?: string[];
-  start: (env: OdooEnv) => any;
+  deploy: (env: OdooEnv) => any;
 }
 
 export function useService<T extends keyof Services>(serviceName: T): Services[T] {
@@ -33,7 +33,7 @@ export function deployServices(env: OdooEnv, registry: Registry<Service>) {
 
   while ((service = findNext())) {
     toBeDeployed.delete(service);
-    const value = service.start(env);
+    const value = service.deploy(env);
     services[service.name] = value;
   }
   if (toBeDeployed.size) {

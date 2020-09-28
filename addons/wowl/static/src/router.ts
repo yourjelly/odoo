@@ -79,7 +79,7 @@ function makeRouter(env: OdooEnv) {
 
 export const routerService = {
   name: "router",
-  start(env: OdooEnv): Router {
+  deploy(env: OdooEnv): Router {
     return makeRouter(env);
   },
 };
