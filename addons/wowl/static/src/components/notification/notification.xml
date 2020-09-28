@@ -4,8 +4,7 @@
     <div t-name="wowl.Notification" t-attf-class="show toast o_notification {{props.className}}"
          role="alert" aria-live="assertive" aria-atomic="true" owl="1">
         <t t-set="closeButton">
-            <button type="button"
-                    class="close o_notification_close"
+            <button type="button" class="close o_notification_close" t-on-click="_onClickClose"
                     data-dismiss="toast" aria-label="Close">
                 <span class="d-inline" aria-hidden="true">&amp;times;</span>
             </button>
@@ -17,9 +16,7 @@
             <t t-raw="closeButton"/>
         </div>
         <div class="toast-body d-flex">
-            <strong t-if="props.subtitle" class="o_notification_subtitle" t-raw="props.subtitle"/>
-            <div t-if="props.message" t-raw="props.message"
-                 class="mr-auto o_notification_content"/>
+            <div t-if="props.message" t-raw="props.message" class="mr-auto o_notification_content"/>
             <div t-if="props.buttons.length" class="mt-2 o_notification_buttons">
                 <button t-foreach="props.buttons" t-as="button" type="button"
                         t-attf-class="btn btn-sm {{button.primary ? 'btn-primary' : 'btn-secondary'}}">
@@ -29,7 +26,7 @@
                             t-attf-class="fa fa-fw o_button_icon {{button.icon}}"/>
                         <img t-else="" t-att-src="button.icon" t-att-alt="button.name"/>
                     </t>
-                    <span t-esc="button.text"/>
+                    <span t-esc="button.name"/>
                 </button>
             </div>
             <t t-if="!props.title" t-raw="closeButton"/>

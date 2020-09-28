@@ -7,6 +7,7 @@ of interest.
 
 ## Message List
 
-| Message        | Payload | Description                                 |
-| -------------- | ------- | ------------------------------------------- |
-| `ROUTE_CHANGE` | none    | triggered whenever the url hash was changed |
+| Message                | Payload               | Description                                          |
+| ---------------------- | --------------------- | ---------------------------------------------------- |
+| `ROUTE_CHANGE`         | none                  | triggered whenever the url hash was changed          |
+| `NOTIFICATIONS_CHANGE` | list of notifications | triggered whenever the list of notifications changes |

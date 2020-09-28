@@ -4,6 +4,7 @@
     <div t-name="wowl.WebClient" owl="1">
         <NavBar menuId="" menuRepo="menuRepo"/>
         Hello WebClient
+        <button t-on-click="notificationService.displayNotification('test')">Show Notif</button>
         <Action/>
         <div>
             <t t-foreach="Components" t-as="Component" t-key="Component[0]">
