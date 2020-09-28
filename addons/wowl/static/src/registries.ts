@@ -1,10 +1,10 @@
 import { Component } from "@odoo/owl";
-import { menusService } from "./MenusService";
-import { NotificationManager, notificationService } from "./notifications";
-import { Registry } from "./registry";
-import { routerService } from "./router";
-import { rpcService } from "./rpc";
-import { userService } from "./user";
+import { menusService } from "./services/MenusService";
+import { NotificationManager, notificationService } from "./services/notifications";
+import { Registry } from "./core/registry";
+import { routerService } from "./services/router";
+import { rpcService } from "./services/rpc";
+import { userService } from "./services/user";
 import { Service } from "./services";
 import { Type } from "./types";
 

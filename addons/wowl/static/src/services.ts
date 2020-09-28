@@ -1,8 +1,8 @@
 import { Component } from "@odoo/owl";
 import { OdooEnv } from "./env";
-import { Registry } from "./registry";
+import { Registry } from "./core/registry";
 
-import type { rpcService } from "./rpc";
+import type { rpcService } from "./services/rpc";
 
 export interface Services {
   rpc: ReturnType<typeof rpcService["deploy"]>;

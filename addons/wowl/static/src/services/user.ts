@@ -1,4 +1,4 @@
-import { Odoo } from "./types";
+import type { Odoo } from "../types";
 
 interface Context {
   lang: string;

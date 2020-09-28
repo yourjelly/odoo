@@ -1,4 +1,4 @@
-import { OdooEnv } from "./env";
+import type { OdooEnv } from "../env";
 
 type Query = { [key: string]: string };
 

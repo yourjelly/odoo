@@ -1,7 +1,7 @@
 import { Component } from "@odoo/owl";
 import { makeEnv, OdooEnv } from "../src/env";
 import { Registries } from "../src/registries";
-import { Registry } from "../src/registry";
+import { Registry } from "../src/core/registry";
 import { Type } from "../src/types";
 
 export { OdooEnv } from "../src/env";
