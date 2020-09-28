@@ -3,18 +3,18 @@ import { OdooEnv } from "./env";
 import { Service } from "./services";
 
 interface Menu {
-  id: number|string,
-  children: any[],
-  name: string,
+  id: number | string;
+  children: any[];
+  name: string;
 }
 
 interface MenuTree extends Menu {
-  childrenTree?: MenuTree[],
+  childrenTree?: MenuTree[];
 }
 
 interface MenuData {
-  [id: number]: Menu,
-  [key: string]: Menu,
+  [id: number]: Menu;
+  [key: string]: Menu;
 }
 
 declare const odoo: Odoo;
@@ -28,7 +28,7 @@ export class MenuRepository {
     this.env = env;
   }
   async _loadMenus(): Promise<MenuData> {
-    return this.env.browser.fetch(this.loadMenusUrl).then(async res => {
+    return this.env.browser.fetch(this.loadMenusUrl).then(async (res) => {
       if (!res.ok) {
         throw new Error("Error while fetching menus");
       }
@@ -40,27 +40,28 @@ export class MenuRepository {
       this.loadMenusPromise = this._loadMenus();
       this.menusData = await this.loadMenusPromise;
     }
+    return this.loadMenusPromise;
   }
   get(menuID: keyof MenuData): Menu {
     return this.menusData[menuID];
   }
   get apps(): Menu[] {
-    return this.get('root').children.map((mid: Menu['id']) => this.get(mid));
+    return this.get("root").children.map((mid: Menu["id"]) => this.get(mid));
   }
   getMenusAsTree(menuID: keyof MenuData): MenuTree {
     const menu = this.get(menuID) as MenuTree;
     if (!menu.childrenTree) {
-      menu.childrenTree = menu.children.map((mid: Menu['id']) => this.getMenusAsTree(mid));
+      menu.childrenTree = menu.children.map((mid: Menu["id"]) => this.getMenusAsTree(mid));
     }
     return menu;
   }
 }
 
 export const menusService = {
-  name: 'menusService',
+  name: "menusService",
   start(env: OdooEnv): MenuRepository {
     const repo = new MenuRepository(env);
     repo.loadMenus();
     return repo;
-  }
+  },
 } as Service;

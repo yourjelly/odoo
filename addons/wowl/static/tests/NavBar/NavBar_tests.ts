@@ -12,8 +12,8 @@ QUnit.module("Navbar", {
     const menusService = registries.services.menusService;
     _loadMenus = menusService._loadMenus;
     menus = [
-      { id: 'root', children: [1], name: 'root'},
-      { id: 1, children: [1], name: 'App0'},
+      { id: "root", children: [1], name: "root" },
+      { id: 1, children: [1], name: "App0" },
     ];
     menusService._loadMenus = async () => menus;
 
