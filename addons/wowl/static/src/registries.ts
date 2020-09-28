@@ -1,4 +1,5 @@
 import { Component } from "@odoo/owl";
+import { menuService } from "./MenuRepositoryService";
 import { Registry } from "./registry";
 import { routerService } from "./router";
 import { rpcService } from "./rpc";
@@ -12,7 +13,10 @@ import { Type } from "./types";
 // needs.
 const serviceRegistry: Registry<Service> = new Registry();
 
-serviceRegistry.add(rpcService.name, rpcService).add(routerService.name, routerService);
+serviceRegistry
+  .add(rpcService.name, rpcService)
+  .add(routerService.name, routerService)
+  .add(menuService.name, menuService);
 
 // Main Components
 //
