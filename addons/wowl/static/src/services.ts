@@ -12,10 +12,10 @@ export interface Services {
   [key: string]: any;
 }
 
-export interface Service {
+export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-  deploy: (env: OdooEnv) => any;
+  deploy: (env: OdooEnv) => T;
 }
 
 export function useService<T extends keyof Services>(serviceName: T): Services[T] {
@@ -27,9 +27,9 @@ export function useService<T extends keyof Services>(serviceName: T): Services[T
   return typeof service === "function" ? service.bind(component) : service;
 }
 
-export const serviceRegistry = new Registry<Service>();
+export const serviceRegistry = new Registry<Service<any>>();
 
-export function deployServices(env: OdooEnv, registry: Registry<Service>) {
+export function deployServices(env: OdooEnv, registry: Registry<Service<any>>) {
   const services = env.services;
   const toBeDeployed = new Set(registry.getAll());
   let service: Service | null = null;

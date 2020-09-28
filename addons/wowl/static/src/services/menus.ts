@@ -1,5 +1,6 @@
 import { Odoo } from "../types";
 import { OdooEnv } from "../env";
+import { Service } from "../services";
 
 interface Menu {
   id: number | string;
@@ -56,7 +57,7 @@ export class MenuRepository {
   }
 }
 
-export const menusService = {
+export const menusService: Service<MenuRepository> = {
   name: "menus",
   deploy(env: OdooEnv): MenuRepository {
     const repo = new MenuRepository(env);
