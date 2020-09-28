@@ -1,5 +1,6 @@
 import { Component } from "@odoo/owl";
 import { menusService } from "./MenusService";
+import { NotificationManager, notificationService } from "./notifications";
 import { Registry } from "./registry";
 import { routerService } from "./router";
 import { rpcService } from "./rpc";
@@ -14,7 +15,7 @@ import { Type } from "./types";
 // needs.
 const serviceRegistry: Registry<Service> = new Registry();
 
-const services = [rpcService, routerService, userService, menusService];
+const services = [menusService, notificationService, routerService, rpcService, userService];
 
 for (let service of services) {
   serviceRegistry.add(service.name, service);
@@ -25,6 +26,8 @@ for (let service of services) {
 // Components registered in this registry will be rendered inside the root node
 // of the webclient.
 const mainComponentRegistry: Registry<Type<Component>> = new Registry();
+
+mainComponentRegistry.add("NotificationManager", NotificationManager);
 
 export const registries = {
   Components: mainComponentRegistry,
