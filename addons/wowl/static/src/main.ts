@@ -18,6 +18,7 @@ declare const odoo: Odoo;
   const baseEnv = c.env;
   const browser: OdooBrowser = Object.assign({}, baseEnv.browser, {
     XMLHttpRequest: window.XMLHttpRequest,
+    console: window.console,
   });
 
   // setup environment

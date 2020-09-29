@@ -7,6 +7,7 @@ import { rpcService } from "./services/rpc";
 import { userService } from "./services/user";
 import { Service } from "./services";
 import { Type } from "./types";
+import { crashManagerService } from "./services/crash_manager";
 
 // Services
 //
@@ -15,7 +16,14 @@ import { Type } from "./types";
 // needs.
 const serviceRegistry: Registry<Service> = new Registry();
 
-const services = [menusService, notificationService, routerService, rpcService, userService];
+const services = [
+  menusService,
+  crashManagerService,
+  notificationService,
+  routerService,
+  rpcService,
+  userService,
+];
 
 for (let service of services) {
   serviceRegistry.add(service.name, service);

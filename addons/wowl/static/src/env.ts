@@ -7,6 +7,7 @@ import { deployServices, Services } from "./services";
 type Browser = Env["browser"];
 export interface OdooBrowser extends Browser {
   XMLHttpRequest: typeof window["XMLHttpRequest"];
+  console: typeof window["console"];
 }
 
 export interface OdooEnv extends Env {
