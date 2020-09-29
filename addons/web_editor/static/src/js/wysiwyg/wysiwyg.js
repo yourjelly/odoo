@@ -465,8 +465,8 @@ var Wysiwyg = Widget.extend({
         let mediaDialog = new weWidgets.MediaDialog(this, params, $fontAwesomeNode);
         mediaDialog.open();
         mediaDialog.on('save', this, async (element) => {
-            if(params.htmlClass) element.className += " " + params.htmlClass;
-            await this.editorHelpers.insertHtml(this.editor, element.outerHTML);
+            if (params.htmlClass) element.className += " " + params.htmlClass;
+            return this.editor.execCommand('insertMedia', { element: element });
         });
     },
     async saveContent(context = this.editor) {
