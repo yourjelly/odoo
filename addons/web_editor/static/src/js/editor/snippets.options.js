@@ -3712,7 +3712,7 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
         newURL.searchParams.set('c1', normalizeColor(widgetValue));
         const src = newURL.pathname + newURL.search;
         await loadImage(src);
-        this.$target.css('background-image', `url('${src}')`);
+        await this.editorHelpers.setStyle(this.editor, target, 'background-image', `url('${src}')`);
         if (!previewMode) {
             this.previousSrc = src;
         }
@@ -4714,7 +4714,7 @@ registry.DynamicSvg = SnippetOptionWidget.extend({
         newURL.searchParams.set('c1', normalizeColor(widgetValue));
         const src = newURL.pathname + newURL.search;
         await loadImage(src);
-        target.src = src;
+        await this.editorHelpers.setAttribute(this.editor, target, 'src', src);
         if (!previewMode) {
             this.previousSrc = src;
         }
