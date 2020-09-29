@@ -452,7 +452,7 @@ var Wysiwyg = Widget.extend({
             // TODO: we use previousSibling because getDomNodes return the wrong
             //       node. change the line when the getDomNodes is fixed in
             //       jabberwock.
-            const $originalFontAwesome = this.editorHelpers.getDomNodes(node)[0].previousSibling;
+            const $originalFontAwesome = this.editorHelpers.getDomNodes(node).filter(dom => dom.nodeType === Node.ELEMENT_NODE);
             $fontAwesomeNode = $($originalFontAwesome).clone();
             params.htmlClass = [...$fontAwesomeNode[0].classList].filter((className) => {
                 return !className.startsWith('fa') || faZoomClassRegex.test(className);
