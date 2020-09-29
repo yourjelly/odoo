@@ -7,6 +7,9 @@ export class Notification extends Component {
     id: { type: Number },
     message: { type: String },
     title: { type: String, optional: true },
+    type: { type: String, optional: true },
+    className: { type: String, optional: true },
+    icon: { type: String, optional: true },
     buttons: {
       type: Array,
       element: {
@@ -18,17 +21,46 @@ export class Notification extends Component {
         },
       },
     },
-    className: { type: String, optional: true },
-    icon: { type: String, optional: true },
   };
   static defaultProps = {
     buttons: [],
     className: "",
+    type: "warning",
   };
 
   notificationService = useService("notifications");
 
-  _onClickClose() {
-    this.notificationService.closeNotification(this.props.id);
+  get icon() {
+    switch (this.props.type) {
+      case "danger":
+        return "fa-exclamation";
+      case "warning":
+        return "fa-lightbulb-o";
+      case "success":
+        return "fa-check";
+      case "info":
+        return "fa-info";
+      default:
+        return this.props.icon;
+    }
+  }
+
+  get className() {
+    let className;
+    switch (this.props.type) {
+      case "danger":
+        className = "bg-danger";
+        break;
+      case "warning":
+        className = "bg-warning";
+        break;
+      case "success":
+        className = "bg-success";
+        break;
+      case "info":
+        className = "bg-info";
+        break;
+    }
+    return className ? `${className} ${this.props.className}` : this.props.className;
   }
 }

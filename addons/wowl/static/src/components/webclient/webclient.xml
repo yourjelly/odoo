@@ -4,8 +4,16 @@
     <div t-name="wowl.WebClient" owl="1">
         <NavBar menuId="" menuRepo="menuRepo"/>
         Hello WebClient
-        <button t-on-click="notificationService.displayNotification('test')">Show Notif</button>
         <Action/>
+
+        Notifications:
+        <button t-on-click="notificationService.display('This is a basic notification')">Show Notif</button>
+        <button t-on-click="notificationService.display('This is a sticky notification', { title: 'Some title', sticky: true })">Show Sticky Notif</button>
+        <button t-on-click="notificationService.display('This is a warning', { title: 'Be careful', sticky: false, type: 'warning' })">Show warning Notif</button>
+        <button t-on-click="notificationService.display('This is a error message', { title: 'Errorrr', sticky: false, type: 'danger' })">Show danger Notif</button>
+        <button t-on-click="notificationService.display('This is a notification', { title: 'FYI', sticky: false, type: 'info' })">Show info Notif</button>
+        <button t-on-click="notificationService.display('This is a notification', { title: 'Yeah', sticky: false, type: 'success' })">Show success Notif</button>
+
         <div>
             <t t-foreach="Components" t-as="Component" t-key="Component[0]">
                 <t t-component="Component[1]"/>
