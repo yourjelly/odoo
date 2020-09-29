@@ -1,12 +1,10 @@
 import * as QUnit from "qunit";
 
-
 // -----------------------------------------------------------------------------
 // QUnit config
 // -----------------------------------------------------------------------------
 
 QUnit.config.autostart = false;
-
 
 // -----------------------------------------------------------------------------
 // QUnit assert
@@ -23,9 +21,9 @@ QUnit.config.autostart = false;
  * @param {string} [msg]
  */
 function containsN(el: HTMLElement, selector: string, n: number, msg?: string): void {
-    msg = msg || `Selector '${selector}' should have exactly ${n} matches inside the target`;
-    const matches = el.querySelectorAll(selector);
-    QUnit.assert.strictEqual(matches.length, n, msg);
+  msg = msg || `Selector '${selector}' should have exactly ${n} matches inside the target`;
+  const matches = el.querySelectorAll(selector);
+  QUnit.assert.strictEqual(matches.length, n, msg);
 }
 
 /**
@@ -36,7 +34,7 @@ function containsN(el: HTMLElement, selector: string, n: number, msg?: string): 
  * @param {string} [msg]
  */
 function containsNone(el: HTMLElement, selector: string, msg?: string) {
-    containsN(el, selector, 0, msg);
+  containsN(el, selector, 0, msg);
 }
 
 /**
@@ -47,7 +45,7 @@ function containsNone(el: HTMLElement, selector: string, msg?: string) {
  * @param {string} [msg]
  */
 function containsOnce(el: HTMLElement, selector: string, msg?: string) {
-    containsN(el, selector, 1, msg);
+  containsN(el, selector, 1, msg);
 }
 
 declare global {
