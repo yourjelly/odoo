@@ -7,6 +7,9 @@ import { userService } from "../src/services/user";
 
 export { OdooEnv } from "../src/env";
 
+// -----------------------------------------------------------------------------
+// Main Helpers
+// -----------------------------------------------------------------------------
 interface MountParameters {
   env: OdooEnv;
   target: HTMLElement;
@@ -20,12 +23,6 @@ export async function mount<T extends Type<Component>>(
   const component: Component = new C(null);
   await component.mount(params.target);
   return component as any;
-}
-
-let templates: string;
-
-export function setTemplates(xml: string) {
-  templates = xml;
 }
 
 interface TestEnvParam {
@@ -48,6 +45,10 @@ export async function makeTestEnv(params: TestEnvParam = {}): Promise<OdooEnv> {
 export function getFixture(): HTMLElement {
   return document.querySelector("#qunit-fixture") as HTMLElement;
 }
+
+// -----------------------------------------------------------------------------
+// Utility stuff
+// -----------------------------------------------------------------------------
 
 interface Deferred<T> extends Promise<T> {
   resolve: (value: T) => void;
@@ -83,4 +84,13 @@ export function makeFakeUserService(): typeof userService {
       };
     },
   };
+}
+
+// -----------------------------------------------------------------------------
+// Private (should not be called from any test)
+// -----------------------------------------------------------------------------
+let templates: string;
+
+export function setTemplates(xml: string) {
+  templates = xml;
 }

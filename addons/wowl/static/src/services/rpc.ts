@@ -30,7 +30,7 @@ interface RPCError {
 // Main RPC method
 // -----------------------------------------------------------------------------
 
-function computeParams(query: RPCQuery, env: OdooEnv): {[key: string]: any} {
+function computeParams(query: RPCQuery, env: OdooEnv): { [key: string]: any } {
   const context = env.services["user"].context;
 
   let params;
