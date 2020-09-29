@@ -2,6 +2,7 @@ import { Action } from "../action/action";
 import { Component } from "@odoo/owl";
 import { NavBar } from "../navbar/navbar";
 import { OdooEnv } from "../../env";
+// import { useService } from "../../services";
 
 export class WebClient extends Component<{}, OdooEnv> {
   static components = { Action, NavBar };
@@ -12,6 +13,7 @@ export class WebClient extends Component<{}, OdooEnv> {
   // rpc = useService("rpc");
 
   // async willStart() {
-  //   await this.rpc({ route: "/web/action/load", params: { action_id: 114 } });
+  //   const data = await this.rpc({ model: "sale.order", method: "read", args: [[7], ["state", "partner_id"]]});
+  //   console.log(data)
   // }
 }

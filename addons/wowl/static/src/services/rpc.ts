@@ -12,9 +12,11 @@ interface RPCRouteQuery {
 interface RPCModelQuery {
   model: string;
   method: string;
+  args?: any[];
+  kwargs?: { [key: string]: any };
 }
 
-type RPCQuery = RPCRouteQuery | RPCModelQuery;
+export type RPCQuery = RPCRouteQuery | RPCModelQuery;
 
 type RPC = (query: RPCQuery) => Promise<any>;
 
@@ -31,13 +33,27 @@ interface RPCError {
 // -----------------------------------------------------------------------------
 
 function computeParams(query: RPCQuery, env: OdooEnv): { [key: string]: any } {
-  const context = env.services["user"].context;
+  const userContext = env.services["user"].context;
 
-  let params;
+  let params: any;
   if ("route" in query) {
+    // call a controller
     params = query.params || {};
+    params.context = userContext;
+  } else {
+    // call a model
+    params = { model: query.model, method: query.method };
+    let context = userContext;
+    params.args = query.args || [];
+    params.kwargs = { context };
+    if (query.kwargs) {
+      Object.assign(params.kwargs, query.kwargs);
+    }
+    if (query.kwargs && query.kwargs.context) {
+      params.kwargs.context = Object.assign({}, userContext, query.kwargs.context);
+    }
   }
-  return Object.assign({}, params, { context });
+  return params;
 }
 
 function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
@@ -51,27 +67,32 @@ function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
     params: computeParams(query, env),
   };
 
-  const url = "route" in query ? query.route : "nope";
+  let url: string;
+  if ("route" in query) {
+    url = query.route;
+  } else {
+    url = `/web/dataset/call_kw/${query.model}/${query.method}`;
+  }
   return new Promise((resolve, reject) => {
     const request = new XHR();
 
     // handle success
     request.addEventListener("load", (data) => {
-      const result = JSON.parse(request.response);
-      if ("error" in result) {
+      const response = JSON.parse(request.response);
+      if ("error" in response) {
         // Odoo returns error like this, in a error field instead of properly
         // using http error codes...
         const error: RPCError = {
           type: "server",
-          message: result.error.message,
-          code: result.error.code,
-          data_debug: result.error.data.debug,
-          data_message: result.error.data.message,
+          message: response.error.message,
+          code: response.error.code,
+          data_debug: response.error.data.debug,
+          data_message: response.error.data.message,
         };
         bus.trigger("RPC_ERROR", error);
         reject(error);
       }
-      resolve(result);
+      resolve(response.result);
     });
 
     // handle failure
