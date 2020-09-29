@@ -12,7 +12,6 @@ import { routerService } from "./services/router";
 type Unwrap<T> = T extends Promise<infer U> ? U : T;
 type ServiceType<T extends (...args: any[]) => any> = Unwrap<ReturnType<T>>;
 
-// type Val<T> =
 export interface Services {
   rpc: ServiceType<typeof rpcService["deploy"]>;
   menus: ServiceType<typeof menusService["deploy"]>;

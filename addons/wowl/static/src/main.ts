@@ -1,6 +1,6 @@
 import * as owl from "@odoo/owl";
 import { WebClient } from "./components/webclient/webclient";
-import { makeEnv } from "./env";
+import { makeEnv, OdooBrowser } from "./env";
 import { registries } from "./registries";
 import { Odoo } from "./types";
 
@@ -13,11 +13,18 @@ declare const odoo: Odoo;
   const templatesUrl = `/wowl/templates/${odoo.session_info.qweb}`;
   const templates = await loadFile(templatesUrl);
 
-  // prepare env
-  const env = await makeEnv(templates, registries);
+  // prepare browser object
+  const c = new owl.Component();
+  const baseEnv = c.env;
+  const browser: OdooBrowser = Object.assign({}, baseEnv.browser, {
+    XMLHttpRequest: window.XMLHttpRequest,
+  });
+
+  // setup environment
+  const env = await makeEnv(templates, registries, browser);
+  owl.Component.env = env;
 
   // start web client
-  owl.Component.env = env;
   const root = new WebClient();
   await whenReady();
   await root.mount(document.body);

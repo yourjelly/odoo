@@ -7,7 +7,8 @@ of interest.
 
 ## Message List
 
-| Message                | Payload               | Description                                          |
-| ---------------------- | --------------------- | ---------------------------------------------------- |
-| `ROUTE_CHANGE`         | none                  | triggered whenever the url hash was changed          |
-| `NOTIFICATIONS_CHANGE` | list of notifications | triggered whenever the list of notifications changes |
+| Message                | Payload               | Triggered when:                                   |
+| ---------------------- | --------------------- | ------------------------------------------------- |
+| `ROUTE_CHANGE`         | none                  | the url hash was changed                          |
+| `NOTIFICATIONS_CHANGE` | list of notifications | the list of notifications changes                 |
+| `RPC_ERROR`            | error data object     | a rpc request (going through `rpc` service) fails |

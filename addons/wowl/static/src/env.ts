@@ -4,20 +4,28 @@ import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import type { Registries } from "./registries";
 import { deployServices, Services } from "./services";
 
+type Browser = Env["browser"];
+export interface OdooBrowser extends Browser {
+  XMLHttpRequest: typeof window["XMLHttpRequest"];
+}
+
 export interface OdooEnv extends Env {
+  browser: OdooBrowser;
   services: Services;
   registries: Registries;
   bus: EventBus;
 }
 
-export async function makeEnv(templates: string, registries: Registries): Promise<OdooEnv> {
-  const c = new owl.Component();
-  const baseEnv = c.env;
+export async function makeEnv(
+  templates: string,
+  registries: Registries,
+  browser: OdooBrowser
+): Promise<OdooEnv> {
   const qweb = new owl.QWeb();
   qweb.addTemplates(templates);
 
   const env = {
-    browser: baseEnv.browser,
+    browser,
     qweb,
     bus: new owl.core.EventBus(),
     registries,

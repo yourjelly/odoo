@@ -5,6 +5,7 @@ import { setTemplates } from "./helpers";
 import "./components/action_tests";
 import "./components/navbar_tests";
 import "./services/router_tests";
+import "./services/rpc_tests";
 import "./services/services_tests";
 import "./components/webclient_tests";
 

@@ -30,7 +30,6 @@ QUnit.test("can deploy an asynchronous service", async (assert) => {
   registry.add("test", {
     name: "test",
     deploy() {
-      debugger;
       return def;
     },
   });
