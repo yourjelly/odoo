@@ -18,8 +18,8 @@ available to the interface (and to other services).
 
 ## List of all services
 
-| Service                                      | Purpose                                                    |
-| -------------------------------------------- | ---------------------------------------------------------- |
+| Service                             | Purpose                                                    |
+| ----------------------------------- | ---------------------------------------------------------- |
 | [`crash_manager`](crash_manager.md) | log errors                                                 |
 | [`menus`](menus.md)                 | keep track of all menu items (app and submenus)            |
 | [`notifications`](notifications.md) | display a notification (or error)                          |

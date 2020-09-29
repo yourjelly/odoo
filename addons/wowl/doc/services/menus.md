@@ -11,7 +11,7 @@ called, it will call the server (using the `/web/load_menus/...` url) to fetch
 the data. Once it is done, the service is available and can be used to query
 informations on the menu items.
 
-## Features
+## API
 
 Here is a description of all exported methods:
 
