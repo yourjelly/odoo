@@ -1,4 +1,4 @@
-import type { Component } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import type { OdooEnv } from "../env";
 
 // -----------------------------------------------------------------------------
@@ -111,12 +111,17 @@ function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
 // -----------------------------------------------------------------------------
 // RPC service
 // -----------------------------------------------------------------------------
+
 export const rpcService = {
   dependencies: ["user"],
   name: "rpc",
   deploy(env: OdooEnv): RPC {
-    return function (this: Component | null, query: RPCQuery): Promise<any> {
-      return jsonrpc(query, env);
+    return async function (this: Component | null, query: RPCQuery): Promise<any> {
+      const result = await jsonrpc(query, env);
+      if (this instanceof Component && this.__owl__.isDestroyed) {
+        return new Promise(() => {});
+      }
+      return result;
     };
   },
 };

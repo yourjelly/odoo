@@ -3,16 +3,20 @@ import * as QUnit from "qunit";
 import { WebClient } from "../../src/components/webclient/webclient";
 import { Registries } from "../../src/registries";
 import { Registry } from "../../src/core/registry";
-import { getFixture, makeTestEnv, mount, OdooEnv } from "../helpers";
+import { getFixture, makeFakeUserService, makeTestEnv, mount, OdooEnv } from "../helpers";
+import { Service } from "../../src/services";
 
 const { xml } = tags;
 
 let target: HTMLElement;
 let env: OdooEnv;
+
 QUnit.module("Web Client", {
   async beforeEach() {
     target = getFixture();
-    env = await makeTestEnv();
+    const services: Registry<Service> = new Registry();
+    services.add("user", makeFakeUserService());
+    env = await makeTestEnv({ services });
   },
 });
 

@@ -54,8 +54,9 @@ export async function nextTick(): Promise<void> {
 // -----------------------------------------------------------------------------
 // Utility stuff
 // -----------------------------------------------------------------------------
-interface Deferred<T> extends Promise<T> {
-  resolve: (value: T) => void;
+
+export interface Deferred<T> extends Promise<T> {
+  resolve: (value?: T) => void;
 }
 
 export function makeDeferred<T>(): Deferred<T> {

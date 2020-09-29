@@ -1,14 +1,27 @@
+import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
-import { Service } from "../../src/services";
+import { Service, useService } from "../../src/services";
 import { rpcService, RPCQuery } from "../../src/services/rpc";
-import { makeFakeUserService, makeTestEnv } from "../helpers";
+import {
+  getFixture,
+  makeFakeUserService,
+  makeTestEnv,
+  mount,
+  Deferred,
+  makeDeferred,
+} from "../helpers";
 
+const { xml } = tags;
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
 
-function createMockXHR(response?: any, sendCb?: (data: any) => void): typeof XMLHttpRequest {
+function createMockXHR(
+  response?: any,
+  sendCb?: (data: any) => void,
+  def?: Deferred<any>
+): typeof XMLHttpRequest {
   let MockXHR: typeof XMLHttpRequest = function () {
     return {
       _loadListener: null,
@@ -22,9 +35,12 @@ function createMockXHR(response?: any, sendCb?: (data: any) => void): typeof XML
         this.url = url;
       },
       setRequestHeader() {},
-      send(data: string) {
+      async send(data: string) {
         if (sendCb) {
           sendCb.call(this, JSON.parse(data));
+        }
+        if (def) {
+          await def;
         }
         (this._loadListener as any)();
       },
@@ -182,4 +198,40 @@ QUnit.test("rpc with args and kwargs", async (assert) => {
   assert.strictEqual(info.request.params.args[0], "arg1");
   assert.strictEqual(info.request.params.args[1], 2);
   assert.strictEqual(info.request.params.kwargs.k, 78);
+});
+
+QUnit.test("rpc coming from destroyed components are left pending", async (assert) => {
+  class MyComponent extends Component {
+    static template = xml`<div/>`;
+    rpc = useService("rpc");
+  }
+  const def = makeDeferred();
+  let MockXHR = createMockXHR({ result: "1" }, () => {}, def);
+
+  const env = await makeTestEnv({
+    services: serviceRegistry,
+    browser: { XMLHttpRequest: MockXHR },
+  });
+
+  const component = await mount(MyComponent, { env, target: getFixture() });
+  let isResolved = false;
+  let isFailed = false;
+  component
+    .rpc({ route: "/my/route" })
+    .then(() => {
+      isResolved = true;
+    })
+    .catch(() => {
+      isFailed = true;
+    });
+  assert.strictEqual(isResolved, false);
+  assert.strictEqual(isFailed, false);
+
+  component.destroy();
+  def.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
+
+  assert.strictEqual(isResolved, false);
+  assert.strictEqual(isFailed, false);
 });
