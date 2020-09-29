@@ -2921,7 +2921,7 @@ Fields:
             field = self._fields.get(name)
             if not field:
                 raise ValueError("Invalid field %r on model %r" % (name, self._name))
-            if field.store:
+            if field.base_field.store:
                 stored_fields.add(name)
             elif field.compute:
                 # optimization: prefetch direct field dependencies
