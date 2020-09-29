@@ -16,7 +16,6 @@ These kind of features are represented in the web client under the name _service
 A service is basically a piece of code that is started with the web client, and
 available to the interface (and to other services).
 
-
 ## List of all services
 
 | Service                                      | Purpose                                        |
@@ -24,7 +23,6 @@ available to the interface (and to other services).
 | [`notifications`](services/notifications.md) | display a notification (or error)              |
 | [`router`](services/router.md)               | manage the url                                 |
 | [`rpc`](services/rpc.md)                     | perform a RPC (in other word, call the server) |
-
 
 ## Defining a service
 
