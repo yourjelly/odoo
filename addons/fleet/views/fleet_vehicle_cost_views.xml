@@ -272,15 +272,15 @@
                         <div t-attf-class="oe_kanban_global_click">
                             <div>
                                 <strong>
-                                    <field name="vehicle_id" widget="res_partner_many2one"/>
+                                    <field name="vehicle_id"/>
                                     <span class="float-right"><field name="date"/></span>
                                 </strong>
                             </div>
                             <div>
-                                <field name="purchaser_id" widget="res_partner_many2one"/>
+                                <field name="purchaser_id"/>
                             </div>
                             <div>
-                                <span><field name="vendor_id" widget="res_partner_many2one"/></span>
+                                <span><field name="vendor_id"/></span>
                                 <span class="float-right"><field name="amount" widget="monetary"/></span>
                             </div>
                         </div>
