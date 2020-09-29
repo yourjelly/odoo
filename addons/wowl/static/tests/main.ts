@@ -1,6 +1,9 @@
 import * as owl from "@odoo/owl";
 import { setTemplates } from "./helpers";
 
+// import qunit configurations and customizations
+import "./qunit";
+
 // import here every test suite files
 import "./components/action_tests";
 import "./components/navbar_tests";
@@ -10,8 +13,6 @@ import "./services/services_tests";
 import "./components/webclient_tests";
 
 const { whenReady, loadFile } = owl.utils;
-
-QUnit.config.autostart = false;
 
 (async () => {
   const templatesUrl = `/wowl/templates/${new Date().getTime()}`;
