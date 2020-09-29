@@ -25,6 +25,7 @@ apt-get update && apt-get -y upgrade
 # Firmware 4.44 seems to prevent the LED mechanism from working
 
 PKGS_TO_INSTALL="
+    libgd3 \
     console-data \
     cups \
     cups-ipp-utils \
