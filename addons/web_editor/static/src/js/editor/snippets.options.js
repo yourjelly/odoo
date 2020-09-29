@@ -3712,7 +3712,7 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
         newURL.searchParams.set('c1', normalizeColor(widgetValue));
         const src = newURL.pathname + newURL.search;
         await loadImage(src);
-        await this.editorHelpers.setStyle(this.editor, target, 'background-image', `url('${src}')`);
+        await this.editorHelpers.setStyle(this.editor, this.$target.get(), 'background-image', `url('${src}')`);
         if (!previewMode) {
             this.previousSrc = src;
         }
