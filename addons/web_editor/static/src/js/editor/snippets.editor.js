@@ -1113,7 +1113,9 @@ var SnippetsMenu = Widget.extend({
         });
 
         const $autoFocusEls = $('.o_we_snippet_autofocus');
-        this._activateSnippet($autoFocusEls.length ? $autoFocusEls.first() : false);
+        if ($autoFocusEls.length) {
+            this._activateSnippet($autoFocusEls.first());
+        }
         this._textToolsSwitchingEnabled = true;
 
         // Add tooltips on we-title elements whose text overflows
