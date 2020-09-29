@@ -14,7 +14,7 @@ QUnit.module("RPC", {
   },
 });
 
-function createMockXHR(response: any): typeof XMLHttpRequest {
+function createMockXHR(response: any, sendCb?: (data: any) => void): typeof XMLHttpRequest {
   let mockXHR = {
     _loadListener: null,
     addEventListener(type: string, listener: any) {
@@ -24,7 +24,10 @@ function createMockXHR(response: any): typeof XMLHttpRequest {
     },
     open() {},
     setRequestHeader() {},
-    send() {
+    send(data: string) {
+      if (sendCb) {
+        sendCb(JSON.parse(data));
+      }
       (this._loadListener as any)();
     },
     response: JSON.stringify(response),
@@ -36,7 +39,12 @@ function createMockXHR(response: any): typeof XMLHttpRequest {
 }
 
 QUnit.test("can perform a simple rpc", async (assert) => {
-  let MockXHR = createMockXHR({ action_id: 123 });
+  assert.expect(4);
+  let MockXHR = createMockXHR({ action_id: 123 }, (request) => {
+    assert.strictEqual(request.jsonrpc, "2.0");
+    assert.strictEqual(request.method, "call");
+    assert.ok(typeof request.id === "number");
+  });
 
   const env = await makeTestEnv({
     services: serviceRegistry,
@@ -77,4 +85,24 @@ QUnit.test("trigger an error on bus when response has 'error' key", async (asser
   } catch (e) {
     assert.ok(true);
   }
+});
+
+QUnit.test("add user context to every request", async (assert) => {
+  assert.expect(2);
+  let MockXHR = createMockXHR({ some: "request" }, (data) => {
+    assert.deepEqual(data.params.context, {
+      allowed_company_ids: [1],
+      lang: "en_us",
+      tz: "Europe/Brussels",
+      uid: 2,
+    });
+  });
+
+  const env = await makeTestEnv({
+    services: serviceRegistry,
+    browser: { XMLHttpRequest: MockXHR },
+  });
+
+  const result = await env.services.rpc({ route: "/test/" });
+  assert.deepEqual(result, { some: "request" });
 });

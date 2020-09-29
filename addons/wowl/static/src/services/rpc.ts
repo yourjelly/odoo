@@ -1,5 +1,4 @@
 import type { Component } from "@odoo/owl";
-import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import type { OdooEnv } from "../env";
 
 // -----------------------------------------------------------------------------
@@ -7,6 +6,7 @@ import type { OdooEnv } from "../env";
 // -----------------------------------------------------------------------------
 interface RPCRouteQuery {
   route: string;
+  params?: { [key: string]: any };
 }
 
 interface RPCModelQuery {
@@ -29,10 +29,26 @@ interface RPCError {
 // -----------------------------------------------------------------------------
 // Main RPC method
 // -----------------------------------------------------------------------------
-function jsonrpc(XHR: typeof XMLHttpRequest, query: RPCQuery, bus: EventBus): Promise<any> {
+
+function computeParams(query: RPCQuery, env: OdooEnv): {[key: string]: any} {
+  const context = env.services["user"].context;
+
+  let params;
+  if ("route" in query) {
+    params = query.params || {};
+  }
+  return Object.assign({}, params, { context });
+}
+
+function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
+  const bus = env.bus;
+  const XHR = env.browser.XMLHttpRequest;
+
   const data = {
-    jsonrpc: "2.0",
     id: Math.floor(Math.random() * 1000 * 1000 * 1000),
+    jsonrpc: "2.0",
+    method: "call",
+    params: computeParams(query, env),
   };
 
   const url = "route" in query ? query.route : "nope";
@@ -55,7 +71,6 @@ function jsonrpc(XHR: typeof XMLHttpRequest, query: RPCQuery, bus: EventBus): Pr
         bus.trigger("RPC_ERROR", error);
         reject(error);
       }
-      console.log(result, request.response);
       resolve(result);
     });
 
@@ -79,10 +94,8 @@ export const rpcService = {
   dependencies: ["user"],
   name: "rpc",
   deploy(env: OdooEnv): RPC {
-    const bus = env.bus;
-    const XHR = env.browser.XMLHttpRequest;
     return function (this: Component | null, query: RPCQuery): Promise<any> {
-      return jsonrpc(XHR, query, bus);
+      return jsonrpc(query, env);
     };
   },
 };

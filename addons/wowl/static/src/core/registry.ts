@@ -21,6 +21,9 @@ export class Registry<T> {
    * be chained
    */
   add(key: string, value: T): Registry<T> {
+    if (key in this.content) {
+      throw new Error(`Cannot add '${key}' in this registry: it already exists`);
+    }
     this.content[key] = value;
     return this;
   }

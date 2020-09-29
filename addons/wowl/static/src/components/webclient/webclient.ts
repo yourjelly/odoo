@@ -12,7 +12,6 @@ export class WebClient extends Component<{}, OdooEnv> {
   // rpc = useService("rpc");
 
   // async willStart() {
-  //   const result = await this.rpc({ route: "/web/action/load" });
-  //   console.log(result);
+  //   await this.rpc({ route: "/web/action/load", params: { action_id: 114 } });
   // }
 }

@@ -4,6 +4,7 @@ interface Context {
   lang: string;
   tz: string;
   uid: number;
+  allowed_company_ids: number[];
   [key: string]: any;
 }
 
@@ -30,6 +31,7 @@ export const userService = {
       lang: user_context.lang,
       tz: user_context.tz,
       uid: info.uid,
+      allowed_company_ids: user_companies.allowed_companies.map(([id]) => id),
     };
     return {
       context: context,
