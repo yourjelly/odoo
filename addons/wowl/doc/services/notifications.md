@@ -1,5 +1,11 @@
 # Notification service
 
+| Technical name  | Dependencies |
+| --------------- | ------------ |
+| `notifications` |              |
+
+## Overview
+
 Lite the name suggests, the `notifications` service allow the rest of the
 interface to display notifications (to inform the user of some interesting
 relevant fact).

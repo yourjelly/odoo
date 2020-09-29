@@ -1,6 +1,10 @@
 # User service
 
-## Description
+| Technical name | Dependencies |
+| -------------- | ------------ |
+| `user`         |              |
+
+## Overview
 
 The `user` service is a very simple service, that aims to just keep track of a
 few important values related to the current user. It simply provides an object

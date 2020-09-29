@@ -1,5 +1,11 @@
 # RPC service
 
+| Technical name | Dependencies |
+| -------------- | ------------ |
+| `rpc`          | `user`       |
+
+## Overview
+
 The RPC service is necessary to properly send a request to the server. The value
 of the service is a function that takes a query and return a promise (which will
 be resolved to the result of the query).

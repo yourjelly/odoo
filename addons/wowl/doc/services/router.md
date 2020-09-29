@@ -1,5 +1,11 @@
 # Router service
 
+| Technical name | Dependencies |
+| -------------- | ------------ |
+| `router`       |              |
+
+## Overview
+
 The `router` service provides three features:
 
 - information about the current route
@@ -64,5 +70,5 @@ displayed state.
 This is mostly useful for the action manager, which needs to act when something
 in the url changed.
 
-- it listens to every (external) hash changes, and trigger a `ROUTE_CHANGE` event
-  on the main bus,
+When created, the router listens to every (external) hash changes, and trigger a
+`ROUTE_CHANGE` event on the main bus,
