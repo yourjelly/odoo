@@ -46,10 +46,14 @@ export function getFixture(): HTMLElement {
   return document.querySelector("#qunit-fixture") as HTMLElement;
 }
 
+export async function nextTick(): Promise<void> {
+  await new Promise((resolve) => window.requestAnimationFrame(resolve));
+  await new Promise((resolve) => setTimeout(resolve));
+}
+
 // -----------------------------------------------------------------------------
 // Utility stuff
 // -----------------------------------------------------------------------------
-
 interface Deferred<T> extends Promise<T> {
   resolve: (value: T) => void;
 }
