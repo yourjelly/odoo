@@ -56,6 +56,21 @@ class test_inherits(common.TransactionCase):
         self.assertEqual(box.readonly_name, "Superuser's box")
         self.assertEqual(box.unit_id.readonly_name, "Superuser's box")
 
+    def test_write_6_parent_field(self):
+        record = self.env['test.box'].create({'name': 'X'})
+        record.flush()
+        parent = record.unit_id
+        self.env.cache.invalidate()
+
+        # modify the parent, read the child, and check consistency
+        parent.name = 'Y'
+        self.assertEqual(record.read(['name'])[0]['name'], 'Y')
+
+        # modify the parent, search the child, and check consistency
+        parent.flush()
+        parent.name = 'Z'
+        self.assertIn(record, record.search([('name', '=', 'Z')]))
+
     def test_ir_model_data_inherits(self):
         """ Check the existence of the correct ir.model.data """
         IrModelData = self.env['ir.model.data']
