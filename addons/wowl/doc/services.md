@@ -21,6 +21,7 @@ available to the interface (and to other services).
 | Service                                      | Purpose                                                    |
 | -------------------------------------------- | ---------------------------------------------------------- |
 | [`crash_manager`](services/crash_manager.md) | log errors                                                 |
+| [`menus`](services/menus.md)                 | keep track of all menu items (app and submenus)            |
 | [`notifications`](services/notifications.md) | display a notification (or error)                          |
 | [`router`](services/router.md)               | manage the url                                             |
 | [`rpc`](services/rpc.md)                     | perform a RPC (in other word, call the server)             |
