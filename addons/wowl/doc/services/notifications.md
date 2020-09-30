@@ -6,16 +6,16 @@
 
 ## Overview
 
-Lite the name suggests, the `notifications` service allow the rest of the
+Like the name suggests, the `notifications` service allows the rest of the
 interface to display notifications (to inform the user of some interesting
-relevant fact).
+relevant facts).
 
 ## API
 
 The `notifications` service provides two methods:
 
-- `display(message: string, options?: Options): number`. This method generate a
-  new notification, and return an `id` value.
+- `create(message: string, options?: Options): number`. This method generates a
+  new notification, and returns an `id` value.
 
   Here is a list of the various options:
 
@@ -46,12 +46,12 @@ class MyComponent extends Component {
     ...
 
     someHandler() {
-        this.notifications.display('Look behind you!!!', { sticky: true });
+        this.notifications.create('Look behind you!!!', { sticky: true });
     }
 }
 ```
 
 ## Notes
 
-- whenever the list of notifications is updated, a `NOTIFICATIONS_CHANGE` is
+- whenever the list of notifications is updated, a `NOTIFICATIONS_CHANGE` event is
   triggered on the main bus.
