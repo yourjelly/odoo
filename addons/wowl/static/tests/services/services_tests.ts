@@ -2,7 +2,7 @@ import * as QUnit from "qunit";
 import { deployServices, Service } from "../../src/services";
 import { Registry } from "../../src/core/registry";
 import { OdooEnv } from "../../src/env";
-import { makeDeferred } from "../helpers";
+import { makeDeferred, nextTick } from "../helpers";
 
 let registry: Registry<Service>;
 let env: OdooEnv;
@@ -38,6 +38,81 @@ QUnit.test("can deploy an asynchronous service", async (assert) => {
   def.resolve(15);
   await Promise.resolve();
   assert.strictEqual(env.services.test, 15);
+});
+
+QUnit.test("can deploy two sequentially dependant asynchronous services", async (assert) => {
+  const def1 = makeDeferred();
+  const def2 = makeDeferred();
+
+  registry.add("test2", {
+    dependencies: ["test1"],
+    name: "test2",
+    deploy() {
+      assert.step("test2");
+      return def2;
+    },
+  });
+  registry.add("test1", {
+    name: "test1",
+    deploy() {
+      assert.step("test1");
+      return def1;
+    },
+  });
+  registry.add("test3", {
+    dependencies: ["test2"],
+    name: "test3",
+    deploy() {
+      assert.step("test3");
+    },
+  });
+  deployServices(env, registry);
+  await nextTick();
+  assert.verifySteps(["test1"]);
+  def2.resolve();
+  await nextTick();
+  assert.verifySteps([]);
+  def1.resolve();
+  await nextTick();
+  assert.verifySteps(["test2", "test3"]);
+});
+
+QUnit.test("can deploy two independant asynchronous services in parallel", async (assert) => {
+  const def1 = makeDeferred();
+  const def2 = makeDeferred();
+
+  registry.add("test1", {
+    name: "test1",
+    deploy() {
+      assert.step("test1");
+      return def1;
+    },
+  });
+  registry.add("test2", {
+    name: "test2",
+    deploy() {
+      assert.step("test2");
+      return def2;
+    },
+  });
+  registry.add("test3", {
+    dependencies: ["test1", "test2"],
+    name: "test3",
+    deploy() {
+      assert.step("test3");
+    },
+  });
+  deployServices(env, registry);
+  await nextTick();
+  assert.verifySteps(["test1", "test2"]);
+
+  def1.resolve();
+  await nextTick();
+  assert.verifySteps([]);
+
+  def2.resolve();
+  await nextTick();
+  assert.verifySteps(["test3"]);
 });
 
 QUnit.test("can deploy a service with a dependency", async (assert) => {

@@ -18,10 +18,10 @@ export interface MenuData {
 }
 
 interface MenuService {
-  getAll(): Menu[],
-  getApps(): Menu[],
-  getMenu(menuID: keyof MenuData): Menu,
-  getMenuAsTree(menuID: keyof MenuData): MenuTree,
+  getAll(): Menu[];
+  getApps(): Menu[];
+  getMenu(menuID: keyof MenuData): Menu;
+  getMenuAsTree(menuID: keyof MenuData): MenuTree;
 }
 
 const loadMenusUrl = `/wowl/load_menus`;
@@ -51,7 +51,7 @@ async function makeMenus(env: OdooEnv, loadMenusHash: string): Promise<MenuServi
         menu.childrenTree = menu.children.map((mid: Menu["id"]) => this.getMenuAsTree(mid));
       }
       return menu;
-    }
+    },
   };
   return menuService;
 }

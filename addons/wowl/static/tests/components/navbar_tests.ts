@@ -1,7 +1,7 @@
 import { NavBar } from "../../src/components/navbar/navbar";
 import * as QUnit from "qunit";
 import { mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
-import { MenuData , menusService } from "./../../src/services/menus";
+import { MenuData, menusService } from "./../../src/services/menus";
 import { Registry } from "./../../src/core/registry";
 import { Service } from "./../../src/services";
 
@@ -10,7 +10,6 @@ let env: OdooEnv;
 let menus: MenuData;
 let services: Registry<Service>;
 let browser: Partial<OdooEnv["browser"]>;
-
 
 QUnit.module("Navbar", {
   async beforeEach() {
@@ -22,14 +21,14 @@ QUnit.module("Navbar", {
     };
     target = getFixture();
     browser = {
-      fetch: (input: any) : Promise<Response> => {
+      fetch: (input: any): Promise<Response> => {
         let blobBody = {};
-        if (typeof input === 'string' && input.includes('load_menus')) {
+        if (typeof input === "string" && input.includes("load_menus")) {
           blobBody = menus;
         }
-        const blob = new Blob([JSON.stringify(blobBody)], {type : 'application/json'});
-        return Promise.resolve(new Response(blob, {status: 200}));
-      }
+        const blob = new Blob([JSON.stringify(blobBody)], { type: "application/json" });
+        return Promise.resolve(new Response(blob, { status: 200 }));
+      },
     };
     env = await makeTestEnv({ browser, services });
   },
