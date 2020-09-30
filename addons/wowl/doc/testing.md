@@ -11,9 +11,9 @@ In a few sentences, here is how the test suite is organized:
   code that setup the test suite environment.
 - some helpers are available in `static/tests/helpers.ts`.
 - to access the test suite, one needs to have an odoo server running and then
-  open `/web/tests` in a browser
+  open `/wowl/tests` in a browser
 
-The test suite file structure look like this:
+The test suite file structure looks like this:
 
 ```
 static/
@@ -34,7 +34,7 @@ static/
 
 - `mount(SomeComponent, {env, target})`: create a component with the `env` provided,
   and mount it to the `target` html element. This method is asynchronous, and
-  return the instance of the component
+  returns the instance of the component
 
 - `makeTestEnv(params?: Params)`: create a test environment. By default, a test
   environment has no service, components or browser access. It can be optionally
