@@ -51,6 +51,34 @@ static/
 - `nextTick(): Promise<void>`: helper to wait for the next animation frame. This
   is extremely useful while writing tests involving components updating the DOM.
 
+- `click(el: HTMLElement, selector?: string): Promise<void>`: helper to click on
+  an element, given the element itself, or an element and a selector that matches
+  a single element inside it. The helper will crash when called with a selector
+  that have no match, or more than 1 match. It returns a promise resolved after
+  the next animation frame, i.e. after potential DOM updates have been applied.
+
+## QUnit custom assertions
+
+QUnit provides several [built-in assertions](https://api.qunitjs.com/assert/),
+available on the `QUnit.assert` object. Alongside them, we provide custom
+assertions.
+
+- `assert.containsN(el: HTMLElement, selector: string, n: number, msg?: string)`:
+  check that a target element `el` contains exactly `n` matches for the given
+  `selector`, with `msg` being an optional short description of the assertion
+
+- `assert.containsNone(el: HTMLElement, selector: string, msg?: string)`: check
+  that a target element `el` contains no match for the given `selector`
+
+- `assert.containsOnce(el: HTMLElement, selector: string, msg?: string)`: check
+  that a target element `el` contains exactly one match for the given `selector`
+
+- `assert.hasClass(el: HTMLElement, classNames: string, msg?: string)`: check
+  that a target element `el` has the given `classNames`
+
+- `assert.doesNotHaveClass(el: HTMLElement, classNames: string, msg?: string)`: check
+  that a target element `el` does not have the given `classNames`.
+
 ## Adding a new test
 
 To add a new test file to the QUnit suite, the following steps need to be done:

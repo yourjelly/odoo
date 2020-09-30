@@ -38,7 +38,6 @@ export class NotificationManager extends Component<{}, OdooEnv> {
       this.notifications = notifications;
       this.render();
     });
-    // todo test event coming before manager is in dom
   }
 }
 
@@ -50,8 +49,10 @@ export const notificationService = {
 
     function close(id: number): void {
       const index = notifications.findIndex((n) => n.id === id);
-      notifications.splice(index, 1);
-      env.bus.trigger("NOTIFICATIONS_CHANGE", notifications);
+      if (index > -1) {
+        notifications.splice(index, 1);
+        env.bus.trigger("NOTIFICATIONS_CHANGE", notifications);
+      }
     }
 
     function create(message: string, options?: DisplayOptions): number {
