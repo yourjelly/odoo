@@ -66,4 +66,9 @@ class WowlClient(http.Controller):
 
     @http.route('/wowl/tests', type='http', auth="user")
     def test_suite(self, **kw):
-        return request.render('wowl.qunit_suite')
+        live_reload = request.params.get('live_reload', '1')
+        try:
+            live_reload = bool(json.loads(live_reload))
+        except Exception:
+            live_reload = False
+        return request.render('wowl.qunit_suite', {'live_reload': live_reload})

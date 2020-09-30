@@ -23,7 +23,6 @@
         <script type="text/javascript" src="/web/static/lib/bootstrap/js/dropdown.js"></script>
 
         <script type="text/javascript" src="/web/static/lib/owl/owl.js"></script>
-        <script type="text/javascript" src="/wowl/static/livereload.js"></script>
         <script type="text/javascript" src="/wowl/static/dist/app.js"></script>
     </template>
 
@@ -42,6 +41,9 @@
 
                 <t t-call-assets="wowl.assets" t-js="False"/>
                 <t t-call-assets="wowl.assets" t-css="False"/>
+                <t t-if="live_reload is None or live_reload is True">
+                    <script type="text/javascript" src="/wowl/static/livereload.js"></script>
+                </t>
             </head>
             <body />
         </html>
@@ -69,6 +71,9 @@
 
                 <t t-call-assets="wowl.test_assets" t-js="False"/>
                 <t t-call-assets="wowl.test_assets" t-css="False"/>
+                <t t-if="live_reload is None or live_reload is True">
+                    <script type="text/javascript" src="/wowl/static/livereload.js"></script>
+                </t>
             </head>
             <body>
                 <div id="qunit"/>
