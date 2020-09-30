@@ -9,7 +9,7 @@ interface DisplayOptions {
   icon?: string;
   sticky?: boolean;
   title?: string;
-  type?: string;
+  type?: "danger" | "warning" | "success" | "info";
 }
 
 interface Notification extends DisplayOptions {
@@ -19,7 +19,7 @@ interface Notification extends DisplayOptions {
 
 export interface NotificationService {
   close: (id: number) => void;
-  display: (message: string, options?: DisplayOptions) => number;
+  create: (message: string, options?: DisplayOptions) => number;
 }
 
 export class NotificationManager extends Component<{}, OdooEnv> {
@@ -54,7 +54,7 @@ export const notificationService = {
       env.bus.trigger("NOTIFICATIONS_CHANGE", notifications);
     }
 
-    function display(message: string, options?: DisplayOptions): number {
+    function create(message: string, options?: DisplayOptions): number {
       const notif: Notification = Object.assign({}, options, {
         id: ++notifId,
         message,
@@ -67,6 +67,6 @@ export const notificationService = {
       return notif.id;
     }
 
-    return { close, display };
+    return { close, create };
   },
 };

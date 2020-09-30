@@ -7,7 +7,11 @@ export class Notification extends Component {
     id: { type: Number },
     message: { type: String },
     title: { type: String, optional: true },
-    type: { type: String, optional: true },
+    type: {
+      type: String,
+      optional: true,
+      validate: (t: string) => ["warning", "danger", "success", "info"].includes(t),
+    },
     className: { type: String, optional: true },
     icon: { type: String, optional: true },
     buttons: {
