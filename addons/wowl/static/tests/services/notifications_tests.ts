@@ -119,7 +119,7 @@ QUnit.test("can close sticky notification", async (assert) => {
   assert.containsOnce(target, ".o_notification");
 
   // close by clicking on the close icon
-  await click(target, '.o_notification .o_notification_close');
+  await click(target, ".o_notification .o_notification_close");
   assert.containsNone(target, ".o_notification");
 });
 

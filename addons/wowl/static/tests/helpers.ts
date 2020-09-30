@@ -76,11 +76,13 @@ export function click(el: HTMLElement, selector?: string) {
       throw new Error(`Found no element to click on (selector: ${selector})`);
     }
     if (els.length > 1) {
-      throw new Error(`Found ${els.length} elements to click on, instead of 1 (selector: ${selector})`);
+      throw new Error(
+        `Found ${els.length} elements to click on, instead of 1 (selector: ${selector})`
+      );
     }
     target = els[0];
   }
-  const ev = new MouseEvent('click');
+  const ev = new MouseEvent("click");
   target.dispatchEvent(ev);
   return nextTick();
 }
