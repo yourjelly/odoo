@@ -111,6 +111,41 @@ export function makeFakeUserService(): typeof userService {
 }
 
 // -----------------------------------------------------------------------------
+// Low level API mocking
+// -----------------------------------------------------------------------------
+
+type MockFetchFn = (route: string) => any;
+
+interface MockFetchParams {
+  mockFetch?: MockFetchFn,
+}
+
+export function createMockedFetch(params: MockFetchParams): typeof fetch {
+  const mockFetch: MockFetchFn = (route) => {
+    if (route.includes('load_menus')) {
+      return {};
+    }
+    return '';
+  };
+  const fetch: MockFetchFn = (...args) => {
+    let res = params && params.mockFetch ? params.mockFetch(...args) : undefined;
+    if (res === undefined || res === null) {
+      res = mockFetch(...args);
+    }
+    return Array.isArray(res) ? res : [res];
+  };
+  return (input: RequestInfo) => {
+    const route = typeof input === 'string' ? input : input.url;
+    const res = fetch(route);
+    const blob = new Blob(
+      res.map((r: any) => JSON.stringify(r)),
+      {type : 'application/json'}
+    );
+    return Promise.resolve(new Response(blob, {status: 200}));
+  };
+}
+
+// -----------------------------------------------------------------------------
 // Private (should not be called from any test)
 // -----------------------------------------------------------------------------
 let templates: string;
