@@ -177,7 +177,9 @@ publicWidget.registry.ChatRoom = publicWidget.Widget.extend({
                 if (this.participantId === this.allParticipantIds[0]) {
                     // only the first participant of the room send the new participant
                     // count so we avoid to send to many HTTP requests
-                    this._updateParticipantCount(this.allParticipantIds.length, joined);
+                    if (this.allParticipantIds.length) {
+                      this._updateParticipantCount(this.allParticipantIds.length, joined);
+                    }
                 }
             }, timeoutTime);
         };
