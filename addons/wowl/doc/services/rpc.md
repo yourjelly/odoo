@@ -51,6 +51,27 @@ const result = await this.rpc({
 });
 ```
 
+## Error Handling
+
+If an rpc fails, then:
+
+- the promise representing the rpc is rejected, so the calling code will crash,
+  unless it handles the situation
+- an event `RPC_ERROR` is triggered on the main application bus. The event payload
+  contains a description of the cause of the error:
+
+  It can be a server error (the server code threw an exception). In that case
+  the payload will be an object with the following keys:
+
+  - `type = 'server'`
+  - `message(string)`
+  - `code(number)`
+  - `data_message(string)`
+  - `data_debug(string)` (this is the main debug information, with the call stack)
+
+  Another possibility is a network error. In that case, the error description is
+  simply an object `{type: 'network'}`.
+
 ## Notes
 
 - If an rpc fails, then an event `RPC_ERROR` will be triggered on the main bus.

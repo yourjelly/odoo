@@ -20,13 +20,19 @@ export type RPCQuery = RPCRouteQuery | RPCModelQuery;
 
 type RPC = (query: RPCQuery) => Promise<any>;
 
-interface RPCError {
+interface RPCServerError {
   type: "server";
   message: string;
   code: number;
   data_message: string;
   data_debug: string;
 }
+
+interface RPCNetworkError {
+  type: "network";
+}
+
+type RPCError = RPCServerError | RPCNetworkError;
 
 // -----------------------------------------------------------------------------
 // Main RPC method
@@ -97,8 +103,11 @@ function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
 
     // handle failure
     request.addEventListener("error", () => {
-      reject();
-      bus.trigger("RPC_ERROR");
+      const error: RPCError = {
+        type: "network",
+      };
+      bus.trigger("RPC_ERROR", error);
+      reject(error);
     });
 
     // configure and send request
