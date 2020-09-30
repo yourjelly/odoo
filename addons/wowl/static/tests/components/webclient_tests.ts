@@ -3,19 +3,21 @@ import * as QUnit from "qunit";
 import { WebClient } from "../../src/components/webclient/webclient";
 import { Registries } from "../../src/registries";
 import { Registry } from "../../src/core/registry";
-import { getFixture, makeFakeUserService, makeTestEnv, mount, OdooEnv } from "../helpers";
+import { getFixture, makeFakeUserService, makeFakeMenusService, makeTestEnv, mount, OdooEnv } from "../helpers";
 import { Service } from "../../src/services";
 
 const { xml } = tags;
 
 let target: HTMLElement;
 let env: OdooEnv;
+let services: Registry<Service>;
 
 QUnit.module("Web Client", {
   async beforeEach() {
     target = getFixture();
-    const services: Registry<Service> = new Registry();
+    services = new Registry();
     services.add("user", makeFakeUserService());
+    services.add("menus", makeFakeMenusService());
     env = await makeTestEnv({ services });
   },
 });
@@ -23,7 +25,7 @@ QUnit.module("Web Client", {
 QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
   await mount(WebClient, { env, target });
-  assert.strictEqual(target.innerText, "NavBar\nHello WebClient\nHello Action");
+  assert.strictEqual(target.innerText, "Hello WebClient\nHello Action");
 });
 
 QUnit.test("can render a main component", async (assert) => {
@@ -35,7 +37,7 @@ QUnit.test("can render a main component", async (assert) => {
   const componentRegistry: Registries["Components"] = new Registry();
   componentRegistry.add("mycomponent", MyComponent);
 
-  env = await makeTestEnv({ Components: componentRegistry });
+  env = await makeTestEnv({ Components: componentRegistry , services });
   await mount(WebClient, { env, target });
   assert.ok(target.querySelector(".chocolate"));
 });

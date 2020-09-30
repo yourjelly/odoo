@@ -4,6 +4,7 @@ import { Registries } from "../src/registries";
 import { Registry } from "../src/core/registry";
 import { Type } from "../src/types";
 import { userService } from "../src/services/user";
+import { Menu , MenuData , menusService , MenuTree } from "../src/services/menus";
 
 export { OdooEnv } from "../src/env";
 
@@ -109,7 +110,34 @@ export function makeFakeUserService(): typeof userService {
     },
   };
 }
-
+export function makeFakeMenusService(menuData?: MenuData): typeof menusService {
+  const _menuData: MenuData = menuData || {
+    root: { id: "root", children: [1], name: "root" },
+    1: { id: 1, children: [], name: "App0" },
+  };
+  return {
+    name: "menus",
+    deploy() {
+      const menusService = {
+        getMenu(menuId: keyof MenuData) {
+          return _menuData![menuId];
+        },
+        getApps() {
+          return this.getMenu('root').children.map(mid => this.getMenu(mid));
+        },
+        getAll() {return Object.values(_menuData);},
+        getMenuAsTree(menuId: keyof MenuData) {
+          const menu = this.getMenu(menuId) as MenuTree;
+          if (!menu.childrenTree) {
+            menu.childrenTree = menu.children.map((mid: Menu["id"]) => this.getMenuAsTree(mid));
+          }
+          return menu;
+        }
+      };
+      return menusService;
+    },
+  };
+}
 // -----------------------------------------------------------------------------
 // Low level API mocking
 // -----------------------------------------------------------------------------

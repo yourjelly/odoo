@@ -2,13 +2,13 @@ import { Odoo } from "../types";
 import { OdooEnv } from "../env";
 import { Service } from "../services";
 
-interface Menu {
+export interface Menu {
   id: number | string;
   children: number[];
   name: string;
 }
 
-interface MenuTree extends Menu {
+export interface MenuTree extends Menu {
   childrenTree?: MenuTree[];
 }
 
@@ -17,7 +17,7 @@ export interface MenuData {
   [key: string]: Menu;
 }
 
-interface MenuService {
+export interface MenuService {
   getAll(): Menu[];
   getApps(): Menu[];
   getMenu(menuID: keyof MenuData): Menu;
