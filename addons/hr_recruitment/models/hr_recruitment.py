@@ -152,7 +152,7 @@ class Applicant(models.Model):
     reference = fields.Char("Referred By")
     day_open = fields.Float(compute='_compute_day', string="Days to Open")
     day_close = fields.Float(compute='_compute_day', string="Days to Close")
-    delay_close = fields.Float(compute="_compute_day", string='Delay to Close', readonly=True, group_operator="avg", help="Number of days to close", store=True)
+    delay_close = fields.Float(compute="_compute_delay_close", string='Delay to Close', readonly=True, group_operator="avg", help="Number of days to close", store=True)
     color = fields.Integer("Color Index", default=0)
     emp_id = fields.Many2one('hr.employee', string="Employee", track_visibility="onchange", help="Employee linked to the applicant.")
     user_email = fields.Char(related='user_id.email', type="char", string="User Email", readonly=True)
@@ -181,7 +181,15 @@ class Applicant(models.Model):
             date_create = self.create_date
             date_closed = self.date_closed
             self.day_close = (date_closed - date_create).total_seconds() / (24.0 * 3600)
-            self.delay_close = self.day_close - self.day_open
+
+    @api.multi
+    @api.depends("day_close", "day_open")
+    def _compute_delay_close(self):
+        for record in self:
+            if record.day_open and record.day_close:
+                record.delay_close = record.day_close - record.day_open
+            else:
+                record.delay_close = False
 
     @api.multi
     def _get_attachment_number(self):
