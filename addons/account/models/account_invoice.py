@@ -402,7 +402,7 @@ class AccountInvoice(models.Model):
     #fields related to vendor bills automated creation by email
     source_email = fields.Char(string='Source Email', track_visibility='onchange')
     vendor_display_name = fields.Char(compute='_get_vendor_display_info', store=True)  # store=True to enable sorting on that column
-    invoice_icon = fields.Char(compute='_get_vendor_display_info', store=False)
+    invoice_icon = fields.Char(compute='_get_invoice_icon', store=False)
 
     _sql_constraints = [
         ('number_uniq', 'unique(number, company_id, journal_id, type)', 'Invoice Number must be unique per Company!'),
@@ -412,15 +412,22 @@ class AccountInvoice(models.Model):
     def _get_vendor_display_info(self):
         for invoice in self:
             vendor_display_name = invoice.partner_id.name
-            invoice.invoice_icon = ''
             if not vendor_display_name:
                 if invoice.source_email:
                     vendor_display_name = _('From: ') + invoice.source_email
-                    invoice.invoice_icon = '@'
                 else:
                     vendor_display_name = _('Created by: %s') % invoice.sudo().create_uid.name
-                    invoice.invoice_icon = '#'
             invoice.vendor_display_name = vendor_display_name
+
+    @api.depends("partner_id", "source_email")
+    def _get_invoice_icon(self):
+        for invoice in self:
+            if invoice.partner_id.name:
+                invoice.invoice_icon = ""
+            elif invoice.source_email:
+                invoice.invoice_icon = '@'
+            else:
+                invoice.invoice_icon = '#'
 
     @api.multi
     def _get_computed_reference(self):
