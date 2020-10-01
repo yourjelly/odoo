@@ -3,7 +3,14 @@ import * as QUnit from "qunit";
 import { WebClient } from "../../src/components/webclient/webclient";
 import { Registries } from "../../src/registries";
 import { Registry } from "../../src/core/registry";
-import { getFixture, makeFakeUserService, makeFakeMenusService, makeTestEnv, mount, OdooEnv } from "../helpers";
+import {
+  getFixture,
+  makeFakeUserService,
+  makeFakeMenusService,
+  makeTestEnv,
+  mount,
+  OdooEnv,
+} from "../helpers";
 import { Service } from "../../src/services";
 
 const { xml } = tags;
@@ -37,7 +44,7 @@ QUnit.test("can render a main component", async (assert) => {
   const componentRegistry: Registries["Components"] = new Registry();
   componentRegistry.add("mycomponent", MyComponent);
 
-  env = await makeTestEnv({ Components: componentRegistry , services });
+  env = await makeTestEnv({ Components: componentRegistry, services });
   await mount(WebClient, { env, target });
   assert.ok(target.querySelector(".chocolate"));
 });

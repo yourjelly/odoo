@@ -4,7 +4,7 @@ import { Registries } from "../src/registries";
 import { Registry } from "../src/core/registry";
 import { Type } from "../src/types";
 import { userService } from "../src/services/user";
-import { Menu , MenuData , menusService , MenuTree } from "../src/services/menus";
+import { Menu, MenuData, menusService, MenuTree } from "../src/services/menus";
 
 export { OdooEnv } from "../src/env";
 
@@ -123,16 +123,18 @@ export function makeFakeMenusService(menuData?: MenuData): typeof menusService {
           return _menuData![menuId];
         },
         getApps() {
-          return this.getMenu('root').children.map(mid => this.getMenu(mid));
+          return this.getMenu("root").children.map((mid) => this.getMenu(mid));
         },
-        getAll() {return Object.values(_menuData);},
+        getAll() {
+          return Object.values(_menuData);
+        },
         getMenuAsTree(menuId: keyof MenuData) {
           const menu = this.getMenu(menuId) as MenuTree;
           if (!menu.childrenTree) {
             menu.childrenTree = menu.children.map((mid: Menu["id"]) => this.getMenuAsTree(mid));
           }
           return menu;
-        }
+        },
       };
       return menusService;
     },
@@ -145,15 +147,15 @@ export function makeFakeMenusService(menuData?: MenuData): typeof menusService {
 type MockFetchFn = (route: string) => any;
 
 interface MockFetchParams {
-  mockFetch?: MockFetchFn,
+  mockFetch?: MockFetchFn;
 }
 
 export function createMockedFetch(params: MockFetchParams): typeof fetch {
   const mockFetch: MockFetchFn = (route) => {
-    if (route.includes('load_menus')) {
+    if (route.includes("load_menus")) {
       return {};
     }
-    return '';
+    return "";
   };
   const fetch: MockFetchFn = (...args) => {
     let res = params && params.mockFetch ? params.mockFetch(...args) : undefined;
@@ -163,13 +165,13 @@ export function createMockedFetch(params: MockFetchParams): typeof fetch {
     return Array.isArray(res) ? res : [res];
   };
   return (input: RequestInfo) => {
-    const route = typeof input === 'string' ? input : input.url;
+    const route = typeof input === "string" ? input : input.url;
     const res = fetch(route);
     const blob = new Blob(
       res.map((r: any) => JSON.stringify(r)),
-      {type : 'application/json'}
+      { type: "application/json" }
     );
-    return Promise.resolve(new Response(blob, {status: 200}));
+    return Promise.resolve(new Response(blob, { status: 200 }));
   };
 }
 

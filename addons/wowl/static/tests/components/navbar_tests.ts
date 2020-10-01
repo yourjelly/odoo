@@ -1,7 +1,7 @@
 import { NavBar } from "../../src/components/navbar/navbar";
 import * as QUnit from "qunit";
-import { createMockedFetch , mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
-import { MenuData , menusService } from "./../../src/services/menus";
+import { createMockedFetch, mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
+import { MenuData, menusService } from "./../../src/services/menus";
 import { Registry } from "./../../src/core/registry";
 import { Service } from "./../../src/services";
 
@@ -22,15 +22,15 @@ QUnit.module("Navbar", {
     target = getFixture();
     browser = {
       fetch: createMockedFetch({
-        mockFetch(route: string): MenuData|undefined {
-          if (route.includes('load_menus')) {
+        mockFetch(route: string): MenuData | undefined {
+          if (route.includes("load_menus")) {
             return menus;
           }
-        }
+        },
       }),
     };
     env = await makeTestEnv({ browser, services });
-  }
+  },
 });
 
 QUnit.test("can be rendered", async (assert) => {
