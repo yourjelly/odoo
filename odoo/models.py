@@ -2670,6 +2670,10 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if not all(field.compute_sudo == compute_sudo for field in fields):
                 _logger.warning("%s: inconsistent 'compute_sudo' for computed fields: %s",
                                 self._name, ", ".join(field.name for field in fields))
+            compute_store = fields[0].store
+            if not all(field.store == compute_store for field in fields):
+                _logger.warning("%s: inconsistent 'store' for computed fields: %s",
+                                self._name, ", ".join(field.name for field in fields))
 
     @api.model
     def _setup_complete(self):
