@@ -109,3 +109,11 @@ QUnit.test("can be rendered", async (assert) => {
   // perform some assertion/actions
 });
 ```
+## Debugging a test
+
+Sometimes, changes in the code make tests fail. Understanding why assertions
+fail reading the logs might be tedious. Hopefully, one can use our custom
+`QUnit.debug` function instead of `QUnit.test` (basically, rename `ŧest` into
+`debug` for the failing test). With this, the target returned by `getFixture`
+will be `document.body`, so that what has been inserted into the DOM is visible,
+and can be directly interacted with.

@@ -5,6 +5,7 @@ import * as QUnit from "qunit";
 // -----------------------------------------------------------------------------
 
 QUnit.config.autostart = false;
+QUnit.config.testTimeout = 1 * 60 * 1000;
 
 // -----------------------------------------------------------------------------
 // QUnit assert
@@ -103,6 +104,39 @@ QUnit.assert.containsNone = containsNone;
 QUnit.assert.containsOnce = containsOnce;
 QUnit.assert.doesNotHaveClass = doesNotHaveClass;
 QUnit.assert.hasClass = hasClass;
+
+// -----------------------------------------------------------------------------
+// QUnit debug
+// -----------------------------------------------------------------------------
+
+/**
+ * For debug purposes, we add a "debug" function to the QUnit object. It has the
+ * same API as "QUnit.test", but before executing the test (in only mode), it
+ * sets a "debug" flag to true on QUnit.config. This flag can then be used in
+ * helpers to change the default target to document.body or add extra logs.
+ */
+
+type TestCallback = (assert: Assert) => void | Promise<any>;
+type QUnitTest = (name: string, callback: TestCallback) => void;
+
+declare global {
+  interface Config {
+    debug: boolean;
+  }
+  interface QUnit {
+    debug: QUnitTest;
+  }
+}
+
+const QUnitCopy = QUnit as any; // to remove rollup warnings
+QUnitCopy.debug = (name: string, cb: TestCallback) => {
+  QUnit.config.debug = true;
+  QUnit.only(name, cb);
+};
+
+// -----------------------------------------------------------------------------
+// QUnit logs
+// -----------------------------------------------------------------------------
 
 /**
  * If we want to log several errors, we have to log all of them at once, as

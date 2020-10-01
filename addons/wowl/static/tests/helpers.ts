@@ -22,7 +22,7 @@ export async function mount<T extends Type<Component>>(
 ): Promise<InstanceType<T>> {
   ((C as any) as typeof Component).env = params.env;
   const component: Component = new C(null);
-  await component.mount(params.target);
+  await component.mount(params.target, { position: "first-child" });
   return component as any;
 }
 
@@ -44,7 +44,11 @@ export async function makeTestEnv(params: TestEnvParam = {}): Promise<OdooEnv> {
 }
 
 export function getFixture(): HTMLElement {
-  return document.querySelector("#qunit-fixture") as HTMLElement;
+  if (QUnit.config.debug) {
+    return document.body;
+  } else {
+    return document.querySelector("#qunit-fixture") as HTMLElement;
+  }
 }
 
 export async function nextTick(): Promise<void> {
