@@ -6,7 +6,7 @@ import werkzeug
 from odoo import http
 from odoo.exceptions import AccessError
 from odoo.http import request
-from odoo.tools import ustr
+from odoo.tools import ustr, config
 
 from .helpers import HomeStaticTemplateHelpers, get_files
 
@@ -31,6 +31,7 @@ class WowlClient(http.Controller):
             context = {
                 "session_info": session_info,
                 "scssFiles": get_files('style'),
+                'live_reload': 'all' in config['dev_mode'],
             }
             response = request.render('wowl.root', qcontext=context)
             response.headers['X-Frame-Options'] = 'DENY'
@@ -66,9 +67,4 @@ class WowlClient(http.Controller):
 
     @http.route('/wowl/tests', type='http', auth="user")
     def test_suite(self, **kw):
-        live_reload = request.params.get('live_reload', '1')
-        try:
-            live_reload = bool(json.loads(live_reload))
-        except Exception:
-            live_reload = False
-        return request.render('wowl.qunit_suite', {'live_reload': live_reload})
+        return request.render('wowl.qunit_suite', {'live_reload': 'all' in config['dev_mode']})

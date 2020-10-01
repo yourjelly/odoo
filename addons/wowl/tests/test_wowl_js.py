@@ -5,4 +5,4 @@ import odoo.tests
 class WebSuite(odoo.tests.HttpCase):
 
     def test_wowl(self):
-        self.browser_js('/wowl/tests?live_reload=0', "", "", login='admin', timeout=1800)
+        self.browser_js('/wowl/tests', "", "", login='admin', timeout=1800)
