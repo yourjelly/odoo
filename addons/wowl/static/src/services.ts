@@ -29,9 +29,12 @@ export interface Services {
 export interface Service<T = any> {
   name: string;
   dependencies?: string[];
+
   deploy:
     | ((env: OdooEnv, odooGlobal?: Odoo) => Promise<T>)
     | ((env: OdooEnv, odooGlobal?: Odoo) => T);
+
+  specialize?(component: Component, value: T): T;
 }
 
 // -----------------------------------------------------------------------------
@@ -39,11 +42,13 @@ export interface Service<T = any> {
 // -----------------------------------------------------------------------------
 export function useService<T extends keyof Services>(serviceName: T): Services[T] {
   const component = Component.current as Component<any, OdooEnv>;
-  const service = component.env.services[serviceName];
+  const env = component.env;
+  const service = env.services[serviceName];
   if (!service) {
     throw new Error(`Service ${serviceName} is not available`);
   }
-  return typeof service === "function" ? service.bind(component) : service;
+  const specialize = env.registries.services.get(serviceName as any).specialize;
+  return specialize ? specialize(component, service) : service;
 }
 
 export const serviceRegistry = new Registry<Service<any>>();

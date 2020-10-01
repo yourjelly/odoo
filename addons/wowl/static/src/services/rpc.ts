@@ -1,5 +1,6 @@
 import { Component } from "@odoo/owl";
 import type { OdooEnv } from "../env";
+import { Service } from "../services";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -121,12 +122,20 @@ function jsonrpc(query: RPCQuery, env: OdooEnv): Promise<any> {
 // RPC service
 // -----------------------------------------------------------------------------
 
-export const rpcService = {
+export const rpcService: Service<RPC> = {
   dependencies: ["user"],
   name: "rpc",
   deploy(env: OdooEnv): RPC {
-    return async function (this: Component | null, query: RPCQuery): Promise<any> {
-      const result = await jsonrpc(query, env);
+    return async function (query: RPCQuery): Promise<any> {
+      return await jsonrpc(query, env);
+    };
+  },
+  specialize(component, rpc: RPC): RPC {
+    return async function (this: Component, query) {
+      if (component.__owl__.isDestroyed) {
+        throw new Error("A destroyed component should never initiate a RPC");
+      }
+      const result = await rpc(query);
       if (this instanceof Component && this.__owl__.isDestroyed) {
         return new Promise(() => {});
       }

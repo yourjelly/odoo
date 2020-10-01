@@ -10,6 +10,7 @@ import {
   mount,
   Deferred,
   makeDeferred,
+  nextTick,
 } from "../helpers";
 
 const { xml } = tags;
@@ -229,9 +230,28 @@ QUnit.test("rpc coming from destroyed components are left pending", async (asser
 
   component.destroy();
   def.resolve();
-  await Promise.resolve();
-  await Promise.resolve();
+  await nextTick();
 
   assert.strictEqual(isResolved, false);
   assert.strictEqual(isFailed, false);
+});
+
+QUnit.test("rpc initiated from destroyed components throw exception", async (assert) => {
+  assert.expect(1);
+  class MyComponent extends Component {
+    static template = xml`<div/>`;
+    rpc = useService("rpc");
+  }
+
+  const env = await makeTestEnv({
+    services: serviceRegistry,
+  });
+
+  const component = await mount(MyComponent, { env, target: getFixture() });
+  component.destroy();
+  try {
+    await component.rpc({ route: "/my/route" });
+  } catch (e) {
+    assert.strictEqual(e.message, "A destroyed component should never initiate a RPC");
+  }
 });

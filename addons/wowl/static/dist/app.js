@@ -65,11 +65,13 @@
     // -----------------------------------------------------------------------------
     function useService(serviceName) {
         const component = owl.Component.current;
-        const service = component.env.services[serviceName];
+        const env = component.env;
+        const service = env.services[serviceName];
         if (!service) {
             throw new Error(`Service ${serviceName} is not available`);
         }
-        return typeof service === "function" ? service.bind(component) : service;
+        const specialize = env.registries.services.get(serviceName).specialize;
+        return specialize ? specialize(component, service) : service;
     }
     async function deployServices(env, registry, odooGlobal) {
         const services = env.services;
@@ -454,7 +456,15 @@
         name: "rpc",
         deploy(env) {
             return async function (query) {
-                const result = await jsonrpc(query, env);
+                return await jsonrpc(query, env);
+            };
+        },
+        specialize(component, rpc) {
+            return async function (query) {
+                if (component.__owl__.isDestroyed) {
+                    throw new Error("A destroyed component should never initiate a RPC");
+                }
+                const result = await rpc(query);
                 if (this instanceof owl.Component && this.__owl__.isDestroyed) {
                     return new Promise(() => { });
                 }
