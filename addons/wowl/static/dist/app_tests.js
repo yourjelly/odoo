@@ -1,28 +1,6 @@
 (function (owl, QUnit$1) {
     'use strict';
 
-    function _interopNamespace(e) {
-        if (e && e.__esModule) return e;
-        var n = Object.create(null);
-        if (e) {
-            Object.keys(e).forEach(function (k) {
-                if (k !== 'default') {
-                    var d = Object.getOwnPropertyDescriptor(e, k);
-                    Object.defineProperty(n, k, d.get ? d : {
-                        enumerable: true,
-                        get: function () {
-                            return e[k];
-                        }
-                    });
-                }
-            });
-        }
-        n['default'] = e;
-        return Object.freeze(n);
-    }
-
-    var QUnit__namespace = /*#__PURE__*/_interopNamespace(QUnit$1);
-
     /**
      * Registry
      *
@@ -364,7 +342,7 @@
     QUnit$1.assert.containsOnce = containsOnce;
     QUnit$1.assert.doesNotHaveClass = doesNotHaveClass;
     QUnit$1.assert.hasClass = hasClass;
-    const QUnitCopy = QUnit__namespace; // to remove rollup warnings
+    const QUnitCopy = QUnit$1; // to remove rollup warnings
     QUnitCopy.debug = (name, cb) => {
         QUnit$1.config.debug = true;
         QUnit$1.only(name, cb);

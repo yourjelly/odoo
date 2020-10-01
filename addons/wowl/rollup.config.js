@@ -17,5 +17,6 @@ export default [{
     name: "wowl",
     extend: true,
     globals: { "@odoo/owl": "owl", "qunit": "QUnit" },
+    interop: false, // to be allowed to add a 'debug' function on the QUnit object
   },
 }];
