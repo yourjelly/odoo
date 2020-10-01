@@ -72,6 +72,17 @@ If an rpc fails, then:
   Another possibility is a network error. In that case, the error description is
   simply an object `{type: 'network'}`.
 
+## Specialized behaviour for components
+
+The `rpc` service has a specialization to make using it with component safer. It
+does two things:
+
+- if a component is destroyed at the moment an rpc is initiated, an error will
+  be thrown. This is considered an error, a destroyed component should be inert.
+- if a component is destroyed when a rpc is completed, which is a normal situation
+  in an application, then the promise is simply left pending, to prevent any
+  followup code to execute.
+
 ## Notes
 
 - If an rpc fails, then an event `RPC_ERROR` will be triggered on the main bus.

@@ -32,10 +32,14 @@ available to the interface (and to other services).
 A service needs to follow the following interface:
 
 ```ts
-interface Service {
+export interface Service<T = any> {
   name: string;
   dependencies?: string[];
-  start(env: OdooEnv): any;
+  deploy:
+    | ((env: OdooEnv, odooGlobal?: Odoo) => Promise<T>)
+    | ((env: OdooEnv, odooGlobal?: Odoo) => T);
+
+  specialize?(component: Component, value: T): T;
 }
 ```
 
@@ -43,12 +47,17 @@ The name is simply a short unique string representing the service, such as `rpc`
 It may define some `dependencies`. In that case, the dependent services will be
 started first, and ready when the current service is started.
 
-Finally, the `start` method is the most important: it will be executed as soon
+The `deploy` method is the most important: it will be executed as soon
 as the service infrastructure is deployed (so, even before the web client is
-instantiated), and the return value of the `start` method will be the value of
-the service.
+instantiated), and the return value of the `deploy` method will be the value of
+the service. This method can also be asynchronous, in which case the value of
+the service will be the result of that promise.
 
-TODO: explain how a service can access a dependent service.
+Finally, the `specialize` method is useful in some cases where a service need to
+provide additional behaviour whenever a component is using a service. This
+method get the value of the service, and should return it, or at least, something
+that provides the same API. An example of a use for this function is the service
+`rpc`, which performs a check to see if the component is destroyed or not.
 
 Once a service is defined, it needs then to be registered to the `serviceRegistry`,
 to make sure it is properly deployed when the application is started.
