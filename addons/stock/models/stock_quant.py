@@ -360,22 +360,19 @@ class QuantPackage(models.Model):
         'res.company', 'Company', compute='_compute_package_info',
         index=True, readonly=True, store=True)
     owner_id = fields.Many2one(
-        'res.partner', 'Owner', compute='_compute_package_info', search='_search_owner',
+        'res.partner', 'Owner', compute='_compute_package_owner', search='_search_owner',
         index=True, readonly=True)
 
-    @api.depends('quant_ids.package_id', 'quant_ids.location_id', 'quant_ids.company_id', 'quant_ids.owner_id', 'quant_ids.quantity', 'quant_ids.reserved_quantity')
+    @api.depends('quant_ids.package_id', 'quant_ids.location_id', 'quant_ids.company_id', 'quant_ids.quantity', 'quant_ids.reserved_quantity')
     def _compute_package_info(self):
         for package in self:
-            values = {'location_id': False, 'company_id': self.env.user.company_id.id, 'owner_id': False}
+            values = {'location_id': False, 'company_id': self.env.user.company_id.id}
             if package.quant_ids:
                 values['location_id'] = package.quant_ids[0].location_id
-                if all(q.owner_id == package.quant_ids[0].owner_id for q in package.quant_ids):
-                    values['owner_id'] = package.quant_ids[0].owner_id
                 if all(q.company_id == package.quant_ids[0].company_id for q in package.quant_ids):
                     values['company_id'] = package.quant_ids[0].company_id
             package.location_id = values['location_id']
             package.company_id = values['company_id']
-            package.owner_id = values['owner_id']
 
     def name_get(self):
         return list(self._compute_complete_name().items())
@@ -387,6 +384,14 @@ class QuantPackage(models.Model):
             name = package.name
             res[package.id] = name
         return res
+
+    @api.depends("quant_ids.owner_id")
+    def _compute_package_owner(self):
+        for package in self:
+            if package.quant_ids and all(q.owner_id == package.quant_ids[0].owner_id for q in package.quant_ids):
+                package.owner_id = package.quant_ids[0].owner_id
+            else:
+                package.owner_id = False
 
     def _search_owner(self, operator, value):
         if value:
