@@ -30,10 +30,7 @@ export interface Service<T = any> {
   name: string;
   dependencies?: string[];
 
-  deploy:
-    | ((env: OdooEnv, odooGlobal?: Odoo) => Promise<T>)
-    | ((env: OdooEnv, odooGlobal?: Odoo) => T);
-
+  deploy: (env: OdooEnv, odooGlobal?: Odoo) => (Promise<T> | T);
   specialize?(component: Component, value: T): T;
 }
 

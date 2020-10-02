@@ -506,7 +506,7 @@
 
     const crashManagerService = {
         name: "crashmanager",
-        async deploy(env) {
+        deploy(env) {
             const console = env.browser.console;
             env.bus.on("RPC_ERROR", null, (error) => {
                 console.error(error);
