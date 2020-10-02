@@ -47,6 +47,9 @@
             outline: none;
             box-shadow: none;
         }
+        .fa {
+            font-size: $o-we-font-size + 5;
+        }
     }
 
     .dropdown-menu {
