@@ -149,3 +149,22 @@ QUnit.test("throw an error if missing dependency", async (assert) => {
     assert.ok(true);
   }
 });
+
+QUnit.test("throw an error when there is a cycle in service dependencies", async (assert) => {
+  assert.expect(1);
+  registry.add("a", {
+    name: "a",
+    dependencies: ['b'],
+    deploy: () => {},
+  });
+  registry.add("b", {
+    name: "b",
+    dependencies: ['a'],
+    deploy: () => {},
+  });
+  try {
+    await deployServices(env, registry);
+  } catch (e) {
+    assert.ok(e.message.startsWith("Some services could not be deployed"));
+  }
+});

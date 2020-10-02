@@ -84,7 +84,7 @@ export async function deployServices(
   await deploy();
 
   if (toBeDeployed.size) {
-    throw new Error("Some services could not be deployed");
+    throw new Error(`Some services could not be deployed: ${[...toBeDeployed].map(s => s.name)}`);
   }
 
   function findNext(): Service | null {

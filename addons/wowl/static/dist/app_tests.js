@@ -94,7 +94,7 @@
         }
         await deploy();
         if (toBeDeployed.size) {
-            throw new Error("Some services could not be deployed");
+            throw new Error(`Some services could not be deployed: ${[...toBeDeployed].map(s => s.name)}`);
         }
         function findNext() {
             for (let s of toBeDeployed) {
@@ -1278,6 +1278,25 @@
         }
         catch (e) {
             assert.ok(true);
+        }
+    });
+    QUnit$1.test("throw an error when there is a cycle in service dependencies", async (assert) => {
+        assert.expect(1);
+        registry.add("a", {
+            name: "a",
+            dependencies: ['b'],
+            deploy: () => { },
+        });
+        registry.add("b", {
+            name: "b",
+            dependencies: ['a'],
+            deploy: () => { },
+        });
+        try {
+            await deployServices(env$2, registry);
+        }
+        catch (e) {
+            assert.ok(e.message.startsWith("Some services could not be deployed"));
         }
     });
 
