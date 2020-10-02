@@ -347,8 +347,6 @@ body .modal {
         .o_link_dialog_preview {
             border-left: 1px solid gray('200');
             #link-preview a {
-                margin-bottom: 20px;
-                display: block;
                 &:first-child {
                     display: none;
                 }
