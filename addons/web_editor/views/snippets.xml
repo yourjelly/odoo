@@ -2,6 +2,9 @@
 <odoo>
 <template id="snippets" groups="base.group_user">
     <div class="o_we_website_top_actions d-none">
+        <div class="o_we_external_history_buttons">
+            <!-- Will be populated externally by Jabberwock/Wysiwyg -->
+        </div>
         <form class="ml-auto">
             <button type="button" class="btn btn-secondary" name="mobile" data-action="mobile"><i class="fa fa-mobile"></i></button>
             <button type="button" class="btn btn-secondary" name="cancel" data-action="cancel" accesskey="j">Discard</button>
