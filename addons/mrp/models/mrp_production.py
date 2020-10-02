@@ -103,6 +103,7 @@ class MrpProduction(models.Model):
         states={'draft': [('readonly', False)]}, domain="[('category_id', '=', product_uom_category_id)]")
     lot_producing_id = fields.Many2one(
         'stock.production.lot', string='Lot/Serial Number', copy=False,
+        states={'cancel': [('readonly', True)], 'done': [('readonly', True)]},
         domain="[('product_id', '=', product_id), ('company_id', '=', company_id)]", check_company=True)
     qty_producing = fields.Float(string="Quantity Producing", digits='Product Unit of Measure', copy=False)
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id')
@@ -128,6 +129,7 @@ class MrpProduction(models.Model):
         help="Location where the system will stock the finished products.")
     date_planned_start = fields.Datetime(
         'Scheduled Date', copy=False, default=_get_default_date_planned_start,
+        states={'cancel': [('readonly', True)], 'to_close': [('readonly', True)], 'done': [('readonly', True)]},
         help="Date at which you plan to start the production.",
         index=True, required=True)
     date_planned_finished = fields.Datetime(
