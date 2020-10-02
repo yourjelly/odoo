@@ -21,6 +21,7 @@
 
 // EDITOR TOP BAR AND POPOVER
 #oe_snippets .o_we_website_top_actions {
+    display: flex;
     height: $o-we-sidebar-top-height;
     background-color: $o-we-sidebar-tabs-bg;
 
