@@ -383,9 +383,11 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
         }).then(function (questionResults) {
             if (questionResults) {
                 self.attendeesCount = questionResults.attendees_count;
+                var graphStatistics = JSON.parse(questionResults.question_statistics_graph);
+                self.maxAnswerCount = self._getMaxAnswerCount(graphStatistics[0]);
 
                 if (self.resultsChart && questionResults.question_statistics_graph) {
-                    self.resultsChart.updateChart(JSON.parse(questionResults.question_statistics_graph), self.attendeesCount);
+                    self.resultsChart.updateChart(graphStatistics, self.maxAnswerCount);
                 } else if (self.textAnswers) {
                     self.textAnswers.updateTextAnswers(questionResults.input_line_values);
                 }
@@ -409,6 +411,20 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
             clearInterval(self.resultsRefreshInterval);
             delete self.resultsRefreshInterval;
         });
+    },
+
+    /**
+     * Extract the count of the most voted answer for the given question's graph statistics.
+     * This method is used to scale the graph and make sure the most voted answer always takes the whole graph height.
+     *
+     * @private
+     */
+    _getMaxAnswerCount: function (graph_statistics) {
+        var maxAnswerCount = 0;
+        $.each(graph_statistics['values'], function (idx, choice) {
+            maxAnswerCount = choice['count'] > maxAnswerCount ? choice['count'] : maxAnswerCount;
+        });
+        return maxAnswerCount;
     },
 
     /**
