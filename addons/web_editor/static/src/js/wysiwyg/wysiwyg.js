@@ -418,6 +418,18 @@ var Wysiwyg = Widget.extend({
             classes = (linkAttributes && linkAttributes.get('class')) || '';
             target = linkAttributes && linkAttributes.get('target');
         }
+
+        const coloredLevelParent = node.ancestor(cNode => {
+            const attributes = cNode.modifiers.find(JWEditorLib.Attributes);
+            return attributes && attributes.get('class').includes('o_cc')
+        });
+
+        let colorCombinationClass = "";
+        if (coloredLevelParent) {
+            let allClasses = coloredLevelParent.modifiers.find(JWEditorLib.Attributes).get('class').split(" ");
+            colorCombinationClass = allClasses.find(classStr => classStr.match(/o_cc[0-9]+/));
+        }
+
         const linkDialog = new weWidgets.LinkDialog(this,
             {
                 props: {
@@ -425,6 +437,7 @@ var Wysiwyg = Widget.extend({
                     images: images,
                     url: linkFormat && linkFormat.url || '',
                     initialClassNames: classes,
+                    colorCombinationClass: colorCombinationClass,
                     target: target,
                 },
             },
