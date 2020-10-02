@@ -277,6 +277,10 @@ var Wysiwyg = Widget.extend({
             }, this.options));
             await this.snippetsMenu.appendTo($mainSidebar);
 
+            // Place the history buttons in their right location.
+            $('.o_we_website_top_actions .o_we_external_history_buttons').append($('button[data-action=undo]'));
+            $('.o_we_website_top_actions .o_we_external_history_buttons').append($('button[data-action=redo]'));
+
             this.$el.on('content_changed', function (e) {
                 self.trigger_up('wysiwyg_change');
             });
