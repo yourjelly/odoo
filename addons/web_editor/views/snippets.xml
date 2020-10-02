@@ -3,7 +3,7 @@
 <template id="snippets" groups="base.group_user">
     <div class="o_we_website_top_actions d-none">
         <form class="ml-auto">
-            <button type="button" class="btn btn-secondary" name="mobile" data-action="mobile">Mobile preview</button>
+            <button type="button" class="btn btn-secondary" name="mobile" data-action="mobile"><i class="fa fa-mobile"></i></button>
             <button type="button" class="btn btn-secondary" name="cancel" data-action="cancel" accesskey="j">Discard</button>
             <button type="button" class="btn btn-primary" name="save" data-action="save" accesskey="s">Save</button>
         </form>
