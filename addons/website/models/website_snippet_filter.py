@@ -5,7 +5,6 @@ from collections import OrderedDict
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
-from odoo.tools import html_escape as escape
 from lxml import etree as ET
 
 
