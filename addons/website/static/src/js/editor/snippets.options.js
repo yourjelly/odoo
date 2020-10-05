@@ -1647,7 +1647,7 @@ snippetOptions.registry.Parallax = snippetOptions.SnippetOptionWidget.extend({
             name: 'setTargetDependency',
             data: () => {
                 const parallaxEl = this.getParallaxEl();
-                return parallaxEl ? $(parallaxEl) : this.$target
+                return parallaxEl ? $(parallaxEl) : this.$target;
             },
         });
     },
