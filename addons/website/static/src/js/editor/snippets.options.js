@@ -1183,21 +1183,31 @@ snippetOptions.registry.Carousel = snippetOptions.SnippetOptionWidget.extend({
      * @override
      */
     onBuilt: function () {
-        this._assignUniqueID();
+        return this._assignUniqueID();
     },
     /**
      * @override
      */
     onClone: function () {
-        this._assignUniqueID();
+        return this._assignUniqueID();
     },
     /**
      * @override
      */
-    cleanForSave: function () {
+    cleanForSave: async function () {
         const $items = this.$target.find('.carousel-item');
         $items.removeClass('next prev left right active').first().addClass('active');
         this.$indicators.find('li').removeClass('active').empty().first().addClass('active');
+        await this._updateChangesInWysiwyg();
+    },
+    /**
+     * @override
+     */
+    notify: async function (name, data) {
+        if (name === 'refreshCarousel') {
+            await this._updateChangesInWysiwyg();
+            data.resolve();
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -1242,7 +1252,7 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
      */
     destroy: function () {
         this._super(...arguments);
-        this.$carousel.off('.carousel_item_option');
+        this.$target.closest('.carousel').off('.carousel_item_option');
     },
     /**
      * @override
@@ -1263,6 +1273,7 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
      */
     updateUI: async function () {
         await this._super(...arguments);
+        this._setupCarousel();
         const $items = this.$carousel.find('.carousel-item');
         const $activeSlide = $items.filter('.active');
         const updatedText = ` (${$activeSlide.index() + 1}/${$items.length})`;
@@ -1279,10 +1290,11 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
      * @see this.selectClass for parameters
      */
     addSlide: async function (previewMode) {
+        this._setupCarousel();
         const $items = this.$carousel.find('.carousel-item');
         this.$controls.removeClass('d-none');
         this.$indicators.append($('<li>', {
-            'data-target': '#' + this.$target.attr('id'),
+            'data-target': '#' + this.$carousel.attr('id'),
             'data-slide-to': $items.length,
         }));
         this.$indicators.append(' ');
@@ -1291,8 +1303,16 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
         $active.clone(false)
             .removeClass('active')
             .insertAfter($active);
+
+        await new Promise((resolve) => {
+            this.trigger_up('option_update', {
+                optionName: 'Carousel',
+                name: 'refreshCarousel',
+                data: { resolve: resolve },
+            });
+        });
+
         this.$carousel.carousel('next');
-        this._updateChangesInWysiwyg();
     },
     /**
      * Removes the current slide.
@@ -1300,6 +1320,7 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
      * @see this.selectClass for parameters.
      */
     removeSlide: async function (previewMode) {
+        this._setupCarousel();
         const $items = this.$carousel.find('.carousel-item');
         const newLength = $items.length - 1;
         if (!this.removing && newLength > 0) {
@@ -1324,6 +1345,7 @@ snippetOptions.registry.CarouselItem = snippetOptions.SnippetOptionWidget.extend
      * @see this.selectClass for parameters
      */
     slide: async function (previewMode, widgetValue, params) {
+        this._setupCarousel();
         switch (widgetValue) {
             case 'left':
                 this.$controls.filter('.carousel-control-prev')[0].click();
