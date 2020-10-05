@@ -93,20 +93,6 @@ weSnippetEditor.SnippetsMenu.include({
         });
     },
     /**
-     * @override
-     */
-    _getScrollOptions(options = {}) {
-        const finalOptions = this._super(...arguments);
-        if (!options.offsetElements || !options.offsetElements.$top) {
-            const $header = $('#top');
-            if ($header.length) {
-                finalOptions.offsetElements = finalOptions.offsetElements || {};
-                finalOptions.offsetElements.$top = $header;
-            }
-        }
-        return finalOptions;
-    },
-    /**
      * @private
      * @param {OdooEvent} ev
      * @param {string} gmapRequestEventName

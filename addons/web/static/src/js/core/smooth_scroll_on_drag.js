@@ -5,48 +5,6 @@ const Class = require('web.Class');
 const mixins = require('web.mixins');
 
 /**
- * Provides a helper for SmoothScrollOnDrag options.offsetElements
- */
-const OffsetElementsHelper = Class.extend({
-
-    /**
-     * @constructor
-     * @param {Object} offsetElements
-     * @param {jQuery} [offsetElements.$top] top offset element
-     * @param {jQuery} [offsetElements.$right] right offset element
-     * @param {jQuery} [offsetElements.$bottom] bottom offset element
-     * @param {jQuery} [offsetElements.$left] left offset element
-     */
-    init: function (offsetElements) {
-        this.offsetElements = offsetElements;
-    },
-    top: function () {
-        if (!this.offsetElements.$top || !this.offsetElements.$top.length) {
-            return 0;
-        }
-        return this.offsetElements.$top.get(0).getBoundingClientRect().bottom;
-    },
-    right: function () {
-        if (!this.offsetElements.$right || !this.offsetElements.$right.length) {
-            return 0;
-        }
-        return this.offsetElements.$right.get(0).getBoundingClientRect().left;
-    },
-    bottom: function () {
-        if (!this.offsetElements.$bottom || !this.offsetElements.$bottom.length) {
-            return 0;
-        }
-        return this.offsetElements.$bottom.get(0).getBoundingClientRect().top;
-    },
-    left: function () {
-        if (!this.offsetElements.$left || !this.offsetElements.$left.length) {
-            return 0;
-        }
-        return this.offsetElements.$left.get(0).getBoundingClientRect().right;
-    },
-});
-
-/**
  * Provides smooth scroll behaviour on drag.
  */
 const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
@@ -55,8 +13,8 @@ const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
      * @constructor
      * @param {Object} parent The parent widget that uses this class.
      * @param {jQuery} $element The element the smooth scroll on drag has to be set on.
-     * @param {jQuery} $container Container for drop element. $scrollTarget is this closest
-     *        scrollable parent element.
+     * @param {jQuery} $container Container for drop element.
+     *        scrollTarget will be found with the closest scrollable parents.
      * @param {Object} [options={}]
      * @param {Object} [options.jQueryDraggableOptions={}] The configuration to be passed to
      *        the jQuery draggable function (all will be passed except scroll which will
@@ -77,20 +35,6 @@ const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
      *        when dragging $element bellow the bottom edge of target.
      * @param {Object} [options.scrollBoundaries.left = true] Specifies whether scroll can still be triggered
      *        when dragging $element before the left edge of target.
-     * @param {Object} [options.offsetElements={}] Visible elements in $scrollTarget that
-     *        reduce $scrollTarget drag visible area (scroll will be triggered sooner than
-     *        normally). A selector is passed so that elements such as automatically hidden
-     *        menu can then be correctly handled.
-     * @param {jQuery} [options.offsetElements.$top] Visible top offset element which height will
-     *        be taken into account when triggering scroll at the top of the $scrollTarget.
-     * @param {jQuery} [options.offsetElements.$right] Visible right offset element which width
-     *        will be taken into account when triggering scroll at the right side of the
-     *        $scrollTarget.
-     * @param {jQuery} [options.offsetElements.$bottom] Visible bottom offset element which height
-     *        will be taken into account when triggering scroll at bottom of the $scrollTarget.
-     * @param {jQuery} [options.offsetElements.$left] Visible left offset element which width
-     *        will be taken into account when triggering scroll at the left side of the
-     *        $scrollTarget.
      * @param {Function<jQuery>} [options.dropzones] Function must return a JQuery list of dropzone elements.
      * @param {Function<ui, droppable>} [options.over] Callback triggered when the draggable element is
      *         over a dropzone (requiered with options.dropzones).
@@ -109,9 +53,7 @@ const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
         this.options.jQueryDraggableOptions = this.options.jQueryDraggableOptions || {};
         this.options.scrollOffsetThreshold = this.options.scrollOffsetThreshold || 150;
         this.options.scrollStep = this.options.scrollStep || 20;
-        this.options.scrollTimerInterval = this.options.scrollTimerInterval || 5;
-        this.options.offsetElements = this.options.offsetElements || {};
-        this.options.offsetElementsManager = new OffsetElementsHelper(this.options.offsetElements);
+        this.options.scrollTimerInterval = this.options.scrollTimerInterval || 16;
         this.options.scrollBoundaries = Object.assign({
             top: true,
             right: true,
@@ -161,56 +103,44 @@ const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
         this._stopSmoothScroll();
         this.autoScrollHandler = setInterval(
             () => {
-                // Prevents Delta's from being different from 0 when scroll should not occur (except when
-                // helper is dragged outside of this.$scrollTarget's visible area as it increases
-                // this.$scrollTarget's scrollHeight).
-                // Also, this code prevents the helper from being incorrectly repositioned when target is
-                // a child of this.$scrollTarget.
-                this.verticalDelta = Math.min(
-                    // Ensures scrolling stops when dragging bellow this.$scrollTarget bottom.
-                    Math.max(
-                        0,
-                        this.$scrollTarget.get(0).scrollHeight
-                        - (this.$scrollTarget.scrollTop() + this.$scrollTarget.innerHeight())
-                    ),
-                    // Ensures scrolling stops when dragging above this.$scrollTarget top.
-                    Math.max(
-                        this.verticalDelta,
-                        -this.$scrollTarget.scrollTop()
-                    )
-                );
-                this.horizontalDelta = Math.min(
-                    //Ensures scrolling stops when dragging left to this.$scrollTarget.
-                    Math.max(
-                        0,
-                        this.$scrollTarget.get(0).scrollWidth
-                        - (this.$scrollTarget.scrollLeft() + this.$scrollTarget.innerWidth())
-                    ),
-                    //Ensures scrolling stops when dragging right to this.$scrollTarget.
-                    Math.max(
-                        this.horizontalDelta,
-                        -this.$scrollTarget.scrollLeft()
-                    )
-                );
-
-                // Keep helper at right position while scrolling when helper is a child of this.$scrollTarget.
-                if (this.scrollTargetIsParent) {
-                    const offset = ui.helper.offset();
-                    ui.helper.offset({
-                        top: offset.top + this.verticalDelta,
-                        left: offset.left + this.horizontalDelta
-                    });
+                for (const scrollTarget of this.scrollableTargets) {
+                    this._smoothScroll(ui, scrollTarget);
                 }
-                this.$scrollTarget.scrollTop(
-                    this.$scrollTarget.scrollTop() +
-                    this.verticalDelta
-                );
-                this.$scrollTarget.scrollLeft(
-                    this.$scrollTarget.scrollLeft() +
-                    this.horizontalDelta
-                );
             },
-            this.options.scrollTimerInterval
+            this.options.scrollTimerInterval,
+        );
+    },
+    _smoothScroll(ui, scrollTarget) {
+        const delta = this.deltaScrollableTargets.get(scrollTarget);
+        // Prevents Delta's from being different from 0 when scroll should not occur (except when
+        // helper is dragged outside of scrollTarget's visible area as it increases
+        // scrollTarget's scrollHeight).
+        // Also, this code prevents the helper from being incorrectly repositioned when target is
+        // a child of scrollTarget.
+        delta.vertical = Math.min(
+            // Ensures scrolling stops when dragging bellow scrollTarget bottom.
+            Math.max( 0, scrollTarget.scrollHeight - (scrollTarget.scrollTop + scrollTarget.clientHeight)),
+            // Ensures scrolling stops when dragging above scrollTarget top.
+            Math.max(delta.vertical, - scrollTarget.scrollTop)
+        );
+        delta.horizontal = Math.min(
+            //Ensures scrolling stops when dragging left to scrollTarget.
+            Math.max(0, scrollTarget.scrollWidth - (scrollTarget.scrollLeft + scrollTarget.clientWidth)),
+            //Ensures scrolling stops when dragging right to scrollTarget.
+            Math.max(delta.horizontal, - scrollTarget.scrollLeft)
+        );
+
+        // Keep helper at right position while scrolling when helper is a child of scrollTarget.
+        const scrollTargetIsParent = scrollTarget.contains(this.$element.get(0));
+        if (scrollTargetIsParent) {
+            ui.helper.css({
+                'margin-left': parseInt(ui.helper.css('margin-left') || 0) + delta.horizontal,
+                'margin-top': parseInt(ui.helper.css('margin-top') || 0) + delta.vertical,
+            });
+        }
+        scrollTarget.scrollTo(
+            scrollTarget.scrollLeft + delta.horizontal,
+            scrollTarget.scrollTop + delta.vertical,
         );
     },
     /**
@@ -230,38 +160,28 @@ const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
      * @private
      * @param {Object} ui The jQuery drag handler ui parameter.
      */
-    _updatePositionOptions(ui) {
-        const draggableHelperOffset = ui.offset;
-        const scrollTargetOffset = this.$scrollTarget.offset();
+    _getPositionDelta(ui, scrollTarget) {
+        const $scrollTarget = $(scrollTarget);
+        const scrollTargetIsDocument = $scrollTarget.is('html, body');
+        const draggableHelperOffset = ui.helper[0].getBoundingClientRect();
+        const scrollTargetOffset = scrollTarget.getBoundingClientRect();
+
         let visibleOffset = {
             top: draggableHelperOffset.top
                 - scrollTargetOffset.top
-                + this.options.jQueryDraggableOptions.cursorAt.top
-                - this.options.offsetElementsManager.top(),
-            right: scrollTargetOffset.left + this.$scrollTarget.outerWidth()
+                + this.options.jQueryDraggableOptions.cursorAt.top,
+            right: scrollTargetOffset.left
+                + scrollTarget.clientWidth
                 - draggableHelperOffset.left
-                - this.options.jQueryDraggableOptions.cursorAt.left
-                - this.options.offsetElementsManager.right(),
-            bottom: scrollTargetOffset.top + this.$scrollTarget.outerHeight()
+                - this.options.jQueryDraggableOptions.cursorAt.right,
+            bottom: scrollTargetOffset.top
+                + scrollTarget.clientHeight
                 - draggableHelperOffset.top
-                - this.options.jQueryDraggableOptions.cursorAt.top
-                - this.options.offsetElementsManager.bottom(),
+                - this.options.jQueryDraggableOptions.cursorAt.bottom,
             left: draggableHelperOffset.left
                 - scrollTargetOffset.left
-                + this.options.jQueryDraggableOptions.cursorAt.left
-                - this.options.offsetElementsManager.left(),
+                + this.options.jQueryDraggableOptions.cursorAt.left,
         };
-
-        // If this.$scrollTarget is the html tag, we need to take the scroll position in to account
-        // as offsets positions are calculated relative to the document (thus <html>).
-        const scrollTargetScrollTop = this.$scrollTarget.scrollTop();
-        const scrollTargetScrollLeft = this.$scrollTarget.scrollLeft();
-        visibleOffset.top -= scrollTargetScrollTop;
-        visibleOffset.left -= scrollTargetScrollLeft;
-        if (this.scrollTargetIsDocument) {
-            visibleOffset.bottom += scrollTargetScrollTop;
-            visibleOffset.right += scrollTargetScrollLeft;
-        }
 
         const scrollDecelerator = {
             vertical: 0,
@@ -306,12 +226,14 @@ const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
             }
         }
 
-        this.verticalDelta = Math.ceil(scrollStepDirection.vertical *
-            this.options.scrollStep *
-            (1 - Math.sqrt(scrollDecelerator.vertical)));
-        this.horizontalDelta = Math.ceil(scrollStepDirection.horizontal *
-            this.options.scrollStep *
-            (1 - Math.sqrt(scrollDecelerator.horizontal)));
+        return {
+            vertical: Math.ceil(scrollStepDirection.vertical *
+                this.options.scrollStep *
+                (1 - Math.sqrt(scrollDecelerator.vertical))),
+            horizontal: Math.ceil(scrollStepDirection.horizontal *
+                this.options.scrollStep *
+                (1 - Math.sqrt(scrollDecelerator.horizontal))),
+        };
     },
 
     //--------------------------------------------------------------------------
@@ -331,7 +253,11 @@ const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
      * @param {Function} onDragCallback The jQuery drag callback.
      */
     _onSmoothDrag(ev, ui, onDragCallback) {
-        this._updatePositionOptions(ui);
+        for (const scrollTarget of this.scrollableTargets) {
+            const delta = this._getPositionDelta(ui, scrollTarget);
+            this.deltaScrollableTargets.set(scrollTarget, delta);
+        }
+
         if (typeof onDragCallback === 'function') {
             onDragCallback.call(ui.helper, ev, ui);
         }
@@ -392,21 +318,34 @@ const SmoothScrollOnDrag = Class.extend(mixins.ParentedMixin, {
      * @param {Function} onDragStartCallBack The jQuery drag callback.
      */
     _onSmoothDragStart(ev, ui, onDragStartCallBack) {
-        const elementOffset = $(ev.target).offset();
+        const elementOffset = ev.target.getBoundingClientRect();
         this.options.jQueryDraggableOptions.cursorAt = {
             top: ev.pageY - elementOffset.top,
+            right: elementOffset.right - ev.pageX,
+            bottom: elementOffset.bottom - ev.pageY,
             left: ev.pageX - elementOffset.left,
         };
 
+        this.scrollableTargets = [];
+        this.deltaScrollableTargets = new WeakMap();
         let scrollTarget = this.$container[0];
-        while (scrollTarget && scrollTarget.scrollHeight <= scrollTarget.clientHeight) {
+        while (scrollTarget) {
+            if (scrollTarget.nodeType === 1 && scrollTarget.scrollHeight > scrollTarget.clientHeight) {
+                const overflow = window.getComputedStyle(scrollTarget).overflow;
+                if (overflow.includes('auto') || overflow.includes('scroll')) {
+                    this.scrollableTargets.push(scrollTarget);
+                    this.deltaScrollableTargets.set(scrollTarget, {
+                        vertical: 0,
+                        horizontal: 0,
+                    });
+                }
+            }
             scrollTarget = scrollTarget.parentNode;
+            if (scrollTarget && scrollTarget.nodeType === Node.DOCUMENT_FRAGMENT_NODE && scrollTarget.host) {
+                scrollTarget = scrollTarget.host;
+            }
         }
-        this.$scrollTarget = scrollTarget && scrollTarget.nodeType === 1 ? $(scrollTarget) : this.$container;
 
-        this.scrollTargetIsDocument = this.$scrollTarget.is('html');
-        this.scrollTargetIsParent = this.$scrollTarget.get(0).contains(this.$element.get(0));
-        this._updatePositionOptions(ui);
         this._startSmoothScroll(ui);
         if (typeof onDragStartCallBack === 'function') {
             onDragStartCallBack.call(ui.helper, ev, ui);
