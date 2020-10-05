@@ -4272,7 +4272,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
             $element: this.$target,
             previewMode: true,
             saveTarget: true,
-            savePerview: true,
+            savePreview: true,
         });
         this.trigger_up('block_preview_overlays');
 
