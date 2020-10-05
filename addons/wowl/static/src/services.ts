@@ -30,7 +30,7 @@ export interface Service<T = any> {
   name: string;
   dependencies?: string[];
 
-  deploy: (env: OdooEnv, odooGlobal?: Odoo) => (Promise<T> | T);
+  deploy: (env: OdooEnv, odooGlobal?: Odoo) => Promise<T> | T;
   specialize?(component: Component, value: T): T;
 }
 
@@ -84,7 +84,7 @@ export async function deployServices(
   await deploy();
 
   if (toBeDeployed.size) {
-    throw new Error(`Some services could not be deployed: ${[...toBeDeployed].map(s => s.name)}`);
+    throw new Error(`Some services could not be deployed: ${[...toBeDeployed].map((s) => s.name)}`);
   }
 
   function findNext(): Service | null {

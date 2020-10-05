@@ -154,12 +154,12 @@ QUnit.test("throw an error when there is a cycle in service dependencies", async
   assert.expect(1);
   registry.add("a", {
     name: "a",
-    dependencies: ['b'],
+    dependencies: ["b"],
     deploy: () => {},
   });
   registry.add("b", {
     name: "b",
-    dependencies: ['a'],
+    dependencies: ["a"],
     deploy: () => {},
   });
   try {
