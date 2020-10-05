@@ -109,6 +109,7 @@ QUnit.test("can be rendered", async (assert) => {
   // perform some assertion/actions
 });
 ```
+
 ## Debugging a test
 
 Sometimes, changes in the code make tests fail. Understanding why assertions
