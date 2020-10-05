@@ -92,7 +92,7 @@ var SnippetEditor = Widget.extend({
         this.$snippetBlock.data('snippet-editor', this);
         // The following class is a hack. There is a possibility of the
         // `$snippetBlock` to be destroyed at some point.
-        // For example: The method `_updateChangesInWysiwyg` of an "editor option" migth
+        // For example: The method `updateChangesInWysiwyg` of an "editor option" migth
         // erase $snippetBlock that are children on the current "editor option".
         // In that case, the editor of the child will be erased with the method
         // `updateCurrentSnippetEditorOverlay` because it's target will not be
@@ -255,8 +255,9 @@ var SnippetEditor = Widget.extend({
             return;
         }
         await this.toggleTargetVisibility(!this.$snippetBlock.hasClass('o_snippet_invisible'));
-        const proms = _.map(this.snippetOptionInstances, option => {
-            return option.cleanForSave();
+        const proms = _.map(this.snippetOptionInstances, async option => {
+            await option.cleanForSave();
+            return option.updateChangesInWysiwyg();
         });
         await Promise.all(proms);
     },
@@ -620,7 +621,7 @@ var SnippetEditor = Widget.extend({
     /**
      * Reset the options target in case the reference is outdated.
      *
-     * This can happend with the method `_updateChangesInWysiwyg` on a `SnippetOption`.
+     * This can happen with the method `updateChangesInWysiwyg` on a `SnippetOption`.
      *
      * @private
      */
