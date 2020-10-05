@@ -764,7 +764,7 @@ snippetOptions.registry.BackgroundVideo = snippetOptions.SnippetOptionWidget.ext
         }
         await this._refreshPublicWidgets();
 
-        await this._updateChangesInWysiwyg();
+        await this.updateChangesInWysiwyg();
     },
 });
 
@@ -1232,7 +1232,7 @@ snippetOptions.registry.Carousel = snippetOptions.SnippetOptionWidget.extend({
                 $el.attr('href', '#' + id);
             }
         });
-        await this._updateChangesInWysiwyg();
+        await this.updateChangesInWysiwyg();
     },
 });
 
@@ -1484,7 +1484,7 @@ snippetOptions.registry.layout_column = snippetOptions.SnippetOptionWidget.exten
             this.trigger_up('activate_snippet', {$element: this.$('> .row').children().first()});
         }
 
-        if (previewMode === false) await this._updateChangesInWysiwyg();
+        if (previewMode === false) await this.updateChangesInWysiwyg();
     },
 
     //--------------------------------------------------------------------------
@@ -1625,7 +1625,7 @@ snippetOptions.registry.Parallax = snippetOptions.SnippetOptionWidget.extend({
         }
 
         this._updateBackgroundOptions();
-        await this._updateChangesInWysiwyg();
+        await this.updateChangesInWysiwyg();
     },
 
     //--------------------------------------------------------------------------
@@ -2149,7 +2149,7 @@ snippetOptions.registry.Box = snippetOptions.SnippetOptionWidget.extend({
             // In this case, the shadowClass is enough
             this.$target[0].style.setProperty('box-shadow', '');
         }
-        if (previewMode === false) await this._updateChangesInWysiwyg();
+        if (previewMode === false) await this.updateChangesInWysiwyg();
     },
 
     //--------------------------------------------------------------------------
@@ -2295,7 +2295,7 @@ snippetOptions.registry.CookiesBar = snippetOptions.registry.SnippetPopup.extend
 
         $content.empty().append($template);
 
-        if (previewMode === false) await this._updateChangesInWysiwyg();
+        if (previewMode === false) await this.updateChangesInWysiwyg();
     },
 });
 
@@ -2341,7 +2341,7 @@ snippetOptions.registry.CoverProperties = snippetOptions.SnippetOptionWidget.ext
             $defaultSizeBtn.click();
             $defaultSizeBtn.closest('we-select').click();
         }
-        if (previewMode === false) await this._updateChangesInWysiwyg();
+        if (previewMode === false) await this.updateChangesInWysiwyg();
     },
     /**
      * @see this.selectClass for parameters
