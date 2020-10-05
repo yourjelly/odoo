@@ -98,7 +98,7 @@
         }
         await deploy();
         if (toBeDeployed.size) {
-            throw new Error("Some services could not be deployed");
+            throw new Error(`Some services could not be deployed: ${[...toBeDeployed].map(s => s.name)}`);
         }
         function findNext() {
             for (let s of toBeDeployed) {
@@ -503,7 +503,7 @@
 
     const crashManagerService = {
         name: "crashmanager",
-        async deploy(env) {
+        deploy(env) {
             const console = env.browser.console;
             env.bus.on("RPC_ERROR", null, (error) => {
                 console.error(error);
