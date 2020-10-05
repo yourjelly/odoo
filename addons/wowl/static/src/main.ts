@@ -2,7 +2,7 @@ import * as owl from "@odoo/owl";
 import { WebClient } from "./components/webclient/webclient";
 import { makeEnv, OdooBrowser } from "./env";
 import { registries } from "./registries";
-import { Odoo } from "./types";
+import { Odoo, RuntimeOdoo } from "./types";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -30,6 +30,13 @@ declare const odoo: Odoo;
   await whenReady();
   await root.mount(document.body);
 
-  // DEBUG. Remove this someday
-  (window as any).root = root;
+  // prepare runtime Odoo object
+  const sessionInfo = odoo.session_info;
+  delete (odoo as any).session_info;
+  ((odoo as any) as RuntimeOdoo).__DEBUG__ = { root };
+  ((odoo as any) as RuntimeOdoo).info = {
+    db: sessionInfo.db,
+    server_version: sessionInfo.server_version,
+    server_version_info: sessionInfo.server_version_info,
+  };
 })();

@@ -11,5 +11,6 @@
 - [Browser](browser.md)
 - [Bus](bus.md)
 - [Environment](environment.md)
+- [Global odoo object](global_odoo_object.md)
 - [Main Components](main_components.md)
 - [Services](services/readme.md)
