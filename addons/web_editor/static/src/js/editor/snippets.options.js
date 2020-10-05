@@ -3676,7 +3676,7 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
             this.__customImageSrc = widgetValue;
         }
 
-        this._setBackground(widgetValue);
+        this._setBackground(this.$target, widgetValue);
 
         if (previewMode !== 'reset') {
             removeOnImageChangeAttrs.forEach(attr => delete this.$target[0].dataset[attr]);
@@ -3721,13 +3721,16 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
         // When we change the target of this option we need to transfer the
         // background-image from the old target to the new one.
         let oldBgURL;
+        const $previousTarget = this.$target;
         if (this.$target) {
             oldBgURL = getBgImageURL(this.$target);
-            this._setBackground('');
         }
         this._super(...arguments);
         if (oldBgURL) {
-            this._setBackground(oldBgURL);
+            this._setBackground(this.$target, oldBgURL);
+        }
+        if ($previousTarget && $previousTarget[0] !== this.$target[0]) {
+            this._setBackground($previousTarget, '');
         }
 
         // TODO should be automatic for all options as equal to the start method
@@ -3764,13 +3767,13 @@ registry.BackgroundImage = SnippetOptionWidget.extend({
      * @private
      * @param {string} backgroundURL
      */
-    _setBackground(backgroundURL) {
+    _setBackground($target, backgroundURL) {
         if (backgroundURL) {
-            this.$target.css('background-image', `url('${backgroundURL}')`);
-            this.$target.addClass('oe_img_bg');
+            $target.css('background-image', `url('${backgroundURL}')`);
+            $target.addClass('oe_img_bg');
         } else {
-            this.$target.css('background-image', '');
-            this.$target.removeClass('oe_img_bg');
+            $target.css('background-image', '');
+            $target.removeClass('oe_img_bg');
         }
     },
 });
