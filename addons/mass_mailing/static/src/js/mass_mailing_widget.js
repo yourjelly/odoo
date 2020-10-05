@@ -270,7 +270,7 @@ var MassMailingFieldHtml = FieldHtml.extend({
         if ($layout.length) {
             let $contents = $layout.contents();
             const classNameThemeId = [].find.call($layout[0].classList, className => className.includes('_theme'));
-            themeId = classNameThemeId && classNameThemeId.slice(2, -6);
+            themeId = classNameThemeId && ('theme-' + classNameThemeId.slice(2, -6));
             const $td = $contents.find('.o_mail_wrapper_td');
             if ($td.length) {
                 $contents = $td.contents();
