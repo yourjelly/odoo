@@ -276,13 +276,6 @@ class Website(Home):
         )
         return dynamic_filter and dynamic_filter.render(template_key, limit, search_domain) or ''
 
-    @http.route('/website/snippet/filters', type='json', auth='public', website=True)
-    def get_dynamic_filter(self, filter_id, template_key, limit=None, search_domain=None):
-        dynamic_filter = request.env['website.snippet.filter'].sudo().search(
-            [('id', '=', filter_id)] + request.website.website_domain()
-        )
-        return dynamic_filter and dynamic_filter.render(template_key, limit, search_domain) or ''
-
     @http.route('/website/snippet/options_filters', type='json', auth='user', website=True)
     def get_dynamic_snippet_filters(self):
         dynamic_filter = request.env['website.snippet.filter'].sudo().search_read(
