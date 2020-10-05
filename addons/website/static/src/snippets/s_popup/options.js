@@ -65,7 +65,7 @@ snippetOptions.registry.SnippetPopup = snippetOptions.SnippetOptionWidget.extend
             });
             this.$target.modal('hide');
         });
-        await this._updateChangesInWysiwyg();
+        await this.updateChangesInWysiwyg();
     },
     /**
      * @override
@@ -99,7 +99,7 @@ snippetOptions.registry.SnippetPopup = snippetOptions.SnippetOptionWidget.extend
         const color = widgetValue ? 'var(--black-50)' : '';
         this.$target[0].style.setProperty('background-color', color, 'important');
 
-        if (previewMode === false) await this._updateChangesInWysiwyg();
+        if (previewMode === false) await this.updateChangesInWysiwyg();
     },
 
     //--------------------------------------------------------------------------
