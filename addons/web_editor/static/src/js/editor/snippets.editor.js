@@ -2128,7 +2128,7 @@ var SnippetsMenu = Widget.extend({
      * the new content of the customizePanel
      * @param {this.tabs.VALUE} [tab='blocks'] - the tab to select
      */
-    _updateLeftPanelContent: function ({content, tab}) {
+    _updateRightPanelContent: function ({content, tab}) {
         clearTimeout(this._textToolsSwitchingTimeout);
         this._closeWidgets();
 
@@ -2142,9 +2142,7 @@ var SnippetsMenu = Widget.extend({
             $(this.customizePanel).append(content);
 
             if (tab === this.tabs.OPTIONS) {
-                // Determine if the toolbar is in image or text mode
-                // We cannot use is(":visible") because the toolbar is detach from the DOM
-                const isImage = this.wysiwyg.$toolbar.find('input[name=font-size]').css('display') === 'none';
+                const isImage = $(this.customizePanel).find('we-customizeblock-option.snippet-option-ImageOptimize').length > 0
                 this._addJabberwockToolbar(isImage);
             }
         }
@@ -2174,7 +2172,6 @@ var SnippetsMenu = Widget.extend({
                 title: 'Clear Formatting',
             })
             $removeFormatButton.on('click', () => {
-                console.log('click');
                 this.wysiwyg.editor.execCommand('removeFormat');
             });
             const $group = $('<we-top-button-group>');
@@ -2437,7 +2434,7 @@ var SnippetsMenu = Widget.extend({
      */
     _onBlocksTabClick: async function (ev) {
         await this._enableLastEditor();
-        this._updateLeftPanelContent({
+        this._updateRightPanelContent({
             content: [],
             tab: this.tabs.BLOCKS,
         });
@@ -2658,7 +2655,7 @@ var SnippetsMenu = Widget.extend({
         // a slight delay to avoid flickering doing it twice.
         clearTimeout(this._textToolsSwitchingTimeout);
         this._textToolsSwitchingTimeout = setTimeout(() => {
-            this._updateLeftPanelContent({tab: this.tabs.OPTIONS});
+            this._updateRightPanelContent({tab: this.tabs.OPTIONS});
         }, 250);
     },
     /**
@@ -2666,7 +2663,7 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onUpdateCustomizeElements: function (ev) {
-        this._updateLeftPanelContent({
+        this._updateRightPanelContent({
             content: ev.data.customize$Elements,
             tab: ev.data.customize$Elements.length ? this.tabs.OPTIONS : this.tabs.BLOCKS,
         });
