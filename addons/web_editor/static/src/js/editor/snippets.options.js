@@ -2690,18 +2690,7 @@ const SnippetOptionWidget = Widget.extend({
      * Refresh the target in the wysiwyg.
      */
     async _updateChangesInWysiwyg($target = this.$target) {
-        const refreshTarget = async (context) => {
-            const html = $target.html();
-            $target.html('');
-            const attributes = [...$target[0].attributes].reduce( (acc, attribute) => {
-                acc[attribute.name] = attribute.value;
-                return acc
-            }, {})
-            await this.editorHelpers.updateAttributes(context, $target[0], attributes);
-            await this.editorHelpers.empty(context, $target[0]);
-            await this.editorHelpers.insertHtml(context, html, $target[0], 'INSIDE');
-        };
-        await this.wysiwyg.editor.execCommand(refreshTarget);
+        return this.wysiwyg.updateChanges($target);
     },
 
     //--------------------------------------------------------------------------
