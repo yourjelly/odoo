@@ -3797,7 +3797,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     shape(previewMode, widgetValue, params) {
-        this._handlePreviewState(previewMode, () => {
+        return this._handlePreviewState(previewMode, () => {
             return {shape: widgetValue, colors: this._getDefaultColors(), flip: []};
         });
     },
@@ -3807,7 +3807,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     color(previewMode, widgetValue, params) {
-        this._handlePreviewState(previewMode, () => {
+        return this._handlePreviewState(previewMode, () => {
             const {colorName} = params;
             const {colors: previousColors} = this._getShapeData();
             const newColor = normalizeColor(widgetValue) || this._getDefaultColors()[colorName];
@@ -3821,7 +3821,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     flipX(previewMode, widgetValue, params) {
-        this._flipShape(previewMode, 'x');
+        return this._flipShape(previewMode, 'x');
     },
     /**
      * Flips the shape on its y axis.
@@ -3829,7 +3829,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @see this.selectClass for params
      */
     flipY(previewMode, widgetValue, params) {
-        this._flipShape(previewMode, 'y');
+        return this._flipShape(previewMode, 'y');
     },
 
     //--------------------------------------------------------------------------
@@ -3898,7 +3898,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      * @param {'x'|'y'} axis the axis of the shape that should be flipped.
      */
     _flipShape(previewMode, axis) {
-        this._handlePreviewState(previewMode, () => {
+        return this._handlePreviewState(previewMode, () => {
             const flip = new Set(this._getShapeData().flip);
             if (flip.has(axis)) {
                 flip.delete(axis);
