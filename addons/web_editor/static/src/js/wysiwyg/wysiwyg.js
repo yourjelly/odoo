@@ -705,6 +705,24 @@ var Wysiwyg = Widget.extend({
     getFormatInfo: function() {
         return this.editor.plugins.get(JWEditorLib.Odoo).formatInfo;
     },
+    async updateChanges($target) {
+        const updateChanges = async (context) => {
+            const html = $target.html();
+            $target.html('');
+            const attributes = [...$target[0].attributes].reduce( (acc, attribute) => {
+                acc[attribute.name] = attribute.value;
+                return acc
+            }, {})
+            await this.editorHelpers.updateAttributes(context, $target[0], attributes);
+            await this.editorHelpers.empty(context, $target[0]);
+            await this.editorHelpers.insertHtml(context, html, $target[0], 'INSIDE');
+        };
+        await this.editor.execCommand(updateChanges);
+    },
+    withDomMutationsObserver ($target, callback) {
+        callback();
+        this.updateChanges($target);
+    },
 
     //--------------------------------------------------------------------------
     // Private
