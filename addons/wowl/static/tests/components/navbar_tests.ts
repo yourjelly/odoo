@@ -1,6 +1,6 @@
 import { NavBar } from "../../src/components/navbar/navbar";
 import * as QUnit from "qunit";
-import { createMockedFetch, mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
+import { click, createMockedFetch, mount, makeTestEnv, OdooEnv, getFixture } from "../helpers";
 import { MenuData, menusService } from "./../../src/services/menus";
 import { Registry } from "./../../src/core/registry";
 import { Service } from "./../../src/services";
@@ -37,4 +37,15 @@ QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
   const navbar = await mount(NavBar, { env, target });
   assert.containsOnce(navbar.el!, '.o_menu_apps a[role="menuitem"]', "1 app present");
+});
+
+QUnit.test("dropdown menu can be toggled", async (assert) => {
+  assert.expect(2);
+  const navbar = await mount(NavBar, { env, target });
+
+  const dropdown = navbar.el!.querySelector<HTMLElement>('.dropdown-menu')!;
+  await click(navbar.el!, 'a[data-toggle="dropdown"]');
+  assert.hasClass(dropdown, 'show');
+  await click(navbar.el!, 'a[data-toggle="dropdown"]');
+  assert.doesNotHaveClass(dropdown, 'show');
 });
