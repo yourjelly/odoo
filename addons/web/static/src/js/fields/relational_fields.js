@@ -3288,6 +3288,7 @@ var FieldReference = FieldMany2One.extend({
      * @override
      */
     start: function () {
+        this.valueAAB = this.field.relation;
         this.$('select').val(this.field.relation);
         return this._super.apply(this, arguments);
     },
@@ -3334,7 +3335,7 @@ var FieldReference = FieldMany2One.extend({
     _renderEdit: function () {
         this._super.apply(this, arguments);
 
-        if (this.$('select').val()) {
+        if (this.valueAAB) {
             this.$('.o_input_dropdown').show();
             this.$el.addClass('o_row'); // this class is used to display the two
                                         // components (select & input) on the same line
@@ -3350,9 +3351,11 @@ var FieldReference = FieldMany2One.extend({
      */
     _reset: function () {
         this._super.apply(this, arguments);
-        var value = this.$('select').val();
+        if (this.value) {
+            this.valueAAB = this.value.model;
+        }
         this._setState();
-        this.$('select').val(this.value && this.value.model || value);
+        this.$('select').val(this.valueAAB);
     },
     /**
      * Set `relation` key in field properties.
@@ -3385,7 +3388,7 @@ var FieldReference = FieldMany2One.extend({
         value = value || {};
         // we need to specify the model for the change in basic_model
         // the value is then now a dict with id, display_name and model
-        value.model = this.$('select').val();
+        value.model = this.valueAAB;
         return this._super(value, options);
     },
 
@@ -3399,9 +3402,9 @@ var FieldReference = FieldMany2One.extend({
      * @private
      */
     _onSelectionChange: function () {
-        var value = this.$('select').val();
+        this.valueAAB = this.$('select').val();
         this.reinitialize(false);
-        this._setRelation(value);
+        this._setRelation(this.valueAAB);
     },
 });
 
