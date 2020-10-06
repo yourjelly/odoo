@@ -421,7 +421,7 @@ var Wysiwyg = Widget.extend({
 
         const coloredLevelParent = node.ancestor(cNode => {
             const attributes = cNode.modifiers.find(JWEditorLib.Attributes);
-            return attributes && attributes.get('class').includes('o_cc')
+            return attributes && attributes.get('class') && attributes.get('class').includes('o_cc')
         });
 
         let colorCombinationClass = "";
