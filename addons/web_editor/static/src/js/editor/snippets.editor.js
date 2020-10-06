@@ -2034,7 +2034,7 @@ var SnippetsMenu = Widget.extend({
                     self._enableLastEditor();
                     self._activateInsertionZones($selectorSiblings, $selectorChildren);
 
-                    this._dragAndDropStart();
+                    self._dragAndDropStart();
 
                     let $el = self.$editor;
                     if ($el[0].ownerDocument !== document) {
@@ -2093,7 +2093,7 @@ var SnippetsMenu = Widget.extend({
                             const domNode = domLayout.getDomNodes(vNodes[0])[0];
                             self._disableUndroppableSnippets();
 
-                            this.dragAndDropResolve();
+                            self.dragAndDropResolve();
 
                             await self._callForEachChildSnippet($(domNode), function (editor) {
                                 return editor.buildSnippet();
@@ -2106,7 +2106,7 @@ var SnippetsMenu = Widget.extend({
                         });
                     } else {
                         $snippetToInsert.remove();
-                        this.dragAndDropResolve();
+                        self.dragAndDropResolve();
                         self.$el.find('.oe_snippet_thumbnail').removeClass('o_we_already_dragging');
                     }
                     dropped = false;
