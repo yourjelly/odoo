@@ -566,7 +566,7 @@ class Survey(http.Controller):
             'format_date': lambda date: format_date(request.env, date),
         })
 
-    @http.route(['/survey/<model("survey.survey"):survey>/get_certification_preview'], type="http", auth="user", methods=['GET'], website=True)
+    @http.route(['/survey/<model("survey.survey"):survey>/get_certification_preview/<title>'], type="http", auth="user", methods=['GET'], website=True)
     def survey_get_certification_preview(self, survey, **kwargs):
         if not request.env.user.has_group('survey.group_survey_user'):
             raise werkzeug.exceptions.Forbidden()

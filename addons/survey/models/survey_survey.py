@@ -912,7 +912,7 @@ class Survey(models.Model):
         return {
             'type': 'ir.actions.act_url',
             'target': '_blank',
-            'url': '/survey/%s/get_certification_preview' % (self.id)
+            'url': '/survey/%s/get_certification_preview/%s Preview' % (self.id, self.title)
         }
 
     def action_start_session(self):
