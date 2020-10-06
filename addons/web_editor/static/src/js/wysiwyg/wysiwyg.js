@@ -339,7 +339,7 @@ var Wysiwyg = Widget.extend({
 
         const previousNode = range.start.previousSibling();
         const nextNode = range.start.nextSibling();
-        const node = previousNode && Link.isLink(previousNode) ? previousNode : nextNode;
+        const node = previousNode && (Link.isLink(previousNode) || !nextNode) ? previousNode : nextNode;
         const currentLink = node && Link.isLink(node) && node.modifiers.find(JWEditorLib.LinkFormat);
 
         let text = '';
@@ -419,10 +419,10 @@ var Wysiwyg = Widget.extend({
             target = linkAttributes && linkAttributes.get('target');
         }
 
-        const coloredLevelParent = node.ancestor(cNode => {
+        const coloredLevelParent = node ? node.ancestor(cNode => {
             const attributes = cNode.modifiers.find(JWEditorLib.Attributes);
             return attributes && attributes.get('class') && attributes.get('class').includes('o_cc')
-        });
+        }) : false;
 
         let colorCombinationClass = "";
         if (coloredLevelParent) {
