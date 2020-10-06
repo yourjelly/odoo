@@ -100,7 +100,10 @@ var LinkDialog = Dialog.extend({
         this._updateOptionsUI();
         this._adaptPreview();
 
-        this.$('input:visible:first').focus();
+        this.opened(() => {
+            // We need to wait to be sure to trigger focus() the tick after the Event normaliser mess with events
+           setTimeout(() => self.$('input:visible:first').focus(), 0);
+        });
 
         return this._super.apply(this, arguments);
     },
