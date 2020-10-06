@@ -2651,7 +2651,7 @@ var SnippetsMenu = Widget.extend({
             // visible text tools.
             return;
         }
-        // Only switch tab without changing content (_updateLeftPanelContent
+        // Only switch tab without changing content (_updateRightPanelContent
         // make text tools visible only on that specific tab). Also do it with
         // a slight delay to avoid flickering doing it twice.
         clearTimeout(this._textToolsSwitchingTimeout);
