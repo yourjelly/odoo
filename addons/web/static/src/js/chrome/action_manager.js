@@ -287,7 +287,9 @@ var ActionManager = Widget.extend({
         var currentController = this.getCurrentController();
         if (currentController) {
             currentController.scrollPosition = this._getScrollPosition();
-            dom.detach([{widget: currentController.widget}]);
+            if (this.isInDOM) {
+                dom.detach([{widget: currentController.widget}]);
+            }
         }
     },
     /**

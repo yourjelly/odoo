@@ -101,6 +101,8 @@ odoo.define('web.OwlCompatibility', function () {
             ComponentAdapter.template = null;
 
             this.widget = null; // widget instance, if Component is a legacy widget
+
+            this.mountedCount = 0;
         }
 
         /**
@@ -149,7 +151,14 @@ odoo.define('web.OwlCompatibility', function () {
          * @override
          */
         mounted() {
+            this.mountedCount += 1;
+            if (this.mountedCount > 1) {
+                throw Error(`ComponentAdapter: Component is mounted twice.`);
+            }
             if (this.widget && this.widget.on_attach_callback) {
+                if (!this.widget.el) {
+                    throw Error(`ComponentAdapter: Widget's el is ${this.widget.el}.`);
+                }
                 this.widget.on_attach_callback();
             }
         }
@@ -158,6 +167,10 @@ odoo.define('web.OwlCompatibility', function () {
          * @override
          */
         willUnmount() {
+            this.mountedCount -= 1;
+            if (this.mountedCount < 0) {
+                throw Error(`ComponentAdapter: Component is unmounted but wasn't mounted.`);
+            }
             if (this.widget && this.widget.on_detach_callback) {
                 this.widget.on_detach_callback();
             }
@@ -363,6 +376,7 @@ odoo.define('web.OwlCompatibility', function () {
             this._handledEvents = new Set(); // Owl events we are redirecting
 
             this.componentRef = useRef("component");
+            this.mountedCount = 0;
         }
 
         /**
@@ -370,6 +384,16 @@ odoo.define('web.OwlCompatibility', function () {
          * function isn't recursive) when the component is appended into the DOM.
          */
         on_attach_callback() {
+            console.log(`on_attach_callback called on ComponentWrapper ${this.__owl__.id}`);
+
+            this.mountedCount += 1;
+            if (this.mountedCount > 1) {
+                throw Error(`ComponentWrapper: Component is mounted twice.`);
+            }
+            if (!this.el) {
+                throw Error(`ComponentWrapper: Widget's el is ${this.el}.`);
+            }
+
             function recursiveCallMounted(component) {
                 for (const key in component.__owl__.children) {
                     recursiveCallMounted(component.__owl__.children[key]);
@@ -382,6 +406,12 @@ odoo.define('web.OwlCompatibility', function () {
          * Calls __callWillUnmount to notify the component it will be unmounted.
          */
         on_detach_callback() {
+            console.log(`on_detach_callback called on ComponentWrapper ${this.__owl__.id}`);
+
+            this.mountedCount -= 1;
+            if (this.mountedCount < 0) {
+                throw Error(`ComponentWrapper: Component is unmounted but wasn't mounted.`);
+            }
             this.__callWillUnmount();
         }
 
