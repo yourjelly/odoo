@@ -1198,14 +1198,14 @@ snippetOptions.registry.Carousel = snippetOptions.SnippetOptionWidget.extend({
         const $items = this.$target.find('.carousel-item');
         $items.removeClass('next prev left right active').first().addClass('active');
         this.$indicators.find('li').removeClass('active').empty().first().addClass('active');
-        await this._updateChangesInWysiwyg();
+        await this.updateChangesInWysiwyg();
     },
     /**
      * @override
      */
     notify: async function (name, data) {
         if (name === 'refreshCarousel') {
-            await this._updateChangesInWysiwyg();
+            await this.updateChangesInWysiwyg();
             data.resolve();
         }
     },

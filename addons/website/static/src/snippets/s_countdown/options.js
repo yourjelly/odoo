@@ -138,7 +138,7 @@ snippetOptions.registry.countdown = snippetOptions.SnippetOptionWidget.extend({
      */
     async cleanForSave() {
         this.$('.s_countdown_anvas_wrapper canvas').remove();c
-        this._updateChangesInWysiwyg();
+        this.updateChangesInWysiwyg();
     },
 
     //--------------------------------------------------------------------------
