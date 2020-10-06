@@ -132,6 +132,7 @@ var AttachmentBox = Widget.extend({
             this.do_warn(_t("Error"), _t("You are not allowed to upload an attachment here."));
         } else {
             this.trigger_up('reload_attachment_box');
+            location.reload();
         }
     },
 });
