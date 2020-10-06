@@ -1998,7 +1998,7 @@ const SnippetOptionWidget = Widget.extend({
     selectDataAttribute: async function (previewMode, widgetValue, params) {
         const selectDataAttribute = async (context) => {
             const value = await this._selectAttributeHelper(widgetValue, params, context);
-            this.$target.attr(`data-${params.attributeName}`, value);
+            this.$target[0].dataset[params.attributeName] = value;
             if (!previewMode) {
                 const attributeName = params.attributeName.replace(/[A-Z]/g, m => "-" + m.toLowerCase());
                 await this.editorHelpers.setAttribute(context, this.$target[0], `data-${attributeName}`, value);
