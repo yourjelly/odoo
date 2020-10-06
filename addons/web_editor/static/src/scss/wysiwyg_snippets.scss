@@ -1884,6 +1884,20 @@ body.editor_enable.editor_has_snippets {
     animation: fadeInDownSmall 700ms forwards;
 }
 
+.o_overlay_move_handle {
+    position: absolute;
+    color: $o-we-fg-lighter;
+    background-color: rgba(0,0,0,.7);
+    > .o_move_handle {
+        cursor: move;
+        width: 30px;
+        height: 22px;
+        background-image: url('/web_editor/static/src/img/snippets_options/o_overlay_move_drag.svg');
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+}
+
 // CONTAINER PREVIEW
 .o_container_preview {
     outline: 2px dashed $o-we-handles-accent-color;

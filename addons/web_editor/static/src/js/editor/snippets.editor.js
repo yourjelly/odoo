@@ -89,6 +89,7 @@ var SnippetEditor = Widget.extend({
         this.options = options;
         this.$editable = $editable;
         this.$snippetBlock = $(snippetElement);
+        this.$editor = this.getParent().$editor;
         this.$snippetBlock.data('snippet-editor', this);
         // The following class is a hack. There is a possibility of the
         // `$snippetBlock` to be destroyed at some point.
@@ -121,6 +122,7 @@ var SnippetEditor = Widget.extend({
      * @override
      */
     start: function () {
+        const self = this;
         var defs = [this._super.apply(this, arguments)];
 
         // Initialize the associated options (see snippets.options.js)
@@ -137,16 +139,15 @@ var SnippetEditor = Widget.extend({
             const smoothScrollOptions = this.options.getScrollOptions({
                 jQueryDraggableOptions: {
                     cursorAt: {
-                        left: 10,
-                        top: 10
+                        left: 15,
+                        top: 11,
                     },
+                    iframeFix: true,
                     handle: '.o_move_handle',
                     helper: () => {
-                        var $clone = this.$el.clone().css({width: '24px', height: '24px', border: 0});
-                        $clone.appendTo(this.$body).removeClass('d-none');
-                        return $clone;
+                        return $('<div class="o_overlay_move_handle"><div class="o_move_handle"/></div>');
                     },
-                    start: this._onDragAndDropStart.bind(this),
+                    start: this._dragAndDropStart.bind(this),
                     stop: (...args) => {
                         // Delay our stop handler so that some summernote handlers
                         // which occur on mouseup (and are themself delayed) are
@@ -160,18 +161,21 @@ var SnippetEditor = Widget.extend({
                 dropzones: function () {
                     return self.$editor.find('.oe_drop_zone');
                 },
-                over: function () {
-                    self.$editable.find('.oe_drop_zone.hide').removeClass('hide');
-                    $(this).addClass('hide').first().after(self.$snippetBlock);
-                    self.dropped = true;
+                over: function (ui, droppable) {
+                    if (!self.dropped) {
+                        $(droppable).addClass('d-none').after(self.$snippetBlock);
+                        self.dropped = true;
+                    }
                 },
-                out: function () {
-                    $(this).removeClass('hide');
-                    self.$snippetBlock.detach();
-                    self.dropped = false;
+                out: function (ui, droppable) {
+                    if (self.dropped) {
+                        $(droppable).removeClass('d-none');
+                        self.$snippetBlock.detach();
+                        self.dropped = false;
+                    }
                 },
             });
-            this.draggableComponent = new SmoothScrollOnDrag(this, this.$editable.find('#wrapwrap').addBack().last(), this.$editor, smoothScrollOptions);
+            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, this.$editable.find('#wrapwrap').addBack().last(), smoothScrollOptions);
         } else {
             this.$('.o_overlay_move_options').addClass('d-none');
             $customize.find('.oe_snippet_clone').addClass('d-none');
@@ -673,7 +677,7 @@ var SnippetEditor = Widget.extend({
      *
      * @private
      */
-    _onDragAndDropStart: function () {
+    _dragAndDropStart: function () {
         var self = this;
         this.dropped = false;
         self.size = {
@@ -708,6 +712,10 @@ var SnippetEditor = Widget.extend({
         });
 
         this.$body.addClass('move-important');
+
+        this.trigger_up('drag_and_drop_start', {
+            $snippet: this.$snippetBlock,
+        });
     },
     /**
      * Called when the snippet is dropped after being dragged thanks to the
@@ -717,7 +725,7 @@ var SnippetEditor = Widget.extend({
      * @param {Event} ev
      * @param {Object} ui
      */
-    _onDragAndDropStop: function (ev, ui) {
+    _onDragAndDropStop: async function (ev, ui) {
         // TODO lot of this is duplicated code of the d&d feature of snippets
         if (!this.dropped) {
             var $el = $.nearest({x: ui.position.left, y: ui.position.top}, '.oe_drop_zone', {container: document.body}).first();
@@ -727,7 +735,7 @@ var SnippetEditor = Widget.extend({
             }
         }
 
-        this.$editable.find('.oe_drop_zone').droppable('destroy').remove();
+        this.$editable.find('.oe_drop_zone').remove();
 
         var prev = this.$snippetBlock.first()[0].previousSibling;
         var next = this.$snippetBlock.last()[0].nextSibling;
@@ -736,8 +744,10 @@ var SnippetEditor = Widget.extend({
         var $clone = this.$editable.find('.oe_drop_clone');
         if (prev === $clone[0]) {
             prev = $clone[0].previousSibling;
+            this.dropped = false;
         } else if (next === $clone[0]) {
             next = $clone[0].nextSibling;
+            this.dropped = false;
         }
         $clone.after(this.$snippetBlock);
         var $from = $clone.parent();
@@ -746,9 +756,9 @@ var SnippetEditor = Widget.extend({
         this.$body.removeClass('move-important');
         $clone.remove();
 
-        if (this.dropped) {
-            this.trigger_up('request_history_undo_record', {$target: this.$snippetBlock});
+        dom.scrollTo(this.$snippetBlock[0], {extraOffset: 50});
 
+        if (this.dropped) {
             if (prev) {
                 this.$snippetBlock.insertAfter(prev);
             } else if (next) {
@@ -757,17 +767,40 @@ var SnippetEditor = Widget.extend({
                 $parent.prepend(this.$snippetBlock);
             }
 
-            for (var i in this.snippetOptionInstances) {
-                this.snippetOptionInstances[i].onMove();
-            }
+            const jwEditor = this.wysiwyg.editor;
+            const moveSnippet = async (context) => {
+                const node = this.editorHelpers.getNodes(this.$snippetBlock[0])[0];
+                const prevNodes = this.editorHelpers.getNodes(prev);
+                if (prevNodes.length) {
+                    prevNodes.pop().after(node);
+                    return;
+                }
+                const nextNodes = this.editorHelpers.getNodes(next);
+                if (nextNodes.length) {
+                    nextNodes[0].before(node);
+                    return;
+                }
+                const parentNodes = this.editorHelpers.getNodes($parent[0]);
+                if (parentNodes.length) {
+                    parentNodes.pop().append(node);
+                    return;
+                }
+            };
+            await jwEditor.execCommand(moveSnippet);
 
-            this.$snippetBlock.trigger('content_changed');
-            $from.trigger('content_changed');
+            for (var i in this.snippetOptionInstances) {
+                await this.snippetOptionInstances[i].onMove();
+            }
         }
 
         this.trigger_up('drag_and_drop_stop', {
             $snippet: this.$snippetBlock,
         });
+
+        if (this.dropped) {
+            this.$snippetBlock.trigger('content_changed');
+            $from.trigger('content_changed');
+        }
     },
     /**
      * @private
@@ -912,6 +945,7 @@ var SnippetsMenu = Widget.extend({
         'clone_snippet': '_onCloneSnippet',
         'cover_update': '_onOverlaysCoverUpdate',
         'deactivate_snippet': '_onDeactivateSnippet',
+        'drag_and_drop_start': '_onDragAndDropStart',
         'drag_and_drop_stop': '_onDragAndDropStop',
         'get_snippet_versions': '_onGetSnippetVersions',
         'go_to_parent': '_onGoToParent',
@@ -1941,8 +1975,6 @@ var SnippetsMenu = Widget.extend({
         var dropped;
         let scrollValue;
 
-        let dragAndDropResolve;
-
         const smoothScrollOptions = this._getScrollOptions({
             jQueryDraggableOptions: {
                 iframeFix: true,
@@ -2002,8 +2034,7 @@ var SnippetsMenu = Widget.extend({
                     self._enableLastEditor();
                     self._activateInsertionZones($selectorSiblings, $selectorChildren);
 
-                    const prom = new Promise(resolve => dragAndDropResolve = () => resolve());
-                    self._mutex.exec(() => prom);
+                    this._dragAndDropStart();
 
                     let $el = self.$editor;
                     if ($el[0].ownerDocument !== document) {
@@ -2062,7 +2093,7 @@ var SnippetsMenu = Widget.extend({
                             const domNode = domLayout.getDomNodes(vNodes[0])[0];
                             self._disableUndroppableSnippets();
 
-                            dragAndDropResolve();
+                            this.dragAndDropResolve();
 
                             await self._callForEachChildSnippet($(domNode), function (editor) {
                                 return editor.buildSnippet();
@@ -2075,7 +2106,7 @@ var SnippetsMenu = Widget.extend({
                         });
                     } else {
                         $snippetToInsert.remove();
-                        dragAndDropResolve();
+                        this.dragAndDropResolve();
                         self.$el.find('.oe_snippet_thumbnail').removeClass('o_we_already_dragging');
                     }
                     dropped = false;
@@ -2263,6 +2294,20 @@ var SnippetsMenu = Widget.extend({
         return mutexExecResult;
     },
 
+    /**
+     * Called when a snippet will be moved in the page.
+     *
+     * @private
+     */
+    _dragAndDropStart: async function () {
+        this._mutex.exec(() => {
+            let dragAndDropResolve;
+            const promise = new Promise(resolve => dragAndDropResolve = () => resolve());
+            this.dragAndDropResolve = dragAndDropResolve;
+            return promise;
+        });
+    },
+
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
@@ -2333,6 +2378,16 @@ var SnippetsMenu = Widget.extend({
     _onDeactivateSnippet: function () {
         this._enableLastEditor();
     },
+
+    /**
+     * Called when a snippet will be moved in the page.
+     *
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onDragAndDropStart: async function (ev) {
+        this._dragAndDropStart()
+    },
     /**
      * Called when a snippet has moved in the page.
      *
@@ -2340,7 +2395,7 @@ var SnippetsMenu = Widget.extend({
      * @param {OdooEvent} ev
      */
     _onDragAndDropStop: async function (ev) {
-        await this._destroyEditors();
+        this.dragAndDropResolve();
         await this._activateSnippet(ev.data.$snippet);
     },
     /**

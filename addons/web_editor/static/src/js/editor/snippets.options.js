@@ -2809,12 +2809,6 @@ const SnippetOptionWidget = Widget.extend({
                 return;
             }
 
-            // If it is not preview mode, the user selected the option for good
-            // (so record the action)
-            if (shouldRecordUndo) {
-                this.trigger_up('request_history_undo_record', {$target: this.$target});
-            }
-
             // Call widget option methods and update $target
             await this._select(previewMode, widget);
             if (previewMode) {
@@ -2992,12 +2986,6 @@ registry.sizing = SnippetOptionWidget.extend({
                 if (begin === current) {
                     return;
                 }
-                setTimeout(function () {
-                    self.trigger_up('request_history_undo_record', {
-                        $target: self.$target,
-                        event: 'resize_' + XY,
-                    });
-                }, 0);
             };
             $body.on('mousemove', bodyMouseMove);
             $body.on('mouseup', bodyMouseUp);
@@ -4560,7 +4548,6 @@ registry.many2one = SnippetOptionWidget.extend({
         this.ID = +$li.data('id');
         this.$target.attr('data-oe-many2one-id', this.ID).data('oe-many2one-id', this.ID);
 
-        this.trigger_up('request_history_undo_record', {$target: this.$target});
         this.$target.trigger('content_changed');
 
         if (self.$target.data('oe-type') === 'contact') {
