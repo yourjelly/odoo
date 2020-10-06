@@ -279,12 +279,14 @@ var Wysiwyg = Widget.extend({
         await this.editor.start();
         this._bindAfterStart();
 
-        this.$toolbar = $('jw-toolbar').detach();
 
         this.editorHelpers = this.editor.plugins.get(JWEditorLib.DomHelpers);
         const domLayout = this.editor.plugins.get(JWEditorLib.Layout).engines.dom;
         this.zoneMain = domLayout.root.firstDescendant(node => node.managedZones && node.managedZones.includes('main'));
+        const rootElement = this.editorHelpers.getDomNodes(domLayout.root.firstDescendant(JWEditorLib.ContainerNode))[0];
         this.editorEditable = this.editorHelpers.getDomNodes(this.zoneMain)[0] || this.editorHelpers.getDomNodes(this.zoneMain.parent)[0];
+
+        this.$toolbar = $(rootElement).find('jw-toolbar').detach();
 
         if (this.options.enableWebsite) {
             const $wrapwrap = $('#wrapwrap');
