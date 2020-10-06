@@ -354,6 +354,12 @@ var SnippetEditor = Widget.extend({
             this.trigger_up('go_to_parent', {$snippet: this.$snippetBlock});
             var $parent = this.$snippetBlock.parent();
             this.$snippetBlock.find('*').addBack().tooltip('dispose');
+            // The snippet has to be removed directly in jquery as well for the
+            // synchronous bubbling up system to remove the empty parent.
+            // Ideally, we should simply call remove inside a mutations observer
+            // callback such that the removal is synchronous while the vdom is
+            // updated through observed mutations without calling remove twice.
+            this.$snippetBlock.remove();
             await this.editorHelpers.remove(context, this.$snippetBlock[0]);
             this.$el.remove();
 
