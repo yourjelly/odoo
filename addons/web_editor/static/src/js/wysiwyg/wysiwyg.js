@@ -137,6 +137,8 @@ var Wysiwyg = Widget.extend({
                             allowEmpty: { value: true },
                         },
                     },
+
+                    // o_header_standard and its descendants.
                     {
                         selector: [
                             (node) => {
@@ -168,6 +170,48 @@ var Wysiwyg = Widget.extend({
                                 return hasNavLink || hasContainer;
                             },
                         ],
+                        properties: {
+                            editable: {
+                                value: true,
+                                cascading: true,
+                            },
+                        },
+                    },
+
+                    // blockquote and alert snippets and their descendants:
+                    {
+                        selector: [node => {
+                            const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
+                            return attributes && (
+                                attributes.classList.has('s_blockquote') ||
+                                attributes.classList.has('s_alert')
+                            );
+                        }],
+                        properties: {
+                            editable: {
+                                value: false,
+                                cascading: true,
+                            },
+                        },
+                    },
+                    {
+                        selector: [node => {
+                            // Blockquote and alert snippets's children are not
+                            // editable...
+                            const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
+                            return attributes && (
+                                attributes.classList.has('s_blockquote') ||
+                                attributes.classList.has('s_alert')
+                            );
+                        }, node => {
+                            // ...except for their _content child and its
+                            // descendants.
+                            const attributes = node.modifiers.find(this.JWEditorLib.Attributes);
+                            return attributes && (
+                                attributes.classList.has('s_blockquote_content') ||
+                                attributes.classList.has('s_alert_content')
+                            );
+                        }],
                         properties: {
                             editable: {
                                 value: true,
