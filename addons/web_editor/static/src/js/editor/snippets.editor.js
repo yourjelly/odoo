@@ -261,7 +261,6 @@ var SnippetEditor = Widget.extend({
         await this.toggleTargetVisibility(!this.$snippetBlock.hasClass('o_snippet_invisible'));
         const proms = _.map(this.snippetOptionInstances, async option => {
             await option.cleanForSave();
-            return option.updateChangesInWysiwyg();
         });
         await Promise.all(proms);
     },

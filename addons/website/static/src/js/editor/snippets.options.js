@@ -2435,8 +2435,8 @@ snippetOptions.registry.ContainerWidth = snippetOptions.SnippetOptionWidget.exte
     /**
      * @override
      */
-    cleanForSave: function () {
-        this.$target.removeClass('o_container_preview');
+    cleanForSave: async function () {
+        await this.editorHelpers.removeClass(this.wysiwyg.editor, this.$target[0], 'o_container_preview');
     },
 
     //--------------------------------------------------------------------------

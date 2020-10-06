@@ -3458,6 +3458,7 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
                 this.$target[0].dataset[key] = value;
             });
             this.$target[0].dataset.bgSrc = img.getAttribute('src');
+            await this.updateChangesInWysiwyg();
         }
     },
 

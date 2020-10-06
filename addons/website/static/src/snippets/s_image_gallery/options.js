@@ -83,9 +83,10 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
     /**
      * @override
      */
-    cleanForSave: function () {
+    cleanForSave: async function () {
         if (this.$target.hasClass('slideshow')) {
             this.$target.removeAttr('style');
+            await this.updateChangesInWysiwyg();
         }
     },
 

@@ -370,7 +370,7 @@ snippetOptions.registry.WebsiteFormEditor = FormEditor.extend({
     /**
      * @override
      */
-    cleanForSave: function () {
+    cleanForSave: async function () {
         const model = this.$target[0].dataset.model_name;
         // because apparently this can be called on the wrong widget and
         // we may not have a model, or fields...
@@ -389,8 +389,9 @@ snippetOptions.registry.WebsiteFormEditor = FormEditor.extend({
             }
         }
         if (this.$message.length) {
-            this.$target.removeClass('d-none');
-            this.$message.addClass("d-none");
+            await this.editorHelpers.removeClass(this.wysiwyg.editor, this.$target[0], 'd-none');
+            await this.editorHelpers.addClass(context, this.$message[0], 'd-none');
+
         }
     },
     /**
