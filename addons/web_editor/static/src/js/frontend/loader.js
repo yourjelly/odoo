@@ -18,7 +18,6 @@ async function createWysiwyg(parent, options, additionnalAssets = []) {
             // Wait the loading of the service and his dependencies (use string to
             // avoid parsing of require function).
             const stringFunction = `return new Promise(resolve => {
-                console.warn('define web_editor.wysiwig.loaded')
                 odoo.define('web_editor.wysiwig.loaded', require => {
                     ` + 'require' + `('web_editor.wysiwyg');
                     resolve();
