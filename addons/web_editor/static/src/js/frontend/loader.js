@@ -3,6 +3,8 @@ odoo.define('web_editor.loader', function (require) {
 
 var ajax = require('web.ajax');
 
+let wysiwygPromise;
+
 /**
  * Load the assets and create a wysiwyg.
  *
@@ -10,20 +12,24 @@ var ajax = require('web.ajax');
  * @param {object} options The wysiwyg options
  */
 async function createWysiwyg(parent, options, additionnalAssets = []) {
-    let Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
-    if (!Wysiwyg) {
-        await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', ...additionnalAssets]});
-        // Wait the loading of the service and his dependencies (use string to
-        // avoid parsing of require function).
-        const stringFunction = `return new Promise(resolve => {
-            odoo.define('web_editor.wysiwig.loaded', require => {
-                ` + 'require' + `('web_editor.wysiwyg');
-                resolve();
-            });
-        });`;
-        await new Function(stringFunction)();
-        Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
+    if (!wysiwygPromise) {
+        wysiwygPromise = new Promise(async (resolve) => {
+            await ajax.loadLibs({assetLibs: ['web_editor.compiled_assets_wysiwyg', ...additionnalAssets]});
+            // Wait the loading of the service and his dependencies (use string to
+            // avoid parsing of require function).
+            const stringFunction = `return new Promise(resolve => {
+                console.warn('define web_editor.wysiwig.loaded')
+                odoo.define('web_editor.wysiwig.loaded', require => {
+                    ` + 'require' + `('web_editor.wysiwyg');
+                    resolve();
+                });
+            });`;
+            await new Function(stringFunction)();
+            resolve();
+        });
     }
+    await wysiwygPromise;
+    const Wysiwyg = odoo.__DEBUG__.services['web_editor.wysiwyg'];
     return new Wysiwyg(parent, options);
 }
 
