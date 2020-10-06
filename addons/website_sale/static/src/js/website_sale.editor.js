@@ -88,7 +88,7 @@ Wysiwyg.include({
     /**
      * @override
      */
-    async save() {
+    async _saveWebsiteContent() {
         const _super = this._super.bind(this);
         await this._saveRibbons();
         return _super(...arguments);
