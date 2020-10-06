@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <div t-name="wowl.Notification" t-attf-class="show toast o_notification {{className}}"
+    <div t-name="wowl.Notification" t-attf-class="o_toast o_notification {{className}}"
          role="alert" aria-live="assertive" aria-atomic="true" owl="1">
         <t t-set="closeButton">
             <button type="button" class="close o_notification_close"

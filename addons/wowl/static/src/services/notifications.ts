@@ -26,7 +26,7 @@ export class NotificationManager extends Component<{}, OdooEnv> {
   static template = tags.xml`
     <div class="o_notification_manager">
         <t t-foreach="notifications" t-as="notification" t-key="notification.id">
-            <NotificationComponent t-props="notification"/>
+            <NotificationComponent t-props="notification" t-transition="fade" />
         </t>
     </div>`;
   static components = { NotificationComponent };
