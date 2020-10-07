@@ -1116,6 +1116,7 @@ var SnippetsMenu = Widget.extend({
             this.snippetEditors.forEach(editor => {
                 editor.toggleOverlayVisibility(true);
             });
+            this.updateCurrentSnippetEditorOverlay();
         }, 250));
         this.$editor.find('#wrapwrap').on('scroll.snippets_menu', () => {
             this.updateCurrentSnippetEditorOverlay();
