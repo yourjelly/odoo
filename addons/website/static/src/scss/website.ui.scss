@@ -12,6 +12,7 @@ body {
 .o_main_sidebar {
     transition: width 400ms ease 0s !important;
     width: 0;
+    overflow: hidden;
     &.o_loaded {
         width: $o-we-sidebar-width;
     }
