@@ -2183,7 +2183,8 @@ var SnippetsMenu = Widget.extend({
 
             if (tab === this.tabs.OPTIONS) {
                 const isImage = $(this.customizePanel).find('we-customizeblock-option.snippet-option-ImageOptimize').length > 0
-                this._addJabberwockToolbar(isImage);
+                this._addJabberwockToolbar(isImage ? 'image' : 'text');
+                this.wysiwyg.onToolbarModeChange(this._updateJabberwockToolbarContainer.bind(this));
             }
         }
 
@@ -2197,16 +2198,44 @@ var SnippetsMenu = Widget.extend({
                                              .prop('disabled', tab !== this.tabs.OPTIONS);
 
     },
-
+    /**
+     * update the jabberwock toolbar container box.
+     */
+    _currentJabberwockToolbarMode: undefined,
+    _updateThrottle: undefined,
+    _updateJabberwockToolbarContainer(toolbarMode = "text") {
+        if(this._updateThrottle) clearTimeout(this._updateThrottle);
+        this._updateThrottle = setTimeout(() => {
+            if(toolbarMode !== this._currentJabberwockToolbarMode) {
+                this._updateThrottle = undefined
+                const $oldToolbar = this.wysiwyg.$toolbar.parent();
+                this._addJabberwockToolbar(toolbarMode);
+                $oldToolbar.remove();
+            }
+        },200);
+    },
     /**
      * Add the jabberwock toolbar.
      */
-    _addJabberwockToolbar(isImage = false) {
+    _addJabberwockToolbar(toolbarMode = "text") {
+        this._currentJabberwockToolbarMode = toolbarMode;
         const $toolbar = this.wysiwyg.$toolbar;
-        const titleText = isImage ? _t("Image Formatting") : _t("Text Formatting");
+
+        let titleText = _t("Text Formatting");
+        switch (toolbarMode) {
+            case "image":
+                titleText = _t("Image Formatting");
+                break;
+            case "video":
+                titleText = _t("Video Formatting");
+                break;
+            case "picto":
+                titleText = _t("Icon Formatting");
+                break;
+        }
         const customizeBlock = $('<WE-CUSTOMIZEBLOCK-OPTIONS />');
         const $title = $("<we-title><span>" + titleText + "</span></we-title>");
-        if (!isImage) {
+        if (toolbarMode === "text") {
             const $removeFormatButton = $('<we-button/>', {
                 class: 'fa fa-fw fa-eraser o_we_link o_we_hover_danger',
                 title: 'Clear Formatting',
@@ -2699,6 +2728,7 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _onSummernoteToolsUpdate(ev) {
+        console.warn(" summernote tool");
         if (!this._textToolsSwitchingEnabled) {
             return;
         }

@@ -332,6 +332,33 @@ var Wysiwyg = Widget.extend({
             });
 
             const onCommitCheckSnippets = (params) => {
+                if (this._toolbarModeChangeHandler) {
+                    const range = this.editor.selection.range;
+                    let currentSelectionType = "text";
+                    if(!range.isCollapsed()) {
+                        const nextStartSibling = range.start.nextSibling();
+                        const prevEndSibling = range.end.previousSibling();
+                        if (nextStartSibling && prevEndSibling && nextStartSibling.id === prevEndSibling.id) {
+                            switch (nextStartSibling.name) {
+                                case "ImageNode":
+                                    currentSelectionType = "image";
+                                    break;
+                                case "OdooVideoNode":
+                                    currentSelectionType = "video";
+                                    break;
+                                case "FontAwesomeNode":
+                                    currentSelectionType = "picto";
+                                    break;
+                                default:
+                                    currentSelectionType = "text";
+                                    break;
+                            }
+
+                        }
+                    }
+                    this._toolbarModeChangeHandler(currentSelectionType);
+                }
+
                 if (params.commandNames.includes('undo') || params.commandNames.includes('redo')) {
                     setTimeout(() => {
                         // use setTimeout to reload snippets after the redraw
@@ -768,6 +795,10 @@ var Wysiwyg = Widget.extend({
     withDomMutationsObserver ($target, callback) {
         callback();
         this.updateChanges($target);
+    },
+    _toolbarModeChangeHandler: false,
+    onToolbarModeChange: function (handler) {
+        this._toolbarModeChangeHandler = handler;
     },
 
     //--------------------------------------------------------------------------
