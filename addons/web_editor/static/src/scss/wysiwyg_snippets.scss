@@ -506,6 +506,54 @@ body.editor_enable.editor_has_snippets {
             }
         }
 
+        jw-select {
+            > jw-group {
+                z-index: 1;
+                display: none;
+                position: absolute;
+                left: 0;
+                right: 0;
+                z-index: 1000;
+                margin-top: 8px !important;
+                &:before {
+                    border-color: transparent transparent #444444 transparent;
+                    border-width: 9px;
+                    top: -17px;
+                    border-style: solid;
+                    content: '';
+                    position: absolute;
+                }
+                jw-button {
+                    display: block;
+                    margin: 0 10px 0 15px;
+                    line-height: 28px;
+                    height: 35px;
+                    text-align: left;
+                    padding-left: 24px;
+                    color: #C6C6C6;
+                    border-bottom-width: 0;
+                    &:last-child {
+                        border-bottom-width: 1px;
+                    }
+                    &.active {
+                        background-color: #42424c !important;
+                        box-shadow: none;
+                        &:before {
+                            color: #01bad2;
+                            content: "";
+                            right: auto;
+                            left: 22px;
+                            position: absolute;
+                            font-family: FontAwesome;
+                        }
+                    }
+                }
+            }
+            &[aria-pressed="true"] > jw-group {
+                display: block;
+            }
+        }
+
         jw-group {
             select {
                 min-width: fit-content;

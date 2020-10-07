@@ -2245,6 +2245,10 @@ var SnippetsMenu = Widget.extend({
         customizeBlock.append($title);
         customizeBlock.append($toolbar);
         $(this.customizePanel).append(customizeBlock);
+
+        $toolbar.off('click.we_oe_snippets').on('click.we_oe_snippets', 'jw-select', ev => {
+            this.$el.toggleClass('o_we_backdrop', ev.currentTarget.getAttribute('aria-pressed') === 'true');
+        });
     },
     /**
      * Scrolls to given snippet.
