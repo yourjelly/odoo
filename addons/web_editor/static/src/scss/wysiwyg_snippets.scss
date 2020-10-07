@@ -1527,8 +1527,12 @@ body.editor_enable.editor_has_snippets {
 
 // MANIPULATORS
 #oe_manipulators {
-    position: relative;
+    position: absolute;
     z-index: $o-we-overlay-zindex;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
 
     // SNIPPET MANIPULATORS
     .oe_overlay {
@@ -1539,6 +1543,7 @@ body.editor_enable.editor_has_snippets {
         background: transparent;
         text-align: center;
         transition: opacity 400ms linear 0s;
+        pointer-events: auto;
 
         &.o_overlay_hidden {
             opacity: 0;
