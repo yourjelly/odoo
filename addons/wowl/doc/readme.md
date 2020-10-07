@@ -13,4 +13,5 @@
 - [Environment](environment.md)
 - [Global odoo object](global_odoo_object.md)
 - [Main Components](main_components.md)
+- [Registries](registries.md)
 - [Services](services/readme.md)

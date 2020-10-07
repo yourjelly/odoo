@@ -1,8 +1,8 @@
 # Crash Manager Service
 
-| Technical name | Dependencies |
-| -------------- | ------------ |
-| `crashmanager` |              |
+| Technical name  | Dependencies |
+| --------------- | ------------ |
+| `crash_manager` |              |
 
 ## Overview
 

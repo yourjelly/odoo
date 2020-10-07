@@ -70,6 +70,7 @@ export async function makeTestEnv(params: TestEnvParam = {}): Promise<OdooEnv> {
     services: params.services || new Registry(),
     Components: params.Components || new Registry(),
     actions: params.actions || new Registry(),
+    views: new Registry(),
   };
   const browser = (params.browser || {}) as OdooBrowser;
   const odoo: Odoo = makeTestOdoo();

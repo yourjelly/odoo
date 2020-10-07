@@ -27,6 +27,7 @@ available to the interface (and to other services).
 | [`router`](router.md)               | manage the url                                             |
 | [`rpc`](rpc.md)                     | perform a RPC (in other word, call the server)             |
 | [`user`](user.md)                   | keep track of user main properties (lang, ...) and context |
+| [`view_loader`](view_loader.md)     | load (and keep in cache) views information                 |
 
 ## Defining a service
 

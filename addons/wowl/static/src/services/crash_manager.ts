@@ -1,7 +1,7 @@
 import { Service, ServiceParams } from "../services";
 
 export const crashManagerService: Service<void> = {
-  name: "crashmanager",
+  name: "crash_manager",
   deploy(params: ServiceParams) {
     const { env } = params;
     const console = env.browser.console;
