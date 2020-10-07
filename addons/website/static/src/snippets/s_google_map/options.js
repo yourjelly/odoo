@@ -37,6 +37,8 @@ snippetOptions.registry.GoogleMap = snippetOptions.SnippetOptionWidget.extend({
         } else if (!widgetValue && descriptionEl) {
             descriptionEl.remove();
         }
+
+        if (previewMode === false) await this.updateChangesInWysiwyg();
     },
 
     //--------------------------------------------------------------------------
