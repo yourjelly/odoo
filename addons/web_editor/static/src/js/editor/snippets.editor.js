@@ -1116,9 +1116,10 @@ var SnippetsMenu = Widget.extend({
             this.snippetEditors.forEach(editor => {
                 editor.toggleOverlayVisibility(true);
             });
-            throttledCoverUpdate();
         }, 250));
-
+        this.$editor.find('#wrapwrap').on('scroll.snippets_menu', () => {
+            this.updateCurrentSnippetEditorOverlay();
+        });
         // Hide the active overlay when scrolling.
         // Show it again and recompute all the overlays after the scroll.
         this.$scrollingElement = $().getScrollingElement();
@@ -1193,6 +1194,7 @@ var SnippetsMenu = Widget.extend({
             this.$window.off('.snippets_menu');
             this.$document.off('.snippets_menu');
             this.$scrollingElement.off('.snippets_menu');
+            this.$editor.find('#wrapwrap').off('.snippets_menu');
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
         delete this.cacheSnippetTemplate[this.options.snippets];
