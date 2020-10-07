@@ -1939,3 +1939,6 @@ we-select.o_we_shape_menu {
     position: fixed;
     right: $o-we-sidebar-width;
 }
+.o_main_sidebar:not(.o_loaded) #oe_snippets {
+    display: none !important;
+}
