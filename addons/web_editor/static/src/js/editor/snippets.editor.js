@@ -2728,7 +2728,6 @@ var SnippetsMenu = Widget.extend({
      * @private
      */
     _onSummernoteToolsUpdate(ev) {
-        console.warn(" summernote tool");
         if (!this._textToolsSwitchingEnabled) {
             return;
         }
