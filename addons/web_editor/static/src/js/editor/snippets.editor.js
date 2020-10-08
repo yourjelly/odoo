@@ -2202,18 +2202,13 @@ var SnippetsMenu = Widget.extend({
      * update the jabberwock toolbar container box.
      */
     _currentJabberwockToolbarMode: undefined,
-    _updateThrottle: undefined,
-    _updateJabberwockToolbarContainer(toolbarMode = "text") {
-        if(this._updateThrottle) clearTimeout(this._updateThrottle);
-        this._updateThrottle = setTimeout(() => {
-            if(toolbarMode !== this._currentJabberwockToolbarMode) {
-                this._updateThrottle = undefined
-                const $oldToolbar = this.wysiwyg.$toolbar.parent();
-                this._addJabberwockToolbar(toolbarMode);
-                $oldToolbar.remove();
-            }
-        },200);
-    },
+    _updateJabberwockToolbarContainer : _.debounce(function (toolbarMode) {
+        if(toolbarMode !== this._currentJabberwockToolbarMode) {
+            const $oldToolbar = this.wysiwyg.$toolbar.parent();
+            this._addJabberwockToolbar(toolbarMode);
+            $oldToolbar.remove();
+        }
+    }, 100),
     /**
      * Add the jabberwock toolbar.
      */
