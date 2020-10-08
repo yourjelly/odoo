@@ -536,23 +536,24 @@ var Wysiwyg = Widget.extend({
     openMediaDialog(params) {
         const nodes = params.context.range.selectedNodes();
         const node = nodes[0];
-        let $fontAwesomeNode;
+        let $baseNode;
 
-        if (nodes.length === 1 && node instanceof JWEditorLib.FontAwesomeNode) {
-            // TODO: we use previousSibling because getDomNodes return the wrong
-            //       node. change the line when the getDomNodes is fixed in
-            //       jabberwock.
-            const $originalFontAwesome = this.editorHelpers.getDomNodes(node).filter(dom => dom.nodeType === Node.ELEMENT_NODE);
-            $fontAwesomeNode = $($originalFontAwesome).clone();
-            params.htmlClass = [...$fontAwesomeNode[0].classList].filter((className) => {
-                return !className.startsWith('fa') || faZoomClassRegex.test(className);
-            }).join(' ');
+        if (nodes.length === 1){
+            if (node instanceof JWEditorLib.FontAwesomeNode || node instanceof JWEditorLib.OdooVideoNode) {
+                const $originalDomNode = this.editorHelpers.getDomNodes(node).filter(dom => dom.nodeType === Node.ELEMENT_NODE);
+                $baseNode = $($originalDomNode).clone();
+            }
+            if (node instanceof JWEditorLib.FontAwesomeNode) {
+                params.htmlClass = [...$baseNode[0].classList].filter((className) => {
+                    return !className.startsWith('fa') || faZoomClassRegex.test(className);
+                }).join(' ');
+            }
         }
 
         // avoid circular reference
         delete params.context;
 
-        let mediaDialog = new weWidgets.MediaDialog(this, params, $fontAwesomeNode);
+        let mediaDialog = new weWidgets.MediaDialog(this, params, $baseNode);
         mediaDialog.open();
         mediaDialog.on('save', this, async (element) => {
             if (params.htmlClass) element.className += " " + params.htmlClass;
