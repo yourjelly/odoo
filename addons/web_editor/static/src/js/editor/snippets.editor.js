@@ -2162,7 +2162,6 @@ var SnippetsMenu = Widget.extend({
             if (tab === this.tabs.OPTIONS) {
                 const isImage = $(this.customizePanel).find('we-customizeblock-option.snippet-option-ImageOptimize').length > 0
                 this._addJabberwockToolbar(isImage ? 'image' : 'text');
-                this.wysiwyg.onToolbarModeChange(this._updateJabberwockToolbarContainer.bind(this));
             }
         }
 
@@ -2180,7 +2179,7 @@ var SnippetsMenu = Widget.extend({
      * update the jabberwock toolbar container box.
      */
     _currentJabberwockToolbarMode: undefined,
-    _updateJabberwockToolbarContainer : _.debounce(function (toolbarMode) {
+    updateJabberwockToolbarContainer : _.debounce(function (toolbarMode) {
         if(toolbarMode !== this._currentJabberwockToolbarMode) {
             const $oldToolbar = this.wysiwyg.$toolbar.parent();
             this._addJabberwockToolbar(toolbarMode);
