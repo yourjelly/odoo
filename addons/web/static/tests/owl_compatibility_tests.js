@@ -20,7 +20,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
         },
     });
 
-    QUnit.module("Owl Compatibility", function () {
+    QUnit.skip("Owl Compatibility", function () {
         QUnit.module("ComponentAdapter");
 
         QUnit.test("sub widget with no argument", async function (assert) {
@@ -737,6 +737,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             const target = testUtils.prepareTarget();
             const widget = new MyWidget();
             await widget.appendTo(target);
+            widget.on_attach_callback();
 
             assert.verifySteps(['init', 'willStart', 'mounted']);
             assert.ok(component.__owl__.isMounted);
@@ -776,6 +777,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             const target = testUtils.prepareTarget();
             const widget = new MyWidget();
             await widget.appendTo(target);
+            widget.on_attach_callback();
 
             assert.strictEqual(widget.el.innerHTML, '<div>Component 1</div><div>Component 2</div>');
             assert.ok(c1.__owl__.isMounted);
@@ -825,6 +827,7 @@ odoo.define('web.OwlCompatibilityTests', function (require) {
             const target = testUtils.prepareTarget();
             const widget = new MyWidget();
             await widget.appendTo(target);
+            widget.on_attach_callback();
 
             assert.strictEqual(widget.el.innerHTML, '<div><div>child</div></div>');
             assert.ok(child.__owl__.isMounted);
