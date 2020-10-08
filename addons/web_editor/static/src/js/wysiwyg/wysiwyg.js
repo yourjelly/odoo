@@ -963,7 +963,7 @@ var Wysiwyg = Widget.extend({
             const renderer = this.editor.plugins.get(JWEditorLib.Renderer);
             const renderedNode = (await renderer.render('dom/html', node))[0];
             $(renderedNode).find('.o_snippet_editor_updated').addBack().removeClass('o_snippet_editor_updated');
-            let $saveNode = $(renderedNode).find('[data-oe-expression]');
+            let $saveNode = $(renderedNode).find('[data-oe-expression][data-oe-id]');
             if ($saveNode.length === 0) {
                 $saveNode = $(renderedNode)
             }
