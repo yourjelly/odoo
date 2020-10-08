@@ -477,7 +477,7 @@ var Wysiwyg = Widget.extend({
                 text = blocks.filter(str => str.length).join('\n');
             }
 
-            if (!domSelection.isCollapsed) {
+            if (!domSelection.isCollapsed || !currentLink) {
                 container.remove();
             }
         }
