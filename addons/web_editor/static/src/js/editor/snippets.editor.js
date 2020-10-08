@@ -38,29 +38,6 @@ $.extend($.expr[':'], {
 });
 
 /**
- * Get an array of all the selector tags and their position within their parents.
- */
-function getQuerySelectorArray (el) {
-    const parent = el.parentNode;
-
-    const index = [...parent.children].indexOf(el) + 1;
-    const selector = `${el.tagName}:nth-child(${index})`;
-    if (parent === document.body || parent.nodeType === el.DOCUMENT_FRAGMENT_NODE || parent.nodeType === el.DOCUMENT_NODE) {
-        return [selector];
-    } else {
-        return [...getQuerySelectorArray(parent), selector];
-    }
-}
-
-/**
- * Retrieve an absolute query selector of an element.
- */
-function getQuerySelector(el) {
-    const array = getQuerySelectorArray(el);
-    return 'body ' + array.join(' > ');
-}
-
-/**
  * Management of the overlay and option list for a snippet.
  */
 var SnippetEditor = Widget.extend({
@@ -1212,6 +1189,7 @@ var SnippetsMenu = Widget.extend({
      */
     cleanForSave: async function () {
         await this._enableLastEditor();
+        await this._removeLastSnippetActivated();
         this.trigger_up('ready_to_clean_for_save');
         await this._destroyEditors();
     },
@@ -1269,9 +1247,9 @@ var SnippetsMenu = Widget.extend({
      * Activate the last snippet that has been activated
      */
     activateLastSnippetBlock() {
-        if (this._lastSnippetBlockActivated) {
-            const $lastSnippet = $(document.querySelector(this._lastSnippetBlockActivated));
-            this._activateSnippet($lastSnippet, this._lastSnippetBlockActivatedPreview);
+        const $lastSnippet = this.$editor.find('.o_we_last_snippet_activated');
+        if ($lastSnippet) {
+            this._activateSnippet($lastSnippet, $lastSnippet.hasClass('o_we_last_snippet_preview'));
         }
     },
 
@@ -2359,9 +2337,8 @@ var SnippetsMenu = Widget.extend({
      */
     _onActivateSnippet: function (ev) {
         if (ev.data.saveTarget) {
-            this._lastSnippetBlockActivated = getQuerySelector(ev.data.$element[0]);
+            this._setLastSnippet(ev.data.$element[0], ev.data.savePreview && ev.data.previewMode);
         }
-        this._lastSnippetBlockActivatedPreview = ev.data.savePreview && ev.data.previewMode;
         this._activateSnippet(ev.data.$element, ev.data.previewMode, ev.data.ifInactiveOptions);
     },
     /**
@@ -2596,8 +2573,7 @@ var SnippetsMenu = Widget.extend({
         if ($snippet.closest(this._notActivableElementsSelector).length) {
             return;
         }
-        this._lastSnippetBlockActivated = getQuerySelector($snippet[0]);
-        this._lastSnippetBlockActivatedPreview = false;
+        this._setLastSnippet($snippet);
         this._activateSnippet($snippet);
     },
     /**
@@ -2870,6 +2846,31 @@ var SnippetsMenu = Widget.extend({
      */
     _onMobilePreviewClick: function() {
         this.wysiwyg.editor.execCommand('toggleDevicePreview', { device: 'mobile' });
+    },
+    /**
+     * Set the last snippet activated.
+     */
+    _setLastSnippet($snippet, preview = false) {
+        this._removeLastSnippetActivated();
+        $snippet[0].classList.add('o_we_last_snippet_activated');
+        if (preview) $snippet[0].classList.add('o_we_last_snippet_preview');
+    },
+    /**
+     * Remove the last snippet that has been activated.
+     */
+    async _removeLastSnippetActivated() {
+        const classesToRemove = ['o_we_last_snippet_activated', 'o_we_last_snippet_preview'];
+        const $lastSnippet = this.$editor.find('.o_we_last_snippet_activated');
+        $lastSnippet.removeClass(classesToRemove);
+        if ($lastSnippet.length) {
+            // loop in case the class has been duplicated (e.g. cloned)
+            const removeLastSnippetActivated = async (context) => {
+                for (const lastSnippet of $lastSnippet.toArray()) {
+                    await this.editorHelpers.removeClass(context, lastSnippet, classesToRemove);
+                }
+            }
+            await this.wysiwyg.editor.execCommand(removeLastSnippetActivated);
+        }
     },
 });
 

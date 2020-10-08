@@ -2663,9 +2663,10 @@ const SnippetOptionWidget = Widget.extend({
             } else {
                 await this[methodName](previewMode, widgetValue, params);
             }
-            if (previewMode === false) {
-                this.wysiwyg.snippetsMenu.activateLastSnippetBlock();
-            }
+        }
+
+        if (previewMode === false) {
+            this.wysiwyg.snippetsMenu.activateLastSnippetBlock();
         }
 
         // We trigger the event on elements targeted by apply-to if any as
