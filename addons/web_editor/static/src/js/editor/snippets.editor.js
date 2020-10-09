@@ -2336,7 +2336,7 @@ var SnippetsMenu = Widget.extend({
      */
     _onActivateSnippet: function (ev) {
         if (ev.data.saveTarget) {
-            this._setLastSnippet(ev.data.$element[0], ev.data.savePreview && ev.data.previewMode);
+            this._setLastSnippet(ev.data.$element, ev.data.savePreview && ev.data.previewMode);
         }
         this._activateSnippet(ev.data.$element, ev.data.previewMode, ev.data.ifInactiveOptions);
     },
