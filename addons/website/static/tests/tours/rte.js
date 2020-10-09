@@ -53,7 +53,6 @@ tour.register('rte_translator', {
                     <font style="color: rgb(255, 0, 0);">services</font>. To be successful your content needs to be\
                     useful to your <a href="/999">readers</a>.</p> <input placeholder="test translate placeholder"/>\
                     <p>&lt;b&gt;&lt;/b&gt; is an HTML&nbsp;tag &amp; is empty</p>');
-            await wysiwyg.editorHelpers.setAttribute(params, document.querySelectorAll("#wrap img"), "title", "test translate image title");
         });
     }
 }, {
