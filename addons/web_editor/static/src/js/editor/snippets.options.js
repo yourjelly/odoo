@@ -3574,7 +3574,7 @@ registry.BackgroundToggler = SnippetOptionWidget.extend({
      *
      * @see this.selectClass for parameters
      */
-    toggleBgFilter(previewMode, widgetValue, params) {
+    async toggleBgFilter(previewMode, widgetValue, params) {
         if (widgetValue) {
             const bgFilterEl = document.createElement('div');
             bgFilterEl.classList.add('o_we_bg_filter', 'bg-black-50');
@@ -3587,6 +3587,7 @@ registry.BackgroundToggler = SnippetOptionWidget.extend({
         } else {
             this.$target.find('.o_we_bg_filter').remove();
         }
+        if (previewMode === false) await this.updateChangesInWysiwyg();
     },
 
     //--------------------------------------------------------------------------
