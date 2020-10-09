@@ -76,6 +76,8 @@ var LinkDialog = Dialog.extend({
      */
     start: function () {
         const self = this;
+        this.buttonOptsCollapseEl = this.el.querySelector('#o_link_dialog_button_opts_collapse');
+
         this.$('input.link-style').prop('checked', false).first().prop('checked', true);
         if (this.props.initialClassNames) {
             this.$('input[name="link_style_color"], select[name="link_style_size"] > option, select[name="link_style_shape"] > option').each(function () {
