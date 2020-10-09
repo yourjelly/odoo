@@ -385,8 +385,12 @@ var Tip = Widget.extend({
     },
     _unbind_anchor_events: function () {
         this.$anchor.off(".anchor");
-        this.$consumeEventAnchors.off(".anchor");
-        this.$scrolableElement.off('.Tip');
+        if (this.$consumeEventAnchors) {
+            this.$consumeEventAnchors.off(".anchor");
+        }
+        if (this.$scrolableElement) {
+            this.$scrolableElement.off('.Tip');
+        }
     },
     _get_spaced_inverted_position: function (position) {
         if (position === "right") return "left+" + this.info.space;
