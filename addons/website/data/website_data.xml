@@ -706,7 +706,8 @@
             <field name="type">url</field>
             <field name="url">/website/static/src/img/snippets_demo/s_popup.jpg</field>
         </record>
-
+    </data>
+    <data>
         <!-- Filter for Dynamic Snippet -->
         <record id="dynamic_snippet_country_filter" model="ir.filters">
             <field name="name">Countries</field>
@@ -770,8 +771,6 @@
             <field name="website_id" ref="website.default_website"/>
         </record>
 
-    </data>
-    <data>
         <record id="group_multi_website" model="res.groups">
             <field name="name">Multi-website</field>
             <field name="category_id" ref="base.module_category_hidden"/>
