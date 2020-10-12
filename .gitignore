@@ -39,3 +39,8 @@ setup/win32/static/postgresql*.exe
 /man/
 /share/
 /src/
+
+# web client
+addons/wowl/node_modules/
+addons/wowl/static/dist/
+addons/wowl/package-lock.json
