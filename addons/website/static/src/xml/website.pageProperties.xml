@@ -60,7 +60,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text" t-att-title="widget.serverUrl"><small><t t-esc="widget.serverUrlTrunc"/></small></span>
                             </div>
-                            <input type="text" class="form-control" id="page_url" t-att-value="widget.page.url" />
+                            <input type="text" class="form-control" id="page_url" autocomplete="off" t-att-value="widget.page.url" />
                         </div>
                     </div>
                 </div>
