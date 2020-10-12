@@ -1,0 +1,106 @@
+# Services
+
+## Overview
+
+The Odoo web client is organized in _components_. It is common for a component
+to have a need to perform tasks or obtain some information outside of itself.
+
+For example:
+
+- performing an RPC
+- displaying a notification
+- asking the web client to change the current action/view
+- ...
+
+These kind of features are represented in the web client under the name _service_.
+A service is basically a piece of code that is started with the web client, and
+available to the interface (and to other services).
+
+## List of all services
+
+| Service                               | Purpose                                                    |
+| ------------------------------------- | ---------------------------------------------------------- |
+| [`crash_manager`](crash_manager.md)   | log and display errors                                     |
+| [`menus`](menus.md)                   | keep track of all menu items (app and submenus)            |
+| [`model`](model.md)                   | interact with (python) models                              |
+| [`notifications`](notifications.md)   | display a notification (or error)                          |
+| [`router`](router.md)                 | manage the url                                             |
+| [`rpc`](rpc.md)                       | perform a RPC (in other word, call the server)             |
+| [`user`](user.md)                     | keep track of user main properties (lang, ...) and context |
+| [`view_manager`](view_manager.md)     | load (and keep in cache) views information                 |
+| [`action_manager`](action_manager.md) | perform actions following user interactions                |
+
+## Defining a service
+
+A service needs to follow the following interface:
+
+```ts
+export interface Service<T = any> {
+  name: string;
+  dependencies?: string[];
+  deploy: (env: OdooEnv, odoo: Odoo) => Promise<T> | T;
+}
+```
+
+The name is simply a short unique string representing the service, such as `rpc`.
+It may define some `dependencies`. In that case, the dependent services will be
+started first, and ready when the current service is started.
+
+The `deploy` method is the most important: it will be executed as soon
+as the service infrastructure is deployed (so, even before the web client is
+instantiated), and the return value of the `deploy` method will be the value of
+the service. This method can also be asynchronous, in which case the value of
+the service will be the result of that promise.
+
+Some services do not export any value. They may just do their work without a
+need to be directly called by other code. In that case, their value will be
+set to `null` in `env.services`.
+
+Once a service is defined, it needs then to be registered to the `serviceRegistry`,
+to make sure it is properly deployed when the application is started.
+
+```ts
+serviceRegistry.add(myService.name, myService);
+```
+
+For example, imagine that we want to provide a service that manage a counter.
+It could be defined like this:
+
+```js
+const counterService = {
+  name: "counter",
+  start(env) {
+    let value = 0;
+    return {
+      getValue() {
+        return value;
+      },
+      increment() {
+        value++;
+      },
+    };
+  },
+};
+serviceRegistry.add(counterService.name, counterService);
+```
+
+## Using a service
+
+To use a service, a component needs to call the `useService` hook. This will
+return a reference to the service value, that can then be used by the component.
+
+For example:
+
+```js
+class MyComponent extends Component {
+    rpc = useService('rpc');
+
+    async willStart() {
+        this.someValue = await this.rpc(...);
+    }
+}
+```
+
+Note: IF the value of the service is a function (for example, like the `rpc`
+service), then the `useService` hook will bind it to the current component. This
+means that the code for the service can actually access the component reference.
