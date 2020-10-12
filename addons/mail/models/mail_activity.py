@@ -199,6 +199,7 @@ class MailActivity(models.Model):
         for activity in self:
             activity.res_name = activity.res_model and \
                 self.env[activity.res_model].browse(activity.res_id).display_name
+            print("res_name-----------",activity.res_name)
 
     @api.depends('date_deadline')
     def _compute_state(self):
@@ -569,6 +570,7 @@ class MailActivity(models.Model):
         return {'type': 'ir.actions.act_window_close'}
 
     def activity_format(self):
+        print("hi-------------\n\n\n\n")
         activities = self.read()
         mail_template_ids = set([template_id for activity in activities for template_id in activity["mail_template_ids"]])
         mail_template_info = self.env["mail.template"].browse(mail_template_ids).read(['id', 'name'])
@@ -940,6 +942,7 @@ class MailActivityMixin(models.AbstractModel):
         return True
 
     def activity_unlink(self, act_type_xmlids, user_id=None):
+        print("1222222-------------------")
         """ Unlink activities, limiting to some activity types and optionally
         to a given user. """
         if self.env.context.get('mail_activity_automation_skip'):
