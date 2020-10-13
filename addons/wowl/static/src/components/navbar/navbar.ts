@@ -8,10 +8,18 @@ export class NavBar extends Component<{}, OdooEnv> {
   menuRepo = useService("menus");
   state = useState({ showDropdownMenu: false });
 
-  systrayItems = this.env.registries.systray.getAll();
+  systrayItems = this._getSystrayItems();
 
   toggleDropdownMenu() {
     this.state.showDropdownMenu = !this.state.showDropdownMenu;
+  }
+
+  _getSystrayItems() {
+    return this.env.registries.systray.getAll().sort((x, y) => {
+      const xSeq = x.sequence ?? 50;
+      const ySeq = y.sequence ?? 50;
+      return ySeq - xSeq;
+    });
   }
 
   _onMenuClicked(menu: any) {
