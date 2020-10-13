@@ -27,7 +27,7 @@ interface ActionOptions {
   clearBreadcrumbs?: boolean;
 }
 
-interface Action {
+export interface Action {
   id?: number;
   jsId: string;
   name: string;
