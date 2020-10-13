@@ -60,3 +60,39 @@ QUnit.test("navbar can display systray items", async (assert) => {
   const navbar = await createComponent(NavBar, { config: { services, systray }, serverData });
   assert.containsOnce(navbar.el!, "li.my-item");
 });
+
+QUnit.test("navbar can display systray items ordered based on their sequence", async (assert) => {
+  class MyItem1 extends Component {
+    static template = xml`<li class="my-item-1">my item 1</li>`;
+  }
+  class MyItem2 extends Component {
+    static template = xml`<li class="my-item-2">my item 2</li>`;
+  }
+  class MyItem3 extends Component {
+    static template = xml`<li class="my-item-3">my item 3</li>`;
+  }
+
+  const item1 = {
+    name: "addon.myitem1",
+    Component: MyItem1,
+    sequence: 0,
+  };
+  const item2 = {
+    name: "addon.myitem2",
+    Component: MyItem2,
+  };
+  const item3 = {
+    name: "addon.myitem3",
+    Component: MyItem3,
+    sequence: 100,
+  };
+  env.registries.systray.add(item2.name, item2);
+  env.registries.systray.add(item1.name, item1);
+  env.registries.systray.add(item3.name, item3);
+
+  await mount(NavBar, { env, target });
+  const menuSystray = target.getElementsByClassName("o_menu_systray")[0] as HTMLElement;
+
+  assert.containsN(menuSystray, "li", 3, "tree systray items should be displayed");
+  assert.strictEqual(menuSystray.innerText, "my item 3\nmy item 2\nmy item 1");
+});
