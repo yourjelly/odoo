@@ -176,7 +176,7 @@
         <p name="payment_term" position="replace"/>
 
 
-        <xpath expr="//span[@t-field='o.payment_reference']/../.." position="replace"/>
+        <xpath expr="//span[@t-field='o.invoice_payment_ref']/../.." position="replace"/>
 
         <div id="informations" position="replace">
             <t t-call="l10n_cl.informations"/>
@@ -201,26 +201,26 @@
 
     </template>
 
-    <template id="report_invoice_document_with_payments" inherit_id="account.report_invoice_document_with_payments"
-              primary="True">
+    <template id="report_invoice_document_with_payments" inherit_id="account.report_invoice_document_with_payments" primary="True">
 
-        <xpath expr="//h2" position="attributes">
-            <attribute name="t-if">not o.l10n_latam_document_type_id.report_name</attribute>
-        </xpath>
+        <!-- custom header and footer -->
+        <t t-set="o" position="after">
+            <t t-set="custom_header" t-value="'l10n_cl.custom_header'"/>
+        </t>
 
-        <xpath expr="//h2" position="after">
-            <h2 t-if="o.l10n_latam_document_type_id.report_name">
-                <span t-field="o.l10n_latam_document_type_id.report_name"/>
-                <span t-field="o.l10n_latam_document_number"/>
-            </h2>
-        </xpath>
+        <!-- remove default partner address -->
+        <t t-set="address" position="replace"/>
+
+        <xpath expr="//h2" position="replace"/>
 
         <xpath expr="//span[@t-field='line.price_unit']" position="attributes">
             <attribute name="t-field">line.l10n_latam_price_unit</attribute>
         </xpath>
 
-        <xpath expr="//span[@id='line_tax_ids']" position="attributes">
-            <attribute name="t-esc">', '.join(map(lambda x: (x.description or x.name), line.l10n_latam_tax_ids))</attribute>
+        <xpath expr="//span[@id='line_tax_ids']" position="replace">
+            <t t-if="is_tax">
+                <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))" id="line_tax_ids"/>
+            </t>
         </xpath>
 
         <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" position="attributes">
@@ -235,6 +235,45 @@
             <attribute name="t-field">o.l10n_latam_amount_untaxed</attribute>
         </span>
 
+
+        <xpath expr="//th[@name='th_taxes']/span" position="replace">
+            <t t-if="is_tax">
+                <span>Taxes</span>
+            </t>
+        </xpath>
+
+        <xpath expr="//span[@id='line_tax_ids']" position="replace">
+            <t t-if="is_tax">
+                <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))" id="line_tax_ids"/>
+            </t>
+        </xpath>
+        <!-- remove payment term, this is added on information section -->
+        <p name="payment_term" position="replace"/>
+
+        <!-- we have in Chile an special section for references. Will be included in l10n_cl_edi -->
+        <xpath expr="//span[@t-field='o.invoice_payment_ref']/../.." position="replace"/>
+
+        <div id="informations" position="replace">
+            <t t-call="l10n_cl.informations"/>
+        </div>
+
+        <!--  we remove the ml auto and also give more space to avoid multiple lines on tax detail -->
+        <xpath expr="//div[@id='total']/div" position="attributes">
+            <attribute name="t-attf-class">#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}</attribute>
+        </xpath>
+
+        <xpath expr="//div[@id='total']/div" position="before">
+            <div t-attf-class="#{'col-6' if report_type != 'html' else 'col-sm-7 col-md-6'}"/>
+        </xpath>
+
+        <xpath expr="//div[@id='total']" position="after">
+            <div class="row">
+                <div name="stamp" class="col-4 text-center"/>
+                <div name="transferable-table" class="col-4"/>
+                <div name="transferable-legend" class="col-4 pull-right"/>
+            </div>
+        </xpath>
     </template>
+
 
 </odoo>
