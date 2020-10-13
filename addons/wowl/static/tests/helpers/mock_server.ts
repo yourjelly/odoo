@@ -1,6 +1,6 @@
 import { Component } from "@odoo/owl";
 import { Model, ModelBuilder } from "../../src/services/model";
-import { Action } from "../../src/services/action_manager/helpers";
+import { Action } from "../../src/services/action_manager/action_manager";
 import { ModelData, ModelMethods, Service } from "../../src/types";
 import { OdooEnv, makeFakeRPCService } from "./index";
 import { Registry } from "../../src/core/registry";
