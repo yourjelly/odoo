@@ -4,7 +4,6 @@ import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import { Localization } from "./core/localization";
 import type { Registry } from "./core/registry";
 import type { actionManagerService } from "./services/action_manager/action_manager";
-import type { crashManagerService } from "./services/crash_manager";
 import type { menusService } from "./services/menus";
 import { DBRecord, modelService } from "./services/model";
 import type { notificationService } from "./services/notifications";
@@ -90,6 +89,7 @@ type Browser = Env["browser"];
 
 export interface OdooBrowser extends Browser {
   console: typeof window["console"];
+  location: typeof window["location"];
   open: typeof window["open"];
   XMLHttpRequest: typeof window["XMLHttpRequest"];
 }
@@ -111,6 +111,7 @@ interface Registries {
   actions: Registry<ComponentAction | FunctionAction>;
   views: Registry<View>;
   systray: Registry<SystrayItem>;
+  errorDialogs: Registry<Type<Component>>;
 }
 
 export interface OdooConfig extends Registries {
@@ -130,7 +131,6 @@ type ServiceType<T extends (...args: any[]) => any> = Nullify<Unwrap<ReturnType<
 
 export interface Services {
   action_manager: ServiceType<typeof actionManagerService["deploy"]>;
-  crash_manager: ServiceType<typeof crashManagerService["deploy"]>;
   menus: ServiceType<typeof menusService["deploy"]>;
   model: ServiceType<typeof modelService["deploy"]>;
   notifications: ServiceType<typeof notificationService["deploy"]>;

@@ -22,6 +22,7 @@ Here is a list of all entities available in the `browser` object:
 - `console`
 - `fetch`
 - `localStorage`
+- `location`
 - `random`
 - `requestAnimationFrame`
 - `setInterval`

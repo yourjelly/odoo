@@ -20,6 +20,8 @@ import "./components/user_menu_tests";
 import "./core/localization_tests";
 import "./components/dialog_tests";
 import "./core/py_tests";
+import "./components/crash_manager_tests";
+import "./components/error_dialogs_tests";
 
 (async () => {
   await setupTests();
