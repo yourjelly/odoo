@@ -9,19 +9,52 @@ type Params = { [key: string]: any };
 
 export type RPC = (route: string, params?: Params) => Promise<any>;
 
-interface RPCServerError {
+export interface RPCServerError {
   type: "server";
-  message: string;
+
   code: number;
-  data_message: string;
-  data_debug: string;
+  message: string;
+
+  name?: string;
+  subType?: string;
+
+  data?: {
+    [key: string]: any;
+  };
 }
 
 interface RPCNetworkError {
   type: "network";
 }
 
-type RPCError = RPCServerError | RPCNetworkError;
+export type RPCError = RPCServerError | RPCNetworkError;
+
+let isConnected = true;
+let rpcId: number = 0;
+
+function handleLostConnection(env: OdooEnv) {
+  if (!isConnected) {
+    return;
+  }
+  isConnected = false;
+  const notificationId = env.services.notifications.create(
+    "Connection lost. Trying to reconnect...",
+    { sticky: true }
+  );
+  let delay = 2000;
+  setTimeout(function checkConnection() {
+    jsonrpc(env, "/web/webclient/version_info", {}, rpcId++)
+      .then(function () {
+        isConnected = true;
+        env.services.notifications.close(notificationId);
+      })
+      .catch(() => {
+        // exponential backoff, with some jitter
+        delay = delay * 1.5 + 500 * Math.random();
+        setTimeout(checkConnection, delay);
+      });
+  }, delay);
+}
 
 // -----------------------------------------------------------------------------
 // Main RPC method
@@ -42,27 +75,36 @@ function jsonrpc(env: OdooEnv, url: string, params: Params, rpcId: number): Prom
     bus.trigger("RPC:REQUEST", data.id);
 
     // handle success
-    request.addEventListener("load", (res) => {
-      const response = JSON.parse(request.response);
+    request.addEventListener("load", () => {
+      const { error: responseError, result: responseResult } = JSON.parse(request.response);
       bus.trigger("RPC:RESPONSE", data.id);
-      if ("error" in response) {
-        // Odoo returns error like this, in a error field instead of properly
-        // using http error codes...
-        const error: RPCError = {
-          type: "server",
-          message: response.error.message,
-          code: response.error.code,
-          data_debug: response.error.data.debug,
-          data_message: response.error.data.message,
-        };
-        bus.trigger("RPC_ERROR", error);
-        reject(error);
+      if (!responseError) {
+        return resolve(responseResult);
       }
-      resolve(response.result);
+
+      // Odoo returns error like this, in a error field instead of properly
+      // using http error codes...
+      const { code, data: errorData, message, type: subType } = responseError;
+      const { context: data_context, name: data_name } = errorData || {};
+      const { exception_class } = data_context || {};
+      const name = exception_class || data_name;
+
+      const error: RPCServerError = {
+        type: "server",
+        code,
+        message,
+        data: errorData,
+        name,
+        subType,
+      };
+
+      bus.trigger("RPC_ERROR", error);
+      reject(error);
     });
 
     // handle failure
     request.addEventListener("error", () => {
+      handleLostConnection(env);
       const error: RPCError = {
         type: "network",
       };
@@ -84,8 +126,8 @@ function jsonrpc(env: OdooEnv, url: string, params: Params, rpcId: number): Prom
 
 export const rpcService: Service<RPC> = {
   name: "rpc",
+  dependencies: ["notifications"],
   deploy(env: OdooEnv): RPC {
-    let rpcId: number = 0;
     return async function (
       this: Component | null,
       route: string,

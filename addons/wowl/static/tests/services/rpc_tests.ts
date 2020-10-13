@@ -12,6 +12,7 @@ import {
   mount,
   nextTick,
 } from "../helpers/index";
+import { notificationService } from "../../src/services/notifications";
 
 const { xml } = tags;
 // -----------------------------------------------------------------------------
@@ -46,7 +47,8 @@ let serviceRegistry: Registry<Service<any>>;
 QUnit.module("RPC", {
   beforeEach() {
     serviceRegistry = new Registry();
-    serviceRegistry.add("rpc", rpcService);
+    serviceRegistry.add(notificationService.name, notificationService);
+    serviceRegistry.add(rpcService.name, rpcService);
   },
 });
 
@@ -86,10 +88,14 @@ QUnit.test("trigger an error on bus when response has 'error' key", async (asser
   env.bus.on("RPC_ERROR", null, (payload) => {
     assert.deepEqual(payload, {
       code: 12,
-      data_debug: "data_debug",
-      data_message: "data_message",
       message: "message",
       type: "server",
+      data: {
+        debug: "data_debug",
+        message: "data_message",
+      },
+      name: undefined,
+      subType: undefined,
     });
   });
   try {
