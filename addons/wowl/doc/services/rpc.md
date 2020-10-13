@@ -1,8 +1,8 @@
 # RPC service
 
-| Technical name | Dependencies |
-| -------------- | ------------ |
-| `rpc`          |              |
+| Technical name | Dependencies    |
+| -------------- | --------------- |
+| `rpc`          | `notifications` |
 
 ## Overview
 
@@ -71,11 +71,17 @@ When a rpc fails, then:
   - `type = 'server'`
   - `message(string)`
   - `code(number)`
-  - `data_message(string)`
-  - `data_debug(string)` (this is the main debug information, with the call stack)
+
+  - `name(string)` (optional, used by the crash manager to look for an appropriate
+    dialog to use when handling the error)
+  - `subType(string)` (optional, often used to determine the dialog title)
+  - `data(object)` (optional object that can contain various keys among which
+    `debug`: the main debug information, with the call stack)
 
   If it is a network error, then the error description is simply an object
   `{type: 'network'}`.
+  When a network error occurs, a notification is displayed and the server is regularly
+  contacted until it responds. The notification is closed as soon as the server responds.
 
 ## Specialized behaviour for components
 

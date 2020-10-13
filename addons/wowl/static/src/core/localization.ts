@@ -39,7 +39,7 @@ export function _t(str: string): string {
 }
 
 export interface Stringifiable {
-  toString: (str: string) => string;
+  toString: () => string;
 }
 
 /**
