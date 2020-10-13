@@ -55,6 +55,7 @@ function makeTestConfig(config: TestConfig = {}): OdooConfig {
     Components: config.Components || new Registry(),
     actions: config.actions || new Registry(),
     systray: config.systray || new Registry(),
+    errorDialogs: config.errorDialogs || new Registry(),
     views: new Registry(),
     odoo,
   };
