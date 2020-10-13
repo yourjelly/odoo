@@ -10,4 +10,5 @@ export class UserMenu extends Component<{}, OdooEnv> {
 export const userMenuItem: SystrayItem = {
   name: "wowl.user_menu",
   Component: UserMenu,
+  sequence: 0,
 };

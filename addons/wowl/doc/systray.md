@@ -15,8 +15,9 @@ A systray item is an object with the following properties:
   usually prefixed by the current module name)
 - `Component`: the Component class that will be used to display the item. Its root
   node has to be a `<li>` tag!
-- `sequence (number, optional)`: if given, this number will be used to order the
-  items.
+- sequence (number, optional): defaults to 50. If given, this number will be used
+  to order the items. The lowest sequence is on the right and the highest sequence
+  is on the left in the systray menu.
 
 Warning: the root node need to be a `<li>` tag. Otherwise, the systray item will
 not be styled properly.
