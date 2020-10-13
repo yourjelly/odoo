@@ -20,7 +20,6 @@ available to the interface (and to other services).
 
 | Service                               | Purpose                                                    |
 | ------------------------------------- | ---------------------------------------------------------- |
-| [`crash_manager`](crash_manager.md)   | log and display errors                                     |
 | [`menus`](menus.md)                   | keep track of all menu items (app and submenus)            |
 | [`model`](model.md)                   | interact with (python) models                              |
 | [`notifications`](notifications.md)   | display a notification (or error)                          |
@@ -101,6 +100,14 @@ class MyComponent extends Component {
 }
 ```
 
-Note: IF the value of the service is a function (for example, like the `rpc`
+Note: If the value of the service is a function (for example, like the `rpc`
 service), then the `useService` hook will bind it to the current component. This
 means that the code for the service can actually access the component reference.
+
+A service that depends on other services (and having properly declared its `dependencies`)
+should use the other services by accessing them directly through the environment.
+For example, the service `action_manager` uses the service `rpc` in that way:
+
+```js
+action = await env.services.rpc(...);
+```

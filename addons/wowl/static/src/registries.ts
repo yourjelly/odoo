@@ -1,9 +1,16 @@
 import { Component } from "@odoo/owl";
+import { CrashManager } from "./components/crash_manager/crash_manager";
 import { LoadingIndicator } from "./components/loading_indicator/loading_indicator";
+import {
+  Error504Dialog,
+  RedirectWarningDialog,
+  SessionExpiredDialog,
+  WarningDialog,
+} from "./components/error_dialogs/error_dialogs";
 import { userMenuItem } from "./components/user_menu/user_menu";
+import { _lt } from "./core/localization";
 import { Registry } from "./core/registry";
 import { actionManagerService } from "./services/action_manager/action_manager";
-import { crashManagerService } from "./services/crash_manager";
 import { menusService } from "./services/menus";
 import { modelService } from "./services/model";
 import { notificationService } from "./services/notifications";
@@ -31,7 +38,6 @@ export const serviceRegistry: Registry<Service<any>> = new Registry();
 const services = [
   actionManagerService,
   menusService,
-  crashManagerService,
   modelService,
   notificationService,
   routerService,
@@ -53,6 +59,7 @@ for (let service of services) {
 // of the webclient.
 export const mainComponentRegistry: Registry<Type<Component>> = new Registry();
 
+mainComponentRegistry.add("CrashManager", CrashManager);
 mainComponentRegistry.add("LoadingIndicator", LoadingIndicator);
 
 // -----------------------------------------------------------------------------
@@ -84,3 +91,19 @@ for (let view of views) {
 export const systrayRegistry: Registry<SystrayItem> = new Registry();
 
 systrayRegistry.add("wowl.user_menu", userMenuItem);
+
+// -----------------------------------------------------------------------------
+// Custom Dialogs for CrashManager
+// -----------------------------------------------------------------------------
+
+export const errorDialogRegistry: Registry<Type<Component>> = new Registry();
+
+errorDialogRegistry.add("odoo.exceptions.AccessDenied", WarningDialog);
+errorDialogRegistry.add("odoo.exceptions.AccessError", WarningDialog);
+errorDialogRegistry.add("odoo.exceptions.MissingError", WarningDialog);
+errorDialogRegistry.add("odoo.exceptions.UserError", WarningDialog);
+errorDialogRegistry.add("odoo.exceptions.ValidationError", WarningDialog);
+errorDialogRegistry.add("odoo.exceptions.RedirectWarning", RedirectWarningDialog);
+errorDialogRegistry.add("odoo.http.SessionExpiredException", SessionExpiredDialog);
+errorDialogRegistry.add("werkzeug.exceptions.Forbidden", SessionExpiredDialog);
+errorDialogRegistry.add("504", Error504Dialog);
