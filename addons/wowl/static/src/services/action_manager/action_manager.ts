@@ -1,6 +1,7 @@
 import { Component, tags } from "@odoo/owl";
 import { Dialog } from "../../components/dialog/dialog";
 import type { OdooEnv, Service, ComponentAction, FunctionAction, Type, View } from "./../../types";
+import { Menu } from '../menus';
 
 // -----------------------------------------------------------------------------
 // Types
@@ -25,6 +26,7 @@ export interface ActionDescription {
 type ActionRequest = ActionId | ActionXMLId | ActionTag | ActionDescription;
 interface ActionOptions {
   clearBreadcrumbs?: boolean;
+  _menuId?: Menu['id'];
 }
 
 export interface Action {
@@ -34,6 +36,7 @@ export interface Action {
   context: object;
   target: "current" | "new";
   type: ActionType;
+  _menuId?: Menu['id'];
 }
 interface ClientAction extends Action {
   tag: string;
@@ -161,6 +164,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
       // actionRequest is an object describing the action
       action = Object.assign({}, actionRequest);
     }
+    if (options && '_menuId' in options)  {
+      action._menuId = options._menuId;
+    }
     action.jsId = `action_${++id}`;
     return action;
   }
@@ -285,6 +291,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       Component = controller.Component;
       mounted() {
         controllerStack = nextStack; // the controller is mounted, commit the new stack
+        env.services.menus.setCurrentMenu(action._menuId);
       }
     }
 
@@ -367,7 +374,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
 export const actionManagerService: Service<ActionManager> = {
   name: "action_manager",
-  dependencies: ["rpc"],
+  dependencies: ["rpc", "menus"],
   deploy(env: OdooEnv): ActionManager {
     return makeActionManager(env);
   },

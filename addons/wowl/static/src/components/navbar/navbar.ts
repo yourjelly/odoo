@@ -9,13 +9,21 @@ export class NavBar extends Component<{}, OdooEnv> {
   state = useState({ showDropdownMenu: false });
 
   systrayItems = this.env.registries.systray.getAll();
+  constructor(...args: any[]) {
+    super(...args);
+    this.env.bus.on("menus:app-changed", this, () => this.render());
+  }
 
   toggleDropdownMenu() {
     this.state.showDropdownMenu = !this.state.showDropdownMenu;
   }
 
   _onMenuClicked(menu: any) {
-    this.actionManager.doAction(menu.actionID, { clearBreadcrumbs: true });
+    this.actionManager.doAction(menu.actionID, { clearBreadcrumbs: true , _menuId: menu.id});
     this.state.showDropdownMenu = false;
+  }
+  get currentApp() {
+    const app = this.menuRepo.getCurentApp();
+    return JSON.stringify(app || {});
   }
 }

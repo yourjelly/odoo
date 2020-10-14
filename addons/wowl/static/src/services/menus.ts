@@ -4,6 +4,7 @@ export interface Menu {
   id: number | string;
   children: number[];
   name: string;
+  appID: Menu["id"];
 }
 
 export interface MenuTree extends Menu {
@@ -18,8 +19,10 @@ export interface MenuData {
 export interface MenuService {
   getAll(): Menu[];
   getApps(): Menu[];
+  getCurentApp(): Menu | undefined;
   getMenu(menuID: keyof MenuData): Menu;
   getMenuAsTree(menuID: keyof MenuData): MenuTree;
+  setCurrentMenu(menuId?: Menu['id']): void;
 }
 
 const loadMenusUrl = `/wowl/load_menus`;
@@ -33,6 +36,7 @@ async function fetchLoadMenus(env: OdooEnv, url: string): Promise<MenuData> {
 }
 
 function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
+  let currentAppId: Menu["id"];
   return {
     getAll(): Menu[] {
       return Object.values(menusData);
@@ -49,6 +53,20 @@ function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
         menu.childrenTree = menu.children.map((mid: Menu["id"]) => this.getMenuAsTree(mid));
       }
       return menu;
+    },
+    setCurrentMenu(menuId) {
+      if (!menuId) {
+        return;
+      }
+      const menu = this.getMenu(menuId);
+      if (currentAppId === menu.appID) {
+        return;
+      }
+      currentAppId = menu.appID;
+      env.bus.trigger("menus:app-changed");
+    },
+    getCurentApp(): Menu | undefined {
+      return currentAppId ? this.getMenu(currentAppId) : undefined;
     },
   };
 }
