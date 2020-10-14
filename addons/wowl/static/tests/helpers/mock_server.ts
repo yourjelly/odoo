@@ -33,7 +33,12 @@ function loadViews(this: ServerData) {
   console.log("loadViews", this);
 }
 function loadMenus(this: ServerData) {
-  return this.menus;
+  return (
+    this.menus || {
+      root: { id: "root", children: [1], name: "root", appID: "root" },
+      1: { id: 1, children: [], name: "App0", appID: 1 },
+    }
+  );
 }
 function loadAction(this: ServerData, route: string, routeArgs?: any) {
   const { action_id } = routeArgs || {};
@@ -64,6 +69,7 @@ export function makeMockServer(
   serverData?: ServerData,
   mockRPC?: MockRPC
 ): void {
+  serverData = serverData || {};
   const mockedRPCs: MockRPC[] = [];
   const _mockRPC: MockRPC = (...params: Parameters<MockRPC>) => {
     const [route, routeArgs] = params;
