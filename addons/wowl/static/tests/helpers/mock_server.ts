@@ -1,8 +1,7 @@
 import { ActionDescription } from "../../src/services/action_manager/action_manager";
 import { ModelData, ModelMethod, ModelMethods, Service } from "../../src/types";
-import { makeFakeRPCService } from "./index";
 import { Registry } from "../../src/core/registry";
-import { MockRPC } from "./mocks";
+import { makeFakeRPCService, MockRPC } from "./mocks";
 import { MenuData } from "../../src/services/menus";
 
 // Aims:
