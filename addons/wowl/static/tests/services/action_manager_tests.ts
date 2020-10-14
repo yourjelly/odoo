@@ -36,7 +36,7 @@ QUnit.module("Action Manager Service", {
     actionsRegistry.add("client_action_by_xml_id", () => assert.step("client_action_xml_id"));
     actionsRegistry.add("client_action_by_object", () => assert.step("client_action_object"));
     services = new Registry<Service>();
-    makeMockServer(services, { models, actions: serverSideActions, views: {} });
+    makeMockServer({ services }, { models, actions: serverSideActions });
 
     services.add("action_manager", actionManagerService);
     env = await makeTestEnv({ actions: actionsRegistry, services });

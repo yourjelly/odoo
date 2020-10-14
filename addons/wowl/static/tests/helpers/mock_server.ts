@@ -1,8 +1,9 @@
 import { ActionDescription } from "../../src/services/action_manager/action_manager";
 import { ModelData, ModelMethod, ModelMethods, Service } from "../../src/types";
-import { Registry } from "../../src/core/registry";
-import { makeFakeRPCService, MockRPC } from "./mocks";
+import { MockRPC, makeFakeRPCService, makeMockFetch } from "./mocks";
 import { MenuData } from "../../src/services/menus";
+import { TestConfig } from "./utility";
+import { Registry } from "../../src/core/registry";
 
 // Aims:
 // - Mock service model high level
@@ -26,18 +27,21 @@ export interface ServerData {
 }
 
 /*
- * BASIC MODEL METHODS
+ * DEFAULT ROUTES AND METHODS
  */
-function loadViews(this: ModelData) {
+function loadViews(this: ServerData) {
   console.log("loadViews", this);
 }
-
+function loadMenus(this: ServerData) {
+  return this.menus;
+}
 function loadAction(this: ServerData, route: string, routeArgs?: any) {
   const { action_id } = routeArgs || {};
   return (action_id && this.actions && this.actions[action_id]) || {};
 }
 const defaultRoutes: any = {
   "/web/action/load": loadAction,
+  "/wowl/load_menus": loadMenus,
 };
 const defaultModelMethods: ModelMethods = {
   load_views: loadViews,
@@ -56,10 +60,10 @@ function getModelMethod(
   );
 }
 export function makeMockServer(
-  servicesRegistry: Registry<Service>,
+  config: TestConfig,
   serverData?: ServerData,
   mockRPC?: MockRPC
-): Registry<Service> {
+): void {
   const mockedRPCs: MockRPC[] = [];
   const _mockRPC: MockRPC = (...params: Parameters<MockRPC>) => {
     const [route, routeArgs] = params;
@@ -88,6 +92,8 @@ export function makeMockServer(
   }
   mockedRPCs.push(_mockRPC);
   const rpcService = makeFakeRPCService(mockedRPCs);
-  servicesRegistry.add("rpc", rpcService);
-  return servicesRegistry;
+  config.browser = config.browser || {};
+  config.browser.fetch = makeMockFetch(mockedRPCs);
+  config.services = config.services || new Registry<Service>();
+  config.services.add("rpc", rpcService);
 }
