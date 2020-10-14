@@ -2989,7 +2989,7 @@ Fields:
 
         # if a read() follows a write(), we must flush updates, as read() will
         # fetch from database and overwrites the cache (`test_update_with_id`)
-        self.flush(fields, self)
+        self._flush_search([], fields=fields)
 
         field_names = []
         inherited_field_names = []
