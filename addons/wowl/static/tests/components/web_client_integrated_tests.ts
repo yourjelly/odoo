@@ -29,8 +29,8 @@ async function createWebClient(params: CreateComponentParams): ReturnType<typeof
   return createComponent(WebClient, params);
 }
 
-QUnit.module("Basic action rendering", {
-  async beforeEach() {
+QUnit.module("Web Client Integration", hooks => {
+  hooks.beforeEach(() => {
     actionsRegistry = new Registry<ComponentAction | FunctionAction>();
     actionsRegistry.add("clientAction", ClientAction);
     const menus = {
@@ -48,93 +48,94 @@ QUnit.module("Basic action rendering", {
       menus,
       actions: serverSideActions,
     };
-  },
-});
-
-// was "can execute client actions from tag name"
-QUnit.test("can display client actions from tag name", async function (assert) {
-  assert.expect(3);
-  const webClient = await createWebClient({
-    config: {},
-    mockRPC(...args) {
-      assert.step(args[0]);
-    },
   });
-  assert.verifySteps(["/wowl/load_menus"]);
-  const actionManager = getService(webClient, "action_manager");
-  actionManager.doAction("clientAction");
-  await nextTick();
-  assert.containsOnce(
-    // LPE fixme: should be inside  ".o_action_manager"
-    webClient.el!,
-    ".test_client_action"
-  );
-});
 
-QUnit.test("can display client actions in Dialog", async function (assert) {
-  assert.expect(1);
+  QUnit.module('Basic action rendering');
+  // was "can execute client actions from tag name"
+  QUnit.test("can display client actions from tag name", async function (assert) {
+    assert.expect(3);
+    const webClient = await createWebClient({
+      config: {},
+      mockRPC(...args) {
+        assert.step(args[0]);
+      },
+    });
+    assert.verifySteps(["/wowl/load_menus"]);
+    const actionManager = getService(webClient, "action_manager");
+    actionManager.doAction("clientAction");
+    await nextTick();
+    assert.containsOnce(
+      // LPE fixme: should be inside  ".o_action_manager"
+      webClient.el!,
+      ".test_client_action"
+    );
+  });
 
-  const webClient = await createWebClient({
-    config: {},
-  });
-  const actionManager = getService(webClient, "action_manager");
-  actionManager.doAction({
-    target: "new",
-    tag: "clientAction",
-    type: "ir.actions.client",
-  });
-  await nextTick();
-  assert.containsOnce(webClient.el!, ".modal .test_client_action");
-});
+  QUnit.test("can display client actions in Dialog", async function (assert) {
+    assert.expect(1);
 
-QUnit.test("can display client actions as main, then in Dialog", async function (assert) {
-  assert.expect(3);
+    const webClient = await createWebClient({
+      config: {},
+    });
+    const actionManager = getService(webClient, "action_manager");
+    actionManager.doAction({
+      target: "new",
+      tag: "clientAction",
+      type: "ir.actions.client",
+    });
+    await nextTick();
+    assert.containsOnce(webClient.el!, ".modal .test_client_action");
+  });
 
-  const webClient = await createWebClient({
-    config: {},
-  });
-  const actionManager = getService(webClient, "action_manager");
-  actionManager.doAction("clientAction");
-  await nextTick();
-  assert.containsOnce(
-    // LPE fixme: should be inside  ".o_action_manager"
-    webClient.el!,
-    ".test_client_action"
-  );
-  actionManager.doAction({
-    target: "new",
-    tag: "clientAction",
-    type: "ir.actions.client",
-  });
-  await nextTick();
-  assert.containsN(
-    // LPE fixme: should be inside  ".o_action_manager"
-    webClient.el!,
-    ".test_client_action",
-    2
-  );
-  assert.containsOnce(webClient.el!, ".modal .test_client_action");
-});
+  QUnit.test("can display client actions as main, then in Dialog", async function (assert) {
+    assert.expect(3);
 
-QUnit.test("can display client actions in Dialog, then as main destroys Dialog", async function (
-  assert
-) {
-  assert.expect(4);
+    const webClient = await createWebClient({
+      config: {},
+    });
+    const actionManager = getService(webClient, "action_manager");
+    actionManager.doAction("clientAction");
+    await nextTick();
+    assert.containsOnce(
+      // LPE fixme: should be inside  ".o_action_manager"
+      webClient.el!,
+      ".test_client_action"
+    );
+    actionManager.doAction({
+      target: "new",
+      tag: "clientAction",
+      type: "ir.actions.client",
+    });
+    await nextTick();
+    assert.containsN(
+      // LPE fixme: should be inside  ".o_action_manager"
+      webClient.el!,
+      ".test_client_action",
+      2
+    );
+    assert.containsOnce(webClient.el!, ".modal .test_client_action");
+  });
 
-  const webClient = await createWebClient({
-    config: {},
+  QUnit.test("can display client actions in Dialog, then as main destroys Dialog", async function (
+    assert
+  ) {
+    assert.expect(4);
+
+    const webClient = await createWebClient({
+      config: {},
+    });
+    const actionManager = getService(webClient, "action_manager");
+    actionManager.doAction({
+      target: "new",
+      tag: "clientAction",
+      type: "ir.actions.client",
+    });
+    await nextTick();
+    assert.containsOnce(webClient.el!, ".test_client_action");
+    assert.containsOnce(webClient.el!, ".modal .test_client_action");
+    actionManager.doAction("clientAction");
+    await nextTick();
+    assert.containsOnce(webClient.el!, ".test_client_action");
+    assert.containsNone(webClient.el!, ".modal .test_client_action");
   });
-  const actionManager = getService(webClient, "action_manager");
-  actionManager.doAction({
-    target: "new",
-    tag: "clientAction",
-    type: "ir.actions.client",
-  });
-  await nextTick();
-  assert.containsOnce(webClient.el!, ".test_client_action");
-  assert.containsOnce(webClient.el!, ".modal .test_client_action");
-  actionManager.doAction("clientAction");
-  await nextTick();
-  assert.containsOnce(webClient.el!, ".test_client_action");
-  assert.containsNone(webClient.el!, ".modal .test_client_action");
 });
