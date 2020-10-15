@@ -164,3 +164,62 @@ QUnit.test("rpc initiated from destroyed components throw exception", async (ass
     assert.strictEqual(e.message, "A destroyed component should never initiate a RPC");
   }
 });
+
+QUnit.test("check trigger RPC:REQUEST and RPC:RESPONSE for a simple rpc", async (assert) => {
+  let MockXHR = makeMockXHR({ test: true }, () => 1);
+  const env = await makeTestEnv({
+    services: serviceRegistry,
+    browser: { XMLHttpRequest: MockXHR },
+  });
+
+  let rpcIdsRequest: number[] = [];
+  let rpcIdsResponse: number[] = [];
+
+  env.bus.on("RPC:REQUEST", null, (rpcId) => {
+    rpcIdsRequest.push(rpcId);
+    assert.step("RPC:REQUEST");
+  });
+  env.bus.on("RPC:RESPONSE", null, (rpcId) => {
+    rpcIdsResponse.push(rpcId);
+    assert.step("RPC:RESPONSE");
+  });
+  await env.services.rpc("/test/");
+
+  assert.strictEqual(rpcIdsRequest.toString(), rpcIdsResponse.toString());
+  assert.verifySteps(["RPC:REQUEST", "RPC:RESPONSE"]);
+});
+
+QUnit.test("check trigger RPC:REQUEST and RPC:RESPONSE for a rpc with an error", async (assert) => {
+  const error = {
+    message: "message",
+    code: 12,
+    data: {
+      debug: "data_debug",
+      message: "data_message",
+    },
+  };
+  let MockXHR = makeMockXHR({ error });
+  const env = await makeTestEnv({
+    services: serviceRegistry,
+    browser: { XMLHttpRequest: MockXHR },
+  });
+
+  let rpcIdsRequest: number[] = [];
+  let rpcIdsResponse: number[] = [];
+
+  env.bus.on("RPC:REQUEST", null, (rpcId) => {
+    rpcIdsRequest.push(rpcId);
+    assert.step("RPC:REQUEST");
+  });
+  env.bus.on("RPC:RESPONSE", null, (rpcId) => {
+    rpcIdsResponse.push(rpcId);
+    assert.step("RPC:RESPONSE");
+  });
+  try {
+    await env.services.rpc("/test/");
+  } catch (e) {
+    assert.ok(true);
+  }
+  assert.strictEqual(rpcIdsRequest.toString(), rpcIdsResponse.toString());
+  assert.verifySteps(["RPC:REQUEST", "RPC:RESPONSE"]);
+});
