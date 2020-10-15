@@ -1297,6 +1297,14 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 field = field.related_field
                 parent_fields[field.model_name].append(field.name)
 
+        # special case for setting self._rec_name from the context
+        if (
+            self._rec_name in fields_list
+            and self._fields[self._rec_name].type in ('char', 'text', 'html')
+            and 'default_display_name' in self.env.context
+        ):
+            defaults[self._rec_name] = self.env.context['default_display_name']
+
         # convert default values to the right format
         #
         # we explicitly avoid using _convert_to_write() for x2many fields,

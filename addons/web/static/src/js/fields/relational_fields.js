@@ -351,7 +351,7 @@ var FieldMany2One = AbstractField.extend({
         var tmp = {};
         var field = this.nodeOptions.create_name_field;
         if (field === undefined) {
-            field = "name";
+            field = "display_name";
         }
         if (field !== false && name && this.nodeOptions.quick_create !== false) {
             tmp["default_" + field] = name;
