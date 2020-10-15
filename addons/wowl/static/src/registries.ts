@@ -1,4 +1,5 @@
 import { Component } from "@odoo/owl";
+import { LoadingIndicator } from "./components/loading_indicator/loading_indicator";
 import { userMenuItem } from "./components/user_menu/user_menu";
 import { Registry } from "./core/registry";
 import { actionManagerService } from "./services/action_manager/action_manager";
@@ -8,6 +9,7 @@ import { modelService } from "./services/model";
 import { notificationService } from "./services/notifications";
 import { routerService } from "./services/router";
 import { rpcService } from "./services/rpc";
+import { uiService } from "./services/ui/ui";
 import { userService } from "./services/user";
 import { viewManagerService } from "./services/view_manager";
 import { ComponentAction, FunctionAction, Service, SystrayItem, Type, View } from "./types";
@@ -34,6 +36,7 @@ const services = [
   notificationService,
   routerService,
   rpcService,
+  uiService,
   userService,
   viewManagerService,
 ];
@@ -49,6 +52,8 @@ for (let service of services) {
 // Components registered in this registry will be rendered inside the root node
 // of the webclient.
 export const mainComponentRegistry: Registry<Type<Component>> = new Registry();
+
+mainComponentRegistry.add("LoadingIndicator", LoadingIndicator);
 
 // -----------------------------------------------------------------------------
 // Client Actions

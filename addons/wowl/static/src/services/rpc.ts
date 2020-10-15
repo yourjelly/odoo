@@ -26,12 +26,12 @@ type RPCError = RPCServerError | RPCNetworkError;
 // -----------------------------------------------------------------------------
 // Main RPC method
 // -----------------------------------------------------------------------------
-function jsonrpc(env: OdooEnv, url: string, params: Params): Promise<any> {
+function jsonrpc(env: OdooEnv, url: string, params: Params, rpcId: number): Promise<any> {
   const bus = env.bus;
   const XHR = env.browser.XMLHttpRequest;
 
   const data = {
-    id: Math.floor(Math.random() * 1000 * 1000 * 1000),
+    id: rpcId,
     jsonrpc: "2.0",
     method: "call",
     params: params,
@@ -39,10 +39,12 @@ function jsonrpc(env: OdooEnv, url: string, params: Params): Promise<any> {
 
   return new Promise((resolve, reject) => {
     const request = new XHR();
+    bus.trigger("RPC:REQUEST", data.id);
 
     // handle success
-    request.addEventListener("load", (data) => {
+    request.addEventListener("load", (res) => {
       const response = JSON.parse(request.response);
+      bus.trigger("RPC:RESPONSE", data.id);
       if ("error" in response) {
         // Odoo returns error like this, in a error field instead of properly
         // using http error codes...
@@ -65,6 +67,7 @@ function jsonrpc(env: OdooEnv, url: string, params: Params): Promise<any> {
         type: "network",
       };
       bus.trigger("RPC_ERROR", error);
+      bus.trigger("RPC:RESPONSE", data.id);
       reject(error);
     });
 
@@ -82,6 +85,7 @@ function jsonrpc(env: OdooEnv, url: string, params: Params): Promise<any> {
 export const rpcService: Service<RPC> = {
   name: "rpc",
   deploy(env: OdooEnv): RPC {
+    let rpcId: number = 0;
     return async function (
       this: Component | null,
       route: string,
@@ -91,13 +95,13 @@ export const rpcService: Service<RPC> = {
         if (this.__owl__.isDestroyed) {
           throw new Error("A destroyed component should never initiate a RPC");
         }
-        const result = await jsonrpc(env, route, params);
+        const result = await jsonrpc(env, route, params, rpcId++);
         if (this instanceof Component && this.__owl__.isDestroyed) {
           return new Promise(() => {});
         }
         return result;
       }
-      return jsonrpc(env, route, params);
+      return jsonrpc(env, route, params, rpcId++);
     };
   },
 };

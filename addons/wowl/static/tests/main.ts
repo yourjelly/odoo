@@ -12,6 +12,8 @@ import "./services/notifications_tests";
 import "./services/router_tests";
 import "./services/rpc_tests";
 import "./services/services_tests";
+import "./services/ui_tests";
+import "./components/loading_indicator_tests";
 import "./components/webclient_tests";
 import "./components/web_client_integrated_tests";
 import "./components/user_menu_tests";
