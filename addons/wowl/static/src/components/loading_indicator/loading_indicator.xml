@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div t-name="wowl.LoadingIndicator" t-att-class="state.isShown ? 'o_loading' : ''" owl="1">
+        <t t-if="state.isShown">
+            Loading (<t t-esc="state.count"/>)
+        </t>
+    </div>
+
+</templates>
