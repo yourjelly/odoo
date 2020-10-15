@@ -33,10 +33,16 @@ QUnit.module("Basic action rendering", {
     actionsRegistry.add("clientAction", ClientAction);
     const menus = {
       root: { id: "root", children: [1], name: "root", appID: "root" },
-      1: { id: 1, children: [], name: "App0", appID: 1 },
+      1: { id: 1, children: [2, 3], name: "App0", appID: 1},
+      2: { id: 2, children: [], name: "App0/Child1", appID: 1, actionID: 2, actionModel: 'ir.actions.client'},
     };
     const serverSideActions: any = {
       "wowl.client_action": {
+        tag: "clientAction",
+        target: "main",
+        type: "ir.actions.client",
+      },
+      2: {
         tag: "clientAction",
         target: "main",
         type: "ir.actions.client",
@@ -118,6 +124,30 @@ QUnit.test("can display client actions in Dialog, then as main destroys Dialog",
   assert
 ) {
   assert.expect(4);
+
+  const webClient = await createWebClient({
+    config: {},
+  });
+  const actionManager = getService(webClient, "action_manager");
+  actionManager.doAction({
+    target: "new",
+    tag: "clientAction",
+    type: "ir.actions.client",
+  });
+  await nextTick();
+  assert.containsOnce(webClient.el!, ".test_client_action");
+  assert.containsOnce(webClient.el!, ".modal .test_client_action");
+  actionManager.doAction("clientAction");
+  await nextTick();
+  assert.containsOnce(webClient.el!, ".test_client_action");
+  assert.containsNone(webClient.el!, ".modal .test_client_action");
+});
+
+QUnit.test("can display client actions in Dialog, then as main destroys Dialog", async function (
+  assert
+) {
+  assert.expect(4);
+
 
   const webClient = await createWebClient({
     config: {},

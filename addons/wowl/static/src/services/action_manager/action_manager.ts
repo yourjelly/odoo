@@ -7,7 +7,7 @@ import { Menu } from '../menus';
 // Types
 // -----------------------------------------------------------------------------
 
-type ActionType =
+export type ActionType =
   | "ir.actions.act_url"
   | "ir.actions.act_window"
   | "ir.actions.act_window_close"

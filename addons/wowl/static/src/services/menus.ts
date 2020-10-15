@@ -1,10 +1,13 @@
 import { OdooEnv, Service } from "../types";
+import { ActionType } from './action_manager/action_manager';
 
 export interface Menu {
   id: number | string;
   children: number[];
   name: string;
   appID: Menu["id"];
+  actionID?: number;
+  actionModel?: ActionType;
 }
 
 export interface MenuTree extends Menu {
