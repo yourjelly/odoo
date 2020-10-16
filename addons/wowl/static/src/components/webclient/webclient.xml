@@ -2,8 +2,9 @@
 <templates xml:space="preserve">
 
     <body t-name="wowl.WebClient" class="o_web_client" owl="1">
-        <NavBar/>
-        <ActionContainer/>
+        <NavBar t-on-toggle-home-menu="_onToggleHomeMenu" hasHomeMenu="state.hasHomeMenu"/>
+        <HomeMenuDemo t-if="state.hasHomeMenu"/>
+        <ActionContainer hasHomeMenu="state.hasHomeMenu"/>
         <div class="o_dialog_container"/>
         <div>
             <t t-foreach="Components" t-as="Component" t-key="Component[0]">

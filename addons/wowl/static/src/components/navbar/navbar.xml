@@ -3,8 +3,16 @@
 
   <header t-name="wowl.NavBar" owl="1">
     <nav class="o_main_navbar">
+      <button t-on-click.stop="trigger('toggle-home-menu')" t-if="currentApp or props.hasHomeMenu">
+        <t t-if="currentApp and props.hasHomeMenu">
+          TO PREVIOUS
+        </t>
+        <t t-if="currentApp and !props.hasHomeMenu">
+          TO HOME
+        </t>
+      </button>
       <t t-call="wowl.AppsMenu"/>
-      <a t-if="currentApp" class="o_menu_brand" role="button"><t t-esc="currentApp.name"/></a>
+      <a t-if="currentApp and !props.hasHomeMenu" class="o_menu_brand" role="button"><t t-esc="currentApp.name"/></a>
       <ul class="o_menu_sections" role="menu"/>
       <ul class="o_menu_systray" role="menu">
         <t t-foreach="systrayItems" t-as="item" t-key="item.name">

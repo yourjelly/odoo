@@ -102,7 +102,7 @@ interface ControllerProps {
   views?: View[];
 }
 
-interface ActionMangerUpdateInfo {
+export interface ActionMangerUpdateInfo {
   type: "MAIN" | "OPEN_DIALOG" | "CLOSE_DIALOG";
   id?: number;
   Component?: Type<Component<{}, OdooEnv>>;
@@ -127,7 +127,7 @@ interface ActionManager {
 export class ActionContainer extends Component<{}, OdooEnv> {
   static template = tags.xml`
     <div t-name="wowl.ActionContainer">
-      <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="main.id"/>
+      <t t-if="main.Component and !props.hasHomeMenu" t-component="main.Component" t-props="main.props" t-key="main.id"/>
       <Dialog t-if="dialog.Component" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed">
         <t t-component="dialog.Component" t-props="dialog.props"/>
       </Dialog>
