@@ -209,9 +209,22 @@ $i: 1;
 
 .pac-container { // google map autosuggestion
     z-index: $zindex-modal-backdrop; // > $o-we-zindex
-    min-width: 400px;
+    min-width: 160px;
+    font-size: 12px;
+    border: $o-we-sidebar-content-field-dropdown-border-width solid $o-we-sidebar-content-field-dropdown-border-color;
+    background-color: $o-we-sidebar-content-field-dropdown-bg;
+    box-shadow: $o-we-sidebar-content-field-dropdown-shadow;
 
     &:after {
         display: none;
+    }
+    .pac-item {
+        border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+        border-radius: $o-we-sidebar-content-field-border-radius;
+        background-color: $o-we-sidebar-content-field-clickable-bg;
+        color: $o-we-sidebar-content-field-clickable-color;
+        &:hover {
+            background-color: $o-we-sidebar-content-field-dropdown-item-bg-hover;
+        }
     }
 }

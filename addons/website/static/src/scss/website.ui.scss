@@ -475,3 +475,34 @@ body .modal {
         color: $info;
     }
 }
+
+.ui-autocomplete.custom-autocomplete {
+    width: 220px;
+    font-size: 12px;
+    border: $o-we-sidebar-content-field-dropdown-border-width solid $o-we-sidebar-content-field-dropdown-border-color;
+    background-color: $o-we-sidebar-content-field-dropdown-bg;
+    box-shadow: $o-we-sidebar-content-field-dropdown-shadow;
+    > li {
+        border: $o-we-sidebar-content-field-border-width solid $o-we-sidebar-content-field-border-color;
+        border-radius: $o-we-sidebar-content-field-border-radius;
+        background-color: $o-we-sidebar-content-field-clickable-bg;
+        color: $o-we-sidebar-content-field-clickable-color;
+    }
+    .ui-menu-item {
+        border-top: 1px solid transparent;
+        > div {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 20px;
+            &.ui-state-active {
+                border: none;
+                background-color: $o-we-sidebar-content-field-dropdown-item-bg-hover;
+            }
+        }
+    }
+    .ui-autocomplete-category {
+        border-top: 1px solid transparent;
+        background-color: #42424c
+    }
+}
