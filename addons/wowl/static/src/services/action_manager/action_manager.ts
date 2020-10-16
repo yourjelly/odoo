@@ -115,7 +115,7 @@ interface UpdateStackOptions {
 }
 
 interface ActionManager {
-  doAction(action: ActionRequest, options?: ActionOptions): void;
+  doAction(action: ActionRequest, options?: ActionOptions): number;
   switchView(viewType: string): void;
   restore(jsId: string): void;
 }
@@ -269,6 +269,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       Component = controller.Component;
       mounted() {
         controllerStack = nextStack; // the controller is mounted, commit the new stack
+        env.bus.trigger('ACTION_MANAGER:UI-UPDATED' , requestId);
       }
     }
 
@@ -587,12 +588,21 @@ function makeActionManager(env: OdooEnv): ActionManager {
     _updateUI(controllerStack[index], { index });
   }
 
+  let requestId = 0;
   return {
     doAction: (...args) => {
+      ++requestId;
       doAction(...args);
+      return requestId;
     },
-    switchView,
-    restore,
+    switchView: (...args) => {
+      ++requestId;
+      switchView(...args);
+    },
+    restore: (...args) => {
+      ++requestId;
+      restore(...args);
+    },
   };
 }
 

@@ -4,7 +4,7 @@
   <header t-name="wowl.NavBar" owl="1">
     <nav class="o_main_navbar">
       <t t-call="wowl.AppsMenu"/>
-      <a class="o_menu_brand" role="button"/>
+      <a t-if="currentApp" class="o_menu_brand" role="button"><t t-esc="currentApp.name"/></a>
       <ul class="o_menu_sections" role="menu"/>
       <ul class="o_menu_systray" role="menu">
         <t t-foreach="systrayItems" t-as="item" t-key="item.name">

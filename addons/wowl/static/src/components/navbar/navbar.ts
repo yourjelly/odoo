@@ -7,6 +7,10 @@ export class NavBar extends Component<{}, OdooEnv> {
   actionManager = useService("action_manager");
   menuRepo = useService("menus");
   state = useState({ showDropdownMenu: false });
+  constructor(...args: any[]) {
+    super(...args);
+    this.env.bus.on('MENUS:APP-CHANGED', this, () => this.render());
+  }
 
   systrayItems = this.env.registries.systray.getAll();
 
@@ -15,7 +19,10 @@ export class NavBar extends Component<{}, OdooEnv> {
   }
 
   _onMenuClicked(menu: any) {
-    this.actionManager.doAction(menu.actionID, { clearBreadcrumbs: true });
+    this.menuRepo.setCurrentMenu(menu);
     this.state.showDropdownMenu = false;
+  }
+  get currentApp() {
+    return this.menuRepo.getCurrentApp();
   }
 }

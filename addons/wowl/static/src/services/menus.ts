@@ -5,6 +5,7 @@ export interface Menu {
   children: number[];
   name: string;
   appID?: Menu['id'];
+  actionID?: number;
 }
 
 export interface MenuTree extends Menu {
@@ -19,8 +20,10 @@ export interface MenuData {
 export interface MenuService {
   getAll(): Menu[];
   getApps(): Menu[];
+  getCurrentApp(): Menu|undefined;
   getMenu(menuID: keyof MenuData): Menu;
   getMenuAsTree(menuID: keyof MenuData): MenuTree;
+  setCurrentMenu(menu: Menu): void;
 }
 
 const loadMenusUrl = `/wowl/load_menus`;
@@ -34,6 +37,16 @@ async function fetchLoadMenus(env: OdooEnv, url: string): Promise<MenuData> {
 }
 
 function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
+  let currentAppRequest: [number, Menu['id']]|null = null;
+  let currentAppId: Menu['appID'];
+  env.bus.on('ACTION_MANAGER:UI-UPDATED', null, requestId => {
+    const [doActionId, appID] = currentAppRequest || [];
+    if (appID && doActionId === requestId) {
+      currentAppId = appID;
+      env.bus.trigger('MENUS:APP-CHANGED');
+    }
+    currentAppRequest = null;
+  });
   return {
     getAll(): Menu[] {
       return Object.values(menusData);
@@ -44,6 +57,12 @@ function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
     getMenu(menuID: keyof MenuData): Menu {
       return menusData[menuID];
     },
+    getCurrentApp(): Menu|undefined {
+      if (!currentAppId) {
+        return;
+      }
+      return this.getMenu(currentAppId);
+    },
     getMenuAsTree(menuID: keyof MenuData): MenuTree {
       const menu = this.getMenu(menuID) as MenuTree;
       if (!menu.childrenTree) {
@@ -51,11 +70,22 @@ function makeMenus(env: OdooEnv, menusData: MenuData): MenuService {
       }
       return menu;
     },
+    setCurrentMenu(menu) {
+      currentAppRequest = null;
+      if (!menu.actionID) {
+        return;
+      }
+      const doActionId =  env.services.action_manager.doAction(menu.actionID, { clearBreadcrumbs: true });
+      if (menu.appID && currentAppId !== menu.appID) {
+        currentAppRequest = [doActionId, menu.appID];
+      }
+    }
   };
 }
 
 export const menusService: Service<MenuService> = {
   name: "menus",
+  dependencies: ['action_manager'],
   async deploy(env: OdooEnv, config): Promise<MenuService> {
     const { odoo } = config;
     const cacheHashes = odoo.session_info.cache_hashes;
