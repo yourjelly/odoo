@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/point_of_sale/static/src/css/keyboard.css"/>
     <link rel="stylesheet" href="/point_of_sale/static/src/css/pos_receipts.css"/>
     <link rel="stylesheet" type="text/less" href="/web/static/src/scss/fontawesome_overridden.scss"/>
+    <link rel="stylesheet" href="/point_of_sale/static/src/scss/header.scss"/>
 
     <script type="text/javascript" src="/point_of_sale/static/lib/html2canvas.js"></script>
     <script type="text/javascript" src="/point_of_sale/static/lib/backbone/backbone.js"></script>

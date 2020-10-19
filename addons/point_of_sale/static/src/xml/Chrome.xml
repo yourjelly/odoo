@@ -32,17 +32,11 @@
                     </div>
                 </Portal>
                 <div class="pos-content">
-                    <div class="window">
-                        <div class="subwindow">
-                            <div class="subwindow-container">
-                                <div class="subwindow-container-fix screens">
-                                    <t isShown="!tempScreen.isShown" t-component="mainScreen.component"
-                                       t-props="mainScreenProps" t-key="mainScreen.name" />
-                                    <t t-if="tempScreen.isShown" t-component="tempScreen.component"
-                                       t-props="tempScreenProps" t-key="tempScreen.name" />
-                                </div>
-                            </div>
-                        </div>
+                    <div class="subwindow-container-fix screens">
+                        <t isShown="!tempScreen.isShown" t-component="mainScreen.component"
+                           t-props="mainScreenProps" t-key="mainScreen.name" />
+                        <t t-if="tempScreen.isShown" t-component="tempScreen.component"
+                           t-props="tempScreenProps" t-key="tempScreen.name" />
                     </div>
                     <DebugWidget t-if="env.isDebug() and state.debugWidgetIsShown"
                                  t-transition="fade" />

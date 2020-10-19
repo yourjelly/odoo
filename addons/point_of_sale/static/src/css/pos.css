@@ -1,11 +1,14 @@
-/* --- Fonts --- */
+/* --- Fonts --- *//*
+
 
 @font-face{
     font-family: 'Inconsolata';
     src: url(../fonts/Inconsolata.otf);
 }
 
-/* --- Styling of OpenERP Elements --- */
+*/
+/* --- Styling of OpenERP Elements --- *//*
+
 .ui-dialog, .modal-dialog {
     background: white;
     padding: 10px;
@@ -38,7 +41,9 @@ div.modal.in {
     left: 50%;
 }
 
-/* --- Generic Restyling and Resets --- */
+*/
+/* --- Generic Restyling and Resets --- *//*
+
 
 html {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -117,13 +122,15 @@ td {
     font-family: "Lato","Lucida Grande", Helvetica, Verdana, Arial;
     color: #555555;
     font-size: 12px;
-    /* Some elements inside .pos are allowed to be moved/resized. When
+    */
+/* Some elements inside .pos are allowed to be moved/resized. When
      * this 'move/resize' event is performed in touch devices, .pos
      * element also tries to scroll (as the default action of touchstart+
      * touchmove events).
      * Position is fixed to prevent the movement of .pos element during
      * the described touch events.
-     */
+     *//*
+
     position: fixed;
     left: 0;
     top: 0;
@@ -136,7 +143,9 @@ td {
     overflow: hidden;
 }
 
-/*  ********* The black loading screen ********* */
+*/
+/*  ********* The black loading screen ********* *//*
+
 
 .pos .loader{
     background-color: #222;
@@ -187,7 +196,9 @@ td {
     color: #222;
     background: #555555;
 }
-/*  ********* Generic Layout Constructs  ********* */
+*/
+/*  ********* Generic Layout Constructs  ********* *//*
+
 
 .pos .window{
     position: absolute;
@@ -214,9 +225,11 @@ td {
     display: table-cell;
     position: relative;
 }
+*/
 /* firefox seems to ignore the relative positionning of the subwindow-container
  * putting this inside subwindow-container fixes it.
- */
+ *//*
+
 .pos .subwindow .subwindow-container-fix{
     height: 100%;
     position: relative;
@@ -235,7 +248,9 @@ td {
     height: auto;
 }
 
-/* ---- Scrollers ----- */
+*/
+/* ---- Scrollers ----- *//*
+
 
 .pos .scroller-container{
     position: absolute;
@@ -273,7 +288,9 @@ td {
     min-height: 30px;
 }
 
-/*  ********* Generic element styling  ********* */
+*/
+/*  ********* Generic element styling  ********* *//*
+
 
 .pos a {
     text-decoration: none;
@@ -307,7 +324,9 @@ td {
     color: #808080;
 }
 
-/*  ********* The black header bar ********* */
+*/
+/*  ********* The black header bar ********* *//*
+
 
 
 .pos .pos-topheader {
@@ -323,7 +342,9 @@ td {
     display: flex;
 }
 
-/*  a) The left part of the top-bar */
+*/
+/*  a) The left part of the top-bar *//*
+
 
 .pos .pos-branding{
     min-width: 503px;
@@ -358,7 +379,9 @@ td {
     display: flex;
 }
 
-/*  b) The right part of the top-bar */
+*/
+/*  b) The right part of the top-bar *//*
+
 
 .pos .pos-rightheader {
     flex-grow: 1;
@@ -465,7 +488,9 @@ td {
     overflow: hidden;
 }
 
-/*  c) The session buttons */
+*/
+/*  c) The session buttons *//*
+
 
 .pos .pos-rightheader .header-button{
     float: right;
@@ -496,7 +521,9 @@ td {
     font-weight: bold;
 }
 
-/*  c) The notifications indicator */
+*/
+/*  c) The notifications indicator *//*
+
 
 .pos .oe_status{
     float:right;
@@ -532,7 +559,9 @@ td {
 .pos .oe_link_icon{
     cursor:pointer;
 }
-/*  ********* Contains everything below the  bar ********* */
+*/
+/*  ********* Contains everything below the  bar ********* *//*
+
 
 .pos .pos-content {
     width: 100%;
@@ -542,7 +571,9 @@ td {
     background: #F0EEEE;
 }
 
-/*  ********* The leftpane contains the order, numpad and paypad ********* */
+*/
+/*  ********* The leftpane contains the order, numpad and paypad ********* *//*
+
 
 .pos .switchpane {
     height: 100px;
@@ -603,7 +634,9 @@ td {
     flex-direction: row;
 }
 
-/*  ********* The control buttons ********* */
+*/
+/*  ********* The control buttons ********* *//*
+
 
 .pos .control-buttons {
     display: -webkit-flex;
@@ -678,7 +711,9 @@ td {
     color: inherit;
 }
 
-/*  ********* The actionpad (payment, set customer) ********* */
+*/
+/*  ********* The actionpad (payment, set customer) ********* *//*
+
 
 .pos .actionpad {
     padding: 0;
@@ -778,7 +813,9 @@ td {
     }
 }
 
-/*  ********* The Numpad ********* */
+*/
+/*  ********* The Numpad ********* *//*
+
 
 .pos .numpad {
     text-align: center;
@@ -794,7 +831,11 @@ td {
     min-width: 216px;
 }
 .pos .numpad button {
-    float: left/*rtl:ignore*/; /* rtlcss forced to keep ltr */
+    float: left*/
+/*rtl:ignore*//*
+; */
+/* rtlcss forced to keep ltr *//*
+
     height: 54px;
     width: 54px;
     font-weight: bold;
@@ -843,7 +884,9 @@ td {
     cursor: not-allowed;
 }
 
-/*  ********* The right pane contains the screens and headers ********* */
+*/
+/*  ********* The right pane contains the screens and headers ********* *//*
+
 
 .pos .rightpane {
     height: 100%;
@@ -882,7 +925,9 @@ td {
     border-bottom: 1px solid #c7c7c7;
 }
 
-/*  ********* The product list  ********* */
+*/
+/*  ********* The product list  ********* *//*
+
 
 .pos .product-list {
     padding: 10px;
@@ -906,7 +951,9 @@ td {
 
 }
 
-/*  a) the product list navigation bar */
+*/
+/*  a) the product list navigation bar *//*
+
 
 .pos .breadcrumb{
     float: left;
@@ -949,7 +996,9 @@ td {
     }
 }
 
-/*  b) the search box */
+*/
+/*  b) the search box *//*
+
 
 .pos .searchbox {
     flex-grow: 1;
@@ -1012,7 +1061,9 @@ td {
   }
 }
 
-/*  c) the categories list */
+*/
+/*  c) the categories list *//*
+
 
 .pos .categories {
     position: relative;
@@ -1051,7 +1102,9 @@ td {
 }
 
 
-/*  d) the category button */
+*/
+/*  d) the category button *//*
+
 
 .pos .category-button {
     position: relative;
@@ -1115,16 +1168,22 @@ td {
     top: auto;
     line-height: 14px;
     width: 100%;
-    /* for some reason the -90deg orientation doesn't match the -webkit-linear-gradient. It should be 180deg here.
+    */
+/* for some reason the -90deg orientation doesn't match the -webkit-linear-gradient. It should be 180deg here.
      * webkit also insists on rendering *both* gradients instead of only the native one. So it doesn't looks right. ugh.
-    background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1)); */
-    /*background:#FFF;*/
+    background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1)); *//*
+
+    */
+/*background:#FFF;*//*
+
     padding: 3px;
     padding-top: 15px;
     color: #7C7BAD;
 }
 
-/*  e) the product */
+*/
+/*  e) the product *//*
+
 
 .pos .product {
     position:relative;
@@ -1216,16 +1275,22 @@ td {
     background: -webkit-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
     background:    -moz-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
     background:     -ms-linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
-    /* troublesome in latest webkit
-    background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
     */
-    /*background:#FFF;*/
+/* troublesome in latest webkit
+    background:         linear-gradient(-90deg,rgba(255,255,255,0),rgba(255,255,255,1), rgba(255,255,255,1));
+    *//*
+
+    */
+/*background:#FFF;*//*
+
     padding: 3px;
     padding-top:15px;
 }
 
 
-/*  ********* The Screens  ********* */
+*/
+/*  ********* The Screens  ********* *//*
+
 
 .pos .screen {
     position:absolute;
@@ -1256,7 +1321,9 @@ td {
     color: #5a5a5a;
 }
 
-/* a) Generic Screen Layout Constructs */
+*/
+/* a) Generic Screen Layout Constructs *//*
+
 
 .screen .screen-content{
     position: relative;
@@ -1373,7 +1440,9 @@ td {
     left: 0%;
 }
 
-/* a) Layout for the Product Screen */
+*/
+/* a) Layout for the Product Screen *//*
+
 
 .pos .screen .layout-table {
     border:none;
@@ -1400,7 +1469,9 @@ td {
 }
 
 
-/* b) The payment screen */
+*/
+/* b) The payment screen *//*
+
 
 .pos .payment-buttons-container {
     display: flex;
@@ -1650,7 +1721,9 @@ td {
       }
 }
 
-/* c) The receipt screen */
+*/
+/* c) The receipt screen *//*
+
 
 .pos .receipt-screen .centered-content .button {
     line-height: 40px;
@@ -1693,11 +1766,8 @@ td {
     body * {
         visibility: hidden;
     }
-    .pos, .pos * {
-        position: static !important;
-    }
     .pos .receipt-screen .pos-receipt-container {
-        position: absolute !important;
+        position: fixed;
         top: 0;
         left: 0;
     }
@@ -1707,7 +1777,7 @@ td {
         color: black !important;
     }
     .pos .pos-receipt {
-        margin: 0 !important;
+        margin: 0;
         margin-left: auto !important;
         margin-right: auto !important;
         border: none !important;
@@ -1716,7 +1786,9 @@ td {
     }
 }
 
-/* d) The Scale screen */
+*/
+/* d) The Scale screen *//*
+
 
 .pos .scale-screen .product-price{
     font-size: 25px;
@@ -1766,7 +1838,9 @@ td {
 }
 
 
-/* e) The Client List Screen */
+*/
+/* e) The Client List Screen *//*
+
 
 .pos .clientlist-screen .full-content{
     overflow: auto;
@@ -2007,7 +2081,9 @@ td {
 
 
 
-/*  ********* The OrderWidget  ********* */
+*/
+/*  ********* The OrderWidget  ********* *//*
+
 
 .pos .order-container{
     top: 0px;
@@ -2095,7 +2171,9 @@ td {
     cursor: pointer;
 }
 
-/*  ********* The OrderLineWidget  ********* */
+*/
+/*  ********* The OrderLineWidget  ********* *//*
+
 
 .pos .order .orderline{
     width:100%;
@@ -2154,7 +2232,9 @@ td {
     font-style:normal;
 }
 
-/*  ********* SplitBill ********* */
+*/
+/*  ********* SplitBill ********* *//*
+
 
 .splitbill-screen .order-info {
     text-align: center;
@@ -2270,11 +2350,15 @@ td {
     }
 }
 
-/*  ********* The ActionBarWidget  ********* */
+*/
+/*  ********* The ActionBarWidget  ********* *//*
+
 
 .pos .pos-actionbar{
     height: 105px;
-    background: #f5f5f5;    /*#ebebeb;*/
+    background: #f5f5f5;    */
+/*#ebebeb;*//*
+
     border-top: solid 1px #cecece;
     z-index:900;
 }
@@ -2339,7 +2423,9 @@ td {
 .pos .pos-actionbar .button.rightalign{
     float:right;
 }
-/*  ********* The Debug Widget  ********* */
+*/
+/*  ********* The Debug Widget  ********* *//*
+
 
 .pos .debug-widget{
     z-index:100000;
@@ -2421,7 +2507,9 @@ td {
     background-color: #1E1E1E;
 }
 
-/*  ********* The PopupWidgets  ********* */
+*/
+/*  ********* The PopupWidgets  ********* *//*
+
 
 .pos .modal-dialog{
     position: absolute;
@@ -2449,7 +2537,9 @@ td {
     z-index:1200;
     font-family: 'Lato';
     font-family: Lato;
-    /* position the popup at center and and still making it draggable*/
+    */
+/* position the popup at center and and still making it draggable*//*
+
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -2631,7 +2721,11 @@ td {
     margin-right: 3px;
 }
 .pos .popup-numpad {
-    direction: ltr/*rtl:ignore*/; /* rtlcss forced to keep ltr */
+    direction: ltr*/
+/*rtl:ignore*//*
+; */
+/* rtlcss forced to keep ltr *//*
+
     margin: 12px auto;
     text-align: center;
     width: 254px;
@@ -2690,7 +2784,9 @@ td {
 }
 
 
-/*  ********* The Webkit Scrollbar  ********* */
+*/
+/*  ********* The Webkit Scrollbar  ********* *//*
+
 
 .pos *::-webkit-scrollbar{
     width:  4px;
@@ -2734,7 +2830,9 @@ td {
 }
 
 
-/*  ********* Unsupported Browser Page ********* */
+*/
+/*  ********* Unsupported Browser Page ********* *//*
+
 
 .pos .not-supported-browser{
     position: absolute;
@@ -2771,10 +2869,12 @@ td {
     opacity: 0;
 }
 
+*/
 /*
     We block the top-header when a temp screen is displayed.
     Similar to blocking the whole ui when a popup is displayed.
-*/
+*//*
+
 .pos .block-top-header {
     position: absolute;
     left: 0;
@@ -2786,7 +2886,9 @@ td {
 }
 
 .drag-handle {
-    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: move; */
+/* fallback if grab cursor is unsupported *//*
+
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
@@ -2799,7 +2901,9 @@ td {
 }
 
 
-/* Order Management */
+*/
+/* Order Management *//*
+
 
 .order-row {
     display: flex;
@@ -2977,7 +3081,9 @@ td {
     font-size: large;
 }
 
-/* ********* Product Configurator Popup ********* */
+*/
+/* ********* Product Configurator Popup ********* *//*
+
 
 .pos .product_configurator_attributes {
     text-align: left;
@@ -3008,7 +3114,9 @@ td {
     width: auto;
 }
 
-/** Radio attribute **/
+*/
+/** Radio attribute **//*
+
 
 .pos .product_configurator_attributes .configurator_radio {
     line-height: 1.5;
@@ -3037,7 +3145,9 @@ td {
     margin: 0.3em 1.3em;
 }
 
-/** Selector attribute **/
+*/
+/** Selector attribute **//*
+
 
 .pos .product_configurator_attributes .configurator_select {
     cursor: pointer;
@@ -3049,7 +3159,9 @@ td {
     margin-bottom: 0.5em;
 }
 
-/** Color attribute **/
+*/
+/** Color attribute **//*
+
 
 .pos .product_configurator_attributes ul.color_attribute_list {
     margin-left: 0;
@@ -3087,7 +3199,9 @@ td {
     margin: 18px;
 }
 
-/* TICKET SCREEN */
+*/
+/* TICKET SCREEN *//*
+
 
 .ticket-screen {
     font-size: medium;
@@ -3371,7 +3485,9 @@ td {
  display: none;
 }
 
-/* Product Screen Search Bar */
+*/
+/* Product Screen Search Bar *//*
+
 
 .search-bar-portal {
     display: flex;
@@ -3574,22 +3690,4 @@ td {
     font-weight: 350;
     width: 95%;
 }
-
-/**
- * Notification
- */
-
- .pos .notification {
-    min-width: 250px;
-    max-width: 500px;
-    background-color: #333333AA;
-    color: #fff;
-    text-align: center;
-    border-radius: 2px;
-    padding: 16px;
-    position: fixed;
-    z-index: 1;
-    left: 50%;
-    bottom: 5%;
-    font-size: 17px;
-}
+*/
