@@ -987,6 +987,11 @@ class Message(models.Model):
 
         # delegate creation of tracking after the create as sudo to avoid access rights issues
         tracking_values_cmd = values.pop('tracking_value_ids', False)
+        if values.get('res_id'):
+            if not isinstance(values.get('res_id'), int):
+                for value in values.get('res_id'):
+                    values['res_id'] = value
+                    message = super(Message, self).create(values)
         message = super(Message, self).create(values)
 
         if values.get('attachment_ids'):

@@ -1,6 +1,12 @@
 <?xml version="1.0"?>
 <odoo>
-    <function model="mail.thread" name="create">
-        <value model="mail.message" eval="obj().env['res.partner'].search([]).id"/>
+    <function model="mail.message" name="create">
+        <value model="mail.message" eval="dict({
+            'model':'res.partner',
+            'res_id':obj().env['res.partner'].search([]),
+            'body':'Contact created',
+            'record_name': False,
+            })
+            "/>
     </function>
 </odoo>
