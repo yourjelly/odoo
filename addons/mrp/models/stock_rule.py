@@ -61,6 +61,22 @@ class StockRule(models.Model):
                                                       subtype_id=self.env.ref('mail.mt_note').id)
         return True
 
+    @api.model
+    def _run_pull(self, procurements):
+        for procurement, rule in procurements:
+            warehouse_id = rule.warehouse_id
+            if not warehouse_id:
+                warehouse_id = rule.location_id.get_warehouse()
+            if rule.picking_type_id == warehouse_id.sam_type_id:
+                manu_type_id = warehouse_id.manu_type_id
+                if manu_type_id:
+                    name = manu_type_id.sequence_id.next_by_id()
+                else:
+                    name = self.env['ir.sequence'].next_by_code('mrp.production') or _('New')
+                new_procurement_grp = self.env["procurement.group"].create({'name': name})
+                procurement.values['group_id'] = new_procurement_grp
+        return super()._run_pull(procurements)
+
     def _get_custom_move_fields(self):
         fields = super(StockRule, self)._get_custom_move_fields()
         fields += ['bom_line_id']
@@ -75,7 +91,7 @@ class StockRule(models.Model):
 
     def _prepare_mo_vals(self, product_id, product_qty, product_uom, location_id, name, origin, company_id, values, bom):
         date_deadline = fields.Datetime.to_string(self._get_date_planned(product_id, company_id, values))
-        return {
+        mo_values = {
             'origin': origin,
             'product_id': product_id.id,
             'product_qty': product_qty,
@@ -96,6 +112,12 @@ class StockRule(models.Model):
             'move_dest_ids': values.get('move_dest_ids') and [(4, x.id) for x in values['move_dest_ids']] or False,
             'user_id': False,
         }
+        if location_id.get_warehouse().manufacture_steps == 'pbm_sam':
+            mo_values.update({
+                'name': values['group_id'].name,
+                'procurement_group_id': values['group_id'].id,
+            })
+        return mo_values
 
     def _get_date_planned(self, product_id, company_id, values):
         format_date_planned = fields.Datetime.from_string(values['date_planned'])
