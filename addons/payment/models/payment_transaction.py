@@ -58,7 +58,7 @@ class PaymentTransaction(models.Model):
         string="Message", help="The complementary information message about the state",
         readonly=True)
     last_state_change = fields.Datetime(
-        string="Last Sate Change Date", readonly=True, default=fields.Datetime.now)
+        string="Last State Change Date", readonly=True, default=fields.Datetime.now)
 
     # Fields used for traceability
     operation = fields.Selection(  # This should not be trusted if the state is 'draft' or 'pending'
