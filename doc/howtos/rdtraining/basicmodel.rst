@@ -123,6 +123,8 @@ defined as attributes on the model class::
 The ``name`` field is a :class:`~odoo.fields.Char` which will be represented as a Python
 ``unicode`` and a SQL ``VARCHAR``.
 
+Exercice: In our estate tutorials, we'll want a estate_property, which model do you have to write ?
+
 Types
 -----
 
