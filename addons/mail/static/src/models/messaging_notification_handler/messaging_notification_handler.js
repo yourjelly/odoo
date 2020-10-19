@@ -162,8 +162,8 @@ function factory(dependencies) {
             channel.update({
                 messageSeenIndicators: [['insert',
                     {
-                        id: this.env.models['mail.message_seen_indicator'].computeId(last_message_id, channel.id),
-                        message: [['insert', {id: last_message_id}]],
+                        channelId: channel.id,
+                        messageId: last_message_id,
                     }
                 ]],
             });
@@ -207,6 +207,7 @@ function factory(dependencies) {
             }
 
             const message = this.env.models['mail.message'].insert(convertedData);
+            this._notifyThreadViewsMessageReceived(message);
 
             // If the message was already known: nothing else should be done,
             // except if it was pending moderation by the current partner, then
@@ -299,7 +300,7 @@ function factory(dependencies) {
                 // knowledge of the channel
                 return;
             }
-            const lastMessage = this.env.models['mail.message'].insert({id: last_message_id});
+            const lastMessage = this.env.models['mail.message'].insert({ id: last_message_id });
             // restrict computation of seen indicator for "non-channel" channels
             // for performance reasons
             const shouldComputeSeenIndicators = channel.channel_type !== 'channel';
@@ -314,8 +315,8 @@ function factory(dependencies) {
                     // FIXME should no longer use computeId (task-2335647)
                     messageSeenIndicators: [['insert',
                         {
-                            id: this.env.models['mail.message_seen_indicator'].computeId(last_message_id, channel.id),
-                            message: [['link', lastMessage]],
+                            channelId: channel.id,
+                            messageId: lastMessage.id,
                         },
                     ]],
                 });
@@ -411,10 +412,7 @@ function factory(dependencies) {
             } else if (type === 'author') {
                 return this._handleNotificationPartnerAuthor(data);
             } else if (info === 'channel_seen') {
-                return this._handleNotificationChannelSeen(data.channel_id, {
-                    last_message_id: data.last_message_id,
-                    partner_id: this.env.messaging.currentPartner.id,
-                });
+                return this._handleNotificationChannelSeen(data.channel_id, data);
             } else if (type === 'deletion') {
                 return this._handleNotificationPartnerDeletion(data);
             } else if (type === 'message_notification_update') {
@@ -553,8 +551,6 @@ function factory(dependencies) {
             const inboxMailbox = this.env.messaging.inbox;
 
             // 1. move messages from inbox to history
-            // AKU TODO: flag other caches to invalidate
-            // task-2171873
             for (const message_id of message_ids) {
                 // We need to ignore all not yet known messages because we don't want them
                 // to be shown partially as they would be linked directly to mainCache
@@ -627,14 +623,10 @@ function factory(dependencies) {
                     continue;
                 }
                 message.update({ isStarred: starred });
-                if (!starred) {
-                    // AKU TODO: flag starred other caches for invalidation
-                    // task-2171873
-                }
                 starredMailbox.update({
                     counter: starred
                         ? starredMailbox.counter + 1
-                        : starredMailbox.counter -1,
+                        : starredMailbox.counter - 1,
                 });
             }
         }
@@ -651,11 +643,12 @@ function factory(dependencies) {
             const convertedData = this.env.models['mail.message'].convertData(data);
             const messageIds = this.env.models['mail.message'].all().map(message => message.id);
             const partnerRoot = this.env.messaging.partnerRoot;
-            this.env.models['mail.message'].create(Object.assign(convertedData, {
+            const message = this.env.models['mail.message'].create(Object.assign(convertedData, {
                 author: [['link', partnerRoot]],
                 id: (messageIds ? Math.max(...messageIds) : 0) + 0.01,
                 isTransient: true,
             }));
+            this._notifyThreadViewsMessageReceived(message);
         }
 
         /**
@@ -757,6 +750,21 @@ function factory(dependencies) {
                 part: '_chat',
                 title: _.str.sprintf(titlePattern, messaging.outOfFocusUnreadMessageCounter),
             });
+        }
+
+        /**
+         * Notifies threadViews about the given message being just received.
+         * This can allow them adjust their scroll position if applicable.
+         *
+         * @private
+         * @param {mail.message}
+         */
+        _notifyThreadViewsMessageReceived(message) {
+            for (const thread of message.threads) {
+                for (const threadView of thread.threadViews) {
+                    threadView.addComponentHint('message-received', { message });
+                }
+            }
         }
 
     }

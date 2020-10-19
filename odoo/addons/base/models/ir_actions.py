@@ -6,29 +6,15 @@ from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import MissingError, UserError, ValidationError, AccessError
 from odoo.osv import expression
 from odoo.tools.safe_eval import safe_eval, test_python_expr
-from odoo.tools import wrap_module
-from odoo.http import request
 
 import base64
 from collections import defaultdict
-import datetime
 import functools
 import logging
-import time
 
 from pytz import timezone
 
 _logger = logging.getLogger(__name__)
-
-# build dateutil helper, starting with the relevant *lazy* imports
-import dateutil
-import dateutil.parser
-import dateutil.relativedelta
-import dateutil.rrule
-import dateutil.tz
-mods = {'parser', 'relativedelta', 'rrule', 'tz'}
-attribs = {atr for m in mods for atr in getattr(dateutil, m).__all__}
-dateutil = wrap_module(dateutil, mods | attribs)
 
 
 class IrActions(models.Model):
@@ -84,9 +70,9 @@ class IrActions(models.Model):
         return {
             'uid': self._uid,
             'user': self.env.user,
-            'time': time,
-            'datetime': datetime,
-            'dateutil': dateutil,
+            'time': tools.safe_eval.time,
+            'datetime': tools.safe_eval.datetime,
+            'dateutil': tools.safe_eval.dateutil,
             'timezone': timezone,
             'b64encode': base64.b64encode,
             'b64decode': base64.b64decode,
@@ -676,10 +662,10 @@ class IrServerObjectLines(models.Model):
                 try:
                     value = int(value)
                     if not self.env[line.col1.relation].browse(value).exists():
-                        record = self.env[line.col1.relation]._search([], limit=1)
+                        record = list(self.env[line.col1.relation]._search([], limit=1))
                         value = record[0] if record else 0
                 except ValueError:
-                    record = self.env[line.col1.relation]._search([], limit=1)
+                    record = list(self.env[line.col1.relation]._search([], limit=1))
                     value = record[0] if record else 0
                 line.resource_ref = '%s,%s' % (line.col1.relation, value)
             else:

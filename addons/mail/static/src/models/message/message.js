@@ -229,14 +229,9 @@ function factory(dependencies) {
                         // on `channel` channels for performance reasons
                         continue;
                     }
-                    thread.update({
-                        messageSeenIndicators: [[
-                            'insert',
-                            {
-                                id: this.env.models['mail.message_seen_indicator'].computeId(message.id, thread.id),
-                                message: [['link', message]],
-                            },
-                        ]],
+                    this.env.models['mail.message_seen_indicator'].insert({
+                        channelId: thread.id,
+                        messageId: message.id,
                     });
                 }
             }
@@ -387,7 +382,7 @@ function factory(dependencies) {
          * @returns {boolean}
          */
         _computeIsCurrentPartnerAuthor() {
-            return (
+            return !!(
                 this.author &&
                 this.messagingCurrentPartner &&
                 this.messagingCurrentPartner === this.author
@@ -408,6 +403,17 @@ function factory(dependencies) {
 
         /**
          * @private
+         */
+        _computeIsEmpty() {
+            return (
+                (!this.body || htmlToTextContentInline(this.body) === '') &&
+                this.attachments.length === 0 &&
+                this.tracking_value_ids.length === 0
+            );
+        }
+
+        /**
+         * @private
          * @returns {boolean}
          */
         _computeIsModeratedByCurrentPartner() {
@@ -424,27 +430,6 @@ function factory(dependencies) {
          */
         _computeMessaging() {
             return [['link', this.env.messaging]];
-        }
-
-        /**
-         * @private
-         * @returns {mail.thread[]}
-         */
-        _computeNonOriginThreads() {
-            const nonOriginThreads = this.serverChannels.filter(thread => thread !== this.originThread);
-            if (this.isHistory) {
-                nonOriginThreads.push(this.env.messaging.history);
-            }
-            if (this.isNeedaction) {
-                nonOriginThreads.push(this.env.messaging.inbox);
-            }
-            if (this.isStarred) {
-                nonOriginThreads.push(this.env.messaging.starred);
-            }
-            if (this.env.messaging.moderation && this.isModeratedByCurrentPartner) {
-                nonOriginThreads.push(this.env.messaging.moderation);
-            }
-            return [['replace', nonOriginThreads]];
         }
 
         /**
@@ -487,7 +472,19 @@ function factory(dependencies) {
          * @returns {mail.thread[]}
          */
         _computeThreads() {
-            const threads = [...this.nonOriginThreads];
+            const threads = [...this.serverChannels];
+            if (this.isHistory) {
+                threads.push(this.env.messaging.history);
+            }
+            if (this.isNeedaction) {
+                threads.push(this.env.messaging.inbox);
+            }
+            if (this.isStarred) {
+                threads.push(this.env.messaging.starred);
+            }
+            if (this.env.messaging.moderation && this.isModeratedByCurrentPartner) {
+                threads.push(this.env.messaging.moderation);
+            }
             if (this.originThread) {
                 threads.push(this.originThread);
             }
@@ -565,6 +562,19 @@ function factory(dependencies) {
                 'subtype_description',
             ],
         }),
+        /**
+         * Determine whether the message has to be considered empty or not.
+         *
+         * An empty message has no text, no attachment and no tracking value.
+         */
+        isEmpty: attr({
+            compute: '_computeIsEmpty',
+            dependencies: [
+                'attachments',
+                'body',
+                'tracking_value_ids',
+            ],
+        }),
         isModeratedByCurrentPartner: attr({
             compute: '_computeIsModeratedByCurrentPartner',
             default: false,
@@ -630,25 +640,6 @@ function factory(dependencies) {
             related: 'messaging.starred',
         }),
         moderation_status: attr(),
-        /**
-         * List of non-origin threads that this message is linked to. This field
-         * is read-only.
-         */
-        nonOriginThreads: many2many('mail.thread', {
-            compute: '_computeNonOriginThreads',
-            dependencies: [
-                'isHistory',
-                'isModeratedByCurrentPartner',
-                'isNeedaction',
-                'isStarred',
-                'messagingHistory',
-                'messagingInbox',
-                'messagingModeration',
-                'messagingStarred',
-                'originThread',
-                'serverChannels',
-            ],
-        }),
         notifications: one2many('mail.notification', {
             inverse: 'message',
             isCausal: true,
@@ -684,8 +675,16 @@ function factory(dependencies) {
         threads: many2many('mail.thread', {
             compute: '_computeThreads',
             dependencies: [
+                'isHistory',
+                'isModeratedByCurrentPartner',
+                'isNeedaction',
+                'isStarred',
+                'messagingHistory',
+                'messagingInbox',
+                'messagingModeration',
+                'messagingStarred',
                 'originThread',
-                'nonOriginThreads',
+                'serverChannels',
             ],
             inverse: 'messages',
         }),

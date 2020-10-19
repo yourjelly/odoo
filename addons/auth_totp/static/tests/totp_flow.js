@@ -4,30 +4,19 @@ odoo.define('auth_totp.tours', function(require) {
 const tour = require('web_tour.tour');
 const ajax = require('web.ajax');
 
-function openDiscussApp() {
+function openRoot() {
     return [{
-            // goToAppSteps is a big dum-dum designed for interactive tours, it's
-            // not designed to open an arbitrary application from an arbitrary
-            // location so it doesn't know to return to the home in enterprise, this
-            // step handles that: it checks if we're no the home screen (~ if there
-            // are apps displayed which is not quite correct but good enough for us)
-            // and if not clicks the toggle
-            edition: 'enterprise',
-            trigger: 'body',
-            run: function(helpers) {
-                if (!$('.o_app').length) {
-                    helpers.click('.o_main_navbar .o_menu_toggle');
-                }
-            }
-        }, tour.stepUtils.showAppsMenuItem(),{
-            trigger: '.o_app[data-menu-xmlid="mail.menu_root_discuss"]',
-            content: "Go to discuss",
-        }, {
-            content: 'Wait for page',
-            trigger: '.o_menu_brand:contains("Discuss")',
-            run: () => {}
+        content: "return to client root to avoid race condition",
+        trigger: 'body',
+        run() {
+            $('body').addClass('wait');
+            window.location = '/web';
         }
-    ];
+    }, {
+        content: "wait for client reload",
+        trigger: 'body:not(.wait)',
+        run() {}
+    }];
 }
 function openUserProfileAtSecurityTab() {
     return [{
@@ -53,7 +42,7 @@ tour.register('totp_tour_setup', {
     trigger: 'button[name=totp_enable_wizard]',
 }, {
     content: "Check that we have to enter enhanced security mode",
-    trigger: '.card-title:contains("confirm your password")',
+    trigger: 'div:contains("confirm your password")',
     run: () => {},
 }, {
     content: "Input password",
@@ -69,22 +58,22 @@ tour.register('totp_tour_setup', {
 }, {
     content: "Get secret from collapsed div",
     trigger: 'a:contains("show the code")',
-    run: async function(helpers) {
+    run(helpers) {
         const secret = this.$anchor.closest('div').find('code').text();
-        const token = await ajax.jsonRpc('/totphook', 'call', {
+        ajax.jsonRpc('/totphook', 'call', {
             secret
+        }).then((token) => {
+            helpers._text(helpers._get_action_values('input[name=code]'), token);
+            helpers._click(helpers._get_action_values('button.btn-primary:contains(Enable)'));
+            $('body').addClass('got-token')
         });
-        helpers._text(helpers._get_action_values('input[name=code]'), token);
-        helpers._click(helpers._get_action_values('button.btn-primary:contains(Enable)'));
     }
+}, {
+    content: 'wait for rpc',
+    trigger: 'body.got-token',
+    run() {}
 },
-// if hr is not installed the preferences dialog will close and we need to
-// reopen it, but if hr is installed then we're already there and a race
-// condition can make it so we thing we've already reopened it while it's
-// rather that we're still on it, then the view resets before the step
-// afterwards and we end up on the wrong tab => first open the settings app to
-// ensure we completely reset the view and only then navigate to the profile
-...openDiscussApp(),
+...openRoot(),
 ...openUserProfileAtSecurityTab(),
 {
     content: "Check that the button has changed",
@@ -115,12 +104,13 @@ tour.register('totp_login_enabled', {
 }, {
     content: "input code",
     trigger: 'input[name=totp_token]',
-    run: async function (helpers) {
-        const token = await ajax.jsonRpc('/totphook', 'call', {});
-        helpers._text(helpers._get_action_values(), token);
-        // FIXME: is there a way to put the button as its own step trigger without
-        //        the tour straight blowing through and not waiting for this?
-        helpers._click(helpers._get_action_values('button:contains("Verify")'));
+    run(helpers) {
+        ajax.jsonRpc('/totphook', 'call', {}).then((token) => {
+            helpers._text(helpers._get_action_values(), token);
+            // FIXME: is there a way to put the button as its own step trigger without
+            //        the tour straight blowing through and not waiting for this?
+            helpers._click(helpers._get_action_values('button:contains("Verify")'));
+        });
     }
 }, {
     content: "check we're logged in",
@@ -136,7 +126,7 @@ tour.register('totp_login_enabled', {
     trigger: 'button[name=totp_disable]',
 }, {
     content: "Check that we have to enter enhanced security mode",
-    trigger: '.card-title:contains("confirm your password")',
+    trigger: 'div:contains("confirm your password")',
     run: () => {},
 }, {
     content: "Input password",
@@ -146,7 +136,7 @@ tour.register('totp_login_enabled', {
     content: "Confirm",
     trigger: "button:contains(Confirm Password)",
 },
-...openDiscussApp(),
+...openRoot(),
 ...openUserProfileAtSecurityTab(),
 {
     content: "Check that the button has changed",
@@ -235,7 +225,7 @@ tour.register('totp_admin_disables', {
     trigger: 'a.dropdown-item:contains(Disable TOTP on users)'
 }, { // enhanced security yo
     content: "Check that we have to enter enhanced security mode",
-trigger: '.card-title:contains("confirm your password")',
+trigger: 'div:contains("confirm your password")',
     run: () => {},
 }, {
     content: "Input password",

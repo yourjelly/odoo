@@ -324,6 +324,7 @@ class Picking(models.Model):
         readonly=True)
     picking_type_entire_packs = fields.Boolean(related='picking_type_id.show_entire_packs',
         readonly=True)
+    hide_picking_type = fields.Boolean(compute='_compute_hide_pickign_type')
     partner_id = fields.Many2one(
         'res.partner', 'Contact',
         check_company=True,
@@ -347,13 +348,13 @@ class Picking(models.Model):
         help='Check the existence of destination packages on move lines')
     show_check_availability = fields.Boolean(
         compute='_compute_show_check_availability',
-        help='Technical field used to compute whether the check availability button should be shown.')
+        help='Technical field used to compute whether the button "Check Availability" should be displayed.')
     show_mark_as_todo = fields.Boolean(
         compute='_compute_show_mark_as_todo',
-        help='Technical field used to compute whether the mark as todo button should be shown.')
+        help='Technical field used to compute whether the button "Mark as Todo" should be displayed.')
     show_validate = fields.Boolean(
         compute='_compute_show_validate',
-        help='Technical field used to compute whether the validate should be shown.')
+        help='Technical field used to decide whether the button "Validate" should be displayed.')
     use_create_lots = fields.Boolean(related='picking_type_id.use_create_lots')
     owner_id = fields.Many2one(
         'res.partner', 'Assign Owner',
@@ -394,6 +395,9 @@ class Picking(models.Model):
         for picking in self:
             picking.has_deadline_issue = picking.date_deadline and picking.date_deadline < picking.scheduled_date or False
 
+    def _compute_hide_pickign_type(self):
+        self.hide_picking_type = self.env.context.get('default_picking_type_id', False)
+
     @api.depends('move_lines.delay_alert_date')
     def _compute_delay_alert_date(self):
         delay_alert_date_data = self.env['stock.move'].read_group([('id', 'in', self.move_lines.ids), ('delay_alert_date', '!=', False)], ['delay_alert_date:max'], 'picking_id')
@@ -410,11 +414,11 @@ class Picking(models.Model):
         for picking in pickings:
             forecast_date = max(picking.move_lines.filtered('forecast_expected_date').mapped('forecast_expected_date'), default=False)
             if any(float_compare(move.forecast_availability, move.product_qty, move.product_id.uom_id.rounding) == -1 for move in picking.move_lines):
-                picking.components_availability = _('Not Available')
-                picking.components_availability_state = 'late'
+                picking.products_availability = _('Not Available')
+                picking.products_availability_state = 'late'
             elif forecast_date:
-                picking.components_availability = _('Exp %s', format_date(self.env, forecast_date))
-                picking.components_availability_state = 'late' if picking.date_deadline < forecast_date else 'expected'
+                picking.products_availability = _('Exp %s', format_date(self.env, forecast_date))
+                picking.products_availability_state = 'late' if picking.date_deadline < forecast_date else 'expected'
 
     @api.depends('picking_type_id.show_operations')
     def _compute_show_operations(self):
@@ -845,9 +849,11 @@ class Picking(models.Model):
                             'move_line_ids': [(6, 0, move_lines_to_pack.ids)],
                             'company_id': picking.company_id.id,
                         })
-                        move_lines_to_pack.write({
-                            'result_package_id': pack.id,
-                        })
+                        # TODO: in master, move package field in `stock` and clean code.
+                        if pack._allowed_to_move_between_transfers():
+                            move_lines_to_pack.write({
+                                'result_package_id': pack.id,
+                            })
                     else:
                         move_lines_in_package_level = move_lines_to_pack.filtered(lambda ml: ml.move_id.package_level_id)
                         move_lines_without_package_level = move_lines_to_pack - move_lines_in_package_level

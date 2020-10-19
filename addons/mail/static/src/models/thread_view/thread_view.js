@@ -4,6 +4,7 @@ odoo.define('mail/static/src/models/thread_view/thread_view.js', function (requi
 const { registerNewModel } = require('mail/static/src/model/model_core.js');
 const { RecordDeletedError } = require('mail/static/src/model/model_errors.js');
 const { attr, many2many, many2one, one2one } = require('mail/static/src/model/model_field.js');
+const { clear } = require('mail/static/src/model/model_field_command.js');
 
 function factory(dependencies) {
 
@@ -46,8 +47,8 @@ function factory(dependencies) {
         markComponentHintProcessed(hint) {
             let filterFun;
             switch (hint.type) {
-                case 'current-partner-just-posted-message':
-                    filterFun = h => h.type !== hint.type && h.messageId !== hint.data.messageId;
+                case 'message-received':
+                    filterFun = h => h.type !== hint.type && h.message !== hint.data.message;
                     break;
                 default:
                     filterFun = h => h.type !== hint.type;
@@ -55,6 +56,10 @@ function factory(dependencies) {
             }
             this.update({
                 componentHintList: this.componentHintList.filter(filterFun),
+            });
+            this.env.messagingBus.trigger('o-thread-view-hint-processed', {
+                hint,
+                threadViewer: this.threadViewer,
             });
         }
 
@@ -77,9 +82,13 @@ function factory(dependencies) {
          */
         _computeThreadCacheInitialScrollPosition() {
             if (!this.threadCache) {
-                return;
+                return clear();
             }
-            return this.threadCacheInitialScrollPositions[this.threadCache.localId];
+            const threadCacheInitialScrollPosition = this.threadCacheInitialScrollPositions[this.threadCache.localId];
+            if (threadCacheInitialScrollPosition !== undefined) {
+                return threadCacheInitialScrollPosition;
+            }
+            return clear();
         }
 
         /**
@@ -102,7 +111,6 @@ function factory(dependencies) {
                     }
                 });
             }
-            return true;
         }
 
         /**
@@ -110,6 +118,9 @@ function factory(dependencies) {
          */
         _onThreadCacheChanged() {
             this.addComponentHint('change-of-thread-cache');
+            if (this.threadCache) {
+                this.threadCache.update({ isCacheRefreshRequested: true });
+            }
         }
 
         /**
@@ -193,6 +204,12 @@ function factory(dependencies) {
         isPreparingLoading: attr({
             default: false,
         }),
+        /**
+         * Determines whether `this` should automatically scroll on receiving
+         * a new message. Detection of new message is done through the component
+         * hint `message-received`.
+         */
+        hasAutoScrollOnMessageReceived: attr(),
         lastMessage: many2one('mail.message', {
             related: 'thread.lastMessage',
         }),

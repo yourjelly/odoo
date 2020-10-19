@@ -105,6 +105,11 @@ MockServer.include({
             const context = args.context;
             return this._mockRouteMailChatPost(uuid, message_content, context);
         }
+        if (route === '/mail/get_suggested_recipients') {
+            const model = args.model;
+            const res_ids = args.res_ids;
+            return this._mockRouteMailGetSuggestedRecipient(model, res_ids);
+        }
         if (route === '/mail/init_messaging') {
             return this._mockRouteMailInitMessaging();
         }
@@ -186,7 +191,8 @@ MockServer.include({
         if (args.model === 'mail.channel' && args.method === 'message_post') {
             const id = args.args[0];
             const kwargs = args.kwargs;
-            const context = args.context;
+            const context = kwargs.context;
+            delete kwargs.context;
             return this._mockMailChannelMessagePost(id, kwargs, context);
         }
         if (args.model === 'mail.channel' && args.method === 'notify_typing') {
@@ -227,8 +233,13 @@ MockServer.include({
             return this._mockMailMessageUnstarAll();
         }
         // res.partner methods
-        if (args.model === 'res.partner' && args.method === 'get_mention_suggestions') {
-            return this._mockResPartnerGetMentionSuggestions(args);
+        if (args.method === 'get_mention_suggestions') {
+            if (args.model === 'mail.channel') {
+                return this._mockMailChannelGetMentionSuggestions(args);
+            }
+            if (args.model === 'res.partner') {
+                return this._mockResPartnerGetMentionSuggestions(args);
+            }
         }
         if (args.model === 'res.partner' && args.method === 'im_search') {
             const name = args.args[0] || args.kwargs.search;
@@ -252,7 +263,8 @@ MockServer.include({
         if (args.method === 'message_post') {
             const id = args.args[0];
             const kwargs = args.kwargs;
-            const context = args.kwargs.context;
+            const context = kwargs.context;
+            delete kwargs.context;
             return this._mockMailThreadMessagePost(args.model, [id], kwargs, context);
         }
         return this._super(route, args);
@@ -310,6 +322,17 @@ MockServer.include({
             },
             context
         );
+    },
+    /**
+     * Simulates `/mail/get_suggested_recipients` route.
+     *
+     * @private
+     * @returns {string} model
+     * @returns {integer[]} res_ids
+     * @returns {Object}
+     */
+    _mockRouteMailGetSuggestedRecipient(model, res_ids) {
+        return this._mockMailThread_MessageGetSuggestedRecipients(model, res_ids);
     },
     /**
      * Simulates the `/mail/init_messaging` route.
@@ -370,6 +393,8 @@ MockServer.include({
 
         const mailFailures = this._mockMailMessageMessageFetchFailed();
 
+        const shortcodes = this._getRecords('mail.shortcode', []);
+
         const starredCounter = this._getRecords('mail.message', [
             ['starred_partner_ids', 'in', this.currentPartnerId],
         ]).length;
@@ -380,7 +405,11 @@ MockServer.include({
                 channel_direct_message: directMessageInfos,
                 channel_private_group: privateGroupInfos,
             },
-            commands: [],
+            commands: [{
+                channel_types: ["channel", "chat"],
+                help: "List users in the current channel",
+                name: "who",
+            }],
             current_partner: currentPartnerFormat,
             current_user_id: this.currentUserId,
             mail_failures: mailFailures,
@@ -391,7 +420,7 @@ MockServer.include({
             needaction_inbox_counter,
             partner_root: partnerRootFormat,
             public_partner: publicPartnerFormat,
-            shortcodes: [],
+            shortcodes,
             starred_counter: starredCounter,
         };
     },
@@ -631,10 +660,13 @@ MockServer.include({
      */
     _mockMailChannelChannelFold(uuid, state) {
         const channel = this._getRecords('mail.channel', [['uuid', '=', uuid]])[0];
-        this._mockWrite('mail.channel', [channel.id], {
-            is_minimized: state !== 'closed',
-            state,
-        });
+        this._mockWrite('mail.channel', [
+            [channel.id],
+            {
+                is_minimized: state !== 'closed',
+                state,
+            }
+        ]);
         const notifConfirmFold = [
             ["dbName", 'res.partner', this.currentPartnerId],
             this._mockMailChannelChannelInfo([channel.id])[0]
@@ -663,7 +695,6 @@ MockServer.include({
         // is supposed to return this existing chat. But the mock is currently
         // always creating a new chat, because no test is relying on receiving
         // an existing chat.
-
         const id = this._mockCreate('mail.channel', {
             channel_type: 'chat',
             mass_mailing: false,
@@ -764,24 +795,21 @@ MockServer.include({
         if (!channel_id) {
             throw new Error('Should only be one channel in channel_seen mock params');
         }
+        const channel = this._getRecords('mail.channel', [['id', '=', channel_id]])[0];
         const messagesBeforeGivenLastMessage = this._getRecords('mail.message', [
-            ['channel_ids', 'in', [channel_id]],
-            ['id', '<=', last_message_id]
+            ['channel_ids', 'in', [channel.id]],
+            ['id', '<=', last_message_id],
         ]);
         if (!messagesBeforeGivenLastMessage || messagesBeforeGivenLastMessage.length === 0) {
             return;
         }
-        const channel = this._getRecords('mail.channel', [['id', '=', channel_id]])[0];
         if (!channel) {
             return;
         }
         if (channel.seen_message_id && channel.seen_message_id >= last_message_id) {
             return;
         }
-        this._mockWrite('mail.channel', [[channel.id], {
-            fetched_message_id: last_message_id,
-            seen_message_id: last_message_id,
-        }]);
+        this._mockMailChannel_SetLastSeenMessage([channel.id], last_message_id);
 
         // Send notification
         const payload = {
@@ -822,9 +850,10 @@ MockServer.include({
         const channels = this._getRecords('mail.channel', [['id', 'in', ids]]);
         if (commandName === 'leave') {
             for (const channel of channels) {
-                this._mockWrite('mail.channel', [channel.id], {
-                    is_pinned: false,
-                });
+                this._mockWrite('mail.channel', [
+                    [channel.id],
+                    { is_pinned: false },
+                ]);
                 const notifConfirmUnpin = [
                     ["dbName", 'res.partner', this.currentPartnerId],
                     Object.assign({}, channel, { info: 'unsubscribe' })
@@ -834,6 +863,56 @@ MockServer.include({
             return;
         }
         throw new Error(`mail/mock_server: the route execute_command doesn't implement the command "${commandName}"`);
+    },
+    /**
+     * Simulates `get_mention_suggestions` on `mail.channel`.
+     *
+     * @private
+     * @returns {Array[]}
+     */
+    _mockMailChannelGetMentionSuggestions(args) {
+        const search = args.kwargs.search || '';
+        const limit = args.kwargs.limit || 8;
+
+        /**
+         * Returns the given list of channels after filtering it according to
+         * the logic of the Python method `get_mention_suggestions` for the
+         * given search term. The result is truncated to the given limit and
+         * formatted as expected by the original method.
+         *
+         * @param {Object[]} channels
+         * @param {string} search
+         * @param {integer} limit
+         * @returns {Object[]}
+         */
+        const mentionSuggestionsFilter = function (channels, search, limit) {
+            const matchingChannels = channels
+                .filter(channel => {
+                    // no search term is considered as return all
+                    if (!search) {
+                        return true;
+                    }
+                    // otherwise name or email must match search term
+                    if (channel.name && channel.name.includes(search)) {
+                        return true;
+                    }
+                    return false;
+                }).map(channel => {
+                    // expected format
+                    return {
+                        id: channel.id,
+                        name: channel.name,
+                        public: channel.public,
+                    };
+                });
+            // reduce results to max limit
+            matchingChannels.length = Math.min(matchingChannels.length, limit);
+            return matchingChannels;
+        };
+
+        const mentionSuggestions = mentionSuggestionsFilter(this.data['mail.channel'].records, search, limit);
+
+        return mentionSuggestions;
     },
     /**
      * Simulates `message_post` on `mail.channel`.
@@ -878,6 +957,14 @@ MockServer.include({
             }),
             context,
         );
+        if (kwargs.author_id === this.currentPartnerId) {
+            this._mockMailChannel_SetLastSeenMessage([channel.id], messageId);
+        } else {
+            this._mockWrite('mail.channel', [
+                [channel.id],
+                { message_unread_counter: (channel.message_unread_counter || 0) + 1 },
+            ])
+        }
         return messageId;
     },
     /**
@@ -935,6 +1022,19 @@ MockServer.include({
             partnerInfos[partner.id] = partnerInfo;
         }
         return partnerInfos;
+    },
+    /**
+     * Simulates the `_set_last_seen_message` method of `mail.channel`.
+     *
+     * @private
+     * @param {integer[]} ids
+     * @param {integer} message_id
+     */
+    _mockMailChannel_SetLastSeenMessage(ids, message_id) {
+        this._mockWrite('mail.channel', [ids, {
+            fetched_message_id: message_id,
+            seen_message_id: message_id,
+        }]);
     },
     /**
      * Simulates `mark_all_as_read` on `mail.message`.
@@ -1079,20 +1179,27 @@ MockServer.include({
                     'res_model': attachment.res_model,
                 });
             });
-            const notifications = this._getRecords('mail.notification', [
+            const allNotifications = this._getRecords('mail.notification', [
                 ['mail_message_id', '=', message.id],
             ]);
-            const historyPartnerIds = notifications
+            const historyPartnerIds = allNotifications
                 .filter(notification => notification.is_read)
                 .map(notification => notification.res_partner_id);
-            const needactionPartnerIds = notifications
+            const needactionPartnerIds = allNotifications
                 .filter(notification => !notification.is_read)
                 .map(notification => notification.res_partner_id);
+            let notifications = this._mockMailNotification_FilteredForWebClient(
+                allNotifications.map(notification => notification.id)
+            );
+            notifications = this._mockMailNotification_NotificationFormat(
+                notifications.map(notification => notification.id)
+            );
             return Object.assign({}, message, {
                 attachment_ids: formattedAttachments,
                 author_id: formattedAuthor,
                 history_partner_ids: historyPartnerIds,
                 needaction_partner_ids: needactionPartnerIds,
+                notifications,
             });
         });
     },
@@ -1121,20 +1228,13 @@ MockServer.include({
             this._widget.call('bus_service', 'trigger', 'notification', [notification]);
         } else if (decision === 'accept') {
             // simulate notification back (new accepted message in channel)
-            const messages = _.filter(model.records, function (rec) {
-                return _.contains(messageIDs, rec.id);
-            });
-
-            const notifications = [];
-            _.each(messages, function (message) {
-                const dbName = undefined; // useless for tests
-                const messageData = message;
-                message.moderation_status = 'accepted';
-                const metaData = [dbName, 'mail.channel', message.res_id];
-                const notification = [metaData, messageData];
-                notifications.push(notification);
-            });
-            this._widget.call('bus_service', 'trigger', 'notification', notifications);
+            const messages = this._getRecords('mail.message', [['id', 'in', messageIDs]]);
+            for (const message of messages) {
+                this._mockWrite('mail.message', [[message.id], {
+                    moderation_status: 'accepted',
+                }]);
+                this._mockMailThread_NotifyThread(model, message.channel_ids, message.id);
+            }
         }
     },
     /**
@@ -1200,11 +1300,12 @@ MockServer.include({
                     ),
                 },
             ]);
+            // NOTE server is sending grouped notifications per channel_ids but
+            // this optimization is not needed here.
+            const data = { type: 'mark_as_read', message_ids: [message.id], channel_ids: message.channel_ids };
+            const busNotifications = [[[false, 'res.partner', this.currentPartnerId], data]];
+            this._widget.call('bus_service', 'trigger', 'notification', busNotifications);
         }
-        // NOTE: server is also sending channel_ids, not done here for simplicity.
-        const data = { type: 'mark_as_read', message_ids: ids };
-        const busNotifications = [[[false, 'res.partner', this.currentPartnerId], data]];
-        this._widget.call('bus_service', 'trigger', 'notification', busNotifications);
     },
     /**
      * Simulates `toggle_message_starred` on `mail.message`.
@@ -1339,6 +1440,47 @@ MockServer.include({
         return [author_id, email_from];
     },
     /**
+     * Simulates `_message_add_suggested_recipient` on `mail.thread`.
+     *
+     * @private
+     * @param {string} model
+     * @param {integer[]} ids
+     * @param {Object} result
+     * @param {Object} [param3={}]
+     * @param {string} [param3.email]
+     * @param {integer} [param3.partner]
+     * @param {string} [param3.reason]
+     * @returns {Object}
+     */
+    _mockMailThread_MessageAddSuggestedRecipient(model, ids, result, { email, partner, reason = '' } = {}) {
+        const record = this._getRecords(model, [['id', 'in', 'ids']])[0];
+        // for simplicity
+        result[record.id].push([partner, email, reason]);
+        return result;
+    },
+    /**
+     * Simulates `_message_get_suggested_recipients` on `mail.thread`.
+     *
+     * @private
+     * @param {string} model
+     * @param {integer[]} ids
+     * @returns {Object}
+     */
+    _mockMailThread_MessageGetSuggestedRecipients(model, ids) {
+        const result = ids.reduce((result, id) => result[id] = [], {});
+        const records = this._getRecords(model, [['id', 'in', ids]]);
+        for (const record in records) {
+            if (record.user_id) {
+                const user = this._getRecords('res.users', [['id', '=', record.user_id]]);
+                if (user.partner_id) {
+                    const reason = this.data[model].fields['user_id'].string;
+                    this._mockMailThread_MessageAddSuggestedRecipient(result, user.partner_id, reason);
+                }
+            }
+        }
+        return result;
+    },
+    /**
      * Simulates `message_post` on `mail.thread`.
      *
      * @private
@@ -1383,7 +1525,7 @@ MockServer.include({
         });
         delete values.subtype_xmlid;
         const messageId = this._mockCreate('mail.message', values);
-        this._mockMailThread_NotifyThread(model, ids, messageId, values);
+        this._mockMailThread_NotifyThread(model, ids, messageId);
         return messageId;
     },
     /**

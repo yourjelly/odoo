@@ -177,17 +177,31 @@ $-seen-urls: ();
 }
 
 .navbar {
-    @if ($o-theme-navbar-font != $o-theme-font) {
-        font-family: $o-theme-navbar-font;
-    }
 
+    .navbar-collapse {
+        min-width: 0; // Allows it to shrink during loading
+    }
     .nav-item {
         transition: opacity 1000ms ease 0s;
     }
-    .o_menu_loading .nav-item {
-        height: 0 !important;
+    .btn {
+        // This was a default bootstrap style before but it was removed from
+        // the library at some point. It seems important in the header so that
+        // the header does not flicker during loading.
+        white-space: nowrap;
+    }
+    .o_menu_loading {
+        flex-wrap: nowrap !important;
         overflow: hidden !important;
-        opacity: 0 !important;
+
+        .nav-item {
+            opacity: 0 !important;
+        }
+    }
+}
+.navbar-brand, .navbar-text, .navbar .nav-link {
+    @if $o-theme-navbar-font != $o-theme-font {
+        font-family: $o-theme-navbar-font;
     }
 }
 
@@ -368,35 +382,8 @@ font[class*='bg-'] {
 .o_bg_video_loading {
     @include o-position-absolute(0, 0 ,0 ,0);
 }
-
-// Probably outdated
-// Lists
-.o_ul_toggle {
-    display: none;
-}
-
-.o_ul_folded {
-    .o_close {
-        display: none!important;
-    }
-    .o_ul_toggle_self,
-    .o_ul_toggle_next {
-        display: inline-block;
-        line-height: inherit;
-        float: left;
-        position: relative;
-        margin-left: -1em;
-        top: -0.15em;
-        left: 0.2em;
-        font-size: 1.4em;
-        text-decoration: none;
-        &.o_open:before {
-            content: "";
-        }
-        &:before {
-            content: "";
-        }
-    }
+.o_background_video, .parallax {
+    @extend %o-we-background-layer-parent;
 }
 
 // Probably outdated
@@ -448,9 +435,13 @@ table.table_desc tr td {
 }
 
 .o_full_screen_height {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
     min-height: 100vh !important;
 }
 .o_half_screen_height {
+    @extend .o_full_screen_height;
     min-height: 55vh !important;
 }
 
@@ -478,6 +469,7 @@ table.table_desc tr td {
     // Controls
     .carousel-control-prev,
     .carousel-control-next {
+        position: absolute;
         cursor: pointer;
         width: 8%;
         opacity: 1;
@@ -504,8 +496,12 @@ table.table_desc tr td {
         }
     }
     // Indicators
-    .carousel-indicators li:hover:not(.active) {
-        background-color: rgba(255,255,255,.8);
+    .carousel-indicators {
+        position: absolute;
+
+        li:hover:not(.active) {
+            background-color: rgba(255,255,255,.8);
+        }
     }
 
     // Default
@@ -790,10 +786,12 @@ $-hamburger-left: o-website-value('hamburger-position') == 'left';
 $-hamburger-center: o-website-value('hamburger-position') == 'center';
 $-hamburger-right: o-website-value('hamburger-position') == 'right';
 
+$zindex-website-header: $zindex-modal - 20;
+
 header {
     &#top {
         // We need this z-index for the shadow option of the header
-        z-index: $zindex-modal - 20;
+        z-index: $zindex-website-header;
     }
     &:not(.o_header_no_transition) {
         #top_menu_container {
@@ -806,6 +804,21 @@ header {
                 transition: height $-transition-duration;
             }
         }
+    }
+
+    // Dropdown menus
+
+    // In mobile there is no need to limit the height...
+    @include media-breakpoint-up(lg) {
+        .navbar .dropdown-menu {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+    }
+    // ... but we limit the navbar-collapse height
+    .navbar-collapse.show {
+        max-height: 80vh;
+        overflow-y: auto;
     }
 
     &:not(.o_header_is_scrolled) {
@@ -857,9 +870,13 @@ header {
     #top_menu_collapse {
 
         &.collapsing, &.show {
+            // Note: position relatively to the header instead of the viewport
+            // because fixed position cannot work inside an element whose CSS
+            // transform is different to none, which the header element is
+            // because of header effects.
             @include o-position-absolute(0, 0, 0, 0);
-            position: fixed;
             z-index: $zindex-sticky;
+            height: 100vh;
             transition: none;
             transform: none;
 
@@ -944,9 +961,9 @@ header {
                 }
             }
 
-            .o_connected_user header:not(.o_header_is_scrolled) &,
-            .o_connected_user header.o_header_affixed & {
-                padding-top: $o-navbar-height !important;
+            .o_connected_user:not(.editor_has_snippets) header & {
+                top: -$o-navbar-height;
+                padding-top: $o-navbar-height;
             }
         }
         &.collapsing #top_menu {
@@ -1038,7 +1055,7 @@ header {
                 }
             }
         }
-        body.o_connected_user #wrapwrap > header {
+        body.o_connected_user:not(.editor_has_snippets) #wrapwrap > header {
             top: $o-navbar-height;
         }
     }
@@ -1071,31 +1088,7 @@ header {
                             position: absolute;
                         }
                     }
-                    &:not(.o_header_affixed) {
-                        position: sticky;
-                        top: 0;
-                        right: 0;
-                        bottom: auto;
-                        left: 0;
-                        z-index: $zindex-fixed;
-                    }
-                    &.o_header_affixed {
-                        transform: none !important;
-                    }
                 }
-                > main {
-                    > :first-child:not(#wrap), #wrap > :first-child {
-                        &::before {
-                            content: "";
-                            display: block;
-                            width: 100%;
-                            margin-top: $o-hamburger-full-navbar-height;
-                        }
-                    }
-                }
-            }
-            #oe_main_menu_navbar ~ #wrapwrap > header {
-                top: $o-navbar-height;
             }
         }
     }
@@ -1132,7 +1125,7 @@ header {
 }
 
 #wrapwrap.o_header_overlay {
-    > header:not(.o_header_affixed) {
+    > header:not(.o_header_affixed):not(.o_top_menu_collapse_shown) {
         @include o-position-absolute(0, 0, auto, 0);
         z-index: 1000;
 

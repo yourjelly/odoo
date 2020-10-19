@@ -106,7 +106,7 @@ class AccountMove(models.Model):
 
     @api.model
     def _get_default_invoice_date(self):
-        return fields.Date.context_today(self) if self._context.get('default_move_type', 'entry') in ('in_invoice', 'in_refund', 'in_receipt') else False
+        return fields.Date.context_today(self) if self._context.get('default_move_type', 'entry') in self.get_purchase_types(include_receipts=True) else False
 
     @api.model
     def _get_default_currency(self):
@@ -217,7 +217,7 @@ class AccountMove(models.Model):
         compute='_compute_amount', currency_field='company_currency_id')
     amount_by_group = fields.Binary(string="Tax amount by group",
         compute='_compute_invoice_taxes_by_group',
-        help='Edit Tax amounts if you encounter rouding issues.')
+        help='Edit Tax amounts if you encounter rounding issues.')
     payment_state = fields.Selection(selection=[
         ('not_paid', 'Not Paid'),
         ('in_payment', 'In Payment'),
@@ -704,6 +704,19 @@ class AccountMove(models.Model):
             if in_draft_mode:
                 taxes_map_entry['tax_line'].update(taxes_map_entry['tax_line']._get_fields_onchange_balance())
 
+    def update_lines_tax_exigibility(self):
+        if all(account.user_type_id.type not in {'payable', 'receivable'} for account in self.mapped('line_ids.account_id')):
+            self.line_ids.write({'tax_exigible': True})
+        else:
+            tax_lines_caba = self.line_ids.filtered(lambda x: x.tax_line_id.tax_exigibility == 'on_payment')
+            base_lines_caba = self.line_ids.filtered(lambda x: any(tax.tax_exigibility == 'on_payment'
+                                                                   or (tax.amount_type == 'group'
+                                                                       and 'on_payment' in tax.mapped('children_tax_ids.tax_exigibility'))
+                                                               for tax in x.tax_ids))
+            caba_lines = tax_lines_caba + base_lines_caba
+            caba_lines.write({'tax_exigible': False})
+            (self.line_ids - caba_lines).write({'tax_exigible': True})
+
     def _recompute_cash_rounding_lines(self):
         ''' Handle the cash rounding feature on invoices.
 
@@ -938,7 +951,7 @@ class AccountMove(models.Model):
 
         existing_terms_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
         others_lines = self.line_ids.filtered(lambda line: line.account_id.user_type_id.type not in ('receivable', 'payable'))
-        company_currency_id = self.company_id.currency_id
+        company_currency_id = (self.company_id or self.env.company).currency_id
         total_balance = sum(others_lines.mapped(lambda l: company_currency_id.round(l.balance)))
         total_amount_currency = sum(others_lines.mapped('amount_currency'))
 
@@ -1313,7 +1326,7 @@ class AccountMove(models.Model):
                         res = True
             r.invoice_has_matching_suspense_amount = res
 
-    @api.depends('partner_id', 'invoice_source_email')
+    @api.depends('partner_id', 'invoice_source_email', 'partner_id.name')
     def _compute_invoice_partner_display_info(self):
         for move in self:
             vendor_display_name = move.partner_id.display_name
@@ -1755,7 +1768,10 @@ class AccountMove(models.Model):
             raise UserError(_('You cannot create a move already in the posted state. Please create a draft move and post it after.'))
 
         vals_list = self._move_autocomplete_invoice_lines_create(vals_list)
-        return super(AccountMove, self).create(vals_list)
+        rslt = super(AccountMove, self).create(vals_list)
+        if 'line_ids' in vals_list:
+            rslt.update_lines_tax_exigibility()
+        return rslt
 
     def write(self, vals):
         for move in self:
@@ -1801,8 +1817,10 @@ class AccountMove(models.Model):
                 res |= super(AccountMove, move).write(vals_hashing)
 
         # Ensure the move is still well balanced.
-        if 'line_ids' in vals and self._context.get('check_move_validity', True):
-            self._check_balanced()
+        if 'line_ids' in vals:
+            if self._context.get('check_move_validity', True):
+                self._check_balanced()
+            self.update_lines_tax_exigibility()
 
         self._synchronize_business_models(set(vals.keys()))
 
@@ -3553,12 +3571,18 @@ class AccountMoveLine(models.Model):
             if account_currency and account_currency != line.company_currency_id and account_currency != line.currency_id:
                 raise UserError(_('The account selected on your journal entry forces to provide a secondary currency. You should remove the secondary currency on the account.'))
 
-            control_journal_failed = account.allowed_journal_ids and journal not in account.allowed_journal_ids
-            control_type_failed = journal.type_control_ids and account.user_type_id not in journal.type_control_ids
-            control_account_failed = journal.account_control_ids and account not in journal.account_control_ids
-            if control_journal_failed:
+            if account.allowed_journal_ids and journal not in account.allowed_journal_ids:
                 raise UserError(_('You cannot use this account (%s) in this journal, check the field \'Allowed Journals\' on the related account.', account.display_name))
-            if control_type_failed or control_account_failed:
+
+            failed_check = False
+            if journal.type_control_ids or journal.account_control_ids:
+                failed_check = True
+                if journal.type_control_ids:
+                    failed_check = account.user_type_id not in journal.type_control_ids
+                if failed_check and journal.account_control_ids:
+                    failed_check = account not in journal.account_control_ids
+
+            if failed_check:
                 raise UserError(_('You cannot use this account (%s) in this journal, check the section \'Control-Access\' under tab \'Advanced Settings\' on the related journal.', account.display_name))
 
     @api.constrains('account_id', 'tax_ids', 'tax_line_id', 'reconciled')
@@ -3687,17 +3711,6 @@ class AccountMoveLine(models.Model):
                         move.company_id,
                         move.date,
                     ))
-
-            # Ensure consistency between taxes & tax exigibility fields.
-            if 'tax_exigible' in vals:
-                continue
-            if vals.get('tax_repartition_line_id'):
-                repartition_line = self.env['account.tax.repartition.line'].browse(vals['tax_repartition_line_id'])
-                tax = repartition_line.invoice_tax_id or repartition_line.refund_tax_id
-                vals['tax_exigible'] = tax.tax_exigibility == 'on_invoice'
-            elif vals.get('tax_ids'):
-                taxes = self.new({'tax_ids': vals['tax_ids']}).tax_ids.flatten_taxes_hierarchy()
-                vals['tax_exigible'] = not any(tax.tax_exigibility == 'on_payment' for tax in taxes)
 
         lines = super(AccountMoveLine, self).create(vals_list)
 
@@ -3916,7 +3929,7 @@ class AccountMoveLine(models.Model):
             if 'account_id' in default_fields and not values.get('account_id'):
                 if len(move.line_ids[-2:]) == 2 and  move.line_ids[-1].account_id == move.line_ids[-2].account_id != False:
                     values['account_id'] = move.line_ids[-2:].mapped('account_id').id
-        if values.get('display_type'):
+        if values.get('display_type') or self.display_type:
             values.pop('account_id', None)
         return values
 
@@ -4657,7 +4670,12 @@ class AccountMoveLine(models.Model):
 
     def action_automatic_entry(self):
         [action] = self.env.ref('account.account_automatic_entry_wizard_action').read()
-        action['context'] = self.env.context
+        # Force the values of the move line in the context to avoid issues
+        ctx = dict(self.env.context)
+        ctx.pop('active_id', None)
+        ctx['active_ids'] = self.ids
+        ctx['active_model'] = 'account.move.line'
+        action['context'] = ctx
         return action
 
     @api.model

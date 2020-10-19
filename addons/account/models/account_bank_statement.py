@@ -243,6 +243,7 @@ class AccountBankStatement(models.Model):
     is_valid_balance_start = fields.Boolean(string="Is Valid Balance Start", store=True,
         compute="_compute_is_valid_balance_start",
         help="Technical field to display a warning message in case starting balance is different than previous ending balance")
+    country_code = fields.Char(related='company_id.country_id.code')
 
     def write(self, values):
         res = super(AccountBankStatement, self).write(values)
@@ -772,9 +773,12 @@ class AccountBankStatementLine(models.Model):
             liquidity_lines, suspense_lines, other_lines = st_line._seek_for_lines()
 
             # Compute is_reconciled
-            if not st_line.id or suspense_lines:
+            if not st_line.id:
                 # New record: The journal items are not yet there.
                 st_line.is_reconciled = False
+            elif suspense_lines:
+                # In case of the statement line comes from an older version, it could have a residual amount of zero.
+                st_line.is_reconciled = all(suspense_line.reconciled for suspense_line in suspense_lines)
             elif st_line.currency_id.is_zero(st_line.amount):
                 st_line.is_reconciled = True
             else:

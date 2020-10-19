@@ -44,6 +44,7 @@ QUnit.test('reply: discard on pressing escape', async function (assert) {
     });
     // message expected to be found in inbox
     this.data['mail.message'].records.push({
+        body: "not empty",
         model: 'res.partner',
         needaction: true,
         needaction_partner_ids: [this.data.currentPartnerId],
@@ -90,7 +91,18 @@ QUnit.test('reply: discard on pressing escape', async function (assert) {
     );
 
     await afterNextRender(() => {
+        document.querySelector(`.o_ComposerTextInput_textarea`).focus();
         document.execCommand('insertText', false, "@");
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keydown'));
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keyup'));
+        document.execCommand('insertText', false, "T");
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keydown'));
+        document.querySelector(`.o_ComposerTextInput_textarea`)
+            .dispatchEvent(new window.KeyboardEvent('keyup'));
+        document.execCommand('insertText', false, "e");
         document.querySelector(`.o_ComposerTextInput_textarea`)
             .dispatchEvent(new window.KeyboardEvent('keydown'));
         document.querySelector(`.o_ComposerTextInput_textarea`)
@@ -98,7 +110,7 @@ QUnit.test('reply: discard on pressing escape', async function (assert) {
     });
     assert.containsOnce(
         document.body,
-        '.o_ComposerTextInput_mentionDropdownPropositionList',
+        '.o_ComposerSuggestion',
         "mention suggestion should be opened after typing @"
     );
 
@@ -108,7 +120,7 @@ QUnit.test('reply: discard on pressing escape', async function (assert) {
     });
     assert.containsNone(
         document.body,
-        '.o_ComposerTextInput_mentionDropdownPropositionList',
+        '.o_ComposerSuggestion',
         "mention suggestion should be closed after pressing escape on mention suggestion"
     );
     assert.containsOnce(
@@ -132,6 +144,7 @@ QUnit.test('reply: discard on discard button click', async function (assert) {
     assert.expect(4);
 
     this.data['mail.message'].records.push({
+        body: "not empty",
         model: 'res.partner',
         needaction: true,
         needaction_partner_ids: [this.data.currentPartnerId],
@@ -172,6 +185,7 @@ QUnit.test('reply: discard on reply button toggle', async function (assert) {
     assert.expect(3);
 
     this.data['mail.message'].records.push({
+        body: "not empty",
         model: 'res.partner',
         needaction: true,
         needaction_partner_ids: [this.data.currentPartnerId],
@@ -207,6 +221,7 @@ QUnit.test('reply: discard on click away', async function (assert) {
     assert.expect(7);
 
     this.data['mail.message'].records.push({
+        body: "not empty",
         model: 'res.partner',
         needaction: true,
         needaction_partner_ids: [this.data.currentPartnerId],
@@ -273,6 +288,7 @@ QUnit.test('"reply to" composer should log note if message replied to is a note'
     assert.expect(6);
 
     this.data['mail.message'].records.push({
+        body: "not empty",
         is_discussion: false,
         model: 'res.partner',
         needaction: true,
@@ -325,6 +341,7 @@ QUnit.test('"reply to" composer should send message if message replied to is not
     assert.expect(6);
 
     this.data['mail.message'].records.push({
+        body: "not empty",
         is_discussion: true,
         model: 'res.partner',
         needaction: true,
@@ -377,6 +394,7 @@ QUnit.test('error notifications should not be shown in Inbox', async function (a
     assert.expect(3);
 
     this.data['mail.message'].records.push({
+        body: "not empty",
         id: 100,
         model: 'mail.channel',
         needaction: true,
@@ -411,6 +429,7 @@ QUnit.test('show subject of message in Inbox', async function (assert) {
     assert.expect(3);
 
     this.data['mail.message'].records.push({
+        body: "not empty",
         model: 'mail.channel', // random existing model
         needaction: true, // message_fetch domain
         needaction_partner_ids: [this.data.currentPartnerId], // not needed, for consistency
@@ -438,6 +457,7 @@ QUnit.test('show subject of message in history', async function (assert) {
     assert.expect(3);
 
     this.data['mail.message'].records.push({
+        body: "not empty",
         history_partner_ids: [3], // not needed, for consistency
         model: 'mail.channel', // random existing model
         subject: "Salutations, voyageur", // will be asserted in the test
@@ -498,6 +518,7 @@ QUnit.test('click on (non-channel/non-partner) origin thread link should redirec
     });
     this.data['some.model'] = { fields: {}, records: [{ id: 10 }] };
     this.data['mail.message'].records.push({
+        body: "not empty",
         model: 'some.model',
         needaction: true,
         needaction_partner_ids: [this.data.currentPartnerId],

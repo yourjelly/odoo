@@ -128,20 +128,12 @@ function factory(dependencies) {
 
         /**
          * @private
-         * @param {Object[]} shortcodes
+         * @param {Object[]} cannedResponsesData
          */
-        _initCannedResponses(shortcodes) {
-            const messaging = this.messaging;
-            const cannedResponses = shortcodes
-                .map(s => {
-                    const { id, source, substitution } = s;
-                    return { id, source, substitution };
-                })
-                .reduce((obj, cr) => {
-                    obj[cr.id] = cr;
-                    return obj;
-                }, {});
-            messaging.update({ cannedResponses });
+        _initCannedResponses(cannedResponsesData) {
+            this.messaging.update({
+                cannedResponses: [['insert', cannedResponsesData]],
+            });
         }
 
         /**
@@ -161,9 +153,14 @@ function factory(dependencies) {
                 // there might be a lot of channels, insert each of them one by
                 // one asynchronously to avoid blocking the UI
                 await this.async(() => new Promise(resolve => setTimeout(resolve)));
-                this.env.models['mail.thread'].insert(
+                const channel = this.env.models['mail.thread'].insert(
                     this.env.models['mail.thread'].convertData(channelData)
                 );
+                // flux specific: channels received at init have to be
+                // considered pinned. task-2284357
+                if (!channel.isPinned) {
+                    channel.update({ isPendingPinned: true });
+                }
             }
         }
 
@@ -172,18 +169,9 @@ function factory(dependencies) {
          * @param {Object[]} commandsData
          */
         _initCommands(commandsData) {
-            const messaging = this.messaging;
-            const commands = commandsData
-                .map(command => {
-                    return Object.assign({
-                        id: command.name,
-                    }, command);
-                })
-                .reduce((obj, command) => {
-                    obj[command.id] = command;
-                    return obj;
-                }, {});
-            messaging.update({ commands });
+            this.messaging.update({
+                commands: [['insert', commandsData]],
+            });
         }
 
         /**

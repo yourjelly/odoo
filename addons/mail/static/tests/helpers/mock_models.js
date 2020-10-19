@@ -136,6 +136,7 @@ class MockModels {
                     res_model_name: { string: "Res Model Name", type: 'char' },
                     starred_partner_ids: { string: "Favorited By", type: 'many2many', relation: 'res.partner' },
                     subject: { string: "Subject", type: 'char' },
+                    tracking_value_ids: { relation: 'mail.tracking.value', string: "Tracking values", type: 'one2many' },
                 },
                 records: [],
             },
@@ -167,6 +168,22 @@ class MockModels {
                     notification_status: { string: "Notification Status", type: 'selection', selection: [['ready', 'Ready to Send'], ['sent', 'Sent'], ['bounce', 'Bounced'], ['exception', 'Exception'], ['canceled', 'Canceled']], default: 'ready' },
                     notification_type: { string: "Notification Type", type: 'selection', selection: [['email', 'Handle by Emails'], ['inbox', 'Handle in Odoo']], default: 'email' },
                     res_partner_id: { string: "Needaction Recipient", type: 'many2one', relation: 'res.partner' },
+                },
+                records: [],
+            },
+            'mail.shortcode': {
+                fields: {
+                    source: { type: 'char' },
+                    substitution: { type: 'char' },
+                },
+                records: [],
+            },
+            'mail.tracking.value': {
+                fields: {
+                    changed_field: { string: 'Changed field', type: 'char' },
+                    field_type: { string: 'Field type', type: 'char' },
+                    new_value: { string: 'New value', type: 'char' },
+                    old_value: { string: 'Old value', type: 'char' },
                 },
                 records: [],
             },

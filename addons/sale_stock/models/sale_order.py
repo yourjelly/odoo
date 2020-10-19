@@ -276,14 +276,13 @@ class SaleOrderLine(models.Model):
     qty_to_deliver = fields.Float(compute='_compute_qty_to_deliver', digits='Product Unit of Measure')
     is_mto = fields.Boolean(compute='_compute_is_mto')
     display_qty_widget = fields.Boolean(compute='_compute_qty_to_deliver')
-    json_forecast = fields.Char('JSON data for the forecast widget', compute='_compute_json_forecast')
 
-    @api.depends('product_type', 'product_uom_qty', 'qty_delivered', 'state', 'move_ids')
+    @api.depends('product_type', 'product_uom_qty', 'qty_delivered', 'state', 'move_ids', 'product_uom')
     def _compute_qty_to_deliver(self):
         """Compute the visibility of the inventory widget."""
         for line in self:
             line.qty_to_deliver = line.product_uom_qty - line.qty_delivered
-            if line.state in ('draft', 'sent', 'sale') and line.product_type == 'product' and line.qty_to_deliver > 0:
+            if line.state in ('draft', 'sent', 'sale') and line.product_type == 'product' and line.product_uom and line.qty_to_deliver > 0:
                 if line.state == 'sale' and not line.move_ids:
                     line.display_qty_widget = False
                 else:
@@ -382,11 +381,6 @@ class SaleOrderLine(models.Model):
                 line.is_mto = True
             else:
                 line.is_mto = False
-
-    @api.depends('move_ids', 'order_id.expected_date', 'qty_delivered')
-    def _compute_json_forecast(self):
-        self.json_forecast = False
-        # TODO: remove this fields in master -> computation done in _compute_qty_at_date
 
     @api.depends('product_id')
     def _compute_qty_delivered_method(self):

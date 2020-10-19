@@ -453,9 +453,8 @@ QUnit.test('chat window: basic rendering', async function (assert) {
 });
 
 QUnit.test('chat window: fold', async function (assert) {
-    assert.expect(27);
+    assert.expect(9);
 
-    let foldCall = 0;
     // channel that is expected to be found in the messaging menu
     // with random UUID, will be asserted during the test
     this.data['mail.channel'].records.push({ uuid: 'channel-uuid' });
@@ -463,44 +462,6 @@ QUnit.test('chat window: fold', async function (assert) {
         mockRPC(route, args) {
             if (args.method === 'channel_fold') {
                 assert.step(`rpc:${args.method}/${args.kwargs.state}`);
-                foldCall++;
-                const kwargsKeys = Object.keys(args.kwargs);
-                assert.strictEqual(
-                    args.args.length,
-                    0,
-                    "channel_fold call have no args"
-                );
-                assert.strictEqual(
-                    kwargsKeys.length,
-                    2,
-                    "channel_fold call have exactly 2 kwargs"
-                );
-                assert.ok(
-                    kwargsKeys.includes('state'),
-                    "channel_fold call have 'state' kwargs"
-                );
-                assert.ok(
-                    kwargsKeys.includes('uuid'),
-                    "channel_fold call have 'uuid' kwargs"
-                );
-                assert.strictEqual(
-                    args.kwargs.uuid,
-                    'channel-uuid',
-                    "channel_fold call uuid is from channel 20"
-                );
-                if (foldCall % 2 === 0) {
-                    assert.strictEqual(
-                        args.kwargs.state,
-                        'folded',
-                        "channel_fold call state is 'folded'"
-                    );
-                } else {
-                    assert.strictEqual(
-                        args.kwargs.state,
-                        'open',
-                        "channel_fold call state is 'open'"
-                    );
-                }
             }
             return this._super(...arguments);
         },
@@ -515,11 +476,17 @@ QUnit.test('chat window: fold', async function (assert) {
         '.o_ChatWindow_thread',
         "chat window should have a thread"
     );
-    assert.verifySteps(['rpc:channel_fold/open']);
+    assert.verifySteps(
+        ['rpc:channel_fold/open'],
+        "should sync fold state 'open' with server after opening chat window"
+    );
 
     // Fold chat window
     await afterNextRender(() => document.querySelector(`.o_ChatWindow_header`).click());
-    assert.verifySteps(['rpc:channel_fold/folded']);
+    assert.verifySteps(
+        ['rpc:channel_fold/folded'],
+        "should sync fold state 'folded' with server after folding chat window"
+    );
     assert.containsNone(
         document.body,
         '.o_ChatWindow_thread',
@@ -528,7 +495,10 @@ QUnit.test('chat window: fold', async function (assert) {
 
     // Unfold chat window
     await afterNextRender(() => document.querySelector(`.o_ChatWindow_header`).click());
-    assert.verifySteps(['rpc:channel_fold/open']);
+    assert.verifySteps(
+        ['rpc:channel_fold/open'],
+        "should sync fold state 'open' with server after unfolding chat window"
+    );
     assert.containsOnce(
         document.body,
         '.o_ChatWindow_thread',
@@ -537,9 +507,8 @@ QUnit.test('chat window: fold', async function (assert) {
 });
 
 QUnit.test('chat window: open / close', async function (assert) {
-    assert.expect(24);
+    assert.expect(10);
 
-    let foldCall = 0;
     // channel that is expected to be found in the messaging menu
     // with random UUID, will be asserted during the test
     this.data['mail.channel'].records.push({ uuid: 'channel-uuid' });
@@ -547,64 +516,55 @@ QUnit.test('chat window: open / close', async function (assert) {
         mockRPC(route, args) {
             if (args.method === 'channel_fold') {
                 assert.step(`rpc:channel_fold/${args.kwargs.state}`);
-                foldCall++;
-                const kwargsKeys = Object.keys(args.kwargs);
-                assert.strictEqual(
-                    args.args.length,
-                    0,
-                    "channel_fold call have no args"
-                );
-                assert.strictEqual(
-                    kwargsKeys.length,
-                    2,
-                    "channel_fold call have exactly 2 kwargs"
-                );
-                assert.ok(
-                    kwargsKeys.includes('state'),
-                    "channel_fold call have 'state' kwargs"
-                );
-                assert.ok(
-                    kwargsKeys.includes('uuid'),
-                    "channel_fold call have 'uuid' kwargs"
-                );
-                assert.strictEqual(
-                    args.kwargs.uuid,
-                    'channel-uuid',
-                    "channel_fold call uuid should be correct"
-                );
-                if (foldCall % 2 === 0) {
-                    assert.strictEqual(
-                        args.kwargs.state,
-                        'closed',
-                        "channel_fold call state is 'closed'"
-                    );
-                } else {
-                    assert.strictEqual(
-                        args.kwargs.state,
-                        'open',
-                        "channel_fold call state is 'open'"
-                    );
-                }
             }
             return this._super(...arguments);
         },
     });
+    assert.containsNone(
+        document.body,
+        '.o_ChatWindow',
+        "should not have a chat window initially"
+    );
     await afterNextRender(() => document.querySelector(`.o_MessagingMenu_toggler`).click());
     await afterNextRender(() =>
         document.querySelector(`.o_MessagingMenu_dropdownMenu .o_NotificationList_preview`).click()
     );
-    assert.verifySteps(['rpc:channel_fold/open']);
+    assert.containsOnce(
+        document.body,
+        '.o_ChatWindow',
+        "should have a chat window after clicking on thread preview"
+    );
+    assert.verifySteps(
+        ['rpc:channel_fold/open'],
+        "should sync fold state 'open' with server after opening chat window"
+    );
 
     // Close chat window
     await afterNextRender(() => document.querySelector(`.o_ChatWindowHeader_commandClose`).click());
-    assert.verifySteps(['rpc:channel_fold/closed']);
+    assert.containsNone(
+        document.body,
+        '.o_ChatWindow',
+        "should not have a chat window after closing it"
+    );
+    assert.verifySteps(
+        ['rpc:channel_fold/closed'],
+        "should sync fold state 'closed' with server after closing chat window"
+    );
 
     // Reopen chat window
     await afterNextRender(() => document.querySelector(`.o_MessagingMenu_toggler`).click());
     await afterNextRender(() =>
         document.querySelector(`.o_MessagingMenu_dropdownMenu .o_NotificationList_preview`).click()
     );
-    assert.verifySteps(['rpc:channel_fold/open']);
+    assert.containsOnce(
+        document.body,
+        '.o_ChatWindow',
+        "should have a chat window again after clicking on thread preview again"
+    );
+    assert.verifySteps(
+        ['rpc:channel_fold/open'],
+        "should sync fold state 'open' with server after opening chat window again"
+    );
 });
 
 QUnit.test('chat window: close on ESCAPE', async function (assert) {
@@ -653,16 +613,17 @@ QUnit.test('chat window: close on ESCAPE', async function (assert) {
     );
 
     await afterNextRender(() => {
-        document.execCommand('insertText', false, "@test");
+        document.querySelector(`.o_ComposerTextInput_textarea`).focus();
+        document.execCommand('insertText', false, "@");
         document.querySelector(`.o_ComposerTextInput_textarea`)
             .dispatchEvent(new window.KeyboardEvent('keydown'));
         document.querySelector(`.o_ComposerTextInput_textarea`)
             .dispatchEvent(new window.KeyboardEvent('keyup'));
     });
-    assert.containsOnce(
-        document.body,
-        '.o_ComposerTextInput_mentionDropdownPropositionList',
-        "mention suggestion should be opened after typing @test"
+    assert.hasClass(
+        document.querySelector('.o_ComposerSuggestionList_list'),
+        'show',
+        "should display mention suggestions on typing '@'"
     );
 
     await afterNextRender(() => {
@@ -671,7 +632,7 @@ QUnit.test('chat window: close on ESCAPE', async function (assert) {
     });
     assert.containsNone(
         document.body,
-        '.o_ComposerTextInput_mentionDropdownPropositionList',
+        '.o_ComposerSuggestionList_list',
         "mention suggestion should be closed after pressing escape on mention suggestion"
     );
     assert.containsOnce(
@@ -841,9 +802,8 @@ QUnit.test('[technical] chat window: scroll conservation on toggle home menu', a
     this.data['mail.channel'].records.push({ id: 20 });
     for (let i = 0; i < 10; i++) {
         this.data['mail.message'].records.push({
+            body: "not empty",
             channel_ids: [20],
-            model: 'mail.channel',
-            res_id: 20,
         });
     }
     await this.start();
@@ -1582,9 +1542,8 @@ QUnit.test('chat window with a thread: keep scroll position in message list on f
     this.data['mail.channel'].records.push({ id: 20 });
     for (let i = 0; i < 10; i++) {
         this.data['mail.message'].records.push({
+            body: "not empty",
             channel_ids: [20],
-            model: 'mail.channel',
-            res_id: 20,
         });
     }
     await this.start();
@@ -1627,9 +1586,8 @@ QUnit.test('chat window should scroll to the newly posted message just after pos
     });
     for (let i = 0; i < 10; i++) {
         this.data['mail.message'].records.push({
+            body: "not empty",
             channel_ids: [20],
-            model: 'mail.channel',
-            res_id: 20,
         });
     }
     await this.start();
@@ -1749,9 +1707,8 @@ QUnit.test('[technical] chat window with a thread: keep scroll position in messa
     this.data['mail.channel'].records.push({ id: 20 });
     for (let i = 0; i < 10; i++) {
         this.data['mail.message'].records.push({
+            body: "not empty",
             channel_ids: [20],
-            model: 'mail.channel',
-            res_id: 20,
         });
     }
     await this.start();
@@ -1904,6 +1861,116 @@ QUnit.test('chat window does not fetch messages if hidden', async function (asse
     assert.verifySteps(
         ['rpc:message_fetch:12'],
         "messages should now be fetched for Channel #12"
+    );
+});
+
+QUnit.test('new message separator is shown in a chat window of a chat on receiving new message', async function (assert) {
+    assert.expect(6);
+
+    this.data['res.partner'].records.push({ id: 10, name: "Demo" });
+    this.data['res.users'].records.push({
+        id: 42,
+        name: "Foreigner user",
+        partner_id: 10,
+    });
+    this.data['mail.channel'].records = [
+        {
+            id: 10,
+            channel_type: "chat",
+            is_minimized: true,
+            is_pinned: false,
+            members: [this.data.currentPartnerId, 10],
+            message_unread_counter: 0,
+            uuid: 'channel-10-uuid',
+        },
+    ];
+    await this.start({
+        mockRPC(route, args) {
+            if (args.method === 'channel_fold') {
+                const channel_uuid = args.kwargs.uuid;
+                assert.strictEqual(channel_uuid, 'channel-10-uuid', "chat window fold state should have been sent to server");
+                assert.step(`rpc:channel_fold:${channel_uuid}`);
+            }
+            return this._super(...arguments);
+        },
+    });
+
+    // simulate receiving a message
+    await afterNextRender(async () => this.env.services.rpc({
+        route: '/mail/chat_post',
+        params: {
+            context: {
+                mockedUserId: 42,
+            },
+            uuid: 'channel-10-uuid',
+            message_content: "hu",
+        },
+    }));
+    assert.containsOnce(
+        document.body,
+        '.o_ChatWindow',
+        "a chat window should be visible after receiving a new message from a chat"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_Message',
+        "chat window should have a single message (the newly received one)"
+    );
+    assert.containsOnce(
+        document.body,
+        '.o_MessageList_separatorNewMessages',
+        "should display 'new messages' separator in the conversation, from reception of new messages"
+    );
+    assert.verifySteps(
+        ['rpc:channel_fold:channel-10-uuid'],
+        "fold state of chat window of chat should have been updated to server"
+    );
+});
+
+QUnit.test('focusing a chat window of a chat should make new message separator disappear [REQUIRE FOCUS]', async function (assert) {
+    assert.expect(2);
+
+    this.data['res.partner'].records.push({ id: 10, name: "Demo" });
+    this.data['res.users'].records.push({
+        id: 42,
+        name: "Foreigner user",
+        partner_id: 10,
+    });
+    this.data['mail.channel'].records = [
+        {
+            id: 10,
+            channel_type: "chat",
+            is_minimized: true,
+            is_pinned: false,
+            members: [this.data.currentPartnerId, 10],
+            message_unread_counter: 0,
+            uuid: 'channel-10-uuid',
+        },
+    ];
+    await this.start();
+
+    // simulate receiving a message
+    await afterNextRender(async () => this.env.services.rpc({
+        route: '/mail/chat_post',
+        params: {
+            context: {
+                mockedUserId: 42,
+            },
+            uuid: 'channel-10-uuid',
+            message_content: "hu",
+        },
+    }));
+    assert.containsOnce(
+        document.body,
+        '.o_MessageList_separatorNewMessages',
+        "should display 'new messages' separator in the conversation, from reception of new messages"
+    );
+
+    await afterNextRender(() => document.querySelector('.o_ComposerTextInput_textarea').focus());
+    assert.containsNone(
+        document.body,
+        '.o_MessageList_separatorNewMessages',
+        "new message separator should no longer be shown, after focus on composer text input of chat window"
     );
 });
 

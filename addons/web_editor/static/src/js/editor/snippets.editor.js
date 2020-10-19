@@ -72,6 +72,7 @@ var SnippetEditor = Widget.extend({
 
         this.isTargetParentEditable = this.$target.parent().is(':o_editable');
         this.isTargetMovable = this.isTargetParentEditable && this.isTargetMovable;
+        this.isTargetRemovable = this.isTargetParentEditable && !this.$target.parent().is('[data-oe-type="image"]');
 
         // Initialize move/clone/remove buttons
         if (this.isTargetMovable) {
@@ -100,13 +101,13 @@ var SnippetEditor = Widget.extend({
                     },
                 },
             });
-            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, $('html'), smoothScrollOptions);
+            this.draggableComponent = new SmoothScrollOnDrag(this, this.$el, $().getScrollingElement(), smoothScrollOptions);
         } else {
             this.$('.o_overlay_move_options').addClass('d-none');
             $customize.find('.oe_snippet_clone').addClass('d-none');
         }
 
-        if (!this.isTargetParentEditable) {
+        if (!this.isTargetRemovable) {
             this.$el.add($customize).find('.oe_snippet_remove').addClass('d-none');
         }
 
@@ -820,6 +821,7 @@ var SnippetsMenu = Widget.extend({
         'mousedown': '_onMouseDown',
         'input .o_snippet_search_filter_input': '_onSnippetSearchInput',
         'click .o_snippet_search_filter_reset': '_onSnippetSearchResetClick',
+        'summernote_popover_update_call .o_we_snippet_text_tools': '_onSummernoteToolsUpdate',
     },
     custom_events: {
         'activate_insertion_zones': '_onActivateInsertionZones',
@@ -888,6 +890,7 @@ var SnippetsMenu = Widget.extend({
 
         this._notActivableElementsSelector = [
             '#web_editor-top-edit',
+            '.o_we_website_top_actions',
             '#oe_snippets',
             '#oe_manipulators',
             '.o_technical_modal',
@@ -925,6 +928,9 @@ var SnippetsMenu = Widget.extend({
 
         this.customizePanel = document.createElement('div');
         this.customizePanel.classList.add('o_we_customize_panel', 'd-none');
+
+        this.textEditorPanelEl = document.createElement('div');
+        this.textEditorPanelEl.classList.add('o_we_snippet_text_tools', 'd-none');
 
         this.invisibleDOMPanelEl = document.createElement('div');
         this.invisibleDOMPanelEl.classList.add('o_we_invisible_el_panel');
@@ -997,8 +1003,8 @@ var SnippetsMenu = Widget.extend({
 
         // Hide the active overlay when scrolling.
         // Show it again and recompute all the overlays after the scroll.
-        // TODO: current limitation, suppose that this is the body which scrolls
-        this.$document.on('scroll.snippets_menu', _.throttle(() => {
+        this.$scrollingElement = $().getScrollingElement();
+        this.$scrollingElement.on('scroll.snippets_menu', _.throttle(() => {
             for (const editor of this.snippetEditors) {
                 editor.toggleOverlayVisibility(false);
             }
@@ -1025,13 +1031,29 @@ var SnippetsMenu = Widget.extend({
         });
 
         const $autoFocusEls = $('.o_we_snippet_autofocus');
-        if ($autoFocusEls.length) {
-            this._activateSnippet($autoFocusEls.first());
-        }
+        this._activateSnippet($autoFocusEls.length ? $autoFocusEls.first() : false);
+        this._textToolsSwitchingEnabled = true;
+
+        // Add tooltips on we-title elements whose text overflows
+        this.$el.tooltip({
+            selector: 'we-title',
+            placement: 'bottom',
+            delay: 100,
+            title: function () {
+                const el = this;
+                // On Firefox, el.scrollWidth is equal to el.clientWidth when
+                // overflow: hidden, so we need to update the style before to
+                // get the right values.
+                el.style.setProperty('overflow', 'scroll', 'important');
+                const tipContent = el.scrollWidth > el.clientWidth ? el.innerHTML : '';
+                el.style.removeProperty('overflow');
+                return tipContent;
+            },
+        });
 
         return Promise.all(defs).then(() => {
             this.$('[data-title]').tooltip({
-                delay: 0,
+                delay: 100,
                 title: function () {
                     return this.classList.contains('active') ? false : this.dataset.title;
                 },
@@ -1054,6 +1076,7 @@ var SnippetsMenu = Widget.extend({
             this.$snippetEditorArea.remove();
             this.$window.off('.snippets_menu');
             this.$document.off('.snippets_menu');
+            this.$scrollingElement.off('.snippets_menu');
         }
         core.bus.off('deactivate_snippet', this, this._onDeactivateSnippet);
         delete this.cacheSnippetTemplate[this.options.snippets];
@@ -1650,6 +1673,7 @@ var SnippetsMenu = Widget.extend({
         // Add the computed template and make elements draggable
         this.$el.html($html);
         this.$el.append(this.customizePanel);
+        this.$el.append(this.textEditorPanelEl);
         this.$el.append(this.invisibleDOMPanelEl);
         this._makeSnippetDraggable(this.$snippets);
         this._disableUndroppableSnippets();
@@ -1778,12 +1802,8 @@ var SnippetsMenu = Widget.extend({
      */
     _getScrollOptions(options = {}) {
         return Object.assign({}, options, {
-            offsetElements: Object.assign({
-                $top: $('#web_editor-top-edit'), // TODO should ideally be retrieved another way
-                $left: this.$el,
-            }, options.offsetElements),
             scrollBoundaries: Object.assign({
-                left: false,
+                right: false,
             }, options.scrollBoundaries),
             jQueryDraggableOptions: Object.assign({
                 appendTo: this.$body,
@@ -1822,12 +1842,13 @@ var SnippetsMenu = Widget.extend({
     _makeSnippetDraggable: function ($snippets) {
         var self = this;
         var $toInsert, dropped, $snippet;
-        let scrollValue;
+
+        let dragAndDropResolve;
 
         const smoothScrollOptions = this._getScrollOptions({
             jQueryDraggableOptions: {
                 distance: 0,
-                handle: '.oe_snippet_thumbnail',
+                handle: '.oe_snippet_thumbnail:not(.o_we_already_dragging)',
                 helper: function () {
                     const dragSnip = this.cloneNode(true);
                     dragSnip.querySelectorAll('.o_delete_btn').forEach(
@@ -1836,6 +1857,8 @@ var SnippetsMenu = Widget.extend({
                     return dragSnip;
                 },
                 start: function () {
+                    self.$el.find('.oe_snippet_thumbnail').addClass('o_we_already_dragging');
+
                     dropped = false;
                     $snippet = $(this);
                     var $baseBody = $snippet.find('.oe_snippet_body');
@@ -1873,7 +1896,6 @@ var SnippetsMenu = Widget.extend({
                         over: function () {
                             if (!dropped) {
                                 dropped = true;
-                                scrollValue = $(this).first().offset().top;
                                 $(this).first().after($toInsert).addClass('d-none');
                                 $toInsert.removeClass('oe_snippet_body');
                             }
@@ -1888,14 +1910,16 @@ var SnippetsMenu = Widget.extend({
                             }
                         },
                     });
+
+                    const prom = new Promise(resolve => dragAndDropResolve = () => resolve());
+                    self._mutex.exec(() => prom);
                 },
                 stop: async function (ev, ui) {
                     $toInsert.removeClass('oe_snippet_body');
 
-                    if (!dropped && ui.position.top > 3 && ui.position.left > self.el.getBoundingClientRect().right) {
+                    if (!dropped && ui.position.top > 3 && ui.position.left + ui.helper.outerHeight() < self.el.getBoundingClientRect().left) {
                         var $el = $.nearest({x: ui.position.left, y: ui.position.top}, '.oe_drop_zone', {container: document.body}).first();
                         if ($el.length) {
-                            scrollValue = $el.offset().top;
                             $el.after($toInsert);
                             dropped = true;
                         }
@@ -1923,26 +1947,31 @@ var SnippetsMenu = Widget.extend({
                         }
 
                         var $target = $toInsert;
-                        await self._scrollToSnippet($target, scrollValue);
+                        await self._scrollToSnippet($target);
 
-                        _.defer(function () {
+                        _.defer(async function () {
                             self.trigger_up('snippet_dropped', {$target: $target});
                             self._disableUndroppableSnippets();
 
-                            self._callForEachChildSnippet($target, function (editor, $snippet) {
+                            dragAndDropResolve();
+
+                            await self._callForEachChildSnippet($target, function (editor, $snippet) {
                                 return editor.buildSnippet();
-                            }).then(function () {
-                                $target.trigger('content_changed');
-                                return self._updateInvisibleDOM();
                             });
+                            $target.trigger('content_changed');
+                            await self._updateInvisibleDOM();
+
+                            self.$el.find('.oe_snippet_thumbnail').removeClass('o_we_already_dragging');
                         });
                     } else {
                         $toInsert.remove();
+                        dragAndDropResolve();
+                        self.$el.find('.oe_snippet_thumbnail').removeClass('o_we_already_dragging');
                     }
                 },
             },
         });
-        this.draggableComponent = new SmoothScrollOnDrag(this, $snippets, $('html'), smoothScrollOptions);
+        this.draggableComponent = new SmoothScrollOnDrag(this, $snippets, $().getScrollingElement(), smoothScrollOptions);
     },
     /**
      * Adds the 'o_default_snippet_text' class on nodes which contain only
@@ -1973,6 +2002,7 @@ var SnippetsMenu = Widget.extend({
      * @param {this.tabs.VALUE} [tab='blocks'] - the tab to select
      */
     _updateLeftPanelContent: function ({content, tab}) {
+        clearTimeout(this._textToolsSwitchingTimeout);
         this._closeWidgets();
 
         tab = tab || this.tabs.BLOCKS;
@@ -1987,35 +2017,22 @@ var SnippetsMenu = Widget.extend({
         this.$('.o_snippet_search_filter').toggleClass('d-none', tab !== this.tabs.BLOCKS);
         this.$('#o_scroll').toggleClass('d-none', tab !== this.tabs.BLOCKS);
         this.customizePanel.classList.toggle('d-none', tab === this.tabs.BLOCKS);
+        this.textEditorPanelEl.classList.toggle('d-none', tab !== this.tabs.OPTIONS);
 
         this.$('.o_we_add_snippet_btn').toggleClass('active', tab === this.tabs.BLOCKS);
         this.$('.o_we_customize_snippet_btn').toggleClass('active', tab === this.tabs.OPTIONS)
                                              .prop('disabled', tab !== this.tabs.OPTIONS);
+
     },
     /**
-     * Scroll to the dropped snippet.
+     * Scrolls to given snippet.
      *
      * @private
-     * @param {jQuery} [$el] - dropped snippet
-     * @param {integer} [scrollValue] - scrollValue
+     * @param {jQuery} $el - snippet to scroll to
+     * @return {Promise}
      */
-    _scrollToSnippet: function ($el, scrollValue) {
-        // return if it's an inner snippet or if it's dropped in a modal
-        if ($el.get(0).tagName.toLowerCase() !== 'section' || $el.parent().find("[class^='modal-']").length) {
-            return Promise.resolve();
-        }
-        let headerHeight = 0;
-        _.each($('.o_top_fixed_element'), el => headerHeight += $(el).outerHeight());
-        return new Promise(resolve => {
-          $('html, body').animate(
-              {
-                  scrollTop: scrollValue - headerHeight - 50,
-              },
-              700,
-              'swing',
-              resolve,
-          );
-        });
+    async _scrollToSnippet($el) {
+        return dom.scrollTo($el[0], {extraOffset: 50});
     },
     /**
      * @private
@@ -2426,6 +2443,33 @@ var SnippetsMenu = Widget.extend({
     _onSnippetThumbnailURLRequest(ev) {
         const $snippet = this.$snippets.has(`[data-snippet="${ev.data.key}"]`);
         ev.data.onSuccess($snippet.length ? $snippet[0].dataset.oeThumbnail : '');
+    },
+    /**
+     * @private
+     */
+    _onSummernoteToolsUpdate(ev) {
+        if (!this._textToolsSwitchingEnabled) {
+            return;
+        }
+        if (!$.summernote.core.range.create()) {
+            // Sometimes not enough...
+            return;
+        }
+        this.textEditorPanelEl.classList.add('d-block');
+        const hasVisibleButtons = !!$(this.textEditorPanelEl).find('.btn:visible').length;
+        this.textEditorPanelEl.classList.remove('d-block');
+        if (!hasVisibleButtons) {
+            // Ugly way to detect that summernote was updated but there is no
+            // visible text tools.
+            return;
+        }
+        // Only switch tab without changing content (_updateLeftPanelContent
+        // make text tools visible only on that specific tab). Also do it with
+        // a slight delay to avoid flickering doing it twice.
+        clearTimeout(this._textToolsSwitchingTimeout);
+        this._textToolsSwitchingTimeout = setTimeout(() => {
+            this._updateLeftPanelContent({tab: this.tabs.OPTIONS});
+        }, 250);
     },
     /**
      * @private

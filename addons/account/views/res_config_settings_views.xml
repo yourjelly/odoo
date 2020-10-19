@@ -39,7 +39,7 @@
                                             <field name="chart_template_id" widget="selection"/>
                                         </div>
                                         <div class="mt8">
-                                            <button name="%(account.open_account_charts_modules)d" icon="fa-arrow-right" type="action" string="Install More Packages" class="btn-link"/>
+                                            <button name="%(account.open_account_charts_modules)d" icon="fa-arrow-right" type="action" string="Install More Packages" discard="0" class="btn-link"/>
                                         </div>
                                     </div>
                                 </div>
@@ -409,7 +409,7 @@
                                 <div class="o_setting_right_pane" name="show_purchase_receipts_right_pane">
                                     <label for="group_show_purchase_receipts"/>
                                     <div class="text-muted">
-                                        Active to create purchase receipt
+                                        Activate to create purchase receipt
                                     </div>
                                 </div>
                             </div>

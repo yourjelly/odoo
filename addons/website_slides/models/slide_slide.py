@@ -18,6 +18,7 @@ from odoo.addons.http_routing.models.ir_http import slug
 from odoo.exceptions import Warning, UserError, AccessError
 from odoo.http import request
 from odoo.addons.http_routing.models.ir_http import url_for
+from odoo.tools import sql
 
 
 class SlidePartnerRelation(models.Model):
@@ -251,7 +252,13 @@ class Slide(models.Model):
     @api.depends('slide_partner_ids.vote')
     @api.depends_context('uid')
     def _compute_user_info(self):
-        slide_data = dict.fromkeys(self.ids, dict({'likes': 0, 'dislikes': 0, 'user_vote': False}))
+        default_stats = {'likes': 0, 'dislikes': 0, 'user_vote': False}
+
+        if not self.ids:
+            self.update(default_stats)
+            return
+
+        slide_data = dict.fromkeys(self.ids, default_stats)
         slide_partners = self.env['slide.slide.partner'].sudo().search([
             ('slide_id', 'in', self.ids)
         ])
@@ -623,11 +630,8 @@ class Slide(models.Model):
             ('slide_id', 'in', self.ids),
             ('partner_id', '=', target_partner.id)
         ])
-        if quiz_attempts_inc:
-            for exsting_slide in existing_sudo:
-                exsting_slide.write({
-                    'quiz_attempts_count': exsting_slide.quiz_attempts_count + 1
-                })
+        if quiz_attempts_inc and existing_sudo:
+            sql.increment_field_skiplock(existing_sudo, 'quiz_attempts_count')
 
         new_slides = self_sudo - existing_sudo.mapped('slide_id')
         return SlidePartnerSudo.create([{

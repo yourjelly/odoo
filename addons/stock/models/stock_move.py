@@ -176,10 +176,8 @@ class StockMove(models.Model):
     next_serial = fields.Char('First SN')
     next_serial_count = fields.Integer('Number of SN')
     orderpoint_id = fields.Many2one('stock.warehouse.orderpoint', 'Original Reordering Rule', check_company=True)
-    # TODO : remove `json_forecast` in master, use forcast_ fields instead
-    json_forecast = fields.Char('JSON data for the forecast widget', compute='_compute_json_forecast')
-    forecast_availability = fields.Float('Forcast Availability', compute='_compute_json_forecast', digits='Product Unit of Measure')
-    forecast_expected_date = fields.Datetime('Forcasted Expected date', compute='_compute_json_forecast')
+    forecast_availability = fields.Float('Forcast Availability', compute='_compute_forecast_information', digits='Product Unit of Measure')
+    forecast_expected_date = fields.Datetime('Forcasted Expected date', compute='_compute_forecast_information')
     lot_ids = fields.Many2many('stock.production.lot', compute='_compute_lot_ids', inverse='_set_lot_ids', string='Serial Numbers', readonly=False)
 
     @api.onchange('product_id', 'picking_type_id')
@@ -409,9 +407,8 @@ class StockMove(models.Model):
                 move.availability = min(move.product_qty, total_availability)
 
     @api.depends('product_id', 'picking_type_id', 'picking_id', 'reserved_availability', 'priority', 'state', 'product_uom_qty')
-    def _compute_json_forecast(self):
+    def _compute_forecast_information(self):
         """ Compute forecasted information of the related product by warehouse."""
-        self.json_forecast = False
         self.forecast_availability = False
         self.forecast_expected_date = False
 
@@ -489,6 +486,7 @@ class StockMove(models.Model):
                     move_line_vals = self._prepare_move_line_vals(quantity=0)
                     move_line_vals['lot_id'] = lot.id
                     move_line_vals['lot_name'] = lot.name
+                    move_line_vals['product_uom_id'] = move.product_id.uom_id.id
                     move_line_vals['qty_done'] = 1
                     move_lines_commands.append((0, 0, move_line_vals))
             move.write({'move_line_ids': move_lines_commands})
@@ -649,6 +647,12 @@ class StockMove(models.Model):
             'default_product_id': self.product_id.id,
             'default_move_id': self.id,
         }
+        return action
+
+    def action_product_forecast_report(self):
+        self.ensure_one()
+        action = self.product_id.action_product_forecast_report()
+        action['context'] = {'warehouse': (self.picking_type_id or self.picking_id.picking_type_id).warehouse_id.id,}
         return action
 
     def _do_unreserve(self):
@@ -853,6 +857,9 @@ class StockMove(models.Model):
 
     @api.onchange('lot_ids')
     def _onchange_lot_ids(self):
+        quantity_done = sum(ml.product_uom_id._compute_quantity(ml.qty_done, self.product_uom) for ml in self.move_line_ids.filtered(lambda ml: not ml.lot_id and ml.lot_name))
+        quantity_done += self.product_id.uom_id._compute_quantity(len(self.lot_ids), self.product_uom)
+        self.update({'quantity_done': quantity_done})
         used_lots = self.env['stock.move.line'].search([
             ('company_id', '=', self.company_id.id),
             ('product_id', '=', self.product_id.id),
@@ -860,15 +867,6 @@ class StockMove(models.Model):
             ('move_id', '!=', self._origin.id),
             ('state', '!=', 'cancel')
         ])
-
-        counter = self.env['stock.move.line'].search_count([
-            ('company_id', '=', self.company_id.id),
-            ('product_id', '=', self.product_id.id),
-            ('move_id', '=', self._origin.id),
-            ('lot_id', '=', False),
-            ('lot_name', '!=', False),
-        ])
-        self.update({'quantity_done': len(self.lot_ids) + counter})
         if used_lots:
             return {
                 'warning': {'title': _('Warning'), 'message': _('Existing Serial numbers (%s). Please correct the serial numbers encoded.') % ','.join(used_lots.lot_id.mapped('display_name'))}
@@ -1233,6 +1231,11 @@ class StockMove(models.Model):
         self.ensure_one()
         return self.location_id.should_bypass_reservation() or self.product_id.type != 'product'
 
+    # necessary hook to be able to override move reservation to a restrict lot, owner, pack, location...
+    def _get_available_quantity(self, location_id, lot_id=None, package_id=None, owner_id=None, strict=False, allow_negative=False):
+        self.ensure_one()
+        return self.env['stock.quant']._get_available_quantity(self.product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, allow_negative=allow_negative)
+
     def _action_assign(self):
         """ Reserve stock moves by creating their stock move lines. A stock move is
         considered reserved once the sum of `product_qty` for all its move lines is
@@ -1281,7 +1284,7 @@ class StockMove(models.Model):
                         continue
                     # Reserve new quants and create move lines accordingly.
                     forced_package_id = move.package_level_id.package_id or None
-                    available_quantity = self.env['stock.quant']._get_available_quantity(move.product_id, move.location_id, package_id=forced_package_id)
+                    available_quantity = move._get_available_quantity(move.location_id, package_id=forced_package_id)
                     if available_quantity <= 0:
                         continue
                     taken_quantity = move._update_reserved_quantity(need, available_quantity, move.location_id, package_id=forced_package_id, strict=False)
@@ -1348,8 +1351,7 @@ class StockMove(models.Model):
                         # partially `quantity`. When this happens, we chose to reserve the maximum
                         # still available. This situation could not happen on MTS move, because in
                         # this case `quantity` is directly the quantity on the quants themselves.
-                        available_quantity = self.env['stock.quant']._get_available_quantity(
-                            move.product_id, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
+                        available_quantity = move._get_available_quantity(location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=True)
                         if float_is_zero(available_quantity, precision_rounding=rounding):
                             continue
                         taken_quantity = move._update_reserved_quantity(need, min(quantity, available_quantity), location_id, lot_id, package_id, owner_id)
@@ -1450,9 +1452,6 @@ class StockMove(models.Model):
                         break
         return extra_move | self
 
-    def _unreserve_initial_demand(self, new_move):
-        pass
-
     def _action_done(self, cancel_backorder=False):
         self.filtered(lambda move: move.state == 'draft')._action_confirm()  # MRP allows scrapping draft moves
         moves = self.exists().filtered(lambda x: x.state not in ('done', 'cancel'))
@@ -1474,6 +1473,7 @@ class StockMove(models.Model):
 
         moves_todo._check_company()
         # Split moves where necessary and move quants
+        backorder_moves_vals = []
         for move in moves_todo:
             # To know whether we need to create a backorder or not, round to the general product's
             # decimal precision and not the product's UOM.
@@ -1481,10 +1481,12 @@ class StockMove(models.Model):
             if float_compare(move.quantity_done, move.product_uom_qty, precision_digits=rounding) < 0:
                 # Need to do some kind of conversion here
                 qty_split = move.product_uom._compute_quantity(move.product_uom_qty - move.quantity_done, move.product_id.uom_id, rounding_method='HALF-UP')
-                new_move = move._split(qty_split)
-                move._unreserve_initial_demand(new_move)
-                if cancel_backorder:
-                    self.env['stock.move'].browse(new_move).with_context(moves_todo=moves_todo)._action_cancel()
+                new_move_vals = move._split(qty_split)
+                backorder_moves_vals += new_move_vals
+        backorder_moves = self.env['stock.move'].create(backorder_moves_vals)
+        backorder_moves._action_confirm(merge=False)
+        if cancel_backorder:
+            backorder_moves.with_context(moves_todo=moves_todo)._action_cancel()
         moves_todo.mapped('move_line_ids').sorted()._action_done()
         # Check the consistency of the result packages; there should be an unique location across
         # the contained quants.
@@ -1532,13 +1534,12 @@ class StockMove(models.Model):
         return vals
 
     def _split(self, qty, restrict_partner_id=False):
-        """ Splits qty from move move into a new move
+        """ Splits `self` quantity and return values for a new moves to be created afterwards
 
         :param qty: float. quantity to split (given in product UoM)
         :param restrict_partner_id: optional partner that can be given in order to force the new move to restrict its choice of quants to the ones belonging to this partner.
-        :param context: dictionay. can contains the special key 'source_location_id' in order to force the source location when copying the move
-        :returns: id of the backorder move created """
-        self = self.with_prefetch() # This makes the ORM only look for one record and not 300 at a time, which improves performance
+        :returns: list of dict. stock move values """
+        self.ensure_one()
         if self.state in ('done', 'cancel'):
             raise UserError(_('You cannot split a stock move that has been set to \'Done\'.'))
         elif self.state == 'draft':
@@ -1546,7 +1547,7 @@ class StockMove(models.Model):
             # case of phantom bom (with mrp module). And we don't want to deal with this complexity by copying the product that will explode.
             raise UserError(_('You cannot split a draft move. It needs to be confirmed first.'))
         if float_is_zero(qty, precision_rounding=self.product_id.uom_id.rounding) or self.product_qty <= qty:
-            return self.id
+            return []
 
         decimal_precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
 
@@ -1566,17 +1567,15 @@ class StockMove(models.Model):
         # TDE CLEANME: remove context key + add as parameter
         if self.env.context.get('source_location_id'):
             defaults['location_id'] = self.env.context['source_location_id']
-        new_move = self.with_context(rounding_method='HALF-UP').copy(defaults)
+        new_move_vals = self.with_context(rounding_method='HALF-UP').copy_data(defaults)
 
-        # FIXME: pim fix your crap
         # Update the original `product_qty` of the move. Use the general product's decimal
         # precision and not the move's UOM to handle case where the `quantity_done` is not
         # compatible with the move's UOM.
         new_product_qty = self.product_id.uom_id._compute_quantity(self.product_qty - qty, self.product_uom, round=False)
         new_product_qty = float_round(new_product_qty, precision_digits=self.env['decimal.precision'].precision_get('Product Unit of Measure'))
         self.with_context(do_not_unreserve=True, rounding_method='HALF-UP').write({'product_uom_qty': new_product_qty})
-        new_move = new_move._action_confirm(merge=False)
-        return new_move.id
+        return new_move_vals
 
     def _recompute_state(self):
         for move in self:

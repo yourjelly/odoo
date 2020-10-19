@@ -38,7 +38,6 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
             self.sessionShowLeaderboard = self.$el.data('sessionShowLeaderboard');
             self.hasCorrectAnswers = self.$el.data('hasCorrectAnswers');
             // display props
-            self.attendeesCount = self.$el.data('attendeesCount');
             self.showBarChart = self.$el.data('showBarChart');
             self.showTextAnswers = self.$el.data('showTextAnswers');
 
@@ -383,6 +382,8 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
             route: _.str.sprintf('/survey/session/results/%s', self.surveyAccessToken)
         }).then(function (questionResults) {
             if (questionResults) {
+                self.attendeesCount = questionResults.attendees_count;
+
                 if (self.resultsChart && questionResults.question_statistics_graph) {
                     self.resultsChart.updateChart(JSON.parse(questionResults.question_statistics_graph));
                 } else if (self.textAnswers) {
@@ -451,7 +452,6 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
 
         if (!this.isStartScreen && this.showBarChart) {
             this.resultsChart = new SurveySessionChart(this, {
-                attendeesCount: this.attendeesCount,
                 questionType: this.$el.data('questionType'),
                 answersValidity: this.$el.data('answersValidity'),
                 hasCorrectAnswers: this.hasCorrectAnswers,
@@ -518,7 +518,7 @@ publicWidget.registry.SurveySessionManage = publicWidget.Widget.extend({
      * - The refresh of results (used for chart/text answers/progress bar)
      */
     _setupIntervals: function () {
-        this.attendeesCount = this.$el.data('attendeesCount');
+        this.attendeesCount = this.$el.data('attendeesCount') ? this.$el.data('attendeesCount') : 0;
 
         if (this.isStartScreen) {
             this.attendeesRefreshInterval = setInterval(this._refreshAttendeesCount.bind(this), 2000);

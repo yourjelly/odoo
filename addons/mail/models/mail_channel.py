@@ -373,7 +373,7 @@ class Channel(models.Model):
 
         # Notifies the message author when his message is pending moderation if required on channel.
         # The fields "email_from" and "reply_to" are filled in automatically by method create in model mail.message.
-        if self.moderation_notify and self.moderation_notify_msg and message_type == 'email' and moderation_status == 'pending_moderation':
+        if self.moderation_notify and self.moderation_notify_msg and message_type in ['email','comment'] and moderation_status == 'pending_moderation':
             self.env['mail.mail'].sudo().create({
                 'author_id': self.env.user.partner_id.id,
                 'email_from': self.env.user.company_id.catchall_formatted or self.env.user.company_id.email_formatted,
@@ -384,6 +384,13 @@ class Channel(models.Model):
                 'state': 'outgoing'
             })
         return message
+
+    def _message_post_after_hook(self, message, msg_vals):
+        """
+        Automatically set the message posted by the current user as seen for himself.
+        """
+        self._set_last_seen_message(message)
+        return super()._message_post_after_hook(message=message, msg_vals=msg_vals)
 
     def _alias_get_error_message(self, message, message_dict, alias):
         if alias.alias_contact == 'followers' and self.ids:
@@ -744,21 +751,7 @@ class Channel(models.Model):
         if not last_message:
             return
 
-        channel_partner_domain = expression.AND([
-            [('channel_id', 'in', self.ids)],
-            [('partner_id', '=', self.env.user.partner_id.id)],
-            expression.OR([
-                [('seen_message_id', '=', False)],
-                [('seen_message_id', '<', last_message.id)]
-            ])
-        ])
-        channel_partner = self.env['mail.channel.partner'].search(channel_partner_domain, limit=1)
-        if not channel_partner:
-            return
-        channel_partner.write({
-            'fetched_message_id': last_message.id,
-            'seen_message_id': last_message.id,
-        })
+        self._set_last_seen_message(last_message)
 
         data = {
             'info': 'channel_seen',
@@ -771,6 +764,25 @@ class Channel(models.Model):
             data['channel_id'] = self.id
             self.env['bus.bus'].sendone((self._cr.dbname, 'res.partner', self.env.user.partner_id.id), data)
         return last_message.id
+
+    def _set_last_seen_message(self, last_message):
+        """
+        Set last seen message of `self` channels for the current user.
+        :param last_message: the message to set as last seen message
+        """
+        channel_partner_domain = expression.AND([
+            [('channel_id', 'in', self.ids)],
+            [('partner_id', '=', self.env.user.partner_id.id)],
+            expression.OR([
+                [('seen_message_id', '=', False)],
+                [('seen_message_id', '<', last_message.id)]
+            ])
+        ])
+        channel_partner = self.env['mail.channel.partner'].search(channel_partner_domain)
+        channel_partner.write({
+            'fetched_message_id': last_message.id,
+            'seen_message_id': last_message.id,
+        })
 
     def channel_fetched(self):
         """ Broadcast the channel_fetched notification to channel members

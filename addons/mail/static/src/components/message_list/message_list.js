@@ -107,7 +107,7 @@ class MessageList extends Component {
      * Because of this, the scroll position must be changed when whole UI
      * is rendered. To make this simpler, this is done when <ThreadView/>
      * component is patched. This is acceptable when <ThreadView/> has a
-     * fixed height, which is the case for the moment.
+     * fixed height, which is the case for the moment. task-2358066
      */
     async adjustFromComponentHints() {
         if (!this.threadView) {
@@ -118,17 +118,23 @@ class MessageList extends Component {
                 case 'change-of-thread-cache':
                     this._adjustFromChangeOfThreadCache(hint);
                     break;
-                case 'current-partner-just-posted-message':
-                    this._adjustFromCurrentPartnerJustPostedMessage(hint);
-                    break;
                 case 'home-menu-hidden':
                     this._adjustFromHomeMenuHidden(hint);
                     break;
                 case 'home-menu-shown':
                     this._adjustFromHomeMenuShown(hint);
                     break;
+                case 'messages-loaded':
+                    this.threadView.markComponentHintProcessed(hint);
+                    break;
+                case 'message-received':
+                    this._adjustFromMessageReceived(hint);
+                    break;
                 case 'more-messages-loaded':
                     this._adjustFromMoreMessagesLoaded(hint);
+                    break;
+                case 'new-messages-loaded':
+                    this.threadView.markComponentHintProcessed(hint);
                     break;
             }
         }
@@ -333,9 +339,6 @@ class MessageList extends Component {
             isProcessed = true;
         }
         if (isProcessed) {
-            this.env.messagingBus.trigger('o-component-message-list-thread-cache-changed', {
-                threadViewer: this.threadView.threadViewer,
-            });
             this.threadView.markComponentHintProcessed(hint);
         }
     }
@@ -347,26 +350,6 @@ class MessageList extends Component {
     _adjustFromChatWindowUnfolded(hint) {
         this._adjustScrollFromModel();
         this.threadView.markComponentHintProcessed(hint);
-    }
-
-    /**
-     * @private
-     * @param {Object} hint
-     * @param {Object} hint.data
-     * @param {integer} hint.data.messageId
-     */
-    async _adjustFromCurrentPartnerJustPostedMessage(hint) {
-        const threadCache = this.threadView.threadCache;
-        const { messageId } = hint.data;
-        if (threadCache.isLoaded) {
-            const threadCacheMessageIds = threadCache.messages.map(message => message.id);
-            if (threadCacheMessageIds.includes(messageId) && this.messageRefFromId(messageId)) {
-                if (this.props.hasScrollAdjust) {
-                    await this._scrollToMessage(messageId);
-                }
-                this.threadView.markComponentHintProcessed(hint);
-            }
-        }
     }
 
     /**
@@ -391,6 +374,41 @@ class MessageList extends Component {
      * @private
      * @param {Object} hint
      */
+    async _adjustFromMessageReceived(hint) {
+        const threadCache = this.threadView.threadCache;
+        if (!threadCache.isLoaded) {
+            return;
+        }
+        const { message } = hint.data;
+        if (!threadCache.messages.includes(message)) {
+            return;
+        }
+        if (!this.messageRefFromId(message.id)) {
+            return;
+        }
+        if (!this.props.hasScrollAdjust) {
+            this.threadView.markComponentHintProcessed(hint);
+            return;
+        }
+        if (!this.threadView.hasAutoScrollOnMessageReceived) {
+            this.threadView.markComponentHintProcessed(hint);
+            return;
+        }
+        if (
+            this.threadView.lastVisibleMessage &&
+            (message.id < this.threadView.lastVisibleMessage.id)
+        ) {
+            this.threadView.markComponentHintProcessed(hint);
+            return;
+        }
+        await this._scrollToMessage(message.id);
+        this.threadView.markComponentHintProcessed(hint);
+    }
+
+    /**
+     * @private
+     * @param {Object} hint
+     */
     _adjustFromMoreMessagesLoaded(hint) {
         if (!this._willPatchSnapshot) {
             this.threadView.markComponentHintProcessed(hint);
@@ -400,9 +418,6 @@ class MessageList extends Component {
         if (this.props.order === 'asc' && this.props.hasScrollAdjust) {
             this.el.scrollTop = this.el.scrollHeight - scrollHeight + scrollTop;
         }
-        this.env.messagingBus.trigger('o-component-message-list-more-messages-loaded', {
-            threadViewer: this.threadView.threadViewer,
-        });
         this.threadView.markComponentHintProcessed(hint);
     }
 
@@ -537,6 +552,14 @@ class MessageList extends Component {
             scrollTop,
             threadViewer: this.threadView.threadViewer,
         });
+        // Margin to compensate for inaccurate scrolling to bottom.
+        const margin = 4;
+        // Automatically scroll to new received messages only when the list is
+        // currently fully scrolled.
+        const hasAutoScrollOnMessageReceived = (this.props.order === 'asc')
+            ? scrollTop >= this.el.scrollHeight - this.el.clientHeight - margin
+            : scrollTop <= margin;
+        this.threadView.update({ hasAutoScrollOnMessageReceived });
         this.threadView.threadViewer.saveThreadCacheScrollPositionsAsInitial(scrollTop);
         if (!this._isAutoLoadOnScrollActive) {
             return;

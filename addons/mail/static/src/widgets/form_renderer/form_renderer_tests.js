@@ -463,7 +463,7 @@ QUnit.test('basic chatter rendering without messages', async function (assert) {
 QUnit.test('chatter updating', async function (assert) {
     assert.expect(3);
 
-    this.data['mail.message'].records.push({ model: 'res.partner', res_id: 12 });
+    this.data['mail.message'].records.push({ body: "not empty", model: 'res.partner', res_id: 12 });
     this.data['res.partner'].records.push(
         { display_name: "first partner", id: 11 },
         { display_name: "second partner", id: 12 }
@@ -821,7 +821,7 @@ QUnit.test('Form view not scrolled when switching record', async function (asser
     );
 
     await afterNextRender(async () => {
-        controllerContentEl.scrollTop = controllerContentEl.scrollHeight - controllerContentEl.offsetHeight;
+        controllerContentEl.scrollTop = controllerContentEl.scrollHeight - controllerContentEl.clientHeight;
         await triggerEvent(
             document.querySelector('.o_ThreadView_messageList'),
             'scroll'
@@ -829,7 +829,7 @@ QUnit.test('Form view not scrolled when switching record', async function (asser
     });
     assert.strictEqual(
         controllerContentEl.scrollTop,
-        controllerContentEl.scrollHeight - controllerContentEl.offsetHeight,
+        controllerContentEl.scrollHeight - controllerContentEl.clientHeight,
         "The controller container should be scrolled to its bottom"
     );
 

@@ -21,7 +21,7 @@ class SaleOrder(models.Model):
     @api.depends('order_line.product_id.project_id')
     def _compute_tasks_ids(self):
         for order in self:
-            order.tasks_ids = self.env['project.task'].search([('sale_line_id', 'in', order.order_line.ids)])
+            order.tasks_ids = self.env['project.task'].search(['|', ('sale_line_id', 'in', order.order_line.ids), ('sale_order_id', '=', order.id)])
             order.tasks_count = len(order.tasks_ids)
 
     @api.depends('order_line.product_id.service_tracking')
@@ -50,8 +50,13 @@ class SaleOrder(models.Model):
     def _action_confirm(self):
         """ On SO confirmation, some lines should generate a task or a project. """
         result = super()._action_confirm()
-        self.mapped('order_line').sudo() \
-            .with_company(self.company_id)._timesheet_service_generation()
+        if len(self.company_id) == 1:
+            # All orders are in the same company
+            self.order_line.sudo().with_company(self.company_id)._timesheet_service_generation()
+        else:
+            # Orders from different companies are confirmed together
+            for order in self:
+                order.order_line.sudo().with_company(order.company_id)._timesheet_service_generation()
         return result
 
     def action_view_task(self):
@@ -70,7 +75,9 @@ class SaleOrder(models.Model):
             if action.get('context'):
                 eval_context = self.env['ir.actions.actions']._get_eval_context()
                 eval_context.update({'active_id': task_projects.id})
-                action['context'] = safe_eval(action['context'], eval_context)
+                action_context = safe_eval(action['context'], eval_context)
+                action_context.update(eval_context)
+                action['context'] = action_context
         else:
             action = self.env["ir.actions.actions"]._for_xml_id("project.action_view_task")
             action['context'] = {}  # erase default context to avoid default filter
@@ -147,7 +154,7 @@ class SaleOrderLine(models.Model):
         # changing the ordered quantity should change the planned hours on the
         # task, whatever the SO state. It will be blocked by the super in case
         # of a locked sale order.
-        if 'product_uom_qty' in values:
+        if 'product_uom_qty' in values and not self.env.context.get('no_update_planned_hours', False):
             for line in self:
                 if line.task_id:
                     planned_hours = line._convert_qty_company_hours(line.task_id.company_id)
@@ -197,6 +204,7 @@ class SaleOrderLine(models.Model):
             # duplicating a project doesn't set the SO on sub-tasks
             project.tasks.filtered(lambda task: task.parent_id != False).write({
                 'sale_line_id': self.id,
+                'sale_order_id': self.order_id,
             })
         else:
             project = self.env['project.project'].create(values)

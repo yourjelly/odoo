@@ -456,6 +456,18 @@ class TestFields(TransactionCaseWithUserDemo):
         record.foo = "Ho"
         self.assertEqual(record.baz, "<[Ho]>")
 
+    def test_12_dynamic_depends(self):
+        Model = self.registry['test_new_api.compute.dynamic.depends']
+        self.assertEqual(Model.full_name.depends, ())
+
+        # the dependencies of full_name are stored in a config parameter
+        self.env['ir.config_parameter'].set_param('test_new_api.full_name', 'name1,name2')
+
+        # this must re-evaluate the field's dependencies
+        self.env['base'].flush()
+        self.registry.setup_models(self.cr)
+        self.assertEqual(Model.full_name.depends, ('name1', 'name2'))
+
     def test_13_inverse(self):
         """ test inverse computation of fields """
         Category = self.env['test_new_api.category']
@@ -746,6 +758,20 @@ class TestFields(TransactionCaseWithUserDemo):
             'line_ids': [(2, record.line_ids.id), (0, 0, {'subtotal': 1.0})],
         })
         check(1.0)
+
+    def test_20_like(self):
+        """ test filtered_domain() on char fields. """
+        record = self.env['test_new_api.multi.tag'].create({'name': 'Foo'})
+        self.assertTrue(record.filtered_domain([('name', 'like', 'F')]))
+        self.assertTrue(record.filtered_domain([('name', 'ilike', 'f')]))
+
+        record.name = 'Bar'
+        self.assertFalse(record.filtered_domain([('name', 'like', 'F')]))
+        self.assertFalse(record.filtered_domain([('name', 'ilike', 'f')]))
+
+        record.name = False
+        self.assertFalse(record.filtered_domain([('name', 'like', 'F')]))
+        self.assertFalse(record.filtered_domain([('name', 'ilike', 'f')]))
 
     def test_21_date(self):
         """ test date fields """
@@ -1927,10 +1953,21 @@ class TestFields(TransactionCaseWithUserDemo):
         self.assertEqual(image_data_uri(record.image_256)[:30], 'data:image/png;base64,iVBORw0K')
 
         # ensure invalid image raises
-        with self.assertRaises(UserError):
+        with self.assertRaises(UserError), self.cr.savepoint():
             record.write({
                 'image': 'invalid image',
             })
+
+        # assignment of invalid image on new record does nothing, the value is
+        # taken from origin instead (use-case: onchange)
+        new_record = record.new(origin=record)
+        new_record.image = '31.54 Kb'
+        self.assertEqual(record.image, image_h)
+        self.assertEqual(new_record.image, image_h)
+
+        # assignment to new record with origin should not do any query
+        with self.assertQueryCount(0):
+            new_record.image = image_w
 
     def test_95_binary_bin_size(self):
         binary_value = base64.b64encode(b'content')

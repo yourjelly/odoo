@@ -234,12 +234,12 @@ const UserValueWidget = Widget.extend({
             const buildImgExtensionSwitcher = (from, to) => {
                 const regex = new RegExp(`${from}$`, 'i');
                 return ev => {
-                    const img = ev.currentTarget;
+                    const img = ev.currentTarget.getElementsByTagName("img")[0];
                     img.src = img.src.replace(regex, to);
                 };
             };
-            this.$el.on('mouseenter.img_animate', 'img', buildImgExtensionSwitcher('png', 'gif'));
-            this.$el.on('mouseleave.img_animate', 'img', buildImgExtensionSwitcher('gif', 'png'));
+            this.$el.on('mouseenter.img_animate', buildImgExtensionSwitcher('png', 'gif'));
+            this.$el.on('mouseleave.img_animate', buildImgExtensionSwitcher('gif', 'png'));
         }
     },
     /**
@@ -705,6 +705,21 @@ const CheckboxUserValueWidget = ButtonUserValueWidget.extend({
 
         return this._super(...arguments);
     },
+
+    //--------------------------------------------------------------------------
+    // Handlers
+    //--------------------------------------------------------------------------
+
+    /**
+     * @override
+     */
+    _onButtonClick(ev) {
+        if (!ev.target.closest('we-title, we-checkbox')) {
+            // Only consider clicks on the label and the checkbox control itself
+            return;
+        }
+        return this._super(...arguments);
+    },
 });
 
 const BaseSelectionUserValueWidget = UserValueWidget.extend({
@@ -861,7 +876,8 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
         let textContent = '';
         const activeWidget = this._userValueWidgets.find(widget => !widget.isPreviewed() && widget.isActive());
         if (activeWidget) {
-            const value = (activeWidget.el.dataset.selectLabel || activeWidget.el.textContent.trim());
+            const svgTag = activeWidget.el.querySelector('svg'); // useful to avoid searching text content in svg element
+            const value = (activeWidget.el.dataset.selectLabel || (!svgTag && activeWidget.el.textContent.trim()));
             const imgSrc = activeWidget.el.dataset.img;
             if (value) {
                 textContent = value;
@@ -1043,6 +1059,9 @@ const InputUserValueWidget = UnitUserValueWidget.extend({
         var unitEl = document.createElement('span');
         unitEl.textContent = unit;
         this.containerEl.appendChild(unitEl);
+        if (unit.length > 3) {
+            this.el.classList.add('o_we_large_input');
+        }
     },
 
     //--------------------------------------------------------------------------
@@ -1816,6 +1835,7 @@ const SnippetOptionWidget = Widget.extend({
         this.ownerDocument = this.$target[0].ownerDocument;
 
         this._userValueWidgets = [];
+        this._actionQueues = new Map();
     },
     /**
      * @override
@@ -2684,9 +2704,34 @@ const SnippetOptionWidget = Widget.extend({
             }
         }
 
+        // Queue action so that we can later skip useless actions.
+        if (!this._actionQueues.get(widget)) {
+            this._actionQueues.set(widget, []);
+        }
+        const currentAction = {previewMode};
+        this._actionQueues.get(widget).push(currentAction);
+
         // Ask a mutexed snippet update according to the widget value change
         const shouldRecordUndo = (!previewMode && !ev.data.isSimulatedEvent);
         this.trigger_up('snippet_edition_request', {exec: async () => {
+            // Filter actions that are counterbalanced by earlier/later actions
+            const actionQueue = this._actionQueues.get(widget).filter(({previewMode}, i, actions) => {
+                const prev = actions[i - 1];
+                const next = actions[i + 1];
+                if (previewMode === true && next && next.previewMode) {
+                    return false;
+                } else if (previewMode === 'reset' && prev && prev.previewMode) {
+                    return false;
+                }
+                return true;
+            });
+            // Skip action if it's been counterbalanced
+            if (!actionQueue.includes(currentAction)) {
+                this._actionQueues.set(widget, actionQueue);
+                return;
+            }
+            this._actionQueues.set(widget, actionQueue.filter(action => action !== currentAction));
+
             if (ev.data.prepare) {
                 ev.data.prepare();
             }
@@ -3129,7 +3174,7 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
             case 'glFilter':
                 return img.dataset.glFilter || "";
             case 'setQuality':
-                return img.dataset.quality || 95;
+                return img.dataset.quality || 75;
             case 'customFilter': {
                 const {filterProperty} = params;
                 const options = JSON.parse(img.dataset.filterOptions || "{}");
@@ -3224,6 +3269,18 @@ const ImageHandlerOption = SnippetOptionWidget.extend({
         this.originalSrc = img.dataset.originalSrc;
     },
     /**
+     * Sets the image's width to its suggested size.
+     *
+     * @private
+     */
+    async _autoOptimizeImage() {
+        await this._loadImageInfo();
+        await this._rerenderXML();
+        this._getImg().dataset.resizeWidth = this.optimizedWidth;
+        await this._applyOptions();
+        await this.updateUI();
+    },
+    /**
      * Returns the image that is currently being modified.
      *
      * @private
@@ -3303,11 +3360,8 @@ registry.ImageOptimize = ImageHandlerOption.extend({
      */
     async _onImageChanged(ev) {
         this.trigger_up('snippet_edition_request', {exec: async () => {
-            await this._loadImageInfo();
-            await this._rerenderXML();
-            this._getImg().dataset.resizeWidth = this.optimizedWidth;
-            await this._applyOptions();
-            await this.updateUI();
+            await this._autoOptimizeImage();
+            this.trigger_up('cover_update');
         }});
     },
     /**
@@ -3389,9 +3443,9 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
         Object.entries(this.$target[0].dataset).forEach(([key, value]) => {
             this.img.dataset[key] = value;
         });
-        const src = new URL(getBgImageURL(this.$target[0]), window.location.origin);
-        // Make URL relative because that is how image urls are stored in the database.
-        this.img.src = src.origin === window.location.origin && src.pathname;
+        const src = getBgImageURL(this.$target[0]);
+        // Don't set the src if not relative (ie, not local image: cannot be modified)
+        this.img.src = src.startsWith('/') ? src : '';
         return await this._super(...arguments);
     },
 
@@ -3407,8 +3461,7 @@ registry.BackgroundOptimize = ImageHandlerOption.extend({
     async _onBackgroundChanged(ev, previewMode) {
         if (!previewMode) {
             this.trigger_up('snippet_edition_request', {exec: async () => {
-                await this._loadImageInfo();
-                await this._rerenderXML();
+                await this._autoOptimizeImage();
             }});
         }
     },
@@ -3703,7 +3756,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         this._handlePreviewState(previewMode, () => {
             const {colorName} = params;
             const {colors: previousColors} = this._getShapeData();
-            const newColor = widgetValue || this._getDefaultColors()[colorName];
+            const newColor = normalizeColor(widgetValue) || this._getDefaultColors()[colorName];
             const newColors = Object.assign(previousColors, {[colorName]: newColor});
             return {colors: newColors};
         });
@@ -3741,7 +3794,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
                 const {shape, colors: customColors} = this._getShapeData();
                 const colors = Object.assign(this._getDefaultColors(), customColors);
                 const color = shape && colors[params.colorName];
-                return color ? normalizeColor(color) : '';
+                return color || '';
             }
             case 'flipX': {
                 return this.$target.find('> .o_we_shape.o_we_flip_x').length !== 0;
@@ -3869,7 +3922,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         const defaultColors = this._getDefaultColors();
         const shapeData = Object.assign(this._getShapeData(), newData);
         const areColorsDefault = Object.entries(shapeData.colors).every(([colorName, colorValue]) => {
-            return colorValue === defaultColors[colorName];
+            return colorValue.toLowerCase() === defaultColors[colorName].toLowerCase();
         });
         if (areColorsDefault) {
             delete shapeData.colors;
@@ -3902,7 +3955,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         }
         const queryString = Object.entries(colors)
             .map(([colorName, colorValue]) => {
-                const encodedCol = encodeURIComponent(normalizeColor(colorValue));
+                const encodedCol = encodeURIComponent(colorValue);
                 return `${colorName}=${encodedCol}`;
             }).join('&');
         return `/web_editor/shape/${shape}.svg?${queryString}`;
@@ -4126,7 +4179,7 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
      * @param {boolean} activate toggle the overlay on (true) or off (false)
      */
     _toggleBgOverlay: function (activate) {
-        if (this.$backgroundOverlay.is('.oe_active') === activate) {
+        if (!this.$backgroundOverlay || this.$backgroundOverlay.is('.oe_active') === activate) {
             return;
         }
 
@@ -4148,6 +4201,12 @@ registry.BackgroundPosition = SnippetOptionWidget.extend({
 
         // Create empty clone of $target with same display size, make it draggable and give it a tooltip.
         this.$bgDragger = this.$target.clone().empty();
+        // Some CSS child selector rules will not be applied since the clone has a different container from $target.
+        // The background-attachment property should be the same in both $target & $bgDragger, this will keep the
+        // preview more "wysiwyg" instead of getting different result when bg position saved (e.g. parallax snippet)
+        // TODO: improve this to copy all style from $target and override it with overlay related style (copying all
+        // css into $bgDragger will not work since it will change overlay content style too).
+        this.$bgDragger.css('background-attachment', this.$target.css('background-attachment'));
         this.$bgDragger.on('mousedown', this._onDragBackgroundStart.bind(this));
         this.$bgDragger.tooltip({
             title: 'Click and drag the background to adjust its position!',

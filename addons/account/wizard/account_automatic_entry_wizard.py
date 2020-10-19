@@ -41,7 +41,8 @@ class AutomaticEntryWizard(models.TransientModel):
 
     # change account
     destination_account_id = fields.Many2one(string="To", comodel_name='account.account', help="Account to transfer to.")
-    display_currency_helper = fields.Boolean(string="Currency Conversion Helper", compute='_compute_display_currency_helper', help="Technical field used to indicate whether or not to display the tooltip informing a currency conversion will be performed with the transfer")
+    display_currency_helper = fields.Boolean(string="Currency Conversion Helper", compute='_compute_display_currency_helper',
+        help="Technical field. Used to indicate whether or not to display the currency conversion tooltip. The tooltip informs a currency conversion will be performed with the transfer.")
 
     @api.constrains('percentage', 'action')
     def _constraint_percentage(self):
@@ -49,7 +50,6 @@ class AutomaticEntryWizard(models.TransientModel):
             if not (0.0 < record.percentage <= 100.0):
                 raise UserError(_("Percentage must be between 0 and 100"))
             if record.percentage != 100 and record.action != 'change_period':
-                print(record.percentage)
                 raise UserError(_("Percentage can only be set for Change Period method"))
 
     @api.depends('percentage', 'move_line_ids')
@@ -60,7 +60,11 @@ class AutomaticEntryWizard(models.TransientModel):
     @api.depends('total_amount', 'move_line_ids')
     def _compute_percentage(self):
         for record in self:
-            record.percentage = record.total_amount / (sum(record.move_line_ids.mapped('balance')) or record.total_amount) * 100
+            total = (sum(record.move_line_ids.mapped('balance')) or record.total_amount)
+            if total != 0:
+                record.percentage = (record.total_amount / total) * 100
+            else:
+                record.percentage = 100
 
     @api.depends('move_line_ids')
     def _compute_account_type(self):
@@ -194,7 +198,7 @@ class AutomaticEntryWizard(models.TransientModel):
 
             move_data['new_date']['line_ids'] += [
                 (0, 0, {
-                    'name': aml.name,
+                    'name': aml.name or '',
                     'debit': reported_debit,
                     'credit': reported_credit,
                     'amount_currency': reported_amount_currency,
@@ -214,7 +218,7 @@ class AutomaticEntryWizard(models.TransientModel):
             ]
             move_data[aml.move_id.date]['line_ids'] += [
                 (0, 0, {
-                    'name': aml.name,
+                    'name': aml.name or '',
                     'debit': reported_credit,
                     'credit': reported_debit,
                     'amount_currency': -reported_amount_currency,

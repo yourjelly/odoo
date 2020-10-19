@@ -105,13 +105,6 @@ class Message extends Component {
     _constructor() {}
 
     mounted() {
-        // Remove all readmore before if any before reinsert them with _insertReadMoreLess.
-        // This is needed because _insertReadMoreLess is working with direct DOM mutations
-        // which are not sync with Owl.
-        for (const el of [...this._contentRef.el.querySelectorAll(':scope .o_Message_readMoreLess')]) {
-            el.remove();
-        }
-        this._insertReadMoreLess($(this._contentRef.el));
         this._update();
     }
 
@@ -140,7 +133,7 @@ class Message extends Component {
             // TODO FIXME for public user this might not be accessible. task-2223236
             // we should probably use the correspondig attachment id + access token
             // or create a dedicated route to get message image, checking the access right of the message
-            return `/web/image/res.partner/${this.message.author.id}/image_128`;
+            return this.message.author.avatarUrl;
         } else if (this.message.message_type === 'email') {
             return '/mail/static/src/img/email_icon.png';
         }
@@ -401,6 +394,15 @@ class Message extends Component {
      * @private
      */
     _update() {
+        // Remove all readmore before if any before reinsert them with _insertReadMoreLess.
+        // This is needed because _insertReadMoreLess is working with direct DOM mutations
+        // which are not sync with Owl.
+        if (this._contentRef.el) {
+            for (const el of [...this._contentRef.el.querySelectorAll(':scope .o_Message_readMoreLess')]) {
+                el.remove();
+            }
+            this._insertReadMoreLess($(this._contentRef.el));
+        }
         this._wasSelected = this.props.isSelected;
         if (!this.state.timeElapsed) {
             this.state.timeElapsed = timeFromNow(this.message.date);
