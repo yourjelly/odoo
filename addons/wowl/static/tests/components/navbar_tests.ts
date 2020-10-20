@@ -86,12 +86,13 @@ QUnit.test("navbar can display systray items ordered based on their sequence", a
     Component: MyItem3,
     sequence: 100,
   };
-  env.registries.systray.add(item2.name, item2);
-  env.registries.systray.add(item1.name, item1);
-  env.registries.systray.add(item3.name, item3);
+  systray = new Registry();
+  systray.add(item2.name, item2);
+  systray.add(item1.name, item1);
+  systray.add(item3.name, item3);
 
-  await mount(NavBar, { env, target });
-  const menuSystray = target.getElementsByClassName("o_menu_systray")[0] as HTMLElement;
+  const navbar = await createComponent(NavBar, { config: { services, systray }, serverData });
+  const menuSystray = navbar.el!.getElementsByClassName("o_menu_systray")[0] as HTMLElement;
 
   assert.containsN(menuSystray, "li", 3, "tree systray items should be displayed");
   assert.strictEqual(menuSystray.innerText, "my item 3\nmy item 2\nmy item 1");
