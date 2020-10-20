@@ -43,7 +43,6 @@ $notification-title-text-color: #6c757d;
       border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
   }
-
 }
 
-@include owl-fade(0.5s, 'o_notification')
+@include owl-fade(0.5s, "o_notification");
