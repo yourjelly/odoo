@@ -359,6 +359,9 @@ class IrActionsReport(models.Model):
         bodies = []
         res_ids = []
 
+        # Retrieve title
+        title_node=root.xpath('//title')[0];
+
         body_parent = root.xpath('//main')[0]
         # Retrieve headers
         for node in root.xpath(match_klass.format('header')):
@@ -399,7 +402,7 @@ class IrActionsReport(models.Model):
         header = layout._render(dict(subst=True, body=lxml.html.tostring(header_node), base_url=base_url))
         footer = layout._render(dict(subst=True, body=lxml.html.tostring(footer_node), base_url=base_url))
 
-        return bodies, res_ids, header, footer, specific_paperformat_args
+        return bodies, res_ids, title_node, header, footer, specific_paperformat_args
 
     @api.model
     def _run_wkhtmltopdf(
@@ -407,6 +410,7 @@ class IrActionsReport(models.Model):
             bodies,
             header=None,
             footer=None,
+            title=None,
             landscape=False,
             specific_paperformat_args=None,
             set_viewport_size=False):
@@ -477,8 +481,20 @@ class IrActionsReport(models.Model):
         except:
             raise
 
+        writer=PdfFileWriter()
         with open(pdf_report_path, 'rb') as pdf_document:
-            pdf_content = pdf_document.read()
+            pdf_reader = PdfFileReader(io.BytesIO(pdf_document.read()),overwriteWarnings=False)
+            for page_number in range(0, pdf_reader.getNumPages()):
+                page = pdf_reader.getPage(page_number)
+                writer.addPage(page)
+                writer.addMetadata({
+                        '/Title': title.text
+                    })
+
+            _buffer = io.BytesIO()
+            writer.write(_buffer)
+            pdf_content = _buffer.getvalue()
+            _buffer.close()
 
         # Manual cleanup of the temporary files
         for temporary_file in temporary_files:
@@ -769,7 +785,7 @@ class IrActionsReport(models.Model):
         # Ensure the current document is utf-8 encoded.
         html = html.decode('utf-8')
 
-        bodies, html_ids, header, footer, specific_paperformat_args = self_sudo.with_context(context)._prepare_html(html)
+        bodies, html_ids, title, header, footer, specific_paperformat_args = self_sudo.with_context(context)._prepare_html(html)
 
         if self_sudo.attachment and set(res_ids) != set(html_ids):
             raise UserError(_("The report's template '%s' is wrong, please contact your administrator. \n\n"
@@ -779,6 +795,7 @@ class IrActionsReport(models.Model):
             bodies,
             header=header,
             footer=footer,
+            title=title,
             landscape=context.get('landscape'),
             specific_paperformat_args=specific_paperformat_args,
             set_viewport_size=context.get('set_viewport_size'),
