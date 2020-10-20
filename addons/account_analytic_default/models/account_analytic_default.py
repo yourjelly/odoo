@@ -75,19 +75,22 @@ class AccountMoveLine(models.Model):
     @api.depends('product_id', 'account_id', 'partner_id', 'date_maturity')
     def _compute_analytic_account(self):
         for record in self:
-            record.analytic_account_id = (record._origin or record).analytic_account_id
-            record.analytic_tag_ids = (record._origin or record).analytic_tag_ids
-            rec = self.env['account.analytic.default'].account_get(
-                product_id=record.product_id.id,
-                partner_id=record.partner_id.commercial_partner_id.id or record.move_id.partner_id.commercial_partner_id.id,
-                account_id=record.account_id.id,
-                user_id=record.env.uid,
-                date=record.date_maturity,
-                company_id=record.move_id.company_id.id
-            )
-            if rec and not record.exclude_from_invoice_tab:
-                record.analytic_account_id = rec.analytic_id
-                record.analytic_tag_ids = rec.analytic_tag_ids
+            # record.analytic_account_id = record.analytic_account_id or False  # TODO wtf ?
+            # record.analytic_tag_ids = record.analytic_tag_ids or False
+            if not record.exclude_from_invoice_tab:
+                rec = self.env['account.analytic.default'].account_get(
+                    product_id=record.product_id.id,
+                    partner_id=record.partner_id.commercial_partner_id.id or record.move_id.partner_id.commercial_partner_id.id,
+                    account_id=record.account_id.id,
+                    user_id=record.env.uid,
+                    date=record.date_maturity,
+                    company_id=record.move_id.company_id.id
+                )
+                if rec:
+                    record.analytic_account_id = rec.analytic_id
+                    record.analytic_tag_ids = rec.analytic_tag_ids
+            # record._origin.analytic_account_id = record.analytic_account_id  # TODO wtf ?
+            # record._origin.analytic_tag_ids = record.analytic_tag_ids
 
     def _copy_data_extend_business_fields(self, values):
         # OVERRIDE to copy the 'analytic_account_id' if set
