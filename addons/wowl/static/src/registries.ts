@@ -5,7 +5,7 @@ import { actionManagerService } from "./services/action_manager/action_manager";
 import { crashManagerService } from "./services/crash_manager";
 import { menusService } from "./services/menus";
 import { modelService } from "./services/model";
-import { NotificationManager, notificationService } from "./services/notifications";
+import { notificationService } from "./services/notifications";
 import { routerService } from "./services/router";
 import { rpcService } from "./services/rpc";
 import { userService } from "./services/user";
@@ -49,8 +49,6 @@ for (let service of services) {
 // Components registered in this registry will be rendered inside the root node
 // of the webclient.
 export const mainComponentRegistry: Registry<Type<Component>> = new Registry();
-
-mainComponentRegistry.add("NotificationManager", NotificationManager);
 
 // -----------------------------------------------------------------------------
 // Client Actions
