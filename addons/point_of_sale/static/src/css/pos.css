@@ -3488,50 +3488,6 @@ td {
 */
 /* Product Screen Search Bar *//*
 
-
-.search-bar-portal {
-    display: flex;
-}
-
-.search-bar-portal .search-box {
-    font-size: medium;
-    position: relative;
-    display: flex;
-    align-items: center;
-    margin: 0 15px;
-}
-
-.search-bar-portal .search-box input {
-    font-size: medium;
-    height: 30px;
-    border: none;
-    color: #63717f;
-    padding-left: 38px;
-    padding-right: 38px;
-    border-radius: 5px;
-}
-
-.search-bar-portal .search-box input:focus {
-    outline: none;
-}
-
-.search-bar-portal .search-box .icon {
-    position: absolute;
-    left: 0;
-    margin-left: 12px;
-    z-index: 1;
-    color: #4f5b66;
-}
-
-.search-bar-portal .search-box .clear-icon {
-    position: absolute;
-    right: 0;
-    margin-right: 12px;
-    z-index: 1;
-    color: #4f5b66;
-    cursor: pointer;
-}
-
 .currencyCashBox {
     font-size: 30px;
 }

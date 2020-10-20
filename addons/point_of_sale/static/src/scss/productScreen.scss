@@ -1,0 +1,40 @@
+$backgroundColor: #F0EEEE;
+$leftpaneBackgroundColor: #e2e2e2;
+
+.pos-content {
+    width: 100%;
+    position: absolute;
+    top: 48px;
+    bottom: 0;
+    background: $backgroundColor;
+    height: 100%;
+    display: table;
+
+    .screen .screen-full-width{
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        overflow: auto;
+
+        .pane {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .leftpane {
+            @extend .pane;
+            border-right: solid 3px #787878;
+            background: $leftpaneBackgroundColor;
+            max-width: 500px;
+        }
+
+        .rightpane {
+            @extend .pane;
+            flex-basis: 25%;
+        }
+    }
+}
