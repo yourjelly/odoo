@@ -30,5 +30,100 @@ $backgroundColor: white;
                 font-size: 20px;
             }
         }
+
+        ul {
+            padding: 0;
+            margin: 0;
+
+            .orderline {
+                width:100%;
+                margin:0px;
+                padding: 3px 15px 10px 15px;
+                cursor: pointer;
+                color: #555555;
+                -webkit-box-sizing: border-box;
+                   -moz-box-sizing: border-box;
+                    -ms-box-sizing: border-box;
+                        box-sizing: border-box;
+                -webkit-transition: background 250ms ease-in-out;
+                   -moz-transition: background 250ms ease-in-out;
+                        transition: background 250ms ease-in-out;
+
+                .product-name {
+                    padding: 0;
+                    display: inline-block;
+                    font-weight: bold;
+                    width: 80%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .price {
+                    padding: 0;
+                    font-weight: bold;
+                    float: right;
+                }
+
+                .price {
+                    padding: 0;
+                    font-weight: bold;
+                    float: right;
+                }
+
+                .info-list{
+                    color: #888;
+                    margin-left:10px;
+                    list-style-type: none;
+                }
+
+                .info-list em{
+                    color: #777;
+                    font-weight: bold;
+                    font-style:normal;
+                }
+            }
+
+            .orderline:active{
+                background: rgba(140,143,183,0.05);
+                -webkit-transition: background 50ms ease-in-out;
+                   -moz-transition: background 50ms ease-in-out;
+                        transition: background 50ms ease-in-out;
+            }
+
+            .orderline.selected{
+                background: rgba(140,143,183,0.2);
+                -webkit-transition: background 250ms ease-in-out;
+                   -moz-transition: background 250ms ease-in-out;
+                        transition: background 250ms ease-in-out;
+                cursor: default;
+            }
+        }
+
+        .summary{
+            width:100%;
+            text-align:right;
+            font-weight: bold;
+            margin-top:20px;
+            margin-bottom:10px;
+
+            .line {
+                float: right;
+                margin-right: 15px;
+                margin-left: 15px;
+                padding-top: 5px;
+                border-top: solid 2px;
+                border-color: #777;
+
+                .total {
+                    font-size: 22px;
+                }
+
+                .subentry {
+                    font-size: 16px;
+                    font-weight: normal;
+                    text-align: center;
+                }
+            }
+        }
     }
 }
