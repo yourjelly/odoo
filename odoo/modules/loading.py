@@ -561,6 +561,18 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
                 except Exception as e:
                     _logger.warning('invalid custom view(s) for model %s: %s', model, tools.ustr(e))
 
+            # check for many2many fields using model tables
+            table2model = {
+                Model._table: name
+                for name, Model in registry.items()
+                if not Model._abstract and Model._table_query is None
+            }
+            for Model in registry.values():
+                for field in Model._fields.values():
+                    if field.type == 'many2many' and field.relation in table2model:
+                        _logger.warning("Field %s uses table of model %s",
+                                        field, table2model[field.relation])
+
         if report.wasSuccessful():
             _logger.info('Modules loaded.')
         else:
