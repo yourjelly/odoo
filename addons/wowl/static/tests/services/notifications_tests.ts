@@ -1,5 +1,5 @@
 import * as QUnit from "qunit";
-import { NotificationManager, notificationService } from "../../src/services/notifications";
+import { notificationService } from "../../src/services/notifications";
 import { OdooEnv, Service } from "../../src/types";
 import { Registry } from "../../src/core/registry";
 import { click, getFixture, makeTestEnv, mount, nextTick } from "../helpers/index";
@@ -18,15 +18,10 @@ QUnit.module("Notifications", {
 });
 
 QUnit.test("can display a basic notification", async (assert) => {
-  assert.expect(4);
-
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  await mount(NotificationManager, { env, target });
+  await mount(env.registries.Components.get('NotificationManager'), { env, target });
 
-  env.bus.on("NOTIFICATIONS_CHANGE", null, (notifs) => {
-    assert.strictEqual(notifs.length, 1);
-  });
   notifications.create("I'm a basic notification");
   await nextTick();
   assert.containsOnce(target, ".o_notification");
@@ -38,7 +33,7 @@ QUnit.test("can display a basic notification", async (assert) => {
 QUnit.test("can display a notification of type danger", async (assert) => {
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  await mount(NotificationManager, { env, target });
+  await mount(env.registries.Components.get('NotificationManager'), { env, target });
 
   notifications.create("I'm a danger notification", { type: "danger" });
   await nextTick();
@@ -51,7 +46,7 @@ QUnit.test("can display a notification of type danger", async (assert) => {
 QUnit.test("can display a danger notification with a title", async (assert) => {
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  await mount(NotificationManager, { env, target });
+  await mount(env.registries.Components.get('NotificationManager'), { env, target });
 
   notifications.create("I'm a danger notification", { title: "Some title", type: "danger" });
   await nextTick();
@@ -74,7 +69,7 @@ QUnit.test("notifications aren't sticky by default", async (assert) => {
   };
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  await mount(NotificationManager, { env, target });
+  await mount(env.registries.Components.get('NotificationManager'), { env, target });
 
   notifications.create("I'm a notification");
   await nextTick();
@@ -92,7 +87,7 @@ QUnit.test("can display a sticky notification", async (assert) => {
   };
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  await mount(NotificationManager, { env, target });
+  await mount(env.registries.Components.get('NotificationManager'), { env, target });
 
   notifications.create("I'm a sticky notification", { sticky: true });
   await nextTick();
@@ -102,7 +97,7 @@ QUnit.test("can display a sticky notification", async (assert) => {
 QUnit.test("can close sticky notification", async (assert) => {
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  await mount(NotificationManager, { env, target });
+  await mount(env.registries.Components.get('NotificationManager'), { env, target });
 
   let id = notifications.create("I'm a sticky notification", { sticky: true });
   await nextTick();
@@ -130,7 +125,7 @@ QUnit.test("can close a non-sticky notification", async (assert) => {
   };
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  await mount(NotificationManager, { env, target });
+  await mount(env.registries.Components.get('NotificationManager'), { env, target });
 
   const id = notifications.create("I'm a sticky notification");
   await nextTick();
@@ -155,7 +150,7 @@ QUnit.test("close a non-sticky notification while another one remains", async (a
   };
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  await mount(NotificationManager, { env, target });
+  await mount(env.registries.Components.get('NotificationManager'), { env, target });
 
   const id1 = notifications.create("I'm a non-sticky notification");
   const id2 = notifications.create("I'm a sticky notification", { sticky: true });
@@ -181,7 +176,7 @@ QUnit.test("close a non-sticky notification while another one remains", async (a
 QUnit.test("notification coming when NotificationManager not mounted yet", async (assert) => {
   const env = await makeTestEnv({ browser, services });
   const notifications = env.services.notifications;
-  mount(NotificationManager, { env, target });
+  mount(env.registries.Components.get('NotificationManager'), { env, target });
 
   notifications.create("I'm a non-sticky notification");
   await nextTick();
