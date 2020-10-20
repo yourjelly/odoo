@@ -18,7 +18,7 @@ class PaymentPortal(CustomerPortal):
     ):
         """ Create a draft `payment.transaction` record and return its processing values.
 
-        :param int invoice_id: The invoice to pay, as a `account.move` id
+        :param int invoice_id: The invoice to pay, as an `account.move` id
         :param int payment_option_id: The payment option handling the transaction, as a
                                       `payment.acquirer` id or a `payment.token` id
         :param float amount: The amount to pay in the given currency
@@ -65,7 +65,7 @@ class PaymentPortal(CustomerPortal):
                 'acquirer_id': acquirer_sudo.id,
                 'tokenize': tokenize,
                 **create_tx_values,
-            })  # In sudo mode to allowed writing on callback fields
+            })  # In sudo mode to allow writing on callback fields
             processing_values = tx_sudo._get_processing_values()
         elif flow == 'token':  # Payment by token
             token_sudo = request.env['payment.token'].sudo().browse(payment_option_id).exists()
@@ -75,7 +75,7 @@ class PaymentPortal(CustomerPortal):
                 'acquirer_id': token_sudo.acquirer_id.id,
                 'token_id': payment_option_id,
                 **create_tx_values,
-            })  # In sudo mode to allowed writing on callback fields
+            })  # In sudo mode to allow writing on callback fields
             tx_sudo._send_payment_request()  # Tokens process transactions immediately
             # The dict of processing values is not filled in token flow since the user is redirected
             # to the payment process page directly from the client

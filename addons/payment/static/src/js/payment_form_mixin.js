@@ -184,7 +184,7 @@ odoo.define('payment.payment_form_mixin', require => {
          * @param {HTMLInputElement} radio - The radio button linked to the payment option
          * @return {string} The flow of the selected payment option. redirect, direct or token.
          */
-        _getPaymentFlowFromRadio: function (radio) {
+        _getPaymentFlowFromRadio: function (radio) { // TODO ANV search radio based on name attribute to avoid matching radios inside the inline form
             if ($(radio).data('is-token') || this.txContext.flow === 'token') {
                 return 'token';
             } else if (this.txContext.flow === 'redirect') {

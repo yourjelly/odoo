@@ -71,7 +71,7 @@ odoo.define('payment_adyen.payment_form', require => {
          */
         _dropinOnSubmit: function (state, dropin) {
             // Call the init route to initialize the transaction and retrieve processing values
-            this._rpc({
+            this._rpc({ // TODO ANV eventually factor this out in payment
                 route: this.txContext.initTxRoute,
                 params: {
                     'payment_option_id': dropin.acquirerId,

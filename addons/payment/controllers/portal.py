@@ -253,7 +253,7 @@ class WebsitePayment(http.Controller):
                 'reference': reference,
                 'tokenize': tokenize,
                 **create_tx_values,
-            })  # In sudo mode to allowed writing on callback fields
+            })  # In sudo mode to allow writing on callback fields
             processing_values = tx_sudo._get_processing_values()
         elif flow == 'token':  # Payment by token
             token_sudo = request.env['payment.token'].sudo().browse(payment_option_id).exists()
@@ -268,7 +268,7 @@ class WebsitePayment(http.Controller):
                 'reference': reference,
                 'token_id': payment_option_id,
                 **create_tx_values,
-            })  # In sudo mode to allowed writing on callback fields
+            })  # In sudo mode to allow writing on callback fields
             tx_sudo._send_payment_request()  # Tokens process transactions immediately
             # The dict of processing values is not filled in token flow since the user is redirected
             # to the payment process page directly from the client
