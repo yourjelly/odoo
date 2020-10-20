@@ -1,3 +1,18 @@
+$container-height: 100%;
+
+#wrapwrap {
+    height: $container-height;
+    div[class*="footer"] {
+        max-height: $container-height / 4;
+        .o_report_footer {
+            display: -webkit-inline-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 10;
+            overflow: hidden;
+        }
+    }
+}
+
 .o_standard_footer {
     margin-top: 200px;
     .list-inline-item {
