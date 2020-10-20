@@ -1,6 +1,8 @@
-import { Component, tags } from "@odoo/owl";
+import { Component, core, tags } from "@odoo/owl";
 import type { OdooEnv, Service } from "../types";
 import { Notification as NotificationComponent } from "../components/notification/notification";
+
+const { EventBus } = core;
 
 const AUTOCLOSE_DELAY: number = 4000;
 
@@ -22,23 +24,16 @@ export interface NotificationService {
   create: (message: string, options?: DisplayOptions) => number;
 }
 
-export class NotificationManager extends Component<{}, OdooEnv> {
+class NotificationManager extends Component<{}, OdooEnv> {
   static template = tags.xml`
     <div class="o_notification_manager">
         <t t-foreach="notifications" t-as="notification" t-key="notification.id">
-            <NotificationComponent t-props="notification" t-transition="o_notification_fade" />
+            <NotificationComponent t-props="notification" t-transition="o_notification_fade"/>
         </t>
     </div>`;
   static components = { NotificationComponent };
-  notifications: Notification[] = [];
 
-  constructor() {
-    super(...arguments);
-    this.env.bus.on("NOTIFICATIONS_CHANGE", this, (notifications) => {
-      this.notifications = notifications;
-      this.render();
-    });
-  }
+  notifications: Notification[] = [];
 }
 
 export const notificationService: Service<NotificationService> = {
@@ -46,22 +41,34 @@ export const notificationService: Service<NotificationService> = {
   deploy(env: OdooEnv): NotificationService {
     let notifId: number = 0;
     let notifications: Notification[] = [];
+    const bus = new EventBus();
+
+    class ReactiveNotificationManager extends NotificationManager {
+      constructor() {
+        super(...arguments);
+        bus.on("UPDATE", this, () => {
+          this.notifications = notifications;
+          this.render();
+        });
+      }
+    }
+    env.registries.Components.add("NotificationManager", ReactiveNotificationManager);
 
     function close(id: number): void {
       const index = notifications.findIndex((n) => n.id === id);
       if (index > -1) {
         notifications.splice(index, 1);
-        env.bus.trigger("NOTIFICATIONS_CHANGE", notifications);
+        bus.trigger("UPDATE");
       }
     }
 
     function create(message: string, options?: DisplayOptions): number {
       const notif: Notification = Object.assign({}, options, {
         id: ++notifId,
-        message,
+        message
       });
       notifications.push(notif);
-      env.bus.trigger("NOTIFICATIONS_CHANGE", notifications);
+      bus.trigger("UPDATE");
       if (!notif.sticky) {
         env.browser.setTimeout(() => close(notif.id), AUTOCLOSE_DELAY);
       }
