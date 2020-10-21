@@ -27,10 +27,10 @@ A click on that button triggers the event `dialog-closed` via the method `_close
 So typically, the parent template could look like to
 
 ```xml
-    <div>
+<div>
         <!-- parent main content -->
         <Dialog t-if="state.displayDialog" t-on-dialog-closed="_onDialogClosed">
-            <SubComponent t-on-subcomponent-clicked="_onSubcomponentClicked"/>
+            <SubComponent t-on-subcomponent-clicked="_onSubcomponentClicked" />
             <t t-set="buttons">
                 <button t-on-click="onConfirmClick">Confirm</button>
                 <button t-on-click="onDiscardClick">Discard</button>

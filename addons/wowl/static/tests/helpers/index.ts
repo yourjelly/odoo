@@ -21,12 +21,4 @@ export {
   makeMockFetch,
 } from "./mocks";
 
-export {
-  getFixture,
-  makeTestConfig,
-  makeTestEnv,
-  mount,
-  nextTick,
-  makeDeferred,
-  click,
-} from "./utility";
+export { getFixture, makeTestEnv, mount, nextTick, makeDeferred, click } from "./utility";
