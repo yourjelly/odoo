@@ -86,7 +86,7 @@ Doing so, **_when one sibling dropdown is open_**, the others will **_automatica
 
 | Prop name           | Default Value | Value type                   | Description                                                                            |
 | ------------------- | ------------- | ---------------------------- | -------------------------------------------------------------------------------------- |
-| `payload`    | null          | Object                       | item payload that will be part of the `dropdown-item-selected` event                    |
+| `payload`           | null          | Object                       | item payload that will be part of the `dropdown-item-selected` event                   |
 | `parentClosingMode` | `all`         | `none` \| `closest` \| `all` | when item clicked, control which parent dropdown will get closed: none, closest or all |
 
 ## Usage
