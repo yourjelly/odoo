@@ -27,7 +27,7 @@ QUnit.module("Navbar", {
       1: { id: 1, children: [], name: "App0", appID: 1 },
     };
     const serverData = { menus };
-    const systray = new Registry() as any;
+    const systray = new Registry<any>();
     const item = {
       name: "addon.myitem",
       Component: MySystrayItem,
