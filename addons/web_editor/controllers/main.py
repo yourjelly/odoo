@@ -514,7 +514,17 @@ class Web_Editor(http.Controller):
         """
         svg = None
         if module == 'illustration':
-            attachment = request.env['ir.attachment'].sudo().search([('url', '=like', request.httprequest.path), ('public', '=', True)], limit=1)
+            path = request.httprequest.path
+
+            params = ''
+            for key, color in kwargs.items():  # double check order
+                match = re.match('^c([1-5])$', key)
+                if match:
+                    params += "%s=%s&" % (key, color.replace('#', '%23')) # use url decodes
+
+            path = path + (params and '?%s' % params or params)
+            print('search %s' % path)
+            attachment = request.env['ir.attachment'].sudo().search([('url', '=like', path), ('public', '=', True)], limit=1)
             if not attachment:
                 raise werkzeug.exceptions.NotFound()
             svg = b64decode(attachment.datas).decode('utf-8')
@@ -606,7 +616,11 @@ class Web_Editor(http.Controller):
                 'res_id': 0,
             })
             if media[id]['is_dynamic_svg']:
-                attachment['url'] = '/web_editor/shape/illustration/%s' % slug(attachment)
+                attachment['url'] = '/web_editor/shape/illustration/%s?' % slug(attachment)
+                for (i, color) in enumerate(media[id]['svg_palette']):
+                    if color:
+                        attachment['url'] += 'c%s=%%23%s&' % (i+1, color[1:])  # use urlencode
+
             attachments.append(attachment._get_media_info())
 
         return attachments

@@ -381,8 +381,9 @@ var FileWidget = SearchableMediaWidget.extend({
         // Create all media-library attachments.
         const toSave = Object.fromEntries(this.selectedMedia.map(media => [
             media.id, {
-                query: media.query || '',
-                is_dynamic_svg: !!media.isDynamicSVG,
+                query: this.needle || '',
+                is_dynamic_svg: media.isDynamicSVG.some(o => !!o),
+                svg_palette: media.isDynamicSVG
             }
         ]));
         let mediaAttachments = [];
@@ -398,7 +399,6 @@ var FileWidget = SearchableMediaWidget.extend({
             // Color-customize dynamic SVGs with the primary theme color
             if (attachment.image_src && attachment.image_src.startsWith('/web_editor/shape/')) {
                 const colorCustomizedURL = new URL(attachment.image_src, window.location.origin);
-                colorCustomizedURL.searchParams.set('c1', getCSSVariableValue('o-color-1'));
                 attachment.image_src = colorCustomizedURL.pathname + colorCustomizedURL.search;
             }
             return attachment;
@@ -884,23 +884,36 @@ var ImageWidget = FileWidget.extend({
             try {
                 const response = await fetch(mediaUrl);
                 if (response.headers.get('content-type') === 'image/svg+xml') {
-                    const svg = await response.text();
+                    let svg = await response.text();
                     const colorRegex = new RegExp(DEFAULT_PALETTE['1'], 'gi');
                     if (colorRegex.test(svg)) {
                         const fileName = mediaUrl.split('/').pop();
-                        const file = new File([svg.replace(colorRegex, getCSSVariableValue('o-color-1'))], fileName, {
+
+                        let svg1 = svg.replace(RegExp(DEFAULT_PALETTE['1'], 'gi'), getCSSVariableValue('o-color-1'));
+                        let svg2 = svg1.replace(RegExp(DEFAULT_PALETTE['2'], 'gi'), getCSSVariableValue('o-color-2'));
+                        let svg3 = svg2.replace(RegExp(DEFAULT_PALETTE['3'], 'gi'), getCSSVariableValue('o-color-3'));
+                        let svg4 = svg3.replace(RegExp(DEFAULT_PALETTE['4'], 'gi'), getCSSVariableValue('o-color-4'));
+                        let svg5 = svg4.replace(RegExp(DEFAULT_PALETTE['5'], 'gi'), getCSSVariableValue('o-color-5'));
+                        const file = new File([svg5], fileName, {
                             type: "image/svg+xml",
                         });
                         img.src = URL.createObjectURL(file);
                         const media = this.libraryMedia.find(media => media.id === parseInt(cell.dataset.mediaId));
                         if (media) {
-                            media.isDynamicSVG = true;
+                            media.isDynamicSVG = [
+                                svg1 != svg && getCSSVariableValue('o-color-1'),
+                                svg2 != svg1 && getCSSVariableValue('o-color-2'),
+                                svg3 != svg2 && getCSSVariableValue('o-color-3'),
+                                svg4 != svg3 && getCSSVariableValue('o-color-4'),
+                                svg5 != svg4 && getCSSVariableValue('o-color-5')
+                            ];
                         }
                         // We changed the src: wait for the next load event to do the styling
                         return;
                     }
                 }
             } catch (e) {
+                console.log(e)
                 console.error('CORS is misconfigured on the API server, image will be treated as non-dynamic.');
             }
         }
