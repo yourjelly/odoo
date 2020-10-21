@@ -65,7 +65,7 @@ export const notificationService: Service<NotificationService> = {
     function create(message: string, options?: DisplayOptions): number {
       const notif: Notification = Object.assign({}, options, {
         id: ++notifId,
-        message
+        message,
       });
       notifications.push(notif);
       bus.trigger("UPDATE");
