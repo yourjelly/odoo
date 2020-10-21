@@ -27,13 +27,13 @@ QUnit.module("Navbar", {
       1: { id: 1, children: [], name: "App0", appID: 1 },
     };
     const serverData = { menus };
-    const systray = new Registry();
+    const systray = new Registry() as any;
     const item = {
       name: "addon.myitem",
       Component: MySystrayItem,
     };
     systray.add(item.name, item);
-    baseConfig = { services, serverData };
+    baseConfig = { services, serverData, systray };
   },
 });
 
