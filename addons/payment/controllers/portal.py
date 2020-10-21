@@ -353,11 +353,14 @@ class WebsitePayment(http.Controller):
         tokens = set(partner.payment_token_ids).union(
             partner.commercial_partner_id.sudo().payment_token_ids
         )  # Show all partner's tokens, regardless of which acquirer is available
+        db_secret = request.env['ir.config_parameter'].sudo().get_param('database.secret')
+        access_token = payment_utils.generate_access_token(db_secret, partner.id, None, None)
         tx_context = {
             'acquirers': acquirers_sudo,
             'tokens': tokens,
             'reference_prefix': payment_utils.singularize_reference_prefix(prefix='validation'),
             'partner_id': partner.id,
+            'access_token': access_token,
             'init_tx_route': '/website_payment/transaction',
             'landing_route': '/website_payment/validate',
         }
