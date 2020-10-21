@@ -2,7 +2,7 @@ import { Component } from "@odoo/owl";
 import { getDefaultLocalization } from "../../src/core/localization";
 import { Registry } from "../../src/core/registry";
 import { makeEnv } from "../../src/env";
-import { Odoo, OdooConfig, OdooEnv, Service, Services, Type } from "../../src/types";
+import { Odoo, OdooConfig, OdooEnv, Type } from "../../src/types";
 import { MockRPC, makeTestOdoo } from "./mocks";
 import { ServerData, makeMockServer } from "./mock_server";
 
@@ -13,7 +13,7 @@ import { ServerData, makeMockServer } from "./mock_server";
 // -----------------------------------------------------------------------------
 interface MountParameters {
   env: OdooEnv;
-  target: HTMLElement;
+  target?: HTMLElement;
 }
 
 export async function mount<T extends Type<Component>>(
@@ -22,11 +22,12 @@ export async function mount<T extends Type<Component>>(
 ): Promise<InstanceType<T>> {
   ((C as any) as typeof Component).env = params.env;
   const component: Component = new C(null);
-  await component.mount(params.target, { position: "first-child" });
+  const target = params.target || getFixture();
+  await component.mount(target, { position: "first-child" });
   return component as any;
 }
 
-export type TestConfig = Partial<
+type _TestConfig = Partial<
   {
     [K in keyof OdooConfig]: OdooConfig[K] extends Registry<any>
       ? OdooConfig[K]
@@ -34,7 +35,13 @@ export type TestConfig = Partial<
   }
 >;
 
-export function makeTestConfig(config: TestConfig = {}): OdooConfig {
+export interface TestConfig extends _TestConfig {
+  serverData?: ServerData;
+  mockRPC?: MockRPC;
+  activateMockServer?: boolean;
+}
+
+function makeTestConfig(config: TestConfig = {}): OdooConfig {
   const browser = (config.browser || {}) as OdooConfig["browser"];
   const localization = config.localization || (getDefaultLocalization() as any);
   const odoo: Odoo = makeTestOdoo();
@@ -54,7 +61,12 @@ export function makeTestConfig(config: TestConfig = {}): OdooConfig {
 }
 
 export async function makeTestEnv(config: TestConfig = {}): Promise<OdooEnv> {
-  return await makeEnv(makeTestConfig(config));
+  const testConfig = makeTestConfig(config);
+  if (config.serverData || config.mockRPC || config.activateMockServer) {
+    testConfig.services.remove("rpc");
+    makeMockServer(testConfig, config.serverData, config.mockRPC);
+  }
+  return await makeEnv(testConfig);
 }
 
 export function getFixture(): HTMLElement {
@@ -109,32 +121,4 @@ let templates: string;
 
 export function setTemplates(xml: string) {
   templates = xml;
-}
-
-export interface CreateComponentParams {
-  config: TestConfig;
-  serverData?: ServerData;
-  mockRPC?: MockRPC;
-}
-
-export async function createComponent(
-  Component: Parameters<typeof mount>[0],
-  params?: CreateComponentParams
-): ReturnType<typeof mount> {
-  let { config, serverData, mockRPC } = params || {};
-  config = config || {};
-  const services = (config.services = config.services || new Registry<Service>());
-  services.remove("rpc");
-  makeMockServer(config, serverData, mockRPC);
-  const env = await makeTestEnv(config);
-  const target = getFixture();
-  return mount(Component, { env, target });
-}
-
-export function getService(
-  component: Component,
-  serviceName: keyof Services
-): Services[typeof serviceName] {
-  const env = component.env as OdooEnv;
-  return env.services[serviceName];
 }

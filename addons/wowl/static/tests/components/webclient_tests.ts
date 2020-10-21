@@ -6,25 +6,28 @@ import { actionManagerService } from "./../../src/services/action_manager/action
 import { notificationService } from "./../../src/services/notifications";
 import { makeFakeUserService } from "../helpers/index";
 import { Service, Type } from "../../src/types";
-import { createComponent } from "../helpers/utility";
+import { mount, makeTestEnv, TestConfig } from "../helpers/utility";
 import { menusService } from "../../src/services/menus";
 
 const { xml } = tags;
 
-let services: Registry<Service>;
+let baseConfig: TestConfig;
+
 QUnit.module("Web Client", {
   async beforeEach() {
-    services = new Registry();
+    const services = new Registry<Service<any>>();
     services.add("user", makeFakeUserService());
     services.add(actionManagerService.name, actionManagerService);
     services.add(notificationService.name, notificationService);
     services.add("menus", menusService);
+    baseConfig = { services, activateMockServer: true };
   },
 });
 
 QUnit.test("can be rendered", async (assert) => {
   assert.expect(1);
-  const webClient = await createComponent(WebClient, { config: { services } });
+  const env = await makeTestEnv(baseConfig);
+  const webClient = await mount(WebClient, { env });
   assert.containsOnce(webClient.el!, "header > nav.o_main_navbar");
 });
 
@@ -35,8 +38,7 @@ QUnit.test("can render a main component", async (assert) => {
   }
   const componentRegistry = new Registry<Type<Component>>();
   componentRegistry.add("mycomponent", MyComponent);
-  const webClient = await createComponent(WebClient, {
-    config: { services, Components: componentRegistry },
-  });
+  const env = await makeTestEnv({ ...baseConfig, Components: componentRegistry });
+  const webClient = await mount(WebClient, { env });
   assert.containsOnce(webClient.el!, ".chocolate");
 });
