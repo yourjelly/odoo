@@ -1,7 +1,7 @@
 import { Component, tags } from "@odoo/owl";
 import * as QUnit from "qunit";
 import { NavBar } from "../../src/components/navbar/navbar";
-import { click } from "../helpers/index";
+import { click, nextTick } from "../helpers/index";
 import { makeTestEnv, mount, TestConfig } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
 import { actionManagerService } from "./../../src/services/action_manager/action_manager";
@@ -27,13 +27,13 @@ QUnit.module("Navbar", {
       1: { id: 1, children: [], name: "App0", appID: 1 },
     };
     const serverData = { menus };
-    const systray = new Registry();
+    const systray = new Registry() as any;
     const item = {
       name: "addon.myitem",
       Component: MySystrayItem,
     };
     systray.add(item.name, item);
-    baseConfig = { services, serverData };
+    baseConfig = { services, serverData, systray };
   },
 });
 
