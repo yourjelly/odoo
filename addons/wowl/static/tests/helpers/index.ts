@@ -4,6 +4,8 @@ const { whenReady, loadFile } = owl.utils;
 
 let templates: string;
 
+owl.config.enableTransitions = false;
+
 export async function setupTests(): Promise<void> {
   const templatesUrl = `/wowl/templates/${new Date().getTime()}`;
   templates = await loadFile(templatesUrl);
