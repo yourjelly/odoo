@@ -140,9 +140,12 @@ odoo.define('web.OwlCompatibility', function () {
                 if (this.__owl__.vnode) { // not at first rendering
                     this.renderWidget();
                 }
-                vnode.elm = this.widget.el;
+                //vnode.elm = this.widget.el;
             }
-            return super.__patch(...arguments);
+            super.__patch(...arguments);
+            if (this.widget && this.el !== this.widget.el) {
+                this.__owl__.vnode.elm = this.widget.el;
+            }
         }
 
         /**
