@@ -285,11 +285,11 @@ odoo.define('payment.payment_form_mixin', require => {
          * @param {string} provider - The provider of the payment option's acquirer
          * @param {number} paymentOptionId - The id of the payment option handling the transaction
          * @param {string} flow - The online payment flow of the transaction
-         * @return {undefined}
+         * @return {(object|undefined)} The transaction processing values if in direct payment flow
          */
         _processTx: function (provider, paymentOptionId, flow) {
             // Call the init route to initialize the transaction and retrieve processing values
-            this._rpc({
+            return this._rpc({
                 route: this.txContext.initTxRoute,
                 params: {
                     'payment_option_id': paymentOptionId,
@@ -323,6 +323,7 @@ odoo.define('payment.payment_form_mixin', require => {
                     $redirectForm.submit();
                 } else if (flow === 'direct') {
                     // The direct flow is handled by acquirers in the override of this method
+                    return result;
                 } else if (flow === 'token') {
                     window.location = '/payment/status'; // Tokens have already been processed
                 }
