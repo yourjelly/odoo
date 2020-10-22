@@ -114,11 +114,10 @@ export function tokenize(str: string): Token[] {
   const tokens: Token[] = [];
   let max = str.length;
   let start: number = 0;
-  let end: number = -1;
+  let end: number = 0;
 
   // /g flag makes repeated exec() have memory
   const pseudoprog = new RegExp(PseudoToken, "g");
-
   while (pseudoprog.lastIndex < max) {
     const pseudomatch = pseudoprog.exec(str);
     if (!pseudomatch) {
@@ -129,6 +128,11 @@ export function tokenize(str: string): Token[] {
       throw new Error(
         "Failed to tokenize <<" + str + ">> at index " + (end || 0) + "; parsed so far: " + tokens
       );
+    }
+    if (pseudomatch.index > end) {
+      if (str.slice(end, pseudomatch.index).trim()) {
+        throw new Error("Tokenizer error: Invalid expression");
+      }
     }
     start = pseudomatch.index;
     end = pseudoprog.lastIndex;
