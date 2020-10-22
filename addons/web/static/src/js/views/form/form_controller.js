@@ -19,6 +19,9 @@ var FormController = BasicController.extend({
         focus_control_button: '_onFocusControlButton',
         form_dialog_discarded: '_onFormDialogDiscarded',
     }),
+    events: Object.assign({}, BasicController.prototype.events, {
+        "click .o_form_readonly .o_form_sheet": '_onEdit',
+    }),
     /**
      * @override
      *
