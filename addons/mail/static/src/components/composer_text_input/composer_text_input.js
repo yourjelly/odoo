@@ -79,7 +79,12 @@ class ComposerTextInput extends Component {
             }
             return this.env._t("Send a message to followers...");
         }
-        return this.env._t("Write something...");
+        if (this.composer.thread.channel_type !== 'chat') {
+            return _.str.sprintf(this.env._t("Message #%s..."), this.composer.thread.displayName);
+        }
+        else {
+            return _.str.sprintf(this.env._t("Message %s..."), this.composer.thread.displayName);
+        }
     }
 
     focus() {
