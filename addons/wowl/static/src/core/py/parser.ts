@@ -232,6 +232,7 @@ function parsePrefix(current: Token, tokens: Token[]): AST {
           if (!tokens[0] || !isSymbol(tokens[0], ")")) {
             throw new Error("parsing error");
           }
+          tokens.shift();
           isTuple = isTuple || content.length === 0;
           return isTuple ? { type: AST_TYPE.Tuple, value: content } : content[0];
         case "[":
