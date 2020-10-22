@@ -7,6 +7,7 @@ import { Odoo, RuntimeOdoo, OdooBrowser } from "./types";
 
 // remove some day
 import "./demo_data";
+import {BatchStrategy, RPCBatchManager} from "./utils/rpc/rpc_batcher";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -59,6 +60,33 @@ declare const odoo: Odoo;
     server_version: sessionInfo.server_version,
     server_version_info: sessionInfo.server_version_info,
   };
+
+  console.log("It is ready");
+
+  const batch = new RPCBatchManager(
+    {
+      strategy: BatchStrategy.Time,
+      strategyValue: 50,
+    },
+    "none"
+  );
+
+  // const rpc = useService('rpc');
+  // const result = await rpc("/my/route", { some: "value" });
+  console.log("About to do my stuff");
+  batch.rpc("/my/route");
+  batch.rpc("/my/route");
+  batch.rpc("/my/route");
+  batch.rpc("/my/route");
+  batch.rpc("/my/route");
+  await setTimeout(() => {
+    batch.rpc("/my/route");
+    batch.rpc("/my/route");
+    batch.rpc("/my/route");
+    batch.rpc("/my/route");
+  }, 150);
+
+  console.log("Aaaand it's done !");
 })();
 
 async function loadTemplates(): Promise<string> {

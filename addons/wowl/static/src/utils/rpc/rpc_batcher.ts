@@ -1,78 +1,64 @@
-import {useService} from "../core/hooks";
-import {RPC} from "./rpc";
+import { useService } from "../../core/hooks";
+import { RPC } from "../../services/rpc";
 
 async function nextTick(): Promise<void> {
   await new Promise((resolve) => window.requestAnimationFrame(resolve));
   await new Promise((resolve) => setTimeout(resolve));
 }
 
-enum BatchStrategy {
+export enum BatchStrategy {
   Time = "Time",
   Tick = "Tick",
   Amount = "Amount",
 }
 
-enum BatchState {
+export enum BatchState {
   Idling = "Idling",
   Gathering = "Gathering",
   Fetching = "Fetching",
 }
 
-interface BatchOptions {
+export interface BatchOptions {
   strategy: BatchStrategy;
   strategyValue: number;
 }
 
-interface RPCParams {
-  route: string,
-  params: object
-}
-
 interface BatchedRPC {
   id: number;
-  rpc: RPCParams;
+  rpc: { route: string; params?: { [key: string]: any } };
 }
 
 type Endpoint = string;
 
-/*
-class RPCBatchDispatcher {
+export class RPCBatchManager {
   private _options: BatchOptions;
   private _endpoint: Endpoint;
-
-  private _runningBatches: Array<RPCBatch>;
-  private _gatheringBatches: Array<RPCBatch>;
-  private _idleBatches: Array<RPCBatch>;
+  private _batches: Array<RPCBatch>;
 
   constructor(options: BatchOptions, endpoint: Endpoint) {
     this._options = options;
     this._endpoint = endpoint;
-    this._runningBatches = new Array<RPCBatch>();
-    this._gatheringBatches = new Array<RPCBatch>();
-    this._idleBatches = new Array<RPCBatch>();
+    this._batches = new Array<RPCBatch>();
   }
 
-  dispatch(rpc: RPC) {
-
+  rpc(route: string, params?: { [key: string]: any }): Promise<any> {
     // search first gathering element
-    let batchToUse = this._gatheringBatches.pop() ?? this._idleBatches.pop();
+    let batchToUse = this._batches.find((batch) => batch.available);
 
     if (!batchToUse) {
       batchToUse = new RPCBatch(this._options, this._endpoint);
+      this._batches.push(batchToUse);
     }
 
-    this._gatheringBatches.push(batchToUse);
-    return batchToUse.executeInBatch(rpc)
-
+    return batchToUse.rpc(route, params);
   }
 }
-*/
 
 class RPCBatch {
   private _options: BatchOptions;
   private _endpoint: Endpoint;
   private _rpcs: Array<BatchedRPC>;
-  private _callback: Promise;
+  private _callback: any;
 
   private _state = BatchState.Idling;
   private _id = 0;
@@ -82,30 +68,37 @@ class RPCBatch {
     this._options = options;
     this._endpoint = endpoint;
     this._rpcs = new Array<BatchedRPC>();
-    this._rpc = useService('rpc');
+    this._rpc = useService("rpc");
   }
 
   get state(): BatchState {
     return this._state;
   }
 
-  async rpc(rpc: RPCParams) {
+  get available() {
+    return this._state === BatchState.Idling || this._state === BatchState.Gathering;
+  }
 
+  async rpc(route: string, params?: { [key: string]: any }): Promise<any> {
     if (this._state === BatchState.Fetching) {
       throw new Error("This batch is already fetching data, you cannot add any more rpcs to it.");
     }
 
     this._rpcs.push({
       id: this._id++,
-      rpc: rpc,
+      rpc: { route: route, params: params },
     });
 
-    if (this._state === BatchState.Idling) {
+    if (
+      this._state === BatchState.Idling ||
+      (this._state === BatchState.Gathering && this._options.strategy === BatchStrategy.Amount)
+    ) {
       this._startGatheringState();
     }
 
-    return this._callback;
-
+    return new Promise<any>((resolve) => {
+      this._callback = resolve;
+    });
   }
 
   async _startGatheringState() {
@@ -113,18 +106,20 @@ class RPCBatch {
 
     switch (this._options.strategy) {
       case BatchStrategy.Time:
-        setTimeout(this._fetch, this._options.strategyValue);
+        setTimeout(this._fetch.bind(this), this._options.strategyValue);
         break;
 
       case BatchStrategy.Tick:
         let tickCounter = 0;
-        while (tickCounter !== this._options.strategyValue) await nextTick();
+        while (tickCounter !== this._options.strategyValue) {
+          await nextTick();
+          tickCounter++;
+        }
         this._fetch();
         break;
 
       case BatchStrategy.Amount:
-        if (this._rpcs.length === this._options.strategyValue)
-          this._fetch();
+        if (this._rpcs.length === this._options.strategyValue) this._fetch();
         break;
     }
   }
@@ -133,14 +128,14 @@ class RPCBatch {
     this._state = BatchState.Fetching;
 
     const params = {
-      rpcs: this._rpcs
-    }
+      rpcs: this._rpcs,
+    };
 
     const results = await this._rpc(this._endpoint, params);
 
     // todo break down results
 
-    this._callback.resolve(results);
+    this._callback(results);
 
     this._reset();
   }
