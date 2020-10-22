@@ -32,6 +32,63 @@ class AccountAccountType(models.Model):
     note = fields.Text(string='Description')
 
 
+ACCOUNT_TYPE_HIERARCHY = [
+    ('equity',                  _("Equity"), (
+        ('equity',                  _("Equity")),
+        ('current_year_earnings',       _("Current Year Earnings")),
+    )),
+    ('asset',                   _("Assets"), (
+        ('current_assets',          _("Current Assets"), (
+            ('liquidity',               _("Bank and Cash")),
+            ('prepayments',             _("Prepayments")),
+            ('receivable',              _("Receivable")),
+        )),
+        ('non_current_assets',  _("Non Current Assets"), (
+            ('fixed_assets',        _("Fixed Assets")),
+        )),
+    )),
+    ('liability',               _("Liabilities"), (
+        ('payable',                 _("Payable")),
+        ('current_liabilities',     _("Current Liabilities")),
+        ('non_current_liabilities', _("Non-Current Liabilities")),
+        ('credit_card',             _("Credit Card")),
+    )),
+    ('income',                  _("Income"), (
+        ('revenue',                 _("Revenue")),
+        ('other_income',            _("Other Income")),
+    )),
+    ('expense',                 _("Expense"), (
+        ('expenses',                _("Expenses")),
+        ('depreciation',            _("Depreciation")),
+        ('cost_of_revenue',         _("Cost of Revenue")),
+    )),
+    ('off_balance',             _("Off Balance")),
+]
+
+
+def _get_account_type_selection(hierarchy_node, cumulated_account_types, selection):
+    ''' Convert ACCOUNT_TYPE_HIERARCHY to a selection field.
+    :param hierarchy_node:          The current node inside ACCOUNT_TYPE_HIERARCHY.
+    :param cumulated_account_types: The cumulated account types when travelling the hierarchy.
+    :param selection:               The selection list to fill.
+    :return:                        A list that can be interpreted by a selection field.
+    '''
+    account_types = cumulated_account_types + [hierarchy_node[0]]
+    if len(hierarchy_node) == 2:
+        # Leaf node.
+        selection.append((','.join(account_types), hierarchy_node[1]))
+    else:
+        for child_node in hierarchy_node[2]:
+            _get_account_type_selection(child_node, account_types, selection)
+
+
+def get_account_type_selection():
+    selection = []
+    for child_node in ACCOUNT_TYPE_HIERARCHY:
+        _get_account_type_selection(child_node, [], selection)
+    return selection
+
+
 class AccountAccount(models.Model):
     _name = "account.account"
     _description = "Account"
@@ -85,6 +142,11 @@ class AccountAccount(models.Model):
     opening_balance = fields.Monetary(string="Opening Balance", compute='_compute_opening_debit_credit', help="Opening balance value for this account.")
 
     is_off_balance = fields.Boolean(compute='_compute_is_off_balance', default=False, store=True, readonly=True)
+
+    type_hierarchy_selection = fields.Selection(
+        selection=get_account_type_selection(),
+        string="Type",)
+        # required=True)
 
     _sql_constraints = [
         ('code_company_uniq', 'unique (code,company_id)', 'The code of the account must be unique per company !')
