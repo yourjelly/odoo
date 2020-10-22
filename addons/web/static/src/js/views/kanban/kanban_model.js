@@ -140,6 +140,18 @@ var KanbanModel = BasicModel.extend({
         });
     },
     /**
+     *
+     * @override
+     * @returns {Object}
+     */
+    _getFieldNames() {
+        let fields = this._super.apply(this, arguments);
+        if ('__last_update'in this.loadParams.fields) {
+            fields.push('__last_update');
+        }
+        return fields;
+    },
+    /**
      * Add the following (kanban specific) keys when performing a `get`:
      *
      * - tooltipData
