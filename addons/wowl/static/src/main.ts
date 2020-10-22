@@ -63,27 +63,24 @@ declare const odoo: Odoo;
 
   console.log("It is ready");
 
+  const params = {"args":[[2],["name","parent_id","sequence","complete_name","action","web_icon","web_icon_data","groups_id","child_id","display_name"]],"model":"ir.ui.menu","method":"read","kwargs":{"context":{"bin_size":true,"lang":"en_US","tz":"Europe/Brussels","uid":2,"allowed_company_ids":[1],"params":{"action":27,"cids":1,"id":2,"menu_id":4,"model":"ir.ui.menu","view_type":"form"},"ir.ui.menu.full_list":true}}}
+
   const batch = new RPCBatchManager(
     {
       strategy: BatchStrategy.Time,
       strategyValue: 50,
-    },
-    "none"
+    }
   );
 
   // const rpc = useService('rpc');
   // const result = await rpc("/my/route", { some: "value" });
-  console.log("About to do my stuff");
-  batch.rpc("/my/route");
-  batch.rpc("/my/route");
-  batch.rpc("/my/route");
-  batch.rpc("/my/route");
-  batch.rpc("/my/route");
+  batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
+  batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
+  batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
   await setTimeout(() => {
-    batch.rpc("/my/route");
-    batch.rpc("/my/route");
-    batch.rpc("/my/route");
-    batch.rpc("/my/route");
+    batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
+    batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
+    batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
   }, 150);
 
   console.log("Aaaand it's done !");

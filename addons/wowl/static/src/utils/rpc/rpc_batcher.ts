@@ -35,14 +35,14 @@ export class RPCBatchManager {
   private _endpoint: Endpoint;
   private _batches: Array<RPCBatch>;
 
-  constructor(options: BatchOptions, endpoint: Endpoint) {
+  constructor(options: BatchOptions, endpoint: Endpoint = "/wowl/batch-query-dispatch") {
     this._options = options;
     this._endpoint = endpoint;
     this._batches = new Array<RPCBatch>();
   }
 
   rpc(route: string, params?: { [key: string]: any }): Promise<any> {
-    // search first gathering element
+
     let batchToUse = this._batches.find((batch) => batch.available);
 
     if (!batchToUse) {
@@ -64,7 +64,7 @@ class RPCBatch {
   private _id = 0;
   private _rpc: RPC;
 
-  constructor(options: BatchOptions, endpoint: Endpoint) {
+  constructor(options: BatchOptions, endpoint: Endpoint = "/wowl/batch-query-dispatch") {
     this._options = options;
     this._endpoint = endpoint;
     this._rpcs = new Array<BatchedRPC>();
