@@ -1,20 +1,9 @@
+import { BUILTINS, PyDate, parseArgs, PyDateTime, PyTime, PyRelativeDelta } from "./builtins";
 import { AST, ASTBinaryOperator, ASTUnaryOperator, AST_TYPE } from "./parser";
 
 export type EvalContext = { [key: string]: any };
 
-function isTrue(value: any): boolean {
-  switch (typeof value) {
-    case "number":
-      return value !== 0;
-    case "string":
-      return value !== "";
-    case "boolean":
-      return value;
-    case "object":
-      return value !== null;
-  }
-  return true;
-}
+const isTrue = BUILTINS.bool;
 
 function applyUnaryOp(ast: ASTUnaryOperator, context: EvalContext): any {
   const expr = evaluate(ast.right, context);
@@ -88,6 +77,13 @@ function applyBinaryOp(ast: ASTBinaryOperator, context: EvalContext): any {
   const right = evaluate(ast.right, context);
   switch (ast.op) {
     case "+":
+      const isLeftDelta = left instanceof PyRelativeDelta;
+      const isRightDelta = right instanceof PyRelativeDelta;
+      if (isLeftDelta || isRightDelta) {
+        const date = isLeftDelta ? right : left;
+        const delta = isLeftDelta ? left : right;
+        return PyRelativeDelta.add(date, delta);
+      }
       return left + right;
     case "-":
       return left - right;
@@ -128,7 +124,8 @@ function applyBinaryOp(ast: ASTBinaryOperator, context: EvalContext): any {
 
 const DICT: any = {
   get(dict: any) {
-    return (key: string, defValue?: any) => {
+    return (...args: any[]) => {
+      const { key, defValue } = parseArgs(args, ["key", "defValue"]);
       if (key in dict) {
         return dict[key];
       } else if (defValue) {
@@ -183,7 +180,19 @@ export function evaluate(ast: AST, context: EvalContext = {}): any {
       case AST_TYPE.FunctionCall:
         const fnValue = _evaluate(ast.fn);
         const args = ast.args.map(_evaluate);
-        return fnValue(...args);
+        const kwargs: any = {};
+        for (let kwarg in ast.kwargs) {
+          kwargs[kwarg] = _evaluate(ast.kwargs[kwarg]);
+        }
+        if (
+          fnValue === PyDate ||
+          fnValue === PyDateTime ||
+          fnValue === PyTime ||
+          fnValue === PyRelativeDelta
+        ) {
+          return fnValue.create(...args, kwargs);
+        }
+        return fnValue(...args, kwargs);
       case AST_TYPE.Lookup: {
         const dict = _evaluate(ast.target);
         const key = _evaluate(ast.key);
@@ -202,6 +211,10 @@ export function evaluate(ast: AST, context: EvalContext = {}): any {
           // this is a dictionary => need to apply dict methods
           return DICT[ast.key](left);
         }
+        if (left instanceof Date) {
+          const result = (left as any)[ast.key];
+          return typeof result === "function" ? result.bind(left) : result;
+        }
         return left[ast.key];
       }
     }
@@ -210,9 +223,3 @@ export function evaluate(ast: AST, context: EvalContext = {}): any {
 
   return _evaluate(ast);
 }
-
-const BUILTINS: { [name: string]: any } = {
-  bool(value: any): boolean {
-    return isTrue(value);
-  },
-};
