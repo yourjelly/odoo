@@ -4,9 +4,12 @@ from lxml.builder import E
 import copy
 import itertools
 import logging
+import ast
 
 from odoo.tools.translate import _
 from odoo.tools import SKIPPED_ELEMENT_TYPES
+from odoo.tools.view_validation import get_dict_asts
+
 _logger = logging.getLogger(__name__)
 
 
@@ -190,6 +193,33 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                             (v for v in values if v not in to_remove),
                             to_add
                         ))
+                    if attribute in ["attrs", "context", "options"]:
+                        old_dict = node.get(attribute)
+                        if old_dict:
+                            _logger.info("%s --> %s", old_dict, value)
+                            old_vals = get_dict_asts(node.get(attribute)) if node.get(attribute) else {}
+                            for key, subnode in get_dict_asts(value).items():
+                                if isinstance(subnode, ast.Name):
+                                    new_val = subnode.id
+                                elif isinstance(subnode, ast.Attribute):
+                                    new_val = subnode.attr
+                                else:
+                                    new_val = ast.literal_eval(subnode)
+                                if key in old_vals:
+                                    old_node = old_vals.get(key)
+                                    if isinstance(old_node, ast.Name):
+                                        old_val = old_node.id
+                                    elif isinstance(old_node, ast.Attribute):
+                                        old_val = old_node.attr
+                                    else:
+                                        old_val = ast.literal_eval(old_node)
+                                    if new_val == old_val:
+                                        _logger.error("new value == old value; %s %s:%s", key, new_val, old_val)
+                                    else:
+                                        _logger.warning("updating value of %s from %s to %s", key, old_val, new_val)
+                                else:
+                                    _logger.warning("new attribute in %s; %s:%s", attribute, key, new_val)
+                                # else new attribute: normal behavior
                     if value:
                         node.set(attribute, value)
                     elif attribute in node.attrib:

@@ -748,6 +748,7 @@ actual arch.
             arch_tree = etree.fromstring(view.arch.encode('utf-8'))
             if self._context.get('inherit_branding'):
                 view.inherit_branding(arch_tree)
+            _logger.info("applying inheritance %s to view %s", self.xml_id, view.xml_id)
             source = view.apply_inheritance_specs(source, arch_tree)
             source = view._apply_view_inheritance(source, inherit_tree)
         return source
