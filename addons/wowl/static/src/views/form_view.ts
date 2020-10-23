@@ -35,34 +35,34 @@ class FormRenderer extends Component<FormRendererProps, OdooEnv> {
   `;
 
   static style = css`
-     .o_form_sheet_bg {
-       border-bottom: 1px solid #ddd;
-       background: url(/web/static/src/img/form_sheetbg.png);
-       .o_form_sheet {
-         margin: 12px auto;
-         min-width: 650px;
-         max-width: 1140px;
-         min-height: 330px;
-         padding: 24px;
-         background: white;
-         box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-         border: 1px solid #c8c8d3;
-         .o_group {
-           display: inline-block;
-           width: 100%;
-           margin: 10px 0;
-           .o_td_label {
-             border-right: 1px solid #ddd;
-           }
-           .o_td_label + td {
-             padding: 0 36px 0 8px;
-           }
-         }
-         .o_group.o_inner_group {
-           display: inline-table;
-         }
-       }
-     }
+    .o_form_sheet_bg {
+      border-bottom: 1px solid #ddd;
+      background: url(/web/static/src/img/form_sheetbg.png);
+      .o_form_sheet {
+        margin: 12px auto;
+        min-width: 650px;
+        max-width: 1140px;
+        min-height: 330px;
+        padding: 24px;
+        background: white;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        border: 1px solid #c8c8d3;
+        .o_group {
+          display: inline-block;
+          width: 100%;
+          margin: 10px 0;
+          .o_td_label {
+            border-right: 1px solid #ddd;
+          }
+          .o_td_label + td {
+            padding: 0 36px 0 8px;
+          }
+        }
+        .o_group.o_inner_group {
+          display: inline-table;
+        }
+      }
+    }
   `;
 }
 
@@ -73,7 +73,7 @@ class FormController extends AbstractController {
     bottomLeft: "wowl.FormView.ControlPanelBottomLeft",
   };
 
-  modelService = useService('model');
+  modelService = useService("model");
   state: ControllerState = useState({
     mode: "readonly",
   });
@@ -81,12 +81,14 @@ class FormController extends AbstractController {
 
   async willStart() {
     await super.willStart();
-    const fieldNames = ['id', 'display_name'];
+    const fieldNames = ["id", "display_name"];
     if (this.props.options.recordId) {
-      this.state.mode = 'readonly';
-      this.record = (await this.modelService(this.props.model).read([this.props.options.recordId], fieldNames))[0];
+      this.state.mode = "readonly";
+      this.record = (
+        await this.modelService(this.props.model).read([this.props.options.recordId], fieldNames)
+      )[0];
     } else {
-      this.state.mode = 'edit';
+      this.state.mode = "edit";
     }
   }
 
