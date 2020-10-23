@@ -25,6 +25,7 @@ available to the interface (and to other services).
 | [`notifications`](notifications.md)   | display a notification (or error)                          |
 | [`router`](router.md)                 | manage the url                                             |
 | [`rpc`](rpc.md)                       | perform a RPC (in other word, call the server)             |
+| [`ui`](ui.md)                         | miscellaneous ui features (block/unblock)                  |
 | [`user`](user.md)                     | keep track of user main properties (lang, ...) and context |
 | [`view_manager`](view_manager.md)     | load (and keep in cache) views information                 |
 | [`action_manager`](action_manager.md) | perform actions following user interactions                |
