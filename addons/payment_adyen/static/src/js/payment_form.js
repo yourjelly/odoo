@@ -202,7 +202,7 @@ odoo.define('payment_adyen.payment_form', require => {
                 error.event.preventDefault();
                 this._displayError(
                     _t("Server Error"),
-                    _t("An error occured when displayed this payment form."),
+                    _t("An error occurred when displayed this payment form."),
                     error.message.data.message
                 );
             });
