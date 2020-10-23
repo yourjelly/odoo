@@ -33,14 +33,15 @@ class KanbanRenderer extends Component<RendererProps, OdooEnv> {
       cursor: pointer;
 
       &:hover {
-        background-color: #EEE;
+        background-color: #eee;
       }
-    }`
+    }
+  `;
   static components = { KanbanRecord };
-  am = useService('action_manager');
+  am = useService("action_manager");
 
   _onClick(id: number) {
-    this.am.switchView('form', { recordId: id });
+    this.am.switchView("form", { recordId: id });
   }
 }
 
@@ -50,15 +51,15 @@ class KanbanController extends AbstractController {
     ...this.cpSubTemplates,
     bottomLeft: "wowl.KanbanView.ControlPanelBottomLeft",
   };
-  modelService = useService('model');
+  modelService = useService("model");
   records: any[] = [];
 
   async willStart() {
     await super.willStart();
-    const fieldTypes = ["char", "text", "integer", "float", "many2one"];
-    const fields = this.viewDescription.fields;
-    const fieldNames = Object.keys(fields).filter((fieldName: string) => fieldTypes.includes(fields[fieldName].type));
-    this.records = await this.modelService(this.props.model).searchRead([], fieldNames, { limit: 80 }) as any;
+    const fieldNames = ["display_name"];
+    this.records = (await this.modelService(this.props.model).searchRead([], fieldNames, {
+      limit: 80,
+    })) as any;
   }
 
   get rendererProps(): any {

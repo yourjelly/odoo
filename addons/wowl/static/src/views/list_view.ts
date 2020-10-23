@@ -57,18 +57,19 @@ class ListRenderer extends Component<ListRendererProps, OdooEnv> {
           cursor: pointer;
         }
       }
-    }`;
-
-    am = useService('action_manager');
-
-    _onRowClicked(id: number) {
-      this.am.switchView('form', { recordId: id });
     }
+  `;
+
+  am = useService("action_manager");
+
+  _onRowClicked(id: number) {
+    this.am.switchView("form", { recordId: id });
+  }
 }
 
 class ListController extends AbstractController {
   static components = { ...AbstractController.components, Renderer: ListRenderer };
-  modelService = useService('model');
+  modelService = useService("model");
   records: any[] = [];
   fieldNames: string[] = [];
 
@@ -76,8 +77,12 @@ class ListController extends AbstractController {
     await super.willStart();
     const fieldTypes = ["char", "text", "integer", "float", "many2one"];
     const fields = this.viewDescription.fields;
-    this.fieldNames = Object.keys(fields).filter((fieldName: string) => fieldTypes.includes(fields[fieldName].type));
-    this.records = await this.modelService(this.props.model).searchRead([], this.fieldNames, { limit: 80 }) as any;
+    this.fieldNames = Object.keys(fields).filter((fieldName: string) =>
+      fieldTypes.includes(fields[fieldName].type)
+    );
+    this.records = (await this.modelService(this.props.model).searchRead([], this.fieldNames, {
+      limit: 80,
+    })) as any;
   }
 
   get rendererProps(): ListRendererProps {
