@@ -11,19 +11,22 @@ class BatchQueryDispatcher(http.Controller):
     @http.route('/wowl/batch-query-dispatch', type='json', auth='none', methods=['POST'])
     def dispatch(self, **kw):
 
-        request.uid = request.session.uid
+        all_rpc_results = []
+        request.csrf_token()
+        cookies = {'session_id':request.session.sid }
 
         rpcs = kw['rpcs']
         for rpc in rpcs:
-
             route = rpc['rpc']['route']
             if route.startswith('/'):
                 route = route[1:]
 
-            data = {}
+            data = request.jsonrequest
+            data['csrf_token'] = request.csrf_token()
+            del data["params"]
             if "params" in rpc['rpc']:
-                data = rpc['rpc']['params']
+                data["params"] = rpc['rpc']['params']
 
-            result = requests.post('http://localhost:8069/' + route, data=data)
-            _logger.info(result)
-        _logger.info(self)
+            result = requests.post('http://localhost:8069/' + route, json=data, cookies=cookies)
+            all_rpc_results.append(json.loads(result.text)['result'])
+        return all_rpc_results
