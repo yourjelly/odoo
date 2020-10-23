@@ -18,6 +18,7 @@ declare const odoo: Odoo;
   const baseEnv = c.env;
   const browser: OdooBrowser = Object.assign({}, baseEnv.browser, {
     console: window.console,
+    location: window.location,
     open: window.open.bind(window),
     XMLHttpRequest: window.XMLHttpRequest,
   });
@@ -38,6 +39,7 @@ declare const odoo: Odoo;
     services: registries.serviceRegistry,
     actions: registries.actionRegistry,
     systray: registries.systrayRegistry,
+    errorDialogs: registries.errorDialogRegistry,
     templates,
     _t,
   });
