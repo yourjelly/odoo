@@ -2,6 +2,17 @@ import { Component, useState } from "@odoo/owl";
 import type { OdooEnv } from "../../types";
 
 export class LoadingIndicator extends Component<{}, OdooEnv> {
+  /**
+   * Loading Indicator
+   *
+   * When the user performs an action, it is good to give him some feedback that
+   * something is currently happening.  The purpose of the Loading Indicator is to
+   * display a small rectangle on the bottom right of the screen with just the
+   * text 'Loading' and the number of currently running rpcs.
+   *
+   * After a delay of 3s, if a rpc is still not completed, we also block the UI.
+   */
+
   static template = "wowl.LoadingIndicator";
   state = useState({
     count: 0,
