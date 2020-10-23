@@ -241,7 +241,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
    * @param {View[]} views
    * @returns {ViewProps}
    */
-  function _getViewProps(view: View, action: ActWindowAction, views: View[], recordId: number | null): ViewProps {
+  function _getViewProps(
+    view: View,
+    action: ActWindowAction,
+    views: View[],
+    recordId?: number | null
+  ): ViewProps {
     const target = action.target;
     const viewSwitcherEntries = views
       .filter((v) => v.multiRecord === view.multiRecord)
@@ -622,7 +627,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    *
    * @param {ViewType} viewType
    */
-  function switchView(viewType: ViewType, options: SwitchViewOptions): void {
+  function switchView(viewType: ViewType, options?: SwitchViewOptions): void {
     const controller = controllerStack[controllerStack.length - 1] as ViewController;
     if (controller.action.type !== "ir.actions.act_window") {
       throw new Error(`switchView called but the current controller isn't a view`);
@@ -637,7 +642,12 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action: controller.action,
       views: controller.views,
       view,
-      props: _getViewProps(view, controller.action, controller.views, options && options.recordId || null),
+      props: _getViewProps(
+        view,
+        controller.action,
+        controller.views,
+        (options && options.recordId) || null
+      ),
     };
     const index = view.multiRecord ? controllerStack.length - 1 : controllerStack.length;
     _updateUI(newController, { index });
