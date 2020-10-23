@@ -12,8 +12,8 @@ of interest.
 | `ROUTE_CHANGE`              | none                                                                                        | the url hash was changed                                                | wowl  |
 | `NOTIFICATIONS_CHANGE`      | list of notifications                                                                       | the list of notifications changes                                       | wowl  |
 | `RPC_ERROR`                 | error data object                                                                           | a rpc request (going through `rpc` service) fails                       | wowl  |
-| `RPC:REQUEST`               | rpc id                                                                                      | a rpc request has just started                                        | wowl  |
-| `RPC:RESPONSE`              | rpc id                                                                                      | a rpc request is completed                                      | wowl  |
+| `RPC:REQUEST`               | rpc id                                                                                      | a rpc request has just started                                          | wowl  |
+| `RPC:RESPONSE`              | rpc id                                                                                      | a rpc request is completed                                              | wowl  |
 | `ACTION_MANAGER:UPDATE`     | next rendering info                                                                         | the action manager has finished computing the next interface            | wowl  |
 | `ACTION_MANAGER:UI-UPDATED` | a mode indicating what part of the ui has been updated, and the corresponding action object | the rendering of the action requested to the action manager is rendered | wowl  |
 | `MENUS:APP-CHANGED`         | none                                                                                        | the menu service's current app has changed                              | wowl  |
