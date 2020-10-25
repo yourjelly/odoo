@@ -206,7 +206,7 @@ class Response(werkzeug.wrappers.Response):
         """
         env = request.env(user=self.uid or request.uid or odoo.SUPERUSER_ID)
         self.qcontext['request'] = request
-        return env["ir.ui.view"].render_template(self.template, self.qcontext)
+        return env["ir.ui.view"]._render_template(self.template, self.qcontext)
 
     def flatten(self):
         """ Forces the rendering of the response's template, sets the result
@@ -386,64 +386,66 @@ class WebRequest(object):
         """Called within an except block to allow converting exceptions
            to abitrary responses. Anything returned (except None) will
            be used as response."""
-        self._failed = exception  # prevent tx commit
-        if not isinstance(exception, NO_POSTMORTEM) and not isinstance(exception, werkzeug.exceptions.HTTPException):
-            odoo.tools.debugger.post_mortem( odoo.tools.config, sys.exc_info())
+        raise exception
+        #self._failed = exception  # prevent tx commit
+        #if not isinstance(exception, NO_POSTMORTEM) and not isinstance(exception, werkzeug.exceptions.HTTPException):
+        #    odoo.tools.debugger.post_mortem( odoo.tools.config, sys.exc_info())
 
-        # WARNING: do not inline or it breaks: raise...from evaluates strictly
-        # LTR so would first remove traceback then copy lack of traceback
-        new_cause = Exception().with_traceback(exception.__traceback__)
-        # tries to provide good chained tracebacks, just re-raising exception
-        # generates a weird message as stacks just get concatenated, exceptions
-        # not guaranteed to copy.copy cleanly & we want `exception` as leaf (for
-        # callers to check & look at)
-        raise exception.with_traceback(None) from new_cause
 
-        # HTTP
-        """Called within an except block to allow converting exceptions
-           to abitrary responses. Anything returned (except None) will
-           be used as response."""
-        try:
-            return super(HttpRequest, self)._handle_exception(exception)
-        except SessionExpiredException:
-            if not request.params.get('noredirect'):
-                query = werkzeug.urls.url_encode({ 'redirect': self.httprequest.url, })
-                return werkzeug.utils.redirect('/web/login?%s' % query)
+        ## WARNING: do not inline or it breaks: raise...from evaluates strictly
+        ## LTR so would first remove traceback then copy lack of traceback
+        #new_cause = Exception().with_traceback(exception.__traceback__)
+        ## tries to provide good chained tracebacks, just re-raising exception
+        ## generates a weird message as stacks just get concatenated, exceptions
+        ## not guaranteed to copy.copy cleanly & we want `exception` as leaf (for
+        ## callers to check & look at)
+        #raise exception.with_traceback(None) from new_cause
 
-        except werkzeug.exceptions.HTTPException as e:
-            return e
-        # JSON
+        ## HTTP
+        #"""Called within an except block to allow converting exceptions
+        #   to abitrary responses. Anything returned (except None) will
+        #   be used as response."""
+        #try:
+        #    return super(HttpRequest, self)._handle_exception(exception)
+        #except SessionExpiredException:
+        #    if not request.params.get('noredirect'):
+        #        query = werkzeug.urls.url_encode({ 'redirect': self.httprequest.url, })
+        #        return werkzeug.utils.redirect('/web/login?%s' % query)
 
-        """Called within an except block to allow converting exceptions
-           to arbitrary responses. Anything returned (except None) will
-           be used as response."""
-        try:
-            return super(JsonRequest, self)._handle_exception(exception)
-        except Exception:
-            if not isinstance(exception, SessionExpiredException):
-                if exception.args and exception.args[0] == "bus.Bus not available in test mode":
-                    _logger.info(exception)
-                elif isinstance(exception, (odoo.exceptions.Warning, odoo.exceptions.except_orm,
-                                          werkzeug.exceptions.NotFound)):
-                    _logger.warning(exception)
-                else:
-                    _logger.exception("Exception during JSON request handling.")
-            error = {
-                'code': 200,
-                'message': "Odoo Server Error",
-                'data': serialize_exception(exception),
-            }
-            if isinstance(exception, werkzeug.exceptions.NotFound):
-                error['http_status'] = 404
-                error['code'] = 404
-                error['message'] = "404: Not Found"
-            if isinstance(exception, AuthenticationError):
-                error['code'] = 100
-                error['message'] = "Odoo Session Invalid"
-            if isinstance(exception, SessionExpiredException):
-                error['code'] = 100
-                error['message'] = "Odoo Session Expired"
-            return self._json_response(error=error)
+        #except werkzeug.exceptions.HTTPException as e:
+        #    return e
+        ## JSON
+
+        #"""Called within an except block to allow converting exceptions
+        #   to arbitrary responses. Anything returned (except None) will
+        #   be used as response."""
+        #try:
+        #    return super(JsonRequest, self)._handle_exception(exception)
+        #except Exception:
+        #    if not isinstance(exception, SessionExpiredException):
+        #        if exception.args and exception.args[0] == "bus.Bus not available in test mode":
+        #            _logger.info(exception)
+        #        elif isinstance(exception, (odoo.exceptions.Warning, odoo.exceptions.except_orm,
+        #                                  werkzeug.exceptions.NotFound)):
+        #            _logger.warning(exception)
+        #        else:
+        #            _logger.exception("Exception during JSON request handling.")
+        #    error = {
+        #        'code': 200,
+        #        'message': "Odoo Server Error",
+        #        'data': serialize_exception(exception),
+        #    }
+        #    if isinstance(exception, werkzeug.exceptions.NotFound):
+        #        error['http_status'] = 404
+        #        error['code'] = 404
+        #        error['message'] = "404: Not Found"
+        #    if isinstance(exception, AuthenticationError):
+        #        error['code'] = 100
+        #        error['message'] = "Odoo Session Invalid"
+        #    if isinstance(exception, SessionExpiredException):
+        #        error['code'] = 100
+        #        error['message'] = "Odoo Session Expired"
+        #    return self._json_response(error=error)
 
     def rpc_debug_pre(self, params, model=None, method=None):
         # For Odoo service RPC params is a list or a tuple, for call_kw style it is a dict
@@ -624,17 +626,9 @@ class WebRequest(object):
         params.pop('session_id', None)
         self.params = params
 
-        # TODO check
-        #def _is_cors_preflight(self, endpoint):
-        #    return request.httprequest.method == 'OPTIONS' and endpoint and endpoint.routing.get('cors')
-        #if self._is_cors_preflight(request.endpoint):
-        #    headers = {
-        #        'Access-Control-Max-Age': 60 * 60 * 24,
-        #        'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept'
-        #    }
-        #    return Response(status=200, headers=headers)
-
-        # Reply to CORS requests
+        # TODO check else because this revert XMO 9e27956aa960dc9eea442418c83f5b3941b0c447
+        # Check if it works with nodb
+        # Reply to CORS requests if allowed
         if request.httprequest.method == 'OPTIONS' and request.endpoint and request.endpoint.routing.get('cors'):
             headers = {
                 'Access-Control-Max-Age': 60 * 60 * 24,
@@ -1256,6 +1250,7 @@ class Root(object):
             response = Response(result, mimetype='text/html')
         else:
             response = result
+        return response
 
     def save_session(self, httprequest, response):
         save_session = (not request.endpoint) or request.endpoint.routing.get('save_session', True)
@@ -1347,8 +1342,12 @@ class Root(object):
                 else:
                     result = self.dispatch_nodb(request)
 
+                print('-'*80)
+                print(httprequest, result)
                 response = self.get_response(httprequest, result)
+                print(httprequest, response)
                 self.save_session(httprequest, response)
+
 
             return response(environ, start_response)
 
