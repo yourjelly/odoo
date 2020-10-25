@@ -4,7 +4,6 @@
 #----------------------------------------------------------
 import ast
 import collections
-import contextlib
 import datetime
 import functools
 import hashlib
@@ -30,16 +29,15 @@ import werkzeug.datastructures
 import werkzeug.exceptions
 import werkzeug.local
 import werkzeug.routing
+import werkzeug.urls
 import werkzeug.wrappers
 import werkzeug.wsgi
-from werkzeug import urls
 
 try:
-    # werkzeug >= 0.15
+    # Since werkzeug >= 0.15 proxy has moved to middleware and doesn't trust
+    # host header by default. We emulate < 0.15 behaviour.
     from werkzeug.middleware.proxy_fix import ProxyFix as ProxyFix_
-    # 0.15 also supports port and prefix, but 0.14 only forwarded for, proto
-    # and host so replicate that
-    ProxyFix = lambda app: ProxyFix_(app, x_for=1, x_proto=1, x_host=1)
+    ProxyFix = lambda app: ProxyFix_(app, x_host=1)
 except ImportError:
     # werkzeug < 0.15
     from werkzeug.contrib.fixers import ProxyFix
@@ -68,10 +66,12 @@ _logger_rpc_response_flag = _logger_rpc_response.isEnabledFor(logging.DEBUG) # s
 # Constants
 #----------------------------------------------------------
 
-# One week cache for static content (static files in apps, library files, ...)
-# Safe resources may use what google page speed recommends (1 year)
-# (attachments with unique hash in the URL, ...)
+
+# Cache for static content from the filesystem is set to one week.
 STATIC_CACHE = 3600 * 24 * 7
+
+# Cache for content where the url uniquely identify the content (usually using
+# a hash) may use what google page speed recommends (1 year)
 STATIC_CACHE_LONG = 3600 * 24 * 365
 
 # To remove when corrected in Babel
@@ -112,7 +112,7 @@ def local_redirect(path, query=None, keep_hash=False, code=303):
     if not query:
         query = {}
     if query:
-        url += '?' + urls.url_encode(query)
+        url += '?' + werkzeug.urls.url_encode(query)
     return werkzeug.utils.redirect(url, code)
 
 def redirect_with_hash(url, code=303):
@@ -569,9 +569,6 @@ class WebRequest(object):
         :returns: ASCII token string
         """
         token = self.session.sid
-        # TODO check OLD
-        max_ts = '' if not time_limit else int(time.time() + time_limit)
-        # TODO check NEW
         # if no `time_limit` => distant 1y expiry (31536000) so max_ts acts as salt, e.g. vs BREACH
         max_ts = int(time.time() + (time_limit or 31536000))
 
@@ -1522,7 +1519,7 @@ def send_file(filepath_or_fp, mimetype=None, as_attachment=False, filename=None,
 
 def content_disposition(filename):
     filename = odoo.tools.ustr(filename)
-    escaped = urls.url_quote(filename, safe='')
+    escaped = werkzeug.urls.url_quote(filename, safe='')
 
     return "attachment; filename*=UTF-8''%s" % escaped
 
