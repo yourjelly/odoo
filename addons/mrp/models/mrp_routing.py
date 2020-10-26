@@ -21,8 +21,7 @@ class MrpRoutingWorkcenter(models.Model):
         help="The Bill of Material this operation is linked to")
     company_id = fields.Many2one(
         'res.company', 'Company',
-        readonly=True, store=True,
-        default=lambda self: self.env.company)
+        store=True, default=lambda self: self.env.company)
     worksheet_type = fields.Selection([
         ('pdf', 'PDF'), ('google_slide', 'Google Slide'), ('text', 'Text')],
         string="Work Sheet", default="pdf",
