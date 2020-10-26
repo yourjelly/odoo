@@ -1300,6 +1300,7 @@ class HttpCaseCommon(BaseCase):
         for thread in request_threads:
             thread.join(timeout - (time.time() - start_time))
 
+        time.sleep(timeout)
         request_threads = get_http_request_threads()
         for thread in request_threads:
             self._logger.info("Stop waiting for thread %s handling request for url %s",
