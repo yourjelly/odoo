@@ -30,11 +30,30 @@ class WebsiteVisitor(models.Model):
     _description = 'Website Visitor'
     _order = 'last_connection_datetime DESC'
 
-    name = fields.Char('Name')
-    access_token = fields.Char(required=True, default=lambda x: uuid.uuid4().hex, index=False, copy=False, groups='base.group_website_publisher')
+    #res.identity
+    or res.person or res.actor
+
     active = fields.Boolean('Active', default=True)
+
+    # Common (sync with partner if exist)
+
+    name = fields.Char('Name')
+
+    # If website
+
     website_id = fields.Many2one('website', "Website", readonly=True)
-    partner_id = fields.Many2one('res.partner', string="Linked Partner", help="Partner of the last logged in user.")
+    access_token = fields.Char(required=True, default=lambda x: uuid.uuid4().hex, index=False, copy=False, groups='base.group_website_publisher') ->
+
+    # If email
+
+    email = fields.Char(string='Email', compute='_compute_email_phone') -> can be empty
+
+    # If mobile (sync with partner if exists)
+
+    mobile = fields.Char(string='Mobile Phone', compute='_compute_email_phone')
+
+    # If partner, email mobile name can be null
+    partner_id = fields.Many2one('res.partner', string="Linked Partner", help="Partner of the last logged in user.") UNIQUE ?
     partner_image = fields.Binary(related='partner_id.image_1920')
 
     # localisation and info
@@ -42,22 +61,21 @@ class WebsiteVisitor(models.Model):
     country_flag = fields.Char(related="country_id.image_url", string="Country Flag")
     lang_id = fields.Many2one('res.lang', string='Language', help="Language from the website when visitor has been created")
     timezone = fields.Selection(_tz_get, string='Timezone')
-    email = fields.Char(string='Email', compute='_compute_email_phone')
-    mobile = fields.Char(string='Mobile Phone', compute='_compute_email_phone')
-
-    # Visit fields
-    visit_count = fields.Integer('Number of visits', default=1, readonly=True, help="A new visit is considered if last connection was more than 8 hours ago.")
-    website_track_ids = fields.One2many('website.track', 'visitor_id', string='Visited Pages History', readonly=True)
-    visitor_page_count = fields.Integer('Page Views', compute="_compute_page_statistics", help="Total number of visits on tracked pages")
-    page_ids = fields.Many2many('website.page', string="Visited Pages", compute="_compute_page_statistics")
-    page_count = fields.Integer('# Visited Pages', compute="_compute_page_statistics", help="Total number of tracked page visited")
-    last_visited_page_id = fields.Many2one('website.page', string="Last Visited Page", compute="_compute_last_visited_page_id")
 
     # Time fields
-    create_date = fields.Datetime('First connection date', readonly=True)
     last_connection_datetime = fields.Datetime('Last Connection', default=fields.Datetime.now, help="Last page view date", readonly=True)
     time_since_last_action = fields.Char('Last action', compute="_compute_time_statistics", help='Time since last page view. E.g.: 2 minutes ago')
     is_connected = fields.Boolean('Is connected ?', compute='_compute_time_statistics', help='A visitor is considered as connected if his last page view was within the last 5 minutes.')
+    create_date = fields.Datetime('First connection date', readonly=True)
+
+
+    # Visit fields -> Website only
+    track_ids = fields.One2many('website.track', 'visitor_id', string='Visited Pages History', readonly=True)
+    page_ids = fields.Many2many('website.page', string="Visited Pages", compute="_compute_page_statistics")
+    page_count = fields.Integer('# Visited Pages', compute="_compute_page_statistics", help="Total number of tracked page visited")
+    visit_count = fields.Integer('Number of visits', default=1, readonly=True, help="A new visit is considered if last connection was more than 8 hours ago.")
+    visitor_page_count = fields.Integer('Page Views', compute="_compute_page_statistics", help="Total number of visits on tracked pages")
+    last_visited_page_id = fields.Many2one('website.page', string="Last Visited Page", compute="_compute_last_visited_page_id")
 
     _sql_constraints = [
         ('access_token_unique', 'unique(access_token)', 'Access token should be unique.'),

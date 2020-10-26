@@ -39,93 +39,64 @@ class Message(models.Model):
                 res['author_id'] = author_id
         return res
 
+
+    # related document
+    model = fields.Char('Related Document Model', index=True) -> mail.channel ? -> ir.model_id ?
+    res_id = fields.Many2oneReference('Related Document ID', ind ex=True, model_field='model') -> id
+    record_name = fields.Char('Message Record Name', help="Name get of the related document.")
+
+    # removed channel_ids only one object
+
+    # Qui envoie ?
+    partner_id -> .... peut etre null email_from
+    email_from -> un exception
+
+    author_avatar = fields.Binary("Author's avatar", related='author_id.image_128', readonly=False)
+    # recipients: include inactive partners (they may have been archived after
+    # the message was sent, but they should remain visible in the relation)
+
     # content
     subject = fields.Char('Subject')
     date = fields.Datetime('Date', default=fields.Datetime.now)
     body = fields.Html('Contents', default='', sanitize_style=True)
-    description = fields.Char(
-        'Short description', compute="_compute_description",
-        help='Message description: either the subject, or the beginning of the body')
-    attachment_ids = fields.Many2many(
-        'ir.attachment', 'message_attachment_rel',
-        'message_id', 'attachment_id',
-        string='Attachments',
-        help='Attachments are linked to a document through model / res_id and to the message '
-             'through this field.')
-    parent_id = fields.Many2one(
-        'mail.message', 'Parent Message', index=True, ondelete='set null',
-        help="Initial thread message.")
+    description = fields.Char( 'Short description', compute="_compute_description", help='Message description: either the subject, or the beginning of the body')
+    attachment_ids = fields.Many2many( 'ir.attachment', 'message_attachment_rel', 'message_id', 'attachment_id', string='Attachments', help='Attachments are linked to a document through model / res_id and to the message ' 'through this field.')
+    parent_id = fields.Many2one( 'mail.message', 'Parent Message', index=True, ondelete='set null', help="Initial thread message.")
     child_ids = fields.One2many('mail.message', 'parent_id', 'Child Messages')
-    # related document
-    model = fields.Char('Related Document Model', index=True)
-    res_id = fields.Many2oneReference('Related Document ID', index=True, model_field='model')
-    record_name = fields.Char('Message Record Name', help="Name get of the related document.")
+    message_id = fields.Char('Message-Id', help='Message unique identifier', index=True, readonly=1, copy=False)
+
+
     # characteristics
     message_type = fields.Selection([
-        ('email', 'Email'),
+        ('email', 'Email'),i
         ('comment', 'Comment'),
-        ('notification', 'System notification'),
-        ('user_notification', 'User Specific Notification')],
-        'Type', required=True, default='email',
-        help="Message type: email for email message, notification for system "
-             "message, comment for other messages such as user replies",
-        )
-    subtype_id = fields.Many2one('mail.message.subtype', 'Subtype', ondelete='set null', index=True)
-    mail_activity_type_id = fields.Many2one(
-        'mail.activity.type', 'Mail Activity Type',
-        index=True, ondelete='set null')
+        ('notification', 'System notification ????'),
+        ('user_notification', 'User Specific Notification ???')], 'Type', required=True, default='email', help="Message type: email for email message, notification for system " "message, comment for other messages such as user replies",)
+    subtype_id = fields.Many2one('mail.message.subtype', 'Subtype', ondelete='set null', index=True) null //
+    mail_activity_type_id = fields.Many2one( 'mail.activity.type', 'Mail Activity Type', index=True, ondelete='set null')
     is_internal = fields.Boolean('Employee Only', help='Hide to public / portal users, independently from subtype configuration.')
-    # origin
-    email_from = fields.Char('From', help="Email address of the sender. This field is set when no matching partner is found and replaces the author_id field in the chatter.")
-    author_id = fields.Many2one(
-        'res.partner', 'Author', index=True, ondelete='set null',
-        help="Author of the message. If not set, email_from may hold an email address that did not match any partner.")
-    author_avatar = fields.Binary("Author's avatar", related='author_id.image_128', readonly=False)
-    # recipients: include inactive partners (they may have been archived after
-    # the message was sent, but they should remain visible in the relation)
+
+    # je veux envoyer en plus des followers
     partner_ids = fields.Many2many('res.partner', string='Recipients', context={'active_test': False})
     # list of partner having a notification. Caution: list may change over time because of notif gc cron.
     # mainly usefull for testing
-    notified_partner_ids = fields.Many2many(
-        'res.partner', 'mail_message_res_partner_needaction_rel', string='Partners with Need Action',
-        context={'active_test': False}, depends=['notification_ids'])
-    needaction = fields.Boolean(
-        'Need Action', compute='_get_needaction', search='_search_needaction',
-        help='Need Action')
-    has_error = fields.Boolean(
-        'Has error', compute='_compute_has_error', search='_search_has_error',
-        help='Has error')
-    channel_ids = fields.Many2many(
-        'mail.channel', 'mail_message_mail_channel_rel', string='Channels')
+    notified_partner_ids = fields.Many2many( 'res.partner', 'mail_message_res_partner_needaction_rel', string='Partners with Need Action', context={'active_test': False}, depends=['notification_ids'])
+    notification_ids = fields.One2many( 'mail.notification', 'mail_message_id', 'Notifications', auto_join=True, copy=False, depends=['notified_partner_ids'])
+
+    needaction = fields.Boolean( 'Need Action', compute='_get_needaction', search='_search_needaction', help='Need Action')
+    has_error = fields.Boolean( 'Has error', compute='_compute_has_error', search='_search_has_error', help='Has error')
     # notifications
-    notification_ids = fields.One2many(
-        'mail.notification', 'mail_message_id', 'Notifications',
-        auto_join=True, copy=False, depends=['notified_partner_ids'])
     # user interface
-    starred_partner_ids = fields.Many2many(
-        'res.partner', 'mail_message_res_partner_starred_rel', string='Favorited By')
-    starred = fields.Boolean(
-        'Starred', compute='_get_starred', search='_search_starred', compute_sudo=False,
-        help='Current user has a starred notification linked to this message')
+    starred = fields.Boolean( 'Starred', compute='_get_starred', search='_search_starred', compute_sudo=False, help='Current user has a starred notification linked to this message')
+    starred_partner_ids = fields.Many2many( 'res.partner', 'mail_message_res_partner_starred_rel', string='Favorited By')
     # tracking
-    tracking_value_ids = fields.One2many(
-        'mail.tracking.value', 'mail_message_id',
-        string='Tracking values',
-        groups="base.group_no_one",
-        help='Tracked values are stored in a separate model. This field allow to reconstruct '
-             'the tracking and to generate statistics on the model.')
+    tracking_value_ids = fields.One2many( 'mail.tracking.value', 'mail_message_id', string='Tracking values', groups="base.group_no_one", help='Tracked values are stored in a separate model. This field allow to reconstruct ' 'the tracking and to generate statistics on the model.')
     # mail gateway
-    no_auto_thread = fields.Boolean(
-        'No threading for answers',
-        help='Answers do not go in the original document discussion thread. This has an impact on the generated message-id.')
-    message_id = fields.Char('Message-Id', help='Message unique identifier', index=True, readonly=1, copy=False)
+    no_auto_thread = fields.Boolean( 'No threading for answers', help='Answers do not go in the original document discussion thread. This has an impact on the generated message-id.')
     reply_to = fields.Char('Reply-To', help='Reply email address. Setting the reply_to bypasses the automatic thread creation.')
     mail_server_id = fields.Many2one('ir.mail_server', 'Outgoing mail server')
     # moderation
-    moderation_status = fields.Selection([
-        ('pending_moderation', 'Pending Moderation'),
-        ('accepted', 'Accepted'),
-        ('rejected', 'Rejected')], string="Moderation Status", index=True)
+    moderation_status = fields.Selection([ ('pending_moderation', 'Pending Moderation'), ('accepted', 'Accepted'), ('rejected', 'Rejected')], string="Moderation Status", index=True)
     moderator_id = fields.Many2one('res.users', string="Moderated By", index=True)
     need_moderation = fields.Boolean('Need moderation', compute='_compute_need_moderation', search='_search_need_moderation')
     # keep notification layout informations to be able to generate mail again

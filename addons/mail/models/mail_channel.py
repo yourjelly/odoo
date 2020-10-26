@@ -16,8 +16,8 @@ MODERATION_FIELDS = ['moderation', 'moderator_ids', 'moderation_ids', 'moderatio
 _logger = logging.getLogger(__name__)
 
 
-class ChannelPartner(models.Model):
-    _name = 'mail.channel.partner'
+class ChannelPartner(models.Model): -> move to follower
+    _name = 'mail.channel.partner' -> merge to
     _description = 'Listeners of a Channel'
     _table = 'mail_channel_partner'
     _rec_name = 'partner_id'
@@ -26,27 +26,12 @@ class ChannelPartner(models.Model):
     partner_id = fields.Many2one('res.partner', string='Recipient', ondelete='cascade')
     partner_email = fields.Char('Email', related='partner_id.email', readonly=False)
     channel_id = fields.Many2one('mail.channel', string='Channel', ondelete='cascade')
+
     fetched_message_id = fields.Many2one('mail.message', string='Last Fetched')
     seen_message_id = fields.Many2one('mail.message', string='Last Seen')
     fold_state = fields.Selection([('open', 'Open'), ('folded', 'Folded'), ('closed', 'Closed')], string='Conversation Fold State', default='open')
     is_minimized = fields.Boolean("Conversation is minimized")
     is_pinned = fields.Boolean("Is pinned on the interface", default=True)
-
-
-class Moderation(models.Model):
-    _name = 'mail.moderation'
-    _description = 'Channel black/white list'
-
-    email = fields.Char(string="Email", index=True, required=True)
-    status = fields.Selection([
-        ('allow', 'Always Allow'),
-        ('ban', 'Permanent Ban')],
-        string="Status", required=True)
-    channel_id = fields.Many2one('mail.channel', string="Channel", index=True, required=True)
-
-    _sql_constraints = [
-        ('channel_email_uniq', 'unique (email,channel_id)', 'The email address must be unique per channel !')
-    ]
 
 
 class Channel(models.Model):
@@ -58,28 +43,9 @@ class Channel(models.Model):
     _mail_post_access = 'read'
     _inherit = ['mail.thread', 'mail.alias.mixin']
 
-    MAX_BOUNCE_LIMIT = 10
-
-    @api.model
-    def default_get(self, fields):
-        res = super(Channel, self).default_get(fields)
-        if not res.get('alias_contact') and (not fields or 'alias_contact' in fields):
-            res['alias_contact'] = 'everyone' if res.get('public', 'private') == 'public' else 'followers'
-        return res
-
-    def _default_channel_last_seen_partner_ids(self):
-        return [(0, 0, {"partner_id": self.env.user.partner_id.id})]
-
-    def _get_default_image(self):
-        image_path = modules.get_module_resource('mail', 'static/src/img', 'groupdefault.png')
-        return base64.b64encode(open(image_path, 'rb').read())
-
     name = fields.Char('Name', required=True, translate=True)
     active = fields.Boolean(default=True, help="Set active to false to hide the channel without removing it.")
-    channel_type = fields.Selection([
-        ('chat', 'Chat Discussion'),
-        ('channel', 'Channel')],
-        'Channel Type', default='channel')
+    channel_type = fields.Selection([ ('chat', 'Chat Discussion'), ('channel', 'Channel')], 'Channel Type', default='channel')
     is_chat = fields.Boolean(string='Is a chat', compute='_compute_is_chat', default=False)
     description = fields.Text('Description')
     uuid = fields.Char('UUID', size=50, index=True, default=lambda self: str(uuid4()), copy=False)
@@ -91,32 +57,17 @@ class Channel(models.Model):
     channel_message_ids = fields.Many2many('mail.message', 'mail_message_mail_channel_rel')
     is_member = fields.Boolean('Is a member', compute='_compute_is_member')
     # access
-    public = fields.Selection([
-        ('public', 'Everyone'),
-        ('private', 'Invited people only'),
-        ('groups', 'Selected group of users')],
-        'Privacy', required=True, default='groups',
-        help='This group is visible by non members. Invisible groups can add members through the invite button.')
-    group_public_id = fields.Many2one('res.groups', string='Authorized Group',
-                                      default=lambda self: self.env.ref('base.group_user'))
-    group_ids = fields.Many2many(
-        'res.groups', string='Auto Subscription',
-        help="Members of those groups will automatically added as followers. "
-             "Note that they will be able to manage their subscription manually "
-             "if necessary.")
+    public = fields.Selection([ ('public', 'Everyone'), ('private', 'Invited people only'), ('groups', 'Selected group of users')], 'Privacy', required=True, default='groups', help='This group is visible by non members. Invisible groups can add members through the invite button.')
+    group_public_id = fields.Many2one('res.groups', string='Authorized Group', default=lambda self: self.env.ref('base.group_user'))
+    group_ids = fields.Many2many( 'res.groups', string='Auto Subscription', help="Members of those groups will automatically added as followers. " "Note that they will be able to manage their subscription manually " "if necessary.")
     image_128 = fields.Image("Image", max_width=128, max_height=128, default=_get_default_image)
-    is_subscribed = fields.Boolean(
-        'Is Subscribed', compute='_compute_is_subscribed')
+    is_subscribed = fields.Boolean( 'Is Subscribed', compute='_compute_is_subscribed')
     # moderation
     moderation = fields.Boolean(string='Moderate this channel')
     moderator_ids = fields.Many2many('res.users', 'mail_channel_moderator_rel', string='Moderators')
     is_moderator = fields.Boolean(help="Current user is a moderator of the channel", string='Moderator', compute="_compute_is_moderator")
-    moderation_ids = fields.One2many(
-        'mail.moderation', 'channel_id', string='Moderated Emails',
-        groups="base.group_user")
-    moderation_count = fields.Integer(
-        string='Moderated emails count', compute='_compute_moderation_count',
-        groups="base.group_user")
+    moderation_ids = fields.One2many( 'mail.moderation', 'channel_id', string='Moderated Emails', groups="base.group_user")
+    moderation_count = fields.Integer( string='Moderated emails count', compute='_compute_moderation_count', groups="base.group_user")
     moderation_notify = fields.Boolean(string="Automatic notification", help="People receive an automatic notification about their message being waiting for moderation.")
     moderation_notify_msg = fields.Text(string="Notification message")
     moderation_guidelines = fields.Boolean(string="Send guidelines to new subscribers", help="Newcomers on this moderated channel will automatically receive the guidelines.")

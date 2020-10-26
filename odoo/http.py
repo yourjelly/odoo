@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import engineio
 #----------------------------------------------------------
 # Odoo HTTP layer
 #----------------------------------------------------------
 import ast
 import collections
+
 import datetime
 import functools
 import hashlib
@@ -62,10 +64,11 @@ _logger_rpc_response = logging.getLogger(__name__ + '.rpc.response')
 _logger_rpc_request_flag = _logger_rpc_request.isEnabledFor(logging.DEBUG)
 _logger_rpc_response_flag = _logger_rpc_response.isEnabledFor(logging.DEBUG) # should rather be named rpc content
 
+
+
 #----------------------------------------------------------
 # Constants
 #----------------------------------------------------------
-
 
 # Cache for static content from the filesystem is set to one week.
 STATIC_CACHE = 3600 * 24 * 7
@@ -1131,6 +1134,9 @@ mimetypes.add_type('application/x-font-ttf', '.ttf')
 # Add potentially missing (detected on windows) svg mime types
 mimetypes.add_type('image/svg+xml', '.svg')
 
+class Websocket(object):
+
+
 class DisableCacheMiddleware(object):
     def __init__(self, app):
         self.app = app
@@ -1289,6 +1295,11 @@ class Root(object):
         Performs the actual WSGI dispatching for the application.
         """
         try:
+
+
+
+
+
             httprequest = werkzeug.wrappers.Request(environ)
             httprequest.app = self
             httprequest.parameter_storage_class = werkzeug.datastructures.ImmutableOrderedMultiDict
@@ -1342,10 +1353,10 @@ class Root(object):
                 else:
                     result = self.dispatch_nodb(request)
 
-                print('-'*80)
-                print(httprequest, result)
+                #print('-'*80)
+                #print(httprequest, result)
                 response = self.get_response(httprequest, result)
-                print(httprequest, response)
+                #print(httprequest, response)
                 self.save_session(httprequest, response)
 
 
@@ -1356,6 +1367,35 @@ class Root(object):
 
     def __call__(self, environ, start_response):
         """ WSGI entry point."""
+        #const socket = new WebSocket('ws://localhost:8069/ws');
+
+        if environ['PATH_INFO']=='/ws':
+            pass
+
+#            class Input(object):
+#                def __init__(self, socket):
+#                    self.socket = socket
+#                def get_socket(self):
+#                    return self.socket
+#            eio = engineio.Server()
+#            #@eio.on('connect')
+#            #@eio.on('connect')
+#            @eio.on('connect')
+#            def on_connect(sid, environ):
+#                print('A client connected!', sid, environ)
+#
+#            @eio.on('message')
+#            def on_message(sid, data):
+#                print('I received a message!')
+#
+#            @eio.on('disconnect')
+#            def on_disconnect(sid):
+#                print('Client disconnected!')
+#            environ['eventlet.input'] = Input(environ['wsgi.input'])
+#            #import pudb; pu.db
+#            r = eio.handle_request(environ, start_response)
+#            print (r, "DONE")
+#            return r
 
         # Lazy load addons
         if not self._loaded:

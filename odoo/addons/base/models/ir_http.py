@@ -242,7 +242,7 @@ class IrHttp(models.AbstractModel):
             return processing
 
         try:
-            print( '_dispatch', request, func, arguments, auth_method)
+            #print( '_dispatch', request, func, arguments, auth_method)
             result = request.dispatch(func, arguments, auth_method)
             if isinstance(result, Exception):
                 raise result

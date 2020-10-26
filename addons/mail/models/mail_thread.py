@@ -76,39 +76,17 @@ class MailThread(models.AbstractModel):
     _mail_post_access = 'write'  # access required on the document to post on it
     _Attachment = namedtuple('Attachment', ('fname', 'content', 'info'))
 
-    message_is_follower = fields.Boolean(
-        'Is Follower', compute='_compute_is_follower', search='_search_is_follower')
-    message_follower_ids = fields.One2many(
-        'mail.followers', 'res_id', string='Followers', groups='base.group_user')
-    message_partner_ids = fields.Many2many(
-        comodel_name='res.partner', string='Followers (Partners)',
-        compute='_get_followers', search='_search_follower_partners',
-        groups='base.group_user')
-    message_channel_ids = fields.Many2many(
-        comodel_name='mail.channel', string='Followers (Channels)',
-        compute='_get_followers', search='_search_follower_channels',
-        groups='base.group_user')
-    message_ids = fields.One2many(
-        'mail.message', 'res_id', string='Messages',
-        domain=lambda self: [('message_type', '!=', 'user_notification')], auto_join=True)
-    message_unread = fields.Boolean(
-        'Unread Messages', compute='_get_message_unread',
-        help="If checked, new messages require your attention.")
-    message_unread_counter = fields.Integer(
-        'Unread Messages Counter', compute='_get_message_unread',
-        help="Number of unread messages")
-    message_needaction = fields.Boolean(
-        'Action Needed', compute='_get_message_needaction', search='_search_message_needaction',
-        help="If checked, new messages require your attention.")
-    message_needaction_counter = fields.Integer(
-        'Number of Actions', compute='_get_message_needaction',
-        help="Number of messages which requires an action")
-    message_has_error = fields.Boolean(
-        'Message Delivery error', compute='_compute_message_has_error', search='_search_message_has_error',
-        help="If checked, some messages have a delivery error.")
-    message_has_error_counter = fields.Integer(
-        'Number of errors', compute='_compute_message_has_error',
-        help="Number of messages with delivery error")
+    message_is_follower = fields.Boolean('Is Follower', compute='_compute_is_follower', search='_search_is_follower')
+    message_follower_ids = fields.One2many('mail.followers', 'res_id', string='Followers', groups='base.group_user')
+    message_partner_ids = fields.Many2many(comodel_name='res.partner', string='Followers (Partners)',compute='_get_followers', search='_search_follower_partners',groups='base.group_user')
+    message_channel_ids = fields.Many2many(comodel_name='mail.channel', string='Followers (Channels)',compute='_get_followers', search='_search_follower_channels',groups='base.group_user')
+    message_ids = fields.One2many( 'mail.message', 'res_id', string='Messages', domain=lambda self: [('message_type', '!=', 'user_notification')], auto_join=True)
+    message_unread = fields.Boolean( 'Unread Messages', compute='_get_message_unread', help="If checked, new messages require your attention.")
+    message_unread_counter = fields.Integer( 'Unread Messages Counter', compute='_get_message_unread', help="Number of unread messages")
+    message_needaction = fields.Boolean( 'Action Needed', compute='_get_message_needaction', search='_search_message_needaction', help="If checked, new messages require your attention.")
+    message_needaction_counter = fields.Integer( 'Number of Actions', compute='_get_message_needaction', help="Number of messages which requires an action")
+    message_has_error = fields.Boolean( 'Message Delivery error', compute='_compute_message_has_error', search='_search_message_has_error', help="If checked, some messages have a delivery error.")
+    message_has_error_counter = fields.Integer( 'Number of errors', compute='_compute_message_has_error', help="Number of messages with delivery error")
     message_attachment_count = fields.Integer('Attachment Count', compute='_compute_message_attachment_count', groups="base.group_user")
     message_main_attachment_id = fields.Many2one(string="Main Attachment", comodel_name='ir.attachment', index=True, copy=False)
 

@@ -24,23 +24,24 @@ class Followers(models.Model):
     # Note. There is no integrity check on model names for performance reasons.
     # However, followers of unlinked models are deleted by models themselves
     # (see 'ir.model' inheritance).
-    res_model = fields.Char(
-        'Related Document Model Name', required=True, index=True)
-    res_id = fields.Many2oneReference(
-        'Related Document ID', index=True, help='Id of the followed resource', model_field='res_model')
-    partner_id = fields.Many2one(
-        'res.partner', string='Related Partner', ondelete='cascade', index=True)
-    channel_id = fields.Many2one(
-        'mail.channel', string='Listener', ondelete='cascade', index=True)
-    subtype_ids = fields.Many2many(
-        'mail.message.subtype', string='Subtype',
-        help="Message subtypes followed, meaning subtypes that will be pushed onto the user's Wall.")
-    name = fields.Char('Name', compute='_compute_related_fields',
-                       help="Name of the related partner (if exist) or the related channel")
-    email = fields.Char('Email', compute='_compute_related_fields',
-                        help="Email of the related partner (if exist) or False")
-    is_active = fields.Boolean('Is Active', compute='_compute_related_fields',
-                               help="If the related partner is active (if exist) or if related channel exist")
+    res_model = fields.Char( 'Related Document Model Name', required=True, index=True)
+    res_id = fields.Many2oneReference( 'Related Document ID', index=True, help='Id of the followed resource', model_field='res_model')
+
+    partner_id = fields.Many2one( 'res.partner', string='Related Partner', ondelete='cascade', index=True)
+
+    # Remove
+    channel_id = fields.Many2one( 'mail.channel', string='Listener', ondelete='cascade', index=True) ->>>>
+
+    subtype_ids = fields.Many2many( 'mail.message.subtype', string='Subtype', help="Message subtypes followed, meaning subtypes that will be pushed onto the user's Wall.")
+    name = fields.Char('Name', compute='_compute_related_fields', help="Name of the related partner (if exist) or the related channel")
+    email = fields.Char('Email', compute='_compute_related_fields', help="Email of the related partner (if exist) or False")
+    is_active = fields.Boolean('Is Active', compute='_compute_related_fields', help="If the related partner is active (if exist) or if related channel exist")
+
+
+
+    ..
+
+    .
 
     def _invalidate_documents(self, vals_list=None):
         """ Invalidate the cache of the documents followed by ``self``.
