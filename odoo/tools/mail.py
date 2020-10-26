@@ -557,6 +557,13 @@ def email_escape_char(email_address):
 def decode_message_header(message, header, separator=' '):
     return separator.join(h for h in message.get_all(header, []) if h)
 
+
+def email_domain(email):
+    """Return the domain of the given email."""
+    *_, domain = email.rpartition('@')
+    return domain
+
+
 def formataddr(pair, charset='utf-8'):
     """Pretty format a 2-tuple of the form (realname, email_address).
 
