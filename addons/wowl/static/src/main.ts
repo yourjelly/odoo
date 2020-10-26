@@ -7,7 +7,8 @@ import { Odoo, RuntimeOdoo, OdooBrowser } from "./types";
 
 // remove some day
 import "./demo_data";
-import {BatchStrategy, RPCBatchManager} from "./utils/rpc/rpc_batcher";
+// import { BatchStrategy, RPCBatchManager } from "./utils/rpc/rpc_batcher";
+// import { useService } from "./core/hooks";
 
 const { whenReady, loadFile } = owl.utils;
 
@@ -61,29 +62,35 @@ declare const odoo: Odoo;
     server_version_info: sessionInfo.server_version_info,
   };
 
-  console.log("It is ready");
+  /*
+  const params1 = {"model":"hr.employee","method":"search_read","args":[],"kwargs":{"context":{"lang":"en_US","tz":"Europe/Brussels","uid":2,"allowed_company_ids":[1]},"domain":[],"fields":["display_name"],"limit":80}}
+  const params2 = {"model":"hr.employee","method":"search_read","args":[],"kwargs":{"context":{"lang":"en_US","tz":"Europe/Brussels","uid":2,"allowed_company_ids":[1]},"domain":[],"fields":["marital"],"limit":80}}
+  const params3 = {"model":"hr.employee","method":"search_read","args":[],"kwargs":{"context":{"lang":"en_US","tz":"Europe/Brussels","uid":2,"allowed_company_ids":[1]},"domain":[],"fields":["user_id"],"limit":80}}
 
-  const params = {"args":[[2],["name","parent_id","sequence","complete_name","action","web_icon","web_icon_data","groups_id","child_id","display_name"]],"model":"ir.ui.menu","method":"read","kwargs":{"context":{"bin_size":true,"lang":"en_US","tz":"Europe/Brussels","uid":2,"allowed_company_ids":[1],"params":{"action":27,"cids":1,"id":2,"menu_id":4,"model":"ir.ui.menu","view_type":"form"},"ir.ui.menu.full_list":true}}}
 
-  const batch = new RPCBatchManager(
-    {
-      strategy: BatchStrategy.Time,
-      strategyValue: 50,
-    }
-  );
+  // /web/dataset/call_kw/hr.employee/search_read
 
-  // const rpc = useService('rpc');
-  // const result = await rpc("/my/route", { some: "value" });
-  batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
-  batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
-  batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
-  await setTimeout(() => {
-    batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
-    batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
-    batch.rpc("/web/dataset/call_kw/ir.ui.menu/read", params);
-  }, 150);
 
-  console.log("Aaaand it's done !");
+  const batch = new RPCBatchManager({
+    strategy: BatchStrategy.Tick,
+    strategyValue: 1,
+  }, "/wowl/batch-models");
+
+
+  const p1 = batch.rpc('/web/dataset/call_kw/hr.employee/search_read', params1);
+  const p2 = batch.rpc('/web/dataset/call_kw/hr.employee/search_read', params2);
+  const p3 = batch.rpc('/web/dataset/call_kw/hr.employee/search_read', params3);
+
+  console.log(p1);
+  console.log(p2);
+  console.log(p3);
+
+
+  console.log(await p3);
+  console.log(p1);
+  console.log(p2);
+  console.log(p3);
+   */
 })();
 
 async function loadTemplates(): Promise<string> {

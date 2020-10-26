@@ -1,6 +1,7 @@
 import { Component } from "@odoo/owl";
-import { Service, OdooEnv } from "../types";
+import { OdooEnv, Service } from "../types";
 import { RPC } from "./rpc";
+import { BatchStrategy, RPCBatchManager } from "../utils/rpc/rpc_batcher";
 
 export interface DBRecord {
   id: number;
@@ -125,6 +126,11 @@ function searchRead(rpc: RPC, env: OdooEnv, model: string): Model["searchRead"] 
   };
 }
 
+const batcher = new RPCBatchManager(
+  { strategy: BatchStrategy.Tick, strategyValue: 1 },
+  "/wowl/batch-models"
+);
+
 function callModel(rpc: RPC, env: OdooEnv, model: string): Model["call"] {
   const user = env.services.user;
   return (method, args = [], kwargs = {}) => {
@@ -135,12 +141,18 @@ function callModel(rpc: RPC, env: OdooEnv, model: string): Model["call"] {
     // }
     const fullContext = Object.assign({}, user.context, kwargs.context || {});
     const fullKwargs = Object.assign({}, kwargs, { context: fullContext });
-    return rpc(url, {
+    return batcher.rpc(url, {
       model: model,
       method,
       args: args,
       kwargs: fullKwargs,
     });
+    // return rpc(url, {
+    //   model: model,
+    //   method,
+    //   args: args,
+    //   kwargs: fullKwargs,
+    // });
   };
 }
 
