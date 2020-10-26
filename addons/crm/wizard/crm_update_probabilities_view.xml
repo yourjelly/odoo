@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="crm_update_probabilities_view_form" model="ir.ui.view">
+        <field name="name">crm.update.probabilities.form</field>
+        <field name="model">crm.lead.pls.update</field>
+        <field name="arch" type="xml">
+            <form string="Update Probabilities">
+                <span>Confirm to update the probabilities of all
+                     the Leads/Opportunities created since <field name="pls_start_date"/>.</span><br/>
+                <span>This can take up to several minutes depending on the number of Leads/Opportunities you have.</span>
+                <footer>
+                    <button name="action_update_crm_lead_probabilities" type="object"
+                        string="Confirm" class="btn-primary"/>
+                    <button special="cancel" string="Cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_crm_lead_update_probabilities" model="ir.actions.act_window">
+        <field name="name">Update Probabilities</field>
+        <field name="res_model">crm.lead.pls.update</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="crm_update_probabilities_view_form"/>
+    </record>
+
+</odoo>

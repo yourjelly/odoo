@@ -62,7 +62,7 @@
                                     <div class="text-muted">
                                         Use this button to update the probabilities of all leads. This can take up to several minutes depending on how many there are.
                                     </div>
-                                    <button name="action_reset_lead_probabilities" type="object" string="Update Probabilities" class="btn-primary"/>
+                                    <button name="%(action_crm_lead_update_probabilities)d" type="action" string="Update Probabilities" class="btn-primary"/>
                                 </div>
                             </div>
                         </div>
