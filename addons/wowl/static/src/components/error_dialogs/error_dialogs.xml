@@ -5,7 +5,7 @@
       <Dialog title="title">
         <div class="alert alert-warning clearfix" role="alert">
             <div class="float-right ml8 btn-group-vertical">
-                <button class="btn btn-primary" t-ref="clipboardButton" t-on-click="onClick">
+                <button class="btn btn-primary" t-ref="clipboardButton" t-on-click="onClickClipboard">
                     <i class="fa fa-clipboard mr8"/><t>Copy the full error to clipboard</t>
                 </button>
             </div>

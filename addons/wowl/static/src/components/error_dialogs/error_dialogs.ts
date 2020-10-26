@@ -52,8 +52,12 @@ export class ErrorDialog extends Component<ErrorDialogProps, OdooEnv> {
     // if (self.browserDetection.isBrowserChrome()) {  --> add to OdooBrowser? We should check things since now Edge uses chromium do they have same behavior?
     //  traceback = ev.reason.stack;
     // } else {
-    this.traceback = `${this.env._t("Error:")} ${message}\n${stack}`;
+    this.traceback = `${message}\n${stack}`;
     // }
+  }
+
+  onClickClipboard() {
+    this.env.browser.navigator.clipboard.writeText(`${this.env._t("Error")}:\n${this.traceback}`);
   }
 }
 

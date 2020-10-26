@@ -58,7 +58,7 @@ QUnit.test("ErrorDialog", async (assert) => {
   assert.containsOnce(target, "div.o_error_detail");
   assert.strictEqual(
     target.querySelector("div.o_error_detail")?.textContent,
-    "Error: Something bad happened\nSome strange unreadable stack"
+    "Something bad happened\nSome strange unreadable stack"
   );
 });
 
