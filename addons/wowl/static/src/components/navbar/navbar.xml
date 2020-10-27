@@ -69,7 +69,7 @@
           </DropdownItem>
         </t>
         <t t-else="">
-          <span class="text-muted pl-3"><t t-esc="item.name" /></span>
+          <span class="pl-3"><t t-esc="item.name" /></span>
           <t t-foreach="item.childrenTree" t-as="subItem" t-key="subItem.id">
             <DropdownItem payload="subItem">
               <t t-esc="subItem.name" />

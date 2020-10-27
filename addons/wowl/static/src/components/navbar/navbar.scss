@@ -24,6 +24,10 @@
     padding: 0 $o-dropdown-hpadding / 2 !important;
   }
 
+  .o_menu_sections > .o_dropdown > .o_dropdown_menu > span {
+    font-size: 0.94791667rem;
+  }
+
   .o_navbar_apps_menu,
   .o_menu_brand,
   .o_menu_sections > * {
