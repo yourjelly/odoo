@@ -21,6 +21,7 @@ export class Dialog extends Component<DialogProps, OdooEnv> {
       type: String,
       validate: (s: string) => ["modal-xl", "modal-lg", "modal-sm"].includes(s),
     },
+    technical: Boolean,
     title: String,
   };
   static defaultProps = {
@@ -29,6 +30,7 @@ export class Dialog extends Component<DialogProps, OdooEnv> {
     renderHeader: true,
     size: "modal-lg",
     title: "Odoo",
+    technical: true,
   };
   static template = "wowl.Dialog";
 
