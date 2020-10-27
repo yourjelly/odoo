@@ -32,7 +32,7 @@
   }
 
   @include media-breakpoint-up(sm) {
-    .modal-dialog .modal-content .modal-body .o_dialog_error {
+    .modal-dialog .modal-content.o_dialog_error .modal-body {
       overflow: visible;
       display: flex;
       flex-flow: column nowrap;

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">   
       
     <t t-name="wowl.ErrorDialog" owl="1">
-      <Dialog title="title">
+      <Dialog title="title" contentClass="'o_dialog_error'">
         <div class="alert alert-warning clearfix" role="alert">
             <div class="float-right ml8 btn-group-vertical">
                 <button class="btn btn-primary" t-ref="clipboardButton" t-on-click="onClickClipboard">
