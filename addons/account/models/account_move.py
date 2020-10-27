@@ -67,12 +67,23 @@ class AccountMove(models.Model):
         if not journal:
             company = self.env['res.company'].browse(company_id)
 
+            action_error = {
+                'name': _('%s journal', self.journal_id.display_name),
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'account.journal',
+                'views': [[False, 'form']],
+                'target': 'new',
+                'context': {
+                    'default_type': journal_types[0]
+                }
+            }
             error_msg = _(
                 "No journal could be found in company %(company_name)s for any of those types: %(journal_types)s",
                 company_name=company.display_name,
                 journal_types=', '.join(journal_types),
             )
-            raise UserError(error_msg)
+            raise RedirectWarning(error_msg, action_error, _('Create one'))
 
         return journal
 
@@ -1664,9 +1675,13 @@ class AccountMove(models.Model):
             if move.date <= lock_date:
                 if self.user_has_groups('account.group_account_manager'):
                     message = _("You cannot add/modify entries prior to and inclusive of the lock date %s.", format_date(self.env, lock_date))
+                    raise UserError(message)
                 else:
-                    message = _("You cannot add/modify entries prior to and inclusive of the lock date %s. Check the company settings or ask someone with the 'Adviser' role", format_date(self.env, lock_date))
-                raise UserError(message)
+                    action_error = self.env.ref('account.action_account_config')
+                    message = _("You cannot add/modify entries prior to and inclusive of the lock date %s."
+                                " Check the company settings or ask someone with the 'Adviser' role",
+                                format_date(self.env, lock_date))
+                    raise RedirectWarning(message, action_error.id, _('Go to the configuration panel'))
         return True
 
     # -------------------------------------------------------------------------
@@ -1813,7 +1828,18 @@ class AccountMove(models.Model):
     def write(self, vals):
         for move in self:
             if (move.restrict_mode_hash_table and move.state == "posted" and set(vals).intersection(INTEGRITY_HASH_MOVE_FIELDS)):
-                raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_MOVE_FIELDS))
+                action_error = {
+                    'name': _('%s journal', move.journal_id.display_name),
+                    'type': 'ir.actions.act_window',
+                    'view_mode': 'form',
+                    'res_model': 'account.journal',
+                    'views': [[False, 'form']],
+                    'target': 'new',
+                    'res_id': move.journal_id.id,
+                }
+                error_msg = _("You cannot edit the following fields due to restrict mode being activated"
+                              " on the journal: %s.") % ', '.join(INTEGRITY_HASH_MOVE_FIELDS)
+                raise RedirectWarning(error_msg, action_error, _('Show journal'))
             if (move.restrict_mode_hash_table and move.inalterable_hash and 'inalterable_hash' in vals) or (move.secure_sequence_number and 'secure_sequence_number' in vals):
                 raise UserError(_('You cannot overwrite the values ensuring the inalterability of the accounting.'))
             if (move.posted_before and 'journal_id' in vals and move.journal_id.id != vals['journal_id']):
@@ -3620,11 +3646,25 @@ class AccountMoveLine(models.Model):
                 raise UserError(_('The account %s (%s) is deprecated.') % (account.name, account.code))
 
             account_currency = account.currency_id
+            action_error = {
+                'name': account.display_name,
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'account.account',
+                'views': [[False, 'form']],
+                'target': 'new',
+                'res_id': account.id,
+            }
+
             if account_currency and account_currency != line.company_currency_id and account_currency != line.currency_id:
-                raise UserError(_('The account selected on your journal entry forces to provide a secondary currency. You should remove the secondary currency on the account.'))
+                error_msg = _('The account selected on your journal entry forces to provide a secondary currency.'
+                              ' You should remove the secondary currency on the account.')
+                raise RedirectWarning(error_msg, action_error, _('Show account'))
 
             if account.allowed_journal_ids and journal not in account.allowed_journal_ids:
-                raise UserError(_('You cannot use this account (%s) in this journal, check the field \'Allowed Journals\' on the related account.', account.display_name))
+                error_msg = _("You cannot use this account (%s) in this journal, "
+                              "check the field \'Allowed Journals\' on the related account.", account.display_name)
+                raise RedirectWarning(error_msg, action_error, _('Show account'))
 
             failed_check = False
             if journal.type_control_ids or journal.account_control_ids:
@@ -3635,7 +3675,18 @@ class AccountMoveLine(models.Model):
                     failed_check = account not in journal.account_control_ids
 
             if failed_check:
-                raise UserError(_('You cannot use this account (%s) in this journal, check the section \'Control-Access\' under tab \'Advanced Settings\' on the related journal.', account.display_name))
+                error_msg = _('You cannot use this account (%s) in this journal, check the section \'Control-Access\''
+                              ' under tab \'Advanced Settings\' on the related journal.', account.display_name)
+                action_error = {
+                    'name': _('%s journal', journal.display_name),
+                    'type': 'ir.actions.act_window',
+                    'view_mode': 'form',
+                    'res_model': 'account.journal',
+                    'views': [[False, 'form']],
+                    'target': 'new',
+                    'res_id': journal.id,
+                }
+                raise RedirectWarning(error_msg, action_error, _('Show journal'))
 
     @api.constrains('account_id', 'tax_ids', 'tax_line_id', 'reconciled')
     def _check_off_balance(self):

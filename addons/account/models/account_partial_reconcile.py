@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError, RedirectWarning
 
 from datetime import date
 
@@ -155,8 +155,10 @@ class AccountPartialReconcile(models.Model):
                 journal = partial.company_id.tax_cash_basis_journal_id
 
                 if not journal:
-                    raise UserError(_("There is no tax cash basis journal defined for the '%s' company.\n"
-                                      "Configure it in Accounting/Configuration/Settings") % partial.company_id.display_name)
+                    action_error = self.env.ref('account.action_account_config')
+                    error_msg = _("There is no tax cash basis journal defined for the '%s' company.",
+                                  partial.company_id.display_name)
+                    raise RedirectWarning(error_msg, action_error.id, _('Go to the configuration panel'))
 
                 partial_amount = 0.0
                 partial_amount_currency = 0.0

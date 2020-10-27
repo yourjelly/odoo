@@ -1,5 +1,5 @@
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, RedirectWarning
 
 class CashBox(models.TransientModel):
     _register = False
@@ -22,9 +22,11 @@ class CashBox(models.TransientModel):
         for box in self:
             for record in records:
                 if not record.journal_id:
-                    raise UserError(_("Please check that the field 'Journal' is set on the Bank Statement"))
+                    raise UserError(_("Please set the field 'Journal' on the Bank Statement"))
                 if not record.journal_id.company_id.transfer_account_id:
-                    raise UserError(_("Please check that the field 'Transfer Account' is set on the company."))
+                    action_error = self.env.ref('account.action_account_config')
+                    error_msg = _("Please set the field 'Transfer Account' in the company settings.")
+                    raise RedirectWarning(error_msg, action_error.id, _('Go to the configuration panel'))
                 box._create_bank_statement_line(record)
         return {}
 
@@ -43,7 +45,19 @@ class CashBoxOut(CashBox):
 
     def _calculate_values_for_statement_line(self, record):
         if not record.journal_id.company_id.transfer_account_id:
-            raise UserError(_("You have to define an 'Internal Transfer Account' in your cash register's journal."))
+            action_error = {
+                'name': _('%s journal', record.journal_id.display_name),
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'account.journal',
+                'views': [[False, 'form']],
+                'target': 'new',
+                'res_id': record.journal_id.id,
+            }
+            error_msg = _("You have to define an 'Internal Transfer Account' on the %s journal.",
+                          record.journal_id.display_name)
+            raise RedirectWarning(error_msg, action_error, _('Show journal'))
+
         amount = self.amount or 0.0
         return {
             'date': record.date,

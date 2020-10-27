@@ -997,7 +997,7 @@
                                                 string="Cut-Off"
                                                 aria-label="Change Period"
                                                 class="float-right"
-                                                attrs="{'invisible': [('account_internal_group', 'not in', ('income', 'expense'))], 'column_invisible': [('parent.move_type', '=', 'entry')]}"
+                                                attrs="{'invisible': [('account_internal_group', 'not in', ('income', 'expense'))], 'column_invisible': ['|', ('parent.move_type', '=', 'entry'), ('parent.state', '=', 'draft')]}"
                                                 context="{'hide_automatic_options': 1, 'default_action': 'change_period'}"/>
 
                                         <!-- Others fields -->

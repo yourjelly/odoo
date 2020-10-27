@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError, RedirectWarning
 
 
 class AccountPaymentMethod(models.Model):
@@ -182,9 +182,19 @@ class AccountPayment(models.Model):
         write_off_line_vals = write_off_line_vals or {}
 
         if not self.journal_id.payment_debit_account_id or not self.journal_id.payment_credit_account_id:
-            raise UserError(_(
-                "You can't create a new payment without an outstanding payments/receipts account set on the %s journal.",
-                self.journal_id.display_name))
+            action_error = {
+                'name': _('%s journal', self.journal_id.display_name),
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'account.journal',
+                'views': [[False, 'form']],
+                'target': 'new',
+                'res_id': self.journal_id.id,
+            }
+            error_msg = _(
+                "You can't create a new payment without an outstanding payments/receipts accounts set on the %s journal.",
+                self.journal_id.display_name)
+            raise RedirectWarning(error_msg, action_error, _('Show journal'))
 
         # Compute amounts.
         write_off_amount = write_off_line_vals.get('amount', 0.0)

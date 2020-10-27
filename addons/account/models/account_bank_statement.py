@@ -5,7 +5,7 @@ from odoo.osv import expression
 from odoo.tools import float_is_zero
 from odoo.tools import float_compare, float_round, float_repr
 from odoo.tools.misc import formatLang, format_date
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError, RedirectWarning
 
 import time
 import math
@@ -304,16 +304,31 @@ class AccountBankStatement(models.Model):
                         'date': stmt.date,
                     }
 
+                    action_error = {
+                        'name': _('%s journal', stmt.journal_id.display_name),
+                        'type': 'ir.actions.act_window',
+                        'view_mode': 'form',
+                        'res_model': 'account.journal',
+                        'views': [[False, 'form']],
+                        'target': 'new',
+                        'res_id': stmt.journal_id.id,
+                    }
+
                     if stmt.difference < 0.0:
                         if not stmt.journal_id.loss_account_id:
-                            raise UserError(_('Please go on the %s journal and define a Loss Account. This account will be used to record cash difference.', stmt.journal_id.name))
+                            error_msg = _('Please go on the %s journal and define a Loss Account.'
+                                          ' This account will be used to record cash difference.',
+                                          stmt.journal_id.display_name)
+                            raise RedirectWarning(error_msg, action_error, _('Show journal'))
 
                         st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Loss)")
                         st_line_vals['counterpart_account_id'] = stmt.journal_id.loss_account_id.id
                     else:
                         # statement.difference > 0.0
                         if not stmt.journal_id.profit_account_id:
-                            raise UserError(_('Please go on the %s journal and define a Profit Account. This account will be used to record cash difference.', stmt.journal_id.name))
+                            error_msg = _('Please go on the %s journal and define a Profit Account.'
+                                          ' This account will be used to record cash difference.', stmt.journal_id.name)
+                            raise RedirectWarning(error_msg, action_error, _('Show journal'))
 
                         st_line_vals['payment_ref'] = _("Cash difference observed during the counting (Profit)")
                         st_line_vals['counterpart_account_id'] = stmt.journal_id.profit_account_id.id
@@ -726,9 +741,18 @@ class AccountBankStatementLine(models.Model):
             counterpart_account_id = self.journal_id.suspense_account_id.id
 
         if not counterpart_account_id:
-            raise UserError(_(
-                "You can't create a new statement line without a suspense account set on the %s journal."
-            ) % self.journal_id.display_name)
+            action_error = {
+                'name': _('%s journal', self.journal_id.display_name),
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'account.journal',
+                'views': [[False, 'form']],
+                'target': 'new',
+                'res_id': self.journal_id.id,
+            }
+            error_msg = _("You can't create a new statement line without a suspense account set on the %s journal.",
+                          self.journal_id.display_name)
+            raise RedirectWarning(error_msg, action_error, _('Show journal'))
 
         liquidity_line_vals = self._prepare_liquidity_move_line_vals()
 
@@ -1179,8 +1203,18 @@ class AccountBankStatementLine(models.Model):
             if not open_balance_vals.get('partner_id'):
                 raise UserError(_("Unable to create an open balance for a statement line without a partner set."))
             if not open_balance_vals.get('account_id'):
-                raise UserError(_("Unable to create an open balance for a statement line because the receivable "
-                                  "/ payable accounts are missing on the partner."))
+                action_error = {
+                    'name': _('%s journal', self.partner_id.name),
+                    'type': 'ir.actions.act_window',
+                    'view_mode': 'form',
+                    'res_model': 'res.partner',
+                    'views': [[False, 'form']],
+                    'target': 'new',
+                    'res_id': self.partner_id.id,
+                }
+                error_msg = _("Unable to create an open balance for a statement line because the receivable "
+                              "/ payable accounts are missing on the partner.")
+                raise RedirectWarning(error_msg, action_error, _('Show partner'))
 
         # ==== Create & reconcile payments ====
         # When reconciling to a receivable/payable account, create an payment on the fly.

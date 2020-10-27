@@ -61,7 +61,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         # It should raise an error.
         custom_account.currency_id = self.currency_data['currency']
 
-        with self.assertRaises(UserError), self.cr.savepoint():
+        with self.assertRaises(RedirectWarning), self.cr.savepoint():
             self.test_move.line_ids[0].account_id = custom_account
 
         # The currency set on the account is the same as the one set on the company.

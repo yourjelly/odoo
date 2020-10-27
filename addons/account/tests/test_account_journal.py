@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.tests import tagged
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import UserError, ValidationError, RedirectWarning
 
 
 @tagged('post_install', '-at_install')
@@ -66,7 +66,7 @@ class TestAccountJournal(AccountTestInvoicingCommon):
 
         # Should fail because 'default_account_expense' is not allowed.
         self.company_data['default_journal_misc'].account_control_ids |= self.company_data['default_account_revenue']
-        with self.assertRaises(UserError), self.cr.savepoint():
+        with self.assertRaises(RedirectWarning), self.cr.savepoint():
             self.env['account.move'].create(move_vals)
 
         # Should be allowed because both accounts are accepted.
