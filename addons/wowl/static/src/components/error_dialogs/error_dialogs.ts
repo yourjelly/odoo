@@ -4,7 +4,7 @@ import { Dialog } from "../dialog/dialog";
 import { ActionRequest } from "../../services/action_manager/action_manager";
 import { useService } from "../../core/hooks";
 import { Stringifiable, _lt } from "../../core/localization";
-const { useRef, useState } = hooks;
+const { useState } = hooks;
 
 function capitalize(s: string | undefined): string {
   return s ? s[0].toUpperCase() + s.slice(1) : "";
@@ -30,7 +30,6 @@ export class ErrorDialog extends Component<ErrorDialogProps, OdooEnv> {
   state = useState({
     showTraceback: false,
   });
-  clipboardButtonRef = useRef("clipboardButton");
 
   constructor() {
     super(...arguments);
