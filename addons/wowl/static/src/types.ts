@@ -178,6 +178,7 @@ export interface ViewProps extends ActionProps {
   domain: Domain;
   model: string;
   recordId: number | null;
+  recordIds: number[] | null;
   type: ViewType;
   views: [ViewId, ViewType][];
   viewSwitcherEntries?: ViewSwitcherEntries;
