@@ -245,7 +245,7 @@ function factory(dependencies) {
                     mail_post_autofollow: true,
                 },
                 message_type: 'comment',
-                partner_ids: this.recipients.map(partner => partner.id),
+                partner_ids: (this.isLog ? this.mentionedPartners : this.recipients).map(partner => partner.id),
             };
             if (this.subjectContent) {
                 postData.subject = this.subjectContent;
