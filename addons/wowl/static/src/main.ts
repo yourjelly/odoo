@@ -19,6 +19,7 @@ declare const odoo: Odoo;
   const browser: OdooBrowser = Object.assign({}, baseEnv.browser, {
     console: window.console,
     location: window.location,
+    navigator: navigator,
     open: window.open.bind(window),
     XMLHttpRequest: window.XMLHttpRequest,
   });

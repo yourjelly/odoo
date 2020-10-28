@@ -6,3 +6,12 @@
 .o_web_client {
   background-color: white;
 }
+
+.btn-primary,
+.btn-secondary {
+  text-transform: uppercase;
+}
+
+.btn-link {
+  font-weight: $btn-font-weight;
+}

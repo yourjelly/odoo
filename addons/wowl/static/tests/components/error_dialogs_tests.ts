@@ -58,8 +58,35 @@ QUnit.test("ErrorDialog", async (assert) => {
   assert.containsOnce(target, "div.o_error_detail");
   assert.strictEqual(
     target.querySelector("div.o_error_detail")?.textContent,
-    "Error: Something bad happened\nSome strange unreadable stack"
+    "Something bad happened\nSome strange unreadable stack"
   );
+});
+
+QUnit.test("button clipboard copy error traceback", async (assert) => {
+  assert.expect(1);
+  const error = {
+    message: "Something bad happened",
+    data: { debug: "Some strange unreadable stack" },
+  };
+  const browser = {
+    navigator: {
+      clipboard: {
+        writeText: (value) => {
+          assert.strictEqual(value, `Error:\n${error.message}\n${error.data.debug}`);
+        },
+      },
+    },
+  } as OdooBrowser;
+  env = await makeTestEnv({ browser });
+  class Parent extends Component {
+    static components = { ErrorDialog };
+    static template = tags.xml`<ErrorDialog error="error"/>`;
+    error = error;
+  }
+  parent = await mount(Parent, { env, target });
+  const clipboardButton = target.querySelector(".fa-clipboard");
+  click(clipboardButton as HTMLElement);
+  await nextTick();
 });
 
 QUnit.test("WarningDialog", async (assert) => {

@@ -4,16 +4,19 @@ const { useRef, useExternalListener } = hooks;
 const { Portal } = misc;
 
 interface DialogProps {
+  contentClass: String;
   fullscreen: boolean;
   renderFooter: boolean;
   renderHeader: boolean;
   size: "modal-xl" | "modal-lg" | "modal-sm";
+  technical: Boolean;
   title: String;
 }
 
 export class Dialog extends Component<DialogProps, OdooEnv> {
   static components = { Portal };
   static props = {
+    contentClass: String,
     fullscreen: Boolean,
     renderFooter: Boolean,
     renderHeader: Boolean,
@@ -21,6 +24,7 @@ export class Dialog extends Component<DialogProps, OdooEnv> {
       type: String,
       validate: (s: string) => ["modal-xl", "modal-lg", "modal-sm"].includes(s),
     },
+    technical: Boolean,
     title: String,
   };
   static defaultProps = {
@@ -28,6 +32,7 @@ export class Dialog extends Component<DialogProps, OdooEnv> {
     renderFooter: true,
     renderHeader: true,
     size: "modal-lg",
+    technical: true,
     title: "Odoo",
   };
   static template = "wowl.Dialog";

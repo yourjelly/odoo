@@ -96,6 +96,7 @@ type Browser = Env["browser"];
 export interface OdooBrowser extends Browser {
   console: typeof window["console"];
   location: typeof window["location"];
+  navigator: typeof navigator;
   open: typeof window["open"];
   XMLHttpRequest: typeof window["XMLHttpRequest"];
 }
