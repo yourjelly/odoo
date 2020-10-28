@@ -108,7 +108,10 @@ const ReplenishReport = clientAction.extend({
     _createGraphView() {
         const graphPromise = this._createGraphController();
         this.iframe.addEventListener("load",
-            () => this._appendGraph(graphPromise),
+            () => {
+                this._appendGraph(graphPromise);
+                this._renderTableButtons();
+            },
             { once: true }
         );
     },
@@ -171,6 +174,13 @@ const ReplenishReport = clientAction.extend({
         this.controlPanelProps.cp_content = {
             $buttons: this.$buttons,
         };
+    },
+
+    /**
+     * Renders the 'Unreserved' and 'Priority' buttons on the stock move lines.
+     */
+    _renderTableButtons: function () {
+        this.$el.find('iframe').contents().find('.o_report_replenishment').on('click', '.o_report_replenish_unreserve', this._onClickUnreserve.bind(this));
     },
 
     /**
@@ -251,7 +261,23 @@ const ReplenishReport = clientAction.extend({
         const data = ev.target.dataset;
         const warehouse_id = Number(data.warehouseId);
         return this._reloadReport({warehouse: warehouse_id});
-    }
+    },
+
+    /**
+     * Re-opens the report with data for the specified warehouse.
+     *
+     * @returns {Promise}
+     */
+    _onClickUnreserve: function (ev) {
+        const moveId = parseInt(ev.target.getAttribute('move-id'));
+        this._rpc({
+            model: 'stock.move',
+            args: [[moveId]],
+            method: 'unreserve'
+        }).then((result) => {
+            return this._reloadReport();
+        });
+    },
 });
 
 core.action_registry.add('replenish_report', ReplenishReport);

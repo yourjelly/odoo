@@ -657,6 +657,16 @@ class StockMove(models.Model):
         action['context'] = {'warehouse': warehouse.id, } if warehouse else {}
         return action
 
+    def _get_next_cycling_priority(self):
+        return PROCUREMENT_PRIORITIES[(([p[0] for p in PROCUREMENT_PRIORITIES].index(self.priority)) + 1) % len(PROCUREMENT_PRIORITIES)][0]
+
+    def unreserve(self):
+        """ Change move priority (called from forecasted report)"""
+        self.ensure_one()
+        if self.picking_id:
+            self.picking_id.do_unreserve()
+        return True
+
     def _do_unreserve(self):
         moves_to_unreserve = self.env['stock.move']
         moves_not_to_recompute = self.env['stock.move']

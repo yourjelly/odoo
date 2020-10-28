@@ -121,6 +121,13 @@
                                 <t t-elif="line['reservation']">
                                     Reserved from stock
                                 </t>
+                                <button t-if="line['move_out'] and line['move_out'].picking_id"
+                                    t-attf-href="#"
+                                    class="btn btn-primary o_report_replenish_unreserve"
+                                    style="background-color: #00A09D; border-color: #00A09D; border-radius: 0px; color: #FFFFFF;"
+                                    t-att-move-id="line['move_out'].id">
+                                    Unreserve
+                                </button>
                                 <t t-elif="line['replenishment_filled']">
                                     <t t-if="line['document_out']">Inventory On Hand</t>
                                     <t t-else="">Free Stock</t>
