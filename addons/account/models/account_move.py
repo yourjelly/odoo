@@ -576,7 +576,7 @@ class AccountMove(models.Model):
                 is_refund=is_refund,
                 handle_price_include=handle_price_include,
             )
-
+            balance_taxes_res['l10n_in_invoice_line_id'] = base_line.id
             if move.move_type == 'entry':
                 repartition_field = is_refund and 'refund_repartition_line_ids' or 'invoice_repartition_line_ids'
                 repartition_tags = base_line.tax_ids.mapped(repartition_field).filtered(lambda x: x.repartition_type == 'base').tag_ids
@@ -616,7 +616,6 @@ class AccountMove(models.Model):
                 continue
 
             compute_all_vals = _compute_base_line_taxes(line)
-
             # Assign tags on base line
             line.tax_tag_ids = compute_all_vals['base_tags']
 
@@ -641,6 +640,7 @@ class AccountMove(models.Model):
                 taxes_map_entry['tax_base_amount'] += tax_vals['base']
                 taxes_map_entry['grouping_dict'] = grouping_dict
             line.tax_exigible = tax_exigible
+            line.l10n_in_invoice_line_id = line.id
 
         # ==== Process taxes_map ====
         for taxes_map_entry in taxes_map.values():

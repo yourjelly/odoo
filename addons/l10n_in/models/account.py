@@ -30,6 +30,8 @@ class AccountJournal(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    l10n_in_invoice_line_id = fields.Many2one('account.move.line', 'Invoice Line')
+    
     @api.depends('move_id.line_ids', 'move_id.line_ids.tax_line_id', 'move_id.line_ids.debit', 'move_id.line_ids.credit')
     def _compute_tax_base_amount(self):
         aml = self.filtered(lambda l: l.company_id.country_id.code == 'IN' and l.tax_line_id  and l.product_id)
@@ -46,10 +48,11 @@ class AccountTax(models.Model):
 
     l10n_in_reverse_charge = fields.Boolean("Reverse charge", help="Tick this if this tax is reverse charge. Only for Indian accounting")
 
-    def get_grouping_key(self, invoice_tax_val):
-        """ Returns a string that will be used to group account.invoice.tax sharing the same properties"""
-        key = super(AccountTax, self).get_grouping_key(invoice_tax_val)
-        if self.company_id.country_id.code == 'IN':
-            key += "-%s-%s"% (invoice_tax_val.get('l10n_in_product_id', False),
-                invoice_tax_val.get('l10n_in_uom_id', False))
-        return key
+    # TODO: check if this is required or not
+    # def get_grouping_key(self, invoice_tax_val):
+    #     """ Returns a string that will be used to group account.invoice.tax sharing the same properties"""
+    #     key = super(AccountTax, self).get_grouping_key(invoice_tax_val)
+    #     if self.company_id.country_id.code == 'IN':
+    #         key += "-%s-%s"% (invoice_tax_val.get('l10n_in_product_id', False),
+    #             invoice_tax_val.get('l10n_in_uom_id', False))
+    #     return key

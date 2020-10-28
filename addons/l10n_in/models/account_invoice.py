@@ -56,7 +56,10 @@ class AccountMove(models.Model):
     def _get_tax_grouping_key_from_tax_line(self, tax_line):
         # OVERRIDE to group taxes also by product.
         res = super()._get_tax_grouping_key_from_tax_line(tax_line)
-        res['product_id'] = tax_line.product_id.id
+        res.update({
+            'l10n_in_invoice_line_id': tax_line.l10n_in_invoice_line_id.id
+        })
+        # res['product_id'] = tax_line.product_id.id
         return res
 
     @api.model
@@ -64,7 +67,7 @@ class AccountMove(models.Model):
         # OVERRIDE to group taxes also by product.
         res = super()._get_tax_grouping_key_from_base_line(base_line, tax_vals)
         res.update({
-            'product_id': base_line.product_id.id,
+            'l10n_in_invoice_line_id': base_line.id
         })
         return res
 
@@ -73,7 +76,7 @@ class AccountMove(models.Model):
         tax_key = super(AccountMove, self)._get_tax_key_for_group_add_base(line)
 
         tax_key += [
-            line.product_id.id,
+            line.id,
         ]
         return tax_key
 
