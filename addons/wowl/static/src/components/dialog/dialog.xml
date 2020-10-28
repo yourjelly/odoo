@@ -6,11 +6,11 @@
             <div class="o_dialog">
                 <div role="dialog" class="modal"
                     tabindex="-1"
-                    t-att-class="{ o_modal_full: props.fullscreen }"
+                    t-att-class="{ o_technical_modal: props.technical, o_modal_full: props.fullscreen }"
                     t-ref="modal"
                     >
                     <div class="modal-dialog" t-att-class="props.size">
-                        <div class="modal-content">
+                        <div class="modal-content" t-att-class="props.contentClass">
                             <header t-if="props.renderHeader" class="modal-header">
                                 <h4 class="modal-title">
                                     <t t-esc="props.title"/>
