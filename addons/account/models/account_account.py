@@ -38,27 +38,28 @@ ACCOUNT_TYPE_HIERARCHY = [
         ('current_year_earnings',       _("Current Year Earnings")),
     )),
     ('asset',                   _("Assets"), (
+        ('non_current_assets',      _("Non Current Assets"), (
+            ('fixed_assets',            _("Fixed Assets")),
+        )),
         ('current_assets',          _("Current Assets"), (
             ('liquidity',               _("Bank and Cash")),
             ('prepayments',             _("Prepayments")),
             ('receivable',              _("Receivable")),
         )),
-        ('non_current_assets',  _("Non Current Assets"), (
-            ('fixed_assets',        _("Fixed Assets")),
-        )),
     )),
     ('liability',               _("Liabilities"), (
-        ('payable',                 _("Payable")),
-        ('current_liabilities',     _("Current Liabilities")),
         ('non_current_liabilities', _("Non-Current Liabilities")),
-        ('credit_card',             _("Credit Card")),
+        ('current_liabilities',     _("Current Liabilities"), (
+            ('payable',                 _("Payable")),
+            ('credit_card',             _("Credit Card")),
+        )),
     )),
-    ('income',                  _("Income"), (
+    ('profit',                  _("Profit"), (
         ('revenue',                 _("Revenue")),
         ('other_income',            _("Other Income")),
     )),
-    ('expense',                 _("Expense"), (
-        ('expenses',                _("Expenses")),
+    ('loss',                    _("Loss"), (
+        ('expense',                 _("Expense")),
         ('depreciation',            _("Depreciation")),
         ('cost_of_revenue',         _("Cost of Revenue")),
     )),
