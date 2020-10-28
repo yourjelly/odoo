@@ -232,22 +232,6 @@ class frozendict(dict):
 ####################################
 ###             QWeb             ###
 ####################################
-class NoEmptyLine(list):
-    _RETURNS = re.compile(r'\n\s*\n')
-
-    def __init__(self):
-        self._was_space_last = True
-
-    def append(self, value):
-        if value.isspace():
-            if self._was_space_last:
-                return
-            self._was_space_last = True
-        else:
-            self._was_space_last = False
-        value = self._RETURNS.sub('\n', value)
-        super().append(value)
-
 
 class QWeb(object):
     __slots__ = ()
@@ -269,9 +253,13 @@ class QWeb(object):
             * ``profile`` (float) profile the rendering (use astor lib) (filter
               profile line with time ms >= profile)
         """
-        body = [] if (values or {}).get('__keep_empty_line') else NoEmptyLine()
+        body = []
         self.compile(template, options)(self, body.append, values or {})
-        return u''.join(body).encode('utf8')
+        if (values or {}).get('__keep_empty_line'):
+            body = u''.join(body)
+        else:
+            body = re.sub(r'\n\s*\n', '\n', u''.join(body).strip())
+        return body.encode('utf8')
 
     def compile(self, template, options):
         """ Compile the given template into a rendering function::

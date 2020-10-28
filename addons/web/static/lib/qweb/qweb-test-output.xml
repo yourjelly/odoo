@@ -80,6 +80,7 @@
         <t t-if="True">
 
             <t t-esc='var'/>
+            
         </t>
 
         ok
@@ -94,7 +95,6 @@
     </t>
     <params id="multiline-not-keep"><![CDATA[{"__keep_empty_line": false}]]></params>
     <result id="multiline-not-keep"><![CDATA[xxx
-        
         ok
         okkk
         <p>
