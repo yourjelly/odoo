@@ -39,4 +39,70 @@
     </t>
     <params id="raw-notescaped"><![CDATA[{"var": "<ok>"}]]></params>
     <result id="raw-notescaped"><![CDATA[<ok>]]></result>
+
+
+    <t t-name="multiline-tokeep">
+        <t t-set="var">yyy</t>
+        <t t-set="var">xxx</t>
+        <t t-if="True">
+
+            <t t-esc='var'/>
+        </t>
+
+        ok
+
+        okkk
+
+        <p>
+
+            ok
+
+        </p>
+    </t>
+    <params id="multiline-tokeep"><![CDATA[{"__keep_empty_line": true}]]></params>
+    <result id="multiline-tokeep"><![CDATA[xxx
+        
+
+        ok
+
+        okkk
+
+        <p>
+
+            ok
+
+        </p>]]></result>
+
+
+    <t t-name="multiline-not-keep">
+        <t t-set="var">yyy</t>
+        <t t-set="var">xxx</t>
+        <t t-if="True">
+
+            <t t-esc='var'/>
+        </t>
+
+        ok
+
+        okkk
+
+        <p>
+
+            ok
+
+        </p>
+    </t>
+    <params id="multiline-not-keep"><![CDATA[{"__keep_empty_line": false}]]></params>
+    <result id="multiline-not-keep"><![CDATA[xxx
+        
+        ok
+        okkk
+        <p>
+            ok
+        </p>
+    ]]></result>
+
+
+
+
 </templates>

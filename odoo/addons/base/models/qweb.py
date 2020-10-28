@@ -232,6 +232,21 @@ class frozendict(dict):
 ####################################
 ###             QWeb             ###
 ####################################
+class NoEmptyLine(list):
+    _RETURNS = re.compile(r'\n\s*\n')
+
+    def __init__(self):
+        self._was_space_last = True
+
+    def append(self, value):
+        if value.isspace():
+            if self._was_space_last:
+                return
+            self._was_space_last = True
+        else:
+            self._was_space_last = False
+        value = self._RETURNS.sub('\n', value)
+        super().append(value)
 
 
 class QWeb(object):
@@ -254,7 +269,7 @@ class QWeb(object):
             * ``profile`` (float) profile the rendering (use astor lib) (filter
               profile line with time ms >= profile)
         """
-        body = []
+        body = [] if (values or {}).get('__keep_empty_line') else NoEmptyLine()
         self.compile(template, options)(self, body.append, values or {})
         return u''.join(body).encode('utf8')
 

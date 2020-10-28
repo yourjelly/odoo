@@ -619,7 +619,7 @@ class TestQWeb(TransactionCase):
             # OrderedDict to ensure JSON mappings are iterated in source order
             # so output is predictable & repeatable
             params = {} if param is None else json.loads(param.text, object_pairs_hook=collections.OrderedDict)
-
+            params.setdefault('__keep_empty_line', True)
             result = doc.find('result[@id="{}"]'.format(template)).text
             self.assertEqual(
                 qweb._render(template, values=params, load=loader).strip(),
