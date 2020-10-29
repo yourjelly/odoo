@@ -22,7 +22,7 @@ class DialogManager extends Component<{}, OdooEnv> {
   static template = tags.xml`
     <div class="o_dialog_manager">
       <t t-foreach="Object.values(dialogs)" t-as="dialog" t-key="dialog.id">
-        <t t-component="dialog.class" error="dialog.props" t-on-dialog-closed="onDialogClosed(dialog.id)"/>
+        <t t-component="dialog.class" t-props="dialog.props" t-on-dialog-closed="onDialogClosed(dialog.id)"/>
       </t>
     </div>
     `;
