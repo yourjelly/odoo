@@ -1,6 +1,37 @@
+import download from "../libs/download";
+import { _t } from "../core/localization";
+import parse from "../libs/content-disposition";
+
+interface DownloadFileOptionsFromForm {
+  type: "form";
+  form: HTMLFormElement;
+}
+
+interface DownloadFileOptionsFromParams {
+  type: "params";
+  url: string;
+  data: Map<string, string | Blob>;
+}
+
+interface DownloadFileOptionsCallbacks {
+  success?: () => void;
+  error?: (error: {
+    message: string;
+    data: {
+      name?: string;
+      title: string;
+    };
+  }) => void;
+  complete?: () => void;
+}
+
+type DownloadFileOptions = (DownloadFileOptionsFromForm | DownloadFileOptionsFromParams) &
+  DownloadFileOptionsCallbacks;
+
+// TODO change with auth logic
+const csrf_token_todo = "Hello there";
+
 /**
- * @deprecated use downloadFile instead.
- *
  * Cooperative file download implementation, for ajaxy APIs.
  *
  * Requires that the server side implements an httprequest correctly
@@ -23,31 +54,87 @@
  *   mean that we probably need to inform the user that something needs to be
  *   changed to make it work.
  */
-function get_file(options) {
-  downloadFile(options);
-}
+export function getFile(options: DownloadFileOptions) {
+  const xhr: XMLHttpRequest = new XMLHttpRequest();
 
-const fetchTimeout = (url, ms, { signal, ...options } = {}) => {
-  const controller = new AbortController();
-  const promise = fetch(url, { signal: controller.signal, ...options });
-  if (signal) signal.addEventListener("abort", () => controller.abort());
-  const timeout = setTimeout(() => controller.abort(), ms);
-  return promise.finally(() => clearTimeout(timeout));
-};
+  let data: FormData;
 
-function downloadFile() {
-  const controller = new AbortController();
-
-  document.querySelector("button.cancel").addEventListener("click", () => controller.abort());
-
-  fetchTimeout("example.json", 5000, { signal: controller.signal })
-    .then((response) => response.json())
-    .then(console.log)
-    .catch((error) => {
-      if (error.name === "AbortError") {
-        // fetch aborted either due to timeout or due to user clicking the cancel button
-      } else {
-        // network error or json parsing error
-      }
+  if (options.type === "form") {
+    xhr.open(options.form.method, options.form.action);
+    data = new FormData(options.form);
+  } else {
+    xhr.open("POST", options.url!);
+    data = new FormData();
+    options.data.forEach((v, k) => {
+      data.append(k, v);
     });
+  }
+
+  data.append("token", "dummy-because-api-expects-one");
+
+  // TODO change with auth logic
+  if (csrf_token_todo) {
+    data.append("csrf_token", csrf_token_todo);
+  }
+
+  // IE11 wants this after xhr.open or it throws
+  xhr.responseType = "blob";
+
+  xhr.onload = () => {
+    const mimetype = xhr.response.type;
+    if (xhr.status === 200 && mimetype !== "text/html") {
+      // replace because apparently we send some C-D headers with a trailing ";"
+      const header = (xhr.getResponseHeader("Content-Disposition") || "").replace(/;$/, "");
+      const filename = header ? (parse(header).parameters as any).filename : null;
+      download(xhr.response, filename, mimetype);
+      if (options.success) {
+        options.success();
+      }
+      return true;
+    }
+
+    if (!options.error) {
+      return true;
+    }
+
+    const decoder = new FileReader();
+    decoder.onload = () => {
+      const contents = decoder.result as string;
+      let err;
+      const doc = new DOMParser().parseFromString(contents, "text/html");
+      const nodes = doc.body.children.length === 0 ? doc.body.childNodes : doc.body.children;
+      try {
+        // Case of a serialized Odoo Exception: It is Json Parsable
+        const node = nodes[1] || nodes[0];
+        err = JSON.parse(node.textContent!);
+      } catch (e) {
+        // Arbitrary uncaught python side exception
+        err = {
+          message: nodes.length > 1 ? nodes[1].textContent : "",
+          data: {
+            name: String(xhr.status),
+            title: nodes.length > 0 ? nodes[0].textContent : "",
+          },
+        };
+      }
+      options.error?.(err);
+    };
+    decoder.readAsText(xhr.response);
+  };
+
+  xhr.onerror = () => {
+    options.error?.({
+      message: _t(
+        "Something happened while trying to contact the server, check that the server is online and that you still have a working network connection."
+      ),
+      data: { title: _t("Could not connect to the server") },
+    });
+  };
+
+  xhr.onloadend = () => {
+    options.complete?.();
+  };
+
+  xhr.send(data);
+  return true;
 }
