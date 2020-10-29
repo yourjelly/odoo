@@ -62,6 +62,31 @@ QUnit.test("ErrorDialog", async (assert) => {
   );
 });
 
+QUnit.test("ErrorDialog type script with traceback", async (assert) => {
+  assert.expect(5);
+  const error = {
+    type: "script",
+    traceback: "Something bad happened\nSome strange unreadable stack",
+  };
+  class Parent extends Component {
+    static components = { ErrorDialog };
+    static template = tags.xml`<ErrorDialog error="error"/>`;
+    error = error;
+  }
+  assert.containsNone(target, ".o_dialog");
+  parent = await mount(Parent, { env, target });
+  const mainButtons = target.querySelectorAll("main button");
+  assert.containsNone(target, "div.o_error_detail");
+  assert.strictEqual(target.querySelector(".o_dialog footer button")?.textContent, "Ok");
+  click(mainButtons[1] as HTMLElement);
+  await nextTick();
+  assert.containsOnce(target, "div.o_error_detail");
+  assert.strictEqual(
+    target.querySelector("div.o_error_detail")?.textContent,
+    "Something bad happened\nSome strange unreadable stack"
+  );
+});
+
 QUnit.test("button clipboard copy error traceback", async (assert) => {
   assert.expect(1);
   const error = {
@@ -72,7 +97,7 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
     navigator: {
       clipboard: {
         writeText: (value) => {
-          assert.strictEqual(value, `Error:\n${error.message}\n${error.data.debug}`);
+          assert.strictEqual(value, `${error.message}\n${error.data.debug}`);
         },
       },
     },

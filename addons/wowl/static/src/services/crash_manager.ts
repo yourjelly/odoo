@@ -1,6 +1,7 @@
 import { OdooEnv, Service } from "../types";
 import { RPCError } from "./rpc";
 import { ErrorDialog } from "../components/error_dialogs/error_dialogs";
+import { isBrowserChromium } from "../utils/ts/utility";
 
 export interface CrashManagerService {}
 
@@ -14,22 +15,30 @@ export const crashManagerService: Service<CrashManagerService> = {
       if (!filename && !lineno && !colno) {
         error = {
           type: "script",
-          message: "Unknown CORS error",
-          stack: `An unknown CORS error occured.
-            
-             The error probably originates from a JavaScript file served from a different origin.
-             (Opening your browser console might give you a hint on the error.)`,
+          traceback: env._t(
+            `Unknown CORS error\n\n` +
+              `An unknown CORS error occured.\n` +
+              `The error probably originates from a JavaScript file served from a different origin.\n` +
+              `(Opening your browser console might give you a hint on the error.)`
+          ),
         };
       } else {
         // ignore Chrome video internal error: https://crbug.com/809574
         if (!eventError && message === "ResizeObserver loop limit exceeded") {
           return;
         }
-        const traceback = eventError ? eventError.stack : "";
+        let stack = eventError ? eventError.stack : "";
+        if (!isBrowserChromium()) {
+          // transforms the stack into a chromium stack
+          // Chromium stack example:
+          // Error: Mock: Can't write value
+          //     _onOpenFormView@http://localhost:8069/web/content/425-baf33f1/wowl.assets.js:1064:30
+          //     ...
+          stack = `${message}\n${stack}`.replace(/\n/g, "\n    ");
+        }
         error = {
           type: "script",
-          message,
-          stack: `${filename}:${lineno}\n${env._t("Traceback:")}\n${traceback}`,
+          traceback: `${message}\n\n${filename}:${lineno}\n${env._t("Traceback")}:\n${stack}`,
         };
       }
       env.services.dialog_manager.open(ErrorDialog, { error });
