@@ -12,12 +12,12 @@ function capitalize(s: string | undefined): string {
 
 interface ErrorDialogProps {
   error: {
-    message: string;
+    message?: string;
     data?: {
       debug?: string;
     };
-    stack?: string;
     subType?: string;
+    traceback?: string;
     type: "server" | "script";
   };
 }
@@ -33,30 +33,21 @@ export class ErrorDialog extends Component<ErrorDialogProps, OdooEnv> {
 
   constructor() {
     super(...arguments);
-    const { data, message, stack: errorStack, subType, type } = this.props.error;
+    const { data, message, subType, traceback, type } = this.props.error;
     if (type === "server") {
       this.title = capitalize(subType) || this.env._t("Odoo Error");
     } else {
       this.title = this.env._t("Odoo Client Error");
     }
-    let stack = (data ? data.debug : errorStack) || "";
-    /**
-     * Error.prototype.stack is non-standard.
-     * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
-     * However, most engines provide an implementation.
-     * In particular, Chrome formats the contents of Error.stack
-     * https://v8.dev/docs/stack-trace-api#compatibility
-     */
-    /** @todo add some key concerning the browser type in env, somewhere? */
-    // if (self.browserDetection.isBrowserChrome()) {  --> add to OdooBrowser? We should check things since now Edge uses chromium do they have same behavior?
-    //  traceback = ev.reason.stack;
-    // } else {
-    this.traceback = `${message}\n${stack}`;
-    // }
+    if (data) {
+      this.traceback = `${message}\n${data.debug || ""}`;
+    } else {
+      this.traceback = traceback || "";
+    }
   }
 
   onClickClipboard() {
-    this.env.browser.navigator.clipboard.writeText(`${this.env._t("Error")}:\n${this.traceback}`);
+    this.env.browser.navigator.clipboard.writeText(`${this.traceback}`);
   }
 }
 
