@@ -31,7 +31,10 @@ class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
     l10n_in_invoice_line_id = fields.Many2one('account.move.line', 'Invoice Line')
-    
+    l10n_in_matching_lines_ref = fields.Text('Matching Ref',
+        help='Technical field to map invoice base line with its tax lines.'
+    )
+
     @api.depends('move_id.line_ids', 'move_id.line_ids.tax_line_id', 'move_id.line_ids.debit', 'move_id.line_ids.credit')
     def _compute_tax_base_amount(self):
         aml = self.filtered(lambda l: l.company_id.country_id.code == 'IN' and l.tax_line_id  and l.product_id)
@@ -42,6 +45,36 @@ class AccountMoveLine(models.Model):
         if remaining_aml:
             return super(AccountMoveLine, remaining_aml)._compute_tax_base_amount()
 
+    def _update_l10n_in_invoice_line_id(self):
+        tax_base_lines_dict = {}
+        Line = self.env['account.move.line']
+        for line in self.filtered('l10n_in_matching_lines_ref'):
+            if not tax_base_lines_dict.get(line.l10n_in_matching_lines_ref):
+                tax_base_lines_dict[line.l10n_in_matching_lines_ref] = {
+                    'tax_lines': Line,
+                    'base_lines': Line
+                }
+            if line.tax_line_id:
+                tax_base_lines_dict[line.l10n_in_matching_lines_ref]['tax_lines'] += line
+            elif line.tax_ids:
+                tax_base_lines_dict[line.l10n_in_matching_lines_ref]['base_lines'] += line
+        for ref, lines in tax_base_lines_dict.items():
+            if lines.get('tax_lines') and lines.get('base_lines'):
+                lines['tax_lines'].write({
+                    'l10n_in_invoice_line_id': lines['base_lines']
+                })
+        return True
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        lines = super().create(vals_list)
+        lines._update_l10n_in_invoice_line_id()
+        return lines
+
+    def write(self, vals):
+        res = super().write(vals)
+        self._update_l10n_in_invoice_line_id()
+        return res
 
 class AccountTax(models.Model):
     _inherit = 'account.tax'

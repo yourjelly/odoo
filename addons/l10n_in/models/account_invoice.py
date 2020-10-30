@@ -57,7 +57,8 @@ class AccountMove(models.Model):
         # OVERRIDE to group taxes also by product.
         res = super()._get_tax_grouping_key_from_tax_line(tax_line)
         res.update({
-            'l10n_in_invoice_line_id': tax_line.l10n_in_invoice_line_id.id
+            'l10n_in_invoice_line_id': tax_line.l10n_in_invoice_line_id.id,
+            'l10n_in_matching_lines_ref': tax_line.ref,
         })
         # res['product_id'] = tax_line.product_id.id
         return res
@@ -66,8 +67,13 @@ class AccountMove(models.Model):
     def _get_tax_grouping_key_from_base_line(self, base_line, tax_vals):
         # OVERRIDE to group taxes also by product.
         res = super()._get_tax_grouping_key_from_base_line(base_line, tax_vals)
+        # if lines are being created, keep it's virtualID ref to link matching
+        # base/tax lines, otherwise, use base line's ID.
+        ref = base_line._origin.id or base_line.id.ref
+        base_line.l10n_in_matching_lines_ref = ref
         res.update({
-            'l10n_in_invoice_line_id': base_line.id
+            'l10n_in_invoice_line_id': base_line._origin.id or base_line.id,
+            'l10n_in_matching_lines_ref': ref,
         })
         return res
 

@@ -28,6 +28,10 @@
                        attrs="{'invisible': ['|', '|',('move_type', 'not in', ('out_invoice', 'out_refund')), ('l10n_in_company_country_code', '!=', 'IN'), ('move_type', '=', 'entry')]}"
                        />
             </xpath>
+            <xpath expr="//field[@name='line_ids']/tree/field[@name='debit']" position="before">
+                <field name="l10n_in_invoice_line_id"/>
+                <field name="l10n_in_matching_lines_ref" invisible="1"/>
+            </xpath>
         </field>
     </record>
 </odoo>
