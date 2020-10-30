@@ -22,7 +22,11 @@
                         <field name="smtp_pass" password="True"/>
                         <button name="test_smtp_connection" type="object" string="Test Connection" icon="fa-television"/>
                     </group>
-                  </sheet>  
+                    <group string="SSL Authentication" colspan="4">
+                        <field name="smtp_ssl_certificate"/>
+                        <field name="smtp_ssl_private_key"/>
+                    </group>
+                  </sheet>
                 </form>
             </field>
         </record>
