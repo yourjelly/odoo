@@ -595,6 +595,47 @@ QUnit.test('close attachment viewer', async function (assert) {
     );
 });
 
+QUnit.test('delete an attachment', async function (assert) {
+    assert.expect(2);
+
+    await this.start({
+        async mockRPC(route, args) {
+            if (args.method === "unlink" && args.model === "ir.attachment") {
+                assert.step('attachment_unlink');
+                return;
+            }
+            return this._super(...arguments);
+        },
+    });
+    const attachment = this.env.models['mail.attachment'].create({
+        filename: "test.txt",
+        id: 750,
+        mimetype: 'text/plain',
+        name: "test.txt",
+    });
+    await this.createAttachmentComponent(attachment, {
+        detailsMode: 'hover',
+        isDownloadable: false,
+        isEditable: true,
+        showExtension: false,
+        showFilename: true,
+    });
+    await afterNextRender(() => {
+        document.querySelector('.o_Attachment_actionUnlink').click();
+    });
+
+    await afterNextRender(() => {
+        // ensures that the unlink method is called only once, regardless of the amount of times the button is pressed.
+        document.querySelector('.o_AttachmentDeleteConfirmDialog_confirmButton').click();
+        document.querySelector('.o_AttachmentDeleteConfirmDialog_confirmButton').click();
+        document.querySelector('.o_AttachmentDeleteConfirmDialog_confirmButton').click();
+    });
+    assert.verifySteps(
+        ['attachment_unlink'],
+        "The unlink method must be called once"
+    );
+});
+
 });
 });
 });

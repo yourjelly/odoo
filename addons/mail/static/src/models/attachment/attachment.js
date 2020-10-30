@@ -97,12 +97,17 @@ function factory(dependencies) {
          * Remove this attachment globally.
          */
         async remove() {
+            if (this.isUnlinkPending) {
+                return;
+            }
             if (!this.isTemporary) {
+                this.isUnlinkPending = true;
                 await this.async(() => this.env.services.rpc({
                     model: 'ir.attachment',
                     method: 'unlink',
                     args: [this.id],
                 }, { shadow: true }));
+                this.isUnlinkPending = undefined;
             } else if (this.uploadingAbortController) {
                 this.uploadingAbortController.abort();
             }
