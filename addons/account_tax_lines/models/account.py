@@ -6,6 +6,17 @@ from odoo import models, fields, api
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    tax_amount_by_line_group = fields.Binary(string="Tax amount for lines",
+        compute='_compute_invoice_taxes_by_line_by_group',
+        help='Tax amount by group for the invoice line.')
+
+    def _compute_invoice_taxes_by_line_by_group(self):
+        for invoice in self:
+            taxes = dict()
+            for line in invoice.invoice_line_ids:
+                taxes[line.id] = line.tax_amount_by_group
+            invoice.tax_amount_by_line_group = taxes
+
     @api.model
     def _get_tax_grouping_key_from_tax_line(self, tax_line):
         res = super()._get_tax_grouping_key_from_tax_line(tax_line)
@@ -44,6 +55,17 @@ class AccountMoveLine(models.Model):
     base_line_ref = fields.Char('Matching Ref',
         help='Technical field to map invoice base line with its tax lines.'
     )
+    tax_amount_by_group = fields.Binary(string="Tax amount by group",
+        compute='_compute_invoice_line_taxes_by_group',
+        help='Tax amount by group for the invoice line.')
+    
+    def _compute_invoice_line_taxes_by_group(self):
+        for line in self:
+            taxes = dict()
+            for ln in self.search([('base_line_ref','=',str(line.id)), ('tax_line_id','!=',False), ('move_id','=',line.move_id.id)]):
+                if ln.tax_line_id.tax_group_id.name not in taxes: taxes[ln.tax_line_id.tax_group_id.name] = 0.0
+                taxes[ln.tax_line_id.tax_group_id.name] += ln.credit and ln.credit or ln.debit
+            line.tax_amount_by_group = taxes
 
     def _update_base_line_ref(self):
         #search for the invoice lines on which the taxes applied
