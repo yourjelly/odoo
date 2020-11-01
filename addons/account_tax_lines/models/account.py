@@ -39,8 +39,8 @@ class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
     #it would be good to use the many2one fields instead of char, but required
-    #related tax lines so it would be ok as of now.
     #framework fix for onchnage/create, we just need the referance to search the
+    #related tax lines so it would be ok as of now.
     base_line_ref = fields.Char('Matching Ref',
         help='Technical field to map invoice base line with its tax lines.'
     )
@@ -55,7 +55,6 @@ class AccountMoveLine(models.Model):
             tax_lines.write({
                 'base_line_ref': line.id,
             })
-        return base_lines
 
     @api.model_create_multi
     def create(self, vals_list):

@@ -26,7 +26,7 @@ This app will add the Matching Ref field in account.move.line, using that you ca
 
     # always loaded
     'data': [
-
+        'views/account_invoice_view.xml'
     ],
     # only loaded in demonstration mode
     'demo': [
