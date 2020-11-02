@@ -61,6 +61,10 @@ class MigrationManager(object):
         self.migrations = defaultdict(dict)
         self._get_files()
 
+    @classmethod
+    def has_base_scripts(cls):
+        return any(os.path.isdir(opj(path, "base")) for path in odoo.upgrade.__path__)
+
     def _get_files(self):
         def _get_upgrade_path(pkg):
             for path in odoo.upgrade.__path__:

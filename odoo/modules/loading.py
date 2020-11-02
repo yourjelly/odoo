@@ -16,7 +16,7 @@ import odoo.modules.db
 import odoo.modules.graph
 import odoo.modules.migration
 import odoo.modules.registry
-from .. import SUPERUSER_ID, api, tools
+from .. import SUPERUSER_ID, api, tools, release
 from .module import adapt_version, initialize_sys_path, load_openerp_module
 
 _logger = logging.getLogger(__name__)
@@ -378,8 +378,29 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         # odoo.modules.registry.Registry.new().
         registry = odoo.registry(cr.dbname)
 
-        if 'base' in tools.config['update'] or 'all' in tools.config['update']:
+        update_base = 'base' in tools.config['update'] or 'all' in tools.config['update']
+
+        if update_base:
             cr.execute("update ir_module_module set state=%s where name=%s and state=%s", ('to upgrade', 'base', 'installed'))
+
+        cr.execute(
+            """select array_to_string((string_to_array(latest_version, '.'))[0:2], '.')
+                 from ir_module_module
+                where name = 'base'"""
+        )
+        base_version, = cr.fetchone() or [""]
+
+        if base_version != release.series:
+            if update_base:
+                if not odoo.modules.migration.MigrationManager.has_base_scripts():
+                    _logger.critical("Cannot upgrade database %s: no upgrade-path defined", cr.dbname)
+                    return
+            else:
+                _logger.critical(
+                    "Cannot load database %s as its version (%s) is different that the server one (%s)",
+                    cr.dbname, base_version, release.series
+                )
+                return
 
         # STEP 1: LOAD BASE (must be done before module dependencies can be computed for later steps)
         graph = odoo.modules.graph.Graph()
