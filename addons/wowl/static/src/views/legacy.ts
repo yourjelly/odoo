@@ -39,6 +39,24 @@ odoo.define("wowl.legacySetup", async function (require: any) {
   };
   serviceRegistry.add(legacyActionManagerService.name, legacyActionManagerService);
 
+  // add a service to redirect rpc events triggered on the bus in the
+  // legacy env on the bus in the wowl env
+  const legacyRpcService: Service<void> = {
+    name: "legacy_rpc",
+    deploy(env: OdooEnv): void {
+      legacyEnv.bus.on("rpc_request", null, (rpcId: number) => {
+        env.bus.trigger("RPC:REQUEST", rpcId);
+      });
+      legacyEnv.bus.on("rpc_response", null, (rpcId: number) => {
+        env.bus.trigger("RPC:RESPONSE", rpcId);
+      });
+      legacyEnv.bus.on("rpc_response_failed", null, (rpcId: number) => {
+        env.bus.trigger("RPC:RESPONSE", rpcId);
+      });
+    },
+  };
+  serviceRegistry.add(legacyRpcService.name, legacyRpcService);
+
   await Promise.all([whenReady(), session.is_bound]);
   legacyEnv.qweb.addTemplates(session.owlTemplates);
 });
