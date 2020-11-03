@@ -1,10 +1,14 @@
 import { Component, hooks, tags } from "@odoo/owl";
-import { ClientActionProps, OdooEnv, ViewProps, Service, ViewId, ViewType } from "../types";
+import { ClientActionProps, OdooEnv, ViewProps, Service, ViewId, ViewType, MenuElement } from "../types";
 import { useService } from "../core/hooks";
 import { useSetupAction } from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
 import { viewRegistry } from "../views/view_registry";
 import { Context } from "../core/context";
+import { useDebugManager } from "../components/debug_manager/debug_manager";
+import { DebuggingAccessRights, editModelDebug } from "../services/debug_manager";
+import { ActWindowAction, ClientAction } from "../action_manager/action_manager";
+
 
 declare const odoo: any;
 
@@ -81,9 +85,15 @@ export function mapLegacyEnvToWowlEnv(legacyEnv: any, wowlEnv: OdooEnv) {
   });
 }
 
-odoo.define("wowl.ActionAdapters", function (require: any) {
-  const { ComponentAdapter } = require("web.OwlCompatibility");
+interface ComponentAdapter extends Component {
+  _trigger_up(ev: any): void;
+  widget: any;
+}
 
+odoo.define("wowl.ActionAdapters", function (require: any) {
+  const {
+    ComponentAdapter,
+  }: { ComponentAdapter: Type<ComponentAdapter> } = require("web.OwlCompatibility");
   class ActionAdapter extends ComponentAdapter {
     am = useService("action_manager");
 
@@ -116,8 +126,14 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
   }
 
   class ClientActionAdapter extends ActionAdapter {
-    env = Component.env;
-
+    constructor(parent: Component, props: any) {
+      super(parent, props);
+      const envWowl = <OdooEnv>this.env;
+      useDebugManager((accessRights: DebuggingAccessRights) =>
+        setupDebugAction(accessRights, envWowl, this.props.widgetArgs[0])
+      );
+      this.env = Component.env;
+    }
     async willStart() {
       if (this.props.widget) {
         this.widget = this.props.widget;
@@ -133,7 +149,23 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     model = useService("model");
     am = useService("action_manager");
     vm = useService("view_manager");
-    env = Component.env;
+    widget: any;
+    constructor(...args: any[]) {
+      super(...args);
+      const envWowl = <OdooEnv>this.env;
+      useDebugManager((accessRights: DebuggingAccessRights) =>
+        setupDebugAction(accessRights, envWowl, this.props.viewParams.action)
+      );
+      useDebugManager((accessRights: DebuggingAccessRights) =>
+        setupDebugView(accessRights, envWowl, this, this.props.viewParams.action)
+      );
+      if (this.props.viewInfo.type === "form") {
+        useDebugManager((accessRights: DebuggingAccessRights) =>
+          setupDebugViewForm(envWowl, this, this.props.viewParams.action)
+        );
+      }
+      this.env = Component.env;
+    }
     async willStart() {
       if (this.props.widget) {
         this.widget = this.props.widget;
@@ -333,3 +365,322 @@ odoo.define("wowl.legacyViews", async function (require: any) {
   }
   legacyViewRegistry.onAdd(registerView);
 });
+
+export function setupDebugAction(
+  accessRights: DebuggingAccessRights,
+  env: OdooEnv,
+  action: ClientAction | ActWindowActionAdapted
+): MenuElement[] {
+  const actionSeparator: MenuElement = {
+    type: "separator",
+    sequence: 100,
+  };
+
+  let description = env._t("Edit Action");
+  const editAction: MenuElement = {
+    type: "item",
+    description: description,
+    callback: () => {
+      console.log("Edit Action");
+      // edit in debug_manager_backend
+      editModelDebug(env, description, action.type, action.id as number);
+    },
+    sequence: 110,
+  };
+
+  description = env._t("View Fields");
+  const viewFields: MenuElement = {
+    type: "item",
+    description: description,
+    callback: async () => {
+      console.log("View Fields");
+      const modelId = (
+        await env.services
+          .model("ir.model")
+          .search([["model", "=", action.res_model as string]], { limit: 1 })
+      )[0];
+
+      env.services.action_manager.doAction({
+        res_model: "ir.model.fields",
+        name: description,
+        views: [
+          [false, "list"],
+          [false, "form"],
+        ],
+        domain: [["model_id", "=", modelId]],
+        type: "ir.actions.act_window",
+        context: {
+          default_model_id: modelId,
+        },
+      });
+    },
+    sequence: 120,
+  };
+
+  description = env._t("Manage Filters");
+  const manageFilters: MenuElement = {
+    type: "item",
+    description: description,
+    callback: () => {
+      // manage_filters
+      env.services.action_manager.doAction({
+        res_model: "ir.filters",
+        name: description,
+        views: [
+          [false, "list"],
+          [false, "form"],
+        ],
+        type: "ir.actions.act_window",
+        context: {
+          search_default_my_filters: true,
+          search_default_model_id: action.res_model,
+        },
+      });
+    },
+    sequence: 130,
+  };
+
+  const technicalTranslation: MenuElement = {
+    type: "item",
+    description: env._t("Technical Translation"),
+    callback: () => {
+      console.log("Technical Translation");
+      //translate
+      env.services
+        .model("ir.translation")
+        .call("get_technical_translations", [action.res_model])
+        .then(env.services.action_manager.doAction);
+    },
+    sequence: 140,
+  };
+
+  const accessSeparator: MenuElement = {
+    type: "separator",
+    sequence: 200,
+  };
+
+  description = env._t("View Access Rights");
+  const viewAccessRights: MenuElement = {
+    type: "item",
+    description: description,
+    callback: async () => {
+      console.log("View Access Rights");
+      //actionModelAccess
+      const modelId = (
+        await env.services
+          .model("ir.model")
+          .search([["model", "=", action.res_model as string]], { limit: 1 })
+      )[0];
+
+      env.services.action_manager.doAction({
+        res_model: "ir.model.access",
+        name: description,
+        views: [
+          [false, "list"],
+          [false, "form"],
+        ],
+        domain: [["model_id", "=", modelId]],
+        type: "ir.actions.act_window",
+        context: {
+          default_model_id: modelId,
+        },
+      });
+    },
+    sequence: 210,
+  };
+
+  description = env._t("Model Record Rules");
+  const viewRecordRules: MenuElement = {
+    type: "item",
+    description: env._t("View Record Rules"),
+    callback: async () => {
+      console.log("View Record Rules");
+      //actionRecordRules
+      const modelId = (
+        await env.services
+          .model("ir.model")
+          .search([["model", "=", action.res_model as string]], { limit: 1 })
+      )[0];
+      env.services.action_manager.doAction({
+        res_model: "ir.rule",
+        name: description,
+        views: [
+          [false, "list"],
+          [false, "form"],
+        ],
+        domain: [["model_id", "=", modelId]],
+        type: "ir.actions.act_window",
+        context: {
+          default_model_id: modelId,
+        },
+      });
+    },
+    sequence: 220,
+  };
+
+  const result: MenuElement[] = [actionSeparator];
+  if (action.id) {
+    result.push(editAction);
+  }
+  if (action.res_model) {
+    result.push(viewFields);
+    result.push(manageFilters);
+    result.push(technicalTranslation);
+
+    if (accessRights.canSeeModelAccess || accessRights.canSeeRecordRules) {
+      result.push(accessSeparator);
+      if (accessRights.canSeeModelAccess) {
+        result.push(viewAccessRights);
+      }
+      if (accessRights.canSeeRecordRules) {
+        result.push(viewRecordRules);
+      }
+    }
+  }
+
+  return result;
+}
+
+interface ActWindowActionAdapted extends Omit<ActWindowAction, "views"> {
+  _views: ActWindowAction["views"];
+  views: {
+    type: string;
+    name: string;
+  }[];
+}
+
+export function setupDebugView(
+  accessRights: DebuggingAccessRights,
+  env: OdooEnv,
+  component: ComponentAdapter,
+  action: ActWindowActionAdapted
+): MenuElement[] {
+  const viewId = component.props.viewInfo.view_id;
+
+  const viewSeparator: MenuElement = {
+    type: "separator",
+    sequence: 300,
+  };
+
+  const fieldsViewGet: MenuElement = {
+    type: "item",
+    description: env._t("Fields View Get"),
+    callback: () => {
+      console.log("Fields View Get");
+      // fvg
+      // Need Arch
+    },
+    sequence: 340,
+  };
+
+  const displayName = action
+    .views!.find((v) => v.type === component.widget.viewType)!
+    .name.toString();
+  let description = env._t("Edit View: ") + displayName;
+  const editView: MenuElement = {
+    type: "item",
+    description: description,
+    callback: () => {
+      console.log("Edit View:");
+      // edit
+      editModelDebug(env, description, "ir.ui.view", viewId);
+    },
+    sequence: 350,
+  };
+
+  description = env._t("Edit ControlPanelView");
+  const editControlPanelView: MenuElement = {
+    type: "item",
+    description: description,
+    callback: () => {
+      console.log("Edit ControlPanelView");
+      editModelDebug(
+        env,
+        description,
+        "ir.ui.view",
+        component.props.viewParams.action.controlPanelFieldsView.view_id
+      );
+    },
+    sequence: 360,
+  };
+
+  const result = [viewSeparator, fieldsViewGet];
+  if (accessRights.canEditView) {
+    result.push(editView);
+    result.push(editControlPanelView);
+  }
+
+  return result;
+}
+
+export function setupDebugViewForm(
+  env: OdooEnv,
+  component: ComponentAdapter,
+  action: ActWindowActionAdapted
+): MenuElement[] {
+  const setDefaults: MenuElement = {
+    type: "item",
+    description: env._t("Set Defaults"),
+    callback: () => {
+      console.log("Set Defaults");
+      // set_defaults
+      // need this._controller.renderer (_controller == widget)
+    },
+    sequence: 310,
+  };
+
+  const viewMetadata: MenuElement = {
+    type: "item",
+    description: env._t("View Metadata"),
+    hide: component.widget.getSelectedIds().length !== 1,
+    callback: () => {
+      console.log("View Metadata");
+      // get_metadata
+      // need getSelectedIds
+    },
+    sequence: 320,
+  };
+
+  const description = env._t("Manage Attachments");
+  const manageAttachments: MenuElement = {
+    type: "item",
+    description: description,
+    hide: component.widget.getSelectedIds().length !== 1,
+    callback: () => {
+      console.log("Manage Attachments");
+      //get_attachments
+      // need getSelectedIds
+      if (!component.widget.getSelectedIds().length) {
+        console.warn(env._t("No attachment available"));
+        return;
+      }
+      const selectedId = component.widget.getSelectedIds()[0];
+      env.services.action_manager.doAction({
+        res_model: "ir.attachment",
+        name: description,
+        views: [
+          [false, "list"],
+          [false, "form"],
+        ],
+        type: "ir.actions.act_window",
+        domain: [
+          ["res_model", "=", action.res_model],
+          ["res_id", "=", selectedId],
+        ],
+        context: {
+          default_res_model: action.res_model,
+          default_res_id: selectedId,
+        },
+      });
+    },
+    sequence: 330,
+  };
+
+  const result = [setDefaults];
+  if (component.widget.getSelectedIds().length === 1) {
+    result.push(viewMetadata);
+    result.push(manageAttachments);
+  }
+
+  return result;
+}

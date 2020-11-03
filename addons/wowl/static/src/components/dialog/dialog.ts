@@ -1,6 +1,6 @@
 import { Component, hooks, misc } from "@odoo/owl";
 import { OdooEnv } from "../../types";
-const { useRef, useExternalListener } = hooks;
+const { useRef, useExternalListener, useSubEnv } = hooks;
 const { Portal } = misc;
 
 interface DialogProps {
@@ -39,9 +39,10 @@ export class Dialog extends Component<DialogProps, OdooEnv> {
 
   modalRef = useRef("modal");
 
-  constructor() {
-    super(...arguments);
+  constructor(...args: any[]) {
+    super(...args);
     useExternalListener(window, "keydown", this._onKeydown);
+    useSubEnv({ inDialog: true });
   }
 
   mounted() {

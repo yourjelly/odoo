@@ -1,5 +1,4 @@
 import { Component, hooks, tags } from "@odoo/owl";
-import { Dialog } from "../components/dialog/dialog";
 import type {
   ActionContext,
   OdooEnv,
@@ -18,6 +17,7 @@ import { DomainListRepr as Domain } from "../core/domain";
 import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
+import { DialogAction } from "../components/dialog_action/dialog_action";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -51,7 +51,8 @@ interface ActionCommonInfo {
   context?: Context;
   type: ActionType;
 }
-interface ClientAction extends ActionCommonInfo {
+export interface ClientAction extends ActionCommonInfo {
+  res_model?: string;
   type: "ir.actions.client";
   tag: string;
   target: ActionTarget;
@@ -62,7 +63,7 @@ interface ClientAction extends ActionCommonInfo {
 interface ActWindowControllers {
   [key: string]: ViewController;
 }
-interface ActWindowAction extends ActionCommonInfo {
+export interface ActWindowAction extends ActionCommonInfo {
   type: "ir.actions.act_window";
   res_model: string;
   views: [ViewId, ViewType][];
@@ -200,14 +201,14 @@ export function useSetupAction(params: useSetupActionParams) {
 // -----------------------------------------------------------------------------
 
 export class ActionContainer extends Component<{}, OdooEnv> {
+  static components = { DialogAction };
   static template = tags.xml`
     <div t-name="wowl.ActionContainer" class="o_action_manager">
       <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="main.id"/>
-      <Dialog t-if="dialog.Component" t-props="dialog.dialogProps" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed">
+      <DialogAction t-if="dialog.Component" t-props="dialog.dialogProps" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed">
         <t t-component="dialog.Component" t-props="dialog.props"/>
-      </Dialog>
+      </DialogAction>
     </div>`;
-  static components = { Dialog };
   main: Partial<ActionManagerUpdateInfo> = {};
   dialog: Partial<ActionManagerUpdateInfo> = {};
 
@@ -346,7 +347,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         return {
           // FIXME: missing accesskey
           icon: v.icon,
-          name: v.name,
+          name: v.display_name,
           type: v.type,
           multiRecord: v.multiRecord, // FIXME: needed for legacy views
         };
@@ -451,7 +452,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
             mode = "fullscreen";
           }
         } else {
-          dialogCloseProm = new Promise((_r) => {
+          dialogCloseProm = new Promise((_r: any) => {
             dialogCloseResolve = _r;
           }).then(() => {
             dialogCloseProm = undefined;

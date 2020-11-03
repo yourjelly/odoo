@@ -1,5 +1,5 @@
 import { Registry } from "../core/registry";
-import { UserMenuItemFactory } from "./user_menu/user_menu";
+import { MenuElementFactory } from "../types";
 import {
   documentationItem,
   logOutItem,
@@ -13,7 +13,7 @@ import {
 // Default UserMenu items
 // -----------------------------------------------------------------------------
 
-export const userMenuRegistry: Registry<UserMenuItemFactory> = new Registry();
+export const userMenuRegistry: Registry<MenuElementFactory> = new Registry();
 
 userMenuRegistry
   .add("documentation", documentationItem)
