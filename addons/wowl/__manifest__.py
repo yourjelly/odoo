@@ -21,6 +21,7 @@ Odoo Web core module written in Owl.
     ],
     'assets': {
         'owl_qweb': [
+            'static/src/components/dialog/dialog.xml',
             'static/src/components/**/*',
             'static/src/notifications/**/*',
             'static/src/webclient/**/*',

@@ -1,11 +1,12 @@
 import { Component } from "@odoo/owl";
 import { Stringifiable, _lt } from "../../core/localization";
-import { OdooEnv } from "../../types";
+import { MenuElement, OdooEnv } from "../../types";
 import { Dialog } from "../../components/dialog/dialog";
 
-export function documentationItem(env: OdooEnv) {
+export function documentationItem(env: OdooEnv): MenuElement {
   const documentationURL = "https://www.odoo.com/documentation/user";
   return {
+    type: "item",
     description: env._t("Documentation"),
     href: documentationURL,
     callback: () => {
@@ -15,9 +16,10 @@ export function documentationItem(env: OdooEnv) {
   };
 }
 
-export function supportItem(env: OdooEnv) {
+export function supportItem(env: OdooEnv): MenuElement {
   const buyEnterpriseURL = "https://www.odoo.com/buy";
   return {
+    type: "item",
     description: env._t("Support"),
     href: buyEnterpriseURL,
     callback: () => {
@@ -33,8 +35,9 @@ class ShortCutsDialog extends Component {
   title: Stringifiable = _lt("Keyboard Shortcuts");
 }
 
-export function shortCutsItem(env: OdooEnv) {
+export function shortCutsItem(env: OdooEnv): MenuElement {
   return {
+    type: "item",
     description: env._t("Shortcuts"),
     callback: () => {
       env.services.dialog_manager.open(ShortCutsDialog);
@@ -43,8 +46,9 @@ export function shortCutsItem(env: OdooEnv) {
   };
 }
 
-export function preferencesItem(env: OdooEnv) {
+export function preferencesItem(env: OdooEnv): MenuElement {
   return {
+    type: "item",
     description: env._t("Preferences"),
     callback: async function () {
       const actionDescription = await env.services.model("res.users").call("action_get");
@@ -55,8 +59,9 @@ export function preferencesItem(env: OdooEnv) {
   };
 }
 
-export function odooAccountItem(env: OdooEnv) {
+export function odooAccountItem(env: OdooEnv): MenuElement {
   return {
+    type: "item",
     description: env._t("My Odoo.com.account"),
     callback: () => {
       env.services
@@ -72,9 +77,10 @@ export function odooAccountItem(env: OdooEnv) {
   };
 }
 
-export function logOutItem(env: OdooEnv) {
+export function logOutItem(env: OdooEnv): MenuElement {
   const route = "/web/session/logout";
   return {
+    type: "item",
     description: env._t("Log out"),
     href: `${odoo.browser.location.origin}${route}`,
     callback: () => {

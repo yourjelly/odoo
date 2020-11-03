@@ -1,27 +1,11 @@
 import { Component } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
-import { Dropdown } from "../../components/dropdown/dropdown";
-import { DropdownItem } from "../../components/dropdown/dropdown_item";
 import { useService } from "../../core/hooks";
-import { OdooEnv } from "../../types";
-import { SystrayItem } from "../systray_registry";
+import { MenuElement, MenuItemEventPayload, Odoo, OdooEnv, SystrayItem } from "../../types";
+import { DropdownItem } from "../../components/dropdown/dropdown_item";
+import { Dropdown } from "../../components/dropdown/dropdown";
 
-type Callback = () => void | Promise<any>;
-interface UserMenuItem {
-  description: string;
-  callback: Callback;
-  hide?: boolean;
-  href?: string;
-  sequence?: number;
-}
-
-export type UserMenuItemFactory = (env: OdooEnv) => UserMenuItem;
-
-interface Detail {
-  payload: {
-    callback: Callback;
-  };
-}
+declare const odoo: Odoo;
 
 export class UserMenu extends Component<{}, OdooEnv> {
   static template = "wowl.UserMenu";
@@ -36,7 +20,7 @@ export class UserMenu extends Component<{}, OdooEnv> {
     this.source = `${origin}/web/image?model=res.users&field=image_128&id=${userId}`;
   }
 
-  getItemGroups(): UserMenuItem[][] {
+  getItemGroups(): MenuElement[][] {
     const filteredItems = [];
     for (const itemFactory of odoo.userMenuRegistry.getAll()) {
       const item = itemFactory(this.env);
@@ -46,17 +30,19 @@ export class UserMenu extends Component<{}, OdooEnv> {
       }
     }
     const sortedItems = filteredItems.sort((x, y) => {
-      return (x.sequence ?? 100) - (y.sequence ?? 100);
+      const xSeq = x.sequence ? x.sequence : 100;
+      const ySeq = y.sequence ? y.sequence : 100;
+      return xSeq - ySeq;
     });
-    const groups: UserMenuItem[][] = [[], []];
+    const groups: MenuElement[][] = [[], []];
     for (const item of sortedItems) {
-      const groupIndex = (item.sequence ?? 100) < 40 ? 0 : 1;
+      const groupIndex = (item.sequence ? item.sequence : 100) < 40 ? 0 : 1;
       groups[groupIndex].push(item);
     }
     return groups;
   }
 
-  onDropdownItemSelected(ev: OwlEvent<Detail>) {
+  onDropdownItemSelected(ev: OwlEvent<MenuItemEventPayload>) {
     ev.detail.payload.callback();
   }
 

@@ -27,6 +27,17 @@ import "./webclient/navbar_tests";
 import "./webclient/user_menu_tests";
 import "./webclient/webclient_tests";
 import "./webclient/web_client_integrated_tests";
+import "./webclient/user_menu_tests";
+import "./components/debug_manager_tests";
+import "./core/localization_tests";
+import "./components/dialog_tests";
+import "./py/py_tests";
+import "./core/domain_tests";
+import "./core/utils_tests";
+import "./services/crash_manager_tests";
+import "./crash_manager/error_dialogs_tests";
+import "./services/dialog_manager_tests";
+import "./services/title_tests";
 
 (async () => {
   await setupTests();
