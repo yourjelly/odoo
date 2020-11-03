@@ -13,6 +13,10 @@ export class Dropdown extends Component {
       type: String,
       optional: true,
     },
+    beforeOpen: {
+      type: Function,
+      optional: true,
+    },
     togglerClass: {
       type: String,
       optional: true,
@@ -51,8 +55,11 @@ export class Dropdown extends Component {
     this._changeStateAndNotify({ open: true, groupIsOpen: true });
   }
 
-  private _toggle() {
+  private async _toggle() {
     const toggled = !this.state.open;
+    if (toggled && this.props.beforeOpen) {
+      await this.props.beforeOpen();
+    }
     this._changeStateAndNotify({
       open: toggled,
       groupIsOpen: toggled,

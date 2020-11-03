@@ -49,6 +49,7 @@ export interface Model {
     options?: GroupByOptions,
     ctx?: Context
   ): Promise<ReadGroupResult>;
+  search(domain: Domain, options?: SearchReadOptions, ctx?: Context): Promise<number[]>;
   searchRead(
     domain: Domain,
     fields: string[],
@@ -101,6 +102,24 @@ function readGroup(rpc: RPC, env: OdooEnv, model: string): Model["readGroup"] {
       kwargs.limit = options.limit;
     }
     return callModel(rpc, env, model)("web_read_group", [domain, fields, groupby], kwargs);
+  };
+}
+
+function search(rpc: RPC, env: OdooEnv, model: string): Model["search"] {
+  return (domain, options = {}, ctx = {}) => {
+    const kwargs: any = {
+      context: ctx,
+    };
+    if (options.offset) {
+      kwargs.offset = options.offset;
+    }
+    if (options.limit) {
+      kwargs.limit = options.limit;
+    }
+    if (options.order) {
+      kwargs.order = options.order;
+    }
+    return callModel(rpc, env, model)("search", [domain], kwargs);
   };
 }
 
@@ -171,6 +190,9 @@ export const modelService: Service<ModelBuilder> = {
         },
         get unlink() {
           return unlink(rpc, env, model);
+        },
+        get search() {
+          return search(rpc, env, model);
         },
         get searchRead() {
           return searchRead(rpc, env, model);

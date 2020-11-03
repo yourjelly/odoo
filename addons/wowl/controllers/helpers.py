@@ -56,8 +56,8 @@ def get_addon_files(addons=['wowl'], bundle=None, css=False, js=False, xml=False
         assets = manifest.get('assets', {})
 
         for path_def in assets.get(bundle, []):
-            path_addon = path_def.split('/')[0]
-            path_addon_manifest = manifests.get(path_addon)
+            path_def = os.path.join(addon, path_def)
+            path_addon_manifest = manifests.get(addon)
 
             if not path_addon_manifest:
                 continue

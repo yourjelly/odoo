@@ -135,6 +135,7 @@ export function makeTestOdoo(config: TestConfig = {}): Odoo {
     systrayRegistry: config.systrayRegistry,
     errorDialogRegistry: config.errorDialogRegistry,
     userMenuRegistry: config.userMenuRegistry,
+    debugManagerRegistry: config.debugManagerRegistry,
     viewRegistry: config.viewRegistry,
   });
 }

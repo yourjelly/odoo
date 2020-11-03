@@ -54,6 +54,7 @@ function makeTestConfig(config: TestConfig = {}): OdooConfig {
     systrayRegistry: config.systrayRegistry || new Registry(),
     errorDialogRegistry: config.errorDialogRegistry || new Registry(),
     userMenuRegistry: config.userMenuRegistry || new Registry(),
+    debugManagerRegistry: config.debugManagerRegistry || new Registry(),
     viewRegistry: config.viewRegistry || new Registry(),
   });
 }
