@@ -10,7 +10,7 @@ import {
 } from "../helpers/index";
 import { TestConfig } from "../helpers/utility";
 import { Registry } from "./../../src/core/registry";
-import { OdooBrowser, Registries } from "./../../src/types";
+import { MenuElement, OdooBrowser, Registries } from "./../../src/types";
 
 let target: HTMLElement;
 let env: OdooEnv;
@@ -38,8 +38,9 @@ QUnit.module("UserMenu", {
 QUnit.test("can be rendered", async (assert) => {
   env = await makeTestEnv(baseConfig);
 
-  odoo.userMenuRegistry.add("bad_item", function () {
+  odoo.userMenuRegistry.add("bad_item", function (): MenuElement {
     return {
+      type: "item",
       description: "Bad",
       callback: () => {
         assert.step("callback bad_item");
@@ -47,8 +48,9 @@ QUnit.test("can be rendered", async (assert) => {
       sequence: 10,
     };
   });
-  odoo.userMenuRegistry.add("ring_item", function () {
+  odoo.userMenuRegistry.add("ring_item", function (): MenuElement {
     return {
+      type: "item",
       description: "Ring",
       callback: () => {
         assert.step("callback ring_item");
@@ -56,16 +58,18 @@ QUnit.test("can be rendered", async (assert) => {
       sequence: 5,
     };
   });
-  odoo.userMenuRegistry.add("invisible_item", function () {
+  odoo.userMenuRegistry.add("invisible_item", function (): MenuElement {
     return {
+      type: "item",
       description: "Hidden Power",
       callback: () => {},
       sequence: 5,
       hide: true,
     };
   });
-  odoo.userMenuRegistry.add("eye_item", function () {
+  odoo.userMenuRegistry.add("eye_item", function (): MenuElement {
     return {
+      type: "item",
       description: "Eye",
       callback: () => {
         assert.step("callback eye_item");

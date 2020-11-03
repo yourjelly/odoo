@@ -5,6 +5,7 @@ import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import type { actionManagerService } from "./action_manager/action_manager";
 import { Breadcrumb } from "./action_manager/action_manager";
 import { actionRegistry } from "./action_manager/action_registry";
+import { debugManagerRegistry } from "./components/debug_manager_item/debug_manager_item";
 import { Context } from "./core/context";
 import { DomainListRepr as Domain } from "./core/domain";
 import { Localization } from "./core/localization";
@@ -34,6 +35,7 @@ export interface Registries {
   systrayRegistry: typeof systrayRegistry;
   errorDialogRegistry: typeof errorDialogRegistry;
   userMenuRegistry: typeof userMenuRegistry;
+  debugManagerRegistry: typeof debugManagerRegistry;
 }
 
 interface CacheHashes {
@@ -200,10 +202,40 @@ export interface ClientActionProps extends ActionProps {
 export type ControllerProps = ActionProps | ViewProps | ClientActionProps;
 
 interface ViewInfo {
-  name: string;
+  display_name: string;
   icon: string;
   multiRecord: boolean;
   type: ViewType;
 }
 
 export type View = Type<Component<ViewProps, OdooEnv>> & ViewInfo;
+
+// -----------------------------------------------------------------------------
+// Menu Element
+// -----------------------------------------------------------------------------
+
+export type Callback = () => void | Promise<any>;
+
+export interface MenuItem {
+  type: "item";
+  description: string;
+  hide?: boolean;
+  href?: string;
+  callback?: Callback;
+  sequence?: number;
+}
+
+export interface MenuItemEventPayload {
+  payload: {
+    callback: Callback;
+  };
+}
+
+export interface MenuSeparator {
+  type: "separator";
+  hide?: boolean;
+  sequence: number;
+}
+
+export type MenuElement = MenuItem | MenuSeparator;
+export type MenuElementFactory<T extends MenuElement = MenuElement> = (env: OdooEnv) => T;

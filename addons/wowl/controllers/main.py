@@ -8,6 +8,7 @@ from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.tools import ustr, config
 from odoo.addons.web.controllers.main import module_boot
+from odoo.http import request
 
 from .helpers import HomeStaticTemplateHelpers, get_addon_files
 
