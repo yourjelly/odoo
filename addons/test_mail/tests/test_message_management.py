@@ -76,7 +76,7 @@ class TestMailResend(TestMailCommon):
              'notif': [{'partner': partner, 'type': 'email', 'status': 'sent', 'check_send': partner == self.partner1} for partner in self.partners]}]
         )
 
-    @mute_logger('odoo.addons.mail.models.mail_mail')
+    # @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_remove_mail_become_canceled(self):
         # two failure sent on bus, one for each mail
         with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 2):
@@ -99,7 +99,7 @@ class TestMailResend(TestMailCommon):
                         'status': (partner == self.user1.partner_id and 'exception') or (partner == self.partner1 and 'canceled') or 'sent'} for partner in self.partners]}]
         )
 
-    @mute_logger('odoo.addons.mail.models.mail_mail')
+    # @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_cancel_all(self):
         with self.mock_mail_gateway(), self.assertBus([(self.cr.dbname, 'res.partner', self.partner_admin.id)] * 2):
             message = self.test_record.with_user(self.user_admin).message_post(partner_ids=self.partners.ids, subtype_xmlid='mail.mt_comment', message_type='notification')

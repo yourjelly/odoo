@@ -427,8 +427,9 @@ class IrMailServer(models.Model):
         # The email's "Envelope From" (Return-Path), and all recipient addresses must only contain ASCII characters.
         from_rfc2822 = extract_rfc2822_addresses(smtp_from)
         bounce_address_rfc2822 = extract_rfc2822_addresses(bounce_address)
-        assert from_rfc2822 and bounce_address_rfc2822, ("Malformed 'Return-Path' or 'From' address: %r - "
-                                                         "It should contain one valid plain ASCII email") % smtp_from
+        assert from_rfc2822 and bounce_address_rfc2822, (
+            "Malformed 'Return-Path' or 'From' address: %r - "
+            "It should contain one valid plain ASCII email") % smtp_from
         # use last extracted email, to support rarities like 'Support@MyComp <support@mycompany.com>'
         smtp_from = from_rfc2822[-1]
         bounce_address = bounce_address_rfc2822[-1]
@@ -451,7 +452,7 @@ class IrMailServer(models.Model):
             del message['X-Forge-To']
             del message['To']           # avoid multiple To: headers!
             message['To'] = x_forge_to
-
+        '''
         if not mail_server_id:
             mail_server, mail_server_from = self._find_mail_server(smtp_from)
 
@@ -472,8 +473,8 @@ class IrMailServer(models.Model):
             smtp_from = bounce_address
         else:
             _logger.info('Bounce might not work because we do not want to spoof')
-
-        return smtp_from, smtp_to_list, message, mail_server
+        '''
+        return smtp_from, smtp_to_list, message, mail_server_id
 
     @api.model
     def send_email(self, message, mail_server_id=None, smtp_server=None, smtp_port=None,
@@ -511,15 +512,12 @@ class IrMailServer(models.Model):
         :return: the Message-ID of the message that was just sent, if successfully sent, otherwise raises
                  MailDeliveryException and logs root cause.
         """
-        # Do not actually send emails in testing mode!
         if getattr(threading.currentThread(), 'testing', False) or self.env.registry.in_test_mode():
+            # Do not actually send emails in testing mode!
             _test_logger.info("skip sending email in test mode")
             return message['Message-Id']
 
-        smtp_from, smtp_to_list, message, mail_server = self._prepare_message(message, mail_server_id)
-
-        if mail_server and not mail_server_id:
-            mail_server_id = mail_server.id
+        smtp_from, smtp_to_list, message, mail_server_id = self._prepare_message(message, mail_server_id)
 
         try:
             message_id = message['Message-Id']
