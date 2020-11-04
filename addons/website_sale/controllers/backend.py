@@ -31,7 +31,7 @@ class WebsiteSaleBackend(WebsiteBackend):
             summary=dict(
                 order_count=0, order_carts_count=0, order_unpaid_count=0,
                 order_to_invoice_count=0, order_carts_abandoned_count=0,
-                payment_to_capture_count=0, total_sold=0,
+                total_sold=0,
                 order_per_day_ratio=0, order_sold_ratio=0, order_convertion_pctg=0,
             )
         )
@@ -97,11 +97,6 @@ class WebsiteSaleBackend(WebsiteBackend):
             order_carts_abandoned_count=request.env['sale.order'].search_count(sale_order_domain + [
                 ('is_abandoned_cart', '=', True),
                 ('cart_recovery_email_sent', '=', False)
-            ]),
-            payment_to_capture_count=request.env['payment.transaction'].search_count([
-                ('state', '=', 'authorized'),
-                # that part perform a search on sale.order in order to comply with access rights as tx do not have any
-                ('sale_order_ids', 'in', request.env['sale.order'].search(sale_order_domain + [('state', '!=', 'cancel')]).ids),
             ]),
             total_sold=sum(price_line['price_subtotal'] for price_line in report_price_lines)
         )
