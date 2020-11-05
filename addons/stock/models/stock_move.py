@@ -1248,28 +1248,86 @@ class StockMove(models.Model):
         equal to its `product_qty`. If it is less, the stock move is considered
         partially available.
         """
-        assigned_moves = self.env['stock.move']
-        partially_available_moves = self.env['stock.move']
-        # Read the `reserved_availability` field of the moves out of the loop to prevent unwanted
+        moves_to_assign = self.filtered(lambda m: m.state in ['confirmed', 'waiting', 'partially_available'])
+
+        # Cache moves which should bypass
+        moves_to_bypass = moves_to_assign.filtered(lambda move: move._should_bypass_reservation())
+        moves_to_bypass_ids = set(moves_to_bypass.ids)
+
+        # Cache the empty move
+        def is_empty_move(move):
+            return float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding)
+        empty_moves = (moves_to_assign - moves_to_bypass).filtered(is_empty_move)
+        empty_moves_ids = set(empty_moves.ids)
+
+        # Cache for linked moves (with move_orig_ids set)
+        move_to_check_origin = moves_to_assign - moves_to_bypass - empty_moves
+        orig_moves_by_moves = {res["id"]: self.browse(res["move_orig_ids"]) for res in move_to_check_origin.read(["move_orig_ids"]) if res["move_orig_ids"]}
+
+        # Cache sibling move information (quantity remain for key) for linked moves
+        keys_in_groupby = ['location_dest_id', 'lot_id', 'result_package_id', 'owner_id']
+        keys_out_groupby = ['location_id', 'lot_id', 'package_id', 'owner_id']
+
+        def _keys_in_sorted(ml):
+            return (ml.location_dest_id.id, ml.lot_id.id, ml.result_package_id.id, ml.owner_id.id)
+
+        def _keys_out_sorted(ml):
+            return (ml.location_id.id, ml.lot_id.id, ml.package_id.id, ml.owner_id.id)
+
+        # Compute in move lines (done) for each move_origin
+        orig_moves = set(orig_moves_by_moves.values())
+        group_move_origin_in = {}
+        for move_orig_ids in orig_moves:
+            move_lines_in_done = move_orig_ids.filtered(lambda m: m.state == 'done').mapped('move_line_ids')
+            grouped_move_lines_in = {}
+            for k, g in groupby(sorted(move_lines_in_done, key=_keys_in_sorted), key=itemgetter(*keys_in_groupby)):
+                qty_done = 0
+                for ml in g:
+                    qty_done += ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
+                grouped_move_lines_in[k] = qty_done
+            group_move_origin_in[move_orig_ids] = grouped_move_lines_in
+
+        # Compute out move lines (done) for each move_origin, will be update during the main loop for sibling reservation
+        for move_orig_ids in orig_moves:
+            move_lines_out_done = move_orig_ids.move_dest_ids.filtered(lambda m: m.state == 'done').mapped('move_line_ids')
+            for k, g in groupby(sorted(move_lines_out_done, key=_keys_out_sorted), key=itemgetter(*keys_out_groupby)):
+                if not group_move_origin_in[move_orig_ids].get(k):
+                    continue
+                qty_done = 0
+                for ml in g:
+                    qty_done += ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
+                group_move_origin_in[move_orig_ids][k] -= qty_done
+            move_lines_out_reserved = move_orig_ids.move_dest_ids.filtered(lambda m: m.state in ('partially_available', 'assigned')).mapped('move_line_ids')
+            for k, g in groupby(sorted(move_lines_out_reserved, key=_keys_out_sorted), key=itemgetter(*keys_out_groupby)):
+                if not group_move_origin_in[move_orig_ids].get(k):
+                    continue
+                qty_reserved = sum(self.env['stock.move.line'].concat(*list(g)).mapped('product_qty'))
+                group_move_origin_in[move_orig_ids][k] -= qty_reserved
+
+        # Read and cache a the `reserved_availability` field of the moves out of the loop to prevent unwanted
         # cache invalidation when actually reserving the move.
-        reserved_availability = {move: move.reserved_availability for move in self}
-        roundings = {move: move.product_id.uom_id.rounding for move in self}
-        move_line_vals_list = []
+        missing_reserved = {move: move.product_qty - sum(move.move_line_ids.mapped('product_qty')) for move in moves_to_assign}
+        # Cache rounding by product
+        rounding_by_product = {product: product.uom_id.rounding for product in moves_to_assign.product_id}
 
         # Store gather param so we can filter values accordingly after large query completed and store values to transfer
         # move_qty_params = [{"move": move, "need": need, "quantity": quantity, "gather_detail": (product, location, lot, package, owner, strict)}]
         # If `need` is set is means no need to compute it again, if not set: compute it via move.product_qty - sum(move.move_line_ids.mapped('product_qty')) and used quantity
         move_qty_params = []
 
-        for move in self.filtered(lambda m: m.state in ['confirmed', 'waiting', 'partially_available']):
-            rounding = roundings[move]
-            missing_reserved_uom_quantity = move.product_uom_qty - reserved_availability[move]
-            missing_reserved_quantity = move.product_uom._compute_quantity(missing_reserved_uom_quantity, move.product_id.uom_id, rounding_method='HALF-UP')
-            if move._should_bypass_reservation():
+        # OrderedSet of ids used to defer the state write in batch
+        assigned_moves, partially_available_moves = OrderedSet(), OrderedSet()
+        # Move lines values to defer create in batch
+        move_line_vals = []
+
+        for move in moves_to_assign:
+            rounding = rounding_by_product[move.product_id]
+            missing_reserved_quantity = missing_reserved[move]
+            if move.id in moves_to_bypass_ids:
                 # create the move line(s) but do not impact quants
                 if move.product_id.tracking == 'serial' and (move.picking_type_id.use_create_lots or move.picking_type_id.use_existing_lots):
                     for i in range(0, int(missing_reserved_quantity)):
-                        move_line_vals_list.append(move._prepare_move_line_vals(quantity=1))
+                        move_line_vals.append(move._prepare_move_line_vals(quantity=1))
                 else:
                     to_update = move.move_line_ids.filtered(lambda ml: ml.product_uom_id == move.product_uom and
                                                             ml.location_id == move.location_id and
@@ -1279,84 +1337,36 @@ class StockMove(models.Model):
                                                             not ml.package_id and
                                                             not ml.owner_id)
                     if to_update:
-                        to_update[0].product_uom_qty += missing_reserved_uom_quantity
+                        to_update[0].product_uom_qty = move.product_uom_qty
                     else:
-                        move_line_vals_list.append(move._prepare_move_line_vals(quantity=missing_reserved_quantity))
-                assigned_moves |= move
+                        move_line_vals.append(move._prepare_move_line_vals(quantity=missing_reserved_quantity))
+                assigned_moves.add(move.id)
             else:
-                if float_is_zero(move.product_uom_qty, precision_rounding=move.product_uom.rounding):
-                    assigned_moves |= move
-                elif not move.move_orig_ids:
+                if move.id in empty_moves_ids or float_is_zero(missing_reserved_quantity, precision_rounding=rounding):
+                    assigned_moves.add(move.id)
+                elif move.id not in orig_moves_by_moves:
                     if move.procure_method == 'make_to_order':
                         continue
-                    # If we don't need any quantity, consider the move assigned.
-                    need = missing_reserved_quantity
-                    if float_is_zero(need, precision_rounding=rounding):
-                        assigned_moves |= move
-                        continue
+
                     # Record values for later batch quant query => new quants and create move lines accordingly.
                     forced_package_id = move.package_level_id.package_id or False
                     move_qty_params.append({
                         "move": move,
-                        "need": need,
+                        "need": missing_reserved_quantity,
                         "gather_detail": (move.product_id, move.location_id, False, forced_package_id, False, False)
                     })
                 else:
-                    # Check what our parents brought and what our siblings took in order to
-                    # determine what we can distribute.
-                    # `qty_done` is in `ml.product_uom_id` and, as we will later increase
-                    # the reserved quantity on the quants, convert it here in
-                    # `product_id.uom_id` (the UOM of the quants is the UOM of the product).
-                    move_lines_in = move.move_orig_ids.filtered(lambda m: m.state == 'done').mapped('move_line_ids')
-                    keys_in_groupby = ['location_dest_id', 'lot_id', 'result_package_id', 'owner_id']
+                    move_orig_ids = orig_moves_by_moves[move.id]
+                    group_move_origin_in[move_orig_ids] = dict((k, v) for k, v in group_move_origin_in[move_orig_ids].items() if v > 0.0)
 
-                    def _keys_in_sorted(ml):
-                        return (ml.location_dest_id.id, ml.lot_id.id, ml.result_package_id.id, ml.owner_id.id)
-
-                    grouped_move_lines_in = {}
-                    for k, g in groupby(sorted(move_lines_in, key=_keys_in_sorted), key=itemgetter(*keys_in_groupby)):
-                        qty_done = 0
-                        for ml in g:
-                            qty_done += ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
-                        grouped_move_lines_in[k] = qty_done
-                    move_lines_out_done = (move.move_orig_ids.mapped('move_dest_ids') - move)\
-                        .filtered(lambda m: m.state in ['done'])\
-                        .mapped('move_line_ids')
-                    # As we defer the write on the stock.move's state at the end of the loop, there
-                    # could be moves to consider in what our siblings already took.
-                    moves_out_siblings = move.move_orig_ids.mapped('move_dest_ids') - move
-                    moves_out_siblings_to_consider = moves_out_siblings & (assigned_moves + partially_available_moves)
-                    reserved_moves_out_siblings = moves_out_siblings.filtered(lambda m: m.state in ['partially_available', 'assigned'])
-                    move_lines_out_reserved = (reserved_moves_out_siblings | moves_out_siblings_to_consider).mapped('move_line_ids')
-                    keys_out_groupby = ['location_id', 'lot_id', 'package_id', 'owner_id']
-
-                    def _keys_out_sorted(ml):
-                        return (ml.location_id.id, ml.lot_id.id, ml.package_id.id, ml.owner_id.id)
-
-                    grouped_move_lines_out = {}
-                    for k, g in groupby(sorted(move_lines_out_done, key=_keys_out_sorted), key=itemgetter(*keys_out_groupby)):
-                        qty_done = 0
-                        for ml in g:
-                            qty_done += ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
-                        grouped_move_lines_out[k] = qty_done
-                    for k, g in groupby(sorted(move_lines_out_reserved, key=_keys_out_sorted), key=itemgetter(*keys_out_groupby)):
-                        grouped_move_lines_out[k] = sum(self.env['stock.move.line'].concat(*list(g)).mapped('product_qty'))
-                    available_move_lines = {key: grouped_move_lines_in[key] - grouped_move_lines_out.get(key, 0) for key in grouped_move_lines_in.keys()}
-                    # pop key if the quantity available amount to 0
-                    available_move_lines = dict((k, v) for k, v in available_move_lines.items() if v)
-
-                    if not available_move_lines:
+                    if not group_move_origin_in[move_orig_ids]:
                         continue
-                    for move_line in move.move_line_ids.filtered(lambda m: m.product_qty):
-                        if available_move_lines.get((move_line.location_id, move_line.lot_id, move_line.result_package_id, move_line.owner_id)):
-                            available_move_lines[(move_line.location_id, move_line.lot_id, move_line.result_package_id, move_line.owner_id)] -= move_line.product_qty
-                    for (location_id, lot_id, package_id, owner_id), quantity in available_move_lines.items():
-                        # `quantity` is what is brought by chained done move lines. We double check
-                        # here this quantity is available on the quants themselves. If not, this
-                        # could be the result of an inventory adjustment that removed totally of
-                        # partially `quantity`. When this happens, we chose to reserve the maximum
-                        # still available. This situation could not happen on MTS move, because in
-                        # this case `quantity` is directly the quantity on the quants themselves.
+                    for (location_id, lot_id, package_id, owner_id), quantity in group_move_origin_in[move_orig_ids].items():
+                        if missing_reserved_quantity <= 0:  # Will be fullfilled
+                            break
+                        quantity = min(quantity, missing_reserved_quantity)
+                        missing_reserved_quantity -= quantity
+                        group_move_origin_in[move_orig_ids][(location_id, lot_id, package_id, owner_id)] -= quantity
                         move_qty_params.append({
                             "move": move,
                             "quantity": quantity,
@@ -1373,7 +1383,6 @@ class StockMove(models.Model):
             move, need, quantity, gather_detail = move_param.get("move"), move_param.get("need"), move_param.get("quantity"), move_param.get("gather_detail")
             product_id, location_id, lot_id, package_id, owner_id, strict = gather_detail
             quants = quants_by_gather_details[gather_detail]
-            rounding = roundings[move]
             if not quants:
                 continue
             available_quantity = move._get_available_quantity(move.product_id, location_id, quants=quants)
@@ -1381,17 +1390,20 @@ class StockMove(models.Model):
                 continue
             if quantity:
                 available_quantity = min(quantity, available_quantity)
-            if need is None:
+            if need is None:  # move with origins, then the need to be recomputed at each iteration
                 need = move.product_qty - sum(move.move_line_ids.mapped('product_qty'))
             taken_quantity = move._update_reserved_quantity(need, available_quantity, location_id, lot_id=lot_id, package_id=package_id, owner_id=owner_id, strict=strict, quants=quants)
+            rounding = rounding_by_product[move.product_id]
             if float_is_zero(taken_quantity, precision_rounding=rounding):
                 continue
             if float_is_zero(need - taken_quantity, precision_rounding=rounding):
-                assigned_moves |= move
+                assigned_moves.add(move.id)
             else:
-                partially_available_moves |= move
+                partially_available_moves.add(move.id)
 
-        self.env['stock.move.line'].create(move_line_vals_list)
+        assigned_moves, partially_available_moves = self.env['stock.move'].browse(list(assigned_moves)), self.env['stock.move'].browse(list(partially_available_moves))
+
+        self.env['stock.move.line'].create(move_line_vals)
         partially_available_moves.write({'state': 'partially_available'})
         assigned_moves.write({'state': 'assigned'})
         self.mapped('picking_id')._check_entire_pack()
