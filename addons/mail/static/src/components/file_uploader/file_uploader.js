@@ -101,7 +101,10 @@ class FileUploader extends Component {
                 attachment.isTemporary &&
                 attachment.filename === file.name
             );
-
+            if (!uploadingAttachment) {
+                //the current attachment may have been removed while awaiting for the previous fetch.
+                continue;
+            }
             try {
                 const response = await this.env.browser.fetch('/web/binary/upload_attachment', {
                     method: 'POST',
