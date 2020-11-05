@@ -1,6 +1,7 @@
 import download from "../libs/download";
-import { _t } from "../core/localization";
+import {_lt, Stringifiable} from "./localization";
 import parse from "../libs/content-disposition";
+import {Odoo} from "../types";
 
 interface DownloadFileOptionsFromForm {
   type: "form";
@@ -16,10 +17,10 @@ interface DownloadFileOptionsFromParams {
 interface DownloadFileOptionsCallbacks {
   success?: () => void;
   error?: (error: {
-    message: string;
+    message: Stringifiable|String
     data: {
-      name?: string;
-      title: string;
+      name?: Stringifiable|String,
+      title: Stringifiable|String
     };
   }) => void;
   complete?: () => void;
@@ -27,9 +28,6 @@ interface DownloadFileOptionsCallbacks {
 
 type DownloadFileOptions = (DownloadFileOptionsFromForm | DownloadFileOptionsFromParams) &
   DownloadFileOptionsCallbacks;
-
-// TODO change with auth logic
-const csrf_token_todo = "Hello there";
 
 /**
  * Cooperative file download implementation, for ajaxy APIs.
@@ -54,7 +52,10 @@ const csrf_token_todo = "Hello there";
  *   mean that we probably need to inform the user that something needs to be
  *   changed to make it work.
  */
-export function getFile(options: DownloadFileOptions) {
+
+declare const odoo: Odoo
+
+export function downloadFile(options: DownloadFileOptions) {
   const xhr: XMLHttpRequest = new XMLHttpRequest();
 
   let data: FormData;
@@ -72,9 +73,8 @@ export function getFile(options: DownloadFileOptions) {
 
   data.append("token", "dummy-because-api-expects-one");
 
-  // TODO change with auth logic
-  if (csrf_token_todo) {
-    data.append("csrf_token", csrf_token_todo);
+  if (odoo.csrf_token) {
+    data.append("csrf_token", odoo.csrf_token);
   }
 
   // IE11 wants this after xhr.open or it throws
@@ -124,10 +124,10 @@ export function getFile(options: DownloadFileOptions) {
 
   xhr.onerror = () => {
     options.error?.({
-      message: _t(
+      message: _lt(
         "Something happened while trying to contact the server, check that the server is online and that you still have a working network connection."
       ),
-      data: { title: _t("Could not connect to the server") },
+      data: { title: _lt("Could not connect to the server") },
     });
   };
 

@@ -65,6 +65,7 @@ export interface SessionInfo {
 
 export interface Odoo {
   session_info: SessionInfo;
+  csrf_token?: string;
 }
 
 interface DBInfo {
