@@ -696,7 +696,7 @@ class Picking(models.Model):
             ._action_confirm()
 
         # run scheduler for moves forecasted to not have enough in stock
-        self.mapped('move_lines').filtered(lambda move: move.state not in ('draft', 'cancel', 'done'))._trigger_scheduler()
+        # self.mapped('move_lines').filtered(lambda move: move.state not in ('draft', 'cancel', 'done'))._trigger_scheduler()
         return True
 
     def action_assign(self):

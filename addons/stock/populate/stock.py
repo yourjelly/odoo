@@ -214,7 +214,7 @@ class StockWarehouseOrderpoint(models.Model):
 class Inventory(models.Model):
     _inherit = 'stock.inventory'
 
-    _populate_sizes = {'small': 5, 'medium': 10, 'large': 20}
+    _populate_sizes = {'small': 50, 'medium': 10, 'large': 20}
     _populate_dependencies = ['stock.location']
 
     def _populate(self, size):
@@ -266,7 +266,7 @@ class Inventory(models.Model):
 class InventoryLine(models.Model):
     _inherit = 'stock.inventory.line'
 
-    _populate_sizes = {'small': 500, 'medium': 5_000, 'large': 20_000}
+    _populate_sizes = {'small': 5000, 'medium': 5_000, 'large': 20_000}
     _populate_dependencies = ['stock.inventory']
 
     def _populate(self, size):
@@ -302,7 +302,7 @@ class InventoryLine(models.Model):
         create_missing_lots()
 
         # (Un)comment to test a DB with a current stock.
-        # validate_inventory_sample(0.8)
+        validate_inventory_sample(0.8)
 
         return inventory_lines
 
@@ -398,7 +398,7 @@ class PickingType(models.Model):
 class Picking(models.Model):
     _inherit = 'stock.picking'
 
-    _populate_sizes = {'small': 100, 'medium': 2_000, 'large': 50_000}
+    _populate_sizes = {'small': 400, 'medium': 2_000, 'large': 50_000}
     _populate_dependencies = ['stock.location', 'stock.picking.type', 'res.partner']
 
     def _populate_factories(self):
@@ -474,7 +474,7 @@ class Picking(models.Model):
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
-    _populate_sizes = {'small': 1_000, 'medium': 20_000, 'large': 1_000_000}
+    _populate_sizes = {'small': 6000, 'medium': 20_000, 'large': 1_000_000}
     _populate_dependencies = ['stock.picking']
 
     def _populate(self, size):
@@ -489,7 +489,7 @@ class StockMove(models.Model):
             picking_to_confirm.action_confirm()
 
         # (Un)comment to test a DB with a lot of outgoing/incoming/internal confirmed moves, e.g. for testing of forecasted report
-        # confirm_pickings(0.8)
+        confirm_pickings(1.0)
 
         return moves.exists()  # Confirm picking can unlink some moves
 
