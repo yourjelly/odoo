@@ -6,7 +6,6 @@ from psycopg2 import IntegrityError
 from odoo.exceptions import AccessError
 from odoo.tools import mute_logger
 
-
 class TestCertificationBadge(common.TestSurveyCommon):
 
     def setUp(self):
@@ -64,40 +63,6 @@ class TestCertificationBadge(common.TestSurveyCommon):
         self.certification_survey.action_unarchive()
         self.assertTrue(self.certification_survey.active)
         self.assertTrue(self.certification_badge.active)
-
-    def test_give_badge_without_badge(self):
-        with mute_logger('odoo.sql_db'):
-            with self.assertRaises(IntegrityError):
-                self.certification_survey.write({'certification_give_badge': True})
-                self.certification_survey.flush(['certification_give_badge'])
-
-    def test_remove_badge_with_give_badge(self):
-        self.certification_survey.write({
-            'certification_give_badge': True,
-            'certification_badge_id': self.certification_badge.id
-        })
-        with mute_logger('odoo.sql_db'):
-            with self.assertRaises(IntegrityError):
-                self.certification_survey.write({'certification_badge_id': None})
-                self.certification_survey.flush(['certification_badge_id'])
-
-    def test_remove_badge_with_give_badge_multi(self):
-        self.certification_survey.write({
-            'certification_give_badge': True,
-            'certification_badge_id': self.certification_badge.id
-        })
-        self.certification_survey_2.write({
-            'certification_give_badge': True,
-            'certification_badge_id': self.certification_badge_2.id
-        })
-        surveys = self.env['survey.survey'].browse([
-            self.certification_survey.id,
-            self.certification_survey_2.id
-        ])
-        with mute_logger('odoo.sql_db'):
-            with self.assertRaises(IntegrityError):
-                surveys.write({'certification_badge_id': None})
-                surveys.flush(['certification_badge_id'])
 
     def test_set_same_badge_on_multiple_survey(self):
         self.certification_survey.write({
@@ -165,6 +130,18 @@ class TestCertificationBadge(common.TestSurveyCommon):
         goal = challenge_line.definition_id
         self.assertEqual(len(goal), 1,
             "A goal should be created if the certification badge is activated on a certification survey")
+
+        new_survey = self.certification_survey.copy({'title': 'TestDuplicate'})
+        self.assertEqual(new_survey.title, 'TestDuplicate')
+        self.assertFalse(new_survey.certification_give_badge)
+        self.assertEqual(new_survey.certification_badge_id, self.env['gamification.badge'])
+        new_survey.write({'certification_give_badge': True})
+        self.assertTrue(new_survey.certification_give_badge)
+        self.assertFalse(new_survey.certification_badge_id.id)
+        challenge = self.env['gamification.challenge'].search([
+            ('name', '=', 'TestDuplicate challenge certification')])
+        self.assertEqual(len(challenge), 0,
+            "The challenge should not be created if the certification badge is unset from the certification survey")
 
     def test_certification_badge_access(self):
         self.certification_badge.with_user(self.survey_manager).write(
