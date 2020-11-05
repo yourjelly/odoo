@@ -1,7 +1,7 @@
 import download from "../libs/download";
-import {_lt, Stringifiable} from "./localization";
+import { _lt, Stringifiable } from "./localization";
 import parse from "../libs/content-disposition";
-import {Odoo} from "../types";
+import { Odoo } from "../types";
 
 interface DownloadFileOptionsFromForm {
   type: "form";
@@ -17,10 +17,10 @@ interface DownloadFileOptionsFromParams {
 interface DownloadFileOptionsCallbacks {
   success?: () => void;
   error?: (error: {
-    message: Stringifiable|String
+    message: Stringifiable | String;
     data: {
-      name?: Stringifiable|String,
-      title: Stringifiable|String
+      name?: Stringifiable | String;
+      title: Stringifiable | String;
     };
   }) => void;
   complete?: () => void;
@@ -53,7 +53,7 @@ type DownloadFileOptions = (DownloadFileOptionsFromForm | DownloadFileOptionsFro
  *   changed to make it work.
  */
 
-declare const odoo: Odoo
+declare const odoo: Odoo;
 
 export function downloadFile(options: DownloadFileOptions) {
   const xhr: XMLHttpRequest = new XMLHttpRequest();
