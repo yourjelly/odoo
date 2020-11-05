@@ -534,6 +534,13 @@ def email_split_and_format(text):
         return []
     return [formataddr((name, email)) for (name, email) in email_split_tuples(text)]
 
+
+def email_domain(email):
+    """Return the domain of the given email."""
+    *_, domain = email.rpartition('@')
+    return domain
+
+
 def email_normalize(text):
     """ Sanitize and standardize email address entries.
         A normalized email is considered as :

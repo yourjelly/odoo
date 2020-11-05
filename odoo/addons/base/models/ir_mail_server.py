@@ -22,7 +22,7 @@ import html2text
 
 from odoo import api, fields, models, tools, _
 from odoo.exceptions import UserError
-from odoo.tools import ustr, pycompat, formataddr
+from odoo.tools import ustr, pycompat, formataddr, email_normalize, email_domain
 
 _logger = logging.getLogger(__name__)
 _test_logger = logging.getLogger('odoo.tests')
@@ -106,6 +106,12 @@ class IrMailServer(models.Model):
     sequence = fields.Integer(string='Priority', default=10, help="When no specific mail server is requested for a mail, the highest priority one "
                                                                   "is used. Default priority is 10 (smaller number = higher priority)")
     active = fields.Boolean(default=True)
+
+    from_filter = fields.Char(
+      "From Filter",
+      help="Define for which MailFrom this mail server can be used.\n"
+      "e.g.: notification@odoo.com\n"
+      "e.g.: odoo.com")
 
     @api.constrains('smtp_ssl_certificate', 'smtp_ssl_private_key')
     def _check_ssl_files(self):
@@ -408,16 +414,20 @@ class IrMailServer(models.Model):
             return "%s@%s" % (email_from, domain)
         return tools.config.get("email_from")
 
-    def _prepare_email_message(self, message):
-        smtp_from = message['Return-Path'] or self._get_default_bounce_address() or message['From']
+    def _prepare_email_message(self, message, mail_server_id):
+        bounce_address = message['Return-Path'] or self._get_default_bounce_address() or message['From']
+        smtp_from = message['From'] or bounce_address
         assert smtp_from, "The Return-Path or From header is required for any outbound email"
 
         # The email's "Envelope From" (Return-Path), and all recipient addresses must only contain ASCII characters.
         from_rfc2822 = extract_rfc2822_addresses(smtp_from)
-        assert from_rfc2822, ("Malformed 'Return-Path' or 'From' address: %r - "
-                              "It should contain one valid plain ASCII email") % smtp_from
+        bounce_address_rfc2822 = extract_rfc2822_addresses(bounce_address)
+        assert from_rfc2822 and bounce_address_rfc2822, (
+            "Malformed 'Return-Path' or 'From' address: %r - "
+            "It should contain one valid plain ASCII email") % smtp_from
         # use last extracted email, to support rarities like 'Support@MyComp <support@mycompany.com>'
         smtp_from = from_rfc2822[-1]
+        bounce_address = bounce_address_rfc2822[-1]
         email_to = message['To']
         email_cc = message['Cc']
         email_bcc = message['Bcc']
@@ -438,7 +448,28 @@ class IrMailServer(models.Model):
             del message['To']           # avoid multiple To: headers!
             message['To'] = x_forge_to
 
-        return smtp_from, smtp_to_list, message
+        if not mail_server_id:
+            mail_server, mail_server_from = self._find_mail_server(smtp_from)
+
+            if mail_server:
+                mail_server_id = mail_server.id
+
+                if mail_server_from != smtp_from:
+                    # Can not spoof, adapt the mail FROM header
+                    message = self._encapsulate_message(message, new_from=mail_server_from)
+                    smtp_from = mail_server_from
+        else:
+            mail_server = self.browse(mail_server_id)
+
+        # Check if it's still possible to put the bounce address as smtp_from
+        if mail_server and mail_server._match_from_filter(smtp_from) and mail_server._match_from_filter(bounce_address):
+            # Mail headers FROM will be spoofed to be able to receive bounce notifications
+            # But the mail server allow it because it support the domain of both
+            smtp_from = bounce_address
+        else:
+            _logger.info('Bounce might not work because we do not want to spoof')
+
+        return smtp_from, smtp_to_list, message, mail_server_id
 
     @api.model
     def send_email(self, message, mail_server_id=None, smtp_server=None, smtp_port=None,
@@ -480,7 +511,7 @@ class IrMailServer(models.Model):
         # provided by caller.  Caller may be using Variable Envelope Return
         # Path (VERP) to detect no-longer valid email addresses.
 
-        smtp_from, smtp_to_list, message = self._prepare_email_message(message)
+        smtp_from, smtp_to_list, message, mail_server_id = self._prepare_email_message(message, mail_server_id)
 
         # Do not actually send emails in testing mode!
         if getattr(threading.currentThread(), 'testing', False) or self.env.registry.in_test_mode():
@@ -522,6 +553,79 @@ class IrMailServer(models.Model):
             raise MailDeliveryException(_("Mail Delivery Failed"), msg)
         return message_id
 
+    @api.model
+    def _encapsulate_message(self, message, new_from):
+        """Change the FROM of the message and use the old one as name.
+        e.g.
+            Old From: "Admin" <admin@gmail.com>
+            New From: notifications@odoo.com
+            Output:   "Admin (admin@gmail.com)" <notifications@odoo.com>
+        """
+        from_name = message['From'].replace('<', '(').replace('>', ')').replace('"', '')
+        del message['From']
+        message['From'] = f'"{from_name}" <{new_from}>'
+        return message
+
+    @api.model
+    def _find_mail_server(self, mail_from):
+        # 1. Try to find a mail server for the right mail from
+        mail_server = self._matching_mail_server(mail_from)
+        if mail_server:
+            return mail_server, mail_from
+
+        # 2. Try to find a mail server for <notifications@domain.com>
+        notifications_email = self._get_default_from_address()
+        if notifications_email:
+            mail_server = self._matching_mail_server(notifications_email)
+            if mail_server:
+                return mail_server, notifications_email
+        else:
+            _logger.info(
+                'No notifications email set\n'
+                'Please set those system parameters\n'
+                '\t mail.catchall.domain\n'
+                '\t mail.default.from'
+            )
+
+        # 3. Take the first mail server because nothing else has been found
+        # Will spoof the FROM because we have no other choices
+        mail_server = self._matching_mail_server()
+        return mail_server, mail_from
+
+    @api.model
+    def _matching_mail_server(self, mail_from=None):
+        """Return a mail server which match the "mail_from".
+        Priority are
+        1. The first mail server which match the entire email
+        2. The first mail server which match the domain of the mail from
+        """
+        if not mail_from:
+            return self.sudo().search(
+                [('from_filter', '=', False)],
+                order='sequence', limit=1,
+            )
+
+        domain_mail_from = email_domain(mail_from)
+        mail_servers = self.sudo().search(
+            [('from_filter', 'ilike', domain_mail_from)],
+            order='sequence',
+        )
+
+        # 1: Return the first exact match of "from_filter"
+        mail_server = next((
+            mail_server for mail_server in mail_servers
+            if email_normalize(mail_server.from_filter) == email_normalize(mail_from)),
+            None)
+
+        if not mail_server:
+            # 2: Return the first domain match
+            mail_server = next((
+                mail_server for mail_server in mail_servers
+                if mail_server.from_filter.lower() == domain_mail_from.lower()),
+                None)
+
+        return mail_server
+
     @api.onchange('smtp_encryption')
     def _onchange_encryption(self):
         result = {}
@@ -535,3 +639,14 @@ class IrMailServer(models.Model):
         else:
             self.smtp_port = 25
         return result
+
+    def _match_from_filter(self, mail_from):
+        """Return True is the given email address match the "from_filter" field."""
+        self.ensure_one()
+        if not self.from_filter:
+            return True
+
+        if '@' in self.from_filter:
+            return email_normalize(self.from_filter) == email_normalize(mail_from)
+
+        return email_domain(mail_from).lower() == self.from_filter.lower()
