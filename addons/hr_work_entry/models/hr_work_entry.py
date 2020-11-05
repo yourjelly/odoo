@@ -33,7 +33,7 @@ class HrWorkEntry(models.Model):
 
     _sql_constraints = [
         ('_work_entry_has_end', 'check (date_stop IS NOT NULL)', 'Work entry must end. Please define an end date or a duration.'),
-        ('_work_entry_start_before_end', 'check (date_stop > date_start)', 'Starting time should be before end time.')
+        ('_work_entry_start_before_end', 'check (date_stop >= date_start)', 'Starting time should be before or equal to end time.')
     ]
 
     @api.depends('state')
