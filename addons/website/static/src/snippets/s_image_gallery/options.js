@@ -15,7 +15,12 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
      * @override
      */
     start: async function () {
+        console.log('image gallery snipped start');
         const _super = this._super;
+
+        $('body').on('DOMSubtreeModified', '.s_image_gallery .container', function(){
+            console.warn('.s_image_gallery html changed', $(this).find('img').length);
+        });
 
         this._images = this.$('img').get();
 
@@ -178,8 +183,11 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
      * Displays the images with the "masonry" layout.
      */
     masonry: async function (previewMode, widgetValue, params) {
+        console.warn("massonry");
         var self = this;
         var imgs = this._getImages();
+        console.log("imgs length : " + imgs.length);
+        console.log(imgs);
         var columns = this._getColumns();
         var colClass = 'col-lg-' + (12 / columns);
         var cols = [];
@@ -193,9 +201,10 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
             $row.append($col);
             cols.push($col[0]);
         }
-
+        // debugger
         // Dispatch images in columns by always putting the next one in the
         // smallest-height column
+        let imgIndex = 0
         while (imgs.length) {
             var min = Infinity;
             var $lowest;
@@ -207,8 +216,12 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
                     $lowest = $col;
                 }
             });
+            console.log("images left : " + imgs.length);
+            console.log(imgs[0]);
             $lowest.append(imgs.shift());
         }
+        console.log("previewMode : " + previewMode);
+        debugger
         if (previewMode === false) await this.updateChangesInWysiwyg();
     },
     /**
@@ -218,7 +231,7 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
      */
     mode: async function (previewMode, widgetValue, params) {
         this._setMode(previewMode, widgetValue, params);
-        if (previewMode === false) await this.updateChangesInWysiwyg();
+        if (previewMode === false) await this.updateChangesInWysiwyg(this.$target, params.context);
     },
     /**
      * Displays the images with the standard layout: floating images.
@@ -307,12 +320,13 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
      * @override
      */
     notify: async function (name, data) {
+        console.log('notify : ' + name, data);
         this._super(...arguments);
         if (name === 'image_removed') {
             data.$image.remove(); // Force the removal of the image before reset
-            await this.mode('reset', this.getMode());
+            await this.mode(false, this.getMode(), {context: data.context});
         } else if (name === 'image_index_request') {
-            const images = this._getImages(this.$('img').get());
+            const images = this._getImages();
             let position = _.indexOf(images, data.$image[0]);
             images.splice(position, 1);
             switch (data.position) {
@@ -432,7 +446,7 @@ snippetOptions.registry.gallery = snippetOptions.SnippetOptionWidget.extend({
      * @private
      * @returns {DOMElement[]}
      */
-    _getImages: function (imgs) {
+    _getImages: function () {
         var imgs = this.$('img').get();
         var self = this;
         imgs.sort(function (a, b) {
@@ -479,12 +493,14 @@ snippetOptions.registry.gallery_img = snippetOptions.SnippetOptionWidget.extend(
      *
      * @override
      */
-    onRemove: function () {
+    onRemove: function (context) {
+        console.warn("OnRemove image");
         this.trigger_up('option_update', {
             optionName: 'gallery',
             name: 'image_removed',
             data: {
                 $image: this.$target,
+                context: context,
             },
         });
     },

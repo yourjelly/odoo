@@ -553,6 +553,7 @@ snippetOptions.SnippetOptionWidget.include({
      * @returns {Promise}
      */
     _refreshPublicWidgets: async function ($el) {
+        console.log('_refreshPublicWidgets');
         return new Promise((resolve, reject) => {
             this.trigger_up('widgets_start_request', {
                 editableMode: true,

@@ -355,7 +355,7 @@ var SnippetEditor = Widget.extend({
                     $snippet: this.$snippetBlock,
                     callback: function (editor, $snippet) {
                         for (var i in editor.snippetOptionInstances) {
-                            editor.snippetOptionInstances[i].onRemove();
+                            editor.snippetOptionInstances[i].onRemove(context);
                         }
                         resolve();
                     },

@@ -798,7 +798,7 @@ var Wysiwyg = Widget.extend({
             this._transform($node);
         }
     },
-    async updateChanges($target) {
+    async updateChanges($target, context = this.editor) {
         const updateChanges = async (context) => {
             const html = $target.html();
             $target.html('');
