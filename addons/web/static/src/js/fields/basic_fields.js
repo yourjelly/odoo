@@ -1527,7 +1527,7 @@ var FieldEmail = InputField.extend({
      */
     init: function () {
         this._super.apply(this, arguments);
-        this.tagName = this.mode === 'readonly' ? 'a' : 'input';
+        this.tagName = this.mode === 'readonly' ? 'div' : 'input';
     },
 
     //--------------------------------------------------------------------------
@@ -1555,9 +1555,11 @@ var FieldEmail = InputField.extend({
      */
     _renderReadonly: function () {
         if (this.value) {
-            this.$el.text(this.value)
-                .addClass('o_form_uri o_text_overflow')
-                .attr('href', this.prefix + ':' + this.value);
+            this.$el.addClass("o_form_uri o_text_overflow");
+            const a = document.createElement('a');
+            a.text = this.value;
+            a.href = this.prefix + ':' + this.value;
+            this.el.appendChild(a);
         } else {
             this.$el.text('');
         }
@@ -1602,15 +1604,27 @@ var FieldPhone = FieldEmail.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * In readonly, phone should be a link, not a span.
+     *
+     * @override
+     */
+    init: function () {
+        this._super.apply(this, arguments);
+        this.tagName = this.mode === 'readonly' ? 'a' : 'input';
+    },
+    /**
      * @override
      * @private
      */
     _renderReadonly: function () {
         this._super();
-
-        // This class should technically be there in case of a very very long
-        // phone number, but it breaks the o_row mechanism, which is more
-        // important right now.
+         if (this.value) {
+           this.$el.text(this.value)
+               .addClass('o_form_uri')
+               .attr('href', this.prefix + ':' + this.value);
+         } else {
+             this.$el.text('');
+         }
         this.$el.removeClass('o_text_overflow');
     },
 });
