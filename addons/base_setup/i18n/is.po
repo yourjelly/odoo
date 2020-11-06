@@ -1,11 +1,11 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * base_setup
-# 
+#
 # Translators:
 # Björn Ingvarsson <boi@exigo.is>, 2018
 # Birgir Steinarsson <biggboss83@gmail.com>, 2018
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
@@ -14,10 +14,10 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:15+0000\n"
 "Last-Translator: Birgir Steinarsson <biggboss83@gmail.com>, 2018\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: base_setup
@@ -36,7 +36,7 @@ msgstr ""
 #. module: base_setup
 #: model:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Access Rights"
-msgstr "Access Rights"
+msgstr ""
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_module_google_calendar
@@ -52,7 +52,7 @@ msgstr ""
 #. module: base_setup
 #: model:ir.model.fields,help:base_setup.field_res_config_settings_group_multi_currency
 msgid "Allows to work in a multi currency environment"
-msgstr "Allows to work in a multi currency environment"
+msgstr ""
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_module_voip
@@ -99,7 +99,7 @@ msgstr ""
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_module_pad
 msgid "Collaborative Pads"
-msgstr "Collaborative Pads"
+msgstr ""
 
 #. module: base_setup
 #: model:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -132,7 +132,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_default_custom_report_footer
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_report_footer
 msgid "Custom Report Footer"
-msgstr "Custom Report Footer"
+msgstr ""
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_default_user_rights
@@ -164,7 +164,7 @@ msgstr ""
 #. module: base_setup
 #: model:ir.model.fields,help:base_setup.field_res_config_settings_report_footer
 msgid "Footer text displayed at the bottom of all reports."
-msgstr "Footer text displayed at the bottom of all reports."
+msgstr ""
 
 #. module: base_setup
 #: model:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -185,7 +185,7 @@ msgstr ""
 #. module: base_setup
 #: model:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Google Calendar"
-msgstr "Google Calendar"
+msgstr ""
 
 #. module: base_setup
 #: model:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -195,7 +195,7 @@ msgstr ""
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_module_google_spreadsheet
 msgid "Google Spreadsheet"
-msgstr "Google Spreadsheet"
+msgstr ""
 
 #. module: base_setup
 #: model:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -236,7 +236,7 @@ msgstr ""
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_group_multi_currency
 msgid "Multi-Currencies"
-msgstr "Multi-Currencies"
+msgstr ""
 
 #. module: base_setup
 #: model:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
@@ -294,7 +294,7 @@ msgstr ""
 #. module: base_setup
 #: model:ir.ui.view,arch_db:base_setup.res_config_settings_view_form
 msgid "Template"
-msgstr "Template"
+msgstr ""
 
 #. module: base_setup
 #: model:ir.model.fields,field_description:base_setup.field_res_config_settings_module_base_gengo
@@ -334,4 +334,4 @@ msgstr "Notendur"
 #. module: base_setup
 #: model:ir.model,name:base_setup.model_res_config_settings
 msgid "res.config.settings"
-msgstr "res.config.settings"
+msgstr ""

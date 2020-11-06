@@ -1,12 +1,12 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * web
-# 
+#
 # Translators:
 # Björn Ingvarsson <boi@exigo.is>, 2018
 # Birgir Steinarsson <biggboss83@gmail.com>, 2019
 # Martin Trigaux, 2019
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
@@ -15,10 +15,10 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:24+0000\n"
 "Last-Translator: Martin Trigaux, 2019\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: web
@@ -292,7 +292,7 @@ msgstr ""
 #: code:addons/web/static/src/js/fields/basic_fields.js:1658
 #, python-format
 msgid "Activate"
-msgstr "Activate"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -614,7 +614,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:174
 #, python-format
 msgid "Change Password"
-msgstr "Change Password"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -629,7 +629,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:928
 #, python-format
 msgid "Clear"
-msgstr "Clear"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -648,7 +648,7 @@ msgstr ""
 #: code:addons/web/static/src/js/widgets/domain_selector_dialog.js:24
 #, python-format
 msgid "Close"
-msgstr "Close"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -662,7 +662,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:52
 #, python-format
 msgid "Column title"
-msgstr "Column title"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -836,7 +836,7 @@ msgstr ""
 #. module: web
 #: model:ir.ui.view,arch_db:web.login
 msgid "Database"
-msgstr "Database"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -923,7 +923,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:1330
 #, python-format
 msgid "Documentation"
-msgstr "Documentation"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1123,7 +1123,7 @@ msgstr ""
 #: code:addons/web/static/src/js/views/list/list_controller.js:133
 #, python-format
 msgid "Export"
-msgstr "Export"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1165,7 +1165,7 @@ msgstr ""
 #: code:addons/web/static/src/js/widgets/data_export.js:458
 #, python-format
 msgid "External ID"
-msgstr "External ID"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1236,7 +1236,7 @@ msgstr ""
 #: code:addons/web/static/src/js/chrome/search_inputs.js:563
 #, python-format
 msgid "Filter"
-msgstr "Filter"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1295,7 +1295,7 @@ msgstr ""
 #: code:addons/web/static/src/js/views/form/form_view.js:17
 #, python-format
 msgid "Form"
-msgstr "Form"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1316,7 +1316,7 @@ msgstr ""
 #: code:addons/web/static/src/js/views/graph/graph_view.js:20
 #, python-format
 msgid "Graph"
-msgstr "Graph"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1336,7 +1336,7 @@ msgstr ""
 #. module: web
 #: model:ir.model,name:web.model_ir_http
 msgid "HTTP routing"
-msgstr "HTTP routing"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1371,7 +1371,7 @@ msgstr ""
 #: code:addons/web/static/src/js/fields/basic_fields.js:1657
 #, python-format
 msgid "Inactive"
-msgstr "Inactive"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1431,7 +1431,7 @@ msgstr ""
 #: code:addons/web/static/src/js/views/kanban/kanban_view.js:16
 #, python-format
 msgid "Kanban"
-msgstr "Kanban"
+msgstr ""
 
 #. module: web
 #: code:addons/web/controllers/main.py:809
@@ -1632,7 +1632,7 @@ msgstr "Mánuður"
 #: code:addons/web/static/src/xml/base.xml:879
 #, python-format
 msgid "More"
-msgstr "More"
+msgstr ""
 
 #. module: web
 #: model:ir.ui.view,arch_db:web.menu
@@ -1672,7 +1672,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:1253
 #, python-format
 msgid "Name:"
-msgstr "Name:"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1686,7 +1686,7 @@ msgstr "Nýtt"
 #: code:addons/web/static/src/xml/base.xml:165
 #, python-format
 msgid "New Password"
-msgstr "New Password"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1700,7 +1700,7 @@ msgstr ""
 #: code:addons/web/static/src/js/chrome/search_inputs.js:333
 #, python-format
 msgid "No"
-msgstr "No"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1774,7 +1774,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:629
 #, python-format
 msgid "None"
-msgstr "None"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1789,7 +1789,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:86
 #, python-format
 msgid "Object:"
-msgstr "Object:"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1860,7 +1860,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:1226
 #, python-format
 msgid "Ok"
-msgstr "Ok"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1888,7 +1888,7 @@ msgstr ""
 #: code:addons/web/static/src/js/fields/basic_fields.js:1920
 #, python-format
 msgid "Only Integer Value should be valid."
-msgstr "Only Integer Value should be valid."
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -1997,7 +1997,7 @@ msgstr ""
 #: code:addons/web/static/src/js/views/pivot/pivot_view.js:23
 #, python-format
 msgid "Pivot"
-msgstr "Pivot"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -2066,7 +2066,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:1333
 #, python-format
 msgid "Preferences"
-msgstr "Preferences"
+msgstr ""
 
 #. module: web
 #: model:ir.actions.report,name:web.action_report_externalpreview
@@ -2282,7 +2282,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:927
 #, python-format
 msgid "Select"
-msgstr "Select"
+msgstr ""
 
 #. module: web
 #: model:ir.ui.view,arch_db:web.login
@@ -2580,7 +2580,7 @@ msgstr "Titill"
 #: code:addons/web/static/src/xml/web_calendar.xml:67
 #, python-format
 msgid "Today"
-msgstr "Today"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -2623,7 +2623,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:25
 #, python-format
 msgid "Type:"
-msgstr "Type:"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -2717,7 +2717,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:926
 #, python-format
 msgid "Upload your file"
-msgstr "Upload your file"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -2733,7 +2733,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/base.xml:985
 #, python-format
 msgid "Uploading..."
-msgstr "Uploading..."
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -2835,7 +2835,7 @@ msgstr ""
 #: code:addons/web/static/src/js/fields/basic_fields.js:1920
 #, python-format
 msgid "Wrong value entered!"
-msgstr "Wrong value entered!"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -2857,7 +2857,7 @@ msgstr "Ár"
 #: code:addons/web/static/src/xml/base.xml:49
 #, python-format
 msgid "Yes"
-msgstr "Yes"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -2990,7 +2990,7 @@ msgstr ""
 #. module: web
 #: model:ir.model,name:web.model_base
 msgid "base"
-msgstr "base"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -3040,7 +3040,7 @@ msgstr ""
 #. module: web
 #: model:ir.model,name:web.model_ir_qweb_field_image
 msgid "ir.qweb.field.image"
-msgstr "ir.qweb.field.image"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -3267,7 +3267,7 @@ msgstr ""
 #: code:addons/web/static/src/xml/kanban.xml:41
 #, python-format
 msgid "remaining)"
-msgstr "remaining)"
+msgstr ""
 
 #. module: web
 #. openerp-web

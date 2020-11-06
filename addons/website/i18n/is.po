@@ -1,12 +1,12 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * website
-# 
+#
 # Translators:
 # Birgir Steinarsson <biggboss83@gmail.com>, 2019
 # Martin Trigaux, 2019
 # Björn Ingvarsson <boi@exigo.is>, 2019
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
@@ -15,10 +15,10 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:25+0000\n"
 "Last-Translator: Björn Ingvarsson <boi@exigo.is>, 2019\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: website
@@ -62,7 +62,7 @@ msgstr ""
 #: code:addons/website/static/src/xml/website.xml:40
 #, python-format
 msgid "&nbsp;"
-msgstr "&nbsp;"
+msgstr ""
 
 #. module: website
 #. openerp-web
@@ -1025,12 +1025,12 @@ msgstr ""
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_page_arch_db
 msgid "Arch Blob"
-msgstr "Arch Blob"
+msgstr ""
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_page_arch_fs
 msgid "Arch Filename"
-msgstr "Arch Filename"
+msgstr ""
 
 #. module: website
 #. openerp-web
@@ -1944,7 +1944,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website.bs_debug_page_ir_ui_view
 #: model:website.page,arch_db:website.bs_debug_page
 msgid "Form"
-msgstr "Form"
+msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.s_company_team
@@ -2489,7 +2489,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:website.bs_debug_page_ir_ui_view
 #: model:website.page,arch_db:website.bs_debug_page
 msgid "Label"
-msgstr "Label"
+msgstr ""
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings_language_ids
@@ -2988,15 +2988,6 @@ msgid ""
 "(<xpath/>) are applied, and the result is used as if it were this view's\n"
 "actual arch.\n"
 msgstr ""
-"Only applies if this view inherits from an other one (inherit_id is not False/Null).\n"
-"\n"
-"* if extension (default), if this view is requested the closest primary view\n"
-"is looked up (via inherit_id), then all views inheriting from it with this\n"
-"view's model are applied\n"
-"* if primary, the closest primary view is fully resolved (even if it uses a\n"
-"different model than this one), then this view's inheritance specs\n"
-"(<xpath/>) are applied, and the result is used as if it were this view's\n"
-"actual arch.\n"
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.show_website_info
@@ -3345,7 +3336,7 @@ msgstr ""
 #. module: website
 #: model:ir.ui.view,arch_db:website.http_error_debug
 msgid "QWeb"
-msgstr "QWeb"
+msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner
@@ -4780,22 +4771,22 @@ msgstr ""
 #. module: website
 #: model:ir.model,name:website.model_ir_actions_server
 msgid "ir.actions.server"
-msgstr "ir.actions.server"
+msgstr ""
 
 #. module: website
 #: model:ir.model,name:website.model_ir_attachment
 msgid "ir.attachment"
-msgstr "ir.attachment"
+msgstr ""
 
 #. module: website
 #: model:ir.model,name:website.model_ir_qweb
 msgid "ir.qweb"
-msgstr "ir.qweb"
+msgstr ""
 
 #. module: website
 #: model:ir.model,name:website.model_ir_ui_view
 msgid "ir.ui.view"
-msgstr "ir.ui.view"
+msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner
@@ -4836,7 +4827,7 @@ msgstr ""
 #. module: website
 #: model:ir.model,name:website.model_res_config_settings
 msgid "res.config.settings"
-msgstr "res.config.settings"
+msgstr ""
 
 #. module: website
 #: model:ir.ui.view,arch_db:website.website_planner

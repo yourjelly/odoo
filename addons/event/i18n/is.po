@@ -1,11 +1,11 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * event
-# 
+#
 # Translators:
 # Birgir Steinarsson <biggboss83@gmail.com>, 2018
 # Björn Ingvarsson <boi@exigo.is>, 2019
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
@@ -14,10 +14,10 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:17+0000\n"
 "Last-Translator: Björn Ingvarsson <boi@exigo.is>, 2019\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: event
@@ -370,7 +370,7 @@ msgstr ""
 #: code:addons/event/models/event.py:297
 #, python-format
 msgid "%s (copy)"
-msgstr "%s (copy)"
+msgstr ""
 
 #. module: event
 #: model:event.event,description:event.event_0
@@ -465,10 +465,10 @@ msgstr ""
 #: model:event.event,description:event.event_1
 #: model:event.event,description:event.event_3
 msgid ""
-"<span style=\"text-align: -webkit-center; \">This course is dedicated to "
-"developers who need to grasp knowledge of the <strong>business applications "
-"development </strong>process. This course is for new developers or for IT "
-"professionals eager to learn more about technical aspects.</span>"
+"<span style=\"text-align: -webkit-center; \">This course is dedicated "
+"to developers who need to grasp knowledge of the <strong>business "
+"applications development </strong>process. This course is for new developers"
+" or for IT professionals eager to learn more about technical aspects.</span>"
 msgstr ""
 
 #. module: event
@@ -570,7 +570,7 @@ msgstr ""
 #. module: event
 #: model:ir.ui.view,arch_db:event.res_config_settings_view_form
 msgid "Attendance"
-msgstr "Attendance"
+msgstr ""
 
 #. module: event
 #: selection:event.registration,state:0
@@ -745,7 +745,7 @@ msgstr ""
 #. module: event
 #: model:ir.ui.view,arch_db:event.view_event_type_form
 msgid "Communication"
-msgstr "Communication"
+msgstr ""
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event_company_id
@@ -757,7 +757,7 @@ msgstr "Fyrirtæki"
 #: code:addons/event/models/event.py:486
 #, python-format
 msgid "Compose Email"
-msgstr "Compose Email"
+msgstr ""
 
 #. module: event
 #: model:event.type,name:event.event_type_2
@@ -777,7 +777,7 @@ msgstr "Stillingar"
 #. module: event
 #: model:ir.ui.view,arch_db:event.view_event_registration_form
 msgid "Confirm"
-msgstr "Confirm"
+msgstr ""
 
 #. module: event
 #: model:ir.ui.view,arch_db:event.view_event_confirm
@@ -963,12 +963,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:event.field_event_mail_template_id
 #: model:ir.model.fields,field_description:event.field_event_type_mail_template_id
 msgid "Email Template"
-msgstr "Email Template"
+msgstr ""
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event_date_end
 msgid "End Date"
-msgstr "End Date"
+msgstr ""
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event_date_end_located
@@ -982,7 +982,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:event.event_event_view_pivot
 #: model:ir.ui.view,arch_db:event.view_registration_search
 msgid "Event"
-msgstr "Event"
+msgstr ""
 
 #. module: event
 #: model:ir.model,name:event.model_event_mail
@@ -1106,7 +1106,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:event.view_event_search
 #: model:ir.ui.view,arch_db:event.view_event_tree
 msgid "Events"
-msgstr "Events"
+msgstr ""
 
 #. module: event
 #: model:ir.actions.act_window,name:event.event_event_action_pivot
@@ -1243,7 +1243,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:event.field_event_type_id
 #: model:ir.model.fields,field_description:event.field_event_type_mail_id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: event
 #: model:ir.model.fields,help:event.field_event_event_state
@@ -1426,7 +1426,7 @@ msgstr ""
 #. module: event
 #: model:res.groups,name:event.group_event_manager
 msgid "Manager"
-msgstr "Manager"
+msgstr ""
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_event_seats_availability
@@ -1655,7 +1655,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:event.view_event_registration_pivot
 #: model:ir.ui.view,arch_db:event.view_event_registration_tree
 msgid "Registration"
-msgstr "Registration"
+msgstr ""
 
 #. module: event
 #: model:ir.actions.report,name:event.report_event_registration_badge
@@ -1775,7 +1775,7 @@ msgstr "Senda með tölvupósti"
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_mail_done
 msgid "Sent"
-msgstr "Sent"
+msgstr ""
 
 #. module: event
 #: model:ir.ui.view,arch_db:event.view_event_form
@@ -1796,7 +1796,7 @@ msgstr "Stillingar"
 #. module: event
 #: model:event.type,name:event.event_type_3
 msgid "Show"
-msgstr "Show"
+msgstr ""
 
 #. module: event
 #: model:ir.model.fields,field_description:event.field_event_registration_origin
@@ -1869,7 +1869,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:event.field_event_event_date_tz
 #: model:ir.model.fields,field_description:event.field_event_type_default_timezone
 msgid "Timezone"
-msgstr "Timezone"
+msgstr ""
 
 #. module: event
 #: model:event.event,description:event.event_0
@@ -2111,7 +2111,7 @@ msgstr ""
 #. module: event
 #: model:ir.model,name:event.model_res_config_settings
 msgid "res.config.settings"
-msgstr "res.config.settings"
+msgstr ""
 
 #. module: event
 #: code:addons/event/models/event.py:504

@@ -1,11 +1,11 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * resource
-# 
+#
 # Translators:
 # Bjorn Ingvarsson <boi@exigo.is>, 2018
 # Birgir Steinarsson <biggboss83@gmail.com>, 2018
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.saas~18\n"
@@ -14,17 +14,17 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:23+0000\n"
 "Last-Translator: Birgir Steinarsson <biggboss83@gmail.com>, 2018\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: resource
 #: code:addons/resource/models/resource.py:703
 #, python-format
 msgid "%s (copy)"
-msgstr "%s (copy)"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_resource_active
@@ -91,7 +91,7 @@ msgstr ""
 #: model:ir.model.fields,help:resource.field_resource_resource_calendar_id
 #: model:ir.model.fields,help:resource.field_resource_test_resource_calendar_id
 msgid "Define the schedule of resource"
-msgstr "Define the schedule of resource"
+msgstr ""
 
 #. module: resource
 #: model:ir.actions.act_window,help:resource.action_resource_calendar_form
@@ -113,13 +113,13 @@ msgstr "Nafn"
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_resource_time_efficiency
 msgid "Efficiency Factor"
-msgstr "Efficiency Factor"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance_date_to
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves_date_to
 msgid "End Date"
-msgstr "End Date"
+msgstr ""
 
 #. module: resource
 #: code:addons/resource/models/resource.py:734
@@ -159,7 +159,7 @@ msgstr "Raða eftir:"
 #. module: resource
 #: model:ir.ui.view,arch_db:resource.view_resource_calendar_attendance_form
 msgid "Hours"
-msgstr "Hours"
+msgstr ""
 
 #. module: resource
 #: selection:resource.resource,resource_type:0
@@ -174,7 +174,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:resource.field_resource_resource_id
 #: model:ir.model.fields,field_description:resource.field_resource_test_id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves_resource_id
@@ -189,13 +189,11 @@ msgid ""
 "If the active field is set to False, it will allow you to hide the resource "
 "record without removing it."
 msgstr ""
-"If the active field is set to False, it will allow you to hide the resource "
-"record without removing it."
 
 #. module: resource
 #: model:ir.ui.view,arch_db:resource.view_resource_resource_search
 msgid "Inactive"
-msgstr "Inactive"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar___last_update
@@ -246,7 +244,7 @@ msgstr ""
 #. module: resource
 #: selection:resource.resource,resource_type:0
 msgid "Material"
-msgstr "Material"
+msgstr ""
 
 #. module: resource
 #: selection:resource.calendar.attendance,dayofweek:0
@@ -278,12 +276,12 @@ msgstr "Heiti"
 #: model:ir.ui.view,arch_db:resource.resource_calendar_leave_form
 #: model:ir.ui.view,arch_db:resource.resource_calendar_leave_tree
 msgid "Reason"
-msgstr "Reason"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_resource_user_id
 msgid "Related user name for the resource to manage its access."
-msgstr "Related user name for the resource to manage its access."
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_hr_employee_resource_id
@@ -324,7 +322,7 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_resource_resource_type
 msgid "Resource Type"
-msgstr "Resource Type"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_attendance_calendar_id
@@ -454,7 +452,7 @@ msgstr ""
 #. module: resource
 #: model:ir.model.fields,field_description:resource.field_resource_calendar_leaves_tz
 msgid "Timezone"
-msgstr "Timezone"
+msgstr ""
 
 #. module: resource
 #: model:ir.model.fields,help:resource.field_resource_calendar_leaves_tz

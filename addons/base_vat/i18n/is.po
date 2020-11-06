@@ -1,11 +1,11 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * base_vat
-# 
+#
 # Translators:
 # Björn Ingvarsson <boi@exigo.is>, 2018
 # Martin Trigaux, 2019
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
@@ -14,10 +14,10 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:16+0000\n"
 "Last-Translator: Martin Trigaux, 2019\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: base_vat
@@ -80,4 +80,4 @@ msgstr ""
 #. module: base_vat
 #: model:ir.model,name:base_vat.model_res_config_settings
 msgid "res.config.settings"
-msgstr "res.config.settings"
+msgstr ""

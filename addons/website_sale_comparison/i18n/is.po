@@ -1,11 +1,11 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * website_sale_comparison
-# 
+#
 # Translators:
 # Björn Ingvarsson <boi@exigo.is>, 2019
 # Martin Trigaux, 2019
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.saas~18\n"
@@ -14,10 +14,10 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:27+0000\n"
 "Last-Translator: Martin Trigaux, 2019\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: website_sale_comparison
@@ -192,7 +192,7 @@ msgstr ""
 #. module: website_sale_comparison
 #: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_3
 msgid "Display"
-msgstr "Display"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category_display_name
@@ -217,7 +217,7 @@ msgstr ""
 #. module: website_sale_comparison
 #: model:ir.model.fields,field_description:website_sale_comparison.field_product_attribute_category_id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_8
@@ -264,7 +264,7 @@ msgstr ""
 #. module: website_sale_comparison
 #: model:product.attribute.value,name:website_sale_comparison.product_attribute_value_9
 msgid "No"
-msgstr "No"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:product.attribute,name:website_sale_comparison.product_attribute_16
@@ -315,7 +315,7 @@ msgstr ""
 #. module: website_sale_comparison
 #: model:ir.model,name:website_sale_comparison.model_product_template
 msgid "Product Template"
-msgstr "Product Template"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:ir.ui.view,arch_db:website_sale_comparison.product_product
@@ -359,7 +359,7 @@ msgstr ""
 #: code:addons/website_sale_comparison/models/website_sale_comparison.py:30
 #, python-format
 msgid "Uncategorized"
-msgstr "Uncategorized"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:product.attribute,name:website_sale_comparison.product_attribute_3
@@ -369,7 +369,7 @@ msgstr ""
 #. module: website_sale_comparison
 #: model:product.attribute.category,name:website_sale_comparison.product_attribute_category_11
 msgid "Warranty"
-msgstr "Warranty"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:product.attribute,name:website_sale_comparison.product_attribute_13
@@ -379,12 +379,12 @@ msgstr ""
 #. module: website_sale_comparison
 #: model:product.attribute,name:website_sale_comparison.product_attribute_7
 msgid "Weight"
-msgstr "Weight"
+msgstr ""
 
 #. module: website_sale_comparison
 #: model:product.attribute.value,name:website_sale_comparison.product_attribute_value_10
 msgid "Yes"
-msgstr "Yes"
+msgstr ""
 
 #. module: website_sale_comparison
 #. openerp-web

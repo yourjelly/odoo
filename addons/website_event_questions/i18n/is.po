@@ -1,10 +1,10 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * website_event_questions
-# 
+#
 # Translators:
 # Bjorn Ingvarsson <boi@exigo.is>, 2018
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.saas~18\n"
@@ -13,10 +13,10 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:26+0000\n"
 "Last-Translator: Bjorn Ingvarsson <boi@exigo.is>, 2018\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: website_event_questions
@@ -86,7 +86,7 @@ msgstr "Nafn"
 #: model:ir.model.fields,field_description:website_event_questions.field_event_question_report_event_id
 #: model:ir.ui.view,arch_db:website_event_questions.view_event_question_report_search
 msgid "Event"
-msgstr "Event"
+msgstr ""
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_registration_answer_event_answer_id
@@ -129,7 +129,7 @@ msgstr "Raða eftir:"
 #: model:ir.model.fields,field_description:website_event_questions.field_event_question_report_id
 #: model:ir.model.fields,field_description:website_event_questions.field_event_registration_answer_id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: website_event_questions
 #: model:ir.model.fields,help:website_event_questions.field_event_question_is_individual
@@ -173,7 +173,7 @@ msgstr "Dags. síðustu uppfærlsu"
 #. module: website_event_questions
 #: model:event.answer,name:website_event_questions.event_suggestion_1_1
 msgid "No"
-msgstr "No"
+msgstr ""
 
 #. module: website_event_questions
 #: model:event.answer,name:website_event_questions.event_suggestion_2_0
@@ -220,7 +220,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_event_questions.field_event_question_report_attendee_id
 #: model:ir.ui.view,arch_db:website_event_questions.view_event_question_report_search
 msgid "Registration"
-msgstr "Registration"
+msgstr ""
 
 #. module: website_event_questions
 #: model:ir.model.fields,field_description:website_event_questions.field_event_answer_sequence
@@ -251,7 +251,7 @@ msgstr ""
 #. module: website_event_questions
 #: model:event.answer,name:website_event_questions.event_suggestion_1_0
 msgid "Yes"
-msgstr "Yes"
+msgstr ""
 
 #. module: website_event_questions
 #: model:ir.model,name:website_event_questions.model_event_answer

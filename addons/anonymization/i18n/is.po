@@ -1,12 +1,12 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * anonymization
-# 
+#
 # Translators:
 # Björn Ingvarsson <boi@exigo.is>, 2018
 # Birgir Steinarsson <biggboss83@gmail.com>, 2018
 # Martin Trigaux, 2019
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.saas~18\n"
@@ -15,10 +15,10 @@ msgstr ""
 "PO-Revision-Date: 2017-09-20 10:14+0000\n"
 "Last-Translator: Martin Trigaux, 2019\n"
 "Language-Team: Icelandic (https://www.transifex.com/odoo/teams/41243/is/)\n"
+"Language: is\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
-"Language: is\n"
 "Plural-Forms: nplurals=2; plural=(n % 10 != 1 || n % 100 == 11);\n"
 
 #. module: anonymization
@@ -99,7 +99,7 @@ msgstr ""
 #: selection:ir.model.fields.anonymization,state:0
 #: selection:ir.model.fields.anonymize.wizard,state:0
 msgid "Clear"
-msgstr "Clear"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_create_uid
@@ -120,7 +120,7 @@ msgstr "Stofndagur"
 #. module: anonymization
 #: model:ir.ui.view,arch_db:anonymization.view_ir_model_fields_anonymize_wizard_form
 msgid "Database Anonymization"
-msgstr "Database Anonymization"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.ui.menu,name:anonymization.menu_administration_anonymization
@@ -135,7 +135,7 @@ msgstr "Dagsetning"
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_history_direction
 msgid "Direction"
-msgstr "Direction"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_display_name
@@ -165,13 +165,13 @@ msgstr ""
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymize_wizard_file_export
 msgid "Export"
-msgstr "Export"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_field_id
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_migration_fix_field_name
 msgid "Field"
-msgstr "Field"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_field_name
@@ -187,7 +187,7 @@ msgstr "Reitir"
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymize_wizard_name
 msgid "File Name"
-msgstr "File Name"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_history_filepath
@@ -200,7 +200,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_migration_fix_id
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymize_wizard_id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymize_wizard_file_import
@@ -249,7 +249,7 @@ msgstr "Skilaboð"
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_migration_fix_model_name
 msgid "Model"
-msgstr "Model"
+msgstr ""
 
 #. module: anonymization
 #: selection:ir.model.fields.anonymization,state:0
@@ -270,12 +270,12 @@ msgstr ""
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_model_id
 msgid "Object"
-msgstr "Object"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_model_name
 msgid "Object Name"
-msgstr "Object Name"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_migration_fix_query
