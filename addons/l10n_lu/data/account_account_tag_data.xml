@@ -1,0 +1,178 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo noupdate="1">
+
+  <record id="account_account_tag_yearly_I_A_2_a_1" model="account.account.tag">
+    <field name="name">001</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_2_a_2" model="account.account.tag">
+    <field name="name">002</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_2_a_3" model="account.account.tag">
+    <field name="name">003</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_2_b" model="account.account.tag">
+    <field name="name">004</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_2_c" model="account.account.tag">
+    <field name="name">005</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_2_e" model="account.account.tag">
+    <field name="name">007</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_3_a" model="account.account.tag">
+    <field name="name">008</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_3_b" model="account.account.tag">
+    <field name="name">009</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_3_c" model="account.account.tag">
+    <field name="name">010</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_A_3_b" model="account.account.tag">
+    <field name="name">011</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_B_1_a" model="account.account.tag">
+    <field name="name">013</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_B_1_b" model="account.account.tag">
+    <field name="name">202</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_I_B_6_b" model="account.account.tag">
+    <field name="name">203</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_1_a" model="account.account.tag">
+    <field name="name">077</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_1_b" model="account.account.tag">
+    <field name="name">078</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_1_c" model="account.account.tag">
+    <field name="name">079</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_1_d" model="account.account.tag">
+    <field name="name">404</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_2_a" model="account.account.tag">
+    <field name="name">081</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_2_b" model="account.account.tag">
+    <field name="name">082</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_2_c" model="account.account.tag">
+    <field name="name">083</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_2_d" model="account.account.tag">
+    <field name="name">405</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_3_a" model="account.account.tag">
+    <field name="name">085</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_3_b" model="account.account.tag">
+    <field name="name">086</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_3_c" model="account.account.tag">
+    <field name="name">087</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_A_3_d" model="account.account.tag">
+    <field name="name">406</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_B_3" model="account.account.tag">
+    <field name="name">096</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_B_3" model="account.account.tag">
+    <field name="name">098</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_B_3" model="account.account.tag">
+    <field name="name">099</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+  <record id="account_account_tag_yearly_III_B_3" model="account.account.tag">
+    <field name="name">100</field>
+    <field name="applicability">taxes</field>
+    <field name="country_id" ref="base.lu"/>
+  </record>
+
+</odoo>
