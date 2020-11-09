@@ -12,6 +12,8 @@ class AccountTestInvoicingCommon(SavepointCase):
 
     @classmethod
     def copy_account(cls, account):
+        if not account:
+            return account
         suffix_nb = 1
         while True:
             new_code = '%s (%s)' % (account.code, suffix_nb)
@@ -332,7 +334,7 @@ class AccountTestInvoicingCommon(SavepointCase):
                     'amount_type': 'percent',
                     'amount': 10.0,
                     'tax_exigibility': 'on_payment',
-                    'cash_basis_transition_account_id': company_data['default_account_tax_sale'].copy().id,
+                    'cash_basis_transition_account_id': cls.copy_account(company_data['default_account_tax_sale']).id,
                     'invoice_repartition_line_ids': [
                         (0, 0, {
                             'factor_percent': 100,

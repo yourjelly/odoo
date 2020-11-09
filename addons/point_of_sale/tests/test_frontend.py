@@ -36,7 +36,7 @@ class TestPointOfSaleHttpCommon(odoo.tests.HttpCase):
             'name': 'Cash Test',
             'type': 'cash',
             'company_id': main_company.id,
-            'code': 'CSH',
+            'code': 'TCSH',
             'sequence': 10,
         })
 
