@@ -135,6 +135,9 @@ def init_logger():
         'reportlab.lib.rl_safe_eval',# reportlab importing ABC from collections
         'xlrd/xlsx',# xlrd mischecks iter() on trees or something so calls deprecated getiterator() instead of iter()
         'ofxparse',# ofxparse importing ABC from collections
+        'PIL',  # pillow < 6.0.0 PY_SSIZE_T_CLEAN will be required for '#' formats
+        'jinja2',  # < 2.10.2 ABCs from 'collections' instead of from 'collections.abc'
+        'reportlab',  # < warning from PIL
     ]:
         warnings.filterwarnings('ignore', category=DeprecationWarning, module=module)
 
