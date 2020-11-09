@@ -74,6 +74,22 @@ function useUpdate({ func, priority }) {
     }
 }
 
+const components = {
+    Popover: require('web.Popover'),
+};
+const { patch } = require('web.utils');
+
+patch(components.Popover, 'mail/static/src/component_hooks/use_update/use_update.js', {
+
+    _onClick(ev) {
+        if (this.env.device.isMobile && !this.state.displayed && this.el.classList.contains('o_Emoji_popover')) {
+            return setTimeout(() => {
+                    this.state.displayed = true;
+                }, 100);
+        }
+        return this._super(ev);
+    }
+});
 return useUpdate;
 
 });
