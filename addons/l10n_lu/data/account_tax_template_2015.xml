@@ -5330,4 +5330,78 @@
 		    }),
 		]"/>
 	</record>
+
+    <!-- Monthly field 457 => yearly [013, 202]-->
+    <record id="lu_2011_tax_VB-IC-0-G-G" model="account.tax.template">
+        <field name="sequence">483</field>
+        <field name="description">0%(goods)</field>
+        <field name="name">0-IC-S-G-G</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="chart_template_id" ref="lu_2011_chart_1"/>
+        <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                	'tag_ids': [ref('account_account_tag_yearly_I_B_1_a')],
+                    'plus_report_line_ids': [ref('account_tax_report_line_1b_1_intra_community_goods_pi_vat')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('account_account_tag_yearly_I_B_1_a')],
+                'minus_report_line_ids': [ref('account_tax_report_line_1b_1_intra_community_goods_pi_vat')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="active" eval="False"/>
+    </record>
+
+	<record id="lu_2011_tax_VB-IC-0-G-T" model="account.tax.template">
+        <field name="sequence">483</field>
+        <field name="description">0%(means of transport)</field>
+        <field name="name">0-IC-S-G-T</field>
+        <field name="amount">0</field>
+        <field name="amount_type">percent</field>
+        <field name="type_tax_use">sale</field>
+        <field name="chart_template_id" ref="lu_2011_chart_1"/>
+        <field name="tax_group_id" ref="tax_group_0"/>
+        <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'base',
+                	'tag_ids': [ref('account_account_tag_yearly_I_B_1_b')],
+                    'plus_report_line_ids': [ref('account_tax_report_line_1b_1_intra_community_goods_pi_vat')],
+                }),
+                (0,0, {
+                    'factor_percent': 100,
+                    'repartition_type': 'tax',
+                }),
+            ]"/>
+        <field name="refund_repartition_line_ids" eval="[(5, 0, 0),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'base',
+                'tag_ids': [ref('account_account_tag_yearly_I_B_1_b')],
+                'minus_report_line_ids': [ref('account_tax_report_line_1b_1_intra_community_goods_pi_vat')],
+            }),
+            (0,0, {
+                'factor_percent': 100,
+                'repartition_type': 'tax',
+            }),
+        ]"/>
+        <field name="active" eval="False"/>
+    </record>
+
 </odoo>
