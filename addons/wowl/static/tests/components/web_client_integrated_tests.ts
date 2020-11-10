@@ -94,17 +94,19 @@ QUnit.module("web client integrated tests", (hooks) => {
   });
 
   QUnit.test("can display client actions in Dialog", async function (assert) {
-    assert.expect(1);
+    assert.expect(2);
 
     const env = await makeTestEnv(baseConfig);
     const webClient = await mount(WebClient, { env });
     env.services.action_manager.doAction({
+      name: "Dialog Test",
       target: "new",
       tag: "clientAction",
       type: "ir.actions.client",
     });
     await nextTick();
     assert.containsOnce(webClient.el!, ".modal .test_client_action");
+    assert.strictEqual(webClient.el!.querySelector(".modal-title")!.textContent, "Dialog Test");
   });
 
   QUnit.test("can display client actions as main, then in Dialog", async function (assert) {
