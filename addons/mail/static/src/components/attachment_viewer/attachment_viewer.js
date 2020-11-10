@@ -60,6 +60,7 @@ class AttachmentViewer extends Component {
          */
         this._renderedAttachment = undefined;
         this._onClickGlobal = this._onClickGlobal.bind(this);
+        this._boundOnLoadImage = this._onLoadImage.bind(this);
     }
 
     mounted() {
@@ -79,6 +80,7 @@ class AttachmentViewer extends Component {
 
     willUnmount() {
         document.removeEventListener('click', this._onClickGlobal);
+        this._imageRef.el && this._imageRef.el.removeEventListener('load', this._boundOnLoadImage);
     }
 
     //--------------------------------------------------------------------------
@@ -161,7 +163,7 @@ class AttachmentViewer extends Component {
             this._renderedAttachment !== this.attachmentViewer.attachment
         ) {
             this.attachmentViewer.update({ isImageLoading: true });
-            this._imageRef.el.addEventListener('load', ev => this._onLoadImage(ev));
+            this._imageRef.el.addEventListener('load', this._boundOnLoadImage);
         }
     }
 
