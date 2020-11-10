@@ -32,50 +32,124 @@ class AccountAccountType(models.Model):
     note = fields.Text(string='Description')
 
 
+class AccountAccountCommon(models.AbstractModel):
+    _name = "account.account.common"
+    _description = "Common between account.account & account.account.template"
+
+    name = fields.Char(string="Account Name", required=True, index=True)
+    code = fields.Char(size=64, required=True, index=True)
+    currency_id = fields.Many2one(
+        comodel_name='res.currency',
+        string="Account Currency",
+        help="Forces all accounting items for this account to have this account currency.")
+    user_type_id = fields.Many2one(
+        comodel_name='account.account.type',
+        string="Type",
+        required=True,
+        help="These types are defined according to your country. The type contains more information about the account "
+             "and its specificities.")
+    reconcile = fields.Boolean(
+        string="Allow Reconciliation",
+        store=True, readonly=False, copy=True,
+        compute='_compute_reconcile',
+        help="Check this box if this account allows invoices & payments matching of journal items.")
+
+    # -------------------------------------------------------------------------
+    # COMPUTE METHODS
+    # -------------------------------------------------------------------------
+
+    @api.depends('user_type_id')
+    def _compute_reconcile(self):
+        for account in self:
+            if account.user_type_id.type in 'liquidity':
+                account.reconcile = False
+            elif account.user_type_id.internal_group == 'off_balance':
+                account.reconcile = False
+            elif account.user_type_id.type in ('receivable', 'payable'):
+                account.reconcile = True
+            else:
+                account.reconcile = False
+
+    # -------------------------------------------------------------------------
+    # CONSTRAINTS
+    # -------------------------------------------------------------------------
+
+    @api.constrains('user_type_id', 'reconcile')
+    def _check_reconcile(self):
+        for account in self:
+            if account.user_type_id.type in ('receivable', 'payable') and not account.reconcile:
+                raise ValidationError(_(
+                    "You cannot have a receivable/payable account that is not reconcilable. (account code: %s)",
+                    account.code,
+                ))
+
+    # -------------------------------------------------------------------------
+    # LOW-LEVEL METHODS
+    # -------------------------------------------------------------------------
+
+    @api.depends('name', 'code')
+    def name_get(self):
+        res = []
+        for record in self:
+            name = record.name
+            if record.code:
+                name = record.code + ' ' + name
+            res.append((record.id, name))
+        return res
+
+
+class AccountAccountTemplate(models.Model):
+    _name = "account.account.template"
+    _inherit = 'account.account.common'
+    _description = 'Templates for Accounts'
+    _order = "code"
+
+    tax_ids = fields.Many2many(
+        comodel_name='account.tax.template',
+        relation='account_account_template_tax_rel',
+        column1='account_id',
+        column2='tax_id',
+        string="Default Taxes")
+    chart_template_id = fields.Many2one(
+        comodel_name='account.chart.template',
+        string="Chart Template",
+        required=True,
+        help="This optional field allow you to link an account template to a specific chart template that may differ "
+             "from the one its root parent belongs to. This allow you to define chart templates that extend another "
+             "and complete it with few new accounts (You don't need to define the whole structure that is common to "
+             "both several times).")
+    tag_ids = fields.Many2many(
+        comodel_name='account.account.tag',
+        relation='account_account_template_account_tag',
+        string="Tags",
+        help="Optional tags you may want to assign for custom reporting")
+
+
 class AccountAccount(models.Model):
     _name = "account.account"
+    _inherit = 'account.account.common'
     _description = "Account"
     _order = "is_off_balance, code, company_id"
     _check_company_auto = True
 
-    @api.constrains('internal_type', 'reconcile')
-    def _check_reconcile(self):
-        for account in self:
-            if account.internal_type in ('receivable', 'payable') and account.reconcile == False:
-                raise ValidationError(_('You cannot have a receivable/payable account that is not reconcilable. (account code: %s)', account.code))
-
-    @api.constrains('user_type_id')
-    def _check_user_type_id_unique_current_year_earning(self):
-        data_unaffected_earnings = self.env.ref('account.data_unaffected_earnings')
-        result = self.read_group([('user_type_id', '=', data_unaffected_earnings.id)], ['company_id'], ['company_id'])
-        for res in result:
-            if res.get('company_id_count', 0) >= 2:
-                account_unaffected_earnings = self.search([('company_id', '=', res['company_id'][0]),
-                                                           ('user_type_id', '=', data_unaffected_earnings.id)])
-                raise ValidationError(_('You cannot have more than one account with "Current Year Earnings" as type. (accounts: %s)', [a.code for a in account_unaffected_earnings]))
-
-    name = fields.Char(string="Account Name", required=True, index=True)
-    currency_id = fields.Many2one('res.currency', string='Account Currency',
-        help="Forces all moves for this account to have this account currency.")
-    code = fields.Char(size=64, required=True, index=True)
+    tax_ids = fields.Many2many(
+        comodel_name='account.tax',
+        relation='account_account_tax_default_rel',
+        string="Default Taxes",
+        store=True, readonly=False, check_company=True,
+        compute='_compute_tax_ids',
+        context={'append_type_to_tax_name': True})
+    tag_ids = fields.Many2many(
+        comodel_name='account.account.tag',
+        relation='account_account_account_tag',
+        string="Tags",
+        help="Optional tags you may want to assign for custom reporting")
     deprecated = fields.Boolean(index=True, default=False)
     used = fields.Boolean(store=False, search='_search_used')
-    user_type_id = fields.Many2one('account.account.type', string='Type', required=True,
-        help="Account Type is used for information purpose, to generate country-specific legal reports, and set the rules to close a fiscal year and generate opening entries.")
     internal_type = fields.Selection(related='user_type_id.type', string="Internal Type", store=True, readonly=True)
     internal_group = fields.Selection(related='user_type_id.internal_group', string="Internal Group", store=True, readonly=True)
-    #has_unreconciled_entries = fields.Boolean(compute='_compute_has_unreconciled_entries',
-    #    help="The account has at least one unreconciled debit and credit since last time the invoices & payments matching was performed.")
-    reconcile = fields.Boolean(string='Allow Reconciliation', default=False,
-        help="Check this box if this account allows invoices & payments matching of journal items.")
-    tax_ids = fields.Many2many('account.tax', 'account_account_tax_default_rel',
-        'account_id', 'tax_id', string='Default Taxes',
-        check_company=True,
-        context={'append_type_to_tax_name': True})
-    note = fields.Text('Internal Notes')
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True,
         default=lambda self: self.env.company)
-    tag_ids = fields.Many2many('account.account.tag', 'account_account_account_tag', string='Tags', help="Optional tags you may want to assign for custom reporting")
     group_id = fields.Many2one('account.group', compute='_compute_account_group', store=True, readonly=False)
     root_id = fields.Many2one('account.root', compute='_compute_account_root', store=True)
     allowed_journal_ids = fields.Many2many('account.journal', string="Allowed Journals", help="Define in which journals this account can be used. If empty, can be used in all journals.")
@@ -89,6 +163,26 @@ class AccountAccount(models.Model):
     _sql_constraints = [
         ('code_company_uniq', 'unique (code,company_id)', 'The code of the account must be unique per company !')
     ]
+
+    @api.onchange('user_type_id')
+    def _compute_tax_ids(self):
+        for account in self:
+            if account.user_type_id.internal_group == 'income':
+                account.tax_ids = account.tax_ids or account.company_id.account_sale_tax_id
+            elif account.user_type_id.internal_group == 'expense':
+                account.tax_ids = account.tax_ids or account.company_id.account_purchase_tax_id
+            else:
+                account.tax_ids = False
+
+    @api.constrains('user_type_id')
+    def _check_user_type_id_unique_current_year_earning(self):
+        data_unaffected_earnings = self.env.ref('account.data_unaffected_earnings')
+        result = self.read_group([('user_type_id', '=', data_unaffected_earnings.id)], ['company_id'], ['company_id'])
+        for res in result:
+            if res.get('company_id_count', 0) >= 2:
+                account_unaffected_earnings = self.search([('company_id', '=', res['company_id'][0]),
+                                                           ('user_type_id', '=', data_unaffected_earnings.id)])
+                raise ValidationError(_('You cannot have more than one account with "Current Year Earnings" as type. (accounts: %s)', [a.code for a in account_unaffected_earnings]))
 
     @api.constrains('reconcile', 'internal_group', 'tax_ids')
     def _constrains_reconcile(self):
@@ -477,60 +571,55 @@ class AccountAccount(models.Model):
             account.copy()
 
 
-class AccountGroup(models.Model):
-    _name = "account.group"
-    _description = 'Account Group'
-    _parent_store = True
-    _order = 'code_prefix_start'
+class AccountGroupCommon(models.AbstractModel):
+    _name = "account.group.common"
+    _description = "Common between account.group & account.group.template"
 
-    parent_id = fields.Many2one('account.group', index=True, ondelete='cascade', readonly=True)
-    parent_path = fields.Char(index=True)
     name = fields.Char(required=True)
-    code_prefix_start = fields.Char()
-    code_prefix_end = fields.Char()
-    company_id = fields.Many2one('res.company', required=True, readonly=True, default=lambda self: self.env.company)
+    code_prefix_start = fields.Char(
+        store=True, readonly=False,
+        compute='_compute_code_prefix_start')
+    code_prefix_end = fields.Char(
+        store=True, readonly=False,
+        compute='_compute_code_prefix_end')
 
-    _sql_constraints = [
-        (
-            'check_length_prefix',
-            'CHECK(char_length(COALESCE(code_prefix_start, \'\')) = char_length(COALESCE(code_prefix_end, \'\')))',
-            'The length of the starting and the ending code prefix must be the same'
-        ),
-    ]
+    # -------------------------------------------------------------------------
+    # COMPUTE METHODS
+    # -------------------------------------------------------------------------
 
-    @api.onchange('code_prefix_start')
-    def _onchange_code_prefix_start(self):
-        if not self.code_prefix_end or self.code_prefix_end < self.code_prefix_start:
-            self.code_prefix_end = self.code_prefix_start
-
-    @api.onchange('code_prefix_end')
-    def _onchange_code_prefix_end(self):
-        if not self.code_prefix_start or self.code_prefix_start > self.code_prefix_end:
-            self.code_prefix_start = self.code_prefix_end
-
-    def name_get(self):
-        result = []
+    @api.depends('code_prefix_end')
+    def _compute_code_prefix_start(self):
         for group in self:
-            prefix = group.code_prefix_start and str(group.code_prefix_start)
-            if prefix and group.code_prefix_end != group.code_prefix_start:
-                prefix += '-' + str(group.code_prefix_end)
-            name = (prefix and (prefix + ' ') or '') + group.name
-            result.append((group.id, name))
-        return result
+            if not group.code_prefix_start and group.code_prefix_end:
+                group.code_prefix_start = group.code_prefix_end
+            else:
+                group.code_prefix_start = min(group.code_prefix_start, group.code_prefix_end) or False
 
-    @api.model
-    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
-        args = args or []
-        if operator == 'ilike' and not (name or '').strip():
-            domain = []
-        else:
-            criteria_operator = ['|'] if operator not in expression.NEGATIVE_TERM_OPERATORS else ['&', '!']
-            domain = criteria_operator + [('code_prefix_start', '=ilike', name + '%'), ('name', operator, name)]
-        return self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
+    @api.depends('code_prefix_start')
+    def _compute_code_prefix_end(self):
+        for group in self:
+            if group.code_prefix_start and not group.code_prefix_end:
+                group.code_prefix_end = group.code_prefix_start
+            else:
+                group.code_prefix_end = max(group.code_prefix_start or '', group.code_prefix_end or '') or False
+
+    # -------------------------------------------------------------------------
+    # CONSTRAINTS
+    # -------------------------------------------------------------------------
 
     @api.constrains('code_prefix_start', 'code_prefix_end')
-    def _constraint_prefix_overlap(self):
-        self.env['account.group'].flush()
+    def _constraint_starting_ending_prefix(self):
+        self.env['account.group'].flush(['code_prefix_start', 'code_prefix_end'])
+
+        # Ensure code_prefix_start/code_prefix_end are sharing the same size.
+        self._cr.execute('''
+            SELECT id
+            FROM account_group
+            WHERE char_length(COALESCE(code_prefix_start, '')) != char_length(COALESCE(code_prefix_end, ''))
+        ''')
+        if self._cr.fetchall():
+            raise ValidationError(_("The length of the starting and the ending code prefix must be the same"))
+
         query = """
             SELECT other.id FROM account_group this
             JOIN account_group other
@@ -548,6 +637,55 @@ class AccountGroup(models.Model):
         res = self.env.cr.fetchall()
         if res:
             raise ValidationError(_('Account Groups with the same granularity can\'t overlap'))
+
+    # -------------------------------------------------------------------------
+    # LOW-LEVEL METHODS
+    # -------------------------------------------------------------------------
+
+    @api.model
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
+        args = args or []
+        if operator == 'ilike' and not (name or '').strip():
+            domain = []
+        else:
+            criteria_operator = ['|'] if operator not in expression.NEGATIVE_TERM_OPERATORS else ['&', '!']
+            domain = criteria_operator + [('code_prefix_start', '=ilike', name + '%'), ('name', operator, name)]
+        return self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
+
+    @api.depends('code_prefix_start', 'code_prefix_end')
+    def name_get(self):
+        result = []
+        for group in self:
+            if group.code_prefix_start and group.code_prefix_end:
+                if group.code_prefix_start == group.code_prefix_end:
+                    result.append((group.id, '%s %s' % (group.code_prefix_start, group.name)))
+                else:
+                    result.append((group.id, '%s-%s %s' % (group.code_prefix_start, group.code_prefix_end, group.name)))
+            else:
+                result.append((group.id, group.name))
+        return result
+
+
+class AccountGroupTemplate(models.Model):
+    _name = "account.group.template"
+    _inherit = 'account.group.common'
+    _description = 'Template for Account Groups'
+    _order = 'code_prefix_start'
+
+    parent_id = fields.Many2one('account.group.template', index=True, ondelete='cascade')
+    chart_template_id = fields.Many2one('account.chart.template', string='Chart Template', required=True)
+
+
+class AccountGroup(models.Model):
+    _name = "account.group"
+    _inherit = 'account.group.common'
+    _description = 'Account Group'
+    _parent_store = True
+    _order = 'code_prefix_start'
+
+    parent_id = fields.Many2one('account.group', index=True, ondelete='cascade', readonly=True)
+    parent_path = fields.Char(index=True)
+    company_id = fields.Many2one('res.company', required=True, readonly=True, default=lambda self: self.env.company)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -584,8 +722,8 @@ class AccountGroup(models.Model):
         """
         if not self and not account_ids:
             return
-        self.env['account.group'].flush()
-        self.env['account.account'].flush()
+        self.env['account.group'].flush(['code_prefix_start', 'code_prefix_end', 'company_id'])
+        self.env['account.account'].flush(['code', 'company_id'])
         query = """
             UPDATE account_account account SET group_id = (
                 SELECT agroup.id FROM account_group agroup
