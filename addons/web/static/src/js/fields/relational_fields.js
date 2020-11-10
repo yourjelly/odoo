@@ -1337,6 +1337,11 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
 
         if (this.renderer) {
             this.currentColInvisibleFields = this._evalColumnInvisibleFields();
+            // const _viewType = this.view.arch.tag === 'tree' ? 'list' : 'kanban';
+            // const _fields = Object.keys(this.renderer.state.fieldsInfo[_viewType]);
+            // if (_fields.some(f => this.renderer.state.fields[f].type === 'boolean')) {
+            //     console.log(`${QUnit.config.current.module.name} > ${QUnit.config.current.testName} (${_viewType})`);
+            // }
             return this.renderer.updateState(this.value, {
                 addCreateLine: this._hasCreateLine(),
                 addTrashIcon: this._hasTrashIcon(),
@@ -1386,6 +1391,10 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
         this.$el.addClass('o_field_x2many o_field_x2many_' + viewType);
         if (this.renderer) {
             return this.renderer.appendTo(document.createDocumentFragment()).then(function () {
+                // const _fields = Object.keys(self.renderer.state.fieldsInfo[viewType]);
+                // if (_fields.some(f => self.renderer.state.fields[f].type === 'boolean')) {
+                //     console.log(`${QUnit.config.current.module.name} > ${QUnit.config.current.testName} (${viewType})`);
+                // }
                 dom.append(self.$el, self.renderer.$el, {
                     in_DOM: self.isInDOM,
                     callbacks: [{widget: self.renderer}],

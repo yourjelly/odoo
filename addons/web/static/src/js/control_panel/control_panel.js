@@ -97,12 +97,13 @@ odoo.define('web.ControlPanel', function (require) {
      * inheritance mechanism when converting the views/actions.
      * @extends Component
      */
+    let id = 0;
     class ControlPanel extends Component {
         constructor() {
             super(...arguments);
 
             this.additionalContent = getAdditionalContent(this.props);
-
+            this.__id = ++id;
             useSubEnv({
                 action: this.props.action,
                 searchModel: this.props.searchModel,
@@ -124,6 +125,12 @@ odoo.define('web.ControlPanel', function (require) {
             };
 
             this.fields = this._formatFields(this.props.fields);
+            hooks.onMounted(() => {
+                console.log(`${this.__id} mounted (${this.constructor.name})`);
+            });
+            hooks.onWillUnmount(() => {
+                console.log(`${this.__id} unmounted (${this.constructor.name})`);
+            });
         }
 
         mounted() {
