@@ -540,6 +540,9 @@ class MessageList extends Component {
      * @private
      */
     _update() {
+        if (!document.querySelector('.o_FormRenderer_chatterContainer.o-aside')) {
+            document.querySelector('.o_form_view').addEventListener('scroll', this.onScroll.bind(this), {passive: true});
+        }
         this._checkMostRecentMessageIsVisible();
     }
 
