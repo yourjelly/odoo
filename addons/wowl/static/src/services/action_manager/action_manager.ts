@@ -124,6 +124,9 @@ interface ActionManagerUpdateInfo {
   id?: number;
   Component?: Type<Component<{}, OdooEnv>>;
   props?: Controller;
+  dialogProps?: {
+    title: string;
+  };
 }
 
 interface UpdateStackOptions {
@@ -172,7 +175,7 @@ export class ActionContainer extends Component<{}, OdooEnv> {
   static template = tags.xml`
     <div t-name="wowl.ActionContainer" class="o_action_manager">
       <t t-if="main.Component" t-component="main.Component" t-props="main.props" t-key="main.id"/>
-      <Dialog t-if="dialog.Component" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed">
+      <Dialog t-if="dialog.Component" t-props="dialog.dialogProps" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed">
         <t t-component="dialog.Component" t-props="dialog.props"/>
       </Dialog>
     </div>`;
@@ -189,7 +192,12 @@ export class ActionContainer extends Component<{}, OdooEnv> {
           this.dialog = {};
           break;
         case "OPEN_DIALOG":
-          this.dialog = { id: info.id, Component: info.Component, props: info.props };
+          this.dialog = {
+            id: info.id,
+            Component: info.Component,
+            props: info.props,
+            dialogProps: info.dialogProps,
+          };
           break;
         case "CLOSE_DIALOG":
           this.dialog = {};
@@ -392,6 +400,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
         id: ++id,
         Component: Controller,
         props: controller.props,
+        dialogProps: {
+          //TODO add size and dialogClass
+          title: action.name,
+        },
       });
       return currentActionProm;
     }
