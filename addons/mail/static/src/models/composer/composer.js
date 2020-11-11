@@ -9,6 +9,7 @@ const mailUtils = require('mail.utils');
 const {
     addLink,
     escapeAndCompactTextContent,
+    htmlToTextContentInline,
     parseAndTransform,
 } = require('mail.utils');
 
@@ -148,6 +149,20 @@ function factory(dependencies) {
             this.update({ hasFocus: true });
         }
 
+        getBody() {
+            const escapedAndCompactContent = escapeAndCompactTextContent(this.textInputContent);
+            let body = escapedAndCompactContent.replace(/&nbsp;/g, ' ').trim();
+            // This message will be received from the mail composer as html content
+            // subtype but the urls will not be linkified. If the mail composer
+            // takes the responsibility to linkify the urls we end up with double
+            // linkification a bit everywhere. Ideally we want to keep the content
+            // as text internally and only make html enrichment at display time but
+            // the current design makes this quite hard to do.
+            body = this._generateMentionsLinks(body);
+            body = parseAndTransform(body, addLink);
+            return this._generateEmojisOnHtml(body);
+        }
+
         /**
          * Inserts text content in text input based on selection.
          *
@@ -276,17 +291,7 @@ function factory(dependencies) {
         async postMessage() {
             const thread = this.thread;
             this.thread.unregisterCurrentPartnerIsTyping({ immediateNotify: true });
-            const escapedAndCompactContent = escapeAndCompactTextContent(this.textInputContent);
-            let body = escapedAndCompactContent.replace(/&nbsp;/g, ' ').trim();
-            // This message will be received from the mail composer as html content
-            // subtype but the urls will not be linkified. If the mail composer
-            // takes the responsibility to linkify the urls we end up with double
-            // linkification a bit everywhere. Ideally we want to keep the content
-            // as text internally and only make html enrichment at display time but
-            // the current design makes this quite hard to do.
-            body = this._generateMentionsLinks(body);
-            body = parseAndTransform(body, addLink);
-            body = this._generateEmojisOnHtml(body);
+            const body = this.getBody();
             let postData = {
                 attachment_ids: this.attachments.map(attachment => attachment.id),
                 body,
@@ -363,6 +368,79 @@ function factory(dependencies) {
             } finally {
                 this.update({ isPostingMessage: false });
             }
+        }
+
+        arrayEquals (a0, a1) {
+            let i, ilen, v0, v1;
+
+            if (!a0 || !a1 || a0.length !== a1.length) {
+                return false;
+            }
+
+            for (i = 0, ilen = a0.length; i < ilen; ++i) {
+                v0 = a0[i];
+                v1 = a1[i];
+
+                if (v0 instanceof Array && v1 instanceof Array) {
+                    if (!helpers.arrayEquals(v0, v1)) {
+                        return false;
+                    }
+                } else if (v0 !== v1) {
+                    // NOTE: two different object instances will never be equal: {x:20} != {x:20}
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        async updateMessage() {
+            if (htmlToTextContentInline(this.message.body) === this.textInputContent &&
+                this.arrayEquals(this.message.attachments.map(attachment => attachment.id), this.attachments.map(attachment => attachment.id))
+            ) {
+                this.message.update({ is_editing_message: false });
+                return;
+            }
+            const attachment_ids = this.attachments.map(attachment => attachment.id);
+            const div = document.createElement('div');
+            div.innerHTML = this.message.body;
+            const anchors = div.querySelectorAll('a');
+            const partners = [];
+            const channels = [];
+            anchors.forEach((element) => {
+                const id = parseInt(element.dataset.oeId);
+                if (element.dataset.oeModel === 'res.partner') {
+                    let partner = this.env.models["mail.partner"].find(partner => partner.id === id);
+                    if (partner) {
+                        partners.push(partner);
+                    }
+                } else if (element.dataset.oeModel === 'mail.channel') {
+                    let channel = this.env.models["mail.thread"].find(channel => channel.id === id);
+                    if (channel) {
+                        channels.push(channel);
+                    }
+                }
+            });
+            if (partners.length || channels.length) {
+                this.update({
+                    mentionedPartners: [['link', partners]],
+                    mentionedChannels: [['link', channels]],
+                })
+            }
+            const vals = {
+                body: this.getBody(),
+                attachment_ids: attachment_ids,
+                is_edited: true,
+            };
+            const [messageData] = await this.async(() => this.env.services.rpc({
+                model: 'mail.message',
+                method: 'update_message',
+                args: [[this.message.id], vals],
+            }));
+            this.message.update(Object.assign(
+                { is_editing_message: false },
+                this.env.models['mail.message'].convertData(messageData),
+            ));
         }
 
         /**
@@ -1047,6 +1125,7 @@ function factory(dependencies) {
             compute: '_computeMentionedPartners',
             dependencies: ['textInputContent'],
         }),
+        message: many2one('mail.message'),
         /**
          * Determines the extra `mail.partner` (on top of existing followers)
          * that will receive the message being composed by `this`, and that will

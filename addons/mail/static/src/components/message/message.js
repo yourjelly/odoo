@@ -3,6 +3,7 @@ odoo.define('mail/static/src/components/message/message.js', function (require) 
 
 const components = {
     AttachmentList: require('mail/static/src/components/attachment_list/attachment_list.js'),
+    Composer: require('mail/static/src/components/composer/composer.js'),
     MessageSeenIndicator: require('mail/static/src/components/message_seen_indicator/message_seen_indicator.js'),
     ModerationBanDialog: require('mail/static/src/components/moderation_ban_dialog/moderation_ban_dialog.js'),
     ModerationDiscardDialog: require('mail/static/src/components/moderation_discard_dialog/moderation_discard_dialog.js'),
@@ -12,6 +13,7 @@ const components = {
 };
 const useStore = require('mail/static/src/component_hooks/use_store/use_store.js');
 const useUpdate = require('mail/static/src/component_hooks/use_update/use_update.js');
+const { htmlToTextContentInline } = require('mail.utils');
 
 const { _lt } = require('web.core');
 const { getLangDatetimeFormat } = require('web.time');
@@ -186,6 +188,16 @@ class Message extends Component {
             elRect.bottom < parentRect.bottom + offset &&
             parentRect.top < elRect.bottom + offset
         );
+    }
+
+    /**
+     * @returns {boolean}
+     */
+    get isMessageEditable() {
+        return this.message.isCurrentPartnerAuthor &&
+               !this.message.is_editing_message &&
+               !this.message.tracking_value_ids.length &&
+               this.message.originThread.model === 'mail.channel'
     }
 
     /**
@@ -483,6 +495,26 @@ class Message extends Component {
             return;
         }
         this.message.author.openProfile();
+    }
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    async _onClickEditMessage(ev) {
+        const composer = this.env.models["mail.composer"].create({
+            textInputContent: htmlToTextContentInline(this.message.body),
+            attachments: [['link', this.message.attachments]],
+            message: [['link', this.message]]
+        });
+        const Composer = new components.Composer(null, {
+            composerLocalId: composer.localId,
+            hasCurrentPartnerAvatar: false,
+            textInputSendShortcuts: ['enter'],
+        });
+        this.message.update({is_editing_message: true});
+        await Composer.mount(this.el.querySelector('.o_Message_core'));
+        this.el.querySelector('.o_Composer').style.width = '95%';
     }
 
     /**

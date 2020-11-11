@@ -65,6 +65,7 @@
 
 .o_Message_core {
     min-width: 0; // allows this flex child to shrink more than its content
+    width: 100%;
     margin-inline-end: map-get($spacers, 3);
 }
 
@@ -81,6 +82,7 @@
 
 .o_Message_headerCommands {
     margin-inline-end: map-get($spacers, 2);
+    margin: auto 0 auto auto;
     align-self: center;
 
     .o_Message_headerCommand {
@@ -182,10 +184,17 @@
 .o_Message {
     background-color: white;
 
+    &:hover {
+        background-color: whitesmoke;
+
+        .o_Message_commands {
+            display: inherit;
+        }
+    }
     &:hover, &.o-clicked {
 
         .o_Message_commands {
-            opacity: 1;
+            background-color: white;
         }
 
         .o_Message_sidebarItem.o-message-squashed {
@@ -298,7 +307,7 @@
 }
 
 .o_Message_headerCommands:not(.o-mobile) {
-    opacity: 0;
+    display: none;
 }
 
 .o_Message_originThread {

@@ -82,6 +82,7 @@
                         sendShortcuts="props.textInputSendShortcuts"
                         t-on-o-composer-suggestion-clicked="_onComposerSuggestionClicked"
                         t-on-o-composer-text-input-send-shortcut="_onComposerTextInputSendShortcut"
+                        t-on-o-composer-text-input-esc-shortcut="_onComposerTextInputEscShortcut"
                         t-on-paste="_onPasteTextInput"
                         t-key="composer.localId"
                         t-ref="textInput"
@@ -119,7 +120,7 @@
                                 </div>
                             </t>
                         </div>
-                        <t t-if="props.isCompact">
+                        <t t-if="props.isCompact and !composer.message">
                             <t t-call="mail.Composer.actionButtons"/>
                         </t>
                     </div>
@@ -141,7 +142,7 @@
                                 showAttachmentsFilenames="props.showAttachmentsFilenames"
                             />
                         </t>
-                        <t t-if="!props.isCompact">
+                        <t t-if="!props.isCompact and !composer.message">
                             <t t-call="mail.Composer.actionButtons"/>
                         </t>
                     </div>

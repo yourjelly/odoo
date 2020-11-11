@@ -140,6 +140,7 @@ class Message(models.Model):
     # Besides for new messages, and messages never sending emails, there was no mail, and it was searching for nothing.
     mail_ids = fields.One2many('mail.mail', 'mail_message_id', string='Mails', groups="base.group_system")
     canned_response_ids = fields.One2many('mail.shortcode', 'message_ids', string="Canned Responses", store=False)
+    is_edited = fields.Boolean()
 
     def _compute_description(self):
         for message in self:
@@ -1098,6 +1099,10 @@ class Message(models.Model):
                 vals['module_icon'] = modules.module.get_module_icon(self.env[vals['model']]._original_module)
         return vals_list
 
+    def update_message(self, vals):
+        self.write(vals)
+        return self._message_format(['attachment_ids', 'body', 'is_edited', 'write_date'])
+
     def _get_message_format_fields(self):
         return [
             'id', 'body', 'date', 'author_id', 'email_from',  # base message fields
@@ -1105,7 +1110,7 @@ class Message(models.Model):
             'model', 'res_id', 'record_name',  # document related
             'channel_ids', 'partner_ids',  # recipients
             'starred_partner_ids',  # list of partner ids for whom the message is starred
-            'moderation_status',
+            'moderation_status', 'is_edited', 'write_date'
         ]
 
     def _message_notification_format(self):

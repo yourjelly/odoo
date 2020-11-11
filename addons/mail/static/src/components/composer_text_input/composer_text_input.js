@@ -192,7 +192,9 @@ class ComposerTextInput extends Component {
      * @private
      */
     _onFocusinTextarea() {
-        this.composer.focus();
+        if (!this.composer.message) {
+            this.composer.focus();
+        }
     }
 
     /**
@@ -226,6 +228,8 @@ class ComposerTextInput extends Component {
                     ev.preventDefault();
                     this.composer.closeSuggestions();
                     markEventHandled(ev, 'ComposerTextInput.closeSuggestions');
+                } else if (this.composer.message) {
+                    this.trigger('o-composer-text-input-esc-shortcut');
                 }
                 break;
             // UP, DOWN, TAB: prevent moving cursor if navigation in mention suggestions

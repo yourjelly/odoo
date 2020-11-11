@@ -561,6 +561,7 @@ var ModelFieldSelector = Widget.extend({
                 e.preventDefault();
                 var name = this.$("li.o_field_selector_item.active").data("name");
                 if (name) {
+                    var name = this._getLastPageField(name);
                     var field = this._getLastPageField(name);
                     if (field.relation) {
                         this._goToNextPage(field);

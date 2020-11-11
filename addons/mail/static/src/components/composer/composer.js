@@ -188,7 +188,12 @@ class Composer extends Component {
             }
             return;
         }
-        await this.composer.postMessage();
+        if (this.composer.message) {
+            await this.composer.updateMessage();
+            this.destroy();
+        } else {
+            await this.composer.postMessage();
+        }
         // TODO: we might need to remove trigger and use the store to wait for the post rpc to be done
         // task-2252858
         this.trigger('o-message-posted');
@@ -276,6 +281,14 @@ class Composer extends Component {
      */
     _onComposerTextInputSendShortcut() {
         this._postMessage();
+    }
+
+    /**
+     * @private
+     */
+    _onComposerTextInputEscShortcut() {
+        this.composer.message.update({is_editing_message: false});
+        this.destroy()
     }
 
     /**
