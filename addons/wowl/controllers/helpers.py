@@ -6,7 +6,7 @@ import io
 import copy
 from logging import getLogger
 import os
-import glob
+from glob import glob
 
 from odoo.tools import apply_inheritance_specs
 from odoo.tools.translate import _
@@ -14,26 +14,81 @@ from odoo import http
 
 _logger = getLogger(__name__)
 
+SCRIPT_EXTENSIONS = ['js'],
 
-def get_files(key):
+STYLE_EXTENSIONS = ['css', 'scss']
+
+TEMPLATE_EXTENSIONS = ['xml']
+
+
+def fs2web(path):
+    """convert FS path into web path"""
+    return '/'.join(path.split(os.path.sep))
+
+def get_addon_files(addons=['wowl'], bundle=None, css=False, js=False, xml=False):
     """
     Helper method to get pathnames to files referenced in wowl addon's manifest file.
-    :param key the key to read in the manifest (typically 'owl_qweb' or 'style')
-    :return: list of pathnames
+    :param addons: the list of addons to take into account when reading the
+                   manifest bundles (default: "wowl" only)
+    :param bundle: the key to read in the manifest's "assets" key (typically
+                   'owl_qweb' or 'style')
+    :param css: whether to take the style assets (default: False)
+    :param js: whether to take the script assets (default: False)
+    :param xml: whether to take the template assets (default: False)
+    :return: list of tuple in the form: (addon, path name)
     """
-    addon = 'wowl'
-    ext = '.scss' if key == 'style' else '.xml'
-    manifest = http.addons_manifest.get(addon, None)
-    addons_path = os.path.join(manifest['addons_path'], '')[:-1]
-    local_paths = manifest.get(key, [])
+    exts = []
+    if js:
+        exts += SCRIPT_EXTENSIONS
+    if css:
+        exts += STYLE_EXTENSIONS
+    if xml:
+        exts += TEMPLATE_EXTENSIONS
 
-    def get_glob_path(local_path):
-        return os.path.normpath(os.path.join(addons_path, addon, local_path)) + '/**/*' + ext
+    manifests = http.addons_manifest
+    addon_files = []
+    for addon in addons:
+        manifest = manifests.get(addon)
 
-    return [file if key == 'owl_qweb' else file[len(addons_path):]
-            for local_path in local_paths
-            for file in glob.glob(get_glob_path(local_path), recursive=True)
-            ]
+        if not manifest:
+            continue
+
+        assets = manifest.get('assets', {})
+
+        for path_def in assets.get(bundle, []):
+            path_addon = path_def.split('/')[0]
+            path_addon_manifest = manifests.get(path_addon)
+
+            if not path_addon_manifest:
+                continue
+
+            addons_path = os.path.join(path_addon_manifest['addons_path'], '')[:-1]
+            full_path = os.path.normpath(os.path.join(addons_path, path_def))
+
+            glob_paths = []
+            for path in glob(full_path, recursive=True):
+                ext = path.split('.')[-1]
+                if not exts or ext in exts:
+                    glob_path = path[len(addons_path):] if ext != 'xml' else path
+                    glob_paths.append(fs2web(glob_path))
+
+            # The glob module returns an unsorted list
+            glob_paths.sort()
+
+            if len(glob_paths):
+                # Files found are appended in the addon_files list if not already in it
+                [addon_files.append((addon, file))
+                    for file in glob_paths
+                    if (addon, file) not in addon_files
+                ]
+            else:
+                # No files matching the path definition -> interpreted as a sub-bundle
+                [addon_files.append((addon, file))
+                    for addon, file in get_addon_files(addons, path_def, css, js, xml)
+                    if (addon, file) not in addon_files
+                ]
+
+    return addon_files
 
 
 class HomeStaticTemplateHelpers(object):
@@ -206,7 +261,7 @@ class HomeStaticTemplateHelpers(object):
 
         :rtype: (str, str)
         """
-        files = get_files('owl_qweb')
+        files = [file for addon, file in get_addon_files(bundle='owl_qweb', xml=True)]
         content, checksum = self._concat_xml(OrderedDict([('wowl', files)]))
         return content, checksum
 
