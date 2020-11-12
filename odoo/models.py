@@ -5314,7 +5314,10 @@ Fields:
                 for rec in self:
                     data = rec.mapped(key)
                     if comparator in ('child_of', 'parent_of'):
-                        value = data.search([(data._parent_name, comparator, value)]).ids
+                        value = data.search([(data._parent_name, comparator, value)], order='id').ids
+                        comparator = 'in'
+                    elif comparator == 'where':
+                        value = data.search(value, order='id').ids
                         comparator = 'in'
                     if isinstance(data, BaseModel):
                         v = value
