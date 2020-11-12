@@ -9,7 +9,7 @@ from odoo.http import request
 from odoo.tools import ustr, config
 from odoo.addons.web.controllers.main import module_boot
 
-from .helpers import HomeStaticTemplateHelpers, get_files
+from .helpers import HomeStaticTemplateHelpers, get_addon_files
 
 CONTENT_MAXAGE = http.STATIC_CACHE_LONG  # menus, translations, static qweb
 
@@ -31,7 +31,7 @@ class WowlClient(http.Controller):
             session_info['qweb'] = qweb_checksum
             context = {
                 "session_info": session_info,
-                "scssFiles": get_files('style'),
+                'scssFiles': [file for addon, file in get_addon_files(bundle='style', css=True)],
                 'live_reload': 'all' in config['dev_mode'],
                 "debug": request.session.debug,
             }
@@ -103,7 +103,7 @@ class WowlClient(http.Controller):
     @http.route('/wowl/tests', type='http', auth="user")
     def test_suite(self, **kw):
         context = {
-            "scssFiles": get_files('style'),
+            'scssFiles': [file for addon, file in get_addon_files(bundle='style', css=True)],
             'live_reload': 'all' in config['dev_mode']
         }
         return request.render('wowl.qunit_suite', context)
