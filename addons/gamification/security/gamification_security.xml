@@ -9,11 +9,14 @@
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
             <field name="domain_force">[
-                '|',
+                    '|',
                     ('user_id','=',user.id),
-                    '&amp;',
-                        ('challenge_id.user_ids','in',user.id),
-                        ('challenge_id.visibility_mode','=','ranking')]</field>
+                    ('challenge_id', 'where', [
+                        ('user_ids','in', [user.id]),
+                        ('visibility_mode', '=', 'ranking'),
+                    ]),
+                ]
+            </field>
         </record>
 
         <record id="goal_gamification_manager_visibility" model="ir.rule">

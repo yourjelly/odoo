@@ -137,13 +137,13 @@ class AccountAnalyticLine(models.Model):
     def _timesheet_get_portal_domain(self):
         return [
             ('task_id', 'where', [
+                ('project_id.privacy_visibility', '=', 'portal'),
+                '|', '|',
                 ('project_id', 'where', [
-                    ('privacy_visibility', '=', 'portal'),
                     '|',
                     ('message_partner_ids', 'child_of', [self.env.user.partner_id.commercial_partner_id.id]),
                     ('allowed_portal_user_ids', 'child_of', [self.env.user.id]),
                 ]),
-                '|',
                 ('message_partner_ids', 'child_of', [self.env.user.partner_id.commercial_partner_id.id]),
                 ('allowed_user_ids', 'in', [self.env.user.id]),
             ])

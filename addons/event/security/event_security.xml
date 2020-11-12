@@ -39,7 +39,7 @@
         <record id="ir_rule_event_event_ticket_company" model="ir.rule">
             <field name="name">Event/Ticket: multi-company</field>
             <field name="model_id" ref="model_event_event_ticket"/>
-            <field name="domain_force">['|', ('event_id.company_id', '=', False), ('event_id.company_id', 'in', company_ids)]</field>
+            <field name="domain_force">[('event_id', 'where', ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)])]</field>
         </record>
 
     </data>
