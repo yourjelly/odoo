@@ -5,6 +5,9 @@ from odoo import api, fields, models, _
 from itertools import groupby
 from operator import itemgetter
 from collections import defaultdict
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class StockPackageLevel(models.Model):
@@ -144,6 +147,7 @@ class StockPackageLevel(models.Model):
             result.mapped('move_line_ids').write({'location_dest_id': vals['location_dest_id']})
             result.mapped('move_ids').write({'location_dest_id': vals['location_dest_id']})
         if result.picking_id.state != 'draft' and result.location_id and result.location_dest_id and not result.move_ids and not result.move_line_ids:
+            _logger.error("_generate_moves")
             result._generate_moves()
         return result
 
