@@ -269,7 +269,7 @@
                                     Customer Satisfaction
                                 </span>
                             </div>
-                        </button>                            
+                        </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                     <div class="oe_title">
@@ -908,6 +908,7 @@
             <field eval="2" name="priority"/>
             <field name="arch" type="xml">
                 <tree string="Tasks" multi_edit="1" sample="1" js_class="project_list">
+                    <button icon="fa-check-circle-o" title="Mark As Done" name="action_mark_as_done" type="object" attrs="{'invisible': [('kanban_state', '=', 'done')]}"/>
                     <field name="message_needaction" invisible="1" readonly="1"/>
                     <field name="is_closed" invisible="1" />
                     <field name="sequence" invisible="1" readonly="1"/>

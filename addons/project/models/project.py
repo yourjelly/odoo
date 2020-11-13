@@ -579,6 +579,7 @@ class Task(models.Model):
         default=_get_default_stage_id, group_expand='_read_group_stage_ids',
         domain="[('project_ids', '=', project_id)]", copy=False)
     tag_ids = fields.Many2many('project.tags', string='Tags')
+    marked_as_done = fields.Boolean('Marked As Done', default=False)
     kanban_state = fields.Selection([
         ('normal', 'In Progress'),
         ('done', 'Ready'),
@@ -1167,7 +1168,7 @@ class Task(models.Model):
                 if task.project_id.partner_id:
                     task.partner_id = task.project_id.partner_id
             else:
-                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id 
+                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id
 
     @api.depends('partner_id.email', 'parent_id.email_from')
     def _compute_email_from(self):
@@ -1339,6 +1340,12 @@ class Task(models.Model):
 
     def action_assign_to_me(self):
         self.write({'user_id': self.env.user.id})
+
+    def action_mark_as_done(self):
+        self.filtered(lambda task: not task.marked_as_done).write({'marked_as_done': True})
+
+    def action_mark_as_incomplete(self):
+        self.filtered(lambda task: task.marked_as_done).write({'marked_as_done': False})
 
     # If depth == 1, return only direct children
     # If depth == 3, return children to third generation
