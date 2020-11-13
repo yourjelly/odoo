@@ -10,6 +10,17 @@ odoo.define('project.ProjectListView', function (require) {
     const _t = core._t;
 
     const ProjectListController = ListController.extend({
+        custom_events: _.extend({}, ListController.prototype.custom_events, {
+            'marked_as_done_changed': '_onMarkedAsDoneChanged'
+        }),
+        /**
+         * When the marked_as_done_toggle_button is clicked, we reload the view to see the updating.
+         * @param {Object} event
+         */
+        _onMarkedAsDoneChanged: function (event) {
+            this.reload();
+        },
+
         _getActionMenuItems(state) {
             if(!this.archiveEnabled) {
                 return this._super(...arguments);
@@ -99,10 +110,21 @@ odoo.define('project.ProjectListView', function (require) {
             }).open();
         }
     });
-    
+
+    const ProjectListRenderer = ListRenderer.extend({
+        _renderRow: function (record) {
+            const $tr = this._super.apply(this, arguments);
+            if (record.data.hasOwnProperty('marked_as_done') && record.data.marked_as_done) {
+                $tr.addClass('o_done_task'); // XBO TODO: add style when the task is done
+            }
+            return $tr;
+        }
+    });
+
     const ProjectListView = ListView.extend({
         config: _.extend({}, ListView.prototype.config, {
             Controller: ProjectListController,
+            Renderer: ProjectListRenderer,
         }),
     });
 
