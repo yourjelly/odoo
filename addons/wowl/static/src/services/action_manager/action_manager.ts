@@ -710,7 +710,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     actionRequest: ActionRequest,
     options: ActionOptions = {}
   ): Promise<void> {
-    const { active_id, active_ids, active_model } = options.additionalContext || {};
+    const { active_id = null, active_ids = null, active_model = null } = options.additionalContext || {};
     const action = await _loadAction(actionRequest, { active_id, active_ids, active_model });
     switch (action.type) {
       case "ir.actions.act_url":
