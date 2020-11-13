@@ -132,6 +132,18 @@ class TestCertificationBadge(common.TestSurveyCommon):
         self.assertEqual(len(goal), 1,
             "A goal should be created if the certification badge is activated on a certification survey")
 
+        duplicate_survey = self.certification_survey.copy({'title': 'TestDuplicate'})
+        self.assertEqual(duplicate_survey.title, 'TestDuplicate')
+        self.assertFalse(duplicate_survey.certification_give_badge)
+        self.assertEqual(duplicate_survey.certification_badge_id, self.env['gamification.badge'])
+        duplicate_survey.write({'certification_give_badge': True})
+        self.assertTrue(duplicate_survey.certification_give_badge)
+        self.assertFalse(duplicate_survey.certification_badge_id.id)
+        challenge = self.env['gamification.challenge'].search([
+            ('name', '=', 'TestDuplicate challenge certification')])
+        self.assertEqual(len(challenge), 0,
+            "The challenge should not be created if the certification badge is unset from the certification survey")
+
     def test_certification_badge_access(self):
         self.certification_badge.with_user(self.survey_manager).write(
             {'description': "Spoiler alert: I'm Aegon Targaryen and I sleep with the Dragon Queen, who is my aunt by the way! So I can do whatever I want! Even if I know nothing!"})

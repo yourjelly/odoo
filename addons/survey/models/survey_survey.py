@@ -316,8 +316,8 @@ class Survey(models.Model):
         return result
 
     def copy_data(self, default=None):
-        title = _("%s (copy)") % (self.title)
-        default = dict(default or {}, title=title)
+        new_defaults = {'title': _("%s (copy)") % (self.title)}
+        default = dict(new_defaults, **(default or {}))
         return super(Survey, self).copy_data(default)
 
     def toggle_active(self):
@@ -1014,34 +1014,35 @@ class Survey(models.Model):
 
     def _create_certification_badge_trigger(self):
         self.ensure_one()
-        goal = self.env['gamification.goal.definition'].create({
-            'name': self.title,
-            'description': _("%s certification passed", self.title),
-            'domain': "['&', ('survey_id', '=', %s), ('scoring_success', '=', True)]" % self.id,
-            'computation_mode': 'count',
-            'display_mode': 'boolean',
-            'model_id': self.env.ref('survey.model_survey_user_input').id,
-            'condition': 'higher',
-            'batch_mode': True,
-            'batch_distinctive_field': self.env.ref('survey.field_survey_user_input__partner_id').id,
-            'batch_user_expression': 'user.partner_id.id'
-        })
-        challenge = self.env['gamification.challenge'].create({
-            'name': _('%s challenge certification', self.title),
-            'reward_id': self.certification_badge_id.id,
-            'state': 'inprogress',
-            'period': 'once',
-            'challenge_category': self._prepare_challenge_category(),
-            'reward_realtime': True,
-            'report_message_frequency': 'never',
-            'user_domain': [('karma', '>', 0)],
-            'visibility_mode': 'personal'
-        })
-        self.env['gamification.challenge.line'].create({
-            'definition_id': goal.id,
-            'challenge_id': challenge.id,
-            'target_goal': 1
-        })
+        if self.certification_badge_id.id:
+            goal = self.env['gamification.goal.definition'].create({
+                'name': self.title,
+                'description': _("%s certification passed", self.title),
+                'domain': "['&', ('survey_id', '=', %s), ('scoring_success', '=', True)]" % self.id,
+                'computation_mode': 'count',
+                'display_mode': 'boolean',
+                'model_id': self.env.ref('survey.model_survey_user_input').id,
+                'condition': 'higher',
+                'batch_mode': True,
+                'batch_distinctive_field': self.env.ref('survey.field_survey_user_input__partner_id').id,
+                'batch_user_expression': 'user.partner_id.id'
+            })
+            challenge = self.env['gamification.challenge'].create({
+                'name': _('%s challenge certification', self.title),
+                'reward_id': self.certification_badge_id.id,
+                'state': 'inprogress',
+                'period': 'once',
+                'challenge_category': self._prepare_challenge_category(),
+                'reward_realtime': True,
+                'report_message_frequency': 'never',
+                'user_domain': [('karma', '>', 0)],
+                'visibility_mode': 'personal'
+            })
+            self.env['gamification.challenge.line'].create({
+                'definition_id': goal.id,
+                'challenge_id': challenge.id,
+                'target_goal': 1
+            })
 
     def _handle_certification_badges(self, vals):
         if vals.get('certification_give_badge'):
