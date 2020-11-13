@@ -150,7 +150,9 @@ class Alias(models.Model):
         if self:
             domain += [('id', 'not in', self.ids)]
         if sanitized_name in [catchall_alias, bounce_alias] or self.search_count(domain):
-            raise UserError(_('The e-mail alias is already used. Please enter another one.'))
+            alias = self.env['mail.alias'].search([('alias_name','=',name)])
+            raise UserError(_(f'''The e-mail alias {name}@{self._default_alias_domain()} is already used by the
+                {alias.alias_parent_model_id.name}. Choose another alias or change it on the other document.'''))
         return sanitized_name
 
     def open_document(self):
