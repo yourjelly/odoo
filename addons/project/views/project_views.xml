@@ -621,7 +621,10 @@
                     <field name="repeat_show_week" invisible="1" />
                     <field name="repeat_show_month" invisible="1" />
                     <field name="recurrence_id" invisible="1" />
+                    <field name="marked_as_done" invisible="1" />
                     <header>
+                        <button name="action_mark_as_done" string="Mark as Done" class="oe_highlight" icon="fa-check-circle" type="object" attrs="{'invisible': [('marked_as_done', '=', True)]}"/>
+                        <button name="action_mark_as_incomplete" string="Mark as Incomplete" icon="fa-check-circle-o" type="object" attrs="{'invisible': [('marked_as_done', '=', False)]}"/>
                         <button name="action_assign_to_me" string="Assign to Me" type="object" class="oe_highlight"
                             attrs="{'invisible' : [('user_id', '!=', False)]}"/>
                         <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '=', False)]}"/>
