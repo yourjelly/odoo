@@ -2,6 +2,7 @@ odoo.define('project.project_kanban', function (require) {
 'use strict';
 
 var KanbanController = require('web.KanbanController');
+var KanbanRenderer = require('web.KanbanRenderer');
 var KanbanView = require('web.KanbanView');
 var KanbanColumn = require('web.KanbanColumn');
 var view_registry = require('web.view_registry');
@@ -47,9 +48,37 @@ var ProjectKanbanController = KanbanController.extend({
     }
 });
 
+const ProjectTaskKanbanRecord = KanbanRecord.extend({
+    custom_events: _.extend({}, KanbanRecord.prototype.custom_events, {
+        'marked_as_done_changed': '_onMarkedAsDoneChanged'
+    }),
+    _render: function () {
+        const promises = this._super.apply(this, arguments);
+        if (this.recordData.hasOwnProperty('marked_as_done') && this.recordData.marked_as_done) {
+            this.$el.addClass('o_done_task'); // XBO TODO: add style when the task is done
+        }
+        return promises;
+    },
+    /**
+     * When the marked_as_done_toggle_button is clicked, we reload the view to see the updating.
+     * @param {Object} event
+     */
+    _onMarkedAsDoneChanged: function (event) {
+        event.stopPropagation();
+        this._render();
+    }
+});
+
+const ProjectTaskKanbanRenderer = KanbanRenderer.extend({
+    config: Object.assign({}, KanbanRenderer.prototype.config, {
+        KanbanRecord: ProjectTaskKanbanRecord,
+    }),
+});
+
 var ProjectKanbanView = KanbanView.extend({
     config: _.extend({}, KanbanView.prototype.config, {
-        Controller: ProjectKanbanController
+        Controller: ProjectKanbanController,
+        Renderer: ProjectTaskKanbanRenderer
     }),
 });
 
