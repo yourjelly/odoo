@@ -1,9 +1,10 @@
+// Style for list and kanban view of project.task model.
 .o_mark_as_done_button i {
     color: grey;
 }
 
 .o_done_task {
-    td button.o_mark_as_done_button i {
+    .o_mark_as_done_button i {
         color: green;
     }
 }
