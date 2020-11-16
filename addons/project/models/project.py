@@ -1343,9 +1343,11 @@ class Task(models.Model):
 
     def action_mark_as_done(self):
         self.filtered(lambda task: not task.marked_as_done).write({'marked_as_done': True})
+        self.message_post(body=_("Task marked as done"))
 
     def action_mark_as_incomplete(self):
         self.filtered(lambda task: task.marked_as_done).write({'marked_as_done': False})
+        self.message_post(body=_("Task marked as incomplete"))
 
     # If depth == 1, return only direct children
     # If depth == 3, return children to third generation
