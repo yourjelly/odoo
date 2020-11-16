@@ -3,6 +3,8 @@ odoo.define('web.field_one_to_many_tests', function (require) {
 
 var AbstractField = require('web.AbstractField');
 var AbstractStorageService = require('web.AbstractStorageService');
+const ControlPanel = require('web.ControlPanel');
+const fieldRegistry = require('web.field_registry');
 var FormView = require('web.FormView');
 var KanbanRecord = require('web.KanbanRecord');
 var ListRenderer = require('web.ListRenderer');
@@ -9369,6 +9371,74 @@ QUnit.module('fields', {}, function () {
             await testUtils.form.clickSave(form);
 
             form.destroy();
+        });
+
+        QUnit.test('mounted is called only once for x2many control panel', async function (assert) {
+            // This test could be remove as soon as the field widgets will be converted in owl.
+            // It comes with a fix for a bug that occurred because in some circonstances, 'mounted'
+            // is called twice for the x2many control panel.
+            // Specifically, this occurs when there is 'pad' widget in the form view, because this
+            // widget does a 'setValue' in its 'start', which thus resets the field x2many.
+            assert.expect(6);
+
+            const PadLikeWidget = fieldRegistry.get('char').extend({
+                start() {
+                    this._setValue("some value");
+                }
+            });
+            fieldRegistry.add('pad_like', PadLikeWidget);
+
+            let resolveCP;
+            const prom = new Promise(r => {
+                resolveCP = r;
+            });
+            ControlPanel.patch('cp_patch_mock', T =>
+                class extends T {
+                    constructor() {
+                        super(...arguments);
+                        owl.hooks.onMounted(() => {
+                            assert.step('mounted');
+                        });
+                        owl.hooks.onWillUnmount(() => {
+                            assert.step('willUnmount');
+                        });
+                    }
+                    async update() {
+                        // the issue is a race condition, so we manually delay the update to turn it deterministic
+                        await prom;
+                        super.update(...arguments);
+                    }
+                }
+            );
+
+            const form = await createView({
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                arch: `
+                    <form>
+                        <field name="foo" widget="pad_like"/>
+                        <field name="p">
+                            <tree><field name="display_name"/></tree>
+                        </field>
+                    </form>`,
+                viewOptions: {
+                    withControlPanel: false,
+                },
+            });
+
+            assert.verifySteps(['mounted']);
+
+            resolveCP();
+            await testUtils.nextTick();
+
+            assert.verifySteps([]);
+
+            ControlPanel.unpatch('cp_patch_mock');
+            delete fieldRegistry.map.pad_like;
+            form.destroy();
+
+            assert.verifySteps(["willUnmount"]);
         });
     });
 });
