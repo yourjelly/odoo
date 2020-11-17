@@ -1190,7 +1190,7 @@
       <field name="parent_id" ref="account_yearly_tax_report_line_5_additional"/>
       <field name="report_id" ref="tax_report_yearly"/>
     </record>
-    <!--TODO: To be referred -->
+    <!--Manually added in the wizard-->
     <record id="account_yearly_tax_report_line_5b_number_of_persons_employed" model="account.tax.report.line">
         <field name="name">V.B.1. Number of persons employed (average for the year) (110)</field>
         <field name="tag_name">110</field>
@@ -1198,7 +1198,7 @@
         <field name="parent_id" ref="account_yearly_tax_report_line_5b_persons_employed"/>
         <field name="report_id" ref="tax_report_yearly"/>
     </record>
-    <!--TODO: To be referred -->
+    <!--Manually added in the wizard-->
     <record id="account_yearly_tax_report_line_5b_with_salary_wage" model="account.tax.report.line">
         <field name="name">V.B.1.a) with salary or wage (108)</field>
         <field name="tag_name">108</field>
@@ -1206,7 +1206,7 @@
         <field name="parent_id" ref="account_yearly_tax_report_line_5b_number_of_persons_employed"/>
         <field name="report_id" ref="tax_report_yearly"/>
     </record>
-    <!--TODO: To be referred -->
+    <!--Manually added in the wizard-->
     <record id="account_yearly_tax_report_line_5b_with_no_salary" model="account.tax.report.line">
         <field name="name">V.B.1.b) with no salary (family members) (109)</field>
         <field name="tag_name">109</field>
@@ -1222,6 +1222,7 @@
       <field name="report_id" ref="tax_report_yearly"/>
     </record>
 
+  <!--Manually added in the wizard-->
     <record id="account_yearly_tax_report_line_5c_taxable_persons_established" model="account.tax.report.line">
         <field name="name">V.C.1. Taxable persons established in Luxemburg: place of storage of books, records and documents the keeping... (238)</field>
         <field name="tag_name">238</field>
