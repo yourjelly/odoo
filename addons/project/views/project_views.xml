@@ -249,7 +249,9 @@
             <field name="arch" type="xml">
                 <form string="Project" delete="0">
                     <header>
-                        <button name="%(portal.portal_share_action)d" string="Share" type="action" class="oe_highlight oe_read_only"/>
+                        <button name="%(portal.portal_share_action)d" string="Share" type="action" class="oe_highlight oe_read_only"/>  
+                        <button name="%(project_user_permission_action)d" string="User permissions" type="action" class="oe_read_only"
+                             context="{'search_default_project_id': active_id, 'default_project_id': active_id}"/>
                     </header>
                 <sheet string="Project">
                     <div class="oe_button_box" name="button_box" groups="base.group_user">
@@ -338,6 +340,8 @@
                                         </dl>
                                     </span>
                                     <field name="company_id" groups="base.group_multi_company"/>
+                                    <field name="use_advanced_user_permission"/>
+                                    <field name="user_permission_ids" />
                                 </group>
                                 <group name="extra_settings">
                                 </group>
@@ -509,6 +513,7 @@
                     <field name="rating_status"/>
                     <field name="rating_active" />
                     <field name="analytic_account_id"/>
+                    <field name="allow_edit"/>
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon">
@@ -535,10 +540,14 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="o_kanban_card_manage_pane dropdown-menu" groups="project.group_project_manager" role="menu">
+                                    <div class="o_kanban_card_manage_pane dropdown-menu" groups="project.group_project_manager" role="menu" attrs="{'invisible': [('allow_edit', '=', False)]}" >
                                         <div class="o_kanban_card_manage_section o_kanban_manage_reports">
                                             <div role="menuitem">
                                                 <a name="%(portal.portal_share_action)d" type="action">Share</a>
+                                            </div>
+                                            <div role="menuitem">
+                                                <a name="%(project_user_permission_action)d" type="action" 
+                                                    context="{'search_default_project_id': active_id, 'default_project_id': active_id}">User permissions</a>
                                             </div>
                                             <div role="menuitem">
                                                 <a type="edit">Edit</a>
@@ -815,7 +824,9 @@
             <field name="name">project.task.kanban</field>
             <field name="model">project.task</field>
             <field name="arch" type="xml">
-                <kanban default_group_by="stage_id" class="o_kanban_small_column o_kanban_project_tasks" on_create="quick_create" quick_create_view="project.quick_create_task_form" examples="project" js_class="project_kanban" sample="1">
+                <kanban default_group_by="stage_id" class="o_kanban_small_column o_kanban_project_tasks" on_create="quick_create"
+                        quick_create_view="project.quick_create_task_form" examples="project" js_class="project_kanban" sample="1"
+                        ><!-- create="allow_edit" -->
                     <field name="color"/>
                     <field name="priority"/>
                     <field name="stage_id" options='{"group_by_tooltip": {"description": "Description"}}'/>
@@ -833,6 +844,7 @@
                     <field name="activity_state"/>
                     <field name="rating_last_value"/>
                     <field name="rating_ids"/>
+                    <field name="allow_edit"/>
                     <progressbar field="kanban_state" colors='{"done": "success", "blocked": "danger", "normal": "muted"}'/>
                     <templates>
                     <t t-name="kanban-box">
@@ -860,6 +872,8 @@
                                         <div class="dropdown-menu" role="menu">
                                             <a t-if="widget.editable" role="menuitem" type="set_cover" class="dropdown-item" data-field="displayed_image_id">Set Cover Image</a>
                                             <a name="%(portal.portal_share_action)d" role="menuitem" type="action" class="dropdown-item">Share</a>
+                                            <a name="%(project_user_permission_action)d" role="menuitem" type="action" 
+                                                    context="{'search_default_project_id': active_id, 'default_project_id': active_id}" class="dropdown-item">User permissions</a>
                                             <a t-if="widget.editable" role="menuitem" type="edit" class="dropdown-item">Edit</a>
                                             <a t-if="widget.editable" role="menuitem" class="dropdown-item" name="toggle_active" type="object">
                                                 <t t-if="record.active.raw_value">Archive</t>
@@ -1140,6 +1154,34 @@
             </field>
         </record>
         <menuitem action="project_tags_action" id="menu_project_tags_act" parent="menu_project_config"/>
+
+        <record id="project_user_permission_view_search" model="ir.ui.view">
+            <field name="name">project.user.permission.view.search</field>
+            <field name="model">project.user.permission</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="project_id"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="project_user_permission_view_tree" model="ir.ui.view">
+            <field name="name">project.user.permission.view.tree</field>
+            <field name="model">project.user.permission</field>
+            <field name="arch" type="xml">
+                <tree string="User permissions" editable="bottom">
+                    <field name="user_id"/>
+                    <field name="permission"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="project_user_permission_action" model="ir.actions.act_window">
+            <field name="name">User permissions</field>
+            <field name="res_model">project.user.permission</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="project_user_permission_view_search"/>
+        </record>
 
         <!-- Reporting menus -->
         <menuitem id="menu_project_report" name="Reporting"

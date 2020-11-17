@@ -25,3 +25,6 @@ access_account_analytic_line_project,account.analytic.line project,analytic.mode
 access_project_delete_wizard,access_project_delete_wizard,model_project_delete_wizard,project.group_project_manager,1,1,1,1
 access_project_task_type_delete_wizard,project.task.type.delete.wizard,model_project_task_type_delete_wizard,project.group_project_manager,1,1,1,1
 access_project_task_recurrence,project.task.recurrence,model_project_task_recurrence,project.group_project_user,1,1,1,1
+access_project_user_permission_manager,project.user.permission,model_project_user_permission,project.group_project_manager,1,1,1,1
+access_project_user_permission,project.user.permission,model_project_user_permission,project.group_project_user,1,1,1,0
+access_project_user_permission_portal,project.user.permission,model_project_user_permission,base.group_portal,1,0,0,0

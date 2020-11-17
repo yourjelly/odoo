@@ -197,6 +197,7 @@ class Project(models.Model):
             ('followers', 'Invited internal users'),
             ('employees', 'All internal users'),
             ('portal', 'Invited portal users and all internal users'),
+            ('advanced', 'Invited internal or internal users'),
         ],
         string='Visibility', required=True,
         default='portal',
@@ -211,6 +212,10 @@ class Project(models.Model):
     allowed_internal_user_ids = fields.Many2many('res.users', 'project_allowed_internal_users_rel',
                                                  string="Allowed Internal Users", default=lambda self: self.env.user, domain=[('share', '=', False)])
     allowed_portal_user_ids = fields.Many2many('res.users', 'project_allowed_portal_users_rel', string="Allowed Portal Users", domain=[('share', '=', True)])
+
+    # retro-compatibility
+    user_permission_ids = fields.One2many('project.user.permission', 'project_id', string="Shared with users")
+
     doc_count = fields.Integer(compute='_compute_attached_docs_count', string="Number of documents attached")
     date_start = fields.Date(string='Start Date')
     date = fields.Date(string='Expiration Date', index=True, tracking=True)
@@ -237,6 +242,8 @@ class Project(models.Model):
         ('monthly', 'Once a Month'),
         ('quarterly', 'Quarterly'),
         ('yearly', 'Yearly')], 'Rating Frequency', required=True, default='monthly')
+
+    allow_edit = fields.Boolean(compute="_compute_allow_edit")
 
     _sql_constraints = [
         ('project_date_greater', 'check(date >= date_start)', 'Error! project start-date must be lower than project end-date.')
@@ -302,6 +309,11 @@ class Project(models.Model):
         for project in self:
             project.rating_request_deadline = fields.datetime.now() + timedelta(days=periods.get(project.rating_status_period, 0))
 
+    @api.depends('user_permission_ids', 'allowed_user_ids')
+    def _compute_allow_edit(self):
+        for project in self:
+            project.allow_edit = project._has_edit_permission(project.id)
+
     @api.model
     def _map_tasks_default_valeus(self, task, project):
         """ get the default value for the copied task on project duplication """
@@ -345,6 +357,17 @@ class Project(models.Model):
             self.map_tasks(project.id)
         return project
 
+    def _has_edit_permission(self, project_id):
+        if self.privacy_visibility != 'advanced':
+            return True
+        user_permission = self.env['project.user.permission'].search([('project_id', '=', project_id), ('user_id', '=', self.env.user.id)])
+        return (self.env.user.has_group('project.group_project_manager') and self.user_id == self.env.user) or \
+            (user_permission and user_permission.permission == 'edit')
+
+    def _check_user_permission(self, project_id, error_message):
+        if not self._has_edit_permission(project_id):
+            raise UserError(_('You are a read-only user on this project. You are not allowed to %s task.', error_message))
+
     @api.model
     def create(self, vals):
         # Prevent double project creation
@@ -360,6 +383,7 @@ class Project(models.Model):
         allowed_users_changed = 'allowed_portal_user_ids' in vals or 'allowed_internal_user_ids' in vals
         if allowed_users_changed:
             allowed_users = {project: project.allowed_user_ids for project in self}
+        self._check_user_permission(self.id, "edit")
         # directly compute is_favorite to dodge allow write access right
         if 'is_favorite' in vals:
             vals.pop('is_favorite')
@@ -723,6 +747,8 @@ class Task(models.Model):
     repeat_show_week = fields.Boolean(compute='_compute_repeat_visibility')
     repeat_show_month = fields.Boolean(compute='_compute_repeat_visibility')
 
+    allow_edit = fields.Boolean(related="project_id.allow_edit", readonly=True, store=False)
+
     @api.model
     def _get_recurrence_fields(self):
         return ['repeat_interval', 'repeat_unit', 'repeat_type', 'repeat_until', 'repeat_number',
@@ -851,7 +877,13 @@ class Task(models.Model):
     @api.constrains('allowed_user_ids')
     def _check_no_portal_allowed(self):
         for task in self.filtered(lambda t: t.project_id.privacy_visibility != 'portal'):
-            portal_users = task.allowed_user_ids.filtered('share')
+            portal_users = []
+            if task.project_id.privacy_visibility == 'advanced':
+                portal_users = task
+                user_permitted = task.project_id.user_permission_ids.mapped('user_id')
+                portal_users = [p if p not in user_permitted for p in task.allowed_user_ids]
+            else:
+                portal_users = task.allowed_user_ids.filtered('share')
             if portal_users:
                 user_names = ', '.join(portal_users[:10].mapped('name'))
                 raise ValidationError(_("The project visibility setting doesn't allow portal users to see the project's tasks. (%s)", user_names))
@@ -924,6 +956,7 @@ class Task(models.Model):
     def _compute_access_warning(self):
         super(Task, self)._compute_access_warning()
         for task in self.filtered(lambda x: x.project_id.privacy_visibility != 'portal'):
+            if task.project_privacy_visibility = 
             task.access_warning = _(
                 "The task cannot be shared with the recipient(s) because the privacy of the project is too restricted. Set the privacy of the project to 'Visible by following customers' in order to make it accessible by the recipient(s).")
 
@@ -995,6 +1028,7 @@ class Task(models.Model):
         res = super(Task, self).message_subscribe(partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=subtype_ids)
         if partner_ids:
             new_allowed_users = self.env['res.partner'].browse(partner_ids).user_ids.filtered('share')
+            # TODO : Check if there is nothing to change here : 17/11/2020 : Nothing noticed
             tasks = self.filtered(lambda task: task.project_id.privacy_visibility == 'portal')
             tasks.sudo().write({'allowed_user_ids': [(4, user.id) for user in new_allowed_users]})
         return res
@@ -1027,6 +1061,20 @@ class Task(models.Model):
     # ------------------------------------------------
     # CRUD overrides
     # ------------------------------------------------
+    def _has_edit_permission(self, project_id):
+        project = self.project_id
+        if not project:
+            project = self.env["project.project"].browse(project_id)
+        if project.privacy_visibility != 'advanced':
+            return True
+        user_permission = self.env['project.user.permission'].search([('project_id', '=', project_id), ('user_id', '=', self.env.user.id)])
+        return (self.env.user.has_group('project.group_project_manager') and project.user_id == self.env.user) or \
+            (user_permission and user_permission.permission == 'edit')
+
+    def _check_user_permission(self, project_id, error_message):
+        if not self._has_edit_permission(project_id):
+            raise UserError(_('You are a read-only user on this project. You are not allowed to %s task.', error_message))
+
     @api.model
     def default_get(self, default_fields):
         vals = super(Task, self).default_get(default_fields)
@@ -1052,6 +1100,7 @@ class Task(models.Model):
         default_stage = dict()
         for vals in vals_list:
             project_id = vals.get('project_id') or self.env.context.get('default_project_id')
+            self._check_user_permission(project_id, error_message="create")
             if project_id and not "company_id" in vals:
                 vals["company_id"] = self.env["project.project"].browse(
                     project_id
@@ -1092,6 +1141,7 @@ class Task(models.Model):
         if 'active' in vals and not vals.get('active') and any(self.mapped('recurrence_id')):
             # TODO: show a dialog to stop the recurrence
             raise UserError(_('You cannot archive recurring tasks. Please, disable the recurrence first.'))
+        self._check_user_permission(self.project_id.id, error_message="edit")
         # stage change: update date_last_stage_update
         if 'stage_id' in vals:
             vals.update(self.update_date_end(vals['stage_id']))
@@ -1422,4 +1472,21 @@ class ProjectTags(models.Model):
 
     _sql_constraints = [
         ('name_uniq', 'unique (name)', "Tag name already exists!"),
+    ]
+
+class ProjectUserPermission(models.Model):
+    """ User permission for project """
+    _name = "project.user.permission"
+    _description = "Project user permission"
+
+    permission = fields.Selection([
+        ('edit', 'Can Edit'),
+        ('read', 'Read only'),
+        ('comment', 'Can read and comment project'),
+    ], default='read')
+    user_id = fields.Many2one('res.users', required=True)
+    project_id = fields.Many2one('project.project', required=True)
+
+    _sql_constraints = [
+        ('permission_uniq', 'unique (project_id, user_id)', "User can only have one permission!"),
     ]
