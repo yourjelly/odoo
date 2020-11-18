@@ -626,6 +626,8 @@ class Task(models.Model):
     legend_normal = fields.Char(related='stage_id.legend_normal', string='Kanban Ongoing Explanation', readonly=True, related_sudo=False)
     is_closed = fields.Boolean(related="stage_id.is_closed", string="Closing Stage", readonly=True, related_sudo=False)
     parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
+    depends_on_ids = fields.Many2many('project.task', string='Depends on', help="Task depends on one or more tasks to be realized")
+    display_first_dependent_task = fields.Char('Display First Dependent Task', compute="_compute_display_first_dependent_task")
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
     subtask_project_id = fields.Many2one('project.project', related="project_id.subtask_project_id", string='Sub-task Project', readonly=True)
     allow_subtasks = fields.Boolean(string="Allow Sub-tasks", related="project_id.allow_subtasks", readonly=True)
@@ -959,6 +961,15 @@ class Task(models.Model):
             else:
                 task.stage_id = False
 
+    @api.depends('depends_on_ids')  # depends_on_ids.marked_as_done (feature in taskID: 2381914) must be add in api.depends
+    def _compute_display_first_dependent_task(self):
+        for task in self:
+            if task.depends_on_ids:
+                dependent_task = sorted(task.depends_on_ids, lambda task: task.date_deadline)[0]  # TODO: we need to add the a condition to get only the task uncomplete
+                task.display_first_dependent_task = _("Dependent on %s due %s" % (dependent_task.name_get(), dependent_task.date_dateline.strftime("%B %d")))
+            else:
+                task.display_first_dependent_task = False
+
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         if default is None:
@@ -1166,7 +1177,7 @@ class Task(models.Model):
                 if task.project_id.partner_id:
                     task.partner_id = task.project_id.partner_id
             else:
-                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id 
+                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id
 
     @api.depends('partner_id.email', 'parent_id.email_from')
     def _compute_email_from(self):
