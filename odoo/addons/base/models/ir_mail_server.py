@@ -178,6 +178,9 @@ class IrMailServer(models.Model):
                               will be output in logs)
            :param mail_server_id: ID of specific mail server to use (overrides other parameters)
         """
+
+        # TEst
+
         # Do not actually connect while running in test mode
         if getattr(threading.currentThread(), 'testing', False):
             return None
