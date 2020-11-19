@@ -215,6 +215,7 @@ class Project(models.Model):
     doc_count = fields.Integer(compute='_compute_attached_docs_count', string="Number of Documents Attached")
     date_start = fields.Date(string='Start Date')
     date = fields.Date(string='Expiration Date', index=True, tracking=True)
+    # FIXME migration : not allowed to delete field : subtask_project_id
     subtask_project_id = fields.Many2one('project.project', string='Sub-task Project', ondelete="restrict",
         help="Project in which sub-tasks of the current project will be created. It can be the current project itself.")
     allow_subtasks = fields.Boolean('Sub-tasks', default=lambda self: self.env.user.has_group('project.group_subtask_project'))
@@ -338,8 +339,6 @@ class Project(models.Model):
         if not default.get('name'):
             default['name'] = _("%s (copy)") % (self.name)
         project = super(Project, self).copy(default)
-        if self.subtask_project_id == self:
-            project.subtask_project_id = project
         for follower in self.message_follower_ids:
             project.message_subscribe(partner_ids=follower.partner_id.ids, subtype_ids=follower.subtype_ids.ids)
         if 'tasks' not in default:
@@ -351,8 +350,6 @@ class Project(models.Model):
         # Prevent double project creation
         self = self.with_context(mail_create_nosubscribe=True)
         project = super(Project, self).create(vals)
-        if not vals.get('subtask_project_id'):
-            project.subtask_project_id = project.id
         if project.privacy_visibility == 'portal' and project.partner_id.user_ids:
             project.allowed_user_ids |= project.partner_id.user_ids
         return project
@@ -631,11 +628,12 @@ class Task(models.Model):
     is_closed = fields.Boolean(related="stage_id.is_closed", string="Closing Stage", readonly=True, related_sudo=False)
     parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
-    subtask_project_id = fields.Many2one('project.project', related="project_id.subtask_project_id", string='Sub-task Project', readonly=True)
     allow_subtasks = fields.Boolean(string="Allow Sub-tasks", related="project_id.allow_subtasks", readonly=True)
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count')
     email_from = fields.Char(string='Email From', help="These people will receive email.", index=True,
         compute='_compute_email_from', store="True", readonly=False)
+    # FIXME migration : not allowed to delete field : subtask_project_id
+    subtask_project_id = fields.Many2one('project.project', related="project_id.subtask_project_id", string='Sub-task Project', readonly=True)
     allowed_user_ids = fields.Many2many('res.users', string="Visible to", groups='project.group_project_manager', compute='_compute_allowed_user_ids', store=True, readonly=False, copy=False)
     project_privacy_visibility = fields.Selection(related='project_id.privacy_visibility', string="Project Visibility")
     # Computed field about working time elapsed between record creation and assignation/closing.
@@ -948,15 +946,29 @@ class Task(models.Model):
         if self.project_id.company_id != self.company_id:
             self.project_id = False
 
+    @api.onchange('recurring_task')
+    def _onchange_recurring_task(self):
+        self.ensure_one()
+        if self.parent_id and self.recurring_task:
+            raise UserError(_("A sub-task cannot be a recurring task. Please consider making its parent task, a recurring task."))
+
     @api.depends('project_id.company_id')
     def _compute_company_id(self):
         for task in self.filtered(lambda task: task.project_id):
             task.company_id = task.project_id.company_id
 
-    @api.depends('project_id')
+    @api.onchange('stage_id')
+    def _onchange_stage_id(self):
+        self.ensure_one()
+        if self.parent_id and self.parent_id.project_id == self.project_id and self.parent_id.stage_id != self.stage_id:
+            raise UserError(_("The sub-task stage cannot be different than its parent task stage."))
+
+    @api.depends('project_id', 'parent_id.stage_id')
     def _compute_stage_id(self):
         for task in self:
-            if task.project_id:
+            if task.parent_id and task.parent_id.stage_id and task.parent_id.project_id == task.project_id:
+                task.stage_id = task.parent_id.stage_id
+            elif task.project_id:
                 if task.project_id not in task.stage_id.project_ids:
                     task.stage_id = task.stage_find(task.project_id.id, [
                         ('fold', '=', False), ('is_closed', '=', False)])
@@ -1050,8 +1062,19 @@ class Task(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         default_stage = dict()
+        default_parent_stage = dict()
+        default_subtask_project = dict()
         for vals in vals_list:
+            parent_id = vals.get('parent_id')
             project_id = vals.get('project_id') or self.env.context.get('default_project_id')
+            if parent_id and "stage_id" not in vals:
+                # Sub-task stage_id must by default be the same as its parent stage_id
+                # 1) It must override project default stage
+                # 2) Ensures the default is only computed once per parent task
+                if parent_id not in default_parent_stage:
+                    parent_task = self.env['project.task'].browse(parent_id)
+                    default_parent_stage[parent_id] = parent_task.stage_id.id
+                vals["stage_id"] = default_parent_stage[parent_id]
             if project_id and not "company_id" in vals:
                 vals["company_id"] = self.env["project.project"].browse(
                     project_id
@@ -1164,18 +1187,24 @@ class Task(models.Model):
                 if task.project_id.partner_id:
                     task.partner_id = task.project_id.partner_id
             else:
-                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id 
+                task.partner_id = task.project_id.partner_id or task.parent_id.partner_id
 
     @api.depends('partner_id.email', 'parent_id.email_from')
     def _compute_email_from(self):
         for task in self:
             task.email_from = task.partner_id.email or task.email_from or task.parent_id.email_from
 
-    @api.depends('parent_id.project_id.subtask_project_id')
+    @api.onchange('project_id')
+    def _onchange_project_id(self):
+        self.ensure_one()
+        if self.parent_id and self.project_id != self.parent_id.project_id:
+            raise UserError(_("A sub-task cannot be linked to another project than its parent task."))
+
+    @api.depends('parent_id.project_id', 'parent_id')
     def _compute_project_id(self):
         for task in self:
             if not task.project_id:
-                task.project_id = task.parent_id.project_id.subtask_project_id
+                task.project_id = task.parent_id.project_id
 
     # ---------------------------------------------------
     # Mail gateway
@@ -1334,6 +1363,9 @@ class Task(models.Model):
     def action_assign_to_me(self):
         self.write({'user_id': self.env.user.id})
 
+    def action_unassign_me(self):
+        self.write({'user_id': False})
+
     # If depth == 1, return only direct children
     # If depth == 3, return children to third generation
     # If depth <= 0, return all children without depth limit
@@ -1355,6 +1387,16 @@ class Task(models.Model):
             'context': dict(self._context, create=False)
         }
 
+    def action_open_sub_task(self):
+        return {
+            'name': _('Sub-Task Detail'),
+            'view_mode': 'form',
+            'res_model': 'project.task',
+            'res_id': self.id,
+            'type': 'ir.actions.act_window',
+            'context': dict(self._context)
+        }
+
     def action_subtask(self):
         action = self.env["ir.actions.actions"]._for_xml_id("project.project_task_action_sub_task")
 
@@ -1362,15 +1404,11 @@ class Task(models.Model):
         action['domain'] = [('id', 'child_of', self.id), ('id', '!=', self.id)]
 
         # update context, with all default values as 'quick_create' does not contains all field in its view
-        if self._context.get('default_project_id'):
-            default_project = self.env['project.project'].browse(self.env.context['default_project_id'])
-        else:
-            default_project = self.project_id.subtask_project_id or self.project_id
         ctx = dict(self.env.context)
         ctx.update({
-            'default_name': self.env.context.get('name', self.name) + ':',
             'default_parent_id': self.id,  # will give default subtask field in `default_get`
-            'default_company_id': default_project.company_id.id if default_project else self.env.company.id,
+            'default_project_id': self.project_id.id,
+            'default_company_id': self.project_id.company_id.id if self.project_id else self.env.company.id,
         })
 
         action['context'] = ctx
