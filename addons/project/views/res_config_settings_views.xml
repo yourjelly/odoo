@@ -21,17 +21,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-6 o_setting_box">
-                                <div class="o_setting_left_pane">
-                                    <field name="group_subtask_project"/>
-                                </div>
-                                <div class="o_setting_right_pane">
-                                    <label for="group_subtask_project"/>
-                                    <div class="text-muted">
-                                        Split your tasks to organize your work into sub-milestones
-                                    </div>
-                                </div>
-                            </div>
                             <div class="col-12 col-lg-6 o_setting_box" id="track_customer_satisfaction_setting">
                                 <div class="o_setting_left_pane">
                                     <field name="group_project_rating"/>

@@ -75,6 +75,20 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         })
         cls.sale_order_2.action_confirm()
 
+        # Projects: at least one per billable type
+        Project = cls.env['project.project'].with_context(tracking_disable=True)
+        cls.project_subtask = Project.create({
+            'name': "Sub Task Project (non billable)",
+            'allow_timesheets': True,
+            'allow_billable': False,
+            'partner_id': False,
+        })
+        cls.project_non_billable = Project.create({
+            'name': "Non Billable Project",
+            'allow_timesheets': True,
+            'allow_billable': False,
+            'partner_id': False,
+        })
         cls.project_task_rate = cls.env['project.project'].search([('sale_line_id', '=', cls.so2_line_deliver_project_task.id)], limit=1)
         cls.project_task_rate2 = cls.env['project.project'].search([('sale_line_id', '=', cls.so2_line_deliver_project_template.id)], limit=1)
 
@@ -85,7 +99,6 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         cls.project_employee_rate.write({
             'sale_order_id': cls.sale_order_1.id,
             'partner_id': cls.sale_order_1.partner_id.id,
-            'subtask_project_id': cls.project_subtask.id,
         })
         cls.project_employee_rate_manager = cls.env['project.sale.line.employee.map'].create({
             'project_id': cls.project_employee_rate.id,
@@ -259,8 +272,9 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         self.assertEqual(self.project_employee_rate_manager.project_id, timesheet1.project_id, "The timesheet should be linked to the project of the map entry")
 
         # create a subtask
-        subtask = Task.with_context(default_project_id=self.project_employee_rate.subtask_project_id.id).create({
+        subtask = Task.create({
             'name': 'first subtask task',
+            'project_id': self.project_subtask.id,
             'parent_id': task.id,
         })
 
@@ -336,9 +350,6 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         Task = self.env['project.task'].with_context(tracking_disable=True)
         Timesheet = self.env['account.analytic.line']
 
-        # set subtask project on task rate project
-        self.project_task_rate.write({'subtask_project_id': self.project_subtask.id})
-
         # create a task
         task = Task.with_context(default_project_id=self.project_task_rate.id).create({
             'name': 'first task',
@@ -360,7 +371,7 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         self.assertEqual(task.sale_line_id, timesheet1.so_line, "The timesheet should be linked to the SOL associated to the task since the pricing type of the project is task rate.")
 
         # create a subtask
-        subtask = Task.with_context(default_project_id=self.project_task_rate.subtask_project_id.id).create({
+        subtask = Task.with_context(default_project_id=self.project_task_rate.id).create({
             'name': 'first subtask task',
             'parent_id': task.id,
         })
@@ -370,13 +381,13 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         # log timesheet on subtask
         timesheet2 = Timesheet.create({
             'name': 'Test Line on subtask',
-            'project_id': subtask.project_id.id,
+            'project_id': subtask.effective_project_id.id,
             'task_id': subtask.id,
             'unit_amount': 50,
             'employee_id': self.employee_user.id,
         })
 
-        self.assertEqual(subtask.project_id, timesheet2.project_id, "The timesheet is in the subtask project")
+        self.assertEqual(subtask.effective_project_id, timesheet2.project_id, "The timesheet is in the subtask project")
         self.assertFalse(timesheet2.so_line, "The timesheet should not be linked to SOL as it's a non billable project")
 
         # move task and subtask into task rate project

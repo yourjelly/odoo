@@ -87,9 +87,9 @@ class TestNestedTaskUpdate(TransactionCase):
         child = self.env['project.task'].create({'name': 'child', 'user_id': False, 'parent_id': parent.id})
         self.assertFalse(child.user_id)
         parent.write({'user_id': self.user.id})
-        self.assertFalse(child.user_id)
+        self.assertEqual(child.user_id, parent.user_id)
         parent.write({'user_id': False})
-        self.assertFalse(child.user_id)
+        self.assertEqual(child.user_id, self.user)
 
     def test_write_partner_id_on_parent_write_on_child(self):
         parent = self.env['project.task'].create({'name': 'parent', 'partner_id': False})
@@ -146,7 +146,7 @@ class TestNestedTaskUpdate(TransactionCase):
         child = self.env['project.task'].create({'name': 'child', 'user_id': False})
         self.assertFalse(child.user_id)
         child.write({'parent_id': parent.id})
-        self.assertFalse(child.user_id)
+        self.assertEqual(child.user_id, parent.user_id)
 
     def test_linking_partner_id_on_parent_write_on_child(self):
         parent = self.env['project.task'].create({'name': 'parent', 'partner_id': self.user.partner_id.id})
@@ -213,4 +213,4 @@ class TestNestedTaskUpdate(TransactionCase):
 
         for child in children:
             self.assertEqual(child.sale_line_id, self.order_line)
-            self.assertFalse(child.user_id)
+            self.assertEqual(child.user_id, parent.user_id)

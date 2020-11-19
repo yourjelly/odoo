@@ -9,7 +9,6 @@ class ResConfigSettings(models.TransientModel):
 
     module_project_forecast = fields.Boolean(string="Planning")
     module_hr_timesheet = fields.Boolean(string="Task Logs")
-    group_subtask_project = fields.Boolean("Sub-tasks", implied_group="project.group_subtask_project")
     group_project_rating = fields.Boolean("Customer Ratings", implied_group='project.group_project_rating')
     group_project_recurring_tasks = fields.Boolean("Recurring Tasks", implied_group="project.group_project_recurring_tasks")
 
@@ -19,7 +18,6 @@ class ResConfigSettings(models.TransientModel):
         projects = self.env["project.project"].search([])
         features = (
             # Pairs of associated (config_flag, project_flag)
-            ("group_subtask_project", "allow_subtasks"),
             ("group_project_rating", "rating_active"),
             ("group_project_recurring_tasks", "allow_recurring_tasks"),
             )

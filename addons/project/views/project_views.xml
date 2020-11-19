@@ -22,7 +22,6 @@
                     <field name="partner_id" operator="child_of"/>
                     <field name="stage_id"/>
                     <field name="project_id"/>
-                    <field name="parent_id" groups="project.group_subtask_project"/>
                     <filter string="My Tasks" name="my_tasks" domain="[('user_id', '=', uid)]"/>
                     <filter string="Followed Tasks" name="my_followed_tasks" domain="[('message_is_follower', '=', True)]" />
                     <filter string="Unassigned" name="unassigned" domain="[('user_id', '=', False)]"/>
@@ -359,7 +358,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-6 o_setting_box"  id="subtask_settings" groups="project.group_subtask_project">
+                                <div class="col-lg-6 o_setting_box"  id="subtask_settings">
                                     <div class="o_setting_left_pane">
                                         <field name="allow_subtasks" />
                                     </div>
@@ -367,10 +366,6 @@
                                         <label for="allow_subtasks" />
                                         <div class="text-muted">
                                             Split your tasks to organize your work into sub-milestones
-                                        </div>
-                                        <div class="mt8" attrs="{'invisible': [('allow_subtasks', '=', False)]}">
-                                            <label for="subtask_project_id" />
-                                            <field name="subtask_project_id" />
                                         </div>
                                     </div>
                                 </div>
@@ -432,7 +427,6 @@
                     <field name="partner_id" optional="show" string="Customer"/>
                     <field name="analytic_account_id" optional="hide"/>
                     <field name="privacy_visibility" optional="hide"/>
-                    <field name="subtask_project_id" optional="hide"/>
                     <field name="label_tasks" optional="hide"/>
                     <field name="company_id" optional="show"  groups="base.group_multi_company"/>
                 </tree>
@@ -647,10 +641,11 @@
                     <field name="repeat_show_week" invisible="1" />
                     <field name="repeat_show_month" invisible="1" />
                     <field name="recurrence_id" invisible="1" />
+                    <field name="effective_project_id" invisible="1" />
                     <header>
                         <button name="action_assign_to_me" string="Assign to Me" type="object" class="oe_highlight"
                             attrs="{'invisible' : [('user_id', '!=', False)]}"/>
-                        <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '=', False)]}"/>
+                        <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '=', False), ('stage_id', '=', False)]}"/>
                     </header>
                     <div class="text-center alert alert-primary" role="alert" attrs="{'invisible': ['|', ('ribbon_message', '=', False), ('ribbon_message', '=', '')]}">
                         <field name="ribbon_message"/>
@@ -661,10 +656,6 @@
                     </div>
                     <sheet string="Task">
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_subtask" type="object" class="oe_stat_button" icon="fa-tasks"
-                            attrs="{'invisible' : ['|', ('allow_subtasks', '=', False), ('id', '=', False)]}" context="{'default_user_id': user_id, 'default_parent_id': id, 'default_project_id': subtask_project_id}">
-                            <field string="Sub-tasks" name="subtask_count" widget="statinfo"/>
-                        </button>
                         <button name="%(rating_rating_action_task)d" type="action" attrs="{'invisible': [('rating_count', '=', 0)]}" class="oe_stat_button" icon="fa-smile-o" groups="project.group_project_rating">
                             <field name="rating_count" string="Rating" widget="statinfo"/>
                         </button>
@@ -680,6 +671,10 @@
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
                     <div class="oe_title pr-0">
+                        <h4 attrs="{'invisible': [('parent_id', '=', False)]}" decoration-muted="1">
+                            <field name="parent_id" readonly="1"/>&amp;nbsp;<i class="fa fa-chevron-down" role="img" aria-label="Parent Task" title="Parent Task"></i>
+                            <br />
+                        </h4>
                         <h1 class="d-flex flex-row justify-content-between">
                             <field name="priority" widget="priority" class="mr-3"/>
                             <field name="name" class="o_task_name text-truncate" placeholder="Task Title..."/>
@@ -688,6 +683,7 @@
                     </div>
                     <group>
                         <group>
+<<<<<<< HEAD
                             <field name="project_id" required="1" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
                             <field name="user_id"
                                 class="o_task_user_field"
@@ -699,8 +695,23 @@
                                 domain="[('parent_id', '=', False)]"
                                 attrs="{'invisible' : [('allow_subtasks', '=', False)]}"
                             />
+=======
+                            <field name="active" invisible="1"/>
+                            <field name="partner_id" class="o_task_customer_field"/>
+                            <field name="partner_email" widget="email" attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                            <field name="partner_phone" widget="phone" attrs="{'invisible': [('partner_id', '=', False)]}"/>
+                            <field name="legend_blocked" invisible="1"/>
+                            <field name="legend_normal" invisible="1"/>
+                            <field name="legend_done" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="project_id" domain="[('active', '=', True), ('company_id', '=', company_id)]"/>
+                            <field name="user_id"
+                                class="o_task_user_field"
+                                domain="[('share', '=', False)]"/>
+>>>>>>> [IMP] project : Improve sub tasks creation and workflow
                             <field name="date_deadline" attrs="{'invisible': [('is_closed', '=', True)]}"/>
-                            <field name="recurring_task" attrs="{'invisible': [('allow_recurring_tasks', '=', False)]}" />
+                            <field name="recurring_task" attrs="{'invisible': ['|', ('allow_recurring_tasks', '=', False), ('parent_id', '!=', False)]}" />
                             <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                         </group>
                         <group>
@@ -715,6 +726,25 @@
                     <notebook>
                         <page name="description_page" string="Description">
                             <field name="description" type="html"/>
+                        </page>
+                        <page name="sub_tasks_page" string="Sub-tasks" attrs="{'invisible': [('allow_subtasks', '=', False)]}">
+                            <field name="child_ids">
+                                <tree editable="bottom">
+                                    <field name="is_closed" invisible="1"/>
+                                    <field name="sequence" widget="handle"/>
+                                    <!-- TODO : ADD Mark as done here  -->
+                                    <field name="name" placeholder="Add a subtask"/>
+                                    <button name="action_assign_to_me" title="Assign to Me" icon="fa-user-circle" class="oe_read_only"
+                                        type="object" attrs="{'invisible': [('user_id', '!=', False)]}"/>
+                                    <button name="action_assign_to_me" title="Assign to Me" icon="fa-exchange" class="text-warning oe_read_only"
+                                        type="object" attrs="{'invisible': &quot;['|', ('user_id', '=', False), ('user_id', '=', uid)]&quot;}"/>
+                                    <button name="action_unassign_me" title="Unassign me" icon="fa-user-times" class="text-danger oe_read_only"
+                                        type="object" attrs="{'invisible': &quot;[('user_id', '!=', uid)]&quot;}"/>
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                    <field name="date_deadline" widget="remaining_days" class="oe_read_only" attrs="{'invisible': [('is_closed', '=', True)]}"/>
+                                    <button name="action_open_sub_task" type="object" icon="fa-external-link" title="View Task" string="View Task" class="oe_read_only"/>
+                                </tree>
+                            </field>
                         </page>
                         <page name="recurrence" string="Recurrence" attrs="{'invisible': [('recurring_task', '=', False)]}">
                             <group>
@@ -769,8 +799,6 @@
                                     <field name="project_privacy_visibility" groups="base.group_no_one"/>
                                     <field name="allowed_user_ids" widget="many2many_tags"
                                            groups="base.group_no_one" attrs="{'invisible': [('project_privacy_visibility', 'not in', ('followers', 'portal'))]}"/>
-                                    <field name="child_ids" invisible="1" />
-                                    <field name="subtask_project_id" invisible="1" />
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                                     <field name="displayed_image_id" groups="base.group_no_one"/>
                                 </group>
@@ -856,6 +884,7 @@
                     <field name="activity_state"/>
                     <field name="rating_last_value"/>
                     <field name="rating_ids"/>
+                    <field name="allow_subtasks"/>
                     <progressbar field="kanban_state" colors='{"done": "success", "blocked": "danger", "normal": "muted"}'/>
                     <templates>
                     <t t-name="kanban-box">
@@ -914,6 +943,7 @@
                                         </div>
                                     </div>
                                     <div class="oe_kanban_bottom_right" t-if="!selection_mode">
+                                        <field name="child_ids" widget="one2many_sub_task"/>
                                         <field name="kanban_state" widget="state_selection" groups="base.group_user" invisible="context.get('fsm_mode', False)"/>
                                         <field name="user_id" widget="many2one_avatar_user"/>
                                     </div>
@@ -935,11 +965,13 @@
                 <tree string="Tasks" multi_edit="1" sample="1" js_class="project_list">
                     <field name="message_needaction" invisible="1" readonly="1"/>
                     <field name="is_closed" invisible="1" />
+                    <field name="allow_subtasks" invisible="1" />
                     <field name="sequence" invisible="1" readonly="1"/>
                     <field name="name"/>
+                    <field name="child_ids" nolabel="1" attrs="{'invisible': [('allow_subtasks', '=', False)]}" widget="one2many_sub_task"/>
                     <field name="project_id" optional="show" readonly="1"/>
                     <field name="partner_id" optional="hide"/>
-                    <field name="parent_id" groups="project.group_subtask_project" optional="hide"/>
+                    <field name="parent_id" optional="hide" attrs="{'invisible': [('allow_subtasks', '=', False)]}"/>
                     <field name="user_id" optional="show" widget="many2one_avatar_user"/>
                     <field name="company_id" groups="base.group_multi_company" optional="show"/>
                     <field name="activity_ids" widget="list_activity" optional="show"/>
@@ -1047,6 +1079,7 @@
             <field name="res_model">project.task</field>
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph,activity</field>
             <field name="context">{'search_default_my_tasks': 1, 'all_task': 0}</field>
+            <field name="domain">[('project_id', '!=', False)]</field>
             <field name="search_view_id" ref="view_task_search_form"/>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
@@ -1111,6 +1144,7 @@
             <field name="res_model">project.task</field>
             <field name="view_mode">tree,form,calendar,graph</field>
             <field name="context">{'search_default_user_id': [active_id], 'default_user_id': active_id}</field>
+            <field name="domain">[('project_id', '!=', False)]</field>
             <field name="binding_model_id" ref="base.model_res_users"/>
             <field name="binding_view_types">form</field>
         </record>

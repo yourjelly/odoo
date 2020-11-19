@@ -14,4 +14,13 @@
             </tbody>
         </table>
     </t>
+
+    <t t-name="one2many_sub_task_widget">
+        <t t-if="widget.value.count">
+            <div class="o_field_one2many o_field_widget o_field_one2many_sub_task" t-att-title="widget.string" t-att-aria-label="widget.string">
+                <t t-esc="widget.value.count"/>
+                <i class="fa fa-tasks" role="img"/>
+            </div>
+        </t>
+    </t>
 </templates>
