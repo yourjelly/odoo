@@ -138,7 +138,7 @@ class Location(models.Model):
 class StockWarehouseOrderpoint(models.Model):
     _inherit = 'stock.warehouse.orderpoint'
 
-    _populate_sizes = {'small': 150, 'medium': 5_000, 'large': 60_000}
+    _populate_sizes = {'small': 1000, 'medium': 5_000, 'large': 60_000}
     _populate_dependencies = ['product.product', 'product.supplierinfo', 'stock.location']
 
     def _populate_factories(self):

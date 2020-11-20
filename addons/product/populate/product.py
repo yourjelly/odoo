@@ -24,7 +24,7 @@ class ProductCategory(models.Model):
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
-    _populate_sizes = {"small": 150, "medium": 5000, "large": 60000}
+    _populate_sizes = {"small": 1000, "medium": 5000, "large": 60000}
 
     def _populate_factories(self):
 
@@ -40,7 +40,7 @@ class ProductProduct(models.Model):
 class SupplierInfo(models.Model):
     _inherit = 'product.supplierinfo'
 
-    _populate_sizes = {'small': 450, 'medium': 15_000, 'large': 180_000}
+    _populate_sizes = {'small': 2000, 'medium': 15_000, 'large': 180_000}
     _populate_dependencies = ['res.partner']
 
     def _populate_factories(self):
