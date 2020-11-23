@@ -1686,7 +1686,7 @@ class Form(object):
 
             modifiers[fname] = {
                 modifier: bool(domain) if isinstance(domain, int) else normalize_domain(domain)
-                for modifier, domain in json.loads(f.get('modifiers', '{}')).items()
+                for modifier, domain in json.loads(ft.get('modifiers', '{}')).items()
             }
             ctx = f.get('context')
             if ctx:

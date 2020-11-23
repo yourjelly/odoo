@@ -226,4 +226,51 @@
             </form>
         </field>
     </record>
+
+    <record id="onchange_cleanup_model_2_form" model="ir.ui.view">
+        <field name="name">onchange_cleanup_model_2.form</field>
+        <field name="model">onchange_cleanup_model_2</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="line_ids" mode="tree">
+                        <tree editable="bottom">
+                            <field name="a"/>
+                            <field name="b"/>
+                            <field name="c"/>
+                        </tree>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="onchange_cleanup_model_2_tree" model="ir.ui.view">
+        <field name="name">onchange_cleanup_model_2.tree</field>
+        <field name="model">onchange_cleanup_model_2</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="onchange_cleanup_model_2_action" model="ir.actions.act_window">
+        <field name="name">test_onchange_cleanup</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">onchange_cleanup_model_2</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_test_onchange_cleanup" model="ir.actions.act_window">
+        <field name="name">test_onchange_cleanup</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">onchange_cleanup_model_2</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_test_onchange_cleanup"
+              parent="menu_ssf"
+              name="test_onchange_cleanup"
+              action="action_test_onchange_cleanup"/>
 </odoo>

@@ -2840,11 +2840,13 @@ class AccountMoveLine(models.Model):
         readonly=True, store=True,
         help='Utility field to express amount currency')
     tax_fiscal_country_id = fields.Many2one(comodel_name='res.country', related='move_id.company_id.account_tax_fiscal_country_id')
-    account_id = fields.Many2one('account.account', string='Account',
-        index=True, ondelete="cascade",
-        domain="[('deprecated', '=', False), ('company_id', '=', 'company_id'),('is_off_balance', '=', False)]",
+    account_id = fields.Many2one(
+        comodel_name='account.account',
+        string='Account',
+        store=True, readonly=False, index=True, tracking=True, ondelete='cascade',
         check_company=True,
-        tracking=True)
+        compute='_compute_account_id',
+        domain="[('deprecated', '=', False), ('company_id', '=', 'company_id'),('is_off_balance', '=', False)]")
     account_internal_type = fields.Selection(related='account_id.user_type_id.type', string="Internal Type", readonly=True)
     account_internal_group = fields.Selection(related='account_id.user_type_id.internal_group', string="Internal Group", readonly=True)
     account_root_id = fields.Many2one(related='account_id.root_id', string="Account Root", store=True, readonly=True)
@@ -3360,7 +3362,6 @@ class AccountMoveLine(models.Model):
                 continue
 
             line.name = line._get_computed_name()
-            line.account_id = line._get_computed_account()
             line.tax_ids = line._get_computed_taxes()
             line.product_uom_id = line._get_computed_uom()
             line.price_unit = line._get_computed_price_unit()
@@ -3477,6 +3478,49 @@ class AccountMoveLine(models.Model):
     def _compute_balance(self):
         for line in self:
             line.balance = line.debit - line.credit
+
+    @api.depends('product_id', 'tax_repartition_line_id')
+    def _compute_account_id(self):
+
+        def filter_deprecated_account(account):
+            ''' Helper to not suggest a deprecated account by default.
+            :param account: An account.account record or a falsy value.
+            :return:        An account.account record or a falsy value.
+            '''
+            if account and not account.deprecated:
+                return account
+            else:
+                return False
+
+        for line in self:
+            move = line.move_id
+            company = move.company_id or self.env.company
+
+            account = False
+
+            # Compute account_id from tax repartition line.
+            if line.tax_repartition_line_id.account_id:
+                account = line.tax_repartition_line_id.account_id
+
+            # Compute account_id from product.
+            if not account and line.product_id:
+                fiscal_position = move.fiscal_position_id
+
+                product_accounts = line.product_id.product_tmpl_id\
+                    .with_company(company)\
+                    .get_product_accounts(fiscal_pos=fiscal_position)
+                if move.is_sale_document(include_receipts=True):
+                    # Out invoice.
+                    account = filter_deprecated_account(product_accounts['income'] or line.account_id)
+                elif move.is_purchase_document(include_receipts=True):
+                    # In invoice.
+                    account = filter_deprecated_account(product_accounts['expense'] or line.account_id)
+
+            # Compute account_id from journal.
+            if not account and move.journal_id:
+                account = filter_deprecated_account(move.journal_id.default_account_id)
+
+            line.account_id = account or line.account_id
 
     @api.model
     def search_read(self, domain=None, fields=None, offset=0, limit=None, order=None):
@@ -3957,10 +4001,6 @@ class AccountMoveLine(models.Model):
                 if len(move.line_ids[-2:]) == 2 and  move.line_ids[-1].partner_id == move.line_ids[-2].partner_id != False:
                     values['partner_id'] = move.line_ids[-2:].mapped('partner_id').id
 
-            # Suggest default value for 'account_id'.
-            if 'account_id' in default_fields and not values.get('account_id'):
-                if len(move.line_ids[-2:]) == 2 and  move.line_ids[-1].account_id == move.line_ids[-2].account_id != False:
-                    values['account_id'] = move.line_ids[-2:].mapped('account_id').id
         if values.get('display_type') or self.display_type:
             values.pop('account_id', None)
         return values

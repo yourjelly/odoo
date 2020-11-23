@@ -314,3 +314,40 @@ class O2MChangesChildrenLines(models.Model):
     parent_id = fields.Many2one('o2m_changes_children')
     v = fields.Integer()
     vv = fields.Integer()
+
+
+class OnchangeCleanupModel1(models.Model):
+    _name = _description = 'onchange_cleanup_model_1'
+
+    a = fields.Integer()
+    b = fields.Integer(store=True, readonly=False, compute='_compute_b')
+
+    @api.depends('a')
+    def _compute_b(self):
+        for record in self:
+            record.b = record.a * 2
+
+
+class OnchangeCleanupModel2(models.Model):
+    _name = _description = 'onchange_cleanup_model_2'
+
+    line_ids = fields.One2many(comodel_name='onchange_cleanup_model_2.line', inverse_name='parent_id')
+
+    @api.onchange('line_ids')
+    def _onchange_line_ids(self):
+        for line in self.line_ids:
+            line.c += 5
+
+
+class OnchangeCleanupModel2Line(models.Model):
+    _name = _description = 'onchange_cleanup_model_2.line'
+
+    parent_id = fields.Many2one(comodel_name='onchange_cleanup_model_2')
+    a = fields.Integer()
+    b = fields.Integer(string="B", store=True, readonly=False, compute='_compute_b')
+    c = fields.Integer()
+
+    @api.depends('a')
+    def _compute_b(self):
+        for record in self:
+            record.b = record.a
