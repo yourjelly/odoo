@@ -1153,6 +1153,16 @@ class ChromeBrowser():
             self._websocket_wait_event('Page.frameStoppedLoading', params={'frameId': frame_id})
 
     def clear(self):
+        clear_service_workers = """
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(
+                (registrations) => {registrations.map(r => r.unregister())}
+            )
+        }
+        """
+        cl_id = self._websocket_send('Runtime.evaluate', params={'expression': clear_service_workers})
+        self._websocket_wait_id(cl_id)
+
         self._websocket_send('Page.stopScreencast')
         if self.screencasts_dir and os.path.isdir(self.screencasts_frames_dir):
             shutil.rmtree(self.screencasts_frames_dir)
