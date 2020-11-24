@@ -1164,6 +1164,15 @@ class ChromeBrowser():
         self._websocket_wait_id(dc_id)
         dc_id = self._websocket_send('Network.clearBrowserCookies')
         self._websocket_wait_id(dc_id)
+        clear_service_workers = """
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(
+                registrations => registrations.forEach(r => r.unregister())
+            )
+        }
+        """
+        cl_id = self._websocket_send('Runtime.evaluate', params={'expression': clear_service_workers, 'awaitPromise': True})
+        self._websocket_wait_id(cl_id)
         cl_id = self._websocket_send('Runtime.evaluate', params={'expression': 'localStorage.clear()'})
         self._websocket_wait_id(cl_id)
         self.navigate_to('about:blank', wait_stop=True)
