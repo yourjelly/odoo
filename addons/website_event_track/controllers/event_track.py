@@ -54,6 +54,9 @@ class EventTrackController(http.Controller):
         if not event.can_access_from_current_website():
             raise NotFound()
 
+        import time
+        time.sleep(1)
+
         return request.render(
             "website_event_track.tracks_session",
             self._event_tracks_get_values(event, tag=tag, **searches)
