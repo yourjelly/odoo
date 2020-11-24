@@ -125,7 +125,13 @@ var QtyAtDateWidget = Widget.extend({
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-    _onClickButton: function () {
+
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickButton: function (ev) {
+        ev.stopPropagation();
         // We add the property special click on the widget link.
         // This hack allows us to trigger the popover (see _setPopOver) without
         // triggering the _onRowClicked that opens the order line form view.
