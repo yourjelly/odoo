@@ -7,6 +7,7 @@ import {
   WarningDialog,
 } from "./error_dialogs";
 import { Type } from "../types";
+import { _lt } from "../core/localization";
 
 // -----------------------------------------------------------------------------
 // Custom Dialogs for CrashManagerService
