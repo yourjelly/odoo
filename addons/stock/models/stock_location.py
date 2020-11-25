@@ -6,6 +6,7 @@ from datetime import timedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.osv import expression
+from odoo.tools.float_utils import float_is_zero
 
 
 class Location(models.Model):
@@ -65,6 +66,7 @@ class Location(models.Model):
     cyclic_inventory_frequency = fields.Integer("Inventory Frequency (Days)", default=0, help=" When different than 0, inventory adjustments for products stored at this location will be created automatically at the defined frequency.")
     last_inventory_date = fields.Datetime("Last Effective Inventory", readonly=True, help="Date of the last inventory at this location.")
     next_inventory_date = fields.Date("Next Expected Inventory", compute="_compute_next_inventory_date", store=True, help="Date for next planned inventory based on cyclic schedule.")
+    storage_category_id = fields.Many2one('stock.storage.category', string='Storage Category')
 
     _sql_constraints = [('barcode_company_uniq', 'unique (barcode,company_id)', 'The barcode for a location must be unique per company !'),
                         ('inventory_freq_nonneg', 'check(cyclic_inventory_frequency >= 0)', 'The inventory frequency (days) for a location must be non-negative')]
@@ -156,23 +158,38 @@ class Location(models.Model):
             domain = ['|', ('barcode', operator, name), ('complete_name', operator, name)]
         return self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
 
-    def _get_putaway_strategy(self, product):
-        ''' Returns the location where the product has to be put, if any compliant putaway strategy is found. Otherwise returns None.'''
-        putaway_location = self.env['stock.location']
+    def _get_putaway_strategy(self, product, quantity=0, package=None):
+        """Returns the location where the product has to be put, if any compliant
+        putaway strategy is found. Otherwise returns self.
+        The quantity should be in the default UOM of the product, it is used when
+        no package is specified.
+        """
+        package_type = package and package.package_type_id or self.env['stock.package.type']
+
         # Looking for a putaway about the product.
-        putaway_rules = self.putaway_rule_ids.filtered(lambda x: x.product_id == product)
-        if putaway_rules:
-            putaway_location = putaway_rules[0].location_out_id
+        putaway_rules = self.putaway_rule_ids.filtered(lambda x: x.product_id == product and (package_type in x.package_type_ids or package_type == x.package_type_ids))
+        for putaway_rule in putaway_rules:
+            putaway_location = putaway_rule._get_putaway_location(product, quantity, package)
+            if putaway_location:
+                return putaway_location
         # If not product putaway found, we're looking with category so.
-        else:
-            categ = product.categ_id
-            while categ:
-                putaway_rules = self.putaway_rule_ids.filtered(lambda x: x.category_id == categ)
-                if putaway_rules:
-                    putaway_location = putaway_rules[0].location_out_id
-                    break
-                categ = categ.parent_id
-        return putaway_location
+        categ = product.categ_id
+        while categ:
+            putaway_rules = self.putaway_rule_ids.filtered(lambda x: x.category_id == categ and (package_type in x.package_type_ids or package_type == x.package_type_ids))
+            for putaway_rule in putaway_rules:
+                putaway_location = putaway_rule._get_putaway_location(product, quantity, package)
+                if putaway_location:
+                    return putaway_location
+            categ = categ.parent_id
+        # If not product category found and if package_type, looking putaway rules with only package_type
+        if package_type:
+            putaway_rules = self.putaway_rule_ids.filtered(lambda x: not x.product_id and (package_type in x.package_type_ids or package_type == x.package_type_ids))
+            for putaway_rule in putaway_rules:
+                putaway_location = putaway_rule._get_putaway_location(product, quantity, package)
+                if putaway_location:
+                    return putaway_location
+
+        return self
 
     @api.returns('stock.warehouse', lambda value: value.id)
     def get_warehouse(self):
@@ -183,6 +200,63 @@ class Location(models.Model):
     def should_bypass_reservation(self):
         self.ensure_one()
         return self.usage in ('supplier', 'customer', 'inventory', 'production') or self.scrap_location or (self.usage == 'transit' and not self.company_id)
+
+    def _check_can_be_used(self, product, quantity=0, package=None):
+        """Check if product/package can be stored in the location. Quantity
+        should in the default uom of product, it's only used when no package is
+        specified."""
+        self.ensure_one()
+        if package and package.package_type_id:
+            return self._check_package_storage(product, package=package)
+        return self._check_product_storage(product, quantity=quantity)
+
+    def _check_product_storage(self, product, quantity):
+        """Check if a number of product can be stored in the location. Quantity
+        should in the default uom of product."""
+        self.ensure_one()
+        if self.storage_category_id:
+            # check weight
+            if self.storage_category_id.max_weight < product.weight:
+                return False
+            # check if only allow new product when empty
+            if self.storage_category_id.allow_new_product == "empty" and any(not float_is_zero(q.quantity, precision_rounding=q.product_id.uom_id.rounding) for q in self.quant_ids):
+                return False
+            # check if only allow same product
+            if self.storage_category_id.allow_new_product == "same" and self.quant_ids and self.quant_ids.product_id != product:
+                return False
+            # check if enough space
+            product_capacity = self.storage_category_id.product_capacity_ids.filtered(lambda pc: pc.product_id == product)
+            if product_capacity:
+                product_qty = sum(self.quant_ids.filtered(lambda q: q.product_id == product).mapped('quantity'))
+                reserved_qty = sum(self.env['stock.move.line'].search([
+                    ('product_id', '=', product.id),
+                    ('location_dest_id', '=', self.id),
+                    ('state', 'not in', ['draft', 'done', 'cancel'])
+                ]).mapped('product_qty'))
+                if product_qty + reserved_qty + quantity > product_capacity.quantity:
+                    return False
+        return True
+
+    def _check_package_storage(self, product, package):
+        """Check if the given package can be stored in the location."""
+        self.ensure_one()
+        if self.storage_category_id:
+            # check weight
+            if self.storage_category_id.max_weight < package.package_type_id.max_weight:
+                return False
+            # check if only allow new product when empty
+            if self.storage_category_id.allow_new_product == "empty" and any(not float_is_zero(q.quantity, precision_rounding=q.product_id.uom_id.rounding) for q in self.quant_ids):
+                return False
+            # check if only allow same product
+            if self.storage_category_id.allow_new_product == "same" and self.quant_ids and self.quant_ids.product_id != product:
+                return False
+            # check if enough space
+            package_capacity = self.storage_category_id.package_capacity_ids.filtered(lambda pc: pc.package_type_id == package.package_type_id)
+            if package_capacity:
+                package_number = len(self.quant_ids.package_id.filtered(lambda q: q.package_type_id == package.package_type_id))
+                if package_number >= package_capacity.quantity:
+                    return False
+        return True
 
 
 class Route(models.Model):
