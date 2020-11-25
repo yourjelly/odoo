@@ -628,12 +628,12 @@ class Task(models.Model):
     is_closed = fields.Boolean(related="stage_id.is_closed", string="Closing Stage", readonly=True, related_sudo=False)
     parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
     child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
+    # FIXME migration : not allowed to delete field : subtask_project_id
+    subtask_project_id = fields.Many2one('project.project', related="project_id.subtask_project_id", string='Sub-task Project', readonly=True)
     allow_subtasks = fields.Boolean(string="Allow Sub-tasks", related="project_id.allow_subtasks", readonly=True)
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count')
     email_from = fields.Char(string='Email From', help="These people will receive email.", index=True,
         compute='_compute_email_from', store="True", readonly=False)
-    # FIXME migration : not allowed to delete field : subtask_project_id
-    subtask_project_id = fields.Many2one('project.project', related="project_id.subtask_project_id", string='Sub-task Project', readonly=True)
     allowed_user_ids = fields.Many2many('res.users', string="Visible to", groups='project.group_project_manager', compute='_compute_allowed_user_ids', store=True, readonly=False, copy=False)
     project_privacy_visibility = fields.Selection(related='project_id.privacy_visibility', string="Project Visibility")
     # Computed field about working time elapsed between record creation and assignation/closing.
@@ -1106,6 +1106,7 @@ class Task(models.Model):
         for task in tasks:
             if task.project_id.privacy_visibility == 'portal':
                 task._portal_ensure_token()
+            task._init_subtask_sort()
         return tasks
 
     def write(self, vals):

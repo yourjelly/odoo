@@ -636,11 +636,6 @@
                     </div>
                     <sheet string="Task">
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_subtask" type="object" class="oe_stat_button" icon="fa-tasks"
-                            attrs="{'invisible' : ['|', ('allow_subtasks', '=', False), ('id', '=', False)]}"
-                            context="{'default_user_id': user_id, 'default_parent_id': id, 'search_default_hide_subtask': False}">
-                            <field string="Sub-tasks" name="subtask_count" widget="statinfo"/>
-                        </button>
                         <button name="%(rating_rating_action_task)d" type="action" attrs="{'invisible': [('rating_count', '=', 0)]}" class="oe_stat_button" icon="fa-smile-o" groups="project.group_project_rating">
                             <field name="rating_count" string="Rating" widget="statinfo"/>
                         </button>
@@ -949,6 +944,7 @@
                     <field name="kanban_state" widget="state_selection" optional="hide" readonly="1"/>
                     <field name="stage_id" invisible="context.get('set_visible',False)" optional="show" readonly="1"/>
                     <field name="recurrence_id" invisible="1" />
+                    <field name="child_ids" widget="one2many"/>
                 </tree>
             </field>
         </record>

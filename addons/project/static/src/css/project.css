@@ -88,3 +88,11 @@
     width: 96%;
     float: left;
 }
+
+.o_tree_project_sub_task_hide {
+  visibility: collapse;
+}
+
+.o_task_unfold {
+  color: #008784; /* FIXME : C'est de la merde */
+}
