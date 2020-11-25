@@ -11,43 +11,86 @@ function capitalize(s: string | undefined): string {
 }
 
 interface ErrorDialogProps {
-  error: {
-    message?: string;
-    data?: {
-      debug?: string;
-    };
-    subType?: string;
-    traceback?: string;
-    type: "server" | "script";
-  };
+  name?: string;
+  message?: string;
+  traceback?: string;
 }
 
 export class ErrorDialog extends Component<ErrorDialogProps, OdooEnv> {
   static template = "wowl.ErrorDialog";
   static components = { Dialog };
-  title: string;
-  traceback: string;
+  title = _lt("Odoo Error");
+
+  state = useState({
+    showTraceback: false,
+  });
+
+  onClickClipboard() {
+    this.env.browser.navigator.clipboard.writeText(
+      `${this.props.name}\n${this.props.message}\n${this.props.traceback}`
+    );
+  }
+}
+
+export class ClientErrorDialog extends ErrorDialog {
+  title = _lt("Odoo Client Error");
+}
+
+export class ServerErrorDialog extends ErrorDialog {
+  title = _lt("Odoo Server Error");
+}
+
+export class NetworkErrorDialog extends ErrorDialog {
+  title = _lt("Odoo Network Error");
+}
+
+interface RPCErrorDialogProps {
+  name: string;
+  message?: string;
+  data?: {
+    [key: string]: any;
+  };
+  subType?: string;
+  traceback?: string;
+  type: "server" | "script" | "network";
+}
+
+export class RPCErrorDialog extends Component<RPCErrorDialogProps, OdooEnv> {
+  static template = "wowl.ErrorDialog";
+  static components = { Dialog };
+  title = _lt("Odoo Error");
+  traceback?: string;
+
   state = useState({
     showTraceback: false,
   });
 
   constructor() {
     super(...arguments);
-    const { data, message, subType, traceback, type } = this.props.error;
-    if (type === "server") {
-      this.title = capitalize(subType) || this.env._t("Odoo Error");
-    } else {
-      this.title = this.env._t("Odoo Client Error");
+
+    switch (this.props.type) {
+      case "server":
+        this.title = this.env._t("Odoo Server Error");
+        break;
+      case "script":
+        this.title = this.env._t("Odoo Client Error");
+        break;
+      case "network":
+        this.title = this.env._t("Odoo Network Error");
+        break;
     }
-    if (data) {
-      this.traceback = `${message}\n${data.debug || ""}`;
-    } else {
-      this.traceback = traceback || "";
+
+    this.traceback = this.props.traceback;
+
+    if (this.props.data && this.props.data.debug) {
+      this.traceback = `${this.props.data.debug}`;
     }
   }
 
   onClickClipboard() {
-    this.env.browser.navigator.clipboard.writeText(`${this.traceback}`);
+    this.env.browser.navigator.clipboard.writeText(
+      `${this.props.name}\n${this.props.message}\n${this.traceback}`
+    );
   }
 }
 
@@ -60,13 +103,11 @@ const odooExceptionTitleMap = {
 };
 
 interface WarningDialogProps {
-  error: {
-    name: keyof typeof odooExceptionTitleMap;
-    data?: {
-      arguments?: [string, ...any[]];
-    };
-    message: string;
+  exceptionName: keyof typeof odooExceptionTitleMap;
+  data?: {
+    arguments?: [string, ...any[]];
   };
+  message: string;
 }
 
 export class WarningDialog extends Component<WarningDialogProps, OdooEnv> {
@@ -77,8 +118,8 @@ export class WarningDialog extends Component<WarningDialogProps, OdooEnv> {
 
   constructor() {
     super(...arguments);
-    const { data, message, name } = this.props.error;
-    this.title = odooExceptionTitleMap[name].toString();
+    const { data, message, exceptionName } = this.props;
+    this.title = odooExceptionTitleMap[exceptionName].toString();
     if (data && data.arguments && data.arguments.length > 0) {
       this.message = data.arguments[0];
     } else {
@@ -88,11 +129,9 @@ export class WarningDialog extends Component<WarningDialogProps, OdooEnv> {
 }
 
 interface RedirectWarningDialogProps {
-  error: {
-    subType?: string;
-    data: {
-      arguments: [string, ActionRequest, string, Object | undefined, ...any[]];
-    };
+  subType?: string;
+  data: {
+    arguments: [string, ActionRequest, string, Object | undefined, ...any[]];
   };
 }
 
@@ -108,7 +147,7 @@ export class RedirectWarningDialog extends Component<RedirectWarningDialogProps,
 
   constructor() {
     super(...arguments);
-    const { data, subType } = this.props.error;
+    const { data, subType } = this.props;
     const [message, actionId, buttonText, additional_context] = data.arguments;
     this.title = capitalize(subType) || this.env._t("Odoo Warning");
     this.message = message;

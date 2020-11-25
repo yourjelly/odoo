@@ -7,9 +7,11 @@ import {
   RedirectWarningDialog,
   SessionExpiredDialog,
   WarningDialog,
+  ClientErrorDialog,
 } from "../../src/components/error_dialogs/error_dialogs";
 import { Registry } from "../../src/core/registry";
 import { OdooBrowser, Service } from "../../src/types";
+import { OdooError } from "../../src/services/crash_manager";
 
 let target: HTMLElement;
 let env: OdooEnv;
@@ -28,16 +30,96 @@ QUnit.module("Error dialogs", {
   },
 });
 
-QUnit.test("ErrorDialog", async (assert) => {
-  assert.expect(9);
+QUnit.test("ErrorDialog without traceback", async (assert) => {
+  assert.expect(8);
   class Parent extends Component {
     static components = { ErrorDialog };
-    static template = tags.xml`<ErrorDialog error="error"/>`;
-    error = {
-      message: "Something bad happened",
-      data: { debug: "Some strange unreadable stack" },
-    };
+    static template = tags.xml`<ErrorDialog name="name" message="message" data="data"/>`;
+    message = "Something bad happened";
+    data = { debug: "Some strange unreadable stack" };
+    name = "ERROR_NAME";
   }
+  assert.containsNone(target, ".o_dialog");
+  parent = await mount(Parent, { env, target });
+  assert.containsOnce(target, "div.o_dialog_container .o_dialog");
+  assert.strictEqual(target.querySelector("header .modal-title")?.textContent, "Odoo Error");
+  const mainButtons = target.querySelectorAll("main button");
+  assert.deepEqual(
+    [...mainButtons].map((el) => el.textContent),
+    ["Copy the full error to clipboard"]
+  );
+  assert.deepEqual(
+    [...target.querySelectorAll("main .clearfix p")].map((el) => el.textContent),
+    [
+      "An error occurred",
+      "Please use the copy button to report the error to your support service.",
+      "Something bad happened", // from the gray box
+    ]
+  );
+
+  assert.deepEqual(
+    [...target.querySelectorAll("main .clearfix code")].map((el) => el.textContent),
+    ["ERROR_NAME"]
+  );
+
+  assert.containsNone(target, "div.o_error_detail");
+  assert.strictEqual(target.querySelector(".o_dialog footer button")?.textContent, "Ok");
+});
+
+QUnit.test("ErrorDialog with traceback", async (assert) => {
+  assert.expect(10);
+  class Parent extends Component {
+    static components = { ErrorDialog };
+    static template = tags.xml`<ErrorDialog traceback="traceback" name="name" message="message" data="data"/>`;
+    message = "Something bad happened";
+    data = { debug: "Some strange unreadable stack" };
+    name = "ERROR_NAME";
+    traceback = "This is a tracback string";
+  }
+
+  assert.containsNone(target, ".o_dialog");
+  parent = await mount(Parent, { env, target });
+  assert.containsOnce(target, "div.o_dialog_container .o_dialog");
+  assert.strictEqual(target.querySelector("header .modal-title")?.textContent, "Odoo Error");
+  const mainButtons = target.querySelectorAll("main button");
+  assert.deepEqual(
+    [...mainButtons].map((el) => el.textContent),
+    ["Copy the full error to clipboard", "See details"]
+  );
+  assert.deepEqual(
+    [...target.querySelectorAll("main .clearfix p")].map((el) => el.textContent),
+    [
+      "An error occurred",
+      "Please use the copy button to report the error to your support service.",
+      "Something bad happened", // from the gray box
+    ]
+  );
+  assert.deepEqual(
+    [...target.querySelectorAll("main .clearfix code")].map((el) => el.textContent),
+    ["ERROR_NAME"]
+  );
+  assert.containsNone(target, "div.o_error_detail");
+  assert.strictEqual(target.querySelector(".o_dialog footer button")?.textContent, "Ok");
+  click(mainButtons[1] as HTMLElement);
+  await nextTick();
+  assert.containsOnce(target, "div.o_error_detail");
+  assert.strictEqual(
+    target.querySelector("div.o_error_detail")?.textContent,
+    "This is a tracback string"
+  );
+});
+
+QUnit.test("Client error dialog with traceback", async (assert) => {
+  assert.expect(10);
+  class Parent extends Component {
+    static components = { ClientErrorDialog };
+    static template = tags.xml`<ClientErrorDialog traceback="traceback" name="name" message="message" data="data"/>`;
+    message = "Something bad happened";
+    data = { debug: "Some strange unreadable stack" };
+    name = "ERROR_NAME";
+    traceback = "This is a tracback string";
+  }
+
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
   assert.containsOnce(target, "div.o_dialog_container .o_dialog");
@@ -49,7 +131,15 @@ QUnit.test("ErrorDialog", async (assert) => {
   );
   assert.deepEqual(
     [...target.querySelectorAll("main .clearfix p")].map((el) => el.textContent),
-    ["An error occurred", "Please use the copy button to report the error to your support service."]
+    [
+      "An error occurred",
+      "Please use the copy button to report the error to your support service.",
+      "Something bad happened", // from the gray box
+    ]
+  );
+  assert.deepEqual(
+    [...target.querySelectorAll("main .clearfix code")].map((el) => el.textContent),
+    ["ERROR_NAME"]
   );
   assert.containsNone(target, "div.o_error_detail");
   assert.strictEqual(target.querySelector(".o_dialog footer button")?.textContent, "Ok");
@@ -58,46 +148,21 @@ QUnit.test("ErrorDialog", async (assert) => {
   assert.containsOnce(target, "div.o_error_detail");
   assert.strictEqual(
     target.querySelector("div.o_error_detail")?.textContent,
-    "Something bad happened\nSome strange unreadable stack"
-  );
-});
-
-QUnit.test("ErrorDialog type script with traceback", async (assert) => {
-  assert.expect(5);
-  const error = {
-    type: "script",
-    traceback: "Something bad happened\nSome strange unreadable stack",
-  };
-  class Parent extends Component {
-    static components = { ErrorDialog };
-    static template = tags.xml`<ErrorDialog error="error"/>`;
-    error = error;
-  }
-  assert.containsNone(target, ".o_dialog");
-  parent = await mount(Parent, { env, target });
-  const mainButtons = target.querySelectorAll("main button");
-  assert.containsNone(target, "div.o_error_detail");
-  assert.strictEqual(target.querySelector(".o_dialog footer button")?.textContent, "Ok");
-  click(mainButtons[1] as HTMLElement);
-  await nextTick();
-  assert.containsOnce(target, "div.o_error_detail");
-  assert.strictEqual(
-    target.querySelector("div.o_error_detail")?.textContent,
-    "Something bad happened\nSome strange unreadable stack"
+    "This is a tracback string"
   );
 });
 
 QUnit.test("button clipboard copy error traceback", async (assert) => {
   assert.expect(1);
-  const error = {
-    message: "Something bad happened",
-    data: { debug: "Some strange unreadable stack" },
-  };
+  const error = new OdooError("ERROR_NAME");
+  error.message = "This is the message";
+  error.traceback = "This is a traceback";
+
   const browser = {
     navigator: {
       clipboard: {
         writeText: (value) => {
-          assert.strictEqual(value, `${error.message}\n${error.data.debug}`);
+          assert.strictEqual(value, `${error.name}\n${error.message}\n${error.traceback}`);
         },
       },
     },
@@ -105,8 +170,10 @@ QUnit.test("button clipboard copy error traceback", async (assert) => {
   env = await makeTestEnv({ browser });
   class Parent extends Component {
     static components = { ErrorDialog };
-    static template = tags.xml`<ErrorDialog error="error"/>`;
-    error = error;
+    static template = tags.xml`<ErrorDialog traceback="traceback" name="name" message="message" data="data"/>`;
+    message = error.message;
+    name = "ERROR_NAME";
+    traceback = "This is a traceback";
   }
   parent = await mount(Parent, { env, target });
   const clipboardButton = target.querySelector(".fa-clipboard");
@@ -118,12 +185,10 @@ QUnit.test("WarningDialog", async (assert) => {
   assert.expect(5);
   class Parent extends Component {
     static components = { WarningDialog };
-    static template = tags.xml`<WarningDialog error="error"/>`;
-    error = {
-      name: "odoo.exceptions.UserError",
-      message: "...",
-      data: { arguments: ["Some strange unreadable message"] },
-    };
+    static template = tags.xml`<WarningDialog exceptionName="name" message="message" data="data"/>`;
+    name = "odoo.exceptions.UserError";
+    message = "...";
+    data = { arguments: ["Some strange unreadable message"] };
   }
   assert.containsNone(target, ".o_dialog");
   parent = await mount(Parent, { env, target });
@@ -137,11 +202,9 @@ QUnit.test("RedirectWarningDialog", async (assert) => {
   assert.expect(8);
   class Parent extends Component {
     static components = { RedirectWarningDialog };
-    static template = tags.xml`<RedirectWarningDialog error="error" t-on-dialog-closed="onDialogClosed"/>`;
-    error = {
-      data: {
-        arguments: ["Some strange unreadable message", "buy_action_id", "Buy book on cryptography"],
-      },
+    static template = tags.xml`<RedirectWarningDialog data="data" t-on-dialog-closed="onDialogClosed"/>`;
+    data = {
+      arguments: ["Some strange unreadable message", "buy_action_id", "Buy book on cryptography"],
     };
     onDialogClosed() {
       assert.step("dialog-closed");

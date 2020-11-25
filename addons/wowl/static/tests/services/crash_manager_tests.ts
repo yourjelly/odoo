@@ -5,9 +5,9 @@ import { Service, Type } from "../../src/types";
 import { crashManagerService } from "../../src/services/crash_manager";
 import { DialogManagerService } from "../../src/services/dialog_manager";
 import { Component, tags } from "@odoo/owl";
-import { ErrorDialog } from "../../src/components/error_dialogs/error_dialogs";
 import { RPCError } from "../../src/services/rpc";
 import { Dialog } from "../../src/components/dialog/dialog";
+import { ErrorDialog } from "../../src/components/error_dialogs/error_dialogs";
 
 function makeFakeDialogManagerService(
   open: (dialogClass: Type<Component>, props?: object) => void
@@ -37,30 +37,43 @@ QUnit.test("does not handle RPC_ERROR with type='network'", async (assert) => {
   }
   services.add("dialog_manager", makeFakeDialogManagerService(open));
   env = await makeTestEnv({ services });
-  env.bus.trigger("RPC_ERROR", {
-    type: "network",
-  });
+  const error = new RPCError();
+  error.type = "network";
+  error.mute = true;
+  env.bus.trigger("ERROR_DISPATCH", error);
   assert.verifySteps([]);
 });
 
 QUnit.test("handle RPC_ERROR of type='server' and no associated dialog class", async (assert) => {
   assert.expect(2);
-  const error: RPCError = {
-    type: "server",
-    code: 701,
-    message: "Some strange error occured",
-    data: {
-      debug: "somewhere",
-    },
-    subType: "strange_error",
-  };
+
+  const error = new RPCError();
+  error.code = 701;
+  error.message = "Some strange error occured";
+  (error.data = {
+    debug: "somewhere",
+  }),
+    (error.subType = "strange_error");
+
   function open(dialogClass: Type<Component>, props?: object) {
     assert.strictEqual(dialogClass, ErrorDialog);
-    assert.deepEqual(props, { error });
+    assert.deepEqual(props, {
+      name: "RPC_ERROR",
+      type: "server",
+      code: 701,
+      data: {
+        debug: "somewhere",
+      },
+      subType: "strange_error",
+      message: "Some strange error occured",
+      exceptionName: undefined,
+      mute: false,
+      traceback: error.stack,
+    });
   }
   services.add("dialog_manager", makeFakeDialogManagerService(open));
   env = await makeTestEnv({ services });
-  env.bus.trigger("RPC_ERROR", error);
+  env.bus.trigger("ERROR_DISPATCH", error);
 });
 
 QUnit.test(
@@ -71,19 +84,29 @@ QUnit.test(
       static template = tags.xml`<Dialog title="'Strange Error'"/>`;
       static components = { Dialog };
     }
-    const error: RPCError = {
-      type: "server",
-      code: 701,
-      message: "Some strange error occured",
-      name: "strange_error",
-    };
+
+    const error = new RPCError();
+    error.code = 701;
+    error.message = "Some strange error occured";
+    error.alternativeComponent = CustomDialog;
+
     function open(dialogClass: Type<Component>, props?: object) {
       assert.strictEqual(dialogClass, CustomDialog);
-      assert.deepEqual(props, { error });
+      assert.deepEqual(props, {
+        name: "RPC_ERROR",
+        type: "server",
+        code: 701,
+        data: undefined,
+        subType: undefined,
+        message: "Some strange error occured",
+        exceptionName: undefined,
+        mute: false,
+        traceback: error.stack,
+      });
     }
     services.add("dialog_manager", makeFakeDialogManagerService(open));
     env = await makeTestEnv({ services });
     env.registries.errorDialogs.add("strange_error", CustomDialog);
-    env.bus.trigger("RPC_ERROR", error);
+    env.bus.trigger("ERROR_DISPATCH", error);
   }
 );

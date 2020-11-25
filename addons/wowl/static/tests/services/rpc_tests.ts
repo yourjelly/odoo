@@ -68,8 +68,8 @@ QUnit.test("can perform a simple rpc", async (assert) => {
   assert.deepEqual(result, { action_id: 123 });
 });
 
-QUnit.test("trigger an error on bus when response has 'error' key", async (assert) => {
-  assert.expect(2);
+QUnit.test("trigger an error when response has 'error' key", async (assert) => {
+  assert.expect(1);
   const error = {
     message: "message",
     code: 12,
@@ -85,22 +85,9 @@ QUnit.test("trigger an error on bus when response has 'error' key", async (asser
     browser: { XMLHttpRequest: MockXHR },
   });
 
-  env.bus.on("RPC_ERROR", null, (payload) => {
-    assert.deepEqual(payload, {
-      code: 12,
-      message: "message",
-      type: "server",
-      data: {
-        debug: "data_debug",
-        message: "data_message",
-      },
-      name: undefined,
-      subType: undefined,
-    });
-  });
   try {
     await env.services.rpc("/test/");
-  } catch (e) {
+  } catch (error) {
     assert.ok(true);
   }
 });
