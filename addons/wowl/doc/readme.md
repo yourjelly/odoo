@@ -19,3 +19,4 @@
 - [Services](services/readme.md)
 - [Systray](systray.md)
 - [Various components](components/readme.md)
+- [Crash managers and errors](crash_manager_and_errors.md)
