@@ -35,7 +35,7 @@ class IrUiMenu(models.Model):
             'children': children,
             'actionModel': action[0] if action else False,
             'actionID': int(action[1]) if action else False,
-            'xmlid': menu_data['xmlid']
+            'xmlid': menu_data.get('xmlid', '')
         }
         accumulator[menuID] = menu
         return accumulator, menu
