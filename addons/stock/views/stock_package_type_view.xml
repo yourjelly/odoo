@@ -30,6 +30,16 @@
                         <field name="barcode"/>
                     </group>
                 </group>
+                <group>
+                    <group>
+                        <field name="storage_category_capacity_ids" context="{'default_package_type_id': id}" groups="stock.group_stock_multi_locations">
+                            <tree editable="bottom">
+                                <field name="storage_category_id"/>
+                                <field name="quantity"/>
+                            </tree>
+                        </field>
+                    </group>
+                </group>
             </sheet>
         </form>
     </field>

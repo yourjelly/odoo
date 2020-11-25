@@ -62,12 +62,15 @@ class StockPutawayRule(models.Model):
         default=_default_location_id, required=True, ondelete='cascade')
     location_out_id = fields.Many2one(
         'stock.location', 'Store to', check_company=True,
-        domain="[('id', 'child_of', location_in_id), ('id', '!=', location_in_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
+        domain="[('id', 'child_of', location_in_id), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
         required=True, ondelete='cascade')
     sequence = fields.Integer('Priority', help="Give to the more specialized category, a higher priority to have them in top of the list.")
     company_id = fields.Many2one(
         'res.company', 'Company', required=True,
         default=lambda s: s.env.company.id, index=True)
+    package_type_ids = fields.Many2many('stock.package.type', string='Package Type', check_company=True)
+    storage_category_id = fields.Many2one('stock.storage.category', 'Storage Category', ondelete='cascade', check_company=True)
+    active = fields.Boolean('Active', default=True)
 
     @api.onchange('location_in_id')
     def _onchange_location_in(self):
@@ -86,3 +89,32 @@ class StockPutawayRule(models.Model):
                 if rule.company_id.id != vals['company_id']:
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
         return super(StockPutawayRule, self).write(vals)
+
+    def _get_putaway_location(self, product, quantity=0, package=None):
+        """When using storage category, we try to find a suitable child location
+        as the putaway location. We first try find if a location already have the
+        product stored. If not or no enough space, use the storage category to
+        find one.
+        """
+        self.ensure_one()
+        package_type = package and package.package_type_id or None
+        if not self.storage_category_id:
+            if self.location_out_id._check_can_be_used(product, quantity, package):
+                return self.location_out_id
+
+        child_locations = self.env['stock.location'].search([('id', 'child_of', self.location_out_id.id), ('usage', '=', 'internal')])
+
+        # check if already have the product stored
+        for location in child_locations:
+            if package_type:
+                if location.quant_ids.filtered(lambda q: q.product_id == product and q.package_id and q.package_id.package_type_id == package_type) and location._check_can_be_used(product, package=package):
+                    return location
+            elif location.quant_ids.filtered(lambda q: q.product_id == product) and location._check_can_be_used(product, quantity=quantity):
+                return location
+
+        # check locations with matched storage category
+        for location in child_locations.filtered(lambda l: l.storage_category_id == self.storage_category_id):
+            if location._check_can_be_used(product, quantity, package):
+                return location
+
+        return None
