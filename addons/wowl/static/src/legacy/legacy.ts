@@ -97,6 +97,17 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
     _trigger_up(ev: any) {
       const payload = ev.data;
       if (ev.name === "do_action") {
+        const actionContext = payload.action.context;
+
+        // The context needs to be evaluated if it comes from the legacy compound context class.
+        if (
+          typeof actionContext == "object" &&
+          actionContext.__ref &&
+          actionContext.__ref === "compound_context"
+        ) {
+          payload.action.context = actionContext.eval();
+        }
+
         this.am.doAction(payload.action);
       } else if (ev.name === "breadcrumb_clicked") {
         this.am.restore(payload.controllerID);
