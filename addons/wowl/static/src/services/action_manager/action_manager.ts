@@ -329,9 +329,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
-   * @param {View} view
+   * @param {BaseView} view
    * @param {ActWindowAction} action
-   * @param {View[]} views
+   * @param {BaseView[]} views
    * @returns {ViewProps}
    */
   function _getViewProps(
@@ -572,7 +572,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       if (lazyView) {
         lazyController = {
           jsId: `controller_${++id}`,
-          Component: lazyView.Component,
+          Component: lazyView,
           action,
           view: lazyView,
           views,
@@ -589,7 +589,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
     const controller: ViewController = {
       jsId: `controller_${++id}`,
-      Component: view.Component,
+      Component: view,
       action,
       view,
       views,
@@ -897,7 +897,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
     const newController = controller.action.controllers[viewType] || {
       jsId: `controller_${++id}`,
-      Component: view.Component,
+      Component: view,
       action: controller.action,
       views: controller.views,
       view,
