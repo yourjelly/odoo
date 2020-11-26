@@ -5,7 +5,6 @@ import {
   ViewProps,
   Context,
   Service,
-  View,
   ViewId,
   ViewType,
 } from "../types";
@@ -259,6 +258,10 @@ odoo.define("wowl.legacyViews", async function (require: any) {
         <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams" widget="widget" t-ref="controller"/>
       `;
       static components = { ViewAdapter };
+      static display_name = LegacyView.prototype.display_name;
+      static icon = LegacyView.prototype.icon;
+      static multiRecord = LegacyView.prototype.multi_record;
+      static type = LegacyView.prototype.viewType;
 
       vm = useService("view_manager");
       controllerRef = hooks.useRef("controller");
@@ -326,16 +329,9 @@ odoo.define("wowl.legacyViews", async function (require: any) {
       }
     }
 
-    const view: View = {
-      name: LegacyView.prototype.display_name,
-      icon: LegacyView.prototype.icon,
-      multiRecord: LegacyView.prototype.multi_record,
-      type: LegacyView.prototype.viewType,
-      Component: Controller as any,
-      Renderer: Component,
-    };
-
-    viewRegistry.add(name, view);
+    if (!viewRegistry.contains(name)) {
+      viewRegistry.add(name, Controller);
+    }
   }
   // register views already in the legacy registry, and listens to future registrations
   for (const [name, action] of Object.entries(legacyViewRegistry.entries())) {

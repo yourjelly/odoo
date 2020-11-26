@@ -18,7 +18,7 @@ import { rpcService } from "./services/rpc";
 import { uiService } from "./services/ui/ui";
 import { userService } from "./services/user";
 import { viewManagerService } from "./services/view_manager";
-import { ComponentAction, FunctionAction, Service, SystrayItem, Type, View } from "./types";
+import { ComponentAction, FunctionAction, Service, SystrayItem, Type } from "./types";
 // import { FormView } from "./views/form_view";
 // import { GraphView } from "./views/graph_view";
 // import { KanbanView } from "./views/kanban_view";
@@ -95,7 +95,7 @@ actionRegistry.add("display_notification", displayNotificationAction);
 
 // const views: View[] = [FormView, GraphView, KanbanView, ListView, PivotView];
 
-export const viewRegistry: Registry<View> = new Registry();
+export { viewRegistry } from "./views/view_registry";
 
 // for (let view of views) {
 //   viewRegistry.add(view.name, view);
