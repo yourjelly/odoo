@@ -21,8 +21,9 @@ Odoo Web core module written in Owl.
     ],
     'assets': {
         'owl_qweb': [
-            'static/src/components/dialog/dialog.xml',
             'static/src/components/**/*',
+            'static/src/action_manager/**/*',
+            'static/src/debug_manager/**/*',
             'static/src/notifications/**/*',
             'static/src/webclient/**/*',
             'static/src/crash_manager/**/*',
@@ -31,6 +32,8 @@ Odoo Web core module written in Owl.
         'style': [
             'static/src/utils/**/*',
             'static/src/components/**/*',
+            'static/src/action_manager/**/*',
+            'static/src/debug_manager/**/*',
             'static/src/notifications/**/*',
             'static/src/webclient/**/*',
             'static/src/views/**/*',
