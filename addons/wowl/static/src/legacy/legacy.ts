@@ -5,8 +5,8 @@ import { useSetupAction } from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
 import { viewRegistry } from "../views/view_registry";
 import { Context } from "../core/context";
-import { useDebugManager } from "../components/debug_manager/debug_manager";
-import { DebuggingAccessRights, editModelDebug } from "../services/debug_manager";
+import { useDebugManager } from "../debug_manager/debug_manager";
+import { DebuggingAccessRights, editModelDebug } from "../debug_manager/debug_manager_service";
 import { ActWindowAction, ClientAction } from "../action_manager/action_manager";
 
 

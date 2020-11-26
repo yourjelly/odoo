@@ -1,4 +1,4 @@
-import { Dialog } from "../dialog/dialog";
+import { Dialog } from "../components/dialog/dialog";
 import { DebugManager } from "../debug_manager/debug_manager";
 
 // -----------------------------------------------------------------------------
