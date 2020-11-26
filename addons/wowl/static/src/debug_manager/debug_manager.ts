@@ -1,10 +1,10 @@
 import { Component, hooks } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
-import { MenuElement, MenuItemEventPayload, OdooEnv, SystrayItem } from "../../types";
-import { Dropdown } from "../dropdown/dropdown";
-import { DropdownItem } from "../dropdown/dropdown_item";
-import { useService } from "../../core/hooks";
-import { DebuggingAccessRights } from "../../services/debug_manager";
+import { MenuElement, MenuItemEventPayload, OdooEnv, SystrayItem } from "../types";
+import { Dropdown } from "../components/dropdown/dropdown";
+import { DropdownItem } from "../components/dropdown/dropdown_item";
+import { useService } from "../core/hooks";
+import { DebuggingAccessRights } from "./debug_manager_service";
 
 export class DebugManager extends Component<{}, OdooEnv> {
   static debugElementsId: number = 1;
