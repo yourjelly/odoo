@@ -1,28 +1,21 @@
-import { Component, tags } from "@odoo/owl";
-import { OdooEnv, RendererProps, View } from "../types";
-import { AbstractController } from "./abstract_controller";
+import { BaseView } from "./base_view";
 
-const { xml } = tags;
+// const { xml } = tags;
 
-class GraphRenderer extends Component<RendererProps, OdooEnv> {
-  static template = xml`
-      <div class="o_graph_renderer">
-        <h2>Graph view</h2>
+// class GraphRenderer extends Component<RendererProps, OdooEnv> {
+//   static template = xml`
+//       <div class="o_graph_renderer">
+//         <h2>Graph view</h2>
 
-        <span><t t-esc="props.arch"/></span>
-      </div>
-    `;
+//         <span><t t-esc="props.arch"/></span>
+//       </div>
+//     `;
+// }
+
+export class GraphView extends BaseView {
+  // static components = { ...View.components, Renderer: GraphRenderer };
+  static display_name = "graph";
+  static icon = "fa-bar-chart";
+  static multiRecord = true;
+  static type = "graph";
 }
-
-class GraphController extends AbstractController {
-  static components = { ...AbstractController.components, Renderer: GraphRenderer };
-}
-
-export const GraphView: View = {
-  name: "graph",
-  icon: "fa-bar-chart",
-  multiRecord: true,
-  type: "graph",
-  Component: GraphController,
-  Renderer: GraphRenderer,
-};

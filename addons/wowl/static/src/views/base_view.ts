@@ -1,40 +1,31 @@
 import { Component } from "@odoo/owl";
-import { OdooEnv, RendererProps, ViewProps, ViewType } from "../types";
 import { useService } from "../core/hooks";
-import type { ViewDefinition } from "./../services/view_manager";
 import { ActionRequest } from "../services/action_manager/action_manager";
+import { ViewDefinition } from "../services/view_manager";
+import { OdooEnv, ViewProps, ViewType } from "../types";
 
-export interface ControlPanelSubTemplates {
-  topLeft: string | null;
-  topRight: string | null;
-  bottomLeft: string | null;
-  bottomRight: string | null;
+export interface SubTemplates {
+  cpTopLeft: string | null;
+  cpTopRight: string | null;
+  cpBottomLeft: string | null;
+  cpBottomRight: string | null;
+  main: string | null;
 }
 
-export class AbstractController extends Component<ViewProps, OdooEnv> {
-  static template = "wowl.AbstractController";
-  static props = {
-    // TODO
-  };
-
-  cpSubTemplates: ControlPanelSubTemplates = {
-    topLeft: "wowl.Views.ControlPanelTopLeft",
-    topRight: null,
-    bottomLeft: null,
-    bottomRight: "wowl.Views.ControlPanelBottomRight",
+export class BaseView extends Component<ViewProps, OdooEnv> {
+  static template = "wowl.BaseView";
+  templates: SubTemplates = {
+    cpTopLeft: "wowl.Views.ControlPanelTopLeft",
+    cpTopRight: null,
+    cpBottomLeft: null,
+    cpBottomRight: "wowl.Views.ControlPanelBottomRight",
+    main: null,
   };
 
   vm = useService("view_manager");
   am = useService("action_manager");
-  viewDescription: ViewDefinition = {} as any;
 
-  get rendererProps(): RendererProps {
-    return {
-      arch: (this.viewDescription as ViewDefinition).arch,
-      model: this.props.model,
-      fields: (this.viewDescription as ViewDefinition).fields,
-    };
-  }
+  viewDescription: ViewDefinition = {} as any;
 
   async willStart() {
     const params = {
@@ -73,6 +64,7 @@ export class AbstractController extends Component<ViewProps, OdooEnv> {
   _onExecuteAction(action: ActionRequest) {
     this.am.doAction(action);
   }
+
   _onOpenFormView() {
     if (this.props.type !== "form") {
       this.am.switchView("form");

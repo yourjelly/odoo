@@ -35,15 +35,15 @@
 
     <!-- Views -->
 
-    <t t-name="wowl.AbstractController" owl="1">
+    <t t-name="wowl.BaseView" owl="1">
          <div>
-            <t t-call="wowl.ControlPanel">
-                <t t-set="topLeft" t-value="cpSubTemplates.topLeft"/>
-                <t t-set="topRight" t-value="cpSubTemplates.topRight"/>
-                <t t-set="bottomLeft" t-value="cpSubTemplates.bottomLeft"/>
-                <t t-set="bottomRight" t-value="cpSubTemplates.bottomRight"/>
+            <t t-call="wowl.ControlPanel" t-debug="" >
+                <t t-set="topLeft" t-value="templates.cpTopLeft"/>
+                <t t-set="topRight" t-value="templates.cpTopRight"/>
+                <t t-set="bottomLeft" t-value="templates.cpBottomLeft"/>
+                <t t-set="bottomRight" t-value="templates.cpBbottomRight"/>
             </t>
-            <Renderer t-props="rendererProps"/>
+            <t t-if="templates.main" t-call="{{templates.main}}" />
         </div>
     </t>
 

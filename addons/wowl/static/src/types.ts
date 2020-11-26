@@ -17,7 +17,6 @@ import type { uiService } from "./services/ui/ui";
 import type { userService } from "./services/user";
 import type { viewManagerService } from "./services/view_manager";
 import { Breadcrumb } from "./services/action_manager/action_manager";
-import { AbstractController } from "./views/abstract_controller";
 import { UserMenuItemFactory } from "./components/user_menu/user_menu";
 
 interface CacheHashes {
@@ -203,31 +202,14 @@ export interface ClientActionProps extends ActionProps {
 
 export type ControllerProps = ActionProps | ViewProps | ClientActionProps;
 
-export interface RendererProps {
-  arch: string; // ViewDefinition['arch'];
-  model: string;
-  fields: any;
-}
-export interface FormRendererProps extends RendererProps {
-  mode: "edit" | "readonly";
-  record: any;
-}
-export interface ListRendererProps extends RendererProps {
-  fieldNames: string[];
-  records: any[];
-}
-export interface KanbanRendererProps extends RendererProps {
-  records: any[];
-}
-
-export interface View {
+interface ViewInfo {
   name: string;
   icon: string;
   multiRecord: boolean;
   type: ViewType;
-  Component: Type<AbstractController>;
-  Renderer?: Type<Component<RendererProps, OdooEnv>>;
 }
+
+export type View = Type<Component<ViewProps, OdooEnv>> & ViewInfo;
 
 export interface SystrayItem {
   name: string;
