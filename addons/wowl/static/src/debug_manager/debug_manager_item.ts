@@ -1,7 +1,7 @@
-import { MenuElement, MenuElementFactory, Odoo, OdooEnv } from "../../types";
-import { routeToUrl } from "../../services/router";
-import { Registry } from "../../core/registry";
-import { DomainListRepr as Domain } from "./core/domain";
+import { MenuElement, MenuElementFactory, Odoo, OdooEnv } from "../types";
+import { routeToUrl } from "../services/router";
+import { Registry } from "../core/registry";
+import { DomainListRepr as Domain } from "../core/domain";
 
 declare const odoo: Odoo;
 
@@ -53,9 +53,9 @@ export function openViewItem(env: OdooEnv): MenuElement {
       // New Dialog with tree view inside
       // select_view
       // TODO Need to be fix
-      // Change main title dialog
       // Error when we select a record
       // Not the good button
+      // disable_multiple_selection don't work
       env.services.action_manager.doAction({
         type: "ir.actions.act_window",
         res_model: "ir.ui.view",

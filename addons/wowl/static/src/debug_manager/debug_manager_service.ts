@@ -1,5 +1,5 @@
 import { OdooEnv, Service } from "../types";
-import { debugManager } from "../components/debug_manager/debug_manager";
+import { debugManager } from "./debug_manager";
 
 export function editModelDebug(
   env: OdooEnv,
