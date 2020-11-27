@@ -44,7 +44,7 @@ class FleetVehicleLogContract(models.Model):
         help='Choose whether the contract is still valid or not',
         tracking=True,
         copy=False)
-    notes = fields.Text('Terms and Conditions', help='Write here all supplementary information relative to this contract', copy=False)
+    notes = fields.Html('Terms and Conditions', help='Write here all supplementary information relative to this contract', copy=False)
     cost_generated = fields.Monetary('Recurring Cost')
     cost_frequency = fields.Selection([
         ('no', 'No'),
@@ -144,7 +144,7 @@ class FleetVehicleLogServices(models.Model):
     purchaser_id = fields.Many2one('res.partner', string="Driver", compute='_compute_purchaser_id', readonly=False, store=True)
     inv_ref = fields.Char('Vendor Reference')
     vendor_id = fields.Many2one('res.partner', 'Vendor')
-    notes = fields.Text()
+    notes = fields.Html()
     service_type_id = fields.Many2one(
         'fleet.service.type', 'Service Type', required=True,
         default=lambda self: self.env.ref('fleet.type_service_service_8', raise_if_not_found=False),
