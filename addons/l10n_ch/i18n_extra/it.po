@@ -18,12 +18,12 @@ msgstr ""
 #. module: l10n_ch
 #: model:ir.actions.report,print_report_name:l10n_ch.l10n_ch_isr_report
 msgid "'ISR-%s' % object.name"
-msgstr ""
+msgstr "'ISR-%s' % object.name"
 
 #. module: l10n_ch
 #: model:ir.actions.report,print_report_name:l10n_ch.l10n_ch_qr_report
 msgid "'QR-bill-%s' % object.name"
-msgstr ""
+msgstr "'QR-bill-%s' % object.name"
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_other_movements_910
@@ -38,7 +38,7 @@ msgstr "0% escl."
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_O_import
 msgid "0% import."
-msgstr ""
+msgstr "0% import."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_other_movements_900
@@ -46,9 +46,14 @@ msgid "0% subventions"
 msgstr "0% sovvenzioni"
 
 #. module: l10n_ch
+#: model:account.tax.template,name:l10n_ch.vat_100_import
+msgid "Dédouanement TVA (biens et services)"
+msgstr "Liquidazione IVA al 100%"
+
+#. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_100_import
 msgid "100% imp."
-msgstr ""
+msgstr "100% imp."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_100_import_invest
@@ -212,7 +217,7 @@ msgstr "381a Imposte sulle acquisizioni"
 #: model:account.tax.report.line,name:l10n_ch.account_tax_report_line_chtax_381b
 #: model:account.tax.report.line,tag_name:l10n_ch.account_tax_report_line_chtax_381b
 msgid "381b Impots sur les acquisitions "
-msgstr "381b Imposte sulle acquisizioni"
+msgstr "381b Imposte sulle acquisizioni "
 
 #. module: l10n_ch
 #: model:account.tax.report.line,name:l10n_ch.account_tax_report_line_chtax_382a
@@ -224,12 +229,12 @@ msgstr "382a Imposte sulle acquisizioni"
 #: model:account.tax.report.line,name:l10n_ch.account_tax_report_line_chtax_382b
 #: model:account.tax.report.line,tag_name:l10n_ch.account_tax_report_line_chtax_382b
 msgid "382b Impots sur les acquisitions "
-msgstr "382b Imposte sulle acquisizioni"
+msgstr "382b Imposte sulle acquisizioni "
 
 #. module: l10n_ch
 #: model:account.tax.report.line,name:l10n_ch.account_tax_report_line_chtax_399
 msgid "399 TVA Due "
-msgstr "399 IVA dovuta"
+msgstr "399 IVA dovuta "
 
 #. module: l10n_ch
 #: model:account.tax.report.line,name:l10n_ch.account_tax_report_line_chtax_400
@@ -323,11 +328,6 @@ msgstr "900 Sovvenzioni, tasse di soggiorno"
 #: model:account.tax.report.line,tag_name:l10n_ch.account_tax_report_line_chtax_910
 msgid "910 Les dons, les dividendes, les dédommagements, ..."
 msgstr "910 Donazioni, dividendi, compensi, ..."
-
-#. module: l10n_ch
-#: model_terms:ir.ui.view,arch_db:l10n_ch.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">ISR scan line offset</span>"
-msgstr ""
 
 #. module: l10n_ch
 #: model_terms:ir.ui.view,arch_db:l10n_ch.l10n_ch_swissqr_template
@@ -731,6 +731,11 @@ msgid "Client Number"
 msgstr "Numero Cliente"
 
 #. module: l10n_ch
+#: model:account.cash.rounding,name:l10n_ch.cash_rounding_5_centime
+msgid "Coinage 0.05"
+msgstr "Monete 0,05"
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_3803
 msgid "Commissions de tiers"
 msgstr "Commissioni di terzi"
@@ -864,11 +869,6 @@ msgstr "Crediti (Punti Vendita)"
 #: model:account.account.template,name:l10n_ch.ch_coa_2201
 msgid "Décompte TVA"
 msgstr "IVA, rendiconto"
-
-#. module: l10n_ch
-#: model:account.tax.template,name:l10n_ch.vat_100_import
-msgid "Dédouanement TVA (biens et services)"
-msgstr "Liquidazione IVA al 100%"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_100_import_invest
@@ -1180,6 +1180,7 @@ msgid "Leasing immobilisations corporelles meubles"
 msgstr "Leasing di immobilizzazioni materiali mobiliari"
 
 #. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.l10nch_chart_template_liquidity_transfer
 msgid "Liquidity Transfer"
 msgstr "Trasferimento di liquidità"
 

@@ -325,11 +325,6 @@ msgid "910 Les dons, les dividendes, les dédommagements, ..."
 msgstr ""
 
 #. module: l10n_ch
-#: model_terms:ir.ui.view,arch_db:l10n_ch.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">ISR scan line offset</span>"
-msgstr ""
-
-#. module: l10n_ch
 #: model_terms:ir.ui.view,arch_db:l10n_ch.l10n_ch_swissqr_template
 msgid "<span class=\"title\">Acceptance point</span>"
 msgstr ""
@@ -714,6 +709,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_ch.field_account_bank_statement_import_journal_creation__l10n_ch_postal
 #: model:ir.model.fields,field_description:l10n_ch.field_account_journal__l10n_ch_postal
 msgid "Client Number"
+msgstr ""
+
+#. module: l10n_ch
+#: model:account.cash.rounding,name:l10n_ch.cash_rounding_5_centime
+msgid "Coinage 0.05"
 msgstr ""
 
 #. module: l10n_ch
@@ -1160,6 +1160,7 @@ msgid "Leasing immobilisations corporelles meubles"
 msgstr ""
 
 #. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.l10nch_chart_template_liquidity_transfer
 msgid "Liquidity Transfer"
 msgstr ""
 

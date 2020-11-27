@@ -46,6 +46,11 @@ msgid "0% subventions"
 msgstr "0% Subv."
 
 #. module: l10n_ch
+#: model:account.tax.template,name:l10n_ch.vat_100_import
+msgid "Dédouanement TVA (biens et services)"
+msgstr "100% Verzollung MwSt."
+
+#. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_100_import
 msgid "100% imp."
 msgstr "100% Imp."
@@ -340,11 +345,6 @@ msgstr ""
 #: model:account.tax.report.line,tag_name:l10n_ch.account_tax_report_line_chtax_910
 msgid "910 Les dons, les dividendes, les dédommagements, ..."
 msgstr "910 Spenden, Dividenden, Schadenersatz usw. (Bst. D-l)"
-
-#. module: l10n_ch
-#: model_terms:ir.ui.view,arch_db:l10n_ch.res_config_settings_view_form
-msgid "<span class=\"o_form_label\">ISR scan line offset</span>"
-msgstr ""
 
 #. module: l10n_ch
 #: model_terms:ir.ui.view,arch_db:l10n_ch.l10n_ch_swissqr_template
@@ -737,6 +737,11 @@ msgid "Client Number"
 msgstr ""
 
 #. module: l10n_ch
+#: model:account.cash.rounding,name:l10n_ch.cash_rounding_5_centime
+msgid "Coinage 0.05"
+msgstr ""
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_3803
 msgid "Commissions de tiers"
 msgstr "Provisionen an Dritte"
@@ -870,11 +875,6 @@ msgstr "Forderungen (PoS)"
 #: model:account.account.template,name:l10n_ch.ch_coa_2201
 msgid "Décompte TVA"
 msgstr "Abrechnungskonto MWST"
-
-#. module: l10n_ch
-#: model:account.tax.template,name:l10n_ch.vat_100_import
-msgid "Dédouanement TVA (biens et services)"
-msgstr "100% Verzollung MwSt."
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_100_import_invest
@@ -1180,6 +1180,7 @@ msgid "Leasing immobilisations corporelles meubles"
 msgstr "Leasingaufwand mobile Sachanlagen"
 
 #. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.l10nch_chart_template_liquidity_transfer
 msgid "Liquidity Transfer"
 msgstr ""
 
