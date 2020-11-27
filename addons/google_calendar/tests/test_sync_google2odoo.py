@@ -21,7 +21,7 @@ class TestSyncGoogle2Odoo(TransactionCase):
     def test_new_google_event(self):
         values = {
             'id': 'oj44nep1ldf8a3ll02uip0c9aa',
-            'description': 'Small mini desc',
+            'description': '<p>Small mini desc</p>',
             'organizer': {'email': 'odoocalendarref@gmail.com', 'self': True},
             'summary': 'Pricing new update',
             'visibility': 'public',
