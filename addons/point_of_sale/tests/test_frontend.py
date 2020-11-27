@@ -468,6 +468,7 @@ class TestPointOfSaleHttpCommon(odoo.tests.HttpCase):
             "property_product_pricelist",
             "res.partner",
             public_pricelist,
+            main_company,
         )
 
 
