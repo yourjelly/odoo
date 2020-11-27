@@ -133,7 +133,7 @@ class AccountMove(models.Model):
         default=fields.Date.context_today
     )
     ref = fields.Char(string='Reference', copy=False, tracking=True)
-    narration = fields.Text(string='Terms and Conditions')
+    narration = fields.Html(string='Terms and Conditions')
     state = fields.Selection(selection=[
             ('draft', 'Draft'),
             ('posted', 'Posted'),
