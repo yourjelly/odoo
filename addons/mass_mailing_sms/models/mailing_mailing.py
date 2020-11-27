@@ -89,6 +89,7 @@ class Mailing(models.Model):
 
     @api.model
     def create(self, values):
+
         # Get subject from "sms_subject" field when SMS installed (used to build the name of record in the super 'create' method)
         if values.get('mailing_type') == 'sms' and values.get('sms_subject'):
             values['subject'] = values['sms_subject']
