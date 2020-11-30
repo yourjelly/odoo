@@ -148,7 +148,7 @@
                                 </div>
                                 <div class="o_kanban_record_bottom">
                                     <ul>
-                                        <li t-esc="record.description.value" class="text-muted"/>
+                                        <t t-raw="record.description.raw_value"/>
                                     </ul>
                                 </div>
                             </div>
@@ -192,7 +192,7 @@
                                 </div>
                                 <div class="o_kanban_record_bottom">
                                     <ul>
-                                        <li t-esc="record.description.value" class="text-muted"/>
+                                        <t t-raw="record.description.raw_value"/>
                                     </ul>
                                 </div>
                             </div>
