@@ -142,7 +142,7 @@ class Channel(models.Model):
     # description
     name = fields.Char('Name', translate=True, required=True)
     active = fields.Boolean(default=True, tracking=100)
-    description = fields.Text('Description', translate=True, help="The description that is displayed on top of the course page, just below the title")
+    description = fields.Html('Description', translate=True, help="The description that is displayed on top of the course page, just below the title")
     description_short = fields.Text('Short Description', translate=True, help="The description that is displayed on the course card")
     description_html = fields.Html('Detailed Description', translate=tools.html_translate, sanitize_attributes=False, sanitize_form=False)
     channel_type = fields.Selection([
