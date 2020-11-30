@@ -925,6 +925,11 @@
                     &.o_field_boolean {
                         margin-right: 0;
                     }
+
+                    &.o_field_number {
+                        // multiline inside readonly
+                        margin-right: $o-horizontal-padding;
+                    }
                 }
 
                 .o_input_dropdown {

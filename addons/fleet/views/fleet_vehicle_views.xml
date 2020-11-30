@@ -64,7 +64,7 @@
                             <field name="vehicle_type" invisible="1"/>
                             <field name="driver_id" domain="['|', ('company_id', '=', False ), ('company_id', '=', company_id)]"/>
                             <label for="future_driver_id"/>
-                            <div class="o_row">
+                            <div class="o_row flex-wrap justify-content-end">
                                 <field name="future_driver_id"/>
                                 <button string="Apply Change"
                                     class="btn btn-primary"
