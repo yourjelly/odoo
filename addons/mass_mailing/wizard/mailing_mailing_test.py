@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models, tools
+from odoo import _, fields, models, tools
 
 
 class TestMassMailing(models.TransientModel):
@@ -48,10 +48,19 @@ class TestMassMailing(models.TransientModel):
                 'notification': True,
                 'mailing_id': mailing.id,
                 'attachment_ids': [(4, attachment.id) for attachment in mailing.attachment_ids],
-                'auto_delete': True,
+                # 'auto_delete': True,
                 'mail_server_id': mailing.mail_server_id.id,
             }
             mail = self.env['mail.mail'].sudo().create(mail_values)
             mails_sudo |= mail
         mails_sudo.send()
+
+        if len(mails_sudo) == 1:
+            if mails_sudo.state == 'exception':
+                self.mass_mailing_id._message_log(
+                    body=_('Test e-mail could not be send, error:<br>%s', mails_sudo.failure_reason))
+            elif mails_sudo.state == 'sent':
+                self.mass_mailing_id._message_log(
+                    body=_('Test e-mail successfully sent to:<br>%s', mails_sudo.email_to))
+
         return True
