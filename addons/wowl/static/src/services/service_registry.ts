@@ -13,6 +13,7 @@ import { uiService } from "./ui/ui";
 import { userService } from "./user";
 import { viewManagerService } from "./view_manager";
 import { Service } from "../types";
+import { debugManagerService } from "../debug_manager/debug_manager_service";
 
 export const serviceRegistry: Registry<Service<any>> = new Registry();
 
@@ -30,6 +31,7 @@ const services = [
   uiService,
   userService,
   viewManagerService,
+  debugManagerService,
 ];
 
 for (let service of services) {

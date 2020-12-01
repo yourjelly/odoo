@@ -31,11 +31,11 @@ interface DebugManagerService {
 
 export const debugManagerService: Service<DebugManagerService> = {
   name: "debug_manager",
-  dependencies: ["rpc"],
+  dependencies: ["model"],
   async deploy(env: OdooEnv): Promise<DebugManagerService> {
     let accessRightsProm: Promise<DebuggingAccessRights> | undefined;
     if (env.debug !== "") {
-      env.registries.systray.add("wowl.debug_mode_menu", debugManager);
+      odoo.systrayRegistry.add("wowl.debug_mode_menu", debugManager);
     }
 
     return {
@@ -51,7 +51,6 @@ export const debugManagerService: Service<DebugManagerService> = {
               .model("ir.ui.view")
               .call("check_access_rights", [], { operation: "write", raise_exception: false })
               .then((result) => (accessRights.canEditView = result));
-
             const canSeeRecordRules = env.services
               .model("ir.rule")
               .call("check_access_rights", [], { operation: "read", raise_exception: false })
@@ -60,6 +59,7 @@ export const debugManagerService: Service<DebugManagerService> = {
               .model("ir.model.access")
               .call("check_access_rights", [], { operation: "read", raise_exception: false })
               .then((result) => (accessRights.canSeeModelAccess = result));
+
             Promise.all([canEditView, canSeeRecordRules, canSeeModelAccess])
               .then(() => resolve(accessRights))
               .catch((error) => {

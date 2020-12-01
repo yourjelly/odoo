@@ -49,7 +49,7 @@ export class NavBar extends Component<{}, OdooEnv> {
   }
 
   get systrayItems() {
-    return this.env.registries.systray.getAll().sort((x, y) => {
+    return odoo.systrayRegistry.getAll().sort((x, y) => {
       const xSeq = x.sequence ? x.sequence : 50;
       const ySeq = y.sequence ? y.sequence : 50;
       return ySeq - xSeq;

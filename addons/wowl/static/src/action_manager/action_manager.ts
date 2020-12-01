@@ -17,7 +17,7 @@ import { DomainListRepr as Domain } from "../core/domain";
 import { Route } from "../services/router";
 import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
-import { DialogAction }  from "./dialog_action";
+import { DialogAction } from "./dialog_action";
 
 // -----------------------------------------------------------------------------
 // Types
