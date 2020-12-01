@@ -1,10 +1,19 @@
 import { Component, hooks } from "@odoo/owl";
 import { OwlEvent } from "@odoo/owl/dist/types/core/owl_event";
-import { MenuElement, MenuItemEventPayload, OdooEnv, SystrayItem } from "../types";
+import { MenuElement, MenuItemEventPayload, OdooEnv } from "../types";
 import { Dropdown } from "../components/dropdown/dropdown";
 import { DropdownItem } from "../components/dropdown/dropdown_item";
 import { useService } from "../core/hooks";
 import { DebuggingAccessRights } from "./debug_manager_service";
+import { SystrayItem } from "../webclient/systray_registry";
+
+type DebugManagerElementsFactory = (accessRights: DebuggingAccessRights) => MenuElement[];
+
+interface useDebugManagerPayload {
+  elementsId: number;
+  elementsFactory: DebugManagerElementsFactory;
+  inDialog?: true;
+}
 
 export class DebugManager extends Component<{}, OdooEnv> {
   static debugElementsId: number = 1;
@@ -40,28 +49,38 @@ export class DebugManager extends Component<{}, OdooEnv> {
     });
 
     if (!this.isInDialog) {
-      this.debugFactories["global"] = (accessRights) =>
-        this.env.registries.debugManager.getAll().map((el) => el(this.env));
+      this.debugFactories["global"] = () =>
+        odoo.debugManagerRegistry.getAll().map((elFactory) => elFactory(this.env));
     }
   }
   get isInDialog(): true | undefined {
     return (this.env as any).inDialog;
   }
 
-  getItems(): MenuElement[] {
-    const sortedItems = Object.values(this.debugFactories)
-      .map((factory: DebugManagerElementsFactory) => factory(this.accessRights!))
-      .reduce((acc: MenuElement[], elements: MenuElement[]) => acc.concat(elements))
-      .sort((x: MenuElement, y: MenuElement) => {
-        const xSeq = x.sequence ? x.sequence : 1000;
-        const ySeq = y.sequence ? y.sequence : 1000;
-        return xSeq - ySeq;
-      });
-    return sortedItems;
+  getElements(): MenuElement[] {
+    if (Object.keys(this.debugFactories).length > 0) {
+      const sortedElements = Object.values(this.debugFactories)
+        .map((factory: DebugManagerElementsFactory) => factory(this.accessRights!))
+        .reduce((acc: MenuElement[], elements: MenuElement[]) => acc.concat(elements))
+        .sort((x: MenuElement, y: MenuElement) => {
+          const xSeq = x.sequence ? x.sequence : 1000;
+          const ySeq = y.sequence ? y.sequence : 1000;
+          return xSeq - ySeq;
+        });
+      return sortedElements;
+    } else {
+      return [];
+    }
   }
 
   onDropdownItemSelected(ev: OwlEvent<MenuItemEventPayload>) {
     ev.detail.payload.callback();
+  }
+
+  onClickOnTagA(ev: MouseEvent) {
+    if (!ev.ctrlKey) {
+      ev.preventDefault();
+    }
   }
 }
 
@@ -70,14 +89,6 @@ export const debugManager: SystrayItem = {
   Component: DebugManager,
   sequence: 100,
 };
-
-type DebugManagerElementsFactory = (accessRights: DebuggingAccessRights) => MenuElement[];
-
-interface useDebugManagerPayload {
-  elementsId: number;
-  elementsFactory: DebugManagerElementsFactory;
-  inDialog?: true;
-}
 
 export function useDebugManager(elementsFactory: DebugManagerElementsFactory): void {
   const elementsId = DebugManager.debugElementsId++;

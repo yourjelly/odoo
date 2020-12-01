@@ -2,6 +2,7 @@ import * as owl from "@odoo/owl";
 import { actionRegistry } from "./action_manager/action_registry";
 import { fetchLocalization } from "./core/localization";
 import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
+import { debugManagerRegistry } from "./debug_manager/debug_manager_registry";
 // remove some day
 import "./demo_data";
 import { makeEnv, makeRAMLocalStorage } from "./env";
@@ -46,6 +47,7 @@ const { whenReady, loadFile } = owl.utils;
   odoo.systrayRegistry = systrayRegistry;
   odoo.errorDialogRegistry = errorDialogRegistry;
   odoo.serviceRegistry = serviceRegistry;
+  odoo.debugManagerRegistry = debugManagerRegistry;
 
   // load templates and localization
   let [templates, { localization, _t }] = await Promise.all([loadTemplates(), fetchLocalization()]);

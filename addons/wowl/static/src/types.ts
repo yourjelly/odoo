@@ -5,7 +5,7 @@ import { EventBus } from "@odoo/owl/dist/types/core/event_bus";
 import type { actionManagerService } from "./action_manager/action_manager";
 import { Breadcrumb } from "./action_manager/action_manager";
 import { actionRegistry } from "./action_manager/action_registry";
-import { debugManagerRegistry } from "./components/debug_manager_item/debug_manager_item";
+import { debugManagerRegistry } from "./debug_manager/debug_manager_registry";
 import { Context } from "./core/context";
 import { DomainListRepr as Domain } from "./core/domain";
 import { Localization } from "./core/localization";
@@ -26,6 +26,7 @@ import { viewRegistry } from "./views/view_registry";
 import { mainComponentRegistry } from "./webclient/main_component_registry";
 import type { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
+import { debugManagerService } from "./debug_manager/debug_manager_service";
 
 export interface Registries {
   mainComponentRegistry: typeof mainComponentRegistry;
@@ -150,6 +151,7 @@ export interface Services {
   ui: ServiceType<typeof uiService["deploy"]>;
   user: ServiceType<typeof userService["deploy"]>;
   view_manager: ServiceType<typeof viewManagerService["deploy"]>;
+  debug_manager: ServiceType<typeof debugManagerService["deploy"]>;
 
   [key: string]: any;
 }

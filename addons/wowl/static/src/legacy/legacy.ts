@@ -1,5 +1,14 @@
 import { Component, hooks, tags } from "@odoo/owl";
-import { ClientActionProps, OdooEnv, ViewProps, Service, ViewId, ViewType, MenuElement } from "../types";
+import {
+  ClientActionProps,
+  OdooEnv,
+  ViewProps,
+  Service,
+  ViewId,
+  ViewType,
+  MenuElement,
+  Type,
+} from "../types";
 import { useService } from "../core/hooks";
 import { useSetupAction } from "../action_manager/action_manager";
 import { actionRegistry } from "../action_manager/action_registry";
@@ -8,7 +17,10 @@ import { Context } from "../core/context";
 import { useDebugManager } from "../debug_manager/debug_manager";
 import { DebuggingAccessRights, editModelDebug } from "../debug_manager/debug_manager_service";
 import { ActWindowAction, ClientAction } from "../action_manager/action_manager";
-
+import { Dialog } from "../components/dialog/dialog";
+import { json_node_to_xml } from "../utils/utils";
+import { formatDateTime, formatMany2one, parseDateTime } from "../utils/fields_utils";
+const { useState } = hooks;
 
 declare const odoo: any;
 
@@ -164,7 +176,7 @@ odoo.define("wowl.ActionAdapters", function (require: any) {
           setupDebugViewForm(envWowl, this, this.props.viewParams.action)
         );
       }
-      this.env = Component.env;
+      this.env = <OdooEnv>Component.env;
     }
     async willStart() {
       if (this.props.widget) {
@@ -381,8 +393,6 @@ export function setupDebugAction(
     type: "item",
     description: description,
     callback: () => {
-      console.log("Edit Action");
-      // edit in debug_manager_backend
       editModelDebug(env, description, action.type, action.id as number);
     },
     sequence: 110,
@@ -393,7 +403,6 @@ export function setupDebugAction(
     type: "item",
     description: description,
     callback: async () => {
-      console.log("View Fields");
       const modelId = (
         await env.services
           .model("ir.model")
@@ -443,13 +452,11 @@ export function setupDebugAction(
   const technicalTranslation: MenuElement = {
     type: "item",
     description: env._t("Technical Translation"),
-    callback: () => {
-      console.log("Technical Translation");
-      //translate
-      env.services
+    callback: async () => {
+      const result = await env.services
         .model("ir.translation")
-        .call("get_technical_translations", [action.res_model])
-        .then(env.services.action_manager.doAction);
+        .call("get_technical_translations", [action.res_model]);
+      env.services.action_manager.doAction(result);
     },
     sequence: 140,
   };
@@ -464,8 +471,6 @@ export function setupDebugAction(
     type: "item",
     description: description,
     callback: async () => {
-      console.log("View Access Rights");
-      //actionModelAccess
       const modelId = (
         await env.services
           .model("ir.model")
@@ -494,8 +499,6 @@ export function setupDebugAction(
     type: "item",
     description: env._t("View Record Rules"),
     callback: async () => {
-      console.log("View Record Rules");
-      //actionRecordRules
       const modelId = (
         await env.services
           .model("ir.model")
@@ -549,6 +552,220 @@ interface ActWindowActionAdapted extends Omit<ActWindowAction, "views"> {
   }[];
 }
 
+class FieldViewGetDialog extends Component<{}, OdooEnv> {
+  static template = tags.xml`
+  <Dialog title="title">
+    <pre t-esc="props.arch"/>
+  </Dialog>`;
+  static components = { Dialog };
+  title = this.env._t("Fields View Get");
+}
+
+interface GetMetadataProps {
+  res_model: string;
+  selectedIds: number[];
+}
+interface GetMetadataState {
+  create_date: string;
+  creator: string;
+  noupdate: any;
+  lastModifiedBy: string;
+  id: number;
+  write_date: string;
+  xmlid: string;
+}
+class GetMetadataDialog extends Component<GetMetadataProps, OdooEnv> {
+  static template = "wowl.DebugManager.GetMetadata";
+  static components = { Dialog };
+  title = this.env._t("View Metadata");
+  state = useState({} as GetMetadataState);
+
+  constructor(...args: any[]) {
+    super(...args);
+  }
+
+  async willStart() {
+    await this.getMetadata();
+  }
+
+  async toggleNoupdate() {
+    await this.env.services
+      .model("ir.model.data")
+      .call("toggle_noupdate", [this.props.res_model, this.state.id]);
+    await this.getMetadata();
+  }
+
+  async getMetadata() {
+    const metadata = (
+      await this.env.services
+        .model(this.props.res_model)
+        .call("get_metadata", [this.props.selectedIds])
+    )[0];
+
+    this.state.id = metadata.id;
+    this.state.xmlid = metadata.xmlid;
+    this.state.creator = formatMany2one(metadata.create_uid);
+    this.state.lastModifiedBy = formatMany2one(metadata.write_uid);
+    this.state.create_date = formatDateTime(
+      parseDateTime(metadata.create_date, this.env),
+      this.env
+    );
+    this.state.write_date = formatDateTime(parseDateTime(metadata.write_date, this.env), this.env);
+    this.state.noupdate = metadata.noupdate;
+  }
+}
+
+interface SetDefaultProps {
+  component: ComponentAdapter;
+  res_model: string;
+}
+class SetDefaultDialog extends Component<SetDefaultProps, OdooEnv> {
+  static template = "wowl.DebugManager.SetDefault";
+  static components = { Dialog };
+  title = this.env._t("Set Default");
+  state = {
+    fieldToSet: "",
+    condition: "",
+    scope: "self",
+  };
+  dataWidgetState = this.getDataWidgetState();
+  defaultFields = this.getDefaultFields();
+  conditions = this.getConditions();
+
+  getDataWidgetState() {
+    const renderer = this.props.component.widget.renderer;
+    const state = renderer.state;
+    const fields = state.fields;
+    const fieldsInfo = state.fieldsInfo.form;
+    const fieldNamesInView = state.getFieldNames();
+    const fieldNamesOnlyOnView: string[] = ["message_attachment_count"];
+    const fieldsValues = state.data;
+    const modifierDatas: {
+      [id: string]: any;
+    } = {};
+    fieldNamesInView.forEach((fieldName: string) => {
+      modifierDatas[fieldName] = renderer.allModifiersData.find((modifierdata: any) => {
+        return modifierdata.node.attrs.name === fieldName;
+      });
+    });
+    return {
+      fields,
+      fieldsInfo,
+      fieldNamesInView,
+      fieldNamesOnlyOnView,
+      fieldsValues,
+      modifierDatas,
+      stateId: state.id,
+    };
+  }
+
+  getDefaultFields() {
+    const {
+      fields,
+      fieldsInfo,
+      fieldNamesInView,
+      fieldNamesOnlyOnView,
+      fieldsValues,
+      modifierDatas,
+      stateId,
+    } = this.dataWidgetState;
+
+    return fieldNamesInView
+      .filter((fieldName: string) => !fieldNamesOnlyOnView.includes(fieldName))
+      .map((fieldName: string) => {
+        const modifierData = modifierDatas[fieldName];
+        let invisibleOrReadOnly;
+        if (modifierData) {
+          const evaluatedModifiers = modifierData.evaluatedModifiers[stateId];
+          invisibleOrReadOnly = evaluatedModifiers.invisible || evaluatedModifiers.readonly;
+        }
+        const fieldInfo = fields[fieldName];
+        const valueDisplayed = this.display(fieldInfo, fieldsValues[fieldName]);
+        const value = valueDisplayed[0];
+        const displayed = valueDisplayed[1];
+        // ignore fields which are empty, invisible, readonly, o2m
+        // or m2m
+        if (
+          !value ||
+          invisibleOrReadOnly ||
+          fieldInfo.type === "one2many" ||
+          fieldInfo.type === "many2many" ||
+          fieldInfo.type === "binary" ||
+          fieldsInfo[fieldName].options.isPassword ||
+          fieldInfo.depends.length !== 0
+        ) {
+          return false;
+        }
+        return {
+          name: fieldName,
+          string: fieldInfo.string,
+          value: value,
+          displayed: displayed,
+        };
+      })
+      .filter((val: any) => val)
+      .sort((field: any) => field.string);
+  }
+
+  getConditions() {
+    const { fields, fieldNamesInView, fieldsValues } = this.dataWidgetState;
+
+    return fieldNamesInView
+      .filter((fieldName: any) => {
+        const fieldInfo = fields[fieldName];
+        return fieldInfo.change_default;
+      })
+      .map((fieldName: any) => {
+        const fieldInfo = fields[fieldName];
+        const valueDisplayed = this.display(fieldInfo, fieldsValues[fieldName]);
+        const value = valueDisplayed[0];
+        const displayed = valueDisplayed[1];
+        return {
+          name: fieldName,
+          string: fieldInfo.string,
+          value: value,
+          displayed: displayed,
+        };
+      });
+  }
+
+  display(fieldInfo: any, value: any) {
+    let displayed = value;
+    if (value && fieldInfo.type === "many2one") {
+      displayed = value.data.display_name;
+      value = value.data.id;
+    } else if (value && fieldInfo.type === "selection") {
+      displayed = fieldInfo.selection.find((option: any) => {
+        return option[0] === value;
+      })[1];
+    }
+    return [value, displayed];
+  }
+
+  async saveDefault() {
+    if (!this.state.fieldToSet) {
+      // TODO $defaults.parent().addClass('o_form_invalid');
+      // It doesn't work in web.
+      // Good solution: Create a FormView
+      return;
+    }
+    const fieldToSet = this.defaultFields.find((field: any) => {
+      return field.name === this.state.fieldToSet;
+    }).value;
+    await this.env.services
+      .model("ir.default")
+      .call("set", [
+        this.props.res_model,
+        this.state.fieldToSet,
+        fieldToSet,
+        this.state.scope === "self",
+        true,
+        this.state.condition || false,
+      ]);
+    this.trigger("dialog-closed");
+  }
+}
+
 export function setupDebugView(
   accessRights: DebuggingAccessRights,
   env: OdooEnv,
@@ -566,9 +783,10 @@ export function setupDebugView(
     type: "item",
     description: env._t("Fields View Get"),
     callback: () => {
-      console.log("Fields View Get");
-      // fvg
-      // Need Arch
+      const props = {
+        arch: json_node_to_xml(env, component.widget.renderer.arch, true, 0),
+      };
+      env.services.dialog_manager.open(FieldViewGetDialog, props);
     },
     sequence: 340,
   };
@@ -581,8 +799,6 @@ export function setupDebugView(
     type: "item",
     description: description,
     callback: () => {
-      console.log("Edit View:");
-      // edit
       editModelDebug(env, description, "ir.ui.view", viewId);
     },
     sequence: 350,
@@ -593,7 +809,6 @@ export function setupDebugView(
     type: "item",
     description: description,
     callback: () => {
-      console.log("Edit ControlPanelView");
       editModelDebug(
         env,
         description,
@@ -622,9 +837,10 @@ export function setupDebugViewForm(
     type: "item",
     description: env._t("Set Defaults"),
     callback: () => {
-      console.log("Set Defaults");
-      // set_defaults
-      // need this._controller.renderer (_controller == widget)
+      env.services.dialog_manager.open(SetDefaultDialog, {
+        res_model: action.res_model,
+        component: component,
+      });
     },
     sequence: 310,
   };
@@ -632,11 +848,12 @@ export function setupDebugViewForm(
   const viewMetadata: MenuElement = {
     type: "item",
     description: env._t("View Metadata"),
-    hide: component.widget.getSelectedIds().length !== 1,
     callback: () => {
-      console.log("View Metadata");
-      // get_metadata
-      // need getSelectedIds
+      const selectedIds = component.widget.getSelectedIds();
+      env.services.dialog_manager.open(GetMetadataDialog, {
+        res_model: action.res_model,
+        selectedIds,
+      });
     },
     sequence: 320,
   };
@@ -645,15 +862,7 @@ export function setupDebugViewForm(
   const manageAttachments: MenuElement = {
     type: "item",
     description: description,
-    hide: component.widget.getSelectedIds().length !== 1,
     callback: () => {
-      console.log("Manage Attachments");
-      //get_attachments
-      // need getSelectedIds
-      if (!component.widget.getSelectedIds().length) {
-        console.warn(env._t("No attachment available"));
-        return;
-      }
       const selectedId = component.widget.getSelectedIds()[0];
       env.services.action_manager.doAction({
         res_model: "ir.attachment",
