@@ -58,7 +58,7 @@ msgstr "ZAZ 100% Mat"
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_100_import_invest
 msgid "100% imp.invest."
-msgstr "#N/A"
+msgstr ""
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_25
@@ -446,8 +446,12 @@ msgid "Ajustement de la valeur des participations"
 msgstr "Wertberichtigungen Beteiligungen"
 
 #. module: l10n_ch
-#: model:account.account.template,name:l10n_ch.ch_coa_1069
 #: model:account.account.template,name:l10n_ch.ch_coa_1409
+msgid "Ajustement de la valeur des titres"
+msgstr "Wertberichtigungen Wertschriften"
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_1069
 msgid "Ajustement de la valeur des titres"
 msgstr "Wertberichtigungen Wertschriften"
 
@@ -830,6 +834,10 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2100
+msgid "Dettes bancaires"
+msgstr "Bankverbindlichkeiten"
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2400
 msgid "Dettes bancaires"
 msgstr "Bankverbindlichkeiten"
@@ -868,7 +876,7 @@ msgstr "Delkredere"
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_1100
 msgid "Débiteurs"
-msgstr "Forderungen aus Lieferungen und Leistungen (Debitoren)"
+msgstr "Forderungen"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_1101
@@ -928,6 +936,10 @@ msgstr "Obligationenanleihen"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2120
+msgid "Engagements de financement par leasing"
+msgstr "Verbindlichkeiten aus Finanzierungsleasing"
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2420
 msgid "Engagements de financement par leasing"
 msgstr "Verbindlichkeiten aus Finanzierungsleasing"
@@ -945,6 +957,10 @@ msgstr "Feste Einrichtungen und Installationen"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_3800
+msgid "Escomptes"
+msgstr "Erlösminderungen"
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_4900
 msgid "Escomptes"
 msgstr "Erlösminderungen"
@@ -1085,8 +1101,12 @@ msgid "Impôt préalable: TVA s/matériel, marchandises, prestations et énergie
 msgstr "Vorsteuer MWST Material, Waren, Dienstleistungen, Energie"
 
 #. module: l10n_ch
-#: model:account.account.template,name:l10n_ch.ch_coa_1189
 #: model:account.account.template,name:l10n_ch.ch_coa_2279
+msgid "Impôt à la source"
+msgstr "Quellensteuer"
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_1189
 msgid "Impôt à la source"
 msgstr "Quellensteuer"
 
@@ -1186,7 +1206,7 @@ msgstr "Leasingaufwand mobile Sachanlagen"
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.l10nch_chart_template_liquidity_transfer
 msgid "Liquidity Transfer"
-msgstr ""
+msgstr "Transferkonto"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_1520
@@ -1768,6 +1788,10 @@ msgstr "Bestandesänderungen fertige Erzeugnisse"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_1207
+msgid "Variation des stocks de marchandises"
+msgstr "Bestandesänderungen Handelsware"
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_4800
 msgid "Variation des stocks de marchandises"
 msgstr "Bestandesänderungen Handelsware"

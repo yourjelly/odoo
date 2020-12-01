@@ -288,6 +288,10 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_purchase
+msgid "7.7% achat"
+msgstr ""
+
+#. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_purchase_reverse
 msgid "7.7% achat"
 msgstr ""
@@ -420,8 +424,12 @@ msgid "Ajustement de la valeur des participations"
 msgstr ""
 
 #. module: l10n_ch
-#: model:account.account.template,name:l10n_ch.ch_coa_1069
 #: model:account.account.template,name:l10n_ch.ch_coa_1409
+msgid "Ajustement de la valeur des titres"
+msgstr ""
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_1069
 msgid "Ajustement de la valeur des titres"
 msgstr ""
 
@@ -801,6 +809,10 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2100
+msgid "Dettes bancaires"
+msgstr ""
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2400
 msgid "Dettes bancaires"
 msgstr ""
@@ -904,6 +916,10 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2120
+msgid "Engagements de financement par leasing"
+msgstr ""
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2420
 msgid "Engagements de financement par leasing"
 msgstr ""
@@ -921,6 +937,10 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_3800
+msgid "Escomptes"
+msgstr ""
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_4900
 msgid "Escomptes"
 msgstr ""
@@ -1061,8 +1081,12 @@ msgid "Impôt préalable: TVA s/matériel, marchandises, prestations et énergie
 msgstr ""
 
 #. module: l10n_ch
-#: model:account.account.template,name:l10n_ch.ch_coa_1189
 #: model:account.account.template,name:l10n_ch.ch_coa_2279
+msgid "Impôt à la source"
+msgstr ""
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_1189
 msgid "Impôt à la source"
 msgstr ""
 
@@ -1742,6 +1766,10 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_1207
+msgid "Variation des stocks de marchandises"
+msgstr ""
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_4800
 msgid "Variation des stocks de marchandises"
 msgstr ""

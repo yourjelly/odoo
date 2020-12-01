@@ -314,9 +314,13 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_purchase
-#: model:account.tax.template,description:l10n_ch.vat_77_purchase_reverse
 msgid "7.7% achat"
 msgstr "7.7% purch."
+
+#. module: l10n_ch
+#: model:account.tax.template,description:l10n_ch.vat_77_purchase_reverse
+msgid "7.7% achat"
+msgstr "7.7% rev."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_purchase_return
@@ -450,8 +454,12 @@ msgid "Ajustement de la valeur des participations"
 msgstr "Accumulated depreciation on participations"
 
 #. module: l10n_ch
-#: model:account.account.template,name:l10n_ch.ch_coa_1069
 #: model:account.account.template,name:l10n_ch.ch_coa_1409
+msgid "Ajustement de la valeur des titres"
+msgstr "Accumulated depreciation on long-term securities"
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_1069
 msgid "Ajustement de la valeur des titres"
 msgstr "Accumulated depreciation on securities"
 
@@ -833,14 +841,18 @@ msgstr ""
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2100
-#: model:account.account.template,name:l10n_ch.ch_coa_2400
 msgid "Dettes bancaires"
 msgstr "Bank Overdraft (Bank)"
 
 #. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_2400
+msgid "Dettes bancaires"
+msgstr "Bank debts"
+
+#. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2160
 msgid "Dettes envers l'actionnaire"
-msgstr "#N/A"
+msgstr ""
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_3806
@@ -931,9 +943,13 @@ msgstr "Debentures"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2120
-#: model:account.account.template,name:l10n_ch.ch_coa_2420
 msgid "Engagements de financement par leasing"
 msgstr "Leasing bondings"
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_2420
+msgid "Engagements de financement par leasing"
+msgstr "Finance lease commitments"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_6100
@@ -948,9 +964,13 @@ msgstr "Equipments and Facilities"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_3800
-#: model:account.account.template,name:l10n_ch.ch_coa_4900
 msgid "Escomptes"
 msgstr "Financial discount"
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_4900
+msgid "Escomptes"
+msgstr "Financial Discounts"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_4530
@@ -1088,8 +1108,12 @@ msgid "Impôt préalable: TVA s/matériel, marchandises, prestations et énergie
 msgstr "Input Tax (VAT) receivable on material, goods, services, energy"
 
 #. module: l10n_ch
-#: model:account.account.template,name:l10n_ch.ch_coa_1189
 #: model:account.account.template,name:l10n_ch.ch_coa_2279
+msgid "Impôt à la source"
+msgstr "Withholding taxes"
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_1189
 msgid "Impôt à la source"
 msgstr "Withholding tax"
 
@@ -1771,9 +1795,13 @@ msgstr "Accumulated depreciation on Finished products"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_1207
-#: model:account.account.template,name:l10n_ch.ch_coa_4800
 msgid "Variation des stocks de marchandises"
 msgstr "Accumulated depreciation on Goods / Merchandise (Trade)"
+
+#. module: l10n_ch
+#: model:account.account.template,name:l10n_ch.ch_coa_4800
+msgid "Variation des stocks de marchandises"
+msgstr "Change in inventories of goods"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_4801
