@@ -38,7 +38,7 @@ msgstr "0% Exkl."
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_O_import
 msgid "0% import."
-msgstr "0% Import."
+msgstr "VST 0% Import."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_other_movements_900
@@ -48,12 +48,12 @@ msgstr "0% Subv."
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_100_import
 msgid "Dédouanement TVA (biens et services)"
-msgstr "100% Verzollung MwSt."
+msgstr "ZAZ 100% Mat.-/DL (OZD)"
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_100_import
 msgid "100% imp."
-msgstr "100% Imp."
+msgstr "ZAZ 100% Mat"
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_100_import_invest
@@ -73,22 +73,22 @@ msgstr "2.5% Inkl."
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_25_purchase
 msgid "2.5% achat"
-msgstr "2.5% Einkauf"
+msgstr "VST 2.5% Mat."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_25_purchase_incl
 msgid "2.5% achat Incl."
-msgstr "2.5% Einkauf Inkl."
+msgstr "VST 2.5% Mat. Inkl."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_25_invest
 msgid "2.5% invest."
-msgstr "2.5% Invest."
+msgstr "VST 2.5% Inv."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_25_invest_incl
 msgid "2.5% invest. Incl."
-msgstr "2.5% Invest. Inkl."
+msgstr "VST 2.5% Inv.Inkl."
 
 #. module: l10n_ch
 #: model:account.tax.report.line,name:l10n_ch.account_tax_report_line_chtax_200
@@ -174,12 +174,12 @@ msgstr "3.7% Einkauf Inkl."
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_37_invest
 msgid "3.7% invest"
-msgstr "3.7% Invest."
+msgstr "VST 3.7% Inv."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_37_invest_incl
 msgid "3.7% invest Incl."
-msgstr "3.7% Invest. Inkl."
+msgstr "VST 3.7% Inv.Inkl."
 
 #. module: l10n_ch
 #: model:account.tax.report.line,name:l10n_ch.account_tax_report_line_chtax_302a
@@ -308,9 +308,13 @@ msgstr "7.7% Inkl."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_purchase
+msgid "7.7% achat"
+msgstr "VST 7.7%"
+
+#. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_purchase_reverse
 msgid "7.7% achat"
-msgstr "7.7% Einkauf"
+msgstr "BZS 7.7%"
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_purchase_return
@@ -320,17 +324,17 @@ msgstr "UST 7.7% Bezugssteuer"
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_purchase_incl
 msgid "7.7% achat Incl."
-msgstr "7.7% Einkauf Inkl."
+msgstr "VST 7.7% Mat."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_invest
 msgid "7.7% invest."
-msgstr "7.7% Invest."
+msgstr "VST 7.7% Inv."
 
 #. module: l10n_ch
 #: model:account.tax.template,description:l10n_ch.vat_77_invest_incl
 msgid "7.7% invest. Incl."
-msgstr "7.7% Invest. Inkl."
+msgstr "VST 7.7% Inv.Inkl."
 
 #. module: l10n_ch
 #: model:account.tax.report.line,name:l10n_ch.account_tax_report_line_chtax_900
@@ -1508,12 +1512,12 @@ msgstr "MwSt. 0%"
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_O_import
 msgid "TVA 0% Importations de biens et services"
-msgstr "MwSt. 0% auf Importe von Gütern und Dienstleistungen"
+msgstr "VST 0.0% Mat.-/DL/Inv./übr.BA/OZD"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_O_exclude
 msgid "TVA 0% exclue"
-msgstr "MwSt. 0% ausgeschlossen"
+msgstr "UST 0.0% Lief./DL (ausgenommen)"
 
 #. module: l10n_ch
 #: model:account.tax.group,name:l10n_ch.tax_group_tva_100
@@ -1528,22 +1532,22 @@ msgstr "MwSt. 2.5%"
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_25_purchase_incl
 msgid "TVA 2.5% sur achat B&S (Incl. TR)"
-msgstr "MwSt. 2,5 % auf Einkäufe B&S (inkl. USt)"
+msgstr "VST 2.5% Mat.-/DL (inkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_25_purchase
 msgid "TVA 2.5% sur achat B&S (TR)"
-msgstr "MwSt. 2,5 % auf Einkäufe B&S (USt)"
+msgstr "VST 2.5% Mat.-/DL (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_25_invest_incl
 msgid "TVA 2.5% sur invest. et autres ch. (Incl. TR)"
-msgstr "MwSt. 2,5% auf Invest. und sonst. Aufw. (inkl. USt)"
+msgstr "VST 2.5% Inv./übr.BA (inkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_25_invest
 msgid "TVA 2.5% sur invest. et autres ch. (TR)"
-msgstr "MwSt. 2,5% auf Invest. und sonst. Aufw. (USt)"
+msgstr "VST 2.5% Inv./übr.BA (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.group,name:l10n_ch.tax_group_tva_37
@@ -1553,22 +1557,22 @@ msgstr "MwSt. 3,7%"
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_37_purchase_incl
 msgid "TVA 3.7% sur achat B&S (Incl. TS)"
-msgstr "MwSt. 3,7% auf Einkäufe B&S (inkl. LSt)"
+msgstr "VST 3.7% Mat.-/DL (inkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_37_purchase
 msgid "TVA 3.7% sur achat B&S (TS)"
-msgstr "MwSt. 3,7% auf Einkäufe B&S (LSt)"
+msgstr "VST 3.7% Mat.-/DL (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_37_invest_incl
 msgid "TVA 3.7% sur invest. et autres ch. (Incl. TS)"
-msgstr "MwSt. 3,7% auf Invest. und sonst. Aufw. (inkl. LSt)"
+msgstr "VST 3.7%  Inv./übr.BA (inkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_37_invest
 msgid "TVA 3.7% sur invest. et autres ch. (TS)"
-msgstr "MwSt. 3,7% auf Invest. und sonst. Aufw. (LSt)"
+msgstr "VST 3.7%  Inv./übr.BA (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.group,name:l10n_ch.tax_group_tva_77
@@ -1578,12 +1582,12 @@ msgstr "MwSt. 7,7%"
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_77_purchase_incl
 msgid "TVA 7.7% sur achat B&S (Incl. TN)"
-msgstr "MwSt. 7,7% auf Einkäufe B&S (inkl. NRZ)"
+msgstr "VST 7.7% Mat.-/DL (inkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_77_purchase
 msgid "TVA 7.7% sur achat B&S (TN)"
-msgstr "MwSt. 7,7% auf Einkäufe B&S (NRZ)"
+msgstr "VST 7.7% Mat.-/DL (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_77_purchase_reverse
@@ -1593,12 +1597,12 @@ msgstr "BZS 7.7% Bezugssteuer"
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_77_invest_incl
 msgid "TVA 7.7% sur invest. et autres ch. (Incl. TN)"
-msgstr "MwSt. 7,7% auf Invest. und sonst. Aufw. (inkl. NRZ)"
+msgstr "VST 7.7% Inv./übr.BA (inkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_77_invest
 msgid "TVA 7.7% sur invest. et autres ch. (TN)"
-msgstr "MwSt. 7,7% auf Invest. und sonst. Aufw. (NRZ)"
+msgstr "VST 7.7% Inv./übr.BA (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.account.template,name:l10n_ch.ch_coa_2200
@@ -1608,22 +1612,22 @@ msgstr "Geschuldete MwSt. (Umsatzsteuer)"
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_XO
 msgid "TVA due a 0% (Exportations)"
-msgstr "Zu zahlende MwSt. bei 0% (Exporte)"
+msgstr "UST 0.0% Lief./DL (Export)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_25
 msgid "TVA due a 2.5% (TR)"
-msgstr "Zu zahlende MwSt. bei 2,5% (USt)"
+msgstr "UST 2.5% Lief./DL (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_37
 msgid "TVA due a 3.7% (TS)"
-msgstr "Zu zahlende MwSt. bei 3,7% (LSt)"
+msgstr "UST 3.7% Lief./DL (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_77
 msgid "TVA due a 7.7% (TN)"
-msgstr "Zu zahlende MwSt. bei 7,7% (NRZ)"
+msgstr "UST 7.7% Lief./DL (exkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_77_purchase_return
@@ -1633,17 +1637,17 @@ msgstr "UST 7.7% Bezugssteuer"
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_25_incl
 msgid "TVA due à 2.5% (Incl. TR)"
-msgstr "Zu zahlende MwSt. bei 2,5% (inkl. USt)"
+msgstr "UST 2.5% Lief./DL (inkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_37_incl
 msgid "TVA due à 3.7% (Incl. TS)"
-msgstr "Zu zahlende MwSt. bei 3,7% (inkl. LSt)"
+msgstr "UST 3.7% Lief./DL (inkl. MWST)"
 
 #. module: l10n_ch
 #: model:account.tax.template,name:l10n_ch.vat_77_incl
 msgid "TVA due à 7.7% (Incl. TN)"
-msgstr "Zu zahlende MwSt. bei 7,7% (inkl. NRZ)"
+msgstr "UST 7.7% Lief./DL (inkl. MWST)"
 
 #. module: l10n_ch
 #: code:addons/l10n_ch/models/res_bank.py:0
