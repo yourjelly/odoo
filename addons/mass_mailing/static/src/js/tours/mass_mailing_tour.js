@@ -37,25 +37,28 @@ odoo.define('mass_mailing.mass_mailing_tour', function (require) {
         run: 'click',
         auto: true,
     }, {
-        trigger: 'div[name="body_arch"] iframe #newsletter',
+        trigger: 'jw-template[name="template-template-newsletter"]',
         content: _t('Choose this <b>theme</b>.'),
         position: 'left',
         edition: 'enterprise',
         run: 'click',
     }, {
-        trigger: 'div[name="body_arch"] iframe #default',
+        trigger: 'jw-template[name="template-template-default"]',
         content: _t('Choose this <b>theme</b>.'),
         position: 'right',
         edition: 'community',
         run: 'click',
     }, {
-        trigger: 'div[name="body_arch"] iframe div.o_mail_block_paragraph',
+        trigger: '.o_mail_block_paragraph',
         content: _t('Click on this paragraph to edit it.'),
         position: 'top',
         edition: 'enterprise',
-        run: 'click',
+        run: function ()
+        {
+            $($('jw-shadow')[0].shadowRoot).find(".o_mail_block_paragraph").trigger('click');
+        },
     }, {
-        trigger: 'div[name="body_arch"] iframe div.o_mail_block_title_text',
+        trigger: 'div[name="body_arch"] div.o_mail_block_title_text',
         content: _t('Click on this paragraph to edit it.'),
         position: 'top',
         edition: 'community',
@@ -69,7 +72,7 @@ odoo.define('mass_mailing.mass_mailing_tour', function (require) {
         content: _t("Check the email address and click send."),
         position: 'bottom',
     }, {
-        trigger: 'button[name="action_put_in_queue"]',
+        trigger: 'button[name="action_launch"]',
         content: _t("Ready for take-off!"),
         position: 'bottom',
     }, {
