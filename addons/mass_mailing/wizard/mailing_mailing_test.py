@@ -60,7 +60,16 @@ class TestMassMailing(models.TransientModel):
                 self.mass_mailing_id._message_log(
                     body=_('Test e-mail could not be send, error:<br>%s', mails_sudo.failure_reason))
             elif mails_sudo.state == 'sent':
-                self.mass_mailing_id._message_log(
-                    body=_('Test e-mail successfully sent to:<br>%s', mails_sudo.email_to))
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'message': _('Test e-mail successfully sent to:\n%s', mails_sudo.email_to),
+                        'type': 'success',
+                        'sticky': False,
+                    }
+                }
+                # self.mass_mailing_id._message_log(
+                #     body=_('Test e-mail successfully sent to:<br>%s', mails_sudo.email_to))
 
         return True
