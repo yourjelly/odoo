@@ -58,6 +58,12 @@ QUnit.test("can be rendered", async (assert) => {
       sequence: 5,
     };
   });
+  odoo.userMenuRegistry.add("separator", function (): MenuElement {
+    return {
+      type: "separator",
+      sequence: 15,
+    };
+  });
   odoo.userMenuRegistry.add("invisible_item", function (): MenuElement {
     return {
       type: "item",

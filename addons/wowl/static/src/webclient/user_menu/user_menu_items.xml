@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="wowl.UserMenu.ShortCutsDialog">
-        <Dialog title="title">
+        <Dialog title="props.title">
             <t t-call="wowl.UserMenu.shortcutsTable"/>
         </Dialog>
     </t>
