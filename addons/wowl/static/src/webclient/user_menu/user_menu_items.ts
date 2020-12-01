@@ -1,5 +1,4 @@
 import { Component } from "@odoo/owl";
-import { Stringifiable, _lt } from "../../core/localization";
 import { MenuElement, OdooEnv } from "../../types";
 import { Dialog } from "../../components/dialog/dialog";
 
@@ -32,7 +31,6 @@ export function supportItem(env: OdooEnv): MenuElement {
 class ShortCutsDialog extends Component {
   static template = "wowl.UserMenu.ShortCutsDialog";
   static components = { Dialog };
-  title: Stringifiable = _lt("Keyboard Shortcuts");
 }
 
 export function shortCutsItem(env: OdooEnv): MenuElement {
@@ -40,9 +38,17 @@ export function shortCutsItem(env: OdooEnv): MenuElement {
     type: "item",
     description: env._t("Shortcuts"),
     callback: () => {
-      env.services.dialog_manager.open(ShortCutsDialog);
+      const title = env._t("Shortcuts");
+      env.services.dialog_manager.open(ShortCutsDialog, { title });
     },
     sequence: 30,
+  };
+}
+
+export function separator(env: OdooEnv): MenuElement {
+  return {
+    type: "separator",
+    sequence: 40,
   };
 }
 
