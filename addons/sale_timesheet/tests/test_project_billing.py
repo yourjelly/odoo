@@ -3,7 +3,6 @@
 from odoo.addons.sale_timesheet.tests.common import TestCommonSaleTimesheet
 from odoo.tests import tagged
 
-
 @tagged('post_install', '-at_install')
 class TestProjectBilling(TestCommonSaleTimesheet):
     """ This test suite provide checks for miscellaneous small things. """
@@ -75,20 +74,6 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         })
         cls.sale_order_2.action_confirm()
 
-        # Projects: at least one per billable type
-        Project = cls.env['project.project'].with_context(tracking_disable=True)
-        cls.project_subtask = Project.create({
-            'name': "Sub Task Project (non billable)",
-            'allow_timesheets': True,
-            'allow_billable': False,
-            'partner_id': False,
-        })
-        cls.project_non_billable = Project.create({
-            'name': "Non Billable Project",
-            'allow_timesheets': True,
-            'allow_billable': False,
-            'partner_id': False,
-        })
         cls.project_task_rate = cls.env['project.project'].search([('sale_line_id', '=', cls.so2_line_deliver_project_task.id)], limit=1)
         cls.project_task_rate2 = cls.env['project.project'].search([('sale_line_id', '=', cls.so2_line_deliver_project_template.id)], limit=1)
 
@@ -262,7 +247,7 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         # log timesheet on task
         timesheet1 = Timesheet.create({
             'name': 'Test Line',
-            'project_id': task.project_id.id,
+            'project_id': task.effective_project_id.id,
             'task_id': task.id,
             'unit_amount': 50,
             'employee_id': self.employee_manager.id,
@@ -285,13 +270,13 @@ class TestProjectBilling(TestCommonSaleTimesheet):
         # log timesheet on subtask
         timesheet2 = Timesheet.create({
             'name': 'Test Line on subtask',
-            'project_id': subtask.project_id.id,
+            'project_id': subtask.effective_project_id.id,
             'task_id': subtask.id,
             'unit_amount': 50,
             'employee_id': self.employee_user.id,
         })
 
-        self.assertEqual(subtask.project_id, timesheet2.project_id, "The timesheet is in the subtask project")
+        self.assertEqual(subtask.effective_project_id, timesheet2.project_id, "The timesheet is in the subtask project")
         self.assertNotEqual(self.project_employee_rate_user.project_id, timesheet2.project_id, "The timesheet should not be linked to the billing project for the map")
         self.assertFalse(timesheet2.so_line, "The timesheet should not be linked to SOL as the task is in a non billable project")
 

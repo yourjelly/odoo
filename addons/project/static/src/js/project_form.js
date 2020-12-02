@@ -4,6 +4,7 @@ odoo.define('project.ProjectFormView', function (require) {
     const Dialog = require('web.Dialog');
     const FormView = require('web.FormView');
     const FormController = require('web.FormController');
+    const FormRenderer = require('web.FormRenderer');
     const core = require('web.core');
     const view_registry = require('web.view_registry');
 
@@ -94,12 +95,29 @@ odoo.define('project.ProjectFormView', function (require) {
                 }),
             }).open();
         }
-
     });
-    
+
+    const SubTaskListRenderer = FormRenderer.extend({
+        events: _.extend({}, FormRenderer.prototype.events, {
+            'mouseover .o_visible_btn_onhover .o_data_row': '_onMouseEnterRow',
+            'mouseout .o_visible_btn_onhover .o_data_row': '_onMouseLeaveRow',
+        }),
+        _onMouseEnterRow: function (event) {
+            _.each($('.o_btn_onhover', event.currentTarget), function (btn) {
+                $(btn).attr('aria-hidden', 'false');
+            });
+        },
+        _onMouseLeaveRow: function (event) {
+            _.each($('.o_btn_onhover', event.currentTarget), function (btn) {
+                $(btn).attr('aria-hidden', 'true');
+            });
+        },
+    });
+
     const ProjectFormView = FormView.extend({
         config: _.extend({}, FormView.prototype.config, {
             Controller: ProjectFormController,
+            Renderer: SubTaskListRenderer,
         }),
     });
 

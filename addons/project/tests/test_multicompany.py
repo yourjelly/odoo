@@ -5,7 +5,6 @@ from contextlib import contextmanager
 from odoo.tests.common import TransactionCase, Form
 from odoo.exceptions import AccessError, UserError
 
-
 class TestMultiCompanyCommon(TransactionCase):
 
     @classmethod
@@ -116,7 +115,6 @@ class TestMultiCompanyCommon(TransactionCase):
             # back
             context = dict(self.env.context, allowed_company_ids=old_companies)
             self.env = self.env(context=context)
-
 
 class TestMultiCompanyProject(TestMultiCompanyCommon):
 
@@ -259,7 +257,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
                 self.assertEqual(task.company_id, self.project_company_b.company_id, "The company of the subtask should be the one from its project, and not from its parent.")
 
                 # set parent on existing orphan task; the onchange will set the correct company and subtask project
-                with Form(self.env['project.task'].with_context({'default_parent_id': self.task_1.id})) as task_form:
+                with Form(self.env['project.task'].with_context({'default_parent_id': self.task_1.id, 'default_stage_id': self.task_1.stage_id})) as task_form:
                     task_form.name = 'Test Task 2 becomes child of Task 1 (other company)'
                 task = task_form.save()
 
@@ -271,7 +269,7 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
 
         with self.sudo('employee-a'):
             with self.allow_companies([self.company_a.id, self.company_b.id]):
-                with Form(self.env['project.task'].with_context({'tracking_disable': True, 'default_parent_id': self.task_1.id})) as task_form:
+                with Form(self.env['project.task'].with_context({'tracking_disable': True, 'default_parent_id': self.task_1.id, 'default_stage_id': self.task_1.stage_id})) as task_form:
                     task_form.name = 'Test Subtask in company B'
 
                 task = task_form.save()

@@ -59,8 +59,8 @@ class ProjectTaskType(models.Model):
         self = self.with_context(active_test=False)
         # retrieves all the projects with a least 1 task in that stage
         # a task can be in a stage even if the project is not assigned to the stage
-        readgroup = self.with_context(active_test=False).env['project.task'].read_group([('stage_id', 'in', self.ids)], ['project_id'], ['project_id'])
-        project_ids = list(set([project['project_id'][0] for project in readgroup] + self.project_ids.ids))
+        readgroup = self.with_context(active_test=False).env['project.task'].read_group([('stage_id', 'in', self.ids)], ['effective_project_id'], ['effective_project_id'])
+        project_ids = list(set([result['effective_project_id'][0] for result in readgroup] + self.project_ids.ids))
 
         wizard = self.with_context(project_ids=project_ids).env['project.task.type.delete.wizard'].create({
             'project_ids': project_ids,
@@ -591,7 +591,7 @@ class Task(models.Model):
     project_id = fields.Many2one('project.project', string='Project', store=True, readonly=False,
         index=True, tracking=True, check_company=True, change_default=True)
     effective_project_id = fields.Many2one('project.project',
-        compute='_compute_effective_project_id', store=True, index=True, tracking=True, check_company=True, change_default=True)
+        compute='_compute_effective_project_id', store=True, index=True, check_company=True, change_default=True)
     planned_hours = fields.Float("Initially Planned Hours", help='Time planned to achieve this task (including its sub-tasks).', tracking=True)
     subtask_planned_hours = fields.Float("Sub-tasks Planned Hours", compute='_compute_subtask_planned_hours',
         help="Sum of the time planned of all the sub-tasks linked to this task. Usually less than or equal to the initially planned time of this task.")
@@ -942,29 +942,17 @@ class Task(models.Model):
     @api.depends('child_ids')
     def _compute_subtask_count(self):
         for task in self:
-            task.subtask_count = len(task._get_all_subtasks())
+            task.subtask_count = len(task._get_all_subtasks().filtered(lambda t: t.project_id))
 
     @api.onchange('company_id')
     def _onchange_task_company(self):
         if self.effective_project_id.company_id != self.company_id:
             self.effective_project_id = False
 
-    @api.onchange('recurring_task')
-    def _onchange_recurring_task(self):
-        self.ensure_one()
-        if self.parent_id and self.recurring_task:
-            raise UserError(_("A sub-task cannot be a recurring task. Please consider making its parent task, a recurring task."))
-
     @api.depends('effective_project_id.company_id')
     def _compute_company_id(self):
         for task in self.filtered(lambda task: task.effective_project_id):
             task.company_id = task.effective_project_id.company_id
-
-    @api.onchange('stage_id')
-    def _onchange_stage_id(self):
-        self.ensure_one()
-        if self.parent_id and not self.project_id and self.parent_id.stage_id != self.stage_id:
-            raise UserError(_("The sub-task stage cannot be different from the one of its parent."))
 
     @api.depends('project_id', 'parent_id.stage_id')
     def _compute_stage_id(self):
@@ -977,6 +965,16 @@ class Task(models.Model):
                         ('fold', '=', False), ('is_closed', '=', False)])
             else:
                 task.stage_id = False
+
+    @api.constrains('recurring_task')
+    def _check_recurring_task(self):
+        if self.filtered(lambda task: task.parent_id and task.recurring_task):
+            raise ValidationError(_("A sub-task cannot be a recurring task. Please consider making its parent task, a recurring task."))
+
+    @api.constrains('stage_id')
+    def _check_stage_id(self):
+        if self.filtered(lambda task: task.parent_id and not task.project_id and task.parent_id.stage_id != task.stage_id):
+            raise ValidationError(_("The sub-task stage cannot be different from the one of its parent."))
 
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
@@ -1065,16 +1063,11 @@ class Task(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         default_stage = dict()
-        default_parent_stage = dict()
+        parent_ids = [vals['parent_id'] for vals in vals_list if vals.get('parent_id')]
+        default_parent_stage = {t.id: t.stage_id.id for t in self.env['project.task'].browse(parent_ids)}
         for vals in vals_list:
             parent_id = vals.get('parent_id')
             if parent_id and "stage_id" not in vals:
-                # Sub-task stage_id must by default be the same as its parent stage_id
-                # 1) It must override project default stage
-                # 2) Ensures the default is only computed once per parent task
-                if parent_id not in default_parent_stage:
-                    parent_task = self.env['project.task'].browse(parent_id)
-                    default_parent_stage[parent_id] = parent_task.stage_id.id
                 vals["stage_id"] = default_parent_stage[parent_id]
             if parent_id and 'project_id' not in vals:
                 vals["project_id"] = False
@@ -1180,9 +1173,8 @@ class Task(models.Model):
 
     @api.depends('parent_id.user_id')
     def _compute_user_id(self):
-        for task in self:
-            if not task.user_id:
-                task.user_id = task.parent_id.user_id if task.parent_id else self.env.uid
+        for task in self.filtered(lambda t: not t.user_id):
+            task.user_id = task.parent_id.user_id
 
     @api.depends('parent_id.partner_id', 'effective_project_id.partner_id')
     def _compute_partner_id(self):
@@ -1372,7 +1364,7 @@ class Task(models.Model):
     def action_assign_to_me(self):
         self.write({'user_id': self.env.user.id})
 
-    def action_unassign_me(self):
+    def action_unassign(self):
         self.write({'user_id': False})
 
     # If depth == 1, return only direct children
