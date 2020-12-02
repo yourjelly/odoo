@@ -667,7 +667,7 @@ class ProductProduct(models.Model):
         """
         name = self.display_name
         if self.description_sale:
-            name += '\n' + self.description_sale
+            name += '\n' + tools.html2plaintext(self.description_sale)
 
         return name
 

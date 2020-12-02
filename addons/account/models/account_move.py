@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import RedirectWarning, UserError, ValidationError, AccessError
-from odoo.tools import float_compare, date_utils, email_split, email_re
+from odoo.tools import float_compare, date_utils, email_split, email_re, html2plaintext
 from odoo.tools.misc import formatLang, format_date, get_lang
 
 from datetime import date, timedelta
@@ -3076,7 +3076,7 @@ class AccountMoveLine(models.Model):
             values.append(product.partner_ref)
         if self.journal_id.type == 'sale':
             if product.description_sale:
-                values.append(product.description_sale)
+                values.append(html2plaintext(product.description_sale))
         elif self.journal_id.type == 'purchase':
             if product.description_purchase:
                 values.append(product.description_purchase)

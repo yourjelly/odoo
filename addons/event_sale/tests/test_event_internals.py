@@ -7,6 +7,7 @@ from unittest.mock import patch
 from odoo.addons.event_sale.tests.common import TestEventSaleCommon
 from odoo.fields import Datetime as FieldsDatetime, Date as FieldsDate
 from odoo.tests.common import users
+from odoo.tools import html2plaintext
 
 
 class TestEventData(TestEventSaleCommon):
@@ -38,7 +39,7 @@ class TestEventData(TestEventSaleCommon):
                 'seats_max': 5,
             })]
         })
-        self.assertEqual(event_type.event_type_ticket_ids.description, self.event_product.description_sale)
+        self.assertEqual(event_type.event_type_ticket_ids.description, html2plaintext(self.event_product.description_sale))
 
         # synchronize event
         event.write({'event_type_id': event_type.id})
@@ -47,7 +48,7 @@ class TestEventData(TestEventSaleCommon):
         self.assertEqual(event.event_ticket_ids.seats_max, 5)
         self.assertEqual(event.event_ticket_ids.product_id, self.event_product)
         self.assertEqual(event.event_ticket_ids.price, self.event_product.list_price)
-        self.assertEqual(event.event_ticket_ids.description, self.event_product.description_sale)
+        self.assertEqual(event.event_ticket_ids.description, html2plaintext(self.event_product.description_sale))
 
     def test_event_registrable(self):
         """Test if `_compute_event_registrations_open` works properly with additional

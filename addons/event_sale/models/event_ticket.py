@@ -4,6 +4,7 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.tools import html2plaintext
 
 _logger = logging.getLogger(__name__)
 
@@ -38,7 +39,7 @@ class EventTemplateTicket(models.Model):
     def _compute_description(self):
         for ticket in self:
             if ticket.product_id and ticket.product_id.description_sale:
-                ticket.description = ticket.product_id.description_sale
+                ticket.description = html2plaintext(ticket.product_id.description_sale)
             # initialize, i.e for embedded tree views
             if not ticket.description:
                 ticket.description = False
