@@ -211,6 +211,17 @@ But you can go even further by extending them:
   </li>
   ```
 
+#### You can also make dropdown right aligned by passing 'o_dropdown_menu_right' in menuClass
+
+- `<Dropdown menuClass="'o_dropdown_menu_right'"/>` will become
+  ```xml
+  <div class="o_dropdown">
+    <button>...</button>
+    <ul class="o_dropdown_menu o_dropdown_menu_right">...</ul>
+  </div>
+  ```
+
+
 ## More Examples
 
 ### Direct Siblings Dropdown
