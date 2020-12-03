@@ -3,14 +3,14 @@
 
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.exceptions import UserError
-
+from datetime import date, timedelta
 
 class TestGamificationCommon(TransactionCaseWithUserDemo):
 
     def setUp(self):
         super(TestGamificationCommon, self).setUp()
-        employees_group = self.env.ref('base.group_user')
-        self.user_ids = employees_group.users
+        self.employees_group = self.env.ref('base.group_user')
+        self.user_ids = self.employees_group.users
 
         # Push demo user into the challenge before creating a new one
         self.env.ref('gamification.challenge_base_discover')._update_all()
@@ -18,7 +18,7 @@ class TestGamificationCommon(TransactionCaseWithUserDemo):
             'name': 'R2D2',
             'login': 'r2d2@openerp.com',
             'email': 'r2d2@openerp.com',
-            'groups_id': [(6, 0, [employees_group.id])]
+            'groups_id': [(6, 0, [self.employees_group.id])]
         })
         self.badge_good_job = self.env.ref('gamification.badge_good_job')
 
@@ -58,6 +58,72 @@ class test_challenge(TestGamificationCommon):
 
         badge_ids = self.env['gamification.badge.user'].search([('badge_id', '=', badge_id), ('user_id', '=', demo.id)])
         self.assertEqual(len(badge_ids), 1, "Demo user has not received the badge")
+
+    def update_goals(self, challenge):
+        # make all goals older than most recent login time so they are included in the upcoming _update_all()
+        self.cr.execute("UPDATE gamification_goal SET write_date = '1970-01-01' WHERE challenge_id = %s", (challenge.id,))
+        self.env['gamification.goal'].invalidate_cache()
+        challenge._update_all()
+
+    def test_20_batch_goals(self):
+        signature_goal_definition = self.env['gamification.goal.definition'].create({
+            'name': 'Set a secret signature',
+            'computation_mode': 'count',
+            'model_id': self.env.ref('base.model_res_users').id,
+            'domain': '[("signature", "=", "secret")]',
+            'batch_mode': True,
+            'batch_distinctive_field': self.env.ref('base.field_res_users__id').id,
+            'batch_user_expression': 'user.id',
+        })
+        challenge_users = self.env['res.users']
+        for i in range(3):
+            challenge_users |= self.env['res.users'].with_context(no_reset_password=True).create({
+                'name': 'Challenge user %s' % i,
+                'login': '%s@openerp.com' % i,
+                'email': '%s@openerp.com' % i,
+                'groups_id': [(6, 0, [self.employees_group.id])],
+                'signature': '',
+            })
+
+        # consider all challenge users recently logged in
+        for user in challenge_users:
+            user.with_user(user)._update_last_login()
+
+        challenge = self.env['gamification.challenge'].create({
+            'name': 'Signature challenge',
+            'user_ids': [(6, 0, challenge_users.ids)],
+            'line_ids': [(0, 0, {'definition_id': signature_goal_definition.id, 'target_goal': 1})],
+        })
+
+        for user in challenge_users:
+            self.assertEqual(user.signature, '', 'signature of user %s should be empty' % user.display_name)
+
+        challenge._generate_goals_from_challenge()
+        self.assertEqual(
+            self.env['gamification.goal'].search_count([('challenge_id', '=', challenge.id), ('state', '=', 'inprogress')]),
+            3,
+            'should have generated 3 in-progress goals (1 for each user)'
+        )
+
+        self.update_goals(challenge)
+        self.assertEqual(
+            self.env['gamification.goal'].search_count([('challenge_id', '=', challenge.id), ('state', '=', 'inprogress')]),
+            3,
+            'no goals should be reached (signatures are all empty)'
+        )
+
+        challenge_users[1].signature = 'secret'
+        self.update_goals(challenge)
+        self.assertEqual(
+            self.env['gamification.goal'].search_count([('challenge_id', '=', challenge.id), ('state', '=', 'inprogress')]),
+            2,
+            '2 goals should remain'
+        )
+        self.assertEqual(
+            self.env['gamification.goal'].search_count([('challenge_id', '=', challenge.id), ('state', '=', 'reached')]),
+            1,
+            '1 goal should be reached'
+        )
 
 
 class test_badge_wizard(TestGamificationCommon):
