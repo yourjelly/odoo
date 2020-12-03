@@ -51,7 +51,7 @@ class IrRule(models.Model):
         # use an empty context for 'user' to make the domain evaluation
         # independent from the context
         return {
-            'user': self.env.user.with_context({}),
+            'user': self.env.user.sudo().with_context({}),
             'time': time,
             'company_ids': self.env.companies.ids,
             'company_id': self.env.company.id,
@@ -140,7 +140,7 @@ class IrRule(models.Model):
 
         # browse user and rules as SUPERUSER_ID to avoid access errors!
         eval_context = self._eval_context()
-        user_groups = self.env.user.groups_id
+        user_groups = self.env.user.sudo().groups_id
         global_domains = []                     # list of domains
         group_domains = []                      # list of domains
         for rule in rules.sudo():
