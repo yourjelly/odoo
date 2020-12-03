@@ -590,7 +590,7 @@ class Environment(Mapping):
 
         :returns: current user - sudoed
         :rtype: :class:`~odoo.addons.base.models.res_users`"""
-        return self(su=True)['res.users'].browse(self.uid)
+        return self['res.users'].browse(self.uid)
 
     @lazy_property
     def company(self):
@@ -613,14 +613,15 @@ class Environment(Mapping):
             even if the current user doesn't have access to
             the targeted company.
         """
+        user_sudo = self.user.sudo()
         company_ids = self.context.get('allowed_company_ids', [])
         if company_ids:
             if not self.su:
-                user_company_ids = self.user.company_ids.ids
+                user_company_ids = user_sudo.company_ids.ids
                 if any(cid not in user_company_ids for cid in company_ids):
                     raise AccessError(_("Access to unauthorized or invalid companies."))
             return self['res.company'].browse(company_ids[0])
-        return self.user.company_id.with_env(self)
+        return user_sudo.company_id.with_env(self)
 
     @lazy_property
     def companies(self):
@@ -643,10 +644,11 @@ class Environment(Mapping):
             even if the current user doesn't have access to
             the targeted company.
         """
+        user_sudo = self.user.sudo()
         company_ids = self.context.get('allowed_company_ids', [])
         if company_ids:
             if not self.su:
-                user_company_ids = self.user.company_ids.ids
+                user_company_ids = user_sudo.company_ids.ids
                 if any(cid not in user_company_ids for cid in company_ids):
                     raise AccessError(_("Access to unauthorized or invalid companies."))
             return self['res.company'].browse(company_ids)
@@ -660,7 +662,7 @@ class Environment(Mapping):
         #   - when printing a report for several records from several companies
         #   - when accessing to a record from the notification email template
         #   - when loading an binary image on a template
-        return self.user.company_ids.with_env(self)
+        return user_sudo.company_ids.with_env(self)
 
     @property
     def lang(self):
