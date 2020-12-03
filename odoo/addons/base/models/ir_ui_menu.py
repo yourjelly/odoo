@@ -75,14 +75,14 @@ class IrUiMenu(models.Model):
             raise ValidationError(_('Error! You cannot create recursive menus.'))
 
     @api.model
-    @tools.ormcache('frozenset(self.env.user.groups_id.ids)', 'debug')
+    @tools.ormcache('frozenset(self.env.user.sudo().groups_id.ids)', 'debug')
     def _visible_menu_ids(self, debug=False):
         """ Return the ids of the menu items visible to the user. """
         # retrieve all menus, and determine which ones are visible
         context = {'ir.ui.menu.full_list': True}
         menus = self.with_context(context).search([]).sudo()
 
-        groups = self.env.user.groups_id
+        groups = self.env.user.sudo().groups_id
         if not debug:
             groups = groups - self.env.ref('base.group_no_one')
         # first discard all menus with groups the user does not have
