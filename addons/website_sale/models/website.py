@@ -135,7 +135,7 @@ class Website(models.Model):
                 # In the weird case we are coming from the backend (https://github.com/odoo/odoo/issues/20245)
                 website = len(self) == 1 and self or self.search([], limit=1)
         isocountry = req and req.session.geoip and req.session.geoip.get('country_code') or False
-        partner = self.env.user.partner_id
+        partner = self.env.user.sudo().partner_id
         last_order_pl = partner.last_website_so_id.pricelist_id
         partner_pl = partner.property_product_pricelist
         pricelists = website._get_pl_partner_order(isocountry, show_visible,
@@ -166,7 +166,7 @@ class Website(models.Model):
         # then this pricelist will always be considered as available
         available_pricelists = self.get_pricelist_available()
         pl = None
-        partner = self.env.user.partner_id
+        partner = self.env.user.sudo().partner_id
         if request and request.session.get('website_sale_current_pl'):
             # `website_sale_current_pl` is set only if the user specifically chose it:
             #  - Either, he chose it from the pricelist selection
@@ -244,7 +244,7 @@ class Website(models.Model):
         :returns: browse record for the current sales order
         """
         self.ensure_one()
-        partner = self.env.user.partner_id
+        partner = self.env.user.sudo().partner_id
         sale_order_id = request.session.get('sale_order_id')
         check_fpos = False
         if not sale_order_id and not self.env.user._is_public():

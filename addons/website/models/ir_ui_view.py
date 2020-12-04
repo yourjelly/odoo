@@ -425,7 +425,7 @@ class View(models.Model):
                 qcontext['multi_website_companies_current'] = {'company_id': cur_company.id, 'name': cur_company.name}
                 qcontext['multi_website_companies'] = [
                     {'company_id': comp.id, 'name': comp.name}
-                    for comp in self.env.user.company_ids if comp != cur_company
+                    for comp in self.env.user.sudo().company_ids if comp != cur_company
                 ]
 
             qcontext.update(dict(
