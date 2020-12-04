@@ -619,7 +619,7 @@ class Slide(models.Model):
             karma_to_add += new_slide.channel_id.karma_gen_slide_vote * (1 if upvote else -1)
 
         if karma_to_add:
-            self.env.user.add_karma(karma_to_add)
+            self.env.user.sudo().add_karma(karma_to_add)
 
     def action_set_viewed(self, quiz_attempts_inc=False):
         if any(not slide.channel_id.is_member for slide in self):

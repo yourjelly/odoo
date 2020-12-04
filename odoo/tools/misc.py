@@ -1244,7 +1244,7 @@ def get_lang(env, lang_code=False):
         lang = lang_code
     elif env.context.get('lang') in langs:
         lang = env.context.get('lang')
-    elif env.user.company_id.partner_id.lang in langs:
+    elif env.user.sudo().company_id.partner_id.lang in langs:
         lang = env.user.company_id.partner_id.lang
     return env['res.lang']._lang_get(lang)
 

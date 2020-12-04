@@ -85,8 +85,8 @@ class TestMultiCompanyCommon(TransactionCase):
     @contextmanager
     def allow_companies(self, company_ids):
         """ The current user will be allowed in each given companies (like he can sees all of them in the company switcher and they are all checked) """
-        old_allow_company_ids = self.env.user.company_ids.ids
-        current_user = self.env.user
+        old_allow_company_ids = self.env.user.sudo().company_ids.ids
+        current_user = self.env.user.sudo()
         try:
             current_user.write({'company_ids': company_ids})
             context = dict(self.env.context, allowed_company_ids=company_ids)

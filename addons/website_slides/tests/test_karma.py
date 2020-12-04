@@ -44,7 +44,7 @@ class TestKarmaGain(common.SlidesCase):
     @users('user_emp', 'user_portal', 'user_officer')
     def test_karma_gain(self):
         user = self.env.user
-        user.write({'karma': 0})
+        user.sudo().write({'karma': 0})
         computed_karma = 0
 
         # Add the user to the course
@@ -102,7 +102,7 @@ class TestKarmaGain(common.SlidesCase):
     @users('user_emp', 'user_portal', 'user_officer')
     def test_karma_gain_multiple_course(self):
         user = self.env.user
-        user.write({'karma': 0})
+        user.sudo().write({'karma': 0})
         computed_karma = 0
 
         # Finish two course at the same time (should not ever happen but hey, we never know)
