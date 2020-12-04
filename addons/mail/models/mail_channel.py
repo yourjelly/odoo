@@ -278,6 +278,12 @@ class Channel(models.Model):
             if not self.env.user.has_group('base.group_system'):
                 raise UserError(_("You do not have the rights to modify fields related to moderation on one of the channels you are modifying."))
 
+        if vals.get('channel_last_seen_partner_ids'):
+            to_delete_mail_channel_parter_ids = [rec[1] for rec in vals.get('channel_last_seen_partner_ids') if rec[0] == 2]
+            if self.channel_last_seen_partner_ids.filtered(lambda r: r.id in to_delete_mail_channel_parter_ids and r.partner_id == self.env.user.partner_id):
+                raise UserError(_('You are trying to leave the channel that you are currently viewing.\
+                    \n\nInstead, go to "Discuss" Menu, find this channel under the CHANNELS menu, and click on "x" icon next to it to leave.'))
+
         result = super(Channel, self).write(vals)
 
         if vals.get('group_ids'):
