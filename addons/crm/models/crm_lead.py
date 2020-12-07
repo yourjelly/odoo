@@ -94,7 +94,7 @@ class Lead(models.Model):
     user_login = fields.Char('User Login', related='user_id.login', readonly=True)
     company_id = fields.Many2one('res.company', string='Company', index=True, default=lambda self: self.env.company.id)
     referred = fields.Char('Referred By')
-    description = fields.Text('Notes')
+    description = fields.Html('Notes')
     active = fields.Boolean('Active', default=True, tracking=True)
     type = fields.Selection([
         ('lead', 'Lead'), ('opportunity', 'Opportunity')],
@@ -916,7 +916,7 @@ class Lead(models.Model):
                 continue
             elif field.type == 'many2one':
                 data[field_name] = _get_first_not_null_id(field_name, self)  # take the first not null
-            elif field.type == 'text':
+            elif field.type == 'html':
                 data[field_name] = '\n\n'.join(it for it in self.mapped(field_name) if it)
             else:
                 data[field_name] = _get_first_not_null(field_name, self)
