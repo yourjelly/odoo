@@ -3,7 +3,6 @@ odoo.define('point_of_sale.Printer', function (require) {
 
 var Session = require('web.Session');
 var core = require('web.core');
-const { Gui } = require('point_of_sale.Gui');
 var _t = core._t;
 
 // IMPROVEMENT: This is too much. We can get away from this class.
@@ -107,9 +106,11 @@ var PrinterMixin = {
         return promise;
     },
 
+    // IMPROVEMENT: The following methods depends on something this mixin doesn't know (the `model`).
+    // Perhaps we move this to a more concrete class which knows about `model`, e.g. Printer.
     _onIoTActionResult: function (data){
-        if (this.pos && (data === false || data.result === false)) {
-            Gui.showPopup('ErrorPopup',{
+        if (this.model && (data === false || data.result === false)) {
+            this.model.ui.askUser('ErrorPopup',{
                 'title': _t('Connection to the printer failed'),
                 'body':  _t('Please check if the printer is still connected.'),
             });
@@ -117,8 +118,8 @@ var PrinterMixin = {
     },
 
     _onIoTActionFail: function () {
-        if (this.pos) {
-            Gui.showPopup('ErrorPopup',{
+        if (this.model) {
+            this.model.ui.askUser('ErrorPopup',{
                 'title': _t('Connection to IoT Box failed'),
                 'body':  _t('Please check if the IoT Box is still connected.'),
             });
@@ -127,9 +128,9 @@ var PrinterMixin = {
 }
 
 var Printer = core.Class.extend(PrinterMixin, {
-    init: function (url, pos) {
+    init: function (url, model) {
         PrinterMixin.init.call(this, arguments);
-        this.pos = pos;
+        this.model = model;
         this.connection = new Session(undefined, url || 'http://localhost:8069', { use_cors: true});
     },
 

@@ -1,40 +1,38 @@
 odoo.define('point_of_sale.OrderFetcher', function (require) {
     'use strict';
 
-    const { EventBus } = owl.core;
-    const { Gui } = require('point_of_sale.Gui');
     const { isRpcError } = require('point_of_sale.utils');
-    const models = require('point_of_sale.models');
+    const { _t } = require('web.core');
+    const env = require('web.env');
 
-    class OrderFetcher extends EventBus {
-        constructor() {
-            super();
+    class OrderFetcher {
+        constructor(model) {
+            this.model = model;
             this.currentPage = 1;
             this.ordersToShow = [];
-            this.cache = {};
             this.totalCount = 0;
+            this.nPerPage = 15;
+            this.searchDomain = undefined;
         }
         get activeOrders() {
-            const allActiveOrders = this.comp.env.pos.get('orders').models;
-            return this.searchDomain
-                ? allActiveOrders.filter(this._predicateBasedOnSearchDomain.bind(this))
-                : allActiveOrders;
+            const pred = this.searchDomain ? this._predicateBasedOnSearchDomain.bind(this) : () => true;
+            return this.model.getDraftOrders().filter(pred);
         }
         _predicateBasedOnSearchDomain(order) {
-            function check(order, field, searchWord) {
+            const check = (order, field, searchWord) => {
                 searchWord = searchWord.toLowerCase();
                 switch (field) {
                     case 'pos_reference':
-                        return order.name.toLowerCase().includes(searchWord);
+                        return this.model.getOrderName(order).toLowerCase().includes(searchWord);
                     case 'partner_id.display_name':
-                        const client = order.get_client();
+                        const client = this.model.getCustomer(order);
                         return client ? client.name.toLowerCase().includes(searchWord) : false;
                     case 'date_order':
-                        return moment(order.creation_date).format('YYYY-MM-DD hh:mm A').includes(searchWord);
+                        return moment(order.date_order).format('YYYY-MM-DD hh:mm A').includes(searchWord);
                     default:
                         return false;
                 }
-            }
+            };
             for (let [field, _, searchWord] of (this.searchDomain || []).filter((item) => item !== '|')) {
                 // remove surrounding "%" from `searchWord`
                 searchWord = searchWord.substring(1, searchWord.length - 1);
@@ -67,7 +65,12 @@ odoo.define('point_of_sale.OrderFetcher', function (require) {
          */
         get lastPage() {
             const nItems = this.nActiveOrders + this.totalCount;
-            return Math.trunc(nItems / (this.nPerPage + 1)) + 1;
+            const npages = nItems / this.nPerPage;
+            if (this.model.floatCompare(npages, Math.trunc(npages), 5) === 0) {
+                return Math.round(npages);
+            } else {
+                return Math.trunc(npages + 1);
+            }
         }
         /**
          * Calling this methods populates the `ordersToShow` then trigger `update` event.
@@ -81,40 +84,34 @@ odoo.define('point_of_sale.OrderFetcher', function (require) {
             try {
                 let limit, offset;
                 let start, end;
-                if (this.currentPage <= this.lastPageFullOfActiveOrders) {
+                if (this.model.floatCompare(this.currentPage, this.lastPageFullOfActiveOrders) !== 1) {
                     // Show only active orders.
                     start = (this.currentPage - 1) * this.nPerPage;
                     end = this.currentPage * this.nPerPage;
                     this.ordersToShow = this.activeOrders.slice(start, end);
-                } else if (this.currentPage === this.lastPageFullOfActiveOrders + 1) {
+                } else if (this.model.floatCompare(this.currentPage, this.lastPageFullOfActiveOrders + 1) === 0) {
                     // Show partially the remaining active orders and
                     // some orders from the backend.
                     offset = 0;
                     limit = this.nPerPage - this.remainingActiveOrders;
                     start = (this.currentPage - 1) * this.nPerPage;
                     end = this.nActiveOrders;
-                    this.ordersToShow = [
-                        ...this.activeOrders.slice(start, end),
-                        ...(await this._fetch(limit, offset)),
-                    ];
+                    this.ordersToShow = [...this.activeOrders.slice(start, end), ...(await this._fetch(limit, offset))];
                 } else {
                     // Show orders from the backend.
                     offset =
                         this.nPerPage -
                         this.remainingActiveOrders +
-                        (this.currentPage - (this.lastPageFullOfActiveOrders + 1) - 1) *
-                            this.nPerPage;
+                        (this.currentPage - (this.lastPageFullOfActiveOrders + 1) - 1) * this.nPerPage;
                     limit = this.nPerPage;
                     this.ordersToShow = await this._fetch(limit, offset);
                 }
-                this.trigger('update');
             } catch (error) {
                 if (isRpcError(error) && error.message.code < 0) {
-                    Gui.showPopup('ErrorPopup', {
-                        title: this.comp.env._t('Network Error'),
-                        body: this.comp.env._t('Unable to fetch orders if offline.'),
+                    this.model.ui.askUser('ErrorPopup', {
+                        title: _t('Network Error'),
+                        body: _t('Unable to fetch orders if offline.'),
                     });
-                    Gui.setSyncStatus('error');
                 } else {
                     throw error;
                 }
@@ -130,85 +127,60 @@ odoo.define('point_of_sale.OrderFetcher', function (require) {
          */
         async _fetch(limit, offset) {
             const { ids, totalCount } = await this._getOrderIdsForCurrentPage(limit, offset);
-            const idsNotInCache = ids.filter((id) => !(id in this.cache));
+            const idsNotInCache = ids.filter((id) => !(this.model.exists('pos.order', id)));
             if (idsNotInCache.length > 0) {
-                const fetchedOrders = await this._fetchOrders(idsNotInCache);
+                const { data, closed_orders } = await this._fetchOrders(idsNotInCache);
                 // Cache these fetched orders so that next time, no need to fetch
                 // them again, unless invalidated. See `invalidateCache`.
-                fetchedOrders.forEach((order) => {
-                    this.cache[order.id] = new models.Order(
-                        {},
-                        { pos: this.comp.env.pos, json: order }
-                    );
-                });
+                this.model.loadManagementOrders(data, new Set(closed_orders));
             }
             this.totalCount = totalCount;
-            return ids.map((id) => this.cache[id]);
+            return ids.map((id) => this.model.getRecord('pos.order', id));
         }
         async _getOrderIdsForCurrentPage(limit, offset) {
-            return await this.rpc({
+            const config_id = this.model.config.id;
+            return await this.model._rpc({
                 model: 'pos.order',
                 method: 'search_paid_order_ids',
-                kwargs: { config_id: this.configId, domain: this.searchDomain ? this.searchDomain : [], limit, offset },
-                context: this.comp.env.session.user_context,
+                kwargs: { config_id, domain: this.searchDomain ? this.searchDomain : [], limit, offset },
+                context: env.session.user_context,
             });
         }
         async _fetchOrders(ids) {
-            return await this.rpc({
+            return await this.model._rpc({
                 model: 'pos.order',
                 method: 'export_for_ui',
                 args: [ids],
-                context: this.comp.env.session.user_context,
+                context: env.session.user_context,
             });
         }
-        nextPage() {
-            if (this.currentPage < this.lastPage) {
+        async nextPage() {
+            if (this.model.floatCompare(this.currentPage, this.lastPage, 5) === -1) {
                 this.currentPage += 1;
-                this.fetch();
+                await this.fetch();
             }
         }
-        prevPage() {
-            if (this.currentPage > 1) {
+        async prevPage() {
+            if (this.model.floatCompare(this.currentPage, 1, 5) === 1) {
                 this.currentPage -= 1;
-                this.fetch();
+                await this.fetch();
             }
         }
-        /**
-         * @param {integer|undefined} id id of the cached order
-         * @returns {Array<models.Order>}
-         */
-        get(id) {
-            if (id) return this.cache[id];
-            return this.ordersToShow;
-        }
-        setSearchDomain(searchDomain) {
+        async setSearchDomain(searchDomain) {
             this.searchDomain = searchDomain;
+            this.currentPage = 1;
+            await this.fetch();
         }
-        setComponent(comp) {
-            this.comp = comp;
-            return this;
-        }
-        setConfigId(configId) {
-            this.configId = configId;
-        }
-        setNPerPage(val) {
+        async setNPerPage(val) {
             this.nPerPage = val;
-        }
-        setPage(page) {
-            this.currentPage = page;
+            await this.fetch();
         }
         invalidateCache(ids) {
             for (let id of ids) {
-                delete this.cache[id];
+                this.model.deleteOrder(id);
             }
-        }
-        async rpc() {
-            Gui.setSyncStatus('connecting');
-            const result = await this.comp.rpc(...arguments);
-            Gui.setSyncStatus('connected');
-            return result;
         }
     }
 
-    return new OrderFetcher();
+    return OrderFetcher;
 });

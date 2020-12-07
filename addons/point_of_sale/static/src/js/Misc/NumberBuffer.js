@@ -8,12 +8,11 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
     const { parse } = require('web.field_utils');
     const { BarcodeEvents } = require('barcodes.BarcodeEvents');
     const { _t } = require('web.core');
-    const { Gui } = require('point_of_sale.Gui');
 
     const INPUT_KEYS = new Set(
         ['Delete', 'Backspace', '+1', '+2', '+5', '+10', '+20', '+50'].concat('0123456789+-.,'.split(''))
     );
-    const CONTROL_KEYS = new Set(['Enter', 'Esc']);
+    const CONTROL_KEYS = new Set(['Enter', 'Esc', 'Escape']);
     const ALLOWED_KEYS = new Set([...INPUT_KEYS, ...CONTROL_KEYS]);
     const getDefaultConfig = () => ({
         decimalPoint: false,
@@ -63,7 +62,9 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
     class NumberBuffer extends EventBus {
         constructor() {
             super();
-            this.isReset = false;
+            // Start in reset state so that beginning empty buffer doesn't become
+            // `null` when `Delete` or `Backspace` is pressed.
+            this.isReset = true;
             this.bufferHolderStack = [];
         }
         /**
@@ -208,7 +209,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
         _handleInput(key) {
             if (key === 'Enter' && this.config.triggerAtEnter) {
                 this.component.trigger(this.config.triggerAtEnter, this.state);
-            } else if (key === 'Esc' && this.config.triggerAtEsc) {
+            } else if ((key === 'Esc' || key === 'Escape') && this.config.triggerAtEsc) {
                 this.component.trigger(this.config.triggerAtEsc, this.state);
             } else if (INPUT_KEYS.has(key)) {
                 this._updateBuffer(key);
@@ -276,7 +277,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
                 // when input is like '+10', '+50', etc
                 const inputValue = parse.float(input.slice(1));
                 const currentBufferValue = this.state.buffer ? parse.float(this.state.buffer) : 0;
-                this.state.buffer = this.component.env.pos.formatFixed(
+                this.state.buffer = this.component.env.model.formatValue(
                     inputValue + currentBufferValue
                 );
             } else if (!isNaN(parseInt(input, 10))) {
@@ -286,7 +287,7 @@ odoo.define('point_of_sale.NumberBuffer', function(require) {
                 if (isFirstInput) {
                     this.state.buffer = '' + input;
                 } else if (this.state.buffer.length > 12) {
-                    Gui.playSound('bell');
+                    this.component.env.ui.playSound('bell');
                 } else {
                     this.state.buffer += input;
                 }

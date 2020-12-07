@@ -3,7 +3,6 @@ odoo.define('point_of_sale.SearchBar', function (require) {
 
     const { useState, useExternalListener } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
     /**
      * This is a simple configurable search bar component. It has search fields
@@ -22,8 +21,8 @@ odoo.define('point_of_sale.SearchBar', function (require) {
      *  },
      *  placeholder: string,
      * }}
-     * @emits search @payload { fieldValue: string, searchTerm: '' }
-     * @emits filter-selected @payload { filter: string }
+     * @emits search @payload { field: string, term: string }
+     * @emits filter-selected @payload string
      *
      * NOTE: The payload of the emitted event is accessible via the `detail`
      * field of the event.
@@ -33,17 +32,17 @@ odoo.define('point_of_sale.SearchBar', function (require) {
             super(...arguments);
             this.config = this.props.config;
             this.state = useState({
-                searchInput: '',
+                searchInput: this.config.initSearchTerm || '',
                 selectedFieldId: this.config.searchFields.length ? 0 : null,
                 showSearchFields: false,
                 showFilterOptions: false,
-                selectedFilter: this.config.filter.options[0] || this.env._t('Select'),
+                selectedFilter: this.config.initFilter || this.config.filter.options[0] || this.env._t('Select'),
             });
             useExternalListener(window, 'click', this._hideOptions);
         }
         selectFilter(option) {
             this.state.selectedFilter = option;
-            this.trigger('filter-selected', { filter: this.state.selectedFilter });
+            this.trigger('filter-selected', this.state.selectedFilter);
         }
         get placeholder() {
             return this.props.placeholder;
@@ -58,8 +57,8 @@ odoo.define('point_of_sale.SearchBar', function (require) {
                 this.state.selectedFieldId = this._fieldIdToSelect(event.key);
             } else if (event.key === 'Enter') {
                 this.trigger('search', {
-                    fieldValue: this.config.searchFields[this.state.selectedFieldId],
-                    searchTerm: this.state.searchInput,
+                    field: this.config.searchFields[this.state.selectedFieldId],
+                    term: this.state.searchInput,
                 });
                 this.state.showSearchFields = false;
             } else {
@@ -75,8 +74,8 @@ odoo.define('point_of_sale.SearchBar', function (require) {
         onClickSearchField(id) {
             this.state.showSearchFields = false;
             this.trigger('search', {
-                fieldValue: this.config.searchFields[id],
-                searchTerm: this.state.searchInput,
+                field: this.config.searchFields[id],
+                term: this.state.searchInput,
             });
         }
         /**
@@ -108,8 +107,6 @@ odoo.define('point_of_sale.SearchBar', function (require) {
         },
         placeholder: 'Search ...',
     };
-
-    Registries.Component.add(SearchBar);
 
     return SearchBar;
 });

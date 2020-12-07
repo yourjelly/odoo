@@ -4,7 +4,6 @@ odoo.define('point_of_sale.AbstractReceiptScreen', function (require) {
     const { useRef } = owl.hooks;
     const { nextFrame } = require('point_of_sale.utils');
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
     /**
      * This relies on the assumption that there is a reference to
@@ -17,38 +16,39 @@ odoo.define('point_of_sale.AbstractReceiptScreen', function (require) {
             super(...arguments);
             this.orderReceipt = useRef('order-receipt');
         }
-        async _printReceipt() {
-            if (this.env.pos.proxy.printer) {
-                const printResult = await this.env.pos.proxy.printer.print_receipt(this.orderReceipt.el.outerHTML);
+        async printReceipt() {
+            if (this.env.model.proxy.printer) {
+                const printResult = await this.env.model.proxy.printer.print_receipt(this.orderReceipt.el.outerHTML);
                 if (printResult.successful) {
                     return true;
                 } else {
-                    const { confirmed } = await this.showPopup('ConfirmPopup', {
+                    const confirmed = await this.env.ui.askUser('ConfirmPopup', {
                         title: printResult.message.title,
-                        body: 'Do you want to print using the web printer?',
+                        body: this.env._t('Do you want to print using the web printer?'),
                     });
                     if (confirmed) {
-                        // We want to call the _printWeb when the popup is fully gone
+                        // We want to call the printWeb when the popup is fully gone
                         // from the screen which happens after the next animation frame.
                         await nextFrame();
-                        return await this._printWeb();
+                        return this.printWeb();
                     }
                     return false;
                 }
             } else {
-                return await this._printWeb();
+                return this.printWeb();
             }
         }
         /**
+         * Opens the web printer to print the printable area of the shown screen.
          * https://stackoverflow.com/questions/21285902/printing-a-part-of-webpage-with-javascript
          */
-        async _printWeb() {
+        printWeb() {
             try {
                 const isPrinted = document.execCommand('print', false, null);
                 if (!isPrinted) window.print();
                 return true;
             } catch (err) {
-                await this.showPopup('ErrorPopup', {
+                this.env.ui.askUser('ErrorPopup', {
                     title: this.env._t('Printing is not supported on some browsers'),
                     body: this.env._t(
                         'Printing is not supported on some browsers due to no default printing protocol ' +
@@ -59,8 +59,6 @@ odoo.define('point_of_sale.AbstractReceiptScreen', function (require) {
             }
         }
     }
-
-    Registries.Component.add(AbstractReceiptScreen);
 
     return AbstractReceiptScreen;
 });

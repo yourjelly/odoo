@@ -1,16 +1,13 @@
-odoo.define('point_of_sale.ClientScreenButton', function(require) {
+odoo.define('point_of_sale.ClientScreenButton', function (require) {
     'use strict';
 
     const { useState } = owl;
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
-    // Formerly ClientScreenWidget
     class ClientScreenButton extends PosComponent {
         constructor() {
             super(...arguments);
-            this.local = this.env.pos.config.iface_customer_facing_display_local && !this.env.pos.config.iface_customer_facing_display_proxy;
-            this.state = useState({ status: this.local ? 'success' : 'failure' });
+            this.state = useState({ status: 'success' });
             this._start();
         }
         get message() {
@@ -21,26 +18,30 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                 not_found: this.env._t('Client Screen Unsupported. Please upgrade the IoT Box'),
             }[this.state.status];
         }
-        onClick() {
+        get local() {
+            return (
+                this.env.model.config.iface_customer_facing_display_local &&
+                !this.env.model.config.iface_customer_facing_display_via_proxy
+            );
+        }
+        async onClick() {
             if (this.local) {
-                return this.onClickLocal();
+                return this._onClickLocal();
             } else {
-                return this.onClickProxy();
+                return this._onClickProxy();
             }
         }
-        async onClickLocal() {
-            this.env.pos.customer_display = window.open('', 'Customer Display', 'height=600,width=900');
-            const renderedHtml = await this.env.pos.render_html_for_customer_facing_display();
+        async _onClickLocal() {
+            this.env.model.customerDisplayWindow = window.open('', 'Customer Display', 'height=600,width=900');
+            const renderedHtml = await this.env.model.renderCustomerDisplay();
             var $renderedHtml = $('<div>').html(renderedHtml);
-            $(this.env.pos.customer_display.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
-            $(this.env.pos.customer_display.document.head).html($renderedHtml.find('.resources').html());
+            $(this.env.model.customerDisplayWindow.document.body).html($renderedHtml.find('.pos-customer_facing_display'));
+            $(this.env.model.customerDisplayWindow.document.head).html($renderedHtml.find('.resources').html());
         }
-        async onClickProxy() {
+        async _onClickProxy() {
             try {
-                const renderedHtml = await this.env.pos.render_html_for_customer_facing_display();
-                const ownership = await this.env.pos.proxy.take_ownership_over_client_screen(
-                    renderedHtml
-                );
+                const renderedHtml = await this.env.model.renderCustomerDisplay();
+                const ownership = await this.env.model.proxy.take_ownership_over_client_screen(renderedHtml);
                 if (typeof ownership === 'string') {
                     ownership = JSON.parse(ownership);
                 }
@@ -49,8 +50,8 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                 } else {
                     this.state.status = 'warning';
                 }
-                if (!this.env.pos.proxy.posbox_supports_display) {
-                    this.env.pos.proxy.posbox_supports_display = true;
+                if (!this.env.model.proxy.posbox_supports_display) {
+                    this.env.model.proxy.posbox_supports_display = true;
                     this._start();
                 }
             } catch (error) {
@@ -65,19 +66,18 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
             if (this.local) {
                 return;
             }
-
-            const self = this;
-            async function loop() {
-                if (self.env.pos.proxy.posbox_supports_display) {
+            // QUESTION: Why is there a need to loop when it already has the ownership?
+            const loop = async () => {
+                if (this.env.model.proxy.posbox_supports_display) {
                     try {
-                        const ownership = await self.env.pos.proxy.test_ownership_of_client_screen();
+                        const ownership = await this.env.model.proxy.test_ownership_of_client_screen();
                         if (typeof ownership === 'string') {
                             ownership = JSON.parse(ownership);
                         }
                         if (ownership.status === 'OWNER') {
-                            self.state.status = 'success';
+                            this.state.status = 'success';
                         } else {
-                            self.state.status = 'warning';
+                            this.state.status = 'warning';
                         }
                         setTimeout(loop, 3000);
                     } catch (error) {
@@ -86,21 +86,19 @@ odoo.define('point_of_sale.ClientScreenButton', function(require) {
                             return;
                         }
                         if (typeof error == 'undefined') {
-                            self.state.status = 'failure';
+                            this.state.status = 'failure';
                         } else {
-                            self.state.status = 'not_found';
-                            self.env.pos.proxy.posbox_supports_display = false;
+                            this.state.status = 'not_found';
+                            this.env.model.proxy.posbox_supports_display = false;
                         }
                         setTimeout(loop, 3000);
                     }
                 }
-            }
+            };
             loop();
         }
     }
     ClientScreenButton.template = 'ClientScreenButton';
-
-    Registries.Component.add(ClientScreenButton);
 
     return ClientScreenButton;
 });

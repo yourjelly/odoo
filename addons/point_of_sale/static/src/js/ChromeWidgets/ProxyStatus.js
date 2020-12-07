@@ -3,13 +3,11 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
 
     const { useState } = owl;
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
-    // Previously ProxyStatusWidget
     class ProxyStatus extends PosComponent {
         constructor() {
             super(...arguments);
-            const initialProxyStatus = this.env.pos.proxy.get('status');
+            const initialProxyStatus = this.env.model.proxy.get('status');
             this.state = useState({
                 status: initialProxyStatus.status,
                 msg: initialProxyStatus.msg,
@@ -18,19 +16,19 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
             this.index = 0;
         }
         mounted() {
-            this.env.pos.proxy.on('change:status', this, this._onChangeStatus);
+            this.env.model.proxy.on('change:status', this, this._onChangeStatus);
         }
         willUnmount() {
-            this.env.pos.proxy.off('change:status', this, this._onChangeStatus);
+            this.env.model.proxy.off('change:status', this, this._onChangeStatus);
         }
         async onClick() {
             try {
-                await this.env.pos.connect_to_proxy();
+                await this.env.actionHandler({ name: 'actionConnectToProxy' });
             } catch (error) {
                 if (error instanceof Error) {
                     throw error;
                 } else {
-                    this.showPopup('ErrorPopup', error);
+                    this.env.ui.askUser('ErrorPopup', error);
                 }
             }
         }
@@ -41,7 +39,7 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
             if (newStatus.status === 'connected') {
                 var warning = false;
                 var msg = '';
-                if (this.env.pos.config.iface_scan_via_proxy) {
+                if (this.env.model.config.iface_scan_via_proxy) {
                     var scannerStatus = newStatus.drivers.scanner
                         ? newStatus.drivers.scanner.status
                         : false;
@@ -51,8 +49,8 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
                     }
                 }
                 if (
-                    this.env.pos.config.iface_print_via_proxy ||
-                    this.env.pos.config.iface_cashdrawer
+                    this.env.model.config.iface_print_via_proxy ||
+                    this.env.model.config.iface_cashdrawer
                 ) {
                     var printerStatus = newStatus.drivers.printer
                         ? newStatus.drivers.printer.status
@@ -63,7 +61,7 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
                         msg += this.env._t('Printer');
                     }
                 }
-                if (this.env.pos.config.iface_electronic_scale) {
+                if (this.env.model.config.iface_electronic_scale) {
                     var scaleStatus = newStatus.drivers.scale
                         ? newStatus.drivers.scale.status
                         : false;
@@ -84,8 +82,6 @@ odoo.define('point_of_sale.ProxyStatus', function(require) {
         }
     }
     ProxyStatus.template = 'ProxyStatus';
-
-    Registries.Component.add(ProxyStatus);
 
     return ProxyStatus;
 });

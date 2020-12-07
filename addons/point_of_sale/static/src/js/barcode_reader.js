@@ -15,10 +15,9 @@ var BarcodeReader = core.Class.extend({
     ],
 
     init: function (attributes) {
-        this.pos = attributes.pos;
+        this.model = attributes.model;
         this.action_callbacks = {};
         this.exclusive_callbacks = {};
-        this.proxy = attributes.proxy;
         this.remote_scanning = false;
         this.remote_active = 0;
 
@@ -118,8 +117,9 @@ var BarcodeReader = core.Class.extend({
 
     // the barcode scanner will listen on the hw_proxy/scanner interface for
     // scan events until disconnect_from_proxy is called
-    connect_to_proxy: function () {
+    connect_to_proxy: function (proxy) {
         var self = this;
+        this.proxy = proxy;
         this.remote_scanning = true;
         if (this.remote_active >= 1) {
             return;

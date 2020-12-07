@@ -106,7 +106,7 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
         this.setParent(parent);
         options = options || {};
 
-        this.pos = parent;
+        this.model = parent;
 
         this.weighing = false;
         this.debug_weight = 0;
@@ -170,7 +170,7 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
         var self = this;
         this.connection = new Session(undefined,url, { use_cors: true});
         this.host = url;
-        if (this.pos.config.iface_print_via_proxy) {
+        if (this.model.config.iface_print_via_proxy) {
             this.connect_to_printer();
         }
         this.set_connection_status('connecting',{});
@@ -191,7 +191,7 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
     },
 
     connect_to_printer: function () {
-        this.printer = new Printer(this.host, this.pos);
+        this.printer = new Printer(this.host, this.model);
     },
 
     /**
@@ -206,7 +206,7 @@ var ProxyDevice  = core.Class.extend(mixins.PropertiesMixin,{
     autoconnect: function (options) {
         var self = this;
         this.set_connection_status('connecting',{});
-        if (this.pos.config.iface_print_via_proxy) {
+        if (this.model.config.iface_print_via_proxy) {
             this.connect_to_printer();
         }
         var found_url = new Promise(function () {});

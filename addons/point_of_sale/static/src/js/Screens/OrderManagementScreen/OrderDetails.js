@@ -2,28 +2,16 @@ odoo.define('point_of_sale.OrderDetails', function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
+    const Orderline = require('point_of_sale.Orderline');
+    const OrderSummary = require('point_of_sale.OrderSummary');
 
     /**
-     * @props {models.Order} order
+     * @props {'pos.order'} order
      */
     class OrderDetails extends PosComponent {
-        get order() {
-            return this.props.order;
-        }
-        get orderlines() {
-            return this.order ? this.order.orderlines.models : [];
-        }
-        get total() {
-            return this.env.pos.format_currency(this.order ? this.order.get_total_with_tax() : 0);
-        }
-        get tax() {
-            return this.env.pos.format_currency(this.order ? this.order.get_total_tax() : 0)
-        }
+        static components = { Orderline, OrderSummary };
     }
     OrderDetails.template = 'OrderDetails';
-
-    Registries.Component.add(OrderDetails);
 
     return OrderDetails;
 });

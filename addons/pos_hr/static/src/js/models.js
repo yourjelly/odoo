@@ -1,97 +1,207 @@
 odoo.define('pos_hr.employees', function (require) {
-    "use strict";
+    'use strict';
 
-var models = require('point_of_sale.models');
+    const PointOfSaleUI = require('point_of_sale.PointOfSaleUI');
+    const PointOfSaleModel = require('point_of_sale.PointOfSaleModel');
+    const TicketScreen = require('point_of_sale.TicketScreen');
+    const HeaderLockButton = require('pos_hr.HeaderLockButton');
+    const LoginScreen = require('pos_hr.LoginScreen');
+    const { useBarcodeReader } = require('point_of_sale.custom_hooks');
+    const { patch } = require('web.utils');
+    const { _t } = require('web.core');
 
-models.load_models([{
-    model:  'hr.employee',
-    fields: ['name', 'id', 'user_id'],
-    domain: function(self){
-        return self.config.employee_ids.length > 0
-            ? [
-                  '&',
-                  ['company_id', '=', self.config.company_id[0]],
-                  '|',
-                  ['user_id', '=', self.user.id],
-                  ['id', 'in', self.config.employee_ids],
-              ]
-            : [['company_id', '=', self.config.company_id[0]]];
-    },
-    loaded: function(self, employees) {
-        if (self.config.module_pos_hr) {
-            self.employees = employees;
-            self.employee_by_id = {};
-            self.employees.forEach(function(employee) {
-                self.employee_by_id[employee.id] = employee;
-                var hasUser = self.users.some(function(user) {
-                    if (user.id === employee.user_id[0]) {
-                        employee.role = user.role;
-                        return true;
-                    }
-                    return false;
-                });
-                if (!hasUser) {
-                    employee.role = 'cashier';
-                }
-            });
-        }
-    }
-}]);
+    const unpatch = {};
 
-var posmodel_super = models.PosModel.prototype;
-models.PosModel = models.PosModel.extend({
-    load_server_data: function () {
-        var self = this;
-        return posmodel_super.load_server_data.apply(this, arguments).then(function () {
-            var employee_ids = _.map(self.employees, function(employee){return employee.id;});
-            var records = self.rpc({
+    unpatch.PointOfSaleModel = patch(PointOfSaleModel.prototype, 'pos_hr', {
+        //#region OVERRIDES
+
+        async loadPosData() {
+            await this._super(...arguments);
+            this.data.uiState.LoginScreen = { prevScreen: null };
+            const employees = this.getRecords('hr.employee');
+            const hashedEmployeeData = await this._rpc({
                 model: 'hr.employee',
                 method: 'get_barcodes_and_pin_hashed',
-                args: [employee_ids],
+                args: [employees.map((employee) => employee.id)],
             });
-            return records.then(function (employee_data) {
-                self.employees.forEach(function (employee) {
-                    var data = _.findWhere(employee_data, {'id': employee.id});
-                    if (data !== undefined){
-                        employee.barcode = data.barcode;
-                        employee.pin = data.pin;
-                    }
-                });
+            for (const employee of employees) {
+                employee._extras = {};
+                employee._extras.hashedPin = hashedEmployeeData[employee.id].pin;
+                employee._extras.hashedBarcode = hashedEmployeeData[employee.id].barcode;
+            }
+        },
+        /**
+         * We save the previous screen before showing the login screen.
+         * This information will be used to determine the screen to show after
+         * a successful login. @see _getScreenAfterLogin
+         */
+        async beforeChangeScreen(prevScreen, newScreen) {
+            if (newScreen === 'LoginScreen') {
+                this.data.uiState.LoginScreen.prevScreen = prevScreen;
+            }
+            await this._super(...arguments);
+        },
+        /**
+         * Replace the employee in the order if it originally has no orderlines.
+         * This means that the currently active employee will automatically be assign
+         * to the empty order.
+         */
+        async actionAddProduct(order) {
+            if (!order.lines.length) {
+                order.employee_id = this.data.uiState.activeEmployeeId;
+            }
+            return this._super(...arguments);
+        },
+        _createDefaultOrder() {
+            const newOrder = this._super(...arguments);
+            newOrder.employee_id = this.data.uiState.activeEmployeeId;
+            return newOrder;
+        },
+        /**
+         * This override augments the method to identify if the active cashier is a manager.
+         */
+        getIsCashierManager() {
+            const cashier = this.getActiveCashier();
+            if (!cashier) {
+                return this._super(...arguments);
+            }
+            return cashier.user_id === this.user.id && this._super(...arguments);
+        },
+        /**
+         * Start screen should be the LoginScreen.
+         */
+        getStartScreen() {
+            if (this.config.module_pos_hr) {
+                return 'LoginScreen';
+            } else {
+                return this._super(...arguments);
+            }
+        },
+        /**
+         * When this module is installed, a cashier is represented by an employee.
+         * We derive the cashier name from the employee instead of the logged in user.
+         */
+        getCashierName() {
+            const activeCashier = this.getActiveCashier();
+            if (!activeCashier) return this._super(...arguments);
+            return activeCashier.name;
+        },
+
+        //#endregion OVERRIDES
+
+        /**
+         * Shows a number dialog to ask the pin of the given employee.
+         * @param {'hr.employee'} employee
+         * @returns {[true, 'hr.employee'] | [false, string | undefined]}
+         */
+        async _verifyPin(employee) {
+            if (!employee._extras.hashedPin) return [true, employee];
+            const [confirmed, inputPin] = await this.ui.askUser('NumberPopup', {
+                isPassword: true,
+                title: employee.name,
+                startingValue: null,
             });
-        });
-    },
-    set_cashier: function(employee) {
-        posmodel_super.set_cashier.apply(this, arguments);
-        const selectedOrder = this.get_order();
-        if (selectedOrder && !selectedOrder.get_orderlines().length) {
-            // Order without lines can be considered to be un-owned by any employee.
-            // We set the employee on that order to the currently set employee.
-            selectedOrder.employee = employee;
-        }
-    }
-});
+            if (!confirmed) return [false];
+            if (employee._extras.hashedPin === Sha1.hash(inputPin)) {
+                return [true, employee];
+            } else {
+                return [false, _t('Incorrect Password')];
+            }
+        },
+        /**
+         * From a selection list of employees, this method asks the user
+         * which employee to select.
+         * @param {{ id: string, label: string }[]} selectionList
+         * @returns {[true, 'hr.employee'] | [false, string | undefined]}
+         */
+        async _selectEmployee(selectionList) {
+            const [confirmed, selected] = await this.ui.askUser('SelectionPopup', {
+                title: _t('Change Cashier'),
+                list: selectionList,
+            });
+            if (!confirmed) return [false];
+            const selectedEmployee = this.getRecord('hr.employee', selected.id);
+            if (!selectedEmployee._extras.hashedPin) {
+                return [true, selectedEmployee];
+            }
+            return await this._verifyPin(selectedEmployee);
+        },
+        /**
+         * If `selected` is given, it is an employee and it is verified.
+         * If `selectionList` is given, it asks user to select from the list and verify the selection.
+         * Then shows the proper screen when selection of employee is successful.
+         * @param {{ selectionList: { id: string, label: string }[], selected: 'hr.employee' }} param0
+         */
+        async actionSelectEmployee({ selectionList, selected }) {
+            let successful, payload;
+            if (selected) {
+                [successful, payload] = await this._verifyPin(selected);
+            } else if (selectionList) {
+                [successful, payload] = await this._selectEmployee(selectionList);
+            }
+            if (successful) {
+                // payload is employee
+                const selectedEmployee = this.getRecord('hr.employee', payload.id);
+                this.data.uiState.activeEmployeeId = payload.id;
+                await this.actionShowScreen(this._getScreenAfterLogin());
+                this.ui.showNotification(_.str.sprintf(_t('Logged in as %s'), selectedEmployee.name));
+            } else {
+                // payload is the error message
+                if (payload) {
+                    this.ui.askUser('ErrorPopup', {
+                        title: _t('Login Error'),
+                        body: payload,
+                    });
+                }
+            }
+        },
+        _getScreenAfterLogin() {
+            const prevScreen = this.data.uiState.LoginScreen.prevScreen;
+            if (prevScreen && !this._shouldSetScreenToOrder(prevScreen)) {
+                return prevScreen;
+            }
+            const activeOrder = this.getActiveOrder();
+            return this.getOrderScreen(activeOrder);
+        },
+        getActiveCashier() {
+            return this.getRecord('hr.employee', this.data.uiState.activeEmployeeId);
+        },
+    });
 
-var super_order_model = models.Order.prototype;
-models.Order = models.Order.extend({
-    initialize: function (attributes, options) {
-        super_order_model.initialize.apply(this, arguments);
-        if (!options.json) {
-            this.employee = this.pos.get_cashier();
-        }
-    },
-    init_from_JSON: function (json) {
-        super_order_model.init_from_JSON.apply(this, arguments);
-        if (this.pos.config.module_pos_hr) {
-            this.employee = this.pos.employee_by_id[json.employee_id];
-        }
-    },
-    export_as_JSON: function () {
-        const json = super_order_model.export_as_JSON.apply(this, arguments);
-        if (this.pos.config.module_pos_hr) {
-            json.employee_id = this.employee ? this.employee.id : false;
-        }
-        return json;
-    },
-});
+    unpatch.PointOfSaleUIPrototype = patch(PointOfSaleUI.prototype, 'pos_hr', {
+        setup() {
+            useBarcodeReader(this.env.model.barcodeReader, {
+                cashier: this._barcodeCashierAction,
+            });
+            this._super(...arguments);
+        },
+        async _barcodeCashierAction(code) {
+            let theEmployee;
+            for (const employee of this.env.model.getRecords('hr.employee')) {
+                if (employee._extras.hashedBarcode === Sha1.hash(code.code)) {
+                    theEmployee = employee;
+                    break;
+                }
+            }
+            if (!theEmployee) return;
+            this.env.actionHandler({ name: 'actionSelectEmployee', args: [{ selected: theEmployee }] });
+        },
+    });
 
+    unpatch.PointOfSaleUI = patch(PointOfSaleUI, 'pos_hr', {
+        components: { ...PointOfSaleUI.components, HeaderLockButton, LoginScreen },
+    });
+
+    unpatch.TicketScreen = patch(TicketScreen.prototype, 'pos_hr', {
+        getEmployee(order) {
+            const employee = this.env.model.getRecord('hr.employee', order.employee_id);
+            if (employee) {
+                return employee.name;
+            } else {
+                return this._super(...arguments);
+            }
+        },
+    });
+
+    return unpatch;
 });

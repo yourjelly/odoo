@@ -2,11 +2,12 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="Notification" owl="1">
-        <div class="notification">
+        <div t-if="state.show" class="notification" t-transition="fade" t-on-click="onClickToastNotification">
             <span>
-                <t t-esc="props.message" />
+                <t t-esc="state.message" />
             </span>
         </div>
+        <div t-else="" style="display: none;"></div>
     </t>
 
 </templates>

@@ -1,11 +1,13 @@
-odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
+odoo.define('point_of_sale.ErrorTracebackPopup', function (require) {
     'use strict';
 
     const ErrorPopup = require('point_of_sale.ErrorPopup');
-    const Registries = require('point_of_sale.Registries');
 
-    // formerly ErrorTracebackPopupWidget
     class ErrorTracebackPopup extends ErrorPopup {
+        onExitButtonClick() {
+            this.props.respondWith();
+            this.env.actionHandler({ name: 'actionClosePos' });
+        }
         get tracebackUrl() {
             const blob = new Blob([this.props.body]);
             const URL = window.URL || window.webkitURL;
@@ -15,7 +17,7 @@ odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
             return `${this.env._t('error')} ${moment().format('YYYY-MM-DD-HH-mm-ss')}.txt`;
         }
         emailTraceback() {
-            const address = this.env.pos.company.email;
+            const address = this.env.model.company.email;
             const subject = this.env._t('IMPORTANT: Bug Report From Odoo Point Of Sale');
             window.open(
                 'mailto:' +
@@ -35,10 +37,7 @@ odoo.define('point_of_sale.ErrorTracebackPopup', function(require) {
         body: '',
         exitButtonIsShown: false,
         exitButtonText: 'Exit Pos',
-        exitButtonTrigger: 'close-pos'
     };
-
-    Registries.Component.add(ErrorTracebackPopup);
 
     return ErrorTracebackPopup;
 });

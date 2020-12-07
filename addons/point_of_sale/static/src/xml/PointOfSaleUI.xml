@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+  <div t-name="PointOfSaleUI" owl="1">
+    <div class="pos" t-att-class="{ 'big-scrollbars': env.model.config.iface_big_scrollbars || false }">
+      <t t-set="_tempScreen" t-value="getTempScreen()" />
+      <div class="pos-receipt-print"></div>
+      <div class="pos-topheader" t-att-class="{ oe_hidden: env.model.data.uiState.loading.state !== 'READY' }">
+        <div t-if="_tempScreen" class="block-top-header" />
+        <div class="pos-branding" t-if="!env.isMobile">
+          <img class="pos-logo" t-on-click="trigger('toggle-debug-widget')" src="/point_of_sale/static/src/img/logo.png"
+            alt="Logo" />
+          <TicketButton />
+        </div>
+        <div class="pos-rightheader">
+          <TicketButton t-if="env.isMobile" />
+          <BasicSearchBar t-ref="basic-search-bar" />
+          <div class="status-buttons-portal">
+            <div class="status-buttons" t-att-class="{ oe_hidden: env.model.data.uiState.loading.state !== 'READY' }">
+              <t t-if="!env.isMobile">
+                <CashierName t-if="env.model.data.uiState.loading.state === 'READY'" />
+              </t>
+              <OrderManagementButton t-if="env.model.config.manage_orders" />
+              <SaleDetailsButton t-if="env.model.proxy.printer" />
+              <ProxyStatus t-if="env.model.getUseProxy()" />
+              <ClientScreenButton t-if="env.model.config.iface_customer_facing_display" />
+              <SyncNotification msg="getSyncNotificationMsg()" t-ref="sync-notification-ref" />
+              <HeaderButton />
+            </div>
+          </div>
+        </div>
+      </div>
+      <t t-if="env.model.data.uiState.loading.state === 'READY'">
+        <div class="pos-content">
+          <div class="window">
+            <div class="subwindow">
+              <div class="subwindow-container">
+                <div class="subwindow-container-fix screens">
+                  <t t-set="_mainScreen" t-value="getMainScreen()" />
+                  <t t-component="_mainScreen.component" t-key="_mainScreen.name"
+                    t-att-class="{ oe_hidden: _tempScreen }" t-props="_mainScreen.props"
+                    basicSearchBar="basicSearchBarRef.comp" />
+                  <t t-if="_tempScreen" t-component="_tempScreen.component" t-props="_tempScreen.props"
+                    t-key="_tempScreen.name" basicSearchBar="basicSearchBarRef.comp" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <DebugWidget t-if="env.isDebug() and state.debugWidgetIsShown" t-transition="fade" />
+        </div>
+      </t>
+
+      <div t-if="['LOADING', 'CLOSING'].includes(env.model.data.uiState.loading.state)" class="loader" t-transition="swing">
+        <div class="loader-feedback">
+          <h1 class="message">
+            <t t-esc="env.model.getLoadingMessage()" />
+          </h1>
+          <!-- <div class="progressbar">
+            <div class="progress" t-ref="progressbar"></div>
+          </div>
+          <div t-if="loading.skipButtonIsShown" class="button skip" t-on-click="trigger('loading-skip-callback')">
+            Skip
+          </div> -->
+        </div>
+      </div>
+
+      <Dialog t-ref="dialog-ref" />
+      <Notification t-ref="toast-notification-ref" />
+      <NotificationSound t-ref="notification-sound-ref" />
+    </div>
+  </div>
+</templates>

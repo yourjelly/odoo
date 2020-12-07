@@ -2,22 +2,19 @@ odoo.define('point_of_sale.ReprintReceiptScreen', function (require) {
     'use strict';
 
     const AbstractReceiptScreen = require('point_of_sale.AbstractReceiptScreen');
-    const Registries = require('point_of_sale.Registries');
+    const OrderReceipt = require('point_of_sale.OrderReceipt');
 
-    const ReprintReceiptScreen = (AbstractReceiptScreen) => {
-        class ReprintReceiptScreen extends AbstractReceiptScreen {
-            confirm() {
-                this.props.resolve({ confirmed: true, payload: null });
-                this.trigger('close-temp-screen');
-            }
-            tryReprint() {
-                this._printReceipt();
-            }
+    class ReprintReceiptScreen extends AbstractReceiptScreen {
+        confirm() {
+            this.props.resolve();
+            this.trigger('close-temp-screen');
         }
-        ReprintReceiptScreen.template = 'ReprintReceiptScreen';
-        return ReprintReceiptScreen;
-    };
-    Registries.Component.addByExtending(ReprintReceiptScreen, AbstractReceiptScreen);
+        tryReprint() {
+            this.printReceipt();
+        }
+    }
+    ReprintReceiptScreen.template = 'ReprintReceiptScreen';
+    ReprintReceiptScreen.components = { OrderReceipt };
 
     return ReprintReceiptScreen;
 });

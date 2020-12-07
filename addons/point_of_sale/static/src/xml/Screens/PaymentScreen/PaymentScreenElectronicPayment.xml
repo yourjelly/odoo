@@ -55,7 +55,7 @@
                 <div>
                     Payment Successful
                 </div>
-                <t t-if="props.line.can_be_reversed">
+                <t t-if="props.line._extras.can_be_reversed">
                     <div class="button send_payment_reversal" title="Reverse Payment" t-on-click="trigger('send-payment-reverse', props.line)">
                         Reverse
                     </div>

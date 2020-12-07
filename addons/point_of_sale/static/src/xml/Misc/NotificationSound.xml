@@ -2,7 +2,8 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="NotificationSound" owl="1">
-        <audio t-att-src="props.sound.src" autoplay="true"></audio>
+        <audio t-if="state.src" t-att-src="state.src" autoplay="true" t-on-ended="state.src = false" />
+        <div t-else="" style="display: none;" />
     </t>
 
 </templates>

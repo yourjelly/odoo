@@ -1,10 +1,9 @@
-odoo.define('point_of_sale.EditListPopup', function(require) {
+odoo.define('point_of_sale.EditListPopup', function (require) {
     'use strict';
 
     const { useState } = owl.hooks;
-    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registries = require('point_of_sale.Registries');
     const { useAutoFocusToLast } = require('point_of_sale.custom_hooks');
+    const EditListInput = require('point_of_sale.EditListInput');
 
     /**
      * Given a array of { id, text }, we show the user this popup to be able to modify this given array.
@@ -38,7 +37,8 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
      *   }
      * ```
      */
-    class EditListPopup extends AbstractAwaitablePopup {
+    class EditListPopup extends owl.Component {
+        static components = { EditListInput };
         /**
          * @param {String} title required title of popup
          * @param {Array} [props.array=[]] the array of { id, text } to be edited or an array of strings
@@ -63,12 +63,14 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
             // If no array is provided, we initialize with one empty item.
             if (array.length === 0) return [this._emptyItem()];
             // Put _id for each item. It will serve as unique identifier of each item.
-            return array.map((item) => Object.assign({}, { _id: this._nextId() }, typeof item === 'object'? item: { 'text': item}));
+            return array.map((item) =>
+                Object.assign({}, { _id: this._nextId() }, typeof item === 'object' ? item : { text: item })
+            );
         }
         removeItem(event) {
             const itemToRemove = event.detail;
             this.state.array.splice(
-                this.state.array.findIndex(item => item._id == itemToRemove._id),
+                this.state.array.findIndex((item) => item._id == itemToRemove._id),
                 1
             );
             // We keep a minimum of one empty item in the popup.
@@ -80,15 +82,14 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
             if (this.props.isSingleItem) return;
             this.state.array.push(this._emptyItem());
         }
-        /**
-         * @override
-         */
-        getPayload() {
-            return {
-                newArray: this.state.array
-                    .filter((item) => item.text.trim() !== '')
-                    .map((item) => Object.assign({}, item)),
-            };
+        confirm() {
+            this.props.respondWith([
+                true,
+                this.state.array.filter((item) => item.text.trim() !== '').map((item) => Object.assign({}, item)),
+            ]);
+        }
+        cancel() {
+            this.props.respondWith([false]);
         }
     }
     EditListPopup.template = 'EditListPopup';
@@ -98,8 +99,6 @@ odoo.define('point_of_sale.EditListPopup', function(require) {
         array: [],
         isSingleItem: false,
     };
-
-    Registries.Component.add(EditListPopup);
 
     return EditListPopup;
 });

@@ -1,25 +1,36 @@
 odoo.define('point_of_sale.MobileOrderManagementScreen', function (require) {
-    const OrderManagementScreen = require('point_of_sale.OrderManagementScreen');
-    const Registries = require('point_of_sale.Registries');
-    const { useListener } = require('web.custom_hooks');
+    'use strict';
+
+    const AbstractOrderManagementScreen = require('point_of_sale.AbstractOrderManagementScreen');
+    const OrderDetails = require('point_of_sale.OrderDetails');
+    const OrderManagementControlPanel = require('point_of_sale.OrderManagementControlPanel');
+    const OrderList = require('point_of_sale.OrderList');
+    const InvoiceButton = require('point_of_sale.InvoiceButton');
+    const ReprintReceiptButton = require('point_of_sale.ReprintReceiptButton');
+    const ActionpadWidget = require('point_of_sale.ActionpadWidget');
+    const NumpadWidget = require('point_of_sale.NumpadWidget');
     const { useState } = owl.hooks;
 
-    const MobileOrderManagementScreen = (OrderManagementScreen) => {
-        class MobileOrderManagementScreen extends OrderManagementScreen {
-            constructor() {
-                super(...arguments);
-                useListener('click-order', this._onShowDetails)
-                this.mobileState = useState({ showDetails: false });
-            }
-            _onShowDetails() {
-                this.mobileState.showDetails = true;
-            }
+    class MobileOrderManagementScreen extends AbstractOrderManagementScreen {
+        static components = {
+            OrderDetails,
+            OrderManagementControlPanel,
+            OrderList,
+            InvoiceButton,
+            ReprintReceiptButton,
+            ActionpadWidget,
+            NumpadWidget,
+        };
+        constructor() {
+            super(...arguments);
+            this.mobileState = useState({ showDetails: false });
         }
-        MobileOrderManagementScreen.template = 'MobileOrderManagementScreen';
-        return MobileOrderManagementScreen;
-    };
-
-    Registries.Component.addByExtending(MobileOrderManagementScreen, OrderManagementScreen);
+        async _onClickOrder() {
+            this.mobileState.showDetails = true;
+            await super._onClickOrder(...arguments);
+        }
+    }
+    MobileOrderManagementScreen.template = 'MobileOrderManagementScreen';
 
     return MobileOrderManagementScreen;
 });

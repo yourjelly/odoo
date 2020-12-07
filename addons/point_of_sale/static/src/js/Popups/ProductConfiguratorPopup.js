@@ -1,17 +1,20 @@
-odoo.define('point_of_sale.ProductConfiguratorPopup', function(require) {
+odoo.define('point_of_sale.ProductConfiguratorPopup', function (require) {
     'use strict';
 
     const { useState, useSubEnv } = owl.hooks;
     const PosComponent = require('point_of_sale.PosComponent');
-    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registries = require('point_of_sale.Registries');
 
-    class ProductConfiguratorPopup extends AbstractAwaitablePopup {
+    class ProductConfiguratorPopup extends owl.Component {
         constructor() {
             super(...arguments);
             useSubEnv({ attribute_components: [] });
         }
-
+        confirm() {
+            this.props.respondWith([true, this.getPayload()]);
+        }
+        cancel() {
+            this.props.respondWith([false]);
+        }
         getPayload() {
             var selected_attributes = [];
             var price_extra = 0.0;
@@ -29,7 +32,6 @@ odoo.define('point_of_sale.ProductConfiguratorPopup', function(require) {
         }
     }
     ProductConfiguratorPopup.template = 'ProductConfiguratorPopup';
-    Registries.Component.add(ProductConfiguratorPopup);
 
     class BaseProductAttribute extends PosComponent {
         constructor() {
@@ -54,7 +56,7 @@ odoo.define('point_of_sale.ProductConfiguratorPopup', function(require) {
 
             return {
                 value,
-                extra: selected_value.price_extra
+                extra: selected_value.price_extra,
             };
         }
     }
@@ -69,15 +71,14 @@ odoo.define('point_of_sale.ProductConfiguratorPopup', function(require) {
         }
     }
     RadioProductAttribute.template = 'RadioProductAttribute';
-    Registries.Component.add(RadioProductAttribute);
 
-    class SelectProductAttribute extends BaseProductAttribute { }
+    class SelectProductAttribute extends BaseProductAttribute {}
     SelectProductAttribute.template = 'SelectProductAttribute';
-    Registries.Component.add(SelectProductAttribute);
 
     class ColorProductAttribute extends BaseProductAttribute {}
     ColorProductAttribute.template = 'ColorProductAttribute';
-    Registries.Component.add(ColorProductAttribute);
+
+    ProductConfiguratorPopup.components = { RadioProductAttribute, SelectProductAttribute, ColorProductAttribute };
 
     return {
         ProductConfiguratorPopup,

@@ -1,303 +1,323 @@
-odoo.define('point_of_sale.ProductScreen', function(require) {
+odoo.define('point_of_sale.ProductScreen', function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const ControlButtonsMixin = require('point_of_sale.ControlButtonsMixin');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
+    const SetPricelistButton = require('point_of_sale.SetPricelistButton');
+    const SetFiscalPositionButton = require('point_of_sale.SetFiscalPositionButton');
+    const Orderline = require('point_of_sale.Orderline');
+    const OrderSummary = require('point_of_sale.OrderSummary');
+    const ActionpadWidget = require('point_of_sale.ActionpadWidget');
+    const NumpadWidget = require('point_of_sale.NumpadWidget');
+    const MobileOrderWidget = require('point_of_sale.MobileOrderWidget');
     const { useListener } = require('web.custom_hooks');
-    const Registries = require('point_of_sale.Registries');
-    const { onChangeOrder, useBarcodeReader } = require('point_of_sale.custom_hooks');
-    const { Gui } = require('point_of_sale.Gui');
+    const { useBarcodeReader } = require('point_of_sale.custom_hooks');
     const { useState } = owl.hooks;
+    const { parse } = require('web.field_utils');
+    const { barcodeRepr } = require('point_of_sale.utils');
 
-    class ProductScreen extends ControlButtonsMixin(PosComponent) {
+    class ProductScreen extends PosComponent {
+        static components = {
+            SetPricelistButton,
+            SetFiscalPositionButton,
+            Orderline,
+            OrderSummary,
+            ActionpadWidget,
+            NumpadWidget,
+            MobileOrderWidget,
+        };
         constructor() {
             super(...arguments);
-            useListener('update-selected-orderline', this._updateSelectedOrderline);
-            useListener('new-orderline-selected', this._newOrderlineSelected);
-            useListener('set-numpad-mode', this._setNumpadMode);
-            useListener('click-product', this._clickProduct);
+            useListener('update-selected-orderline', this._onUpdateSelectedOrderline);
+            useListener('click-product', this._onClickProduct);
             useListener('click-customer', this._onClickCustomer);
             useListener('click-pay', this._onClickPay);
-            useBarcodeReader({
-                product: this._barcodeProductAction,
-                weight: this._barcodeProductAction,
-                price: this._barcodeProductAction,
-                client: this._barcodeClientAction,
-                discount: this._barcodeDiscountAction,
-                error: this._barcodeErrorAction,
-            })
-            onChangeOrder(null, (newOrder) => newOrder && this.render());
+            useListener('select-orderline', this.onSelectOrderline);
+            useListener('click-lot', this.onClickLot);
+            useListener('set-numpad-mode', this.onChangeMode);
+            useListener('switchpane', this.onSwitchPane);
+            useListener('categ-popup', this.onCategPopup);
+            useBarcodeReader(this.env.model.barcodeReader, {
+                product: this._onProductScan,
+                weight: this._onProductScan,
+                price: this._onProductScan,
+                discount: this._onProductScan,
+                client: this._onClientScan,
+                error: (parsedCode) => {
+                    this.env.ui.askUser('ErrorBarcodePopup', { code: barcodeRepr(parsedCode) });
+                },
+            });
             NumberBuffer.use({
                 nonKeyboardInputEvent: 'numpad-click-input',
                 triggerAtInput: 'update-selected-orderline',
                 useWithBarcode: true,
             });
-            this.state = useState({ numpadMode: 'quantity' });
+            this.state = useState({ numpadMode: 'quantity', searchTerm: '' });
+            this._clearSearchBar = this.props.basicSearchBar.useSearchBar({
+                onSearchTermChange: owl.utils.debounce(this._onSearchTermChange, 100),
+                placeholder: this.env._t('Search Products...'),
+            });
             this.mobile_pane = this.props.mobile_pane || 'right';
         }
         mounted() {
-            if(this.env.pos.config.cash_control && this.env.pos.pos_session.state == 'opening_control') {
-                Gui.showPopup('CashOpeningPopup');
+            this._onMounted();
+        }
+        async _onMounted() {
+            if (this.env.model.config.cash_control && this.env.model.session.state == 'opening_control') {
+                await this.env.ui.askUser('CashOpeningPopup');
             }
-            this.env.pos.on('change:selectedClient', this.render, this);
-        }
-        willUnmount() {
-            this.env.pos.off('change:selectedClient', null, this);
-        }
-        /**
-         * To be overridden by modules that checks availability of
-         * connected scale.
-         * @see _onScaleNotAvailable
-         */
-        get isScaleAvailable() {
-            return true;
-        }
-        get client() {
-            return this.env.pos.get_client();
-        }
-        get currentOrder() {
-            return this.env.pos.get_order();
-        }
-        async _clickProduct(event) {
-            if (!this.currentOrder) {
-                this.env.pos.add_new_order();
+            if (this.env.model.getProducts(0).length === 0) {
+                await this.env.actionHandler({ name: 'actionLoadDemoData' });
             }
+        }
+        _onUpdateSelectedOrderline(event) {
+            const buffer = event.detail.buffer;
+            const order = this.props.activeOrder;
+            const orderline = this.env.model.getActiveOrderline(order);
+            if (!orderline) return;
+            const isLowerQuantity = (buffer ? parse.float(buffer) : 0) < orderline.qty;
+            if (
+                this.state.numpadMode === 'quantity' &&
+                this.env.model.getDisallowLineQuantityChange() &&
+                isLowerQuantity
+            ) {
+                this.env.actionHandler({
+                    name: 'actionShowDecreaseQuantityPopup',
+                    args: [this.props.activeOrder],
+                });
+                NumberBuffer.reset();
+            } else if (this.state.numpadMode === 'quantity' && buffer === null) {
+                this.env.actionHandler({
+                    name: 'actionDeleteOrderline',
+                    args: [this.props.activeOrder, orderline],
+                });
+                NumberBuffer.reset();
+            } else {
+                const orderlineFieldName = { quantity: 'qty', price: 'price_unit', discount: 'discount' }[
+                    this.state.numpadMode
+                ];
+                this.env.actionHandler({
+                    name: 'actionUpdateOrderline',
+                    args: [orderline, { [orderlineFieldName]: buffer ? parse.float(buffer) : 0 }],
+                });
+            }
+        }
+        async _onClickProduct(event) {
             const product = event.detail;
-            let price_extra = 0.0;
-            let draftPackLotLines, weight, description, packLotLinesToEdit;
-
-            if (this.env.pos.config.product_configurator && _.some(product.attribute_line_ids, (id) => id in this.env.pos.attributes_by_ptal_id)) {
-                let attributes = _.map(product.attribute_line_ids, (id) => this.env.pos.attributes_by_ptal_id[id])
-                                  .filter((attr) => attr !== undefined);
-                let { confirmed, payload } = await this.showPopup('ProductConfiguratorPopup', {
-                    product: product,
-                    attributes: attributes,
-                });
-
-                if (confirmed) {
-                    description = payload.selected_attributes.join(', ');
-                    price_extra += payload.price_extra;
-                } else {
-                    return;
-                }
-            }
-
-            // Gather lot information if required.
-            if (['serial', 'lot'].includes(product.tracking) && (this.env.pos.picking_type.use_create_lots || this.env.pos.picking_type.use_existing_lots)) {
-                const isAllowOnlyOneLot = product.isAllowOnlyOneLot();
-                if (isAllowOnlyOneLot) {
-                    packLotLinesToEdit = [];
-                } else {
-                    const orderline = this.currentOrder
-                        .get_orderlines()
-                        .filter(line => !line.get_discount())
-                        .find(line => line.product.id === product.id);
-                    if (orderline) {
-                        packLotLinesToEdit = orderline.getPackLotLinesToEdit();
-                    } else {
-                        packLotLinesToEdit = [];
-                    }
-                }
-                const { confirmed, payload } = await this.showPopup('EditListPopup', {
-                    title: this.env._t('Lot/Serial Number(s) Required'),
-                    isSingleItem: isAllowOnlyOneLot,
-                    array: packLotLinesToEdit,
-                });
-                if (confirmed) {
-                    // Segregate the old and new packlot lines
-                    const modifiedPackLotLines = Object.fromEntries(
-                        payload.newArray.filter(item => item.id).map(item => [item.id, item.text])
-                    );
-                    const newPackLotLines = payload.newArray
-                        .filter(item => !item.id)
-                        .map(item => ({ lot_name: item.text }));
-
-                    draftPackLotLines = { modifiedPackLotLines, newPackLotLines };
-                } else {
-                    // We don't proceed on adding product.
-                    return;
-                }
-            }
-
-            // Take the weight if necessary.
-            if (product.to_weight && this.env.pos.config.iface_electronic_scale) {
-                // Show the ScaleScreen to weigh the product.
-                if (this.isScaleAvailable) {
-                    const { confirmed, payload } = await this.showTempScreen('ScaleScreen', {
-                        product,
-                    });
-                    if (confirmed) {
-                        weight = payload.weight;
-                    } else {
-                        // do not add the product;
-                        return;
-                    }
-                } else {
-                    await this._onScaleNotAvailable();
-                }
-            }
-
-            // Add the product after having the extra information.
-            this.currentOrder.add_product(product, {
-                draftPackLotLines,
-                description: description,
-                price_extra: price_extra,
-                quantity: weight,
-            });
-
+            const [proceed, options] = await this._beforeAddProduct(product);
+            if (!proceed) return;
+            this.env.actionHandler({ name: 'actionAddProduct', args: [this.props.activeOrder, product, options] });
+            this.state.numpadMode = 'quantity';
             NumberBuffer.reset();
         }
-        _setNumpadMode(event) {
-            const { mode } = event.detail;
+        async _onClickCustomer() {
+            // IMPROVEMENT: This code snippet is very similar to selectClient of PaymentScreen.
+            const [confirmed, selectedClientId] = await this.showTempScreen('ClientListScreen', {
+                clientId: this.props.activeOrder.partner_id,
+            });
+            if (confirmed) {
+                this.env.actionHandler({
+                    name: 'actionSetClient',
+                    args: [this.props.activeOrder, selectedClientId || false],
+                });
+            }
+        }
+        _onClickPay() {
+            this.env.actionHandler({ name: 'actionShowScreen', args: ['PaymentScreen'] });
+        }
+        /**
+         * This single method is used to act on multiple types of barcode, specifically, the
+         * 'weight', 'price', 'discount' and 'product' barcode types.
+         * @param {Object} parsedCode
+         * @param {string} parsedCode.type
+         * @param {string} parsedCode.base_code
+         * @param {any} parsedCode.value
+         */
+        _onProductScan(parsedCode) {
+            const product = this.env.model.getProductByBarcode(parsedCode.base_code);
+            const barcodeTypeMapping = {
+                weight: 'qty',
+                price: 'price_unit',
+                discount: 'discount',
+            };
+            if (product) {
+                const options = {};
+                if (parsedCode.type !== 'product') {
+                    options[barcodeTypeMapping[parsedCode.type]] = parsedCode.value;
+                }
+                this.env.actionHandler({ name: 'actionAddProduct', args: [this.props.activeOrder, product, options] });
+            } else if (!product && parsedCode.type === 'product') {
+                this.env.ui.askUser('ErrorBarcodePopup', {
+                    code: barcodeRepr(parsedCode),
+                    message: `The product with base barcode of ${parsedCode.base_code} was not loaded or does not exist.`,
+                });
+            } else {
+                const orderline = this.env.model.getActiveOrderline(this.props.activeOrder);
+                this.env.actionHandler({
+                    name: 'actionUpdateOrderline',
+                    args: [orderline, { [barcodeTypeMapping[parsedCode.type]]: parsedCode.value }],
+                });
+            }
+        }
+        /**
+         * @param {Object} parsedCode
+         * @param {string} parsedCode.base_code
+         */
+        _onClientScan(parsedCode) {
+            const partner = this.env.model.getPartnerByBarcode(parsedCode.base_code);
+            if (partner) {
+                this.env.actionHandler({ name: 'actionSetClient', args: [partner.id] });
+            } else {
+                this.env.ui.askUser('ErrorBarcodePopup', {
+                    code: barcodeRepr(parsedCode),
+                    message: this.env._t('Unable to find the customer with the scanned barcode.'),
+                });
+            }
+        }
+        onSpaceClickProduct(product, event) {
+            if (event.which === 32) {
+                this.trigger('click-product', product);
+            }
+        }
+        onChangeMode({ detail: mode }) {
             NumberBuffer.capture();
             NumberBuffer.reset();
             this.state.numpadMode = mode;
         }
-        async _updateSelectedOrderline(event) {
-            if(this.state.numpadMode === 'quantity' && this.env.pos.disallowLineQuantityChange()) {
-                let order = this.env.pos.get_order();
-                let selectedLine = order.get_selected_orderline();
-                let lastId = order.orderlines.last().cid;
-                let currentQuantity = this.env.pos.get_order().get_selected_orderline().get_quantity();
-
-                if(selectedLine.noDecrease) {
-                    this.showPopup('ErrorPopup', {
-                        title: this.env._t('Invalid action'),
-                        body: this.env._t('You are not allowed to change this quantity'),
-                    });
-                    return;
-                }
-                if(lastId != selectedLine.cid)
-                    this._showDecreaseQuantityPopup();
-                else if(currentQuantity < event.detail.buffer)
-                    this._setValue(event.detail.buffer);
-                else if(event.detail.buffer < currentQuantity)
-                    this._showDecreaseQuantityPopup();
-            } else {
-                let { buffer } = event.detail;
-                let val = buffer === null ? 'remove' : buffer;
-                this._setValue(val);
-            }
-        }
-        async _newOrderlineSelected() {
+        onSelectOrderline({ detail: orderline }) {
+            this.state.numpadMode = 'quantity';
+            this.env.actionHandler({ name: 'actionSelectOrderline', args: [this.props.activeOrder, orderline] });
             NumberBuffer.reset();
         }
-        _setValue(val) {
-            if (this.currentOrder.get_selected_orderline()) {
-                if (this.state.numpadMode === 'quantity') {
-                    this.currentOrder.get_selected_orderline().set_quantity(val);
-                } else if (this.state.numpadMode === 'discount') {
-                    this.currentOrder.get_selected_orderline().set_discount(val);
-                } else if (this.state.numpadMode === 'price') {
-                    var selected_orderline = this.currentOrder.get_selected_orderline();
-                    selected_orderline.price_manually_set = true;
-                    selected_orderline.set_unit_price(val);
-                }
-                if (this.env.pos.config.iface_customer_facing_display) {
-                    this.env.pos.send_current_order_to_customer_facing_display();
+        async _onSearchTermChange([searchTerm, key]) {
+            this.state.searchTerm = searchTerm;
+            if (key && key === 'Enter') {
+                const products = this.getProductsToDisplay();
+                if (products.length === 1) {
+                    await this.env.actionHandler({
+                        name: 'actionAddProduct',
+                        args: [this.props.activeOrder, products[0], {}],
+                    });
+                    this._clearSearchBar();
+                    NumberBuffer.reset();
                 }
             }
         }
-        _barcodeProductAction(code) {
-            // NOTE: scan_product call has side effect in pos if it returned true.
-            if (!this.env.pos.scan_product(code)) {
-                this._barcodeErrorAction(code);
-            }
+        onClickLot({ detail: orderline }) {
+            this.env.actionHandler({ name: 'actionSetOrderlineLots', args: [orderline] });
         }
-        _barcodeClientAction(code) {
-            const partner = this.env.pos.db.get_partner_by_barcode(code.code);
-            if (partner) {
-                if (this.currentOrder.get_client() !== partner) {
-                    this.currentOrder.set_client(partner);
-                    this.currentOrder.set_pricelist(
-                        _.findWhere(this.env.pos.pricelists, {
-                            id: partner.property_product_pricelist[0],
-                        }) || this.env.pos.default_pricelist
-                    );
-                }
-                return true;
-            }
-            this._barcodeErrorAction(code);
-            return false;
-        }
-        _barcodeDiscountAction(code) {
-            var last_orderline = this.currentOrder.get_last_orderline();
-            if (last_orderline) {
-                last_orderline.set_discount(code.value);
-            }
-        }
-        // IMPROVEMENT: The following two methods should be in PosScreenComponent?
-        // Why? Because once we start declaring barcode actions in different
-        // screens, these methods will also be declared over and over.
-        _barcodeErrorAction(code) {
-            this.showPopup('ErrorBarcodePopup', { code: this._codeRepr(code) });
-        }
-        _codeRepr(code) {
-            if (code.code.length > 32) {
-                return code.code.substring(0, 29) + '...';
+        onSwitchPane() {
+            if (this.mobile_pane === 'left') {
+                this.mobile_pane = 'right';
             } else {
-                return code.code;
+                this.mobile_pane = 'left';
             }
+            this.render();
+        }
+        async onCategPopup(event) {
+            const subcategories = event.detail;
+            const activeCategoryId = this.getActiveCategoryId();
+            const selectionList = [
+                {
+                    id: 0,
+                    label: 'All Items',
+                    isSelected: 0 === activeCategoryId,
+                },
+                ...subcategories.map((category) => ({
+                    id: category.id,
+                    label: category.name,
+                    isSelected: category.id === activeCategoryId,
+                })),
+            ];
+            const [confirmed, selectedCategory] = await this.env.ui.askUser('SelectionPopup', {
+                title: this.env._t('Select the category'),
+                list: selectionList,
+            });
+            if (confirmed) {
+                this.env.actionHandler({ name: 'actionSetActiveCategoryId', args: [selectedCategory.id] });
+            }
+        }
+        getActiveOrderlineId() {
+            return this.props.activeOrder._extras.activeOrderlineId;
+        }
+        getOrderlineAdditionalClasses(orderline) {
+            return {
+                selected: orderline.id === this.getActiveOrderlineId(),
+            };
+        }
+        showSetPricelistButton() {
+            return (
+                this.env.model.config.use_pricelist && this.env.model.getRecords('product.pricelist').length > 1
+            );
+        }
+        showSetFiscalPositionButton() {
+            return this.env.model.getRecords('account.fiscal.position').length > 0;
+        }
+        getCategoryImageURL(category) {
+            return `/web/image?model=pos.category&field=image_128&id=${category.id}&write_date=${category.write_date}&unique=1`;
+        }
+        getProductImageURL(product) {
+            return `/web/image?model=product.product&field=image_128&id=${product.id}&write_date=${product.write_date}&unique=1`;
+        }
+        getActiveCategoryId() {
+            return this.env.model.data.uiState.activeCategoryId;
+        }
+        getActiveCategory() {
+            return this.env.model.getRecord('pos.category', this.getActiveCategoryId());
+        }
+        getProductsToDisplay() {
+            const categoryId = this.getActiveCategoryId();
+            return this.env.model.getProducts(categoryId, this.state.searchTerm);
+        }
+        getCategoryChildrenIds(categoryId) {
+            return this.env.model.data.derived.categoryChildren[categoryId] || [];
+        }
+        getSubcategories(categoryId) {
+            const categoryChildrenIds = this.getCategoryChildrenIds(categoryId);
+            return categoryChildrenIds.map((id) => this.env.model.getRecord('pos.category', id));
+        }
+        getBreadcrumbs(categoryId) {
+            if (categoryId === 0) return [];
+            return [...this.env.model.getCategoryAncestorIds(categoryId).slice(1), categoryId].map((id) =>
+                this.env.model.getRecord('pos.category', id)
+            );
+        }
+        getProductDisplayPrice(product) {
+            const order = this.props.activeOrder;
+            if (!order.pricelist_id) {
+                throw new Error('An order should have pricelist.');
+            }
+            const basePrice = this.env.model.getProductPrice(product.id, order.pricelist_id, 1);
+            const productTaxes = product.taxes_id.map((id) => this.env.model.getRecord('account.tax', id));
+            const taxes = this.env.model.getFiscalPositionTaxes(productTaxes, order.fiscal_position_id);
+            const [withoutTax, withTax] = this.env.model.getUnitPrices(basePrice, taxes);
+            const unitPrice = this.env.model.config.iface_tax_included === 'subtotal' ? withoutTax : withTax;
+            return this.env.model.formatCurrencyNoSymbol(unitPrice);
+        }
+        get hasNoCategories() {
+            return this.getCategoryChildrenIds(0).length === 0;
         }
         /**
-         * override this method to perform procedure if the scale is not available.
-         * @see isScaleAvailable
+         * This is a hook method before calling `actionAddProduct`. It allows to `proceed` on calling
+         * the action or completely ignore it. Return `[true, options]` to proceed with the action or
+         * `[false]` to cancel it.
+         * @param {'product.product'} product
+         * @returns {[boolean, { qty: number?, price_unit: number?, discount: number? }]} [proceed, options]
          */
-        async _onScaleNotAvailable() {}
-        async _showDecreaseQuantityPopup() {
-            const { confirmed, payload: inputNumber } = await this.showPopup('NumberPopup', {
-                startingValue: 0,
-                title: this.env._t('Set the new quantity'),
-            });
-            let newQuantity = inputNumber !== ""? inputNumber: null;
-            if (confirmed && newQuantity !== null) {
-                let order = this.env.pos.get_order();
-                let selectedLine = this.env.pos.get_order().get_selected_orderline();
-                let currentQuantity = selectedLine.get_quantity()
-                if(selectedLine.is_last_line() && currentQuantity === 1 && newQuantity < currentQuantity)
-                    selectedLine.set_quantity(newQuantity);
-                else if(newQuantity >= currentQuantity)
-                    selectedLine.set_quantity(newQuantity);
-                else {
-                    let newLine = selectedLine.clone();
-                    let decreasedQuantity = currentQuantity - newQuantity
-                    newLine.order = order;
-
-                    newLine.set_quantity( - decreasedQuantity, true);
-                    order.add_orderline(newLine);
+        async _beforeAddProduct(product) {
+            if (product.to_weight && this.env.model.config.iface_electronic_scale) {
+                const [confirmed, payload] = await this.showTempScreen('ScaleScreen', { product });
+                if (confirmed) {
+                    return [true, { qty: payload.weight }];
+                } else {
+                    return [false, {}];
                 }
-            }
-        }
-        async _onClickCustomer() {
-            // IMPROVEMENT: This code snippet is very similar to selectClient of PaymentScreen.
-            const currentClient = this.currentOrder.get_client();
-            const { confirmed, payload: newClient } = await this.showTempScreen(
-                'ClientListScreen',
-                { client: currentClient }
-            );
-            if (confirmed) {
-                this.currentOrder.set_client(newClient);
-                this.currentOrder.updatePricelist(newClient);
-            }
-        }
-        _onClickPay() {
-            this.showScreen('PaymentScreen');
-        }
-        switchPane() {
-            if (this.mobile_pane === "left") {
-                this.mobile_pane = "right";
-                this.render();
-            }
-            else {
-                this.mobile_pane = "left";
-                this.render();
+            } else {
+                return [true, {}];
             }
         }
     }
     ProductScreen.template = 'ProductScreen';
-
-    Registries.Component.add(ProductScreen);
 
     return ProductScreen;
 });

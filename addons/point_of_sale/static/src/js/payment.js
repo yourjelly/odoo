@@ -4,18 +4,23 @@ odoo.define('point_of_sale.PaymentInterface', function (require) {
 var core = require('web.core');
 
 /**
+ * This is the container of concrete implementations of PaymentInterface.
+ * Use `registerImplementation` to populate this container.
+ * Use `getImplementation` to get a specific implementation.
+ */
+const Implementations = {};
+
+/**
  * Implement this interface to support a new payment method in the POS:
  *
- * var PaymentInterface = require('point_of_sale.PaymentInterface');
+ * ```
+ * var { PaymentInterface, registerImplementation } = require('point_of_sale.PaymentInterface');
  * var MyPayment = PaymentInterface.extend({
  *     ...
  * })
- *
- * To connect the interface to the right payment methods register it:
- *
- * var models = require('point_of_sale.models');
- * models.register_payment_method('my_payment', MyPayment);
- *
+ * // Register the implementation so that it can be properly instantiated by PointOfSaleModel.
+ * registerImplementation('my_payment', MyPayment);
+ *```
  * my_payment is the technical name of the added selection in
  * use_payment_terminal.
  *
@@ -24,8 +29,8 @@ var core = require('web.core');
  * models.load_fields('pos.payment.method', ['new_field1', 'new_field2']);
  */
 var PaymentInterface = core.Class.extend({
-    init: function (pos, payment_method) {
-        this.pos = pos;
+    init: function (model, payment_method) {
+        this.model = model;
         this.payment_method = payment_method;
         this.supports_reversals = false;
     },
@@ -91,5 +96,17 @@ var PaymentInterface = core.Class.extend({
     close: function () {},
 });
 
-return PaymentInterface;
+function registerImplementation(terminalName, Implementation) {
+    if (terminalName in Implementations) {
+        throw new Error(`An implementation of PaymentInterface for '${terminalName}' payment terminal has been registered.`);
+    } else {
+        Implementations[terminalName] = Implementation;
+    }
+}
+
+function getImplementation(terminalName) {
+    return Implementations[terminalName];
+}
+
+return { PaymentInterface, registerImplementation, getImplementation };
 });

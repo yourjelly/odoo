@@ -1,30 +1,26 @@
-odoo.define('point_of_sale.PaymentScreenStatus', function(require) {
+odoo.define('point_of_sale.PaymentScreenStatus', function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
     class PaymentScreenStatus extends PosComponent {
+        get activeOrder() {
+            return this.props.activeOrder;
+        }
         get changeText() {
-            return this.env.pos.format_currency(this.currentOrder.get_change());
+            const change = this.env.model.getOrderChange(this.activeOrder);
+            return this.env.model.formatCurrency(change);
         }
         get totalDueText() {
-            return this.env.pos.format_currency(
-                this.currentOrder.get_total_with_tax() + this.currentOrder.get_rounding_applied()
-            );
+            const totalAmountToPay = this.env.model.getTotalAmountToPay(this.activeOrder);
+            return this.env.model.formatCurrency(totalAmountToPay);
         }
         get remainingText() {
-            return this.env.pos.format_currency(
-                this.currentOrder.get_due() > 0 ? this.currentOrder.get_due() : 0
-            );
-        }
-        get currentOrder() {
-            return this.env.pos.get_order();
+            const remaining = this.env.model.getOrderDue(this.activeOrder);
+            return this.env.model.formatCurrency(remaining);
         }
     }
     PaymentScreenStatus.template = 'PaymentScreenStatus';
-
-    Registries.Component.add(PaymentScreenStatus);
 
     return PaymentScreenStatus;
 });

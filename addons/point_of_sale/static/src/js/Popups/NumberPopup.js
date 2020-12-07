@@ -1,14 +1,13 @@
-odoo.define('point_of_sale.NumberPopup', function(require) {
+odoo.define('point_of_sale.NumberPopup', function (require) {
     'use strict';
 
     const { useState } = owl;
-    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const { useListener } = require('web.custom_hooks');
-    const Registries = require('point_of_sale.Registries');
+    const Draggable = require('point_of_sale.Draggable');
 
-    // formerly NumberPopupWidget
-    class NumberPopup extends AbstractAwaitablePopup {
+    class NumberPopup extends owl.Component {
+        static components = { Draggable };
         /**
          * @param {Object} props
          * @param {Boolean} props.isPassword Show password popup.
@@ -25,15 +24,23 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
             useListener('close-this-popup', this.cancel);
             let startingBuffer = '';
             if (typeof this.props.startingValue === 'number' && this.props.startingValue > 0) {
-                startingBuffer = this.props.startingValue.toString();
+                startingBuffer = this.props.startingValue.toFixed(2);
             }
             this.state = useState({ buffer: startingBuffer, toStartOver: this.props.isInputSelected });
             NumberBuffer.use({
                 nonKeyboardInputEvent: 'numpad-click-input',
                 triggerAtEnter: 'accept-input',
-                triggerAtEscape: 'close-this-popup',
+                triggerAtEsc: 'close-this-popup',
                 state: this.state,
             });
+        }
+        confirm() {
+            if (NumberBuffer.get()) {
+                this.props.respondWith([true, NumberBuffer.get()]);
+            }
+        }
+        cancel() {
+            this.props.respondWith([false]);
         }
         get decimalSeparator() {
             return this.env._t.database.parameters.decimal_point;
@@ -48,16 +55,8 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
                 return this.state.buffer;
             }
         }
-        confirm(event) {
-            if (NumberBuffer.get()) {
-                super.confirm();
-            }
-        }
         sendInput(key) {
             this.trigger('numpad-click-input', { key });
-        }
-        getPayload() {
-            return NumberBuffer.get();
         }
     }
     NumberPopup.template = 'NumberPopup';
@@ -65,13 +64,10 @@ odoo.define('point_of_sale.NumberPopup', function(require) {
         confirmText: 'Ok',
         cancelText: 'Cancel',
         title: 'Confirm ?',
-        body: '',
         cheap: false,
         startingValue: null,
         isPassword: false,
     };
-
-    Registries.Component.add(NumberPopup);
 
     return NumberPopup;
 });

@@ -1,19 +1,25 @@
 odoo.define('point_of_sale.NotificationSound', function (require) {
     'use strict';
 
-    const { useListener } = require('web.custom_hooks');
+    const { useState } = owl;
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
     class NotificationSound extends PosComponent {
         constructor() {
             super(...arguments);
-            useListener('ended', () => (this.props.sound.src = null));
+            this.state = useState({ src: false });
+        }
+        playSound(name) {
+            let src = false;
+            if (name === 'error') {
+                src = '/point_of_sale/static/src/sounds/error.wav';
+            } else if (name === 'bell') {
+                src = '/point_of_sale/static/src/sounds/bell.wav';
+            }
+            this.state.src = src;
         }
     }
     NotificationSound.template = 'NotificationSound';
-
-    Registries.Component.add(NotificationSound);
 
     return NotificationSound;
 });

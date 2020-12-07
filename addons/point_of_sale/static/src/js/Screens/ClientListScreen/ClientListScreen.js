@@ -1,91 +1,71 @@
-odoo.define('point_of_sale.ClientListScreen', function(require) {
+odoo.define('point_of_sale.ClientListScreen', function (require) {
     'use strict';
 
     const { debounce } = owl.utils;
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
-    const { useListener } = require('web.custom_hooks');
 
     /**
+     * IMPROVEMENT: this component needs pagination. It should only show limited number
+     * of partners to prevent clogging the rendering.
+     *
      * Render this screen using `showTempScreen` to select client.
      * When the shown screen is confirmed ('Set Customer' or 'Deselect Customer'
      * button is clicked), the call to `showTempScreen` resolves to the
      * selected client. E.g.
      *
      * ```js
-     * const { confirmed, payload: selectedClient } = await showTempScreen('ClientListScreen');
+     * const [confirmed, selectedClientId] = await showTempScreen('ClientListScreen');
      * if (confirmed) {
-     *   // do something with the selectedClient
+     *   // do something with the selectedClientId
      * }
      * ```
      *
-     * @props client - originally selected client
+     * @props clientId - originally selected client id
      */
     class ClientListScreen extends PosComponent {
         constructor() {
             super(...arguments);
-            useListener('click-save', () => this.env.bus.trigger('save-customer'));
-            useListener('click-edit', () => this.editClient());
-            useListener('save-changes', this.saveChanges);
-
-            // We are not using useState here because the object
-            // passed to useState converts the object and its contents
-            // to Observer proxy. Not sure of the side-effects of making
-            // a persistent object, such as pos, into owl.Observer. But it
-            // is better to be safe.
-            this.state = {
-                query: null,
-                selectedClient: this.props.client,
+            this.state = owl.useState({
+                query: '',
+                selectedClientId: this.props.clientId,
                 detailIsShown: false,
                 isEditMode: false,
-                editModeProps: {
-                    partner: {
-                        country_id: this.env.pos.company.country_id,
-                        state_id: this.env.pos.company.state_id,
-                    }
-                },
-            };
+            });
+            this.intFields = ['country_id', 'state_id', 'property_product_pricelist'];
+            this.changes = {};
             this.updateClientList = debounce(this.updateClientList, 70);
         }
 
         // Lifecycle hooks
         back() {
-            if(this.state.detailIsShown) {
+            if (this.state.detailIsShown) {
                 this.state.detailIsShown = false;
-                this.render();
             } else {
-                this.props.resolve({ confirmed: false, payload: false });
+                this.props.resolve([false]);
                 this.trigger('close-temp-screen');
             }
         }
         confirm() {
-            this.props.resolve({ confirmed: true, payload: this.state.selectedClient });
+            this.props.resolve([true, this.state.selectedClientId]);
             this.trigger('close-temp-screen');
         }
         // Getters
 
-        get currentOrder() {
-            return this.env.pos.get_order();
-        }
-
-        get clients() {
-            if (this.state.query && this.state.query.trim() !== '') {
-                return this.env.pos.db.search_partner(this.state.query.trim());
-            } else {
-                return this.env.pos.db.get_partners_sorted(1000);
-            }
+        getVisibleClients() {
+            const query = this.state.query.trim();
+            return this.env.model.getPartners(query);
         }
         get isNextButtonVisible() {
-            return this.state.selectedClient ? true : false;
+            return this.state.selectedClientId ? true : false;
         }
         /**
          * Returns the text and command of the next button.
          * The command field is used by the clickNext call.
          */
         get nextButton() {
-            if (!this.props.client) {
+            if (!this.props.clientId) {
                 return { command: 'set', text: 'Set Customer' };
-            } else if (this.props.client && this.props.client === this.state.selectedClient) {
+            } else if (this.props.clientId && this.props.clientId === this.state.selectedClientId) {
                 return { command: 'deselect', text: 'Deselect Customer' };
             } else {
                 return { command: 'set', text: 'Change Customer' };
@@ -98,67 +78,60 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
         // order to lower its trigger rate.
         updateClientList(event) {
             this.state.query = event.target.value;
-            const clients = this.clients;
-            if (event.code === 'Enter' && clients.length === 1) {
-                this.state.selectedClient = clients[0];
+            if (event.code === 'Enter') {
+                const visibleClients = this.getVisibleClients();
+                if (visibleClients.length !== 1) return;
+                this.state.selectedClientId = visibleClients[0].id;
                 this.clickNext();
-            } else {
-                this.render();
             }
         }
-        clickClient(event) {
-            let partner = event.detail.client;
-            if (this.state.selectedClient === partner) {
-                this.state.selectedClient = null;
+        onClickClient(partner) {
+            let partnerId = partner.id;
+            if (this.state.selectedClientId === partnerId) {
+                this.state.selectedClientId = null;
             } else {
-                this.state.selectedClient = partner;
+                this.state.selectedClientId = partnerId;
             }
-            this.render();
         }
-        editClient() {
-            this.state.editModeProps = {
-                partner: this.state.selectedClient,
-            };
+        onClickEdit() {
             this.state.detailIsShown = true;
-            this.render();
         }
         clickNext() {
-            this.state.selectedClient = this.nextButton.command === 'set' ? this.state.selectedClient : null;
+            this.state.selectedClientId = this.nextButton.command === 'set' ? this.state.selectedClientId : null;
             this.confirm();
         }
-        activateEditMode(event) {
-            const { isNewClient } = event.detail;
+        onCreateNewClient() {
             this.state.isEditMode = true;
             this.state.detailIsShown = true;
-            this.state.isNewClient = isNewClient;
-            if (!isNewClient) {
-                this.state.editModeProps = {
-                    partner: this.state.selectedClient,
-                };
-            }
-            this.render();
+            this.state.isNewClient = true;
         }
         deactivateEditMode() {
             this.state.isEditMode = false;
-            this.state.editModeProps = {
-                partner: {
-                    country_id: this.env.pos.company.country_id,
-                    state_id: this.env.pos.company.state_id,
-                },
-            };
-            this.render();
         }
-        async saveChanges(event) {
+        async onClickSave() {
+            const processedChanges = {};
+            for (let [key, value] of Object.entries(this.changes)) {
+                if (this.intFields.includes(key)) {
+                    processedChanges[key] = parseInt(value) || false;
+                } else {
+                    processedChanges[key] = value;
+                }
+            }
+            if (processedChanges.name === '') {
+                return this.showPopup('ErrorPopup', {
+                    title: _('A Customer Name Is Required'),
+                });
+            }
+            processedChanges.id = this.state.selectedClientId || false;
             try {
                 let partnerId = await this.rpc({
                     model: 'res.partner',
                     method: 'create_from_ui',
-                    args: [event.detail.processedChanges],
+                    args: [processedChanges],
                 });
-                await this.env.pos.load_new_partners();
-                this.state.selectedClient = this.env.pos.db.get_partner_by_id(partnerId);
+                await this.env.actionHandler({ name: 'actionLoadUpdatedPartners' });
+                this.state.selectedClientId = partnerId;
                 this.state.detailIsShown = false;
-                this.render();
             } catch (error) {
                 if (error.message.code < 0) {
                     await this.showPopup('OfflineErrorPopup', {
@@ -169,14 +142,95 @@ odoo.define('point_of_sale.ClientListScreen', function(require) {
                     throw error;
                 }
             }
+            this.changes = {};
         }
-        cancelEdit() {
-            this.deactivateEditMode();
+        isHighlighted(customer) {
+            return this.state.selectedClientId ? customer.id === this.state.selectedClientId : false;
+        }
+        get partnerImageUrl() {
+            // We prioritize image_1920 in the `changes` field because we want
+            // to show the uploaded image without fetching new data from the server.
+            const partner = this.state.selectedClientId;
+            if (this.changes.image_1920) {
+                return this.changes.image_1920;
+            } else if (partner.id) {
+                return `/web/image?model=res.partner&id=${partner.id}&field=image_128&write_date=${partner.write_date}&unique=1`;
+            } else {
+                return false;
+            }
+        }
+        getClientToEdit() {
+            return this.state.selectedClientId
+                ? this.env.model.getRecord('res.partner', this.state.selectedClientId)
+                : {
+                      country_id: this.env.model.company.country_id,
+                      state_id: this.env.model.company.state_id,
+                  };
+        }
+        /**
+         * Save to field `changes` all input changes from the form fields.
+         */
+        captureChange(event) {
+            this.changes[event.target.name] = event.target.value;
+        }
+        async uploadImage(event) {
+            const file = event.target.files[0];
+            if (!file.type.match(/image.*/)) {
+                await this.showPopup('ErrorPopup', {
+                    title: this.env._t('Unsupported File Format'),
+                    body: this.env._t('Only web-compatible Image formats such as .png or .jpeg are supported.'),
+                });
+            } else {
+                const imageUrl = await getDataURLFromFile(file);
+                const loadedImage = await this._loadImage(imageUrl);
+                if (loadedImage) {
+                    const resizedImage = await this._resizeImage(loadedImage, 800, 600);
+                    this.changes.image_1920 = resizedImage.toDataURL();
+                }
+            }
+        }
+        _resizeImage(img, maxwidth, maxheight) {
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            var ratio = 1;
+
+            if (img.width > maxwidth) {
+                ratio = maxwidth / img.width;
+            }
+            if (img.height * ratio > maxheight) {
+                ratio = maxheight / img.height;
+            }
+            var width = Math.floor(img.width * ratio);
+            var height = Math.floor(img.height * ratio);
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            return canvas;
+        }
+        /**
+         * Loading image is converted to a Promise to allow await when
+         * loading an image. It resolves to the loaded image if succesful,
+         * else, resolves to false.
+         *
+         * [Source](https://stackoverflow.com/questions/45788934/how-to-turn-this-callback-into-a-promise-using-async-await)
+         */
+        _loadImage(url) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.addEventListener('load', () => resolve(img));
+                img.addEventListener('error', () => {
+                    this.showPopup('ErrorPopup', {
+                        title: this.env._t('Loading Image Error'),
+                        body: this.env._t('Encountered error when loading image. Please try again.'),
+                    });
+                    resolve(false);
+                });
+                img.src = url;
+            });
         }
     }
     ClientListScreen.template = 'ClientListScreen';
-
-    Registries.Component.add(ClientListScreen);
 
     return ClientListScreen;
 });

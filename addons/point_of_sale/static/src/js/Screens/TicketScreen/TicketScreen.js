@@ -1,39 +1,39 @@
 odoo.define('point_of_sale.TicketScreen', function (require) {
     'use strict';
 
-    const Registries = require('point_of_sale.Registries');
-    const IndependentToOrderScreen = require('point_of_sale.IndependentToOrderScreen');
+    const PosComponent = require('point_of_sale.PosComponent');
     const { useListener } = require('web.custom_hooks');
-    const { posbus } = require('point_of_sale.utils');
+    const SearchBar = require('point_of_sale.SearchBar');
 
-    class TicketScreen extends IndependentToOrderScreen {
+    class TicketScreen extends PosComponent {
+        static components = { SearchBar };
         constructor() {
             super(...arguments);
-            useListener('close-screen', this.close);
-            useListener('filter-selected', this._onFilterSelected);
-            useListener('search', this._onSearch);
-            this.searchDetails = {};
-            this.filter = null;
-            this._initializeSearchFieldConstants();
+            useListener('filter-selected', ({ detail: filter }) =>
+                this.env.actionHandler({ name: 'actionSetTicketScreenFilter', args: [filter] })
+            );
+            useListener('search', ({ detail: searchDetails }) =>
+                this.env.actionHandler({ name: 'actionSetTicketScreenSearchDetails', args: [searchDetails] })
+            );
         }
-        mounted() {
-            posbus.on('ticket-button-clicked', this, this.close);
-            this.env.pos.get('orders').on('add remove change', () => this.render(), this);
-            this.env.pos.on('change:selectedOrder', () => this.render(), this);
-        }
-        willUnmount() {
-            posbus.off('ticket-button-clicked', this);
-            this.env.pos.get('orders').off('add remove change', null, this);
-            this.env.pos.off('change:selectedOrder', null, this);
-        }
-        _onFilterSelected(event) {
-            this.filter = event.detail.filter;
-            this.render();
-        }
-        _onSearch(event) {
-            const searchDetails = event.detail;
-            Object.assign(this.searchDetails, searchDetails);
-            this.render();
+        async onDeleteOrder(order) {
+            const orderlines = this.env.model.getOrderlines(order);
+            if (['ProductScreen', 'PaymentScreen'].includes(order._extras.activeScreen) && orderlines.length > 0) {
+                const message = _.str.sprintf(
+                    this.env._t('%s has total amount of %s, are you sure you want delete this order?'),
+                    this.env.model.getOrderName(order),
+                    this.env.model.formatCurrency(this.getTotal(order))
+                );
+                const confirmed = await this.env.ui.askUser('ConfirmPopup', {
+                    title: this.env._t('Existing orderlines'),
+                    body: message,
+                });
+                if (confirmed) {
+                    this.env.actionHandler({ name: 'actionDeleteOrder', args: [order] });
+                }
+            } else {
+                this.env.actionHandler({ name: 'actionDeleteOrder', args: [order] });
+            }
         }
         /**
          * Override to conditionally show the new ticket button.
@@ -41,94 +41,82 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         get showNewTicketButton() {
             return true;
         }
-        get orderList() {
-            return this.env.pos.get_order_list();
-        }
         get filteredOrderList() {
             const { AllTickets } = this.getOrderStates();
+            const filter = this.env.model.data.uiState.TicketScreen.filter || '';
             const filterCheck = (order) => {
-                if (this.filter && this.filter !== AllTickets) {
-                    const screen = order.get_screen_data();
-                    return this.filter === this.constants.screenToStatusMap[screen.name];
+                if (filter && filter !== AllTickets) {
+                    const screen = this.env.model.getOrderScreen(order);
+                    return filter === this.screenToStatus[screen];
                 }
                 return true;
             };
-            const { fieldValue, searchTerm } = this.searchDetails;
-            const fieldAccessor = this._searchFields[fieldValue];
+            const { field, term } = this.env.model.data.uiState.TicketScreen.searchDetails || {
+                field: undefined,
+                term: undefined,
+            };
+            const fieldAccessor = this.searchFieldAccessors[field];
             const searchCheck = (order) => {
                 if (!fieldAccessor) return true;
                 const fieldValue = fieldAccessor(order);
                 if (fieldValue === null) return true;
-                if (!searchTerm) return true;
-                return fieldValue && fieldValue.toString().toLowerCase().includes(searchTerm.toLowerCase());
+                if (!term) return true;
+                return fieldValue && fieldValue.toString().toLowerCase().includes(term.toLowerCase());
             };
             const predicate = (order) => {
                 return filterCheck(order) && searchCheck(order);
             };
-            return this.orderList.filter(predicate);
+
+            // IMPROVEMENT: Is it better if sorted? If so, apply this and fix the TicketScreen tour.
+            // .sort((a, b) => new Date(b.date_order) - new Date(a.date_order));
+            return this.getOrdersToShow(predicate);
         }
-        selectOrder(order) {
-            this._setOrder(order);
-            if (order === this.env.pos.get_order()) {
-                this.close();
-            }
+        getOrdersToShow(predicate) {
+            return this.env.model.getDraftOrders().filter(predicate);
         }
-        _setOrder(order) {
-            this.env.pos.set_order(order);
-        }
-        createNewOrder() {
-            this.env.pos.add_new_order();
-        }
-        async deleteOrder(order) {
-            const screen = order.get_screen_data();
-            if (['ProductScreen', 'PaymentScreen'].includes(screen.name) && order.get_orderlines().length > 0) {
-                const { confirmed } = await this.showPopup('ConfirmPopup', {
-                    title: 'Existing orderlines',
-                    body: `${order.name} has total amount of ${this.getTotal(
-                        order
-                    )}, are you sure you want delete this order?`,
-                });
-                if (!confirmed) return;
-            }
-            if (order) {
-                order.destroy({ reason: 'abandon' });
-            }
-            posbus.trigger('order-deleted');
+        getReceiptNumber(order) {
+            const orderName = this.env.model.getOrderName(order);
+            const uid = orderName.match(/\d{5,}-\d{3,}-\d{4,}/);
+            if (uid) return uid[0];
+            return orderName;
         }
         getDate(order) {
-            return moment(order.creation_date).format('YYYY-MM-DD hh:mm A');
+            return moment(order.date_order).format('YYYY-MM-DD hh:mm A');
         }
         getTotal(order) {
-            return this.env.pos.format_currency(order.get_total_with_tax());
-        }
-        getCustomer(order) {
-            return order.get_client_name();
+            const { withTaxWithDiscount } = this.env.model.getOrderTotals(order);
+            return withTaxWithDiscount;
         }
         getCardholderName(order) {
-            return order.get_cardholder_name();
+            const defaultName = '';
+            for (const payment of this.env.model.getPayments(order)) {
+                if (payment.cardholder_name) return payment.cardholder_name;
+            }
+            return defaultName;
         }
         getEmployee(order) {
-            return order.employee ? order.employee.name : '';
+            const user = this.env.model.getRecord('res.users', order.user_id);
+            return user ? user.name : '';
         }
         getStatus(order) {
-            const screen = order.get_screen_data();
-            return this.constants.screenToStatusMap[screen.name];
+            return this.screenToStatus[this.env.model.getOrderScreen(order)];
         }
         /**
          * Hide the delete button if one of the payments is a 'done' electronic payment.
          */
         hideDeleteButton(order) {
-            return order
-                .get_paymentlines()
-                .some((payment) => payment.is_electronic() && payment.get_payment_status() === 'done');
+            const payments = this.env.model.getPayments(order);
+            return payments.some((payment) => payment.payment_status && payment.payment_status === 'done');
         }
         showCardholderName() {
-            return this.env.pos.payment_methods.some(method => method.use_payment_terminal);
+            return this.env.model.data.derived.paymentMethods.some((method) => method.use_payment_terminal);
         }
         get searchBarConfig() {
             return {
-                searchFields: this.constants.searchFieldNames,
+                searchFields: Object.keys(this.searchFieldAccessors),
                 filter: { show: true, options: this.filterOptions },
+                initSearchTerm: this.env.model.data.uiState.TicketScreen.searchDetails.term,
+                initFilter: this.env.model.data.uiState.TicketScreen.filter,
             };
         }
         get filterOptions() {
@@ -159,16 +147,16 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
          * ```
          * @returns Record<string, (models.Order) => string>
          */
-        get _searchFields() {
+        get searchFieldAccessors() {
             const { ReceiptNumber, Date, Customer, CardholderName } = this.getSearchFieldNames();
-            var fields = {
-                [ReceiptNumber]: (order) => order.name,
-                [Date]: (order) => moment(order.creation_date).format('YYYY-MM-DD hh:mm A'),
-                [Customer]: (order) => order.get_client_name(),
+            const fields = {
+                [ReceiptNumber]: (order) => this.env.model.getOrderName(order),
+                [Date]: (order) => moment(order.date_order).format('YYYY-MM-DD hh:mm A'),
+                [Customer]: (order) => this.env.model.getCustomerName(order),
             };
 
             if (this.showCardholderName()) {
-                fields[CardholderName] = (order) => order.get_cardholder_name();
+                fields[CardholderName] = (order) => this.getCardholderName(order);
             }
 
             return fields;
@@ -176,20 +164,13 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         /**
          * Maps the order screen params to order status.
          */
-        get _screenToStatusMap() {
+        get screenToStatus() {
             const { Ongoing, Payment, Receipt } = this.getOrderStates();
             return {
                 ProductScreen: Ongoing,
                 PaymentScreen: Payment,
                 ReceiptScreen: Receipt,
             };
-        }
-        _initializeSearchFieldConstants() {
-            this.constants = {};
-            Object.assign(this.constants, {
-                searchFieldNames: Object.keys(this._searchFields),
-                screenToStatusMap: this._screenToStatusMap,
-            });
         }
         getOrderStates() {
             return {
@@ -209,8 +190,6 @@ odoo.define('point_of_sale.TicketScreen', function (require) {
         }
     }
     TicketScreen.template = 'TicketScreen';
-
-    Registries.Component.add(TicketScreen);
 
     return TicketScreen;
 });

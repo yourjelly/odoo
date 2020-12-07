@@ -1,39 +1,28 @@
-odoo.define('point_of_sale.MobileOrderWidget', function(require) {
+odoo.define('point_of_sale.MobileOrderWidget', function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
+    /**
+     * @prop {string} pane
+     * @prop {'pos.order'} order
+     */
     class MobileOrderWidget extends PosComponent {
         constructor() {
             super(...arguments);
             this.pane = this.props.pane;
-            this.update();
         }
-        get order() {
-            return this.env.pos.get_order();
+        get total() {
+            const { withTaxWithDiscount } = this.env.model.getOrderTotals(this.props.order);
+            return this.env.model.formatCurrency(withTaxWithDiscount);
         }
-        mounted() {
-          this.order.on('change', () => {
-              this.update();
-              this.render();
-          });
-          this.order.orderlines.on('change', () => {
-              this.update();
-              this.render();
-          });
-        }
-        update() {
-            const total = this.order ? this.order.get_total_with_tax() : 0;
-            const tax = this.order ? total - this.order.get_total_without_tax() : 0;
-            this.total = this.env.pos.format_currency(total);
-            this.items_number = this.order ? this.order.orderlines.reduce((items_number,line) => items_number + line.quantity, 0) : 0;
+        get items_number() {
+            if (!this.props.order) return 0;
+            const orderlines = this.env.model.getOrderlines(this.props.order);
+            return orderlines.reduce((items_number, line) => items_number + line.qty, 0);
         }
     }
-
     MobileOrderWidget.template = 'MobileOrderWidget';
-
-    Registries.Component.add(MobileOrderWidget);
 
     return MobileOrderWidget;
 });

@@ -1,31 +1,17 @@
 odoo.define('point_of_sale.OrderList', function (require) {
     'use strict';
 
-    const { useState } = owl.hooks;
-    const { useListener } = require('web.custom_hooks');
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
     /**
-     * @props {models.Order} [initHighlightedOrder] initially highligted order
-     * @props {Array<models.Order>} orders
+     * @props {'pos.order'[]} orders
      */
     class OrderList extends PosComponent {
-        constructor() {
-            super(...arguments);
-            useListener('click-order', this._onClickOrder);
-            this.state = useState({ highlightedOrder: this.props.initHighlightedOrder || null });
-        }
-        get highlightedOrder() {
-            return this.state.highlightedOrder;
-        }
-        _onClickOrder({ detail: order }) {
-            this.state.highlightedOrder = order;
+        isHighlighted(order) {
+            return order.id === this.env.model.data.uiState.OrderManagementScreen.activeOrderId;
         }
     }
     OrderList.template = 'OrderList';
-
-    Registries.Component.add(OrderList);
 
     return OrderList;
 });

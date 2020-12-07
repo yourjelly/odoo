@@ -1,7 +1,7 @@
 odoo.define('point_of_sale.utils', function (require) {
     'use strict';
 
-    const { EventBus } = owl.core;
+    const { patch } = require('web.utils');
 
     function getFileAsText(file) {
         return new Promise((resolve, reject) => {
@@ -38,12 +38,120 @@ odoo.define('point_of_sale.utils', function (require) {
     };
 
     function isRpcError(error) {
-        return (
-            !(error instanceof Error) &&
-            error.message &&
-            [100, 200, 404, -32098].includes(error.message.code)
-        );
+        return !(error instanceof Error) && error.message && [100, 200, 404, -32098].includes(error.message.code);
     }
 
-    return { getFileAsText, nextFrame, isRpcError, posbus: new EventBus() };
+    /**
+     * Simple implementation of deep clone. Doesn't take into account
+     * Date fields.
+     * @param {Object} obj
+     */
+    function cloneDeep(obj, overrides = {}) {
+        const newObj = obj instanceof Array ? [] : {};
+        for (const key in obj) {
+            if (obj[key] && typeof obj[key] == 'object') {
+                newObj[key] = cloneDeep(obj[key]);
+            } else {
+                newObj[key] = obj[key];
+            }
+        }
+        return Object.assign(newObj, overrides);
+    }
+
+    /**
+     * Taken from uuidv4 of o_spreadsheet.js.
+     */
+    function uuidv4() {
+        if (window.crypto && window.crypto.getRandomValues) {
+            //@ts-ignore
+            return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+                (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+            );
+        } else {
+            // mainly for jest and other browsers that do not have the crypto functionality
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = (Math.random() * 16) | 0,
+                    v = c == 'x' ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+            });
+        }
+    }
+
+    function barcodeRepr(parsedCode) {
+        if (parsedCode.code.length > 32) {
+            return parsedCode.code.substring(0, 29) + '...';
+        } else {
+            return parsedCode.code;
+        }
+    }
+
+    function sum(array, selector = (item) => item) {
+        return array.reduce((total, item) => total + selector(item), 0);
+    }
+
+    /**
+     * Returns the max of the given date strings.
+     * @param {string[]} dateStrings
+     */
+    function maxDateString(...dateStrings) {
+        return dateStrings.reduce((max, item) => {
+            if (max >= item) return max;
+            return item;
+        }, '');
+    }
+
+    function generateWrappedName(name) {
+        var MAX_LENGTH = 24; // 40 * line ratio of .6
+        var wrapped = [];
+        var current_line = '';
+
+        while (name.length > 0) {
+            var space_index = name.indexOf(' ');
+
+            if (space_index === -1) {
+                space_index = name.length;
+            }
+
+            if (current_line.length + space_index > MAX_LENGTH) {
+                if (current_line.length) {
+                    wrapped.push(current_line);
+                }
+                current_line = '';
+            }
+
+            current_line += name.slice(0, space_index + 1);
+            name = name.slice(space_index + 1);
+        }
+
+        if (current_line.length) {
+            wrapped.push(current_line);
+        }
+
+        return wrapped;
+    }
+
+    /**
+     * We can allow proper chaining of patches if we return the original
+     * object after patching.
+     * @param {*} original
+     * @param {*} patchname
+     * @param {*} patchobj
+     */
+    function pospatch(original, patchname, patchobj) {
+        const unpatch = patch(original, patchname, patchobj);
+        return [original, unpatch];
+    }
+
+    return {
+        getFileAsText,
+        nextFrame,
+        isRpcError,
+        cloneDeep,
+        uuidv4,
+        barcodeRepr,
+        sum,
+        maxDateString,
+        generateWrappedName,
+        pospatch,
+    };
 });

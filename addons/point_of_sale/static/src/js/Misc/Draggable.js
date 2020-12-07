@@ -4,7 +4,6 @@ odoo.define('point_of_sale.Draggable', function(require) {
     const { useExternalListener } = owl.hooks;
     const { useListener } = require('web.custom_hooks');
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
     /**
      * Wrap an element or a component with { position: absolute } to make it
@@ -135,8 +134,6 @@ odoo.define('point_of_sale.Draggable', function(require) {
         }
     }
     Draggable.template = 'Draggable';
-
-    Registries.Component.add(Draggable);
 
     return Draggable;
 });

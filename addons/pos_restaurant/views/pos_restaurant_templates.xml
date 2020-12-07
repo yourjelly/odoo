@@ -4,9 +4,9 @@
     <template id="assets" inherit_id="point_of_sale.assets">
         <xpath expr="." position="inside">
             <script type="text/javascript" src="/pos_restaurant/static/lib/js/jquery.ui.touch-punch.js"></script>
-            <script type="text/javascript" src="/pos_restaurant/static/src/js/multiprint.js"></script>
-            <script type="text/javascript" src="/pos_restaurant/static/src/js/floors.js"></script>
-            <script type="text/javascript" src="/pos_restaurant/static/src/js/notes.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/PointOfSaleModel.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/PointOfSaleUI.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/Dialog.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/payment.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Resizeable.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/OrderlineNoteButton.js"></script>
@@ -16,6 +16,7 @@
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/SplitBillButton.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/TransferOrderButton.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/ProductScreen/Orderline.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/ProductScreen/ProductScreen.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/BillScreen.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/SplitBillScreen/SplitBillScreen.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/SplitBillScreen/SplitOrderline.js"></script>
@@ -23,15 +24,15 @@
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/EditBar.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/TableWidget.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/FloorScreen/EditableTable.js"></script>
-            <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/OrderManagementScreen/OrderManagementScreen.js"></script>
-            <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/OrderManagementScreen/OrderRow.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/TicketScreen.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/ChromeWidgets/BackToFloorButton.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/ChromeWidgets/TicketButton.js"></script>
-            <script type="text/javascript" src="/pos_restaurant/static/src/js/Chrome.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js"></script>
-            <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/PaymentScreen.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/PaymentScreen/PaymentScreen.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/PaymentScreen/PaymentScreenElectronicPayment.js"></script>
             <script type="text/javascript" src="/pos_restaurant/static/src/js/Screens/TipScreen.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/Popups/TextAreaPopup.js"></script>
+            <script type="text/javascript" src="/pos_restaurant/static/src/js/Popups/TextInputPopup.js"></script>
         </xpath>
         <xpath expr="//link[@id='pos-stylesheet']" position="after">
             <link rel="stylesheet" href="/pos_restaurant/static/src/css/restaurant.css"/>

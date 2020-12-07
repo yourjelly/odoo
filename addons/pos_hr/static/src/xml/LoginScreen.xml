@@ -15,7 +15,9 @@
                     <span class="login-or">or</span>
                     <span class="login-element">
                         <button class="login-button select-employee"
-                                t-on-click="selectCashier">Select Cashier</button>
+                            t-on-click="onSelectCashier">
+                            Select Cashier
+                        </button>
                     </span>
                 </div>
             </div>

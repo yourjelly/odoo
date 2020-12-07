@@ -1,82 +1,43 @@
-odoo.define('pos_restaurant.SplitBillScreen', function(require) {
+odoo.define('pos_restaurant.SplitBillScreen', function (require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const { useState } = owl.hooks;
+    const SplitOrderline = require('pos_restaurant.SplitOrderline');
     const { useListener } = require('web.custom_hooks');
-    const models = require('point_of_sale.models');
-    const Registries = require('point_of_sale.Registries');
+    const { useState } = owl.hooks;
 
     class SplitBillScreen extends PosComponent {
+        static components = { SplitOrderline };
         constructor() {
             super(...arguments);
-            useListener('click-line', this.onClickLine);
-            this.splitlines = useState(this._initSplitLines(this.env.pos.get_order()));
-            this.newOrderLines = {};
-            this.newOrder = new models.Order(
-                {},
-                {
-                    pos: this.env.pos,
-                    temporary: true,
-                }
-            );
-            this._isFinal = false;
-        }
-        mounted() {
-            this.env.pos.on('change:selectedOrder', this._resetState, this);
+            useListener('click-line', this._onClickLine);
+            this.splitlines = useState(this._initSplitLines(this.props.activeOrder));
+            this.newOrder = this.env.model.cloneRecord('pos.order', this.props.activeOrder, {
+                id: this.env.model._getNextId(),
+                lines: [],
+            });
+            this.newOrder._extras.temporary = true;
+            this._newOrderlines = {};
         }
         willUnmount() {
-            this.env.pos.off('change:selectedOrder', null, this);
+            if (this.newOrder && this.newOrder._extras.temporary) {
+                this.env.actionHandler({ name: 'actionDeleteOrder', args: [this.newOrder] });
+            }
         }
-        get currentOrder() {
-            return this.env.pos.get_order();
+        async onProceed() {
+            if (this._hasEmptySplit()) {
+                this.env.ui.showNotification(this.env._t('Nothing to split.'));
+            } else {
+                await this.env.actionHandler({
+                    name: 'actionSplitOrder',
+                    args: [this.props.activeOrder, this.newOrder, this.splitlines, this.props.disallow],
+                });
+            }
         }
-        get orderlines() {
-            return this.currentOrder.get_orderlines();
-        }
-        onClickLine(event) {
+        _onClickLine(event) {
             const line = event.detail;
             this._splitQuantity(line);
             this._updateNewOrder(line);
-        }
-        back() {
-            this.showScreen('ProductScreen');
-        }
-        proceed() {
-            if (_.isEmpty(this.splitlines))
-                // Splitlines is empty
-                return;
-
-            this._isFinal = true;
-            delete this.newOrder.temporary;
-
-            if (this._isFullPayOrder()) {
-                this.showScreen('PaymentScreen');
-            } else {
-                this._setQuantityOnCurrentOrder();
-
-                this.newOrder.set_screen_data({ name: 'PaymentScreen' });
-
-                // for the kitchen printer we assume that everything
-                // has already been sent to the kitchen before splitting
-                // the bill. So we save all changes both for the old
-                // order and for the new one. This is not entirely correct
-                // but avoids flooding the kitchen with unnecessary orders.
-                // Not sure what to do in this case.
-
-                if (this.newOrder.saveChanges) {
-                    this.currentOrder.saveChanges();
-                    this.newOrder.saveChanges();
-                }
-
-                this.newOrder.set_customer_count(1);
-                const newCustomerCount = this.currentOrder.get_customer_count() - 1;
-                this.currentOrder.set_customer_count(newCustomerCount || 1);
-                this.currentOrder.set_screen_data({ name: 'ProductScreen' });
-
-                this.env.pos.get('orders').add(this.newOrder);
-                this.env.pos.set('selectedOrder', this.newOrder);
-            }
         }
         /**
          * @param {models.Order} order
@@ -84,8 +45,8 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
          */
         _initSplitLines(order) {
             const splitlines = {};
-            for (let line of order.get_orderlines()) {
-                splitlines[line.id] = { product: line.get_product().id, quantity: 0 };
+            for (const line of this.env.model.getOrderlines(order)) {
+                splitlines[line.id] = { product: line.product_id, quantity: 0 };
             }
             return splitlines;
         }
@@ -93,24 +54,25 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
             const split = this.splitlines[line.id];
 
             let totalQuantity = 0;
+            for (const orderline of this.env.model.getOrderlines(this.props.activeOrder)) {
+                if (orderline.product_id === split.product) {
+                    totalQuantity += orderline.qty;
+                }
+            }
 
-            this.env.pos.get_order().get_orderlines().forEach(function(orderLine) {
-                if(orderLine.get_product().id === split.product)
-                    totalQuantity += orderLine.get_quantity();
-            });
-
-            if(line.get_quantity() > 0) {
-                if (!line.get_unit().is_pos_groupable) {
-                    if (split.quantity !== line.get_quantity()) {
-                        split.quantity = line.get_quantity();
+            if (this.env.model.floatCompare(line.qty, 0) > 0) {
+                const unit = this.env.model.getOrderlineUnit(line);
+                if (!unit.is_pos_groupable) {
+                    if (this.env.model.floatCompare(line.qty, split.quantity) !== 0) {
+                        split.quantity = line.qty;
                     } else {
                         split.quantity = 0;
                     }
                 } else {
                     if (split.quantity < totalQuantity) {
-                        split.quantity += line.get_unit().is_pos_groupable? 1: line.get_unit().rounding;
-                        if (split.quantity > line.get_quantity()) {
-                            split.quantity = line.get_quantity();
+                        split.quantity += unit.is_pos_groupable ? 1 : unit.rounding;
+                        if (this.env.model.floatCompare(split.quantity, line.qty) > 0) {
+                            split.quantity = line.qty;
                         }
                     } else {
                         split.quantity = 0;
@@ -120,78 +82,32 @@ odoo.define('pos_restaurant.SplitBillScreen', function(require) {
         }
         _updateNewOrder(line) {
             const split = this.splitlines[line.id];
-            let orderline = this.newOrderLines[line.id];
-            if (split.quantity) {
+            let orderline = this._newOrderlines[line.id];
+            if (this.env.model.floatCompare(split.quantity, 0) > 0) {
                 if (!orderline) {
-                    orderline = line.clone();
-                    this.newOrder.add_orderline(orderline);
-                    this.newOrderLines[line.id] = orderline;
+                    orderline = this.env.model.cloneRecord('pos.order.line', line, {
+                        id: this.env.model._getNextId(),
+                    });
+                    this._newOrderlines[line.id] = orderline;
+                    this.env.model.addOrderline(this.newOrder, orderline);
                 }
-                orderline.set_quantity(split.quantity, 'do not recompute unit price');
+                this.env.model.updateRecord('pos.order.line', orderline.id, { qty: split.quantity });
             } else if (orderline) {
-                this.newOrder.remove_orderline(orderline);
-                this.newOrderLines[line.id] = null;
+                this.env.model.actionDeleteOrderline(this.newOrder, orderline);
+                this._newOrderlines[line.id] = null;
             }
         }
-        _isFullPayOrder() {
-            let order = this.env.pos.get_order();
-            let full = true;
-            let splitlines = this.splitlines;
-            let groupedLines = _.groupBy(order.get_orderlines(), line => line.get_product().id);
-
-            Object.keys(groupedLines).forEach(function (lineId) {
-                var maxQuantity = groupedLines[lineId].reduce(((quantity, line) => quantity + line.get_quantity()), 0);
-                Object.keys(splitlines).forEach(id => {
-                    let split = splitlines[id];
-                    if(split.product === groupedLines[lineId][0].get_product().id)
-                        maxQuantity -= split.quantity;
-                });
-                if(maxQuantity !== 0)
-                    full = false;
-            });
-
-            return full;
-        }
-        _setQuantityOnCurrentOrder() {
-            let order = this.env.pos.get_order();
-            for (var id in this.splitlines) {
-                var split = this.splitlines[id];
-                var line = this.currentOrder.get_orderline(parseInt(id));
-
-                if(!this.props.disallow) {
-                    line.set_quantity(
-                        line.get_quantity() - split.quantity,
-                        'do not recompute unit price'
-                    );
-                    if (Math.abs(line.get_quantity()) < 0.00001) {
-                        this.currentOrder.remove_orderline(line);
-                    }
-                } else {
-                    if(split.quantity) {
-                        let decreaseLine = line.clone();
-                        decreaseLine.order = order;
-                        decreaseLine.noDecrease = true;
-                        decreaseLine.set_quantity(-split.quantity);
-                        order.add_orderline(decreaseLine);
-                    }
+        _hasEmptySplit() {
+            for (const lineId in this.splitlines) {
+                const split = this.splitlines[lineId];
+                if (this.env.model.floatCompare(split.quantity, 0, 5) !== 0) {
+                    return false;
                 }
             }
-        }
-        _resetState() {
-            if (this._isFinal) return;
-
-            for (let id in this.splitlines) {
-                delete this.splitlines[id];
-            }
-            for (let line of this.currentOrder.get_orderlines()) {
-                this.splitlines[line.id] = { quantity: 0 };
-            }
-            this.newOrder.orderlines.reset();
+            return true;
         }
     }
     SplitBillScreen.template = 'SplitBillScreen';
-
-    Registries.Component.add(SplitBillScreen);
 
     return SplitBillScreen;
 });

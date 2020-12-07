@@ -2,7 +2,6 @@ odoo.define('point_of_sale.ActionpadWidget', function(require) {
     'use strict';
 
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
 
     /**
      * @props client
@@ -18,8 +17,6 @@ odoo.define('point_of_sale.ActionpadWidget', function(require) {
         }
     }
     ActionpadWidget.template = 'ActionpadWidget';
-
-    Registries.Component.add(ActionpadWidget);
 
     return ActionpadWidget;
 });

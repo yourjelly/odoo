@@ -5,7 +5,7 @@
         <div class="splitbill-screen screen">
             <div class="contents">
                 <div class="top-content">
-                    <span class="button back" t-on-click="back">
+                    <span class="button back" t-on-click="env.actionHandler({ name: 'actionShowScreen', args: ['ProductScreen'] })">
                         <i class="fa fa-angle-double-left"></i>
                         <span> </span>
                         <span>Back</span>
@@ -18,7 +18,7 @@
                     <div class="lines">
                         <div class="order">
                             <ul class="orderlines">
-                                <t t-foreach="orderlines" t-as="line" t-key="line.cid">
+                                <t t-foreach="env.model.getOrderlines(props.activeOrder)" t-as="line" t-key="line.id">
                                     <SplitOrderline line="line" split="splitlines[line.id]" />
                                 </t>
                             </ul>
@@ -26,12 +26,13 @@
                     </div>
                     <div class="controls">
                         <div class="order-info">
+                            <t t-set="_newOrderTotals" t-value="env.model.getOrderTotals(newOrder)" />
                             <span class="subtotal">
-                                <t t-esc="env.pos.format_currency(newOrder.get_subtotal())" />
+                                <t t-esc="env.model.formatCurrency(_newOrderTotals.noTaxWithDiscount)" />
                             </span>
                         </div>
                         <div class="pay-button">
-                            <div class="button" t-on-click="proceed">
+                            <div class="button" t-on-click="onProceed">
                                 <i class="fa fa-chevron-right" />
                                 <span> </span>
                                 <span>Payment</span>

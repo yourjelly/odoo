@@ -1,19 +1,16 @@
 odoo.define('pos_epson_printer.pos_epson_printer', function (require) {
-"use strict";
+    'use strict';
 
-var models = require('point_of_sale.models');
-var EpsonPrinter = require('pos_epson_printer.Printer');
+    const { patch } = require('web.utils');
+    const EpsonPrinter = require('pos_epson_printer.Printer');
+    const PointOfSaleModel = require('point_of_sale.PointOfSaleModel');
 
-var posmodel_super = models.PosModel.prototype;
-models.PosModel = models.PosModel.extend({
-    after_load_server_data: function () {
-        var self = this;
-        return posmodel_super.after_load_server_data.apply(this, arguments).then(function () {
-            if (self.config.other_devices && self.config.epson_printer_ip) {
-                self.proxy.printer = new EpsonPrinter(self.config.epson_printer_ip , self);
+    return patch(PointOfSaleModel, 'pos_epson_printer', {
+        async load() {
+            await this._super(...arguments);
+            if (this.data.config.other_devices && this.data.config.epson_printer_ip) {
+                this.proxy.printer = new EpsonPrinter(this.data.config.epson_printer_ip, this);
             }
-        });
-    },
-});
-
+        },
+    });
 });

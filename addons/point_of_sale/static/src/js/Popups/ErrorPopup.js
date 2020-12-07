@@ -1,15 +1,14 @@
-odoo.define('point_of_sale.ErrorPopup', function(require) {
+odoo.define('point_of_sale.ErrorPopup', function (require) {
     'use strict';
 
-    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registries = require('point_of_sale.Registries');
+    const Draggable = require('point_of_sale.Draggable');
 
-    // formerly ErrorPopupWidget
-    class ErrorPopup extends AbstractAwaitablePopup {
+    class ErrorPopup extends owl.Component {
         mounted() {
-            this.playSound('error');
+            this.env.ui.playSound('error');
         }
     }
+    ErrorPopup.components = { Draggable };
     ErrorPopup.template = 'ErrorPopup';
     ErrorPopup.defaultProps = {
         confirmText: 'Ok',
@@ -17,8 +16,6 @@ odoo.define('point_of_sale.ErrorPopup', function(require) {
         title: 'Error',
         body: '',
     };
-
-    Registries.Component.add(ErrorPopup);
 
     return ErrorPopup;
 });

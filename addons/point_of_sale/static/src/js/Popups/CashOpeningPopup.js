@@ -1,68 +1,41 @@
-odoo.define('point_of_sale.CashOpeningPopup', function(require) {
+odoo.define('point_of_sale.CashOpeningPopup', function (require) {
     'use strict';
 
-    const { useState, useRef} = owl.hooks;
-    const { useListener } = require('web.custom_hooks');
+    const { useState } = owl.hooks;
+    const { parse } = require('web.field_utils');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
-    const PosComponent = require('point_of_sale.PosComponent');
-    const AbstractAwaitablePopup = require('point_of_sale.AbstractAwaitablePopup');
-    const Registries = require('point_of_sale.Registries');
 
-
-    class CashOpeningPopup extends AbstractAwaitablePopup {
+    class CashOpeningPopup extends owl.Component {
         constructor() {
             super(...arguments);
-            this.cashBoxValue = this.env.pos.bank_statement.balance_start || 0;;
-            this.currency = this.env.pos.currency;
+            this.currency = this.env.model.currency;
             this.state = useState({
-                notes: "",
+                notes: '',
+                buffer: this.env.model.formatValue(this.env.model.backStatement.balance_start || 0),
             });
-            useListener('numpad-click-input', this._updateCashAmount);
-            useListener('update-cash', this._updateCashAmount);
-            this.inputRef = useRef('input');
             NumberBuffer.use({
                 nonKeyboardInputEvent: 'numpad-click-input',
-                triggerAtInput: 'update-cash',
                 useWithBarcode: false,
+                // Number buffer can take control on the state containing `buffer` property.
+                state: this.state,
             });
         }
-
-        startSession() {
-            this.env.pos.bank_statement.balance_start = parseFloat(this.cashBoxValue);
-            this.env.pos.pos_session.state = 'opened';
-            this.rpc({
-                   model: 'pos.session',
-                    method: 'set_cashbox_pos',
-                    args: [this.env.pos.pos_session.id, parseFloat(this.cashBoxValue), this.state.notes],
-                });
-            this.trigger('close-popup');
+        async startSession() {
+            this.env.model.backStatement.balance_start = parse.float(this.state.buffer);
+            this.env.model.session.state = 'opened';
+            await this.rpc({
+                model: 'pos.session',
+                method: 'set_cashbox_pos',
+                args: [this.env.model.session.id, parse.float(this.state.buffer), this.state.notes],
+            });
+            this.props.respondWith(true);
         }
-
-        sendInput(value) {
-            this.trigger('numpad-click-input', { value });
-        }
-
-        async _updateCashAmount(event) {
-            let value = event.detail.value ? event.detail.value : event.detail.key
-            if(value !== "Backspace") {
-                if(this.cashBoxValue === 0) {
-                    this.cashBoxValue = value !== "."? value: this.cashBoxValue + value;
-                } else {
-                    this.cashBoxValue += value;
-                }
-            } else {
-                if(this.cashBoxValue.length > 1) {
-                    this.cashBoxValue = this.cashBoxValue.substring(0, this.cashBoxValue.length -1)
-                } else {
-                    this.cashBoxValue = 0;
-                }
-            }
-            this.render();
+        sendInput(key) {
+            this.trigger('numpad-click-input', { key });
         }
     }
 
     CashOpeningPopup.template = 'CashOpeningPopup';
-    Registries.Component.add(CashOpeningPopup);
 
     return CashOpeningPopup;
 });

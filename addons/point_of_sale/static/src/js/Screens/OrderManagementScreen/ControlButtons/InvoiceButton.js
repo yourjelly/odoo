@@ -2,25 +2,16 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
     'use strict';
 
     const { useListener } = require('web.custom_hooks');
-    const { useContext } = owl.hooks;
     const { isRpcError } = require('point_of_sale.utils');
     const PosComponent = require('point_of_sale.PosComponent');
-    const OrderManagementScreen = require('point_of_sale.OrderManagementScreen');
-    const OrderFetcher = require('point_of_sale.OrderFetcher');
-    const Registries = require('point_of_sale.Registries');
-    const contexts = require('point_of_sale.PosContext');
 
     class InvoiceButton extends PosComponent {
         constructor() {
             super(...arguments);
             useListener('click', this._onClick);
-            this.orderManagementContext = useContext(contexts.orderManagement);
         }
         get selectedOrder() {
-            return this.orderManagementContext.selectedOrder;
-        }
-        set selectedOrder(value) {
-            this.orderManagementContext.selectedOrder = value;
+            return this.props.activeOrder;
         }
         get isAlreadyInvoiced() {
             if (!this.selectedOrder) return false;
@@ -32,17 +23,17 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
             } else {
                 return this.isAlreadyInvoiced
                     ? 'Reprint Invoice'
-                    : this.selectedOrder.isFromClosedSession
+                    : this.selectedOrder._extras.isFromClosedSession
                     ? 'Cannot Invoice'
                     : 'Invoice';
             }
         }
         get isHighlighted() {
-            return this.selectedOrder && !this.isAlreadyInvoiced && !this.selectedOrder.isFromClosedSession;
+            return this.selectedOrder && !this.isAlreadyInvoiced && !this.selectedOrder._extras.isFromClosedSession;
         }
         async _downloadInvoice(orderId) {
             try {
-                await this.env.pos.do_action('point_of_sale.pos_invoice_report', {
+                await this.env.model.webClient.do_action('point_of_sale.pos_invoice_report', {
                     additional_context: {
                         active_ids: [orderId],
                     },
@@ -52,7 +43,7 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
                     throw error;
                 } else {
                     // NOTE: error here is most probably undefined
-                    this.showPopup('ErrorPopup', {
+                    this.env.ui.askUser('ErrorPopup', {
                         title: this.env._t('Network Error'),
                         body: this.env._t('Unable to download invoice.'),
                     });
@@ -63,18 +54,16 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
             const order = this.selectedOrder;
             if (!order) return;
 
-            const orderId = order.backendId;
-
             // Part 0.1. If already invoiced, print the invoice.
             if (this.isAlreadyInvoiced) {
-                await this._downloadInvoice(orderId);
+                await this._downloadInvoice(order.id);
                 return;
             }
 
             // Part 0.2. Check if order belongs to an active session.
             // If not, do not allow invoicing.
-            if (order.isFromClosedSession) {
-                this.showPopup('ErrorPopup', {
+            if (order._extras.isFromClosedSession) {
+                this.env.ui.askUser('ErrorPopup', {
                     title: this.env._t('Session is closed'),
                     body: this.env._t('Cannot invoice order from closed session.'),
                 });
@@ -83,14 +72,14 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
 
             // Part 1: Handle missing client.
             // Write to pos.order the selected client.
-            if (!order.get_client()) {
-                const { confirmed: confirmedPopup } = await this.showPopup('ConfirmPopup', {
+            if (!order.partner_id) {
+                const confirmedPopup = await this.env.ui.askUser('ConfirmPopup', {
                     title: 'Need customer to invoice',
                     body: 'Do you want to open the customer list to select customer?',
                 });
                 if (!confirmedPopup) return;
 
-                const { confirmed: confirmedTempScreen, payload: newClient } = await this.showTempScreen(
+                const [confirmedTempScreen, newClientId] = await this.showTempScreen(
                     'ClientListScreen'
                 );
                 if (!confirmedTempScreen) return;
@@ -98,7 +87,7 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
                 await this.rpc({
                     model: 'pos.order',
                     method: 'write',
-                    args: [[orderId], { partner_id: newClient.id }],
+                    args: [[order.id], { partner_id: newClientId }],
                     kwargs: { context: this.env.session.user_context },
                 });
             }
@@ -108,7 +97,7 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
                 {
                     model: 'pos.order',
                     method: 'action_pos_order_invoice',
-                    args: [orderId],
+                    args: [order.id],
                     kwargs: { context: this.env.session.user_context },
                 },
                 {
@@ -118,19 +107,19 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
             );
 
             // Part 3: Download invoice.
-            await this._downloadInvoice(orderId);
+            await this._downloadInvoice(order.id);
 
             // Invalidate the cache then fetch the updated order.
-            OrderFetcher.invalidateCache([orderId]);
-            await OrderFetcher.fetch();
-            this.selectedOrder = OrderFetcher.get(this.selectedOrder.backendId);
+            this.env.model.orderFetcher.invalidateCache([order.id]);
+            await this.env.model.orderFetcher.fetch();
+            this.env.actionHandler({ name: 'actionSelectOrder', args: [this.selectedOrder] });
         }
         async _onClick() {
             try {
                 await this._invoiceOrder();
             } catch (error) {
                 if (isRpcError(error) && error.message.code < 0) {
-                    this.showPopup('ErrorPopup', {
+                    this.env.ui.askUser('ErrorPopup', {
                         title: this.env._t('Network Error'),
                         body: this.env._t('Unable to invoice order.'),
                     });
@@ -141,15 +130,6 @@ odoo.define('point_of_sale.InvoiceButton', function (require) {
         }
     }
     InvoiceButton.template = 'InvoiceButton';
-
-    OrderManagementScreen.addControlButton({
-        component: InvoiceButton,
-        condition: function () {
-            return this.env.pos.config.module_account;
-        },
-    });
-
-    Registries.Component.add(InvoiceButton);
 
     return InvoiceButton;
 });

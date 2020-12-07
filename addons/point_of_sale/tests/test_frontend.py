@@ -471,7 +471,7 @@ class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
         )
 
 
-@odoo.tests.tagged('post_install', '-at_install')
+@odoo.tests.tagged('post_install', '-at_install', 'pos_frontend')
 class TestUi(TestPointOfSaleHttpCommon):
     def test_01_pos_basic_order(self):
 

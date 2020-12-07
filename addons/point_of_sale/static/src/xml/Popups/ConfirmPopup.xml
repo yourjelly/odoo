@@ -12,10 +12,10 @@
                         <t t-esc=" props.body" />
                     </main>
                     <footer class="footer">
-                        <div class="button confirm" t-on-click="confirm">
+                        <div class="button confirm" t-on-click="props.respondWith(true)">
                             <t t-esc="props.confirmText" />
                         </div>
-                        <div class="button cancel" t-on-click="cancel">
+                        <div t-if="!props.hideCancel" class="button cancel" t-on-click="props.respondWith(false)">
                             <t t-esc="props.cancelText" />
                         </div>
                     </footer>

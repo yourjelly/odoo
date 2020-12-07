@@ -13,10 +13,10 @@
                         </span>
                     </header>
                     <main class="body">
-                        <t t-esc="translatedMessage" />
+                        <t t-esc="errorMessage" />
                     </main>
                     <footer class="footer">
-                        <div class="button cancel" t-on-click="confirm">
+                        <div class="button cancel" t-on-click="props.respondWith(true)">
                             Ok
                         </div>
                     </footer>

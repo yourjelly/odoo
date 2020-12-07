@@ -7,9 +7,10 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
     const { parse } = require('web.field_utils');
     const NumberBuffer = require('point_of_sale.NumberBuffer');
     const PosComponent = require('point_of_sale.PosComponent');
-    const Registries = require('point_of_sale.Registries');
+    const Draggable = require('point_of_sale.Draggable');
 
     class DebugWidget extends PosComponent {
+        static components = { Draggable };
         constructor() {
             super(...arguments);
             this.state = useState({
@@ -19,7 +20,6 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
                 isUnpaidOrdersReady: false,
                 buffer: NumberBuffer.get(),
             });
-
             // NOTE: Perhaps this can still be improved.
             // What we do here is loop thru the `event` elements
             // then we assign animation that happens when the event is triggered
@@ -29,7 +29,7 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
             this.animations = {};
             for (let eventName of ['open_cashbox', 'print_receipt', 'scale_read']) {
                 this.eventElementsRef[eventName] = useRef(eventName);
-                this.env.pos.proxy.add_notification(
+                this.env.model.proxy.add_notification(
                     eventName,
                     (() => {
                         if (this.animations[eventName]) {
@@ -51,50 +51,49 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
         willUnmount() {
             NumberBuffer.off('buffer-update', this, this._onBufferUpdate);
         }
-        toggleWidget() {
-            this.state.isShown = !this.state.isShown;
-        }
         setWeight() {
             var weightInKg = parse.float(this.state.weightInput);
             if (!isNaN(weightInKg)) {
-                this.env.pos.proxy.debug_set_weight(weightInKg);
+                this.env.model.proxy.debug_set_weight(weightInKg);
             }
         }
         resetWeight() {
             this.state.weightInput = '';
-            this.env.pos.proxy.debug_reset_weight();
+            this.env.model.proxy.debug_reset_weight();
         }
         barcodeScan() {
-            this.env.pos.barcode_reader.scan(this.state.barcodeInput);
+            this.env.model.barcodeReader.scan(this.state.barcodeInput);
         }
         barcodeScanEAN() {
-            const ean = this.env.pos.barcode_reader.barcode_parser.sanitize_ean(
-                this.state.barcodeInput || '0'
-            );
+            const ean = this.env.model.barcodeReader.barcode_parser.sanitize_ean(this.state.barcodeInput || '0');
             this.state.barcodeInput = ean;
-            this.env.pos.barcode_reader.scan(ean);
+            this.env.model.barcodeReader.scan(ean);
         }
         async deleteOrders() {
-            const { confirmed } = await this.showPopup('ConfirmPopup', {
+            const confirmed = await this.env.ui.askUser('ConfirmPopup', {
                 title: this.env._t('Delete Paid Orders ?'),
                 body: this.env._t(
                     'This operation will permanently destroy all paid orders from the local storage. You will lose all the data. This operation cannot be undone.'
                 ),
             });
             if (confirmed) {
-                this.env.pos.db.remove_all_orders();
-                this.env.pos.set_synch('connected', 0);
+                await this.env.actionHandler({
+                    name: 'actionRemoveOrders',
+                    args: [this.env.model.getPersistedPaidOrders()],
+                });
             }
         }
         async deleteUnpaidOrders() {
-            const { confirmed } = await this.showPopup('ConfirmPopup', {
+            const confirmed = await this.env.ui.askUser('ConfirmPopup', {
                 title: this.env._t('Delete Unpaid Orders ?'),
                 body: this.env._t(
                     'This operation will destroy all unpaid orders in the browser. You will lose all the unsaved data and exit the point of sale. This operation cannot be undone.'
                 ),
             });
             if (confirmed) {
-                this.env.pos.db.remove_all_unpaid_orders();
+                // NOTE: No need to call using the action handler because no need for any rerendering,
+                // because it is followed by a window location change.
+                this.env.model.actionRemoveOrders(this.env.model.getPersistedUnpaidOrders());
                 window.location = '/';
             }
         }
@@ -108,7 +107,20 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
         // The implementation can be better.
         preparePaidOrders() {
             try {
-                this.paidOrdersBlob = this._createBlob(this.env.pos.export_paid_orders());
+                this.paidOrdersBlob = this._createBlob(
+                    JSON.stringify(
+                        {
+                            session: this.env.model.session.name,
+                            session_id: this.env.model.session.id,
+                            date: new Date().toUTCString(),
+                            version: this.env.model.version.server_version_info,
+                            config_uuid: this.env.model.config.uuid,
+                            paid_orders: this.env.model.getPersistedPaidOrders(),
+                        },
+                        null,
+                        2
+                    )
+                );
                 this.state.isPaidOrdersReady = true;
             } catch (error) {
                 console.warn(error);
@@ -123,7 +135,20 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
         }
         prepareUnpaidOrders() {
             try {
-                this.unpaidOrdersBlob = this._createBlob(this.env.pos.export_unpaid_orders());
+                this.unpaidOrdersBlob = this._createBlob(
+                    JSON.stringify(
+                        {
+                            session: this.env.model.session.name,
+                            session_id: this.env.model.session.id,
+                            date: new Date().toUTCString(),
+                            version: this.env.model.version.server_version_info,
+                            config_uuid: this.env.model.config.uuid,
+                            unpaid_orders: this.env.model.getPersistedUnpaidOrders(),
+                        },
+                        null,
+                        2
+                    )
+                );
                 this.state.isUnpaidOrdersReady = true;
             } catch (error) {
                 console.warn(error);
@@ -139,12 +164,18 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
         async importOrders(event) {
             const file = event.target.files[0];
             if (file) {
-                const report = this.env.pos.import_orders(await getFileAsText(file));
-                await this.showPopup('OrderImportPopup', { report });
+                const report = await this.env.actionHandler({
+                    name: 'actionImportOrders',
+                    args: [await getFileAsText(file)],
+                });
+                // No need to wait for the user's response on the import popup
+                // before dispatching `actionSyncOrders`.
+                this.env.ui.askUser('OrderImportPopup', { report });
+                await this.env.actionHandler({ name: 'actionSyncOrders' });
             }
         }
         refreshDisplay() {
-            this.env.pos.proxy.message('display_refresh', {});
+            this.env.model.proxy.message('display_refresh', {});
         }
         _onBufferUpdate(buffer) {
             this.state.buffer = buffer;
@@ -154,8 +185,6 @@ odoo.define('point_of_sale.DebugWidget', function (require) {
         }
     }
     DebugWidget.template = 'DebugWidget';
-
-    Registries.Component.add(DebugWidget);
 
     return DebugWidget;
 });
