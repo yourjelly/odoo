@@ -1572,7 +1572,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         "/web/action/load",
         "load_views",
         "read", // read the opened record
-        "/web/dataset/search_read", // search read when coming back to List
+        "search_read", // search read when coming back to List
       ]);
 
       webClient.destroy();
@@ -1710,7 +1710,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read", // list view
+      "search_read", // list view
       "/web/dataset/search_read", // kanban view
       "read", // form view
     ]);
@@ -1767,7 +1767,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read", // list view
+      "search_read", // list view
       "read", // form view, record 1
       "read", // form view, record 4
     ]);
