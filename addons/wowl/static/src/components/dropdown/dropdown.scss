@@ -23,7 +23,7 @@ ul.o_dropdown_menu {
 // Toggler and items
 button.o_dropdown_toggler,
 li.o_dropdown_item {
-  background-color: inherit;
+  background-color: transparent;
   border: none;
   color: inherit;
   cursor: pointer;
@@ -34,7 +34,6 @@ li.o_dropdown_item {
 
   * {
     color: inherit;
-    line-height: inherit;
   }
 
   > span {
@@ -53,10 +52,4 @@ li.o_dropdown_item {
     background-color: rgba($black, 0.08);
   }
 
-  // Make sure the dark veil does not affect child content,
-  // so it is just applied to the background.
-  &:hover > *,
-  &.o_dropdown_active > * {
-    filter: brightness(1);
-  }
 }
