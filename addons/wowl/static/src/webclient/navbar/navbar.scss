@@ -49,6 +49,13 @@
   // Apps Menu
   .o_navbar_apps_menu {
     grid-area: apps;
+
+    // Button / toggler to open apps menu
+    button.o_dropdown_toggler {
+      padding: 0;
+      width: 100%;
+    }
+
   }
 
   // Brand (Current App Name)
