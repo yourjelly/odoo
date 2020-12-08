@@ -18,6 +18,11 @@ ul.o_dropdown_menu {
   position: absolute;
   min-width: 100%;
   z-index: 1000;
+
+  &.o_dropdown_menu_right {
+    right: 0;
+    left: auto;
+  }
 }
 
 // Toggler and items
