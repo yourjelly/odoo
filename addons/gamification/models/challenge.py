@@ -333,6 +333,13 @@ class Challenge(models.Model):
             (start_date, end_date) = start_end_date_for_period(challenge.period, challenge.start_date, challenge.end_date)
             to_update = Goals.browse(())
 
+            self._cr.execute('''
+                SELECT res_users.id
+                FROM gamification_challenge_users_rel
+                JOIN res_users ON res_users.id = gamification_challenge_users_rel.res_users_id
+                WHERE gamification_challenge_users_rel.gamification_challenge_id = %s AND res_users.active = 't'
+            ''', (challenge.id,)) # TODO JOV: this optimization elsewhere as well
+            participant_user_ids = set(self._cr.fetchall())
             for line in challenge.line_ids:
                 # there is potentially a lot of users
                 # detect the ones with no goal linked to this line
@@ -355,7 +362,6 @@ class Challenge(models.Model):
                 self.env.cr.execute(query, query_params)
                 user_with_goal_ids = {it for [it] in self.env.cr._obj}
 
-                participant_user_ids = set(challenge.user_ids.ids)
                 user_squating_challenge_ids = user_with_goal_ids - participant_user_ids
                 if user_squating_challenge_ids:
                     # users that used to match the challenge 
@@ -387,7 +393,7 @@ class Challenge(models.Model):
 
                 for user_id in (participant_user_ids - user_with_goal_ids):
                     values['user_id'] = user_id
-                    to_update |= Goals.create(values)
+                    to_update |= Goals.create(values) # TODO JOV: this takes a lot of time
 
             to_update.update_goal()
 
