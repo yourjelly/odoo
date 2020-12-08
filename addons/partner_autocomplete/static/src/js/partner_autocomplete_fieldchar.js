@@ -135,7 +135,7 @@ var FieldAutocomplete = FieldChar.extend(AutocompleteMixin, {
                 onSuccess: function () {
                     // update the input's value directly
                     if (self.onlyVAT)
-                        self.$input.val(self._formatValue(company.vat));
+                        self.$input.val(self._formatValue(company.vat));//TODO OCO chiant
                     else
                         self.$input.val(self._formatValue(company.name));
                 },

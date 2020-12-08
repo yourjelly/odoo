@@ -50,4 +50,4 @@ class TestStructure(common.TransactionCase):
         # reactivate it and correct the vat number
         with patch.object(vat, 'check_vies', mock_check_vies):
             self.env.user.company_id.vat_check_vies = True
-            company.vat = "BE0987654321"
+            company.vat = "BE0987654321" #TODO OCO chiant

@@ -65,7 +65,7 @@ class AccountMove(models.Model):
             raise UserError(_("%s must have a country") % (seller.display_name))
 
         # <1.1.1.2>
-        if not seller.vat:
+        if not seller.vat: #TODO OCO chiant
             raise UserError(_("%s must have a VAT number") % (seller.display_name))
         elif len(seller.vat) > 30:
             raise UserError(_("The maximum length for VAT number is 30. %s have a VAT number too long: %s.") % (seller.display_name, seller.vat))

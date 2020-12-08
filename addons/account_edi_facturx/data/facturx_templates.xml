@@ -138,8 +138,8 @@
                             </t>
 
                             <!-- VAT. -->
-                            <ram:SpecifiedTaxRegistration t-if="record.company_id.vat">
-                                <ram:ID schemeID="VA" t-esc="record.company_id.vat"/>
+                            <ram:SpecifiedTaxRegistration t-if="record.company_id.vat"> <!--#TODO OCO chiant-->
+                                <ram:ID schemeID="VA" t-esc="record.company_id.vat"/> <!--#TODO OCO chiant-->
                             </ram:SpecifiedTaxRegistration>
                         </ram:SellerTradeParty>
 

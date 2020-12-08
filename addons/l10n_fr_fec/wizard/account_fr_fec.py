@@ -92,13 +92,13 @@ class AccountFrFec(models.TransientModel):
         """
         dom_tom_group = self.env.ref('l10n_fr.dom-tom')
         is_dom_tom = company.country_id.code in dom_tom_group.country_ids.mapped('code')
-        if not is_dom_tom and not company.vat:
+        if not is_dom_tom and not company.vat: #TODO OCO chiant
             raise UserError(_("Missing VAT number for company %s", company.name))
-        if not is_dom_tom and company.vat[0:2] != 'FR':
+        if not is_dom_tom and company.vat[0:2] != 'FR': #TODO OCO chiant
             raise UserError(_("FEC is for French companies only !"))
 
         return {
-            'siren': company.vat[4:13] if not is_dom_tom else '',
+            'siren': company.vat[4:13] if not is_dom_tom else '', #TODO OCO chiant
         }
 
     def generate_fec(self):

@@ -72,7 +72,7 @@ odoo.define('partner_autocomplete.tests', function (require) {
                     _getOdooSuggestions: function (value, isVAT) {
                         var results = _.filter(suggestions, function (suggestion) {
                             value = value ? value.toLowerCase() : '';
-                            if (isVAT) return (suggestion.vat.toLowerCase().indexOf(value) >= 0);
+                            if (isVAT) return (suggestion.vat.toLowerCase().indexOf(value) >= 0);//TODO OCO chiant ???
                             else return (suggestion.name.toLowerCase().indexOf(value) >= 0);
                         });
                         return Promise.resolve(results);

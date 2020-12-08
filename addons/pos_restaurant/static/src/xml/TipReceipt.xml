@@ -20,8 +20,8 @@
                 <t t-if="receipt.company.phone">
                     <div>Tel:<t t-esc="receipt.company.phone" /></div>
                 </t>
-                <t t-if="receipt.company.vat">
-                    <div>VAT:<t t-esc="receipt.company.vat" /></div>
+                <t t-if="receipt.company.vat"> <!--TODO OCO chiant-->
+                    <div>VAT:<t t-esc="receipt.company.vat" /></div> <!--TODO OCO chiant-->
                 </t>
                 <t t-if="receipt.company.email">
                     <div><t t-esc="receipt.company.email" /></div>

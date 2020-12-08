@@ -2800,7 +2800,7 @@ exports.Order = Backbone.Model.extend({
                 website: company.website,
                 company_registry: company.company_registry,
                 contact_address: company.partner_id[1],
-                vat: company.vat,
+                vat: company.vat,//TODO OCO chiant
                 vat_label: company.country && company.country.vat_label || _t('Tax ID'),
                 name: company.name,
                 phone: company.phone,

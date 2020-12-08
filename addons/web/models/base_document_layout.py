@@ -62,7 +62,7 @@ class BaseDocumentLayout(models.TransientModel):
     phone = fields.Char(related='company_id.phone', readonly=True)
     email = fields.Char(related='company_id.email', readonly=True)
     website = fields.Char(related='company_id.website', readonly=True)
-    vat = fields.Char(related='company_id.vat', readonly=True)
+    vat = fields.Char(related='company_id.vat', readonly=True) #TODO OCO chiant
     name = fields.Char(related='company_id.name', readonly=True)
     country_id = fields.Many2one(related="company_id.country_id", readonly=True)
 

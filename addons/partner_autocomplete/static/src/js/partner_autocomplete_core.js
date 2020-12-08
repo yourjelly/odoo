@@ -85,7 +85,7 @@ var PartnerAutocompleteMixin = {
         return this._rpc({
             model: 'res.partner',
             method: 'enrich_company',
-            args: [company.website, company.partner_gid, company.vat],
+            args: [company.website, company.partner_gid, company.vat], //TODO OCO chiant
         });
     },
 
@@ -138,9 +138,9 @@ var PartnerAutocompleteMixin = {
 
                 // The vat should be returned for free. This is the reason why
                 // we add it into the data of 'company' even if an error such as
-                // an insufficient credit error is raised. 
-                if (company_data.error && company_data.vat) {
-                    company.vat = company_data.vat;
+                // an insufficient credit error is raised.
+                if (company_data.error && company_data.vat) { //TODO OCO chiant
+                    company.vat = company_data.vat; //TODO OCO chiant
                 }
 
                 if (company_data.error) {
@@ -162,8 +162,8 @@ var PartnerAutocompleteMixin = {
                 removeUselessFields(company_data);
 
                 // Assign VAT coming from parent VIES VAT query
-                if (company.vat) {
-                    company_data.vat = company.vat;
+                if (company.vat) { //TODO OCO chiant
+                    company_data.vat = company.vat; //TODO OCO chiant
                 }
                 resolve({
                     company: company_data,
@@ -268,7 +268,7 @@ var PartnerAutocompleteMixin = {
             suggestions.map(function (suggestion) {
                 suggestion.logo = suggestion.logo || '';
                 suggestion.label = suggestion.legal_name || suggestion.name;
-                if (suggestion.vat) suggestion.description = suggestion.vat;
+                if (suggestion.vat) suggestion.description = suggestion.vat; //TODO OCO chiant??
                 else if (suggestion.website) suggestion.description = suggestion.website;
 
                 if (suggestion.country_id && suggestion.country_id.display_name) {

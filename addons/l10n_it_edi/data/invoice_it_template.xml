@@ -51,7 +51,7 @@
                 <FatturaElettronicaHeader>
                     <DatiTrasmissione>
                         <IdTrasmittente>
-                            <IdPaese t-esc="get_vat_country(record.company_id.vat)"/>
+                            <IdPaese t-esc="get_vat_country(record.company_id.vat)"/><!--#TODO OCO chiant-->
                             <IdCodice t-esc="record.company_id.l10n_it_codice_fiscale"/>
                         </IdTrasmittente>
                         <ProgressivoInvio t-esc="record.name.replace('/','')[-10:]"/>
@@ -69,8 +69,8 @@
                     <CedentePrestatore>
                         <DatiAnagrafici>
                             <IdFiscaleIVA>
-                                <IdPaese t-esc="get_vat_country(record.company_id.vat)"/>
-                                <IdCodice t-esc="get_vat_number(record.company_id.vat)"/>
+                                <IdPaese t-esc="get_vat_country(record.company_id.vat)"/><!--#TODO OCO chiant-->
+                                <IdCodice t-esc="get_vat_number(record.company_id.vat)"/><!--#TODO OCO chiant-->
                             </IdFiscaleIVA>
                             <CodiceFiscale t-if="record.company_id.l10n_it_codice_fiscale" t-esc="record.company_id.l10n_it_codice_fiscale"/>
                             <Anagrafica>
