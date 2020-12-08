@@ -78,6 +78,7 @@ class ResCompany(models.Model):
     bank_journal_ids = fields.One2many('account.journal', 'company_id', domain=[('type', '=', 'bank')], string='Bank Journals')
     tax_exigibility = fields.Boolean(string='Use Cash Basis')
     account_tax_fiscal_country_id = fields.Many2one('res.country', string="Fiscal Country", compute='compute_account_tax_fiscal_country', store=True, readonly=False, help="The country to use the tax reports from for this company")
+    company_vat_ids = fields.One2many(string="VAT Numbers", comodel_name='account.company.vat', inverse_name='company_id', help="Use this field to store the different VAT numbers of your company in the countries it has to pay taxes in.") #TODO OCO il faudra un truc pour le peupler à l'installation d'account si la société a déjà une vat sur son partenaire
 
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm',
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
