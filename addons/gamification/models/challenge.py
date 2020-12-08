@@ -391,9 +391,12 @@ class Challenge(models.Model):
                 if challenge.remind_update_delay:
                     values['remind_update_delay'] = challenge.remind_update_delay
 
+                value_list = []
                 for user_id in (participant_user_ids - user_with_goal_ids):
                     values['user_id'] = user_id
-                    to_update |= Goals.create(values) # TODO JOV: this takes a lot of time
+                    value_list.append(values.copy())
+
+                to_update |= Goals.create(value_list)
 
             to_update.update_goal()
 
