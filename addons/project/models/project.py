@@ -565,6 +565,10 @@ class Task(models.Model):
         stage_ids = stages._search(search_domain, order=order, access_rights_uid=SUPERUSER_ID)
         return stages.browse(stage_ids)
 
+    @api.model
+    def _group_expand_todo_status(self, status, domain, order):
+        return ['recent', 'today', 'upcoming', 'later']
+
     active = fields.Boolean(default=True)
     name = fields.Char(string='Title', tracking=True, required=True, index=True)
     description = fields.Html(string='Description')
@@ -617,6 +621,7 @@ class Task(models.Model):
         compute='_compute_partner_phone', inverse='_inverse_partner_phone',
         string="Phone", readonly=False, store=True)
     ribbon_message = fields.Char('Ribbon Message', compute='_compute_ribbon_message')
+    private_ribbon_message = fields.Char('Private Ribbon Message', compute='_compute_private_ribbon_message')
     partner_city = fields.Char(related='partner_id.city', readonly=False)
     manager_id = fields.Many2one('res.users', string='Project Manager', related='project_id.user_id', readonly=True)
     company_id = fields.Many2one(
@@ -648,6 +653,13 @@ class Task(models.Model):
     working_days_close = fields.Float(compute='_compute_elapsed', string='Working Days to Close', store=True, group_operator="avg")
     # customer portal: include comment and incoming emails in communication history
     website_message_ids = fields.One2many(domain=lambda self: [('model', '=', self._name), ('message_type', 'in', ['email', 'comment'])])
+    #Todo list field
+    todo_status = fields.Selection([
+        ('recent', 'Recently assigned'),
+        ('today', 'Today'),
+        ('upcoming', 'Upcoming'),
+        ('later', 'Later'),
+    ], default='recent', group_expand='_group_expand_todo_status')
 
     # recurrence fields
     allow_recurring_tasks = fields.Boolean(related='project_id.allow_recurring_tasks')
@@ -851,6 +863,13 @@ class Task(models.Model):
                 task.ribbon_message = _('By saving this change, the customer phone number will also be updated.')
             else:
                 task.ribbon_message = False
+
+    @api.depends('project_id', 'user_id')
+    def _compute_private_ribbon_message(self):
+        for task in self:
+            task.private_ribbon_message = False
+            if task.user_id == self.env.user and not task.project_id:
+                task.private_ribbon_message = _('This task is private to you.')
 
     @api.constrains('parent_id')
     def _check_parent_id(self):

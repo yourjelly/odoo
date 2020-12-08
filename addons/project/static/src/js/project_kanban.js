@@ -3,6 +3,7 @@ odoo.define('project.project_kanban', function (require) {
 
 var KanbanController = require('web.KanbanController');
 var KanbanView = require('web.KanbanView');
+var KanbanRenderer = require('web.KanbanRenderer');
 var KanbanColumn = require('web.KanbanColumn');
 var view_registry = require('web.view_registry');
 var KanbanRecord = require('web.KanbanRecord');
@@ -53,6 +54,19 @@ var ProjectKanbanView = KanbanView.extend({
     }),
 });
 
+const ProjectOrderKanbanRenderer = KanbanRenderer.extend({
+    _renderUngrouped: function (fragment) {
+        this.state.data = _.sortBy(this.state.data, (record) => {return record.data.is_favorite;}).reverse();
+        this._super.apply(this, arguments);
+    }
+})
+
+const ProjectOrderKanbanView = KanbanView.extend({
+    config: _.extend({}, KanbanView.prototype.config, {
+        Renderer: ProjectOrderKanbanRenderer
+    }),
+});
+
 KanbanColumn.include({
     _onDeleteColumn: function (event) {
         event.preventDefault();
@@ -65,6 +79,7 @@ KanbanColumn.include({
 });
 
 view_registry.add('project_kanban', ProjectKanbanView);
+view_registry.add('project_order_kanban', ProjectOrderKanbanView);
 
 return ProjectKanbanController;
 });

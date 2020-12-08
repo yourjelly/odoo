@@ -4,6 +4,7 @@ odoo.define('project.ProjectListView', function (require) {
     const Dialog = require('web.Dialog');
     const ListView = require('web.ListView');
     const ListController = require('web.ListController');
+    const ListModel = require('web.ListModel');
     const core = require('web.core');
     const view_registry = require('web.view_registry');
 
@@ -99,11 +100,36 @@ odoo.define('project.ProjectListView', function (require) {
             }).open();
         }
     });
+
+    const ProjectListModel = ListModel.extend({
+        __load: function (params) {
+            this.defaultGroupedBy = params.groupedBy || [];
+            return this._super(params);
+        },
+
+        reload: function (id, options) {
+            if (options && options.groupBy && !options.groupBy.length) {
+                options.groupBy = this.defaultGroupedBy;
+            }
+            return this._super(id, options);
+        },
+    });
     
     const ProjectListView = ListView.extend({
         config: _.extend({}, ListView.prototype.config, {
             Controller: ProjectListController,
+            Model: ProjectListModel,
         }),
+
+        /**
+         * @override
+         */
+        _updateMVCParams: function () {
+            this._super.apply(this, arguments);
+            if (!this.noDefaultGroupby) {
+                this.loadParams.groupedBy = ['todo_status'];
+            }
+        },
     });
 
     view_registry.add('project_list', ProjectListView);
