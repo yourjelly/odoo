@@ -3472,6 +3472,7 @@ class Many2many(_RelationalMulti):
     relation = None                     # name of table
     column1 = None                      # column of table referring to model
     column2 = None                      # column of table referring to comodel
+    relation_model = None               # model corresponding to the table
     auto_join = False                   # whether joins are generated upon search
     limit = None                        # optional limit to use upon read
     ondelete = None                     # optional ondelete for the column2 fkey
@@ -3704,10 +3705,15 @@ class Many2many(_RelationalMulti):
         pairs = [(x, y) for x, ys in new_relation.items() for y in ys - old_relation[x]]
         if pairs:
             if self.store:
-                query = "INSERT INTO {} ({}, {}) VALUES {} ON CONFLICT DO NOTHING".format(
-                    self.relation, self.column1, self.column2, ", ".join(["%s"] * len(pairs)),
-                )
-                cr.execute(query, pairs)
+                if self.relation_model:
+                    records.env[self.relation_model].create([
+                        {self.column1: x, self.column2: y} for x, y in pairs
+                    ])
+                else:
+                    query = "INSERT INTO {} ({}, {}) VALUES {} ON CONFLICT DO NOTHING".format(
+                        self.relation, self.column1, self.column2, ", ".join(["%s"] * len(pairs)),
+                    )
+                    cr.execute(query, pairs)
 
             # update the cache of inverse fields
             y_to_xs = defaultdict(set)
@@ -3743,12 +3749,21 @@ class Many2many(_RelationalMulti):
                 for y, xs in y_to_xs.items():
                     xs_to_ys[frozenset(xs)].add(y)
                 # delete the rows where (id1 IN xs AND id2 IN ys) OR ...
-                COND = "{} IN %s AND {} IN %s".format(self.column1, self.column2)
-                query = "DELETE FROM {} WHERE {}".format(
-                    self.relation, " OR ".join([COND] * len(xs_to_ys)),
-                )
-                params = [arg for xs, ys in xs_to_ys.items() for arg in [tuple(xs), tuple(ys)]]
-                cr.execute(query, params)
+                if self.relation_model:
+                    from odoo.osv.expression import OR
+                    domain = OR([
+                        ['&', (self.column1, 'in', list(xs)),
+                              (self.column2, 'in', list(ys))]
+                        for xs, ys in xs_to_ys.items()
+                    ])
+                    records.env[self.relation_model].sudo().search(domain).unlink()
+                else:
+                    COND = "{} IN %s AND {} IN %s".format(self.column1, self.column2)
+                    query = "DELETE FROM {} WHERE {}".format(
+                        self.relation, " OR ".join([COND] * len(xs_to_ys)),
+                    )
+                    params = [arg for xs, ys in xs_to_ys.items() for arg in [tuple(xs), tuple(ys)]]
+                    cr.execute(query, params)
 
             # update the cache of inverse fields
             for invf in records._field_inverses[self]:

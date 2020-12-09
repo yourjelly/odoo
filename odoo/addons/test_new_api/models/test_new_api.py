@@ -1199,3 +1199,32 @@ class ConstrainedUnlinks(models.Model):
         for rec in self:
             if rec.foo and rec.foo == 'prosciutto':
                 raise ValueError("You didn't say if you wanted it crudo or cotto...")
+
+
+class Many2manyLeft(models.Model):
+    _name = 'test_new_api.many2many.left'
+    _description = 'Left side of many2many relation'
+
+    name = fields.Char()
+    right_ids = fields.Many2many(
+        'test_new_api.many2many.right',
+        relation='test_new_api_many2many_middle',
+        column1='left_id', column1='right_id',
+        relation_model='test_new_api.many2many.middle',
+    )
+
+
+class Many2manyRight(models.Model):
+    _name = 'test_new_api.many2many.right'
+    _description = 'Right side of many2many relation'
+
+    name = fields.Char()
+
+
+class Many2manyMiddle(models.Model):
+    _name = 'test_new_api.many2many.middle'
+    _description = 'Model implementing the many2many relation'
+
+    left_id = fields.Many2one('test_new_api.many2many.left', required=True)
+    right_id = fields.Many2one('test_new_api.many2many.right', required=True)
+    done = fields.Boolean()
