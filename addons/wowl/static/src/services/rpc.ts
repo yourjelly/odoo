@@ -68,7 +68,7 @@ function makeErrorFromResponse(reponse: any): RPCError {
   // It is used as key in the error dialog from server registry to know which dialog component to use.
   // It's how a backend dev can easily map its error to another component.
   // Note that for a client side exception, we don't use this registry as we can directly assign a value to `component`.
-  if (name && odoo.errorDialogRegistry.contains(exception_class_name)) {
+  if (exception_class_name && odoo.errorDialogRegistry.contains(exception_class_name)) {
     error.component = odoo.errorDialogRegistry.get(exception_class_name);
   }
   error.exceptionName = exception_class_name;
