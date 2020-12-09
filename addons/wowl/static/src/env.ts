@@ -16,6 +16,11 @@ export async function makeEnv(config: OdooConfig): Promise<OdooEnv> {
     _t,
     debug,
   };
+  Object.defineProperty(env, "isMobile", {
+    get() {
+      return env.services.device.isMobile;
+    },
+  });
 
   await deployServices(env, config);
 
