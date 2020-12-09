@@ -79,6 +79,7 @@ export interface SessionInfo {
 export interface Odoo extends Registries {
   browser: OdooBrowser;
   session_info: SessionInfo;
+  csrf_token?: string;
   debug?: string;
   __WOWL_DEBUG__: Debug;
   info: DBInfo;

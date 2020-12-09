@@ -36,6 +36,8 @@
         <xpath expr="//script[@src='/web/static/src/js/chrome/systray_menu.js']" position="replace"/>
         <xpath expr="//script[@src='/web/static/src/js/chrome/user_menu.js']" position="replace"/>
         <xpath expr="//script[@src='/web/static/src/js/chrome/web_client.js']" position="replace"/>
+        <xpath expr="//script[@src='/web/static/src/js/services/crash_manager_service.js']" position="replace"/>
+
 
         <xpath expr="//script[@src='/web/static/lib/fuzzy-master/fuzzy.js']" position="after">
             <script type="text/javascript" src="/web/static/lib/Chart/Chart.js"></script> <!-- would be good to lazy load it -->
@@ -54,6 +56,7 @@
                     window.odoo = {
                         session_info: <t t-raw="json.dumps(session_info)"/>,
                         debug: "<t t-esc="debug"/>",
+                        csrf_token: "<t t-esc="request.csrf_token(None)"/>",
                     };
                 </script>
 

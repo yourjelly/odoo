@@ -782,8 +782,18 @@ function makeActionManager(env: OdooEnv): ActionManager {
     type: ReportType
   ): Promise<void> {
     const url = _getReportUrl(action, type);
-    // TODO: download the report
-    console.log(`download report ${url}`);
+    env.services.ui.block();
+    try {
+      await env.services.download({
+        url: "/report/download",
+        data: {
+          data: JSON.stringify([url, action.report_type]),
+          context: JSON.stringify(env.services.user.context),
+        },
+      });
+    } finally {
+      env.services.ui.unblock();
+    }
     if (action.close_on_report_download) {
       return doAction({ type: "ir.actions.act_window_close" });
     }
