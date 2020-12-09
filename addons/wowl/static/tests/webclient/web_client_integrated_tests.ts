@@ -4975,7 +4975,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
   QUnit.module('Actions in target="new"');
 
   QUnit.test('can execute act_window actions in target="new"', async function (assert) {
-    assert.expect(7);
+    assert.expect(8);
 
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
@@ -4988,12 +4988,11 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       ".o_technical_modal .o_form_view",
       "should have rendered a form view in a modal"
     );
-    // LPE FIXME:
-    // assert.hasClass(
-    //   $(".o_technical_modal .modal-body")[0],
-    //   "o_act_window",
-    //   "dialog main element should have classname 'o_act_window'"
-    // );
+    assert.hasClass(
+      $(".o_technical_modal .modal-body")[0],
+      "o_act_window",
+      "dialog main element should have classname 'o_act_window'"
+    );
     assert.hasClass(
       $(".o_technical_modal .o_form_view")[0],
       "o_form_editable",
@@ -5027,7 +5026,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("footer buttons are moved to the dialog footer", async function (assert) {
+  QUnit.test("footer buttons are moved to the dialog footer", async function (assert) {
     assert.expect(3);
 
     baseConfig.serverData!.views!["partner,false,form"] = `
@@ -5060,7 +5059,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("Button with `close` attribute closes dialog", async function (assert) {
+  QUnit.test("Button with `close` attribute closes dialog", async function (assert) {
     // unskip when button in dialogAction are implemented (boi I think)
     assert.expect(2);
 
@@ -5108,11 +5107,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     };
 
     const webClient = await createWebClient({ baseConfig, mockRPC });
-
-    await doAction(webClient, 4);
+    await doAction(webClient, 4); // boi lpe fixme: owl render triggers legacy update
     await testUtils.dom.click(`button[name="5"]`);
+    await legacyExtraNextTick();
     assert.strictEqual($(".modal").length, 1, "It should display a modal");
     await testUtils.dom.click(`button[name="some_method"]`);
+    await legacyExtraNextTick();
     assert.strictEqual($(".modal").length, 0, "It should have closed the modal");
     webClient.destroy();
   });
