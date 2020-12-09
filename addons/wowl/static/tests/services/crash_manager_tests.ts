@@ -19,7 +19,6 @@ function makeFakeDialogManagerService(
   };
 }
 
-let env: OdooEnv;
 let serviceRegistry: Registries["serviceRegistry"];
 let windowAddEventListener = window.addEventListener;
 
@@ -64,7 +63,7 @@ QUnit.test("handle RPC_ERROR of type='server' and no associated dialog class", a
   }
   serviceRegistry.add("dialog_manager", makeFakeDialogManagerService(open));
 
-  env = await makeTestEnv({ serviceRegistry });
+  await makeTestEnv({ serviceRegistry });
   const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null as any });
   errorCb(errorEvent);
 });
@@ -104,7 +103,7 @@ QUnit.test(
       });
     }
     serviceRegistry.add("dialog_manager", makeFakeDialogManagerService(open));
-    env = await makeTestEnv({ serviceRegistry });
+    await makeTestEnv({ serviceRegistry });
     odoo.errorDialogRegistry.add("strange_error", CustomDialog);
     const errorEvent = new PromiseRejectionEvent("error", { reason: error, promise: null as any });
     errorCb(errorEvent);
