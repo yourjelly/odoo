@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.ListView" owl="1">
+      <Layout viewProps="props">
+        <div class="o_list_view">
+          <div class="table-responsive">
+            <table class="o_list_table table table-sm table-hover table-striped">
+              <thead>
+                <tr>
+                  <th class="o_list_record_selector"><input type="checkbox"/></th>
+                  <th t-foreach="model.columns" t-as="fieldName" t-key="fieldName">
+                    <t t-esc="model.info.fields[fieldName].string"/>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr  t-foreach="model.records" t-as="record" t-key="record.id" class="o_data_row" t-on-click="_onRowClicked(record.id)">
+                  <td class="o_list_record_selector"><input type="checkbox"/></td>
+                  <td t-foreach="model.columns" t-as="fieldName" t-key="fieldName" class="o_data_cell">
+                    <t t-if="model.info.fields[fieldName].type === 'many2one'">
+                      <t t-esc="record[fieldName] ? record[fieldName][1] : ''"/>
+                    </t>
+                    <t t-else="">
+                      <t t-esc="record[fieldName] !== false ? record[fieldName] : ''"/>
+                    </t>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <td/>
+                <td t-foreach="model.columns" t-as="fieldName" t-key="fieldName"/>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </Layout>
+    </t>
+</templates>

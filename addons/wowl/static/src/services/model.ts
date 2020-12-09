@@ -21,11 +21,15 @@ interface GroupByOptions {
 }
 
 // todo: describe (and normalize if necessary) group results
-interface GroupResult {}
+interface Group {
+  __count: number;
+  __domain: Domain;
+  [key: string]: any;
+}
 
-interface ReadGroupResult {
+export interface ReadGroupResult {
   length: number;
-  groups: GroupResult[];
+  groups: Group[];
 }
 
 interface SearchReadOptions {

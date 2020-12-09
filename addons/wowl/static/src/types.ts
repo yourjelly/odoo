@@ -196,6 +196,8 @@ export interface ViewProps extends ActionProps {
   viewSwitcherEntries?: ViewSwitcherEntries;
   withActionMenus?: boolean;
   withFilters?: boolean;
+
+  noContentHelp?: string;
 }
 
 export interface ClientActionProps extends ActionProps {

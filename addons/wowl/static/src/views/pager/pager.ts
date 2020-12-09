@@ -1,6 +1,6 @@
 import { Component, hooks, useState } from "@odoo/owl";
-import { useAutofocus } from "../core/hooks";
-import { OdooEnv } from "../types";
+import { useAutofocus } from "../../core/hooks";
+import { OdooEnv } from "../../types";
 
 interface PagerModel {
   limit: number;

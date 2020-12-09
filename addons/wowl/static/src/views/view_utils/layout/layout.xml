@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <div t-name="wowl.Action" owl="1" class="o_action">
+      <div class="o_control_panel">
+        <div class="o_cp_top">
+            <div class="o_cp_top_left">
+              <t t-slot="control-panel-top-left">
+                <t t-call="wowl.Breadcrumbs" />
+              </t>
+            </div>
+            <div class="o_cp_top_right">
+              <t t-slot="control-panel-top-right"/>
+            </div>
+        </div>
+        <div class="o_cp_bottom">
+            <div class="o_cp_bottom_left">
+              <t t-slot="control-panel-bottom-left"/>
+            </div>
+            <div class="o_cp_bottom_right">
+              <t t-slot="control-panel-bottom-right"/>
+              <t t-if="props.viewProps.viewSwitcherEntries and props.viewProps.viewSwitcherEntries.length > 1">
+                <nav class="btn-group o_cp_switch_buttons">
+                  <button t-foreach="props.viewProps.viewSwitcherEntries" t-as="view" t-key="view.type"
+                          t-attf-class="btn btn-secondary fa fa-lg {{view.icon}}"
+                          t-att-title="view.name"
+                          t-on-click="onViewClicked(view.type)"/>
+                </nav>
+              </t>
+              <div class="o_cp_pager"/>
+            </div>
+        </div>
+    </div>
+    <div class="o_content">
+      <t t-slot="default" />
+    </div>
+  </div>
+
+  <t t-name="wowl.Breadcrumbs" owl="1">
+    <ol class="breadcrumb">
+        <li t-foreach="props.viewProps.breadcrumbs" t-as="breadcrumb" class="breadcrumb-item">
+            <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="onBreadcrumbClicked(breadcrumb.jsId)">
+                <t t-esc="breadcrumb.name"/>
+            </a>
+            <t t-else=""><t t-esc="breadcrumb.name"/></t>
+        </li>
+    </ol>
+</t>
+
+</templates>

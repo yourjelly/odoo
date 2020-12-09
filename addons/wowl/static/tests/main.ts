@@ -39,6 +39,8 @@ import "./services/crash_manager_tests";
 import "./crash_manager/error_dialogs_tests";
 import "./services/dialog_manager_tests";
 import "./services/title_tests";
+import "./views/model/search_model_tests";
+import "./views/model/group_by_tests";
 
 (async () => {
   await setupTests();
