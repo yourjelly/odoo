@@ -5,6 +5,9 @@ import { Deferred, TestConfig } from "./utility";
 import { Query, Route, Router, makePushState, routeToUrl } from "../../src/services/router";
 import { Cookie, cookieService } from "../../src/services/cookie";
 import { titleService } from "../../src/services/title";
+import { DowloadFileOptions, Download } from "../../src/services/download";
+import { NotificationService } from "../../src/notifications/notification_service";
+import { UIService } from "../../src/services/ui/ui";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -302,3 +305,53 @@ export const fakeTitleService: typeof titleService = {
     };
   },
 };
+
+export function makeFakeDownloadService(callback: CallableFunction): Service<Download> {
+  return {
+    name: "download",
+    deploy(): Download {
+      return async function (options: DowloadFileOptions) {
+        return await callback(options);
+      };
+    },
+  };
+}
+
+export function makeFakeUIService(
+  blockCallback: CallableFunction,
+  unblockCallback: CallableFunction
+): Service<UIService> {
+  return {
+    name: "ui",
+    deploy(): UIService {
+      function block(): void {
+        blockCallback();
+      }
+      function unblock(): void {
+        unblockCallback();
+      }
+      return { block, unblock };
+    },
+  };
+}
+
+export function makeFakeNotificationService(
+  createMock: CallableFunction,
+  closeMock: CallableFunction
+): Service<NotificationService> {
+  return {
+    name: "notifications",
+    deploy(): NotificationService {
+      function create() {
+        return createMock();
+      }
+      function close() {
+        return closeMock();
+      }
+      return {
+        create,
+        close,
+      };
+    },
+  };
+}
