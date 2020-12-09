@@ -2,10 +2,19 @@ import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
 import { makeTestEnv, nextTick } from "../helpers/index";
-import { ComponentAction, FunctionAction, OdooEnv, Service, Registries } from "../../src/types";
+import {
+  ComponentAction,
+  FunctionAction,
+  OdooEnv,
+  Service,
+  Registries,
+  OdooBrowser,
+} from "../../src/types";
 import { fakeTitleService, makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 import { notificationService } from "../../src/notifications/notification_service";
+import { TestConfig } from "../helpers/utility";
 
+let baseConfig: TestConfig;
 let env: OdooEnv;
 let serviceRegistry: Registries["serviceRegistry"];
 let actionRegistry: Registries["actionRegistry"];
@@ -44,16 +53,17 @@ QUnit.module("Action Manager Service", {
     serviceRegistry.add("user", makeFakeUserService());
     serviceRegistry.add("title", fakeTitleService);
 
-    env = await makeTestEnv({
+    baseConfig = {
       actionRegistry,
       serverData: { models, actions: serverSideActions },
       serviceRegistry,
-    });
+    };
   },
 });
 
 QUnit.test("action_manager service loads actions", async (assert) => {
   assert.expect(6);
+  env = await makeTestEnv(baseConfig);
 
   env.services.action_manager.doAction(1);
   await nextTick();
@@ -68,4 +78,25 @@ QUnit.test("action_manager service loads actions", async (assert) => {
   });
   await nextTick();
   assert.verifySteps(["client_action_object"]);
+});
+
+QUnit.test("execute an 'ir.actions.act_url' action with target 'self'", async (assert) => {
+  assert.expect(2);
+
+  const browser = {
+    location: {
+      assign(url: string) {
+        assert.step(url);
+      },
+    },
+  } as OdooBrowser;
+  env = await makeTestEnv(Object.assign(baseConfig, { browser }));
+
+  await env.services.action_manager.doAction({
+    type: "ir.actions.act_url",
+    target: "self",
+    url: "/my/test/url",
+  });
+
+  assert.verifySteps(["/my/test/url"]);
 });
