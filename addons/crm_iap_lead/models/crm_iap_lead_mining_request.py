@@ -57,7 +57,7 @@ class CRMLeadMiningRequest(models.Model):
     company_size_max = fields.Integer(default=1000)
     country_ids = fields.Many2many('res.country', string='Countries', default=_default_country_ids)
     state_ids = fields.Many2many('res.country.state', string='States')
-    industry_ids = fields.Many2many('crm.iap.lead.industry', string='Industries')
+    industry_ids = fields.Many2many('crm.iap.lead.industry', string='Industries', required=True)
 
     # Contact Generation Filter
     contact_number = fields.Integer(string='Number of Contacts', default=10)

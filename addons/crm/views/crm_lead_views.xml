@@ -847,6 +847,7 @@ if record:
                     'default_type':'lead',
                     'search_default_type': 'lead',
                     'search_default_to_process':1,
+                    'action_helper': 'leads',
                 }
             </field>
         </record>
@@ -899,7 +900,7 @@ if record:
             <field name="domain">[('activity_ids','!=',False)]</field>
             <field name="search_view_id" ref="crm.view_crm_case_my_activities_filter"/>
             <field name="context">{'default_type': 'opportunity',
-                    'search_default_assigned_to_me': 1}
+                    'search_default_assigned_to_me': 1,'action_helper': 'activities'}
             </field>
         </record>
 
@@ -917,7 +918,7 @@ if record:
             <field name="view_mode">kanban,tree,graph,pivot,form,calendar,activity</field>
             <field name="domain">[('type','=','opportunity')]</field>
             <field name="context">{
-                    'default_type': 'opportunity',
+                    'default_type': 'opportunity'
                 }
             </field>
             <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter"/>
@@ -973,7 +974,8 @@ if record:
             <field name="domain">[('type','=','opportunity')]</field>
             <field name="context">{
                     'default_type': 'opportunity',
-                    'search_default_assigned_to_me': 1
+                    'search_default_assigned_to_me': 1,
+                    'action_helper': 'pipeline'
             }</field>
             <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter"/>
         </record>
