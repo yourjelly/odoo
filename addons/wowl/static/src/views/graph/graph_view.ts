@@ -29,7 +29,7 @@ import Chart, {
   ChartLegendOptions,
   ChartLegendItem,
 } from "chart.js";
-import { sortBy } from "../../utils/utils";
+import { sortBy } from "../../utils/arrays";
 import { evaluateExpr } from "../../py/index";
 import { ViewDescriptions } from "../../services/view_manager";
 

@@ -1,6 +1,6 @@
 import { SearchModel, ModelParams } from "../view_utils/search_model";
 import { ReadGroupResult } from "../../services/model";
-import { sortBy } from "../../utils/utils";
+import { sortBy } from "../../utils/arrays";
 import { ChartData, ChartDataSets } from "chart.js";
 import { Fields } from "./view";
 import { DomainListRepr } from "../../core/domain";

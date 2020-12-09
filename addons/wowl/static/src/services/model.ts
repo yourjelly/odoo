@@ -23,7 +23,7 @@ interface GroupByOptions {
 // todo: describe (and normalize if necessary) group results
 interface Group {
   __count: number;
-  __domain: Domain;
+  __domain: DomainListRepr;
   [key: string]: any;
 }
 
