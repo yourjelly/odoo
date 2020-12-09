@@ -19,6 +19,7 @@ import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
 import { DialogAction } from "./dialog_action";
 import { KeepLast } from "../utils/concurrency";
+import { redirect } from "../utils/misc";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -601,7 +602,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
    */
   function _executeActURLAction(action: ActURLAction): void {
     if (action.target === "self") {
-      // framework.redirect(action.url); // TODO
+      redirect(env, action.url);
     } else {
       const w = odoo.browser.open(action.url, "_blank");
       if (!w || w.closed || typeof w.closed === "undefined") {

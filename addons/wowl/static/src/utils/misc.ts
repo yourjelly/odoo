@@ -86,3 +86,26 @@ export function json_node_to_xml(env: OdooEnv, node: any, human_readable: any, i
     return r + "/>";
   }
 }
+
+/**
+ * Redirect to url by replacing window.location
+ * If wait is true, sleep 1s and wait for the server i.e. after a restart.
+ */
+export function redirect(env: OdooEnv, url: string, wait?: number) {
+  const browser = odoo.browser;
+  const load = () => browser.location.assign(url);
+
+  if (wait) {
+    const wait_server = function () {
+      env.services
+        .rpc("/web/webclient/version_info", {})
+        .then(load)
+        .catch(function () {
+          browser.setTimeout(wait_server, 250);
+        });
+    };
+    browser.setTimeout(wait_server, 1000);
+  } else {
+    load();
+  }
+}
