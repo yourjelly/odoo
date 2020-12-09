@@ -12,7 +12,13 @@ import {
   clearUncommittedChanges,
 } from "../../src/action_manager/action_manager";
 import { Component, tags } from "@odoo/owl";
-import { makeFakeRouterService, fakeTitleService } from "../helpers/mocks";
+import {
+  makeFakeRouterService,
+  fakeTitleService,
+  makeFakeDownloadService,
+  makeFakeNotificationService,
+  makeFakeUIService,
+} from "../helpers/mocks";
 import { useService } from "../../src/core/hooks";
 
 import { viewManagerService } from "../../src/services/view_manager";
@@ -26,6 +32,8 @@ import { actionRegistry } from "../../src/action_manager/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
 import { Route } from "../../src/services/router";
 import type { Context } from "../../src/core/context";
+import { DowloadFileOptionsFromParams } from "../../src/services/download";
+import { uiService } from "../../src/services/ui/ui";
 
 // JQuery :visible selector
 // https://stackoverflow.com/questions/13388616/firefox-query-selector-and-the-visible-pseudo-selector
@@ -199,7 +207,8 @@ function beforeEachActionManager(): TestConfig {
     .add("router", makeFakeRouterService())
     .add("view_manager", viewManagerService)
     .add("model", modelService)
-    .add(fakeTitleService.name, fakeTitleService);
+    .add(fakeTitleService.name, fakeTitleService)
+    .add(uiService.name, uiService);
 
   const browser = {
     setTimeout: window.setTimeout.bind(window),
@@ -460,6 +469,7 @@ let core: any;
 let ListController: any;
 let testUtils: any;
 let Widget: any;
+let ReportClientAction: any;
 
 QUnit.module("web client integrated tests", (hooks) => {
   hooks.beforeEach(() => {
@@ -817,6 +827,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     testUtils = legacy.testUtils;
     cpHelpers = testUtils.controlPanel;
     Widget = legacy.Widget;
+    ReportClientAction = legacy.ReportClientAction;
   });
 
   hooks.beforeEach(async (assert) => {
@@ -2912,229 +2923,182 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
 
   QUnit.module("Report actions");
 
-  QUnit.skip("can execute report actions from db ID", async function (assert) {
-    /*
-    assert.expect(5);
+  QUnit.test("can execute report actions from db ID", async function (assert) {
+    assert.expect(5); // TODO on close param
 
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        report: ReportService,
-      },
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        if (route === "/report/check_wkhtmltopdf") {
-          return Promise.resolve("ok");
-        }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        get_file: async function (params) {
-          assert.step(params.url);
-          params.success();
-          params.complete();
-          return true;
-        },
-      },
-    });
-    await doAction(webClient, 7, {
-      on_close: function () {
-        assert.step("on_close");
-      },
-    });
+    baseConfig.serviceRegistry!.add(
+      "download",
+      makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
+        assert.step(options.url);
+        return Promise.resolve();
+      })
+    );
+
+    const mockRPC: RPC = async (route, args) => {
+      assert.step(args?.method || route);
+      if (route === "/report/check_wkhtmltopdf") {
+        return Promise.resolve("ok");
+      }
+    };
+
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    await doAction(webClient, 7); // TODO on close param
     await testUtils.nextTick();
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load",
       "/report/check_wkhtmltopdf",
       "/report/download",
-      "on_close",
+      // TODO on close
     ]);
-
     webClient.destroy();
-    */
   });
 
-  QUnit.skip("report actions can close modals and reload views", async function (assert) {
-    /*
-    assert.expect(8);
-
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        report: ReportService,
-      },
-      mockRPC: function (route, args) {
-        if (route === "/report/check_wkhtmltopdf") {
-          return Promise.resolve("ok");
-        }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        get_file: async function (params) {
-          assert.step(params.url);
-          params.success();
-          params.complete();
-          return true;
-        },
-      },
-    });
-
-    // load modal
-    await doAction(webClient, 5, {
-      on_close: function () {
-        assert.step("on_close");
-      },
-    });
-
+  QUnit.test("report actions can close modals and reload views", async function (assert) {
+    assert.expect(6); // TODO on close param
+    baseConfig.serviceRegistry!.add(
+      "download",
+      makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
+        assert.step(options.url);
+        return Promise.resolve();
+      })
+    );
+    const mockRPC: RPC = async (route, args) => {
+      if (route === "/report/check_wkhtmltopdf") {
+        return Promise.resolve("ok");
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
+    await doAction(webClient, 5); // TODO on close
     assert.strictEqual(
       $(".o_technical_modal .o_form_view").length,
       1,
       "should have rendered a form view in a modal"
     );
-
-    await doAction(webClient, 7, {
-      on_close: function () {
-        assert.step("on_printed");
-      },
-    });
-
+    await doAction(webClient, 7); // TODO on close
     assert.strictEqual(
       $(".o_technical_modal .o_form_view").length,
       1,
       "The modal should still exist"
     );
-
-    await doAction(webClient, 11);
-
+    await doAction(webClient, 11); // TODO on close
     assert.strictEqual(
       $(".o_technical_modal .o_form_view").length,
       0,
       "the modal should have been closed after the action report"
     );
-
-    assert.verifySteps(["/report/download", "on_printed", "/report/download", "on_close"]);
-
+    assert.verifySteps([
+      "/report/download",
+      "/report/download",
+      // TODO on close
+    ]);
+    // old test with on close expected : assert.verifySteps(["/report/download", "on_printed", "/report/download", "on_close"]);
     webClient.destroy();
-    */
   });
 
-  QUnit.skip("should trigger a notification if wkhtmltopdf is to upgrade", async function (assert) {
-    /*
-    assert.expect(5);
-
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        report: ReportService,
-        notification: NotificationService.extend({
-          notify: function (params) {
-            assert.step(params.type || "notification");
-          },
-        }),
-      },
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
-        if (route === "/report/check_wkhtmltopdf") {
-          return Promise.resolve("upgrade");
-        }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        get_file: async function (params) {
-          assert.step(params.url);
-          params.success();
-          params.complete();
-          return true;
+  QUnit.test("should trigger a notification if wkhtmltopdf is to upgrade", async function (assert) {
+    baseConfig.serviceRegistry!.add(
+      notificationService.name,
+      makeFakeNotificationService(
+        () => {
+          assert.step("notify");
         },
-      },
-    });
+        () => {}
+      ),
+      true
+    );
+    baseConfig.serviceRegistry!.add(
+      "download",
+      makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
+        assert.step(options.url);
+        return Promise.resolve();
+      })
+    );
+    const mockRPC: RPC = async (route, args) => {
+      assert.step(args?.method || route);
+      if (route === "/report/check_wkhtmltopdf") {
+        return Promise.resolve("upgrade");
+      }
+    };
+    const webClient = await createWebClient({ baseConfig, mockRPC });
     await doAction(webClient, 7);
     assert.verifySteps([
+      "/wowl/load_menus",
       "/web/action/load",
       "/report/check_wkhtmltopdf",
-      "warning",
+      "notify",
       "/report/download",
     ]);
-
     webClient.destroy();
-    */
   });
 
   QUnit.skip(
     "should open the report client action if wkhtmltopdf is broken",
     async function (assert) {
-      /*
-    assert.expect(7);
-
-    // patch the report client action to override its iframe's url so that
-    // it doesn't trigger an RPC when it is appended to the DOM (for this
-    // usecase, using removeSRCAttribute doesn't work as the RPC is
-    // triggered as soon as the iframe is in the DOM, even if its src
-    // attribute is removed right after)
-    testUtils.mock.patch(ReportClientAction, {
-      start: function () {
-        var self = this;
-        return this._super.apply(this, arguments).then(function () {
-          self._rpc({ route: self.iframe.getAttribute("src") });
-          self.iframe.setAttribute("src", "about:blank");
-        });
-      },
-    });
-
-    var actionManager = await createActionManager({
-      actions: this.actions,
-      archs: this.archs,
-      data: this.data,
-      services: {
-        report: ReportService,
-        notification: NotificationService.extend({
-          notify: function (params) {
-            assert.step(params.type || "notification");
+      baseConfig.serviceRegistry!.add(
+        "download",
+        makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
+          assert.step("download"); // should not be called
+          return Promise.resolve();
+        })
+      );
+      baseConfig.serviceRegistry!.add(
+        notificationService.name,
+        makeFakeNotificationService(
+          () => {
+            assert.step("notify");
           },
-        }),
-      },
-      mockRPC: function (route, args) {
-        assert.step(args.method || route);
+          () => {}
+        ),
+        true
+      );
+      const mockRPC: RPC = async (route, args) => {
+        assert.step(args!.method || route);
         if (route === "/report/check_wkhtmltopdf") {
           return Promise.resolve("broken");
         }
         if (route.includes("/report/html/some_report")) {
           return Promise.resolve();
         }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        get_file: function (params) {
-          assert.step(params.url); // should not be called
-          return true;
+      };
+
+      // patch the report client action to override its iframe's url so that
+      // it doesn't trigger an RPC when it is appended to the DOM (for this
+      // usecase, using removeSRCAttribute doesn't work as the RPC is
+      // triggered as soon as the iframe is in the DOM, even if its src
+      // attribute is removed right after)
+      testUtils.mock.patch(ReportClientAction, {
+        start: function () {
+          var self = this;
+          return this._super.apply(this, arguments).then(function () {
+            self._rpc({ route: self.iframe.getAttribute("src") });
+            self.iframe.setAttribute("src", "about:blank");
+          });
         },
-      },
-    });
-    await doAction(webClient, 7);
+      });
 
-    assert.containsOnce(
-      actionManager,
-      ".o_report_iframe",
-      "should have opened the report client action"
-    );
-    assert.containsOnce(webClient, ".o_cp_buttons .o_report_buttons .o_report_print");
+      const webClient = await createWebClient({ baseConfig, mockRPC });
 
-    assert.verifySteps([
-      "/web/action/load",
-      "/report/check_wkhtmltopdf",
-      "warning",
-      "/report/html/some_report?context=%7B%7D", // report client action's iframe
-    ]);
+      await doAction(webClient, 7);
 
-    webClient.destroy();
-    testUtils.mock.unpatch(ReportClientAction);
-    */
+      assert.containsOnce(
+        webClient,
+        ".o_report_iframe",
+        "should have opened the report client action"
+      );
+
+      assert.containsOnce(webClient, ".o_cp_buttons .o_report_buttons .o_report_print");
+
+      assert.verifySteps([
+        "/wowl/load_menus",
+        "/web/action/load",
+        "/report/check_wkhtmltopdf",
+        "notify",
+        "/report/html/some_report?context=%7B%7D",
+      ]);
+
+      webClient.destroy();
+      testUtils.mock.unpatch(ReportClientAction);
     }
   );
 
@@ -3200,47 +3164,69 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     */
   });
 
-  QUnit.skip(
-    "crashmanager service called on failed report download actions",
+  QUnit.test(
+    "UI unblocks after downloading the report even if it threw an error",
     async function (assert) {
-      /*
-    assert.expect(1);
+      assert.expect(8);
 
-    var actionManager = await createActionManager({
-      data: this.data,
-      actions: this.actions,
-      services: {
-        report: ReportService,
-      },
-      mockRPC: function (route) {
+      let timesDownloasServiceHasBeenCalled = 0;
+      baseConfig.serviceRegistry!.add(
+        "download",
+        makeFakeDownloadService((options: DowloadFileOptionsFromParams) => {
+          if (timesDownloasServiceHasBeenCalled === 0) {
+            assert.step("successful download");
+            timesDownloasServiceHasBeenCalled++;
+            return Promise.resolve();
+          }
+          if (timesDownloasServiceHasBeenCalled === 1) {
+            assert.step("failed download");
+            return Promise.reject();
+          }
+        })
+      );
+
+      baseConfig.serviceRegistry!.add(
+        "ui",
+        makeFakeUIService(
+          () => {
+            assert.step("block");
+          },
+          () => {
+            assert.step("unblock");
+          }
+        ),
+        true
+      );
+
+      const mockRPC: RPC = async (route, args) => {
         if (route === "/report/check_wkhtmltopdf") {
           return Promise.resolve("ok");
         }
-        return this._super.apply(this, arguments);
-      },
-      session: {
-        get_file: function (params) {
-          params.error({
-            data: {
-              name: "error",
-              arguments: ["could not download file"],
-            },
-          });
-          params.complete();
-        },
-      },
-    });
+      };
 
-    try {
-      await doAction(webClient, 11);
-    } catch (e) {
-      // e is undefined if we land here because of a rejected promise,
-      // otherwise, it is an Error, which is not what we expect
-      assert.strictEqual(e, undefined);
-    }
+      const webClient = await createWebClient({ baseConfig, mockRPC });
 
-    webClient.destroy();
-    */
+      await doAction(webClient, 7);
+      await testUtils.nextTick();
+
+      try {
+        await doAction(webClient, 7);
+      } catch (e) {
+        assert.step("error caught");
+      }
+      await testUtils.nextTick();
+
+      assert.verifySteps([
+        "block",
+        "successful download",
+        "unblock",
+        "block",
+        "failed download",
+        "unblock",
+        "error caught",
+      ]);
+
+      webClient.destroy();
     }
   );
 
