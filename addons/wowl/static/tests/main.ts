@@ -40,6 +40,9 @@ import "./webclient/loading_indicator_tests";
 import "./webclient/navbar_tests";
 import "./webclient/user_menu_tests";
 import "./webclient/webclient_tests";
+import "./views/view_utils/search_model_tests";
+import "./views/view_utils/group_by_tests";
+import "./views/view_utils/comparison_menu_tests";
 
 (async () => {
   await setupTests();

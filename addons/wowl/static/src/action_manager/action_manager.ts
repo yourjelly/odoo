@@ -202,7 +202,8 @@ interface ScrollOffset {
   top?: number;
   left?: number;
 }
-interface UseSetupActionParams {
+
+export interface useSetupActionParams {
   export?: () => any;
   beforeLeave?: ClearUncommittedChanges;
 }
@@ -263,7 +264,7 @@ function setScrollPosition(component: Component<any, OdooEnv>, offset: ScrollOff
  * allows to implement the 'export' feature which aims at restoring the state
  * of the Component when we come back to it (e.g. using the breadcrumbs).
  */
-export function useSetupAction(params: UseSetupActionParams): UseSetupActionReturnType {
+export function useSetupAction(params: useSetupActionParams): UseSetupActionReturnType {
   const component = Component.current! as Component<any, OdooEnv>;
   hooks.onMounted(() => {
     if (component.props.state) {
@@ -472,9 +473,9 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
-   * @param {BaseView} view
+   * @param {View} view
    * @param {ActWindowAction} action
-   * @param {BaseView[]} views
+   * @param {View[]} views
    * @returns {ViewProps}
    */
   function _getViewProps(
@@ -596,7 +597,10 @@ function makeActionManager(env: OdooEnv): ActionManager {
             if (!nextStackActionIds.includes(c.action.jsId)) {
               if (c.action.type === "ir.actions.act_window") {
                 for (const viewType in (c.action as any).controllers) {
-                  toDestroy.add(c.action.controllers[viewType]);
+                  const controller = c.action.controllers[viewType];
+                  if ((controller.Component as any).isLegacy) {
+                    toDestroy.add(controller);
+                  }
                 }
               } else {
                 toDestroy.add(c);

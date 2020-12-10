@@ -39,3 +39,29 @@ export function groupBy(list: any[], criterion: string | Function): Object {
   }
   return groups;
 }
+
+/**
+ * Return a shallow copy of a given array sorted by a given criterion or a default one.
+ * The given criterion can either be:
+ * - a string: a property name on the array elements returning the sortable primitive
+ * - a function: a handler that will return the sortable primitive from a given element.
+ * The default order is ascending ('asc'). It can be modified by setting the extra param 'order' to 'desc'.
+ */
+export function sortBy<T = any>(
+  array: T[],
+  criterion: string | ((element: T) => any),
+  order: "asc" | "desc" = "asc"
+): T[] {
+  const extract = _getExtractorFrom(criterion);
+  return array.slice().sort((elA, elB) => {
+    const a = extract(elA);
+    const b = extract(elB);
+    let result;
+    if (isNaN(a) && isNaN(b)) {
+      result = a > b ? 1 : a < b ? -1 : 0;
+    } else {
+      result = a - b;
+    }
+    return order === "asc" ? result : -result;
+  });
+}

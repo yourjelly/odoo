@@ -11,6 +11,7 @@ import { NotificationService } from "../../src/notifications/notification_servic
 import { UIService } from "../../src/services/ui/ui";
 import { Device, SIZES } from "../../src/services/device";
 import { getDefaultLocalization, Localization } from "../../src/services/localization";
+import { Component } from "@odoo/owl";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -87,7 +88,10 @@ export function makeFakeUserService(values?: Partial<UserService>): Service<User
 }*/
 
 function buildMockRPC(mockRPC?: MockRPC) {
-  return async (...args: Parameters<RPC>) => {
+  return async function (this: any, ...args: Parameters<RPC>) {
+    if (this instanceof Component && this.__owl__.isDestroyed) {
+      return new Promise(() => {});
+    }
     if (mockRPC) {
       return mockRPC(...args);
     }
@@ -140,6 +144,7 @@ export function makeTestOdoo(config: TestConfig = {}): Odoo {
     userMenuRegistry: config.userMenuRegistry,
     debugManagerRegistry: config.debugManagerRegistry,
     viewRegistry: config.viewRegistry,
+    favoriteMenuRegistry: config.favoriteMenuRegistry,
   });
 }
 

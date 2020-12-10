@@ -320,7 +320,7 @@ QUnit.module("ActionManager", (hooks) => {
         "/web/action/load",
         "load_views",
         "read", // read the opened record
-        "/web/dataset/search_read", // search read when coming back to List
+        "web_search_read", // search read when coming back to List
       ]);
 
       webClient.destroy();
@@ -458,7 +458,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read", // list view
+      "web_search_read", // list view
       "/web/dataset/search_read", // kanban view
       "read", // form view
     ]);
@@ -515,7 +515,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load",
       "load_views",
-      "/web/dataset/search_read", // list view
+      "web_search_read", // list view
       "read", // form view, record 1
       "read", // form view, record 4
     ]);
@@ -752,7 +752,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/dataset/search_read", // action 3
       "setItem session current_action", // action 3
       "getItem session current_action", // loadState
-      "/web/dataset/search_read", // loaded action
+      "web_search_read", // loaded action
       "setItem session current_action", // loaded action
     ]);
 

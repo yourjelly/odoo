@@ -81,7 +81,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/action/load", // load action 4
       "/web/action/load", // load action 6
       "/web/dataset/call_kw/pony/load_views", // load views for action 6
-      "/web/dataset/search_read", // search read for list view action 6
+      "/web/dataset/call_kw/pony/web_search_read", // search read for list view action 6
     ]);
 
     webClient.destroy();
@@ -95,7 +95,7 @@ QUnit.module("ActionManager", (hooks) => {
 
     const mockRPC: RPC = async function (route, args) {
       assert.step(route);
-      if (route === "/web/dataset/search_read") {
+      if (route.endsWith("search_read")) {
         await defs.shift();
       }
     };
@@ -117,7 +117,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/web/action/load", // initial load action
       "/web/dataset/call_kw/partner/load_views", // load views
       "/web/dataset/search_read", // search_read for kanban view
-      "/web/dataset/search_read", // search_read for list view (not resolved yet)
+      "/web/dataset/call_kw/partner/web_search_read", // search_read for list view (not resolved yet)
       "/web/dataset/search_read", // search_read for kanban view reload (not resolved yet)
     ]);
 
@@ -257,7 +257,7 @@ QUnit.module("ActionManager", (hooks) => {
         "/web/dataset/search_read", // blocked search read when coming back to Kanban (action 4)
         "/web/action/load", // action 8
         "load_views", // action 8
-        "/web/dataset/search_read", // search read action 8
+        "web_search_read", // search read action 8
       ]);
 
       // unblock the switch to Kanban in action 4
@@ -317,12 +317,12 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // action 3
-      "/web/dataset/search_read", // list for action 3
+      "web_search_read", // list for action 3
       "read", // form for action 3
       "object", // click on 'Call method' button (this request is blocked)
       "/web/action/load", // action 8
       "load_views", // action 8
-      "/web/dataset/search_read", // list for action 8
+      "web_search_read", // list for action 8
     ]);
 
     // unblock the call_button request
@@ -392,7 +392,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // action 3
-      "/web/dataset/search_read", // search read of list view of action 3
+      "web_search_read", // search read of list view of action 3
       "read", // read of form view of action 3 (this request is blocked)
       "/web/action/load", // action 4
       "load_views", // action 4
@@ -483,7 +483,7 @@ QUnit.module("ActionManager", (hooks) => {
     const def = testUtils.makeTestPromise();
     const mockRPC: RPC = async function (route, args) {
       assert.step((args && args.method) || route);
-      if (route === "/web/dataset/search_read") {
+      if (route.endsWith("search_read")) {
         await def;
       }
     };
@@ -525,7 +525,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // action 3
-      "/web/dataset/search_read", // search read action 3
+      "web_search_read", // search read action 3
       "/web/action/load", // action 4
       "load_views", // action 4
       "/web/dataset/search_read", // search read action 4
@@ -651,7 +651,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // action 3
-      "/web/dataset/search_read", // action 3 list fetch
+      "web_search_read", // action 3 list fetch
       "/web/action/load", // action 4
       "load_views", // action 4 Hanging
       "/web/dataset/search_read", // action 3 kanban fetch
@@ -667,7 +667,7 @@ QUnit.module("ActionManager", (hooks) => {
     const defs = [null, def, null];
     const mockRPC: RPC = async (route, args) => {
       assert.step((args && args.method) || route);
-      if (route === "/web/dataset/search_read") {
+      if (route.endsWith("search_read")) {
         await Promise.resolve(defs.shift());
       }
     };
@@ -696,7 +696,7 @@ QUnit.module("ActionManager", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // action 3
-      "/web/dataset/search_read", // action 3 list fetch
+      "web_search_read", // action 3 list fetch
       "/web/action/load", // action 4
       "load_views", // action 4
       "/web/dataset/search_read", // action 4 kanban fetch Hanging
