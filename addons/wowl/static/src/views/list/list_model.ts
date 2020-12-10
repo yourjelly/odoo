@@ -22,7 +22,7 @@ export class ListModel {
     const fields = this.fields
       .filter((f) => !f.invisible && f.optional !== "hide")
       .map((f) => f.name);
-    const result = await this._model(modelName).searchRead(domain, fields);
+    const result = await this._model(modelName).call("search_read", [domain, fields]);
     this.records = result.records;
   }
 }

@@ -158,13 +158,13 @@ function callModel(rpc: RPC, env: OdooEnv, model: string): Model["call"] {
       method,
     };
     // yes or no???
-    if (method === "search_read") {
-      url = `/web/dataset/search_read`;
-      params = Object.assign(params, { context: fullContext }, fullKwargs);
-    } else {
+    // if (method === "search_read") {
+    //   url = `/web/dataset/search_read`;
+    //   params = Object.assign(params, { context: fullContext }, fullKwargs);
+    // } else {
       params.args = args;
       params.kwargs = fullKwargs;
-    }
+    // }
     return rpc(url, params);
   };
 }
@@ -187,6 +187,7 @@ export const modelService: Service<ModelBuilder> = {
   dependencies: ["rpc", "user"],
   deploy(env: OdooEnv) {
     return function (this: Component | null, model: string): Model {
+
       const rpc = this instanceof Component ? env.services.rpc.bind(this) : env.services.rpc;
       return {
         get read() {
