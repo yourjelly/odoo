@@ -208,6 +208,7 @@ export function makeMockFetch(mockRPC: MockRPC): typeof fetch {
 interface FakeRouterParams {
   onPushState?: (mode: "push" | "replace", newState: Route["hash"]) => any;
   initialRoute?: Partial<Route>;
+  redirect?: (url: string, wait?: boolean) => void;
 }
 
 function stripUndefinedQueryKey(query: Query): Query {
@@ -263,6 +264,7 @@ export function makeFakeRouterService(params?: FakeRouterParams): Service<Router
         },
         pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
         replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
+        redirect: (params && params.redirect) || (() => {}),
       };
     },
   };
