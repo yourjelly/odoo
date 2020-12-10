@@ -5059,9 +5059,10 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.test("Button with `close` attribute closes dialog", async function (assert) {
-    // unskip when button in dialogAction are implemented (boi I think)
-    assert.expect(2);
+  QUnit.skip("Button with `close` attribute closes dialog", async function (assert) {
+    // LPE unskip: needs commit for enabling buttons
+    // after doActionButton
+    assert.expect(19);
 
     baseConfig.serverData!.views! = {
       "partner,false,form": `
@@ -5098,6 +5099,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     };
 
     const mockRPC: RPC = async (route, args) => {
+      assert.step(route);
       if (route === "/web/dataset/call_button" && args!.method === "some_method") {
         return {
           tag: "display_notification",
@@ -5107,11 +5109,31 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     };
 
     const webClient = await createWebClient({ baseConfig, mockRPC });
-    await doAction(webClient, 4); // boi lpe fixme: owl render triggers legacy update
+    assert.verifySteps(['/wowl/load_menus']);
+    await doAction(webClient, 4);
+    assert.verifySteps([
+      '/web/action/load',
+      '/web/dataset/call_kw/partner/load_views',
+      '/web/dataset/call_kw/partner/onchange',
+    ]);
+
     await testUtils.dom.click(`button[name="5"]`);
+    assert.verifySteps([
+      '/web/dataset/call_kw/partner/create',
+      '/web/dataset/call_kw/partner/read',
+      '/web/action/load',
+      '/web/dataset/call_kw/partner/load_views',
+      '/web/dataset/call_kw/partner/onchange',
+    ]);
     await legacyExtraNextTick();
     assert.strictEqual($(".modal").length, 1, "It should display a modal");
     await testUtils.dom.click(`button[name="some_method"]`);
+    assert.verifySteps([
+      '/web/dataset/call_kw/partner/create',
+      '/web/dataset/call_kw/partner/read',
+      '/web/dataset/call_button',
+      '/web/dataset/call_kw/partner/read', // LPE fixme; should be triggered by onClose
+    ]);
     await legacyExtraNextTick();
     assert.strictEqual($(".modal").length, 0, "It should have closed the modal");
     webClient.destroy();

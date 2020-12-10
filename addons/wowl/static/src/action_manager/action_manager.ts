@@ -145,7 +145,7 @@ interface DialogActionManagerUpdateInfo {
   onCloseInfo?: any;
 }
 
-type ActionManagerUpdateInfo = MainActionManagerUpdateInfo | DialogActionManagerUpdateInfo;
+export type ActionManagerUpdateInfo = MainActionManagerUpdateInfo | DialogActionManagerUpdateInfo;
 
 interface UpdateStackOptions {
   clearBreadcrumbs?: boolean;
@@ -283,6 +283,12 @@ export class ActionContainer extends Component<{}, OdooEnv> {
   _onDialogClosed() {
     this.dialog = {};
     this.render();
+  }
+
+  shouldUpdate(nextProps: any) {
+    // We should not be updated by a render triggered from our parent
+    // LPE FIXME: except in the case of the HomeMenu
+    return false;
   }
 }
 
