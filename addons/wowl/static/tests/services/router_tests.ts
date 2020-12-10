@@ -1,5 +1,13 @@
 import * as QUnit from "qunit";
-import { parseHash, parseSearchQuery, Route, routeToUrl } from "../../src/services/router";
+import {
+  parseHash,
+  parseSearchQuery,
+  redirect,
+  Route,
+  routeToUrl,
+} from "../../src/services/router";
+import { OdooBrowser } from "../../src/types";
+import { makeTestEnv, nextTick } from "../helpers/index";
 
 QUnit.module("Router");
 
@@ -72,4 +80,39 @@ QUnit.test("routeToUrl encodes URI compatible strings", (assert) => {
 
   route.hash = { b: "2", c: "", d: undefined, e: "kloug,gloubi" };
   assert.strictEqual(routeToUrl(route), "/asf?a=11&g=summer%20wine#b=2&c&e=kloug%2Cgloubi");
+});
+
+QUnit.test("can redirect an URL", async (assert) => {
+  const browser = {
+    location: {
+      assign(url: string) {
+        assert.step(url);
+      },
+    },
+    setTimeout: (handler: Function, delay: number) => {
+      handler();
+      assert.step(String(delay));
+    },
+  } as Partial<OdooBrowser>;
+
+  let firstCheckServer = true;
+  const env = await makeTestEnv({
+    browser,
+    mockRPC(...args) {
+      if (args[0] === "/web/webclient/version_info") {
+        if (firstCheckServer) {
+          firstCheckServer = false;
+          return;
+        }
+        return Promise.resolve(true);
+      }
+    },
+  });
+
+  redirect(env, "/my/test/url");
+  assert.verifySteps(["/my/test/url"]);
+
+  redirect(env, "/my/test/url/2", true);
+  await nextTick();
+  assert.verifySteps(["1000", "250", "/my/test/url/2"]);
 });
