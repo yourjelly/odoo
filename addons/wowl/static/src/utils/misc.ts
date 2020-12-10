@@ -1,5 +1,3 @@
-import { OdooEnv } from "../types";
-
 export function isBrowserChromium(): boolean {
   // true for the browser base on Chromium (Google Chrome, Opera, Edge)
   return navigator.userAgent.includes("Chrome");
@@ -35,7 +33,7 @@ export function debounce(func: Function, wait: number, immediate?: boolean): Fun
 /**
  * For debugging purpose, this function will convert a json node back to xml
  */
-export function json_node_to_xml(env: OdooEnv, node: any, human_readable: any, indent: number) {
+export function json_node_to_xml(node: any, human_readable: any, indent: number) {
   indent = indent || 0;
   const sindent = human_readable ? new Array(indent + 1).join("\t") : "";
   let r = sindent + "<" + node.tag;
@@ -55,7 +53,7 @@ export function json_node_to_xml(env: OdooEnv, node: any, human_readable: any, i
     <any>!node.children instanceof Array ||
     <any>!node.attrs instanceof Object
   ) {
-    throw new Error(`${env._t("Node [%s] is not a JSONified XML node")} ${JSON.stringify(node)}`);
+    throw new Error(`"Node [%s] is not a JSONified XML node" ${JSON.stringify(node)}`);
   }
   for (const attr in node.attrs) {
     let vattr = node.attrs[attr];
@@ -77,35 +75,12 @@ export function json_node_to_xml(env: OdooEnv, node: any, human_readable: any, i
     r += ">" + cr;
     const childs = [];
     for (let i = 0, ii = node.children.length; i < ii; i++) {
-      childs.push(json_node_to_xml(env, node.children[i], human_readable, indent + 1));
+      childs.push(json_node_to_xml(node.children[i], human_readable, indent + 1));
     }
     r += childs.join(cr);
     r += cr + sindent + "</" + node.tag + ">";
     return r;
   } else {
     return r + "/>";
-  }
-}
-
-/**
- * Redirect to url by replacing window.location
- * If wait is true, sleep 1s and wait for the server i.e. after a restart.
- */
-export function redirect(env: OdooEnv, url: string, wait?: number) {
-  const browser = odoo.browser;
-  const load = () => browser.location.assign(url);
-
-  if (wait) {
-    const wait_server = function () {
-      env.services
-        .rpc("/web/webclient/version_info", {})
-        .then(load)
-        .catch(function () {
-          browser.setTimeout(wait_server, 250);
-        });
-    };
-    browser.setTimeout(wait_server, 1000);
-  } else {
-    load();
   }
 }

@@ -72,3 +72,20 @@ in the url changed.
 
 When created, the router listens to every (external) hash changes, and trigger a
 `ROUTE_CHANGE` event on the main bus,
+
+## Redirect URL
+
+The `redirect` method will redirect the browser to `url`. If `wait` is true, sleep 1s and wait for the server (e.g. after a restart).
+
+```js
+redirect(url: string, wait?: boolean)
+```
+
+For example:
+
+```ts
+// The complete url is "www.localhost/wowl"
+env.services.router.redirect("/wowl/tests");
+
+// The complete url is "www.localhost/wowl/tests"
+```

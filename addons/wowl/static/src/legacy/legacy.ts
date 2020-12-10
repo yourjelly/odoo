@@ -864,7 +864,7 @@ export function setupDebugView(
     description: env._t("Fields View Get"),
     callback: () => {
       const props = {
-        arch: json_node_to_xml(env, component.widget.renderer.arch, true, 0),
+        arch: json_node_to_xml(component.widget.renderer.arch, true, 0),
       };
       env.services.dialog_manager.open(FieldViewGetDialog, props);
     },
