@@ -2006,7 +2006,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/web/dataset/search_read", // action 3
       "setItem session current_action", // action 3
       "getItem session current_action", // loadState
-      "/web/dataset/search_read", // loaded action
+      "search_read", // loaded action
       "setItem session current_action", // loaded action
     ]);
 
@@ -2218,7 +2218,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         "/web/dataset/search_read", // blocked search read when coming back to Kanban (action 4)
         "/web/action/load", // action 8
         "load_views", // action 8
-        "/web/dataset/search_read", // search read action 8
+        "search_read", // search read action 8
       ]);
 
       // unblock the switch to Kanban in action 4
@@ -2278,12 +2278,12 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // action 3
-      "/web/dataset/search_read", // list for action 3
+      "search_read", // list for action 3
       "read", // form for action 3
       "object", // click on 'Call method' button (this request is blocked)
       "/web/action/load", // action 8
       "load_views", // action 8
-      "/web/dataset/search_read", // list for action 8
+      "search_read", // list for action 8
     ]);
 
     // unblock the call_button request
@@ -2353,7 +2353,7 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
       "/wowl/load_menus",
       "/web/action/load", // action 3
       "load_views", // action 3
-      "/web/dataset/search_read", // search read of list view of action 3
+      "search_read", // search read of list view of action 3
       "read", // read of form view of action 3 (this request is blocked)
       "/web/action/load", // action 4
       "load_views", // action 4

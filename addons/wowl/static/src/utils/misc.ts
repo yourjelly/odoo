@@ -87,6 +87,7 @@ export function json_node_to_xml(env: OdooEnv, node: any, human_readable: any, i
   }
 }
 
+// TODO: move this in router service
 /**
  * Redirect to url by replacing window.location
  * If wait is true, sleep 1s and wait for the server i.e. after a restart.

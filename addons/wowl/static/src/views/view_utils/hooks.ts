@@ -3,7 +3,7 @@ import { useService } from "../../core/hooks";
 import { ViewDescriptions } from "../../services/view_manager";
 import { ViewProps } from "../../types";
 
-const { onWillStart } = hooks;
+const { onWillStart, onMounted } = hooks;
 
 interface SearchParams {
   onSearchReady?: any;
@@ -67,7 +67,8 @@ function _useLoadViews(props: ViewProps): Promise<ViewDescriptions> {
 
 export function useSetupView(setup: ViewSetupParams): ViewData {
   const component = Component.current!;
-  const props = component.props;
+  const props: ViewProps = component.props;
+  const title = useService("title");
 
   let resolve: any;
   let isReady: Promise<void> = new Promise((_resolve) => {
@@ -92,6 +93,10 @@ export function useSetupView(setup: ViewSetupParams): ViewData {
     modelName: props.model,
   };
 
+  // should probably do this only in main mode, not in a dialog or something...
+  onMounted(() => {
+    title.setParts({"action": props.action.name})
+  });
   onWillStart(async () => {
     const viewDescriptions = await _useLoadViews(props);
     const descr = viewDescriptions[props.type];

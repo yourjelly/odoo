@@ -22,6 +22,7 @@ export class ListView extends Component<any, any> {
   model: any = null;
 
   async willStart() {
+    console.log(this);
     await this.metadata.isReady;
     // step 1: process arch
     const fields = this.processArch(this.metadata.arch!);

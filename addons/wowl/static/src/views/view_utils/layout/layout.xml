@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <div t-name="wowl.Action" owl="1" class="o_action">
+    <div t-name="wowl.Action" owl="1" class="o_action" t-att-class="{'o_view_controller': props.viewProps}">
       <div class="o_control_panel">
         <div class="o_cp_top">
             <div class="o_cp_top_left">
@@ -39,7 +39,7 @@
 
   <t t-name="wowl.Breadcrumbs" owl="1">
     <ol class="breadcrumb">
-        <li t-foreach="props.viewProps.breadcrumbs" t-as="breadcrumb" class="breadcrumb-item">
+        <li t-foreach="props.viewProps.breadcrumbs" t-as="breadcrumb" class="breadcrumb-item" t-att-class="{'active':breadcrumb_last}">
             <a t-if="!breadcrumb_last" href="#" t-on-click.prevent="onBreadcrumbClicked(breadcrumb.jsId)">
                 <t t-esc="breadcrumb.name"/>
             </a>
