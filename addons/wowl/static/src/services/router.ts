@@ -12,6 +12,7 @@ export interface Router {
   current: Route;
   pushState(hash: Query, replace?: boolean): void;
   replaceState(hash: Query, replace?: boolean): void;
+  redirect(url: string, wait?: boolean): void;
 }
 
 function parseString(str: string): Query {
@@ -43,6 +44,23 @@ export function routeToUrl(route: Route): string {
   const search = toString(route.search);
   const hash = toString(route.hash);
   return route.pathname + (search ? "?" + search : "") + (hash ? "#" + hash : "");
+}
+
+export function redirect(env: OdooEnv, url: string, wait?: boolean) {
+  const browser = odoo.browser;
+  const load = () => browser.location.assign(url);
+
+  if (wait) {
+    const wait_server = function () {
+      env.services
+        .rpc("/web/webclient/version_info", {})
+        .then(load)
+        .catch(() => browser.setTimeout(wait_server, 250));
+    };
+    browser.setTimeout(wait_server, 1000);
+  } else {
+    load();
+  }
 }
 
 function getRoute(): Route {
@@ -83,6 +101,7 @@ function makeRouter(env: OdooEnv) {
     },
     pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
     replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
+    redirect: (url: string, wait: boolean) => redirect(env, url, wait),
   };
 }
 

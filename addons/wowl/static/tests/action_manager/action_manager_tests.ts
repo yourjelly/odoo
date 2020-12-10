@@ -2,14 +2,7 @@ import * as QUnit from "qunit";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
 import { makeTestEnv, nextTick } from "../helpers/index";
-import {
-  ComponentAction,
-  FunctionAction,
-  OdooEnv,
-  Service,
-  Registries,
-  OdooBrowser,
-} from "../../src/types";
+import { ComponentAction, FunctionAction, OdooEnv, Service, Registries } from "../../src/types";
 import { fakeTitleService, makeFakeRouterService, makeFakeUserService } from "../helpers/mocks";
 import { notificationService } from "../../src/notifications/notification_service";
 import { TestConfig } from "../helpers/utility";
@@ -49,7 +42,7 @@ QUnit.module("Action Manager Service", {
 
     serviceRegistry.add(actionManagerService.name, actionManagerService);
     serviceRegistry.add(notificationService.name, notificationService);
-    serviceRegistry.add("router", makeFakeRouterService());
+    serviceRegistry.add("router", makeFakeRouterService({}));
     serviceRegistry.add("user", makeFakeUserService());
     serviceRegistry.add("title", fakeTitleService);
 
@@ -82,15 +75,16 @@ QUnit.test("action_manager service loads actions", async (assert) => {
 
 QUnit.test("execute an 'ir.actions.act_url' action with target 'self'", async (assert) => {
   assert.expect(2);
-
-  const browser = {
-    location: {
-      assign(url: string) {
+  baseConfig.serviceRegistry?.remove("router");
+  baseConfig.serviceRegistry?.add(
+    "router",
+    makeFakeRouterService({
+      redirect: (url) => {
         assert.step(url);
       },
-    },
-  } as OdooBrowser;
-  env = await makeTestEnv(Object.assign(baseConfig, { browser }));
+    })
+  );
+  env = await makeTestEnv(Object.assign(baseConfig));
 
   await env.services.action_manager.doAction({
     type: "ir.actions.act_url",
