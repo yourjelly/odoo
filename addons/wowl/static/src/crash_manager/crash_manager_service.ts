@@ -120,24 +120,27 @@ export const crashManagerService: Service<void> = {
         return;
       }
 
+      // The thrown error was originally an instance of "OdooError" or subtype.
+      if (OdooError.prototype.isPrototypeOf(unhandledError)) {
+        handleError(unhandledError, env);
+      }
+
       // The thrown error was originally an instance of "Error"
-      if (Error.prototype == Object.getPrototypeOf(unhandledError)) {
+      else if (Error.prototype.isPrototypeOf(unhandledError)) {
         const error = new OdooError("DEFAULT_ERROR");
         error.message = ev.reason.message;
         error.traceback = ev.reason.stack;
         handleError(error, env);
       }
-      // The thrown error was originally an instance of "OdooError" or subtype.
-      else if (OdooError.prototype.isPrototypeOf(unhandledError)) {
-        handleError(unhandledError, env);
-      }
+      
       // The thrown value was originally a non-Error instance or a raw js object
       else {
         const error = new OdooError("UNCAUGHT_OBJECT_REJECTION_ERROR");
         error.message = ev.reason.message;
         error.traceback = JSON.stringify(
           unhandledError,
-          Object.getOwnPropertyNames(unhandledError)
+          Object.getOwnPropertyNames(unhandledError),
+          4
         );
         handleError(error, env);
       }
