@@ -1612,6 +1612,9 @@ var BasicModel = AbstractModel.extend({
                 record._rawChanges[name] = val;
                 return;
             }
+            if (self._isFieldProtected(record, name, viewType)) {
+                return;
+            }
             if (record._rawChanges[name]) {
                 // if previous _rawChanges exists, clear them since the field is now knwon
                 // and restoring outdated onchange over posterious change is wrong
