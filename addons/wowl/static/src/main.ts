@@ -3,8 +3,6 @@ import { actionRegistry } from "./action_manager/action_registry";
 import { fetchLocalization } from "./core/localization";
 import { errorDialogRegistry } from "./crash_manager/error_dialog_registry";
 import { debugManagerRegistry } from "./debug_manager/debug_manager_registry";
-// remove some day
-import "./demo_data";
 import { makeEnv, makeRAMLocalStorage } from "./env";
 import { mapLegacyEnvToWowlEnv } from "./legacy/legacy";
 import { legacySetupProm } from "./legacy/legacy_setup";
