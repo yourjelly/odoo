@@ -78,7 +78,7 @@ class ResCompany(models.Model):
     bank_journal_ids = fields.One2many('account.journal', 'company_id', domain=[('type', '=', 'bank')], string='Bank Journals')
     tax_exigibility = fields.Boolean(string='Use Cash Basis')
     account_tax_fiscal_country_id = fields.Many2one('res.country', string="Fiscal Country", compute='compute_account_tax_fiscal_country', store=True, readonly=False, help="The country to use the tax reports from for this company")
-    company_vat_ids = fields.One2many(string="VAT Numbers", comodel_name='account.company.vat', inverse_name='company_id', help="Use this field to store the different VAT numbers of your company in the countries it has to pay taxes in.") #TODO OCO il faudra un truc pour le peupler à l'installation d'account si la société a déjà une vat sur son partenaire
+    vat_number_ids = fields.One2many(string="VAT Numbers", comodel_name='account.company.vat', inverse_name='company_id', help="Use this field to store the different VAT numbers of your company in the countries it has to pay taxes in.") #TODO OCO il faudra un truc pour le peupler à l'installation d'account si la société a déjà une vat sur son partenaire
 
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm',
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
@@ -558,3 +558,16 @@ class ResCompany(models.Model):
 
         return {'date_from': datetime(year=current_date.year, month=1, day=1).date(),
                 'date_to': datetime(year=current_date.year, month=12, day=31).date()}
+
+
+class CompanyVAT(models.Model):
+    _name = "account.company.vat"
+    _description = "Company VAT"
+
+    company_id = fields.Many2one(string="Company", comodel_name='res.company', required=True)
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True)
+    vat = fields.Char(string="VAT", required=True) # TODO OCO y'avait pas qqch quelque part pour changer ça en TIN ou quoi ? A vérifier
+
+    #TODO OCO redéfinir name_get pour qu'il mette le numéro de TVA avec le country code entre ()
+
+    # TODO OCO il y a une contrainte d'unicité sur vat sur le partner, non ? A vérifier et peut-être arranger un peu (ici aussi)
