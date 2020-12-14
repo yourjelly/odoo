@@ -6616,26 +6616,28 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
     baseConfig.actionRegistry!.remove("ClientAction2");
   });
 
-  QUnit.test("on_close should be called only once with right parameters in js_class form view", async function (assert) {
-    assert.expect(4);
-    // This test is quite specific but matches a real case in legacy: event_configurator_widget.js
-    // Clicking on form view's action button triggers its own mechanism: it saves the record and closes the dialog.
-    // Now it is possible that the dialog action wants to do something of its own at closing time, to, for instance
-    // update the main action behind it, with specific parameters.
-    // This test ensures that this flow is supported in legacy,
-    const {FormView , legacyViewRegistry } = await getLegacy() as any;
+  QUnit.test(
+    "on_close should be called only once with right parameters in js_class form view",
+    async function (assert) {
+      assert.expect(4);
+      // This test is quite specific but matches a real case in legacy: event_configurator_widget.js
+      // Clicking on form view's action button triggers its own mechanism: it saves the record and closes the dialog.
+      // Now it is possible that the dialog action wants to do something of its own at closing time, to, for instance
+      // update the main action behind it, with specific parameters.
+      // This test ensures that this flow is supported in legacy,
+      const { FormView, legacyViewRegistry } = (await getLegacy()) as any;
 
-    const TestCustoFormController = FormView.prototype.config.Controller.extend({
-      async saveRecord() {
-        await this._super.apply(this, arguments);
-        this.do_action({type: 'ir.actions.act_window_close', infos: { cantaloupe: 'island' }});
-      }
-    });
-    const TestCustoFormView = FormView.extend({});
-    TestCustoFormView.prototype.config.Controller = TestCustoFormController;
-    legacyViewRegistry.add('test_view', TestCustoFormView);
+      const TestCustoFormController = FormView.prototype.config.Controller.extend({
+        async saveRecord() {
+          await this._super.apply(this, arguments);
+          this.do_action({ type: "ir.actions.act_window_close", infos: { cantaloupe: "island" } });
+        },
+      });
+      const TestCustoFormView = FormView.extend({});
+      TestCustoFormView.prototype.config.Controller = TestCustoFormController;
+      legacyViewRegistry.add("test_view", TestCustoFormView);
 
-    baseConfig.serverData!.views!['partner,1,form'] = `
+      baseConfig.serverData!.views!["partner,1,form"] = `
       <form js_class="test_view">
         <field name="foo" />
         <footer>
@@ -6643,25 +6645,29 @@ QUnit.module("Action Manager Legacy Tests Porting", (hooks) => {
         </footer>
       </form>`;
 
-     const webClient = await createWebClient({ baseConfig });
-     await doAction(webClient, 24); // main form view
-     await doAction(webClient, 25, { // Custom jsClass form view in target new
-       onClose(infos: any) {
-         assert.step('onClose');
-         assert.deepEqual(infos, {cantaloupe: 'island'});
-       },
-     });
+      const webClient = await createWebClient({ baseConfig });
+      await doAction(webClient, 24); // main form view
+      await doAction(webClient, 25, {
+        // Custom jsClass form view in target new
+        onClose(infos: any) {
+          assert.step("onClose");
+          assert.deepEqual(infos, { cantaloupe: "island" });
+        },
+      });
 
-     // Close dialog by clicking on save button
-     await testUtils.dom.click(webClient.el!.querySelector('.o_dialog .modal-footer button[special=save]'));
-     assert.verifySteps(['onClose']);
+      // Close dialog by clicking on save button
+      await testUtils.dom.click(
+        webClient.el!.querySelector(".o_dialog .modal-footer button[special=save]")
+      );
+      assert.verifySteps(["onClose"]);
 
-     await legacyExtraNextTick();
-     assert.containsNone(webClient.el!, '.modal');
-     webClient.destroy();
-     delete legacyViewRegistry.map.test_view;
-     baseConfig.viewRegistry!.remove('test_view');
-   });
+      await legacyExtraNextTick();
+      assert.containsNone(webClient.el!, ".modal");
+      webClient.destroy();
+      delete legacyViewRegistry.map.test_view;
+      baseConfig.viewRegistry!.remove("test_view");
+    }
+  );
 
   QUnit.test("jsClass legacy", async function (assert) {
     assert.expect(2);
