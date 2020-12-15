@@ -71,7 +71,7 @@ class AccountEdiDocument(models.Model):
             else:
                 continue
 
-            custom_key = edi_format._get_batch_key(edi_doc.move_id)
+            custom_key = edi_format._get_batch_key(edi_doc.move_id, edi_doc.state)
             key = (edi_format, edi_doc.state, doc_type, move.company_id, custom_key)
             to_process.setdefault(key, self.env['account.edi.document'])
             to_process[key] |= edi_doc
