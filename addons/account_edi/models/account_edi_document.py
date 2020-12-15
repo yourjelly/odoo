@@ -55,7 +55,7 @@ class AccountEdiDocument(models.Model):
         * doc_type:       Are the moves of this job invoice or payments ?
         """
 
-        # Classify jobs by (edi_format, edi_doc.state, doc_type, move.company_id)
+        # Classify jobs by (edi_format, edi_doc.state, doc_type, move.company_id, custom_key)
         to_process = {}
         if 'blocked_level' in self.env['account.edi.document']._fields:
             documents = self.filtered(lambda d: d.state in ('to_send', 'to_cancel') and d.blocked_level != 'error')
@@ -82,10 +82,14 @@ class AccountEdiDocument(models.Model):
         for key, documents in to_process.items():
             edi_format, state, doc_type, company_id, custom_key = key
             target = result if doc_type == 'invoice' else payments
-            if edi_format._support_batching(documents.move_id, state, company_id):
-                target.append((documents, doc_type))
-            else:
-                target.extend((doc, doc_type) for doc in documents)
+            batch = self.env['account.edi.document']
+            for doc in documents:
+                if edi_format._support_batching(move=doc.move_id, state=state, company=company_id):
+                    batch |= doc
+                else:
+                    target.append((doc, doc_type))
+            if batch:
+                target.append((batch, doc_type))
         result.extend(payments)
         return result
 
