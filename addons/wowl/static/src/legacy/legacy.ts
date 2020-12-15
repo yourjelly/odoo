@@ -494,8 +494,7 @@ odoo.define("wowl.legacyClientActions", function (require: any) {
       class Action extends Component<ClientActionProps, OdooEnv> {
         static template = tags.xml`
           <ClientActionAdapter Component="Widget" widgetArgs="widgetArgs" widget="widget"
-                               onReverseBreadcrumb="onReverseBreadcrumb" controllerId="props.jsId"
-                               t-ref="controller"
+                               onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
                                t-on-scrollTo.stop="onScrollTo"/>
         `;
         static components = { ClientActionAdapter };
@@ -560,8 +559,7 @@ odoo.define("wowl.legacyViews", async function (require: any) {
     class Controller extends Component<ViewProps, OdooEnv> {
       static template = tags.xml`
         <ViewAdapter Component="Widget" View="View" viewInfo="viewInfo" viewParams="viewParams"
-                     widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" controllerId="props.jsId"
-                     t-ref="controller"
+                     widget="widget" onReverseBreadcrumb="onReverseBreadcrumb" t-ref="controller"
                      t-on-scrollTo.stop="onScrollTo"/>
       `;
       static components = { ViewAdapter };

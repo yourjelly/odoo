@@ -455,36 +455,39 @@ function makeActionManager(env: OdooEnv): ActionManager {
   }
 
   /**
-   * @param {Controller} controller
+   * @param {ClientAction | ActWindowAction} action
    * @returns {ActionProps}
    */
-  function _getActionProps(controller: Controller): ActionProps {
-    const action = controller.action;
+  function _getActionProps(action: ClientAction | ActWindowAction): ActionProps {
     return {
       action, // FIXME remove it? the id is enough if we can provide a way to get the action from its id
       actionId: action.id,
-      jsId: controller.jsId,
     };
   }
 
   /**
-   * @param {Controller} controller
+   * @param {ClientAction} action
    * @param {ActionOptions} options
    * @returns {ActionProps}
    */
-  function _getClientActionProps(controller: Controller, options: ActionOptions): ClientActionProps {
-    return Object.assign({}, _getActionProps(controller), { options });
+  function _getClientActionProps(action: ClientAction, options: ActionOptions): ClientActionProps {
+    return Object.assign({}, _getActionProps(action), { options });
   }
 
   /**
-   * @param {Controller} controller
+   * @param {BaseView} view
+   * @param {ActWindowAction} action
+   * @param {BaseView[]} views
    * @returns {ViewProps}
    */
-  function _getViewProps(controller: ViewController, options: ViewOptions = {}): ViewProps {
-    const action = controller.action;
-    const view = controller.view;
+  function _getViewProps(
+    view: View,
+    action: ActWindowAction,
+    views: View[],
+    options: ViewOptions = {}
+  ): ViewProps {
     const target = action.target;
-    const viewSwitcherEntries = controller.views
+    const viewSwitcherEntries = views
       .filter((v) => v.multiRecord === view.multiRecord)
       .map((v) => {
         return {
@@ -496,7 +499,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
         };
       });
 
-    const props: ViewProps = Object.assign({}, _getActionProps(controller), {
+    const props: ViewProps = Object.assign({}, _getActionProps(action), {
       context: action.context,
       domain: action.domain || [],
       model: action.res_model,
@@ -554,6 +557,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       static template = tags.xml`<t t-component="Component" t-props="props"
         __exportState__="exportState"
         __beforeLeave__="beforeLeave"
+        __getTitle__="getTitle"
           t-ref="component"
           t-on-history-back="onHistoryBack"/>`;
 
@@ -763,8 +767,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
           action,
           view: lazyView,
           views,
+          props: _getViewProps(lazyView, action, views),
         };
-        lazyController.props = _getViewProps(lazyController);
       }
     } else if (!view) {
       view = views[0];
@@ -780,8 +784,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
       action,
       view,
       views,
+      props: _getViewProps(view, action, views, viewOptions),
     };
-    controller.props = _getViewProps(controller, viewOptions);
     action.controllers[view.type] = controller;
     return _updateUI(controller, {
       clearBreadcrumbs: options.clearBreadcrumbs,
@@ -808,8 +812,8 @@ function makeActionManager(env: OdooEnv): ActionManager {
         jsId: `controller_${++id}`,
         Component: clientAction as ComponentAction,
         action,
+        props: _getClientActionProps(action, options),
       };
-      controller.props = _getClientActionProps(controller, options);
       return _updateUI(controller, {
         clearBreadcrumbs: options.clearBreadcrumbs,
         onClose: options.onClose,
@@ -1136,7 +1140,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       views: controller.views,
       view,
     };
-    newController.props = _getViewProps(newController, options);
+    newController.props = _getViewProps(view, controller.action, controller.views, options);
     controller.action.controllers[viewType] = newController;
     let index;
     if (view.multiRecord) {
@@ -1168,7 +1172,11 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
     const controller = controllerStack[index];
     if (controller.action.type === "ir.actions.act_window") {
-      controller.props = _getViewProps(controller);
+      controller.props = _getViewProps(
+        (controller as ViewController).view,
+        controller.action,
+        (controller as ViewController).views
+      );
     } else if (controller.exportedState) {
       controller.props.state = controller.exportedState;
     }
