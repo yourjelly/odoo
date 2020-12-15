@@ -423,11 +423,13 @@ function factory(dependencies) {
          * @private
          */
         _computeIsEmpty() {
+            // debugger;
             return (
                 (!this.body || htmlToTextContentInline(this.body) === '') &&
                 this.attachments.length === 0 &&
                 this.tracking_value_ids.length === 0 &&
-                !this.subtype_description
+                // (!this.subtype_description && !JSON.stringify(this.subtype_description))
+                (!this.subtype_description && this.subtype_description !== '')
             );
         }
 
