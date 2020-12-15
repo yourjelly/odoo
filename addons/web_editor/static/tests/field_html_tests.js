@@ -271,14 +271,14 @@ QUnit.module('web_editor', {}, function () {
                     '<field name="body" widget="html" style="height: 100px"/>' +
                     '</form>',
                 res_id: 1,
-                mockRPC: function (route, args) {
+                mockRPC: async function (route, args) {
                     if (args.method === "write") {
                         assert.strictEqual(args.args[1].body,
                             '<p>t<span style="background-color:#00FFFF;">oto toto </span>toto</p><p>tata</p>',
                             "should save the content");
 
                     }
-                    return this._super.apply(this, arguments);
+                    return await this._super.apply(this, arguments);
                 },
             });
             await testUtils.form.clickEdit(form);
@@ -298,6 +298,7 @@ QUnit.module('web_editor', {}, function () {
 
             await testUtils.nextTick();
             await new Promise((resolve) => wysiwyg.execCommand(resolve));
+            await new Promise(resolve => setTimeout(resolve, 100));
             await openColorpicker();
 
             await testUtils.nextTick();
@@ -308,8 +309,9 @@ QUnit.module('web_editor', {}, function () {
             await new Promise((resolve) => wysiwyg.execCommand(resolve));
             await testUtils.form.clickSave(form);
 
-            await wysiwyg.isEditorStoppedPromise;
+            await testUtils.nextTick();
             form.destroy();
+            await wysiwyg.isEditorStoppedPromise;
         });
         QUnit.test('media dialog: image', async function (assert) {
             assert.expect(1);
