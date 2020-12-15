@@ -56,7 +56,7 @@
                                 <div class="mt16">
                                     Consider leads created as of the
                                     <field name="predictive_lead_scoring_start_date_str" invisible="1"/>
-                                    <field name="predictive_lead_scoring_start_date" class="oe_inline" required="1"/>
+                                    <field name="predictive_lead_scoring_start_date" class="oe_inline" required="0"/>
                                 </div>
                                 <div class="mt16" groups="base.group_erp_manager">
                                     <div class="text-muted">
