@@ -34,4 +34,22 @@
         </field>
     </record>
 
+    <record id="mail_activity_view_form" model="ir.ui.view">
+        <field name="name">mail.activity.view.form.inherit.calendar</field>
+        <field name="model">mail.activity</field>
+        <field name="inherit_id" ref="mail.mail_activity_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_done']" position="attributes">
+                  <attribute name="attrs">{'invisible': ['|', ('activity_category', '=', 'meeting'), ('force_next', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_done_schedule_next']" position="after">
+                <button string="Open Calendar"
+                    attrs="{'invisible': [('activity_category', '!=', 'meeting')]}"
+                    name="action_create_calendar_event"
+                    type="object"
+                    class="btn-primary"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>
