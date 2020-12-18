@@ -97,6 +97,11 @@ function factory(dependencies) {
                 if ('module_icon' in data) {
                     originThreadData.moduleIcon = data.module_icon;
                 }
+                if ('followers' in data) {
+                    originThreadData.followers = insertAndReplace(data.followers.map(followerData =>
+                        this.env.models['mail.follower'].convertData(followerData)
+                    ));
+                }
                 data2.originThread = insert(originThreadData);
             }
             if ('moderation_status' in data) {

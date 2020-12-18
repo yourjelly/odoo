@@ -596,6 +596,10 @@ Object.assign(MessageList, {
         hasSquashCloseMessages: Boolean,
         haveMessagesMarkAsReadIcon: Boolean,
         haveMessagesReplyIcon: Boolean,
+        haveMessagesUnfollowIcon: {
+            type: Boolean,
+            optional: true,
+        },
         hasScrollAdjust: Boolean,
         order: {
             type: String,

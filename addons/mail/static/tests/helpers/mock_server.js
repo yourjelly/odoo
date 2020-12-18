@@ -1211,6 +1211,18 @@ MockServer.include({
                     'res_model': attachment.res_model,
                 });
             });
+            const follower_recs = this._getRecords('mail.followers', [['res_id', '=', message.res_id], ['res_model', '=', message.model]]);
+            var followers = [];
+            for (var follower of follower_recs) {
+                followers.push({
+                    'id': follower.id,
+                    'partner_id': follower.partner_id,
+                    'name': follower.name,
+                    'email': follower.email,
+                    'is_active': follower.is_active,
+                    'is_editable': follower.is_editable,
+                })
+            }
             const allNotifications = this._getRecords('mail.notification', [
                 ['mail_message_id', '=', message.id],
             ]);
@@ -1236,6 +1248,7 @@ MockServer.include({
                 needaction_partner_ids: needactionPartnerIds,
                 notifications,
                 tracking_value_ids: trackingValueIds,
+                followers: followers,
             });
             if (message.subtype_id) {
                 const subtype = this._getRecords('mail.message.subtype', [

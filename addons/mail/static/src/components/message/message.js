@@ -73,6 +73,7 @@ class Message extends Component {
                 message: message ? message.__state : undefined,
                 notifications: message ? message.notifications.map(notif => notif.__state) : [],
                 originThread,
+                originThreadCurrentPartnerFollowing: originThread && originThread.isCurrentPartnerFollowing,
                 originThreadModel: originThread && originThread.model,
                 originThreadName: originThread && originThread.name,
                 originThreadUrl: originThread && originThread.url,
@@ -645,6 +646,17 @@ class Message extends Component {
 
     /**
      * @private
+     * @param {MouseEvent} ev
+     */
+    _onClickUnfollow(ev) {
+        this.message.markAsRead();
+        if (this.message.originThread) {
+            this.message.originThread.unfollow();
+        }
+    }
+
+    /**
+     * @private
      */
     _onDialogClosedModerationBan() {
         this.state.hasModerationBanDialog = false;
@@ -683,6 +695,10 @@ Object.assign(Message, {
         hasCheckbox: Boolean,
         hasMarkAsReadIcon: Boolean,
         hasReplyIcon: Boolean,
+        hasUnfollowIcon: {
+            type: Boolean,
+            optional: true,
+        },
         isSquashed: Boolean,
         messageLocalId: String,
         threadViewLocalId: {
