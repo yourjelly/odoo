@@ -2145,7 +2145,7 @@ class MailThread(models.AbstractModel):
             } for pid in inbox_pids]
             self.env['mail.notification'].sudo().create(notif_create_values)
 
-            message_format_values = message.message_format()[0]
+            message_format_values = message.message_format(fetch_followers=True)[0]
             for partner_id in inbox_pids:
                 bus_notifications.append([(self._cr.dbname, 'ir.needaction', partner_id), dict(message_format_values)])
 

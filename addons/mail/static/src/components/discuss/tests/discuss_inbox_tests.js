@@ -549,6 +549,34 @@ QUnit.test('click on (non-channel/non-partner) origin thread link should redirec
     assert.verifySteps(['do-action'], "should have made an action on click on origin thread (to open form view)");
 });
 
+QUnit.test('should not display unfollow button when current user is not follower of the thread', async function (assert) {
+    assert.expect(1);
+
+    this.data['mail.message'].records.push({
+        body: "<p>Test</p>",
+        id: 100,
+        model: 'res.partner',
+        record_name: 'Refactoring',
+        res_id: 20,
+    });
+    this.data['mail.notification'].records.push({
+        mail_message_id: 100,
+        res_partner_id: this.data.currentPartnerId,
+    });
+    await this.start({
+        discuss: {
+            params: {
+                default_active_id: 'mail.box_inbox',
+            },
+        },
+    });
+    assert.containsNone(
+        document.body,
+        '.o_Message_commandUnfollow',
+        "should not have button unfollow"
+    );
+});
+
 QUnit.test('subject should not be shown when subject is the same as the thread name', async function (assert) {
     assert.expect(1);
 
