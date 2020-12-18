@@ -87,6 +87,11 @@ function factory(dependencies) {
                     id: data.res_id,
                     model: data.model,
                 };
+                if ('followers' in data) {
+                    originThreadData.followers = insertAndReplace(data.followers.map(followerData =>
+                        this.env.models['mail.follower'].convertData(followerData)
+                    ));
+                }
                 if ('record_name' in data && data.record_name) {
                     originThreadData.name = data.record_name;
                 }

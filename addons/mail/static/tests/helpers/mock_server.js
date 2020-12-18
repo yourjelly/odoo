@@ -1210,6 +1210,17 @@ MockServer.include({
                     'res_model': attachment.res_model,
                 });
             });
+            const follower_recs = this._getRecords('mail.followers', [['res_id', '=', message.res_id], ['res_model', '=', message.model]]);
+            const followers = follower_recs.map(follower => {
+                return Object.assign({
+                    'email': follower.email,
+                    'id': follower.id,
+                    'is_active': follower.is_active,
+                    'is_editable': follower.is_editable,
+                    'name': follower.name,
+                    'partner_id': follower.partner_id,
+                });
+            });
             const allNotifications = this._getRecords('mail.notification', [
                 ['mail_message_id', '=', message.id],
             ]);
@@ -1231,6 +1242,7 @@ MockServer.include({
             const response = Object.assign({}, message, {
                 attachment_ids: formattedAttachments,
                 author_id: formattedAuthor,
+                followers: followers,
                 history_partner_ids: historyPartnerIds,
                 needaction_partner_ids: needactionPartnerIds,
                 notifications,
