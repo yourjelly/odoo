@@ -1113,6 +1113,18 @@ class Message(models.Model):
 
         for vals in vals_list:
             message_sudo = self.browse(vals['id']).sudo().with_prefetch(self.ids)
+            follower_recs = self.env['mail.followers'].sudo().search([
+                ('res_model', '=', message_sudo.model),
+                ('res_id', '=', message_sudo.res_id)
+            ])
+            followers = [{
+                'email': follower.email,
+                'id': follower.id,
+                'is_active': follower.is_active,
+                'is_editable': True,
+                'name': follower.name,
+                'partner_id': follower.partner_id.id,
+            } for follower in follower_recs]
             notifs = message_sudo.notification_ids.filtered(lambda n: n.res_partner_id)
             vals.update({
                 'needaction_partner_ids': notifs.filtered(lambda n: not n.is_read).res_partner_id.ids,
@@ -1121,6 +1133,7 @@ class Message(models.Model):
                 'is_discussion': message_sudo.subtype_id.id == com_id,
                 'subtype_description': message_sudo.subtype_id.description,
                 'is_notification': vals['message_type'] == 'user_notification',
+                'followers': followers,
             })
             if vals['model'] and self.env[vals['model']]._original_module:
                 vals['module_icon'] = modules.module.get_module_icon(self.env[vals['model']]._original_module)
