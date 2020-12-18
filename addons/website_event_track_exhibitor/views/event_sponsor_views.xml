@@ -48,8 +48,8 @@
             </xpath>
             <xpath expr="//h1" position="after">
                 <div class="oe_title">
-                    <label for="subtitle" class="oe_edit_only"/>
-                    <field name="subtitle" placeholder="e.g. : Your best choice for your home"/>
+                    <label for="subtitle"/>
+                    <field name="subtitle" placeholder="e.g. Your best choice for your home"/>
                 </div>
             </xpath>
             <xpath expr="//field[@name='sponsor_type_id']" position="after">

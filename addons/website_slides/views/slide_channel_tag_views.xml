@@ -65,8 +65,8 @@
                 <sheet>
                     <group>
                         <div class="oe_title">
-                            <label for="name" class="oe_edit_only" string="Group Name"/>
-                            <h1><field name="name" default_focus="1" placeholder="Group Name"/></h1>
+                            <label for="name" string="Group Name"/>
+                            <h1><field name="name" default_focus="1" placeholder="e.g. Your Level"/></h1>
                             <label for="is_published" string="Menu Entry"/>
                             <field name="is_published"/><br/>
                             <field name="tag_ids">

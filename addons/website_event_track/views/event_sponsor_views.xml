@@ -64,7 +64,7 @@
                     <field name="active" invisible="1"/>
                     <field name="image_512" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
-                        <label for="name" class="oe_edit_only" string="Sponsor Name"/>
+                        <label for="name" string="Sponsor Name"/>
                         <h1><field name="name" placeholder="e.g. : OpenWood Decoration"/></h1>
                     </div>
                     <group>
