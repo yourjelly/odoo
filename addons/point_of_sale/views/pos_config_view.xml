@@ -232,7 +232,7 @@
                             <div class="o_setting_right_pane">
                                 <label for="module_pos_discount"/>
                                 <div class="text-muted">
-                                    Allow global discounts on orders
+                                    Allow global discounts at once on each product of the order
                                 </div>
                                 <div class="content-group " attrs="{'invisible':[('module_pos_discount','=',False)]}">
                                     <div class="mt16" id="btn_use_pos_discount">

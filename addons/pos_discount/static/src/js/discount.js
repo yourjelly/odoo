@@ -23,37 +23,10 @@ var DiscountButton = screens.ActionButtonWidget.extend({
     apply_discount: function(pc) {
         var order    = this.pos.get_order();
         var lines    = order.get_orderlines();
-        var product  = this.pos.db.get_product_by_id(this.pos.config.discount_product_id[0]);
-        if (product === undefined) {
-            this.gui.show_popup('error', {
-                title : _t("No discount product found"),
-                body  : _t("The discount product seems misconfigured. Make sure it is flagged as 'Can be Sold' and 'Available in Point of Sale'."),
-            });
-            return;
-        }
 
-        // Remove existing discounts
-        var i = 0;
-        while ( i < lines.length ) {
-            if (lines[i].get_product() === product) {
-                order.remove_orderline(lines[i]);
-            } else {
-                i++;
-            }
-        }
-
-        // Add discount
-        // We add the price as manually set to avoid recomputation when changing customer.
-        var discount = - pc / 100.0 * order.get_total_with_tax();
-
-        if( discount < 0 ){
-            order.add_product(product, {
-                price: discount,
-                extras: {
-                    price_manually_set: true,
-                },
-            });
-        }
+        lines.forEach(function (line) {
+            line.set_discount(pc);
+        })
     },
 });
 
@@ -61,7 +34,7 @@ screens.define_action_button({
     'name': 'discount',
     'widget': DiscountButton,
     'condition': function(){
-        return this.pos.config.module_pos_discount && this.pos.config.discount_product_id;
+        return this.pos.config.module_pos_discount;
     },
 });
 
