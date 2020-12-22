@@ -184,7 +184,7 @@ class AccountEdiDocument(models.Model):
                 elif not move_result.get('success'):
                     document.write({
                         'error': move_result.get('error', False),
-                        'blocked_level': move_result.get('blocked_level', DEFAULT_BLOCKING_LEVEL) if document.error else False,
+                        'blocked_level': move_result.get('blocked_level', DEFAULT_BLOCKING_LEVEL) if move_result.get('error') else False,
                     })
 
             if invoice_ids_to_cancel:
