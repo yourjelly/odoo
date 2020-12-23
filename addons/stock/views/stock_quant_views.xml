@@ -266,6 +266,22 @@
                             <field name="product_uom_id" groups="uom.group_uom"/>
                         </tree>
                     </field>
+                    <separator string="Added Consumables"/>
+                    <field name="incoming_consu_move_line_ids">
+                        <tree>
+                            <field name="product_id"/>
+                            <field name="qty_done"/>
+                            <field name="product_uom_id" groups="uom.group_uom"/>
+                        </tree>
+                    </field>
+                    <separator string="Removed Consumables"/>
+                    <field name="outgoing_consu_move_line_ids">
+                        <tree>
+                            <field name="product_id"/>
+                            <field name="qty_done"/>
+                            <field name="product_uom_id" groups="uom.group_uom"/>
+                        </tree>
+                    </field>
                 </sheet>
             </form>
         </field>

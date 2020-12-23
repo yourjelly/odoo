@@ -666,9 +666,10 @@ class QuantPackage(models.Model):
         ], string='Package Use', default='disposable', required=True,
         help="""Reusable boxes are used for batch picking and emptied afterwards to be reused. In the barcode application, scanning a reusable box will add the products in this box.
         Disposable boxes aren't reused, when scanning a disposable box in the barcode application, the contained products are added to the transfer.""")
+    incoming_consu_move_line_ids = fields.One2many('stock.move.line', 'result_package_id', 'Incoming Consumable Move Lines', domain=[('product_id.type', '=', 'consu'), ('state', '=', 'done')], readonly=True)
+    outgoing_consu_move_line_ids = fields.One2many('stock.move.line', 'package_id', 'Outgoing Consumable Move Lines', domain=[('product_id.type', '=', 'consu'), ('state', '=', 'done')], readonly=True)
 
-
-    @api.depends('quant_ids.package_id', 'quant_ids.location_id', 'quant_ids.company_id', 'quant_ids.owner_id', 'quant_ids.quantity', 'quant_ids.reserved_quantity')
+    @api.depends('quant_ids.package_id', 'quant_ids.location_id', 'quant_ids.company_id', 'quant_ids.owner_id', 'quant_ids.quantity', 'quant_ids.reserved_quantity', 'incoming_consu_move_line_ids')
     def _compute_package_info(self):
         for package in self:
             values = {'location_id': False, 'owner_id': False}
@@ -678,6 +679,8 @@ class QuantPackage(models.Model):
                     values['owner_id'] = package.quant_ids[0].owner_id
                 if all(q.company_id == package.quant_ids[0].company_id for q in package.quant_ids):
                     values['company_id'] = package.quant_ids[0].company_id
+            elif package.incoming_consu_move_line_ids:
+                values['location_id'] = package.incoming_consu_move_line_ids[0].location_dest_id
             package.location_id = values['location_id']
             package.company_id = values.get('company_id')
             package.owner_id = values['owner_id']
@@ -712,6 +715,8 @@ class QuantPackage(models.Model):
             ])
             move_line_to_modify.write({'package_id': False})
             package.mapped('quant_ids').sudo().write({'package_id': False})
+            package.incoming_consu_move_line_ids.write({'result_package_id': False})
+            package.outgoing_consu_move_line_ids.write({'package_id': False})
 
         # Quant clean-up, mostly to avoid multiple quants of the same product. For example, unpack
         # 2 packages of 50, then reserve 100 => a quant of -50 is created at transfer validation.
