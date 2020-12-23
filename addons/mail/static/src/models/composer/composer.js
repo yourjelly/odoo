@@ -395,12 +395,7 @@ function factory(dependencies) {
         }
 
         async updateMessage() {
-            if (htmlToTextContentInline(this.message.body) === this.textInputContent &&
-                this.arrayEquals(this.message.attachments.map(attachment => attachment.id), this.attachments.map(attachment => attachment.id))
-            ) {
-                this.message.update({ is_editing_message: false });
-                return;
-            }
+            const body = this.getBody();
             const attachment_ids = this.attachments.map(attachment => attachment.id);
             const div = document.createElement('div');
             div.innerHTML = this.message.body;
@@ -427,8 +422,18 @@ function factory(dependencies) {
                     mentionedChannels: [['link', channels]],
                 })
             }
+            if (htmlToTextContentInline(this.message.body) === this.textInputContent &&
+                this.arrayEquals(this.message.attachments.map(attachment => attachment.id), this.attachments.map(attachment => attachment.id))
+            ) {
+                this.message.update({
+                    is_editing_message: false,
+                    body: body,
+                    attachments: [['link', this.attachments]],
+                });
+                return;
+            }
             const vals = {
-                body: this.getBody(),
+                body: body,
                 attachment_ids: attachment_ids,
                 is_edited: true,
             };

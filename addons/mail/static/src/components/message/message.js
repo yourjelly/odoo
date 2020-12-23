@@ -197,7 +197,7 @@ class Message extends Component {
         return this.message.isCurrentPartnerAuthor &&
                !this.message.is_editing_message &&
                !this.message.tracking_value_ids.length &&
-               this.message.originThread.model === 'mail.channel'
+               this.message.originThread.model === 'mail.channel';
     }
 
     /**
@@ -502,18 +502,18 @@ class Message extends Component {
      * @param {MouseEvent} ev
      */
     async _onClickEditMessage(ev) {
-        const composer = this.env.models["mail.composer"].create({
+        const composerRecord = this.env.models["mail.composer"].create({
             textInputContent: htmlToTextContentInline(this.message.body),
-            attachments: [['link', this.message.attachments]],
-            message: [['link', this.message]]
+            attachments: [['replace', Array.from(this.message.attachments)]],
+            message: [['link', this.message]],
         });
-        const Composer = new components.Composer(null, {
-            composerLocalId: composer.localId,
+        const composerInstance = new components.Composer(null, {
+            composerLocalId: composerRecord.localId,
             hasCurrentPartnerAvatar: false,
             textInputSendShortcuts: ['enter'],
         });
         this.message.update({is_editing_message: true});
-        await Composer.mount(this.el.querySelector('.o_Message_core'));
+        await composerInstance.mount(this.el.querySelector('.o_Message_core'));
         this.el.querySelector('.o_Composer').style.width = '95%';
     }
 

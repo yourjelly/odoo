@@ -634,10 +634,10 @@ function factory(dependencies) {
             default: false,
         }),
         is_edited: attr({
-            default: false
+            default: false,
         }),
         is_editing_message: attr({
-            default: false
+            default: false,
         }),
         /**
          * Determine whether the message was a needaction. Useful to make it
