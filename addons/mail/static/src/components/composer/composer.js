@@ -287,8 +287,8 @@ class Composer extends Component {
      * @private
      */
     _onComposerTextInputEscShortcut() {
-        this.composer.message.update({is_editing_message: false});
-        this.destroy()
+        this.composer.updateMessageData();
+        this.destroy();
     }
 
     /**

@@ -395,7 +395,6 @@ function factory(dependencies) {
         }
 
         async updateMessage() {
-            const body = this.getBody();
             const attachment_ids = this.attachments.map(attachment => attachment.id);
             const div = document.createElement('div');
             div.innerHTML = this.message.body;
@@ -425,15 +424,11 @@ function factory(dependencies) {
             if (htmlToTextContentInline(this.message.body) === this.textInputContent &&
                 this.arrayEquals(this.message.attachments.map(attachment => attachment.id), this.attachments.map(attachment => attachment.id))
             ) {
-                this.message.update({
-                    is_editing_message: false,
-                    body: body,
-                    attachments: [['link', this.attachments]],
-                });
+                this.updateMessageData();
                 return;
             }
             const vals = {
-                body: body,
+                body: this.getBody(),
                 attachment_ids: attachment_ids,
                 is_edited: true,
             };
@@ -442,10 +437,22 @@ function factory(dependencies) {
                 method: 'update_message',
                 args: [[this.message.id], vals],
             }));
-            this.message.update(Object.assign(
-                { is_editing_message: false },
-                this.env.models['mail.message'].convertData(messageData),
-            ));
+           this.updateMessageData(messageData);
+        }
+
+        updateMessageData(messageData) {
+            const vals = {
+                is_editing_message: false
+            }
+            if (messageData) {
+                Object.assign(vals, this.env.models['mail.message'].convertData(messageData));
+            } else {
+                Object.assign(vals, {
+                    body: this.getBody(),
+                    attachments: [['link', this.attachments]],
+                });
+            }
+            this.message.update(vals);
         }
 
         /**
