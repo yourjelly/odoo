@@ -787,7 +787,7 @@ class Lead(models.Model):
 
     def _get_rainbowman_message(self):
         message = False
-        if self.user_id and self.team_id and self.expected_revenue:
+        if self.user_id and self.team_id:
             self.flush()  # flush fields to make sure DB is up to date
             query = """
                 SELECT
