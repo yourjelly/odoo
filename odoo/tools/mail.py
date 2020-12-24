@@ -293,6 +293,9 @@ def html2plaintext(html, body_id=None, encoding='utf-8'):
 
     tree = etree.fromstring(html, parser=etree.HTMLParser())
 
+    if not tree:
+        return ''
+
     if body_id is not None:
         source = tree.xpath('//*[@id=%s]' % (body_id,))
     else:
