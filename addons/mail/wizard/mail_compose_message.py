@@ -479,10 +479,10 @@ class MailComposer(models.TransientModel):
             multi_mode = False
             res_ids = [res_ids]
 
-        subjects = self.env['mail.template']._render_template(self.subject, self.model, res_ids)
-        bodies = self.env['mail.template']._render_template(self.body, self.model, res_ids, post_process=True)
-        emails_from = self.env['mail.template']._render_template(self.email_from, self.model, res_ids)
-        replies_to = self.env['mail.template']._render_template(self.reply_to, self.model, res_ids)
+        subjects = self._render_field('subject', res_ids)
+        bodies = self._render_field('body', res_ids, render_args={'post_process': True})
+        emails_from = self._render_field('email_from', res_ids)
+        replies_to = self._render_field('reply_to', res_ids)
         default_recipients = {}
         if not self.partner_ids:
             records = self.env[self.model].browse(res_ids).sudo()
@@ -542,3 +542,57 @@ class MailComposer(models.TransientModel):
             values[res_id] = res_id_values
 
         return multi_mode and values or values[res_ids[0]]
+
+    def _render_field(self, field, res_ids, render_args=None):
+        """Render the given field on the given records.
+
+        This method bypass the rights when needed, to be able to render the template values
+        in mass mode. Bypassing the right is allowed when the field value is the same as
+        the one on the linked mail template.
+
+        :param field: The field on the <mail.compose.message> model to render
+        :param res_ids: The ids of the record to render (model is taken from the model field)
+        :param render_args: Additional rendering parameters given to `render_template`
+        """
+        render_args = render_args or {}
+        if field not in self._fields:
+            raise AssertionError(_('<%s> is not a valid field of <mail.compose.message> and can not be rendered.') % field)
+        composer_value = self[field]
+
+        if not self.template_id:
+            return self.env['mail.template']._render_template(composer_value, self.model, res_ids, **render_args)
+
+        template_field = 'body_html' if field == 'body' else field
+        if template_field not in self.template_id._fields:
+            raise AssertionError(_('<%s> is not a valid field of <mail.template> and can not be rendered.') % template_field)
+        template_value = self.template_id[template_field]
+
+        if field == 'body':
+            sanitized_template = tools.html_sanitize(template_value)
+
+            if self.template_id.user_signature and self.composition_mode == 'mass_mail':
+                template_with_signature = tools.append_content_to_html(template_value, self.env.user.signature, plaintext=False)
+                sanitized_template_with_signature = tools.html_sanitize(template_with_signature)
+
+                if composer_value in (template_value, sanitized_template, template_with_signature, sanitized_template_with_signature):
+                    # Render the template from the body and sanitize it
+                    values = self.env['mail.template'].sudo()._render_template(sanitized_template, self.model, res_ids, **render_args)
+                    signature = self.env.user.signature if self.template_id.user_signature and self.composition_mode == 'mass_mail' else None
+                    # Sanitize and add the signature
+                    values = {
+                        res_id: (
+                            tools.append_content_to_html(tools.html_sanitize(value), signature, plaintext=False)
+                            if signature else tools.html_sanitize(value)
+                        )
+                        for res_id, value in values.items()
+                    }
+                    return values
+
+            elif composer_value in (template_value, sanitized_template):
+                return self.env['mail.template'].sudo()._render_template(sanitized_template, self.model, res_ids, **render_args)
+
+        if composer_value == template_value:
+            # The value is the same as the mail template so we trust it
+            return self.env['mail.template'].sudo()._render_template(template_value, self.model, res_ids, **render_args)
+
+        return self.env['mail.template']._render_template(composer_value, self.model, res_ids, **render_args)

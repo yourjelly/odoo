@@ -148,6 +148,18 @@ msgid "0 Today"
 msgstr ""
 
 #. module: mail
+#: code:addons/mail/wizard/mail_compose_message.py:559
+#, python-format
+msgid "<%s> is not a valid field of <mail.compose.message> and can not be rendered."
+msgstr ""
+
+#. module: mail
+#: code:addons/mail/wizard/mail_compose_message.py:567
+#, python-format
+msgid "<%s> is not a valid field of <mail.template> and can not be rendered."
+msgstr ""
+
+#. module: mail
 #: code:addons/mail/models/mail_channel.py:0
 #, python-format
 msgid ""

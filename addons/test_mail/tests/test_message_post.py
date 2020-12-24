@@ -292,6 +292,30 @@ class TestMessagePost(BaseFunctionalTest, TestRecipients, MockEmails):
             body_content=test_record.name,
             attachments=[('first.txt', b'My first attachment', 'text/plain'), ('second.txt', b'My second attachment', 'text/plain')])
 
+    @mute_logger('odoo.addons.mail.models.mail_mail')
+    def test_post_post_w_template_mass_mode(self):
+        test_record = self.env['mail.test.simple'].with_context(self._test_context).create({'name': 'Test', 'email_from': 'ignasse@example.com'})
+        self.user_employee.write({
+            'groups_id': [(4, self.env.ref('base.group_partner_manager').id)],
+        })
+
+        self._create_template('mail.test.simple', {
+            'email_to': 'test@example.com',
+            # After the HTML sanitizer, it will become "<p>Body for: ${object.name}</p>"
+            'body_html': 'Body for: ${object.name}',
+        })
+
+        test_record.with_user(self.user_employee).message_post_with_template(self.email_template.id, composition_mode='mass_mail')
+
+        new_partner = self.env['res.partner'].search([('email', '=', 'test@example.com')])
+
+        self.assertEmails(
+            self.user_employee.partner_id,
+            [new_partner],
+            subject='About %s' % test_record.name,
+            body_content=test_record.name,
+            attachments=[])
+
     # This method should be run inside a post_install class to ensure that all
     # message_post overrides are tested.
     def test_message_post_return(self):
