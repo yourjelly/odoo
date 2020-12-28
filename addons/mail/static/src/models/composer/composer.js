@@ -395,7 +395,12 @@ function factory(dependencies) {
         }
 
         async updateMessage() {
-            const attachment_ids = this.attachments.map(attachment => attachment.id);
+            if (htmlToTextContentInline(this.message.body) === this.textInputContent &&
+                this.arrayEquals(this.attachments.map((attachment) => attachment.localId), this.messageAttachments)
+            ) {
+                this.updateMessageData();
+                return;
+            }
             const div = document.createElement('div');
             div.innerHTML = this.message.body;
             const anchors = div.querySelectorAll('a');
@@ -421,15 +426,9 @@ function factory(dependencies) {
                     mentionedChannels: [['link', channels]],
                 })
             }
-            if (htmlToTextContentInline(this.message.body) === this.textInputContent &&
-                this.arrayEquals(this.message.attachments.map(attachment => attachment.id), this.attachments.map(attachment => attachment.id))
-            ) {
-                this.updateMessageData();
-                return;
-            }
             const vals = {
                 body: this.getBody(),
-                attachment_ids: attachment_ids,
+                attachment_ids: this.attachments.map(attachment => attachment.id),
                 is_edited: true,
             };
             const [messageData] = await this.async(() => this.env.services.rpc({
@@ -1138,6 +1137,9 @@ function factory(dependencies) {
             dependencies: ['textInputContent'],
         }),
         message: one2one('mail.message'),
+        messageAttachments: attr({
+            default: [],
+        }),
         /**
          * Determines the extra `mail.partner` (on top of existing followers)
          * that will receive the message being composed by `this`, and that will

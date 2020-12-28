@@ -504,8 +504,9 @@ class Message extends Component {
     async _onClickEditMessage(ev) {
         const composerRecord = this.env.models["mail.composer"].create({
             textInputContent: htmlToTextContentInline(this.message.body),
-            attachments: [['replace', Array.from(this.message.attachments)]],
+            attachments: [['link', this.message.attachments]],
             message: [['link', this.message]],
+            messageAttachments: this.message.attachments.map((attachment) => attachment.localId)
         });
         const composerInstance = new components.Composer(null, {
             composerLocalId: composerRecord.localId,
@@ -514,6 +515,7 @@ class Message extends Component {
         });
         this.message.update({is_editing_message: true});
         await composerInstance.mount(this.el.querySelector('.o_Message_core'));
+        composerInstance.focus();
     }
 
     /**
