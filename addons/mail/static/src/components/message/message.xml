@@ -185,7 +185,7 @@
                     <t t-if="isMessageEditable">
                         <span class="o_Message_command o_Message_commandEdit o_Message_headerCommand fa fa-pencil" t-on-click="_onClickEditMessage"/>
                     </t>
-                    <div class="btn-group dropleft o_Message_headerCommand o_Message_More_Action">
+                    <div t-if="isMessageEditable" class="btn-group dropleft o_Message_headerCommand o_Message_More_Action">
                         <button type="button" class="btn btn-secondary fa fa-ellipsis-h" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"/>
                         <div class="dropdown-menu">
                             <div t-if="isMessageEditable" class="o_Message_command o_Message_commandEdit o_Message_headerCommand dropdown-item" t-on-click="_onClickEditMessage">

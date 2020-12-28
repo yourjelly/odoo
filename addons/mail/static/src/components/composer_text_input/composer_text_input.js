@@ -192,9 +192,7 @@ class ComposerTextInput extends Component {
      * @private
      */
     _onFocusinTextarea() {
-        if (!this.composer.message) {
-            this.composer.focus();
-        }
+        this.composer.focus();
     }
 
     /**

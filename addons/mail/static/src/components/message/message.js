@@ -506,7 +506,7 @@ class Message extends Component {
             textInputContent: htmlToTextContentInline(this.message.body),
             attachments: [['link', this.message.attachments]],
             message: [['link', this.message]],
-            messageAttachments: this.message.attachments.map((attachment) => attachment.localId)
+            messageAttachments: this.message.attachments.map((attachment) => attachment.localId),
         });
         const composerInstance = new components.Composer(null, {
             composerLocalId: composerRecord.localId,

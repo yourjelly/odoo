@@ -424,7 +424,7 @@ function factory(dependencies) {
                 this.update({
                     mentionedPartners: [['link', partners]],
                     mentionedChannels: [['link', channels]],
-                })
+                });
             }
             const vals = {
                 body: this.getBody(),
@@ -445,11 +445,6 @@ function factory(dependencies) {
             }
             if (messageData) {
                 Object.assign(vals, this.env.models['mail.message'].convertData(messageData));
-            } else {
-                Object.assign(vals, {
-                    body: this.getBody(),
-                    attachments: [['link', this.attachments]],
-                });
             }
             this.message.update(vals);
         }
