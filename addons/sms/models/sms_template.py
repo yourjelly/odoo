@@ -127,7 +127,7 @@ class SMSTemplate(models.Model):
             lang = self.env.context.get('template_preview_lang')
             results = dict((res_id, self.with_context(lang=lang)) for res_id in res_ids)
         else:
-            rendered_langs = self._render_template(self.lang, self.model, res_ids)
+            rendered_langs = self.sudo()._render_template(self.lang, self.model, res_ids)
             results = dict((res_id, self.with_context(lang=lang) if lang else self)
                 for res_id, lang in rendered_langs.items())
 
@@ -150,7 +150,7 @@ class SMSTemplate(models.Model):
         all_bodies = {}
         for lang, rids in lang_to_rids.items():
             template = self.with_context(lang=lang)
-            all_bodies.update(template._render_template(template.body, self.model, rids))
+            all_bodies.update(template.sudo()._render_template(template.body, self.model, rids))
         return all_bodies
 
     @api.model

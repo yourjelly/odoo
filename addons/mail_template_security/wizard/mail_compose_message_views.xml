@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mail_compose_message_view_form" model="ir.ui.view" >
+        <field name="name">mail.compose.message.view.form.mail.template.security</field>
+        <field name="model">mail.compose.message</field>
+        <field name="inherit_id" ref="mail.email_compose_message_wizard_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='save_as_template']" position="attributes">
+                <attribute name="groups">mail_template_security.group_mail_template_editor</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

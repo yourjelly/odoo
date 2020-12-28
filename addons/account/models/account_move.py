@@ -2352,7 +2352,7 @@ class AccountMove(models.Model):
         template = self.env.ref('account.email_template_edi_invoice', raise_if_not_found=False)
         lang = get_lang(self.env)
         if template and template.lang:
-            lang = template._render_template(template.lang, 'account.move', self.id)
+            lang = template.sudo()._render_template(template.lang, 'account.move', self.id)
         else:
             lang = lang.code
         compose_form = self.env.ref('account.account_invoice_send_wizard_form', raise_if_not_found=False)

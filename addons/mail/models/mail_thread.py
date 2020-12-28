@@ -2380,7 +2380,7 @@ class MailThread(models.AbstractModel):
         if {'default_template_id', 'default_model', 'default_res_id'} <= self.env.context.keys():
             template = self.env['mail.template'].browse(self.env.context['default_template_id'])
             if template and template.lang:
-                lang = template._render_template(template.lang, self.env.context['default_model'], self.env.context['default_res_id'])
+                lang = template.sudo()._render_template(template.lang, self.env.context['default_model'], self.env.context['default_res_id'])
 
         if not model_description and model:
             model_description = self.env['ir.model'].with_context(lang=lang)._get(model).display_name

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+    <record id="mass_mailing.group_mass_mailing_user" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('mail_template_security.group_mail_template_editor'))]"/>
+    </record>
+</data>
+</odoo>

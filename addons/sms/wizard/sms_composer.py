@@ -295,7 +295,7 @@ class SendSMS(models.TransientModel):
         if composition_mode == 'comment':
             if not body and template_id and res_id:
                 template = self.env['sms.template'].browse(template_id)
-                result['body'] = template._render_template(template.body, res_model, [res_id])[res_id]
+                result['body'] = template.sudo()._render_template(template.body, res_model, [res_id])[res_id]
             elif template_id:
                 template = self.env['sms.template'].browse(template_id)
                 result['body'] = template.body

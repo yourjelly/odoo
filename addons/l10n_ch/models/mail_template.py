@@ -30,7 +30,7 @@ class MailTemplate(models.Model):
             if related_model._name == 'account.move':
 
                 template = res_ids_to_templates[res_id]
-                inv_print_name = self._render_template(template.report_name, template.model, res_id)
+                inv_print_name = self.sudo()._render_template(template.report_name, template.model, res_id)
                 new_attachments = []
 
                 if related_model.l10n_ch_isr_valid:

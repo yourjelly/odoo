@@ -745,7 +745,7 @@ class SaleOrder(models.Model):
         lang = self.env.context.get('lang')
         template = self.env['mail.template'].browse(template_id)
         if template.lang:
-            lang = template._render_template(template.lang, 'sale.order', self.ids[0])
+            lang = template.sudo()._render_template(template.lang, 'sale.order', self.ids[0])
         ctx = {
             'default_model': 'sale.order',
             'default_res_id': self.ids[0],

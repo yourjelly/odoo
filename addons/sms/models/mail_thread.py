@@ -158,7 +158,7 @@ class MailThread(models.AbstractModel):
             template = self.env.ref(template_xmlid, raise_if_not_found=False)
         if template:
             template_w_lang = template._get_context_lang_per_id(self.ids)[self.id]
-            body = template._render_template(template_w_lang.body, self._name, self.ids)[self.id]
+            body = template.sudo()._render_template(template_w_lang.body, self._name, self.ids)[self.id]
         else:
             body = self.env['sms.template']._render_template(template_fallback, self._name, self.ids)[self.id]
         return self._message_sms(body, partner_ids=partner_ids, **kwargs)

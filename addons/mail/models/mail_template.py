@@ -39,7 +39,45 @@ try:
     # This is done on purpose: it prevents incidental or malicious execution of
     # Python code that may break the security of the server.
     from jinja2.sandbox import SandboxedEnvironment
-    mako_template_env = SandboxedEnvironment(
+    from jinja2.nodes import Template, TemplateData, Output
+
+    class JinjaInspectionSandboxedEnvironment(SandboxedEnvironment):
+        """Environment used to retrieve the compiled code of the Jinja template."""
+
+        def _parse(self, *args, **kwargs):
+            self.current_code = super()._parse(*args, **kwargs)
+            return self.current_code
+
+        def from_string(self, source, *args, **kwargs):
+            template = super().from_string(source, *args, **kwargs)
+            template.code = self.current_code
+            template.is_dynamic = self._is_current_code_dynamic()
+            return template
+
+        def _is_current_code_dynamic(self):
+            """Detect the current code is not purely static.
+            Return True / False if the template is dynamic or not.
+            """
+            if not isinstance(self.current_code, Template):
+                return True
+
+            if len(self.current_code.body) != 1:
+                return True
+
+            output = self.current_code.body[0]
+            if not isinstance(output, Output):
+                return True
+
+            if len(output.nodes) != 1:
+                return True
+
+            template_data = output.nodes[0]
+            if not isinstance(template_data, TemplateData):
+                return True
+
+            return False
+
+    mako_template_env = JinjaInspectionSandboxedEnvironment(
         block_start_string="<%",
         block_end_string="%>",
         variable_start_string="${",
@@ -268,6 +306,13 @@ class MailTemplate(models.Model):
             _logger.info("Failed to load template %r", template_txt, exc_info=True)
             return multi_mode and results or results[res_ids[0]]
 
+        if not self._check_render_template_permission(template):
+            # So even if we failed to detect dynamic code, non-"mail_template_editor"
+            # users won't be able to execute Jinja
+            if multi_mode:
+                return {record_id: template_txt for record_id in res_ids}
+            return template_txt
+
         # prepare template variables
         records = self.env[model].browse(it for it in res_ids if it)  # filter to avoid browsing [None]
         res_to_rec = dict.fromkeys(res_ids, None)
@@ -318,7 +363,7 @@ class MailTemplate(models.Model):
             for res_id in res_ids:
                 results[res_id] = self.with_context(lang=lang)
         else:
-            langs = self._render_template(self.lang, self.model, res_ids)
+            langs = self.sudo()._render_template(self.lang, self.model, res_ids)
             for res_id, lang in langs.items():
                 if lang:
                     template = self.with_context(lang=lang)
@@ -398,7 +443,7 @@ class MailTemplate(models.Model):
                 Template = Template.with_context(lang=template._context.get('lang'))
             for field in fields:
                 Template = Template.with_context(safe=field in {'subject'})
-                generated_field_values = Template._render_template(
+                generated_field_values = Template.sudo()._render_template(
                     getattr(template, field), template.model, template_res_ids,
                     post_process=(field == 'body_html'))
                 for res_id, field_value in generated_field_values.items():
@@ -429,7 +474,7 @@ class MailTemplate(models.Model):
             if template.report_template:
                 for res_id in template_res_ids:
                     attachments = []
-                    report_name = self._render_template(template.report_name, template.model, res_id)
+                    report_name = self.sudo()._render_template(template.report_name, template.model, res_id)
                     report = template.report_template
                     report_service = report.report_name
 
@@ -491,7 +536,7 @@ class MailTemplate(models.Model):
                 _logger.warning('QWeb template %s not found when sending template %s. Sending without layouting.' % (notif_layout, self.name))
             else:
                 record = self.env[self.model].browse(res_id)
-                lang = self._render_template(self.lang, self.model, res_id)
+                lang = self.sudo()._render_template(self.lang, self.model, res_id)
                 model = self.env['ir.model']._get(record._name)
                 if lang:
                     template = template.with_context(lang=lang)
@@ -522,3 +567,10 @@ class MailTemplate(models.Model):
         if force_send:
             mail.send(raise_exception=raise_exception)
         return mail.id  # TDE CLEANME: return mail + api.returns ?
+
+    def _check_render_template_permission(self, template):
+        """Check that we can render the given template. If return True, the template can
+        rendered otherwise we just keep the raw text of the template without rendering.
+        This method will be inherited in a sub-module for custom behavior.
+        """
+        return True
