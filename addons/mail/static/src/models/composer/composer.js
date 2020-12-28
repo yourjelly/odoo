@@ -1137,7 +1137,7 @@ function factory(dependencies) {
             compute: '_computeMentionedPartners',
             dependencies: ['textInputContent'],
         }),
-        message: many2one('mail.message'),
+        message: one2one('mail.message'),
         /**
          * Determines the extra `mail.partner` (on top of existing followers)
          * that will receive the message being composed by `this`, and that will

@@ -230,6 +230,7 @@ class ComposerTextInput extends Component {
                     markEventHandled(ev, 'ComposerTextInput.closeSuggestions');
                 } else if (this.composer.message) {
                     this.trigger('o-composer-text-input-esc-shortcut');
+                    ev.preventDefault();
                 }
                 break;
             // UP, DOWN, TAB: prevent moving cursor if navigation in mention suggestions

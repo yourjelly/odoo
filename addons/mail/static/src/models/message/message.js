@@ -85,14 +85,11 @@ function factory(dependencies) {
             if ('id' in data) {
                 data2.id = data.id;
             }
-            if ('is_edited' in data) {
-                data2.is_edited = data.is_edited;
-            }
-            if ('write_date' in data) {
-                data2.edit_date = data.write_date;
-            }
             if ('is_discussion' in data) {
                 data2.is_discussion = data.is_discussion;
+            }
+            if ('is_edited' in data) {
+                data2.is_edited = data.is_edited;
             }
             if ('is_note' in data) {
                 data2.is_note = data.is_note;
@@ -144,6 +141,9 @@ function factory(dependencies) {
             }
             if ('tracking_value_ids' in data) {
                 data2.tracking_value_ids = data.tracking_value_ids;
+            }
+            if ('write_date' in data) {
+                data2.edit_date = data.write_date;
             }
 
             return data2;

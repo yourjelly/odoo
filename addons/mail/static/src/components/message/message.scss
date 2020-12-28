@@ -187,8 +187,8 @@
     &:hover {
         background-color: whitesmoke;
 
-        .o_Message_commands {
-            display: inherit;
+        .o_Message_commands:not(.o-mobile) {
+            opacity: 1;
         }
     }
     &:hover, &.o-clicked {
@@ -306,8 +306,8 @@
     }
 }
 
-.o_Message_headerCommands:not(.o-mobile) {
-    display: none;
+.o_Message_headerCommands {
+    opacity: 0;
 }
 
 .o_Message_originThread {
