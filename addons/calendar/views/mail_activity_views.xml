@@ -42,7 +42,7 @@
             <xpath expr="//button[@name='action_done']" position="attributes">
                   <attribute name="attrs">{'invisible': ['|', ('activity_category', '=', 'meeting'), ('force_next', '=', True)]}</attribute>
             </xpath>
-            <xpath expr="//button[@name='action_done_schedule_next']" position="after">
+            <xpath expr="//button[@name='action_done']" position="before">
                 <button string="Open Calendar"
                     attrs="{'invisible': [('activity_category', '!=', 'meeting')]}"
                     name="action_create_calendar_event"
