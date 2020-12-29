@@ -13,7 +13,7 @@
                 'o-selected': isSelected,
                 'o-squashed': props.isSquashed,
                 'o-starred': message and message.isStarred,
-            }" t-on-click="_onClick" t-att-data-message-local-id="message and message.localId"
+            }" t-on-click="_onClick" t-att-data-message-local-id="message and message.localId" t-on-touchstart="_onTouchStart" t-on-touchend="_onTouchEnd"
         >
             <t t-if="message" name="rootCondition">
                 <div class="o_Message_sidebar" t-att-class="{ 'o-message-squashed': props.isSquashed }">

@@ -615,6 +615,15 @@ class Message extends Component {
             this.message.replyTo();
         }
     }
+    _onTouchStart(ev) {
+        this.Touchtimer = setTimeout(this._onClickEditMessage.bind(this), 1000);
+
+    }
+    _onTouchEnd(ev) {
+        if (this.Touchtimer) {
+            clearTimeout(this.Touchtimer);
+        }
+    }
 
     /**
      * @private
