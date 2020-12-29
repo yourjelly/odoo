@@ -1063,6 +1063,11 @@ class Channel(models.Model):
         return self.search_read(domain, ['id', 'name', 'public'], limit=limit)
 
     @api.model
+    def get_mention_suggestions_from_ids(self, ids):
+        """ Return 'limit'-first channels' id, name and public fields of the records given in ids."""
+        return self.browse(ids).read(['id', 'name', 'public'])
+
+    @api.model
     def channel_fetch_listeners(self, uuid):
         """ Return the id, name and email of partners listening to the given channel """
         self._cr.execute("""

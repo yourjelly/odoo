@@ -131,6 +131,12 @@ class Partner(models.Model):
         return [users, partners]
 
     @api.model
+    def get_mention_suggestions_from_ids(self, ids):
+        """ Return 'limit'-first partners' id, name and email fields of the records given in ids."""
+        fields = ['id', 'name', 'email']
+        return self.browse(ids).read(fields)
+
+    @api.model
     def im_search(self, name, limit=20):
         """ Search partner with a name and return its id, name and im_status.
             Note : the user must be logged

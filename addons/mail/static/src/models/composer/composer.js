@@ -394,6 +394,80 @@ function factory(dependencies) {
             return true;
         }
 
+        async updateMentions() {
+            const div = document.createElement('div');
+            div.innerHTML = this.message.body;
+            const anchors = div.querySelectorAll('a');
+
+            let partners = [];
+            let channels = [];
+            const remainPartners = [];
+            const remainChannels = [];
+
+            anchors.forEach((element) => {
+                const id = parseInt(element.dataset.oeId);
+                if (element.dataset.oeModel === 'res.partner') {
+                    let partner = this.env.models["mail.partner"].find(partner => partner.id === id);
+                    if (partner) {
+                        partners.push(partner);
+                    } else {
+                        remainPartners.push(id);
+                    }
+                } else if (element.dataset.oeModel === 'mail.channel') {
+                    let channel = this.env.models["mail.thread"].find(channel => channel.id === id);
+                    if (channel) {
+                        channels.push(channel);
+                    } else {
+                        remainChannels.push(id);
+                    }
+                }
+            });
+            if (remainPartners.length) {
+                partners = partners.concat(await this.updateMentionedPartners(remainPartners));
+            }
+            if (remainChannels.length) {
+                channels = channels.concat(await this.updateMentionedChannels(remainChannels));
+            }
+            this.update({
+                mentionedPartners: [['link', partners]],
+                mentionedChannels: [['link', channels]],
+            });
+        }
+
+        async updateMentionedChannels(channels) {
+            const mentions = await this.async(() => this.env.services.rpc(
+                {
+                    model: 'mail.channel',
+                    method: 'get_mention_suggestions_from_ids',
+                    kwargs: {
+                        ids: channels,
+                    },
+                },
+                { shadow: true }
+            ));
+            return this.env.models['mail.thread'].insert(mentions.map(data => {
+                const threadData = this.env.models['mail.thread'].convertData(data);
+                return Object.assign({ model: 'mail.channel' }, threadData);
+            }));
+        }
+
+        async updateMentionedPartners(partners) {
+            const mentions = await this.async(() => this.env.services.rpc(
+                {
+                    model: 'res.partner',
+                    method: 'get_mention_suggestions_from_ids',
+                    kwargs: {
+                        ids: partners,
+                    },
+                },
+                { shadow: true }
+            ));
+
+            return this.env.models['mail.partner'].insert(mentions.map(data =>
+                this.env.models['mail.partner'].convertData(data)
+            ));
+        }
+
         async updateMessage() {
             if (htmlToTextContentInline(this.message.body) === this.textInputContent &&
                 this.arrayEquals(this.attachments.map((attachment) => attachment.localId), this.messageAttachments)
@@ -401,31 +475,7 @@ function factory(dependencies) {
                 this.updateMessageData();
                 return;
             }
-            const div = document.createElement('div');
-            div.innerHTML = this.message.body;
-            const anchors = div.querySelectorAll('a');
-            const partners = [];
-            const channels = [];
-            anchors.forEach((element) => {
-                const id = parseInt(element.dataset.oeId);
-                if (element.dataset.oeModel === 'res.partner') {
-                    let partner = this.env.models["mail.partner"].find(partner => partner.id === id);
-                    if (partner) {
-                        partners.push(partner);
-                    }
-                } else if (element.dataset.oeModel === 'mail.channel') {
-                    let channel = this.env.models["mail.thread"].find(channel => channel.id === id);
-                    if (channel) {
-                        channels.push(channel);
-                    }
-                }
-            });
-            if (partners.length || channels.length) {
-                this.update({
-                    mentionedPartners: [['link', partners]],
-                    mentionedChannels: [['link', channels]],
-                });
-            }
+            await this.updateMentions();
             const vals = {
                 body: this.getBody(),
                 attachment_ids: this.attachments.map(attachment => attachment.id),
