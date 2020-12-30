@@ -467,9 +467,6 @@ function factory(dependencies) {
          * @returns {string}
          */
         _computePrettyBody() {
-            if (this.is_editing_message) {
-                return this.prettyBody;
-            }
             let prettyBody;
             for (const emoji of emojis) {
                 const { unicode } = emoji;
@@ -715,7 +712,7 @@ function factory(dependencies) {
          */
         prettyBody: attr({
             compute: '_computePrettyBody',
-            dependencies: ['body', 'is_editing_message'],
+            dependencies: ['body'],
         }),
         subject: attr(),
         subtype_description: attr(),

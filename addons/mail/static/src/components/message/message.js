@@ -404,10 +404,14 @@ class Message extends Component {
         if (!this.message) {
             return;
         }
-        if (this._prettyBodyRef.el && this.message.prettyBody !== this._lastPrettyBody) {
+        if (this._prettyBodyRef.el &&
+            (this.message.prettyBody !== this._lastPrettyBody ||
+            this.message.is_editing_message !== this._last_message_editing)
+        ) {
             this._prettyBodyRef.el.innerHTML = this.message.prettyBody;
             this._lastPrettyBody = this.message.prettyBody;
         }
+        this._last_message_editing = this.message.is_editing_message;
         // Remove all readmore before if any before reinsert them with _insertReadMoreLess.
         // This is needed because _insertReadMoreLess is working with direct DOM mutations
         // which are not sync with Owl.

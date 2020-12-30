@@ -381,11 +381,7 @@ function factory(dependencies) {
                 v0 = a0[i];
                 v1 = a1[i];
 
-                if (v0 instanceof Array && v1 instanceof Array) {
-                    if (!helpers.arrayEquals(v0, v1)) {
-                        return false;
-                    }
-                } else if (v0 !== v1) {
+                if (v0 !== v1) {
                     // NOTE: two different object instances will never be equal: {x:20} != {x:20}
                     return false;
                 }
@@ -401,8 +397,8 @@ function factory(dependencies) {
 
             let partners = [];
             let channels = [];
-            const remainPartners = [];
-            const remainChannels = [];
+            const remainingPartners = [];
+            const remainingChannels = [];
 
             anchors.forEach((element) => {
                 const id = parseInt(element.dataset.oeId);
@@ -411,22 +407,22 @@ function factory(dependencies) {
                     if (partner) {
                         partners.push(partner);
                     } else {
-                        remainPartners.push(id);
+                        remainingPartners.push(id);
                     }
                 } else if (element.dataset.oeModel === 'mail.channel') {
                     let channel = this.env.models["mail.thread"].find(channel => channel.id === id);
                     if (channel) {
                         channels.push(channel);
                     } else {
-                        remainChannels.push(id);
+                        remainingChannels.push(id);
                     }
                 }
             });
-            if (remainPartners.length) {
-                partners = partners.concat(await this.updateMentionedPartners(remainPartners));
+            if (remainingPartners.length) {
+                partners = partners.concat(await this.updateMentionedPartners(remainingPartners));
             }
-            if (remainChannels.length) {
-                channels = channels.concat(await this.updateMentionedChannels(remainChannels));
+            if (remainingChannels.length) {
+                channels = channels.concat(await this.updateMentionedChannels(remainingChannels));
             }
             this.update({
                 mentionedPartners: [['link', partners]],
