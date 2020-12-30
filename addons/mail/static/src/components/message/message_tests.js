@@ -1192,6 +1192,27 @@ QUnit.test('rendering of tracked field with change of value from empty to string
     );
 });
 
+QUnit.test('Edit button should not be shown if current user is not author', async function (assert) {
+    assert.expect(2);
+
+    await this.start();
+    const message = this.env.models['mail.message'].create({
+        author: [['insert', { id: 7, display_name: "Demo User" }]],
+        body: "<p>Test</p>",
+        id: 100,
+    });
+    await this.createMessageComponent(message);
+    assert.strictEqual(
+        document.querySelectorAll('.o_Message').length,
+        1,
+        "should display a message component"
+    );
+    const messageEl = document.querySelector('.o_Message');
+    assert.containsNone(messageEl, `.o_Message_commandEdit`,
+        "should not have the Edit button in message"
+    );
+});
+
 });
 });
 });
