@@ -378,8 +378,8 @@ QUnit.module('relational_fields', {
             },
         });
 
-        assert.strictEqual(form.$('.o_field_one2many[name=turtles] tbody').text().trim(), "kawablip",
-            'The o2m should not have been sorted.');
+        assert.strictEqual(form.$('.o_field_one2many[name=turtles] .o_data_row')
+            .text().trim(), "kawablip", 'The o2m should not have been sorted.');
 
         form.destroy();
     });

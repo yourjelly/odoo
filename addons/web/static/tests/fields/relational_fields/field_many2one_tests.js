@@ -393,7 +393,7 @@ QUnit.module('fields', {}, function () {
                         '<field name="display_name"/>' +
                         '<field name="turtle_trululu" context="{\'show_address\': 1}" options="{\'always_reload\': True}"/>' +
                         '</form>',
-                    "turtle,false,list": '<tree editable="bottom">' +
+                    "turtle,false,list": '<tree>' +
                         '<field name="display_name"/>' +
                         '</tree>',
                 },
@@ -436,7 +436,7 @@ QUnit.module('fields', {}, function () {
                         '<field name="display_name"/>' +
                         '<field name="turtle_trululu" context="{\'show_address\': 1}" options="{\'always_reload\': True}"/>' +
                         '</form>',
-                    "turtle,false,list": '<tree editable="bottom">' +
+                    "turtle,false,list": '<tree>' +
                         '<field name="display_name"/>' +
                         '<field name="turtle_trululu"/>' +
                         '</tree>',

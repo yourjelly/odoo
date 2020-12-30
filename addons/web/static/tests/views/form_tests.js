@@ -7958,7 +7958,7 @@ QUnit.module('Views', {
         });
 
         // in readonly
-        await testUtils.dom.click(form.$('[name="display_name"]'));
+        await testUtils.dom.click(form.$('div.oe_title'));
         assert.hasClass(form.$('.o_form_button_edit'), 'o_catch_attention');
 
         // in edit
@@ -9665,6 +9665,319 @@ QUnit.module('Views', {
 
         assert.verifySteps(['mounted', 'willUnmount']);
     });
+
+    QUnit.test('Quick Edition: click on a quick editable field', async function (assert) {
+        assert.expect(3);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <group>
+                        <field name="display_name"/>
+                    </group>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        await testUtils.dom.click(form.$('.o_field_widget[name="display_name"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+
+        assert.containsOnce(form, '.o_form_view.o_form_editable');
+        assert.strictEqual(document.activeElement, $('.o_field_widget[name="display_name"]')[0]);
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: click on a non quick editable field', async function (assert) {
+        assert.expect(4);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <group>
+                        <field name="priority" widget="priority"/>
+                    </group>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsNone(form, '.o_priority_star[aria-checked="true"]');
+
+        await testUtils.dom.click(form.$('.o_field_widget[name="priority"] a:first'));
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsOnce(form, '.o_priority_star[aria-checked="true"]');
+
+        form.destroy();
+    });
+    
+    QUnit.test('Quick Edition: Label click', async function (assert) {
+        assert.expect(2);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <group>
+                        <field name="foo"/>
+                    </group>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        await testUtils.dom.click(form.$('.o_form_label:first'));
+
+        assert.containsOnce(form, '.o_form_view.o_form_editable');
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: Checkbox click', async function (assert) {
+        assert.expect(4);
+
+        const form = await createView({
+            debug:1,
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <group>
+                        <field name="bar"/>
+                    </group>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsOnce(form, '.o_field_boolean input:checked');
+
+        await testUtils.dom.click(form.$('.o_field_widget[name="bar"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+
+        assert.containsOnce(form, '.o_form_view.o_form_editable');
+        assert.containsNone(form, '.o_field_boolean input:checked');
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: Readonly one2many list', async function (assert) {
+        assert.expect(4);
+
+        this.data.partner.records[0].p.push(2);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <field name="p" attrs="{'readonly': True}">
+                        <tree>
+                            <field name="foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsNone(form, '.o_field_x2many_list_row_add',
+            'create line should not be displayed');
+
+        await testUtils.dom.click(form.$('.o_field_cell:first'));
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly',
+            'should not switch into edit mode');
+        assert.containsNone(form, '.o_field_x2many_list_row_add',
+            'create line should still not be displayed');
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: Editable one2many list (click cell)', async function (assert) {
+        assert.expect(3);
+
+        this.data.partner.records[0].p.push(2);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <field name="p">
+                        <tree editable="bottom">
+                            <field name="foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        await testUtils.dom.click(form.$('.o_field_cell[name="foo"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+
+        assert.containsOnce(form, '.o_form_view.o_form_editable',
+            'should switch into edit mode');
+        assert.strictEqual(document.activeElement, form.$('.o_field_cell[name="foo"] input')[0]);
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: Editable one2many list (add a line)', async function (assert) {
+        assert.expect(4);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <field name="p">
+                        <tree editable="bottom">
+                            <field name="foo"/>
+                        </tree>
+                    </field>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsOnce(form, '.o_field_x2many_list_row_add',
+            'create line should be displayed');
+
+        await testUtils.dom.click(form.$('.o_field_x2many_list_row_add a'));
+        await testUtils.owlCompatibilityExtraNextTick();
+
+        assert.containsOnce(form, '.o_form_view.o_form_editable',
+            'should switch into edit mode');
+        assert.strictEqual(document.activeElement, form.$('.o_field_cell[name="foo"] input')[0]);
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: Date picker', async function (assert) {
+        assert.expect(4);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+This conversation was marked as resolved by mcm-odoo
+                    <field name="date"/>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        await testUtils.dom.click(form.$('.o_field_widget[name="date"]'));
+        await testUtils.owlCompatibilityExtraNextTick();
+
+        assert.containsOnce(form, '.o_form_view.o_form_editable',
+            'should switch into edit mode');
+        assert.strictEqual(document.activeElement, form.$('.o_field_widget[name="date"] input')[0]);
+        assert.containsOnce(document.body, '.bootstrap-datetimepicker-widget');
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: Many2one', async function (assert) {
+        assert.expect(5);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <field name="trululu"/>
+                </form>`,
+            res_id: 1,
+            mockRPC(route, { method }) {
+                assert.step(method);
+                return this._super(...arguments);
+            },
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+
+        await testUtils.dom.click(form.$('.o_field_widget[name="trululu"]'));
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.verifySteps(['read', 'get_formview_action'])
+
+        form.destroy();
+    });
+
+    QUnit.test('Quick Edition: Many2Many checkbox', async function (assert) {
+        assert.expect(5);
+
+        const form = await createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: `
+                <form>
+                    <field name="timmy" widget="many2many_checkboxes"/>
+                </form>`,
+            res_id: 1,
+        });
+
+        assert.containsOnce(form, '.o_form_view.o_form_readonly');
+        assert.containsNone(form, 'input[type="checkbox"]:checked');
+
+        await testUtils.dom.click(form.$('.o_field_widget[name="timmy"] label:eq(1)'));
+
+        assert.containsOnce(form, '.o_form_view.o_form_editable');
+        assert.containsOnce(form, 'input[type="checkbox"]:checked');
+        assert.containsOnce(form, 'input[type="checkbox"]:eq(1):checked');
+
+        form.destroy();
+    });
+
+    // QUnit.test('Quick Edition: Many2one radio', async function (assert) {
+    //     assert.expect(4);
+
+    //     const form = await createView({
+    //         View: FormView,
+    //         model: 'partner',
+    //         data: this.data,
+    //         arch: `
+    //             <form>
+    //                 <field name="trululu" widget="radio"/>
+    //             </form>`,
+    //         res_id: 1,
+    //     });
+
+    //     assert.containsOnce(form, '.o_form_view.o_form_readonly');
+    //     assert.containsNone(form, 'input[type="radio"]:eq(1):checked');
+
+    //     await testUtils.dom.click(form.$('.o_field_widget[name="trululu"] label:eq(1)'));
+
+    //     assert.containsOnce(form, '.o_form_view.o_form_editable');
+    //     assert.containsOnce(form, 'input[type="radio"]:eq(1):checked');
+
+    //     form.destroy();
+    // });
 });
 
 });

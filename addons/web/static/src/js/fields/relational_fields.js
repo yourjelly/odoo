@@ -92,10 +92,10 @@ var FieldMany2One = AbstractField.extend({
         'focusout input': '_onInputFocusout',
         'keyup input': '_onInputKeyup',
         'click .o_external_button': '_onExternalButtonClick',
-        'click': '_onClick',
     }),
     AUTOCOMPLETE_DELAY: 200,
     SEARCH_MORE_LIMIT: 320,
+    isQuickEditable: true,
 
     /**
      * @override
@@ -354,6 +354,14 @@ var FieldMany2One = AbstractField.extend({
     },
     /**
      * @private
+     * @override
+     */
+    _executeQuickEdit: function () {
+        this._super(...arguments);
+        this._openAutoComplete();
+    },
+    /**
+     * @private
      * @returns {Array}
      */
     _getSearchBlacklist: function () {
@@ -441,6 +449,18 @@ var FieldMany2One = AbstractField.extend({
             classname: 'o_m2o_dropdown_option',
         });
         return values;
+    },
+    /**
+     * @private
+     */
+    _openAutoComplete: function () {
+        if (this.$input.autocomplete("widget").is(":visible")) {
+            this.$input.autocomplete("close");
+        } else if (this.floating) {
+            this.$input.autocomplete("search"); // search with the input's content
+        } else {
+            this.$input.autocomplete("search", ''); // search with the empty string
+        }
     },
     /**
      * Listens to events 'field_changed' to keep track of the last event that
@@ -681,22 +701,27 @@ var FieldMany2One = AbstractField.extend({
 
     /**
      * @private
+     * @override
      * @param {MouseEvent} event
      */
     _onClick: function (event) {
         var self = this;
-        if (this.mode === 'readonly' && !this.noOpen) {
-            event.preventDefault();
-            event.stopPropagation();
-            this._rpc({
-                    model: this.field.relation,
-                    method: 'get_formview_action',
-                    args: [[this.value.res_id]],
-                    context: this.record.getContext(this.recordParams),
-                })
-                .then(function (action) {
-                    self.trigger_up('do_action', {action: action});
-                });
+        if (this.mode === 'readonly') {
+            if (this.noOpen) {
+                this._super(...arguments);
+            } else {
+                event.preventDefault();
+                event.stopPropagation();
+                this._rpc({
+                        model: this.field.relation,
+                        method: 'get_formview_action',
+                        args: [[this.value.res_id]],
+                        context: this.record.getContext(this.recordParams),
+                    })
+                    .then(function (action) {
+                        self.trigger_up('do_action', {action: action});
+                    });
+            }
         }
     },
 
@@ -753,13 +778,7 @@ var FieldMany2One = AbstractField.extend({
      * @private
      */
     _onInputClick: function () {
-        if (this.$input.autocomplete("widget").is(":visible")) {
-            this.$input.autocomplete("close");
-        } else if (this.floating) {
-            this.$input.autocomplete("search"); // search with the input's content
-        } else {
-            this.$input.autocomplete("search", ''); // search with the empty string
-        }
+        this._openAutoComplete();
     },
     /**
      * @private
@@ -1045,6 +1064,11 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
      * useSubview is used in form view to load view of the related model of the x2many field
      */
     useSubview: true,
+    isQuickEditable: true,
+    quickEditionExclusion: [
+        '.o_x2m_control_panel',
+        'thead',
+    ],
 
     /**
      * @override
@@ -1056,6 +1080,7 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
         });
         this.operations = [];
         this.isReadonly = this.mode === 'readonly';
+        this.hasReadonlyModifier = options.readonlyModifier;
         this.view = this.attrs.views[this.attrs.mode];
         this.isMany2Many = this.field.type === 'many2many' || this.attrs.widget === 'many2many';
         this.activeActions = {};
@@ -1084,6 +1109,7 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
                                             !!JSON.parse(arch.attrs.delete) :
                                             true;
             this.editable = arch.attrs.editable;
+            this._canQuickEdit = this.editable && arch.tag === 'tree';
         }
         this._computeAvailableActions(record);
         if (this.attrs.columnInvisibleFields) {
@@ -1253,6 +1279,22 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
             true;
     },
     /**
+     * @private
+     * @override
+     * @param {Object} extraInfo
+     * @param {string} extraInfo.row
+     * @param {string} extraInfo.subFieldName
+     */
+    _executeQuickEdit: function (extraInfo) {
+        this._super(...arguments);
+
+        if (extraInfo.subFieldName) {
+            const query = `.o_data_row[data-id="${extraInfo.row}"] [name="${extraInfo.subFieldName}"]`;
+            const subField = this.el.querySelector(query);
+            subField.click();
+        }
+    },
+    /**
      * Evaluates the 'column_invisible' modifier for the parent record.
      *
      * @return {Object} Object containing fieldName as key and the evaluated
@@ -1279,6 +1321,22 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
         };
     },
     /**
+     * @private
+     * @override
+     * @param {MouseEvent} ev
+     * @returns {Object}
+     */
+    _getQuickEditExtraInfo: function (ev) {
+        const row = ev.target.closest('.o_data_row');
+        const field = ev.target.closest('.o_data_row .o_field_widget') ||
+            ev.target.closest('.o_field_cell');
+
+        return {
+            row: row && row.dataset.id,
+            subFieldName: row && field && field.getAttribute('name'),
+        };
+    },
+    /**
      * Computes the default renderer to use depending on the view type.
      * We create this as a method so we can override it if we want to use
      * another renderer instead (eg. section_and_note_one2many).
@@ -1299,7 +1357,7 @@ var FieldX2Many = AbstractField.extend(WidgetAdapterMixin, {
      * @returns {boolean} true iff the list should contain a 'create' line.
      */
     _hasCreateLine: function () {
-        return !this.isReadonly && (
+        return !this.hasReadonlyModifier && (
             (this.activeActions.create && this.canCreate) ||
             (this.isMany2Many)
         );
@@ -1832,6 +1890,7 @@ var FieldOne2Many = FieldX2Many.extend({
     //--------------------------------------------------------------------------
     // Public
     //--------------------------------------------------------------------------
+
     /**
      * @override
      * @param {Object} record
@@ -1858,6 +1917,60 @@ var FieldOne2Many = FieldX2Many.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @param {*} data 
+     */
+    _addCreateRecordRow(data) {
+        const self = this;
+        if (this.editable || data.forceEditable) {
+            if (!this.activeActions.create) {
+                if (data.onFail) {
+                    data.onFail();
+                }
+            } else if (!this.creatingRecord) {
+                this.creatingRecord = true;
+                this.trigger_up('edited_list', { id: this.value.id });
+                this._setValue({
+                    operation: 'CREATE',
+                    position: this.editable || data.forceEditable,
+                    context: data.context,
+                }, {
+                    allowWarning: data.allowWarning
+                }).then(function () {
+                    self.creatingRecord = false;
+                }).then(function (){
+                    if (data.onSuccess){
+                        data.onSuccess();
+                    }
+                }).guardedCatch(function() {
+                    self.creatingRecord = false;
+                });
+            }
+        } else {
+            this._openFormDialog({
+                context: data.context && data.context[0],
+                disable_multiple_selection: data.disable_multiple_selection,
+                on_saved: function (record) {
+                    self._setValue({ operation: 'ADD', id: record.id });
+                },
+            });
+        }
+    },
+    /**
+     * @private
+     * @override
+     * @param {Object} extraInfo
+     * @param {boolean} [extraInfo.__addRecord]
+     * @param {Object} [extraInfo.data]
+     */
+    _executeQuickEdit: function (extraInfo) {
+        if (extraInfo.__addRecord) {
+            this._addCreateRecordRow(extraInfo.data);
+        } else {
+            this._super(...arguments);
+        }
+    },
     /**
      * @override
      * @private
@@ -1935,45 +2048,17 @@ var FieldOne2Many = FieldX2Many.extend({
      *   to the list even if warnings are triggered (e.g: stock warning for product availability)
      */
     _onAddRecord: function (ev) {
-        var self = this;
-        var data = ev.data || {};
-
-        // we don't want interference with the components upstream.
-        ev.stopPropagation();
-
-        if (this.editable || data.forceEditable) {
-            if (!this.activeActions.create) {
-                if (data.onFail) {
-                    data.onFail();
-                }
-            } else if (!this.creatingRecord) {
-                this.creatingRecord = true;
-                this.trigger_up('edited_list', { id: this.value.id });
-                this._setValue({
-                    operation: 'CREATE',
-                    position: this.editable || data.forceEditable,
-                    context: data.context,
-                }, {
-                    allowWarning: data.allowWarning
-                }).then(function () {
-                    self.creatingRecord = false;
-                }).then(function (){
-                    if (data.onSuccess){
-                        data.onSuccess();
-                    }
-                }).guardedCatch(function() {
-                    self.creatingRecord = false;
-                })
-                ;
-            }
-        } else {
-            this._openFormDialog({
-                context: data.context && data.context[0],
-                disable_multiple_selection: data.disable_multiple_selection,
-                on_saved: function (record) {
-                    self._setValue({ operation: 'ADD', id: record.id });
-                },
+        const data = ev.data || {};
+        if (this._canQuickEdit && this.isReadonly) {
+            this.trigger_up('quick_edit', {
+                fieldName: this.name,
+                target: this.el,
+                extraInfo: { __addRecord: true, data },
             });
+        } else {
+            // we don't want interference with the components upstream.
+            ev.stopPropagation();
+            this._addCreateRecordRow(data);
         }
     },
     /**
@@ -1990,6 +2075,9 @@ var FieldOne2Many = FieldX2Many.extend({
         // we don't want interference with the components upstream.
         var self = this;
         ev.stopPropagation();
+        if (this.editable) {
+            return;
+        }
 
         var id = ev.data.id;
         var onSaved = function (record) {
@@ -2572,6 +2660,8 @@ var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
         'mousedown .o_colorpicker a': '_onUpdateColor',
         'mousedown .o_colorpicker .o_hide_in_kanban': '_onUpdateColor',
     }),
+    isQuickEditable: true,
+    quickEditionExclusion: ['.dropdown-toggle'],
     /**
      * @override
      */
@@ -2579,6 +2669,20 @@ var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
         this._super.apply(this, arguments);
 
         this.hasDropdown = !!this.colorField;
+        this._canQuickEdit = !this.nodeOptions.no_edit_color;
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @override
+     */
+    _executeQuickEdit: function () {
+        this._super(...arguments);
+        this.many2one.$input.click();
     },
 
     //--------------------------------------------------------------------------
@@ -2659,7 +2763,7 @@ var KanbanFieldMany2ManyTags = FieldMany2ManyTags.extend({
     // KanbanRecord, which should definitely be cleaned.
     // Anyway, those handlers are only necessary in Form and List views, so we
     // can removed them here.
-    events: AbstractField.prototype.events,
+    events: _.omit(AbstractField.prototype.events, 'click'),
 
     //--------------------------------------------------------------------------
     // Private
@@ -2701,6 +2805,7 @@ var FieldMany2ManyCheckBoxes = AbstractField.extend({
     }),
     specialData: "_fetchSpecialRelation",
     supportedFieldTypes: ['many2many'],
+    isQuickEditable: true,
     init: function () {
         this._super.apply(this, arguments);
         this.m2mValues = this.record.specialData[this.name];
@@ -2718,6 +2823,44 @@ var FieldMany2ManyCheckBoxes = AbstractField.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @override
+     * @param {Object} extraInfo
+     * @param {number|null} extraInfo.id
+     */
+    _executeQuickEdit: function (extraInfo) {
+        this._super(...arguments);
+        if (extraInfo.id !== null) {
+            const ids = [...this.value.res_ids];
+            if (ids.includes(extraInfo.id)) {
+                ids.splice(ids.indexOf(extraInfo.id), 1);
+            } else {
+                ids.push(extraInfo.id);
+            }
+            this._setValue({
+                operation: 'REPLACE_WITH',
+                ids,
+            });
+        }
+    },
+    /**
+     * @private
+     * @override
+     * @param {MouseEvent} ev
+     * @returns {Object}
+     */
+    _getQuickEditExtraInfo: function (ev) {
+        let id = null;
+        if (ev.target.tagName.toLowerCase() === 'label') {
+            const checkboxId = ev.target.getAttribute('for');
+            const checkbox = this.el.querySelector(`#${checkboxId}`);
+            id = parseInt(checkbox.dataset.recordId, 10);
+        }
+        return {
+            id,
+        };
+    },
     /**
      * @private
      */
@@ -2887,6 +3030,7 @@ var FieldSelection = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'change': '_onChange',
     }),
+    isQuickEditable: true,
     /**
      * @override
      */
@@ -3022,6 +3166,7 @@ var FieldRadio = FieldSelection.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         'click input': '_onInputClick',
     }),
+    isQuickEditable: true,
     /**
      * @constructs FieldRadio
      */
@@ -3080,6 +3225,41 @@ var FieldRadio = FieldSelection.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @override
+     * @param {Object} extraInfo
+     * @param {Array|null} extraInfo.value
+     */
+    _executeQuickEdit: function (extraInfo) {
+        this._super(...arguments);
+        if (extraInfo.value !== null) {
+            const [id, label] = extraInfo.value;
+            if (this.field.type === 'many2one') {
+                this._setValue({ id, display_name: label });
+            } else {
+                this._setValue(id);
+            }
+        }
+    },
+    /**
+     * @private
+     * @override
+     * @param {MouseEvent} ev
+     * @returns {Object}
+     */
+    _getQuickEditExtraInfo: function (ev) {
+        let value = null;
+        if (ev.target.tagName.toLowerCase() === 'label') {
+            const radioId = ev.target.getAttribute('for');
+            const radio = this.el.querySelector(`#${radioId}`);
+            const index = parseInt(radio.dataset.index, 10);
+            value = this.values[index];
+        }
+        return {
+            value,
+        };
+    },
     /**
      * @private
      * @override

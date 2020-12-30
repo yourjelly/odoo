@@ -83,6 +83,31 @@ odoo.define('web.basic_fields_owl', function (require) {
         }
 
         //----------------------------------------------------------------------
+        // Private
+        //----------------------------------------------------------------------
+
+        /**
+         * @private
+         * @override
+         * @param {Object} extraInfo
+         * @param {boolean} extraInfo.value
+         */
+        _executeQuickEdit(extraInfo) {
+            super._executeQuickEdit(...arguments);
+            this._setValue(!extraInfo.value);
+        }
+        /**
+         * @private
+         * @override
+         * @returns {Object}
+         */
+        _getQuickEditExtraInfo() {
+            return {
+                value: this.value,
+            };
+        }
+
+        //----------------------------------------------------------------------
         // Handlers
         //----------------------------------------------------------------------
 
@@ -123,6 +148,7 @@ odoo.define('web.basic_fields_owl', function (require) {
     FieldBoolean.description = _lt("Checkbox");
     FieldBoolean.supportedFieldTypes = ['boolean'];
     FieldBoolean.template = 'web.FieldBoolean';
+    FieldBoolean.isQuickEditable = true;
 
 
     return {

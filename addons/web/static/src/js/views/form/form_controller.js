@@ -18,6 +18,7 @@ var FormController = BasicController.extend({
         toggle_column_order: '_onToggleColumnOrder',
         focus_control_button: '_onFocusControlButton',
         form_dialog_discarded: '_onFormDialogDiscarded',
+        quick_edit: '_onQuickEdit',
     }),
     /**
      * @override
@@ -646,6 +647,14 @@ var FormController = BasicController.extend({
             res_model: record.model,
             title: _t("Open: ") + ev.data.string,
         }).open();
+    },
+    /**
+     * 
+     * @param {*} ev 
+     */
+    _onQuickEdit: function (ev) {
+        ev.stopPropagation();
+        this._onEdit();
     },
     /**
      * Called when the user wants to save the current record -> @see saveRecord

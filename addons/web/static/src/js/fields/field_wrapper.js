@@ -93,6 +93,9 @@ odoo.define('web.FieldWrapper', function (require) {
         get noLabel() {
             return this.Component.noLabel;
         }
+        get isQuickEditable() {
+            return this.Component.isQuickEditable;
+        }
 
         //----------------------------------------------------------------------
         // Public
@@ -103,6 +106,9 @@ odoo.define('web.FieldWrapper', function (require) {
         }
         commitChanges() {
             return this.componentRef.comp.commitChanges(...arguments);
+        }
+        executeQuickEdit() {
+            return this.componentRef.comp.executeQuickEdit(...arguments);
         }
         getFocusableElement() {
             return $(this.componentRef.comp.focusableElement);
@@ -140,6 +146,9 @@ odoo.define('web.FieldWrapper', function (require) {
         }
         setInvalidClass() {
             return this.componentRef.comp.setInvalidClass(...arguments);
+        }
+        setQuickEdit() {
+            return this.componentRef.comp.setQuickEdit(...arguments);
         }
         updateModifiersValue(modifiers) {
             if (this.props.options.attrs) {

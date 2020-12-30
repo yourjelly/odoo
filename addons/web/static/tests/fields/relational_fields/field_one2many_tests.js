@@ -405,8 +405,8 @@ QUnit.module('fields', {}, function () {
 
             assert.containsNone(form, 'td.o_list_record_selector',
                 "embedded one2many should not have a selector");
-            assert.ok(!form.$('.o_field_x2many_list_row_add').length,
-                "embedded one2many should not be editable");
+            assert.ok(form.$('.o_field_x2many_list_row_add').length,
+                "embedded one2many should be editable");
             assert.ok(!form.$('td.o_list_record_remove').length,
                 "embedded one2many records should not have a remove icon");
 
@@ -2597,8 +2597,8 @@ QUnit.module('fields', {}, function () {
 
             assert.ok(!form.$('.o_list_record_remove').length,
                 'remove icon should not be visible in readonly');
-            assert.ok(!form.$('.o_field_x2many_list_row_add').length,
-                '"Add an item" should not be visible in readonly');
+            assert.ok(form.$('.o_field_x2many_list_row_add').length,
+                '"Add an item" should be visible in readonly');
 
             await testUtils.form.clickEdit(form);
 
@@ -2657,15 +2657,12 @@ QUnit.module('fields', {}, function () {
                 res_id: 1,
             });
 
-            assert.ok(!form.$('.o_field_x2many_list_row_add').length,
-                '"Add an item" link should not be available in readonly');
+            assert.ok(form.$('.o_field_x2many_list_row_add').length,
+                '"Add an item" link should be available in readonly');
 
             await testUtils.dom.click(form.$('.o_list_view tbody td:first()'));
-            assert.ok($('.modal .o_form_readonly').length,
-                'in readonly, clicking on a subrecord should open it in readonly in a dialog');
-            await testUtils.dom.click($('.modal .o_form_button_cancel'));
-
-            await testUtils.form.clickEdit(form);
+            assert.ok(form.$('.o_form_view.o_form_editable').length,
+                'should toggle form mode to edit');
 
             assert.ok(form.$('.o_field_x2many_list_row_add').length,
                 '"Add an item" link should be available in edit');
@@ -4981,12 +4978,7 @@ QUnit.module('fields', {}, function () {
                 'second record', "m2m values should have been correctly fetched");
 
             await testUtils.dom.click(form.$('.o_data_row:first'));
-
-            assert.strictEqual($('.modal .o_field_widget').text(), "xphone",
-                'should display the form view dialog with the many2one value');
-            await testUtils.dom.click($('.modal-footer button'));
-
-            await testUtils.form.clickEdit(form);
+            assert.containsOnce(form, '.o_form_view.o_form_editable', 'should toggle form mode to edit');
 
             // edit the m2m of first row
             await testUtils.dom.click(form.$('.o_list_view tbody td:first()'));

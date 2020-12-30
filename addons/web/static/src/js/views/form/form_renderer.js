@@ -19,14 +19,22 @@ var FormRenderer = BasicRenderer.extend({
         'click .o_notification_box .oe_field_translate': '_onTranslate',
         'click .o_notification_box .close': '_onTranslateNotificationClose',
         'shown.bs.tab a[data-toggle="tab"]': '_onNotebookTabChanged',
+        'click .o_form_label': '_onFieldLabelClicked',
     }),
     custom_events: _.extend({}, BasicRenderer.prototype.custom_events, {
         'navigation_move':'_onNavigationMove',
         'activate_next_widget' : '_onActivateNextWidget',
+        'quick_edit': '_onQuickEdit',
     }),
     // default col attributes for the rendering of groups
     INNER_GROUP_COL: 2,
     OUTER_GROUP_COL: 2,
+    quickEditionExclusion: [
+        '.o_list_view tbody',
+        '.o_form_statusbar',
+        '.oe_button_box',
+        '.oe_subtotal_footer',
+    ],
 
     /**
      * @override
@@ -44,6 +52,7 @@ var FormRenderer = BasicRenderer.extend({
         // display them (e.g. in Studio, in "show invisible" mode). This flag
         // allows to disable this optimization.
         this.renderInvisible = false;
+        this.quickEditInfo = null;
     },
     /**
      * @override
@@ -71,6 +80,14 @@ var FormRenderer = BasicRenderer.extend({
             if (firstPrimaryFormButton.length > 0) {
                 return firstPrimaryFormButton.focus();
             } else {
+                return;
+            }
+        }
+        if (this.quickEditInfo) {
+            const fieldWidget = this.allFieldWidgets[this.state.id]
+                .find(field => field[symbol] === this.quickEditInfo.fieldName);
+            if (fieldWidget) {
+                fieldWidget.executeQuickEdit(this.quickEditInfo.extraInfo);
                 return;
             }
         }
@@ -205,6 +222,10 @@ var FormRenderer = BasicRenderer.extend({
      */
     getLocalState: function () {
         const state = {};
+        const sheetBg = this.el.querySelector('.o_form_sheet_bg');
+        if (sheetBg) {
+            state.scrollValue = sheetBg.scrollTop;
+        }
         for (const notebook of this.el.querySelectorAll(':scope div.o_notebook')) {
             const name = notebook.dataset.name;
             const navs = notebook.querySelectorAll(':scope .o_notebook_headers .nav-item > .nav-link');
@@ -260,6 +281,10 @@ var FormRenderer = BasicRenderer.extend({
                 }
                 core.bus.trigger('DOM_updated');
             }
+        }
+        const sheetBg = this.el.querySelector('.o_form_sheet_bg');
+        if (sheetBg) {
+            sheetBg.scrollTop = state.scrollValue;
         }
     },
     /**
@@ -1087,6 +1112,10 @@ var FormRenderer = BasicRenderer.extend({
                 widget.renderWithLabel($label);
             }
         });
+
+        if (this.mode === 'readonly') {
+            this.quickEditInfo = null;
+        }
     },
     /**
      * Sets id attribute of given widget to idForLabel
@@ -1111,6 +1140,22 @@ var FormRenderer = BasicRenderer.extend({
         ev.stopPropagation();
         var index = this.allFieldWidgets[this.state.id].indexOf(ev.data.target);
         this._activateNextFieldWidget(this.state, index);
+    },
+    /**
+     * @private
+     * @param {MouseEvent} ev
+     */
+    _onFieldLabelClicked: function (ev) {
+        const idForLabel = ev.currentTarget.getAttribute('for');
+        const entry = Object.entries(this.idsForLabels)
+            .find(x => x[1] === idForLabel);
+        if (entry) {
+            this.trigger_up('quick_edit', {
+                fieldName: entry[0],
+                target: ev.currentTarget,
+                extraInfo: {},
+            });
+        }
     },
     /**
      * @override
@@ -1148,6 +1193,19 @@ var FormRenderer = BasicRenderer.extend({
      */
     _onNotebookTabChanged: function () {
         core.bus.trigger('DOM_updated');
+    },
+    /**
+     * @private
+     * @param {OdooEvent} ev
+     */
+    _onQuickEdit: function (ev) {
+        if (this.mode === 'readonly' &&
+            !this.quickEditionExclusion.some(x => ev.data.target.closest(x))
+        ) {
+            this.quickEditInfo = ev.data;
+        } else {
+            ev.stopPropagation();
+        }
     },
     /**
      * open the translation view for the current field

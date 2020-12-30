@@ -25,6 +25,7 @@ var FieldBoolean = AbstractField.extend({
     events: _.extend({}, AbstractField.prototype.events, {
         change: '_onChange',
     }),
+    isQuickEditable: false,
     supportedFieldTypes: ['boolean'],
 
     //--------------------------------------------------------------------------
@@ -91,6 +92,26 @@ var FieldBoolean = AbstractField.extend({
     // Private
     //--------------------------------------------------------------------------
 
+    /**
+     * @private
+     * @override
+     * @params {Object} extraInfo
+     * @params {boolean} extraInfo.value
+     */
+    _executeQuickEdit: function (extraInfo) {
+        this._super(...arguments);
+        this._setValue(!extraInfo.value);
+    },
+    /**
+     * @private
+     * @override
+     * @returns {Object}
+     */
+    _getQuickEditExtraInfo() {
+        return {
+            value: this.value,
+        };
+    },
     /**
      * The actual checkbox is designed in css to have full control over its
      * appearance, as opposed to letting the browser and the os decide how
