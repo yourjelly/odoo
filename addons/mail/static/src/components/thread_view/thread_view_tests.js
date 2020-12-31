@@ -12,6 +12,9 @@ const {
     dragenterFiles,
     start,
 } = require('mail/static/src/utils/test_utils.js');
+const {
+    dom: { triggerEvent },
+} = require('web.test_utils');
 
 QUnit.module('mail', {}, function () {
 QUnit.module('components', {}, function () {
@@ -1888,8 +1891,8 @@ QUnit.test('failure on loading more messages should not alter message list displ
     assert.expect(1);
 
     // first call needs to be successful as it is the initial loading of messages
-    // second call comes from load more and needs to fail in order to show the error alert
-    // any later call should work so that retry button and load more clicks would now work
+    // second call comes from load more by scroll and needs to fail in order to show the error alert
+    // any later call should work so that retry button click and scroll would now work
     let messageFetchShouldFail = false;
     this.data['mail.channel'].records.push({
         channel_type: 'channel',
@@ -1925,7 +1928,12 @@ QUnit.test('failure on loading more messages should not alter message list displ
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
     messageFetchShouldFail = true;
-    await afterNextRender(() => document.querySelector('.o_MessageList_loadMore').click());
+    await afterNextRender(async () => {
+        await triggerEvent(
+            document.querySelector('.o_ThreadView_messageList'),
+            'scroll'
+        );
+    });
     assert.containsN(
         document.body,
         '.o_Message',
@@ -1938,8 +1946,8 @@ QUnit.test('failure on loading more messages should display error and prompt ret
     assert.expect(3);
 
     // first call needs to be successful as it is the initial loading of messages
-    // second call comes from load more and needs to fail in order to show the error alert
-    // any later call should work so that retry button and load more clicks would now work
+    // second call comes from load more by scroll and needs to fail in order to show the error alert
+    // any later call should work so that retry button click and scroll would now work
     let messageFetchShouldFail = false;
     this.data['mail.channel'].records.push({
         channel_type: 'channel',
@@ -1975,7 +1983,12 @@ QUnit.test('failure on loading more messages should display error and prompt ret
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
 
     messageFetchShouldFail = true;
-    await afterNextRender(() => document.querySelector('.o_MessageList_loadMore').click());
+    await afterNextRender(async () => {
+        await triggerEvent(
+            document.querySelector('.o_ThreadView_messageList'),
+            'scroll'
+        );
+    });
     assert.containsOnce(
         document.body,
         '.o_ThreadView_alertLoadingFailed',
@@ -1997,8 +2010,8 @@ QUnit.test('Retry loading more messages on failed load more messages should load
     assert.expect(0);
 
     // first call needs to be successful as it is the initial loading of messages
-    // second call comes from load more and needs to fail in order to show the error alert
-    // any later call should work so that retry button and load more clicks would now work
+    // second call comes from load more by scroll and needs to fail in order to show the error alert
+    // any later call should work so that retry button click and scroll would now work
     let messageFetchShouldFail = false;
     this.data['mail.channel'].records.push({
         channel_type: 'channel',
@@ -2033,13 +2046,18 @@ QUnit.test('Retry loading more messages on failed load more messages should load
     });
     await this.createThreadViewComponent(threadViewer.threadView, { hasComposer: true });
     messageFetchShouldFail = true;
-    await afterNextRender(() => document.querySelector('.o_MessageList_loadMore').click());
+    await afterNextRender(async () => {
+        await triggerEvent(
+            document.querySelector('.o_ThreadView_messageList'),
+            'scroll'
+        );
+    });
 
     messageFetchShouldFail = false;
     await this.afterEvent({
         eventName: 'o-thread-view-hint-processed',
         func: () => document.querySelector('.o_ThreadView_alertLoadingFailedRetryButton').click(),
-        message: "should wait until channel 20 loaded more messages after clicked on load more",
+        message: "should wait until channel 20 loaded more messages after scrolling",
         predicate: ({ hint, threadViewer }) => {
             return (
                 hint.type === 'more-messages-loaded' &&

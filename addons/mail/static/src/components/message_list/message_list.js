@@ -63,6 +63,7 @@ class MessageList extends Component {
         /**
          * Snapshot computed during willPatch, which is used by patched.
          */
+        this.env.bus.on('formview_scroll', this, this.onScroll.bind(this));
         this._willPatchSnapshot = undefined;
         this._onScrollThrottled = _.throttle(this._onScrollThrottled.bind(this), 100);
         /**
@@ -480,15 +481,6 @@ class MessageList extends Component {
     //--------------------------------------------------------------------------
     // Handlers
     //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @param {MouseEvent} ev
-     */
-    _onClickLoadMore(ev) {
-        ev.preventDefault();
-        this._loadMore();
-    }
 
     /**
      * @private
