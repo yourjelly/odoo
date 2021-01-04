@@ -714,7 +714,7 @@ class ProductPackaging(models.Model):
     _order = 'sequence'
     _check_company_auto = True
 
-    name = fields.Char('Package Type', required=True)
+    name = fields.Char('Product Packaging', required=True)
     sequence = fields.Integer('Sequence', default=1, help="The first in the sequence is the default one.")
     product_id = fields.Many2one('product.product', string='Product', check_company=True)
     qty = fields.Float('Contained Quantity', help="Quantity of products contained in the packaging.")

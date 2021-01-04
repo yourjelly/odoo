@@ -874,6 +874,11 @@ class ProductCategory(models.Model):
                 routes |= base_cat.route_ids
             category.total_route_ids = routes
 
+class ProductPackaging(models.Model):
+    _inherit = "product.packaging"
+
+    package_type_id = fields.Many2one('stock.package.type', 'Package Type')
+
 
 class UoM(models.Model):
     _inherit = 'uom.uom'

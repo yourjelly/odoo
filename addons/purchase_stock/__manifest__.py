@@ -22,6 +22,7 @@
         'views/res_partner_views.xml',
         'views/stock_production_lot_views.xml',
         'views/product_category_views.xml',
+        'views/product_packaging_views.xml',
         'report/purchase_report_views.xml',
         'report/purchase_report_templates.xml',
         'report/report_stock_forecasted.xml',

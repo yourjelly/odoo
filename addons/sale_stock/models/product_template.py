@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+from odoo import api, fields, models
 
 
 class ProductTemplate(models.Model):
@@ -17,3 +17,8 @@ class ProductTemplate(models.Model):
             self.expense_policy = 'no'
             self.service_type = 'manual'
         return res
+
+class ProductPackaging(models.Model):
+    _inherit = 'product.packaging'
+
+    sales = fields.Boolean("Sales", default=True, help="Checked if the package can be used for sales oder")

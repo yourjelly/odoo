@@ -36,6 +36,7 @@ Preferences
         'data/sale_stock_data.xml',
         'wizard/stock_rules_report_views.xml',
         'wizard/sale_order_cancel_views.xml',
+        'views/product_packaging_views.xml',
     ],
     'demo': ['data/sale_order_demo.xml'],
     'qweb': ['static/src/xml/sale_stock.xml'],

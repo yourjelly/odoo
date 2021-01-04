@@ -69,3 +69,9 @@ class ProductProduct(models.Model):
             qty_by_product_location[(product.id, location.id)] += product_qty
             qty_by_product_wh[(product.id, location.get_warehouse().id)] += product_qty
         return qty_by_product_location, qty_by_product_wh
+
+
+class ProductPackaging(models.Model):
+    _inherit = 'product.packaging'
+
+    purchase = fields.Boolean("Purchase", default=True, help="Checked if the package can be used for purchase oder")

@@ -276,6 +276,7 @@ class PurchaseOrderLine(models.Model):
     move_dest_ids = fields.One2many('stock.move', 'created_purchase_line_id', 'Downstream Moves')
     product_description_variants = fields.Char('Custom Description')
     propagate_cancel = fields.Boolean('Propagate cancellation', default=True)
+    product_packaging = fields.Many2one( 'product.packaging', string='Package', domain="[('purchase', '=', True), ('product_id', '=', product_id)]", default=False, check_company=True)
 
     def _compute_qty_received_method(self):
         super(PurchaseOrderLine, self)._compute_qty_received_method()

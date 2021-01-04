@@ -175,6 +175,7 @@ class StockMove(models.Model):
     lot_ids = fields.Many2many('stock.production.lot', compute='_compute_lot_ids', inverse='_set_lot_ids', string='Serial Numbers', readonly=False)
     reservation_date = fields.Date('Date to Reserve', compute='_compute_reservation_date', store=True,
         help="This is a technical field for calculating when a move should be reserved")
+    packaging_id = fields.Many2one('product.packaging', "Packaging", domain="[('product_id', '=', product_id)]", check_company=True)
 
     @api.depends('has_tracking', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
     def _compute_display_assign_serial(self):
