@@ -6,6 +6,9 @@ import copy
 import functools
 import logging
 import re
+import os
+import base64
+import mimetypes
 
 import dateutil.relativedelta as relativedelta
 from werkzeug import urls
@@ -183,6 +186,44 @@ class MailRenderMixin(models.AbstractModel):
 
         return html
 
+    def _encode_images(self, html):
+        """ Encode the images in base64
+
+            The function will select all `img` tags having an `src` attribute.
+            Then, the function will search the image in the folders of the addons path.
+            If the image exists, the function will load the image, encode it in base 64
+            and update the `src` attribute. Otherwise, the tag will not be modified.
+            
+            Before:
+            <img src="..."/>
+            
+            After:
+            <img src="data:image/png;base64,...">
+        """
+        if not html:
+            return html
+
+        html = tools.ustr(html)
+
+        def replace(match):
+            for directory in tools.config['addons_path'].split(','):
+                src = directory + match.group(2)
+                if os.path.isfile(src):
+                    (media_type, _) = mimetypes.guess_type(src)
+                    if media_type.startswith('image/'):
+                        with open(src, 'rb') as image_file:
+                            encoded_string = base64.b64encode(image_file.read())
+                            return '{}data:{};base64,{}'.format(
+                                match.group(1),
+                                media_type,
+                                encoded_string.decode('utf-8')
+                            )
+            return match.group(0)
+
+        pattern = r"""(<img(?=\s)[^>]*\ssrc=")(/[^/][^"]+)"""
+        html = re.sub(pattern, replace, html)
+        return html
+
     @api.model
     def _render_encapsulate(self, layout_xmlid, html, add_context=None, context_record=None):
         try:
@@ -348,16 +389,18 @@ class MailRenderMixin(models.AbstractModel):
 
     @api.model
     def _render_template_postprocess(self, rendered):
-        """ Tool method for post processing. In this method we ensure local
-        links ('/shop/Basil-1') are replaced by global links ('https://www.
-        mygardin.com/hop/Basil-1').
+        """ Tool method for post processing. In this method, we ensure that the images
+        will be encoded in base64 and we ensure that all local links ('/shop/Basil-1')
+        will be replaced by global links ('https://www.mygardin.com/hop/Basil-1').
 
         :param rendered: result of ``_render_template``
 
         :return dict: updated version of rendered
         """
         for res_id, html in rendered.items():
-            rendered[res_id] = self._replace_local_links(html)
+            html = self._encode_images(html)
+            html = self._replace_local_links(html)
+            rendered[res_id] = html
         return rendered
 
     @api.model
