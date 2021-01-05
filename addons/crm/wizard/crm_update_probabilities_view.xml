@@ -6,9 +6,24 @@
         <field name="model">crm.lead.pls.update</field>
         <field name="arch" type="xml">
             <form string="Update Probabilities">
-                <span>Please confirm to update the probabilities of all
-                     the Leads/Opportunities created since <field name="pls_start_date"/>. </span>
-                     <span>This can take up to several minutes.</span>
+                <div class="row">
+                    <div class="col">
+                        The success rate is computed based on the stage, but you can add more fields in the statistical analysis.
+                    </div>
+                    <div class="col">
+                        <field name="pls_fields" widget="many2many_tags" placeholder="Extra fields..."/>
+                    </div>
+                </div>
+                <br/><br/>
+                <div>
+                    <span>
+                        Please confirm to update the probabilities of all 
+                        the Leads/Opportunities created since <field name="pls_start_date"/>. 
+                    </span>
+                    <span>
+                        This can take up to several minutes.
+                    </span>
+                </div>
                 <footer>
                     <button name="action_update_crm_lead_probabilities" type="object"
                         string="Confirm" class="btn-primary"/>
