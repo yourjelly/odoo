@@ -183,11 +183,6 @@ class RatingMixin(models.AbstractModel):
 
         :returns rating.rating record
         """
-        ratings = {
-            5: ['😊︎', 'text-info'],
-            3: ['😐︎', 'text-warning'],
-            1: ['☹', 'text-danger'],
-        }
         rating = None
         if token:
             rating = self.env['rating.rating'].search([('access_token', '=', token)], limit=1)
@@ -198,8 +193,8 @@ class RatingMixin(models.AbstractModel):
             if hasattr(self, 'message_post'):
                 feedback = tools.plaintext2html(feedback or '')
                 self.message_post(
-                    body="<h2 class='float-left mr-1 mb-0 %s'>%s</h2>%s"
-                    % (ratings[rate][1], ratings[rate][0], feedback),
+                    body="<p style='float:left;margin-right: 7px;margin-bottom: 0;'>Rating: </p><img src='/rating/static/src/img/rating_%s.png' alt=':%s/10' style='width:18px;height:18px;float:left;margin-right: 5px;'/>%s"
+                    % (rate, rate, feedback),
                     subtype_xmlid=subtype_xmlid or "mail.mt_comment",
                     author_id=rating.partner_id and rating.partner_id.id or None  # None will set the default author in mail_thread.py
                 )
