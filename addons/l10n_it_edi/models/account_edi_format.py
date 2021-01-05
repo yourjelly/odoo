@@ -5,10 +5,10 @@ from odoo import api, models, fields, _
 from odoo.tests.common import Form
 from odoo.exceptions import UserError
 from odoo.tools import float_repr
-from .sdl_coop_request import SdlCoopRequest
+from . import sdi_coop_proxy
 
 import re
-from datetime import date, datetime
+from datetime import datetime
 import logging
 import base64
 
@@ -22,6 +22,7 @@ DEFAULT_FACTUR_ITALIAN_DATE_FORMAT = '%Y-%m-%d'
 # - FatturaPA documentation (v1.3.1)
 # - Exchange System (v1.8.1)
 
+
 class AccountEdiFormat(models.Model):
     _inherit = 'account.edi.format'
 
@@ -31,7 +32,7 @@ class AccountEdiFormat(models.Model):
 
     @api.model
     def _l10n_it_edi_generate_electronic_invoice_filename(self, invoice):
-        '''Returns a name conform to the Fattura pa Specifications : 
+        '''Returns a name conform to the Fattura pa Specifications:
            See ES documentation 2.2
         '''
         a = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -154,6 +155,9 @@ class AccountEdiFormat(models.Model):
         def get_vat_country(vat):
             return vat[:2].upper()
 
+        def in_eu(partner):
+            return partner._is_company_in_europe(partner.country_id.code)
+
         formato_trasmissione = "FPR12"
         if len(invoice.commercial_partner_id.l10n_it_pa_index or '1') == 6:
             formato_trasmissione = "FPA12"
@@ -178,6 +182,7 @@ class AccountEdiFormat(models.Model):
             'format_phone': format_phone,
             'get_vat_number': get_vat_number,
             'get_vat_country': get_vat_country,
+            'in_eu': in_eu,
             'abs': abs,
             'formato_trasmissione': formato_trasmissione,
             'document_type': document_type,
@@ -480,7 +485,6 @@ class AccountEdiFormat(models.Model):
             return super()._is_required_for_invoice(invoice)
 
         # Determine on which invoices the FatturaPA must be generated.
-        print('checking', invoice.l10n_it_send_state, invoice.is_sale_document(), invoice.country_code)
         return invoice.is_sale_document() and invoice.l10n_it_send_state not in ['sent', 'delivered', 'delivered_accepted'] and invoice.country_code == 'IT'
 
     def _post_invoice_edi(self, invoices, test_mode=False):
@@ -505,7 +509,6 @@ class AccountEdiFormat(models.Model):
             'description': _('Italian invoice: %s', invoice.move_type),
             'type': 'binary',
         })
-        res = {'attachment': attachment}
 
         if len(invoice.commercial_partner_id.l10n_it_pa_index or '') == 6:
             invoice.message_post(
@@ -513,7 +516,12 @@ class AccountEdiFormat(models.Model):
             )
         else:
             invoice.l10n_it_send_state = 'to_send'
-            invoice.send_pec_mail(attachment)
-            sdl = SdlCoopRequest()
-            sdl.upload(attachment.name, xml)
+            invoice.send_pec_mail(attachment)  # TODO delete this
+            response = sdi_coop_proxy.upload(attachment.name, xml, invoice.company_id.l10n_it_edi_test_mode)
+            if 'error' in response and response['error']:
+                res = response
+            else:
+                # TODO : save the transactionId and do something different in _post_invoice_edi if there is already a transactionId
+                print('Sucessfully sent, transaction id is ', response['transactionId'])
+                res = {'attachment': attachment}
         return {invoice: res}

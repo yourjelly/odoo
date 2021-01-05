@@ -8,4 +8,4 @@ from . import account_edi_format
 from . import res_config_settings
 from . import ir_mail_server
 from . import ddt
-from . import sdl_coop_request
+from . import sdi_coop_proxy

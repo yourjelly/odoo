@@ -9,14 +9,25 @@
             <field name="zip">12345</field>
         </record>
 
+        <record id="l10n_it.demo_company_it" model="res.company">
+            <field name="vat">IT00410128888</field>
+            <field name="l10n_it_codice_fiscale">0123456789123456</field>
+            <field name="l10n_it_tax_system">RF01</field>
+            <field name="zip">12345</field>
+        </record>
+
         <record id="base.res_partner_1" model="res.partner">
             <field name="vat">IT12345670124</field>
+            <field name="l10n_it_codice_fiscale">01234567891</field>
         </record>
         <record id="base.res_partner_2" model="res.partner">
             <field name="vat">IT12345670231</field>
+            <field name="l10n_it_codice_fiscale">01234567892</field>
         </record>
         <record id="base.res_partner_12" model="res.partner">
             <field name="vat">IT12345670348</field>
+            <field name="l10n_it_codice_fiscale">01234567893</field>
+            <field name="country_id" ref="base.it"/>
         </record>
 
     </data>
