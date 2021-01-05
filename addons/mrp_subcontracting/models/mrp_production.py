@@ -39,6 +39,8 @@ class MrpProduction(models.Model):
         assert self.env.context.get('subcontract_move_id')
         if float_is_zero(self.qty_producing, precision_rounding=self.product_uom_id.rounding):
             return {'type': 'ir.actions.act_window_close'}
+        if self.product_id.tracking != 'none' and not self.lot_producing_id:
+            raise UserError(_('You must enter a serial number for finished good - %s') % self.product_id.name)
         for sml in self.move_raw_ids.move_line_ids:
             if sml.tracking != 'none' and not sml.lot_id:
                 raise UserError(_('You must enter a serial number for each line of %s') % sml.product_id.name)
@@ -59,6 +61,20 @@ class MrpProduction(models.Model):
             action.update({'res_id': backorder.id})
             return action
         return {'type': 'ir.actions.act_window_close'}
+
+    def action_generate_serial(self):
+        self.ensure_one()
+
+        super().action_generate_serial()
+        view = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
+        return {
+            'name': _('Subcontract'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'mrp.production',
+            'views': [(view.id, 'form')],
+            'target': 'new',
+            'res_id': self.id
+        }
 
     def _pre_button_mark_done(self):
         if self.env.context.get('subcontract_move_id'):
