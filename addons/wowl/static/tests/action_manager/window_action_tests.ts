@@ -1374,8 +1374,7 @@ QUnit.module("ActionManager", (hooks) => {
     webClient.destroy();
   });
 
-  QUnit.skip("limit set in action is passed to each created controller", async function (assert) {
-    // need more work on liste view
+  QUnit.test("limit set in action is passed to each created controller", async function (assert) {
     assert.expect(2);
 
     testConfig.serverData!.actions![3].limit = 2;

@@ -59,9 +59,6 @@ export function useSearch(params: useSearchParams) {
 type useSetupViewParams = useSearchParams & useSetupActionParams;
 
 export interface ViewData {
-  arch: string | null;
-  viewId: number | null;
-  fields: { [key: string]: any } | null;
   search: SearchModel;
   modelName: string;
   load: () => Promise<void>;
@@ -113,9 +110,6 @@ export function useSetupView(setup: useSetupViewParams): ViewData {
   });
 
   const data: ViewData = {
-    arch: null,
-    viewId: null,
-    fields: null,
     search,
     load: () => isReady,
     modelName: props.model,
@@ -124,13 +118,6 @@ export function useSetupView(setup: useSetupViewParams): ViewData {
   // should probably do this only in main mode, not in a dialog or something...
   onMounted(() => {
     title.setParts({ action: props.action.name });
-  });
-  onWillStart(async () => {
-    const viewDescriptions = await _useLoadViews(props);
-    const descr = viewDescriptions[props.type];
-    data.arch = descr.arch;
-    data.viewId = descr.view_id;
-    data.fields = descr.fields;
   });
 
   return data;

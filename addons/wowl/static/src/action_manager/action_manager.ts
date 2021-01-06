@@ -22,6 +22,7 @@ import { evaluateExpr } from "../py/index";
 import { makeContext } from "../core/context";
 import { ActionDialog, ActionDialogProps } from "./action_dialog";
 import { KeepLast } from "../utils/concurrency";
+import { ViewLoader } from "../views/view_utils/view_loader";
 
 // -----------------------------------------------------------------------------
 // Types
@@ -497,11 +498,13 @@ function makeActionManager(env: OdooEnv): ActionManager {
         };
       });
 
+    // FIXME: props should be cleaned
     const props: ViewProps = Object.assign({}, _getActionProps(action), {
       context: action.context,
       domain: action.domain || [],
       model: action.res_model,
       type: view.type,
+      View: view,
       views: action.views,
       viewSwitcherEntries,
       withActionMenus: target !== "new" && target !== "inline",
@@ -550,6 +553,16 @@ function makeActionManager(env: OdooEnv): ActionManager {
       reject = _rej;
     });
     const action = controller.action;
+
+    // LEGACY CODE COMPATIBILITY: remove when all views will be written in owl
+    if (action.type === 'ir.actions.act_window') {
+      const View: any = (controller as ViewController).view;
+      if (View.isLegacy) {
+        controller.Component = View;
+        delete (controller.props as any).View;
+      }
+    }
+    // END LEGACY CODE COMPATIBILITY
 
     class ControllerComponent extends Component<{}, OdooEnv> {
       static template = tags.xml`<t t-component="Component" t-props="props"
@@ -759,7 +772,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
       if (lazyView) {
         lazyController = {
           jsId: `controller_${++id}`,
-          Component: lazyView,
+          Component: ViewLoader,
           action,
           view: lazyView,
           views,
@@ -776,7 +789,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
 
     const controller: ViewController = {
       jsId: `controller_${++id}`,
-      Component: view,
+      Component: ViewLoader,
       action,
       view,
       views,
@@ -1134,7 +1147,7 @@ function makeActionManager(env: OdooEnv): ActionManager {
     }
     const newController = controller.action.controllers[viewType] || {
       jsId: `controller_${++id}`,
-      Component: view,
+      Component: ViewLoader,
       action: controller.action,
       views: controller.views,
       view,

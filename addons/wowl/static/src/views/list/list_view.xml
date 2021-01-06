@@ -45,7 +45,7 @@
                 <tr>
                   <th class="o_list_record_selector"><input type="checkbox"/></th>
                   <th t-foreach="model.columns" t-as="fieldName" t-key="fieldName">
-                    <t t-esc="model.info.fields[fieldName].string"/>
+                    <t t-esc="props.fields[fieldName].string"/>
                   </th>
                 </tr>
               </thead>
@@ -53,7 +53,7 @@
                 <tr  t-foreach="model.records" t-as="record" t-key="record.id" class="o_data_row" t-on-click="_onRowClicked(record.id)">
                   <td class="o_list_record_selector"><input type="checkbox"/></td>
                   <td t-foreach="model.columns" t-as="fieldName" t-key="fieldName" class="o_data_cell">
-                    <t t-if="model.info.fields[fieldName].type === 'many2one'">
+                    <t t-if="props.fields[fieldName].type === 'many2one'">
                       <t t-esc="record[fieldName] ? record[fieldName][1] : ''"/>
                     </t>
                     <t t-else="">

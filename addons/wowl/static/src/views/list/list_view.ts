@@ -28,20 +28,18 @@ export class ListView extends Component<any, any> {
     },
   });
 
+  fields = this.processArch(this.props.arch);
   model: any = null;
 
   async willStart() {
     await this.metadata.load();
-    // step 1: process arch
-    const fields = this.processArch(this.metadata.arch!);
-
-    // step 2: create model
+    // create model and load data
     const Model = (this.constructor as any).Model;
-
-    this.model = new Model(this._model, this.metadata, fields);
+    this.model = new Model(this._model, this.metadata, this.fields);
     const { domain } = this.metadata.search;
-
-    return this.model.load(domain);
+    return this.model.load(domain, {
+      limit: this.props.limit,
+    });
   }
 
   processArch(arch: string) {
@@ -52,8 +50,8 @@ export class ListView extends Component<any, any> {
     return fields.map((elem) => {
       return {
         name: elem.getAttribute("name"),
-        invisible: elem.getAttribute("invisible"),
-        optional: elem.getAttribute("optional"),
+        invisible: elem.getAttribute("invisible") || false,
+        optional: elem.getAttribute("optional") || false,
       };
     });
   }

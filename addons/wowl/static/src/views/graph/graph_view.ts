@@ -129,6 +129,9 @@ interface GraphViewProps extends ViewProps {
   isEmbedded: boolean; // not the right concept anymore
   isSample: boolean; // should be in ViewProps
   noContentHelp?: any; // should be in ViewProps
+
+  arch: string; // should be in ViewProps
+  fields: any; // should be in ViewProps
 }
 
 interface State {
@@ -218,7 +221,7 @@ export class GraphView extends Component<GraphViewProps, OdooEnv> {
   }
 
   processMetaData() {
-    const fields = this.metadata.fields!;
+    const fields = this.props.fields;
     for (const fieldName in fields) {
       const field = fields[fieldName];
       if (fieldName !== "id" && field.store === true) {
@@ -240,7 +243,7 @@ export class GraphView extends Component<GraphViewProps, OdooEnv> {
     fields.__count__ = { string: this.env._t("Count"), type: "integer" };
     this.fields = fields as Fields;
 
-    const arch = this.metadata.arch!;
+    const arch = this.props.arch;
     const parser = new DOMParser();
     const xml = parser.parseFromString(arch, "text/xml");
     this.parseXML(xml.documentElement);
