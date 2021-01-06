@@ -60,6 +60,7 @@ class User(models.Model):
     certificate = fields.Selection(related='employee_id.certificate', readonly=False, related_sudo=False)
     study_field = fields.Char(related='employee_id.study_field', readonly=False, related_sudo=False)
     study_school = fields.Char(related='employee_id.study_school', readonly=False, related_sudo=False)
+    license_plate = fields.Char(related='employee_id.license_plate', readonly=False, related_sudo=False)
     employee_count = fields.Integer(compute='_compute_employee_count')
     hr_presence_state = fields.Selection(related='employee_id.hr_presence_state')
     last_activity = fields.Date(related='employee_id.last_activity')
@@ -141,6 +142,7 @@ class User(models.Model):
             'certificate',
             'study_field',
             'study_school',
+            'license_plate',
         ]
 
         init_res = super(User, self).__init__(pool, cr)
