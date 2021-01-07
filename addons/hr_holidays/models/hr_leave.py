@@ -18,6 +18,7 @@ from odoo.addons.resource.models.resource import float_to_time, HOURS_PER_DAY
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools import float_compare
 from odoo.tools.float_utils import float_round
+from odoo.tools.misc import format_datetime
 from odoo.tools.translate import _
 from odoo.osv import expression
 
@@ -1171,8 +1172,8 @@ class HolidaysRequest(models.Model):
     def activity_update(self):
         to_clean, to_do = self.env['hr.leave'], self.env['hr.leave']
         for holiday in self:
-            start = UTC.localize(holiday.date_from).astimezone(timezone(holiday.employee_id.tz or 'UTC'))
-            end = UTC.localize(holiday.date_to).astimezone(timezone(holiday.employee_id.tz or 'UTC'))
+            start = format_datetime(holiday.env, holiday.date_from, tz=holiday.employee_id.tz, dt_format=False)
+            end = format_datetime(holiday.env, holiday.date_to, tz=holiday.employee_id.tz, dt_format=False)
             note = _(
                 'New %(leave_type)s Request created by %(user)s from %(start)s to %(end)s',
                 leave_type=holiday.holiday_status_id.name,
