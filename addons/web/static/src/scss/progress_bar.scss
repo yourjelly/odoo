@@ -26,11 +26,76 @@
             background-color: $o-brand-primary;
             height: 100%;
         }
+
+    }
+
+    .o_basic_progress {
+        width: 100px;
+        height: 15px;
+        vertical-align: middle;
+
+        border: 1px solid $o-brand-secondary;
+        overflow: hidden;
+
+        background-color: white;
+        &.o_progress_overflow {
+            background-color: $o-brand-secondary;
+        }
+
+        .o_progressbar_complete {
+            background-color: $o-brand-primary;
+            height: 100%;
+
+            &.o_progressbar_complete_readonly {
+                background-color: $o-brand-secondary !important;
+            }
+        }
+
+        .o_progressbar_thumb {
+            cursor: pointer;
+            float: right;
+            border-radius: 50%;
+            background-color: lighten($o-brand-primary, 5%);
+            width: 13px;
+            height: 13px;
+            margin-right: -7px;
+
+            &:focus, &:active {
+                background-color: lighten($o-brand-primary, 10%);
+            }
+
+            &:active {
+                cursor: grabbing;
+            }
+
+            &.o_progressbar_thumb_readonly {
+                cursor: default !important;
+                display: none;
+            }
+        }
     }
 
     .o_progressbar_value {
         width: 100px;
         white-space: nowrap;
         padding-left: 10px;
+    }
+
+    .o_basic_progressbar_value {
+        white-space: nowrap;
+        padding-left: 10px;
+
+        .o_input {
+            width: 50px;
+        }
+    }
+
+    .o_basic_progressbar_unit {
+        white-space: nowrap;
+        padding-left: 4px;
+        
+        .o_input {
+            width: 50px;
+        }
     }
 }
