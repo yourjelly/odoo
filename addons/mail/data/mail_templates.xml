@@ -3,31 +3,32 @@
     <data>
         <template id="message_notification_email">
 <div>
-<!--    success, next to optimize code :try loop + append until this much char-->
+<!--    not a goood solution need to find out a way to build a common method for same needs,but in case custom email template in paynow has given priority -->
+<!--    option 1 success, next to optimize code :try loop + append until this much char-->
+<!--    option2  if elemnttag==table or if -->
+<!--    try inserting js for particular tag-->
+<!--    skipping this codition because in email marketing if no preview text is given then txt in message body appears-->
     <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">
             <div t-raw="message.body"/>
-        <span>&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;
-            &amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-        </span>
+<!--        <span>&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;-->
+<!--            &amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
+<!--        </span>-->
     </div>
-    <t t-set="foo" t-value="42"/>
+
 
 <div t-if="has_button_access" itemscope="itemscope" itemtype="http://schema.org/EmailMessage">
     <div itemprop="potentialAction" itemscope="itemscope" itemtype="http://schema.org/ViewAction">
@@ -216,7 +217,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 24px; background-color: white; color: #454748; border-collapse:separate;">
 <tbody>
     <!-- HEADER -->
-    <tr>
+     <tr>
         <td align="center" style="min-width: 590px;">
             <t t-set="access_action" t-value="record.with_context(force_website=True).get_access_action()"/>
             <t t-set="is_online" t-value="access_action and access_action['type'] == 'ir.actions.act_url'"/>

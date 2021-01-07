@@ -58,6 +58,7 @@
                                 attrs="{'invisible': [('composition_mode', '!=', 'comment')]}"/>
                         </div>
                         <field name="subject" placeholder="Subject..." required="True"/>
+                        <field name="preview_text" placeholder="preview text..."/>
                         <!-- mass post -->
                         <field name="notify"
                             attrs="{'invisible':[('composition_mode', '!=', 'mass_post')]}"/>

@@ -834,9 +834,11 @@ Reason(s) of this behavior could be:
     def action_quotation_send(self):
         ''' Opens a wizard to compose an email, with relevant mail template loaded by default '''
         self.ensure_one()
+        print("context................................",self._context)
         template_id = self._find_mail_template()
         lang = self.env.context.get('lang')
         template = self.env['mail.template'].browse(template_id)
+        print("template...........",template)
         if template.lang:
             lang = template._render_lang(self.ids)[self.id]
         ctx = {
@@ -851,6 +853,7 @@ Reason(s) of this behavior could be:
             'force_email': True,
             'model_description': self.with_context(lang=lang).type_name,
         }
+        print("ctx in actin quotn sent................",ctx)
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
