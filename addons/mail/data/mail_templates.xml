@@ -25,9 +25,10 @@
             &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
             &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
             &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
-            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;
         </span>
     </div>
+    <t t-set="foo" t-value="42"/>
+
 <div t-if="has_button_access" itemscope="itemscope" itemtype="http://schema.org/EmailMessage">
     <div itemprop="potentialAction" itemscope="itemscope" itemtype="http://schema.org/ViewAction">
         <link itemprop="target" t-att-href="button_access['url']"/>
