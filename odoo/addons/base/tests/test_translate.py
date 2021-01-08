@@ -533,7 +533,7 @@ class TestTranslationWrite(TransactionCase):
         }])
 
         # remove the value
-        belgium.with_context(lang='fr_FR').write({'vat_label': False})
+        belgium.with_context(lang='fr_FR').write({'vat_label': ""})
         # should recover the initial value from db
         self.assertEqual(
             False, belgium.with_context(lang='fr_FR').vat_label,
