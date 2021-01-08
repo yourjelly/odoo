@@ -4,6 +4,7 @@ odoo.define('project.ProjectListView', function (require) {
     const Dialog = require('web.Dialog');
     const ListView = require('web.ListView');
     const ListController = require('web.ListController');
+    const ListRenderer = require('web.ListRenderer');
     const core = require('web.core');
     const view_registry = require('web.view_registry');
 

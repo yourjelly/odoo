@@ -17,7 +17,9 @@ const MarkedAsDoneToggleButton = FieldToggleBoolean.extend({
         const label = this.value ? _lt('Mark task incomplete') : _lt('Mark task complete');
 
         this.$('i')
-            .addClass('fa fa-check-circle-o')
+            .addClass('fa')
+            .toggleClass('fa-check-circle', !this.value)
+            .toggleClass('fa-check-circle-o', this.value)
             .removeClass('fa-circle')
             .attr('title', title);
 
