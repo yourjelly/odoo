@@ -106,7 +106,7 @@ class AssetsBundle(object):
 
     TRACKED_BUNDLES = ['web.assets_common', 'web.assets_backend']
 
-    def __init__(self, name, files, env=None):
+    def __init__(self, name, files, env=None, css=True, js=True):
         self.name = name
         self.env = request.env if env is None else env
         self.javascripts = []
@@ -124,9 +124,9 @@ class AssetsBundle(object):
                 self.stylesheets.append(ScssStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
             elif f['atype'] == 'text/less':
                 self.stylesheets.append(LessStylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
-            elif f['atype'] == 'text/css':
+            elif f['atype'] == 'text/css' and css:
                 self.stylesheets.append(StylesheetAsset(self, url=f['url'], filename=f['filename'], inline=f['content'], media=f['media'], direction=self.user_direction))
-            elif f['atype'] == 'text/javascript':
+            elif f['atype'] == 'text/javascript' and js:
                 self.javascripts.append(JavascriptAsset(self, url=f['url'], filename=f['filename'], inline=f['content']))
 
     def to_node(self, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False):
