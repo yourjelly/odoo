@@ -656,7 +656,6 @@
                         </button>
                     </div>
                     <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
-                    <widget name="web_ribbon" title="Task Done" attrs="{'invisible': ['|', ('marked_as_done', '=', False), ('active', '=', False)]}"/>
                     <div class="oe_title pr-0">
                         <h1 class="d-flex flex-row justify-content-between">
                             <field name="priority" widget="priority" class="mr-3"/>
