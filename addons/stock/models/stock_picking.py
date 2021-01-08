@@ -380,6 +380,12 @@ class Picking(models.Model):
         ('available', 'Available'),
         ('expected', 'Expected'),
         ('late', 'Late')], compute='_compute_products_availability')
+    packaging_reserve_method = fields.Selection([
+        ('full', 'Reserve Only Full Packagings'),
+        ('partial', 'Reserve Partial Packagings'),], string="Reserve Packagings",
+        states={'done': [('readonly', True)], 'cancel': [('readonly', True)]}, default='partial',
+        help="Reserve Only Full Packagings: will not reserve the partial packagings. If customer orders 2 pallets of 1000 units each and you only have 1600 in stock, only 1000 will be reserved\n"
+             "Reserve Partial Packagings: allow to reserve partial packagings. If customer orders 2 pallets of 1000 units each, and you only have 1600 in stock, 1600 will be reserved")
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),

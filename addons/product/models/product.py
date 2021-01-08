@@ -9,7 +9,7 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 
 
-from odoo.tools import float_compare
+from odoo.tools import float_compare, float_round
 
 _logger = logging.getLogger(__name__)
 
@@ -721,6 +721,31 @@ class ProductPackaging(models.Model):
     barcode = fields.Char('Barcode', copy=False, help="Barcode used for packaging identification. Scan this packaging barcode from a transfer in the Barcode app to move all the contained units")
     product_uom_id = fields.Many2one('uom.uom', related='product_id.uom_id', readonly=True)
     company_id = fields.Many2one('res.company', 'Company', index=True)
+
+    def _check_qty(self, qty, uom_id, rounding_method):
+        """Check if qty in given uom is a multiple of the packaging qty. If not,
+        rounding the qty to closest multiple of the packaging qty according to
+        the rounding_method "ceiling" or "floor".
+        """
+        default_uom = self.product_id.uom_id
+        q = default_uom._compute_quantity(self.qty, uom_id)
+        # We do not use the modulo operator to check if qty is a mltiple of q. Indeed the quantity
+        # per package might be a float, leading to incorrect results. For example:
+        # 8 % 1.6 = 1.5999999999999996
+        # 5.4 % 1.8 = 2.220446049250313e-16
+        if (
+            qty
+            and q
+            and float_compare(
+                qty / q, float_round(qty / q, precision_rounding=1.0), precision_rounding=0.001
+            )
+            != 0
+        ):
+            if rounding_method == "ceiling":
+                return qty - (qty % q) + q
+            elif rounding_method == "floor":
+                return qty - (qty % q)
+        return qty
 
 
 class SupplierInfo(models.Model):

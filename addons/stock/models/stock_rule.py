@@ -306,6 +306,7 @@ class StockRule(models.Model):
             'description_picking': picking_description,
             'priority': values.get('priority', "0"),
             'orderpoint_id': values.get('orderpoint_id') and values['orderpoint_id'].id,
+            'packaging_id': values.get('packaging_id', False),
         }
         for field in self._get_custom_move_fields():
             if field in values:
@@ -353,8 +354,8 @@ class ProcurementGroup(models.Model):
     _description = 'Procurement Group'
     _order = "id desc"
 
-    Procurement = namedtuple('Procurement', ['product_id', 'product_qty',
-        'product_uom', 'location_id', 'name', 'origin', 'company_id', 'values'])
+    Procurement = namedtuple('Procurement', ['product_id', 'product_qty', 'product_uom',
+        'location_id', 'name', 'origin', 'company_id', 'values'])
     partner_id = fields.Many2one('res.partner', 'Partner')
     name = fields.Char(
         'Reference',

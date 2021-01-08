@@ -276,7 +276,7 @@ class PurchaseOrderLine(models.Model):
     move_dest_ids = fields.One2many('stock.move', 'created_purchase_line_id', 'Downstream Moves')
     product_description_variants = fields.Char('Custom Description')
     propagate_cancel = fields.Boolean('Propagate cancellation', default=True)
-    product_packaging = fields.Many2one( 'product.packaging', string='Package', domain="[('purchase', '=', True), ('product_id', '=', product_id)]", default=False, check_company=True)
+    product_packaging_id = fields.Many2one('product.packaging', string='Package', domain="[('purchase', '=', True), ('product_id', '=', product_id)]", check_company=True)
 
     def _compute_qty_received_method(self):
         super(PurchaseOrderLine, self)._compute_qty_received_method()
@@ -316,6 +316,24 @@ class PurchaseOrderLine(models.Model):
                             total += move.product_uom._compute_quantity(move.product_uom_qty, line.product_uom)
                 line._track_qty_received(total)
                 line.qty_received = total
+
+    @api.onchange('product_packaging_id', 'product_qty', 'product_uom')
+    def _onchange_product_packaging(self):
+        if self.product_packaging_id and self.product_qty:
+            newqty = self.product_packaging_id._check_qty(self.product_qty, self.product_uom, "ceiling")
+            if newqty != self.product_qty:
+                return {
+                    'warning': {
+                        'title': _('Warning'),
+                        'message': _(
+                            "This product is packaged by %(pack_size).2f %(pack_name)s. You should purchase %(quantity).2f %(unit)s.",
+                            pack_size=self.product_packaging_id.qty,
+                            pack_name=self.product_id.uom_id.name,
+                            quantity=newqty,
+                            unit=self.product_uom.name
+                        ),
+                    },
+                }
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -457,6 +475,7 @@ class PurchaseOrderLine(models.Model):
             'warehouse_id': self.order_id.picking_type_id.warehouse_id.id,
             'product_uom_qty': product_uom_qty,
             'product_uom': product_uom.id,
+            'packaging_id': self.product_packaging_id.id,
         }
 
     @api.model
