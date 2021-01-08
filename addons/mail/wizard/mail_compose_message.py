@@ -7,7 +7,7 @@ import re
 
 from odoo import _, api, fields, models, tools, Command
 from odoo.exceptions import UserError
-
+from bs4 import BeautifulSoup
 
 # main mako-like expression pattern
 EXPRESSION_PATTERN = re.compile('(\$\{.+?\})')
@@ -242,6 +242,7 @@ class MailComposer(models.TransientModel):
                 # to create lots of emails in sudo as it is consdiered as a technical model.
                 batch_mails_sudo = self.env['mail.mail'].sudo()
                 all_mail_values = wizard.get_mail_values(res_ids)
+                print("all_mail_values..in send_mail.........",all_mail_values)
                 for res_id, mail_values in all_mail_values.items():
                     if wizard.composition_mode == 'mass_mail':
                         batch_mails_sudo |= self.env['mail.mail'].sudo().create(mail_values)
@@ -297,9 +298,38 @@ class MailComposer(models.TransientModel):
 
         for res_id in res_ids:
             # static wizard (mail.message) values
+            html_doc = f'''{self.body}'''
+            # html_doc_odoo_tools = tools.prepend_html_content(self.body,self.body)
+            # print("html_doc_odoo_tools.............................................................................",html_doc_odoo_tools)
+            # print("html_doc.vareirty.........................",html_doc)
+            # print("typewof body.,",type(self.body))
+            soup = BeautifulSoup(html_doc, 'html.parser')
+            print(soup.prettify())
+            print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",soup.get_text())
+            prety_text= soup.get_text()
+            # using re
+            re_prety_text = re.sub("[\r\n]","9",prety_text)
+            print("\n re prety text.....................",re_prety_text)
+
+            # print("{tools.html_escape(preview)}>>>>>>>>>>>>>>.",tools.html_escape(prety_text))
+            # odoo_toolk = tools.html_escape(prety_text)
+
+            def pre(preview):
+                if preview:
+                    preview = f"""
+                        <div style="display:none;font-size:1px;height:0px;width:0px;opacity:0;">
+                          {preview}
+                        </div>
+                    """
+                    print("insidee ...........................",preview)
+                    return preview
+
+
             mail_values = {
+                # 'subject': self.env['mail.render.mixin']._prepend_preview(self.subject,self.body), not working
                 'subject': self.subject,
-                'body': self.body or '',
+                'body':  pre(re_prety_text) + self.body or '',
+                # 'body': self.env['mail.render.mixin']._prepend_preview(self.body,self.body), working but html content is coming also it only comes inside the table layout which is not required result
                 'parent_id': self.parent_id and self.parent_id.id,
                 'partner_ids': [partner.id for partner in self.partner_ids],
                 'attachment_ids': [attach.id for attach in self.attachment_ids],
@@ -311,6 +341,10 @@ class MailComposer(models.TransientModel):
                 'mail_activity_type_id': self.mail_activity_type_id.id,
             }
 
+            # re eprsn to eliminate linefeed and carriage returns because it is the cause of failure in sending emails while we append it to the subject
+
+
+            print("mail values in get_mail_values.......",mail_values)
             # mass mailing: rendering override wizard static values
             if mass_mail_mode and self.model:
                 record = self.env[self.model].browse(res_id)
@@ -408,7 +442,7 @@ class MailComposer(models.TransientModel):
 
         # This onchange should return command instead of ids for x2many field.
         values = self._convert_to_write(values)
-
+        print("values....................",values)
         return {'value': values}
 
     def save_as_template(self):

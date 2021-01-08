@@ -6,10 +6,22 @@
 <!--    not a goood solution need to find out a way to build a common method for same needs,but in case custom email template in paynow has given priority -->
 <!--    option 1 success, next to optimize code :try loop + append until this much char-->
 <!--    option2  if elemnttag==table or if -->
-<!--    try inserting js for particular tag-->
-<!--    skipping this codition because in email marketing if no preview text is given then txt in message body appears-->
+<!--    if len(message.body) < 120
+        then whitwspce = 120 - len(message.body)
+        <span>&amp;nbsp;&amp;#847;</span> * whitespace
+        -->
+<!--    skipping this condition because in email marketing if no preview text is given then txt in message body appears-->
     <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">
             <div t-raw="message.body"/>
+                <t t-if="len(message.body) < 120 ">
+                    <p>
+                 <t t-foreach="range(1, 120-len(message.body))" t-as="num">
+                     <span>&amp;nbsp;&amp;#847;</span>
+                 </t>
+
+                    </p>
+            </t>
+<!--        <t t-esc="&amp;nbsp;&amp;#847; * 120"/>-->
 <!--        <span>&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
 <!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
 <!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
