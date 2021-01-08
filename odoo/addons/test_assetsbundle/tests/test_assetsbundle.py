@@ -60,20 +60,31 @@ class TestJavascriptAssetsBundle(FileTouchable):
 
     def test_01_generation(self):
         """ Checks that a bundle creates an ir.attachment record when its `js` method is called
-        for the first time.
+        for the first time and this ir.attachment is different depending on `is_minified` param.
         """
         self.bundle = self._get_asset(self.jsbundle_xmlid, env=self.env)
 
-        # there shouldn't be any attachment associated to this bundle
+        # there shouldn't be any minified attachment associated to this bundle
         self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=True)), 0)
         self.assertEqual(len(self.bundle.get_attachments('js', is_minified=True)), 0)
 
         # trigger the first generation and, thus, the first save in database
         self.bundle.js()
 
-        # there should be one attachment associated to this bundle
+        # there should be one minified attachment associated to this bundle
         self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=True)), 1)
         self.assertEqual(len(self.bundle.get_attachments('js', is_minified=True)), 1)
+
+        # there shouldn't be any non-minified attachment associated to this bundle
+        self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=False)), 0)
+        self.assertEqual(len(self.bundle.get_attachments('js', is_minified=False)), 0)
+
+        # trigger the first generation and, thus, the first save in database for the non-minified version.
+        self.bundle.js(is_minified=False)
+
+        # there should be one non-minified attachment associated to this bundle
+        self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=False)), 1)
+        self.assertEqual(len(self.bundle.get_attachments('js', is_minified=False)), 1)
 
     def test_02_access(self):
         """ Checks that the bundle's cache is working, i.e. that the bundle creates only one
@@ -158,18 +169,37 @@ class TestJavascriptAssetsBundle(FileTouchable):
         # check if the previous attachment are correctly cleaned
         self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=True)), 1)
 
-    ### TODO TO adapt
-    # def test_05_debug(self):
-    #     """ Checks that a bundle rendered in debug mode outputs non-minified assets.
-    #     """
-    #     debug_bundle = self._get_asset(self.jsbundle_xmlid)
-    #     nodes = debug_bundle.to_node(debug='assets')
-    #     content = self._node_to_list(nodes)
-    #     # find back one of the original asset file
-    #     self.assertIn('/test_assetsbundle/static/src/js/test_jsfile1.js', content)
+    def test_05_debug(self):
+        """ Checks that a bundle rendered in debug assets mode outputs non-minified assets
+            and create an non-minified ir.attachment.
+        """
+        debug_bundle = self._get_asset(self.jsbundle_xmlid)
+        nodes = debug_bundle.to_node(debug='assets')
+        content = self._node_to_list(nodes)
+        # there should be a non-minified file (not .min.js)
+        self.assertEqual(content[3].count('test_assetsbundle.bundle1.js'), 1)
 
-    #     # there shouldn't be any assets created in debug mode
-    #     self.assertEqual(len(self._any_ira_for_bundle('js')), 0)
+        # there shouldn't be any minified assets created in debug mode
+        self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=True)), 0)
+
+        # there should be one non-minified assets created in debug mode
+        self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=False)), 1)
+
+    def test_06_default_mode(self):
+        """ Checks that a bundle rendered in default mode outputs minified assets
+            and create an minified ir.attachment.
+        """
+        debug_bundle = self._get_asset(self.jsbundle_xmlid)
+        nodes = debug_bundle.to_node()
+        content = self._node_to_list(nodes)
+        # there should be a non-minified file (not .min.js)
+        self.assertEqual(content[3].count('test_assetsbundle.bundle1.min.js'), 1)
+
+        # there should be one any minified assets created in debug mode
+        self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=True)), 1)
+
+        # there shouldn't be one non-minified assets created in debug mode
+        self.assertEqual(len(self._any_ira_for_bundle('js', is_minified=False)), 0)
 
     def test_08_css_generation3(self):
         # self.cssbundle_xlmid contains 3 rules
@@ -502,6 +532,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
     <body>
     </body>
 </html>""" % format_data).encode('utf8'))
+
     #### TODO TO ADAPAT
 #     def test_21_exteral_lib_assets_debug_mode(self):
 #         html = self.env['ir.ui.view']._render_template('test_assetsbundle.template2', {"debug": "assets"})
