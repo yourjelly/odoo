@@ -14,4 +14,9 @@
             </tbody>
         </table>
     </t>
+    <t t-name="project_state_selection" t-inherit="web.FormSelection" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('o_selection')]/a[@role='button']" position="after">
+            <span class="o_status_label"/>
+        </xpath>
+    </t>
 </templates>
