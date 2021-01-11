@@ -216,6 +216,7 @@ class MailRenderMixin(models.AbstractModel):
         :param preview: the preview to add before the html content
         :return: html with preprended preview
         """
+        print("in prepend preview,........................")
         if preview:
             preview = preview.strip()
 

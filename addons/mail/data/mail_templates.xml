@@ -11,16 +11,16 @@
         <span>&amp;nbsp;&amp;#847;</span> * whitespace
         -->
 <!--    skipping this condition because in email marketing if no preview text is given then txt in message body appears-->
-    <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">
-            <div t-raw="message.body"/>
-                <t t-if="len(message.body) < 120 ">
-                    <p>
-                 <t t-foreach="range(1, 120-len(message.body))" t-as="num">
-                     <span>&amp;nbsp;&amp;#847;</span>
-                 </t>
+<!--    <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">-->
+<!--            <div t-raw="message.body"/>-->
+<!--                <t t-if="len(message.body) < 120 ">-->
+<!--                   -->
+<!--                 <t t-foreach="range(1, 120-len(message.body))" t-as="num">-->
+<!--                     <span>&amp;nbsp;&amp;#847;</span>-->
+<!--                 </t>-->
 
-                    </p>
-            </t>
+<!--                    -->
+<!--            </t>-->
 <!--        <t t-esc="&amp;nbsp;&amp;#847; * 120"/>-->
 <!--        <span>&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
 <!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
@@ -39,7 +39,7 @@
 <!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
 <!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
 <!--        </span>-->
-    </div>
+<!--    </div>-->
 
 
 <div t-if="has_button_access" itemscope="itemscope" itemtype="http://schema.org/EmailMessage">

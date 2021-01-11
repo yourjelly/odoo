@@ -629,6 +629,7 @@ class MassMailing(models.Model):
                 'template_id': None,
                 'mail_server_id': mailing.mail_server_id.id,
             }
+            print("composer values..................",composer_values)
             if mailing.reply_to_mode == 'email':
                 composer_values['reply_to'] = mailing.reply_to
 
