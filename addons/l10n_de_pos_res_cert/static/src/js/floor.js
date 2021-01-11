@@ -61,8 +61,8 @@ odoo.define('l10n_de_pos_res_cert.floor', function(require) {
                 return Promise.reject(error);
             });
         },
-        async sendLineDifference() {
-            const lineDifference = [];
+        getLineItems() {
+            const lineItems = [];
             this.get_orderlines().forEach(line => {
                 if (line.quantity) {
                     const price = line.get_price_with_tax()/line.quantity;
@@ -70,14 +70,27 @@ odoo.define('l10n_de_pos_res_cert.floor', function(require) {
                     if (Math.floor(price) === price || priceString.split('.')[1].length < 2) {
                         priceString = price.toFixed(2);
                     }
-                    lineDifference.push({
+                    lineItems.push({
                         'quantity': line.quantity,
                         'text': line.get_product().display_name,
                         'price_per_unit': priceString
                     })
                 }
             })
-            return await this.createAndFinishOrderTransaction(lineDifference);
+            return lineItems;
+        },
+        async sendLineItems() {
+            const lineItems = this.getLineItems();
+            return await this.createAndFinishOrderTransaction(lineItems);
+        },
+        //@Override
+        async cancelTransaction() {
+            const lineItems = this.getLineItems();
+            lineItems.forEach(line => {
+                line.quantity = -1 * line.quantity;
+            });
+            await this.createAndFinishOrderTransaction(lineItems);
+            return await _super_order.cancelTransaction.apply(this, arguments);
         }
     });
 });

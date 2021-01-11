@@ -10,7 +10,7 @@ odoo.define('l10n_de_pos_res_cert.screens', function (require) {
             const order = this.pos.get_order();
             if (this.pos.isRestaurantCountryGermany() && (!order.is_to_invoice() || order.get_client())) {
                 // In order to not modify the base code, the second condition is needed for invoicing
-                await order.sendLineDifference().then(async () => {
+                await order.sendLineItems().then(async () => {
                     await _super();
                 }).catch(error => {
                     const title = _('No internet')
