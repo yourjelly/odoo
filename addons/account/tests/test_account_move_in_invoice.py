@@ -200,7 +200,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'amount_type': 'percent',
             'amount': 10,
             'price_include': True,
-            'include_base_amount': True,
+            'include_base_amount': 'affect_base',
         })
         tax_price_exclude = self.env['account.tax'].create({
             'name': '15% excl',
@@ -343,7 +343,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'amount_type': 'percent',
             'amount': 10,
             'price_include': True,
-            'include_base_amount': True,
+            'include_base_amount': 'affect_base',
         })
         tax_price_include_2 = self.env['account.tax'].create({
             'name': '20% incl',
@@ -351,7 +351,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
             'amount_type': 'percent',
             'amount': 20,
             'price_include': True,
-            'include_base_amount': True,
+            'include_base_amount': 'affect_base',
         })
 
         fiscal_position = self.env['account.fiscal.position'].create({

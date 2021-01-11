@@ -72,7 +72,12 @@ class AccountTax(models.Model):
     description = fields.Char(string='Label on Invoices')
     price_include = fields.Boolean(string='Included in Price', default=False,
         help="Check this if the price you use on the product and invoices includes this tax.")
-    include_base_amount = fields.Boolean(string='Affect Base of Subsequent Taxes', default=False,
+    include_base_amount = fields.Selection(
+        selection=[
+            ('affect_base', "Affect Base"),
+            ('cumulate_base', "Cumulate Base"),
+        ],
+        string="Affect Base of Subsequent Taxes", default=False,
         help="If set, taxes which are computed after this one will be computed based on the price tax included.")
     analytic = fields.Boolean(string="Include in Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
     tax_group_id = fields.Many2one('account.tax.group', string="Tax Group", default=_default_tax_group, required=True)
@@ -244,7 +249,7 @@ class AccountTax(models.Model):
     @api.onchange('price_include')
     def onchange_price_include(self):
         if self.price_include:
-            self.include_base_amount = True
+            self.include_base_amount = 'affect_base'
 
     def _compute_amount(self, base_amount, price_unit, quantity=1.0, product=None, partner=None):
         """ Returns the amount of a single tax. base_amount is the actual amount on which the tax is applied, which is
@@ -473,7 +478,7 @@ class AccountTax(models.Model):
                 ).filtered(lambda x: x.repartition_type == "tax")
                 sum_repartition_factor = sum(tax_repartition_lines.mapped("factor"))
 
-                if tax.include_base_amount:
+                if tax.include_base_amount in ('affect_base', 'cumulate_base'):
                     base = recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount)
                     incl_fixed_amount = incl_percent_amount = incl_division_amount = 0
                     store_included_tax_total = True
@@ -509,6 +514,7 @@ class AccountTax(models.Model):
         taxes_vals = []
         i = 0
         cumulated_tax_included_amount = 0
+        cumulated_affect_base_amount = 0
         for tax in taxes:
             tax_repartition_lines = (is_refund and tax.refund_repartition_line_ids or tax.invoice_repartition_line_ids).filtered(lambda x: x.repartition_type == 'tax')
             sum_repartition_factor = sum(tax_repartition_lines.mapped('factor'))
@@ -536,7 +542,7 @@ class AccountTax(models.Model):
             # the right total
             subsequent_taxes = self.env['account.tax']
             subsequent_tags = self.env['account.account.tag']
-            if tax.include_base_amount:
+            if tax.include_base_amount in ('affect_base', 'cumulate_base'):
                 subsequent_taxes = taxes[i+1:]
                 subsequent_tags = subsequent_taxes.get_tax_tags(is_refund, 'base')
 
@@ -579,8 +585,11 @@ class AccountTax(models.Model):
                     total_void += line_amount
 
             # Affect subsequent taxes
-            if tax.include_base_amount:
-                base += factorized_tax_amount
+            if tax.include_base_amount == 'affect_base':
+                base += factorized_tax_amount + cumulated_affect_base_amount
+                cumulated_affect_base_amount = 0
+            elif tax.include_base_amount == 'cumulate_base':
+                cumulated_affect_base_amount += factorized_tax_amount
 
             total_included += factorized_tax_amount
             i += 1

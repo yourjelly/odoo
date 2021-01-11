@@ -292,7 +292,7 @@ class AccountTestInvoicingCommon(TransactionCase):
                     'amount_type': 'percent',
                     'amount': 20.0,
                     'price_include': True,
-                    'include_base_amount': True,
+                    'include_base_amount': 'affect_base',
                     'tax_exigibility': 'on_invoice',
                     'invoice_repartition_line_ids': [
                         (0, 0, {

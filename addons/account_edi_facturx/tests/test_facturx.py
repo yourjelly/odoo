@@ -19,7 +19,7 @@ class TestAccountEdiFacturx(AccountEdiTestCommon):
             'amount': 10,
             'type_tax_use': 'sale',
             'price_include': True,
-            'include_base_amount': True,
+            'include_base_amount': 'affect_base',
             'sequence': 10,
         })
 

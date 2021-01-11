@@ -86,7 +86,7 @@
         <field name="type_tax_use">sale</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tax_group_id" ref="tax_group_vat_exempt"/>
-        <field name="include_base_amount">1</field>
+        <field name="include_base_amount">affect_base</field>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,
@@ -158,7 +158,7 @@
         <field name="type_tax_use">purchase</field>
         <field name="chart_template_id" ref="il_chart_template"/>
         <field name="tax_group_id" ref="tax_group_vat_17"/>
-        <field name="include_base_amount" eval="True"/>
+        <field name="include_base_amount">affect_base</field>
         <field name="invoice_repartition_line_ids" eval="[(5, 0, 0),
             (0,0, {
                 'factor_percent': 100,

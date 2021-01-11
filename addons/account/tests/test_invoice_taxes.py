@@ -24,7 +24,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
             'amount_type': 'percent',
             'amount': 21,
             'price_include': True,
-            'include_base_amount': True,
+            'include_base_amount': 'affect_base',
             'sequence': 20,
         })
         cls.percent_tax_2 = cls.env['account.tax'].create({
@@ -38,7 +38,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
             'amount_type': 'percent',
             'amount': 5,
             'price_include': True,
-            'include_base_amount': True,
+            'include_base_amount': 'affect_base',
             'sequence': 40,
         })
         cls.group_tax = cls.env['account.tax'].create({
@@ -286,7 +286,7 @@ class TestInvoiceTaxes(AccountTestInvoicingCommon):
             'amount_type': 'division',
             'amount': 100,
             'price_include': True,
-            'include_base_amount': True,
+            'include_base_amount': 'affect_base',
         })
         invoice = self._create_invoice([(100, sale_tax)])
         self.assertRecordValues(invoice.line_ids.filtered('tax_line_id'), [{

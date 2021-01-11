@@ -185,7 +185,7 @@ class TestTax(TestTaxCommon):
         super(TestTax, cls).setUpClass()
 
     def test_tax_group_of_group_tax(self):
-        self.fixed_tax.include_base_amount = True
+        self.fixed_tax.include_base_amount = 'affect_base'
         res = self.group_of_group_tax.compute_all(200.0)
         self._check_compute_all_results(
             263,    # 'total_included'
@@ -234,7 +234,7 @@ class TestTax(TestTaxCommon):
 
     def test_tax_percent_division(self):
         self.division_tax.price_include = True
-        self.division_tax.include_base_amount = True
+        self.division_tax.include_base_amount = 'affect_base'
         res_division = self.division_tax.compute_all(200.0)
         self._check_compute_all_results(
             200,    # 'total_included'
@@ -276,7 +276,7 @@ class TestTax(TestTaxCommon):
             res_division
         )
         self.percent_tax.price_include = True
-        self.percent_tax.include_base_amount = True
+        self.percent_tax.include_base_amount = 'affect_base'
         res_percent = self.percent_tax.compute_all(110.0)
         self._check_compute_all_results(
             110,    # 'total_included'
@@ -290,7 +290,7 @@ class TestTax(TestTaxCommon):
             res_percent
         )
         self.percent_tax_bis.price_include = True
-        self.percent_tax_bis.include_base_amount = True
+        self.percent_tax_bis.include_base_amount = 'affect_base'
         self.percent_tax_bis.amount = 21
         res_percent = self.percent_tax_bis.compute_all(7.0)
         self._check_compute_all_results(
@@ -326,7 +326,7 @@ class TestTax(TestTaxCommon):
         )
 
     def test_fixed_tax_include_base_amount(self):
-        self.fixed_tax.include_base_amount = True
+        self.fixed_tax.include_base_amount = 'affect_base'
         res = self.group_tax.compute_all(200.0)
         self._check_compute_all_results(
             231,     # 'total_included'
@@ -428,7 +428,7 @@ class TestTax(TestTaxCommon):
             'amount_type': 'percent',
             'amount': 10,
             'price_include': True,
-            'include_base_amount': True,
+            'include_base_amount': 'affect_base',
             'sequence': 1,
             'invoice_repartition_line_ids': [
                 (0, 0, {'repartition_type': 'base', 'factor_percent': 100.0}),
@@ -1043,5 +1043,32 @@ class TestTax(TestTaxCommon):
                 (47.60, 2.40),
                 # ---------------
             ],
-            res3
+            res3,
+        )
+
+    def test_tax_cumulate_base_amount_price_exclude(self):
+        taxes = self.env['account.tax'].create([{
+            'name': 'test_tax_cumulate_base_amount_%s' % i,
+            'amount_type': 'percent',
+            'amount': amount,
+            'include_base_amount': include_base_amount,
+            'sequence': i,
+        } for i, amount, include_base_amount in [
+            (0, 6, 'cumulate_base'),
+            (1, 6, 'affect_base'),
+            (2, 10, False),
+        ]])
+
+        self._check_compute_all_results(
+            123.2,      # 'total_included'
+            100.0,      # 'total_excluded'
+            [
+                # base,     amount
+                # -------------------------
+                (100.0,     6.0),
+                (100.0,     6.0),
+                (112.0,     11.2),
+                # -------------------------
+            ],
+            taxes.compute_all(100.0),
         )

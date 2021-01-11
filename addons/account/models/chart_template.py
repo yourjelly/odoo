@@ -866,7 +866,12 @@ class AccountTaxTemplate(models.Model):
     description = fields.Char(string='Display on Invoices')
     price_include = fields.Boolean(string='Included in Price', default=False,
         help="Check this if the price you use on the product and invoices includes this tax.")
-    include_base_amount = fields.Boolean(string='Affect Subsequent Taxes', default=False,
+    include_base_amount = fields.Selection(
+        selection=[
+            ('affect_base', "Affect Base"),
+            ('cumulate_base', "Cumulate Base"),
+        ],
+        string="Affect Base of Subsequent Taxes", default=False,
         help="If set, taxes which are computed after this one will be computed based on the price tax included.")
     analytic = fields.Boolean(string="Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
     invoice_repartition_line_ids = fields.One2many(string="Repartition for Invoices", comodel_name="account.tax.repartition.line.template", inverse_name="invoice_tax_id", copy=True, help="Repartition when the tax is used on an invoice")
