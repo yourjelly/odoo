@@ -116,7 +116,7 @@
                                 nolabel="1"/>
                         </div>
                     </group>
-                    <group>
+                    <group name="activity_info">
                         <group>
                             <field name="activity_type_id" required="1" options="{'no_create': True, 'no_open': True}"/>
                             <field name="summary" placeholder="e.g. Discuss proposal"/>
@@ -166,9 +166,13 @@
                         context="{'mail_activity_quick_update': True}"/>
                 </header>
             </sheet>
-            <field name="activity_type_id" position="before">
-                <field name="res_name" readonly="1"/>
-            </field>
+            <group name="activity_info" position="before">
+                <div class="oe_title">
+                    <h3>
+                        <field name="res_name" readonly="1"/>
+                    </h3>
+                </div>
+            </group>
             <footer position="replace"/>
         </field>
     </record>
