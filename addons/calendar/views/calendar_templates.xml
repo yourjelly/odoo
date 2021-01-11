@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="assets_backend" name="calendar assets" inherit_id="web.assets_backend">
+    <template id="assets_backend" name="calendar assets" inherit_id="web.backend">
         <xpath expr="." position="inside">
             <link rel="stylesheet" type="text/scss" href="/calendar/static/src/scss/calendar.scss"/>
             <script type="text/javascript" src="/calendar/static/src/js/base_calendar.js"></script>
@@ -24,8 +24,8 @@
     <template id="invitation_page_anonymous" name="Calendar Invitation Page for anonymous users">
         <t t-call="web.layout">
             <t t-set="head">
-                <t t-call-assets="web.assets_common" t-js="false"/>
-                <t t-call-assets="web.assets_frontend" t-js="false"/>
+                <t t-call-assets="web.common" t-js="false"/>
+                <t t-call-assets="web.frontend" t-js="false"/>
             </t>
 
             <div class="container">

@@ -14,7 +14,7 @@ from werkzeug import urls
 from odoo import api, models, tools
 from odoo.tools.safe_eval import assert_valid_codeobj, _BUILTINS, _SAFE_OPCODES
 from odoo.tools.misc import get_lang
-from odoo.http import request
+from odoo.http import module_boot, request
 from odoo.modules.module import get_resource_path
 
 from odoo.addons.base.models.qweb import QWeb, Contextifier
@@ -291,7 +291,7 @@ class IrQWeb(models.AbstractModel, QWeb):
         tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', keys=("website_id",)),
     )
     def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
-        files, remains = self._get_asset_content(xmlid, options)
+        files, remains = self._get_asset_content(xmlid, options, css, js)
         asset = self.get_asset_bundle(xmlid, files, env=self.env)
         remains = [node for node in remains if (css and node[0] == 'link') or (js and node[0] != 'link')]
         return remains + asset.to_node(css=css, js=js, debug=debug, async_load=async_load, defer_load=defer_load, lazy_load=lazy_load)
@@ -300,62 +300,31 @@ class IrQWeb(models.AbstractModel, QWeb):
         asset_nodes = self._get_asset_nodes(xmlid, options, js=False)
         return [node[1]['href'] for node in asset_nodes if node[0] == 'link']
 
-    @tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', keys=("website_id",))
-    def _get_asset_content(self, xmlid, options):
+    # @tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', keys=("website_id",))
+    def _get_asset_content(self, xmlid, options, css, js):
         options = dict(options,
             inherit_branding=False, inherit_branding_auto=False,
             edit_translations=False, translatable=False,
             rendering_bundle=True)
 
         options['website_id'] = self.env.context.get('website_id')
-        IrQweb = self.env['ir.qweb'].with_context(options)
+        IrAsset = self.env['ir.asset']
 
-        def can_aggregate(url):
-            return not urls.url_parse(url).scheme and not urls.url_parse(url).netloc and not url.startswith('/web/content')
+        def get_file_info(file):
+            path = [segment for segment in file.split('/') if segment]
+            return {
+                'atype': IrAsset.get_mime_type(file),
+                'url': file,
+                'filename': get_resource_path(*path) if path else None,
+                'content': '',
+                'media': None,
+            }
 
-        # TODO: This helper can be used by any template that wants to embedd the backend.
-        #       It is currently necessary because the ir.ui.view bundle inheritance does not
-        #       match the module dependency graph.
-        def get_modules_order():
-            if request:
-                from odoo.addons.web.controllers.main import module_boot
-                return json.dumps(module_boot())
-            return '[]'
-        template = IrQweb._render(xmlid, {"get_modules_order": get_modules_order})
+        addons = module_boot()
 
-        files = []
-        remains = []
-        for el in html.fragments_fromstring(template):
-            if isinstance(el, html.HtmlElement):
-                href = el.get('href', '')
-                src = el.get('src', '')
-                atype = el.get('type')
-                media = el.get('media')
-
-                if can_aggregate(href) and (el.tag == 'style' or (el.tag == 'link' and el.get('rel') == 'stylesheet')):
-                    if href.endswith('.sass'):
-                        atype = 'text/sass'
-                    elif href.endswith('.scss'):
-                        atype = 'text/scss'
-                    elif href.endswith('.less'):
-                        atype = 'text/less'
-                    if atype not in ('text/less', 'text/scss', 'text/sass'):
-                        atype = 'text/css'
-                    path = [segment for segment in href.split('/') if segment]
-                    filename = get_resource_path(*path) if path else None
-                    files.append({'atype': atype, 'url': href, 'filename': filename, 'content': el.text, 'media': media})
-                elif can_aggregate(src) and el.tag == 'script':
-                    atype = 'text/javascript'
-                    path = [segment for segment in src.split('/') if segment]
-                    filename = get_resource_path(*path) if path else None
-                    files.append({'atype': atype, 'url': src, 'filename': filename, 'content': el.text, 'media': media})
-                else:
-                    remains.append((el.tag, OrderedDict(el.attrib), el.text))
-            else:
-                # the other cases are ignored
-                pass
-
-        return (files, remains)
+        addon_files = IrAsset.get_addon_files(addons=addons, bundle=xmlid, css=css, js=js)
+        files = [get_file_info(file) for addon, file in addon_files]
+        return (files, [])
 
     def _get_field(self, record, field_name, expression, tagName, field_options, options, values):
         field = record._fields[field_name]

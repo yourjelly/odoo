@@ -386,7 +386,7 @@ class Web_Editor(http.Controller):
             bundle_1 = files_data_by_bundle[i]
             for j in range(0, len(files_data_by_bundle)):
                 bundle_2 = files_data_by_bundle[j]
-                # In unwanted bundles, keep only the files which are in wanted bundles too (_assets_helpers)
+                # In unwanted bundles, keep only the files which are in wanted bundles too (web._helpers)
                 if bundle_1[0]["xmlid"] not in bundles_restriction and bundle_2[0]["xmlid"] in bundles_restriction:
                     bundle_1[1] = [item_1 for item_1 in bundle_1[1] if item_1 in bundle_2[1]]
         for i in range(0, len(files_data_by_bundle)):

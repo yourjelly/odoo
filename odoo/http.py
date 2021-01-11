@@ -25,6 +25,7 @@ import warnings
 from os.path import join as opj
 from zlib import adler32
 
+from collections import OrderedDict
 import babel.core
 from datetime import datetime, date
 import passlib.utils
@@ -52,7 +53,7 @@ from .service.server import memory_info
 from .service import security, model as service_model
 from .sql_db import flush_env
 from .tools.func import lazy_property
-from .tools import ustr, consteq, frozendict, pycompat, unique, date_utils
+from .tools import ustr, consteq, frozendict, pycompat, unique, date_utils, topological_sort
 from .tools.mimetypes import guess_mimetype
 from .tools._vendor import sessions
 from .modules.module import module_manifest
@@ -1232,6 +1233,7 @@ class Response(werkzeug.wrappers.Response):
         """
         env = request.env(user=self.uid or request.uid or odoo.SUPERUSER_ID)
         self.qcontext['request'] = request
+        self.qcontext['get_modules_order'] = lambda: json.dumps(module_boot())
         return env["ir.ui.view"]._render_template(self.template, self.qcontext)
 
     def flatten(self):
@@ -1522,6 +1524,46 @@ def db_monodb(httprequest=None):
     if len(dbs) == 1:
         return dbs[0]
     return None
+
+def module_boot(db=None):
+    server_wide_modules = odoo.conf.server_wide_modules or []
+    serverside = ['base', 'web']
+    dbside = []
+    for i in server_wide_modules:
+        if i in addons_manifest and i not in serverside:
+            serverside.append(i)
+    monodb = db or db_monodb()
+    if monodb:
+        dbside = module_installed_bypass_session(monodb)
+        dbside = [i for i in dbside if i not in serverside]
+    addons = serverside + dbside
+    return addons
+
+def module_installed(environment):
+    # Candidates module the current heuristic is the /static dir
+    loadable = list(addons_manifest)
+
+    # Retrieve database installed modules
+    # TODO The following code should move to ir.module.module.list_installed_modules()
+    Modules = environment['ir.module.module']
+    domain = [('state','=','installed'), ('name','in', loadable)]
+    modules = collections.OrderedDict(
+        (module.name, module.dependencies_id.mapped('name'))
+        for module in Modules.search(domain)
+    )
+
+    sorted_modules = topological_sort(modules)
+    return sorted_modules
+
+def module_installed_bypass_session(dbname):
+    try:
+        registry = odoo.registry(dbname)
+        with registry.cursor() as cr:
+            return module_installed(
+                environment=odoo.api.Environment(cr, odoo.SUPERUSER_ID, {}))
+    except Exception:
+        pass
+    return {}
 
 def send_file(filepath_or_fp, mimetype=None, as_attachment=False, filename=None, mtime=None,
               add_etags=True, cache_timeout=STATIC_CACHE, conditional=True):
