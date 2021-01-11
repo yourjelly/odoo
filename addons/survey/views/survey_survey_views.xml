@@ -179,7 +179,7 @@
         <field name="name">Kanban view for survey</field>
         <field name="model">survey.survey</field>
         <field name="arch" type="xml">
-            <kanban sample="1">
+            <kanban class="o_kanban_survey" sample="1">
                 <field name="state" />
                 <field name="title" />
                 <field name="answer_done_count" />
@@ -209,41 +209,38 @@
                                 <ul class="oe_kanban_colorpicker" data-field="color"/>
                             </div>
                         </div>
-                        <div class="o_kanban_record_top">
-                                <h4 class="o_kanban_record_title p-0 mb4"><field name="title" /></h4>
-                        </div>
                         <div class="row">
-                            <div class="col-10 p-0 pb-1">
-                                <div class="container o_kanban_card_content" t-if="record.answer_done_count.raw_value != 0 or record.state.raw_value != 'draft'">
-                                    <div class="row mt-4 ml-5">
-                                        <div class="col-4 p-0">
-                                            <a name="action_result_survey" type="object" class="d-flex flex-column align-items-center">
-                                                <span class="font-weight-bold"><field name="answer_done_count"/></span>
-                                                <span class="text-muted">Answers</span>
-                                            </a>
-                                        </div>
-                                        <div class="col-4 p-0 border-left" t-if="record.scoring_type.raw_value != 'no_scoring'" >
-                                            <a name="action_survey_user_input_certified" type="object" class="d-flex flex-column align-items-center">
-                                                <span class="font-weight-bold"><field name="success_count"/></span>
-                                                <span class="text-muted" t-if="!record.certification.raw_value">Passed</span>
-                                                <span class="text-muted" t-else="">Certified</span>
-                                            </a>
-                                        </div>
-                                        <div class="col-4 p-0 border-left" t-if="record.scoring_type.raw_value != 'no_scoring'" >
-                                            <a name="action_survey_user_input_completed" type="object" class="d-flex flex-column align-items-center">
-                                                <span class="font-weight-bold"> <t t-esc="Math.round(record.success_ratio.raw_value)"></t> %</span>
-                                                <span class="text-muted" >Success</span>
-                                            </a> 
-                                        </div>
-                                    </div>
+                            <div class="col">
+                                <b><field name="title"/></b>
+                                <div>
+                                    <field name="create_uid"/> - <field name="create_date" options="{'format': 'MM/YYYY'}"/>
                                 </div>
                             </div>
-                            <div class="col-2 align-self-end">
-                                <div class="o_kanban_record_bottom">
-                                    <div class="oe_kanban_bottom_left"/>
-                                    <div class="oe_kanban_bottom_right">
-                                        <field name="activity_ids" widget="kanban_activity"/>
-                                    </div>
+                            <div class="col">
+                                <a name="action_result_survey" type="object" class="d-flex flex-column align-items-center">
+                                    <span class="font-weight-bold"><field name="answer_done_count"/></span>
+                                    <span class="text-muted">Answers</span>
+                                </a>
+                            </div>
+                            <div class="col" t-if="record.scoring_type.raw_value != 'no_scoring'" >
+                                <a name="action_survey_user_input_certified" type="object" class="d-flex flex-column align-items-center">
+                                    <span class="font-weight-bold"><field name="success_count"/></span>
+                                    <span class="text-muted" t-if="!record.certification.raw_value">Passed</span>
+                                    <span class="text-muted" t-else="">Certified</span>
+                                </a>
+                            </div>
+                            <div class="col" t-if="record.scoring_type.raw_value != 'no_scoring'" >
+                                <a name="action_survey_user_input_completed" type="object" class="d-flex flex-column align-items-center">
+                                    <span class="font-weight-bold"> <t t-esc="Math.round(record.success_ratio.raw_value)"></t> %</span>
+                                    <span class="text-muted" >Success</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-2 align-self-end">
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left"/>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="activity_ids" widget="kanban_activity"/>
                                 </div>
                             </div>
                         </div>
@@ -269,9 +266,6 @@
                     domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter invisible="1" string="Upcoming Activities" name="activities_upcoming_all"
                     domain="[('activity_ids.date_deadline', '&gt;', context_today().strftime('%Y-%m-%d'))]"/>
-                <group expand="0" string="Group By">
-                    <filter string="State" name="groupby_state" context="{'group_by': 'state'}"/>
-                </group>
             </search>
         </field>
     </record>
