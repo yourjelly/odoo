@@ -182,46 +182,14 @@ class Assets(models.AbstractModel):
             new_attach.update(self._save_asset_attachment_hook())
             self.env["ir.attachment"].create(new_attach)
 
-            # Create a view to extend the template which adds the original file
-            # to link the new modified version instead
-            file_type_info = {
-                'tag': 'link' if file_type == 'scss' else 'script',
-                'attribute': 'href' if file_type == 'scss' else 'src',
-            }
-
-            def views_linking_url(view):
-                """
-                Returns whether the view arch has some html tag linked to
-                the url. (note: searching for the URL string is not enough as it
-                could appear in a comment or an xpath expression.)
-                """
-                tree = etree.XML(view.arch)
-                return bool(tree.xpath("//%%(tag)s[@%%(attribute)s='%(url)s']" % {
-                    'url': url,
-                } % file_type_info))
-
-            IrUiView = self.env["ir.ui.view"]
-            view_to_xpath = IrUiView.get_related_views(bundle_xmlid, bundles=True).filtered(views_linking_url)
-            new_view = {
+            # Create an asset with the new attachment
+            new_asset = {
                 'name': custom_url,
-                'key': 'web_editor.%s_%s' % (file_type, str(uuid.uuid4())[:6]),
-                'mode': "extension",
-                'inherit_id': view_to_xpath.id,
-                'arch': """
-                    <data inherit_id="%(inherit_xml_id)s" name="%(name)s">
-                        <xpath expr="//%%(tag)s[@%%(attribute)s='%(url_to_replace)s']" position="attributes">
-                            <attribute name="%%(attribute)s">%(new_url)s</attribute>
-                        </xpath>
-                    </data>
-                """ % {
-                    'inherit_xml_id': view_to_xpath.xml_id,
-                    'name': custom_url,
-                    'url_to_replace': url,
-                    'new_url': custom_url,
-                } % file_type_info
+                'bundle': bundle_xmlid,
+                'glob': custom_url,
             }
-            new_view.update(self._save_asset_view_hook())
-            IrUiView.create(new_view)
+            new_asset.update(self._save_asset_view_hook())
+            self.env['ir.asset'].create(new_asset)
 
         self.env["ir.qweb"].clear_caches()
 
