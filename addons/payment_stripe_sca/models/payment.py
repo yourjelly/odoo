@@ -11,6 +11,7 @@ from odoo.exceptions import ValidationError
 from odoo.addons.payment_stripe_sca.controllers.main import StripeControllerSCA as StripeController
 from odoo.addons.payment_stripe.models.payment import INT_CURRENCIES
 from odoo.tools.float_utils import float_round
+from collections import namedtuple
 
 _logger = logging.getLogger(__name__)
 
@@ -23,7 +24,6 @@ class PaymentAcquirerStripeSCA(models.Model):
 
         base_url = self.get_base_url()
         stripe_session_data = {
-            "payment_method_types[]": "card",
             "line_items[][amount]": int(
                 tx_values["amount"]
                 if tx_values["currency"].name in INT_CURRENCIES
@@ -40,9 +40,47 @@ class PaymentAcquirerStripeSCA(models.Model):
             "payment_intent_data[description]": tx_values["reference"],
             "customer_email": tx_values.get("partner_email") or tx_values.get("billing_partner_email"),
         }
+        self._add_available_payment_method_types(stripe_session_data, tx_values)
         tx_values["session_id"] = self._create_stripe_session(stripe_session_data)
 
         return tx_values
+
+    @api.model
+    def _add_available_payment_method_types(self, stripe_session_data, tx_values):
+        """
+        Add payment methods available for the given transaction
+
+        :param stripe_session_data: dictionary to add the payment method types to
+        :param tx_values: values of the transaction to consider the payment method types for
+        """
+        PMT = namedtuple('PaymentMethodType', ['name', 'countries', 'currencies', 'recurrence'])
+        all_payment_method_types = [
+            PMT('card', [], [], 'recurring'),
+            PMT('ideal', ['nl'], ['eur'], 'punctual'),
+            PMT('bancontact', ['be'], ['eur'], 'punctual'),
+            PMT('eps', ['at'], ['eur'], 'punctual'),
+            PMT('giropay', ['de'], ['eur'], 'punctual'),
+            PMT('p24', ['pl'], ['eur', 'pln'], 'punctual'),
+        ]
+
+        existing_icons = [(icon.name or '').lower() for icon in self.env['payment.icon'].search([])]
+        linked_icons = [(icon.name or '').lower() for icon in self.payment_icon_ids]
+
+        # We don't filter out pmt in the case the icon doesn't exist at all as it would be **implicit** exclusion
+        icon_filtered = filter(lambda pmt: pmt.name == 'card' or
+                                           pmt.name in linked_icons or
+                                           pmt.name not in existing_icons, all_payment_method_types)
+        country = (tx_values['billing_partner_country'].code or 'no_country').lower()
+        pmt_country_filtered = filter(lambda pmt: not pmt.countries or country in pmt.countries, icon_filtered)
+        currency = (tx_values.get('currency').name or 'no_currency').lower()
+        pmt_currency_filtered = filter(lambda pmt: not pmt.currencies or currency in pmt.currencies, pmt_country_filtered)
+        pmt_recurrence_filtered = filter(lambda pmt: tx_values.get('type') != 'form_save' or pmt.recurrence == 'recurring',
+                                    pmt_currency_filtered)
+
+        available_payment_method_types = map(lambda pmt: pmt.name, pmt_recurrence_filtered)
+
+        for idx, payment_method_type in enumerate(available_payment_method_types):
+            stripe_session_data[f'payment_method_types[{idx}]'] = payment_method_type
 
     def _stripe_request(self, url, data=False, method="POST"):
         self.ensure_one()
@@ -82,6 +120,8 @@ class PaymentAcquirerStripeSCA(models.Model):
                 .search([("reference", "=", kwargs["client_reference_id"])])
             )
             tx.stripe_payment_intent = resp["payment_intent"]
+        if 'id' not in resp and 'error' in resp:
+            _logger.error(resp['error']['message'])
         return resp["id"]
 
     def _create_setup_intent(self, kwargs):
