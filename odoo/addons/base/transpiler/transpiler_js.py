@@ -79,7 +79,7 @@ class TranspilerJS:
 
     def replace_from_export(self):
         p = re.compile(r"^(?P<space>\s*)export\s*(?P<list>{(\s*\w+\s*,?\s*)*}\s*)from\s*(?P<path>(\".*\")|('.*')|(`.*`))", re.MULTILINE)
-        repl = r"\g<space>const \g<list> = require(\g<path>);\g<space>__exports = Object.assign(__exports, \g<list>)"
+        repl = r"{\g<space>const \g<list> = require(\g<path>);\g<space>__exports = Object.assign(__exports, \g<list>)}"
         self.content = p.sub(repl, self.content)
 
     def replace_default(self):
