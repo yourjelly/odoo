@@ -53,8 +53,12 @@ class TSConfig(Command):
     def generate_imports(self, modules):
         return [f""""@{module}/*": ["{path}"]""" for _, (module, path) in enumerate(modules.items())]
 
+    def generate_includes(self, modules):
+        return [f"""\"{path.replace("src/*", "**/*")}\"""" for _, (module, path) in enumerate(modules.items())]
+
     def generate_file_content(self, modules):
         imports = ",\n\t\t".join(self.generate_imports(modules))
+        includes = ",\n\t\t".join(self.generate_includes(modules))
         return """
 {
     "compilerOptions": {
@@ -65,6 +69,12 @@ class TSConfig(Command):
         "paths": {
         \t%s
         }
-    }
+    },
+    "exclude": [
+        "**/*"
+    ],
+    "include": [
+        %s  
+    ]
 }
-        """ % imports
+        """ % (imports, includes)
