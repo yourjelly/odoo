@@ -11,5 +11,13 @@ odoo.define('@tests/functions', function (require) {
     console.log("Hello world");
   };
 
+  const sayAsyncHello = __exports.sayAsyncHello = async function sayAsyncHello() {
+    console.log("Hello Async");
+  };
+
+  const sayHelloDefault = __exports.__default = function sayHelloDefault() {
+    console.log("Hello Default");
+  };
+
   return __exports;
 });

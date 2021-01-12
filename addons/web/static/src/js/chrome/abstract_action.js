@@ -11,7 +11,7 @@ import ActionMixin from "web.ActionMixin";
 import ActionModel from "web.ActionModel";
 import ControlPanel from "web.ControlPanel";
 import Widget from "web.Widget";
-import { ComponentWrapper as ComponentWrapper, b as Jack } from "web.OwlCompatibility";
+import { ComponentWrapper } from "web.OwlCompatibility";
 
 const AbstractAction = Widget.extend(ActionMixin, {
     config: {

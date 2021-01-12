@@ -56,10 +56,10 @@ class TranspilerJS:
 
     # Replace EXPORT
     def replace_function_and_class_export(self, default=False):
-        pattern = r"^(?P<space>\s*)export\s+(?P<type>function|class)\s+(?P<identifier>\w+)"
+        pattern = r"^(?P<space>\s*)export\s+(?P<type>(async\s+)?function|class)\s+(?P<identifier>\w+)"
         repl = r"\g<space>const \g<identifier> = __exports.\g<identifier> = \g<type> \g<identifier>"
         if default:
-            pattern = r"^(?P<space>\s*)export\s+default\s+(?P<type>function|class)\s+(?P<identifier>\w+)"
+            pattern = r"^(?P<space>\s*)export\s+default\s+(?P<type>(async\s+)?function|class)\s+(?P<identifier>\w+)"
             repl = r"\g<space>const \g<identifier> = __exports.__default = \g<type> \g<identifier>"
         p = re.compile(pattern, re.MULTILINE)
         self.content = p.sub(repl, self.content)
