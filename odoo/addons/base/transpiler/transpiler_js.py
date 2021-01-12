@@ -1,5 +1,20 @@
 import re
 
+#TODO TO MOVE
+def process(val):
+    if " as " in val:
+        x, y = val.split(" as ")
+        return "%s: %s" % (y, x)
+    return val
+
+
+#TODO TO MOVE
+def clean(val):
+    if " as " in val:
+        x, y = val.split(" as ")
+        return x
+    return val
+
 class TranspilerJS:
 
     def __init__(self, content, url, generate=False):
@@ -85,12 +100,24 @@ class TranspilerJS:
 
     def replace_list_export(self):
         p = re.compile(r"^(?P<space>\s*)export\s*(?P<list>{(\s*\w+\s*,?\s*)*}\s*)", re.MULTILINE)
-        repl = r"\g<space>__exports = Object.assign(__exports, \g<list>)"
+
+        def repl(matchobj):
+            d = matchobj.groupdict()
+            list_process = "{" + ", ".join([process(val) for val in d.get("list")[1:-1].split(",")]) + "}"
+            space = d["space"]
+            return f"{space}__exports = Object.assign(__exports, {list_process})"
         self.content = p.sub(repl, self.content)
 
     def replace_from_export(self):
-        p = re.compile(r"^(?P<space>\s*)export\s*(?P<list>{(\s*\w+\s*,?\s*)*}\s*)from\s*(?P<path>(\".*\")|('.*')|(`.*`))", re.MULTILINE)
-        repl = r"{\g<space>const \g<list> = require(\g<path>);\g<space>__exports = Object.assign(__exports, \g<list>)}"
+        p = re.compile(r"^(?P<space>\s*)export\s*(?P<list>{(\s*\w+\s*,?\s*)*})\s*from\s*(?P<path>(\".*\")|('.*')|(`.*`))", re.MULTILINE)
+
+        def repl(matchobj):
+            d = matchobj.groupdict()
+            list_clean = "{" + ", ".join([clean(val) for val in d.get("list")[1:-1].split(",")]) + "}"
+            list_process = "{" + ", ".join([process(val) for val in d.get("list")[1:-1].split(",")]) + "}"
+            space = d["space"]
+            path = d["path"]
+            return f"{space}" + "{" + f"const {list_clean} = require({path});__exports = Object.assign(__exports, {list_process})" + ";}"
         self.content = p.sub(repl, self.content)
 
     def replace_star_from_export(self):
