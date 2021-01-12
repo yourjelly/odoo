@@ -1133,6 +1133,8 @@ class Task(models.Model):
                 recurrence_domain = [('recurrence_id', 'in', self.recurrence_id.ids)]
             tasks |= self.env['project.task'].search(recurrence_domain)
 
+        if 'mark_as_done' in vals:
+            vals['active'] = not vals.get('mark_as_done')
         result = super(Task, tasks).write(vals)
         # rating on stage
         if 'stage_id' in vals and vals.get('stage_id'):
