@@ -10,5 +10,7 @@ odoo.define('@tests/list', function (require) {
 
     {const {e} = require("@tests/Dialog");
     __exports = Object.assign(__exports, {e})};
+
+    __exports = Object.assign(__exports, require("@tests/Dialog"));
     return __exports;
 });

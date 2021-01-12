@@ -23,6 +23,7 @@ class TranspilerJS:
         self.replace_star_import()
         self.replace_no_name_import()
         self.replace_from_export()
+        self.replace_star_from_export()
         self.replace_relative_imports()
         self.replace_function_and_class_export()
         self.replace_variable_export()
@@ -90,6 +91,11 @@ class TranspilerJS:
     def replace_from_export(self):
         p = re.compile(r"^(?P<space>\s*)export\s*(?P<list>{(\s*\w+\s*,?\s*)*}\s*)from\s*(?P<path>(\".*\")|('.*')|(`.*`))", re.MULTILINE)
         repl = r"{\g<space>const \g<list> = require(\g<path>);\g<space>__exports = Object.assign(__exports, \g<list>)}"
+        self.content = p.sub(repl, self.content)
+
+    def replace_star_from_export(self):
+        p = re.compile(r"^(?P<space>\s*)export\s*\*\s*from\s*(?P<path>(\".*\")|('.*')|(`.*`))", re.MULTILINE)
+        repl = r"\g<space>__exports = Object.assign(__exports, require(\g<path>))"
         self.content = p.sub(repl, self.content)
 
     def replace_default(self):
