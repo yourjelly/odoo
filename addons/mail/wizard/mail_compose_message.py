@@ -302,28 +302,24 @@ class MailComposer(models.TransientModel):
             html_doc_odoo_tools = tools.prepend_html_content(self.body,self.body)
             print("html_doc_odoo_tools.............................................................................",html_doc_odoo_tools)
             print("html_doc.html2plaintext.........................",tools.html2plaintext(self.body))
-            # print("typewof body.,",type(self.body))
-            # soup = BeautifulSoup(html_doc, 'html.parser')
-            # print(soup.prettify())
-            # print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&",soup.get_text())
-            # prety_text= soup.get_text()
             # using re
             # re_prety_text = re.sub("[\r\n]","9",prety_text)
             # print("\n re prety text.....................",re_prety_text)
 
             # print("{tools.html_escape(preview)}>>>>>>>>>>>>>>.",tools.html_escape(prety_text))
-            # odoo_toolk = tools.html_escape(prety_text)
+            # odoo_toolk = tools.html_escape(prety_text
+            def pre(preview_text):
+                if preview_text:
+                    preview_text = f"""
+                                 <div style="display:none;font-size:1px;height:0px;width:0px;opacity:0;font-weight: normal !important;">
+                                   {tools.html2plaintext(preview_text)}
+                                 </div>
+                             """
+                preview_text = re.sub("[\r\n]", "9", preview_text)
+                print("preil keriiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+                return preview_text
             ggg = tools.html2plaintext(self.body)
-            def pre(preview):
-                if preview:
-                    preview = f"""
-                        <div style="display:none;font-size:1px;height:0px;width:0px;opacity:0;">
-                          {preview}
-                        </div>
-                    """
-                    print("insidee ...........................",preview)
-                    return preview
-
+            ggg = re.sub("[\r\n]","",ggg)
 
             mail_values = {
                 # 'subject': self.env['mail.render.mixin']._prepend_preview(self.subject,self.body), not working
