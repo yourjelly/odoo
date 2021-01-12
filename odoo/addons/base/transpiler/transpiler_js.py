@@ -13,6 +13,8 @@ class TranspilerJS:
         self.strings_mapping = {}
         self.string_id = 0
 
+        self.path_regex = """(?P<path>(".*")|('.*')|(`.*`))"""
+
     def convert(self):
         legacy_odoo_define = self.get_legacy_odoo_define()
         #self.alias_comments()
@@ -20,6 +22,8 @@ class TranspilerJS:
         self.replace_legacy_default_import()
         self.replace_import()
         self.replace_default_import()
+        self.replace_star_import()
+        self.replace_no_name_import()
         self.replace_relative_imports()
         self.replace_function_and_class_export()
         self.replace_variable_export()
@@ -70,7 +74,7 @@ class TranspilerJS:
         self.content = p.sub(repl, self.content)
 
     def replace_list_export(self):
-        p = re.compile(r"^(?P<space>\s*)export\s*(?P<list>{(\s*\w+\s*,?\s*)+}\s*);", re.MULTILINE)
+        p = re.compile(r"^(?P<space>\s*)export\s*(?P<list>{(\s*\w+\s*,?\s*)*}\s*);", re.MULTILINE)
         repl = r"\g<space>__exports = Object.assign(__exports, \g<list>);"
         self.content = p.sub(repl, self.content)
 
@@ -90,16 +94,16 @@ class TranspilerJS:
             space = d["space"]
             return f"{space}const {new_list} = require({path})"
 
-        p = re.compile(r"^(?P<space>\s*)import\s+(?P<list>{(\s*\w+\s*,?\s*)+})\s*from\s*(?P<path>[^;\n]+)", re.MULTILINE)
+        p = re.compile(r"^(?P<space>\s*)import\s+(?P<list>{(\s*\w+\s*,?\s*)+})\s*from\s*(?P<path>(\".*\")|('.*')|(`.*`))", re.MULTILINE)
         self.content = p.sub(repl, self.content)
 
     def replace_legacy_default_import(self):
-        p = re.compile(r"^(?P<space>\s*)import\s+(?P<identifier>\w+)\s*from\s*[\"\'](?P<path>\w+\.\w+)[\"\']", re.MULTILINE)
-        repl = r"""\g<space>const \g<identifier> = require("\g<path>")"""
+        p = re.compile(r"^(?P<space>\s*)import\s+(?P<identifier>\w+)\s*from\s*(?P<path>(\"\w+\.\w+\")|('\w+\.\w+')|(`\w+\.\w+`))", re.MULTILINE)
+        repl = r"""\g<space>const \g<identifier> = require(\g<path>)"""
         self.content = p.sub(repl, self.content)
 
     def replace_default_import(self):
-        p = re.compile(r"^(?P<space>\s*)import\s+(?P<identifier>\w+)\s*from\s*(?P<path>[^;\n]+)", re.MULTILINE)
+        p = re.compile(r"^(?P<space>\s*)import\s+(?P<identifier>\w+)\s*from\s*(?P<path>(\".*\")|('.*')|(`.*`))", re.MULTILINE)
         repl = r"\g<space>const \g<identifier> = require(\g<path>).__default"
         self.content = p.sub(repl, self.content)
 
@@ -108,6 +112,16 @@ class TranspilerJS:
         for open, path, close in p:
             if not bool(re.match(r"\w+\.\w+", path)):
                 self.content = re.sub(rf"require\({str(open)}{path}{str(close)}\)", f'require("{self.get_full_import_path(path)}")', self.content)
+
+    def replace_star_import(self):
+        p = re.compile(r"^(?P<space>\s*)import\s+\*\s+as\s+(?P<identifier>\w+)\s*from\s*(?P<path>[^;\n]+)", re.MULTILINE)
+        repl = r"\g<space>const \g<identifier> = require(\g<path>)"
+        self.content = p.sub(repl, self.content)
+
+    def replace_no_name_import(self):
+        p = re.compile(r"^(?P<space>\s*)import\s+(?P<path>[^;\n]+)", re.MULTILINE)
+        repl = r"require(\g<path>)"
+        self.content = p.sub(repl, self.content)
 
     # def alias_comments(self):
     #     p = re.compile(r"""(?P<comment>(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/(.+?)$))""", flags=re.MULTILINE)
