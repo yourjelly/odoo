@@ -28,6 +28,11 @@ class TSConfig(Command):
     def prefix_suffix_path(self, path, prefix, suffix):
         return self.clean_path(f"{prefix}/{path}/{suffix}")
 
+    def remove_(self, modules, module):
+        for name, path in modules:
+            if module == name:
+                modules.remove((name, path))
+
     def run(self, cmdargs):
         parser = argparse.ArgumentParser(
             prog="%s %s" % (sys.argv[0].split(os.path.sep)[-1], self.command_name),
@@ -36,17 +41,17 @@ class TSConfig(Command):
 
         args, unknown = parser.parse_known_args(args=cmdargs)
 
-        modules = []
-        for path in unknown:
-            modules += [(module, self.prefix_suffix_path(module, f"{path}", "/static/src/*")) for module in
-                        self.get_module_list(self.clean_path(f"{path}"))]
+        modules = {}
+        for path in unknown:   
+            for module in self.get_module_list(self.clean_path(f"{path}")):
+                modules[module] = self.prefix_suffix_path(module, f"{path}", "/static/src/*")
 
         content = self.generate_file_content(modules)
 
         print(content)
 
     def generate_imports(self, modules):
-        return [f""""@{module}/*": ["{path}"]""" for (module, path) in modules]
+        return [f""""@{module}/*": ["{path}"]""" for _, (module, path) in enumerate(modules.items())]
 
     def generate_file_content(self, modules):
         imports = ",\n\t\t".join(self.generate_imports(modules))
