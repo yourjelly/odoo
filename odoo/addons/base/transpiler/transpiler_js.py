@@ -6,6 +6,7 @@ class TranspilerJS:
         super().__init__()
         self.content = content
         self.url = url
+        self.is_src_file = self.get_is_src_file()
         self.define_url = self.get_define_url(url)
         self.generate = generate  # To Remove
         self.comments_mapping = {}
@@ -40,10 +41,18 @@ class TranspilerJS:
 
         return self.content
 
+    def get_is_src_file(self):
+        return self.url.find("/static/src") >= 0
+
     def get_define_url(self, url):
-        result = re.match(r"\/?(?P<module>\w+)\/[\w\/]*static\/src\/(?P<url>[\w\/]*)", url)
-        d = result.groupdict()
-        return "@%s/%s" % (d.get('module'), d.get('url'))
+        if self.is_src_file:
+            result = re.match(r"\/?(?P<module>\w+)\/[\w\/]*static\/src\/(?P<url>[\w\/]*)", url)
+            d = result.groupdict()
+            return "@%s/%s" % (d.get('module'), d.get('url'))
+        else:
+            result = re.match(r"\/?(?P<module>\w+)\/[\w\/]*static\/tests\/(?P<url>[\w\/]*)", url)
+            d = result.groupdict()
+            return "@%s/../tests/%s" % (d.get('module'), d.get('url'))
 
     def add_odoo_def(self):
         self.content = f"odoo.define('{self.define_url}', function (require) {{\
