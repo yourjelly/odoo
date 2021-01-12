@@ -56,6 +56,13 @@ class TranspilerJS:
                 \nreturn __exports;\
                 \n}});\n"
 
+        if (self.url.split("/")[-1] == "index.js"):
+            url_dir = "/".join(self.define_url.split('/')[:-1])
+            self.content += f"odoo.define('{url_dir}', function (require) {{\
+                \n'use strict';\
+                return require('{self.define_url}');\
+                \n}});\n"
+
     # Replace EXPORT
     def replace_function_and_class_export(self, default=False):
         pattern = r"^(?P<space>\s*)export\s+(?P<type>(async\s+)?function|class)\s+(?P<identifier>\w+)"
