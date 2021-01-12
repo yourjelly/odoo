@@ -3,6 +3,7 @@
     <data>
         <template id="message_notification_email">
 <div>
+    <t t-debug="pdb"/>
 <!--    not a goood solution need to find out a way to build a common method for same needs,but in case custom email template in paynow has given priority -->
 <!--    option 1 success, next to optimize code :try loop + append until this much char-->
 <!--    option2  if elemnttag==table or if -->
@@ -51,6 +52,14 @@
 </div>
 <div t-if="has_button_access or len(actions) &gt; 0 or not is_discussion"
         summary="o_mail_notification" style="padding: 0px; width:600px;">
+    <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">
+      <t t-if="record._name in ( 'sale.order','purchase.order')">
+        <div t-raw="message.body"/>
+          <![CDATA[
+&nbsp;
+]]>
+     </t>
+    </div>
     <table cellspacing="0" cellpadding="0" border="0" style="width: 600px; margin-top: 5px;">
     <tbody><tr>
     <td valign="center">
