@@ -46,6 +46,38 @@ function getRoute() {
   const hashQuery = parseHash(hash);
   return { pathname, search: searchQuery, hash: hashQuery };
 }
+export function makePreProcessQuery(getCurrent) {
+  const lockedKeys = new Set();
+  return (hash) => {
+    const newHash = {};
+    Object.keys(hash).forEach((key) => {
+      if (lockedKeys.has(key)) {
+        return;
+      }
+      const k = key.split(" ");
+      let value;
+      if (k.length === 2) {
+        value = hash[key];
+        key = k[1];
+        if (k[0] === "lock") {
+          lockedKeys.add(key);
+        } else if (k[0] === "unlock") {
+          lockedKeys.delete(key);
+        } else {
+          return;
+        }
+      }
+      newHash[key] = value || hash[key];
+    });
+    const current = getCurrent();
+    Object.keys(current.hash).forEach((key) => {
+      if (lockedKeys.has(key) && !(key in newHash)) {
+        newHash[key] = current.hash[key];
+      }
+    });
+    return newHash;
+  };
+}
 function makeRouter(env) {
   let bus = env.bus;
   let current = getRoute();
@@ -67,21 +99,32 @@ function makeRouter(env) {
   function getCurrent() {
     return current;
   }
+  const preProcessQuery = makePreProcessQuery(getCurrent);
   return {
     get current() {
       return getCurrent();
     },
-    pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
-    replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
+    pushState: makePushState(getCurrent, doPush.bind(null, "push"), preProcessQuery),
+    replaceState: makePushState(getCurrent, doPush.bind(null, "replace"), preProcessQuery),
     redirect: (url, wait) => redirect(env, url, wait),
   };
 }
-export function makePushState(env, getCurrent, doPush) {
+/*export function __makePush(): Router['pushState'] {
+
+  const lockedKeys = new Set();
+  return (hash, replace) => {
+    const _hash: Query = {};
+
+    });
+  };
+}*/
+export function makePushState(getCurrent, doPush, preProcessQuery) {
   let _replace = false;
   let timeoutId;
   let tempHash;
   return (hash, replace = false) => {
     clearTimeout(timeoutId);
+    hash = preProcessQuery(hash);
     _replace = _replace || replace;
     tempHash = Object.assign(tempHash || {}, hash);
     timeoutId = setTimeout(() => {

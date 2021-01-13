@@ -1,9 +1,8 @@
 /** @odoo-module **/
-import { serviceRegistry } from "./service_registry";
 export async function deployServices(env) {
   const toDeploy = new Set();
   let timeoutId;
-  serviceRegistry.on("UPDATE", null, async (payload) => {
+  odoo.serviceRegistry.on("UPDATE", null, async (payload) => {
     const { operation, value } = payload;
     if (operation === "delete") {
       // We hardly see why it would be usefull to remove a service.

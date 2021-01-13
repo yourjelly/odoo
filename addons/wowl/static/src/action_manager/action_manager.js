@@ -134,10 +134,38 @@ export class ActionContainer extends Component {
     // LPE FIXME: except in the case of the HomeMenu
     return false;
   }
+  _onGenericClick(ev) {
+    //this._domCleaning();
+    const target = ev.target;
+    if (target.tagName.toUpperCase() !== "A") {
+      return;
+    }
+    const disable_anchor = target.attributes.getNamedItem("disable_anchor");
+    if (disable_anchor && disable_anchor.value === "true") {
+      return;
+    }
+    const href = target.attributes.getNamedItem("href");
+    if (href) {
+      if (href.value[0] === "#") {
+        ev.preventDefault();
+        if (href.value.length === 1 || !this.el) {
+          return;
+        }
+        let matchingEl = null;
+        try {
+          matchingEl = this.el.querySelector(`.o_content #${href.value.substr(1)}`);
+        } catch (e) {} // Invalid selector: not an anchor anyway
+        if (matchingEl) {
+          const offset = matchingEl.getBoundingClientRect();
+          setScrollPosition(this, offset);
+        }
+      }
+    }
+  }
 }
 ActionContainer.components = { ActionDialog };
 ActionContainer.template = tags.xml`
-    <div t-name="wowl.ActionContainer" class="o_action_manager">
+    <div t-name="wowl.ActionContainer" class="o_action_manager" t-on-click="_onGenericClick">
       <t t-if="main.Component" t-component="main.Component" t-props="main.componentProps" t-key="main.id"/>
       <ActionDialog t-if="dialog.id" t-props="dialog.props" t-key="dialog.id" t-on-dialog-closed="_onDialogClosed"/>
     </div>`;
@@ -447,6 +475,7 @@ function makeActionManager(env) {
       id: ++id,
       Component: ControllerComponent,
       componentProps: controller.props,
+      controllerJsId: controller.jsId,
     });
     return Promise.all([currentActionProm, closingProm]).then((r) => r[0]);
   }
@@ -883,7 +912,12 @@ function makeActionManager(env) {
    * @param {string} jsId
    */
   async function restore(jsId) {
-    const index = controllerStack.findIndex((controller) => controller.jsId === jsId);
+    let index;
+    if (!jsId) {
+      index = controllerStack.length - 1;
+    } else {
+      index = controllerStack.findIndex((controller) => controller.jsId === jsId);
+    }
     if (index < 0) {
       throw new Error("invalid controller to restore");
     }

@@ -39,15 +39,15 @@ function makeMenus(env, menusData) {
       }
       await env.services.action_manager.doAction(menu.actionID, { clearBreadcrumbs: true });
       this.setCurrentMenu(menu);
-      env.services.router.pushState({
-        menu_id: `${menu.id}`,
-      });
     },
     setCurrentMenu(menu) {
       menu = typeof menu === "number" ? this.getMenu(menu) : menu;
       if (menu && menu.appID !== currentAppId) {
         currentAppId = menu.appID;
         env.bus.trigger("MENUS:APP-CHANGED");
+        env.services.router.pushState({
+          "lock menu_id": `${menu.id}`,
+        });
       }
     },
   };

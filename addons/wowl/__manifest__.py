@@ -18,6 +18,7 @@ Odoo Web core module written in Owl.
     'auto_install': True,
     'data': [
         'views/templates.xml',
+        'views/ent_templates.xml',
     ],
     'assets': {
         'js': [
@@ -37,6 +38,7 @@ Odoo Web core module written in Owl.
             'static/src/services/**/*',
             'static/src/utils/**/*',
             'static/src/views/**/*',
+            'static/src/web_enterprise/**/*',
             'static/src/webclient/**/*',
             'static/src/env.js',
             'static/tests/**/*',
@@ -50,6 +52,8 @@ Odoo Web core module written in Owl.
             'static/src/webclient/**/*',
             'static/src/crash_manager/**/*',
             'static/src/views/**/*',
+
+            'static/src/web_enterprise/**/*',
         ],
         'style': [
             'static/src/utils/**/*',

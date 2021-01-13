@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { effectService } from "../../src/effects/effects_service";
-import { makePushState, routeToUrl } from "../../src/services/router";
+import { makePreProcessQuery, makePushState, routeToUrl } from "../../src/services/router";
 import { SIZES } from "../../src/services/device";
 import { makeLocalization } from "../../src/services/localization";
 // // -----------------------------------------------------------------------------
@@ -231,12 +231,13 @@ export function makeFakeRouterService(params) {
         }
         current = newRoute;
       }
+      const preProcessQuery = makePreProcessQuery(getCurrent);
       return {
         get current() {
           return getCurrent();
         },
-        pushState: makePushState(env, getCurrent, doPush.bind(null, "push")),
-        replaceState: makePushState(env, getCurrent, doPush.bind(null, "replace")),
+        pushState: makePushState(getCurrent, doPush.bind(null, "push"), preProcessQuery),
+        replaceState: makePushState(getCurrent, doPush.bind(null, "replace"), preProcessQuery),
         redirect: (params && params.redirect) || (() => {}),
       };
     },

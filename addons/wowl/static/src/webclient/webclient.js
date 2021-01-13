@@ -18,11 +18,13 @@ export class WebClient extends Component {
       this.env.bus.on("ACTION_MANAGER:UI-UPDATED", this, (mode) => {
         if (mode !== "new") {
           this.el.classList.toggle("o_fullscreen", mode === "fullscreen");
-          this.replaceRouterState();
         }
       });
       this.loadRouterState();
     });
+  }
+  static getClass() {
+    return this;
   }
   mounted() {
     // the chat window and dialog services listen to 'web_client_ready' event in
@@ -74,17 +76,6 @@ export class WebClient extends Component {
     if (firstApp) {
       return this.menus.selectMenu(firstApp);
     }
-  }
-  replaceRouterState() {
-    const currentApp = this.menus.getCurrentApp();
-    const persistentHash = {
-      menu_id: currentApp && `${currentApp.id}`,
-    };
-    const allowedCompanyIds = this.user.context.allowed_company_ids;
-    if (allowedCompanyIds) {
-      persistentHash.cids = allowedCompanyIds.join(",");
-    }
-    this.router.pushState(persistentHash);
   }
 }
 WebClient.components = { ActionContainer, NavBar };

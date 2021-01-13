@@ -42,7 +42,7 @@ export const userService = {
       allowed_company_ids: allowedCompanies,
     };
     const cids = allowedCompanies.join(",");
-    env.services.router.replaceState({ cids });
+    env.services.router.replaceState({ "lock cids": cids });
     env.services.cookie.setCookie("cids", cids);
     return {
       context,
