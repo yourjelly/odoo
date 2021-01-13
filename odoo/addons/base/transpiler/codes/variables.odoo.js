@@ -8,7 +8,7 @@ odoo.define('@tests/variables', function (require) {
   const a = 12;
   const b = 15;
 
-  __exports = Object.assign(__exports, { a, b});
+  Object.assign(__exports, { a, b});
 
   __exports.__default = 100;
 

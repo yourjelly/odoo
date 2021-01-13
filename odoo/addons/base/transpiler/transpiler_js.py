@@ -40,6 +40,7 @@ class TranspilerJS:
         self.replace_from_export()
         self.replace_star_from_export()
         self.replace_relative_imports()
+        self.remove_index()
         self.replace_function_and_class_export()
         self.replace_variable_export()
         self.replace_list_export()
@@ -59,10 +60,13 @@ class TranspilerJS:
     def get_define_url(self, url):
         result = re.match(r"\/?(?P<module>\w+)\/[\w\/]*static\/(?P<type>src|tests)\/(?P<url>[\w\/]*)", url)
         d = result.groupdict()
+        url = d.get("url")
+        if (url.split("/")[-1] in ["index.js", "index"]):
+            url = "/".join(url.split("/")[:-1])
         if d.get("type") == "src":
-            return "@%s/%s" % (d.get('module'), d.get('url'))
+            return "@%s/%s" % (d.get('module'), url)
         else:
-            return "@%s/../tests/%s" % (d.get('module'), d.get('url'))
+            return "@%s/../tests/%s" % (d.get('module'), url)
 
     def add_odoo_def(self):
         self.content = f"odoo.define('{self.define_url}', function (require) {{\
@@ -72,12 +76,12 @@ class TranspilerJS:
                 \nreturn __exports;\
                 \n}});\n"
 
-        if (self.url.split("/")[-1] == "index.js"):
-            url_dir = "/".join(self.define_url.split('/')[:-1])
-            self.content += f"odoo.define('{url_dir}', function (require) {{\
-                \n'use strict';\
-                return require('{self.define_url}');\
-                \n}});\n"
+        # if (self.url.split("/")[-1] == "index.js"):
+        #     url_dir = "/".join(self.define_url.split('/')[:-1])
+        #     self.content += f"odoo.define('{url_dir}', function (require) {{\
+        #         \n'use strict';\
+        #         return require('{self.define_url}');\
+        #         \n}});\n"
 
     # Replace EXPORT
     def replace_function_and_class_export(self, default=False):
@@ -105,7 +109,7 @@ class TranspilerJS:
             d = matchobj.groupdict()
             list_process = "{" + ", ".join([process(val) for val in d.get("list")[1:-1].split(",")]) + "}"
             space = d["space"]
-            return f"{space}__exports = Object.assign(__exports, {list_process})"
+            return f"{space}Object.assign(__exports, {list_process})"
         self.content = p.sub(repl, self.content)
 
     def replace_from_export(self):
@@ -117,12 +121,12 @@ class TranspilerJS:
             list_process = "{" + ", ".join([process(val) for val in d.get("list")[1:-1].split(",")]) + "}"
             space = d["space"]
             path = d["path"]
-            return f"{space}" + "{" + f"const {list_clean} = require({path});__exports = Object.assign(__exports, {list_process})" + ";}"
+            return f"{space}" + "{" + f"const {list_clean} = require({path});Object.assign(__exports, {list_process})" + ";}"
         self.content = p.sub(repl, self.content)
 
     def replace_star_from_export(self):
         p = re.compile(r"^(?P<space>\s*)export\s*\*\s*from\s*(?P<path>(\".*\")|('.*')|(`.*`))", re.MULTILINE)
-        repl = r"\g<space>__exports = Object.assign(__exports, require(\g<path>))"
+        repl = r"\g<space>Object.assign(__exports, require(\g<path>))"
         self.content = p.sub(repl, self.content)
 
     def replace_default(self):
@@ -170,6 +174,13 @@ class TranspilerJS:
         repl = r"require(\g<path>)"
         self.content = p.sub(repl, self.content)
 
+    def remove_index(self):
+        p = re.compile(r"require\s*\(\s*(?P<path>(\".*/index\/?\")|('.*/index\/?')|(`.*/index\/?`))\s*\)", re.MULTILINE)
+        def repl(matchobj):
+            d = matchobj.groupdict()
+            path = d["path"][: d["path"].rfind("/index")] + d["path"][0]
+            return f"require({path})"
+        self.content = p.sub(repl, self.content)
     # def alias_comments(self):
     #     p = re.compile(r"""(?P<comment>(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/(.+?)$))""", flags=re.MULTILINE)
 
