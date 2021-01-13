@@ -141,11 +141,17 @@
     </template>
 
     <template id="wowl.ent_qunit_suite" inherit_id="wowl.qunit_suite" >
-        <xpath expr="//t[@t-call-assets='wowl.test_assets_backend']" position="before">
-            <t t-call-assets="wowl._ent_assets_backend" t-css="false"/>
+        <xpath expr="//t[@t-call-assets='web.assets_common'][@t-js='false']" position="replace">
+            <t t-call-assets="wowl.ent_assets_common" t-js="false"/>
         </xpath>
-        <xpath expr="//t[@t-call-assets='wowl.test_assets_backend']" position="before">
+        <xpath expr="//t[@t-call-assets='web.assets_common'][@t-css='false']" position="replace">
+            <t t-call-assets="wowl.ent_assets_common" t-css="false"/>
+        </xpath>
+        <xpath expr="//t[@t-call-assets='wowl.test_assets_backend'][@t-js='false']" position="replace">
             <t t-call-assets="wowl._ent_assets_backend" t-js="false"/>
+        </xpath>
+        <xpath expr="//t[@t-call-assets='wowl.test_assets_backend'][@t-css='false']" position="replace">
+            <t t-call-assets="wowl._ent_assets_backend" t-css="false"/>
         </xpath>
     </template>
 </odoo>
