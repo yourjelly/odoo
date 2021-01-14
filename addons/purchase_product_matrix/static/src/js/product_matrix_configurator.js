@@ -104,6 +104,7 @@ var MatrixConfiguratorWidget = relationalFields.FieldMany2One.extend({
         this._super.apply(this, arguments);
 
         if (ev.data.changes && ev.data.changes.product_template_id && ev.data.changes.product_template_id.id) {
+            ev.stopPropagation();
             self._onTemplateChange(ev.data.changes.product_template_id.id, ev.data.dataPointID);
         }
     },

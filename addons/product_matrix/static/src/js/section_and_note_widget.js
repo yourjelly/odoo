@@ -58,7 +58,7 @@ SectionAndNoteFieldOne2Many.include({
         var editedCellAttributes = ev.data.editedCellAttributes;
         if (!ev.data.edit) {
             // remove the line used to open the matrix
-            this._setValue({operation: 'DELETE', ids: [dataPointId]});
+            this._setValue({operation: 'DELETE', ids: [dataPointId]}, { notifyChange: false });
         }
         // the getParent is to trigger the event on the form Controller instead of the one2many.
         // If not, the one2many crashes on reset because it tries to find an operation in the event
