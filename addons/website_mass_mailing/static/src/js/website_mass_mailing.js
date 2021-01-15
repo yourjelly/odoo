@@ -116,8 +116,63 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
     },
 });
 
-publicWidget.registry.newsletter_popup = publicWidget.Widget.extend({
-    selector: ".o_newsletter_popup",
+publicWidget.registry.newsletter_popup = publicWidget.registry.popup.extend({
+    selector: ".o_newsletter_popup_modal",
+    disabledInEditableMode: false,
+
+    /**
+     * @override
+     */
+    start: async function () {
+        debugger;
+        this.websiteID = this._getContext().website_id;
+        this.listID = parseInt(this.$target.attr('data-list-id'));
+        if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !this.editableMode)) {
+            return;
+        }
+        await this._super(...arguments);
+        const $newsletterContent = this.$target.find(".o_newsletter_content");
+        if (this.$target.data('content') && this.editableMode) {
+            // To avoid losing user changes.
+            $newsletterContent.html(this.$target.data('content'));
+        } else {
+            const data = await this._rpc({
+                route: '/website_mass_mailing/get_content',
+                params: {
+                    newsletter_id: this.listID,
+                },
+            });
+            $newsletterContent.html(data.popup_content);
+            this.$target.find('.js_subscribe').attr('data-list-id', this.listID)
+                  .find('input.js_subscribe_email').val(data.email);
+            if (this.editableMode) {
+                $newsletterContent.addClass('oe_structure oe_empty modal-body p-0')
+                    .attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+            }
+        }
+        this.trigger_up('widgets_start_request', {
+            editableMode: this.editableMode,
+            $target: $newsletterContent,
+        });
+    },
+    /**
+     * @override
+     */
+    destroy: function () {
+        if (this.$target.data('subscribed') === true){
+            utils.set_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.$target.attr('data-list-id'), this.websiteID), true)
+        }
+        if (parseInt(this.$el.attr('data-list-id')) === this.listID) {
+            // To avoid losing user changes.
+            this.$el.data('content', this.$target.find('.o_newsletter_content').html());
+        }
+        this._super.apply(this, arguments);
+    },
+});
+
+
+publicWidget.registry.newsletter_popup1 = publicWidget.Widget.extend({
+    selector: ".o_newsletter_popup1",
     disabledInEditableMode: false,
 
     /**

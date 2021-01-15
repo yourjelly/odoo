@@ -53,7 +53,11 @@
 <template id="s_newsletter_subscribe_popup" name="Newsletter Popup" inherit_id="website.s_popup" primary="True">
     <xpath expr="//div[hasclass('s_popup')]" position="attributes">
         <attribute name="data-list-id">0</attribute>
+        <attribute name="class" separator=" " remove="s_popup"/>
         <attribute name="class" separator=" " add="o_newsletter_popup"/>
+    </xpath>
+    <xpath expr="//div[hasclass('modal')]" position="attributes">
+        <attribute name="class" separator=" " add="o_newsletter_popup_modal"/>
     </xpath>
     <!-- remove oe_structure class from modal-content -->
     <xpath expr="//div[hasclass('modal-content')]" position="attributes">
@@ -83,13 +87,26 @@
     </section>
 </template>
 
+<template id="newsletter_popup_options" inherit_id="website.s_popup_options">
+    <xpath expr="." position="inside">
+        <div data-js="newsletter_popup" data-selector=".o_newsletter_popup" data-exclude="#website_cookies_bar" data-target=".o_newsletter_popup_modal">
+            <we-row>
+                <we-title>Change Newsletter</we-title>
+                <we-select data-name="mailing_list" data-no-preview="true"></we-select>
+            </we-row>
+            <t t-raw="base_popup_options"/>
+            <t t-raw="extra_popup_options"/>
+        </div>
+    </xpath>
+</template>
+
 <template id="newsletter_subscribe_options" name="Newsletter Subscribe Options" inherit_id="website.snippet_options">
     <xpath expr="//*[@t-set='so_snippet_addition_selector']" position="inside">, .o_newsletter_popup</xpath>
     <xpath expr="//div" position="after">
         <t t-set="selector" t-value="'.js_subscribe'"/>
         <div data-js="mailing_list_subscribe"
             t-att-data-selector="selector"
-            t-attf-data-exclude=".o_newsletter_content #{selector}">
+            t-attf-data-exclude=".o_newsletter_modal #{selector}">
             <we-row>
                 <we-title>Change Newsletter</we-title>
                 <we-select data-name="mailing_list" data-no-preview="true"></we-select>
@@ -101,12 +118,12 @@
             <we-checkbox t-if="recaptcha_public_key" string="Show reCaptcha Policy" data-toggle-recaptcha-legal="" data-no-preview="true"/>
         </div>
         <div t-att-data-selector="selector" data-drop-near="p, h1, h2, h3, blockquote, .card"/>
-        <div data-js="newsletter_popup" data-selector=".o_newsletter_popup">
+        <!-- <div data-js="newsletter_popup" data-selector=".o_newsletter_popup">
             <we-row>
                 <we-title>Change Newsletter</we-title>
                 <we-select data-name="mailing_list" data-no-preview="true"></we-select>
             </we-row>
-        </div>
+        </div> -->
     </xpath>
 </template>
 
