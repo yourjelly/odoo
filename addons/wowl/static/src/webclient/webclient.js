@@ -23,7 +23,7 @@ export class WebClient extends Component {
       this.loadRouterState();
     });
   }
-  static setupConfig(config) {
+  static getClass(config) {
     return this;
   }
   mounted() {

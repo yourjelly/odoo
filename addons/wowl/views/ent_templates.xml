@@ -36,10 +36,10 @@
         </xpath>
 
         <xpath expr="//link[@href='/web/static/src/scss/webclient_extra.scss']" position="replace">
-            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient.scss"/>
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/webclient.scss"/>
         </xpath>
         <xpath expr="//link[@href='/web/static/src/scss/webclient_layout.scss']" position="replace">
-            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient_layout.scss"/>
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/webclient_layout.scss"/>
         </xpath>
         <xpath expr="//link[@href='/web/static/src/scss/fields_extra.scss']" position="replace">
             <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/fields.scss"/>
@@ -54,9 +54,9 @@
             <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/search_view.scss"/>
         </xpath>
         <xpath expr="//link[last()]" position="after">
-            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/home_menu/home_menu.scss"/>
-            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/home_menu/home_menu_layout.scss"/>
-            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/navbar/navbar.scss"/>
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/home_menu/home_menu.scss"/>
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/home_menu/home_menu_layout.scss"/>
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/webclient/navbar/navbar.scss"/>
             <link rel="stylesheet" type="text/scss" href="/wowl/static/src/web_enterprise/kanban_view.scss"/>
         </xpath>
         <!-- Lazy load in prod/eager in tests => So place this at the right spot-->
