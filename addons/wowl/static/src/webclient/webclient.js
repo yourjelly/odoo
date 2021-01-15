@@ -23,9 +23,6 @@ export class WebClient extends Component {
       this.loadRouterState();
     });
   }
-  static getClass(config) {
-    return this;
-  }
   mounted() {
     // the chat window and dialog services listen to 'web_client_ready' event in
     // order to initialize themselves:

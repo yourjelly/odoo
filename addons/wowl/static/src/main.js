@@ -10,7 +10,7 @@ import { viewRegistry } from "./views/view_registry";
 import { mainComponentRegistry } from "./webclient/main_component_registry";
 import { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
-import { WebClient } from "./webclient/webclient";
+import { configure } from "wowl.WebClientConfigure";
 
 const { mount, utils } = owl;
 const { whenReady, loadFile } = utils;
@@ -44,6 +44,7 @@ const { whenReady, loadFile } = utils;
   odoo.errorDialogRegistry = errorDialogRegistry;
   odoo.serviceRegistry = serviceRegistry;
   odoo.debugManagerRegistry = debugManagerRegistry;
+  const WebClient = configure(odoo);
   // setup environment
   const [env, templates] = await Promise.all([makeEnv(odoo.debug), loadTemplates()]);
   env.qweb.addTemplates(templates);
@@ -51,7 +52,7 @@ const { whenReady, loadFile } = utils;
   await whenReady();
   const legacyEnv = await legacySetupProm;
   mapLegacyEnvToWowlEnv(legacyEnv, env);
-  const root = await mount(WebClient.getClass(odoo), { env, target: document.body, position: "self" });
+  const root = await mount(WebClient, { env, target: document.body, position: "self" });
   // prepare runtime Odoo object
   const sessionInfo = odoo.session_info;
   // delete (odoo as any).session_info; // FIXME: some legacy code rely on this (e.g. ajax.js)

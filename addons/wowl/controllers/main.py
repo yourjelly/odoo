@@ -106,6 +106,7 @@ class WowlClient(http.Controller):
         context = {
             'scssFiles': [file for addon, file in get_addon_files(bundle='style', css=True)],
             'jsFiles': [file for addon, file in get_addon_files(bundle='tests_js', js=True)],
+            'isCommunity': 'wowlent' not in request.httprequest.full_path,
         }
         return request.render('wowl.qunit_suite', context)
 

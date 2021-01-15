@@ -1,6 +1,7 @@
 /** @odoo-module **/
 const { Component, tags, core } = owl;
-import { WebClient } from "../../src/webclient/webclient";
+
+import { configure } from "wowl.WebClientConfigure";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
 import { notificationService } from "../../src/notifications/notification_service";
@@ -10,6 +11,8 @@ import { fakeTitleService } from "../helpers/mocks";
 import { createWebClient, doAction, getActionManagerTestConfig } from "../action_manager/helpers";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/action_manager/action_registry";
+import { WebClient } from '../../src/webclient/webclient';
+
 const { xml } = tags;
 let baseConfig;
 QUnit.module("Web Client", {
@@ -44,7 +47,7 @@ QUnit.test("can render a main component", async (assert) => {
 // Tests to be executed with the same WebClient class as currently in production
 QUnit.module("WebClient Common", (hooks) => {
   function createCurrentWebClient(params) {
-    params.WebClientClass = WebClient.getClass();
+    params.WebClientClass = configure(params.testConfig);
     return createWebClient(params);
   }
   let testConfig;

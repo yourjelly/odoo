@@ -107,7 +107,10 @@
 
         <!-- insert all js files in /wowl -->
         <t t-foreach="jsFiles" t-as="jsFile">
-            <script type="text/javascript" t-att-src="jsFile"></script>
+            <!-- LPE FIXME -->
+            <t t-if="'src/webclient/webclient_configure' not in jsFile">
+                <script type="text/javascript" t-att-src="jsFile"></script>
+            </t>
         </t>
     </template>
 
@@ -138,6 +141,21 @@
             </head>
             <body />
         </html>
+    </template>
+
+    <template id="wowl.ent_test_assets" inherit_id="wowl.test_assets">
+        <xpath expr="//t[@t-foreach='jsFiles']" position="replace">
+            <!-- insert all js files in /wowl -->
+            <t t-foreach="jsFiles" t-as="jsFile">
+                <!-- LPE FIXME -->
+                <t t-if="'src/webclient/webclient_configure' not in jsFile and not isCommunity">
+                    <script type="text/javascript" t-att-src="jsFile"></script>
+                </t>
+                <t t-else="" >
+                    <script type="text/javascript" t-att-src="jsFile"></script>
+                </t>
+            </t>
+        </xpath>
     </template>
 
     <template id="wowl.ent_qunit_suite" inherit_id="wowl.qunit_suite" >
