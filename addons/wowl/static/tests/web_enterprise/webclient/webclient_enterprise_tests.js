@@ -30,6 +30,19 @@ QUnit.module("WebClient Enterprise", (hooks) => {
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
     testConfig.serviceRegistry.add(homeMenuService.name, homeMenuService);
+    // TODO: extract this somewhere else
+    const fakeEnterpriseService = {
+      name: "enterprise",
+      dependencies: [],
+      deploy() {
+        return {
+          warning: false,
+          expirationDate: false,
+          expirationReason: false,
+        };
+      },
+    };
+    testConfig.serviceRegistry.add(fakeEnterpriseService.name, fakeEnterpriseService);
   });
   QUnit.module("basic flow with home menu", (hooks) => {
     let mockRPC;

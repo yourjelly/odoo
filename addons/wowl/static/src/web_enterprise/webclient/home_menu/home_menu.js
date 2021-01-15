@@ -1,8 +1,10 @@
 /** @odoo-module **/
-// const ExpirationPanel = require("web_enterprise.ExpirationPanel");
-const { Component, hooks } = owl;
+import { ExpirationPanel } from "./expiration_panel";
 import { useService } from "../../../core/hooks";
+
+const { Component, hooks } = owl;
 const { useExternalListener, useState, useRef } = hooks;
+
 /**
  * Home menu
  *
@@ -36,24 +38,37 @@ export class HomeMenu extends Component {
   constructor() {
     super(...arguments);
     this.menus = useService("menus");
+
     this.availableApps = this.props.apps;
     this.displayedMenuItems = [];
     this.inputRef = useRef("input");
     this.mainContentRef = useRef("mainContent");
     this.state = useState({
-      // Check if expiration panel must be shown and get its prop diffDays.
-      displayExpirationPanel: this._shouldExpirationPanelBeDisplayed(),
       focusedIndex: null,
       isSearching: false,
       query: "",
     });
+
     if (!this.env.isSmall) {
       useExternalListener(window, "keydown", this._onKeydown);
     }
   }
+
+  async willUpdateProps() {
+    // State is reset on each remount
+    this.state.focusedIndex = null;
+    this.state.isSearching = false;
+    this.state.query = "";
+    this.inputRef.el.value = "";
+
+    this.availableApps = this.props.apps;
+    this.displayedMenuItems = [];
+  }
+
   mounted() {
     this._updateScrollBarWidth();
   }
+
   patched() {
     if (this.state.focusedIndex !== null && !this.env.isSmall) {
       const selectedItem = document.querySelector(".o_home_menu .o_menuitem.o_focused");
@@ -65,9 +80,11 @@ export class HomeMenu extends Component {
     }
     this._updateScrollBarWidth();
   }
+
   //--------------------------------------------------------------------------
   // Getters
   //--------------------------------------------------------------------------
+
   /**
    * @returns {(number|null)}
    */
@@ -76,12 +93,14 @@ export class HomeMenu extends Component {
     const focusedIndex = this.state.focusedIndex;
     return focusedIndex < appLength ? focusedIndex : null;
   }
+
   /**
    * @returns {Object[]}
    */
   get displayedApps() {
     return this.availableApps;
   }
+
   /**
    * @returns {number}
    */
@@ -89,6 +108,7 @@ export class HomeMenu extends Component {
     const w = window.innerWidth;
     return w < 576 ? 3 : w < 768 ? 4 : 6;
   }
+
   /**
    * @returns {(number|null)}
    */
@@ -97,27 +117,11 @@ export class HomeMenu extends Component {
     const focusedIndex = this.state.focusedIndex;
     return focusedIndex >= appLength ? focusedIndex - appLength : null;
   }
+
   //--------------------------------------------------------------------------
   // Private
   //--------------------------------------------------------------------------
-  /**
-   * Check if the expiration panel mush be shown and compute its props.
-   * @private
-   */
-  _shouldExpirationPanelBeDisplayed() {
-    return false; // skip this for now
-    // // Don't show the expiration warning for portal users
-    // if (!this.env.session.warning) {
-    //     return false;
-    // }
-    // // If no date found, assume 1 month and hope for the best
-    // const expirationDate = new moment(
-    //     this.env.session.expiration_date || new moment().add(30, "d")
-    // );
-    // const diffDays = ExpirationPanel.computeDiffDays(expirationDate);
-    // const hideCookie = this.env.services.getCookie("oe_instance_hide_panel");
-    // return (diffDays <= 30 && !hideCookie) || diffDays <= 0;
-  }
+
   /**
    * @private
    * @param {Object[]} array
@@ -127,24 +131,18 @@ export class HomeMenu extends Component {
     const options = {
       extract: (el) => (el.parents + " / " + el.label).split("/").reverse().join("/"),
     };
-    return window.fuzzy.filter(this.state.query, array, options).map((el) => el.original);
+    return fuzzy.filter(this.state.query, array, options).map((el) => el.original);
   }
+
   /**
    * @private
-   * @param {Object} param
-   * @param {Object} param.menu
-   * @param {boolean} param.isApp
+   * @param {Object} menu
+   * @returns {Promise}
    */
-  _openMenu({ menu, isApp }) {
-    this.menus.selectMenu(menu);
-    // this.trigger(isApp ? 'app-clicked' : 'menu-clicked', {
-    //     menu_id: menu.id,
-    //     action_id: menu.action,
-    // });
-    // if (!isApp) {
-    //     this.env.bus.trigger('change_menu_section', menu.menu_id);
-    // }
+  _openMenu(menu) {
+    return this.menus.selectMenu(menu);
   }
+
   /**
    * Update this.state.focusedIndex if not null.
    * @private
@@ -258,6 +256,7 @@ export class HomeMenu extends Component {
       item.focus();
     }
   }
+
   /**
    * Update query and recompute 'global' state (this.state and displayed elements).
    * @private
@@ -268,6 +267,7 @@ export class HomeMenu extends Component {
     this.state.query = query;
     this.inputRef.el.value = this.state.query;
     this.state.isSearching = true;
+
     // Keep elements matching search query
     if (query === "") {
       this.availableApps = this.props.apps;
@@ -279,6 +279,7 @@ export class HomeMenu extends Component {
     const total = this.displayedApps.length + this.displayedMenuItems.length;
     this.state.focusedIndex = total ? 0 : null;
   }
+
   /**
    * Compensates the width of the scrollbar to avoid flickering when
    * elongating the content of the home menu.
@@ -288,23 +289,19 @@ export class HomeMenu extends Component {
     const { clientWidth, offsetWidth, style } = this.mainContentRef.el;
     style.paddingLeft = `${offsetWidth - clientWidth}px`;
   }
+
   //--------------------------------------------------------------------------
   // Handlers
   //--------------------------------------------------------------------------
+
   /**
    * @private
    * @param {Object} app
    */
   _onAppClick(app) {
-    this._openMenu({ menu: app, isApp: true });
+    this._openMenu(app);
   }
-  /**
-   * @private
-   */
-  _onHideExpirationPanel() {
-    this.env.services.setCookie("oe_instance_hide_panel", true, 24 * 60 * 60);
-    this.state.displayExpirationPanel = false;
-  }
+
   /**
    * @private
    * @param {InputEvent} ev
@@ -312,6 +309,7 @@ export class HomeMenu extends Component {
   _onInputSearch(ev) {
     this._updateQuery(ev.target.value);
   }
+
   /**
    * @private
    * @param {KeyboardEvent} ev
@@ -321,10 +319,12 @@ export class HomeMenu extends Component {
       ev.target.tagName === "INPUT" ||
       ev.target.tagName === "TEXTAREA" ||
       ev.target.isContentEditable;
+
     const input = this.inputRef.el;
     if (isEditable && ev.target !== input) {
       return;
     }
+
     switch (ev.key) {
       case "ArrowDown":
         this._updateFocusedIndex("nextLine");
@@ -361,7 +361,7 @@ export class HomeMenu extends Component {
           const menu = isApp
             ? this.displayedApps[this.appIndex]
             : this.displayedMenuItems[this.menuIndex];
-          this._openMenu({ menu, isApp });
+          this._openMenu(menu);
           ev.preventDefault();
         }
         return;
@@ -372,7 +372,7 @@ export class HomeMenu extends Component {
       case "PageUp":
       case "Shift":
         break;
-      case "Escape":
+      case "Escape": {
         // Clear search query and hide search bar if there was no content
         // before ESC
         // Hide home menu if there is an inner action
@@ -384,6 +384,7 @@ export class HomeMenu extends Component {
           this.trigger("hide-home-menu");
         }
         break;
+      }
       case "c":
       case "x":
         // keep focus and selection on keyboard copy and cut
@@ -399,15 +400,16 @@ export class HomeMenu extends Component {
         }
     }
   }
+
   /**
    * @private
    * @param {Object} menu
    */
   _onMenuitemClick(menu) {
-    this._openMenu({ menu, isApp: false });
+    this._openMenu(menu);
   }
 }
-// HomeMenu.components = { ExpirationPanel };
+HomeMenu.components = { ExpirationPanel };
 HomeMenu.props = {
   apps: {
     type: Array,
