@@ -234,6 +234,80 @@ QUnit.module("WebClient Enterprise", (hooks) => {
       assert.containsN(webClient, ".breadcrumb-item", 3);
       webClient.destroy();
     });
+    QUnit.test('restore the newly created record in form view (legacy)', async (assert) => {
+      assert.expect(7);
+      const action = testConfig.serverData.actions[6];
+      delete action.res_id;
+      action.target = "current";
+      const webClient = await createEnterpriseWebClient({testConfig});
+
+      await doAction(webClient, 6);
+      let formEl = webClient.el.querySelector('.o_form_view');
+      assert.isVisible(formEl);
+      assert.ok(formEl.classList.contains('o_form_editable'));
+      const input = webClient.el.querySelector("input.o_input");
+      await testUtils.fields.editInput(input, "red right hand");
+      await click(webClient.el.querySelector('.o_form_button_save'));
+      assert.strictEqual(
+        webClient.el.querySelector('.breadcrumb-item.active').textContent,
+        "red right hand"
+      );
+      await click(webClient.el.querySelector(".o_menu_toggle"));
+      assert.isNotVisible(webClient.el.querySelector('.o_form_view'));
+
+      await click(webClient.el.querySelector(".o_menu_toggle"));
+      await nextTick();
+      await legacyExtraNextTick();
+      formEl = webClient.el.querySelector('.o_form_view');
+      assert.isVisible(formEl);
+      assert.notOk(formEl.classList.contains('o_form_editable'));
+      assert.strictEqual(
+        webClient.el.querySelector('.breadcrumb-item.active').textContent,
+        "red right hand"
+      );
+      webClient.destroy();
+    });
+    // QUnit.debug('fast clicking on restore (implementation detail)', async (assert) => {
+    //   let _resolve;
+    //   const prom = new Promise((resolve) => {
+    //     _resolve = resolve;
+    //   });
+    //   let doVeryFastClick = false;
+    //   class DelayedClientAction extends Component {
+    //     static template = owl.tags.xml`<div class='delayed_client_action'>
+    //       <button t-on-click="resolve">RESOLVE</button>
+    //     </div>`;
+    //     mounted() {
+    //       //console.log('patched');
+    //       if (doVeryFastClick) {
+    //         doVeryFastClick = false;
+    //         click(webClient.el.querySelector(".o_menu_toggle"));
+    //       }
+    //     }
+    //   }
+    //   testConfig.actionRegistry.add('DelayedClientAction', DelayedClientAction);
+    //   const webClient = await createEnterpriseWebClient({testConfig});
+    //   await doAction(webClient, 'DelayedClientAction');
+    //   await nextTick();
+    //   await click(webClient.el.querySelector(".o_menu_toggle"));
+    //   assert.isVisible(webClient.el.querySelector('.o_home_menu'));
+    //   assert.isNotVisible(webClient.el.querySelector('.delayed_client_action'));
+
+    //   doVeryFastClick = true;
+    //   await click(webClient.el.querySelector(".o_menu_toggle"));
+    //   await nextTick();
+    //   // off homemenu
+    //   assert.isVisible(webClient.el.querySelector('.o_home_menu'));
+    //   assert.isNotVisible(webClient.el.querySelector('.delayed_client_action'));
+
+    //   await click(webClient.el.querySelector(".o_menu_toggle"));
+    //   await nextTick();
+    //   assert.isNotVisible(webClient.el.querySelector('.o_home_menu'));
+    //   assert.isVisible(webClient.el.querySelector('.delayed_client_action'));
+
+    //   //await prom;
+    //   webClient.destroy();
+    // });
   });
   QUnit.test("clear unCommittedChanges when toggling home menu", async function (assert) {
     assert.expect(8);

@@ -86,20 +86,19 @@ export const homeMenuService = {
       });
       return { apps, menuItems };
     }
-    async function callOnToggled(restore = true) {
+    async function doToggle(restore = true) {
       if (hasHomeMenu) {
         const newHash = {
           home: "",
           "unlock menu_id": undefined,
         };
         env.services.router.pushState(newHash, true);
+        env.bus.trigger("ACTION_MANAGER:UPDATE", {type: 'MAIN'});
       } else {
         if (restore) {
           restoreProm = env.services.action_manager.restore();
           return;
         }
-        await restoreProm;
-        restoreProm = undefined;
         if (currentMenuId) {
           env.services.router.pushState({ "lock menu_id": currentMenuId });
         }
@@ -116,15 +115,17 @@ export const homeMenuService = {
       }
       if (fswitch !== hasHomeMenu) {
         hasHomeMenu = fswitch;
-        return callOnToggled();
+        return doToggle();
       }
     }
-    env.bus.on("ACTION_MANAGER:UI-UPDATED", null, (mode) => {
+    env.bus.on("ACTION_MANAGER:UI-UPDATED", null, async (mode) => {
       if (mode !== "new") {
+        await restoreProm;
+        restoreProm = undefined;
         currentMenuId = env.services.menus.getCurrentApp() || undefined;
         currentMenuId = currentMenuId && `${currentMenuId.id}`;
         hasHomeMenu = false;
-        callOnToggled(false);
+        doToggle(false);
       }
     });
     return {
