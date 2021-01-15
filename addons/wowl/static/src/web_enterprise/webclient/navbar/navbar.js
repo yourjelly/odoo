@@ -1,7 +1,7 @@
 /** @odoo-module **/
 const { hooks } = owl;
-import { NavBar } from "../../webclient/navbar/navbar";
-import { useService } from "../../core/hooks";
+import { NavBar } from "../../../webclient/navbar/navbar";
+import { useService } from "../../../core/hooks";
 const { useRef } = hooks;
 export class EnterpriseNavBar extends NavBar {
   constructor() {

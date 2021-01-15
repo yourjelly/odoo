@@ -100,7 +100,8 @@ class WowlClient(http.Controller):
         ])
         return response
 
-    @http.route('/wowl/tests', type='http', auth="user")
+    # LPE Fixme:remove route /wowlent/tests when enterprise is another module
+    @http.route(['/wowl/tests', '/wowlent/tests'], type='http', auth="user")
     def test_suite(self, **kw):
         context = {
             'scssFiles': [file for addon, file in get_addon_files(bundle='style', css=True)],

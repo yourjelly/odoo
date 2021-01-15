@@ -1,7 +1,7 @@
 /** @odoo-module **/
 // const ExpirationPanel = require("web_enterprise.ExpirationPanel");
 const { Component, hooks } = owl;
-import { useService } from "../../core/hooks";
+import { useService } from "../../../core/hooks";
 const { useExternalListener, useState, useRef } = hooks;
 /**
  * Home menu

@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { WebClientEnterprise } from "../../../src/web_enterprise/webclient";
+import { WebClientEnterprise } from "../../../src/web_enterprise/webclient/webclient";
 import { click, legacyExtraNextTick } from "../../helpers/utility";
 import { getLegacy } from "wowl.test_legacy";
 import { nextTick } from "../../helpers/index";
@@ -9,7 +9,7 @@ import {
   getActionManagerTestConfig,
   loadState,
 } from "../../action_manager/helpers";
-import { homeMenuService } from "../../../src/web_enterprise/home_menu/home_menu_service";
+import { homeMenuService } from "../../../src/web_enterprise/webclient/home_menu/home_menu_service";
 import { debugManagerService } from "../../../src/debug_manager/debug_manager_service";
 import { Registry } from "../../../src/core/registry";
 import { debugManager } from "../../../src/debug_manager/debug_manager";

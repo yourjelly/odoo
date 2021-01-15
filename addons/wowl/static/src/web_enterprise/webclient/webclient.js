@@ -1,8 +1,8 @@
 /** @odoo-module **/
-import { WebClient } from "../webclient/webclient";
+import { WebClient } from "../../webclient/webclient";
 import { EnterpriseNavBar } from "./navbar/navbar";
 const { hooks } = owl;
-import { useService } from "../core/hooks";
+import { useService } from "../../core/hooks";
 export class WebClientEnterprise extends WebClient {
   constructor() {
     super(...arguments);

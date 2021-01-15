@@ -1,8 +1,8 @@
 /** @odoo-module **/
 const { Component, core, hooks, tags } = owl;
 import { HomeMenu } from "./home_menu";
-import { clearUncommittedChanges } from "../../action_manager/action_manager";
-import { useService } from "../../core/hooks";
+import { clearUncommittedChanges } from "../../../action_manager/action_manager";
+import { useService } from "../../../core/hooks";
 const { EventBus } = core;
 export const homeMenuService = {
   name: "home_menu",
