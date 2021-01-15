@@ -87,7 +87,7 @@ class MailComposer(models.TransientModel):
     #     help='Catchy preview sentence that encourages recipients to open this email.\n'
     #          'In most inboxes, this is displayed next to the subject.\n'
     #          'Keep it empty if you prefer the first characters of your email content to appear instead.')
-    # either append bodyhtml to subject from python while passing or TODO assign bodyhtml to new field annd the (can pass it through config_parameter?)
+    # either append bodyhtml to subject from python while passing or assign bodyhtml to new field annd the (can pass it through config_parameter?)
     body = fields.Html('Contents', default='', sanitize_style=True)
     parent_id = fields.Many2one(
         'mail.message', 'Parent Message', index=True, ondelete='set null',

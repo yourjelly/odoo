@@ -54,9 +54,6 @@
     <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">
       <t t-if="record._name in ( 'sale.order','purchase.order')">
         <div t-raw="message.body"/>
-          <![CDATA[
-&nbsp;
-]]>
      </t>
     </div>
     <table cellspacing="0" cellpadding="0" border="0" style="width: 600px; margin-top: 5px;">
