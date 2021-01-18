@@ -34,6 +34,7 @@ class WowlClient(http.Controller):
                 'scssFiles': [file for addon, file in get_addon_files(bundle='style', css=True)],
                 'jsFiles': [file for addon, file in get_addon_files(bundle='js', js=True)],
                 "debug": request.session.debug,
+                'isCommunity': 'wowlent' not in request.httprequest.full_path,
             }
             response = request.render('wowl.root', qcontext=context)
             response.headers['X-Frame-Options'] = 'DENY'

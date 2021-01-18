@@ -1,14 +1,12 @@
-if (document.location.pathname.includes("wowlent")) {
-  odoo.define('wowl.WebClientConfigure', require => {
-    const { WebClientEnterprise } = require("@wowl/web_enterprise/webclient/webclient");
-    const { homeMenuService } = require("@wowl/web_enterprise/webclient/home_menu/home_menu_service");
-    const { enterpriseService } = require('@wowl/web_enterprise/webclient/home_menu/enterprise_service');
-    const { serviceRegistry } = require('@wowl/services/service_registry');
-    const configure = (odooConfig) => {
-      odooConfig.serviceRegistry.add(homeMenuService.name, homeMenuService);
-      serviceRegistry.add(enterpriseService.name, enterpriseService);
-      return WebClientEnterprise;
-    };
-    return { configure };
-  });
+/** @odoo-module alias=wowl.WebClientConfigure **/
+// keep this alias, it is needed to override the configuration for booting the webclient
+import { WebClientEnterprise } from "./webclient";
+import { homeMenuService } from './home_menu/home_menu_service';
+import { enterpriseService } from './home_menu/enterprise_service';
+
+// LPE FIXME: this is only because the module is aliased
+export default function configure(odooConfig) {
+  odooConfig.serviceRegistry.add(homeMenuService.name, homeMenuService);
+  odooConfig.serviceRegistry.add(enterpriseService.name, enterpriseService);
+  return WebClientEnterprise;
 }

@@ -1,7 +1,7 @@
 /** @odoo-module **/
 const { Component, tags, core } = owl;
 
-import { configure } from "wowl.WebClientConfigure";
+import configure from "wowl.WebClientConfigure";
 import { Registry } from "../../src/core/registry";
 import { actionManagerService } from "../../src/action_manager/action_manager";
 import { notificationService } from "../../src/notifications/notification_service";

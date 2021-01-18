@@ -21,7 +21,9 @@
 
         <!-- insert all js files in /wowl -->
         <t t-foreach="jsFiles" t-as="jsFile">
-            <script type="text/javascript" t-att-src="jsFile"></script>
+            <t t-if="not (isCommunity is not None and isCommunity and 'web_enterprise' in jsFile)" >
+                <script type="text/javascript" t-att-src="jsFile"></script>
+            </t>
         </t>
     </template>
 

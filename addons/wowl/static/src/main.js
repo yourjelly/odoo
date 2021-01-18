@@ -10,7 +10,7 @@ import { viewRegistry } from "./views/view_registry";
 import { mainComponentRegistry } from "./webclient/main_component_registry";
 import { systrayRegistry } from "./webclient/systray_registry";
 import { userMenuRegistry } from "./webclient/user_menu_registry";
-import { configure } from "wowl.WebClientConfigure";
+import configure from "wowl.WebClientConfigure";
 
 const { mount, utils } = owl;
 const { whenReady, loadFile } = utils;
