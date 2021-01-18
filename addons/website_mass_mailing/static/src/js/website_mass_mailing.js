@@ -117,7 +117,7 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
 });
 
 publicWidget.registry.newsletter_popup = publicWidget.registry.popup.extend({
-    selector: ".o_newsletter_popup_modal",
+    selector: ".o_newsletter_modal",
     disabledInEditableMode: false,
 
     /**

@@ -13,7 +13,56 @@ const qweb = core.qweb;
 var _t = core._t;
 
 
-options.registry.mailing_list_subscribe = options.Class.extend({
+
+const mailingListSubscribeButton = {
+
+    /**
+     * @private
+     */
+    isMailingListExists(){
+        const mailingListID = parseInt(this.$target.attr('data-list-id')) || this.defaultMailingID;
+        if (mailingListID) {
+            this.$target.attr("data-list-id", mailingListID);
+            return;
+        }
+        const text =  _t('No mailing list exists in the database, Do you want to create a new mailing list!');
+        Dialog.confirm(this, text, {
+            title: _t("Warning!"),
+            confirm_callback: () => {
+                window.location.href = '/web#action=mass_mailing.action_view_mass_mailing_lists';
+            },
+            cancel_callback: () => {
+                this.getParent()._onRemoveClick($.Event( "click" ));
+            },
+        });
+    },
+    /**
+     * @private
+     */
+    async _renderMailingListButtons (uiFragment) {
+        debugger;
+        const mailingLists = await this._rpc({
+            model: 'mailing.list',
+            method: 'name_search',
+            args: ['', [['is_public', '=', true]]],
+            context: this.options.recordInfo.context,
+        });
+        if (mailingLists && mailingLists.length) {
+            const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
+            // set default mailing list for we-select
+            this.defaultMailingID = mailingLists[0][0];
+            for (const mailingList of mailingLists) {
+                const button = document.createElement('we-button');
+                button.dataset.selectMailingList = mailingList[0];
+                button.textContent = mailingList[1];
+                selectEl.appendChild(button);
+            }
+        }
+    },
+}
+
+
+options.registry.mailing_list_subscribe = options.Class.extend(mailingListSubscribeButton, {
     popup_template_id: "editor_new_mailing_list_subscribe_button",
     popup_title: _t("Add a Newsletter Subscribe Button"),
 
@@ -26,44 +75,38 @@ options.registry.mailing_list_subscribe = options.Class.extend({
      *
      * @see this.selectClass for parameters
      */
-    select_mailing_list: function (previewMode, value) {
-        var self = this;
-        var def = wUtils.prompt({
-            'id': this.popup_template_id,
-            'window_title': this.popup_title,
-            'select': _t("Newsletter"),
-            'init': function (field, dialog) {
-                return rpc.query({
-                    model: 'mailing.list',
-                    method: 'name_search',
-                    args: ['', [['is_public', '=', true]]],
-                    context: self.options.recordInfo.context,
-                }).then(function (data) {
-                    $(dialog).find('.btn-primary').prop('disabled', !data.length);
-                    var list_id = self.$target.attr("data-list-id");
-                    $(dialog).on('show.bs.modal', function () {
-                        if (list_id !== "0"){
-                            $(dialog).find('select').val(list_id);
-                        };
-                    });
-                    return data;
-                });
-            },
-        });
-        def.then(function (result) {
-            self.$target.attr("data-list-id", result.val);
-        });
-        return def;
+    selectMailingList(previewMode, widgetValue, params) {
+        this.$target.attr("data-list-id", widgetValue);
     },
     /**
      * @override
      */
     onBuilt: function () {
-        var self = this;
         this._super();
-        this.select_mailing_list('click').guardedCatch(function () {
-            self.getParent()._onRemoveClick($.Event( "click" ));
-        });
+        this.isMailingListExists();
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @override
+     */
+    async _renderCustomXML(uiFragment) {
+        await this._renderMailingListButtons(uiFragment);
+    },
+    /**
+     * @private
+     * @override
+     */
+    _computeWidgetState(methodName, params) {
+        switch (methodName) {
+            case 'selectMailingList':
+                return parseInt(this.$target.attr('data-list-id')) || this.defaultMailingID;
+        }
+        return this._super(...arguments);
     },
 });
 
@@ -100,110 +143,12 @@ options.registry.recaptchaSubscribe = options.Class.extend({
     },
 });
 
-options.registry.newsletter_popup = options.registry.SnippetPopup.extend({
-
-     /**
-     * @override
-     */
-    start: function () {
-        this.$target.on('hidden.bs.modal.newsletter_popup_option', () => {
-            this.trigger_up('snippet_option_visibility_update', {show: false});
-        });
-        return this._super(...arguments);
-    },
-    /**
-     * @override
-     */
-    onTargetShow: async function () {
-        // Open the modal
-        if (this.$target.attr("data-list-id")) {
-            await this._super(...arguments);
-        }
-        return this._refreshPublicWidgets();
-    },
-
-    //--------------------------------------------------------------------------
-    // Options
-    //--------------------------------------------------------------------------
-
-    /**
-     * Allows to select mailing list.
-     *
-     * @see this.selectClass for parameters
-     */
-    selectMailingList(previewMode, widgetValue, params) {
-        this.$target.attr("data-list-id", widgetValue);
-    },
-    /**
-     * @override
-     */
-    onBuilt: function () {
-        this._super();
-        const mailingListID = parseInt(this.$target.attr('data-list-id')) || this.defaultMailingID;
-        if (mailingListID) {
-            this.$target.attr("data-list-id", mailingListID);
-        } else {
-            const text =  _t('No mailing list exists in the database, Do you want to create a new mailing list!');
-            Dialog.confirm(this, text, {
-                title: _t("Warning!"),
-                confirm_callback: () => {
-                    window.location.href = '/web#action=mass_mailing.action_view_mass_mailing_lists';
-                },
-                cancel_callback: () => {
-                    this.getParent()._onRemoveClick($.Event( "click" ));
-                },
-            });
-        }
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @private
-     * @override
-     */
-    async _renderCustomXML(uiFragment) {
-        const mailingLists = await this._rpc({
-            model: 'mailing.list',
-            method: 'name_search',
-            args: ['', [['is_public', '=', true]]],
-            context: this.options.recordInfo.context,
-        });
-        if (mailingLists && mailingLists.length) {
-            const selectEl = uiFragment.querySelector('we-select[data-name="mailing_list"]');
-            // set default mailing list for we-select
-            this.defaultMailingID = mailingLists[0][0];
-            for (const mailingList of mailingLists) {
-                const button = document.createElement('we-button');
-                button.dataset.selectMailingList = mailingList[0];
-                button.textContent = mailingList[1];
-                selectEl.appendChild(button);
-            }
-        }
-    },
-    /**
-     * @private
-     * @override
-     */
-    _computeWidgetState(methodName, params) {
-        switch (methodName) {
-            case 'selectMailingList':
-                return parseInt(this.$target.attr('data-list-id')) || this.defaultMailingID;
-        }
-        return this._super(...arguments);
-    },
-});
-
-options.registry.newsletter_popup1 = options.registry.mailing_list_subscribe.extend({
-    popup_template_id: "editor_new_mailing_list_subscribe_popup",
-    popup_title: _t("Add a Newsletter Subscribe Popup"),
-
+options.registry.newsletter_popup = options.registry.Popup.extend(mailingListSubscribeButton, {
     /**
      * @override
      */
     start: function () {
+        this.selectorClass = '.o_newsletter_popup';
         this.$target.on('hidden.bs.modal.newsletter_popup_option', () => {
             this.trigger_up('snippet_option_visibility_update', {show: false});
         });
@@ -213,19 +158,11 @@ options.registry.newsletter_popup1 = options.registry.mailing_list_subscribe.ext
      * @override
      */
     onTargetShow: function () {
-        // Open the modal
-        this.$target.data('quick-open', true);
-        return this._refreshPublicWidgets();
-    },
-    /**
-     * @override
-     */
-    onTargetHide: function () {
-        // Close the modal
-        const $modal = this.$('.modal');
-        if ($modal.length && $modal.is('.modal_shown')) {
-            $modal.modal('hide');
+        if (this.$target.attr("data-list-id")) {
+            this.$target.modal('show');
+            $(document.body).children('.modal-backdrop:last').addClass('d-none');
         }
+        return this._refreshPublicWidgets();
     },
     /**
      * @override
@@ -248,6 +185,7 @@ options.registry.newsletter_popup1 = options.registry.mailing_list_subscribe.ext
      */
     destroy: function () {
         this.$target.off('.newsletter_popup_option');
+        this.$target.find('.o_newsletter_content').empty();
         this._super.apply(this, arguments);
     },
 
@@ -256,17 +194,47 @@ options.registry.newsletter_popup1 = options.registry.mailing_list_subscribe.ext
     //--------------------------------------------------------------------------
 
     /**
+     * Allows to select mailing list.
+     *
+     * @see this.selectClass for parameters
+     */
+    selectMailingList(previewMode, widgetValue, params) {
+        this.$target.attr("data-list-id", widgetValue);
+        this.$target.removeData('content');
+        return this._refreshPublicWidgets();
+    },
+    /**
      * @override
      */
-    select_mailing_list: function () {
-        var self = this;
-        return this._super.apply(this, arguments).then(function () {
-            self.$target.data('quick-open', true);
-            self.$target.removeData('content');
-            return self._refreshPublicWidgets();
-        });
+    onBuilt: function () {
+        this._super();
+        this.isMailingListExists();
+    },
+
+    //--------------------------------------------------------------------------
+    // Private
+    //--------------------------------------------------------------------------
+
+    /**
+     * @private
+     * @override
+     */
+    async _renderCustomXML(uiFragment) {
+        await this._renderMailingListButtons(uiFragment);
+    },
+    /**
+     * @private
+     * @override
+     */
+    _computeWidgetState(methodName, params) {
+        switch (methodName) {
+            case 'selectMailingList':
+                return parseInt(this.$target.attr('data-list-id')) || this.defaultMailingID;
+        }
+        return this._super(...arguments);
     },
 });
+
 
 WysiwygMultizone.include({
 
