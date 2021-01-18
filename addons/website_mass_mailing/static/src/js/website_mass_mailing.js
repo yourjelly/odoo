@@ -117,167 +117,56 @@ publicWidget.registry.subscribe = publicWidget.Widget.extend({
 });
 
 publicWidget.registry.newsletter_popup = publicWidget.registry.popup.extend({
-    selector: ".o_newsletter_modal",
+    selector: ".o_newsletter_popup",
     disabledInEditableMode: false,
 
     /**
      * @override
      */
-    start: async function () {
-        debugger;
-        this.websiteID = this._getContext().website_id;
-        this.listID = parseInt(this.$target.attr('data-list-id'));
-        if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !this.editableMode)) {
-            return;
-        }
-        await this._super(...arguments);
-        const $newsletterContent = this.$target.find(".o_newsletter_content");
-        if (this.$target.data('content') && this.editableMode) {
-            // To avoid losing user changes.
-            $newsletterContent.html(this.$target.data('content'));
-        } else {
-            const data = await this._rpc({
-                route: '/website_mass_mailing/get_content',
-                params: {
-                    newsletter_id: this.listID,
-                },
-            });
-            $newsletterContent.html(data.popup_content);
-            this.$target.find('.js_subscribe').attr('data-list-id', this.listID)
-                  .find('input.js_subscribe_email').val(data.email);
-            if (this.editableMode) {
-                $newsletterContent.addClass('oe_structure oe_empty modal-body p-0')
-                    .attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-            }
-        }
-        this.trigger_up('widgets_start_request', {
-            editableMode: this.editableMode,
-            $target: $newsletterContent,
-        });
-    },
-    /**
-     * @override
-     */
-    destroy: function () {
-        if (this.$target.data('subscribed') === true){
-            utils.set_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.$target.attr('data-list-id'), this.websiteID), true)
-        }
-        if (parseInt(this.$el.attr('data-list-id')) === this.listID) {
-            // To avoid losing user changes.
-            this.$el.data('content', this.$target.find('.o_newsletter_content').html());
-        }
-        this._super.apply(this, arguments);
-    },
-});
-
-
-publicWidget.registry.newsletter_popup1 = publicWidget.Widget.extend({
-    selector: ".o_newsletter_popup1",
-    disabledInEditableMode: false,
-
-    /**
-     * @override
-     */
-    start: function () {
-        var self = this;
-        var defs = [this._super.apply(this, arguments)];
-        this.websiteID = this._getContext().website_id;
-        this.listID = parseInt(this.$target.attr('data-list-id'));
-        if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !self.editableMode)) {
-            return Promise.all(defs);
-        }
-        if (this.$target.data('content') && this.editableMode) {
-            // To avoid losing user changes.
-            this._dialogInit(this.$target.data('content'));
-            this.$target.removeData('quick-open');
-            this.massMailingPopup.open();
-        } else {
-            defs.push(this._rpc({
-                route: '/website_mass_mailing/get_content',
-                params: {
-                    newsletter_id: self.listID,
-                },
-            }).then(function (data) {
-                self._dialogInit(data.popup_content, data.email || '');
-                if (!self.editableMode && !data.is_subscriber) {
-                    if (config.device.isMobile) {
-                        setTimeout(function () {
-                            self._showBanner();
-                        }, 5000);
-                    } else {
-                        $(document).on('mouseleave.open_popup_event', self._showBanner.bind(self));
-                    }
-                } else {
-                    $(document).off('mouseleave.open_popup_event');
-                }
-                // show popup after choosing a newsletter
-                if (self.$target.data('quick-open')) {
-                    self.massMailingPopup.open();
-                    self.$target.removeData('quick-open');
-                }
-            }));
-        }
-
-        return Promise.all(defs);
-    },
-    /**
-     * @override
-     */
-    destroy: function () {
-        if (this.massMailingPopup) {
-            this.massMailingPopup.close();
-        }
-        this._super.apply(this, arguments);
-    },
-
-    //--------------------------------------------------------------------------
-    // Private
-    //--------------------------------------------------------------------------
-
-    /**
-     * @param {string} content
-     * @private
-     */
-    _dialogInit: function (content, email) {
-        var self = this;
-        this.massMailingPopup = new Dialog(this, {
-            technical: false,
-            $content: $('<div/>').html(content),
-            $parentNode: this.$target,
-            backdrop: !this.editableMode,
-            dialogClass: 'p-0' + (this.editableMode ? ' oe_structure oe_empty' : ''),
-            renderFooter: false,
-            size: 'medium',
-        });
-        this.massMailingPopup.opened().then(function () {
-            var $modal = self.massMailingPopup.$modal;
-            $modal.find('header button.close').on('mouseup', function (ev) {
-                ev.stopPropagation();
-            });
-            $modal.addClass('o_newsletter_modal');
-            $modal.find('.oe_structure').attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
-            $modal.find('.modal-dialog').addClass('modal-dialog-centered');
-            $modal.find('.js_subscribe').data('list-id', self.listID)
-                  .find('input.js_subscribe_email').val(email);
-            self.trigger_up('widgets_start_request', {
-                editableMode: self.editableMode,
-                $target: $modal,
-            });
-        });
-        this.massMailingPopup.on('closed', this, function () {
-            var $modal = self.massMailingPopup.$modal;
-            if ($modal) { // The dialog might have never been opened
-                self.$el.data('content', $modal.find('.modal-body').html());
-            }
-        });
-    },
-    /**
-     * @private
-     */
-    _showBanner: function () {
-        this.massMailingPopup.open();
-        utils.set_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID), true);
-        $(document).off('mouseleave.open_popup_event');
-    },
+    // start: async function () {
+    //     debugger;
+    //     this.websiteID = this._getContext().website_id;
+    //     this.listID = parseInt(this.$target.attr('data-list-id'));
+    //     if (!this.listID || (utils.get_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.listID, this.websiteID)) && !this.editableMode)) {
+    //         return;
+    //     }
+    //     await this._super(...arguments);
+    //     const $newsletterContent = this.$target.find(".o_newsletter_content");
+    //     if (this.$target.data('content') && this.editableMode) {
+    //         // To avoid losing user changes.
+    //         $newsletterContent.html(this.$target.data('content'));
+    //     } else {
+    //         const data = await this._rpc({
+    //             route: '/website_mass_mailing/get_content',
+    //             params: {
+    //                 newsletter_id: this.listID,
+    //             },
+    //         });
+    //         $newsletterContent.html(data.popup_content);
+    //         this.$target.find('.js_subscribe').attr('data-list-id', this.listID)
+    //               .find('input.js_subscribe_email').val(data.email);
+    //         if (this.editableMode) {
+    //             $newsletterContent.addClass('oe_structure oe_empty modal-body p-0')
+    //                 .attr('data-editor-message', _t('DRAG BUILDING BLOCKS HERE'));
+    //         }
+    //     }
+    //     this.trigger_up('widgets_start_request', {
+    //         editableMode: this.editableMode,
+    //         $target: $newsletterContent,
+    //     });
+    // },
+    // /**
+    //  * @override
+    //  */
+    // destroy: function () {
+    //     if (this.$target.data('subscribed') === true){
+    //         utils.set_cookie(_.str.sprintf("newsletter-popup-%s-%s", this.$target.attr('data-list-id'), this.websiteID), true)
+    //     }
+    //     if (parseInt(this.$el.attr('data-list-id')) === this.listID) {
+    //         // To avoid losing user changes.
+    //         this.$el.data('content', this.$target.find('.o_newsletter_content').html());
+    //     }
+    //     this._super.apply(this, arguments);
+    // },
 });
 });

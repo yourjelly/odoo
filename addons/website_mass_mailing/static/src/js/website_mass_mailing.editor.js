@@ -63,8 +63,6 @@ const mailingListSubscribeButton = {
 
 
 options.registry.mailing_list_subscribe = options.Class.extend(mailingListSubscribeButton, {
-    popup_template_id: "editor_new_mailing_list_subscribe_button",
-    popup_title: _t("Add a Newsletter Subscribe Button"),
 
     //--------------------------------------------------------------------------
     // Options
