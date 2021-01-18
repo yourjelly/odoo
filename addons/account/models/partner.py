@@ -492,6 +492,27 @@ class ResPartner(models.Model):
                     vals['supplier_rank'] = 1
         return super().create(vals_list)
 
+    def write(self, vals):
+        super().write(vals)
+
+        if 'vat' in vals:
+            for record in self:
+                linked_company = self.env['res.company'].search([('partner_id', '=', record.id)])
+                fiscal_country = linked_company.account_tax_fiscal_country_id
+
+                if fiscal_country:
+                    existing_vat = linked_company.vat_number_ids.filtered(lambda x: x.country_id == fiscal_country)
+
+                    if existing_vat: # TODO OCO évidemment, si on peut en avoir plusieurs pour le même pays, ça, c'est nul
+                        existing_vat.write({'vat': vals['vat']})
+                    else:
+                        self.env['account.company.vat'].create({
+                            'company_id': linked_company.id,
+                            'country_id': fiscal_country.id,
+                            'vat': vals['vat'],
+                        })
+
+
     def _increase_rank(self, field, n=1):
         if self.ids and field in ['customer_rank', 'supplier_rank']:
             try:

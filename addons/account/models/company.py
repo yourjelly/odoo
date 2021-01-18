@@ -568,6 +568,9 @@ class CompanyVAT(models.Model):
     country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True)
     vat = fields.Char(string="VAT", required=True) # TODO OCO y'avait pas qqch quelque part pour changer ça en TIN ou quoi ? A vérifier
 
+    #TODO OCO je mets une contrainte d'unicité (company, country) ? => Pour des trucs comme l'Espagne, on peut pas en avoir plusieurs, selon nos normes ? (le calcul des rapports par défaut pourrait donc être dynamique selon la gueule du numéro ; p-ê too much)
+
     #TODO OCO redéfinir name_get pour qu'il mette le numéro de TVA avec le country code entre ()
 
     # TODO OCO il y a une contrainte d'unicité sur vat sur le partner, non ? A vérifier et peut-être arranger un peu (ici aussi)
+    # TODO OCO en enterprise on ajoute la sélection de tax report là-dessus plutôt que dans un seul champ ? Ce sera mieux structuré comme ça, et plus lisible. > il faudra faire en sorte d'assigner par défaut les rapports à montrer, alors => compute éditable ?
