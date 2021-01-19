@@ -2201,6 +2201,7 @@ class MailThread(models.AbstractModel):
 
         email_layout_xmlid = msg_vals.get('email_layout_xmlid') if msg_vals else message.email_layout_xmlid
         template_xmlid = email_layout_xmlid if email_layout_xmlid else 'mail.message_notification_email'
+        print("kerii templte id................",template_xmlid)
         try:
             base_template = self.env.ref(template_xmlid, raise_if_not_found=True).with_context(lang=template_values['lang']) # 1 query
         except ValueError:

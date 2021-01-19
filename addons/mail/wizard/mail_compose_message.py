@@ -298,17 +298,8 @@ class MailComposer(models.TransientModel):
 
         for res_id in res_ids:
             # static wizard (mail.message) values
-            html_doc = f'''{self.body}'''
-            html_doc_odoo_tools = tools.prepend_html_content(self.body,self.body)
-            print("html_doc_odoo_tools.............................................................................",html_doc_odoo_tools)
-            print("html_doc.html2plaintext.........................",tools.html2plaintext(self.body))
-            # using re
-            # re_prety_text = re.sub("[\r\n]","9",prety_text)
-            # print("\n re prety text.....................",re_prety_text)
-
-            # print("{tools.html_escape(preview)}>>>>>>>>>>>>>>.",tools.html_escape(prety_text))
-            # odoo_toolk = tools.html_escape(prety_text
             def pre(preview_text):
+                print("preeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
                 if preview_text:
                     preview_text = f"""
                                  <div style="display:none;font-size:1px;height:0px;width:0px;opacity:0;font-weight: normal !important;">
@@ -316,17 +307,16 @@ class MailComposer(models.TransientModel):
                                  </div>
                              """
                 preview_text = re.sub("[\r\n]", "9", preview_text)
-                print("preil keriiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+                print("len of preview text............",len(preview_text))
                 return preview_text
-            ggg = tools.html2plaintext(self.body)
-            ggg = re.sub("[\r\n]","",ggg)
-
+            print("verum boody -- plain body,len pain textnte",self.body,len(tools.html2plaintext(self.body)))
+            print(
+                "============================================================================================"
+            )
+            print("context modelllllllllllllllllllllllllllllllll",self._context)
             mail_values = {
-                # 'subject': self.env['mail.render.mixin']._prepend_preview(self.subject,self.body), not working
-                'subject': self.subject,
-                'body': self.body or '',
-                # 'body': self.env['mail.render.mixin']._prepend_preview(self.body,ggg),
-                # working but html content is coming also it only comes inside the table layout which is not required result
+                'subject':  self.subject,
+                'body': self.body + '&nbsp;&zwnj;' * 120 if self._context.get('custom_layout') == 'mail.mail_notification_paynow' and len(tools.html2plaintext(self.body)) < 120 else self.body,
                 'parent_id': self.parent_id and self.parent_id.id,
                 'partner_ids': [partner.id for partner in self.partner_ids],
                 'attachment_ids': [attach.id for attach in self.attachment_ids],
@@ -337,13 +327,10 @@ class MailComposer(models.TransientModel):
                 'mail_server_id': self.mail_server_id.id,
                 'mail_activity_type_id': self.mail_activity_type_id.id,
             }
-
-            # re eprsn to eliminate linefeed and carriage returns because it is the cause of failure in sending emails while we append it to the subject
-
-
             print("mail values in get_mail_values.......",mail_values)
             # mass mailing: rendering override wizard static values
             if mass_mail_mode and self.model:
+                print("massmailing il kerii")
                 record = self.env[self.model].browse(res_id)
                 mail_values['headers'] = record._notify_email_headers()
                 # keep a copy unless specifically requested, reset record name (avoid browsing records)
@@ -384,6 +371,7 @@ class MailComposer(models.TransientModel):
                     mail_values['notification'] = False
 
             results[res_id] = mail_values
+            print("resultss.......",results)
         return results
 
     # ------------------------------------------------------------
@@ -436,10 +424,13 @@ class MailComposer(models.TransientModel):
 
         if values.get('body_html'):
             values['body'] = values.pop('body_html')
-
+        print(
+               "body_html/////////////", values.get('body_html')
+            )
         # This onchange should return command instead of ids for x2many field.
         values = self._convert_to_write(values)
         print("values....................",values)
+
         return {'value': values}
 
     def save_as_template(self):

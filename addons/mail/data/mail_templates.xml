@@ -3,45 +3,6 @@
     <data>
         <template id="message_notification_email">
 <div>
-<!--    not a goood solution need to find out a way to build a common method for same needs,but in case custom email template in paynow has given priority -->
-<!--    option 1 success, next to optimize code :try loop + append until this much char-->
-<!--    option2  if elemnttag==table or if -->
-<!--    if len(message.body) < 120
-        then whitwspce = 120 - len(message.body)
-        <span>&amp;nbsp;&amp;#847;</span> * whitespace
-        -->
-<!--    skipping this condition because in email marketing if no preview text is given then txt in message body appears-->
-<!--    <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">-->
-<!--            <div t-raw="message.body"/>-->
-<!--                <t t-if="len(message.body) < 120 ">-->
-<!--                   -->
-<!--                 <t t-foreach="range(1, 120-len(message.body))" t-as="num">-->
-<!--                     <span>&amp;nbsp;&amp;#847;</span>-->
-<!--                 </t>-->
-
-<!--                    -->
-<!--            </t>-->
-
-<!--        <span>&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;-->
-<!--            &amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--            &amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;&amp;nbsp;&amp;#847;-->
-<!--        </span>-->
-<!--    </div>-->
-
-
 <div t-if="has_button_access" itemscope="itemscope" itemtype="http://schema.org/EmailMessage">
     <div itemprop="potentialAction" itemscope="itemscope" itemtype="http://schema.org/ViewAction">
         <link itemprop="target" t-att-href="button_access['url']"/>
@@ -52,9 +13,7 @@
 <div t-if="has_button_access or len(actions) &gt; 0 or not is_discussion"
         summary="o_mail_notification" style="padding: 0px; width:600px;">
     <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">
-      <t t-if="record._name in ( 'sale.order','purchase.order')">
         <div t-raw="message.body"/>
-     </t>
     </div>
     <table cellspacing="0" cellpadding="0" border="0" style="width: 600px; margin-top: 5px;">
     <tbody><tr>
@@ -245,13 +204,12 @@
                 View <t t-esc="model_description or 'document'"/>
             </t>
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: white; padding: 0; border-collapse:separate;" >
+                <tr style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;"><t t-raw="message.body"/></tr>
                 <tr><td valign="middle">
-                    <t t-if="record._name not in ( 'sale.order','purchase.order')">
                     <span style="font-size: 10px;">Your <t t-esc="model_description or 'document'"/></span><br/>
                     <span style="font-size: 20px; font-weight: bold;">
                         <t t-esc="message.record_name"/>
                     </span>
-                    </t>
                 </td><td valign="middle" align="right">
                     <img t-att-src="'/logo.png?company=%s' % (company.id or 0)" style="padding: 0px; margin: 0px; height: 48px;" t-att-alt="'%s' % company.name"/>
                 </td></tr>
