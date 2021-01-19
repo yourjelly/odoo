@@ -503,7 +503,7 @@ class ResPartner(models.Model):
                 if fiscal_country:
                     existing_vat = linked_company.vat_number_ids.filtered(lambda x: x.country_id == fiscal_country)
 
-                    if existing_vat: # TODO OCO évidemment, si on peut en avoir plusieurs pour le même pays, ça, c'est nul
+                    if existing_vat:
                         existing_vat.write({'vat': vals['vat']})
                     else:
                         self.env['account.company.vat'].create({

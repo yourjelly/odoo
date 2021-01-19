@@ -660,6 +660,7 @@
                                     <label for="partner_id" string="Vendor" style="font-weight:bold;"
                                            attrs="{'invisible': [('move_type', 'not in', ('in_invoice', 'in_refund', 'in_receipt'))]}"/>
                                 </div>
+                                <!--TODO OCO à tester: supprimer le show_vat du widget (au moins ici, voir les autres appels d'abord, puis ajouter un champ ?-->
                                 <field name="partner_id" widget="res_partner_many2one" nolabel="1"
                                        context="{
                                             'res_partner_search_mode': (context.get('default_move_type', 'entry') in ('out_invoice', 'out_refund', 'out_receipt') and 'customer') or (context.get('default_move_type', 'entry') in ('in_invoice', 'in_refund', 'in_receipt') and 'supplier') or False,

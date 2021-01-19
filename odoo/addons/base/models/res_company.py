@@ -87,7 +87,6 @@ class Company(models.Model):
     vat = fields.Char(related='partner_id.vat', string="Tax ID", readonly=False) # TODO OCO on ne va pas l'utiliser dans account pour ce qu'on veut faire => MAIS on pourrait définir le nouveau modèle ici ou dans account>> choisir >>> on pourrait aussi carrément le mettre sur les partenaires, mais ça me semble fumé
     #TODO OCO on peut auss simplement remplire vat sur le partenaire de la company avec le numéro qui correspond à son fiscal_country dans le m2m
     # TODO OCO veut-on garder un champ vat sur la company quand accounting n'est pas installé ?
-    # TODO OCO je partirais dans l'idée de le zigouiller et de cacher celui du partenaire quand accounting est installé => et si on écrit sur le nouvel objet qui correspond au fiscal country,
     company_registry = fields.Char()
     paperformat_id = fields.Many2one('report.paperformat', 'Paper format', default=lambda self: self.env.ref('base.paperformat_euro', raise_if_not_found=False))
     external_report_layout_id = fields.Many2one('ir.ui.view', 'Document Template')
