@@ -127,7 +127,16 @@ class AssetsBundle(object):
             elif f['atype'] == 'text/javascript':
                 self.javascripts.append(JavascriptAsset(self, url=f['url'], filename=f['filename'], inline=f['content']))
 
-    def to_node(self, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False):
+    def to_node(
+        self,
+        css=True,
+        js=True,
+        debug=False,
+        async_load=False,
+        defer_load=False,
+        lazy_load=False,
+        inlined=False,
+    ):
         """
         :returns [(tagName, attributes, content)] if the tag is auto close
         """
@@ -152,28 +161,48 @@ class AssetsBundle(object):
             if css and self.stylesheets:
                 css_attachments = self.css() or []
                 for attachment in css_attachments:
-                    attr = OrderedDict([
-                        ["type", "text/css"],
-                        ["rel", "stylesheet"],
-                        ["href", attachment.url],
-                        ['data-asset-xmlid', self.name],
-                        ['data-asset-version', self.version],
-                    ])
-                    response.append(("link", attr, None))
+                    if inlined:
+                        # TODO: do the same for debug mode, or maybe have an outer conditional
+                        # case for inlined to be treated the same way for both debug and
+                        # non-debug mode
+                        tag = 'style'
+                        attrs = {'type': 'text/css'}
+                        content = attachment.raw.decode('utf-8')
+                    else:
+                        tag = 'link'
+                        attrs = OrderedDict([
+                            ["type", "text/css"],
+                            ["rel", "stylesheet"],
+                            ["href", attachment.url],
+                            ['data-asset-xmlid', self.name],
+                            ['data-asset-version', self.version],
+                        ])
+                        content = None
+                    response.append((tag, attrs, content))
                 if self.css_errors:
                     msg = '\n'.join(self.css_errors)
                     response.append(JavascriptAsset(self, inline=self.dialog_message(msg)).to_node())
             if js and self.javascripts:
-                attr = OrderedDict([
-                    ["async", "async" if async_load else None],
-                    ["defer", "defer" if defer_load or lazy_load else None],
-                    ["type", "text/javascript"],
-                    ["data-src" if lazy_load else "src", self.js().url],
-                    ['data-asset-xmlid', self.name],
-                    ['data-asset-version', self.version],
-                ])
-                response.append(("script", attr, None))
-
+                if inlined:
+                    attrs = {
+                        'async': 'async' if async_load else None,
+                        'defer': 'defer' if defer_load or lazy_load else None,
+                        'type': 'text/javascript',
+                        'data-asset-xmlid': self.name,
+                        'data-asset-version': self.version,
+                    }
+                    content = self.js().raw.decode('utf-8')
+                else:
+                    attrs = OrderedDict([
+                        ["async", "async" if async_load else None],
+                        ["defer", "defer" if defer_load or lazy_load else None],
+                        ["type", "text/javascript"],
+                        ["data-src" if lazy_load else "src", self.js().url],
+                        ['data-asset-xmlid', self.name],
+                        ['data-asset-version', self.version],
+                    ])
+                    content = None
+                response.append(("script", attrs, content))
         return response
 
     @func.lazy_property

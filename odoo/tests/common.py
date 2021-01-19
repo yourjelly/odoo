@@ -793,11 +793,8 @@ class ChromeBrowser():
                 os.dup2(stderr_replacement.fileno(), sys.stderr.fileno())
             os.execv(cmd[0], cmd)
 
-    def _chrome_start(self):
-        if self.chrome_pid is not None:
-            return
-
-        switches = {
+    def _get_chrome_options(self):
+        return {
             '--headless': '',
             '--no-default-browser-check': '',
             '--no-first-run': '',
@@ -808,7 +805,6 @@ class ChromeBrowser():
             '--disable-renderer-backgrounding' : '',
             '--disable-breakpad': '',
             '--disable-client-side-phishing-detection': '',
-            '--disable-crash-reporter': '',
             '--disable-default-apps': '',
             '--disable-dev-shm-usage': '',
             '--disable-device-discovery-notifications': '',
@@ -823,8 +819,13 @@ class ChromeBrowser():
             '--no-sandbox': '',
             '--disable-gpu': '',
         }
+
+    def _chrome_start(self):
+        if self.chrome_pid is not None:
+            return
+
         cmd = [self.executable]
-        cmd += ['%s=%s' % (k, v) if v else k for k, v in switches.items()]
+        cmd += ['%s=%s' % (k, v) if v else k for k, v in self._get_chrome_options().items()]
         url = 'about:blank'
         cmd.append(url)
         try:

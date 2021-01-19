@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <template id="minimal_layout" inherit_id="web.minimal_layout">
+            <xpath expr="//head" position="inside">
+                <style type="text/css" media="print">
+                    div.footer {
+                        page-break-after: always;
+                        page-break-inside: avoid;
+                    }
+                </style>
+            </xpath>
+        </template>
+    </data>
+</odoo>
