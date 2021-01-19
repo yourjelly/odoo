@@ -2,12 +2,15 @@
 const { hooks } = owl;
 import { NavBar } from "../../../webclient/navbar/navbar";
 import { useService } from "../../../core/hooks";
+import { burgerMenu } from '../burger_menu/burger_menu';
+
 const { useRef } = hooks;
 export class EnterpriseNavBar extends NavBar {
   constructor() {
     super(...arguments);
     this.menus = useService("menus");
     this.actionManager = useService("action_manager");
+    this.device = useService('device');
     this.hm = useService("home_menu");
     this.menuAppsRef = useRef("menuApps");
     this.hasBackgroundAction = false;
@@ -22,9 +25,14 @@ export class EnterpriseNavBar extends NavBar {
     hooks.onPatched(() => {
       this._updateMenuAppsIcon();
     });
+
+    if (this.device.isSmall || this.device.isMobileOS) {
+      odoo.systrayRegistry.remove('wowl.user_menu');
+      odoo.systrayRegistry.add('wowl.burger_menu', burgerMenu);
+    }
   }
   get currentApp() {
-    return !this.hm.hasHomeMenu ? super.currentApp : undefined;
+    return !this.device.isMobileOS && !this.hm.hasHomeMenu ? super.currentApp : undefined;
   }
   _updateMenuAppsIcon() {
     const menuAppsEl = this.menuAppsRef.el;
