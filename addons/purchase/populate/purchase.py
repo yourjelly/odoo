@@ -67,6 +67,33 @@ class PurchaseOrderLine(models.Model):
     _populate_sizes = {'small': 500, 'medium': 7_500, 'large': 125_000}
     _populate_dependencies = ['purchase.order', 'product.product']
 
+    def _populate(self, size):
+        po_lines = super()._populate(size)
+
+        def confirm_po(sample_ratio):
+            # Confirm sample_ratio * 100 % of picking
+            random = populate.Random('confirm_pickings')
+            pos_ids = po_lines.order_id.ids
+            po_to_confirm = self.env['purchase.order'].browse(random.sample(pos_ids, int(len(pos_ids) * sample_ratio)))
+            _logger.info("Confirm %d of PO" % len(po_to_confirm))
+            po_to_confirm.button_confirm()
+            return po_to_confirm
+
+        def validate_po(po_to_finish):
+            # Validate PO, it works only without stock!
+            _logger.info("Put qty_received in %d PO" % len(po_to_finish))
+
+            for line in po_to_finish.order_line:
+                line.qty_received = line.product_qty
+
+            _logger.info("Validate %d of PO" % len(po_to_finish))
+            po_to_finish.button_done()
+
+        po_to_confirm = confirm_po(0.8)
+        validate_po(po_to_confirm)
+
+        return po_lines
+
     def _populate_factories(self):
 
         purchase_order_ids = self.env.registry.populated_models['purchase.order']
