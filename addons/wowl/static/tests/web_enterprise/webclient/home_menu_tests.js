@@ -147,13 +147,13 @@ QUnit.module(
       bus = new EventBus();
       const fakeActionManagerService = {
         name: "action_manager",
-        deploy() {
+        deploy(env) {
           return {
             doAction(action, options) {
               bus.trigger("do_action", { action, options });
             },
             async restore() {
-              bus.trigger('ACTION_MANAGER:UI-UPDATED', 'current');
+              env.bus.trigger('ACTION_MANAGER:UI-UPDATED', 'current');
             }
           };
         },
@@ -174,7 +174,7 @@ QUnit.module(
   function () {
     QUnit.module("HomeMenu");
 
-    QUnit.skip("ESC Support", async function (assert) {
+    QUnit.test("ESC Support", async function (assert) {
       // crash when pressing escape with no background action (cannot restore controller)
       assert.expect(8);
 
