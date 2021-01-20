@@ -384,8 +384,9 @@ export class HomeMenu extends Component {
         // before ESC
         // Hide home menu if there is an inner action
         const currentQuery = this.state.query;
-        this._updateQuery("");
-        if (!currentQuery) {
+        if (currentQuery) {
+          this._updateQuery("");
+        } else {
           this.homeMenuService.toggle(false);
         }
         break;
