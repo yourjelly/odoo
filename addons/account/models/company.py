@@ -78,7 +78,6 @@ class ResCompany(models.Model):
     bank_journal_ids = fields.One2many('account.journal', 'company_id', domain=[('type', '=', 'bank')], string='Bank Journals')
     tax_exigibility = fields.Boolean(string='Use Cash Basis')
     account_tax_fiscal_country_id = fields.Many2one('res.country', string="Fiscal Country", compute='compute_account_tax_fiscal_country', store=True, readonly=False, help="The country to use the tax reports from for this company")
-    vat_number_ids = fields.One2many(string="VAT Numbers", comodel_name='account.company.vat', inverse_name='company_id', help="Use this field to store the different VAT numbers of your company in the countries it has to pay taxes in.") #TODO OCO il faudra un truc pour le peupler à l'installation d'account si la société a déjà une vat sur son partenaire
 
     incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm',
         help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
@@ -558,30 +557,3 @@ class ResCompany(models.Model):
 
         return {'date_from': datetime(year=current_date.year, month=1, day=1).date(),
                 'date_to': datetime(year=current_date.year, month=12, day=31).date()}
-
-
-class CompanyVAT(models.Model):
-    # TODO OCO déplacer dans base sur res.partner
-    _name = "account.company.vat"
-    _description = "Company VAT"
-
-    company_id = fields.Many2one(string="Company", comodel_name='res.company', required=True)
-    country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True)
-    vat = fields.Char(string="VAT", required=True)
-    tax_report_ids = fields.Many2many(string="Tax Reports", comodel_name='account.tax.report', compute="_compute_tax_report_ids", store=True, readonly=False)
-
-    # TODO OCO et le vat check, comment on le gère, du coup ?
-
-    _sql_constraints = [
-        ('company_vat_country_unique', 'unique (company_id, country_id)', "A company cannot have multiple VAT numbers for the same country.")
-    ]
-
-    def name_get(self):
-        return ["%s (%s)" % (record.vat, record.country_id.code) for record in self]
-
-    # TODO OCO modifier le compute pour ne le faire qu'à condition qu'on ait une res.company liée au partenaire.
-    @api.depends('country_id')
-    def _compute_tax_report_ids(self):
-        for record in self:
-            country_reports = self.env['account.tax.report'].search([('country_id', '=', record.country_id.id)])
-            record.tax_report_ids = [(6, 0, country_reports.ids)]

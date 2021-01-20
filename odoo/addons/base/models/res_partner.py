@@ -129,6 +129,24 @@ class PartnerTitle(models.Model):
     shortcut = fields.Char(string='Abbreviation', translate=True)
 
 
+class PartnerVAT(models.Model):
+    _name = "res.partner.vat"
+    _description = "Partner VAT"
+
+    partner_id = fields.Many2one(string="Partner", comodel_name='res.partner', required=True)
+    country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True)
+    vat = fields.Char(string="VAT", required=True)
+
+    # TODO OCO et le vat check, comment on le gère, du coup ?
+
+    _sql_constraints = [
+        ('company_vat_country_unique', 'unique (company_id, country_id)', "A partner cannot have multiple VAT numbers for the same country.")
+    ]
+
+    def name_get(self):
+        return ["%s (%s)" % (record.vat, record.country_id.code) for record in self]
+
+
 class Partner(models.Model):
     _description = 'Contact'
     _inherit = ['format.address.mixin', 'image.mixin']
@@ -170,7 +188,7 @@ class Partner(models.Model):
     tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset', invisible=True)
     user_id = fields.Many2one('res.users', string='Salesperson',
       help='The internal user in charge of this contact.')
-    vat = fields.Char(string='Tax ID', index=True, help="The Tax Identification Number. Complete it if the contact is subjected to government taxes. Used in some legal statements.")
+    vat_number_ids = fields.One2many(string="VAT Numbers", comodel_name='res.partner.vat', inverse_name='partner_id', help="The different VAT numbers for this partner, per country.")
     same_vat_partner_id = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False) #TODO OCO à quoi ça sert, ça ? S'en inquiéter ??
     bank_ids = fields.One2many('res.partner.bank', 'partner_id', string='Banks')
     website = fields.Char('Website Link')
@@ -263,7 +281,7 @@ class Partner(models.Model):
         for partner in self - super_partner:
             partner.partner_share = not partner.user_ids or not any(not user.share for user in partner.user_ids)
 
-    @api.depends('vat', 'company_id')
+    #@api.depends('vat', 'company_id') #TODO OCO temporairement commenté; il faudra arranger le coup
     def _compute_same_vat_partner_id(self):
         for partner in self:
             # use _origin to deal with onchange()
@@ -402,7 +420,7 @@ class Partner(models.Model):
             if field.type == 'many2one':
                 values[fname] = self[fname].id
             elif field.type == 'one2many':
-                raise AssertionError(_('One2Many fields cannot be synchronized as part of `commercial_fields` or `address fields`'))
+                raise AssertionError(_('One2Many fields cannot be synchronized as part of `commercial_fields` or `address fields`')) # TODO OCO Ca aussi, c'est chiant ; ça plantera ici :/ => pourquoi on permet les m2m mais pas les o2m ?
             elif field.type == 'many2many':
                 values[fname] = [Command.set(self[fname].ids)]
             else:
@@ -433,7 +451,7 @@ class Partner(models.Model):
         extended by inheriting classes. """
         return ['vat', 'credit_limit']
 
-    def _commercial_sync_from_company(self):
+    def _commercial_sync_from_company(self): # TODO OCO ça, c'est hyper chiant. ==> cça veut dire qu'on synchronise chaque fois tout le o2m
         """ Handle sync of commercial fields when a new parent commercial entity is set,
         as if they were related fields """
         commercial_partner = self.commercial_partner_id

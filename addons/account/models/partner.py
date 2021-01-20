@@ -492,27 +492,6 @@ class ResPartner(models.Model):
                     vals['supplier_rank'] = 1
         return super().create(vals_list)
 
-    def write(self, vals):
-        super().write(vals)
-
-        if 'vat' in vals:
-            for record in self:
-                linked_company = self.env['res.company'].search([('partner_id', '=', record.id)])
-                fiscal_country = linked_company.account_tax_fiscal_country_id
-
-                if fiscal_country:
-                    existing_vat = linked_company.vat_number_ids.filtered(lambda x: x.country_id == fiscal_country)
-
-                    if existing_vat:
-                        existing_vat.write({'vat': vals['vat']})
-                    else:
-                        self.env['account.company.vat'].create({
-                            'company_id': linked_company.id,
-                            'country_id': fiscal_country.id,
-                            'vat': vals['vat'],
-                        })
-
-
     def _increase_rank(self, field, n=1):
         if self.ids and field in ['customer_rank', 'supplier_rank']:
             try:
@@ -530,3 +509,16 @@ class ResPartner(models.Model):
                     _logger.debug('Another transaction already locked partner rows. Cannot update partner ranks.')
                 else:
                     raise e
+
+
+class PartnerVAT(models.Model):
+    _inherit = "res.partner.vat"
+
+    tax_report_ids = fields.Many2many(string="Tax Reports", comodel_name='account.tax.report', compute="_compute_tax_report_ids", store=True, readonly=False)
+
+    # TODO OCO modifier le compute pour ne le faire qu'à condition qu'on ait une res.company liée au partenaire.
+    @api.depends('country_id')
+    def _compute_tax_report_ids(self):
+        for record in self:
+            country_reports = self.env['account.tax.report'].search([('country_id', '=', record.country_id.id)])
+            record.tax_report_ids = [(6, 0, country_reports.ids)]

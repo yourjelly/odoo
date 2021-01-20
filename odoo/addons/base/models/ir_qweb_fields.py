@@ -669,6 +669,7 @@ class Contact(models.AbstractModel):
     _description = 'Qweb Field Contact'
     _inherit = 'ir.qweb.field.many2one'
 
+    #TODO OCO c'est pour le widget contact sur les champ dans les vues ; les options définissent ce qui est affiché. Pour la TVA, voir ce qu'on fait.
     @api.model
     def get_available_options(self):
         options = super(Contact, self).get_available_options()
@@ -714,7 +715,7 @@ class Contact(models.AbstractModel):
             'country_id': value.country_id.display_name,
             'website': value.website,
             'email': value.email,
-            'vat': value.vat,
+            'vat': value.vat_number_ids[0].vat if value.vat_number_ids else None, #TODO OCO j'adapte, mais il faudra voir si c'est suffisant
             'vat_label': value.country_id.vat_label or _('VAT'),
             'fields': opf,
             'object': value,
