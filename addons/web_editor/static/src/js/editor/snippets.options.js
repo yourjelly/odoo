@@ -3611,7 +3611,7 @@ registry.sizing = SnippetOptionWidget.extend({
             };
             var bodyMouseUp = function () {
                 $body.off('mousemove', bodyMouseMove);
-                $(window).off('mouseup', bodyMouseUp);
+                $body.off('mouseup', bodyMouseUp);
                 $body.removeClass(cursor);
                 $handle.removeClass('o_active');
 
@@ -3632,7 +3632,7 @@ registry.sizing = SnippetOptionWidget.extend({
                 }, 0);
             };
             $body.on('mousemove', bodyMouseMove);
-            $(window).on('mouseup', bodyMouseUp);
+            $body.on('mouseup', bodyMouseUp);
         });
 
         return def;
