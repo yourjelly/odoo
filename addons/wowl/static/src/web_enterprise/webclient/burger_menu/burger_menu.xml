@@ -3,8 +3,8 @@
 
 <!-- Owl Templates -->
 
-<div t-name="wowl.OwlBurgerMenu" owl="1" class="float-right d-block d-md-none">
-    <button type="button"
+<li t-name="wowl.BurgerMenu" owl="1">
+    <a type="button"
         class="fa fa-bars o_mobile_menu_toggle"
         title="Toggle menu" aria-label="Toggle menu"
          t-on-click="_openBurger"/>
@@ -28,7 +28,7 @@
                 <BurgerUserMenu/>
             </div>
 
-      <!-- Current App Sections -->
+            <!-- Current App Sections -->
             <div class="o_burger_menu_app" t-if="!state.isUserMenuOpened and currentApp">
                 <ul class="o_menu_sections">
                     <t t-foreach="currentAppSections" t-as="subMenu">
@@ -38,24 +38,15 @@
                     </t>
                 </ul>
             </div>
-<!--               <div class="o_burger_menu_app" t-if="!state.isUserMenuOpened and currentApp">
-                  <t t-call="wowl.NavBar.SectionsMenu">
-                    <t t-set="sections" t-value="currentAppSections" />
-                  </t>
-              </div> -->
-<!--             <div t-if="props.curr
-entApp and !state.displayUserMenu" class="o_burger_menu_app">
-                <t t-call="wowl.MenuSections.Burger" />
-            </div> -->
         </div>
       </div>
       <div t-else="" />
     </Portal>
-</div>
+</li>
 
-<t t-name="wowl.BurgerSection" >
-    <Dropdown t-if="section.childrenTree.length" t-att-class="'o_burger_menu_section'">
-        <t t-esc="section.name or 'prout'" />
+<t t-name="wowl.BurgerSection">
+    <Dropdown t-if="section.childrenTree.length" t-att-class="'o_burger_menu_section'" t-on-click.stop="_onDropDownClicked" manualOnly="true" t-key="section.id">
+        <span class="float-left"><t t-esc="section.name" /></span><span class="fa fa-chevron-right toggle_icon float-right"/>
         <t t-set-slot="menu" >
             <t t-foreach="section.childrenTree" t-as="subSection" >
                 <t t-call="wowl.BurgerSection">
@@ -64,32 +55,9 @@ entApp and !state.displayUserMenu" class="o_burger_menu_app">
             </t>
         </t>
     </Dropdown>
-    <DropdownItem t-else="" >
-        <t t-esc="section.name or 'prout'" />
+    <DropdownItem t-else="" t-key="section.id" t-on-click.stop="_onMenuClicked(section)">
+        <t t-esc="section.name" />
     </DropdownItem>
 </t>
 
-<!-- <t t-name="wowl.MenuLink.Burger" t-inherit="web.MenuLink" owl="1">
-    <xpath expr="/t/t[@t-else='']" position="replace" >
-        <li t-else="" class="o_burger_menu_section" t-on-click="_onBurgerMenuSectionClicked">
-            <a href="#" t-attf-class="o_menu_entry_lvl_{{depth}}" t-att-data-menu-xmlid="menu.xmlid" data-toggle="dropdown" role="button" aria-expanded="false">
-                <t t-esc="menu.name"/>
-                <span class="fa fa-chevron-right toggle_icon float-right"/>
-            </a>
-            <ul t-foreach="menu.children" t-as="menuID" t-key="menuID">
-                <t t-set="menu" t-value="props.menus[menuID]" />
-                <t t-call="wowl.MenuLink.Burger"/>
-            </ul>
-        </li>
-    </xpath>
-</t> -->
-
-<!-- <ul t-name="wowl.MenuSections.Burger" class="o_menu_sections" owl="1">
-    <t t-set="mobile" t-value="true"/>
-    <t t-set="inNavbar" t-value="true"/>
-    <t t-foreach="props.currentApp.children" t-as="primaryID" t-key="primaryID">
-        <t t-set="menu" t-value="props.menus[primaryID]" />
-        <t t-call="wowl.MenuLink.Burger"/>
-    </t>
-</ul> -->
 </templates>

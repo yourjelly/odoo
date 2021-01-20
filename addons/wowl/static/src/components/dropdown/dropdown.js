@@ -5,10 +5,12 @@ export class Dropdown extends Component {
   constructor() {
     super(...arguments);
     this.state = useState({ open: this.props.startOpen, groupIsOpen: this.props.startOpen });
-    // Close on outside click listener
-    hooks.useExternalListener(window, "click", this.onWindowClicked);
-    // Listen to siblings state
-    Dropdown.bus.on("state-changed", this, this.onSiblingDropdownStateChanged);
+    if(!this.props.manualOnly) {
+      // Close on outside click listener
+      hooks.useExternalListener(window, "click", this.onWindowClicked);
+      // Listen to siblings state
+      Dropdown.bus.on("state-changed", this, this.onSiblingDropdownStateChanged);
+    }
     hooks.onWillStart(() => {
       if ((this.state.open || this.state.groupIsOpen) && this.props.beforeOpen) {
         return this.props.beforeOpen();
@@ -53,7 +55,7 @@ export class Dropdown extends Component {
     const closeSelf =
       dropdownClosingRequest.isFresh &&
       dropdownClosingRequest.mode === ParentClosingMode.ClosestParent;
-    if (closeAll || closeSelf) {
+    if (!this.props.manualOnly && (closeAll || closeSelf)) {
       this._close();
     }
     // Mark closing request as started
@@ -114,6 +116,10 @@ export class Dropdown extends Component {
 Dropdown.bus = new core.EventBus();
 Dropdown.props = {
   startOpen: {
+    type: Boolean,
+    optional: true,
+  },
+  manualOnly: {
     type: Boolean,
     optional: true,
   },

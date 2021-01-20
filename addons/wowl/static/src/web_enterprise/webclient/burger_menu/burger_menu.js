@@ -65,21 +65,21 @@ class BurgerMenu extends owl.Component {
   _toggleUserMenu() {
     this.state.isUserMenuOpened = !this.state.isUserMenuOpened;
   }
-/**
- * Toggles the clicked sub menu
- *
- * @private
- * @param {MouseEvent} ev
- */
- _onBurgerMenuSectionClicked(ev) {
-   ev.preventDefault();
-   ev.stopPropagation();
-   var $target = $(ev.currentTarget);
-   $target.toggleClass('show');
-   $target.find('> a .toggle_icon').toggleClass('fa-chevron-down fa-chevron-right');
- }
+  /**
+   * @param {Event} ev
+   */
+  _onDropDownClicked(ev) {
+    const dropDownToggler = ev.currentTarget.querySelector('.o_dropdown_toggler');
+    const wasActive = dropDownToggler.classList.contains('o_dropdown_active');
+    const toggleIcon = dropDownToggler.querySelector('.toggle_icon');
+    toggleIcon.classList.toggle('fa-chevron-down', !wasActive);
+    toggleIcon.classList.toggle('fa-chevron-right', wasActive);
+  }
+  _onMenuClicked(menu) {
+    this.menuRepo.selectMenu(menu);
+  }
 }
-BurgerMenu.template = "wowl.OwlBurgerMenu";
+BurgerMenu.template = "wowl.BurgerMenu";
 BurgerMenu.components = { Portal: owl.misc.Portal, Dropdown, DropdownItem , BurgerUserMenu };
 
 export const burgerMenu = {

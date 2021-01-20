@@ -24,6 +24,9 @@
     transition: left 0.2s;
     left: 100%;
 }
+.o_mobile_menu_toggle {
+    font-size: 18px;
+}
 
 .o_burger_menu {
     display: flex;
@@ -74,25 +77,24 @@
                 padding: 0px;
                 .o_dropdown_toggler {
                     font-weight: inherit;
+                    width: 100%;
+                    text-align: initial;
                 }
                 .o_dropdown_menu {
                     background-color: initial;
                     border: initial;
                     box-shadow: initial;
                     position: relative;
-                    left: 1em;
+                    padding-left: 1em;
                 }
 
                 > li, .o_burger_menu_section {
                     list-style: none;
                     span {
                         display: block;
-                        padding: 10px 15px;
+                        padding: 10px 0px;
                         color: white;
                         font-weight: inherit;
-                        .toggle_icon {
-                            margin-top: 4px;
-                        }
                     }
 
                 }
