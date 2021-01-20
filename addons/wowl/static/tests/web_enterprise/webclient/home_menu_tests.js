@@ -152,6 +152,9 @@ QUnit.module(
             doAction(action, options) {
               bus.trigger("do_action", { action, options });
             },
+            async restore() {
+              bus.trigger('ACTION_MANAGER:UI-UPDATED', 'current');
+            }
           };
         },
       };

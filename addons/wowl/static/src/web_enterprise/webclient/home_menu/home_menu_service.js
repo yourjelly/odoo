@@ -1,7 +1,7 @@
 /** @odoo-module **/
 const { Component, core, hooks, tags } = owl;
 import { HomeMenu } from "./home_menu";
-import { clearUncommittedChanges } from "../../../action_manager/action_manager";
+import { ControllerNotFoundError, clearUncommittedChanges } from "../../../action_manager/action_manager";
 import { useService } from "../../../core/hooks";
 const { EventBus } = core;
 export const homeMenuService = {
@@ -88,6 +88,18 @@ export const homeMenuService = {
       </t>`;
     odoo.mainComponentRegistry.add("HomeMenu", HMWrap);
 
+    function restoreLastController() {
+      restoreProm = new Promise((resolve, reject) => {
+        env.services.action_manager.restore().then(resolve).catch(err => {
+          if (err instanceof ControllerNotFoundError) {
+            restoreProm = undefined;
+          } else {
+            reject(err);
+          }
+        });
+      });
+    }
+
     async function doToggle(restore = true) {
       if (hasHomeMenu) {
         const newHash = {
@@ -98,7 +110,7 @@ export const homeMenuService = {
         env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "MAIN" });
       } else {
         if (restore) {
-          restoreProm = env.services.action_manager.restore();
+          restoreLastController();
           return;
         }
         if (currentMenuId) {

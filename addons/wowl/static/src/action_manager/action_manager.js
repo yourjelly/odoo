@@ -19,6 +19,13 @@ export class ViewNotFoundError extends Error {
     this.name = "ViewNotFoundError";
   }
 }
+
+export class ControllerNotFoundError extends Error {
+  constructor() {
+    super(...arguments);
+    this.name = "ControllerNotFoundError";
+  }
+}
 // -----------------------------------------------------------------------------
 // Action hook
 // -----------------------------------------------------------------------------
@@ -919,7 +926,7 @@ function makeActionManager(env) {
       index = controllerStack.findIndex((controller) => controller.jsId === jsId);
     }
     if (index < 0) {
-      throw new Error("invalid controller to restore");
+      throw new ControllerNotFoundError("invalid controller to restore");
     }
     const controller = controllerStack[index];
     if (controller.action.type === "ir.actions.act_window") {
