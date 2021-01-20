@@ -8,6 +8,55 @@ export const homeMenuService = {
   name: "home_menu",
   dependencies: ["menus", "router", "action_manager"],
   deploy(env) {
+    function processMenuData() {
+      const menuTree = env.services.menus.getMenuAsTree("root");
+      const apps = [];
+      const menuItems = [];
+      function traverseMenuTree(tree, cb, parents = []) {
+        cb(tree, parents);
+        tree.childrenTree.forEach((c) => traverseMenuTree(c, cb, parents.concat([tree])));
+      }
+      traverseMenuTree(menuTree, (menuItem, parents) => {
+        if (!menuItem.id || !menuItem.actionID) {
+          return;
+        }
+        const isApp = menuItem.id === menuItem.appID;
+        const item = {
+          parents: parents
+            .slice(1)
+            .map((p) => p.name)
+            .join(" / "),
+          label: menuItem.name,
+          id: menuItem.id,
+          xmlid: menuItem.xmlid,
+          actionID: menuItem.actionID,
+          appID: menuItem.appID,
+          webIcon: menuItem.webIcon,
+        };
+        if (isApp) {
+          if (menuItem.webIconData) {
+            item.webIconData = menuItem.webIconData;
+          } else {
+            const [iconClass, color, backgroundColor] = (item.webIcon || "").split(",");
+            if (backgroundColor !== undefined) {
+              // Could split in three parts?
+              item.webIcon = { iconClass, color, backgroundColor };
+            } else {
+              item.webIconData = "/web_enterprise/static/src/img/default_icon_app.png";
+            }
+          }
+        } else {
+          item.menuID = parents[1].id;
+        }
+        if (isApp) {
+          apps.push(item);
+        } else {
+          menuItems.push(item);
+        }
+      });
+      return { apps, menuItems };
+    }
+
     let hasHomeMenu = false;
     let currentMenuId;
     const bus = new EventBus();
@@ -38,54 +87,7 @@ export const homeMenuService = {
         <div t-else=""></div>
       </t>`;
     odoo.mainComponentRegistry.add("HomeMenu", HMWrap);
-    function processMenuData() {
-      const menuTree = env.services.menus.getMenuAsTree("root");
-      const apps = [];
-      const menuItems = [];
-      function traverseMenuTree(tree, cb, parents = []) {
-        cb(tree, parents);
-        tree.childrenTree.forEach((c) => traverseMenuTree(c, cb, parents.concat([tree])));
-      }
-      traverseMenuTree(menuTree, (menuItem, parents) => {
-        if (!menuItem.id || !menuItem.actionID) {
-          return;
-        }
-        const isApp = menuItem.id === menuItem.appID;
-        const item = {
-          parents: parents
-            .slice(1)
-            .map((p) => p.name)
-            .join(" / "),
-          label: menuItem.name,
-          id: menuItem.id,
-          xmlid: menuItem.xmlid,
-          actionID: menuItem.actionID,
-          webIcon: menuItem.webIcon,
-          appID: menuItem.appID,
-        };
-        if (isApp) {
-          if (menuItem.webIconData) {
-            item.webIconData = menuItem.webIconData;
-          } else {
-            const [iconClass, color, backgroundColor] = (item.webIcon || "").split(",");
-            if (backgroundColor !== undefined) {
-              // Could split in three parts?
-              item.webIcon = { iconClass, color, backgroundColor };
-            } else {
-              item.webIconData = "/web_enterprise/static/src/img/default_icon_app.png";
-            }
-          }
-        } else {
-          item.menuID = parents[1].id;
-        }
-        if (isApp) {
-          apps.push(item);
-        } else {
-          menuItems.push(item);
-        }
-      });
-      return { apps, menuItems };
-    }
+
     async function doToggle(restore = true) {
       if (hasHomeMenu) {
         const newHash = {
@@ -93,7 +95,7 @@ export const homeMenuService = {
           "unlock menu_id": undefined,
         };
         env.services.router.pushState(newHash, true);
-        env.bus.trigger("ACTION_MANAGER:UPDATE", {type: 'MAIN'});
+        env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "MAIN" });
       } else {
         if (restore) {
           restoreProm = env.services.action_manager.restore();

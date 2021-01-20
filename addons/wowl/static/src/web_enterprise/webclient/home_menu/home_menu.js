@@ -38,6 +38,7 @@ export class HomeMenu extends Component {
   constructor() {
     super(...arguments);
     this.menus = useService("menus");
+    this.homeMenuService = useService("home_menu");
 
     this.availableApps = this.props.apps;
     this.displayedMenuItems = [];
@@ -106,7 +107,13 @@ export class HomeMenu extends Component {
    */
   get maxIconNumber() {
     const w = window.innerWidth;
-    return w < 576 ? 3 : w < 768 ? 4 : 6;
+    if (w < 576) {
+      return 3;
+    } else if (w < 768) {
+      return 4;
+    } else {
+      return 6;
+    }
   }
 
   /**
@@ -379,9 +386,7 @@ export class HomeMenu extends Component {
         const currentQuery = this.state.query;
         this._updateQuery("");
         if (!currentQuery) {
-          this.state.focusedIndex = null;
-          this.state.isSearching = false;
-          this.trigger("hide-home-menu");
+          this.homeMenuService.toggle(false);
         }
         break;
       }
@@ -417,8 +422,8 @@ HomeMenu.props = {
       type: Object,
       shape: {
         actionID: Number,
+        appID: Number,
         id: Number,
-        appID: { optional: 1, type: Number },
         label: String,
         parents: String,
         webIcon: [
@@ -445,13 +450,13 @@ HomeMenu.props = {
       type: Object,
       shape: {
         actionID: Number,
+        appID: Number,
         id: Number,
         label: String,
         menuID: Number,
         parents: String,
         webIcon: Boolean,
         xmlid: String,
-        appID: { optional: 1, type: Number },
       },
     },
   },
