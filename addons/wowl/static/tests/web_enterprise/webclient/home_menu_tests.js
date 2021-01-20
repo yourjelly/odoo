@@ -11,18 +11,29 @@ const { core } = owl;
 const { EventBus } = core;
 const patchDate = testUtils.mock.patchDate;
 
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
+
+async function toggleHomeMenu(env) {
+  await env.services.home_menu.toggle();
+  return testUtils.nextTick();
+}
+
 async function createHomeMenu(testConfig) {
   const env = await makeTestEnv(testConfig);
   const HMWrap = odoo.mainComponentRegistry.get("HomeMenu");
   const homeMenu = await mount(HMWrap, { env });
-  await env.services.home_menu.toggle();
-  await testUtils.nextTick();
+  await toggleHomeMenu(env);
   return homeMenu;
 }
 
 async function walkOn(assert, homeMenu, path) {
   for (const step of path) {
-    await testUtils.dom.triggerEvent(window, "keydown", { key: step.key, shiftKey: step.shiftKey });
+    await testUtils.dom.triggerEvent(window, "keydown", {
+      key: step.key,
+      shiftKey: step.shiftKey,
+    });
     assert.hasClass(
       homeMenu.el.querySelectorAll(".o_menuitem")[step.index],
       "o_focused",
@@ -31,6 +42,10 @@ async function walkOn(assert, homeMenu, path) {
   }
 }
 
+// -----------------------------------------------------------------------------
+// Tests
+// -----------------------------------------------------------------------------
+
 let testConfig;
 let bus;
 QUnit.module(
@@ -38,7 +53,13 @@ QUnit.module(
   {
     beforeEach: function () {
       const menus = {
-        root: { id: "root", children: [1, 2, 3], name: "root", appID: false, actionID: false },
+        root: {
+          id: "root",
+          children: [1, 2, 3],
+          name: "root",
+          appID: false,
+          actionID: false,
+        },
         1: {
           id: 1,
           children: [],
@@ -167,7 +188,6 @@ QUnit.module(
       testConfig = {
         serverData,
         serviceRegistry,
-        activateMockServer: true,
       };
     },
   },
@@ -389,7 +409,13 @@ QUnit.module(
       assert.expect(9);
 
       testConfig.serverData.menus = {
-        root: { id: "root", children: [1, 2, 3], name: "root", appID: false, actionID: false },
+        root: {
+          id: "root",
+          children: [1, 2, 3],
+          name: "root",
+          appID: false,
+          actionID: false,
+        },
         1: {
           id: 1,
           children: [],
@@ -775,7 +801,13 @@ QUnit.module(
       assert.expect(13);
 
       testConfig.serverData.menus = {
-        root: { id: "root", children: [1, 2, 3], name: "root", appID: false, actionID: false },
+        root: {
+          id: "root",
+          children: [1, 2, 3],
+          name: "root",
+          appID: false,
+          actionID: false,
+        },
         1: {
           id: 1,
           children: [4, 5],
@@ -859,8 +891,7 @@ QUnit.module(
       homeMenu.destroy();
     });
 
-    QUnit.skip("State reset", async function (assert) {
-      // crash when toggling the home menu off (action manager restore)
+    QUnit.test("State reset", async function (assert) {
       assert.expect(7);
 
       const homeMenu = await createHomeMenu(testConfig);
@@ -878,11 +909,11 @@ QUnit.module(
       );
       assert.strictEqual(input.value, "dis", "search bar input must contain the input text");
 
-      await homeMenu.env.services.home_menu.toggle();
+      await toggleHomeMenu(homeMenu.env);
 
-      assert.strictEqual(homeMenu.innerHTML, "", "home menu should no longer be displayed");
+      assert.strictEqual(homeMenu.el.innerHTML, "", "home menu should no longer be displayed");
 
-      await homeMenu.env.services.home_menu.toggle();
+      await toggleHomeMenu(homeMenu.env);
 
       input = homeMenu.el.querySelector(".o_menu_search_input");
       assert.hasClass(homeMenu.el, "o_search_hidden", "search bar is hidden after remount");

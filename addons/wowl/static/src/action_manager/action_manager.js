@@ -926,7 +926,8 @@ function makeActionManager(env) {
       index = controllerStack.findIndex((controller) => controller.jsId === jsId);
     }
     if (index < 0) {
-      throw new ControllerNotFoundError("invalid controller to restore");
+      const msg = jsId ? "Invalid controller to restore" : "No controller to restore";
+      throw new ControllerNotFoundError(msg);
     }
     const controller = controllerStack[index];
     if (controller.action.type === "ir.actions.act_window") {

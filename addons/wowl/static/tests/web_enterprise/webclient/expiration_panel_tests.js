@@ -2,14 +2,11 @@
 import { ExpirationPanel } from "@wowl/web_enterprise/webclient/home_menu/expiration_panel";
 import { Registry } from "@wowl/core/registry";
 import { modelService } from "@wowl/services/model";
-import makeTestEnvironment from "web.test_env";
 import { makeFakeUIService } from "../../helpers/mocks";
 import { makeTestEnv, mount } from "../../helpers/utility";
 import testUtils from "web.test_utils";
 
-const { Component, tags } = owl;
 const patchDate = testUtils.mock.patchDate;
-const { xml } = tags;
 
 async function createExpirationPanel(params = {}) {
   const serviceRegistry = new Registry();
@@ -45,6 +42,7 @@ async function createExpirationPanel(params = {}) {
   serviceRegistry.add("ui", makeFakeUIService(ui.block, ui.unblock));
   serviceRegistry.add("model", modelService);
   serviceRegistry.add(mockedEnterpriseService.name, mockedEnterpriseService);
+
   const env = await makeTestEnv({
     browser: Object.assign(
       {
@@ -55,8 +53,8 @@ async function createExpirationPanel(params = {}) {
     mockRPC: params.mockRPC,
     serviceRegistry,
   });
-  const expirationPanel = await mount(ExpirationPanel, { env });
-  return expirationPanel;
+
+  return mount(ExpirationPanel, { env });
 }
 
 QUnit.module("web_enterprise", {}, function () {
