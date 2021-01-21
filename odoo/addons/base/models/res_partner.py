@@ -140,7 +140,7 @@ class PartnerVAT(models.Model):
     # TODO OCO et le vat check, comment on le gère, du coup ?
 
     _sql_constraints = [
-        ('company_vat_country_unique', 'unique (company_id, country_id)', "A partner cannot have multiple VAT numbers for the same country.")
+        ('partner_vat_country_unique', 'unique (partner_id, country_id)', "A partner cannot have multiple VAT numbers for the same country.")
     ]
 
     def name_get(self):
@@ -188,7 +188,7 @@ class Partner(models.Model):
     tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset', invisible=True)
     user_id = fields.Many2one('res.users', string='Salesperson',
       help='The internal user in charge of this contact.')
-    vat_number_ids = fields.One2many(string="VAT Numbers", comodel_name='res.partner.vat', inverse_name='partner_id', help="The different VAT numbers for this partner, per country.")
+    vat_number_ids = fields.Many2many(string="VAT Numbers", comodel_name='res.partner.vat', help="The different VAT numbers for this partner, per country.")
     same_vat_partner_id = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False) #TODO OCO à quoi ça sert, ça ? S'en inquiéter ??
     bank_ids = fields.One2many('res.partner.bank', 'partner_id', string='Banks')
     website = fields.Char('Website Link')
@@ -257,7 +257,7 @@ class Partner(models.Model):
 
     @api.depends('is_company', 'name', 'parent_id.display_name', 'type', 'company_name')
     def _compute_display_name(self):
-        diff = dict(show_address=None, show_address_only=None, show_email=None, html_format=None, show_vat=None)
+        diff = dict(show_address=None, show_address_only=None, show_email=None, html_format=None, show_vat=None) #TODO OCO show_vat ?
         names = dict(self.with_context(**diff).name_get())
         for partner in self:
             partner.display_name = names.get(partner.id)
@@ -281,9 +281,11 @@ class Partner(models.Model):
         for partner in self - super_partner:
             partner.partner_share = not partner.user_ids or not any(not user.share for user in partner.user_ids)
 
-    #@api.depends('vat', 'company_id') #TODO OCO temporairement commenté; il faudra arranger le coup
+    @api.depends('vat_number_ids', 'company_id')
     def _compute_same_vat_partner_id(self):
+        #TODO OCO temporairement commenté; il faudra arranger le coup
         for partner in self:
+            """
             # use _origin to deal with onchange()
             partner_id = partner._origin.id
             #active_test = False because if a partner has been deactivated you still want to raise the error,
@@ -296,6 +298,8 @@ class Partner(models.Model):
             if partner_id:
                 domain += [('id', '!=', partner_id), '!', ('id', 'child_of', partner_id)]
             partner.same_vat_partner_id = bool(partner.vat) and not partner.parent_id and Partner.search(domain, limit=1)
+            """
+            partner.same_vat_partner_id = None #TODO OCO seulement pour débug
 
     @api.depends(lambda self: self._display_address_depends())
     def _compute_contact_address(self):
@@ -420,7 +424,7 @@ class Partner(models.Model):
             if field.type == 'many2one':
                 values[fname] = self[fname].id
             elif field.type == 'one2many':
-                raise AssertionError(_('One2Many fields cannot be synchronized as part of `commercial_fields` or `address fields`')) # TODO OCO Ca aussi, c'est chiant ; ça plantera ici :/ => pourquoi on permet les m2m mais pas les o2m ?
+                raise AssertionError(_('One2Many fields cannot be synchronized as part of `commercial_fields` or `address fields`'))
             elif field.type == 'many2many':
                 values[fname] = [Command.set(self[fname].ids)]
             else:
@@ -449,9 +453,9 @@ class Partner(models.Model):
         partners that aren't `commercial entities` themselves, and will be
         delegated to the parent `commercial entity`. The list is meant to be
         extended by inheriting classes. """
-        return ['vat', 'credit_limit']
+        return ['vat_number_ids', 'credit_limit']
 
-    def _commercial_sync_from_company(self): # TODO OCO ça, c'est hyper chiant. ==> cça veut dire qu'on synchronise chaque fois tout le o2m
+    def _commercial_sync_from_company(self):
         """ Handle sync of commercial fields when a new parent commercial entity is set,
         as if they were related fields """
         commercial_partner = self.commercial_partner_id
@@ -629,7 +633,7 @@ class Partner(models.Model):
         self.ensure_one()
         if self.company_name:
             # Create parent company
-            values = dict(name=self.company_name, is_company=True, vat=self.vat)
+            values = dict(name=self.company_name, is_company=True)#, vat=self.vat)#TODO OCO, je commente ça pour l'instant
             values.update(self._update_fields_values(self._address_fields()))
             new_company = self.create(values)
             # Set new company as my parent
@@ -686,8 +690,9 @@ class Partner(models.Model):
             name = "%s <%s>" % (name, partner.email)
         if self._context.get('html_format'):
             name = name.replace('\n', '<br/>')
-        if self._context.get('show_vat') and partner.vat:
-            name = "%s ‒ %s" % (name, partner.vat)
+        # TODO OCO temporairement commenté
+        """if self._context.get('show_vat') and partner.vat:
+            name = "%s ‒ %s" % (name, partner.vat)"""
         return name
 
     def name_get(self):
@@ -808,7 +813,7 @@ class Partner(models.Model):
                                display_name=unaccent('res_partner.display_name'),
                                reference=unaccent('res_partner.ref'),
                                percent=unaccent('%s'),
-                               vat=unaccent('res_partner.vat'),)
+                               vat=unaccent('res_partner.vat'),) #TODO OCO ça, ça va être bieeeen casse-couille à gérer, il me semble
 
             where_clause_params += [search_name]*3  # for email / display_name, reference
             where_clause_params += [re.sub('[^a-zA-Z0-9]+', '', search_name) or None]  # for vat

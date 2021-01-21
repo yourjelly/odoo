@@ -679,7 +679,7 @@ class Contact(models.AbstractModel):
             {'field_name': 'phone', 'label': _('Phone'), 'default': True},
             {'field_name': 'mobile', 'label': _('Mobile'), 'default': True},
             {'field_name': 'email', 'label': _('Email'), 'default': True},
-            {'field_name': 'vat', 'label': _('VAT')},
+            #{'field_name': 'vat', 'label': _('VAT')}, #TODO OCO pas ŝur du tout ; ça sert à quoi, ça ?
         ]
         separator_params = dict(
             type='selection',
@@ -715,7 +715,7 @@ class Contact(models.AbstractModel):
             'country_id': value.country_id.display_name,
             'website': value.website,
             'email': value.email,
-            'vat': value.vat_number_ids[0].vat if value.vat_number_ids else None, #TODO OCO j'adapte, mais il faudra voir si c'est suffisant
+            #'vat': value.vat_number_ids[0].vat if value.vat_number_ids else None, #TODO OCO j'adapte, mais il faudra voir si c'est suffisant
             'vat_label': value.country_id.vat_label or _('VAT'),
             'fields': opf,
             'object': value,

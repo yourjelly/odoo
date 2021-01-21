@@ -144,6 +144,3 @@
 "access_account_analytic_default_invoice","account.analytic.default invoice","model_account_analytic_default","account.group_account_invoice",1,1,1,1
 "access_account_tour_upload_bill","account.tour.upload.bill","model_account_tour_upload_bill","account.group_account_manager",1,1,1,0
 "access_account_tour_upload_bill_email_confirm","account.tour.upload.bill.email.confirm","model_account_tour_upload_bill_email_confirm","account.group_account_manager",1,1,1,0
-"access_account_company_vat_readonly","account.company.vat.readonly","model_account_company_vat","account.group_account_readonly",1,0,0,0
-"access_account_company_vat_invoice","account.company.vat.invoice","model_account_company_vat","account.group_account_invoice",1,0,0,0
-"access_account_company_vat_manager","account.company.vat.manager","model_account_company_vat","account.group_account_manager",1,1,1,1

@@ -63,7 +63,7 @@
                                     <field name="display_name" />
                                     <field name="email" />
                                     <field name="is_company" />
-                                    <field name="vat" />
+                                    <field name="vat_number_ids" widget="many2many_tags" />
                                     <field name="country_id" />
                                 </tree>
                             </field>

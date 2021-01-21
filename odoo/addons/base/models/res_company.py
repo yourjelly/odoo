@@ -84,7 +84,7 @@ class Company(models.Model):
     phone = fields.Char(related='partner_id.phone', store=True, readonly=False)
     mobile = fields.Char(related='partner_id.mobile', store=True, readonly=False)
     website = fields.Char(related='partner_id.website', readonly=False)
-    vat_number_ids = fields.One2many(related='partner_id.vat', string="Tax ID", readonly=False)
+    vat_number_ids = fields.Many2many(related='partner_id.vat_number_ids', string="Tax ID", readonly=False)
     company_registry = fields.Char()
     paperformat_id = fields.Many2one('report.paperformat', 'Paper format', default=lambda self: self.env.ref('base.paperformat_euro', raise_if_not_found=False))
     external_report_layout_id = fields.Many2one('ir.ui.view', 'Document Template')
@@ -205,7 +205,7 @@ class Company(models.Model):
             'email': vals.get('email'),
             'phone': vals.get('phone'),
             'website': vals.get('website'),
-            'vat': vals.get('vat'),
+            #'vat': vals.get('vat'), #TODO OCO temporairement retiré; sans doute à garder
         })
         # compute stored fields, for example address dependent fields
         partner.flush()

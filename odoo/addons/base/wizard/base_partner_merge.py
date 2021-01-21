@@ -53,7 +53,7 @@ class MergePartnerAutomatic(models.TransientModel):
     group_by_email = fields.Boolean('Email')
     group_by_name = fields.Boolean('Name')
     group_by_is_company = fields.Boolean('Is Company')
-    group_by_vat = fields.Boolean('VAT')
+    group_by_vat = fields.Boolean('VAT') # TODO OCO Il doit y avoir un truc chiant qqpart par ici
     group_by_parent_id = fields.Boolean('Parent Company')
 
     state = fields.Selection([

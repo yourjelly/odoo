@@ -176,7 +176,7 @@ class TestBase(TransactionCase):
             'street': 'Main Street, 10',
             'phone': '123456789',
             'email': 'info@ghoststep.com',
-            'vat': 'BE0477472701',
+            'vat': 'BE0477472701', #TODO OCO
             'type': 'contact',
         })
         p1 = res_partner.browse(res_partner.name_create('Denis Bladesmith <denis.bladesmith@ghoststep.com>')[0])
@@ -196,7 +196,7 @@ class TestBase(TransactionCase):
         self.assertEqual(p1.street, p1street, 'Address fields must not be synced after turning sync off')
         self.assertNotEqual(ghoststep.street, p1street, 'Parent address must never be touched')
 
-        # turn on sync again       
+        # turn on sync again
         p1.write({'type': 'contact'})
         self.assertEqual(p1.street, ghoststep.street, 'Address fields must be synced again')
         self.assertEqual(p1.phone, p1phone, 'Phone should be preserved after address sync')
