@@ -1,6 +1,5 @@
 /** @odoo-module **/
 import { SwitchCompanyMenu } from '../switch_company_menu/switch_company_menu';
-import { useService } from '../core/hooks';
 
 function computeAllowedCompanyIds(env) {
   const { cookie, router } = env.services;
@@ -63,7 +62,7 @@ export function makeSwitchCompaniesSystray(odooObject, reloadFn) {
     }
   }
   SwitchCompanySystrayItem.template = owl.tags.xml`
-    <t t-component="props.Item" t-on-switch-companies="onSwitchCompanies" switchCompanies="switchCompanies"/>
+    <t t-component="props.Item" switchCompanies="switchCompanies"/>
   `;
   const switchCompanySystrayItem = {
     name: 'SwitchCompanyMenu',
