@@ -2147,6 +2147,7 @@ var SnippetsMenu = Widget.extend({
 
                         var $target = $toInsert;
                         await self._scrollToSnippet($target);
+                        self.options.wysiwyg.odooEditor.historyStep();
 
                         _.defer(async function () {
                             self.trigger_up('snippet_dropped', {$target: $target});
