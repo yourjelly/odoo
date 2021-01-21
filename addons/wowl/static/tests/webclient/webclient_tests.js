@@ -65,6 +65,7 @@ QUnit.module("WebClient Common", (hooks) => {
   });
   hooks.beforeEach(() => {
     testConfig = getActionManagerTestConfig();
+    testConfig.userMenuRegistry = new Registry();
   });
   QUnit.test("can set window title (from legacy)", async function (assert) {
     assert.expect(1);

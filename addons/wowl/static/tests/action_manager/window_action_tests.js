@@ -1488,14 +1488,15 @@ QUnit.module("ActionManager", (hooks) => {
         lang: "en",
         uid: 7,
         tz: "taht",
+        allowed_company_ids: [1],
       },
     };
     const sessionStorage = testConfig.browser.sessionStorage;
     testConfig.browser.sessionStorage = Object.assign(Object.create(sessionStorage), {
       setItem(k, value) {
-        assert.strictEqual(
-          value,
-          JSON.stringify(expectedAction),
+        assert.deepEqual(
+          JSON.parse(value),
+          expectedAction,
           "should store the executed action in the sessionStorage"
         );
       },
@@ -1520,6 +1521,7 @@ QUnit.module("ActionManager", (hooks) => {
           active_model: "partner",
           active_id: 1,
           active_ids: [1],
+          allowed_company_ids: [1],
         },
       };
       let checkSessionStorage = false;
@@ -1527,9 +1529,9 @@ QUnit.module("ActionManager", (hooks) => {
       testConfig.browser.sessionStorage = Object.assign(Object.create(sessionStorage), {
         setItem(k, value) {
           if (checkSessionStorage) {
-            assert.strictEqual(
-              value,
-              JSON.stringify(expectedAction),
+            assert.deepEqual(
+              JSON.parse(value),
+              expectedAction,
               "should store the executed action in the sessionStorage"
             );
           }

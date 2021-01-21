@@ -1,16 +1,10 @@
 /** @odoo-module **/
 import { SwitchCompanyMenu } from '../switch_company_menu/switch_company_menu';
 
-function computeAllowedCompanyIds(env) {
-  const { cookie, router } = env.services;
+export function computeAllowedCompanyIds(cidsFromHash) {
   const { user_companies } = odoo.session_info;
-  let cids;
-  if ("cids" in router.current.hash) {
-    cids = router.current.hash.cids;
-  } else if ("cids" in cookie.current) {
-    cids = cookie.current.cids;
-  }
-  let allowedCompanies = cids ? cids.split(",").map((id) => parseInt(id, 10)) : [];
+
+  let allowedCompanies = cidsFromHash || [];
   const allowedCompaniesFromSession = user_companies.allowed_companies.map(([id, name]) => id);
   const notReallyAllowedCompanies = allowedCompanies.filter(
     (id) => !allowedCompaniesFromSession.includes(id)
@@ -21,7 +15,7 @@ function computeAllowedCompanyIds(env) {
   return allowedCompanies;
 }
 
-export function makeSwitchCompanies(env, reloadFn) {
+function makeSwitchCompanies(env, reloadFn) {
   const { cookie, router, user } = env.services;
   let reloadTimeout;
   function doReload() {
@@ -54,7 +48,7 @@ export function makeSwitchCompanies(env, reloadFn) {
   };
 }
 
-export function makeSwitchCompaniesSystray(odooObject, reloadFn) {
+export function makeSwitchCompaniesSystray(reloadFn) {
   class SwitchCompanySystrayItem extends owl.Component {
     constructor() {
       super(...arguments);
@@ -64,19 +58,19 @@ export function makeSwitchCompaniesSystray(odooObject, reloadFn) {
   SwitchCompanySystrayItem.template = owl.tags.xml`
     <t t-component="props.Item" switchCompanies="switchCompanies"/>
   `;
-  const switchCompanySystrayItem = {
+  return {
     name: 'SwitchCompanyMenu',
     Component: SwitchCompanySystrayItem,
     sequence: 1,
     props: { Item: SwitchCompanyMenu },
   };
-  odooObject.systrayRegistry.add(switchCompanySystrayItem.name, switchCompanySystrayItem);
 }
 
 export const userService = {
   name: "user",
   dependencies: ["router", "cookie"],
   deploy(env) {
+    const {router, cookie} = env.services;
     const info = odoo.session_info;
     const {
       user_context,
@@ -89,7 +83,14 @@ export const userService = {
       db,
       show_effect: showEffect,
     } = info;
-    const allowedCompanies = computeAllowedCompanyIds(env);
+
+    let cids;
+    if ("cids" in router.current.hash) {
+      cids = router.current.hash.cids;
+    } else if ("cids" in cookie.current) {
+      cids = cookie.current.cids;
+    }
+    const allowedCompanies = computeAllowedCompanyIds(cids && cids.split(",").map((id) => parseInt(id, 10)));
     let context = {
       lang: user_context.lang,
       tz: user_context.tz,
@@ -97,11 +98,12 @@ export const userService = {
       allowed_company_ids: allowedCompanies,
     };
 
-    const cids = allowedCompanies.join(",");
-    env.services.router.replaceState({ "lock cids": cids });
-    env.services.cookie.setCookie("cids", cids);
+    cids = allowedCompanies.join(",");
+    router.replaceState({ "lock cids": cids });
+    cookie.setCookie("cids", cids);
     if (user_companies.allowed_companies.length > 1) {
-      makeSwitchCompaniesSystray(odoo, () => window.location.reload());
+      const systrayItem = makeSwitchCompaniesSystray(() => window.location.reload());
+      odoo.systrayRegistry.add(systrayItem.name, systrayItem);
     }
     return {
       context,

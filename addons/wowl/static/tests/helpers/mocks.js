@@ -3,6 +3,8 @@ import { effectService } from "../../src/effects/effects_service";
 import { makePreProcessQuery, makePushState, routeToUrl } from "../../src/services/router";
 import { SIZES } from "../../src/services/device";
 import { makeLocalization } from "../../src/services/localization";
+import { computeAllowedCompanyIds } from '../../src/services/user';
+
 // // -----------------------------------------------------------------------------
 // // Mock Services
 // // -----------------------------------------------------------------------------
@@ -21,20 +23,23 @@ export function makeFakeLocalizationService(config) {
  * Simulate a fake user service.
  */
 export function makeFakeUserService(values) {
-  const { uid, name, username, is_admin, user_companies, partner_id, db } = odoo.session_info;
-  const { user_context } = odoo.session_info;
+  const sessionInfo = {};
+  Object.assign(sessionInfo, odoo.session_info, values && values.session_info);
+  const { uid, name, username, is_admin, user_companies, partner_id, db, user_context } = sessionInfo;
   return {
     name: "user",
-    deploy() {
+    deploy(env) {
+      const allowedCompanies = computeAllowedCompanyIds();
+      const context = {...user_context, allowed_company_ids: allowedCompanies};
       const result = {
-        context: user_context,
+        context,
         userId: uid,
         name: name,
         userName: username,
         isAdmin: is_admin,
         partnerId: partner_id,
         allowed_companies: user_companies.allowed_companies,
-        current_company: user_companies.current_company,
+        current_company: user_companies.allowed_companies.find(([id]) => id === allowedCompanies[0]),
         lang: user_context.lang,
         tz: "Europe/Brussels",
         db: db,
