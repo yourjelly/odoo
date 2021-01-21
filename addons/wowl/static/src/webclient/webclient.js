@@ -59,8 +59,11 @@ export class WebClient extends Component {
     }
     if (!actionManagerHandles && !action) {
       return this._loadDefaultApp();
+    } else {
+      return this._routerStateLoaded();
     }
   }
+  async _routerStateLoaded() {}
   async _loadDefaultApp() {
     const action = this.user.home_action_id;
     if (action) {

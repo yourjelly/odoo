@@ -17,7 +17,11 @@ export class WebClientEnterprise extends WebClient {
       });
     });
   }
-  async _loadDefaultApp() {
+  async _routerStateLoaded() {
+    await super.loadRouterState(...arguments);
+    return this.hm.toggle(false, false);
+  }
+  _loadDefaultApp() {
     return this.hm.toggle(true);
   }
 }

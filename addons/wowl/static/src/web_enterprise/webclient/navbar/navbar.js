@@ -28,7 +28,7 @@ export class EnterpriseNavBar extends NavBar {
     });
   }
   get currentApp() {
-    return !this.device.isMobileOS && !this.hm.hasHomeMenu ? super.currentApp : undefined;
+    return !this.device.isMobileOS /*&& !this.hm.hasHomeMenu*/ ? super.currentApp : undefined;
   }
   _updateMenuAppsIcon() {
     const menuAppsEl = this.menuAppsRef.el;

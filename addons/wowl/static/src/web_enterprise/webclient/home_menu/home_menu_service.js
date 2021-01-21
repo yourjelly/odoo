@@ -7,6 +7,7 @@ import {
 } from "../../../action_manager/action_manager";
 import { useService } from "../../../core/hooks";
 const { EventBus } = core;
+import { Mutex } from "@wowl/utils/concurrency";
 export const homeMenuService = {
   name: "home_menu",
   dependencies: ["menus", "router", "action_manager"],
@@ -61,10 +62,8 @@ export const homeMenuService = {
     }
 
     let hasHomeMenu = false;
-    let currentMenuId;
     const bus = new EventBus();
     const { apps, menuItems } = processMenuData();
-    let restoreProm;
     class HMWrap extends Component {
       constructor() {
         super(...arguments);
@@ -72,82 +71,61 @@ export const homeMenuService = {
         this.menus = useService("menus");
         this.apps = apps;
         this.menuItems = menuItems;
+        this.hasHomeMenu = hasHomeMenu;
         hooks.onMounted(() => {
-          bus.on("TOGGLE", this, () => {
-            this.render();
+          bus.on("TOGGLE", this, async (cb) => {
+            this.hasHomeMenu = !this.hasHomeMenu;
+            await this.render();
+            cb();
           });
-          this.env.bus.trigger("HOME-MENU:TOGGLED");
-        });
-        hooks.onPatched(() => {
-          this.env.bus.trigger("HOME-MENU:TOGGLED");
         });
       }
     }
     HMWrap.components = { HomeMenu };
     HMWrap.template = tags.xml`
       <t>
-        <HomeMenu t-if="hm.hasHomeMenu" apps="apps" menuItems="menuItems"/>
+        <HomeMenu t-if="hasHomeMenu" apps="apps" menuItems="menuItems"/>
         <div t-else=""></div>
       </t>`;
     odoo.mainComponentRegistry.add("HomeMenu", HMWrap);
 
-    function restoreLastController() {
-      restoreProm = new Promise((resolve, reject) => {
-        env.services.action_manager
-          .restore()
-          .then(resolve)
-          .catch((err) => {
-            if (err instanceof ControllerNotFoundError) {
-              restoreProm = undefined;
-            } else {
-              reject(err);
+    const mutex = new Mutex();
+    async function toggle(show, reload = true) {
+      mutex.exec(async () => {
+        show = show === undefined ? !hasHomeMenu : Boolean(show);
+        if (show !== hasHomeMenu) {
+          if (show) {
+            await clearUncommittedChanges(env);
+            const newHash = {
+              "home": "",
+              "unlock menu_id": undefined,
+            };
+            env.services.router.pushState(newHash, true);
+          } else {
+            if (reload) {
+              try {
+                await env.services.action_manager.restore();
+              } catch (err) {
+                if (!(err instanceof ControllerNotFoundError)) {
+                  throw err;
+                }
+                return;
+              }
             }
+            const currentMenuId = env.services.menus.getCurrentApp();
+            if (currentMenuId) {
+              env.services.router.pushState({ "lock menu_id": `${currentMenuId.id}` });
+            }
+          }
+          await new Promise(resolve => {
+            bus.trigger("TOGGLE", resolve);
           });
+          hasHomeMenu = show;
+          env.bus.trigger("HOME-MENU:TOGGLED");
+          return new Promise(r => setTimeout(r)); // hack: wait to ensure that the url has been updated
+        }
       });
     }
-
-    async function doToggle(restore = true) {
-      if (hasHomeMenu) {
-        const newHash = {
-          home: "",
-          "unlock menu_id": undefined,
-        };
-        env.services.router.pushState(newHash, true);
-        env.bus.trigger("ACTION_MANAGER:UPDATE", { type: "MAIN" });
-      } else {
-        if (restore) {
-          restoreLastController();
-          return;
-        }
-        if (currentMenuId) {
-          env.services.router.pushState({ "lock menu_id": currentMenuId });
-        }
-        currentMenuId = undefined;
-      }
-      bus.trigger("TOGGLE", hasHomeMenu);
-    }
-    async function toggle(fswitch) {
-      if (fswitch === undefined) {
-        fswitch = !hasHomeMenu;
-      }
-      if (fswitch) {
-        await clearUncommittedChanges(env);
-      }
-      if (fswitch !== hasHomeMenu) {
-        hasHomeMenu = fswitch;
-        return doToggle();
-      }
-    }
-    env.bus.on("ACTION_MANAGER:UI-UPDATED", null, async (mode) => {
-      if (mode !== "new") {
-        await restoreProm;
-        restoreProm = undefined;
-        currentMenuId = env.services.menus.getCurrentApp() || undefined;
-        currentMenuId = currentMenuId && `${currentMenuId.id}`;
-        hasHomeMenu = false;
-        doToggle(false);
-      }
-    });
     return {
       get hasHomeMenu() {
         return hasHomeMenu;
