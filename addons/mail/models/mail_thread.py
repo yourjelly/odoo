@@ -2193,6 +2193,11 @@ class MailThread(models.AbstractModel):
         model_name = model_description or (self._fallback_lang().env['ir.model']._get(model).display_name if model else False) # one query for display name
         recipients_groups_data = self._notify_classify_recipients(partners_data, model_name, msg_vals=msg_vals)
         preview_text = msg_vals.get('body') + '&nbsp;&zwnj;' * 120
+        dummy =  msg_vals.get('body')
+        charc = '&nbsp;&zwnj;'
+        resd = bytes(dummy, 'utf-8')
+        print("type..............",(type(dummy)),type(charc),resd)
+
         if not recipients_groups_data:
             return True
         force_send = self.env.context.get('mail_notify_force_send', force_send)

@@ -397,7 +397,7 @@ MSOFFICE_1 = u"""
         </div>
         <p class="MsoNormal"></p>
         <p>&nbsp;</p>
-        <p>Hello Alan Widmer, </p>nbsp
+        <p>Hello Alan Widmer, </p>
         <p></p>
         <p>I noticed you recently downloaded OpenERP. </p>
         <p></p>
