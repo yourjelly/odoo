@@ -8,24 +8,6 @@ import { BurgerUserMenu } from './user_menu/user_menu.';
 * This file includes the widget Menu in mobile to render the BurgerMenu which
 * opens fullscreen and displays the user menu and the current app submenus.
 */
-const { useListener } = require('web.custom_hooks');
-//const { ComponentAdapter } = require('web.OwlCompatibility');
-//const { SwitchCompanyMenuMobile } = require('web_enterprise.SwitchCompanyMenu');
-//const UserMenu = require('web_enterprise.UserMenu');
-
-// class CompanySwitcherAdapter extends ComponentAdapter {
-//   constructor(parent, props) {
-//     props.Component = SwitchCompanyMenuMobile;
-//     super(parent, props);
-//     this.switcherTitle = `
-//     <div class="o_burger_menu_user_title">
-//     ${this.env._t('COMPANIES')}
-//     </div>`;
-//   }
-//   get widgetArgs() {
-//     return [this.env, {title: this.switcherTitle}];
-//   }
-// }
 
 class BurgerMenu extends owl.Component {
   constructor() {
@@ -47,7 +29,6 @@ class BurgerMenu extends owl.Component {
         }
       });
     });
-    useListener('click', 'a[data-menu]', this._closeBurger);
   }
   get currentApp() {
     return !this.hm.hasHomeMenu && this.menuRepo.getCurrentApp();

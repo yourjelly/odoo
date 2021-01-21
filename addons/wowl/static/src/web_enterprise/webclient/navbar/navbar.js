@@ -3,6 +3,8 @@ const { hooks } = owl;
 import { NavBar } from "../../../webclient/navbar/navbar";
 import { useService } from "../../../core/hooks";
 import { burgerMenu } from '../burger_menu/burger_menu';
+import { MobileSwitchCompanyMenu } from '../burger_menu/mobile_switch_company_menu/mobile_switch_company_menu';
+import { switchCompanyMenuItem } from '../../../switch_company_menu/switch_company_menu';
 
 const { useRef } = hooks;
 export class EnterpriseNavBar extends NavBar {
@@ -26,9 +28,15 @@ export class EnterpriseNavBar extends NavBar {
       this._updateMenuAppsIcon();
     });
 
-    if (this.device.isSmall || this.device.isMobileOS) {
+    if (this.device.isMobileOS) {
+      const SwitchCompanyMenu = odoo.systrayRegistry.get('SwitchCompanyMenu');
+      odoo.systrayRegistry.remove('SwitchCompanyMenu');
+      switchCompanyMenuItem.Component = MobileSwitchCompanyMenu;
+
       odoo.systrayRegistry.remove('wowl.user_menu');
-      odoo.systrayRegistry.add('wowl.burger_menu', burgerMenu);
+      const alteredBurgerMenu = Object.create(burgerMenu);
+      alteredBurgerMenu.props = { SwitchCompanyMenu };
+      odoo.systrayRegistry.add('wowl.burger_menu', alteredBurgerMenu);
     }
   }
   get currentApp() {
