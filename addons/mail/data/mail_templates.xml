@@ -12,9 +12,6 @@
 </div>
 <div t-if="has_button_access or len(actions) &gt; 0 or not is_discussion"
         summary="o_mail_notification" style="padding: 0px; width:600px;">
-    <div style="display:none;font-size:.25px;height:0px;width:0px;opacity:0;">
-        <div t-raw="message.body"/>
-    </div>
     <table cellspacing="0" cellpadding="0" border="0" style="width: 600px; margin-top: 5px;">
     <tbody><tr>
     <td valign="center">
@@ -193,7 +190,7 @@
 <table border="0" cellpadding="0" cellspacing="0" width="590" style="padding: 24px; background-color: white; color: #454748; border-collapse:separate;">
 <tbody>
     <!-- HEADER -->
-     <tr>
+    <tr>
         <td align="center" style="min-width: 590px;">
             <t t-set="access_action" t-value="record.with_context(force_website=True).get_access_action()"/>
             <t t-set="is_online" t-value="access_action and access_action['type'] == 'ir.actions.act_url'"/>

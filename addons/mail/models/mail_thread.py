@@ -2192,16 +2192,14 @@ class MailThread(models.AbstractModel):
         model = msg_vals.get('model') if msg_vals else message.model
         model_name = model_description or (self._fallback_lang().env['ir.model']._get(model).display_name if model else False) # one query for display name
         recipients_groups_data = self._notify_classify_recipients(partners_data, model_name, msg_vals=msg_vals)
-
+        preview_text = msg_vals.get('body') + '&nbsp;&zwnj;' * 120
         if not recipients_groups_data:
             return True
         force_send = self.env.context.get('mail_notify_force_send', force_send)
 
         template_values = self._notify_prepare_template_context(message, msg_vals, model_description=model_description) # 10 queries
-
         email_layout_xmlid = msg_vals.get('email_layout_xmlid') if msg_vals else message.email_layout_xmlid
         template_xmlid = email_layout_xmlid if email_layout_xmlid else 'mail.message_notification_email'
-        print("kerii templte id................",template_xmlid)
         try:
             base_template = self.env.ref(template_xmlid, raise_if_not_found=True).with_context(lang=template_values['lang']) # 1 query
         except ValueError:
@@ -2239,13 +2237,11 @@ class MailThread(models.AbstractModel):
             render_values = {**template_values, **recipients_group_data}
             # {company, is_discussion, lang, message, model_description, record, record_name, signature, subtype, tracking_values, website_url}
             # {actions, button_access, has_button_access, recipients}
-
             if base_template:
                 mail_body = base_template._render(render_values, engine='ir.qweb', minimal_qcontext=True)
             else:
                 mail_body = message.body
             mail_body = self.env['mail.render.mixin']._replace_local_links(mail_body)
-
             # create email
             for recipients_ids_chunk in split_every(recipients_max, recipients_ids):
                 recipient_values = self._notify_email_recipient_values(recipients_ids_chunk)
@@ -2253,7 +2249,7 @@ class MailThread(models.AbstractModel):
                 recipient_ids = recipient_values['recipient_ids']
 
                 create_values = {
-                    'body_html': mail_body,
+                    'body_html': self.env['mail.render.mixin']._prepend_preview(mail_body, tools.html2plaintext(preview_text).replace('[1]',"")),
                     'subject': mail_subject,
                     'recipient_ids': [Command.link(pid) for pid in recipient_ids],
                 }
@@ -2302,7 +2298,6 @@ class MailThread(models.AbstractModel):
                 email_ids = emails.ids
                 dbname = self.env.cr.dbname
                 _context = self._context
-
                 @self.env.cr.postcommit.add
                 def send_notifications():
                     db_registry = registry(dbname)
@@ -2311,7 +2306,6 @@ class MailThread(models.AbstractModel):
                         env['mail.mail'].browse(email_ids).send()
             else:
                 emails.send()
-
         return True
 
     @api.model

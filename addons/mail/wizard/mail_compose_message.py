@@ -82,12 +82,6 @@ class MailComposer(models.TransientModel):
 
     # content
     subject = fields.Char('Subject')
-    # preview_text = fields.Char(
-    #     'Preview Text', translate=True,
-    #     help='Catchy preview sentence that encourages recipients to open this email.\n'
-    #          'In most inboxes, this is displayed next to the subject.\n'
-    #          'Keep it empty if you prefer the first characters of your email content to appear instead.')
-    # either append bodyhtml to subject from python while passing or assign bodyhtml to new field annd the (can pass it through config_parameter?)
     body = fields.Html('Contents', default='', sanitize_style=True)
     parent_id = fields.Many2one(
         'mail.message', 'Parent Message', index=True, ondelete='set null',
@@ -242,7 +236,6 @@ class MailComposer(models.TransientModel):
                 # to create lots of emails in sudo as it is consdiered as a technical model.
                 batch_mails_sudo = self.env['mail.mail'].sudo()
                 all_mail_values = wizard.get_mail_values(res_ids)
-                print("all_mail_values..in send_mail.........",all_mail_values)
                 for res_id, mail_values in all_mail_values.items():
                     if wizard.composition_mode == 'mass_mail':
                         batch_mails_sudo |= self.env['mail.mail'].sudo().create(mail_values)
@@ -298,22 +291,6 @@ class MailComposer(models.TransientModel):
 
         for res_id in res_ids:
             # static wizard (mail.message) values
-            def pre(preview_text):
-                print("preeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-                if preview_text:
-                    preview_text = f"""
-                                 <div style="display:none;font-size:1px;height:0px;width:0px;opacity:0;font-weight: normal !important;">
-                                   {tools.html2plaintext(preview_text)}
-                                 </div>
-                             """
-                preview_text = re.sub("[\r\n]", "9", preview_text)
-                print("len of preview text............",len(preview_text))
-                return preview_text
-            print("verum boody -- plain body,len pain textnte",self.body,len(tools.html2plaintext(self.body)))
-            print(
-                "============================================================================================"
-            )
-            print("context modelllllllllllllllllllllllllllllllll",self._context)
             mail_values = {
                 'subject':  self.subject,
                 'body': self.body + '&nbsp;&zwnj;' * 120 if self._context.get('custom_layout') == 'mail.mail_notification_paynow' and len(tools.html2plaintext(self.body)) < 120 else self.body,
@@ -327,10 +304,8 @@ class MailComposer(models.TransientModel):
                 'mail_server_id': self.mail_server_id.id,
                 'mail_activity_type_id': self.mail_activity_type_id.id,
             }
-            print("mail values in get_mail_values.......",mail_values)
             # mass mailing: rendering override wizard static values
             if mass_mail_mode and self.model:
-                print("massmailing il kerii")
                 record = self.env[self.model].browse(res_id)
                 mail_values['headers'] = record._notify_email_headers()
                 # keep a copy unless specifically requested, reset record name (avoid browsing records)
@@ -371,7 +346,6 @@ class MailComposer(models.TransientModel):
                     mail_values['notification'] = False
 
             results[res_id] = mail_values
-            print("resultss.......",results)
         return results
 
     # ------------------------------------------------------------
@@ -424,13 +398,8 @@ class MailComposer(models.TransientModel):
 
         if values.get('body_html'):
             values['body'] = values.pop('body_html')
-        print(
-               "body_html/////////////", values.get('body_html')
-            )
         # This onchange should return command instead of ids for x2many field.
         values = self._convert_to_write(values)
-        print("values....................",values)
-
         return {'value': values}
 
     def save_as_template(self):
