@@ -22,43 +22,48 @@ function computeAllowedCompanyIds(env) {
   return allowedCompanies;
 }
 
-export function makeSwitchCompaniesSystray(odooObject, reloadFn) {
+export function makeSwitchCompanies(env, reloadFn) {
+  const { cookie, router, user } = env.services;
   let reloadTimeout;
+  function doReload() {
+    odoo.browser.clearTimeout(reloadTimeout);
+    reloadTimeout = odoo.browser.setTimeout(() => {
+      reloadTimeout = undefined;
+      reloadFn();
+    });
+  }
+  return (mode, companyId) => {
+    let currentCompanies = user.context.allowed_company_ids.slice();
+    if (mode === 'toggle') {
+      if (currentCompanies.includes(companyId)) {
+        currentCompanies = currentCompanies.filter(id => id !== companyId);
+      } else {
+        currentCompanies.push(companyId);
+      }
+    } else if (mode === 'loginto') {
+      if (currentCompanies.includes(companyId)) {
+        currentCompanies = currentCompanies.filter(id => id !== companyId);
+      }
+      currentCompanies.unshift(companyId);
+    }
+    const newCompanyIds = currentCompanies.join(',');
+    router.pushState({
+      'lock cids': newCompanyIds,
+    });
+    cookie.setCookie('cids', newCompanyIds);
+    doReload();
+  };
+}
+
+export function makeSwitchCompaniesSystray(odooObject, reloadFn) {
   class SwitchCompanySystrayItem extends owl.Component {
     constructor() {
       super(...arguments);
-      this.user = useService('user');
-      this.router = useService('router');
-      this.cookie = useService('cookie');
-    }
-    onSwitchCompanies(ev) {
-      const { mode, companyId } = ev.detail;
-      console.log(mode, companyId);
-      let currentCompanies = this.user.context.allowed_company_ids.slice();
-
-      if (mode === 'toggle') {
-        if (currentCompanies.includes(companyId)) {
-          currentCompanies = currentCompanies.filter(id => id !== companyId);
-        } else {
-          currentCompanies.push(companyId);
-        }
-      } else if (mode === 'loginto') {
-        if (currentCompanies.includes(companyId)) {
-          currentCompanies = currentCompanies.filter(id => id !== companyId);
-        }
-        currentCompanies.unshift(companyId);
-      }
-      const newCompanyIds = currentCompanies.join(',');
-      this.router.pushState({
-        'lock cids': newCompanyIds,
-      });
-      this.cookie.setCookie('cids', newCompanyIds);
-      odooObject.browser.clearTimeout(reloadTimeout);
-      reloadTimeout = odooObject.browser.setTimeout(reloadFn);
+      this.switchCompanies = makeSwitchCompanies(this.env, reloadFn);
     }
   }
   SwitchCompanySystrayItem.template = owl.tags.xml`
-    <t t-component="props.Item" t-on-switch-companies="onSwitchCompanies"/>
+    <t t-component="props.Item" t-on-switch-companies="onSwitchCompanies" switchCompanies="switchCompanies"/>
   `;
   const switchCompanySystrayItem = {
     name: 'SwitchCompanyMenu',

@@ -10,16 +10,10 @@ export class SwitchCompanyMenu extends owl.Component {
     this.user = useService('user');
   }
   toggleCompany(companyId) {
-    this.trigger('switch-companies', {
-      mode: 'toggle',
-      companyId
-    });
+    this.props.switchCompanies('toggle', companyId);
   }
   logIntoCompany(companyId) {
-    this.trigger('switch-companies', {
-      mode: 'loginto',
-      companyId
-    });
+    this.props.switchCompanies('loginto', companyId);
   }
 }
 SwitchCompanyMenu.template = "wowl.SwitchCompanyMenu";
