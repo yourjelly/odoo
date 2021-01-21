@@ -1,13 +1,12 @@
 /** @odoo-module **/
-import { homeMenuService } from "@wowl/web_enterprise/webclient/home_menu/home_menu_service";
-import { menusService } from "@wowl/services/menus";
+import { HomeMenu } from "@wowl/web_enterprise/webclient/home_menu/home_menu";
 import { modelService } from "@wowl/services/model";
 import { Registry } from "@wowl/core/registry";
 import testUtils from "web.test_utils";
 import { getFixture, makeTestEnv, mount } from "../../helpers/utility";
-import { makeFakeUIService, makeFakeRouterService } from "../../helpers/mocks";
+import { makeFakeUIService } from "../../helpers/mocks";
 
-const { core } = owl;
+const { Component, core, hooks, tags } = owl;
 const { EventBus } = core;
 const patchDate = testUtils.mock.patchDate;
 
@@ -15,17 +14,19 @@ const patchDate = testUtils.mock.patchDate;
 // Helpers
 // -----------------------------------------------------------------------------
 
-async function toggleHomeMenu(env) {
-  await env.services.home_menu.toggle();
-  return testUtils.nextTick();
-}
-
 async function createHomeMenu(testConfig) {
+  class Parent extends Component {
+    constructor() {
+      super();
+      this.homeMenuRef = hooks.useRef("home-menu");
+      this.homeMenuProps = testConfig.homeMenuProps;
+    }
+  }
+  Parent.components = { HomeMenu };
+  Parent.template = tags.xml`<HomeMenu t-ref="home-menu" t-props="homeMenuProps"/>`;
   const env = await makeTestEnv(testConfig);
-  const HMWrap = odoo.mainComponentRegistry.get("HomeMenu");
-  const homeMenu = await mount(HMWrap, { env });
-  await toggleHomeMenu(env);
-  return homeMenu;
+  const parent = await mount(Parent, { env });
+  return parent.homeMenuRef.comp;
 }
 
 async function walkOn(assert, homeMenu, path) {
@@ -52,106 +53,109 @@ QUnit.module(
   "web_enterprise",
   {
     beforeEach: function () {
-      const menus = {
-        root: {
-          id: "root",
-          children: [1, 2, 3],
-          name: "root",
-          appID: false,
-          actionID: false,
-        },
-        1: {
-          id: 1,
-          children: [],
-          name: "Discuss",
-          appID: 1,
-          actionID: 1,
-          webIcon: false,
-          xmlid: "app.1",
-        },
-        2: {
-          id: 2,
-          children: [],
-          name: "Calendar",
-          appID: 2,
-          actionID: 2,
-          webIcon: false,
-          xmlid: "app.2",
-        },
-        3: {
-          id: 3,
-          children: [4, 5],
-          name: "Contacts",
-          appID: 3,
-          actionID: 4,
-          webIcon: false,
-          xmlid: "app.3",
-        },
-        4: {
-          id: 4,
-          children: [],
-          name: "Contacts",
-          appID: 3,
-          actionID: 4,
-          webIcon: false,
-          xmlid: "menu.4",
-        },
-        5: {
-          id: 5,
-          children: [6, 7, 8],
-          name: "Configuration",
-          appID: 3,
-          actionID: 5,
-          webIcon: false,
-          xmlid: "menu.5",
-        },
-        6: {
-          id: 6,
-          children: [],
-          name: "Contact Tags",
-          appID: 3,
-          actionID: 6,
-          webIcon: false,
-          xmlid: "menu.6",
-        },
-        7: {
-          id: 7,
-          children: [],
-          name: "Contact Titles",
-          appID: 3,
-          actionID: 7,
-          webIcon: false,
-          xmlid: "menu.7",
-        },
-        8: {
-          id: 8,
-          children: [9, 10],
-          name: "Localization",
-          appID: 3,
-          actionID: 8,
-          webIcon: false,
-          xmlid: "menu.8",
-        },
-        9: {
-          id: 9,
-          children: [],
-          name: "Countries",
-          appID: 3,
-          actionID: 9,
-          webIcon: false,
-          xmlid: "menu.9",
-        },
-        10: {
-          id: 10,
-          children: [],
-          name: "Fed. States",
-          appID: 3,
-          actionID: 10,
-          webIcon: false,
-          xmlid: "menu.10",
-        },
+      const homeMenuProps = {
+        apps: [
+          {
+            actionID: 121,
+            appID: 1,
+            id: 1,
+            label: "Discuss",
+            parents: "",
+            webIcon: false,
+            xmlid: "app.1",
+          },
+          {
+            actionID: 122,
+            appID: 2,
+            id: 2,
+            label: "Calendar",
+            parents: "",
+            webIcon: false,
+            xmlid: "app.2",
+          },
+          {
+            actionID: 123,
+            appID: 3,
+            id: 3,
+            label: "Contacts",
+            parents: "",
+            webIcon: false,
+            xmlid: "app.3",
+          },
+        ],
+        menuItems: [
+          {
+            actionID: 124,
+            appID: 3,
+            id: 4,
+            label: "Contacts",
+            menuID: 4,
+            parents: "Contacts",
+            webIcon: false,
+            xmlid: "menu.4",
+          },
+          {
+            actionID: 125,
+            appID: 3,
+            id: 5,
+            label: "Configuration",
+            menuID: 5,
+            parents: "Contacts",
+            webIcon: false,
+            xmlid: "menu.5",
+          },
+          {
+            actionID: 126,
+            appID: 3,
+            id: 6,
+            label: "Contact Tags",
+            menuID: 6,
+            parents: "Contacts / Configuration",
+            webIcon: false,
+            xmlid: "menu.6",
+          },
+          {
+            actionID: 127,
+            appID: 3,
+            id: 7,
+            label: "Contact Titles",
+            menuID: 7,
+            parents: "Contacts / Configuration",
+            webIcon: false,
+            xmlid: "menu.7",
+          },
+          {
+            actionID: 128,
+            appID: 3,
+            id: 8,
+            label: "Localization",
+            menuID: 8,
+            parents: "Contacts / Configuration",
+            webIcon: false,
+            xmlid: "menu.8",
+          },
+          {
+            actionID: 129,
+            appID: 3,
+            id: 9,
+            label: "Countries",
+            menuID: 9,
+            parents: "Contacts / Configuration / Localization",
+            webIcon: false,
+            xmlid: "menu.9",
+          },
+          {
+            actionID: 130,
+            appID: 3,
+            id: 10,
+            label: "Fed. States",
+            menuID: 10,
+            parents: "Contacts / Configuration / Localization",
+            webIcon: false,
+            xmlid: "menu.10",
+          },
+        ],
       };
-      const serverData = { menus };
 
       const serviceRegistry = new Registry();
       const fakeEnterpriseService = {
@@ -166,27 +170,32 @@ QUnit.module(
         },
       };
       bus = new EventBus();
-      const fakeActionManagerService = {
-        name: "action_manager",
-        deploy(env) {
+      const fakeHomeMenuService = {
+        name: "home_menu",
+        deploy() {
           return {
-            doAction(action, options) {
-              bus.trigger("do_action", { action, options });
+            toggle(show) {
+              bus.trigger("toggle", show);
             },
-            async restore() {
-              env.bus.trigger("ACTION_MANAGER:UI-UPDATED", "current");
+          };
+        },
+      };
+      const fakeMenuService = {
+        name: "menus",
+        deploy() {
+          return {
+            selectMenu(menu) {
+              bus.trigger("selectMenu", menu.id);
             },
           };
         },
       };
       serviceRegistry.add(fakeEnterpriseService.name, fakeEnterpriseService);
-      serviceRegistry.add(fakeActionManagerService.name, fakeActionManagerService);
-      serviceRegistry.add(homeMenuService.name, homeMenuService);
-      serviceRegistry.add(menusService.name, menusService);
-      serviceRegistry.add("router", makeFakeRouterService());
+      serviceRegistry.add(fakeHomeMenuService.name, fakeHomeMenuService);
+      serviceRegistry.add(fakeMenuService.name, fakeMenuService);
 
       testConfig = {
-        serverData,
+        homeMenuProps,
         serviceRegistry,
       };
     },
@@ -195,9 +204,11 @@ QUnit.module(
     QUnit.module("HomeMenu");
 
     QUnit.test("ESC Support", async function (assert) {
-      // crash when pressing escape with no background action (cannot restore controller)
-      assert.expect(8);
+      assert.expect(9);
 
+      bus.on("toggle", null, (show) => {
+        assert.step(`toggle ${show}`);
+      });
       const homeMenu = await createHomeMenu(testConfig);
 
       assert.hasClass(homeMenu.el, "o_search_hidden", "search bar must be hidden by default");
@@ -227,7 +238,7 @@ QUnit.module(
 
       await testUtils.dom.triggerEvent(window, "keydown", { key: "Escape" });
 
-      assert.strictEqual(homeMenu.el.innerHTML, "");
+      assert.verifySteps(["toggle false"]);
 
       homeMenu.destroy();
     });
@@ -235,8 +246,8 @@ QUnit.module(
     QUnit.test("Navigation and search in the home menu", async function (assert) {
       assert.expect(8);
 
-      bus.on("do_action", null, (payload) => {
-        assert.step(`do_action ${payload.action}`);
+      bus.on("selectMenu", null, (menuId) => {
+        assert.step(`selectMenu ${menuId}`);
       });
       const homeMenu = await createHomeMenu(testConfig);
 
@@ -265,7 +276,7 @@ QUnit.module(
       // open first app (Calendar)
       await testUtils.dom.triggerEvent(window, "keydown", { key: "Enter" });
 
-      assert.verifySteps(["do_action 2"]);
+      assert.verifySteps(["selectMenu 2"]);
 
       homeMenu.destroy();
     });
@@ -273,13 +284,13 @@ QUnit.module(
     QUnit.test("Click on an app", async function (assert) {
       assert.expect(2);
 
-      bus.on("do_action", null, (payload) => {
-        assert.step(`do_action ${payload.action}`);
+      bus.on("selectMenu", null, (menuId) => {
+        assert.step(`selectMenu ${menuId}`);
       });
       const homeMenu = await createHomeMenu(testConfig);
 
       await testUtils.dom.click(homeMenu.el.querySelectorAll(".o_menuitem")[0]);
-      assert.verifySteps(["do_action 1"]);
+      assert.verifySteps(["selectMenu 1"]);
 
       homeMenu.destroy();
     });
@@ -287,8 +298,8 @@ QUnit.module(
     QUnit.test("Click on a menu item", async function (assert) {
       assert.expect(2);
 
-      bus.on("do_action", null, (payload) => {
-        assert.step(`do_action ${payload.action}`);
+      bus.on("selectMenu", null, (menuId) => {
+        assert.step(`selectMenu ${menuId}`);
       });
       const homeMenu = await createHomeMenu(testConfig);
 
@@ -298,7 +309,7 @@ QUnit.module(
       await testUtils.fields.editInput(input, "a");
 
       await testUtils.dom.click(homeMenu.el.querySelectorAll(".o_menuitem")[2]);
-      assert.verifySteps(["do_action 8"]);
+      assert.verifySteps(["selectMenu 8"]);
 
       homeMenu.destroy();
     });
@@ -323,8 +334,8 @@ QUnit.module(
     QUnit.test("navigate to a non app item and open it", async function (assert) {
       assert.expect(5);
 
-      bus.on("do_action", null, (payload) => {
-        assert.step(`do_action ${payload.action}`);
+      bus.on("selectMenu", null, (menuId) => {
+        assert.step(`selectMenu ${menuId}`);
       });
       const homeMenu = await createHomeMenu(testConfig);
 
@@ -345,7 +356,7 @@ QUnit.module(
       // press ENTER
       await testUtils.dom.triggerEvent(window, "keydown", { key: "Enter" });
 
-      assert.verifySteps(["do_action 4"]);
+      assert.verifySteps(["selectMenu 4"]);
 
       homeMenu.destroy();
     });
@@ -408,41 +419,19 @@ QUnit.module(
     QUnit.test("Navigation (only apps, only one line)", async function (assert) {
       assert.expect(9);
 
-      testConfig.serverData.menus = {
-        root: {
-          id: "root",
-          children: [1, 2, 3],
-          name: "root",
-          appID: false,
-          actionID: false,
-        },
-        1: {
-          id: 1,
-          children: [],
-          name: "00",
-          appID: 1,
-          actionID: 120,
-          webIcon: false,
-          xmlid: "app.1",
-        },
-        2: {
-          id: 2,
-          children: [],
-          name: "01",
-          appID: 2,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.2",
-        },
-        3: {
-          id: 3,
-          children: [],
-          name: "02",
-          appID: 3,
-          actionID: 122,
-          webIcon: false,
-          xmlid: "app.3",
-        },
+      testConfig.homeMenuProps = {
+        apps: new Array(3).fill().map((x, i) => {
+          return {
+            actionID: 120 + i,
+            appID: i + 1,
+            id: i + 1,
+            label: `0${i}`,
+            parents: "",
+            webIcon: false,
+            xmlid: `app.${i}`,
+          };
+        }),
+        menuItems: [],
       };
       const homeMenu = await createHomeMenu(testConfig);
 
@@ -481,86 +470,19 @@ QUnit.module(
     QUnit.test("Navigation (only apps, two lines, one incomplete)", async function (assert) {
       assert.expect(19);
 
-      testConfig.serverData.menus = {
-        root: {
-          id: "root",
-          children: [1, 2, 3, 4, 5, 6, 7, 8],
-          name: "root",
-          appID: false,
-          actionID: false,
-        },
-        1: {
-          id: 1,
-          children: [],
-          name: "00",
-          appID: 1,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.1",
-        },
-        2: {
-          id: 2,
-          children: [],
-          name: "01",
-          appID: 2,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.2",
-        },
-        3: {
-          id: 3,
-          children: [],
-          name: "03",
-          appID: 3,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.3",
-        },
-        4: {
-          id: 4,
-          children: [],
-          name: "04",
-          appID: 4,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.4",
-        },
-        5: {
-          id: 5,
-          children: [],
-          name: "05",
-          appID: 5,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.5",
-        },
-        6: {
-          id: 6,
-          children: [],
-          name: "06",
-          appID: 6,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.6",
-        },
-        7: {
-          id: 7,
-          children: [],
-          name: "07",
-          appID: 7,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.7",
-        },
-        8: {
-          id: 8,
-          children: [],
-          name: "08",
-          appID: 8,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.8",
-        },
+      testConfig.homeMenuProps = {
+        apps: new Array(8).fill().map((x, i) => {
+          return {
+            actionID: 121,
+            appID: i + 1,
+            id: i + 1,
+            label: `0${i}`,
+            parents: "",
+            webIcon: false,
+            xmlid: `app.${i}`,
+          };
+        }),
+        menuItems: [],
       };
       const homeMenu = await createHomeMenu(testConfig);
 
@@ -604,86 +526,19 @@ QUnit.module(
       async function (assert) {
         assert.expect(19);
 
-        testConfig.serverData.menus = {
-          root: {
-            id: "root",
-            children: [1, 2, 3, 4, 5, 6, 7, 8],
-            name: "root",
-            appID: false,
-            actionID: false,
-          },
-          1: {
-            id: 1,
-            children: [],
-            name: "00",
-            appID: 1,
-            actionID: 121,
-            webIcon: false,
-            xmlid: "app.1",
-          },
-          2: {
-            id: 2,
-            children: [],
-            name: "01",
-            appID: 2,
-            actionID: 121,
-            webIcon: false,
-            xmlid: "app.2",
-          },
-          3: {
-            id: 3,
-            children: [],
-            name: "03",
-            appID: 3,
-            actionID: 121,
-            webIcon: false,
-            xmlid: "app.3",
-          },
-          4: {
-            id: 4,
-            children: [],
-            name: "04",
-            appID: 4,
-            actionID: 121,
-            webIcon: false,
-            xmlid: "app.4",
-          },
-          5: {
-            id: 5,
-            children: [],
-            name: "05",
-            appID: 5,
-            actionID: 121,
-            webIcon: false,
-            xmlid: "app.5",
-          },
-          6: {
-            id: 6,
-            children: [],
-            name: "06",
-            appID: 6,
-            actionID: 121,
-            webIcon: false,
-            xmlid: "app.6",
-          },
-          7: {
-            id: 7,
-            children: [],
-            name: "07",
-            appID: 7,
-            actionID: 121,
-            webIcon: false,
-            xmlid: "app.7",
-          },
-          8: {
-            id: 8,
-            children: [],
-            name: "08",
-            appID: 8,
-            actionID: 121,
-            webIcon: false,
-            xmlid: "app.8",
-          },
+        testConfig.homeMenuProps = {
+          apps: new Array(8).fill().map((x, i) => {
+            return {
+              actionID: 121,
+              appID: i + 1,
+              id: i + 1,
+              label: `0${i}`,
+              parents: "",
+              webIcon: false,
+              xmlid: `app.${i}`,
+            };
+          }),
+          menuItems: [],
         };
         const homeMenu = await createHomeMenu(testConfig);
 
@@ -732,36 +587,20 @@ QUnit.module(
     QUnit.test("Navigation (only 3 menuItems)", async function (assert) {
       assert.expect(10);
 
-      testConfig.serverData.menus = {
-        root: { id: "root", children: [1], name: "root", appID: false, actionID: false },
-        1: { id: 1, children: [2, 3, 4], name: "app", appID: 1, actionID: false },
-        2: {
-          id: 2,
-          children: [],
-          name: "00",
-          appID: 1,
-          actionID: 2,
-          webIcon: false,
-          xmlid: "menu.0",
-        },
-        3: {
-          id: 3,
-          children: [],
-          name: "01",
-          appID: 1,
-          actionID: 3,
-          webIcon: false,
-          xmlid: "menu.1",
-        },
-        4: {
-          id: 4,
-          children: [],
-          name: "02",
-          appID: 1,
-          actionID: 4,
-          webIcon: false,
-          xmlid: "menu.2",
-        },
+      testConfig.homeMenuProps = {
+        apps: [],
+        menuItems: new Array(3).fill().map((x, i) => {
+          return {
+            actionID: 120 + i,
+            appID: 0,
+            id: i + 1,
+            menuID: i + 1,
+            label: `0${i}`,
+            parents: "0",
+            webIcon: false,
+            xmlid: `menu_${i}`,
+          };
+        }),
       };
       const homeMenu = await createHomeMenu(testConfig);
 
@@ -800,61 +639,31 @@ QUnit.module(
     QUnit.test("Navigation (one line of 3 apps and 2 menuItems)", async function (assert) {
       assert.expect(13);
 
-      testConfig.serverData.menus = {
-        root: {
-          id: "root",
-          children: [1, 2, 3],
-          name: "root",
-          appID: false,
-          actionID: false,
-        },
-        1: {
-          id: 1,
-          children: [4, 5],
-          name: "00",
-          appID: 1,
-          actionID: 120,
-          webIcon: false,
-          xmlid: "app.1",
-        },
-        2: {
-          id: 2,
-          children: [],
-          name: "01",
-          appID: 2,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "app.2",
-        },
-        3: {
-          id: 3,
-          children: [],
-          name: "02",
-          appID: 3,
-          actionID: 122,
-          webIcon: false,
-          xmlid: "app.3",
-        },
-        4: {
-          id: 4,
-          children: [],
-          name: "01",
-          appID: 1,
-          actionID: 120,
-          webIcon: false,
-          xmlid: "menu.0",
-        },
-        5: {
-          id: 5,
-          children: [],
-          name: "02",
-          appID: 1,
-          actionID: 121,
-          webIcon: false,
-          xmlid: "menu.1",
-        },
+      testConfig.homeMenuProps = {
+        apps: new Array(3).fill().map((x, i) => {
+          return {
+            actionID: 120 + i,
+            appID: i + 1,
+            id: i + 1,
+            label: `0${i}`,
+            parents: "",
+            webIcon: false,
+            xmlid: `app.${i}`,
+          };
+        }),
+        menuItems: new Array(2).fill().map((x, i) => {
+          return {
+            actionID: 120 + i,
+            appID: 1,
+            id: i + 3,
+            label: `0${i}`,
+            menuID: i,
+            parents: "",
+            webIcon: false,
+            xmlid: `menu_${i}`,
+          };
+        }),
       };
-
       const homeMenu = await createHomeMenu(testConfig);
 
       const input = homeMenu.el.querySelector(".o_menu_search_input");
@@ -887,41 +696,6 @@ QUnit.module(
       input.setSelectionRange(0, 0);
 
       await walkOn(assert, homeMenu, path.slice(11));
-
-      homeMenu.destroy();
-    });
-
-    QUnit.test("State reset", async function (assert) {
-      assert.expect(7);
-
-      const homeMenu = await createHomeMenu(testConfig);
-
-      let input = homeMenu.el.querySelector(".o_menu_search_input");
-
-      assert.hasClass(homeMenu.el, "o_search_hidden", "search bar must be hidden by default");
-
-      await testUtils.fields.editInput(input, "dis");
-
-      assert.doesNotHaveClass(
-        homeMenu.el,
-        "o_search_hidden",
-        "search must be visible after some input"
-      );
-      assert.strictEqual(input.value, "dis", "search bar input must contain the input text");
-
-      await toggleHomeMenu(homeMenu.env);
-
-      assert.strictEqual(homeMenu.el.innerHTML, "", "home menu should no longer be displayed");
-
-      await toggleHomeMenu(homeMenu.env);
-
-      input = homeMenu.el.querySelector(".o_menu_search_input");
-      assert.hasClass(homeMenu.el, "o_search_hidden", "search bar is hidden after remount");
-      assert.strictEqual(input.value, "", "search bar input must be empty");
-
-      await testUtils.fields.editInput(input, "dis");
-
-      assert.strictEqual(input.value, "dis", "search bar input must contain the input text");
 
       homeMenu.destroy();
     });

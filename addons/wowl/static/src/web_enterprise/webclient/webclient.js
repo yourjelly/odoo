@@ -12,14 +12,14 @@ export class WebClientEnterprise extends WebClient {
         if (!this.el) {
           return;
         }
-        this.el.classList.toggle("o_home_menu_background", this.hm.hasHomeMenu);
-        this.el.classList.toggle("o_has_home_menu", this.hm.hasHomeMenu);
+        this._updateClassList();
       });
+      this._updateClassList();
     });
   }
-  async _routerStateLoaded() {
-    await super.loadRouterState(...arguments);
-    return this.hm.toggle(false, false);
+  _updateClassList() {
+    this.el.classList.toggle("o_home_menu_background", this.hm.hasHomeMenu);
+    this.el.classList.toggle("o_has_home_menu", this.hm.hasHomeMenu);
   }
   _loadDefaultApp() {
     return this.hm.toggle(true);

@@ -921,7 +921,7 @@ function makeActionManager(env) {
   async function restore(jsId) {
     let index;
     if (!jsId) {
-      index = controllerStack.length - 1;
+      index = controllerStack.length - 2;
     } else {
       index = controllerStack.findIndex((controller) => controller.jsId === jsId);
     }

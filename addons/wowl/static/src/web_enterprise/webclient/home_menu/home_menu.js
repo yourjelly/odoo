@@ -146,9 +146,8 @@ export class HomeMenu extends Component {
    * @param {Object} menu
    * @returns {Promise}
    */
-  async _openMenu(menu) {
-    await this.menus.selectMenu(menu);
-    return this.homeMenuService.toggle(false, false);
+  _openMenu(menu) {
+    return this.menus.selectMenu(menu);
   }
 
   /**

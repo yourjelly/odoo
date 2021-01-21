@@ -345,11 +345,10 @@ QUnit.module("WebClient Enterprise", (hooks) => {
     webClient.destroy();
   });
   QUnit.test("can have HomeMenu and dialog action", async function (assert) {
-    assert.expect(8);
+    assert.expect(6);
     const webClient = await createEnterpriseWebClient({ testConfig });
     await nextTick();
     assert.containsOnce(webClient, ".o_home_menu");
-    assert.isNotVisible(webClient.el.querySelector(".o_action_manager"));
     assert.containsNone(webClient, ".modal .o_form_view");
     await doAction(webClient, 5);
     await legacyExtraNextTick();
@@ -357,7 +356,6 @@ QUnit.module("WebClient Enterprise", (hooks) => {
     assert.isVisible(webClient.el.querySelector(".modal .o_form_view"));
     assert.containsOnce(webClient, ".o_home_menu");
     assert.isVisible(webClient.el.querySelector(".o_home_menu"));
-    assert.isNotVisible(webClient.el.querySelector(".o_action_manager"));
     webClient.destroy();
   });
   QUnit.test("supports attachments of apps deleted", async function (assert) {
@@ -447,16 +445,22 @@ QUnit.module("WebClient Enterprise", (hooks) => {
     "url state is well handled when going in and out of the HomeMenu",
     async function (assert) {
       assert.expect(4);
+
       const webClient = await createEnterpriseWebClient({ testConfig });
-      assert.deepEqual(webClient.env.services.router.current.hash, { home: "" });
+      await nextTick();
+      assert.deepEqual(webClient.env.services.router.current.hash, { action: "menu" });
+
       await click(webClient.el.querySelector(".o_app.o_menuitem:nth-child(2)"));
       await legacyExtraNextTick();
       assert.deepEqual(webClient.env.services.router.current.hash, {
         action: "1002",
         menu_id: "2",
       });
+
       await click(webClient.el.querySelector(".o_menu_toggle"));
-      assert.deepEqual(webClient.env.services.router.current.hash, { home: "" });
+      await nextTick();
+      assert.deepEqual(webClient.env.services.router.current.hash, { action: "menu" });
+
       await click(webClient.el.querySelector(".o_menu_toggle"));
       // if we reload on going back to underlying action
       await legacyExtraNextTick();
@@ -465,6 +469,7 @@ QUnit.module("WebClient Enterprise", (hooks) => {
         action: "1002",
         menu_id: "2",
       });
+
       webClient.destroy();
     }
   );
@@ -504,26 +509,54 @@ QUnit.module("WebClient Enterprise", (hooks) => {
   );
   QUnit.test("loadState back and forth keeps relevant keys in state", async function (assert) {
     assert.expect(9);
+
     const webClient = await createEnterpriseWebClient({ testConfig });
+
     await click(webClient.el.querySelector(".o_app.o_menuitem:nth-child(2)"));
     await legacyExtraNextTick();
-    assert.isVisible(webClient.el.querySelector(".test_client_action"));
-    assert.isNotVisible(webClient.el.querySelector(".o_home_menu"));
+    assert.containsOnce(webClient, ".test_client_action");
+    assert.containsNone(webClient, ".o_home_menu");
     const state = webClient.env.services.router.current.hash;
     assert.deepEqual(state, {
       action: "1002",
       menu_id: "2",
     });
-    await loadState(webClient, { home: "" });
-    assert.isNotVisible(webClient.el.querySelector(".test_client_action"));
-    assert.isVisible(webClient.el.querySelector(".o_home_menu"));
+
+    await loadState(webClient, {});
+    assert.containsNone(webClient, ".test_client_action");
+    assert.containsOnce(webClient, ".o_home_menu");
     assert.deepEqual(webClient.env.services.router.current.hash, {
-      home: "",
+      action: "menu",
     });
+
     await loadState(webClient, state);
-    assert.isVisible(webClient.el.querySelector(".test_client_action"));
-    assert.isNotVisible(webClient.el.querySelector(".o_home_menu"));
+    assert.containsOnce(webClient, ".test_client_action");
+    assert.containsNone(webClient, ".o_home_menu");
     assert.deepEqual(webClient.env.services.router.current.hash, state);
+
     webClient.destroy();
   });
+
+  QUnit.test(
+    "go back to home menu using browser back button (i.e. loadState)",
+    async function (assert) {
+      assert.expect(7);
+
+      const webClient = await createEnterpriseWebClient({ testConfig });
+      assert.containsOnce(webClient, ".o_home_menu");
+      assert.isNotVisible(webClient.el.querySelector(".o_main_navbar .o_menu_toggle"));
+
+      await click(webClient.el.querySelector(".o_app.o_menuitem:nth-child(2)"));
+      await legacyExtraNextTick();
+      assert.containsOnce(webClient, ".test_client_action");
+      assert.containsNone(webClient, ".o_home_menu");
+
+      await loadState(webClient, { action: "menu" }); // FIXME: this might need to be changed
+      assert.containsNone(webClient, ".test_client_action");
+      assert.containsOnce(webClient, ".o_home_menu");
+      assert.isNotVisible(webClient.el.querySelector(".o_main_navbar .o_menu_toggle"));
+
+      webClient.destroy();
+    }
+  );
 });

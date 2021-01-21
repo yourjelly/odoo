@@ -17,6 +17,7 @@ export function parseSearchQuery(search) {
 function toString(query) {
   return Object.entries(query)
     .filter(([k, v]) => v !== undefined)
+    // .sort(([k1, v1], [k2, v2]) => k1 < k2 ? -1 : 1) // normalize url
     .map(([k, v]) => (v ? `${k}=${encodeURIComponent(v)}` : k))
     .join("&");
 }
@@ -123,11 +124,13 @@ export function makePushState(getCurrent, doPush, preProcessQuery) {
   let timeoutId;
   let tempHash;
   return (hash, replace = false) => {
+    console.log('push state request ', hash, replace);
     clearTimeout(timeoutId);
     hash = preProcessQuery(hash);
     _replace = _replace || replace;
     tempHash = Object.assign(tempHash || {}, hash);
     timeoutId = setTimeout(() => {
+      console.log('validate push', tempHash, _replace);
       const current = getCurrent();
       if (!_replace) {
         tempHash = Object.assign({}, current.hash, tempHash);

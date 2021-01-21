@@ -139,18 +139,9 @@
   }
 }
 
-.o_web_client.o_has_home_menu {
-  .o_action_manager {
-    height: 0;
-    flex: none;
-    display: none;
-  }
-  .o_home_menu {
-    z-index: $zindex-modal - 1;
-  }
-}
-
 .o_home_menu {
+  z-index: $zindex-modal - 1;
+
   .o_menu_search {
     align-items: center;
     background-color: rgba(white, 0.1);
