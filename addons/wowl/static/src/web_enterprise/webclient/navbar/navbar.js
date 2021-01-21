@@ -4,7 +4,6 @@ import { NavBar } from "../../../webclient/navbar/navbar";
 import { useService } from "../../../core/hooks";
 import { burgerMenu } from '../burger_menu/burger_menu';
 import { MobileSwitchCompanyMenu } from '../burger_menu/mobile_switch_company_menu/mobile_switch_company_menu';
-import { switchCompanyMenuItem } from '../../../switch_company_menu/switch_company_menu';
 
 const { useRef } = hooks;
 export class EnterpriseNavBar extends NavBar {
@@ -30,8 +29,10 @@ export class EnterpriseNavBar extends NavBar {
 
     if (this.device.isMobileOS) {
       const SwitchCompanyMenu = odoo.systrayRegistry.get('SwitchCompanyMenu');
-      odoo.systrayRegistry.remove('SwitchCompanyMenu');
-      switchCompanyMenuItem.Component = MobileSwitchCompanyMenu;
+      if (SwitchCompanyMenu) {
+        SwitchCompanyMenu.props.Item = MobileSwitchCompanyMenu;
+        odoo.systrayRegistry.remove('SwitchCompanyMenu');
+      }
 
       odoo.systrayRegistry.remove('wowl.user_menu');
       const alteredBurgerMenu = Object.create(burgerMenu);

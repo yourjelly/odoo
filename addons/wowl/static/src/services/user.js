@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { switchCompanyMenuItem } from '../switch_company_menu/switch_company_menu';
+import { SwitchCompanyMenu } from '../switch_company_menu/switch_company_menu';
 import { useService } from '../core/hooks';
 
 function computeAllowedCompanyIds(env) {
@@ -23,7 +23,6 @@ function computeAllowedCompanyIds(env) {
 }
 
 export function makeSwitchCompaniesSystray(odooObject, reloadFn) {
-const { user_companies } = odooObject.session_info;
   let reloadTimeout;
   class SwitchCompanySystrayItem extends owl.Component {
     constructor() {
@@ -31,7 +30,6 @@ const { user_companies } = odooObject.session_info;
       this.user = useService('user');
       this.router = useService('router');
       this.cookie = useService('cookie');
-      this.switchCompanyMenuItem = switchCompanyMenuItem;
     }
     onSwitchCompanies(ev) {
       const { mode, companyId } = ev.detail;
@@ -60,12 +58,13 @@ const { user_companies } = odooObject.session_info;
     }
   }
   SwitchCompanySystrayItem.template = owl.tags.xml`
-    <t t-component="switchCompanyMenuItem.Component" t-on-switch-companies="onSwitchCompanies"/>
+    <t t-component="props.Item" t-on-switch-companies="onSwitchCompanies"/>
   `;
   const switchCompanySystrayItem = {
     name: 'SwitchCompanyMenu',
     Component: SwitchCompanySystrayItem,
     sequence: 1,
+    props: { Item: SwitchCompanyMenu },
   };
   odooObject.systrayRegistry.add(switchCompanySystrayItem.name, switchCompanySystrayItem);
 }

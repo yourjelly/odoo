@@ -24,9 +24,3 @@ export class SwitchCompanyMenu extends owl.Component {
 }
 SwitchCompanyMenu.template = "wowl.SwitchCompanyMenu";
 SwitchCompanyMenu.components = { Dropdown , DropdownItem };
-
-export const switchCompanyMenuItem = {
-  name: 'SwitchCompanyMenu',
-  Component: SwitchCompanyMenu,
-  sequence: 1,
-};
