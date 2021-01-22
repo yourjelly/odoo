@@ -1,7 +1,10 @@
 /** @odoo-module **/
 const { Component, core, hooks, tags } = owl;
 import { HomeMenu } from "./home_menu";
-import { ControllerNotFoundError, clearUncommittedChanges } from "../../../action_manager/action_manager";
+import {
+  ControllerNotFoundError,
+  clearUncommittedChanges,
+} from "../../../action_manager/action_manager";
 import { useService } from "../../../core/hooks";
 const { EventBus } = core;
 export const homeMenuService = {
@@ -90,13 +93,16 @@ export const homeMenuService = {
 
     function restoreLastController() {
       restoreProm = new Promise((resolve, reject) => {
-        env.services.action_manager.restore().then(resolve).catch(err => {
-          if (err instanceof ControllerNotFoundError) {
-            restoreProm = undefined;
-          } else {
-            reject(err);
-          }
-        });
+        env.services.action_manager
+          .restore()
+          .then(resolve)
+          .catch((err) => {
+            if (err instanceof ControllerNotFoundError) {
+              restoreProm = undefined;
+            } else {
+              reject(err);
+            }
+          });
       });
     }
 

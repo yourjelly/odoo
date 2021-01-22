@@ -2,8 +2,8 @@
 const { hooks } = owl;
 import { NavBar } from "../../../webclient/navbar/navbar";
 import { useService } from "../../../core/hooks";
-import { burgerMenu } from '../burger_menu/burger_menu';
-import { MobileSwitchCompanyMenu } from '../burger_menu/mobile_switch_company_menu/mobile_switch_company_menu';
+import { burgerMenu } from "../burger_menu/burger_menu";
+import { MobileSwitchCompanyMenu } from "../burger_menu/mobile_switch_company_menu/mobile_switch_company_menu";
 
 const { useRef } = hooks;
 export class EnterpriseNavBar extends NavBar {
@@ -11,7 +11,7 @@ export class EnterpriseNavBar extends NavBar {
     super(...arguments);
     this.menus = useService("menus");
     this.actionManager = useService("action_manager");
-    this.device = useService('device');
+    this.device = useService("device");
     this.hm = useService("home_menu");
     this.menuAppsRef = useRef("menuApps");
     this.hasBackgroundAction = false;

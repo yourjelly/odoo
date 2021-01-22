@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { switchCompanySystrayItem } from '../switch_company_menu/switch_company_menu';
+import { switchCompanySystrayItem } from "../switch_company_menu/switch_company_menu";
 
 export function computeAllowedCompanyIds(cidsFromHash) {
   const { user_companies } = odoo.session_info;
@@ -18,15 +18,15 @@ export function computeAllowedCompanyIds(cidsFromHash) {
 export function makeSetCompanies(getAllowedCompanyIds) {
   return function setCompanies(mode, companyId) {
     let nextCompanyIds = getAllowedCompanyIds().slice();
-    if (mode === 'toggle') {
+    if (mode === "toggle") {
       if (nextCompanyIds.includes(companyId)) {
-        nextCompanyIds = nextCompanyIds.filter(id => id !== companyId);
+        nextCompanyIds = nextCompanyIds.filter((id) => id !== companyId);
       } else {
         nextCompanyIds.push(companyId);
       }
-    } else if (mode === 'loginto') {
+    } else if (mode === "loginto") {
       if (nextCompanyIds.includes(companyId)) {
-        nextCompanyIds = nextCompanyIds.filter(id => id !== companyId);
+        nextCompanyIds = nextCompanyIds.filter((id) => id !== companyId);
       }
       nextCompanyIds.unshift(companyId);
     }
@@ -38,7 +38,7 @@ export const userService = {
   name: "user",
   dependencies: ["router", "cookie"],
   deploy(env) {
-    const {router, cookie} = env.services;
+    const { router, cookie } = env.services;
     const info = odoo.session_info;
     const {
       user_context,
@@ -58,7 +58,9 @@ export const userService = {
     } else if ("cids" in cookie.current) {
       cids = cookie.current.cids;
     }
-    const allowedCompanies = computeAllowedCompanyIds(cids && cids.split(",").map((id) => parseInt(id, 10)));
+    const allowedCompanies = computeAllowedCompanyIds(
+      cids && cids.split(",").map((id) => parseInt(id, 10))
+    );
     let context = {
       lang: user_context.lang,
       tz: user_context.tz,
@@ -96,11 +98,11 @@ export const userService = {
       db,
       showEffect,
       setCompanies: (mode, companyId) => {
-        const nextCompanyIds = setCompanies(mode, companyId).join(',');
-        router.pushState({ 'lock cids': nextCompanyIds });
-        cookie.setCookie('cids', nextCompanyIds);
+        const nextCompanyIds = setCompanies(mode, companyId).join(",");
+        router.pushState({ "lock cids": nextCompanyIds });
+        cookie.setCookie("cids", nextCompanyIds);
         odoo.browser.setTimeout(() => window.location.reload()); // history.pushState is a little async
       },
-  };
+    };
   },
 };

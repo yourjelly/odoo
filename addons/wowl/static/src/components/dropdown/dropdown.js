@@ -5,7 +5,7 @@ export class Dropdown extends Component {
   constructor() {
     super(...arguments);
     this.state = useState({ open: this.props.startOpen, groupIsOpen: this.props.startOpen });
-    if(!this.props.manualOnly) {
+    if (!this.props.manualOnly) {
       // Close on outside click listener
       hooks.useExternalListener(window, "click", this.onWindowClicked);
       // Listen to siblings state

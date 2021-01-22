@@ -3,7 +3,7 @@ import { effectService } from "../../src/effects/effects_service";
 import { makePreProcessQuery, makePushState, routeToUrl } from "../../src/services/router";
 import { SIZES } from "../../src/services/device";
 import { makeLocalization } from "../../src/services/localization";
-import { computeAllowedCompanyIds, makeSetCompanies } from '../../src/services/user';
+import { computeAllowedCompanyIds, makeSetCompanies } from "../../src/services/user";
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -25,7 +25,16 @@ export function makeFakeLocalizationService(config) {
 export function makeFakeUserService(values) {
   const sessionInfo = {};
   Object.assign(sessionInfo, odoo.session_info, values && values.session_info);
-  const { uid, name, username, is_admin, user_companies, partner_id, db, user_context } = sessionInfo;
+  const {
+    uid,
+    name,
+    username,
+    is_admin,
+    user_companies,
+    partner_id,
+    db,
+    user_context,
+  } = sessionInfo;
   return {
     name: "user",
     deploy(env) {
@@ -54,7 +63,7 @@ export function makeFakeUserService(values) {
         showEffect: false,
         setCompanies(mode, companyId) {
           allowedCompanies = setCompanies(mode, companyId);
-        }
+        },
       };
       Object.assign(result, values);
       return result;

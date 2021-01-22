@@ -6,8 +6,8 @@ import { clearUncommittedChanges } from "../../src/action_manager/action_manager
 import { actionRegistry } from "../../src/action_manager/action_registry";
 import { viewRegistry } from "../../src/views/view_registry";
 import { createWebClient, doAction, getActionManagerTestConfig, loadState } from "./helpers";
-import { debugManagerService } from '../../src/debug_manager/debug_manager_service';
-import { Registry } from '../../src/core/registry';
+import { debugManagerService } from "../../src/debug_manager/debug_manager_service";
+import { Registry } from "../../src/core/registry";
 
 let testConfig;
 // legacy stuff
@@ -2039,27 +2039,27 @@ QUnit.module("ActionManager", (hooks) => {
     webClient.destroy();
   });
   QUnit.test("debugManager is active for (legacy) views", async function (assert) {
-      assert.expect(2);
+    assert.expect(2);
 
-      testConfig.serviceRegistry.add(debugManagerService.name, debugManagerService);
-      testConfig.systrayRegistry = new Registry();
-      testConfig.debug = "1";
-      const mockRPC = async (route, args) => {
-        if (route.includes("check_access_rights")) {
-          return true;
-        }
-      };
-      const webClient = await createWebClient({ testConfig, mockRPC });
-      await doAction(webClient, 1);
-      assert.containsNone(
-        webClient.el,
-        ".o_debug_manager .o_dropdown_item:contains('Edit View: Kanban')"
-      );
-      await click(webClient.el.querySelector(".o_debug_manager .o_dropdown_toggler"));
-      assert.containsOnce(
-        webClient.el,
-        ".o_debug_manager .o_dropdown_item:contains('Edit View: Kanban')"
-      );
-      webClient.destroy();
-    });
+    testConfig.serviceRegistry.add(debugManagerService.name, debugManagerService);
+    testConfig.systrayRegistry = new Registry();
+    testConfig.debug = "1";
+    const mockRPC = async (route, args) => {
+      if (route.includes("check_access_rights")) {
+        return true;
+      }
+    };
+    const webClient = await createWebClient({ testConfig, mockRPC });
+    await doAction(webClient, 1);
+    assert.containsNone(
+      webClient.el,
+      ".o_debug_manager .o_dropdown_item:contains('Edit View: Kanban')"
+    );
+    await click(webClient.el.querySelector(".o_debug_manager .o_dropdown_toggler"));
+    assert.containsOnce(
+      webClient.el,
+      ".o_debug_manager .o_dropdown_item:contains('Edit View: Kanban')"
+    );
+    webClient.destroy();
+  });
 });

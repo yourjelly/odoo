@@ -34,13 +34,14 @@ export class NavBar extends Component {
     return (this.currentApp && this.menuRepo.getMenuAsTree(this.currentApp.id).childrenTree) || [];
   }
   get systrayItems() {
-    return odoo.systrayRegistry.getAll().filter(elm =>
-      'isDisplayed' in elm ? elm.isDisplayed(this.env) : true
-    ).sort((x, y) => {
-      const xSeq = x.sequence !== undefined ? x.sequence : 50;
-      const ySeq = y.sequence !== undefined ? y.sequence : 50;
-      return ySeq - xSeq;
-    });
+    return odoo.systrayRegistry
+      .getAll()
+      .filter((elm) => ("isDisplayed" in elm ? elm.isDisplayed(this.env) : true))
+      .sort((x, y) => {
+        const xSeq = x.sequence !== undefined ? x.sequence : 50;
+        const ySeq = y.sequence !== undefined ? y.sequence : 50;
+        return ySeq - xSeq;
+      });
   }
   async adapt() {
     if (!this.el) {

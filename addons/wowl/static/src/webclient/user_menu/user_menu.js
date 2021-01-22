@@ -39,5 +39,5 @@ export const userMenu = {
   sequence: 0,
   isDisplayed(env) {
     return !env.services.device.isSmall;
-  }
+  },
 };

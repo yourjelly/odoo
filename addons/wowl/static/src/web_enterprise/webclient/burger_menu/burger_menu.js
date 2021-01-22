@@ -1,21 +1,21 @@
 /** @odoo-module **/
-import { useService } from '../../../core/hooks';
-import { DropdownItem } from '../../../components/dropdown/dropdown_item';
-import { Dropdown } from '../../../components/dropdown/dropdown';
-import { BurgerUserMenu } from './user_menu/user_menu.';
-import { MobileSwitchCompanyMenu } from './mobile_switch_company_menu/mobile_switch_company_menu';
+import { useService } from "../../../core/hooks";
+import { DropdownItem } from "../../../components/dropdown/dropdown_item";
+import { Dropdown } from "../../../components/dropdown/dropdown";
+import { BurgerUserMenu } from "./user_menu/user_menu.";
+import { MobileSwitchCompanyMenu } from "./mobile_switch_company_menu/mobile_switch_company_menu";
 
 /**
-* This file includes the widget Menu in mobile to render the BurgerMenu which
-* opens fullscreen and displays the user menu and the current app submenus.
-*/
+ * This file includes the widget Menu in mobile to render the BurgerMenu which
+ * opens fullscreen and displays the user menu and the current app submenus.
+ */
 
 class BurgerMenu extends owl.Component {
   constructor() {
     super(...arguments);
-    this.user = useService('user');
-    this.menuRepo = useService('menus');
-    this.hm = useService('home_menu');
+    this.user = useService("user");
+    this.menuRepo = useService("menus");
+    this.hm = useService("home_menu");
     this.state = owl.hooks.useState({
       isUserMenuOpened: false,
       isBurgerOpened: false,
@@ -51,18 +51,24 @@ class BurgerMenu extends owl.Component {
    * @param {Event} ev
    */
   _onDropDownClicked(ev) {
-    const dropDownToggler = ev.currentTarget.querySelector('.o_dropdown_toggler');
-    const wasActive = dropDownToggler.classList.contains('o_dropdown_active');
-    const toggleIcon = dropDownToggler.querySelector('.toggle_icon');
-    toggleIcon.classList.toggle('fa-chevron-down', !wasActive);
-    toggleIcon.classList.toggle('fa-chevron-right', wasActive);
+    const dropDownToggler = ev.currentTarget.querySelector(".o_dropdown_toggler");
+    const wasActive = dropDownToggler.classList.contains("o_dropdown_active");
+    const toggleIcon = dropDownToggler.querySelector(".toggle_icon");
+    toggleIcon.classList.toggle("fa-chevron-down", !wasActive);
+    toggleIcon.classList.toggle("fa-chevron-right", wasActive);
   }
   _onMenuClicked(menu) {
     this.menuRepo.selectMenu(menu);
   }
 }
 BurgerMenu.template = "wowl.BurgerMenu";
-BurgerMenu.components = { Portal: owl.misc.Portal, Dropdown, DropdownItem , BurgerUserMenu , MobileSwitchCompanyMenu };
+BurgerMenu.components = {
+  Portal: owl.misc.Portal,
+  Dropdown,
+  DropdownItem,
+  BurgerUserMenu,
+  MobileSwitchCompanyMenu,
+};
 
 export const burgerMenu = {
   name: "wowl.burger_menu",
@@ -70,5 +76,5 @@ export const burgerMenu = {
   sequence: 0,
   isDisplayed(env) {
     return env.services.device.isSmall;
-  }
+  },
 };

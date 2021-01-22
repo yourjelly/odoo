@@ -11,7 +11,7 @@ import { fakeTitleService } from "../helpers/mocks";
 import { createWebClient, doAction, getActionManagerTestConfig } from "../action_manager/helpers";
 import { getLegacy } from "wowl.test_legacy";
 import { actionRegistry } from "../../src/action_manager/action_registry";
-import { WebClient } from '../../src/webclient/webclient';
+import { WebClient } from "../../src/webclient/webclient";
 
 const { xml } = tags;
 let baseConfig;
@@ -111,8 +111,8 @@ QUnit.module("WebClient Common", (hooks) => {
     </div>
     </sheet>
     </form>`;
-    const fixture = document.createElement('div'); // Force to have realistic DOM values
-    fixture.style.height = '50px';
+    const fixture = document.createElement("div"); // Force to have realistic DOM values
+    fixture.style.height = "50px";
     document.body.append(fixture);
     const webClient = await createWebClient({ testConfig, target: fixture });
     await doAction(webClient, 6, { viewType: "form", resId: 1 });
