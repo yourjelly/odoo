@@ -66,7 +66,7 @@ var PartnerField = FieldMany2One.extend(AutocompleteMixin, {
      * @param {string} value
      * @returns {string} display_name without TaxID
      */
-    _getDisplayNameWithoutVAT: function (value) {
+    _getDisplayNameWithoutVAT: function (value) { //TODO OCO ça vient d'un fix de len pour show_vat ; probablement à retirer et modifier la façon dont ce truc fonctionne
         return value.split(' ‒ ')[0];
     },
 

@@ -205,7 +205,7 @@ class Company(models.Model):
             'email': vals.get('email'),
             'phone': vals.get('phone'),
             'website': vals.get('website'),
-            #'vat': vals.get('vat'), #TODO OCO temporairement retiré; sans doute à garder
+            #'vat': vals.get('vat'), #TODO OCO temporairement retiré; sans doute à garder=> quoique, le related ne s'en occupe pas quand on create la company ?? => tester
         })
         # compute stored fields, for example address dependent fields
         partner.flush()

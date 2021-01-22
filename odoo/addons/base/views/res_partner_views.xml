@@ -199,7 +199,7 @@
                                 <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'
                                     attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
                             </div>
-                            <field name="vat_number_ids" attrs="{'readonly': [('parent_id','!=',False)]}"/>
+                            <field name="vat_number_ids" attrs="{'readonly': [('parent_id','!=',False)]}" widget="one2many" context="{'default_partner_id': id}"/>
                             <!--TODO OCO remettre le placeholder qqpart ? placeholder="e.g. BE0477472701"-->
                         </group>
                         <group>
@@ -713,5 +713,35 @@
               </p>
             </field>
         </record>
+
+        <!-- VAT Numbers -->
+        <record id="res_partner_vat_view_form" model="ir.ui.view">
+            <field name="name">Partner VAT</field>
+            <field name="model">res.partner.vat</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="country_id"/>
+                        </group>
+                        <group>
+                            <field name="vat"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="res_partner_vat_view_tree" model="ir.ui.view">
+            <field name="name">Partner VAT</field>
+            <field name="model">res.partner.vat</field>
+            <field name="arch" type="xml">
+                <tree editable="bottom" create="1" delete="1">
+                    <field name="country_id"/>
+                    <field name="vat"/>
+                </tree>
+            </field>
+        </record>
+
     </data>
 </odoo>

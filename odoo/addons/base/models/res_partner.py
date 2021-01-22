@@ -133,18 +133,16 @@ class PartnerVAT(models.Model):
     _name = "res.partner.vat"
     _description = "Partner VAT"
 
-    partner_id = fields.Many2one(string="Partner", comodel_name='res.partner', required=True)
+    partner_ids = fields.Many2many(string="Partner", relation='res_partner_res_partner_vat_rel', comodel_name='res.partner', required=True)
     country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True)
     vat = fields.Char(string="VAT", required=True)
 
     # TODO OCO et le vat check, comment on le gère, du coup ?
 
-    _sql_constraints = [
-        ('partner_vat_country_unique', 'unique (partner_id, country_id)', "A partner cannot have multiple VAT numbers for the same country.")
-    ]
+    #TODO OCO ajouter une contrainte python qui dit sur les partenaires qu'on ne peut avoir qu'un pays de chaque max
 
     def name_get(self):
-        return ["%s (%s)" % (record.vat, record.country_id.code) for record in self]
+        return [(record.id, "%s (%s)" % (record.vat, record.country_id.code)) for record in self]
 
 
 class Partner(models.Model):
@@ -188,8 +186,14 @@ class Partner(models.Model):
     tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset', invisible=True)
     user_id = fields.Many2one('res.users', string='Salesperson',
       help='The internal user in charge of this contact.')
-    vat_number_ids = fields.Many2many(string="VAT Numbers", comodel_name='res.partner.vat', help="The different VAT numbers for this partner, per country.")
-    same_vat_partner_id = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False) #TODO OCO à quoi ça sert, ça ? S'en inquiéter ??
+    vat_number_ids = fields.Many2many(string="VAT Numbers",
+                                      comodel_name='res.partner.vat',
+                                      compute='_compute_vat_number_ids',
+                                      relation='res_partner_res_partner_vat_rel',
+                                      store=True,
+                                      readonly=False,
+                                      help="The different VAT numbers for this partner, per country.")
+    same_vat_partner_id = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False)
     bank_ids = fields.One2many('res.partner.bank', 'partner_id', string='Banks')
     website = fields.Char('Website Link')
     comment = fields.Text(string='Notes')
@@ -283,23 +287,23 @@ class Partner(models.Model):
 
     @api.depends('vat_number_ids', 'company_id')
     def _compute_same_vat_partner_id(self):
-        #TODO OCO temporairement commenté; il faudra arranger le coup
         for partner in self:
-            """
-            # use _origin to deal with onchange()
-            partner_id = partner._origin.id
-            #active_test = False because if a partner has been deactivated you still want to raise the error,
-            #so that you can reactivate it instead of creating a new one, which would loose its history.
-            Partner = self.with_context(active_test=False).sudo()
-            domain = [
-                ('vat', '=', partner.vat),
-                ('company_id', 'in', [False, partner.company_id.id]),
-            ]
-            if partner_id:
-                domain += [('id', '!=', partner_id), '!', ('id', 'child_of', partner_id)]
-            partner.same_vat_partner_id = bool(partner.vat) and not partner.parent_id and Partner.search(domain, limit=1)
-            """
-            partner.same_vat_partner_id = None #TODO OCO seulement pour débug
+            if partner.parent_id or not partner.vat_number_ids:
+                partner.same_vat_partner_id = None
+            else:
+                # use _origin to deal with onchange()
+                partner_origin = partner._origin
+
+                #active_test = False because if a partner has been deactivated you still want to raise the error,
+                #so that you can reactivate it instead of creating a new one, which would loose its history.
+                PartnerVAT = self.env['res.partner.vat'].with_context(active_test=False)
+                partner_vats = PartnerVAT.search([
+                    ('id', 'not in', partner_origin.vat_number_ids.ids),
+                    ('vat', 'in', partner.mapped('vat_number_ids.vat')),
+                ], limit=1)
+
+                partner_filter = lambda x: not x.parent_id and x.company_id in {partner.company_id, False}
+                partner.same_vat_partner_id = partner_vats.mapped('partner_ids').filtered(partner_filter)
 
     @api.depends(lambda self: self._display_address_depends())
     def _compute_contact_address(self):
@@ -323,6 +327,16 @@ class Partner(models.Model):
         for partner in self:
             p = partner.commercial_partner_id
             partner.commercial_company_name = p.is_company and p.name or partner.company_name
+
+    @api.depends('parent_id.vat_number_ids')
+    def _compute_vat_number_ids(self):
+        # Computed field instead of synchronizing with _commercial_fields, so that when
+        # the parent partner is removed, the VAT numbers are cleared.
+        for record in self:
+            if record.parent_id:
+                record.vat_number_ids = record.parent_id.vat_number_ids
+            else:
+                record.vat_number_ids = [(5, 0, 0)]
 
     @api.model
     def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
@@ -453,7 +467,7 @@ class Partner(models.Model):
         partners that aren't `commercial entities` themselves, and will be
         delegated to the parent `commercial entity`. The list is meant to be
         extended by inheriting classes. """
-        return ['vat_number_ids', 'credit_limit']
+        return ['credit_limit']
 
     def _commercial_sync_from_company(self):
         """ Handle sync of commercial fields when a new parent commercial entity is set,
@@ -560,16 +574,27 @@ class Partner(models.Model):
                             ("The selected company is not compatible with the companies of the related user(s)"))
                 if partner.child_ids:
                     partner.child_ids.write({'company_id': company_id})
+
+        partner_vats_before = self.mapped('vat_number_ids')
+
         result = True
         # To write in SUPERUSER on field is_company and avoid access rights problems.
         if 'is_company' in vals and self.user_has_groups('base.group_partner_manager') and not self.env.su:
             result = super(Partner, self.sudo()).write({'is_company': vals.get('is_company')})
             del vals['is_company']
         result = result and super(Partner, self).write(vals)
+
+        #Synchronize fields
         for partner in self:
             if any(u.has_group('base.group_user') for u in partner.user_ids if u != self.env.user):
                 self.env['res.users'].check_access_rights('write')
             partner._fields_sync(vals)
+
+        if 'vat_number_ids' in vals:
+            # Unlink the res.partner.vat objects that are not used on parent partners anymore
+            # (active_test=False, so that VAT numbers are not removed from archived partners)
+            partner_vats_before.with_context(active_test=False).filtered(lambda x: all(partner.parent_id for partner in x.partner_ids)).unlink()
+
         return result
 
     @api.model_create_multi
@@ -798,6 +823,10 @@ class Partner(models.Model):
 
             query = """SELECT res_partner.id
                          FROM {from_str}
+                         LEFT JOIN res_partner_res_partner_vat_rel partner_vat_rel
+                           ON partner_vat_rel.res_partner_id = res_partner.id
+                         LEFT JOIN res_partner_vat
+                           ON res_partner_vat.id = partner_vat_rel.res_partner_vat_id
                       {where} ({email} {operator} {percent}
                            OR {display_name} {operator} {percent}
                            OR {reference} {operator} {percent}
@@ -813,7 +842,7 @@ class Partner(models.Model):
                                display_name=unaccent('res_partner.display_name'),
                                reference=unaccent('res_partner.ref'),
                                percent=unaccent('%s'),
-                               vat=unaccent('res_partner.vat'),) #TODO OCO ça, ça va être bieeeen casse-couille à gérer, il me semble
+                               vat=unaccent('res_partner_vat.vat'),)
 
             where_clause_params += [search_name]*3  # for email / display_name, reference
             where_clause_params += [re.sub('[^a-zA-Z0-9]+', '', search_name) or None]  # for vat
