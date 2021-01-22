@@ -10,11 +10,20 @@ export class SwitchCompanyMenu extends owl.Component {
     this.user = useService('user');
   }
   toggleCompany(companyId) {
-    this.props.switchCompanies('toggle', companyId);
+    this.user.setCompanies('toggle', companyId);
   }
   logIntoCompany(companyId) {
-    this.props.switchCompanies('loginto', companyId);
+    this.user.setCompanies('loginto', companyId);
   }
 }
 SwitchCompanyMenu.template = "wowl.SwitchCompanyMenu";
 SwitchCompanyMenu.components = { Dropdown , DropdownItem };
+
+export const switchCompanySystrayItem = {
+  name: 'switchCompanySystrayItem',
+  Component: SwitchCompanyMenu,
+  sequence: 1,
+  isDisplayed(env) {
+    return !env.services.device.isSmall;
+  }
+};

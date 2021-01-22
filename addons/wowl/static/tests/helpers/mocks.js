@@ -3,7 +3,7 @@ import { effectService } from "../../src/effects/effects_service";
 import { makePreProcessQuery, makePushState, routeToUrl } from "../../src/services/router";
 import { SIZES } from "../../src/services/device";
 import { makeLocalization } from "../../src/services/localization";
-import { computeAllowedCompanyIds } from '../../src/services/user';
+import { computeAllowedCompanyIds, makeSetCompanies } from '../../src/services/user';
 
 // // -----------------------------------------------------------------------------
 // // Mock Services
@@ -29,8 +29,14 @@ export function makeFakeUserService(values) {
   return {
     name: "user",
     deploy(env) {
-      const allowedCompanies = computeAllowedCompanyIds();
-      const context = {...user_context, allowed_company_ids: allowedCompanies};
+      let allowedCompanies = computeAllowedCompanyIds();
+      const setCompanies = makeSetCompanies(() => allowedCompanies);
+      const context = {
+        ...user_context,
+        get allowed_company_ids() {
+          return allowedCompanies;
+        },
+      };
       const result = {
         context,
         userId: uid,
@@ -39,11 +45,16 @@ export function makeFakeUserService(values) {
         isAdmin: is_admin,
         partnerId: partner_id,
         allowed_companies: user_companies.allowed_companies,
-        current_company: user_companies.allowed_companies.find(([id]) => id === allowedCompanies[0]),
+        get current_company() {
+          return user_companies.allowed_companies.find(([id]) => id === allowedCompanies[0]);
+        },
         lang: user_context.lang,
         tz: "Europe/Brussels",
         db: db,
         showEffect: false,
+        setCompanies(mode, companyId) {
+          allowedCompanies = setCompanies(mode, companyId);
+        }
       };
       Object.assign(result, values);
       return result;

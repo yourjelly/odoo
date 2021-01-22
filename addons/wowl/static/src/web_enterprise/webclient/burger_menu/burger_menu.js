@@ -3,6 +3,7 @@ import { useService } from '../../../core/hooks';
 import { DropdownItem } from '../../../components/dropdown/dropdown_item';
 import { Dropdown } from '../../../components/dropdown/dropdown';
 import { BurgerUserMenu } from './user_menu/user_menu.';
+import { MobileSwitchCompanyMenu } from './mobile_switch_company_menu/mobile_switch_company_menu';
 
 /**
 * This file includes the widget Menu in mobile to render the BurgerMenu which
@@ -61,10 +62,13 @@ class BurgerMenu extends owl.Component {
   }
 }
 BurgerMenu.template = "wowl.BurgerMenu";
-BurgerMenu.components = { Portal: owl.misc.Portal, Dropdown, DropdownItem , BurgerUserMenu };
+BurgerMenu.components = { Portal: owl.misc.Portal, Dropdown, DropdownItem , BurgerUserMenu , MobileSwitchCompanyMenu };
 
 export const burgerMenu = {
   name: "wowl.burger_menu",
   Component: BurgerMenu,
   sequence: 0,
+  isDisplayed(env) {
+    return env.services.device.isSmall;
+  }
 };

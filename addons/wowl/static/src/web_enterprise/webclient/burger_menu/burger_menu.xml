@@ -23,7 +23,7 @@
         <div class="o_burger_menu_content"
             t-att-class="{o_burger_menu_dark: !state.isUserMenuOpened and currentApp}">
             <div t-if="!currentApp or state.isUserMenuOpened" class="o_burger_menu_user">
-                <t t-if="props.SwitchCompanyMenu" t-component="props.SwitchCompanyMenu.Component" t-props="props.SwitchCompanyMenu.props" />
+                <MobileSwitchCompanyMenu t-if="user.allowed_companies.length > 1" />
                 <BurgerUserMenu/>
             </div>
 

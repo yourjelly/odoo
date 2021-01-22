@@ -26,19 +26,6 @@ export class EnterpriseNavBar extends NavBar {
     hooks.onPatched(() => {
       this._updateMenuAppsIcon();
     });
-
-    if (this.device.isMobileOS) {
-      const SwitchCompanyMenu = odoo.systrayRegistry.get('SwitchCompanyMenu');
-      if (SwitchCompanyMenu) {
-        SwitchCompanyMenu.props.Item = MobileSwitchCompanyMenu;
-        odoo.systrayRegistry.remove('SwitchCompanyMenu');
-      }
-
-      odoo.systrayRegistry.remove('wowl.user_menu');
-      const alteredBurgerMenu = Object.create(burgerMenu);
-      alteredBurgerMenu.props = { SwitchCompanyMenu };
-      odoo.systrayRegistry.add('wowl.burger_menu', alteredBurgerMenu);
-    }
   }
   get currentApp() {
     return !this.device.isMobileOS && !this.hm.hasHomeMenu ? super.currentApp : undefined;

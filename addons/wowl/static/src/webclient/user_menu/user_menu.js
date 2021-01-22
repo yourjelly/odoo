@@ -37,4 +37,7 @@ export const userMenu = {
   name: "wowl.user_menu",
   Component: UserMenu,
   sequence: 0,
+  isDisplayed(env) {
+    return !env.services.device.isSmall;
+  }
 };
