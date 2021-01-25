@@ -11,6 +11,7 @@
                         <field name="bundle"/>
                         <field name="directive"/>
                         <field name="glob"/>
+                        <field name="target" attrs="{ 'invisible': [('directive', '!=', 'replace')] }"/>
                     </group>
                 </sheet>
             </form>

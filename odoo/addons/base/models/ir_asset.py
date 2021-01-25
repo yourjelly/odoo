@@ -15,15 +15,46 @@ SCRIPT_EXTENSIONS = ['js', 'ts']
 STYLE_EXTENSIONS = ['css', 'scss', 'sass', 'less']
 TEMPLATE_EXTENSIONS = ['xml']
 
-ADD_DIRECTIVE = 'add'
+APPEND_DIRECTIVE = 'append'
 INCLUDE_DIRECTIVE = 'include'
+PREPEND_DIRECTIVE = 'prepend'
 REMOVE_DIRECTIVE = 'remove'
+REPLACE_DIRECTIVE = 'replace'
 
 
 def fs2web(path):
     """Converts FS path into web path"""
     return '/'.join(path.split(os.path.sep))
 
+def get_paths(path_def, extensions):
+    """
+    :param path_def: the definition (glob) of file paths to match
+    :param extensions: a list of extensions that found files must match
+    :returns: a tuple: the addon targetted by the path definition [0] and the
+              list of glob files matching the definition [1].
+    """
+    paths = []
+    addon = path_def.split('/')[0]
+    addon_manifest = http.addons_manifest.get(addon)
+
+    # If the specified addon is found, we can add the files matching the glob
+    if not addon_manifest:
+        raise Exception("No valid addon matching path %s" % (path_def))
+
+    addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
+    full_path = os.path.normpath(os.path.join(addons_path, path_def))
+
+    for path in sorted(glob(full_path, recursive=True)) or [full_path]:
+        ext = path.split('.')[-1]
+        if not extensions or ext in extensions:
+            if ext not in TEMPLATE_EXTENSIONS:
+                # JS and CSS are loaded by the browser so we need
+                # the relative path, while templates are loaded
+                # directly from the file system.
+                path = path[len(addons_path):]
+            paths.append(fs2web(path))
+
+    return addon, paths
 
 class IrAsset(models.Model):
     """This model contributes to two things:
@@ -38,20 +69,23 @@ class IrAsset(models.Model):
     _name = 'ir.asset'
     _description = 'Asset'
 
-    def _get_related_assets(self, bundle, domain=[]):
+    def _get_asset_domain(self, bundle):
         """Meant to be overridden to give additional information to the search"""
-        return self.sudo().search(domain + [
-            ('bundle', '=', bundle),
-            ('active', '=', True)
-        ])
+        return [('bundle', '=', bundle), ('active', '=', True)]
 
     name = fields.Char(string='Name', required=True)
     bundle = fields.Char(string='Bundle name', required=True)
-    directive = fields.Selection(string='Directive', selection=[(ADD_DIRECTIVE, 'Add'), (REMOVE_DIRECTIVE, 'Remove'), (INCLUDE_DIRECTIVE, 'Include')], default=ADD_DIRECTIVE)
+    directive = fields.Selection(string='Directive', selection=[
+        (APPEND_DIRECTIVE, 'Append'),
+        (PREPEND_DIRECTIVE, 'Prepend'),
+        (REMOVE_DIRECTIVE, 'Remove'),
+        (REPLACE_DIRECTIVE, 'Replace'),
+        (INCLUDE_DIRECTIVE, 'Include')], default=APPEND_DIRECTIVE)
     glob = fields.Char(string='File')
+    target = fields.Char(string='Target')
     active = fields.Boolean(string='active', default=True)
 
-    def get_addon_files(self, addons, bundle, css=False, js=False, xml=False, addon_files=None, file_cache=None):
+    def get_addon_files(self, addons, bundle, css=False, js=False, xml=False, addon_files=None):
         """
         Fetches all asset files from a given list of addons matching a certain
         bundle. The returned list is composed of tuples containing the file
@@ -60,7 +94,7 @@ class IrAsset(models.Model):
         module.
 
         :param addons: list of addon names as strings. The files returned will
-                       only be contained in the given addons.
+                        only be contained in the given addons.
         :param bundle: name of the bundle from which to fetch the file paths
         :param css: boolean: whether or not to include style files
         :param js: boolean: whether or not to include script files
@@ -74,49 +108,53 @@ class IrAsset(models.Model):
         if xml:
             exts += TEMPLATE_EXTENSIONS
 
-        manifests = http.addons_manifest
-
-        # The addon_files list and its related cache are only created during the
-        # initial function call. The list and its cache is then given to the
+        # The addon_files list is only created during the
+        # initial function call. It is then given to the
         # subsequent calls to allow them to add/remove files in place.
         if addon_files is None:
             addon_files = []
-            file_cache = []
 
-        def process_path(directive, path_def):
+        def process_path(directive, target, path_def):
+            if not path_def:
+                path_def = target
+                target = None
+
             if directive == INCLUDE_DIRECTIVE:
-                return self.get_addon_files(addons, path_def, css, js, xml, addon_files, file_cache)
+                return self.get_addon_files(addons, path_def, css, js, xml, addon_files)
 
-            glob_paths = []
-            path_addon = path_def.split('/')[0]
-            path_addon_manifest = manifests.get(path_addon)
+            addon, paths = get_paths(path_def, exts)
 
-            # If the specified addon is found, we can add the files matching the glob
-            if path_addon_manifest:
-                addons_path = os.path.join(path_addon_manifest['addons_path'], '')[:-1]
-                full_path = os.path.normpath(os.path.join(addons_path, path_def))
+            if directive == REPLACE_DIRECTIVE:
+                target_addon, target_paths = get_paths(target, exts)
 
-                for path in sorted(glob(full_path, recursive=True)) or [full_path]:
-                    ext = path.split('.')[-1]
-                    if not exts or ext in exts:
-                        if ext not in TEMPLATE_EXTENSIONS:
-                            # JS and CSS are loaded by the browser so we need
-                            # the relative path, while templates are loaded
-                            # directly from the file system.
-                            path = path[len(addons_path):]
-                        glob_paths.append(fs2web(path))
+                if not len(target_paths):
+                    return
+
+                target_path = target_paths[0]
+
+                if exts and target_path.split('.')[-1] not in exts:
+                    return
+
+                if (target_addon, target_path) not in addon_files:
+                    raise Exception("File %s not found in bundle %s of %s manifest" % (target_path, bundle, target_addon))
+
+                index = addon_files.index((target_addon, target_path))
+                addon_files[index:index + 1] = [(addon, path) for path in paths]
+                return
 
             # Add or remove all file paths found
-            for file in glob_paths:
-                if directive == REMOVE_DIRECTIVE and file in file_cache:
-                    file_cache.remove(file)
-                    [addon_files.remove((a, f)) for a, f in addon_files if f == file]
-                elif directive == ADD_DIRECTIVE and file not in file_cache:
-                    file_cache.append(file)
-                    addon_files.append((path_addon, file))
+            for path in paths:
+                if directive == APPEND_DIRECTIVE and (addon, path) not in addon_files:
+                    addon_files.append((addon, path))
+                elif directive == PREPEND_DIRECTIVE and (addon, path) not in addon_files:
+                    addon_files.prepend((addon, path))
+                elif directive == REMOVE_DIRECTIVE:
+                    if (addon, path) not in addon_files:
+                        raise Exception("File %s not found in bundle %s of %s manifest" % (path, bundle, addon))
+                    addon_files.remove((addon, path))
 
         for addon in addons:
-            manifest = manifests.get(addon)
+            manifest = http.addons_manifest.get(addon)
 
             if not manifest:
                 continue
@@ -125,14 +163,18 @@ class IrAsset(models.Model):
             bundle_paths = assets.get(bundle, [])
 
             for path_def in bundle_paths:
-                directive = ADD_DIRECTIVE
+                directive = APPEND_DIRECTIVE
+                target = None
                 if type(path_def) == tuple:
                     # Additional directive given
-                    directive, path_def = path_def
-                process_path(directive, path_def)
+                    if len(path_def) == 2:
+                        directive, path_def = path_def
+                    if len(path_def) == 3:
+                        directive, target, path_def = path_def
+                process_path(directive, target, path_def)
 
-        for asset in self._get_related_assets(bundle):
-            process_path(asset.directive, asset.glob)
+        for asset in self.sudo().search(self._get_asset_domain(bundle)):
+            process_path(asset.directive, asset.target, asset.glob)
 
         return addon_files
 

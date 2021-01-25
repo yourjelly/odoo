@@ -95,7 +95,8 @@ This module provides the core of the Odoo Web Client.
 
             'base/static/src/css/modules.css',
 
-            ('include', 'web._backend_webclient'),
+            'web/static/src/scss/webclient_extra.scss',
+            'web/static/src/scss/webclient_layout.scss',
 
             'web/static/src/scss/webclient.scss',
             'web/static/src/scss/domain_selector.scss',
@@ -130,8 +131,11 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/scss/ribbon.scss',
             'web/static/src/scss/base_settings.scss',
             'web/static/src/scss/report_backend.scss',
-
-            ('include', 'web._backend_extra'),
+            'web/static/src/scss/dropdown_extra.scss',
+            'web/static/src/scss/fields_extra.scss',
+            'web/static/src/scss/form_view_extra.scss',
+            'web/static/src/scss/list_view_extra.scss',
+            'web/static/src/scss/search_view_extra.scss',
 
             'base/static/src/js/res_config_settings.js',
             'web/static/lib/jquery.scrollTo/jquery.scrollTo.js',
@@ -343,17 +347,6 @@ This module provides the core of the Odoo Web Client.
         ],
         'web._backend_bootstrap_overrides': [
             'web/static/src/scss/bootstrap_overridden.scss',
-        ],
-        'web._backend_webclient': [
-            'web/static/src/scss/webclient_extra.scss',
-            'web/static/src/scss/webclient_layout.scss',
-        ],
-        'web._backend_extra': [
-            'web/static/src/scss/dropdown_extra.scss',
-            'web/static/src/scss/fields_extra.scss',
-            'web/static/src/scss/form_view_extra.scss',
-            'web/static/src/scss/list_view_extra.scss',
-            'web/static/src/scss/search_view_extra.scss',
         ],
         'web._frontend_bootstrap_overrides': [
             'web/static/src/scss/bootstrap_overridden_frontend.scss',
