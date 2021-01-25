@@ -189,11 +189,14 @@ class Lang(models.Model):
         lang = self._activate_lang(lang_code) or self._create_lang(lang_code)
         IrDefault = self.env['ir.default']
         default_value = IrDefault.get('res.partner', 'lang')
+        print("default value....................... in install lang", default_value)
         if default_value is None:
             IrDefault.set('res.partner', 'lang', lang_code)
+            print("if............................")
             # set language of main company, created directly by db bootstrap SQL
             partner = self.env.company.partner_id
             if not partner.lang:
+                print("if not partner lang ...............",lang_code)
                 partner.write({'lang': lang_code})
         return True
 

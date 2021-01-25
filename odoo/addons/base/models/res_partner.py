@@ -138,10 +138,40 @@ class Partner(models.Model):
     def _default_category(self):
         return self.env['res.partner.category'].browse(self._context.get('category_id'))
 
+    # @api.model
+    # def default_get(self, default_fields):
+    #     """Add the company of the parent as default if we are creating a child partner.
+    #     Also take the parent lang by default if any, otherwise, fallback to default DB lang."""
+    #     values = super().default_get(default_fields)
+    #     parent = self.env["res.partner"]
+    #     if 'parent_id' in default_fields and values.get('parent_id'):
+    #         parent = self.browse(values.get('parent_id'))
+    #         values['company_id'] = parent.company_id.id
+    #     if 'lang' in default_fields:
+    #         values['lang'] = values.get('lang') or parent.lang or self.env.lang
+    #     return values
     @api.model
     def default_get(self, default_fields):
         """Add the company of the parent as default if we are creating a child partner.
         Also take the parent lang by default if any, otherwise, fallback to default DB lang."""
+        print("context..........................",self._context.get('parent_id'))
+        parent_int_id = self._context.get('parent_id')
+        # print("parent lang ...................",parent_lang.lang)
+
+        all_patners = self.env["res.partner"].search([])
+        print("all partners................",all_patners)
+        for partner in all_patners:
+            print("parent_id.inside for...and partner int id ..",partner.id,parent_int_id)
+            if partner.id == parent_int_id:
+                print("parent language.......",self.parent_id.lang)
+                # context = self.env.context.copy()
+                # context.update({'default_lang' : self.parent_id.lang})
+                self.lang = self.parent_id.lang
+                # self._context.update({
+                #     'default_lang' : self.parent_id.lang
+                # })
+                print("context after updating lang.................",self._context)
+
         values = super().default_get(default_fields)
         parent = self.env["res.partner"]
         if 'parent_id' in default_fields and values.get('parent_id'):
@@ -149,6 +179,7 @@ class Partner(models.Model):
             values['company_id'] = parent.company_id.id
         if 'lang' in default_fields:
             values['lang'] = values.get('lang') or parent.lang or self.env.lang
+        print("values..........................................................",values)
         return values
 
     name = fields.Char(index=True)
