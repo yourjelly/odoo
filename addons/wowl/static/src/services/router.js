@@ -1,4 +1,6 @@
 /** @odoo-module **/
+import { shallowEqual } from "../utils/objects";
+
 function parseString(str) {
   const parts = str.split("&");
   const result = {};
@@ -8,6 +10,9 @@ function parseString(str) {
   }
   return result;
 }
+function sanitizeHash(hash) {
+  return Object.fromEntries(Object.entries(hash).filter(([_, v]) => v !== undefined));
+}
 export function parseHash(hash) {
   return hash === "#" || hash === "" ? {} : parseString(hash.slice(1));
 }
@@ -16,8 +21,6 @@ export function parseSearchQuery(search) {
 }
 function toString(query) {
   return Object.entries(query)
-    .filter(([k, v]) => v !== undefined)
-    // .sort(([k1, v1], [k2, v2]) => k1 < k2 ? -1 : 1) // normalize url
     .map(([k, v]) => (v ? `${k}=${encodeURIComponent(v)}` : k))
     .join("&");
 }
@@ -87,8 +90,8 @@ function makeRouter(env) {
     bus.trigger("ROUTE_CHANGE");
   });
   function doPush(mode = "push", route) {
-    const url = location.origin + routeToUrl(route);
-    if (url !== window.location.href) {
+    if (!shallowEqual(route.hash, current.hash)) {
+      const url = location.origin + routeToUrl(route);
       if (mode === "push") {
         window.history.pushState({}, url, url);
       } else {
@@ -124,13 +127,12 @@ export function makePushState(getCurrent, doPush, preProcessQuery) {
   let timeoutId;
   let tempHash;
   return (hash, replace = false) => {
-    console.log('push state request ', hash, replace);
     clearTimeout(timeoutId);
     hash = preProcessQuery(hash);
     _replace = _replace || replace;
     tempHash = Object.assign(tempHash || {}, hash);
     timeoutId = setTimeout(() => {
-      console.log('validate push', tempHash, _replace);
+      tempHash = sanitizeHash(tempHash);
       const current = getCurrent();
       if (!_replace) {
         tempHash = Object.assign({}, current.hash, tempHash);
