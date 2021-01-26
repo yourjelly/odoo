@@ -669,7 +669,6 @@ class Contact(models.AbstractModel):
     _description = 'Qweb Field Contact'
     _inherit = 'ir.qweb.field.many2one'
 
-    #TODO OCO c'est pour le widget contact sur les champ dans les vues ; les options définissent ce qui est affiché. Pour la TVA, voir ce qu'on fait.
     @api.model
     def get_available_options(self):
         options = super(Contact, self).get_available_options()
@@ -679,7 +678,6 @@ class Contact(models.AbstractModel):
             {'field_name': 'phone', 'label': _('Phone'), 'default': True},
             {'field_name': 'mobile', 'label': _('Mobile'), 'default': True},
             {'field_name': 'email', 'label': _('Email'), 'default': True},
-            #{'field_name': 'vat', 'label': _('VAT')}, #TODO OCO pas ŝur du tout ; ça sert à quoi, ça ?
         ]
         separator_params = dict(
             type='selection',
