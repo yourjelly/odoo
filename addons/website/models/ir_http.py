@@ -77,10 +77,7 @@ class Http(models.AbstractModel):
             if isinstance(kw[arg], models.BaseModel):
                 kw[arg] = kw[arg].with_context(slug_matching=True)
         qs = request.httprequest.query_string.decode('utf-8')
-        try:
-            return adapter.build(endpoint, kw) + (qs and '?%s' % qs or '')
-        except odoo.exceptions.MissingError:
-            raise werkzeug.exceptions.NotFound()
+        return adapter.build(endpoint, kw) + (qs and '?%s' % qs or '')
 
     @classmethod
     def _match(cls, path_info, key=None):
