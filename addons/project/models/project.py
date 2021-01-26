@@ -432,6 +432,14 @@ class Project(models.Model):
             self.mapped('tasks').message_subscribe(
                 partner_ids=partner_ids, channel_ids=channel_ids, subtype_ids=task_subtypes)
         if partner_ids:
+            if not self.user_has_groups('project.group_project_manager') and self.user_has_groups('project.group_project_user'):
+                # Internal users can add himself as follower in the project, even if the users only has read rights.
+                if all(self.env.user.partner_id.id == partner_id for partner_id in partner_ids):
+                    self.check_access_rights('read')
+                    self.check_access_rule('read')
+                    self.sudo().allowed_portal_user_ids |= self.env.user
+                    self.sudo().allowed_internal_user_ids |= self.env.user
+                    return res
             all_users = self.env['res.partner'].browse(partner_ids).user_ids
             portal_users = all_users.filtered('share')
             internal_users = all_users - portal_users
