@@ -160,8 +160,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         if (this.cssReadonly) return;
         this.wysiwyg = await wysiwygLoader.createWysiwyg(this, this._getWysiwygOptions());
         this.wysiwyg.__extraAssetsForIframe = this.__extraAssetsForIframe || [];
-        return this.wysiwyg.attachTo(this.$wysiwygWrapper).then(() => {
-            this.$content = this.wysiwyg.$editor.closest('body, odoo-wysiwyg-container');
+        return this.wysiwyg.appendTo(this.$el).then(() => {
+            this.$content = this.wysiwyg.$editable;
             this._onLoadWysiwyg();
             this.isRendered = true;
         });
@@ -186,7 +186,8 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             value: this.value,
 
             tabsize: 0,
-            height: 180,
+            height: 380,
+            resizable: true,
         });
     },
     /**
@@ -220,9 +221,6 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
         var value = this._textToHtml(this.value);
         if (this.nodeOptions.wrapper) {
             value = this._wrap(value);
-        }
-        this.$wysiwygWrapper = $('<div class="note-editable">');
-        this.$el.append(this.$wysiwygWrapper);
 
         var fieldNameAttachment = _.chain(this.recordData)
             .pairs()
