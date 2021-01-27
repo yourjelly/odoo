@@ -11,7 +11,7 @@ from odoo import fields, http, models
 
 _logger = getLogger(__name__)
 
-SCRIPT_EXTENSIONS = ['js', 'ts']
+SCRIPT_EXTENSIONS = ['js']
 STYLE_EXTENSIONS = ['css', 'scss', 'sass', 'less']
 TEMPLATE_EXTENSIONS = ['xml']
 
@@ -37,24 +37,22 @@ def get_paths(path_def, extensions):
     addon = path_def.split('/')[0]
     addon_manifest = http.addons_manifest.get(addon)
 
-    # If the specified addon is found, we can add the files matching the glob
-    if not addon_manifest:
-        raise Exception("No valid addon matching path %s" % (path_def))
+    if addon_manifest:
+        addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
+        full_path = os.path.normpath(os.path.join(addons_path, path_def))
+        paths = [path if path.split('.')[-1] in TEMPLATE_EXTENSIONS else path[len(addons_path):]
+            for path in sorted(glob(full_path, recursive=True))
+        ]
+    else:
+        addon = 'unknown'
 
-    addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
-    full_path = os.path.normpath(os.path.join(addons_path, path_def))
+    if not len(paths):
+        paths = [path_def]
 
-    for path in sorted(glob(full_path, recursive=True)) or [full_path]:
-        ext = path.split('.')[-1]
-        if not extensions or ext in extensions:
-            if ext not in TEMPLATE_EXTENSIONS:
-                # JS and CSS are loaded by the browser so we need
-                # the relative path, while templates are loaded
-                # directly from the file system.
-                path = path[len(addons_path):]
-            paths.append(fs2web(path))
-
-    return addon, paths
+    return addon, [path
+        for path in paths
+        if not extensions or path.split('.')[-1] in extensions
+    ]
 
 class IrAsset(models.Model):
     """This model contributes to two things:
@@ -147,7 +145,7 @@ class IrAsset(models.Model):
                 if directive == APPEND_DIRECTIVE and (addon, path) not in addon_files:
                     addon_files.append((addon, path))
                 elif directive == PREPEND_DIRECTIVE and (addon, path) not in addon_files:
-                    addon_files.prepend((addon, path))
+                    addon_files.insert(0, (addon, path))
                 elif directive == REMOVE_DIRECTIVE:
                     if (addon, path) not in addon_files:
                         raise Exception("File %s not found in bundle %s of %s manifest" % (path, bundle, addon))
