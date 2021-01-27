@@ -113,6 +113,10 @@ class IrAsset(models.Model):
             addon_files = []
 
         def process_path(directive, target, path_def):
+            """
+            TODO: doc
+            (hard to extract somewhere else since we need: 'addons', 'exts' and 'addon_files')
+            """
             if not path_def:
                 path_def = target
                 target = None

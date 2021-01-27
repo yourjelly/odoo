@@ -23,6 +23,10 @@ from odoo.addons.base.models.assetsbundle import AssetsBundle
 _logger = logging.getLogger(__name__)
 
 
+def can_aggregate(url):
+    parsed = urls.url_parse(url)
+    return not parsed.scheme and not parsed.netloc and not url.startswith('/web/content')
+
 class IrQWeb(models.AbstractModel, QWeb):
     """ Base QWeb rendering engine
     * to customize ``t-field`` rendering, subclass ``ir.qweb.field`` and
@@ -293,7 +297,6 @@ class IrQWeb(models.AbstractModel, QWeb):
     def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
         files, remains = self._get_asset_content(xmlid, options, css, js)
         asset = self.get_asset_bundle(xmlid, files, env=self.env)
-        remains = [node for node in remains if (css and node[0] == 'link') or (js and node[0] != 'link')]
         return remains + asset.to_node(css=css, js=js, debug=debug, async_load=async_load, defer_load=defer_load, lazy_load=lazy_load)
 
     def _get_asset_link_urls(self, xmlid, options):
@@ -301,7 +304,7 @@ class IrQWeb(models.AbstractModel, QWeb):
         return [node[1]['href'] for node in asset_nodes if node[0] == 'link']
 
     # @tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', keys=("website_id",))
-    def _get_asset_content(self, xmlid, options, css, js):
+    def _get_asset_content(self, xmlid, options, css=True, js=True):
         options = dict(options,
             inherit_branding=False, inherit_branding_auto=False,
             edit_translations=False, translatable=False,
@@ -309,22 +312,30 @@ class IrQWeb(models.AbstractModel, QWeb):
 
         options['website_id'] = self.env.context.get('website_id')
         IrAsset = self.env['ir.asset']
-
-        def get_file_info(file):
-            path = [segment for segment in file.split('/') if segment]
-            return {
-                'atype': IrAsset.get_mime_type(file),
-                'url': file,
-                'filename': get_resource_path(*path) if path else None,
-                'content': '',
-                'media': None,
-            }
-
         addons = module_boot()
 
-        addon_files = IrAsset.get_addon_files(addons=addons, bundle=xmlid, css=css, js=js)
-        files = [get_file_info(file) for addon, file in addon_files]
-        return (files, [])
+        files = []
+        remains = []
+        for addon, file in IrAsset.get_addon_files(addons=addons, bundle=xmlid, css=css, js=js):
+            if can_aggregate(file):
+                path = [segment for segment in file.split('/') if segment]
+                files.append({
+                    'atype': IrAsset.get_mime_type(file),
+                    'url': file,
+                    'filename': get_resource_path(*path) if path else None,
+                    'content': '',
+                    'media': None,
+                })
+            else:
+                tag = 'link' if css else 'script'
+                url_attr = 'href' if css else 'src'
+                attributes = {
+                    'type': IrAsset.get_mime_type(file),
+                    url_attr: file,
+                }
+                remains.append((tag, attributes, ''))
+
+        return (files, remains)
 
     def _get_field(self, record, field_name, expression, tagName, field_options, options, values):
         field = record._fields[field_name]
