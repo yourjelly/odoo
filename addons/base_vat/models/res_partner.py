@@ -67,36 +67,42 @@ _ref_vat = {
 }
 
 
-class ResPartner(models.Model):
-    _inherit = 'res.partner'
+class ResPartnerVAT(models.Model):
+    _inherit = 'res.partner.vat'
 
     def _split_vat(self, vat):
-        vat_country, vat_number = vat[:2].lower(), vat[2:].replace(' ', '')
+        vat_country, vat_number = vat[:2].lower(), vat[2:].replace(' ', '') #TODO OCO modifier, p-ê retirer la fonction, même
         return vat_country, vat_number
 
-    @api.model
-    def simple_vat_check(self, country_code, vat_number):
+    def simple_vat_check(self):
         '''
         Check the VAT number depending of the country.
         http://sima-pc.com/nif.php
         '''
-        if not ustr(country_code).encode('utf-8').isalpha():
-            return False
+        self.ensure_one()
+
+        if self.vat[]
+
+        country_code = self.country_id.code
         check_func_name = 'check_vat_' + country_code
         check_func = getattr(self, check_func_name, None) or getattr(stdnum.util.get_cc_module(country_code, 'vat'), 'is_valid', None)
         if not check_func:
             # No VAT validation available, default to check that the country code exists
             if country_code.upper() == 'EU':
+                # TODO OCO comme c'est là, ça, ça ne va pas marcher :/ Moyen d'éviter ça ? Ou alors, ils doivent le redéfinir sur chaque pays, mais c'est même pas correct :s
+                # TODO OCO ceci dit, il y a quand même moyen de vérifier qu'on n'utilise un numéro comme ça que sur un pays de l'UE
+                # TODO OCO => et vies, il passe avec ça ?
                 # Foreign companies that trade with non-enterprises in the EU
                 # may have a VATIN starting with "EU" instead of a country code.
                 return True
-            country_code = _eu_country_vat_inverse.get(country_code, country_code)
-            return bool(self.env['res.country'].search([('code', '=ilike', country_code)]))
+            vat_country_code = _eu_country_vat_inverse.get(country_code, country_code)
+            return bool(self.env['res.country'].search([('code', '=ilike', vat_country_code)]))
         return check_func(vat_number)
 
     @api.model
     @tools.ormcache('vat')
     def _check_vies(self, vat):
+        # TODO OCO j'ai testé; vies n'accepte pas les numéros EU ...
         # Store the VIES result in the cache. In case an exception is raised during the request
         # (e.g. service unavailable), the fallback on simple_vat_check is not kept in cache.
         return stdnum.eu.vat.check_vies(vat)
@@ -106,7 +112,7 @@ class ResPartner(models.Model):
         try:
             # Validate against  VAT Information Exchange System (VIES)
             # see also http://ec.europa.eu/taxation_customs/vies/
-            return self._check_vies(country_code.upper() + vat_number)
+            return self._check_vies(country_code.upper() + vat_number) #TODO OCO donc ça, c'est de la merde pour reconnaître les numéros grec ... EL n'est pas passé, mais GR ==> corriger au passage
         except Exception:
             # see http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl
             # Fault code may contain INVALID_INPUT, SERVICE_UNAVAILABLE, MS_UNAVAILABLE,
@@ -134,18 +140,22 @@ class ResPartner(models.Model):
             company = self.env['res.company'].browse(self.env.context['company_id'])
         else:
             company = self.env.company
+
         if company.vat_check_vies:
             # force full VIES online check
             check_func = self.vies_vat_check
         else:
             # quick and partial off-line checksum validation
             check_func = self.simple_vat_check
+
         for partner in self:
             if not partner.vat:
                 continue
+
             #check with country code as prefix of the TIN
             vat_country, vat_number = self._split_vat(partner.vat)
             if not check_func(vat_country, vat_number):
+
                 #if fails, check with country code from country
                 country_code = partner.commercial_partner_id.country_id.code
                 if country_code:
@@ -164,14 +174,14 @@ class ResPartner(models.Model):
         if company.vat_check_vies:
             return '\n' + _(
                 'The VAT number [%(vat)s] for partner [%(name)s] either failed the VIES VAT validation check or did not respect the expected format %(format)s.',
-                vat=self.vat,
-                name=self.name,
+                vat=self.vat, #TODO OCO
+                name=self.name, #TODO OCO
                 format=vat_no
             )
         return '\n' + _(
             'The VAT number [%(vat)s] for partner [%(name)s] does not seem to be valid. \nNote: the expected format is %(format)s',
-            vat=self.vat,
-            name=self.name,
+            vat=self.vat, #TODO OCO
+            name=self.name, #TODO OCO
             format=vat_no
         )
 
@@ -183,7 +193,7 @@ class ResPartner(models.Model):
         '''
         # A new VAT number format in Switzerland has been introduced between 2011 and 2013
         # https://www.estv.admin.ch/estv/fr/home/mehrwertsteuer/fachinformationen/steuerpflicht/unternehmens-identifikationsnummer--uid-.html
-        # The old format "TVA 123456" is not valid since 2014 
+        # The old format "TVA 123456" is not valid since 2014
         # Accepted format are: (spaces are ignored)
         #     CHE#########MWST
         #     CHE#########TVA

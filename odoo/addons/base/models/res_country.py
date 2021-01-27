@@ -69,7 +69,6 @@ class Country(models.Model):
         ], string="Customer Name Position", default="before",
         help="Determines where the customer/company name should be placed, i.e. after or before the address.")
     vat_label = fields.Char(string='Vat Label', translate=True, help="Use this field if you want to change vat label.")
-    # TODO OCO vérifier ce qu'on fait avec ça et que ça a toujours un sens
 
     state_required = fields.Boolean(default=False)
     zip_required = fields.Boolean(default=True)

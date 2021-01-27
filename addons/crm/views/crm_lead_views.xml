@@ -105,6 +105,7 @@
                                         'default_website': website,
                                         'show_vat': True
                                     }" groups="base.group_no_one"/>
+
                                 <field name="partner_name"/>
                                 <label for="street" string="Address"/>
                                 <div class="o_address_format">

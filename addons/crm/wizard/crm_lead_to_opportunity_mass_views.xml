@@ -40,6 +40,7 @@
                             attrs="{'required': [('action', '=', 'exist')], 'invisible':[('action','!=','exist')]}"
                             context="{'show_vat': True}"
                             class="oe_inline"/>
+                        <!--TODO OCO supprimer show_vat-->
                     </group>
                 </group>
                 <footer>

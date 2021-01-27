@@ -33,7 +33,7 @@
                             <field name='group_by_email' />
                             <field name='group_by_name' />
                             <field name='group_by_is_company' />
-                            <field name='group_by_vat' />
+                            <field name='group_by_default_vat' />
                             <field name='group_by_parent_id' />
                         </group>
                         <group string="Exclude contacts having"

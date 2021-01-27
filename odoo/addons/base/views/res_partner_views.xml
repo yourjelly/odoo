@@ -60,7 +60,6 @@
                     <field name="city" optional="show"/>
                     <field name="state_id" optional="hide" readonly="1"/>
                     <field name="country_id" optional="show" readonly="1"/>
-                    <field name="vat_number_ids" widget="many2many_tags" optional="hide" readonly="1"/> <!--TODO OCO sans doute à retirer.-->
                     <field name="category_id" optional="hide" widget="many2many_tags" options="{'color_field': 'color'}"/>
                     <field name="company_id" groups="base.group_multi_company" readonly="1"/>
                     <field name="is_company" invisible="1"/>
@@ -200,7 +199,6 @@
                                     attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
                             </div>
                             <field name="vat_number_ids" attrs="{'readonly': [('parent_id','!=',False)]}" widget="one2many" context="{'default_partner_id': id}"/>
-                            <!--TODO OCO remettre le placeholder qqpart ? placeholder="e.g. BE0477472701"-->
                         </group>
                         <group>
                             <field name="function" placeholder="e.g. Sales Director"

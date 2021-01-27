@@ -137,10 +137,6 @@ class PartnerVAT(models.Model):
     country_id = fields.Many2one(string="Country", comodel_name='res.country', required=True)
     vat = fields.Char(string="VAT", required=True)
 
-    # TODO OCO et le vat check, comment on le gère, du coup ?
-
-    #TODO OCO ajouter une contrainte python qui dit sur les partenaires qu'on ne peut avoir qu'un pays de chaque max
-
     def name_get(self):
         return [(record.id, "%s (%s)" % (record.vat, record.country_id.code)) for record in self]
 
@@ -193,6 +189,7 @@ class Partner(models.Model):
                                       store=True,
                                       readonly=False,
                                       help="The different VAT numbers for this partner, per country.")
+    default_vat = fields.Chat(string="Default VAT", compute='_compute_vat_number_ids', store=True, help="Technical field containing the most prioritary VAT number for this partner. It's used for deduplication.")
     same_vat_partner_id = fields.Many2one('res.partner', string='Partner with same Tax ID', compute='_compute_same_vat_partner_id', store=False)
     bank_ids = fields.One2many('res.partner.bank', 'partner_id', string='Banks')
     website = fields.Char('Website Link')
@@ -261,7 +258,7 @@ class Partner(models.Model):
 
     @api.depends('is_company', 'name', 'parent_id.display_name', 'type', 'company_name')
     def _compute_display_name(self):
-        diff = dict(show_address=None, show_address_only=None, show_email=None, html_format=None, show_vat=None) #TODO OCO show_vat ?
+        diff = dict(show_address=None, show_address_only=None, show_email=None, html_format=None, show_vat=None)
         names = dict(self.with_context(**diff).name_get())
         for partner in self:
             partner.display_name = names.get(partner.id)
@@ -337,6 +334,8 @@ class Partner(models.Model):
                 record.vat_number_ids = record.parent_id.vat_number_ids
             else:
                 record.vat_number_ids = [(5, 0, 0)]
+
+            record.default_vat = record.vat_number_ids[0] if record.vat_number_ids else None
 
     @api.model
     def _fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
@@ -429,6 +428,17 @@ class Partner(models.Model):
     def _check_barcode_unicity(self):
         if self.env['res.partner'].search_count([('barcode', '=', self.barcode)]) > 1:
             raise ValidationError('An other user already has this barcode')
+
+    @api.constrains('vat_number_ids')
+    def _check_vat_number_ids(self):
+        for record in self:
+            seen_country_ids = set()
+
+            for vat_number in record.vat_number_ids:
+                if vat_number.country_id.id in seen_country_ids:
+                    raise ValidationError(_("Cannot have more than one VAT number per country."))
+
+                seen_country_ids.add(vat_number.country_id.id)
 
     def _update_fields_values(self, fields):
         """ Returns dict of write() values for synchronizing ``fields`` """
@@ -658,7 +668,7 @@ class Partner(models.Model):
         self.ensure_one()
         if self.company_name:
             # Create parent company
-            values = dict(name=self.company_name, is_company=True)#, vat=self.vat)#TODO OCO, je commente ça pour l'instant
+            values = dict(name=self.company_name, is_company=True)
             values.update(self._update_fields_values(self._address_fields()))
             new_company = self.create(values)
             # Set new company as my parent
@@ -715,9 +725,8 @@ class Partner(models.Model):
             name = "%s <%s>" % (name, partner.email)
         if self._context.get('html_format'):
             name = name.replace('\n', '<br/>')
-        # TODO OCO temporairement commenté
-        """if self._context.get('show_vat') and partner.vat:
-            name = "%s ‒ %s" % (name, partner.vat)"""
+        if self._context.get('show_vat') and partner.vat_number_ids: #TODO OCO on pourra peut-être s'en débarrasser en mettant des champs explicites.
+            name = "%s ‒ %s" % (name, partner.vat_number_ids[0].vat)
         return name
 
     def name_get(self):
