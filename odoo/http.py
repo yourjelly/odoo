@@ -1423,6 +1423,8 @@ class Root(object):
             current_thread.url = httprequest.url
             current_thread.query_count = 0
             current_thread.query_time = 0
+            current_thread.render_time = 0
+            current_thread.render_query_time = 0
             current_thread.perf_t0 = time.time()
 
             explicit_session = self.setup_session(httprequest)
@@ -1470,6 +1472,22 @@ class Root(object):
                     result = _dispatch_nodb()
 
                 response = self.get_response(httprequest, result, explicit_session)
+                if hasattr(response, 'headers'):
+                    query_time = current_thread.query_time * 1000
+                    render_time = current_thread.render_time * 1000
+                    render_query_time = current_thread.render_query_time * 1000
+                    query_count = current_thread.query_count
+                    total_time = (time.time() - current_thread.perf_t0) * 1000
+                    remaining_time = total_time - query_time - render_time
+                    response.headers.add(
+                        'Server-Timing',
+                        ','.join([
+                            'db;desc="%s queries";dur=%s' % (query_count, query_time),
+                            'render;desc=Render;dur=%s' % render_time,
+                            'render_queries;desc="+ Render queries";dur=%s' % render_query_time,
+                            'other;desc=Other;dur=%s' % remaining_time,
+                            'total;desc=Total;dur=%s' % total_time
+                        ]))
             return response(environ, start_response)
 
         except werkzeug.exceptions.HTTPException as e:

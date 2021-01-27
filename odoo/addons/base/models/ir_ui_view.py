@@ -11,6 +11,7 @@ import logging
 import math
 import pprint
 import re
+import threading
 import time
 import uuid
 
@@ -1707,11 +1708,20 @@ actual arch.
 
     def _render(self, values=None, engine='ir.qweb', minimal_qcontext=False):
         assert isinstance(self.id, int)
-
         qcontext = dict() if minimal_qcontext else self._prepare_qcontext()
         qcontext.update(values or {})
+        
+        t0 = time.time()
+        query_start = getattr(threading.current_thread(), 'query_time', 0)
 
-        return self.env[engine]._render(self.id, qcontext)
+        res = self.env[engine]._render(self.id, qcontext)
+
+        if hasattr(threading.current_thread(), 'render_time'):
+            query_time = getattr(threading.current_thread(), 'query_time', 0) - query_start
+            threading.current_thread().render_time += (time.time() - t0) - query_time
+            threading.current_thread().render_query_time += query_time
+
+        return res
 
     @api.model
     def _prepare_qcontext(self):
