@@ -16,7 +16,7 @@ class AccountMoveLine(models.Model):
         res = super().reconcile()
         paid_expenses = not_paid_expenses.filtered(lambda expense: expense.currency_id.is_zero(expense.amount_residual))
         paid_expenses.write({'state': 'done'})
-        not_paid_expense_sheets.filtered(lambda sheet: all(expense.state == 'done' for expense in sheet.expense_line_ids)).set_to_paid()
+        not_paid_expense_sheets.filtered(lambda sheet: all(expense.state in ('in_payment', 'done') for expense in sheet.expense_line_ids)).update_state_after_payment()
         return res
 
     def _get_attachment_domains(self):

@@ -58,7 +58,7 @@ class HrExpense(models.Model):
     accounting_date = fields.Date(string="Accounting Date", related='sheet_id.accounting_date', store=True, groups='account.group_account_invoice,account.group_account_readonly')
     employee_id = fields.Many2one('hr.employee', compute='_compute_employee_id', string="Employee",
         store=True, required=True, readonly=False, tracking=True,
-        states={'approved': [('readonly', True)], 'done': [('readonly', True)]},
+        states={'approved': [('readonly', True)], 'partial': [('readonly', True)], 'in_payment': [('readonly', True)], 'done': [('readonly', True)]},
         default=_default_employee_id, domain=lambda self: self._get_employee_id_domain(), check_company=True)
     # product_id not required to allow create an expense without product via mail alias, but should be required on the view.
     product_id = fields.Many2one('product.product', string='Category', readonly=True, tracking=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]}, domain="[('can_be_expensed', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]", ondelete='restrict')
@@ -79,21 +79,23 @@ class HrExpense(models.Model):
     company_currency_id = fields.Many2one('res.currency', string="Report Company Currency", related='company_id.currency_id', readonly=True)
     total_amount_company = fields.Monetary("Total (Company Currency)", compute='_compute_total_amount_company', store=True, currency_field='company_currency_id')
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, states={'draft': [('readonly', False)], 'refused': [('readonly', False)]}, default=lambda self: self.env.company)
-    currency_id = fields.Many2one('res.currency', string='Currency', required=True, readonly=False, store=True, states={'reported': [('readonly', True)], 'approved': [('readonly', True)], 'done': [('readonly', True)]}, compute='_compute_currency_id', default=lambda self: self.env.company.currency_id)
+    currency_id = fields.Many2one('res.currency', string='Currency', required=True, readonly=False, store=True, states={'reported': [('readonly', True)], 'approved': [('readonly', True)], 'partial': [('readonly', True)], 'done': [('readonly', True)]}, compute='_compute_currency_id', default=lambda self: self.env.company.currency_id)
     analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', check_company=True)
-    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags', states={'post': [('readonly', True)], 'done': [('readonly', True)]}, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+    analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags', states={'post': [('readonly', True)], 'done': [('readonly', True)]}, 'in_payment': [('readonly', True)]}, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]")
     account_id = fields.Many2one('account.account', compute='_compute_from_product_id_company_id', store=True, readonly=False, string='Account',
         default=_default_account_id, domain="[('internal_type', '=', 'other'), ('company_id', '=', company_id)]", help="An expense account is expected")
     description = fields.Text('Notes...', readonly=True, states={'draft': [('readonly', False)], 'reported': [('readonly', False)], 'refused': [('readonly', False)]})
     payment_mode = fields.Selection([
         ("own_account", "Employee (to reimburse)"),
         ("company_account", "Company")
-    ], default='own_account', tracking=True, states={'done': [('readonly', True)], 'approved': [('readonly', True)], 'reported': [('readonly', True)]}, string="Paid By")
+    ], default='own_account', tracking=True, states={'done': [('readonly', True)], 'in_payment': [('readonly', True)], 'partial': [('readonly', True)], 'approved': [('readonly', True)], 'partial': [('readonly', True)], 'reported': [('readonly', True)]}, string="Paid By")
     attachment_number = fields.Integer('Number of Attachments', compute='_compute_attachment_number')
     state = fields.Selection([
         ('draft', 'To Submit'),
         ('reported', 'Submitted'),
+        ('partial', 'Partially Paid'),
         ('approved', 'Approved'),
+        ('in_payment', 'In Payment'),
         ('done', 'Paid'),
         ('refused', 'Refused')
     ], compute='_compute_state', string='Status', copy=False, index=True, readonly=True, store=True, default='draft', help="Status of the expense.")
@@ -139,6 +141,8 @@ class HrExpense(models.Model):
                 expense.state = "refused"
             elif expense.sheet_id.state == "approve" or expense.sheet_id.state == "post":
                 expense.state = "approved"
+            elif expense.sheet_id.state in ("partial", "in_payment"):
+                expense.state = expense.sheet_id.state
             elif not expense.sheet_id.account_move_id:
                 expense.state = "reported"
             else:
@@ -311,7 +315,7 @@ class HrExpense(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_posted_or_approved(self):
         for expense in self:
-            if expense.state in ['done', 'approved']:
+            if expense.state in ['done', 'approved', 'partial', 'in_payment']:
                 raise UserError(_('You cannot delete a posted or approved expense.'))
 
     def write(self, vals):
@@ -824,9 +828,11 @@ class HrExpenseSheet(models.Model):
         ('submit', 'Submitted'),
         ('approve', 'Approved'),
         ('post', 'Posted'),
+        ('partial', 'Partially Paid'),
+        ('in_payment', 'In Payment'),
         ('done', 'Paid'),
         ('cancel', 'Refused')
-    ], string='Status', index=True, readonly=True, tracking=True, copy=False, default='draft', required=True, help='Expense Report State')
+    ], string='Status', index=True, readonly=True, tracking=True, copy=False, default='draft', required=True, help='Expense Report State', compute='_compute_state', store=True)
     employee_id = fields.Many2one('hr.employee', string="Employee", required=True, readonly=True, tracking=True, states={'draft': [('readonly', False)]}, default=_default_employee_id, check_company=True, domain= lambda self: self.env['hr.expense']._get_employee_id_domain())
     address_id = fields.Many2one('res.partner', compute='_compute_from_employee_id', store=True, readonly=False, copy=True, string="Employee Home Address", check_company=True)
     payment_mode = fields.Selection(related='expense_line_ids.payment_mode', default='own_account', readonly=True, string="Paid By", tracking=True)
@@ -839,19 +845,19 @@ class HrExpenseSheet(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True, readonly=True, states={'draft': [('readonly', False)]}, default=lambda self: self.env.company)
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True, states={'draft': [('readonly', False)]}, default=lambda self: self.env.company.currency_id)
     attachment_number = fields.Integer(compute='_compute_attachment_number', string='Number of Attachments')
-    journal_id = fields.Many2one('account.journal', string='Expense Journal', states={'done': [('readonly', True)], 'post': [('readonly', True)]}, check_company=True, domain="[('type', '=', 'purchase'), ('company_id', '=', company_id)]",
+    journal_id = fields.Many2one('account.journal', string='Expense Journal', states={'done': [('readonly', True)], 'in_payment': [('readonly', True)], 'post': [('readonly', True)], 'partial': [('readonly', True)]}, check_company=True, domain="[('type', '=', 'purchase'), ('company_id', '=', company_id)]",
         default=_default_journal_id, help="The journal used when the expense is done.")
-    bank_journal_id = fields.Many2one('account.journal', string='Bank Journal', states={'done': [('readonly', True)], 'post': [('readonly', True)]}, check_company=True, domain="[('type', 'in', ['cash', 'bank']), ('company_id', '=', company_id)]",
+    bank_journal_id = fields.Many2one('account.journal', string='Bank Journal', states={'done': [('readonly', True)], 'in_payment': [('readonly', True)], 'post': [('readonly', True)], 'partial': [('readonly', True)]}, check_company=True, domain="[('type', 'in', ['cash', 'bank']), ('company_id', '=', company_id)]",
         default=_default_bank_journal_id, help="The payment method used when the expense is paid by the company.")
     accounting_date = fields.Date("Accounting Date")
     account_move_id = fields.Many2one('account.move', string='Journal Entry', ondelete='restrict', copy=False, readonly=True)
-    department_id = fields.Many2one('hr.department', compute='_compute_from_employee_id', store=True, readonly=False, copy=False, string='Department', states={'post': [('readonly', True)], 'done': [('readonly', True)]})
+    department_id = fields.Many2one('hr.department', compute='_compute_from_employee_id', store=True, readonly=False, copy=False, string='Department', states={'post': [('readonly', True)], 'partial': [('readonly', True)], 'done': [('readonly', True)], 'in_payment': [('readonly', True)]})
     is_multiple_currency = fields.Boolean("Handle lines with different currencies", compute='_compute_is_multiple_currency')
     can_reset = fields.Boolean('Can Reset', compute='_compute_can_reset')
     can_approve = fields.Boolean('Can Approve', compute='_compute_can_approve')
 
     _sql_constraints = [
-        ('journal_id_required_posted', "CHECK((state IN ('post', 'done') AND journal_id IS NOT NULL) OR (state NOT IN ('post', 'done')))", 'The journal must be set on posted expense'),
+        ('journal_id_required_posted', "CHECK((state IN ('post', 'done', 'partial', 'in_payment') AND journal_id IS NOT NULL) OR (state NOT IN ('post', 'done', 'partial', 'in_payment')))", 'The journal must be set on posted expense'),
     ]
 
     @api.depends('expense_line_ids.total_amount_company')
@@ -903,6 +909,27 @@ class HrExpenseSheet(models.Model):
             sheet.department_id = sheet.employee_id.department_id
             sheet.user_id = sheet.employee_id.expense_manager_id or sheet.employee_id.parent_id.user_id
 
+    @api.depends(
+        'account_move_id.line_ids.matched_debit_ids.debit_move_id.move_id.line_ids.amount_residual',
+        'account_move_id.line_ids.matched_debit_ids.debit_move_id.move_id.line_ids.amount_residual_currency',
+        'account_move_id.line_ids.matched_credit_ids.credit_move_id.move_id.line_ids.amount_residual',
+        'account_move_id.line_ids.matched_credit_ids.credit_move_id.move_id.line_ids.amount_residual_currency',
+        'account_move_id.line_ids.debit',
+        'account_move_id.line_ids.credit',
+        'account_move_id.line_ids.currency_id',
+        'account_move_id.line_ids.amount_currency',
+        'account_move_id.line_ids.amount_residual',
+        'account_move_id.line_ids.amount_residual_currency',
+        'account_move_id.line_ids.payment_id.state',
+        'account_move_id.line_ids.full_reconcile_id'
+        )
+    def _compute_state(self):
+        for sheet in self:
+            if sheet.state in ('partial', 'in_payment', 'done'):
+                sheet.state = sheet._get_state_after_payment()
+            else:
+                sheet.state = sheet.state
+
     @api.constrains('expense_line_ids')
     def _check_payment_mode(self):
         for sheet in self:
@@ -932,8 +959,8 @@ class HrExpenseSheet(models.Model):
     @api.ondelete(at_uninstall=False)
     def _unlink_except_posted_or_paid(self):
         for expense in self:
-            if expense.state in ['post', 'done']:
-                raise UserError(_('You cannot delete a posted or paid expense.'))
+            if expense.state in ['post', 'done', 'partial', 'in_payment']:
+                raise UserError(_('You cannot delete a posted, in payment or paid expense.'))
 
     # --------------------------------------------
     # Mail Thread
@@ -945,7 +972,7 @@ class HrExpenseSheet(models.Model):
             return self.env.ref('hr_expense.mt_expense_approved')
         elif 'state' in init_values and self.state == 'cancel':
             return self.env.ref('hr_expense.mt_expense_refused')
-        elif 'state' in init_values and self.state == 'done':
+        elif 'state' in init_values and self.state in ('done','in_payment'):
             return self.env.ref('hr_expense.mt_expense_paid')
         return super(HrExpenseSheet, self)._track_subtype(init_values)
 
@@ -966,14 +993,14 @@ class HrExpenseSheet(models.Model):
         if samples.count(True):
             if samples.count(False):
                 raise UserError(_("You can't mix sample expenses and regular ones"))
-            self.write({'state': 'post'})
+            self.update_state_after_payment()
             return
 
         if any(sheet.state != 'approve' for sheet in self):
             raise UserError(_("You can only generate accounting entry for approved expense(s)."))
 
         if any(not sheet.journal_id for sheet in self):
-            raise UserError(_("Expenses must have an expense journal specified to generate accounting entries."))
+            raise UserError(_("Specify expense journal in tab Other Info to generate accounting entries."))
 
         expense_line_ids = self.mapped('expense_line_ids')\
             .filtered(lambda r: not float_is_zero(r.total_amount, precision_rounding=(r.currency_id or self.env.company.currency_id).rounding))
@@ -981,8 +1008,7 @@ class HrExpenseSheet(models.Model):
         for sheet in self.filtered(lambda s: not s.accounting_date):
             sheet.accounting_date = sheet.account_move_id.date
         to_post = self.filtered(lambda sheet: sheet.payment_mode == 'own_account' and sheet.expense_line_ids)
-        to_post.write({'state': 'post'})
-        (self - to_post).write({'state': 'done'})
+        to_post.update_state_after_payment()
         self.activity_update()
         return res
 
@@ -1001,8 +1027,18 @@ class HrExpenseSheet(models.Model):
     # Business
     # --------------------------------------------
 
-    def set_to_paid(self):
-        self.write({'state': 'done'})
+    def update_state_after_payment(self):
+        for sheet in self:
+            sheet.state = sheet._get_state_after_payment()
+
+    def _get_state_after_payment(self):
+        if self.currency_id.is_zero(self.amount_residual):
+            reconciled_payments = self.account_move_id._get_reconciled_payments()
+            if not reconciled_payments or all(payment.is_matched for payment in reconciled_payments):
+                return 'done'
+            else:
+                return 'in_payment'
+        return 'partial'
 
     def action_submit_sheet(self):
         self.write({'state': 'submit'})
@@ -1025,7 +1061,7 @@ class HrExpenseSheet(models.Model):
         self.activity_update()
 
     def paid_expense_sheets(self):
-        self.write({'state': 'done'})
+        self.update_state_after_payment()
 
     def refuse_sheet(self, reason):
         if not self.user_has_groups('hr_expense.group_hr_expense_team_approver'):

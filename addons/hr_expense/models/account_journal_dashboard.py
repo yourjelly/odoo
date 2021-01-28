@@ -16,7 +16,7 @@ class AccountJournal(models.Model):
         """
         query = """SELECT total_amount as amount_total, currency_id AS currency
                   FROM hr_expense_sheet
-                  WHERE state IN ('approve', 'post')
+                  WHERE state IN ('approve', 'post', 'partial')
                   and journal_id = %(journal_id)s"""
         return (query, {'journal_id': self.id})
 

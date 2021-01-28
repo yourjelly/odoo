@@ -16,7 +16,6 @@ class AccountPaymentRegister(models.TransientModel):
 
         expense_sheets = self.env['hr.expense.sheet'].search([('account_move_id', 'in', self.line_ids.move_id.ids)])
         for expense_sheet in expense_sheets:
-            if expense_sheet.currency_id.is_zero(expense_sheet.amount_residual):
-                expense_sheet.state = 'done'
+            expense_sheet.update_state_after_payment()
 
         return payments
