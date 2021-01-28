@@ -152,7 +152,7 @@ Here are some important bundles that most developers will need to know:
 
 - *web.common*: this bundle contains most assets which are common to the
   web client, the website, and also the point of sale. This is supposed to contain
-  lower level building blocks for the odoo framework.  Note that it contains the
+  lower level building blocks for the odoo framework. Note that it contains the
   *boot.js* file, which defines the odoo module system.
 
 - *web.backend*: this bundle contains the code specific to the web client
@@ -176,11 +176,9 @@ to add a glob path to the bundle in the file *__manifest__.py* like so:
 
 .. code-block:: py
 
-    'assets': {
-        'web.common': [
-            'my_addon/static/src/js/**/*',
-        ],
-    },
+    'web.common': [
+        'my_addon/static/src/js/**/*',
+    ],
 
 By default, adding a simple string to a bundle will append the files matching the
 glob at the end of the bundle.
@@ -193,11 +191,9 @@ like so:
 
 .. code-block:: py
 
-    'assets': {
-        'web.common': [
-            ('prepend', 'my_addon/static/src/css/bootstrap_overridden.scss'),
-        ],
-    },
+    'web.common': [
+        ('prepend', 'my_addon/static/src/css/bootstrap_overridden.scss'),
+    ],
 
 c) Use nested bundles: include
 
@@ -208,13 +204,11 @@ like this:
 
 .. code-block:: py
 
-    'assets': {
-        'web.common': [
-            ('include', 'web._primary_variables'),
-        ],
-    },
+    'web.common': [
+        ('include', 'web._primary_variables'),
+    ],
 
-d) Remove an asset file: remove
+d) Remove one or multiple file(s): remove
 
 In some additional module you may want to get rid of the call of a certain asset
 in a bundle. Any file can be removed from an existing bundle using the *remove*
@@ -222,11 +216,9 @@ directive:
 
 .. code-block:: py
 
-    'assets': {
-        'web.common': [
-            ('remove', 'web/static/src/js/boot.js'),
-        ],
-    },
+    'web.common': [
+        ('remove', 'web/static/src/js/boot.js'),
+    ],
 
 e) Replace an asset file with one or multiple file(s): replace
 
@@ -236,11 +228,12 @@ the *replace* directive, using a 3-element tuple `('replace', target, asset)`:
 
 .. code-block:: py
 
-    'assets': {
-        'web.common': [
-            ('replace', 'web/static/src/js/boot.js', 'my_addon/static/src/js/boot.js'),
-        ],
-    },
+    'web.common': [
+        ('replace', 'web/static/src/js/boot.js', 'my_addon/static/src/js/boot.js'),
+    ],
+
+Note that you can only replace or remove the file paths that have been added by
+previous globs in manifests higher up in the hierarchy.
 
 .. note ::
 
@@ -253,8 +246,8 @@ the *replace* directive, using a 3-element tuple `('replace', target, asset)`:
     widget class has actually builtin support just for this use case. (see section
     :ref:`reference/javascript_reference/qweb`)
 
-Asset order
------------
+Asset loading order
+-------------------
 
 The order in which assets are loaded is sometimes critical and must be deterministic,
 mostly for stylesheets priorities and setup scripts. Assets in Odoo are processed
@@ -280,12 +273,10 @@ call any setup file specifically before calling its parent folder:
 
 .. code-block:: py
 
-    'assets': {
-        'web.common': [
-            'my_addon/static/lib/jquery/jquery.js',
-            'my_addon/static/lib/jquery/**/*',
-        ],
-    },
+    'web.common': [
+        'my_addon/static/lib/jquery/jquery.js',
+        'my_addon/static/lib/jquery/**/*',
+    ],
 
 .. note ::
 
@@ -303,21 +294,21 @@ be associated to a `bundle` and apply their `glob` (and `target` if any) to the
 list of assets using according to their `directive`. Each record of 'ir.asset' has
 the following fields:
 
-.. :class: IrAsset
+.. autoclass:: odoo.addons.base.models.ir_asset.IrAsset
 
-    .. :attribute: name
+    .. attribute:: name
 
         Name of the asset record (for identification purpose).
 
-    .. :attribute: bundle
+    .. attribute:: bundle
 
         Bundle in which the asset will be applied.
 
-    .. :attribute: directive (default='append')
+    .. attribute:: directive (default='append')
 
         Directive to use on the bundle.
 
-    .. :attribute: glob
+    .. attribute:: glob
 
         Glob string defining:
 
@@ -325,32 +316,32 @@ the following fields:
 
             b) a URL to an attachment
 
-    .. :attribute: target
+    .. attribute:: target
 
         Target file to replace in the bundle. Can only be used with the 'replace'
         directive.
 
-    .. :attribute: active (default=True)
+    .. attribute:: active (default=True)
 
 What to do if a file is not loaded/updated
 ------------------------------------------
 
-There are many different reasons why a file may not be properly loaded.  Here
+There are many different reasons why a file may not be properly loaded. Here
 are a few things you can try to solve the issue:
 
 - once the server is started, it does not know if an asset file has been
-  modified.  So, you can simply restart the server to regenerate the assets.
+  modified. So, you can simply restart the server to regenerate the assets.
 - check the console (in the dev tools, usually opened with F12) to make sure
   there are no obvious errors
 - try to add a console.log at the beginning of your file (before any module
   definition), so you can see if a file has been loaded or not
 - in the user interface, in debug mode (INSERT LINK HERE TO DEBUG MODE), there
   is an option to force the server to update its assets files.
-- use the *debug=assets* mode.  This will actually bypass the asset bundles (note
+- use the *debug=assets* mode. This will actually bypass the asset bundles (note
   that it does not actually solve the issue. The server still uses outdated bundles)
 - finally, the most convenient way to do it, for a developer, is to start the
   server with the *--dev=all* option. This activates the file watcher options,
-  which will automatically invalidate assets when necessary.  Note that it does
+  which will automatically invalidate assets when necessary. Note that it does
   not work very well if the OS is Windows.
 - remember to refresh your page!
 - or maybe to save your code file...

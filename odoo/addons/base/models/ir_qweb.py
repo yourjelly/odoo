@@ -19,6 +19,7 @@ from odoo.modules.module import get_resource_path
 
 from odoo.addons.base.models.qweb import QWeb, Contextifier
 from odoo.addons.base.models.assetsbundle import AssetsBundle
+from odoo.addons.base.models.ir_asset import get_mime_type
 
 _logger = logging.getLogger(__name__)
 
@@ -311,16 +312,16 @@ class IrQWeb(models.AbstractModel, QWeb):
             rendering_bundle=True)
 
         options['website_id'] = self.env.context.get('website_id')
-        IrAsset = self.env['ir.asset']
         addons = module_boot()
+        addon_files = self.env['ir.asset'].get_addon_files(addons=addons, bundle=xmlid, css=css, js=js)
 
         files = []
         remains = []
-        for addon, file in IrAsset.get_addon_files(addons=addons, bundle=xmlid, css=css, js=js):
+        for _, file in addon_files:
             if can_aggregate(file):
                 path = [segment for segment in file.split('/') if segment]
                 files.append({
-                    'atype': IrAsset.get_mime_type(file),
+                    'atype': get_mime_type(file),
                     'url': file,
                     'filename': get_resource_path(*path) if path else None,
                     'content': '',
@@ -330,7 +331,7 @@ class IrQWeb(models.AbstractModel, QWeb):
                 tag = 'link' if css else 'script'
                 url_attr = 'href' if css else 'src'
                 attributes = {
-                    'type': IrAsset.get_mime_type(file),
+                    'type': get_mime_type(file),
                     url_attr: file,
                 }
                 remains.append((tag, attributes, ''))

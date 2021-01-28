@@ -476,8 +476,8 @@ class TestJavascriptAssetsBundle(FileTouchable):
         attachments = self.env['ir.attachment'].search([('url', '=like', '/web/content/%-%/test_assetsbundle.bundle4.%')])
         self.assertEqual(len(attachments), 2)
 
-        asset_data = etree.HTML(html).xpath('//*[@data-asset-xmlid]')[0]
-        asset_xmlid = asset_data.attrib.get('data-asset-xmlid')
+        asset_data = etree.HTML(html).xpath('//*[@data-asset-bundle]')[0]
+        asset_xmlid = asset_data.attrib.get('data-asset-bundle')
         asset_version = asset_data.attrib.get('data-asset-version')
 
         format_data = {
@@ -492,11 +492,11 @@ class TestJavascriptAssetsBundle(FileTouchable):
     <head>
         <link rel="stylesheet" href="http://test.external.link/style1.css"/>
         <link rel="stylesheet" href="http://test.external.link/style2.css"/>
-        <link type="text/css" rel="stylesheet" href="%(css)s" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"/>
+        <link type="text/css" rel="stylesheet" href="%(css)s" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"/>
         <meta/>
         <script type="text/javascript" src="http://test.external.link/javascript1.js"></script>
         <script type="text/javascript" src="http://test.external.link/javascript2.js"></script>
-        <script type="text/javascript" src="%(js)s" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
+        <script type="text/javascript" src="%(js)s" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
     </head>
     <body>
     </body>
@@ -507,8 +507,8 @@ class TestJavascriptAssetsBundle(FileTouchable):
         attachments = self.env['ir.attachment'].search([('url', '=like', '/web/content/%-%/test_assetsbundle.bundle4.%')])
         self.assertEqual(len(attachments), 0)
 
-        asset_data = etree.HTML(html).xpath('//*[@data-asset-xmlid]')[0]
-        asset_xmlid = asset_data.attrib.get('data-asset-xmlid')
+        asset_data = etree.HTML(html).xpath('//*[@data-asset-bundle]')[0]
+        asset_xmlid = asset_data.attrib.get('data-asset-bundle')
         asset_version = asset_data.attrib.get('data-asset-version')
 
         format_data = {
@@ -521,14 +521,14 @@ class TestJavascriptAssetsBundle(FileTouchable):
     <head>
         <link rel="stylesheet" href="http://test.external.link/style1.css"/>
         <link rel="stylesheet" href="http://test.external.link/style2.css"/>
-        <link type="text/css" rel="stylesheet" href="/test_assetsbundle/static/src/css/test_cssfile1.css" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"/>
-        <link type="text/css" rel="stylesheet" href="/test_assetsbundle/static/src/css/test_cssfile2.css" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"/>
+        <link type="text/css" rel="stylesheet" href="/test_assetsbundle/static/src/css/test_cssfile1.css" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"/>
+        <link type="text/css" rel="stylesheet" href="/test_assetsbundle/static/src/css/test_cssfile2.css" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"/>
         <meta/>
         <script type="text/javascript" src="http://test.external.link/javascript1.js"></script>
         <script type="text/javascript" src="http://test.external.link/javascript2.js"></script>
-        <script type="text/javascript" src="/test_assetsbundle/static/src/js/test_jsfile1.js" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
-        <script type="text/javascript" src="/test_assetsbundle/static/src/js/test_jsfile2.js" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
-        <script type="text/javascript" src="/test_assetsbundle/static/src/js/test_jsfile3.js" data-asset-xmlid="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
+        <script type="text/javascript" src="/test_assetsbundle/static/src/js/test_jsfile1.js" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
+        <script type="text/javascript" src="/test_assetsbundle/static/src/js/test_jsfile2.js" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
+        <script type="text/javascript" src="/test_assetsbundle/static/src/js/test_jsfile3.js" data-asset-bundle="%(asset_xmlid)s" data-asset-version="%(asset_version)s"></script>
     </head>
     <body>
     </body>
