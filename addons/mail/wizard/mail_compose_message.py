@@ -288,12 +288,14 @@ class MailComposer(models.TransientModel):
                 # First extract email from recipient before comparing with blacklist
                 blacklisted_rec_ids.update(target['id'] for target in targets
                                            if target['email_normalized'] in blacklist)
-
+        preview_text = tools.html2plaintext(self.body)
+        preview_text = re.sub("[\r\n]",'', preview_text)
+        print("type of preview text: ",type(preview_text))
         for res_id in res_ids:
             # static wizard (mail.message) values
             mail_values = {
                 'subject': self.subject,
-                'body': '&nbsp;&zwnj;' * 120 if self._context.get('custom_layout') == 'mail.mail_notification_paynow' and len(tools.html2plaintext(self.body)) == 0 else self.body,
+                'body': preview_text + '&nbsp;&zwnj;' * 120 if self._context.get('custom_layout') == 'mail.mail_notification_paynow' and len(tools.html2plaintext(self.subject+self.body)) < 120 else self.body or '',
                 'parent_id': self.parent_id and self.parent_id.id,
                 'partner_ids': [partner.id for partner in self.partner_ids],
                 'attachment_ids': [attach.id for attach in self.attachment_ids],
