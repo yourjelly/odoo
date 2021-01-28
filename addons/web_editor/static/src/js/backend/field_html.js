@@ -164,6 +164,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             this.$content = this.wysiwyg.$editable;
             this._onLoadWysiwyg();
             this.isRendered = true;
+            $(this.wysiwyg.odooEditor.document.body).append(this.wysiwyg.toolbar.$el);
         });
     },
     /**
@@ -188,6 +189,7 @@ var FieldHtml = basic_fields.DebouncedField.extend(TranslatableFieldMixin, {
             tabsize: 0,
             height: 380,
             resizable: true,
+            autohideToolbar: true,
         });
     },
     /**
