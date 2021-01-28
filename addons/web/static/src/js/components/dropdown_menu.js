@@ -107,7 +107,7 @@ odoo.define('web.DropdownMenu', function (require) {
             if (this.state.open && !this.el.contains(ev.target)) {
                 if (document.body.classList.contains("modal-open")) {
                     // retrieve the active modal and check if the dropdown is a child of this modal
-                    const modal = document.querySelector('.modal:not(.o_inactive_modal)');
+                    const modal = document.querySelector('body  > .modal:not(.o_inactive_modal)');
                     if (!modal.contains(this.el)) {
                         return;
                     }
