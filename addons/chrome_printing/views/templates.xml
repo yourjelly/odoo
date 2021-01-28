@@ -1,24 +1,25 @@
 <odoo>
     <data>
-<!--
-        <template id="listing">
-          <ul>
-            <li t-foreach="objects" t-as="object">
-              <a t-attf-href="#{ root }/objects/#{ object.id }">
-                <t t-esc="object.display_name"/>
-              </a>
-            </li>
-          </ul>
+        <template id="minimal_layout">
+            &lt;!DOCTYPE html&gt;
+            <t t-raw="'&lt;base href=%s&gt;' % base_url"/>
+            <html style="height: 0;">
+                <head>
+                    <t t-call-assets="web.report_assets_pdf" t-js="false"/>
+                    <t t-call-assets="web.report_assets_common" t-js="false"/>
+                    <t t-call-assets="web.report_assets_pdf" t-css="false"/>
+                    <meta charset="utf-8"/>
+                    <style type="text/css" media="print">
+                        div.footer {
+                            page-break-after: always;
+                            page-break-inside: avoid;
+                        }
+                    </style>
+                </head>
+                <body class="container">
+                    <t t-raw="body"/>
+                </body>
+            </html>
         </template>
-        <template id="object">
-          <h1><t t-esc="object.display_name"/></h1>
-          <dl>
-            <t t-foreach="object._fields" t-as="field">
-              <dt><t t-esc="field"/></dt>
-              <dd><t t-esc="object[field]"/></dd>
-            </t>
-          </dl>
-        </template>
--->
     </data>
 </odoo>

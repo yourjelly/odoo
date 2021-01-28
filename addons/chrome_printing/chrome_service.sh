@@ -2,6 +2,7 @@
 
 google-chrome-stable \
     --headless \
+    --disable-web-security \
     --no-default-browser-check \
     --no-first-run \
     --disable-extensions \
