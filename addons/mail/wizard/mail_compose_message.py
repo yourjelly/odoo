@@ -293,7 +293,7 @@ class MailComposer(models.TransientModel):
             # static wizard (mail.message) values
             mail_values = {
                 'subject':  self.subject,
-                'body': self.body + '&nbsp;&zwnj;' * 120 if self._context.get('custom_layout') == 'mail.mail_notification_paynow' and len(tools.html2plaintext(self.body)) < 120 else self.body or '',
+                'body': self.body or '',
                 'parent_id': self.parent_id and self.parent_id.id,
                 'partner_ids': [partner.id for partner in self.partner_ids],
                 'attachment_ids': [attach.id for attach in self.attachment_ids],
