@@ -248,6 +248,8 @@ class MailComposer(models.TransientModel):
                             mail_auto_delete=wizard.template_id.auto_delete if wizard.template_id else False,
                             model_description=model_description)
                         post_params.update(mail_values)
+                        print("mail values...................",mail_values)
+                        print("post_params values...................",post_params)
                         if ActiveModel._name == 'mail.thread':
                             if wizard.model:
                                 post_params['model'] = wizard.model
@@ -290,7 +292,6 @@ class MailComposer(models.TransientModel):
                                            if target['email_normalized'] in blacklist)
         preview_text = tools.html2plaintext(self.body)
         preview_text = re.sub("[\r\n]",'', preview_text)
-        print("type of preview text: ",type(preview_text))
         for res_id in res_ids:
             # static wizard (mail.message) values
             mail_values = {
