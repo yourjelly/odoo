@@ -248,8 +248,6 @@ class MailComposer(models.TransientModel):
                             mail_auto_delete=wizard.template_id.auto_delete if wizard.template_id else False,
                             model_description=model_description)
                         post_params.update(mail_values)
-                        print("mail values...................",mail_values)
-                        print("post_params values...................",post_params)
                         if ActiveModel._name == 'mail.thread':
                             if wizard.model:
                                 post_params['model'] = wizard.model
