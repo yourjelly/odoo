@@ -234,7 +234,7 @@ class Cursor(BaseCursor):
         self.sql_log = _logger.isEnabledFor(logging.DEBUG)
 
         self.sql_log_count = 0
-
+        self.sql_log_queries = []
         # avoid the call of close() (by __del__) if an exception
         # is raised by any of the following initialisations
         self._closed = True
@@ -303,6 +303,7 @@ class Cursor(BaseCursor):
 
         # simple query count is always computed
         self.sql_log_count += 1
+        self.sql_log_queries.append(query)
         delay = (time.time() - now)
         if hasattr(threading.current_thread(), 'query_count'):
             threading.current_thread().query_count += 1
@@ -352,6 +353,7 @@ class Cursor(BaseCursor):
         process('from')
         process('into')
         self.sql_log_count = 0
+        self.sql_log_queries = []
         self.sql_log = False
 
     @check

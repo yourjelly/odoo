@@ -4,6 +4,9 @@
 from odoo.addons.website.tests.test_performance import UtilPerf
 import random
 
+import logging
+_logger = logging.getLogger(__name__)
+
 
 class TestBlogPerformance(UtilPerf):
     def setUp(self):
@@ -38,5 +41,8 @@ class TestBlogPerformance(UtilPerf):
         for blog_post in blog_posts:
             blog_post.write({'tag_ids': [[6, 0, random.choices(blog_tags.ids, k=random.randint(0, len(blog_tags)))]]})
 
-        self.assertLessEqual(self._get_url_hot_query('/blog'), 28)
+        count, queries = self._get_url_hot_queries('/blog')
+        if count > 28:
+            _logger.error(queries)
+            self.assertLessEqual(count, 28)
         self.assertLessEqual(self._get_url_hot_query(blog_post[0].website_url), 31)
