@@ -939,6 +939,10 @@ var FormRenderer = BasicRenderer.extend({
         var self = this;
         var $headers = $('<ul class="nav nav-tabs">');
         var $pages = $('<div class="tab-content">');
+        const navs = document.querySelectorAll('.o_form_sheet .o_notebook_headers .nav-item > .nav-link');
+        const activeIndex = Math.max([...navs].findIndex(
+            nav => nav.classList.contains('active')
+        ), 0);
         // renderedTabs is used to aggregate the generated $headers and $pages
         // alongside their node, so that their modifiers can be registered once
         // all tabs have been rendered, to ensure that the first visible tab
@@ -948,6 +952,9 @@ var FormRenderer = BasicRenderer.extend({
             var $header = self._renderTabHeader(child, pageID);
             var $page = self._renderTabPage(child, pageID);
             self._handleAttributes($header, child);
+            if (index == activeIndex) {
+                child.attrs["autofocus"] = "autofocus";
+            }
             $headers.append($header);
             $pages.append($page);
             return {
