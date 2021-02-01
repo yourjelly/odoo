@@ -546,6 +546,14 @@ class StockMove(models.Model):
                 move.location_id.name, move.location_dest_id.name)))
         return res
 
+    @api.model
+    def create(self, vals):
+        res = super().create(vals)
+        if self.user_has_groups('product.group_stock_packaging') and not res.packaging_id:
+            single_unit_packagings = res.product_id.packaging_ids.filtered(lambda p: p.qty == 1)
+            res.packaging_id = single_unit_packagings and single_unit_packagings[0] or False
+        return res
+
     def write(self, vals):
         # Handle the write on the initial demand by updating the reserved quantity and logging
         # messages according to the state of the stock.move records.
@@ -870,6 +878,9 @@ class StockMove(models.Model):
         product = self.product_id.with_context(lang=self._get_lang())
         self.name = product.partner_ref
         self.product_uom = product.uom_id.id
+        if self.user_has_groups('product.group_stock_packaging') and not self.packaging_id:
+            single_unit_packagings = product.packaging_ids.filtered(lambda p: p.qty == 1)
+            self.packaging_id = single_unit_packagings and single_unit_packagings[0] or False
         if product:
             self.description_picking = product._get_description(self.picking_type_id)
 
@@ -1019,7 +1030,7 @@ class StockMove(models.Model):
         if origin_move_line:
             location_dest = origin_move_line.location_dest_id
         else:
-            location_dest = self.location_dest_id._get_putaway_strategy(self.product_id, quantity=1)
+            location_dest = self.location_dest_id._get_putaway_strategy(self.product_id, quantity=1, packaging=self.packaging_id)
         move_line_vals = {
             'picking_id': self.picking_id.id,
             'location_dest_id': location_dest and location_dest.id or self.location_dest_id.id,
@@ -1172,7 +1183,7 @@ class StockMove(models.Model):
     def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
         self.ensure_one()
         # apply putaway
-        putaway_location = self.location_dest_id._get_putaway_strategy(self.product_id, quantity=quantity or 0)
+        putaway_location = self.location_dest_id._get_putaway_strategy(self.product_id, quantity=quantity or 0, packaging=self.packaging_id)
         location_dest_id = putaway_location and putaway_location.id or self.location_dest_id.id
         vals = {
             'move_id': self.id,
