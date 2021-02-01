@@ -159,6 +159,19 @@
                             </div>
                         </div>
                     </div>
+                     <div class="col-12 col-lg-6 o_setting_box"
+                        id="gift_card_programs"
+                        title="Gift Card on your eCommerce, it allows user to use it as a wallet.">
+                        <div class="o_setting_left_pane">
+                            <field name="module_website_sale_wallet" />
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="module_website_sale_wallet"/>
+                            <div class="text-muted" id="website_sale_wallet">
+                                Gift Card on your eCommerce, it allows user to use it as a wallet.
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <h2>Shipping</h2>

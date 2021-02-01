@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="add_gift_card_form">
+        <form t-att-action="'/shop/add_gift_card%s' % (redirect and '?r=' + redirect or '')"
+              class="mb-2"
+              method="post" name="gift_card_code">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <div class="input-group w-100">
+                <input name="gift_card_code" class="form-control" type="text" required="required"
+                       placeholder="Gift card code..."/>
+                <div class="input-group-append">
+                    <button href="#" type="submit" role="button" class="btn btn-secondary a-submit">Add</button>
+                </div>
+            </div>
+        </form>
+        <t t-if="request.params.get('gift_card_code_not_available')">
+            <div class="alert alert-danger text-left mt16" role="alert">
+                Invalid or expired Gift Card code.
+            </div>
+        </t>
+    </template>
+    <template id="cart_line_product_no_link" inherit_id="website_sale.cart_line_product_link" name="cart_line_product_no_link">
+        <xpath expr="." position="replace">
+            <div>
+                <t t-if="not line.is_wallet_payment">
+                    <a t-att-href="line.product_id.website_url">
+                        <strong t-field="line.name_short"/>
+                    </a>
+                </t>
+                <t t-else="">
+                    <strong t-field="line.name_short"/>
+                </t>
+            </div>
+
+        </xpath>
+    </template>
+    <template id="add_gift_card" inherit_id="website_sale.total" customize_show="True" name="Gift Card">
+        <xpath expr="//div[@id='cart_total']//table/tr[last()]" position="after">
+            <tr t-if="not hide_wallet" class="oe_website_sale_wallet">
+                <td colspan="3" class="text-center text-xl-right border-0">
+                    <span class=''>
+                        <t t-set='force_wallet' t-value="request.params.get('gift_card_code_not_available')"/>
+                        <t t-if="not force_wallet">
+                            <a href="#" class="show_wallet">I have a gift card</a>
+                        </t>
+                        <div t-attf-class="wallet_form #{not force_wallet and 'd-none'}">
+                            <t t-call="website_sale_wallet.add_gift_card_form"/>
+                        </div>
+                    </span>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+    <template id="gift_card_form" inherit_id="website_sale.payment">
+        <xpath expr="//div[@id='payment_method']/h3" position="after">
+            <tr>
+                <td colspan="3" class="text-center text-xl-right border-0">
+                    <div class="card mt-3" t-if="order.wallet_balance != 0">
+                        <div class="card-body">
+                            <a t-att-href="'/shop/pay_with_wallet%s' % (redirect and '?r=' + redirect or '')"
+                               t-att-class="'btn btn-link %s' % ( order.reload_wallet_payment() and 'text-warning')"
+                               role="button">
+                                <t t-if="order.reload_wallet_payment()">
+                                    <i class='fa fa-repeat'/>
+                                </t>
+                                <b>Pay with Wallet :</b>
+                                (Balance:
+                                <span t-field="order.wallet_balance" style="white-space: nowrap;"
+                                      t-options="{'widget': 'monetary', 'display_currency': order.currency_id}"/>
+                                <t t-if="order.wallet_actual_balance != order.wallet_balance">
+                                    , Actual Balance:
+                                    <span t-field="order.wallet_actual_balance" style="white-space: nowrap;"
+                                          t-options="{'widget': 'monetary', 'display_currency': order.currency_id}"/>
+                                </t>
+                                )
+                            </a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+    <template id="website_sale_wallet_gift_card_qty" inherit_id="website_sale.cart_lines">
+        <xpath expr="//td[hasclass('td-qty')]/div" position="attributes">
+            <attribute name="t-attf-style" add ="#{line.is_wallet_payment and 'display: none;'}" separator=" " />
+        </xpath>
+        <xpath expr="//td[hasclass('td-qty')]/div" position="after">
+            <t t-if="line.is_wallet_payment">
+                <span class="text-muted" t-esc="int(line.product_uom_qty)"/>
+            </t>
+        </xpath>
+    </template>
+    <template id="sale_wallet_purchased_gift_card">
+        <div class="card mt-3 o_purchased_gift_card" t-if="order.generated_gift_card_count != 0">
+            <div class="card-body">
+                <div>
+                    <b>Gift Card</b>
+                </div>
+                <span>Thank for your purchasing. You will find below your gift cards code.</span>
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th class="border-top-0">Code</th>
+                            <th class="border-top-0 text-center">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="order.generated_gift_card_ids" t-as="gift_card">
+                            <td class="copy-to-clipboard" t-att-data-clipboard-text="gift_card.code">
+                                <span t-esc="gift_card.code"/>
+                            </td>
+                            <td class="text-center">
+                                <span t-field="gift_card.amount" style="white-space: nowrap;"
+                                      t-options="{'widget': 'monetary', 'display_currency': order.currency_id}"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </template>
+    <template inherit_id="website_sale.confirmation" id="website_sale_wallet_purchased_gift_card">
+        <xpath expr="//div[@id='oe_structure_website_sale_confirmation_2']" position="after">
+            <t t-call="website_sale_wallet.sale_wallet_purchased_gift_card">
+                <t t-set="order" t-value="order"/>
+            </t>
+        </xpath>
+    </template>
+    <template inherit_id="sale.sale_order_portal_content" id="website_sale_wallet_purchased_gift_card_preview">
+        <xpath expr="//section[@id='details']" position="after">
+            <t t-call="website_sale_wallet.sale_wallet_purchased_gift_card">
+                <t t-set="order" t-value="sale_order"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

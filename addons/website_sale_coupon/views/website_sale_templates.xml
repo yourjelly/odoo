@@ -28,7 +28,7 @@
         </t>
     </xpath>
     <xpath expr="//td[hasclass('td-qty')]/div" position="attributes">
-        <attribute name="t-att-style">line.is_reward_line and "display:none;"</attribute>
+        <attribute name="t-attf-style" add="#{line.is_reward_line and 'display:none;'}" separator=" "/>
     </xpath>
     <xpath expr="//table[@id='cart_products']/tbody//tr//td[hasclass('td-product_name')]//div" position="attributes">
     <!-- Can't xpath "//table[@id='cart_products']/tbody//tr" since optional_product already xpath that one.

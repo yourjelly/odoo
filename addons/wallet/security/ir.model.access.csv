@@ -1,0 +1,7 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_gift_card_sales,Gift Card Program (Salesperson),model_gift_card,sales_team.group_sale_salesman,1,0,0,0
+access_gift_card_manager,Gift Card Program (Manager),model_gift_card,sales_team.group_sale_manager,1,1,1,1
+access_wallet_transaction_sales,access_wallet_transaction,model_wallet_transaction,sales_team.group_sale_salesman,1,0,0,0
+access_wallet_transaction_manager,access_wallet_transaction,model_wallet_transaction,sales_team.group_sale_manager,1,1,1,1
+access_wallet_sales,access_wallet_sales,model_wallet,sales_team.group_sale_salesman,1,0,0,0
+access_wallet_manager,access_wallet_manager,model_wallet,sales_team.group_sale_manager,1,1,1,1

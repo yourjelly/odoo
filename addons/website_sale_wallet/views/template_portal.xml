@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_wallet_transactions" name="Wallet" inherit_id="portal.portal_my_home"
+              customize_show="True" priority="30">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Wallet</t>
+                <t t-set="url" t-value="'/my/wallet_transactions'"/>
+                <t t-set="placeholder_count" t-value="'wallet_balance'"/>
+            </t>
+        </xpath>
+    </template>
+    <template id="portal_layout_wallet_transactions"
+              name="Portal layout: transactions wallet menu entry"
+              inherit_id="portal.portal_breadcrumbs"
+              priority="35">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'wallet_transactions' or wallet_transactions"
+                t-attf-class="breadcrumb-item #{'active' if wallet_transactions else ''}">
+                <t>Wallet</t>
+            </li>
+        </xpath>
+    </template>
+    <template id="portal_my_wallet_transactions" name="My Wallet">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Wallet</t>
+            </t>
+            <section>
+                <h4>Register a gift card</h4>
+                <t t-call="website_sale_wallet.add_gift_card_form">
+
+                        <t t-set='redirect' t-value="redirect or '/my/wallet_transactions'"/>
+
+                </t>
+            </section>
+            <t t-if="not wallet.wallet_transaction_ids">
+                <p>There are currently no transactions added in your wallet.</p>
+            </t>
+            <t t-if="wallet.wallet_transaction_ids" t-call="portal.portal_table">
+                <span>
+                    Balance:
+                    <span t-field="wallet.balance"/>
+                    <t t-if="wallet.actual_balance != wallet.balance">
+                        (Actual Balance:
+                        <span t-field="wallet.actual_balance"/>)
+                    </t>
+                </span>
+                <thead>
+                    <tr class="active">
+                        <th>Date</th>
+                        <th>Operation #</th>
+                        <th class="text-right">Amount</th>
+                    </tr>
+                </thead>
+                <t t-foreach="wallet.wallet_transaction_ids" t-as="wallet_transaction">
+                    <tr t-if="wallet_transaction.is_debit"
+                        t-att-class="'' if wallet_transaction.is_confirmed else 'table-warning'">
+                        <td>
+                            <span t-field="wallet_transaction.create_date"/>
+                        </td>
+                        <td>
+                            <span>Payment of the order
+                                (
+                                <a t-att-href="wallet_transaction.sale_order_line_id.order_id.get_portal_url()">
+                                    <t t-esc="wallet_transaction.sale_order_line_id.order_id.name"/>
+                                </a>
+                                )
+                                <span t-if="not wallet_transaction.is_confirmed">
+                                    to confirm ...
+                                </span>
+                            </span>
+
+                        </td>
+                        <td class="text-right">
+                            <span t-field="wallet_transaction.sale_order_line_id.price_unit"
+                                  t-options='{"widget": "monetary", "display_currency": wallet_transaction.sale_order_line_id.currency_id}'/>
+                        </td>
+                    </tr>
+                    <tr t-else="" class="table-success">
+                        <td>
+                            <span t-field="wallet_transaction.create_date"/>
+                        </td>
+                        <td>
+                            <span>
+                                Adding gift card (<span t-field="wallet_transaction.gift_card_id.code"/>)
+                            </span>
+
+                        </td>
+
+                        <td class="text-right">
+                            <span t-field="wallet_transaction.gift_card_id.amount"/>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
