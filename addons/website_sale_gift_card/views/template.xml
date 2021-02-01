@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="pay_with_gift_card_form">
+        <form t-att-action="'/shop/pay_with_gift_card%s' % (redirect and '?r=' + redirect or '')"
+              class="mb-2"
+              method="post" name="gift_card_code">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+            <div class="input-group w-100">
+                <input name="gift_card_code" class="form-control" type="text" required="required"
+                       placeholder="Gift card code..."/>
+                <div class="input-group-append">
+                    <button href="#" type="submit" role="button" class="btn btn-secondary a-submit">Pay</button>
+                </div>
+            </div>
+        </form>
+        <t t-if="request.params.get('gift_card_error')">
+            <div class="alert alert-danger text-left mt16" role="alert" t-esc="request.params.get('gift_card_error')"/>
+        </t>
+    </template>
+    <template id="website_sale_gift_card.description_gift_card">
+        <div class="text-muted d-none d-md-block small">
+            <span>
+                Code:
+                <t t-esc="line.payed_with_gift_card_id.code[-5:].rjust(20, '*')"/>
+            </span>
+            <br/>
+            <span>
+                Expired Date:
+                <t t-esc="line.payed_with_gift_card_id.expired_date"/>
+            </span>
+        </div>
+    </template>
+    <template id="cart_line_product_no_link" inherit_id="website_sale.cart_line_product_link"
+              name="cart_line_product_no_link">
+        <xpath expr="." position="replace">
+            <div>
+                <t t-if="not line.is_gift_card_payment">
+                    <a t-att-href="line.product_id.website_url">
+                        <strong t-field="line.name_short"/>
+                    </a>
+                </t>
+                <t t-else="">
+                    <strong t-field="line.name_short"/>
+                    <t t-call="website_sale_gift_card.description_gift_card"/>
+                </t>
+            </div>
+
+        </xpath>
+    </template>
+    <template id="add_gift_card" inherit_id="website_sale.total" customize_show="True" name="Gift Card">
+        <xpath expr="//div[@id='cart_total']//table/tr[last()]" position="after">
+            <tr t-if="not hide_promotions" class="oe_website_sale_gift_card">
+                <td colspan="3" class="text-center text-xl-right border-0">
+                    <span class=''>
+                        <t t-set='force_gift_card' t-value="website_sale_order.pricelist_id.code or request.params.get('gift_card_error')"/>
+                        <t t-if="not force_gift_card">
+                            <a href="#" class="show_gift_card">I have a gift card</a>
+                        </t>
+                        <div t-attf-class="gift_card_form #{not force_gift_card and 'd-none'}">
+                            <t t-call="website_sale_gift_card.pay_with_gift_card_form"/>
+                        </div>
+                    </span>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+    <template id="website_sale_gift_card_gift_card_qty" inherit_id="website_sale.cart_lines">
+        <xpath expr="//td[hasclass('td-qty')]/div" position="attributes">
+            <attribute name="t-attf-style" add="#{line.is_gift_card_payment and 'display: none;'}" separator=" "/>
+        </xpath>
+        <xpath expr="//td[hasclass('td-qty')]/div" position="after">
+            <t t-if="line.is_gift_card_payment">
+                <span class="text-muted" t-esc="int(line.product_uom_qty)"/>
+            </t>
+        </xpath>
+    </template>
+    <template id="cart_summary_inherit_website_gift_card_sale" inherit_id="website_sale.cart_summary">
+        <xpath expr="//td[hasclass('td-product_name')]/div/strong" position="after">
+            <t t-if="line.is_gift_card_payment" t-call="website_sale_gift_card.description_gift_card"/>
+        </xpath>
+    </template>
+    <template id="sale_order_portal_content_inherit_website_sale" name="Orders Followup Products Links"
+              inherit_id="sale.sale_order_portal_content">
+        <xpath expr="//section[@id='details']//td[@id='product_name']/*[last()]" position="after">
+            <t t-if="line.is_gift_card_payment" t-call="website_sale_gift_card.description_gift_card"/>
+        </xpath>
+    </template>
+    <template id="sale_purchased_gift_card">
+        <div class="card mt-3 " t-if="order.generated_gift_card_count != 0">
+            <div class="card-body">
+                <span>You will find below your gift cards code. An email has been sent with it.You can use it starting right now on our website.</span>
+                <table class="table text-center table-borderless">
+                    <thead>
+                        <tr>
+                            <th class="font-weight-normal">Gift Card Code</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="order.order_line" t-as="order_line">
+                            <tr t-foreach="order_line.generated_gift_card_ids" t-as="gift_card">
+                                <td class="o_purchased_gift_card">
+                                        Gift #<t t-esc="gift_card.id"/> (<span t-field="gift_card.initial_amount" style="white-space: nowrap;"
+                                          t-options="{'widget': 'monetary', 'display_currency': gift_card.currency_id}"/>)
+                                        <strong t-esc="gift_card.code"/>
+                                        <button class="btn btn-xm btn-light copy-to-clipboard" t-att-data-clipboard-text="gift_card.code">
+                                            <span class="fa fa-clipboard"/> Copy
+                                        </button>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </template>
+    <template inherit_id="website_sale.confirmation" id="website_sale_purchased_gift_card">
+        <xpath expr="//div[@id='oe_structure_website_sale_confirmation_2']" position="after">
+            <t t-call="website_sale_gift_card.sale_purchased_gift_card">
+                <t t-set="order" t-value="order"/>
+            </t>
+        </xpath>
+    </template>
+    <template inherit_id="sale.sale_order_portal_content" id="website_sale_purchased_gift_card_preview">
+        <xpath expr="//section[@id='details']" position="after">
+            <t t-call="website_sale_gift_card.sale_purchased_gift_card">
+                <t t-set="order" t-value="sale_order"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

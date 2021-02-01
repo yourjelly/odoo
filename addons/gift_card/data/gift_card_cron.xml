@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<odoo>
+   <data noupdate="1">
+        <record id="cron_expire_gift_card" model="ir.cron">
+            <field name="name">Gift Card: expire gift card based on date</field>
+            <field name="model_id" ref="gift_card.model_gift_card"/>
+            <field name="code">model.cron_expire_gift_card()</field>
+            <field name="active" eval="True"/>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+        </record>
+   </data>
+</odoo>
