@@ -1004,7 +1004,7 @@
                             </t>
                         </td>
                         <td class="text-center td-qty">
-                            <div class="css_quantity input-group mx-auto">
+                            <div class="css_quantity input-group mx-auto" t-if="not line._is_not_sellable_line()">
                                 <div class="input-group-prepend">
                                     <a t-attf-href="#" class="btn btn-link js_add_cart_json d-none d-md-inline-block" aria-label="Remove one" title="Remove one">
                                         <i class="fa fa-minus"></i>
@@ -1016,6 +1016,9 @@
                                         <i class="fa fa-plus"></i>
                                     </a>
                                 </div>
+                            </div>
+                            <div t-else="">
+                                <span class="text-muted" t-esc="int(line.product_uom_qty)"/>
                             </div>
                         </td>
                         <td class="text-center td-price" name="price">
@@ -1127,7 +1130,7 @@
             <div class="text-center">
                 <span class="h6">
                     <t t-call="website_sale.total">
-                        <t t-set="hide_coupon" t-value="True"/>
+                        <t t-set="hide_promotions" t-value="True"/>
                     </t>
                 </span>
                 <a role="button" class="btn btn-primary" href="/shop/cart">
@@ -1314,7 +1317,7 @@
                     <div class="row">
                         <div class="col-12 col-xl-auto order-xl-2 d-none d-xl-block">
                             <t t-call="website_sale.cart_summary">
-                                <t t-set="hide_coupon">True</t>
+                                <t t-set="hide_promotions">True</t>
                                 <t t-set="redirect" t-valuef="/shop/address"/>
                             </t>
                         </div>
@@ -1693,7 +1696,7 @@
                         <div class="col-12 col-xl-auto">
                             <t t-set="website_sale_order" t-value="order"/>
                             <t t-call="website_sale.cart_summary">
-                                <t t-set="hide_coupon" t-value="1"/>
+                                <t t-set="hide_promotions" t-value="1"/>
                             </t>
                         </div>
                     </div>
@@ -1736,7 +1739,7 @@
 
     <template id="reduction_code" inherit_id="website_sale.total" customize_show="True" name="Promo Code">
         <xpath expr="//div[@id='cart_total']//table/tr[last()]" position="after">
-            <tr t-if="not hide_coupon">
+            <tr t-if="not hide_promotions">
                 <td colspan="3" class="text-center text-xl-right border-0">
                 <span class=''>
                     <t t-set='force_coupon' t-value="website_sale_order.pricelist_id.code or request.params.get('code_not_available')"/>

@@ -787,6 +787,10 @@ Reason(s) of this behavior could be:
             )
         return moves
 
+    def __is_not_sellable_line(self):
+        # True if the line is a computed line (reward, delivery, ...) that user cannot add manually
+        return False
+
     def action_draft(self):
         orders = self.filtered(lambda s: s.state in ['cancel', 'sent'])
         return orders.write({

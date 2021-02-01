@@ -822,7 +822,7 @@ class WebsiteSale(http.Controller):
             order=order,
             payment_action_id=request.env.ref('payment.action_payment_acquirer').id,
             return_url= '/shop/payment/validate',
-            bootstrap_formatting= True
+            bootstrap_formatting=True
         )
 
         domain = expression.AND([
