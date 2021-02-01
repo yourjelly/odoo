@@ -2,12 +2,14 @@ odoo.define('web.WebClient', function (require) {
 "use strict";
 
 var AbstractWebClient = require('web.AbstractWebClient');
+var config = require('web.config');
 var core = require('web.core');
 var data_manager = require('web.data_manager');
+var dom = require('web.dom');
 var Menu = require('web.Menu');
 var session = require('web.session');
 
-const WebClient = AbstractWebClient.extend({
+return AbstractWebClient.extend({
     custom_events: _.extend({}, AbstractWebClient.prototype.custom_events, {
         app_clicked: 'on_app_clicked',
         menu_clicked: 'on_menu_clicked',
@@ -237,7 +239,5 @@ const WebClient = AbstractWebClient.extend({
         return this.do_action(action, options);
     },
 });
-
-return WebClient;
 
 });

@@ -11,11 +11,11 @@ class IrAsset(models.Model):
 
     _inherit = 'ir.asset'
 
+    website_id = fields.Many2one('website')
+
     def _get_asset_domain(self, bundle):
         domain = super(IrAsset, self)._get_asset_domain()
         website_id = self.env.context.get('website_id', False)
         if website_id:
             domain += [('website_id', '=', website_id)]
         return domain
-
-    website_id = fields.Many2one('website')
