@@ -87,6 +87,14 @@ class IrActionsReport(models.Model):
                 ._post_pdf(save_in_attachment, pdf_content=pdf_content, res_ids=html_ids), 'pdf'
         return pdf_content, 'pdf'
 
+    @api.model
+    def preprocess(self, headers, articles, footers):
+        # page = footer.xpath(match_klass.format('span', 'page'))[0]
+        # page.text = str(i)
+        # topage = footer.xpath(match_klass.format('span', 'topage'))[0]
+        # topage.text = str(max_pages)
+        return NotImplemented
+
     def _prepare_html(self, html):
         '''Divide and recreate the header/footer html by merging all found in html.
         The bodies are extracted and added to a list. Then, extract the specific_paperformat_args.
@@ -120,14 +128,13 @@ class IrActionsReport(models.Model):
         footers = root.xpath(match_klass.format('div', 'footer'))
         articles = root.xpath(match_klass.format('div', 'article'))
 
+        # TODO: set it up properly, try to avoid multiple loops if possible
+        self.preprocess(headers, articles, footers)
+
         max_pages = len(footers)
         for i, (header, article, footer) in enumerate(zip(headers, articles, footers), start=1):
             main.append(header)
             main.append(article)
-            page = footer.xpath(match_klass.format('span', 'page'))[0]
-            page.text = str(i)
-            topage = footer.xpath(match_klass.format('span', 'topage'))[0]
-            topage.text = str(max_pages)
             main.append(footer)
             if article.get('data-oe-model') == self.model:
                 res_ids.append(int(article.get('data-oe-id', 0)))
@@ -213,16 +220,25 @@ class IrActionsReport(models.Model):
 
         temporary_files = []
 
-        # write html version of document on disk so that it can be opened with headless chrome
+        # Write html version of document on disk so that it can be opened with headless chrome,
+        # this requires the chrome flag `--disable-web-security` otherwise we get CORS errors.
+        # Another solution would be to inject the user's session cookie into Chrome, navigating
+        # to the corresponding document's HTML view and printing that, but it'd produce a lot of
+        # HTTP requests which IIRC the Odoo.sh team seemed to want to avoid.
         html_file_fd, html_file_path = tempfile.mkstemp(suffix='.html', prefix='report.tmp.')
         with closing(os.fdopen(html_file_fd, 'wb')) as body_file:
             body_file.write(rendered)
         temporary_files.append(html_file_path)
 
         browser.Page.enable()
+        browser.Network.enable()
+        browser.Runtime.enable()
+        # For the two resolve calls below, we may want to set the timeout to the request timeout
+        # of the server, as the amount of time taken to both load the HTML file and to
+        # generate a PDF from said file scale according to the size of the HTML file
+        import pdb; pdb.set_trace()
         browser.Page.navigate(f"file://{html_file_path}").resolve()
-        promise = browser.Page.printToPDF(**chrome_print_args)
-        result = promise.resolve()
+        result = browser.Page.printToPDF(**chrome_print_args).resolve()
 
         for temporary_file in temporary_files:
             try:

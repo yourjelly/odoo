@@ -109,6 +109,7 @@ class ChromeBrowser:
             'method': method_name,
             'params': params or {},
         }
+        # useless, simply return as Promise
         self._id_to_callback_map[_id] = self.callbacks[method_name]
         self.ws.send(json.dumps(payload))
         return Promise(self, _id, method_name)
@@ -118,6 +119,7 @@ class ChromeBrowser:
             raise NotImplementedError(f"Domain {attribute} has not been implemented yet")
         return self.dispatch[attribute]
 
+    # TODO: remove me, dead code up to cdp api methods
     def _handle_by_id(self, _id, response):
         return self._id_to_callback_map[_id](response)
 
@@ -138,11 +140,22 @@ class ChromeBrowser:
     ## CDP API Methods ##
     #####################
 
+    # FIXME: use kwargs-only with a generic method but allow for specific overrides for more
+    # complex methods that may require some pre-processing, might require a proxy class
+    # something like Method(browser, domain) where domain == 'Network'|'Page'|...
     def register_methods(self):
         self.dispatch['Network']['setCookie'] = self._network_set_cookie
+        self.dispatch['Network']['enable'] = self._network_enable
         self.dispatch['Page']['enable'] = self._page_enable
         self.dispatch['Page']['navigate'] = self._page_navigate
         self.dispatch['Page']['printToPDF'] = self._page_print_to_pdf
+        self.dispatch['Runtime']['enable'] = self._runtime_enable
+
+    def _runtime_enable(self):
+        return self._send('Runtime', 'enable')
+
+    def _network_enable(self):
+        return self._send('Network', 'enable')
 
     def _network_set_cookie(self, name, value, domain='', path=''):
         params = {
@@ -166,6 +179,7 @@ class ChromeBrowser:
     #######################
     ## CDP API Callbacks ##
     #######################
+    # TODO: Remove me, dead code
 
     def register_callbacks(self):
         self.callbacks = defaultdict(lambda: self._default_callback)
@@ -271,7 +285,7 @@ class Promise(metaclass=MetaPromise):
                 key = response.get('method', response.get('id'))
                 self.events[key] = response
 
-    def resolve(self, timeout=10):
+    def resolve(self, timeout=60):
         self._resolve(timeout)
         return getattr(self, self.callbacks[self.method_name])(self.response)
 
