@@ -17,7 +17,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
-        'views/partner_autocomplete_assets.xml',
+        
         'views/res_partner_views.xml',
         'views/res_company_views.xml',
         'views/res_config_settings_views.xml',
@@ -27,4 +27,24 @@
         'static/src/xml/partner_autocomplete.xml',
     ],
     'auto_install': True,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'partner_autocomplete/static/src/scss/partner_autocomplete.scss',
+            # inside .
+            'partner_autocomplete/static/src/js/partner_autocomplete_core.js',
+            # inside .
+            'partner_autocomplete/static/src/js/partner_autocomplete_fieldchar.js',
+            # inside .
+            'partner_autocomplete/static/src/js/partner_autocomplete_many2one.js',
+        ],
+        'tests_assets': [
+            # after //script[last()]
+            'partner_autocomplete/static/lib/jsvat.js',
+        ],
+        'qunit_suite': [
+            # after //script[last()]
+            'partner_autocomplete/static/tests/partner_autocomplete_tests.js',
+        ],
+    }
 }

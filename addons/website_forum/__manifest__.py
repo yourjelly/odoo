@@ -41,4 +41,24 @@ Ask questions, get answers, no distractions
     ],
     'installable': True,
     'application': True,
+    'assets': {
+        'assets_editor': [
+            # inside .
+            'website_forum/static/src/js/tours/website_forum.js',
+            # inside .
+            'website_forum/static/src/js/website_forum.editor.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'website_forum/static/tests/tours/website_forum_question.js',
+        ],
+        'assets_frontend': [
+            # after link[last()]
+            'website_forum/static/src/scss/website_forum.scss',
+            # after script[last()]
+            'website_forum/static/src/js/website_forum.js',
+            # after script[last()]
+            'website_forum/static/src/js/website_forum.share.js',
+        ],
+    }
 }

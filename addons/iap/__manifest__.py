@@ -16,7 +16,7 @@ to support In-App purchases inside Odoo. """,
     'data': [
         'security/ir.model.access.csv',
         'security/ir_rule.xml',
-        'views/assets.xml',
+        
         'views/iap_views.xml',
         'views/res_config_settings.xml',
     ],
@@ -24,4 +24,18 @@ to support In-App purchases inside Odoo. """,
         'static/src/xml/iap_templates.xml',
     ],
     'auto_install': True,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'iap/static/src/js/iap_credit.js',
+            # inside .
+            'iap/static/src/js/crash_manager.js',
+            # inside .
+            'iap/static/src/js/iap_buy_more_credits.js',
+        ],
+        'tests_assets': [
+            # inside .
+            'iap/static/tests/helpers/mock_server.js',
+        ],
+    }
 }

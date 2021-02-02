@@ -35,4 +35,100 @@
     'application': True,
     'pre_init_hook': 'pre_init_hook',
     'uninstall_hook': 'uninstall_hook',
+    'assets': {
+        'assets_snippet_s_dynamic_snippet_products_js_000': [
+            # after //script[last()]
+            'website_sale/static/src/snippets/s_dynamic_snippet_products/000.js',
+        ],
+        'assets_snippet_s_products_searchbar_js_000': [
+            # after //script[last()]
+            'website_sale/static/src/snippets/s_products_searchbar/000.js',
+        ],
+        '_assets_primary_variables': [
+            # after //link[last()]
+            'website_sale/static/src/scss/primary_variables.scss',
+        ],
+        'assets_backend': [
+            # inside .
+            'website_sale/static/src/js/website_sale_video_field_preview.js',
+            # inside .
+            'website_sale/static/src/js/website_sale_backend.js',
+            # inside .
+            'website_sale/static/src/scss/website_sale_dashboard.scss',
+            # inside .
+            'website_sale/static/src/scss/website_sale_backend.scss',
+            # inside .
+            'website_sale/static/src/js/tours/website_sale_shop_backend.js',
+        ],
+        'assets_frontend': [
+            # after link[last()]
+            'website_sale/static/src/scss/website_sale.scss',
+            # after link[last()]
+            'website_sale/static/src/scss/website_mail.scss',
+            # after link[last()]
+            'website_sale/static/src/scss/website_sale_frontend.scss',
+            # after link[last()]
+            'sale/static/src/scss/sale_portal.scss',
+            # after link[last()]
+            'sale/static/src/scss/product_configurator.scss',
+            # after script[last()]
+            'sale/static/src/js/variant_mixin.js',
+            # after script[last()]
+            'website_sale/static/src/js/variant_mixin.js',
+            # after script[last()]
+            'website_sale/static/src/js/website_sale.js',
+            # after script[last()]
+            'website_sale/static/src/js/website_sale_utils.js',
+            # after script[last()]
+            'website_sale/static/src/js/website_sale_payment.js',
+            # after script[last()]
+            'website_sale/static/src/js/website_sale_validate.js',
+            # after script[last()]
+            'website_sale/static/src/js/website_sale_recently_viewed.js',
+            # after script[last()]
+            'website_sale/static/src/js/website_sale_tracking.js',
+        ],
+        'assets_wysiwyg': [
+            # after //link[last()]
+            'website_sale/static/src/scss/website_sale.editor.scss',
+            # after //link[last()]
+            'website_sale/static/src/snippets/s_dynamic_snippet_products/options.js',
+        ],
+        'assets_editor': [
+            # after //script[last()]
+            'website_sale/static/src/js/website_sale.editor.js',
+            # after //script[last()]
+            'website_sale/static/src/js/website_sale_form_editor.js',
+            # after //script[last()]
+            'website_sale/static/src/js/tours/website_sale_shop_frontend.js',
+        ],
+        'assets_common': [
+            # inside .
+            'website_sale/static/src/js/tours/website_sale_shop.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'website_sale/static/tests/tours/website_sale_buy.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_complete_flow.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_cart_recovery.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_mail.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_customize.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_custom_attribute_value.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_zoom.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_dynamic_variants.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_deleted_archived_variants.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_list_view_b2c.js',
+            # inside .
+            'website_sale/static/tests/tours/website_sale_shop_no_variant_attribute.js',
+        ],
+    }
 }

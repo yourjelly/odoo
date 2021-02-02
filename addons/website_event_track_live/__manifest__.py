@@ -14,7 +14,7 @@
         'website_event_track',
     ],
     'data': [
-        'views/assets.xml',
+        
         'views/event_track_templates_list.xml',
         'views/event_track_templates_page.xml',
         'views/event_track_views.xml',
@@ -27,4 +27,14 @@
     ],
     'application': False,
     'installable': True,
+    'assets': {
+        'assets_frontend': [
+            # after //link[last()]
+            'website_event_track_live/static/src/scss/website_event_track_live.scss',
+            # after //script[last()]
+            'website_event_track_live/static/src/js/website_event_track_suggestion.js',
+            # after //script[last()]
+            'website_event_track_live/static/src/js/website_event_track_live.js',
+        ],
+    }
 }

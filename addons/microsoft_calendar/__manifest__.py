@@ -15,10 +15,18 @@
         'views/res_config_settings_views.xml',
         'views/res_users_views.xml',
         'views/microsoft_calendar_views.xml',
-        'views/microsoft_calendar_templates.xml',
+        
     ],
     'demo': [],
     'installable': True,
     'auto_install': False,
     'post_init_hook': 'init_initiating_microsoft_uuid',
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'microsoft_calendar/static/src/js/microsoft_calendar_popover.js',
+            # inside .
+            'microsoft_calendar/static/src/js/microsoft_calendar.js',
+        ],
+    }
 }

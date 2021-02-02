@@ -16,10 +16,18 @@ Please refer to Sale Matrix or Purchase Matrix for the use of this module.
         "static/src/xml/product_matrix.xml",
     ],
     'data': [
-        'views/assets.xml',
+        
         'views/matrix_templates.xml',
     ],
     'demo': [
         'data/product_matrix_demo.xml',
     ]
+    'assets': {
+        'assets_backend_inherit_sale': [
+            # after script[last()]
+            'product_matrix/static/src/js/section_and_note_widget.js',
+            # after script[last()]
+            'product_matrix/static/src/scss/product_matrix.scss',
+        ],
+    }
 }

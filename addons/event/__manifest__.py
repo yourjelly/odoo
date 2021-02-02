@@ -43,4 +43,14 @@ Key Features
     ],
     'installable': True,
     'auto_install': False,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'event/static/src/scss/event.scss',
+        ],
+        'assets_common': [
+            # after //script[last()]
+            'event/static/src/js/tours/event_tour.js',
+        ],
+    }
 }

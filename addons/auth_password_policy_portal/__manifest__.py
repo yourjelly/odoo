@@ -4,4 +4,10 @@
     'category': 'Tools',
     'auto_install': True,
     'data': ['views/templates.xml']
+    'assets': {
+        'assets_frontend': [
+            # inside .
+            'auth_password_policy_portal/static/src/scss/portal_policy.scss',
+        ],
+    }
 }

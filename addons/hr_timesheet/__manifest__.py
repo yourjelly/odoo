@@ -24,7 +24,7 @@ up a management by affair.
     'data': [
         'security/hr_timesheet_security.xml',
         'security/ir.model.access.csv',
-        'views/assets.xml',
+        
         'views/hr_timesheet_views.xml',
         'views/res_config_settings_views.xml',
         'views/project_views.xml',
@@ -46,4 +46,22 @@ up a management by affair.
     'application': False,
     'auto_install': False,
     'post_init_hook': 'create_internal_project',
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'hr_timesheet/static/src/scss/timesheets_task_form.scss',
+            # inside .
+            'hr_timesheet/static/src/js/task_with_hours.js',
+            # inside .
+            'hr_timesheet/static/src/js/timesheet_uom.js',
+            # inside .
+            'hr_timesheet/static/src/js/timesheet_factor.js',
+            # inside .
+            'hr_timesheet/static/src/js/timesheet_config_form_view.js',
+            # inside .
+            'hr_timesheet/static/src/js/qr_code_action.js',
+            # inside .
+            'hr_timesheet/static/src/js/timesheet_graph.js',
+        ],
+    }
 }

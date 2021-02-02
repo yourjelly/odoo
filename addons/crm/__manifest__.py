@@ -39,7 +39,7 @@
         'wizard/crm_lead_to_opportunity_mass_views.xml',
         'wizard/crm_merge_opportunities_views.xml',
 
-        'views/assets.xml',
+        
         'views/calendar_views.xml',
         'views/crm_recurring_plan_views.xml',
         'views/crm_menu_views.xml',
@@ -65,4 +65,26 @@
     'installable': True,
     'application': True,
     'auto_install': False
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'crm/static/src/js/crm_form.js',
+            # inside .
+            'crm/static/src/js/crm_kanban.js',
+            # inside .
+            'crm/static/src/js/systray_activity_menu.js',
+            # inside .
+            'crm/static/src/js/tours/crm.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'crm/static/tests/tours/crm_rainbowman.js',
+        ],
+        'qunit_suite': [
+            # inside .
+            'crm/static/tests/mock_server.js',
+            # inside .
+            'crm/static/tests/crm_rainbowman_tests.js',
+        ],
+    }
 }

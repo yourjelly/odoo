@@ -18,7 +18,7 @@
         'data/mail_template_data.xml',
         'data/ir_sequence_data.xml',
         'security/ir.model.access.csv',
-        'views/assets.xml',
+        
         'views/crm_lead_view.xml',
         'views/crm_iap_lead_views.xml',
         'views/res_config_settings_views.xml',
@@ -28,4 +28,12 @@
         'static/src/xml/leads_tree_generate_leads_views.xml',
     ],
     'auto_install': True,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'crm_iap_lead/static/src/js/leads_tree_generate_leads.js',
+            # inside .
+            'crm_iap_lead/static/src/js/tours/crm_iap_lead.js',
+        ],
+    }
 }

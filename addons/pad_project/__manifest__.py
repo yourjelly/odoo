@@ -16,7 +16,12 @@ This module adds a PAD in all project form views.
         'views/res_config_settings_views.xml',
         'views/project_views.xml',
         'views/project_portal_templates.xml',
-        'views/project_portal_assets.xml'
-    ],
+        ],
     'auto_install': True,
+    'assets': {
+        'project_portal_assets_frontend': [
+            # inside .
+            'pad_project/static/src/css/pad_project.css',
+        ],
+    }
 }

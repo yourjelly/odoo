@@ -35,7 +35,7 @@ Print product labels with barcode.
         'views/product_views.xml',
         'views/product_template_views.xml',
         'views/product_pricelist_views.xml',
-        'views/product_templates.xml',
+        
         'views/res_partner_views.xml',
         'report/product_reports.xml',
         'report/product_product_templates.xml',
@@ -49,4 +49,14 @@ Print product labels with barcode.
     ],
     'installable': True,
     'auto_install': False,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'product/static/src/js/product_pricelist_report.js',
+        ],
+        'qunit_suite': [
+            # inside .
+            'product/static/tests/product_pricelist_report_test.js',
+        ],
+    }
 }

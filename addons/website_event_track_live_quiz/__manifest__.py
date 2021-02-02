@@ -14,7 +14,7 @@
         'website_event_track_quiz',
     ],
     'data': [
-        'views/assets.xml',
+        
         'views/event_track_templates_page.xml',
     ],
     'demo': [
@@ -26,4 +26,12 @@
     'application': False,
     'installable': True,
     'auto_install': True,
+    'assets': {
+        'assets_frontend': [
+            # after //script[last()]
+            'website_event_track_live_quiz/static/src/js/website_event_track_suggestion.js',
+            # after //script[last()]
+            'website_event_track_live_quiz/static/src/js/event_quiz.js',
+        ],
+    }
 }

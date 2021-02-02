@@ -28,7 +28,7 @@ This module contains all the common features of Sales Management and eCommerce.
         'views/sales_team_views.xml',
         'views/res_partner_views.xml',
         'views/mail_activity_views.xml',
-        'views/assets.xml',
+        
         'views/variant_templates.xml',
         'views/sale_portal_templates.xml',
         'views/sale_onboarding_views.xml',
@@ -45,4 +45,42 @@ This module contains all the common features of Sales Management and eCommerce.
     ],
     'installable': True,
     'auto_install': False
+    'assets': {
+        'assets_backend_inherit_sale': [
+            # after link[last()]
+            'sale/static/src/scss/sale_onboarding.scss',
+            # after link[last()]
+            'sale/static/src/scss/product_configurator.scss',
+            # after script[last()]
+            'sale/static/src/js/sale.js',
+            # after script[last()]
+            'sale/static/src/js/tours/sale.js',
+            # after script[last()]
+            'sale/static/src/js/product_configurator_widget.js',
+            # after script[last()]
+            'sale/static/src/js/sale_order_view.js',
+            # after script[last()]
+            'sale/static/src/js/product_discount_widget.js',
+        ],
+        'report_assets_common_inherit_sale': [
+            # after link[last()]
+            'sale/static/src/scss/sale_report.scss',
+        ],
+        'assets_frontend_inherit_sale': [
+            # after link[last()]
+            'sale/static/src/scss/sale_portal.scss',
+            # after script[last()]
+            'sale/static/src/js/sale_portal_sidebar.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'sale/static/tests/tours/sale_signature.js',
+        ],
+        'qunit_suite': [
+            # inside .
+            'sale/static/tests/product_configurator_tests.js',
+            # inside .
+            'sale/static/tests/sales_team_dashboard_tests.js',
+        ],
+    }
 }

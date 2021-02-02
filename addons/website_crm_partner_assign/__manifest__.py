@@ -41,4 +41,10 @@ The automatic assignment is figured from the weight of partner levels and the ge
     ],
     'qweb': ['static/src/xml/*.xml'],
     'installable': True,
+    'assets': {
+        'assets_frontend': [
+            # inside .
+            'website_crm_partner_assign/static/src/js/crm_partner_assign.js',
+        ],
+    }
 }

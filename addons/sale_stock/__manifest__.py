@@ -41,4 +41,10 @@ Preferences
     'qweb': ['static/src/xml/sale_stock.xml'],
     'installable': True,
     'auto_install': True,
+    'assets': {
+        'sale_order_line_view_list': [
+            # inside .
+            'sale_stock/static/src/js/qty_at_date_widget.js',
+        ],
+    }
 }

@@ -20,4 +20,16 @@ Configure your own methods with a pricing grid or integrate with carriers for a 
     'qweb': [],
     'installable': True,
     'auto_install': True,
+    'assets': {
+        'assets_frontend': [
+            # inside .
+            'website_sale_delivery/static/src/js/website_sale_delivery.js',
+            # inside .
+            'website_sale_delivery/static/src/scss/website_sale_delivery.scss',
+        ],
+        'assets_tests': [
+            # inside .
+            'website_sale_delivery/static/tests/tours/website_free_delivery.js',
+        ],
+    }
 }

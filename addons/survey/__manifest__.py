@@ -56,4 +56,82 @@ sent mails with personal token for the invitation of the survey.
     'auto_install': False,
     'application': True,
     'sequence': 220,
+    'assets': {
+        'survey_assets': [
+            # new module 
+            'web/static/lib/Chart/Chart.js',
+            # new module 
+            'web/static/src/js/fields/field_utils.js',
+            # new module 
+            'survey/static/src/js/survey_quick_access.js',
+            # new module 
+            'survey/static/src/js/survey_timer.js',
+            # new module 
+            'survey/static/src/js/survey_breadcrumb.js',
+            # new module 
+            'survey/static/src/js/survey_form.js',
+            # new module 
+            'survey/static/src/js/survey_print.js',
+            # new module 
+            'survey/static/src/js/survey_result.js',
+            # None None
+            ('include', 'web._assets_frontend_helpers'),
+            # new module 
+            'survey/static/src/css/survey_print.css',
+            # new module 
+            'survey/static/src/css/survey_result.css',
+            # new module 
+            'survey/static/src/scss/survey_form.scss',
+        ],
+        'survey_user_input_session_assets': [
+            # new module 
+            'survey/static/src/js/libs/chartjs-plugin-datalabels.min.js',
+            # new module 
+            'survey/static/src/js/survey_session_colors.js',
+            # new module 
+            'survey/static/src/js/survey_session_chart.js',
+            # new module 
+            'survey/static/src/js/survey_session_text_answers.js',
+            # new module 
+            'survey/static/src/js/survey_session_leaderboard.js',
+            # new module 
+            'survey/static/src/js/survey_session_manage.js',
+        ],
+        'survey_report_assets_pdf': [
+            # after link[last()]
+            'survey/static/src/scss/survey_reports.scss',
+        ],
+        'assets_backend': [
+            # inside .
+            'survey/static/src/css/survey_result.css',
+            # inside .
+            'survey/static/src/js/fields_section_one2many.js',
+            # inside .
+            'survey/static/src/js/fields_form_page_description.js',
+        ],
+        'assets_backend_inherit_survey': [
+            # after link[last()]
+            'survey/static/src/scss/survey_views.scss',
+        ],
+        'assets_tests': [
+            # inside .
+            'survey/static/tests/tours/certification_failure.js',
+            # inside .
+            'survey/static/tests/tours/certification_success.js',
+            # inside .
+            'survey/static/tests/tours/survey.js',
+            # inside .
+            'survey/static/tests/tours/survey_prefill.js',
+            # inside .
+            'survey/static/tests/tours/survey_tour_session_tools.js',
+            # inside .
+            'survey/static/tests/tours/survey_tour_session_create.js',
+            # inside .
+            'survey/static/tests/tours/survey_tour_session_start.js',
+            # inside .
+            'survey/static/tests/tours/survey_tour_session_manage.js',
+            # inside .
+            'survey/static/tests/tours/survey_session_manage_test.js',
+        ],
+    }
 }

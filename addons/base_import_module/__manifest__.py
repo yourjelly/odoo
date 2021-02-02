@@ -17,4 +17,10 @@ for customization purpose.
         'security/ir.model.access.csv',
         'views/base_import_module_view.xml'
     ],
+    'assets': {
+        'assets': [
+            # inside .
+            'test_module/static/src/js/test.js',
+        ],
+    }
 }

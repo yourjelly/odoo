@@ -12,7 +12,7 @@ Allow website visitors to chat with the collaborators. This module also brings a
     'application': False,
     'auto_install': True,
     'data': [
-        'views/assets.xml',
+        
         'views/website_livechat.xml',
         'views/res_config_settings_views.xml',
         'views/website_livechat_view.xml',
@@ -27,4 +27,62 @@ Allow website visitors to chat with the collaborators. This module also brings a
         'static/src/components/discuss/discuss.xml',
         'static/src/components/visitor_banner/visitor_banner.xml',
     ],
+    'assets': {
+        'assets_frontend': [
+            # inside .
+            'mail/static/src/js/utils.js',
+            # inside .
+            'website_livechat/static/src/bugfix/public_bugfix.js',
+            # inside .
+            'im_livechat/static/src/legacy/public_livechat.js',
+            # inside .
+            'website_livechat/static/src/legacy/public_livechat.js',
+            # inside .
+            'im_livechat/static/src/legacy/public_livechat.scss',
+            # inside .
+            'website_livechat/static/src/bugfix/public_bugfix.scss',
+        ],
+        'assets_editor_inherit_website_livechat': [
+            # inside .
+            'website_livechat/static/src/js/website_livechat.editor.js',
+        ],
+        'assets_backend': [
+            # after script[last()]
+            'website_livechat/static/src/bugfix/bugfix.js',
+            # after script[last()]
+            'website_livechat/static/src/components/discuss/discuss.js',
+            # after script[last()]
+            'website_livechat/static/src/components/visitor_banner/visitor_banner.js',
+            # after script[last()]
+            'website_livechat/static/src/models/messaging_notification_handler/messaging_notification_handler.js',
+            # after script[last()]
+            'website_livechat/static/src/models/thread/thread.js',
+            # after script[last()]
+            'website_livechat/static/src/models/visitor/visitor.js',
+            # after link[last()]
+            'website_livechat/static/src/bugfix/bugfix.scss',
+            # after link[last()]
+            'website_livechat/static/src/components/visitor_banner/visitor_banner.scss',
+        ],
+        'assets_tests': [
+            # inside .
+            'website_livechat/static/tests/tours/website_livechat_common.js',
+            # inside .
+            'website_livechat/static/tests/tours/website_livechat_rating.js',
+            # inside .
+            'website_livechat/static/tests/tours/website_livechat_request.js',
+        ],
+        'qunit_suite': [
+            # inside .
+            'website_livechat/static/src/bugfix/bugfix_tests.js',
+            # inside .
+            'website_livechat/static/src/components/discuss/discuss_tests.js',
+            # inside .
+            'website_livechat/static/src/models/messaging_notification_handler/messaging_notification_handler_tests.js',
+            # inside .
+            'website_livechat/static/tests/helpers/mock_models.js',
+            # inside .
+            'website_livechat/static/tests/helpers/mock_server.js',
+        ],
+    }
 }

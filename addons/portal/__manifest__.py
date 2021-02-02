@@ -20,7 +20,7 @@ a dependency towards website editing and customization capabilities.""",
         'security/ir.model.access.csv',
         'data/mail_template_data.xml',
         'data/mail_templates.xml',
-        'views/assets.xml',
+        
         'views/portal_templates.xml',
         'wizard/portal_share_views.xml',
         'wizard/portal_wizard_views.xml',
@@ -29,4 +29,34 @@ a dependency towards website editing and customization capabilities.""",
         'static/src/xml/portal_chatter.xml',
         'static/src/xml/portal_signature.xml',
     ],
+    'assets': {
+        '_assets_primary_variables': [
+            # after //link[last()]
+            'portal/static/src/scss/primary_variables.scss',
+        ],
+        '_assets_frontend_helpers': [
+            # before //link
+            ('prepend', 'portal/static/src/scss/bootstrap_overridden.scss'),
+        ],
+        'assets_frontend': [
+            # after //link[last()]
+            'portal/static/src/scss/bootstrap.extend.scss',
+            # after //link[last()]
+            'portal/static/src/scss/portal.scss',
+            # after //script[last()]
+            'portal/static/src/js/portal.js',
+            # after //script[last()]
+            'portal/static/src/js/portal_chatter.js',
+            # after //script[last()]
+            'portal/static/src/js/portal_composer.js',
+            # after //script[last()]
+            'portal/static/src/js/portal_signature.js',
+            # after //script[last()]
+            'portal/static/src/js/portal_sidebar.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'portal/static/tests/tours/portal.js',
+        ],
+    }
 }

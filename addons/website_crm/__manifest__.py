@@ -23,4 +23,14 @@ This module includes contact phone and mobile numbers validation.""",
     'qweb': ['static/src/xml/*.xml'],
     'installable': True,
     'auto_install': True,
+    'assets': {
+        'assets_editor': [
+            # inside .
+            'website_crm/static/src/js/website_crm_editor.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'website_crm/static/tests/tours/website_crm.js',
+        ],
+    }
 }

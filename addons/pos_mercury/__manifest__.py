@@ -25,7 +25,7 @@ following:
     'data': [
         'data/pos_mercury_data.xml',
         'security/ir.model.access.csv',
-        'views/pos_mercury_templates.xml',
+        
         'views/pos_mercury_views.xml',
         'views/pos_mercury_transaction_templates.xml',
         'views/pos_config_setting_views.xml',
@@ -40,4 +40,22 @@ following:
     ],
     'installable': True,
     'auto_install': False,
+    'assets': {
+        'assets': [
+            # inside .
+            'pos_mercury/static/src/js/pos_mercury.js',
+            # inside .
+            'pos_mercury/static/src/js/OrderReceipt.js',
+            # inside .
+            'pos_mercury/static/src/js/PaymentScreen.js',
+            # inside .
+            'pos_mercury/static/src/js/PaymentScreenPaymentLines.js',
+            # inside .
+            'pos_mercury/static/src/js/PaymentTransactionPopup.js',
+            # inside .
+            'pos_mercury/static/src/js/ProductScreen.js',
+            # inside .
+            'pos_mercury/static/src/css/pos_mercury.css',
+        ],
+    }
 }

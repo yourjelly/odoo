@@ -41,7 +41,7 @@ This module also uses analytic accounting and is compatible with the invoice on 
         'security/ir_rule.xml',
         'report/hr_expense_report.xml',
         'views/hr_department_views.xml',
-        'views/assets.xml',
+        
         'views/res_config_settings_views.xml',
         'views/account_journal_dashboard.xml',
     ],
@@ -53,4 +53,22 @@ This module also uses analytic accounting and is compatible with the invoice on 
     ],
     'installable': True,
     'application': True,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'hr_expense/static/src/js/expense_views.js',
+            # inside .
+            'hr_expense/static/src/js/expense_qr_code_action.js',
+            # inside .
+            'hr_expense/static/src/js/upload_mixin.js',
+            # after link[last()]
+            'hr_expense/static/src/scss/hr_expense.scss',
+        ],
+        'assets_tests': [
+            # inside .
+            'hr_expense/static/src/js/tours/hr_expense.js',
+            # inside .
+            'hr_expense/static/tests/tours/expense_upload_tours.js',
+        ],
+    }
 }

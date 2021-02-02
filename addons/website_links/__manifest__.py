@@ -16,4 +16,24 @@ Those trackers can be used in Google Analytics to track clicks and visitors, or 
     ],
     'qweb': ['static/src/xml/*.xml'],
     'auto_install': True,
+    'assets': {
+        'assets_website_links': [
+            # inside .
+            'website_links/static/src/js/website_links.js',
+            # inside .
+            'website_links/static/src/js/website_links_code_editor.js',
+            # inside .
+            'website_links/static/src/js/website_links_charts.js',
+            # inside .
+            'website_links/static/src/css/website_links.css',
+        ],
+        'assets_tests': [
+            # inside .
+            'website_links/static/tests/tours/website_links.js',
+        ],
+        'asset_website_links_menu': [
+            # inside .
+            'website_links/static/src/js/website_links_menu.js',
+        ],
+    }
 }

@@ -14,4 +14,14 @@
         'views/res_config_settings_view.xml',
     ],
     'auto_install': False,
+    'assets': {
+        'assets_frontend': [
+            # after //script[last()]
+            # wtf
+            # after //link[last()]
+            'google_recaptcha/static/src/scss/recaptcha.scss',
+            # after //script[last()]
+            'google_recaptcha/static/src/js/recaptcha.js',
+        ],
+    }
 }

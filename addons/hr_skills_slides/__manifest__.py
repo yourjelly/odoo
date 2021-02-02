@@ -22,4 +22,10 @@ This module add completed courses to resumé for employees.
         'static/src/xml/resume_templates.xml',
     ],
     'auto_install': True,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'hr_skills_slides/static/src/scss/hr_skills.scss',
+        ],
+    }
 }

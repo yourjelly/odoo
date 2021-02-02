@@ -23,7 +23,7 @@ This module adds several features to the Point of Sale that are specific to rest
         'views/pos_order_views.xml',
         'views/pos_restaurant_views.xml',
         'views/pos_config_views.xml',
-        'views/pos_restaurant_templates.xml',
+        
     ],
     'qweb': [
         'static/src/xml/Resizeable.xml',
@@ -58,4 +58,108 @@ This module adds several features to the Point of Sale that are specific to rest
     ],
     'installable': True,
     'auto_install': False,
+    'assets': {
+        'assets': [
+            # inside .
+            'pos_restaurant/static/lib/js/jquery.ui.touch-punch.js',
+            # inside .
+            'pos_restaurant/static/src/js/multiprint.js',
+            # inside .
+            'pos_restaurant/static/src/js/floors.js',
+            # inside .
+            'pos_restaurant/static/src/js/notes.js',
+            # inside .
+            'pos_restaurant/static/src/js/payment.js',
+            # inside .
+            'pos_restaurant/static/src/js/Resizeable.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/OrderlineNoteButton.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/TableGuestsButton.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/PrintBillButton.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/SubmitOrderButton.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/SplitBillButton.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/ProductScreen/ControlButtons/TransferOrderButton.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/ProductScreen/Orderline.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/BillScreen.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/SplitBillScreen/SplitBillScreen.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/SplitBillScreen/SplitOrderline.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/FloorScreen/FloorScreen.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/FloorScreen/EditBar.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/FloorScreen/TableWidget.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/FloorScreen/EditableTable.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/OrderManagementScreen/OrderManagementScreen.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/OrderManagementScreen/OrderRow.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/TicketScreen.js',
+            # inside .
+            'pos_restaurant/static/src/js/ChromeWidgets/BackToFloorButton.js',
+            # inside .
+            'pos_restaurant/static/src/js/ChromeWidgets/TicketButton.js',
+            # inside .
+            'pos_restaurant/static/src/js/Chrome.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/PaymentScreen.js',
+            # inside .
+            'pos_restaurant/static/src/js/Screens/TipScreen.js',
+            # after //link[@id='pos-stylesheet']
+            'pos_restaurant/static/src/css/restaurant.css',
+        ],
+        'assets_backend': [
+            # inside .
+            'point_of_sale/static/src/scss/pos_dashboard.scss',
+        ],
+        'assets_tests': [
+            # inside .
+            'pos_restaurant/static/tests/tours/helpers/ProductScreenTourMethods.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/helpers/ChromeTourMethods.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/helpers/FloorScreenTourMethods.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/helpers/SplitBillScreenTourMethods.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/helpers/TextAreaPopupTourMethods.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/helpers/TextInputPopupTourMethods.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/helpers/BillScreenTourMethods.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/helpers/TipScreenTourMethods.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/pos_restaurant.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/SplitBillScreen.tour.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/ControlButtons.tour.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/FloorScreen.tour.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/OrderManagementScreen.tour.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/TicketScreen.tour.js',
+            # inside .
+            'pos_restaurant/static/tests/tours/TipScreen.tour.js',
+        ],
+        'pos_restaurant.qunit_suite_tests': [
+            # inside .
+            'pos_restaurant/static/tests/unit/test_FloorScreen.js',
+        ],
+    }
 }

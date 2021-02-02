@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <template id="assets_backend" name="sale timesheet assets" inherit_id="web.assets_backend">
-        <xpath expr="." position="inside">
-            <link rel="stylesheet" type="text/scss" href="/sale_timesheet/static/src/scss/sale_timesheet.scss"/>
-                <script type="text/javascript" src="/sale_timesheet/static/src/js/project_overview.js"></script>
-                <script type="text/javascript" src="/sale_timesheet/static/src/js/sale_project_kanban_controller.js"/>
-        </xpath>
-    </template>
+    
 
     <record id="timesheet_plan" model="ir.ui.view">
         <field name="name">Timesheet Plan</field>

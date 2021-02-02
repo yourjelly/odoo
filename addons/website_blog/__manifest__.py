@@ -32,4 +32,36 @@
     ],
     'installable': True,
     'application': True,
+    'assets': {
+        'assets_wysiwyg': [
+            # inside .
+            'website_blog/static/src/snippets/s_latest_posts/options.js',
+        ],
+        'assets_editor': [
+            # inside .
+            'website_blog/static/src/js/website_blog.editor.js',
+            # inside .
+            'website_blog/static/src/js/tours/website_blog.js',
+        ],
+        'assets_frontend': [
+            # inside .
+            'website_blog/static/src/scss/website_blog.scss',
+            # inside .
+            'website_blog/static/src/js/contentshare.js',
+            # inside .
+            'website_blog/static/src/js/website_blog.js',
+        ],
+        'assets_snippet_s_latest_posts_css_000': [
+            # after //link[last()]
+            'website_blog/static/src/snippets/s_latest_posts/000.scss',
+        ],
+        'assets_snippet_s_latest_posts_css_001': [
+            # after //link[last()]
+            'website_blog/static/src/snippets/s_latest_posts/001.scss',
+        ],
+        'assets_snippet_s_latest_posts_js_000': [
+            # after //script[last()]
+            'website_blog/static/src/snippets/s_latest_posts/000.js',
+        ],
+    }
 }

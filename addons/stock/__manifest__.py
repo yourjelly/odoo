@@ -91,4 +91,72 @@
     'auto_install': False,
     'pre_init_hook': 'pre_init_hook',
     'post_init_hook': '_assign_default_mail_template_picking_id',
+    'assets': {
+        'assets_common_replenishment_report': [
+            # inside .
+            'web/static/src/scss/views.scss',
+            # inside .
+            'web/static/src/scss/graph_view.scss',
+            # inside .
+            'stock/static/src/scss/report_stock_forecasted.scss',
+        ],
+        'assets_common': [
+            # inside .
+            'stock/static/src/scss/report_stock_rule.scss',
+        ],
+        'assets_stock_print_report': [
+            # inside .
+            'stock/static/src/scss/stock_traceability_report.scss',
+        ],
+        'stock_assets_backend': [
+            # inside .
+            'stock/static/src/js/inventory_report_list_controller.js',
+            # inside .
+            'stock/static/src/js/inventory_report_list_view.js',
+            # inside .
+            'stock/static/src/js/inventory_singleton_list_controller.js',
+            # inside .
+            'stock/static/src/js/inventory_singleton_list_view.js',
+            # inside .
+            'stock/static/src/js/inventory_validate_button_controller.js',
+            # inside .
+            'stock/static/src/js/inventory_validate_button_view.js',
+            # inside .
+            'stock/static/src/js/report_stock_forecasted.js',
+            # inside .
+            'stock/static/src/js/stock_orderpoint_list_controller.js',
+            # inside .
+            'stock/static/src/js/stock_orderpoint_list_model.js',
+            # inside .
+            'stock/static/src/js/stock_orderpoint_list_view.js',
+            # inside .
+            'stock/static/src/js/stock_traceability_report_backend.js',
+            # inside .
+            'stock/static/src/js/stock_traceability_report_widgets.js',
+            # inside .
+            'stock/static/src/js/popover_widget.js',
+            # inside .
+            'stock/static/src/js/forecast_widget.js',
+            # inside .
+            'stock/static/src/js/basic_model.js',
+            # inside .
+            'stock/static/src/js/stock_rescheduling_popover.js',
+            # inside .
+            'stock/static/tests/tours/stock_report_tests.js',
+            # inside .
+            'stock/static/src/scss/forecast_widget.scss',
+            # inside .
+            'stock/static/src/scss/stock_traceability_report.scss',
+            # inside .
+            'stock/static/src/scss/stock_empty_screen.scss',
+        ],
+        'qunit_suite': [
+            # inside .
+            'stock/static/tests/singleton_list_tests.js',
+            # inside .
+            'stock/static/tests/popover_widget_tests.js',
+            # inside .
+            'stock/static/tests/stock_traceability_report_backend_tests.js',
+        ],
+    }
 }

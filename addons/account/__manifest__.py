@@ -52,7 +52,7 @@ You could use this simplified accounting in case you work with an (external) acc
         'views/res_company_views.xml',
         'views/product_view.xml',
         'views/account_analytic_view.xml',
-        'views/account.xml',
+        
         'views/report_invoice.xml',
         'report/account_invoice_report_view.xml',
         'views/account_cash_rounding_view.xml',
@@ -93,4 +93,64 @@ You could use this simplified accounting in case you work with an (external) acc
     'application': True,
     'auto_install': False,
     'post_init_hook': '_account_post_init',
+    'assets': {
+        '_assets_primary_variables': [
+            # after //link[last()]
+            'account/static/src/scss/variables.scss',
+        ],
+        'assets_backend': [
+            # inside .
+            'account/static/src/css/account_bank_and_cash.css',
+            # inside .
+            'account/static/src/css/account.css',
+            # inside .
+            'account/static/src/css/tax_group.css',
+            # inside .
+            'account/static/src/scss/account_reconciliation.scss',
+            # inside .
+            'account/static/src/scss/account_journal_dashboard.scss',
+            # inside .
+            'account/static/src/scss/account_dashboard.scss',
+            # inside .
+            'account/static/src/scss/account_searchpanel.scss',
+            # inside .
+            'account/static/src/scss/section_and_note_backend.scss',
+            # inside .
+            'account/static/src/scss/account_activity.scss',
+            # inside .
+            'account/static/src/js/account_payment_field.js',
+            # inside .
+            'account/static/src/js/account_resequence_field.js',
+            # inside .
+            'account/static/src/js/grouped_view_widget.js',
+            # inside .
+            'account/static/src/js/mail_activity.js',
+            # inside .
+            'account/static/src/js/tax_group.js',
+            # inside .
+            'account/static/src/js/section_and_note_fields_backend.js',
+            # inside .
+            'account/static/src/js/tours/account.js',
+            # inside .
+            'account/static/src/js/bills_upload.js',
+            # inside .
+            'account/static/src/js/account_selection.js',
+        ],
+        'assets_frontend': [
+            # inside .
+            'account/static/src/js/account_portal_sidebar.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'account/static/tests/tours/account_dashboard_setup_bar_tests.js',
+            # inside .
+            'account/static/tests/tours/tax_group_tests.js',
+        ],
+        'qunit_suite': [
+            # after //script[contains(@src, '/web/static/tests/views/kanban_tests.js')]
+            'account/static/tests/account_payment_field_tests.js',
+            # after //script[contains(@src, '/web/static/tests/views/kanban_tests.js')]
+            'account/static/tests/section_and_note_tests.js',
+        ],
+    }
 }

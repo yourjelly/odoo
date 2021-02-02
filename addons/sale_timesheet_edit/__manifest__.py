@@ -17,9 +17,15 @@ timesheet in task form view when it is needed.
 """,
     'depends': ['sale_timesheet'],
     'data': [
-        'views/assets.xml',
+        
         'views/project_task.xml',
     ],
     'demo': [],
     'auto_install': True,
+    'assets': {
+        'assets_backend': [
+            # after script[last()]
+            'sale_timesheet_edit/static/src/js/so_line_one2many.js',
+        ],
+    }
 }

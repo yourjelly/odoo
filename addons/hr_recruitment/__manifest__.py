@@ -41,4 +41,18 @@
     'installable': True,
     'auto_install': False,
     'application': True,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'hr_recruitment/static/src/scss/hr_job.scss',
+            # inside .
+            'hr_recruitment/static/src/js/recruitment.js',
+            # inside .
+            'hr_recruitment/static/src/js/tours/hr_recruitment.js',
+        ],
+        'assets_tests': [
+            # inside .
+            '# That shouldn't exist...',
+        ],
+    }
 }

@@ -22,4 +22,18 @@
     ],
     'installable': True,
     'application': True,
+    'assets': {
+        'assets_frontend': [
+            # after //link[last()]
+            'website_hr_recruitment/static/src/scss/website_hr_recruitment.scss',
+        ],
+        'website_hr_recuitment_assets_editor': [
+            # inside .
+            'website_hr_recruitment/static/src/js/website_hr_recruitment_editor.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'website_hr_recruitment/static/tests/tours/website_hr_recruitment.js',
+        ],
+    }
 }

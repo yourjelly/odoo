@@ -16,7 +16,7 @@ Shows you a list of applications features to install from.
         'data/base_setup_data.xml',
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',
-        'views/assets.xml',
+        
     ],
     'demo': [],
     'installable': True,
@@ -29,4 +29,16 @@ Shows you a list of applications features to install from.
     ],
 
     
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'base_setup/static/src/scss/settings.scss',
+            # inside .
+            'base_setup/static/src/js/res_config_dev_tool.js',
+            # inside .
+            'base_setup/static/src/js/res_config_edition.js',
+            # inside .
+            'base_setup/static/src/js/res_config_invite_users.js',
+        ],
+    }
 }

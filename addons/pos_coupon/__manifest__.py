@@ -17,7 +17,7 @@
         "views/coupon_program_views.xml",
         "views/pos_config_views.xml",
         "views/res_config_settings_views.xml",
-        "views/assets_common.xml",
+        
     ],
     "demo": [
         "demo/pos_coupon_demo.xml",
@@ -30,4 +30,32 @@
         "static/src/xml/OrderWidget.xml",
     ],
     "installable": True,
+    'assets': {
+        'assets': [
+            # inside .
+            'pos_coupon/static/src/css/coupon.css',
+            # inside .
+            'pos_coupon/static/src/js/coupon.js',
+            # inside .
+            'pos_coupon/static/src/js/Orderline.js',
+            # inside .
+            'pos_coupon/static/src/js/PaymentScreen.js',
+            # inside .
+            'pos_coupon/static/src/js/ProductScreen.js',
+            # inside .
+            'pos_coupon/static/src/js/ActivePrograms.js',
+            # inside .
+            'pos_coupon/static/src/js/ControlButtons/PromoCodeButton.js',
+            # inside .
+            'pos_coupon/static/src/js/ControlButtons/ResetProgramsButton.js',
+        ],
+        'pos_coupon.assets_tests': [
+            # inside .
+            'pos_coupon/static/src/js/tours/PosCouponTourMethods.js',
+            # inside .
+            'pos_coupon/static/src/js/tours/PosCoupon1.tour.js',
+            # inside .
+            'pos_coupon/static/src/js/tours/PosCoupon2.tour.js',
+        ],
+    }
 }

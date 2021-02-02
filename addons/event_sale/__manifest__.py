@@ -20,7 +20,7 @@ this event.
 """,
     'depends': ['event', 'sale_management'],
     'data': [
-        'views/assets.xml',
+        
         'views/event_ticket_views.xml',
         'views/event_registration_views.xml',
         'views/event_views.xml',
@@ -37,4 +37,22 @@ this event.
     'demo': ['data/event_demo.xml'],
     'installable': True,
     'auto_install': True
+    'assets': {
+        'assets_backend': [
+            # after script[last()]
+            'event_sale/static/src/js/event_configurator_controller.js',
+            # after script[last()]
+            'event_sale/static/src/js/event_configurator_view.js',
+            # after script[last()]
+            'event_sale/static/src/js/event_configurator_widget.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'event_sale/static/tests/tours/event_configurator_ui.js',
+        ],
+        'qunit_suite': [
+            # inside .
+            'event_sale/static/tests/event_configurator.test.js',
+        ],
+    }
 }

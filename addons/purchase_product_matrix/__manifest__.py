@@ -13,9 +13,23 @@
     'version': '1.0',
     'depends': ['purchase', 'product_matrix'],
     'data': [
-        'views/assets.xml',
+        
         'views/purchase_views.xml',
         'report/purchase_quotation_templates.xml',
         'report/purchase_order_templates.xml',
     ],
+    'assets': {
+        'assets_backend_inherit_purchase': [
+            # after script[last()]
+            'purchase_product_matrix/static/src/js/product_matrix_configurator.js',
+        ],
+        'qunit_suite': [
+            # inside .
+            'purchase_product_matrix/static/tests/section_and_note_widget_tests.js',
+        ],
+        'assets_tests': [
+            # inside .
+            'purchase_product_matrix/static/tests/tours/purchase_product_matrix_tour.js',
+        ],
+    }
 }

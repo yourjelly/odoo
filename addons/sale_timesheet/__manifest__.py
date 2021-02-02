@@ -42,4 +42,18 @@ have real delivered quantities in sales orders.
     ],
     'auto_install': True,
     'uninstall_hook': 'uninstall_hook',
+    'assets': {
+        'assets_frontend': [
+            # inside .
+            'sale_timesheet/static/src/scss/sale_timesheet_portal.scss',
+        ],
+        'assets_backend': [
+            # inside .
+            'sale_timesheet/static/src/scss/sale_timesheet.scss',
+            # inside .
+            'sale_timesheet/static/src/js/project_overview.js',
+            # inside .
+            'sale_timesheet/static/src/js/sale_project_kanban_controller.js',
+        ],
+    }
 }

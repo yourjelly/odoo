@@ -50,4 +50,44 @@
         'static/src/xml/*.xml',
     ],
     'application': True,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'mass_mailing/static/src/scss/mass_mailing.scss',
+            # inside .
+            'mass_mailing/static/src/scss/mass_mailing_mobile.scss',
+            # inside .
+            'mass_mailing/static/src/css/email_template.css',
+            # inside .
+            'mass_mailing/static/src/scss/mass_mailing.ui.jw.scss',
+            # inside .
+            'mass_mailing/static/src/js/mass_mailing.js',
+            # inside .
+            'mass_mailing/static/src/js/mass_mailing_widget.js',
+            # after //script[last()]
+            'mass_mailing/static/src/js/unsubscribe.js',
+        ],
+        'assets_mail_themes': [
+            # new module 
+            'mass_mailing/static/src/scss/themes/theme_basic.scss',
+            # new module 
+            'mass_mailing/static/src/scss/themes/theme_default.scss',
+            # None None
+            ('include', 'mass_mailing.mass_mailing_mail_style'),
+        ],
+        'iframe_css_assets_readonly': [
+            # new module 
+            'mass_mailing/static/src/css/basic_theme_readonly.css',
+        ],
+        'assets_common': [
+            # after //script[last()]
+            'mass_mailing/static/src/js/tours/mass_mailing_tour.js',
+        ],
+        'qunit_suite': [
+            # inside .
+            'mass_mailing/static/src/js/mass_mailing_snippets.js',
+            # inside .
+            'mass_mailing/static/tests/mass_mailing_html_tests.js',
+        ],
+    }
 }

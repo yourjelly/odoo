@@ -19,7 +19,7 @@ This module introduces skills and resumé management for employees.
         'security/ir.model.access.csv',
         'security/hr_skills_security.xml',
         'views/hr_views.xml',
-        'views/hr_templates.xml',
+        
         'data/hr_resume_data.xml',
     ],
     'demo': [
@@ -33,4 +33,16 @@ This module introduces skills and resumé management for employees.
     ],
     'installable': True,
     'application': True,
+    'assets': {
+        'assets_backend': [
+            # inside .
+            'hr_skills/static/src/css/hr_skills.scss',
+            # inside .
+            'hr_skills/static/src/js/resume_widget.js',
+        ],
+        'qunit_suite': [
+            # inside .
+            'hr_skills/static/tests/widget_tests.js',
+        ],
+    }
 }
