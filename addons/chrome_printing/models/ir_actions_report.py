@@ -236,7 +236,6 @@ class IrActionsReport(models.Model):
         # For the two resolve calls below, we may want to set the timeout to the request timeout
         # of the server, as the amount of time taken to both load the HTML file and to
         # generate a PDF from said file scale according to the size of the HTML file
-        import pdb; pdb.set_trace()
         browser.Page.navigate(f"file://{html_file_path}").resolve()
         result = browser.Page.printToPDF(**chrome_print_args).resolve()
 
