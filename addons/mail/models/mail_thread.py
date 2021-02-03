@@ -2250,6 +2250,7 @@ class MailThread(models.AbstractModel):
                 recipient_values = self._notify_email_recipient_values(recipients_ids_chunk)
                 email_to = recipient_values['email_to']
                 recipient_ids = recipient_values['recipient_ids']
+                email_cc = recipient_values['email_cc']
 
                 create_values = {
                     'body_html': mail_body,
@@ -2258,6 +2259,9 @@ class MailThread(models.AbstractModel):
                 }
                 if email_to:
                     create_values['email_to'] = email_to
+                if email_cc:
+                    create_values['email_cc'] = email_cc
+
                 create_values.update(base_mail_values)  # mail_message_id, mail_server_id, auto_delete, references, headers
                 email = SafeMail.create(create_values)
 
