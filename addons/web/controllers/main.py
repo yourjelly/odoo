@@ -589,14 +589,14 @@ class HomeStaticTemplateHelpers(object):
         :rtype: (str, str)
         """
         xml_paths = OrderedDict()
-        addon_files = request.env['ir.asset'].get_addon_files(addons=self.addons, bundle='assets_qweb', xml=True)
+        assets = request.env['ir.asset'].get_asset_paths(addons=self.addons, bundle='assets_qweb', xml=True)
 
-        for addon, file in addon_files:
+        for path, addon, _ in assets:
             if addon not in xml_paths:
                 xml_paths[addon] = []
             addon_paths = xml_paths[addon]
-            if file not in addon_paths:
-                addon_paths.append(file)
+            if path not in addon_paths:
+                addon_paths.append(path)
 
         content, checksum = self._concat_xml(xml_paths)
         return content, checksum

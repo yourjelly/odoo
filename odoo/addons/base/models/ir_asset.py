@@ -31,15 +31,6 @@ def fs2web(path):
     """Converts a file system path to a web path"""
     return '/'.join(path.split(os.path.sep))
 
-def get_mime_type(file):
-    """Returns the mime type related to the given file path."""
-    ext = file.split('.')[-1]
-    if ext in SCRIPT_EXTENSIONS:
-        return 'text/javascript'
-    elif ext in STYLE_EXTENSIONS:
-        return 'text/%s' % ext
-    return None
-
 def get_paths(path_def, extensions, manifest_cache=None):
     """
     Returns a list of file paths matching a given glob (path_def) as well as
@@ -122,11 +113,11 @@ class IrAsset(models.Model):
         (REMOVE_DIRECTIVE, 'Remove'),
         (REPLACE_DIRECTIVE, 'Replace'),
         (INCLUDE_DIRECTIVE, 'Include')], default=APPEND_DIRECTIVE)
-    glob = fields.Char(string='File')
+    glob = fields.Char(string='Path')
     target = fields.Char(string='Target')
     active = fields.Boolean(string='active', default=True)
 
-    def get_addon_files(self, addons, bundle, css=False, js=False, xml=False, addon_files=None, circular_path=None):
+    def get_asset_paths(self, bundle, addons=None, css=False, js=False, xml=False, asset_paths=None, circular_path=None):
         """
         Fetches all asset file paths from a given list of addons matching a
         certain bundle. The returned list is composed of tuples containing the
@@ -149,7 +140,7 @@ class IrAsset(models.Model):
         :param css: boolean: whether or not to include style files
         :param js: boolean: whether or not to include script files
         :param xml: boolean: whether or not to include template files
-        :param addon_files: (addon, path)[]: the current list of loaded assets.
+        :param asset_paths: (addon, path)[]: the current list of loaded assets.
             It starts blank (initial) and is given to each subsequent call.
         :returns: the list of tuples (addon, file_path)
         """
@@ -162,20 +153,49 @@ class IrAsset(models.Model):
         if xml:
             exts += TEMPLATE_EXTENSIONS
 
-        # 1. Creates an empty assets list (if initial call).
-        if addon_files is None:
-            addon_files = []
+        if addons is None:
+            if not http.request:
+                addons = self.env['ir.module.module']._installed_sorted()
+            else:
+                addons = http.module_boot()
 
-        bundle_start_index = len(addon_files)
+        # 1. Creates an empty assets list (if initial call).
+        if asset_paths is None:
+            asset_paths = []
+        # This index will be used when prepending: files will be prepend at the
+        # start of the CURRENT bundle.
+        bundle_start_index = len(asset_paths)
+
+        def get_path_index(path):
+            """Returns the index of the given path in the current assets list."""
+            for i in range(len(asset_paths)):
+                if asset_paths[i][0] == path:
+                    return i
+            return None
+
+        def add_path(addon, path, target_index=None):
+            """Adds the given path to the current list. An index can be specified."""
+            if get_path_index(path) is None:
+                if target_index is None:
+                    asset_paths.append((path, addon, bundle))
+                else:
+                    asset_paths.insert(target_index, (path, addon, bundle))
+
+        def remove_path(target):
+            """Removes the given path from the current assets list."""
+            target_index = get_path_index(target)
+            if target_index is None:
+                raise Exception("File %s not found in bundle %s" % (target, bundle))
+            del asset_paths[target_index]
 
         def process_path(directive, target, path_def):
             """
             This sub function is meant to take a directive and a set of
-            arguments and apply them to the current addon_files list
+            arguments and apply them to the current asset_paths list
             accordingly.
 
-            It is nested inside `get_addon_files` since we need the current
-            list of addons, extensions, addon_files and manifest_cache.
+            It is nested inside `get_asset_paths` since we need the current
+            list of addons, extensions, asset_paths and manifest_cache.
 
             :param directive: string
             :param path_def: string
@@ -192,7 +212,7 @@ class IrAsset(models.Model):
                     raise Exception('Circular assets bundle declaration: %s' % ' > '.join(c_path))
                 c_path.append(bundle)
                 # Recursively calls this function for each 'include' directive.
-                return self.get_addon_files(addons, path_def, css, js, xml, addon_files, c_path)
+                return self.get_asset_paths(path_def, addons, css, js, xml, asset_paths, c_path)
 
             addon, paths = get_paths(path_def, exts, manifest_cache)
 
@@ -211,48 +231,33 @@ class IrAsset(models.Model):
                 # it was declared like this in the first place. This is why we
                 # go through the trouble of finding the exact paths matching
                 # the given target glob (even though we only need the first one).
-                target_addon, target_paths = get_paths(target, exts, manifest_cache)
+                _, target_paths = get_paths(target, exts, manifest_cache)
 
                 if not len(target_paths):
                     # The list is empty when the target path has the wrong extension.
                     # -> nothing to replace
                     return
 
-                target_path = target_paths[0]
-
-                if (target_addon, target_path) not in addon_files:
-                    raise Exception("File %s not found in bundle %s of %s manifest" % (target_path, bundle, target_addon))
-
                 # New file paths are inserted at the position of the target path.
-                index = addon_files.index((target_addon, target_path))
-                addon_files[index:index + 1] = [(addon, path) for path in paths]
-                return
+                index = get_path_index(target)
+                [remove_path(p) for p in target_paths]
+                [add_path(addon, p, index) for p in paths]
 
-            # Add or remove all file paths found.
-            for path in paths:
-                if directive == APPEND_DIRECTIVE and (addon, path) not in addon_files:
-                    # Append all file paths to the list (if not already in it).
-                    addon_files.append((addon, path))
-                elif directive == PREPEND_DIRECTIVE and (addon, path) not in addon_files:
-                    # Prepend all file paths to the list (if not already in it).
-                    addon_files.insert(bundle_start_index, (addon, path))
-                elif directive == REMOVE_DIRECTIVE:
-                    if (addon, path) not in addon_files:
-                        raise Exception("File %s not found in bundle %s of %s manifest" % (path, bundle, addon))
-                    # Remove all file paths from the list.
-                    addon_files.remove((addon, path))
+            elif directive == REMOVE_DIRECTIVE:
+                # Removes all file paths found.
+                [remove_path(path) for path in paths]
+            else:
+                index = bundle_start_index if directive == PREPEND_DIRECTIVE else None
+                # Adds all file paths found.
+                [add_path(addon, path, index) for path in paths]
 
         # 2. Goes through all addons' manifests.
         for addon in addons:
             manifest = manifest_cache.get(addon)
-
             if not manifest:
                 continue
-
             assets = manifest.get('assets', {})
-            bundle_paths = assets.get(bundle, [])
-
-            for path_def in bundle_paths:
+            for path_def in assets.get(bundle, []):
                 # Default directive: append
                 directive = APPEND_DIRECTIVE
                 target = None
@@ -268,7 +273,37 @@ class IrAsset(models.Model):
         for asset in self.sudo().search(self._get_asset_domain(bundle)):
             process_path(asset.directive, asset.target, asset.glob)
 
-        return addon_files
+        return asset_paths
+
+    def get_related_bundle(self, target_path, root_bundle):
+        """
+        Returns the first bundle directly defining a glob matching the target
+        path. This is useful when generating an 'ir.asset' record to override
+        a specific asset and target the right bundle, i.e. the first one
+        defining the target path.
+
+        :param target_path: string: path to match.
+        :root_bundle: string: bundle from which to initiate the search.
+        :returns: the first matching bundle or None
+        """
+        ext = target_path.split('.')[-1]
+
+        js = False
+        css = False
+        xml = False
+
+        if ext in SCRIPT_EXTENSIONS:
+            js = True
+        elif ext in STYLE_EXTENSIONS:
+            css = True
+        elif ext in TEMPLATE_EXTENSIONS:
+            xml = True
+
+        asset_paths = self.get_asset_paths(bundle=root_bundle, css=css, js=js, xml=xml)
+
+        for path, _, bundle in asset_paths:
+            if path == target_path:
+                return bundle
 
     def _get_asset_domain(self, bundle):
         """Meant to be overridden to add additional parts to the search domain"""

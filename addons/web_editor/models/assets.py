@@ -183,14 +183,15 @@ class Assets(models.AbstractModel):
             self.env["ir.attachment"].create(new_attach)
 
             # Create an asset with the new attachment
+            IrAssset = self.env['ir.asset']
             new_asset = {
                 'name': custom_url,
-                'bundle': bundle,
+                'bundle': IrAssset.get_related_bundle(url, bundle),
                 'glob': custom_url,
                 'target': url,
                 'directive': 'replace',
             }
-            self.env['ir.asset'].create(new_asset)
+            IrAssset.create(new_asset)
 
         self.env["ir.qweb"].clear_caches()
 

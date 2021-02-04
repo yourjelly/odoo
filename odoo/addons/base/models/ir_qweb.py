@@ -19,8 +19,6 @@ from odoo.modules.module import get_resource_path
 
 from odoo.addons.base.models.qweb import QWeb, Contextifier
 from odoo.addons.base.models.assetsbundle import AssetsBundle
-from odoo.addons.base.models.ir_asset import get_mime_type
-
 from odoo.addons.base.models.ir_asset import STYLE_EXTENSIONS, SCRIPT_EXTENSIONS
 
 _logger = logging.getLogger(__name__)
@@ -322,29 +320,24 @@ class IrQWeb(models.AbstractModel, QWeb):
 
         options['website_id'] = self.env.context.get('website_id')
 
-        addons = []
-        if not request:
-            addons = self.env['ir.module.module']._installed_sorted()
-        else:
-            addons = module_boot()
-
-        addon_files = self.env['ir.asset'].get_addon_files(addons=addons, bundle=xmlid, css=True, js=True)
+        asset_paths = self.env['ir.asset'].get_asset_paths(bundle=xmlid, css=True, js=True)
 
         files = []
         remains = []
-        for _, file in addon_files:
-            ext = file.split('.')[-1]
+        for path, *_ in asset_paths:
+            ext = path.split('.')[-1]
             is_js = ext in SCRIPT_EXTENSIONS
             is_css = ext in STYLE_EXTENSIONS
             if not is_js and not is_css:
                 continue
-            mimetype = get_mime_type(file)
-            if can_aggregate(file):
-                path = [segment for segment in file.split('/') if segment]
+
+            mimetype = 'text/javascript' if is_js else 'text/%s' % ext
+            if can_aggregate(path):
+                segments = [segment for segment in path.split('/') if segment]
                 files.append({
                     'atype': mimetype,
-                    'url': file,
-                    'filename': get_resource_path(*path) if path else None,
+                    'url': path,
+                    'filename': get_resource_path(*segments) if segments else None,
                     'content': '',
                     'media': nodeAttrs and nodeAttrs.get('media'),
                 })
@@ -353,14 +346,14 @@ class IrQWeb(models.AbstractModel, QWeb):
                     tag = 'script'
                     attributes = OrderedDict([
                         ["type", mimetype],
-                        ["src", file],
+                        ["src", path],
                     ])
                 else:
                     tag = 'link'
                     attributes = OrderedDict([
                         ["type", mimetype],
                         ["rel", "stylesheet"],
-                        ["href", file],
+                        ["href", path],
                         ['media', nodeAttrs and nodeAttrs.get('media')],
                     ])
                 remains.append((tag, attributes, ''))

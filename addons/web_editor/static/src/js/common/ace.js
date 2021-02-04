@@ -802,7 +802,7 @@ var ViewEditor = Widget.extend({
         function _populateList(sortedData, $list, lettersToRemove) {
             _.each(sortedData, function (bundleInfos) {
                 var $optgroup = $('<optgroup/>', {
-                    label: bundleInfos[0].name,
+                    label: bundleInfos[0],
                 }).appendTo($list);
                 _.each(bundleInfos[1], function (dataInfo) {
                     var name = dataInfo.url.substring(_.lastIndexOf(dataInfo.url, '/') + 1, dataInfo.url.length - lettersToRemove);
