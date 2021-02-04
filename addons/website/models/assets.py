@@ -26,7 +26,7 @@ class Assets(models.AbstractModel):
                 overridden.
         """
         if 'color-palettes-number' in values:
-            self.reset_asset('/website/static/src/scss/options/colors/user_color_palette.scss', 'web.assets_common')
+            self.reset_asset('/website/static/src/scss/options/colors/user_color_palette.scss', 'assets_common')
             # Do not reset all theme colors for compatibility (not removing alpha -> epsilon colors)
             self.make_scss_customization('/website/static/src/scss/options/colors/user_theme_color_palette.scss', {
                 'success': 'null',
@@ -60,14 +60,14 @@ class Assets(models.AbstractModel):
         res = super(Assets, self)._get_custom_attachment(custom_url, op=op)
         return res.with_context(website_id=website.id).filtered(lambda x: not x.website_id or x.website_id == website)
 
-    def _get_custom_view(self, custom_url, op='='):
+    def _get_custom_asset(self, custom_url, op='='):
         """
-        See web_editor.Assets._get_custom_view
+        See web_editor.Assets._get_custom_asset
         Extend to only return the views related to the current website.
         """
         website = self.env['website'].get_current_website()
-        res = super(Assets, self)._get_custom_view(custom_url, op=op)
-        return res.with_context(website_id=website.id).filter_duplicate()
+        res = super(Assets, self)._get_custom_asset(custom_url, op=op)
+        return res.with_context(website_id=website.id).filtered(lambda x: not x.website_id or x.website_id == website)
 
     def _save_asset_attachment_hook(self):
         """
@@ -75,18 +75,6 @@ class Assets(models.AbstractModel):
         Extend to add website ID at attachment creation.
         """
         res = super(Assets, self)._save_asset_attachment_hook()
-
-        website = self.env['website'].get_current_website()
-        if website:
-            res['website_id'] = website.id
-        return res
-
-    def _save_asset_view_hook(self):
-        """
-        See web_editor.Assets._save_asset_view_hook
-        Extend to add website ID at view creation.
-        """
-        res = super(Assets, self)._save_asset_view_hook()
 
         website = self.env['website'].get_current_website()
         if website:

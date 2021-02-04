@@ -57,12 +57,13 @@ def get_paths(path_def, extensions, manifest_cache=None):
         manifest_cache = http.addons_manifest
 
     paths = []
-    addon = path_def.split('/')[0]
+    clean_path_def = path_def[1:] if path_def.startswith('/') else path_def
+    addon = clean_path_def.split('/')[0]
     addon_manifest = manifest_cache.get(addon)
 
     if addon_manifest:
         addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
-        full_path = os.path.normpath(os.path.join(addons_path, path_def))
+        full_path = os.path.normpath(os.path.join(addons_path, clean_path_def))
         # When fetching template file paths, we need the full paths since xml
         # files are read from the file system. But web assets (scripts and
         # stylesheets) must be loaded using relative paths, hence the trimming
@@ -165,6 +166,8 @@ class IrAsset(models.Model):
         if addon_files is None:
             addon_files = []
 
+        bundle_start_index = len(addon_files)
+
         def process_path(directive, target, path_def):
             """
             This sub function is meant to take a directive and a set of
@@ -232,7 +235,7 @@ class IrAsset(models.Model):
                     addon_files.append((addon, path))
                 elif directive == PREPEND_DIRECTIVE and (addon, path) not in addon_files:
                     # Prepend all file paths to the list (if not already in it).
-                    addon_files.insert(0, (addon, path))
+                    addon_files.insert(bundle_start_index, (addon, path))
                 elif directive == REMOVE_DIRECTIVE:
                     if (addon, path) not in addon_files:
                         raise Exception("File %s not found in bundle %s of %s manifest" % (path, bundle, addon))

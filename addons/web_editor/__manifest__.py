@@ -137,7 +137,7 @@ Odoo Web Editor widget.
             'web_editor/static/src/scss/bootstrap_overridden.scss',
         ],
         '_assets_frontend_helpers': [
-            'web_editor/static/src/scss/bootstrap_overridden.scss',
+            ('prepend', 'web_editor/static/src/scss/bootstrap_overridden.scss'),
         ],
 
         # ----------------------------------------------------------------------
