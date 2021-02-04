@@ -17,7 +17,9 @@ class MailGroup(http.Controller):
 
     def _get_archives(self, group_id):
         MailMessage = request.env['mail.message']
-        groups = MailMessage._read_group_raw(
+        # The read_group on the <mail.message> is limited to the administrators.
+        # So we use SUDO (there's no security leak as we just get the date of the message)
+        groups = MailMessage.sudo()._read_group_raw(
             [('model', '=', 'mail.channel'), ('res_id', '=', group_id), ('message_type', '!=', 'notification')],
             ['subject', 'date'],
             groupby=["date"], orderby="date desc")
@@ -44,7 +46,10 @@ class MailGroup(http.Controller):
 
         # compute statistics
         month_date = datetime.today() - relativedelta.relativedelta(months=1)
-        messages = request.env['mail.message'].read_group([
+        # The read_group on the <mail.message> is limited to the administrators.
+        # So we use SUDO (there's no security as we are limited to the message
+        # of the channel for which we have access)
+        messages = request.env['mail.message'].sudo().read_group([
             ('model', '=', 'mail.channel'),
             ('date', '>=', fields.Datetime.to_string(month_date)),
             ('message_type', '!=', 'notification'),
