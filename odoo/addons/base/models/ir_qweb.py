@@ -159,7 +159,7 @@ class IrQWeb(models.AbstractModel, QWeb):
         if len(el):
             raise SyntaxError("t-call-assets cannot contain children nodes")
 
-        # nodes = self._get_asset_nodes(xmlid, options, css=css, js=js, debug=values.get('debug'), async=async, values=values)
+        # nodes = self._get_asset_nodes(xmlid, options, css=css, js=js, debug=values.get('debug'), async=async, values=values, inlined=inlined)
         #
         # for index, (tagName, t_attrs, content) in enumerate(nodes):
         #     if index:
@@ -217,6 +217,7 @@ class IrQWeb(models.AbstractModel, QWeb):
                         ast.keyword('defer_load', self._get_attr_bool(el.get('defer_load', False))),
                         ast.keyword('lazy_load', self._get_attr_bool(el.get('lazy_load', False))),
                         ast.keyword('values', ast.Name(id='values', ctx=ast.Load())),
+                        ast.keyword('inlined', self._get_attr_bool(el.get('t-inline', False))),
                     ],
                     starargs=None, kwargs=None
                 )
@@ -290,11 +291,32 @@ class IrQWeb(models.AbstractModel, QWeb):
         'xml' not in tools.config['dev_mode'],
         tools.ormcache_context('xmlid', 'options.get("lang", "en_US")', 'css', 'js', 'debug', 'async_load', 'defer_load', 'lazy_load', keys=("website_id",)),
     )
-    def _get_asset_nodes(self, xmlid, options, css=True, js=True, debug=False, async_load=False, defer_load=False, lazy_load=False, values=None):
+    def _get_asset_nodes(
+        self,
+        xmlid,
+        options,
+        css=True,
+        js=True,
+        debug=False,
+        async_load=False,
+        defer_load=False,
+        lazy_load=False,
+        values=None,
+        inlined=False,
+    ):
         files, remains = self._get_asset_content(xmlid, options)
         asset = self.get_asset_bundle(xmlid, files, env=self.env)
+        # TODO: should we handle this in the case of inline?
         remains = [node for node in remains if (css and node[0] == 'link') or (js and node[0] != 'link')]
-        return remains + asset.to_node(css=css, js=js, debug=debug, async_load=async_load, defer_load=defer_load, lazy_load=lazy_load)
+        return remains + asset.to_node(
+            css=css,
+            js=js,
+            debug=debug,
+            async_load=async_load,
+            defer_load=defer_load,
+            lazy_load=lazy_load,
+            inlined=inlined,
+        )
 
     def _get_asset_link_urls(self, xmlid, options):
         asset_nodes = self._get_asset_nodes(xmlid, options, js=False)
