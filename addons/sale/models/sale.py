@@ -1147,9 +1147,6 @@ class SaleOrderLine(models.Model):
     _order = 'order_id, sequence, id'
     _check_company_auto = True
 
-    def is_not_a_product_line(self):
-        pass
-
     @api.depends('state', 'product_uom_qty', 'qty_delivered', 'qty_to_invoice', 'qty_invoiced')
     def _compute_invoice_status(self):
         """
@@ -1910,3 +1907,7 @@ class SaleOrderLine(models.Model):
             name += "\n" + pacv.with_context(lang=self.order_id.partner_id.lang).display_name
 
         return name
+
+    def _is_not_sellable_line(self):
+        # True if the line is a computed line (reward, delivery, ...) that user cannot add manually
+        return False
