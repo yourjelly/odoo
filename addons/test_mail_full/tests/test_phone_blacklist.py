@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from unittest import skipUnless
 
 from odoo.addons.sms.tests import common as sms_common
 from odoo.addons.test_mail_full.tests import common as test_mail_full_common
+from odoo.tests.common import can_import
 
 
 class TestPhoneBlacklist(test_mail_full_common.BaseFunctionalTest, sms_common.MockSMS, test_mail_full_common.TestRecipients):
@@ -64,6 +66,7 @@ class TestPhoneBlacklist(test_mail_full_common.BaseFunctionalTest, sms_common.Mo
             test_record.invalidate_cache()
             self.assertFalse(test_record.phone_blacklisted)
 
+    @skipUnless(can_import('phonenumbers'), "The phonenumbers library is needed to run this test")
     def test_phone_sanitize_internals(self):
         with self.sudo('employee'):
             test_record = self.env['mail.test.sms.bl'].browse(self.test_record.id)

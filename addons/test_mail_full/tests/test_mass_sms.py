@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-
+from unittest import skipUnless
 
 from odoo.addons.phone_validation.tools import phone_validation
 from odoo.addons.mass_mailing_sms.tests import common as mass_mailing_sms_common
 from odoo.addons.test_mail.tests import common as test_mail_common
 from odoo.addons.test_mail_full.tests import common as test_mail_full_common
 from odoo.tools import mute_logger
-from odoo.tests import tagged
+from odoo.tests import tagged, can_import
 
 
 @tagged('mass_mailing')
@@ -87,6 +87,7 @@ class TestMassSMS(test_mail_full_common.MassSMSBaseFunctionalTest, mass_mailing_
             mailing, self.records, check_sms=True
         )
 
+    @skipUnless(can_import('phonenumbers'), "The phonenumbers library is needed to run this test")
     def test_mass_sms_internals_errors(self):
         # same customer, specific different number on record -> should be valid
         new_record_1 = self.env['mail.test.sms'].create({

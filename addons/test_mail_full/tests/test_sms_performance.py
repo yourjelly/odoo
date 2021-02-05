@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from unittest import skipUnless
+
 from odoo.addons.sms.tests import common as sms_common
 from odoo.addons.test_mail.tests.test_performance import BaseMailPerformance
-from odoo.tests.common import users, warmup
+from odoo.tests.common import users, warmup, can_import
 from odoo.tests import tagged
 from odoo.tools import mute_logger
 
@@ -75,6 +77,7 @@ class TestSMSPerformance(BaseMailPerformance, sms_common.MockSMS):
         self.assertEqual(record.message_ids[0].body, '<p>Performance Test</p>')
         self.assertSMSNotification([{'partner': partner} for partner in self.partners], 'Performance Test', messages)
 
+    @skipUnless(can_import('phonenumbers'), "The phonenumbers library is needed to run this test")
     @mute_logger('odoo.addons.sms.models.sms_sms')
     @users('employee')
     @warmup
