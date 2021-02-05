@@ -23,8 +23,15 @@ INCLUDE_DIRECTIVE = 'include'
 PREPEND_DIRECTIVE = 'prepend'
 # `('remove', 'file_path')`
 REMOVE_DIRECTIVE = 'remove'
+
+# `('after', 'target_path', 'file_path')`
+AFTER_DIRECTIVE = 'after'
+# `('before', 'target_path', 'file_path')`
+BEFORE_DIRECTIVE = 'before'
 # `('replace', 'target_path', 'file_path')`
 REPLACE_DIRECTIVE = 'replace'
+
+DIRECTIVES_WITH_TARGET = [AFTER_DIRECTIVE, BEFORE_DIRECTIVE, REPLACE_DIRECTIVE]
 
 
 def fs2web(path):
@@ -110,6 +117,8 @@ class IrAsset(models.Model):
     directive = fields.Selection(string='Directive', selection=[
         (APPEND_DIRECTIVE, 'Append'),
         (PREPEND_DIRECTIVE, 'Prepend'),
+        (AFTER_DIRECTIVE, 'After'),
+        (BEFORE_DIRECTIVE, 'Before'),
         (REMOVE_DIRECTIVE, 'Remove'),
         (REPLACE_DIRECTIVE, 'Replace'),
         (INCLUDE_DIRECTIVE, 'Include')], default=APPEND_DIRECTIVE)
@@ -215,41 +224,30 @@ class IrAsset(models.Model):
                 return self.get_asset_paths(path_def, addons, css, js, xml, asset_paths, c_path)
 
             addon, paths = get_paths(path_def, exts, manifest_cache)
+            insert_index = None
 
-            if directive == REPLACE_DIRECTIVE:
-                # When replacing, we need the target path to be exactly the
-                # same as it was inserted. For example:
-                #
-                #   'assets_common':  ['web/static/src/js/boot.js']
-                #
-                # ... will insert '/web/static/src/js/boot.js' in the files
-                # list. But we would want:
-                #
-                #   'assets_common':  [('replace', 'web/static/src/js/boot.js', 'other/static/src/js/boot.js')]
-                #
-                # ... to replace the originally defined asset, simply because
-                # it was declared like this in the first place. This is why we
-                # go through the trouble of finding the exact paths matching
-                # the given target glob (even though we only need the first one).
+            if directive in DIRECTIVES_WITH_TARGET:
                 _, target_paths = get_paths(target, exts, manifest_cache)
-
                 if not len(target_paths):
                     # The list is empty when the target path has the wrong extension.
                     # -> nothing to replace
                     return
+                insert_index = get_path_index(target)
 
-                # New file paths are inserted at the position of the target path.
-                index = get_path_index(target)
+            if directive == REPLACE_DIRECTIVE:
+                # Remove all target paths and add all paths found
                 [remove_path(p) for p in target_paths]
-                [add_path(addon, p, index) for p in paths]
-
+                [add_path(addon, p, insert_index) for p in paths]
             elif directive == REMOVE_DIRECTIVE:
-                # Removes all file paths found.
+                # Remove all paths found
                 [remove_path(path) for path in paths]
             else:
-                index = bundle_start_index if directive == PREPEND_DIRECTIVE else None
-                # Adds all file paths found.
-                [add_path(addon, path, index) for path in paths]
+                # Add all paths found...
+                if directive == AFTER_DIRECTIVE:
+                    insert_index += 1
+                elif directive == PREPEND_DIRECTIVE:
+                    insert_index = bundle_start_index
+                [add_path(addon, path, insert_index) for path in paths]
 
         # 2. Goes through all addons' manifests.
         for addon in addons:
@@ -263,7 +261,7 @@ class IrAsset(models.Model):
                 target = None
                 if type(path_def) == tuple:
                     # Additional directive given
-                    if path_def[0] == REPLACE_DIRECTIVE:
+                    if path_def[0] in DIRECTIVES_WITH_TARGET:
                         directive, target, path_def = path_def
                     else:
                         directive, path_def = path_def
