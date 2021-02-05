@@ -3,6 +3,7 @@
 
 import base64
 
+from odoo import Command
 from .test_project_base import TestProjectCommon
 from odoo.tools import mute_logger
 from odoo.modules.module import get_resource_path
@@ -112,7 +113,7 @@ class TestProjectFlow(TestProjectCommon):
 
         parent_task = Task.create({
             'name': 'Mother Task',
-            'user_id': self.user_projectuser.id,
+            'user_ids': [Command.link(self.user_projectuser.id)],
             'project_id': self.project_pigs.id,
             'partner_id': self.partner_2.id,
             'planned_hours': 12,
@@ -120,7 +121,7 @@ class TestProjectFlow(TestProjectCommon):
 
         another_parent_task = Task.create({
             'name': 'Another Mother Task',
-            'user_id': self.user_projectuser.id,
+            'user_ids': [Command.link(self.user_projectuser.id)],
             'project_id': self.project_pigs.id,
             'partner_id': self.partner_3.id,
             'planned_hours': 0,
@@ -211,7 +212,7 @@ class TestProjectFlow(TestProjectCommon):
         Task = self.env['project.task'].with_context({'tracking_disable': True})
         first_task = Task.create({
             'name': 'first task',
-            'user_id': self.user_projectuser.id,
+            'user_ids': [Command.link(self.user_projectuser.id)],
             'project_id': self.project_pigs.id,
             'partner_id': self.partner_2.id,
         })

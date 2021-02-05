@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from odoo import Command
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import UserError
 
@@ -60,11 +61,11 @@ class TestProjectCommon(TransactionCase):
         # Already-existing tasks in Pigs
         cls.task_1 = cls.env['project.task'].with_context({'mail_create_nolog': True}).create({
             'name': 'Pigs UserTask',
-            'user_id': cls.user_projectuser.id,
+            'user_ids': [Command.link(cls.user_projectuser.id)],
             'project_id': cls.project_pigs.id})
         cls.task_2 = cls.env['project.task'].with_context({'mail_create_nolog': True}).create({
             'name': 'Pigs ManagerTask',
-            'user_id': cls.user_projectmanager.id,
+            'user_ids': [Command.link(cls.user_projectmanager.id)],
             'project_id': cls.project_pigs.id})
 
         # Test 'Goats' project, same as 'Pigs', but with 2 stages

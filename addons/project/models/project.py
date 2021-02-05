@@ -5,7 +5,7 @@ import ast
 from datetime import timedelta, datetime
 from random import randint
 
-from odoo import api, fields, models, tools, SUPERUSER_ID, _
+from odoo import api, fields, Command, models, tools, SUPERUSER_ID, _
 from odoo.exceptions import UserError, AccessError, ValidationError, RedirectWarning
 from odoo.tools.misc import format_date, get_lang
 from odoo.osv.expression import OR
@@ -600,9 +600,9 @@ class Task(models.Model):
     planned_hours = fields.Float("Initially Planned Hours", help='Time planned to achieve this task (including its sub-tasks).', tracking=True)
     subtask_planned_hours = fields.Float("Sub-tasks Planned Hours", compute='_compute_subtask_planned_hours',
         help="Sum of the time planned of all the sub-tasks linked to this task. Usually less than or equal to the initially planned time of this task.")
-    user_id = fields.Many2one('res.users',
-        string='Assigned to',
-        default=lambda self: self.env.uid,
+    user_ids = fields.Many2many('res.users', 'project_task_assigned_user_rel',
+        string='Assignees',
+        default=lambda self: [Command.link(self.env.uid)],
         index=True, tracking=True)
     partner_id = fields.Many2one('res.partner',
         string='Customer',
@@ -623,7 +623,6 @@ class Task(models.Model):
         'res.company', string='Company', compute='_compute_company_id', store=True, readonly=False,
         required=True, copy=True, default=_default_company_id)
     color = fields.Integer(string='Color Index')
-    user_email = fields.Char(related='user_id.email', string='User Email', readonly=True, related_sudo=False)
     attachment_ids = fields.One2many('ir.attachment', compute='_compute_attachment_ids', string="Main Attachments",
         help="Attachments that don't come from a message.")
     # In the domain of displayed_image_id, we couln't use attachment_ids because a one2many is represented as a list of commands so we used res_model & res_id
@@ -954,6 +953,7 @@ class Task(models.Model):
     def _onchange_task_company(self):
         if self.project_id.company_id != self.company_id:
             self.project_id = False
+        self.user_ids = self.user_ids.filtered(lambda x: x.company_id == self.company_id)
 
     @api.depends('project_id.company_id')
     def _compute_company_id(self):
@@ -1072,8 +1072,8 @@ class Task(models.Model):
                         default_project_id=project_id
                     ).default_get(['stage_id']).get('stage_id')
                 vals["stage_id"] = default_stage[project_id]
-            # user_id change: update date_assign
-            if vals.get('user_id'):
+            # user_ids change: update date_assign
+            if vals.get('user_ids'):
                 vals['date_assign'] = fields.Datetime.now()
             # Stage change: Update date_end if folded stage and date_last_stage_update
             if vals.get('stage_id'):
@@ -1106,9 +1106,10 @@ class Task(models.Model):
             # reset kanban state when changing stage
             if 'kanban_state' not in vals:
                 vals['kanban_state'] = 'normal'
-        # user_id change: update date_assign
-        if vals.get('user_id') and 'date_assign' not in vals:
-            vals['date_assign'] = now
+        # on first user_ids set: update date_assign
+        unassigned_task = self.browse()
+        if vals.get('user_ids') and 'date_assign' not in vals:
+            unassigned_task = self.filtered(lambda task: not task.user_ids)
 
         # recurrence fields
         rec_fields = vals.keys() & self._get_recurrence_fields()
@@ -1136,7 +1137,8 @@ class Task(models.Model):
                 recurrence_domain = [('recurrence_id', 'in', self.recurrence_id.ids)]
             tasks |= self.env['project.task'].search(recurrence_domain)
 
-        result = super(Task, tasks).write(vals)
+        result = super(Task, tasks - unassigned_task).write(vals)
+        result &= super(Task, unassigned_task).write(dict(vals, **{'date_assign': now}))
         # rating on stage
         if 'stage_id' in vals and vals.get('stage_id'):
             self.filtered(lambda x: x.project_id.rating_active and x.project_id.rating_status == 'stage')._send_task_rating_mail(force_send=True)
@@ -1204,6 +1206,7 @@ class Task(models.Model):
 
     def _track_subtype(self, init_values):
         self.ensure_one()
+        # TODO mba: track user_ids m2m as it's not working in standard way....
         if 'kanban_state_label' in init_values and self.kanban_state == 'blocked':
             return self.env.ref('project.mt_task_blocked')
         elif 'kanban_state_label' in init_values and self.kanban_state == 'done':
@@ -1229,7 +1232,7 @@ class Task(models.Model):
             group_func = lambda pdata: pdata['type'] == 'user' and project_user_group_id in pdata['groups'] and pdata['id'] in allowed_user_ids
         new_group = ('group_project_user', group_func, {})
 
-        if not self.user_id and not self.stage_id.fold:
+        if not self.user_ids and not self.stage_id.fold:
             take_action = self._notify_get_action_link('assign', **msg_vals)
             project_actions = [{'url': take_action, 'title': _('I take it')}]
             new_group[2]['actions'] = project_actions
@@ -1275,11 +1278,11 @@ class Task(models.Model):
             This override updates the document according to the email.
         """
         # remove default author when going through the mail gateway. Indeed we
-        # do not want to explicitly set user_id to False; however we do not
+        # do not want to explicitly set user_ids to False; however we do not
         # want the gateway user to be responsible if no other responsible is
         # found.
         create_context = dict(self.env.context or {})
-        create_context['default_user_id'] = False
+        create_context['default_user_ids'] = False
         if custom_values is None:
             custom_values = {}
         defaults = {
@@ -1342,7 +1345,7 @@ class Task(models.Model):
         return super(Task, self)._message_post_after_hook(message, msg_vals)
 
     def action_assign_to_me(self):
-        self.write({'user_id': self.env.user.id})
+        self.write({'user_ids': [Command.link(self.env.user.id)]})
 
     # If depth == 1, return only direct children
     # If depth == 3, return children to third generation

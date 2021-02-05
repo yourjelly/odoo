@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 
+from odoo import Command
 from odoo.tests.common import TransactionCase, Form
 from odoo.exceptions import AccessError, UserError
 
@@ -181,12 +182,12 @@ class TestMultiCompanyProject(TestMultiCompanyCommon):
         Task = cls.env['project.task'].with_context({'mail_create_nolog': True, 'tracking_disable': True})
         cls.task_1 = Task.create({
             'name': 'Task 1 in Project A',
-            'user_id': cls.user_employee_company_a.id,
+            'user_ids': [Command.link(cls.user_employee_company_a.id)],
             'project_id': cls.project_company_a.id
         })
         cls.task_2 = Task.create({
             'name': 'Task 2 in Project B',
-            'user_id': cls.user_employee_company_b.id,
+            'user_ids': [Command.link(cls.user_employee_company_b.id)],
             'project_id': cls.project_company_b.id
         })
 

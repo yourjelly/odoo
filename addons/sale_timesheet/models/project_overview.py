@@ -28,9 +28,8 @@ class Project(models.Model):
         return values
 
     def _plan_get_employee_ids(self):
-        user_ids = self.env['project.task'].sudo().read_group([('project_id', 'in', self.ids), ('user_id', '!=', False)], ['user_id'], ['user_id'])
-        user_ids = [user_id['user_id'][0] for user_id in user_ids]
-        employee_ids = self.env['res.users'].sudo().search_read([('id', 'in', user_ids)], ['employee_ids'])
+        tasks = self.env['project.task'].sudo().search([('project_id', 'in', self.ids), ('user_ids', '!=', False)])
+        employee_ids = self.env['res.users'].sudo().search_read([('id', 'in', tasks.user_ids.ids)], ['employee_ids'])
         # flatten the list of list
         employee_ids = list(itertools.chain.from_iterable([employee_id['employee_ids'] for employee_id in employee_ids]))
 
