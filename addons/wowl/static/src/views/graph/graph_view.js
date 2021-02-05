@@ -98,11 +98,16 @@ export const VIEW_DEFAULT_PROPS = {
   isSample: false,
 };
 export const VIEW_PROPS = {
+  __beforeLeave__: { type: Function, optional: 1, },
+  __exportState__: { type: Function, optional: 1, }, // hum hum for export ...
   action: Object, // not sure yet
   fields: { type: Object, elements: Object }, // more precision on elements...
-  modelName: String,
+  model: String,
   isEmbedded: Boolean,
   isSample: Boolean,
+  processedSearchViewDescription: { type: Object, optional: 1 },
+  type: String, // ViewType redondant par rapport à static key --> used for Layout
+  viewSwitcherEntries: { type: Array, elements: Object, optional: 1 },
 };
 export const GRAPH_DEFAULT_PROPS = {
   ...VIEW_DEFAULT_PROPS,
@@ -114,6 +119,7 @@ export const GRAPH_DEFAULT_PROPS = {
   order: DEFAUL_ORDER,
   stacked: true,
   title: "Undefined", // we should be sure it is in translated term in one way or other
+  type: "graph",
 };
 export const GRAPH_PROPS = {
   ...VIEW_PROPS,
@@ -124,6 +130,7 @@ export const GRAPH_PROPS = {
   mode: { validate: (m) => MODES.includes(m) },
   order: { validate: (o) => ORDERS.includes(o) },
   stacked: Boolean,
+  state: { type: Object, optional: 1, }, // to describe. Is it better to have it optional or to have a default {}?
   title: String,
 };
 export class GraphView extends Component {
@@ -206,7 +213,7 @@ export class GraphView extends Component {
     // sort measures for measure menu
     // there was a params.withButtons for the pie chart widget;
     this.model = new GraphModel(this._modelService, {
-      modelName: this.props.modelName,
+      modelName: this.props.model,
       fields: this.fields,
     });
   }
