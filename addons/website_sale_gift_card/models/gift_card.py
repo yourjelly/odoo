@@ -8,7 +8,6 @@ class GiftCard(models.Model):
     _name = "gift.card"
     _inherit = ['website.multi.mixin', 'gift.card']
 
-    # Logic
-    def is_valid(self):
+    def can_be_used(self):
         website = self.env['website'].get_current_website()
-        return super(GiftCard, self).is_valid() and self.website_id.id in [website.id, False]
+        return super(GiftCard, self).can_be_used() and self.website_id.id in [website.id, False]

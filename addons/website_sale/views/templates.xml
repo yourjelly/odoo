@@ -1004,7 +1004,7 @@
                             </t>
                         </td>
                         <td class="text-center td-qty">
-                            <div class="css_quantity input-group mx-auto">
+                            <div class="css_quantity input-group mx-auto" t-if="not line._is_not_sellable_line()">
                                 <div class="input-group-prepend">
                                     <a t-attf-href="#" class="btn btn-link js_add_cart_json d-none d-md-inline-block" aria-label="Remove one" title="Remove one">
                                         <i class="fa fa-minus"></i>
@@ -1016,6 +1016,9 @@
                                         <i class="fa fa-plus"></i>
                                     </a>
                                 </div>
+                            </div>
+                            <div t-else="">
+                                <span class="text-muted" t-esc="int(line.product_uom_qty)"/>
                             </div>
                         </td>
                         <td class="text-center td-price" name="price">

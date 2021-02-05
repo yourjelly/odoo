@@ -2,14 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': "WebSite Sale Gift Card",
-    'summary': "Use gift card in ecommerce",
-    'description': """Integrate gift card mechanism in ecommerce.""",
+    'name': "Website Sale Gift Card",
+    'summary': "Use gift card in eCommerce",
+    'description': """Integrate gift card mechanism in your ecommerce.""",
     'category': 'Website/Website',
     'version': '1.0',
     'depends': ['website_sale', 'gift_card'],
-    'application': False,
-    'installable': True,
     'data': [
         'views/template.xml',
         'views/gift_card_views.xml',
@@ -17,5 +15,8 @@
         'views/sale_order_views.xml',
         'views/gift_card_menus.xml',
         'views/assets.xml',
-    ]
+    ],
+    'demo': [
+        'data/product_demo.xml',
+    ],
 }
