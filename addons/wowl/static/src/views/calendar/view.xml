@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="wowl.CalendarView" owl="1">
+        <Layout viewProps="props" title="state.title">
+            <t t-set-slot="control-panel-bottom-left">
+                <div class="o_cp_buttons" role="toolbar">
+                    <div class="o_calendar_buttons">
+                        <span class="o_calendar_navigation_buttons">
+                            <button class="btn btn-primary" title="Previous"
+                                t-on-click.stop="model.setPreviousDate()"
+                            >
+                                <i class="fa fa-arrow-left"/>
+                            </button>
+                            <button class="btn btn-primary"
+                                t-on-click.stop="model.setToday()"
+                            >
+                                Today
+                            </button>
+                            <button class="btn btn-primary"
+                                t-on-click.stop="model.setNextDate()"
+                            >
+                                <i class="fa fa-arrow-right" title="Next"/>
+                            </button>
+                        </span>
+                        <span class="o_calendar_scale_buttons">
+                            <div class="btn-group">
+                                <button class="btn btn-secondary"
+                                    t-att-class="{active: model.state.scale === 'day'}"
+                                    t-on-click.stop="model.setScale('day')"
+                                >Day</button>
+                                <button class="btn btn-secondary"
+                                    t-att-class="{active: model.state.scale === 'week'}"
+                                    t-on-click.stop="model.setScale('week')"
+                                >Week</button>
+                                <button class="btn btn-secondary"
+                                    t-att-class="{active: model.state.scale === 'month'}"
+                                    t-on-click.stop="model.setScale('month')"
+                                >Month</button>
+                                <!-- <button class="btn btn-secondary"
+                                    t-att-class="{active: model.state.scale === 'year'}"
+                                    t-on-click.stop="model.setScale('year')"
+                                >Year</button> -->
+                            </div>
+                        </span>
+                    </div>
+                </div>
+            </t>
+            <t t-set-slot="control-panel-top-right">
+                <div class="o_cp_searchview" role="search" t-ref="searchView">
+                    <div class="o_searchview" role="search" aria-autocomplete="list">
+                        <i class="o_searchview_icon fa fa-search"
+                            title="Search..."
+                            role="img"
+                            aria-label="Search..."
+                        />
+                        <SearchBar searchModel="searchModel"/>
+                    </div>
+                </div>
+            </t>
+            <t t-set-slot="control-panel-bottom-right">
+                <div class="btn-group o_search_options position-static" role="search">
+                    <FilterMenu searchModel="searchModel"/>
+                    <FavoriteMenu searchModel="searchModel"/>
+                </div>
+            </t>
+            <div class="o_calendar_container">
+                <div class="o_calendar_view">
+                    <div class="o_calendar_widget"
+                        t-ref="calendar"
+                    />
+                </div>
+                <div class="o_calendar_sidebar_container d-none d-md-block">
+                    <div class="o_calendar_sidebar">
+                        <div class="o_calendar_mini"/>
+
+                        <div>
+                            <t t-foreach="filterGroups" t-as="filterGroup" t-key="filterGroup.key">
+                                <div>
+                                    <strong t-esc="filterGroup.title" />
+                                </div>
+
+                                <t t-foreach="filterGroup.items" t-as="item" t-key="item.value">
+                                    <t t-set="itemId" t-value="filterGroup.key + item.value"/>
+                                    <div t-attf-class="{{ item.colorIndex ? 'o_cw_filter_color_' + item.colorIndex : '' }}">
+                                        <input type="checkbox"
+                                            t-att-id="itemId"
+                                            t-att-checked="item.active"
+                                            t-on-click="model.toggleFilter(filterGroup.key, item.value)"
+                                        />
+                                        <label t-att-for="itemId"
+                                            t-esc="item.label"
+                                        />
+                                    </div>
+                                </t>
+
+                                <hr/>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Layout>
+    </t>
+
+    <t t-name="wowl.CalendarView.event" owl="1">
+        <div t-attf-class="{{ event.extendedProps.colorIndex ? 'o_cw_filter_color_' + event.extendedProps.colorIndex : '' }}">
+            <span t-if="!props.hideTime" class="fc-time"/>
+            <div class="o_event_title" t-esc="event.title"/>
+        </div>
+    </t>
+
+</templates>

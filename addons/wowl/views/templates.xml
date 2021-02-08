@@ -42,6 +42,9 @@
         <xpath expr="//script[@src='/web/static/lib/fuzzy-master/fuzzy.js']" position="after">
             <script type="text/javascript" src="/web/static/lib/Chart/Chart.js"></script> <!-- would be good to lazy load it -->
             <script type="text/javascript" src="/web/static/lib/luxon/luxon.js"></script>
+
+            <script type="text/javascript" src="/wowl/static/lib/fullcalendar/main.js"></script>
+            <link rel="stylesheet" type="text/scss" href="/wowl/static/lib/fullcalendar/main.css"/>
         </xpath>
     </template>
 

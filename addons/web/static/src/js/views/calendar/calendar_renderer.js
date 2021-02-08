@@ -678,6 +678,7 @@ return AbstractRenderer.extend({
         if (this.state.fullWidth) {
             return Promise.resolve();
         }
+        console.log(this.state.filters);
         return this._renderFiltersOneByOne();
     },
     /**

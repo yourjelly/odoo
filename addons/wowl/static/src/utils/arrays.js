@@ -61,3 +61,12 @@ export function sortBy(array, criterion, order = "asc") {
     return order === "asc" ? result : -result;
   });
 }
+/**
+ * Returns a copy of the array but with unique values
+ *
+ * @param {any[]} array
+ * @returns {any[]}
+ */
+export function unique(array) {
+  return [...new Set(array)];
+}

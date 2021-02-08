@@ -170,6 +170,7 @@ export const localizationService = {
       multiLang: lang_params && lang_params.multi_lang,
       timeFormat: lang_params && lang_params.time_format,
       thousandsSep: lang_params && lang_params.thousands_sep,
+      weekStart: lang_params && lang_params.week_start,
     };
     return makeLocalization({ langParams, terms });
   },

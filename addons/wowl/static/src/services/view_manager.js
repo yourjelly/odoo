@@ -69,7 +69,7 @@ export const viewManagerService = {
             const xml = parser.parseFromString(viewDescription.arch, "text/xml");
             const rootNode = xml.documentElement;
             let processArch;
-            if (rootNode.hasAttribute("js_class")) {
+            if (false && rootNode.hasAttribute("js_class")) {
               const jsViewType = rootNode.getAttribute("js_class");
               View = odoo.viewRegistry.get(jsViewType);
               processArch = View.processArch || odoo.viewRegistry.get(viewType).processArch;
