@@ -17,8 +17,7 @@ class AccountPaymentMethod(models.Model):
 
 class AccountPayment(models.Model):
     _name = "account.payment"
-    _inherits = {'account.move': 'move_id'}
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['account.move.inherits.mixin', 'mail.thread', 'mail.activity.mixin']
     _description = "Payments"
     _order = "date desc, name desc"
     _check_company_auto = True
@@ -33,11 +32,6 @@ class AccountPayment(models.Model):
         return self.env['account.move']._search_default_journal(('bank', 'cash'))
 
     # == Business fields ==
-    move_id = fields.Many2one(
-        comodel_name='account.move',
-        string='Journal Entry', required=True, readonly=True, ondelete='cascade',
-        check_company=True)
-
     is_reconciled = fields.Boolean(string="Is Reconciled", store=True,
         compute='_compute_reconciliation_status',
         help="Technical field indicating if the payment is already reconciled.")
@@ -131,6 +125,12 @@ class AccountPayment(models.Model):
         help="Technical field used to know whether the field `partner_bank_id` needs to be required or not in the payments form views")
     country_code = fields.Char(related='company_id.country_id.code')
 
+    fake_line_ids = fields.One2many(
+        comodel_name='account.payment.line',
+        inverse_name='payment_id',
+        store=False, readonly=False,
+        compute='_compute_fake_line_ids')
+
     _sql_constraints = [
         (
             'check_amount_not_negative',
@@ -138,6 +138,193 @@ class AccountPayment(models.Model):
             "The payment amount cannot be negative.",
         ),
     ]
+
+    # -------------------------------------------------------------------------
+    # HELPERS
+    # -------------------------------------------------------------------------
+
+    def _dispatch_lines(self, lines):
+        ''' Helper used to dispatch the journal items between:
+        - The lines using the temporary liquidity account.
+        - The lines using the counterpart account.
+        - The lines being the write-off lines.
+        :return: (liquidity_lines, counterpart_lines, writeoff_lines)
+        '''
+        self.ensure_one()
+
+        liquidity_lines = self.env[lines._name]
+        counterpart_lines = self.env[lines._name]
+        writeoff_lines = self.env[lines._name]
+
+        for line in lines:
+            if line.account_id in (
+                    self.journal_id.default_account_id,
+                    self.journal_id.payment_debit_account_id,
+                    self.journal_id.payment_credit_account_id,
+            ):
+                liquidity_lines += line
+            elif line.account_id.internal_type in ('receivable', 'payable') or line.partner_id == line.company_id.partner_id:
+                counterpart_lines += line
+            else:
+                writeoff_lines += line
+
+        return liquidity_lines, counterpart_lines, writeoff_lines
+
+    # -------------------------------------------------------------------------
+    # account.move.inherits.mixin OVERRIDES
+    # -------------------------------------------------------------------------
+
+    def _recompute_preview_from_business_model(self, extra_param=None):
+        # OVERRIDE
+        self.ensure_one()
+        write_off_line_vals = extra_param or {}
+
+        if not self.journal_id.payment_debit_account_id or not self.journal_id.payment_credit_account_id:
+            return []
+
+        # Compute amounts.
+        write_off_amount = write_off_line_vals.get('amount', 0.0)
+
+        if self.payment_type == 'inbound':
+            # Receive money.
+            counterpart_amount = -self.amount
+            write_off_amount *= -1
+        elif self.payment_type == 'outbound':
+            # Send money.
+            counterpart_amount = self.amount
+        else:
+            counterpart_amount = 0.0
+            write_off_amount = 0.0
+
+        balance = self.currency_id._convert(counterpart_amount, self.company_id.currency_id, self.company_id, self.date)
+        counterpart_amount_currency = counterpart_amount
+        write_off_balance = self.currency_id._convert(write_off_amount, self.company_id.currency_id, self.company_id, self.date)
+        write_off_amount_currency = write_off_amount
+        currency_id = self.currency_id.id
+
+        if self.is_internal_transfer:
+            if self.payment_type == 'inbound':
+                liquidity_line_name = _('Transfer to %s', self.journal_id.name)
+            else: # payment.payment_type == 'outbound':
+                liquidity_line_name = _('Transfer from %s', self.journal_id.name)
+        else:
+            liquidity_line_name = self.payment_reference
+
+        # Compute a default label to set on the journal items.
+
+        payment_display_name = {
+            'outbound-customer': _("Customer Reimbursement"),
+            'inbound-customer': _("Customer Payment"),
+            'outbound-supplier': _("Vendor Payment"),
+            'inbound-supplier': _("Vendor Reimbursement"),
+        }
+
+        default_line_name = self.env['account.move.line']._get_default_line_name(
+            _("Internal Transfer") if self.is_internal_transfer else payment_display_name['%s-%s' % (self.payment_type, self.partner_type)],
+            self.amount,
+            self.currency_id,
+            self.date,
+            partner=self.partner_id,
+        )
+
+        line_vals_list = [
+            # Liquidity line.
+            {
+                'payment_id': self.id,
+                'name': liquidity_line_name or default_line_name,
+                'amount_currency': -counterpart_amount_currency,
+                'currency_id': currency_id,
+                'partner_id': self.partner_id.id,
+                'debit': balance < 0.0 and -balance or 0.0,
+                'credit': balance > 0.0 and balance or 0.0,
+                'account_id': self.journal_id.payment_debit_account_id.id if balance < 0.0 else self.journal_id.payment_credit_account_id.id,
+            },
+            # Receivable / Payable.
+            {
+                'payment_id': self.id,
+                'name': default_line_name,
+                'amount_currency': counterpart_amount_currency + write_off_amount_currency if currency_id else 0.0,
+                'currency_id': currency_id,
+                'debit': balance + write_off_balance > 0.0 and balance + write_off_balance or 0.0,
+                'credit': balance + write_off_balance < 0.0 and -balance - write_off_balance or 0.0,
+                'account_id': self.destination_account_id.id,
+            },
+        ]
+        if write_off_balance:
+            # Write-off line.
+            line_vals_list.append({
+                'name': write_off_line_vals.get('name') or default_line_name,
+                'amount_currency': -write_off_amount_currency,
+                'currency_id': currency_id,
+                'debit': write_off_balance < 0.0 and -write_off_balance or 0.0,
+                'credit': write_off_balance > 0.0 and write_off_balance or 0.0,
+                'partner_id': self.partner_id.id,
+                'account_id': write_off_line_vals.get('account_id'),
+            })
+        return line_vals_list
+
+    def _recompute_business_model_from_preview(self):
+        # OVERRIDE
+        self.ensure_one()
+        liquidity_lines, counterpart_lines, writeoff_lines = self._dispatch_lines(self.fake_line_ids)
+
+        if counterpart_lines.account_id.user_type_id.type == 'receivable':
+            partner_type = 'customer'
+        else:
+            partner_type = 'supplier'
+
+        liquidity_amount = liquidity_lines.amount_currency
+
+        payment_vals_to_write = {
+            'amount': abs(liquidity_amount),
+            'payment_type': 'inbound' if liquidity_amount > 0.0 else 'outbound',
+            'partner_type': partner_type,
+            'currency_id': liquidity_lines.currency_id.id,
+            'partner_id': liquidity_lines.partner_id.id,
+            'destination_account_id': counterpart_lines.account_id.id,
+        }
+        self.write(self.move_id._cleanup_write_orm_values(self, payment_vals_to_write))
+
+    def _check_preview_consistency(self):
+        # OVERRIDE
+        self.ensure_one()
+        lines = self.fake_line_ids
+        liquidity_lines, counterpart_lines, writeoff_lines = self._dispatch_lines(lines)
+
+        if len(liquidity_lines) != 1 or len(counterpart_lines) != 1:
+            return _(
+                "The journal entry %s reached an invalid state relative to its payment.\n"
+                "To be consistent, the journal entry must always contains:\n"
+                "- one journal item involving the outstanding payment/receipts account.\n"
+                "- one journal item involving a receivable/payable account.\n"
+                "- optional journal items, all sharing the same account.\n\n"
+            )
+
+        if writeoff_lines and len(writeoff_lines.account_id) != 1:
+            return _(
+                "The journal entry %s reached an invalid state relative to its payment.\n"
+                "To be consistent, all the write-off journal items must share the same account."
+            )
+
+        if lines and len(lines.currency_id) != 1:
+            return _(
+                "The journal entry %s reached an invalid state relative to its payment.\n"
+                "To be consistent, the journal items must share the same currency."
+            )
+
+        if lines and len(lines.partner_id) > 1:
+            return _(
+                "The journal entry %s reached an invalid state relative to its payment.\n"
+                "To be consistent, the journal items must share the same partner."
+            )
+
+        return None
+
+    @api.depends('amount', 'currency_id', 'destination_account_id', 'payment_reference',
+                 'payment_type', 'partner_type')
+    def _compute_fake_line_ids(self):
+        # OVERRIDE to add dependencies.
+        return super()._compute_fake_line_ids()
 
     # -------------------------------------------------------------------------
     # HELPERS
@@ -235,7 +422,6 @@ class AccountPayment(models.Model):
             # Liquidity line.
             {
                 'name': liquidity_line_name or default_line_name,
-                'date_maturity': self.date,
                 'amount_currency': -counterpart_amount_currency,
                 'currency_id': currency_id,
                 'debit': balance < 0.0 and -balance or 0.0,
@@ -246,8 +432,7 @@ class AccountPayment(models.Model):
             # Receivable / Payable.
             {
                 'name': self.payment_reference or default_line_name,
-                'date_maturity': self.date,
-                'amount_currency': counterpart_amount_currency + write_off_amount_currency if currency_id else 0.0,
+                'amount_currency': counterpart_amount_currency + write_off_amount_currency ,
                 'currency_id': currency_id,
                 'debit': balance + write_off_balance > 0.0 and balance + write_off_balance or 0.0,
                 'credit': balance + write_off_balance < 0.0 and -balance - write_off_balance or 0.0,
@@ -361,10 +546,10 @@ class AccountPayment(models.Model):
 
             pay.hide_payment_method = len(pay.available_payment_method_ids) == 1 and pay.available_payment_method_ids.code == 'manual'
 
-    @api.depends('journal_id')
+    @api.depends('journal_id', 'company_id')
     def _compute_currency_id(self):
         for pay in self:
-            pay.currency_id = pay.journal_id.currency_id or pay.journal_id.company_id.currency_id
+            pay.currency_id = pay.journal_id.currency_id or pay.company_id.currency_id
 
     @api.depends('is_internal_transfer')
     def _compute_partner_id(self):
@@ -546,12 +731,7 @@ class AccountPayment(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         # OVERRIDE
-        write_off_line_vals_list = []
-
         for vals in vals_list:
-
-            # Hack to add a custom write-off line.
-            write_off_line_vals_list.append(vals.pop('write_off_line_vals', None))
 
             # Force the move_type to avoid inconsistency with residual 'default_move_type' inside the context.
             vals['move_type'] = 'entry'
@@ -570,9 +750,7 @@ class AccountPayment(models.Model):
 
         payments = super().create(vals_list)
 
-        for i, pay in enumerate(payments):
-            write_off_line_vals = write_off_line_vals_list[i]
-
+        for i, pay in enumerate(payments.with_context(skip_account_move_synchronization=True)):
             # Write payment_id on the journal entry plus the fields being stored in both models but having the same
             # name, e.g. partner_bank_id. The ORM is currently not able to perform such synchronization and make things
             # more difficult by creating related fields on the fly to handle the _inherits.
@@ -583,168 +761,13 @@ class AccountPayment(models.Model):
                 if k in self._fields and self._fields[k].store and k in pay.move_id._fields and pay.move_id._fields[k].store:
                     to_write[k] = v
 
-            if 'line_ids' not in vals_list[i]:
-                to_write['line_ids'] = [(0, 0, line_vals) for line_vals in pay._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)]
-
             pay.move_id.write(to_write)
 
         return payments
 
-    def write(self, vals):
-        # OVERRIDE
-        res = super().write(vals)
-        self._synchronize_to_moves(set(vals.keys()))
-        return res
-
-    def unlink(self):
-        # OVERRIDE to unlink the inherited account.move (move_id field) as well.
-        moves = self.with_context(force_delete=True).move_id
-        res = super().unlink()
-        moves.unlink()
-        return res
-
     @api.depends('move_id.name')
     def name_get(self):
         return [(payment.id, payment.move_id.name or _('Draft Payment')) for payment in self]
-
-    # -------------------------------------------------------------------------
-    # SYNCHRONIZATION account.payment <-> account.move
-    # -------------------------------------------------------------------------
-
-    def _synchronize_from_moves(self, changed_fields):
-        ''' Update the account.payment regarding its related account.move.
-        Also, check both models are still consistent.
-        :param changed_fields: A set containing all modified fields on account.move.
-        '''
-        if self._context.get('skip_account_move_synchronization'):
-            return
-
-        for pay in self.with_context(skip_account_move_synchronization=True):
-
-            # After the migration to 14.0, the journal entry could be shared between the account.payment and the
-            # account.bank.statement.line. In that case, the synchronization will only be made with the statement line.
-            if pay.move_id.statement_line_id:
-                continue
-
-            move = pay.move_id
-            move_vals_to_write = {}
-            payment_vals_to_write = {}
-
-            if 'journal_id' in changed_fields:
-                if pay.journal_id.type not in ('bank', 'cash'):
-                    raise UserError(_("A payment must always belongs to a bank or cash journal."))
-
-            if 'line_ids' in changed_fields:
-                all_lines = move.line_ids
-                liquidity_lines, counterpart_lines, writeoff_lines = pay._seek_for_lines()
-
-                if len(liquidity_lines) != 1 or len(counterpart_lines) != 1:
-                    raise UserError(_(
-                        "The journal entry %s reached an invalid state relative to its payment.\n"
-                        "To be consistent, the journal entry must always contains:\n"
-                        "- one journal item involving the outstanding payment/receipts account.\n"
-                        "- one journal item involving a receivable/payable account.\n"
-                        "- optional journal items, all sharing the same account.\n\n"
-                    ) % move.display_name)
-
-                if writeoff_lines and len(writeoff_lines.account_id) != 1:
-                    raise UserError(_(
-                        "The journal entry %s reached an invalid state relative to its payment.\n"
-                        "To be consistent, all the write-off journal items must share the same account."
-                    ) % move.display_name)
-
-                if any(line.currency_id != all_lines[0].currency_id for line in all_lines):
-                    raise UserError(_(
-                        "The journal entry %s reached an invalid state relative to its payment.\n"
-                        "To be consistent, the journal items must share the same currency."
-                    ) % move.display_name)
-
-                if any(line.partner_id != all_lines[0].partner_id for line in all_lines):
-                    raise UserError(_(
-                        "The journal entry %s reached an invalid state relative to its payment.\n"
-                        "To be consistent, the journal items must share the same partner."
-                    ) % move.display_name)
-
-                if counterpart_lines.account_id.user_type_id.type == 'receivable':
-                    partner_type = 'customer'
-                else:
-                    partner_type = 'supplier'
-
-                liquidity_amount = liquidity_lines.amount_currency
-
-                move_vals_to_write.update({
-                    'currency_id': liquidity_lines.currency_id.id,
-                    'partner_id': liquidity_lines.partner_id.id,
-                })
-                payment_vals_to_write.update({
-                    'amount': abs(liquidity_amount),
-                    'payment_type': 'inbound' if liquidity_amount > 0.0 else 'outbound',
-                    'partner_type': partner_type,
-                    'currency_id': liquidity_lines.currency_id.id,
-                    'destination_account_id': counterpart_lines.account_id.id,
-                    'partner_id': liquidity_lines.partner_id.id,
-                })
-
-            move.write(move._cleanup_write_orm_values(move, move_vals_to_write))
-            pay.write(move._cleanup_write_orm_values(pay, payment_vals_to_write))
-
-    def _synchronize_to_moves(self, changed_fields):
-        ''' Update the account.move regarding the modified account.payment.
-        :param changed_fields: A list containing all modified fields on account.payment.
-        '''
-        if self._context.get('skip_account_move_synchronization'):
-            return
-
-        if not any(field_name in changed_fields for field_name in (
-            'date', 'amount', 'payment_type', 'partner_type', 'payment_reference', 'is_internal_transfer',
-            'currency_id', 'partner_id', 'destination_account_id', 'partner_bank_id',
-        )):
-            return
-
-        for pay in self.with_context(skip_account_move_synchronization=True):
-            liquidity_lines, counterpart_lines, writeoff_lines = pay._seek_for_lines()
-
-            # Make sure to preserve the write-off amount.
-            # This allows to create a new payment with custom 'line_ids'.
-
-            if writeoff_lines:
-                writeoff_amount = sum(writeoff_lines.mapped('amount_currency'))
-                counterpart_amount = counterpart_lines['amount_currency']
-                if writeoff_amount > 0.0 and counterpart_amount > 0.0:
-                    sign = 1
-                else:
-                    sign = -1
-
-                write_off_line_vals = {
-                    'name': writeoff_lines[0].name,
-                    'amount': writeoff_amount * sign,
-                    'account_id': writeoff_lines[0].account_id.id,
-                }
-            else:
-                write_off_line_vals = {}
-
-            line_vals_list = pay._prepare_move_line_default_vals(write_off_line_vals=write_off_line_vals)
-
-            line_ids_commands = [
-                (1, liquidity_lines.id, line_vals_list[0]),
-                (1, counterpart_lines.id, line_vals_list[1]),
-            ]
-
-            for line in writeoff_lines:
-                line_ids_commands.append((2, line.id))
-
-            if writeoff_lines:
-                line_ids_commands.append((0, 0, line_vals_list[2]))
-
-            # Update the existing journal items.
-            # If dealing with multiple write-off lines, they are dropped and a new one is generated.
-
-            pay.move_id.write({
-                'partner_id': pay.partner_id.id,
-                'currency_id': pay.currency_id.id,
-                'partner_bank_id': pay.partner_bank_id.id,
-                'line_ids': line_ids_commands,
-            })
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
@@ -839,3 +862,17 @@ class AccountPayment(models.Model):
                 'domain': [('id', 'in', self.reconciled_statement_ids.ids)],
             })
         return action
+
+
+class AccountPaymentLine(models.AbstractModel):
+    _name = "account.payment.line"
+    _inherit = 'account.move.line.preview.mixin'
+    _description = "On-the-fly editable journal items"
+    _table = 'account_move_line'
+
+    payment_id = fields.Many2one(
+        comodel_name='account.payment',
+        required=True, readonly=True, ondelete="cascade")
+    company_id = fields.Many2one(related='payment_id.company_id')
+    date = fields.Date(related='payment_id.date')
+    company_currency_id = fields.Many2one(related='payment_id.company_id.currency_id')

@@ -11,6 +11,7 @@ from . import account_tax_report
 from . import account_reconcile_model
 from . import account_payment_term
 from . import account_move
+from . import account_move_inherits_mixin
 from . import account_analytic_default
 from . import account_partial_reconcile
 from . import account_full_reconcile

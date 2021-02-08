@@ -114,6 +114,9 @@ access_account_full_reconcile_group_readonly,account.full.reconcile.group.invoic
 access_account_full_reconcile_group_invoice,account.full.reconcile.group.invoice,model_account_full_reconcile,account.group_account_invoice,1,1,1,1
 access_account_full_reconcile,account.full.reconcile,model_account_full_reconcile,account.group_account_user,1,1,1,1
 
+access_account_move_inherits_mixin_model,account.move.inherits.mixin,model_account_move_inherits_mixin,account.group_account_user,1,1,1,1
+access_account_move_line_preview_mixin_model,account.move.line.preview.mixin,model_account_move_line_preview_mixin,account.group_account_user,1,1,1,1
+
 access_account_payment_term_partner_manager,account.payment.term partner manager,model_account_payment_term,base.group_user,1,0,0,0
 access_account_payment_term_manager,account.payment.term,model_account_payment_term,account.group_account_manager,1,1,1,1
 access_account_payment_term_line_partner_manager,account.payment.term.line partner manager,model_account_payment_term_line,base.group_user,1,0,0,0
@@ -122,6 +125,8 @@ access_account_payment_method_readonly,account.payment.method,model_account_paym
 access_account_payment_method,account.payment.method,model_account_payment_method,account.group_account_invoice,1,1,1,1
 access_account_payment_readonly,account.payment,model_account_payment,account.group_account_readonly,1,0,0,0
 access_account_payment,account.payment,model_account_payment,account.group_account_invoice,1,1,1,1
+access_account_payment__linereadonly,account.payment.line,model_account_payment_line,account.group_account_readonly,1,0,0,0
+access_account_payment_line,account.payment.line,model_account_payment_line,account.group_account_invoice,1,1,1,1
 
 access_account_payment_register,access.account.payment.register,model_account_payment_register,account.group_account_invoice,1,1,1,0
 access_account_bank_statement_closebalance,access.account.bank.statement.closebalance,model_account_bank_statement_closebalance,account.group_account_user,1,1,1,0

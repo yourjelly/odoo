@@ -53,11 +53,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'payment_method_id': self.env.ref('account.account_payment_method_manual_in').id,
             'partner_bank_id': False,
         }
-        expected_move_values = {
-            'currency_id': self.company_data['currency'].id,
-            'partner_id': False,
-            'partner_bank_id': False,
-        }
         expected_liquidity_line = {
             'debit': 50.0,
             'credit': 0.0,
@@ -74,7 +69,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         }
 
         self.assertRecordValues(payment, [expected_payment_values])
-        self.assertRecordValues(payment.move_id, [expected_move_values])
         self.assertRecordValues(payment.line_ids.sorted('balance'), [
             expected_counterpart_line,
             expected_liquidity_line,
@@ -92,12 +86,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             **expected_payment_values,
             'partner_type': 'supplier',
             'destination_account_id': self.partner_a.property_account_payable_id.id,
-            'currency_id': self.currency_data['currency'].id,
-            'partner_id': self.partner_a.id,
-            'partner_bank_id': self.partner_bank_account.id,
-        }])
-        self.assertRecordValues(payment.move_id, [{
-            **expected_move_values,
             'currency_id': self.currency_data['currency'].id,
             'partner_id': self.partner_a.id,
             'partner_bank_id': self.partner_bank_account.id,
@@ -159,10 +147,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'amount': 100.0,
             'partner_id': self.partner_b.id,
         }])
-        self.assertRecordValues(payment.move_id, [{
-            **expected_move_values,
-            'partner_id': self.partner_b.id,
-        }])
         self.assertRecordValues(payment.line_ids.sorted('balance'), [
             {
                 **expected_counterpart_line,
@@ -210,10 +194,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'destination_account_id': copy_receivable.id,
             'payment_method_id': self.env.ref('account.account_payment_method_manual_in').id,
         }
-        expected_move_values = {
-            'currency_id': self.company_data['currency'].id,
-            'partner_id': False,
-        }
         expected_liquidity_line = {
             'debit': 50.0,
             'credit': 0.0,
@@ -230,7 +210,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         }
 
         self.assertRecordValues(payment, [expected_payment_values])
-        self.assertRecordValues(payment.move_id, [expected_move_values])
         self.assertRecordValues(payment.line_ids.sorted('balance'), [
             expected_counterpart_line,
             expected_liquidity_line,
@@ -248,11 +227,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             **expected_payment_values,
             'partner_type': 'supplier',
             'destination_account_id': self.partner_a.property_account_payable_id.id,
-            'currency_id': self.currency_data['currency'].id,
-            'partner_id': self.partner_a.id,
-        }])
-        self.assertRecordValues(payment.move_id, [{
-            **expected_move_values,
             'currency_id': self.currency_data['currency'].id,
             'partner_id': self.partner_a.id,
         }])
@@ -339,10 +313,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'partner_id': self.company_data['company'].partner_id.id,
             'destination_account_id': self.company_data['company'].transfer_account_id.id,
         }
-        expected_move_values = {
-            'currency_id': self.company_data['currency'].id,
-            'partner_id': self.company_data['company'].partner_id.id,
-        }
         expected_liquidity_line = {
             'debit': 50.0,
             'credit': 0.0,
@@ -359,7 +329,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         }
 
         self.assertRecordValues(payment, [expected_payment_values])
-        self.assertRecordValues(payment.move_id, [expected_move_values])
         self.assertRecordValues(payment.line_ids.sorted('balance'), [
             expected_counterpart_line,
             expected_liquidity_line,
@@ -379,10 +348,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
             'destination_account_id': copy_receivable.id,
             'partner_id': self.partner_a.id,
             'is_internal_transfer': False,
-        }])
-        self.assertRecordValues(payment.move_id, [{
-            **expected_move_values,
-            'partner_id': self.partner_a.id,
         }])
         self.assertRecordValues(payment.line_ids.sorted('balance'), [
             {
@@ -408,7 +373,6 @@ class TestAccountPayment(AccountTestInvoicingCommon):
         })
 
         self.assertRecordValues(payment, [expected_payment_values])
-        self.assertRecordValues(payment.move_id, [expected_move_values])
         self.assertRecordValues(payment.line_ids.sorted('balance'), [
             expected_counterpart_line,
             expected_liquidity_line,

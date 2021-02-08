@@ -419,7 +419,7 @@ class AccountPaymentRegister(models.TransientModel):
         }
 
         if not self.currency_id.is_zero(self.payment_difference) and self.payment_difference_handling == 'reconcile':
-            payment_vals['write_off_line_vals'] = {
+            payment_vals['__preview_extra_param'] = {
                 'name': self.writeoff_label,
                 'amount': self.payment_difference,
                 'account_id': self.writeoff_account_id.id,
