@@ -42,8 +42,10 @@ class AccountMove(models.Model):
             is 72 so the reference will be '+++000/0000/65472+++'.
         """
         self.ensure_one()
-        base = self.id
-        bbacomm = str(base).rjust(10, '0')
+        bbacomm = (
+            str(re.sub(r'\D', '', self.name or '')).rjust(8, '0')[-8:]
+            + str(self.journal_id.id).rjust(2, '0')[-2:]
+        )
         base = int(bbacomm)
         mod = base % 97 or 97
         reference = '+++%s/%s/%s%02d+++' % (bbacomm[:3], bbacomm[3:7], bbacomm[7:], mod)
