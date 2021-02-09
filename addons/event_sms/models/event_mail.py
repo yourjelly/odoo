@@ -32,21 +32,22 @@ class EventMailScheduler(models.Model):
         help='This field contains the template of the SMS that will be automatically sent')
 
     def execute(self):
-        for mail in self:
+        for scheduler in self:
             now = fields.Datetime.now()
-            if mail.interval_type != 'after_sub':
+            if scheduler.interval_type != 'after_sub':
                 # Do not send SMS if the communication was scheduled before the event but the event is over
-                if not mail.mail_sent and mail.scheduled_date <= now and mail.notification_type == 'sms' and \
-                        (mail.interval_type != 'before_event' or mail.event_id.date_end > now) and \
-                        mail.sms_template_id:
+                if not scheduler.event_mail_sent and scheduler.scheduled_date <= now and scheduler.notification_type == 'sms' and \
+                        (scheduler.interval_type != 'before_event' or scheduler.event_id.date_end > now) and \
+                        scheduler.sms_template_id:
                     self.env['event.registration']._message_sms_schedule_mass(
-                        template=mail.sms_template_id,
-                        active_domain=[('event_id', '=', mail.event_id.id), ('state', '!=', 'cancel')],
+                        template=scheduler.sms_template_id,
+                        active_domain=[('event_id', '=', scheduler.event_id.id), ('state', '!=', 'cancel')],
                         mass_keep_log=True
                     )
-                    mail.write({'mail_sent': True})
-
-                    mail.mail_count_done = len(mail.event_id.registration_ids.filtered(lambda reg: reg.state != 'cancel'))
+                    scheduler.update({
+                        'event_mail_sent': True,
+                        'mail_count_done': scheduler.event_id.seats_reserved + scheduler.event_id.seats_used,
+                    })
 
         return super(EventMailScheduler, self).execute()
 
