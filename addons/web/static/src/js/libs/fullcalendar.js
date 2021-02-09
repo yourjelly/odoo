@@ -83,7 +83,7 @@ odoo.define('/web/static/src/js/libs/fullcalendar.js', function () {
                     }
                 }
 
-                if (currentMonthEl !== undefined) {
+                if (currentMonthEl !== undefined && currentMonthNumber > 4) {
                     currentMonthEl.scrollIntoView();
                 }
             }
