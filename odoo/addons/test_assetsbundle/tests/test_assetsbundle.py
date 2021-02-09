@@ -10,7 +10,7 @@ import time
 from unittest.mock import patch
 
 from odoo import api
-from odoo.addons.base.models.assetsbundle import AssetsBundle, VersionMode
+from odoo.addons.base.models.assetsbundle import AssetsBundle
 from odoo.addons.base.models.ir_attachment import IrAttachment
 from odoo.modules.module import get_resource_path
 from odoo.tests import HttpCase, tagged
@@ -42,18 +42,14 @@ class TestJavascriptAssetsBundle(FileTouchable):
         files, remains = env['ir.qweb']._get_asset_content(xmlid, env.context)
         return AssetsBundle(xmlid, files, env=env)
 
-    def _any_ira_for_bundle(self, extension, lang=None, with_version=True):
+    def _any_ira_for_bundle(self, extension, lang=None):
         """ Returns all ir.attachments associated to a bundle, regardless of the verion.
         """
         user_direction = self.env['res.lang']._lang_get(lang or self.env.user.lang).direction
         bundle = self.jsbundle_xmlid if extension in ['js', 'min.js'] else self.cssbundle_xmlid
         rtl = 'rtl/' if extension == 'css' and user_direction == 'rtl' else ''
-        url_with_version = f'/web/content/%-%/{rtl}{bundle}.{extension}'
-        if with_version:
-            domain = [('url', '=like', url_with_version)]
-        else:
-            url = f'/web/content/%/{rtl}{bundle}.{extension}'
-            domain = [('url', '=like', url), ('url', 'not like', url_with_version)]
+        url = f'/web/content/%-%/{rtl}{bundle}.{extension}'
+        domain = [('url', '=like', url)]
         return self.env['ir.attachment'].search(domain)
 
     def _node_to_list(self, nodes):
@@ -87,16 +83,16 @@ class TestJavascriptAssetsBundle(FileTouchable):
         # there shouldn't be any non-minified attachment associated to this bundle
         self.assertEqual(len(self._any_ira_for_bundle('js')), 0,
                          "there shouldn't be any non-minified attachment associated to this bundle")
-        self.assertEqual(len(self.bundle.get_attachments('js', version_mode=VersionMode.NONE)), 0,
+        self.assertEqual(len(self.bundle.get_attachments('js')), 0,
                          "there shouldn't be any non-minified attachment associated to this bundle")
 
         # trigger the first generation and, thus, the first save in database for the non-minified version.
         self.bundle.js(is_minified=False)
 
         # there should be one non-minified attachment associated to this bundle
-        self.assertEqual(len(self._any_ira_for_bundle('js', with_version=False)), 1,
+        self.assertEqual(len(self._any_ira_for_bundle('js')), 1,
                          "there should be one non-minified attachment associated to this bundle")
-        self.assertEqual(len(self.bundle.get_attachments('js', version_mode=VersionMode.NONE)), 1,
+        self.assertEqual(len(self.bundle.get_attachments('js')), 1,
                          "there should be one non-minified attachment associated to this bundle")
 
     def test_02_access(self):
@@ -242,16 +238,12 @@ class TestJavascriptAssetsBundle(FileTouchable):
                          "there should be one non-minified assets created in debug assets mode")
 
         # there shouldn't be any minified assets created in debug mode
-        self.assertEqual(len(self._any_ira_for_bundle('min.js', with_version=False)), 0,
-                         "there shouldn't be any minified assets created in debug assets mode")
         self.assertEqual(len(self._any_ira_for_bundle('min.js')), 0,
                          "there shouldn't be any minified assets created in debug assets mode")
 
         # there should be one non-minified assets created in debug mode
-        self.assertEqual(len(self._any_ira_for_bundle('js', with_version=False)), 1,
+        self.assertEqual(len(self._any_ira_for_bundle('js')), 1,
                          "there should be one non-minified assets without a version in its url created in debug assets mode")
-        self.assertEqual(len(self._any_ira_for_bundle('js')), 0,
-                         "there shouldn't be any non-minified assets with a version in its url created in debug assets mode")
 
     def test_08_css_generation3(self):
         # self.cssbundle_xlmid contains 3 rules
@@ -600,7 +592,7 @@ class TestJavascriptAssetsBundle(FileTouchable):
             "asset_version_css": asset_data_css.attrib.get('data-asset-version'),
             "asset_xmlid_js": asset_data_js.attrib.get('data-asset-xmlid'),
             "asset_version_js": asset_data_js.attrib.get('data-asset-version'),
-            "js": attachments[0].url,
+            "js": '/web/content/debug/test_assetsbundle.bundle4.js',
         }
         self.assertEqual(html.strip(), ("""<!DOCTYPE html>
 <html>

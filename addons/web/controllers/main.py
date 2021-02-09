@@ -1442,7 +1442,34 @@ class Binary(http.Controller):
     def content_common(self, xmlid=None, model='ir.attachment', id=None, field='datas',
                        filename=None, filename_field='name', unique=None, mimetype=None,
                        download=None, data=None, token=None, access_token=None, **kw):
+        if xmlid == 'debug':
+            xmlid=None
+            id = id or request.env['ir.attachment'].sudo().search_read([('url', '=like', f'/web/content/%/{filename}')], fields=['id'], limit=1)[0]['id']
+        status, headers, content = request.env['ir.http'].binary_content(
+            xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
+            filename_field=filename_field, download=download, mimetype=mimetype, access_token=access_token)
 
+        if status != 200:
+            return request.env['ir.http']._response_by_status(status, headers, content)
+        else:
+            content_base64 = base64.b64decode(content)
+            headers.append(('Content-Length', len(content_base64)))
+            response = request.make_response(content_base64, headers)
+        if token:
+            response.set_cookie('fileToken', token)
+        return response
+
+    @http.route(['/web/assets',
+        '/web/assets/<int:id>/<string:filename>',
+        '/web/assets/<string:filename>',
+        '/web/assets/<int:id>-<string:unique>',
+        '/web/assets/<int:id>-<string:unique>/<string:filename>',
+        '/web/assets/<int:id>-<string:unique>/<path:extra>/<string:filename>',], type='http', auth="public")
+    def assets_common(self, xmlid=None, model='ir.attachment', id=None, field='datas',
+                       filename=None, filename_field='name', unique=None, mimetype=None,
+                       download=None, data=None, token=None, access_token=None, **kw):
+
+        id = id or request.env['ir.attachment'].sudo().search_read([('url', '=like', f'/web/assets/%/{filename}')], fields=['id'], limit=1)[0]['id']
         status, headers, content = request.env['ir.http'].binary_content(
             xmlid=xmlid, model=model, id=id, field=field, unique=unique, filename=filename,
             filename_field=filename_field, download=download, mimetype=mimetype, access_token=access_token)

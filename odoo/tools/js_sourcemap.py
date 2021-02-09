@@ -112,8 +112,7 @@ class SourceMapGenerator:
         """
         source_line_count = len(source_content.split("\n"))
 
-        if (source_name not in self._sources):
-            self._sources[source_name] = len(self._sources)
+        self._sources.setdefault(source_name, len(self._sources))
 
         self._sources_contents[source_name] = source_content
         if start_offset > 0:

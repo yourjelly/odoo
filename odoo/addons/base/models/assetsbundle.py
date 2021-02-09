@@ -100,12 +100,6 @@ class AssetNotFound(AssetError):
     pass
 
 
-class VersionMode(enum.Enum):
-    EQUAL = 0
-    INCLUDE = 1
-    NONE = 2
-
-
 class AssetsBundle(object):
     rx_css_import = re.compile("(@import[^;{]+;?)", re.M)
     rx_preprocess_imports = re.compile("""(@import\s?['"]([^'"]+)['"](;?))""")
@@ -166,7 +160,7 @@ class AssetsBundle(object):
                     ["async", "async" if async_load else None],
                     ["defer", "defer" if defer_load or lazy_load else None],
                     ["type", "text/javascript"],
-                    ["data-src" if lazy_load else "src", js_src.url],
+                    ["data-src" if lazy_load else "src", f"/web/content/debug/{js_src.name}"],
                     ['data-asset-xmlid', self.name],
                     ['data-asset-version', self.version],
                 ])
@@ -223,12 +217,12 @@ class AssetsBundle(object):
         return hashlib.sha512(check.encode('utf-8')).hexdigest()[:64]
 
     def _get_asset_template_url(self):
-        return "/web/content/{id}{unique}/{extra}{name}{sep}{type}"
+        return "/web/content/{id}-{unique}/{extra}{name}{sep}{type}"
 
     def _get_asset_url_values(self, id, unique, extra, name, sep, type):  # extra can contain direction or/and website
         return {
             'id': id,
-            'unique': f'-{unique}' if unique else '',
+            'unique': unique,
             'extra': extra,
             'name': name,
             'sep': sep,
@@ -272,7 +266,7 @@ class AssetsBundle(object):
 
         return True
 
-    def get_attachments(self, extension, version_mode=VersionMode.EQUAL):
+    def get_attachments(self, extension, ignore_version=False):
         """ Return the ir.attachment records for a given bundle. This method takes care of mitigating
         an issue happening when parallel transactions generate the same bundle: while the file is not
         duplicated on the filestore (as it is stored according to its hash), there are multiple
@@ -281,20 +275,14 @@ class AssetsBundle(object):
         by file name and only return the one with the max id for each group.
 
         :param extension: file extension (js, min.js, css)
-        :param version_mode: if VersionMode.EQUAL, the url contains a version equal to that of the self.version
-                                => web/content/%-self.version/name.extension,
-                             elif VersionMode.INCLUDE, the url contains a version => web/content/%-%/name.extension
+        :param ignore_version: if ignore_version, the url contains a version => web/content/%-%/name.extension
                                 (the second '%' corresponds to the version),
-                             elif VersionMode.NONE, the url does not contain a version => web/content/%/name.extension
-                                (the '-' and the second '%' which represents the version is not present).
+                               else: the url contains a version equal to that of the self.version
+                                => web/content/%-self.version/name.extension.
         """
-        unique = (
-            self.version if version_mode == VersionMode.EQUAL else
-            "%" if version_mode == VersionMode.INCLUDE else
-            ""
-        )
+        unique = "%" if ignore_version else self.version
 
-        url_pattern_with_version = self.get_asset_url(
+        url_pattern = self.get_asset_url(
             unique=unique,
             extra='%s' % ('rtl/' if extension == 'css' and self.user_direction == 'rtl' else ''),
             name=self.name,
@@ -308,20 +296,18 @@ class AssetsBundle(object):
                 AND url like %s
            GROUP BY name
            ORDER BY name
-         """, [SUPERUSER_ID, url_pattern_with_version])
+         """, [SUPERUSER_ID, url_pattern])
 
         attachment_ids = [r[0] for r in self.env.cr.fetchall()]
         return self.env['ir.attachment'].sudo().browse(attachment_ids)
 
-    def save_attachment(self, extension, content, with_version=True):
-        """Record the given bundle in an ir.attachment and if not with_version,
-        delete all other ir.attachments referring to this bundle (with the same name and extension).
+    def save_attachment(self, extension, content):
+        """Record the given bundle in an ir.attachment and delete
+        all other ir.attachments referring to this bundle (with the same name and extension).
 
         :param extension: extension of the bundle to be recorded
         :param content: bundle content to be recorded
-        :param with_version: if with_version, the url of the ir.attachment contains the version
-                                ('web/content/{id}-{version}/{name}.{extension}')
-                             else: ('web/content/{id}/{name}.{extension}')
+
         :return the ir.attachment records for a given bundle.
         """
         assert extension in ('js', 'min.js', 'js.map', 'css')
@@ -349,7 +335,7 @@ class AssetsBundle(object):
         attachment = ira.with_user(SUPERUSER_ID).create(values)
         url = self.get_asset_url(
             id=attachment.id,
-            unique=self.version if with_version else '',
+            unique=self.version,
             extra='%s' % ('rtl/' if extension == 'css' and self.user_direction == 'rtl' else ''),
             name=fname,
             sep='',  # included in fname
@@ -363,8 +349,7 @@ class AssetsBundle(object):
         if self.env.context.get('commit_assetsbundle') is True:
             self.env.cr.commit()
 
-        if with_version:
-            self.clean_attachments(extension)
+        self.clean_attachments(extension)
 
         # For end-user assets (common and backend), send a message on the bus
         # to invite the user to refresh their browser
@@ -378,9 +363,9 @@ class AssetsBundle(object):
 
     def js(self, is_minified=True):
         extension = 'min.js' if is_minified else 'js'
-        attachments = self.get_attachments(extension, version_mode=VersionMode.INCLUDE if is_minified else VersionMode.NONE)
+        attachments = self.get_attachments(extension)
 
-        if attachments and (is_minified or self.last_modified < attachments[0].write_date):
+        if attachments:
             return attachments[0]
 
         if is_minified:
@@ -400,8 +385,8 @@ class AssetsBundle(object):
 
         :return ir.attachment representing the un-minified content of the bundleJS
         """
-        sourcemap_attachment = self.get_attachments('js.map', version_mode=VersionMode.NONE) \
-                                or self.save_attachment('js.map', '', with_version=False)
+        sourcemap_attachment = self.get_attachments('js.map') \
+                                or self.save_attachment('js.map', '')
         generator = SourceMapGenerator(
             source_root="../../../",
         )
@@ -423,17 +408,18 @@ class AssetsBundle(object):
 
         content_bundle = ';\n'.join(content_bundle_list) + "\n//# sourceMappingURL=" + sourcemap_attachment.url
 
-        js_attachment = self.get_attachments('js', version_mode=VersionMode.NONE)
+        js_attachment = self.get_attachments('js')
         if js_attachment:
             js_attachment.write({
                 "raw": content_bundle.encode('utf8'),
             })
         else:
-            js_attachment = self.save_attachment('js', content_bundle, with_version=False)
+            js_attachment = self.save_attachment('js', content_bundle)
 
         generator._file = js_attachment.url
         sourcemap_attachment.write({
-            "raw": json.dumps(generator.to_json()).encode('utf8'),
+            # Store with XSSI-prevention prefix
+            "raw": b")]}'\n" + json.dumps(generator.to_json()).encode('utf8'),
         })
 
         return js_attachment
@@ -444,7 +430,7 @@ class AssetsBundle(object):
             # get css content
             css = self.preprocess_css()
             if self.css_errors:
-                return self.get_attachments('css', version_mode=VersionMode.INCLUDE)
+                return self.get_attachments('css', ignore_version=True)
 
             # move up all @import rules to the top
             matches = []
@@ -815,7 +801,7 @@ class JavascriptAsset(WebAsset):
     @property
     def content(self):
         content = super().content
-        if  self.is_transpiled:
+        if self.is_transpiled:
             if not self._convert_content:
                 self._convert_content = transpile_javascript(self.url, content)
             return self._convert_content
