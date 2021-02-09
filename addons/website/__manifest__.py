@@ -85,11 +85,9 @@
         'views/ir_asset_views.xml',
         'views/ir_attachment_views.xml',
         'views/res_partner_views.xml',
+        'views/snippets/s_btn.xml',
         'wizard/base_language_install_views.xml',
         'wizard/website_robots.xml',
-
-        # Old snippets
-        'views/snippets/s_btn.xml',
     ],
     'demo': [
         'data/website_demo.xml',
