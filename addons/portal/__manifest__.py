@@ -17,16 +17,33 @@ of this module is to allow the display of a customer portal without having
 a dependency towards website editing and customization capabilities.""",
     'depends': ['web', 'web_editor', 'http_routing', 'mail', 'auth_signup'],
     'data': [
+        'data/ir_asset.xml',
         'security/ir.model.access.csv',
         'data/mail_template_data.xml',
         'data/mail_templates.xml',
-        'views/assets.xml',
         'views/portal_templates.xml',
         'wizard/portal_share_views.xml',
         'wizard/portal_wizard_views.xml',
     ],
-    'qweb': [
-        'static/src/xml/portal_chatter.xml',
-        'static/src/xml/portal_signature.xml',
-    ],
+    'assets': {
+        'web._assets_primary_variables': [
+            # after //link[last()]
+            'portal/static/src/scss/primary_variables.scss',
+        ],
+        'web._assets_frontend_helpers': [
+            # before //link
+            ('prepend', 'portal/static/src/scss/bootstrap_overridden.scss'),
+        ],
+        'web.assets_frontend': [
+
+        ],
+        'web.assets_tests': [
+            # inside .
+            'portal/static/tests/tours/portal.js',
+        ],
+        'web.assets_backend': [
+            'static/src/xml/portal_chatter.xml',
+            'static/src/xml/portal_signature.xml',
+        ],
+    }
 }

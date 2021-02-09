@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    
+            <record id="assets_frontend" model="ir.asset">
+                <field name="name">assets frontend</field>
+                <field name="bundle">web_editor.assets_frontend</field>
+                <field name="directive">append</field>
+                <field name="glob">portal/static/src/scss/bootstrap.extend.scss</field>
+                <field name="target">NULL</field>
+                <field name="active">True</field>
+                <field name="priority">15</field>
+            </record>
+
+
+            <record id="assets_frontend" model="ir.asset">
+                <field name="name">assets frontend</field>
+                <field name="bundle">web_editor.assets_frontend</field>
+                <field name="directive">append</field>
+                <field name="glob">portal/static/src/scss/portal.scss</field>
+                <field name="target">NULL</field>
+                <field name="active">True</field>
+                <field name="priority">15</field>
+            </record>
+
+
+            <record id="assets_frontend" model="ir.asset">
+                <field name="name">assets frontend</field>
+                <field name="bundle">web_editor.assets_frontend</field>
+                <field name="directive">append</field>
+                <field name="glob">portal/static/src/js/portal.js</field>
+                <field name="target">NULL</field>
+                <field name="active">True</field>
+                <field name="priority">15</field>
+            </record>
+
+
+            <record id="assets_frontend" model="ir.asset">
+                <field name="name">assets frontend</field>
+                <field name="bundle">web_editor.assets_frontend</field>
+                <field name="directive">append</field>
+                <field name="glob">portal/static/src/js/portal_chatter.js</field>
+                <field name="target">NULL</field>
+                <field name="active">True</field>
+                <field name="priority">15</field>
+            </record>
+
+
+            <record id="assets_frontend" model="ir.asset">
+                <field name="name">assets frontend</field>
+                <field name="bundle">web_editor.assets_frontend</field>
+                <field name="directive">append</field>
+                <field name="glob">portal/static/src/js/portal_composer.js</field>
+                <field name="target">NULL</field>
+                <field name="active">True</field>
+                <field name="priority">15</field>
+            </record>
+
+
+            <record id="assets_frontend" model="ir.asset">
+                <field name="name">assets frontend</field>
+                <field name="bundle">web_editor.assets_frontend</field>
+                <field name="directive">append</field>
+                <field name="glob">portal/static/src/js/portal_signature.js</field>
+                <field name="target">NULL</field>
+                <field name="active">True</field>
+                <field name="priority">15</field>
+            </record>
+
+
+            <record id="assets_frontend" model="ir.asset">
+                <field name="name">assets frontend</field>
+                <field name="bundle">web_editor.assets_frontend</field>
+                <field name="directive">append</field>
+                <field name="glob">portal/static/src/js/portal_sidebar.js</field>
+                <field name="target">NULL</field>
+                <field name="active">True</field>
+                <field name="priority">15</field>
+            </record>
+
+    </data>
+</odoo>
+    
