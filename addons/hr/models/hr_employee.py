@@ -95,7 +95,7 @@ class HrEmployeePrivate(models.Model):
     km_home_work = fields.Integer(string="Km Home-Work", groups="hr.group_hr_user", tracking=True)
 
     image_1920 = fields.Image(default=_default_image)
-    phone = fields.Char(related='address_home_id.phone', related_sudo=False, readonly=False, string="Private Phone", groups="hr.group_hr_user")
+    phone = fields.Char(related='address_home_id.phone', related_sudo=False, readonly=True, string="Private Phone", groups="hr.group_hr_user")
     # employee in company
     child_ids = fields.One2many('hr.employee', 'parent_id', string='Direct subordinates')
     category_ids = fields.Many2many(
@@ -257,6 +257,7 @@ class HrEmployeePrivate(models.Model):
         return employee
 
     def write(self, vals):
+        print(vals)
         if 'address_home_id' in vals:
             account_id = vals.get('bank_account_id') or self.bank_account_id.id
             if account_id:
