@@ -13,22 +13,24 @@ from odoo.tools import populate, groupby
 _logger = logging.getLogger(__name__)
 
 # Take X first company to put some stock on it data (it is to focus data on these companies)
-COMPANY_NB_WITH_STOCK = 3  # Need to be smaller than 5 (_populate_sizes['small'] of company)
+COMPANY_NB_WITH_STOCK = 1  # Need to be smaller than 5 (_populate_sizes['small'] of company)
 
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
+    _populate_sizes = {'small': 6, 'medium': 12, 'large': 1}
+
     def _populate_factories(self):
 
         def get_tracking(values, counter, random):
             if values['type'] == 'product':
-                return random.choices(['none', 'lot', 'serial'], [0.7, 0.2, 0.1])[0]
+                return random.choices(['none', 'lot', 'serial'], [1, 0, 0])[0]
             else:
                 return 'none'
 
         res = super()._populate_factories()
-        res.append(('type', populate.iterate(['consu', 'service', 'product'], [0.3, 0.2, 0.5])))
+        res.append(('type', populate.iterate(['consu', 'service', 'product'], [0, 0, 1])))
         res.append(('tracking', populate.compute(get_tracking)))
         return res
 
@@ -36,7 +38,7 @@ class ProductProduct(models.Model):
 class Warehouse(models.Model):
     _inherit = 'stock.warehouse'
 
-    _populate_sizes = {'small': 6, 'medium': 12, 'large': 24}
+    _populate_sizes = {'small': 6, 'medium': 12, 'large': 1}
     _populate_dependencies = ['res.company']
 
     def _populate(self, size):
@@ -62,16 +64,40 @@ class Warehouse(models.Model):
             ('company_id', populate.iterate(company_ids)),
             ('name', populate.compute(get_name)),
             ('code', populate.constant("W{counter}")),
-            ('reception_steps', populate.iterate(['one_step', 'two_steps', 'three_steps'], [0.6, 0.2, 0.2])),
+            ('reception_steps', populate.iterate(['one_step', 'two_steps', 'three_steps'], [1, 0, 0])),
             ('delivery_steps', populate.iterate(['ship_only', 'pick_ship', 'pick_pack_ship'], [0.6, 0.2, 0.2])),
         ]
 
+
+class StorageCategory(models.Model):
+    _inherit = 'stock.storage.category'
+
+    _populate_sizes = {'small': 6, 'medium': 12, 'large': 1}
+
+    def _populate(self, size):
+        # Activate options used in the stock populate to have a ready Database
+
+        _logger.info("Activate settings for stock populate")
+        self.env['res.config.settings'].create({
+            'group_stock_storage_categories': True,  # Activate storage categories
+        }).execute()
+
+        return super()._populate(size)
+
+    def _populate_factories(self):
+
+        def get_name(values, counter, random):
+            return "SC-%d" % counter
+
+        return [
+            ('name', populate.compute(get_name)),
+        ]
 
 class Location(models.Model):
     _inherit = 'stock.location'
 
     _populate_sizes = {'small': 50, 'medium': 2_000, 'large': 50_000}
-    _populate_dependencies = ['stock.warehouse']
+    _populate_dependencies = ['stock.warehouse', 'stock.storage.category']
 
     def _populate(self, size):
         locations = super()._populate(size)
@@ -132,19 +158,40 @@ class Location(models.Model):
         # Change 20 % the usage of some no-leaf location into 'view' (instead of 'internal')
         to_views = locations_sample.filtered_domain([('child_ids', '!=', [])]).ids
         random = populate.Random('stock_location_views')
-        self.browse(random.sample(to_views, int(len(to_views) * 0.1))).usage = 'view'
+        view_locations = self.browse(random.sample(to_views, int(len(to_views) * 0.1)))
+        view_locations.write({
+            'usage': 'view',
+            'storage_category_id': False,
+        })
 
         return locations
 
     def _populate_factories(self):
         company_ids = self.env.registry.populated_models['res.company'][:COMPANY_NB_WITH_STOCK]
         removal_strategies = self.env['product.removal'].search([])
+        storage_category_ids = self.env.registry.populated_models['stock.storage.category']
 
         return [
             ('name', populate.constant("Loc-{counter}")),
             ('usage', populate.constant('internal')),
             ('removal_strategy_id', populate.randomize(removal_strategies.ids + [False])),
             ('company_id', populate.iterate(company_ids)),
+            ('storage_category_id', populate.iterate(storage_category_ids)),
+        ]
+
+class StockQuant(models.Model):
+    _inherit = 'stock.quant'
+
+    _populate_sizes = {'small': 150, 'medium': 5_000, 'large': 60_000}
+    _populate_dependencies = ['product.product', 'stock.location']
+
+    def _populate_factories(self):
+        product_ids = self.env['product.product'].browse(self.env.registry.populated_models['product.product']).filtered(lambda p: p.type == 'product' and p.tracking == "none").ids
+        location_ids = self.env['stock.location'].browse(self.env.registry.populated_models['stock.location']).filtered(lambda l: l.usage == 'internal').ids
+
+        return [
+            ('location_id', populate.iterate(location_ids)),
+            ('product_id', populate.iterate(product_ids)),
         ]
 
 
@@ -228,7 +275,7 @@ class Inventory(models.Model):
     _inherit = 'stock.inventory'
 
     _populate_sizes = {'small': 5, 'medium': 10, 'large': 20}
-    _populate_dependencies = ['stock.location']
+    _populate_dependencies = ['stock.location', 'product.product']
 
     def _populate(self, size):
         inventories = super()._populate(size)
@@ -497,7 +544,7 @@ class StockMove(models.Model):
     _inherit = 'stock.move'
 
     _populate_sizes = {'small': 1_000, 'medium': 20_000, 'large': 1_000_000}
-    _populate_dependencies = ['stock.picking']
+    _populate_dependencies = ['stock.picking', 'product.product']
 
     def _populate(self, size):
         moves = super()._populate(size)
