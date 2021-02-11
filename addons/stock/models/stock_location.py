@@ -166,29 +166,35 @@ class Location(models.Model):
         """
         package_type = package and package.package_type_id or self.env['stock.package.type']
 
-        # Looking for a putaway about the product.
-        putaway_rules = self.putaway_rule_ids.filtered(lambda x: x.product_id == product and (package_type in x.package_type_ids or package_type == x.package_type_ids))
-        for putaway_rule in putaway_rules:
-            putaway_location = putaway_rule._get_putaway_location(product, quantity, package)
-            if putaway_location:
-                return putaway_location
-        # If not product putaway found, we're looking with category so.
+        putaway_rules = self.env['stock.putaway.rule']
+        putaway_rules |= self.putaway_rule_ids.filtered(lambda x: x.product_id == product and (package_type in x.package_type_ids or package_type == x.package_type_ids))
         categ = product.categ_id
         while categ:
-            putaway_rules = self.putaway_rule_ids.filtered(lambda x: x.category_id == categ and (package_type in x.package_type_ids or package_type == x.package_type_ids))
-            for putaway_rule in putaway_rules:
-                putaway_location = putaway_rule._get_putaway_location(product, quantity, package)
-                if putaway_location:
-                    return putaway_location
+            putaway_rules |= self.putaway_rule_ids.filtered(lambda x: x.category_id == categ and (package_type in x.package_type_ids or package_type == x.package_type_ids))
             categ = categ.parent_id
-        # If not product category found and if package_type, looking putaway rules with only package_type
         if package_type:
-            putaway_rules = self.putaway_rule_ids.filtered(lambda x: not x.product_id and (package_type in x.package_type_ids or package_type == x.package_type_ids))
-            for putaway_rule in putaway_rules:
-                putaway_location = putaway_rule._get_putaway_location(product, quantity, package)
-                if putaway_location:
-                    return putaway_location
+            putaway_rules |= self.putaway_rule_ids.filtered(lambda x: not x.product_id and (package_type in x.package_type_ids or package_type == x.package_type_ids))
 
+        qty_by_location = {}
+        if putaway_rules.storage_category_id:
+            # get current product qty (qty in current quants and future qty on assigned ml) of all child locations
+            locations = self.env['stock.location'].search([('id', 'child_of', self.id), ('usage', '=', 'internal')])
+            move_line_data = self.env['stock.move.line'].read_group([
+                ('product_id', '=', product.id),
+                ('location_dest_id', 'in', locations.ids),
+                ('state', 'not in', ['draft', 'done', 'cancel'])
+            ], ['location_dest_id', 'product_qty:sum'], ['location_dest_id'])
+            quant_data = self.env['stock.quant'].read_group([
+                ('product_id', '=', product.id),
+                ('location_id', 'in', locations.ids),
+            ], ['location_id', 'quantity:sum'], ['location_id'])
+            for values in move_line_data:
+                qty_by_location[values['location_dest_id'][0]] = values['product_qty']
+            for values in quant_data:
+                qty_by_location[values['location_id'][0]] = qty_by_location.get(values['location_id'][0], 0) + values['quantity']
+        putaway_location = putaway_rules._get_putaway_location(product, quantity, package, qty_by_location)
+        if putaway_location:
+            return putaway_location
         return self
 
     @api.returns('stock.warehouse', lambda value: value.id)
@@ -208,7 +214,7 @@ class Location(models.Model):
         self.ensure_one()
         if package and package.package_type_id:
             return self._check_package_storage(product, package=package)
-        return self._check_product_storage(product, quantity=quantity)
+        return self._check_product_storage(product, quantity)
 
     def _check_product_storage(self, product, quantity):
         """Check if a number of product can be stored in the location. Quantity
@@ -226,15 +232,8 @@ class Location(models.Model):
                 return False
             # check if enough space
             product_capacity = self.storage_category_id.product_capacity_ids.filtered(lambda pc: pc.product_id == product)
-            if product_capacity:
-                product_qty = sum(self.quant_ids.filtered(lambda q: q.product_id == product).mapped('quantity'))
-                reserved_qty = sum(self.env['stock.move.line'].search([
-                    ('product_id', '=', product.id),
-                    ('location_dest_id', '=', self.id),
-                    ('state', 'not in', ['draft', 'done', 'cancel'])
-                ]).mapped('product_qty'))
-                if product_qty + reserved_qty + quantity > product_capacity.quantity:
-                    return False
+            if product_capacity and quantity > product_capacity.quantity:
+                return False
         return True
 
     def _check_package_storage(self, product, package):

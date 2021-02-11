@@ -90,31 +90,43 @@ class StockPutawayRule(models.Model):
                     raise UserError(_("Changing the company of this record is forbidden at this point, you should rather archive it and create a new one."))
         return super(StockPutawayRule, self).write(vals)
 
-    def _get_putaway_location(self, product, quantity=0, package=None):
-        """When using storage category, we try to find a suitable child location
-        as the putaway location. We first try find if a location already have the
-        product stored. If not or no enough space, use the storage category to
-        find one.
-        """
-        self.ensure_one()
+    def _get_putaway_location(self, product, quantity=0, package=None, qty_by_location=None):
         package_type = package and package.package_type_id or None
-        if not self.storage_category_id:
-            if self.location_out_id._check_can_be_used(product, quantity, package):
-                return self.location_out_id
 
-        child_locations = self.env['stock.location'].search([('id', 'child_of', self.location_out_id.id), ('usage', '=', 'internal')])
+        checked_locations = self.env['stock.location']
+        for putaway_rule in self:
+            location_out = putaway_rule.location_out_id
 
-        # check if already have the product stored
-        for location in child_locations:
-            if package_type:
-                if location.quant_ids.filtered(lambda q: q.product_id == product and q.package_id and q.package_id.package_type_id == package_type) and location._check_can_be_used(product, package=package):
+            if not putaway_rule.storage_category_id:
+                if location_out in checked_locations:
+                    continue
+                if location_out._check_can_be_used(product, quantity, package):
+                    return location_out
+                continue
+
+            child_locations = self.env['stock.location'].search([('id', 'child_of', location_out.id), ('usage', '=', 'internal')])
+            # check if already have the product stored
+            for location in child_locations:
+                if location in checked_locations:
+                    continue
+                if package_type:
+                    if location.quant_ids.filtered(lambda q: q.product_id == product and q.package_id and q.package_id.package_type_id == package_type):
+                        if location._check_can_be_used(product, package=package):
+                            return location
+                        else:
+                            checked_locations |= location
+                elif qty_by_location.get(location.id):
+                    if  location._check_can_be_used(product, quantity=quantity + qty_by_location[location.id]):
+                        return location
+                    else:
+                        checked_locations |= location
+
+            # check locations with matched storage category
+            for location in child_locations.filtered(lambda l: l.storage_category_id == self.storage_category_id):
+                if location in checked_locations:
+                    continue
+                if location._check_can_be_used(product, quantity + qty_by_location.get(location.id, 0), package):
                     return location
-            elif location.quant_ids.filtered(lambda q: q.product_id == product) and location._check_can_be_used(product, quantity=quantity):
-                return location
-
-        # check locations with matched storage category
-        for location in child_locations.filtered(lambda l: l.storage_category_id == self.storage_category_id):
-            if location._check_can_be_used(product, quantity, package):
-                return location
+                checked_locations |= location
 
         return None
