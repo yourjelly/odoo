@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 import os
 import platform
 import requests
@@ -8,7 +9,6 @@ import sys
 import time
 import websocket
 
-
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
@@ -16,9 +16,11 @@ from pathlib import Path
 
 import odoo
 
-
 from odoo.tools import config
 from odoo.tools.misc import find_in_path, DotDict
+
+
+_logger = logging.getLogger(__name__)
 
 
 class ChromeBrowser:
@@ -284,6 +286,7 @@ class Promise(metaclass=MetaPromise):
             else:
                 key = response.get('method', response.get('id'))
                 self.events[key] = response
+                _logger.debug("Non standard response: %r" % response)
 
     def resolve(self, timeout=60):
         self._resolve(timeout)

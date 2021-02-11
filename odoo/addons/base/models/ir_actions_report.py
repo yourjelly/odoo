@@ -813,6 +813,8 @@ class IrActionsReport(models.Model):
             data = {}
         data.setdefault('report_type', 'html')
         data = self._get_rendering_context(docids, data)
+        # IDEA: create a copy of the report on-the-fly that edits the t-call-assets to have
+        # t-inline="true" and avoid injecting values into data?
         return self._render_template(self.sudo().report_name, data), 'html'
 
     @api.model

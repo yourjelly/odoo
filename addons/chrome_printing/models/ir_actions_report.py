@@ -64,8 +64,10 @@ class IrActionsReport(models.Model):
             # TODO: logging
             return self_sudo._post_pdf(save_in_attachment), 'pdf'
 
+        # data must force inlined css/js assets here
+        data['inlined'] = True
         html = self_sudo.with_context(context)._render_qweb_html(res_ids, data=data)[0]
-        rendered, html_ids, specific_paperformat_args = self_sudo\
+        body, header, footer, html_ids, specific_paperformat_args = self_sudo\
             .with_context(context)\
             ._prepare_html(html)
 
@@ -75,7 +77,9 @@ class IrActionsReport(models.Model):
             raise Exception
 
         pdf_content = self._print_chrome(
-            rendered=rendered,
+            body=body,
+            header=header,
+            footer=footer,
             landscape=context.get('landscape'),
             specific_paperformat_args=specific_paperformat_args,
             set_viewport_size=context.get('set_viewport_size'),
@@ -109,6 +113,7 @@ class IrActionsReport(models.Model):
         :type specific_paperformat_args: dictionary of prioritized paperformat values.
         :return: bodies, header, footer, specific_paperformat_args
         '''
+        import ipdb; ipdb.set_trace()
         IrConfig = self.env['ir.config_parameter'].sudo()
         base_url = IrConfig.get_param('report.url') or IrConfig.get_param('web.base.url')
 
@@ -124,18 +129,19 @@ class IrActionsReport(models.Model):
         res_ids = []
 
         main = etree.Element('main')
-        headers = root.xpath(match_klass.format('div', 'header'))
-        footers = root.xpath(match_klass.format('div', 'footer'))
+        header = root.xpath(match_klass.format('div', 'header'))[0]
+        footer = root.xpath(match_klass.format('div', 'footer'))[0]
         articles = root.xpath(match_klass.format('div', 'article'))
 
         # TODO: set it up properly, try to avoid multiple loops if possible
-        self.preprocess(headers, articles, footers)
+        # self.preprocess(headers, articles, footers)
 
-        max_pages = len(footers)
-        for i, (header, article, footer) in enumerate(zip(headers, articles, footers), start=1):
-            main.append(header)
+        # max_pages = len(footers)
+        # for i, (header, article, footer) in enumerate(zip(headers, articles, footers), start=1):
+        for article in articles:
+            # main.append(header)
             main.append(article)
-            main.append(footer)
+            # main.append(footer)
             if article.get('data-oe-model') == self.model:
                 res_ids.append(int(article.get('data-oe-id', 0)))
             else:
@@ -148,8 +154,11 @@ class IrActionsReport(models.Model):
             if attribute[0].startswith('data-report-'):
                 specific_paperformat_args[attribute[0]] = attribute[1]
 
-        rendered = layout._render(dict(subst=False, body=lxml.html.tostring(main), base_url=base_url))
-        return rendered, res_ids, specific_paperformat_args
+        # TODO: with lang?
+        body = layout._render(dict(subst=False, body=lxml.html.tostring(main), base_url=base_url))
+        header = layout._render(dict(subst=True, body=lxml.html.tostring(header), base_url=base_url))
+        footer = layout._render(dict(subst=True, body=lxml.html.tostring(footer), base_url=base_url))
+        return body, header, footer, res_ids, specific_paperformat_args
 
     def _build_chrome_print_args(
         self,
@@ -170,8 +179,8 @@ class IrActionsReport(models.Model):
                 .get('data-report-landscape'):
             landscape = specific_paperformat_args['data-report-landscape']
 
-        # args = {'displayHeaderFooter': True}
-        args = {}
+        args = {'displayHeaderFooter': True}
+        # args = {}
         if paperformat_id:
 
             # document print format (A4, A3, Legal, ...)
@@ -205,7 +214,9 @@ class IrActionsReport(models.Model):
     @api.model
     def _print_chrome(
         self,
-        rendered,
+        body,
+        header,
+        footer,
         landscape=False,
         specific_paperformat_args=None,
         set_viewport_size=False,
@@ -217,6 +228,8 @@ class IrActionsReport(models.Model):
             specific_paperformat_args=specific_paperformat_args,
             set_viewport_size=set_viewport_size,
         )
+        chrome_print_args['headerTemplate'] = header.decode('utf-8')
+        chrome_print_args['footerTemplate'] = footer.decode('utf-8')
 
         temporary_files = []
 
@@ -227,7 +240,7 @@ class IrActionsReport(models.Model):
         # HTTP requests which IIRC the Odoo.sh team seemed to want to avoid.
         html_file_fd, html_file_path = tempfile.mkstemp(suffix='.html', prefix='report.tmp.')
         with closing(os.fdopen(html_file_fd, 'wb')) as body_file:
-            body_file.write(rendered)
+            body_file.write(body)
         temporary_files.append(html_file_path)
 
         browser.Page.enable()

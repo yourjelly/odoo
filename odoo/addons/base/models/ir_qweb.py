@@ -315,7 +315,10 @@ class IrQWeb(models.AbstractModel, QWeb):
             async_load=async_load,
             defer_load=defer_load,
             lazy_load=lazy_load,
-            inlined=inlined,
+            # there are cases in which we cannot control whether we want inlined CSS/JS through
+            # a template e.g. when rendering a report in HTML to convert to PDF because we have
+            # no control over the templates used during the initial rendering
+            inlined=inlined or values.pop('inlined', False),
         )
 
     def _get_asset_link_urls(self, xmlid, options):

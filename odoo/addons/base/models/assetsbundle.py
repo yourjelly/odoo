@@ -16,7 +16,9 @@ except ImportError:
 from datetime import datetime
 from subprocess import Popen, PIPE
 from collections import OrderedDict
+from werkzeug.urls import url_parse
 from odoo import fields, tools, SUPERUSER_ID
+from odoo.tools import file_open
 from odoo.tools.pycompat import to_text
 from odoo.http import request
 from odoo.modules.module import get_resource_path
@@ -29,6 +31,8 @@ _logger = logging.getLogger(__name__)
 
 
 class CompileError(RuntimeError): pass
+
+
 def rjsmin(script):
     """ Minify js with a clever regex.
     Taken from http://opensource.perlig.de/rjsmin (version 1.1.0)
@@ -88,6 +92,7 @@ def rjsmin(script):
         r'\011\013\014\016-\040]|(?:/\*[^*]*\*+(?:[^/*][^*]*\*+)*/))*)+', subber, '\n%s\n' % script
     ).strip()
     return result
+
 
 class AssetError(Exception):
     pass
@@ -168,6 +173,7 @@ class AssetsBundle(object):
                         tag = 'style'
                         attrs = {'type': 'text/css'}
                         content = attachment.raw.decode('utf-8')
+                        content = self.inject_resources(content)
                     else:
                         tag = 'link'
                         attrs = OrderedDict([
@@ -204,6 +210,38 @@ class AssetsBundle(object):
                     content = None
                 response.append(("script", attrs, content))
         return response
+
+    def inject_resources(self, css):
+        # Very basic regex, should match stuff like url("/web/static/.../Font-Regular.ttf")
+        # will not match external resources (http[s]) since the goal is to only match local
+        # resources used for report printing, if used for anything else, then the regex should
+        # be modified.  The second group is to match static resource urls that may end with a
+        # fragment/query like myfont.ttf?#iefix&v=4.7.0 which is something for the
+        # browser/web-client to parse, so we discard it in this case.
+        RE_URL = re.compile(r"""url\((\"|\')([A-z0-9-_\/\.\:]+)([A-z0-9\.\#\?\=\&]*)(\"|\')\)""")
+        urls = list(set(groups[1] for groups in RE_URL.findall(css)))
+        mime_types = {
+            'svg': 'image/svg+xml',
+            'eot': 'application/vnd.ms-fontobject',
+        }
+        url_to_data = {}
+        for url in urls:
+            path = url_parse(url).path
+            ext = os.path.splitext(path)[1][1:]
+            mime_type = mime_types.get(ext, f"font/{ext}")
+            data = ''
+            # try:
+                # # [1:] because file_open wants a relative path and url_parse returns an absolute one
+                # with file_open(path[1:], mode="rb") as f:
+                    # data = base64.b64encode(f.read()).decode('ascii')
+            # except OSError:
+                # data = ''
+            url_to_data[url] = f"data:{mime_type};base64,{data}"
+
+        def replace(match):
+            return f"url(\"{url_to_data[match[2]]}\")"
+
+        return RE_URL.sub(replace, css)
 
     @func.lazy_property
     def last_modified(self):
