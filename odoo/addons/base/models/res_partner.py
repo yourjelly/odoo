@@ -670,6 +670,8 @@ class Partner(models.Model):
             name = name.replace('\n', '<br/>')
         if self._context.get('show_vat') and partner.vat:
             name = "%s ‒ %s" % (name, partner.vat)
+        if self._context.get('show_partner_ids'):
+            name = "%s (%s)" % (name, partner.id)
         return name
 
     def name_get(self):
