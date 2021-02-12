@@ -13,7 +13,7 @@ from odoo.tools import populate, groupby
 _logger = logging.getLogger(__name__)
 
 # Take X first company to put some stock on it data (it is to focus data on these companies)
-COMPANY_NB_WITH_STOCK = 3  # Need to be smaller than 5 (_populate_sizes['small'] of company)
+COMPANY_NB_WITH_STOCK = 1  # Need to be smaller than 5 (_populate_sizes['small'] of company)
 
 
 class ProductProduct(models.Model):
@@ -28,7 +28,7 @@ class ProductProduct(models.Model):
                 return 'none'
 
         res = super()._populate_factories()
-        res.append(('type', populate.iterate(['consu', 'service', 'product'], [0.3, 0.2, 0.5])))
+        res.append(('type', populate.iterate(['consu', 'service', 'product'], [0.3, 0, 0.5])))
         res.append(('tracking', populate.compute(get_tracking)))
         return res
 
@@ -36,7 +36,7 @@ class ProductProduct(models.Model):
 class Warehouse(models.Model):
     _inherit = 'stock.warehouse'
 
-    _populate_sizes = {'small': 6, 'medium': 12, 'large': 24}
+    _populate_sizes = {'small': 3, 'medium': 12, 'large': 24}
     _populate_dependencies = ['res.company']
 
     def _populate(self, size):
@@ -70,7 +70,7 @@ class Warehouse(models.Model):
 class StorageCategory(models.Model):
     _inherit = 'stock.storage.category'
 
-    _populate_sizes = {'small': 10, 'medium': 20, 'large': 50}
+    _populate_sizes = {'small': 30, 'medium': 20, 'large': 50}
 
     def _populate(self, size):
         # Activate options used in the stock populate to have a ready Database
@@ -93,7 +93,7 @@ class StorageCategory(models.Model):
 class Location(models.Model):
     _inherit = 'stock.location'
 
-    _populate_sizes = {'small': 50, 'medium': 2_000, 'large': 50_000}
+    _populate_sizes = {'small': 500, 'medium': 2_000, 'large': 50_000}
     _populate_dependencies = ['stock.warehouse', 'stock.storage.category']
 
     def _populate(self, size):
@@ -185,7 +185,7 @@ class Location(models.Model):
 class StockPutawayRule(models.Model):
     _inherit = 'stock.putaway.rule'
 
-    _populate_sizes = {'small': 10, 'medium': 20, 'large': 50}
+    _populate_sizes = {'small': 50, 'medium': 20, 'large': 50}
     _populate_dependencies = ['stock.location', 'product.product']
 
     def _populate_factories(self):
@@ -193,10 +193,12 @@ class StockPutawayRule(models.Model):
         product_ids = self.env['product.product'].browse(self.env.registry.populated_models['product.product']).filtered(lambda p: p.type == 'product').ids
         product_categ_ids = self.env.registry.populated_models['product.category']
         storage_categ_ids = self.env.registry.populated_models['stock.storage.category']
-        location_ids = self.env['stock.location'].browse(self.env.registry.populated_models['stock.location']).filtered(lambda loc: loc.usage == 'internal')
+        warehouses = self.env['stock.warehouse'].browse(self.env.registry.populated_models['stock.warehouse'])
+        # Get the most parent location
+        location_ids = self.env['stock.location'].browse(warehouses.lot_stock_id.ids)
 
         def get_product_id(values, counter, random):
-            if random.random() > 0.5:
+            if random.random() > 0.1:
                 return random.choice(product_ids)
             return False
 
@@ -302,7 +304,7 @@ class StockWarehouseOrderpoint(models.Model):
 class Inventory(models.Model):
     _inherit = 'stock.inventory'
 
-    _populate_sizes = {'small': 5, 'medium': 10, 'large': 20}
+    _populate_sizes = {'small': 20, 'medium': 10, 'large': 20}
     _populate_dependencies = ['stock.location', 'product.product']
 
     def _populate(self, size):
@@ -354,7 +356,7 @@ class Inventory(models.Model):
 class InventoryLine(models.Model):
     _inherit = 'stock.inventory.line'
 
-    _populate_sizes = {'small': 500, 'medium': 5_000, 'large': 20_000}
+    _populate_sizes = {'small': 10000, 'medium': 5_000, 'large': 20_000}
     _populate_dependencies = ['stock.inventory']
 
     def _populate(self, size):
@@ -390,7 +392,7 @@ class InventoryLine(models.Model):
         create_missing_lots()
 
         # (Un)comment to test a DB with a current stock.
-        # validate_inventory_sample(0.8)
+        validate_inventory_sample(0.8)
 
         return inventory_lines
 
@@ -435,7 +437,7 @@ class InventoryLine(models.Model):
 class PickingType(models.Model):
     _inherit = 'stock.picking.type'
 
-    _populate_sizes = {'small': 10, 'medium': 30, 'large': 200}
+    _populate_sizes = {'small': 3, 'medium': 30, 'large': 200}
     _populate_dependencies = ['stock.location']
 
     def _populate_factories(self):
@@ -571,7 +573,7 @@ class Picking(models.Model):
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
-    _populate_sizes = {'small': 1_000, 'medium': 20_000, 'large': 1_000_000}
+    _populate_sizes = {'small': 5_000, 'medium': 20_000, 'large': 1_000_000}
     _populate_dependencies = ['stock.picking', 'product.product']
 
     def _populate(self, size):
