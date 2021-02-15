@@ -61,10 +61,10 @@ const Wysiwyg = Widget.extend({
         this._super.apply(this, arguments);
         this.id = ++id;
         this.options = options;
-        // autohideToolbar is true by default.
+        // autohideToolbar is true by default (false by default if navbar present).
         this.options.autohideToolbar = typeof this.options.autohideToolbar === 'boolean'
             ? this.options.autohideToolbar
-            : true;
+            : !options.snippets;
         this.saving_mutex = new concurrency.Mutex();
     },
     /**
@@ -665,8 +665,10 @@ const Wysiwyg = Widget.extend({
         this.toolbar.$el.find([
             '#style',
             '#decoration',
+            '#font-size',
             '#justifyFull',
             '#list',
+            '#colorInputButtonGroup',
             '#table',
             '#create-link',
             '#unlink',
@@ -675,11 +677,13 @@ const Wysiwyg = Widget.extend({
         // Toggle the 'active' class on the active image tool buttons.
         if (isInImage) {
             const imagePosition = this.lastImageClicked.getBoundingClientRect();
-            this.toolbar.$el.css({
-                visibility: 'visible',
-                top: imagePosition.top + 10 + 'px',
-                left: imagePosition.left + 10 + 'px',
-            });
+            if (this.options.autohideToolbar) {
+                this.toolbar.$el.css({
+                    visibility: 'visible',
+                    top: imagePosition.top + 10 + 'px',
+                    left: imagePosition.left + 10 + 'px',
+                });
+            }
             for (const button of $('#image-shape div')) {
                 button.classList.toggle('active', $(e.target).hasClass(button.id));
             }
