@@ -16,8 +16,9 @@ class IrAsset(models.Model):
             asset_domain += website.website_domain()
         return asset_domain
 
-    def _get_addons_list(self):
-        addons_list = super(IrAsset, self)._get_addons_list()
+    def _get_active_addons_list(self):
+        """Overridden to discard inactive themes."""
+        addons_list = super()._get_installed_addons_list()
         website = self.env['website'].get_current_website(fallback=False)
 
         if not website:

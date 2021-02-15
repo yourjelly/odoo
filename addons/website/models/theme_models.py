@@ -180,8 +180,7 @@ class Theme(models.AbstractModel):
         )
 
         # Reinitialize effets
-        self.disable_asset('option_ripple_effect_css')
-        self.disable_asset('option_ripple_effect_js')
+        self.disable_asset('option_ripple_effect')
 
         # Reinitialize header templates
         self.enable_view('website.template_header_default')
@@ -213,10 +212,11 @@ class Theme(models.AbstractModel):
     @api.model
     def _toggle_asset(self, name, active):
         website = self.env['website'].get_current_website()
-        asset = self.env['ir.asset'].search([('name', '=', name), ('website_id', '=', website.id)])
-        if active == asset.active:
-            return
-        asset.write({'active': active})
+        assets = self.env['ir.asset'].search([('name', '=', name), ('website_id', '=', website.id)])
+        [asset.write({'active': active})
+            for asset in assets
+            if active != assets.active
+        ]
 
     @api.model
     def _toggle_view(self, xml_id, active):

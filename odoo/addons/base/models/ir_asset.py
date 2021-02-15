@@ -19,7 +19,17 @@ SCRIPT_EXTENSIONS = ['js']
 STYLE_EXTENSIONS = ['css', 'scss', 'sass', 'less']
 TEMPLATE_EXTENSIONS = ['xml']
 DEFAULT_SEQUENCE = 16
-DIRECTIVES_WITH_TARGET = ['after', 'before', 'replace']
+
+# Directives are stored in variables for ease of use and syntax checks.
+APPEND_DIRECTIVE = 'append'
+PREPEND_DIRECTIVE = 'prepend'
+AFTER_DIRECTIVE = 'after'
+BEFORE_DIRECTIVE = 'before'
+REMOVE_DIRECTIVE = 'remove'
+REPLACE_DIRECTIVE = 'replace'
+INCLUDE_DIRECTIVE = 'include'
+# Those are the directives used with a 'target' argument/field.
+DIRECTIVES_WITH_TARGET = [AFTER_DIRECTIVE, BEFORE_DIRECTIVE, REPLACE_DIRECTIVE]
 
 
 def fs2web(path):
@@ -70,13 +80,13 @@ class IrAsset(models.Model):
     name = fields.Char(string='Name', required=True)
     bundle = fields.Char(string='Bundle name', required=True)
     directive = fields.Selection(string='Directive', selection=[
-        ('append', 'Append'),
-        ('prepend', 'Prepend'),
-        ('after', 'After'),
-        ('before', 'Before'),
-        ('remove', 'Remove'),
-        ('replace', 'Replace'),
-        ('include', 'Include')], default='append')
+        (APPEND_DIRECTIVE, 'Append'),
+        (PREPEND_DIRECTIVE, 'Prepend'),
+        (AFTER_DIRECTIVE, 'After'),
+        (BEFORE_DIRECTIVE, 'Before'),
+        (REMOVE_DIRECTIVE, 'Remove'),
+        (REPLACE_DIRECTIVE, 'Replace'),
+        (INCLUDE_DIRECTIVE, 'Include')], default=APPEND_DIRECTIVE)
     glob = fields.Char(string='Path', required=True)
     target = fields.Char(string='Target')
     active = fields.Boolean(string='active', default=True)
@@ -108,13 +118,14 @@ class IrAsset(models.Model):
         :returns: the list of tuples (path, addon, bundle)
         """
         if addons is None:
-            addons = self._get_addons_list()
+            addons = self._get_active_addons_list()
+        installed = self._get_installed_addons_list()
 
         asset_paths = AssetPaths()
-        self._fill_asset_paths(bundle, addons, css, js, xml, asset_paths, [])
+        self._fill_asset_paths(bundle, addons, installed, css, js, xml, asset_paths, [])
         return asset_paths.list
 
-    def _fill_asset_paths(self, bundle, addons, css, js, xml, asset_paths, seen):
+    def _fill_asset_paths(self, bundle, addons, installed, css, js, xml, asset_paths, seen):
         """
         Fills the given AssetPaths instance by applying the operations found in
         the matching bundle of the given addons manifests.
@@ -157,32 +168,32 @@ class IrAsset(models.Model):
             :param target: string or None or False
             :param path_def: string
             """
-            if directive == 'include':
-                # recursively call this function for each 'include' directive.
-                self._fill_asset_paths(path_def, addons, css, js, xml, asset_paths, seen + [bundle])
+            if directive == INCLUDE_DIRECTIVE:
+                # recursively call this function for each INCLUDE_DIRECTIVE directive.
+                self._fill_asset_paths(path_def, addons, installed, css, js, xml, asset_paths, seen + [bundle])
                 return
 
-            addon, paths = self._get_paths(path_def, addons, exts)
+            addon, paths = self._get_paths(path_def, installed, exts)
 
             # retrieve target index when it applies
             if directive in DIRECTIVES_WITH_TARGET:
-                _, target_paths = self._get_paths(target, addons, exts)
+                _, target_paths = self._get_paths(target, installed, exts)
                 if not target_paths:
                     # nothing to do: possibly the target has the wrong extension
                     return
                 target_index = asset_paths.index(target_paths[0], addon, bundle)
 
-            if directive == 'append':
+            if directive == APPEND_DIRECTIVE:
                 asset_paths.append(paths, addon, bundle)
-            elif directive == 'prepend':
+            elif directive == PREPEND_DIRECTIVE:
                 asset_paths.insert(paths, addon, bundle, bundle_start_index)
-            elif directive == 'after':
+            elif directive == AFTER_DIRECTIVE:
                 asset_paths.insert(paths, addon, bundle, target_index + 1)
-            elif directive == 'before':
+            elif directive == BEFORE_DIRECTIVE:
                 asset_paths.insert(paths, addon, bundle, target_index)
-            elif directive == 'remove':
+            elif directive == REMOVE_DIRECTIVE:
                 asset_paths.remove(paths, addon, bundle)
-            elif directive == 'replace':
+            elif directive == REPLACE_DIRECTIVE:
                 asset_paths.insert(paths, addon, bundle, target_index)
                 asset_paths.remove(target_paths, addon, bundle)
             else:
@@ -203,7 +214,7 @@ class IrAsset(models.Model):
             for command in manifest_assets.get(bundle, []):
                 if isinstance(command, str):
                     # Default directive: append
-                    directive, target, path_def = 'append', None, command
+                    directive, target, path_def = APPEND_DIRECTIVE, None, command
                 elif command[0] in DIRECTIVES_WITH_TARGET:
                     directive, target, path_def = command
                 else:
@@ -227,14 +238,14 @@ class IrAsset(models.Model):
         :returns: the first matching bundle or None
         """
         ext = target_path_def.split('.')[-1]
-        addons = self._get_addons_list()
-        target_path = self._get_paths(target_path_def, addons)[1][0]
+        installed = self._get_installed_addons_list()
+        target_path = self._get_paths(target_path_def, installed)[1][0]
 
         css = ext in STYLE_EXTENSIONS
         js = ext in SCRIPT_EXTENSIONS
         xml = ext in TEMPLATE_EXTENSIONS
 
-        asset_paths = self.get_asset_paths(root_bundle, addons, css, js, xml)
+        asset_paths = self.get_asset_paths(root_bundle, css=css, js=js, xml=xml)
 
         for path, _, bundle in asset_paths:
             if path == target_path:
@@ -242,10 +253,17 @@ class IrAsset(models.Model):
 
         return root_bundle
 
-    def _get_addons_list(self):
+    def _get_active_addons_list(self):
+        """Can be overridden to filter the returned list of active modules."""
+        return self._get_installed_addons_list()
+
+    def _get_asset_domain(self, bundle):
+        """Meant to be overridden to add additional parts to the search domain"""
+        return [('bundle', '=', bundle), ('active', '=', True)]
+
+    def _get_installed_addons_list(self):
         """
-        Returns the list of addons to take into account when loading assets.
-        Can be overridden to filter the returned list of modules.
+        Returns the list of all installed addons.
         :returns: string[]: list of module names
         """
         if not http.request:
@@ -253,15 +271,11 @@ class IrAsset(models.Model):
         else:
             return http.module_boot()
 
-    def _get_asset_domain(self, bundle):
-        """Meant to be overridden to add additional parts to the search domain"""
-        return [('bundle', '=', bundle), ('active', '=', True)]
-
     def _get_manifest_cache(self):
         """Proxy to the http addons manifest, used for test overrides."""
         return http.addons_manifest
 
-    def _get_paths(self, path_def, addons, extensions=None):
+    def _get_paths(self, path_def, installed, extensions=None):
         """
         Returns a list of file paths matching a given glob (path_def) as well as
         the addon targetted by the path definition. If no file matches that glob,
@@ -269,7 +283,7 @@ class IrAsset(models.Model):
         not correctly written or because it points to an URL.
 
         :param path_def: the definition (glob) of file paths to match
-        :param addons: the list of installed addons
+        :param installed: the list of installed addons
         :param extensions: a list of extensions that found files must match
         :returns: a tuple: the addon targetted by the path definition [0] and the
             list of glob files matching the definition [1] (or the glob itself if
@@ -282,7 +296,7 @@ class IrAsset(models.Model):
         addon_manifest = self._get_manifest_cache().get(addon)
 
         if addon_manifest:
-            if addon not in addons:
+            if addon not in installed:
                 raise Exception("Unallowed to fetch files from addon %s" % addon)
             addons_path = os.path.join(addon_manifest['addons_path'], '')[:-1]
             full_path = os.path.normpath(os.path.join(addons_path, *path_parts))
