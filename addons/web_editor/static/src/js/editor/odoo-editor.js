@@ -434,19 +434,102 @@ var exportVariable = (function (exports) {
      * @returns {Node[]}
      */
     function getTraversedNodes(document) {
-        const sel = document.defaultView.getSelection();
-        const iterator = document.createNodeIterator(sel.getRangeAt(0).commonAncestorContainer);
+        const range = getDeepRange(document);
+        if (!range) return [];
+        const iterator = document.createNodeIterator(range.commonAncestorContainer);
         let node;
         do {
             node = iterator.nextNode();
-        } while (node && node !== sel.anchorNode && node !== sel.focusNode);
-        const end = node === sel.anchorNode ? sel.focusNode : sel.anchorNode;
+        } while (node && node !== range.startContainer);
         const traversedNodes = [node];
-        while (node && node !== end) {
+        while (node && node !== range.endContainer) {
             node = iterator.nextNode();
             node && traversedNodes.push(node);
         }
         return traversedNodes;
+    }
+    /**
+     * Returns an array containing all the nodes fully contained in the selection.
+     *
+     * @param {Document} document
+     * @returns {Node[]}
+     */
+    function getSelectedNodes(document) {
+        const sel = document.defaultView.getSelection();
+        if (!sel.rangeCount) {
+            return [];
+        }
+        const range = sel.getRangeAt(0);
+        return getTraversedNodes(document).filter(
+            node => range.isPointInRange(node, 0) && range.isPointInRange(node, nodeSize(node)),
+        );
+    }
+
+    /**
+     * Returns the current range (if any), adapted to target the deepest
+     * descendants.
+     *
+     * @param {Document} document
+     * @param {object} [options]
+     * @param {boolean} [options.splitText] split the targeted text nodes at offset.
+     * @param {boolean} [options.select] select the new range if it changed (via splitText)
+     * @returns {Range}
+     */
+    function getDeepRange(document, options = {}) {
+        const sel = document.defaultView.getSelection();
+        if (!sel.rangeCount) return;
+        const range = sel.getRangeAt(0).cloneRange();
+        let start = range.startContainer;
+        let startOffset = range.startOffset;
+        let end = range.endContainer;
+        let endOffset = range.endOffset;
+
+        // Target the deepest descendant of the range nodes.
+        while (start.childNodes.length) {
+            start = start.childNodes[startOffset - 1] || start.firstChild;
+            startOffset = 0;
+        }
+        while (end.childNodes.length) {
+            end = end.childNodes[endOffset - 1] || end.firstChild;
+            endOffset = 0;
+        }
+
+        // Split text nodes if that was requested.
+        if (options.splitText) {
+            const isInSingleContainer = start === end;
+            if (
+                end.nodeType === Node.TEXT_NODE &&
+                endOffset !== 0 &&
+                endOffset !== end.textContent.length
+            ) {
+                const endParent = end.parentNode;
+                const splitOffset = splitTextNode(end, endOffset);
+                end = endParent.childNodes[splitOffset - 1] || endParent.firstChild;
+                if (isInSingleContainer) {
+                    start = end;
+                }
+                endOffset = end.textContent.length;
+            }
+            if (
+                start.nodeType === Node.TEXT_NODE &&
+                startOffset !== 0 &&
+                startOffset !== start.textContent.length
+            ) {
+                splitTextNode(start, startOffset);
+                startOffset = 0;
+                if (isInSingleContainer) {
+                    endOffset = start.textContent.length;
+                }
+            }
+        }
+
+        range.setStart(start, startOffset);
+        range.setEnd(end, endOffset);
+        if (options.select) {
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+        return range;
     }
 
     function getCursors(document) {
@@ -881,6 +964,29 @@ var exportVariable = (function (exports) {
             }
         }
         return parentOffset;
+    }
+
+    /**
+     * Split the given element at the given offset. The element will be removed in
+     * the process so caution is advised in dealing with its reference. Returns a
+     * tuple containing the new elements on both sides of the split.
+     *
+     * @param {Element} element
+     * @param {number} offset
+     * @returns {[Element, Element]}
+     */
+    function splitElement(element, offset) {
+        const before = element.cloneNode();
+        const after = element.cloneNode();
+        let index = 0;
+        for (const child of [...element.childNodes]) {
+            index < offset ? before.appendChild(child) : after.appendChild(child);
+            index++;
+        }
+        element.before(before);
+        element.after(after);
+        element.remove();
+        return [before, after];
     }
 
     function insertText(sel, content) {
@@ -2110,6 +2216,9 @@ var exportVariable = (function (exports) {
     const TABLEPICKER_ROW_COUNT = 3;
     const TABLEPICKER_COL_COUNT = 3;
 
+    const TEXT_CLASSES_REGEX = /\btext-.*\b/g;
+    const BG_CLASSES_REGEX = /\bbg-.*\b/g;
+
     const KEYBOARD_TYPES = { VIRTUAL: 'VIRTUAL', PHYSICAL: 'PHYSICAL', UNKNOWN: 'UKNOWN' };
     class OdooEditor extends EventTarget {
         constructor(dom, options = {}) {
@@ -2131,8 +2240,6 @@ var exportVariable = (function (exports) {
             dom.oid = 1; // convention: root node is ID 1
             this.dom = this.options.toSanitize ? sanitize(dom) : dom;
             this.resetHistory();
-            window.h = this.history;
-            window.editor = this;
             this.undos = new Map();
 
             // set contenteditable before clone as FF updates the content at this point
@@ -2181,7 +2288,7 @@ var exportVariable = (function (exports) {
                     });
                     colorLabel.addEventListener('input', ev => {
                         this.document.execCommand(ev.target.name, false, ev.target.value);
-                        this._updateColorpickerLabels();
+                        this.updateColorpickerLabels();
                     });
                 }
             }
@@ -2301,7 +2408,6 @@ var exportVariable = (function (exports) {
         }
 
         observerApply(destel, records) {
-            window.h = this.history;
             records = this.filterMutationRecords(records);
             for (let record of records) {
                 switch (record.type) {
@@ -2809,6 +2915,91 @@ var exportVariable = (function (exports) {
             } while (fakeEl.parentNode);
         }
 
+        /**
+         * Apply a css or class color on the current selection (wrapped in <font>).
+         *
+         * @param {string} color hexadecimal or bg-name/text-name class
+         * @param {string} mode 'color' or 'backgroundColor'
+         */
+        applyColor(color, mode) {
+            const range = getDeepRange(document, { splitText: true, select: true });
+            if (!range) return;
+            const restoreCursor = preserveCursor(this.document);
+            // Get the <font> nodes to color
+            const selectedNodes = getSelectedNodes(this.document);
+            let fonts = selectedNodes.flatMap(node => {
+                let font = closestElement(node, 'font');
+                const children = font && [...font.childNodes];
+                if (font && font.nodeName === 'FONT') {
+                    // Partially selected <font>: split it.
+                    const selectedChildren = children.filter(child => selectedNodes.includes(child));
+                    const after = selectedChildren[selectedChildren.length - 1].nextSibling;
+                    font = after ? splitElement(font, childNodeIndex(after))[0] : font;
+                    const before = selectedChildren[0].previousSibling;
+                    font = before ? splitElement(font, childNodeIndex(before) + 1)[1] : font;
+                } else if (node.nodeType === Node.TEXT_NODE && isVisibleStr(node)) {
+                    // Node is a visible text node: wrap it in a <font>.
+                    const previous = node.previousSibling;
+                    const classRegex = mode === 'color' ? BG_CLASSES_REGEX : TEXT_CLASSES_REGEX;
+                    if (
+                        previous &&
+                        previous.nodeName === 'FONT' &&
+                        !previous.style[mode === 'color' ? 'backgroundColor' : 'color'] &&
+                        !classRegex.test(previous.className) &&
+                        selectedNodes.includes(previous.firstChild) &&
+                        selectedNodes.includes(previous.lastChild)
+                    ) {
+                        // Directly follows a fully selected <font> that isn't
+                        // colored in the other mode: append to that.
+                        font = previous;
+                    } else {
+                        // No <font> found: insert a new one.
+                        font = document.createElement('font');
+                        node.parentNode.insertBefore(font, node);
+                    }
+                    font.appendChild(node);
+                } else {
+                    font = []; // Ignore non-text or invisible text nodes.
+                }
+                return font;
+            });
+            // Color the selected <font>s and remove uncolored fonts.
+            for (const font of new Set(fonts)) {
+                this._colorElement(font, color, mode);
+                if (!this._hasColor(font, mode) && !this._hasColor(font, mode)) {
+                    for (const child of [...font.childNodes]) {
+                        font.parentNode.insertBefore(child, font);
+                    }
+                    font.parentNode.removeChild(font);
+                }
+            }
+            restoreCursor();
+        }
+
+        updateColorpickerLabels(params = {}) {
+            let foreColor = params.foreColor || rgbToHex(document.queryCommandValue('foreColor'));
+            this.toolbar.style.setProperty('--fore-color', foreColor);
+            const foreColorInput = this.toolbar.querySelector('#foreColor input');
+            if (foreColorInput) {
+                foreColorInput.value = foreColor;
+            }
+
+            let hiliteColor = params.hiliteColor;
+            if (!hiliteColor) {
+                const sel = this.document.defaultView.getSelection();
+                if (sel.rangeCount) {
+                    const endContainer = closestElement(sel.getRangeAt(0).endContainer);
+                    const hiliteColorRgb = getComputedStyle(endContainer).backgroundColor;
+                    hiliteColor = rgbToHex(hiliteColorRgb);
+                }
+            }
+            this.toolbar.style.setProperty('--hilite-color', hiliteColor);
+            const hiliteColorInput = this.toolbar.querySelector('#hiliteColor input');
+            if (hiliteColorInput) {
+                hiliteColorInput.value = hiliteColor;
+            }
+        }
+
         _insertFontAwesome(faClass = 'fa fa-star') {
             const insertedNode = this._insertHTML('<i></i>')[0];
             insertedNode.className = faClass;
@@ -2846,6 +3037,46 @@ var exportVariable = (function (exports) {
             newRange.setEnd(lastPosition[0], lastPosition[1]);
             selection.addRange(newRange);
             return insertedNodes;
+        }
+
+        /**
+         * Applies a css or class color (fore- or background-) to an element.
+         * Replace the color that was already there if any.
+         *
+         * @param {Node} element
+         * @param {string} color hexadecimal or bg-name/text-name class
+         * @param {string} mode 'color' or 'backgroundColor'
+         */
+        _colorElement(element, color, mode) {
+            const newClassName = element.className
+                .replace(mode === 'color' ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX, '')
+                .replace(/\s+/, ' ');
+            element.className !== newClassName && (element.className = newClassName);
+            if (color.startsWith('text') || color.startsWith('bg-')) {
+                element.style[mode] = '';
+                element.className += ' ' + color;
+            } else {
+                element.style[mode] = color;
+            }
+        }
+
+        /**
+         * Returns true if the given element has a visible color (fore- or
+         * -background depending on the given mode).
+         *
+         * @param {Node} element
+         * @param {string} mode 'color' or 'backgroundColor'
+         * @returns {boolean}
+         */
+        _hasColor(element, mode) {
+            const style = element.style;
+            const parent = element.parentNode;
+            const classRegex = mode === 'color' ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
+            return (
+                (style[mode] && style[mode] !== 'inherit' && style[mode] !== parent.style[mode]) ||
+                (classRegex.test(element.className) &&
+                    getComputedStyle(element)[mode] !== getComputedStyle(parent)[mode])
+            );
         }
 
         _createLink(link, content) {
@@ -3227,7 +3458,7 @@ var exportVariable = (function (exports) {
                     fontSizeValue.innerHTML = /\d+/.exec(selectionStartStyle.fontSize).pop();
                 }
             }
-            this._updateColorpickerLabels();
+            this.updateColorpickerLabels();
             let block = closestBlock(sel.anchorNode);
             for (const [style, tag, isList] of [
                 ['paragraph', 'P', false],
@@ -3260,29 +3491,6 @@ var exportVariable = (function (exports) {
             redoButton && redoButton.classList.toggle('disabled', !this.historyCanRedo());
             if (this.options.autohideToolbar) {
                 this._positionToolbar();
-            }
-        }
-        _updateColorpickerLabels() {
-            const foreColorInput = this.toolbar.querySelector('#foreColor input');
-            if (foreColorInput) {
-                const foreColor = rgbToHex(document.queryCommandValue('foreColor'));
-                this.toolbar.style.setProperty('--fore-color', foreColor);
-                foreColorInput.value = foreColor;
-            }
-
-            const hiliteColorInput = this.toolbar.querySelector('#hiliteColor input');
-            if (hiliteColorInput) {
-                const sel = this.document.defaultView.getSelection();
-                const startContainer = sel.rangeCount && sel.getRangeAt(0).startContainer;
-                let closestBgColor =
-                    startContainer && closestElement(startContainer, '[style*="background-color"]');
-                const hasBgColorStyle = !!closestBgColor;
-                closestBgColor = closestBgColor || closestElement(startContainer);
-                const hiliteColor = hasBgColorStyle
-                    ? rgbToHex(getComputedStyle(closestBgColor).backgroundColor).slice(0, 7)
-                    : 'transparent';
-                this.toolbar.style.setProperty('--hilite-color', hiliteColor);
-                hiliteColorInput.value = hiliteColor;
             }
         }
         _positionToolbar() {
@@ -3785,10 +3993,12 @@ var exportVariable = (function (exports) {
     exports.firstChild = firstChild;
     exports.getCursorDirection = getCursorDirection;
     exports.getCursors = getCursors;
+    exports.getDeepRange = getDeepRange;
     exports.getInSelection = getInSelection;
     exports.getListMode = getListMode;
     exports.getNormalizedCursorPosition = getNormalizedCursorPosition;
     exports.getOuid = getOuid;
+    exports.getSelectedNodes = getSelectedNodes;
     exports.getState = getState;
     exports.getTraversedNodes = getTraversedNodes;
     exports.insertText = insertText;
@@ -3829,6 +4039,7 @@ var exportVariable = (function (exports) {
     exports.setCursorEnd = setCursorEnd;
     exports.setCursorStart = setCursorStart;
     exports.setTagName = setTagName;
+    exports.splitElement = splitElement;
     exports.splitTextNode = splitTextNode;
     exports.startPos = startPos;
     exports.toggleClass = toggleClass;
