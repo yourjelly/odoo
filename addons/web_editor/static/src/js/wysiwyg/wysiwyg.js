@@ -4,6 +4,8 @@ const core = require('web.core');
 const Widget = require('web.Widget');
 const Dialog = require('web.Dialog');
 const customColors = require('web_editor.custom_colors');
+const {ColorPaletteWidget} = require('web_editor.ColorPalette');
+const {ColorpickerWidget} = require('web.Colorpicker');
 const concurrency = require('web.concurrency');
 const weContext = require('web_editor.context');
 const OdooEditorLib = require('web_editor.odoo-editor');
@@ -15,6 +17,7 @@ var _t = core._t;
 
 const OdooEditor = OdooEditorLib.OdooEditor;
 const isBlock = OdooEditorLib.isBlock;
+const rgbToHex = OdooEditorLib.rgbToHex;
 
 var id = 0;
 const faZoomClassRegex = RegExp('fa-[0-9]x');
@@ -664,6 +667,95 @@ const Wysiwyg = Widget.extend({
             $(this.lastImageClicked).remove();
             this.lastImageClicked = undefined;
         });
+        const $colorpickerGroup = $toolbar.find('#colorInputButtonGroup');
+        if ($colorpickerGroup.length) {
+            this._createPalette();
+        }
+    },
+    _createPalette() {
+        const $dropdownContent = this.toolbar.$el.find('#colorInputButtonGroup .colorPalette');
+        // The editor's root widget can be website or web's root widget and cannot be properly retrieved...
+        const parent = odoo.__DEBUG__.services['root.widget'];
+        for (const elem of $dropdownContent) {
+            const eventName = elem.dataset.eventName;
+            let colorpicker = null;
+            const mutex = new concurrency.MutexedDropPrevious();
+            const $dropdown = $(elem).closest('.colorpicker-group , .dropdown');
+            let manualOpening = false;
+            // Prevent dropdown closing on colorpicker click
+            $dropdown.on('hide.bs.dropdown', ev => {
+                return !(ev.clickEvent && ev.clickEvent.originalEvent && ev.clickEvent.originalEvent.__isColorpickerClick);
+            });
+            $dropdown.on('show.bs.dropdown', () => {
+                if (manualOpening) {
+                    return true;
+                }
+                mutex.exec(() => {
+                    const oldColorpicker = colorpicker;
+                    const hookEl = oldColorpicker ? oldColorpicker.el : elem;
+
+                    const selection = this.odooEditor.document.getSelection();
+                    const range = selection.rangeCount && selection.getRangeAt(0);
+                    const targetNode = range && range.startContainer;
+                    const targetElement = targetNode && targetNode.nodeType === Node.ELEMENT_NODE
+                        ? targetNode
+                        : targetNode && targetNode.parentNode;
+                    colorpicker = new ColorPaletteWidget(parent, {
+                        excluded: ['transparent_grayscale'],
+                        $editable: $(this.odooEditor.dom), // Our parent is the root widget, we can't retrieve the editable section from it...
+                        selectedColor: $(targetElement).css(eventName === "foreColor" ? 'color' : 'backgroundColor'),
+                    });
+                    colorpicker.on('custom_color_picked color_picked', null, ev => {
+                        this._processAndApplyColor(eventName, ev.data.color);
+                        this.odooEditor.historyStep();
+                    });
+                    colorpicker.on('color_hover color_leave', null, ev => {
+                        this._processAndApplyColor(eventName, ev.data.color);
+                    });
+                    colorpicker.on('enter_key_color_colorpicker', null, () => {
+                        $dropdown.children('.dropdown-toggle').dropdown('hide');
+                    });
+                    return colorpicker.replace(hookEl).then(() => {
+                        if (oldColorpicker) {
+                            oldColorpicker.destroy();
+                        }
+                        manualOpening = true;
+                        $dropdown.children('.dropdown-toggle').dropdown('show');
+                        manualOpening = false;
+                    });
+                });
+                return false;
+            });
+        };
+    },
+    _processAndApplyColor: function (eventName, color) {
+        if (!color) {
+            color = 'inherit';
+        } else if (!ColorpickerWidget.isCSSColor(color)) {
+            color = (eventName === "foreColor" ? 'text-' : 'bg-') + color;
+        }
+        this.odooEditor.applyColor(color, eventName === 'foreColor' ? 'color' : 'backgroundColor');
+        const hexColor = this._colorToHex(color);
+        this.odooEditor.updateColorpickerLabels({
+            [eventName === 'foreColor' ? 'foreColor' : 'hiliteColor']: hexColor,
+        });
+    },
+    _colorToHex: function (color) {
+        if (color.startsWith('#')) {
+            return color;
+        } else {
+            let rgbColor;
+            if (color.startsWith('rgb')) {
+                rgbColor = color;
+            } else {
+                const $font = $(`<font class="${color}"/>`)
+                $(document.body).append($font);
+                const propertyName = color.startsWith('text') ? 'color' : 'backgroundColor';
+                rgbColor = $font.css(propertyName);
+                $font.remove();
+            }
+            return rgbToHex(rgbColor);
+        }
     },
     /**
      * Update any editor UI that is not handled by the editor itself.
