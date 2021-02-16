@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tests.common import TransactionCase
+from odoo.tests.common import TransactionCase, Form
 from odoo.exceptions import UserError
 
 
@@ -40,3 +40,9 @@ class TestPartner(TransactionCase):
 
         with self.assertRaises(UserError, msg="You should not be able to update the company_id of the partner company if the linked user of a child partner is not an allowed to be assigned to that company"), self.cr.savepoint():
             test_partner_company.write({'company_id': company_2.id})
+
+    def test_partner_name_with_ids(self):
+        partner1 = self.env['res.partner'].create({'name': 'Nicolas'})
+        move_form = Form(self.env['base.partner.merge.automatic.wizard'].with_context(show_partner_ids=True))
+        move_form.dst_partner_id = partner1
+        self.assertNotEqual(move_form.dst_partner_id.id, "Destination partner id must be equal to partner id")
