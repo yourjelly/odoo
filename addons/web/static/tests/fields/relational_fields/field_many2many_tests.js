@@ -712,6 +712,46 @@ QUnit.module('fields', {}, function () {
             form.destroy();
         });
 
+        QUnit.only('fieldmany2many list comodel not writable', async function (assert) {
+            /**
+             * Many2Many List should behave as the m2m_tags
+             * that is, the relation can be altered even if the comodel itself is not CRUD-able
+             * This can happen when someone has read access alone on the comodel
+             * and full CRUD on the current model
+             */
+            assert.expect(12);
+
+
+            this.data.partner.records[0].timmy = [14];
+            var form = await createView({
+                debug:true,
+                View: FormView,
+                model: 'partner',
+                data: this.data,
+                res_id: 1,
+                arch:`<form string="Partners">
+                        <field name="timmy" widget="many2many" can_create="false" can_write="true"/>
+                    </form>`,
+                archs:{
+                    'partner_type,false,list': `<tree create="false" delete="false" edit="true">
+                                                    <field name="display_name"/>
+                                                </tree>`,
+                    'partner_type,false,search': '<search><field name="display_name"/></search>',
+                    'partner_type,false,form': '<form><field name="display_name"/></form>',
+                },
+                // mockRPC: function (route, args) {
+                //     if (route === '/web/dataset/call_kw/partner/create') {
+                //         assert.deepEqual(args.args[0], {timmy: [[6, false, [12]]]});
+                //     }
+                //     if (route === '/web/dataset/call_kw/partner/write') {
+                //         assert.deepEqual(args.args[1], {timmy: [[6, false, []]]});
+                //     }
+                //     return this._super.apply(this, arguments);
+                // }
+            });
+            await new Promise(() => {});
+        });
+
         QUnit.test('fieldmany2many list comodel not writable', async function (assert) {
             /**
              * Many2Many List should behave as the m2m_tags
@@ -750,7 +790,7 @@ QUnit.module('fields', {}, function () {
             assert.containsOnce(document.body, '.modal');
 
             assert.containsN($('.modal-footer'), 'button', 2);
-            assert.containsOnce($('.modal-footer'), 'button.o_select_button');
+            assert.containsOnce($('.modal-footer'), 'button.o_select_button'); 
             assert.containsOnce($('.modal-footer'), 'button.o_form_button_cancel');
 
             await testUtils.dom.click($('.modal .o_list_view .o_data_cell:first()'));
