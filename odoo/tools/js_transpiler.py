@@ -537,7 +537,7 @@ def relative_path_to_module_path(url, path_rel):
 ODOO_MODULE_RE = re.compile(r"""
     \/(\*|\/).*\s+                          # // or /*
     @odoo-module\s+                         # @odoo-module
-    (alias=(?P<alias>\S+))?\s+              # alias=web.AbstractAction (optional)
+    (alias=(?P<alias>\S+)\s+)?              # alias=web.AbstractAction (optional)
     (default=(?P<default>False|false|0))?   # default=False or false or 0 (optional)
     """, re.VERBOSE)
 
