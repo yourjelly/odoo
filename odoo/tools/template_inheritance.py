@@ -34,9 +34,11 @@ def add_text_inside(node, text):
 
 def remove_element(node):
     """ Remove ``node`` but not its tail, from its XML tree. """
+    # print("\n\n in def remove_element(node):", etree.tostring(node))
     add_text_before(node, node.tail)
     node.tail = None
     node.getparent().remove(node)
+    # print("\n\n in def remove_element(node):")
 
 
 def locate_node(arch, spec):
@@ -101,6 +103,8 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
     specs = specs_tree if isinstance(specs_tree, list) else [specs_tree]
 
     def extract(spec):
+        # print("===================def extract(spec):-------------------------")
+        # print("===================sepcs==",etree.tostring(spec))
         """
         Utility function that locates a node given a specification, remove
         it from the source and returns it.
@@ -113,6 +117,8 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
         pre_locate(spec)
         to_extract = locate_node(source, spec)
         if to_extract is not None:
+            # print(etree.tostring(to_extract))
+            # print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             remove_element(to_extract)
             return to_extract
         else:
@@ -123,6 +129,7 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
 
     while len(specs):
         spec = specs.pop(0)
+        print ("\n\nactual spec :::: ", etree.tostring(spec))
         if isinstance(spec, SKIPPED_ELEMENT_TYPES):
             continue
         if spec.tag == 'data':
@@ -133,6 +140,7 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
         if node is not None:
             pos = spec.get('position', 'inside')
             if pos == 'replace':
+                print("spec in pos == replace ::::", spec)
                 for loc in spec.xpath(".//*[text()='$0']"):
                     loc.text = ''
                     loc.append(copy.deepcopy(node))
@@ -206,14 +214,169 @@ def apply_inheritance_specs(source, specs_tree, inherit_branding=False, pre_loca
                 sentinel = E.sentinel()
                 node.addnext(sentinel)
                 add_text_before(sentinel, spec.text)
+                
+                print("\n\n\n\n\n\narch===================")
+                # parser = etree.XMLParser(remove_blank_text=True)
+                # arch = etree.fromstring(spec, parser=p==================arser)
+                # abc = etree.fromstring(spec)
+
+
+
+
+
+
+
+
+                def findAllNodes(specs):
+                    # print(spec)
+                    # if specs:
+                    #     specs = specs
+                    # else:
+                    #     specs = spec
+                    
+                    for child in specs:
+                        parent_node = child.getparent()
+                    #     print(spespecsc.find(parent_node))
+                        # print("@@@@@@@@@")
+                        # print("@@@@@@@@@")
+                        if child.get('position') == 'move':
+                            child1 = extract(child)
+                            spec.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"='"+parent_node.get(parent_node.keys()[0])+"']").append(child1)
+                            temp = locate_node(spec, child)
+                            print("\n\n  temp:::", etree.tostring(temp))
+                            # remove_element(temp)
+                            # print("\n\n spec after remove element :::", etree.tostring(spec))
+                            # print("@@@@@@@@@---------------")
+                            # print(etree.tostring((parent_node)))
+                            # print("\n\n",parent_node.tag)
+                            # print("\n\n",parent_node.keys())
+                            # print("\n\n",parent_node.get(parent_node.keys()[0]))
+                            # print("\n\ntry to find==\n")
+                            # elm = spec.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"='"+parent_node.get(parent_node.keys()[0])+"']")
+                            # elm = spec.find(".//group[@name='"+parent_node.get(parent_node.keys()[0])+"']")
+                            # print(type(elm))
+                            # print(etree.tostring(elm))
+                            # print("\n\n",spec.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"="+parent_node.get(parent_node.keys()[0])+"]"))
+                            # print("\n\n",etree.tostring(spec.find(parent_node.tag)))
+                            # 
+                            # print("@@@@@@@@@")
+                            # print(etree.tostring(child))
+                            # print("@@@@@@@@@")
+                            # print("\n\n spec0 isv: --",etree.tostring(spec))
+                            # prev_elm.append(child)
+                            # node = locate_node(source, parent_node)
+                            # print(node)
+                            # node.append(child)
+                            # spec.find(parent_node.tag).append(child)
+                            # etree.SubEleme                    # for child in specs:
+                        # parent_node = child.getparent()
+                    #     print(spespecsc.find(parent_node))
+                        # print("@@@@@@@@@")
+                        # print("@@@@@@@@@")
+
+
+                        # if child.get('position') == 'move':
+                        #     # print("@@@@@@@@@---------------")
+                        #     # print(etree.tostring((parent_node)))
+                        #     # print("\n\n",parent_node.tag)
+                        #     # print("\n\n",parent_node.keys())
+                        #     # print("\n\n",parent_node.get(parent_node.keys()[0]))
+                        #     # print("\n\ntry to find==\n")
+                        #     # elm = spec.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"='"+parent_node.get(parent_node.keys()[0])+"']")
+                        #     # elm = spec.find(".//group[@name='"+parent_node.get(parent_node.keys()[0])+"']")
+                        #     # print(type(elm))
+                        #     # print(etree.tostring(elm))
+                        #     # print("\n\n",spec.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"="+parent_node.get(parent_node.keys()[0])+"]"))
+                        #     # print("\n\n",etree.tostring(spec.find(parent_node.tag)))
+                        #     child = extract(child)
+                        #     # print("@@@@@@@@@")
+                        #     # print(etree.tostring(child))
+                        #     # print("@@@@@@@@@")
+                        #     # print("\n\n spec0 isv: --",etree.tostring(spec))
+                        #     # prev_elm.append(child)
+                        #     # node = locate_node(source, parent_node)
+                        #     # print(node)
+                        #     node.append(child)
+                        #     # spec.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"='"+parent_node.get(parent_node.keys()[0])+"']").append(child)
+                        #     # spec.find(parent_node.tag).append(child)
+                        #     # etree.SubElement(spec.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"='"+parent_node.get(parent_node.keys()[0])+"']"), etree.tostring(child))
+                        #     # print("\n\n spec1 isv: --",etree.tostring(spec))
+                        # # prev_elm = child
+                        # #     # return parent_node, child
+                        findAllNodes(child)
+
+
+                    
+
+
+
+
+                # def move_element(child):
+                #     temp = child
+                #     for c in child.iter():
+                #         print("\n\n\n\n--------------def move_element(child):==========================================================")
+                #         # print(etree.tostring(c))
+                #         parent_node = c.getparent()
+                #         # print("\n\n\n\n--------------c.getparent()")
+                #         # print(etree.tostring(c.getparent()))
+                        
+                #         if c.get('position') == 'move':
+                #             print("\n\n\n\n-------------c===",etree.tostring(c))
+                #             child = extract(c)
+                #             print("\n\n\n\n-------------find")
+                #             print("\n\n\n\n-------------ke[0]",parent_node.keys())
+                #             print("\n\n\n\n-------------ke[0]",parent_node.keys()[0])
+                #             print("\n\n\n\n-------------value",parent_node.get(parent_node.keys()[0]))
+                #             print("\n\n\n\n-------------spec",etree.tostring(spec))
+                #             print("\n\n\n\n-------------spec",etree.tostring(temp))
+                #             print(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"='"+parent_node.get(parent_node.keys()[0])+"']")
+                #             print(temp.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"='"+parent_node.get(parent_node.keys()[0])+"']"))
+                #             # print("\n\n",)
+                #             # temp1 = temp.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"="+parent_node.get(parent_node.keys()[0])+"]")
+                #             # print("\n\n\n\n--------------temp1")
+                #             # print(etree.tostring(temp1))
+                #             # etree.SubElement(temp1,child)
+                #     print("\n\n\n\n--------------return temp")
+                #     print(etree.tostring(temp))
+                #     return temp
+                
+                
+                
+                # for child in spec.iter():
+                #     if child.get('position') == 'move':
+                #         child = extract(child)
+                #     sentinel.addprevious(child)
+                
                 for child in spec:
-                    if child.get('position') == 'move':
-                        child = extract(child)
+                #     print("\n\nchild in for loop",etree.tostring(child))
+                    # temp3 = move_element(child)                    
+                    findAllNodes(child)
+
+                    # temp =  child.find(parent_node)
+                    # print(etree.tostring(temp))
+                    # if child.get('position') == 'move':
+                    #     child = extract(child)
                     sentinel.addprevious(child)
                 remove_element(sentinel)
             elif pos == 'before':
                 add_text_before(node, spec.text)
+                print("\n\nspec  in pos == before ::::", etree.tostring(spec))
+
+                def findAllNodes(specs):
+                    for child in specs:
+                        parent_node = child.getparent()
+                        # if child.get('position') == 'move':
+                        #     child = extract(child)
+                        #     spec.find(".//"+parent_node.tag+"[@"+parent_node.keys()[0]+"='"+parent_node.get(parent_node.keys()[0])+"']").append(child)
+                            
+                        if child.get('position') == 'move':
+                            child = extract(child)
+                            node.append(child)
+                        findAllNodes(child)
+
+
                 for child in spec:
+                    # findAllNodes(child)
                     if child.get('position') == 'move':
                         child = extract(child)
                     node.addprevious(child)
