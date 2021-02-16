@@ -73,6 +73,13 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         border: $o-we-dropdown-border-width solid $o-we-dropdown-border-color;
         background-color: $o-we-dropdown-bg;
         box-shadow: $o-we-dropdown-shadow;
+
+        &.colorpicker-menu {
+            top: auto;
+            bottom: 100%;
+            margin-top: 0;
+            margin-bottom: 0.125rem;
+        }
     }
     .dropdown-menu.show { // To overcome .note-XXX .dropdown-menu rules
         min-width: 0;
