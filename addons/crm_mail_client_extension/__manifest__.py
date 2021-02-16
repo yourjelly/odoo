@@ -16,7 +16,8 @@
         'crm_iap_lead_enrich'
     ],
     'data': [
-        'views/crm_mail_client_extension_lead.xml'
+        'views/crm_mail_client_extension_lead.xml',
+        'views/crm_lead_views.xml'
     ],
     'installable': True,
     'application': False,
