@@ -183,6 +183,7 @@ class Users(models.Model):
     def _init_messaging(self):
         self.ensure_one()
         partner_root = self.env.ref('base.partner_root')
+        throttle = self.env['ir.config_parameter'].sudo().get_param('mail.link_preview_throttle', 99)
         values = {
             'channels': self.partner_id._get_channels_as_member().channel_info(),
             'companyName': self.env.company.name,
@@ -196,6 +197,7 @@ class Users(models.Model):
             'publicPartners': [('insert', [{'id': p.id} for p in self.env.ref('base.group_public').sudo().with_context(active_test=False).users.partner_id])],
             'shortcodes': self.env['mail.shortcode'].sudo().search_read([], ['source', 'substitution']),
             'starred_counter': self.partner_id._get_starred_count(),
+            'isLinkPreviewEnabled': int(throttle) != 0,
         }
         return values
 

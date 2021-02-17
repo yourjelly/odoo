@@ -62,6 +62,7 @@ registerModel({
             if ('is_notification' in data) {
                 data2.is_notification = data.is_notification;
             }
+            data2.linkPreviews = data.linkPreviews;
             if ('messageReactionGroups' in data) {
                 data2.messageReactionGroups = data.messageReactionGroups;
             }
@@ -806,6 +807,9 @@ registerModel({
          */
         lastTrackingValue: one('TrackingValue', {
             compute: '_computeLastTrackingValue',
+        }),
+        linkPreviews: many('LinkPreview', {
+            inverse: 'message',
         }),
         /**
          * Groups of reactions per content allowing to know the number of

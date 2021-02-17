@@ -107,6 +107,9 @@ patch(MockServer.prototype, 'mail', {
             const { min_id, max_id, limit } = args;
             return this._mockRouteMailMessageStarredMessages(min_id, max_id, limit);
         }
+        if (route === '/mail/link_preview') {
+            return this._mockRouteMailLinkPreview(args.urls);
+        }
         if (route === '/mail/read_subscription_data') {
             const follower_id = args.follower_id;
             return this._mockRouteMailReadSubscriptionData(follower_id);
@@ -1418,6 +1421,22 @@ patch(MockServer.prototype, 'mail', {
         });
     },
     /**
+     * Simulates the `_link_preview_format` method of `mail.link.preview`.
+     *
+     * @private
+     * @param {object} linkPreview
+     */
+    _mockMailLinkPreviewFormat(linkPreview) {
+        return {
+            description: linkPreview.og_description,
+            id: linkPreview.id,
+            image_url: linkPreview.og_image,
+            title: linkPreview.og_title,
+            type: linkPreview.og_type,
+            mimetype: linkPreview.og_mimetype,
+        };
+    },
+    /**
      * Simulates `mark_all_as_read` on `mail.message`.
      *
      * @private
@@ -1546,10 +1565,16 @@ patch(MockServer.prototype, 'mail', {
                 'res.partner',
                 [['id', 'in', message.partner_ids]],
             );
+            const linkPreviews = this.getRecords('mail.link.preview', [
+                ['id', 'in', message.link_preview_ids],
+            ]);
+            const linkPreviewsFormatted = [['insert-and-replace', linkPreviews.map(linkPreview => this._mockMailLinkPreviewFormat(linkPreview))]];
+
             const response = Object.assign({}, message, {
                 attachment_ids: formattedAttachments,
                 author_id: formattedAuthor,
                 history_partner_ids: historyPartnerIds,
+                linkPreviews: linkPreviewsFormatted,
                 needaction_partner_ids: needactionPartnerIds,
                 notifications,
                 parentMessage: message.parent_id ? this._mockMailMessageMessageFormat([message.parent_id])[0] : false,
@@ -2563,4 +2588,27 @@ patch(MockServer.prototype, 'mail', {
             ),
         });
     },
+    /**
+     * Simulates `/mail/link_preview` route.
+     *
+     * @private
+     * @param {string} url
+     * @returns {Object}
+     */
+    _mockRouteMailLinkPreview(urls) {
+        const linkPreviews = [];
+        for (const url of urls) {
+            if (url === 'https://make-link-preview.com') {
+                const linkPreviewId = this.pyEnv['mail.link.preview'].create({
+                    og_description: "test description",
+                    og_title: url,
+                    og_type: 'article',
+                    source_url: url,
+                });
+                const linkPreview = this.pyEnv['mail.link.preview'].searchRead([['id', '=', linkPreviewId]])[0];
+                linkPreviews.push(['insert', this._mockMailLinkPreviewFormat(linkPreview)]);
+            }
+        }
+        return linkPreviews || [['clear']];
+    }
 });

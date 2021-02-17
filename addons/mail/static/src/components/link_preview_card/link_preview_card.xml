@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.LinkPreviewCard" owl="1">
+        <div class="o_LinkPreviewCard bg-300 rounded px-3 pt-3 pb-2 d-flex position-relative" t-attf-class="{{ className }}" t-ref="root" t-on-mouseenter="linkPreviewCardView.linkPreviewAsideView.onMouseEnterParent" t-on-mouseleave="linkPreviewCardView.linkPreviewAsideView.onMouseLeaveParent">
+            <div class="o_LinkPreviewCard_content">
+                <a t-att-href="linkPreviewCardView.linkPreview.url" target="_blank">
+                    <h5 class="o_LinkPreviewCard_title" t-esc="linkPreviewCardView.linkPreview.title"></h5>
+                </a>
+                <p t-if="linkPreviewCardView.linkPreview.description" class="o_LinkPreviewCard_description" t-esc="linkPreviewCardView.linkPreview.description"></p>
+                <img t-if="linkPreviewCardView.linkPreview.image_url" class="o_LinkPreviewCard_image img-fluid rounded mr-3 mb-2" t-att-src="linkPreviewCardView.linkPreview.image_url" t-att-alt="linkPreviewCardView.linkPreview.title"/>
+            </div>
+            <div class="o_LinkPreviewCard_aside position-absolute top-0 start-100 translate-middle">
+                <LinkPreviewAsideView record="linkPreviewCardView.linkPreviewAsideView"/>
+            </div>
+        </div>
+    </t>
+</templates>

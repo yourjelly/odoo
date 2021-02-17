@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.LinkPreviewImage" owl="1">
+        <div class="o_LinkPreviewImage bg-300 rounded px-3 pt-3 pb-2 position-relative" t-attf-class="{{ className }}" t-ref="root" t-on-mouseenter="linkPreviewImageView.linkPreviewAsideView.onMouseEnterParent" t-on-mouseleave="linkPreviewImageView.linkPreviewAsideView.onMouseLeaveParent">
+            <a t-att-href="linkPreviewImageView.linkPreview.url" target="_blank">
+                <h5 class="o_LinkPreviewImage_title" t-esc="linkPreviewImageView.linkPreview.url"></h5>
+            </a>
+            <a t-att-href="linkPreviewImageView.linkPreview.url" target="_blank">
+                <img t-if="linkPreviewImageView.linkPreview.url" class="o_LinkPreviewImage_image img-fluid rounded mr-3 mb-2" t-att-src="linkPreviewImageView.linkPreview.url" t-att-alt="linkPreviewImageView.linkPreview.url" />
+            </a>
+            <div class="o_LinkPreviewImage_overlay position-absolute top-0 start-100 translate-middle">
+                <LinkPreviewAsideView record="linkPreviewImageView.linkPreviewAsideView"/>
+            </div>
+        </div>
+    </t>
+</templates>

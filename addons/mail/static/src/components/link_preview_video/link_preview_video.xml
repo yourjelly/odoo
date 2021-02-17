@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.LinkPreviewVideo" owl="1">
+        <div class="o_LinkPreviewVideo bg-300 rounded px-3 pt-3 pb-2 position-relative" t-attf-class="{{ className }}" t-ref="root" t-on-mouseenter="linkPreviewVideoView.linkPreviewAsideView.onMouseEnterParent" t-on-mouseleave="linkPreviewVideoView.linkPreviewAsideView.onMouseLeaveParent">
+            <div class="o_LinkPreviewVideo_content">
+                <a t-att-href="linkPreviewVideoView.linkPreview.url" target="_blank">
+                    <h5 class="o_LinkPreviewVideo_title" t-esc="linkPreviewVideoView.linkPreview.title"></h5>
+                </a>
+                <p t-if="linkPreviewVideoView.linkPreview.description" class="o_LinkPreviewVideo_description" t-esc="linkPreviewVideoView.linkPreview.description"></p>
+                <a t-att-href="linkPreviewVideoView.linkPreview.url" target="_blank">
+                    <div class="o_linkPreviewVideo_overlayBackground position-relative" t-att-style="linkPreviewVideoView.backgroundStyle">
+                        <div class="o_linkPreviewVideo_overlay position-absolute top-50 start-50 translate-middle">
+                            <div class="btn btn-dark btn-lg rounded opacity-75 opacity-100-hover">
+                                <i class="fa fa-play text-white"/>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="o_LinkPreviewVideo_aside position-absolute top-0 start-100 translate-middle">
+                <LinkPreviewAsideView record="linkPreviewVideoView.linkPreviewAsideView"/>
+            </div>
+        </div>
+    </t>
+</templates>

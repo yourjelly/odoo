@@ -129,6 +129,8 @@ registerModel({
         _reset() {
             this.update({
                 attachments: clear(),
+                linkPreviews: clear(),
+                linkPreviewsRemovedUrls: [],
                 mentionedChannels: clear(),
                 mentionedPartners: clear(),
                 textInputContent: clear(),
@@ -178,6 +180,12 @@ registerModel({
          * Determines whether a post_message request is currently pending.
          */
         isPostingMessage: attr(),
+        linkPreviews: many('LinkPreview', {
+            inverse: 'composer',
+        }),
+        linkPreviewsRemovedUrls: attr({
+            default: [],
+        }),
         mentionedChannels: many('Thread', {
             compute: '_computeMentionedChannels',
         }),

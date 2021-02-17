@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.LinkPreviewList" owl="1">
+        <div class="o_LinkPreviewList d-flex flex-column justify-content-start" t-attf-class="{{ className }}" t-ref="root">
+            <div class="o_LinkPreviewList_partialList o_LinkPreviewList_partialListImages d-flex flex-grow-1 flex-wrap">
+                <LinkPreviewImage t-foreach="linkPreviewListView.linkPreviewAsImageViews" t-as="linkPreviewImageView" t-key="linkPreviewImageView.localId" className="'my-1 me-1'" record="linkPreviewImageView"/>
+                <LinkPreviewCard t-foreach="linkPreviewListView.linkPreviewAsCardViews" t-as="linkPreviewCardView" t-key="linkPreviewCardView.localId" className="'my-1 me-1'" record="linkPreviewCardView"/>
+                <LinkPreviewGif t-foreach="linkPreviewListView.linkPreviewAsGifViews" t-as="linkPreviewGifView" t-key="linkPreviewGifView.localId" className="'my-1 me-1'" record="linkPreviewGifView"/>
+                <LinkPreviewVideo t-foreach="linkPreviewListView.linkPreviewAsVideoViews" t-as="linkPreviewVideoView" t-key="linkPreviewVideoView.localId" className="'my-1 me-1'" record="linkPreviewVideoView"/>
+            </div>
+        </div>
+    </t>
+</templates>

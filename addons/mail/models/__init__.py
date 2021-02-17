@@ -28,6 +28,7 @@ from . import mail_message
 from . import mail_mail
 from . import mail_tracking_value
 from . import mail_template
+from . import mail_link_preview
 
 # discuss
 from . import mail_channel_member

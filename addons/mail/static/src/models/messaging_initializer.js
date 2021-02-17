@@ -86,7 +86,8 @@ registerModel({
             partner_root,
             publicPartners,
             shortcodes = [],
-            starred_counter = 0
+            starred_counter = 0,
+            isLinkPreviewEnabled = true
         }) {
             const discuss = this.messaging.discuss;
             // partners first because the rest of the code relies on them
@@ -122,7 +123,7 @@ registerModel({
             }
             discuss.update({ menu_id });
             // company related data
-            this.messaging.update({ companyName });
+            this.messaging.update({ companyName, isLinkPreviewEnabled });
         },
         /**
          * @private

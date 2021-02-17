@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.LinkPreviewAsideView" owl="1">
+        <button t-if="linkPreviewAsideView.displayClose and linkPreviewAsideView.linkPreview.isDeletable" class="o_LinkPreviewAside btn" t-on-click="linkPreviewAsideView.onClickUnlink" t-attf-class="{{ className }}" t-ref="root">
+            <i class="o_LinkPreviewAside_itemUnlinkIcon fa fa-times"/>
+        </button>
+    </t>
+</templates>

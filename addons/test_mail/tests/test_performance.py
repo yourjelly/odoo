@@ -313,7 +313,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
                 'partner_ids': [(4, customer_id)],
             })
 
-        with self.assertQueryCount(__system__=25, employee=31):
+        with self.assertQueryCount(__system__=26, employee=32):
             composer._action_send_mail()
 
     @users('__system__', 'employee')
@@ -335,7 +335,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
                 'partner_ids': [(4, customer.id)],
             })
 
-        with self.assertQueryCount(__system__=28, employee=36):
+        with self.assertQueryCount(__system__=29, employee=37):
             composer._action_send_mail()
 
     @users('__system__', 'employee')
@@ -360,7 +360,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
                 composer_form.attachment_ids.add(attachment)
             composer = composer_form.save()
 
-        with self.assertQueryCount(__system__=37, employee=45):
+        with self.assertQueryCount(__system__=38, employee=46):
             composer._action_send_mail()
 
         # notifications
@@ -386,7 +386,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
                 'partner_ids': [(4, customer_id)],
             })
 
-        with self.assertQueryCount(__system__=25, employee=31):
+        with self.assertQueryCount(__system__=26, employee=32):
             composer._action_send_mail()
 
     @users('__system__', 'employee')
@@ -408,7 +408,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
             }).create({})
             composer._onchange_template_id_wrapper()
 
-        with self.assertQueryCount(__system__=25, employee=31):
+        with self.assertQueryCount(__system__=26, employee=32):
             composer._action_send_mail()
 
         # notifications
@@ -435,7 +435,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
             }).create({})
             composer._onchange_template_id_wrapper()
 
-        with self.assertQueryCount(__system__=33, employee=44):
+        with self.assertQueryCount(__system__=34, employee=45):
             composer._action_send_mail()
 
         # notifications
@@ -469,7 +469,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
             )
             composer = composer_form.save()
 
-        with self.assertQueryCount(__system__=34, employee=40):
+        with self.assertQueryCount(__system__=35, employee=41):
             composer._action_send_mail()
 
         # notifications
@@ -501,7 +501,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
             )
             composer = composer_form.save()
 
-        with self.assertQueryCount(__system__=46, employee=63):
+        with self.assertQueryCount(__system__=47, employee=64):
             composer._action_send_mail()
 
         # notifications
@@ -587,7 +587,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
     def test_message_post_one_inbox_notification(self):
         record = self.env['mail.test.simple'].create({'name': 'Test'})
 
-        with self.assertQueryCount(__system__=13, employee=17):
+        with self.assertQueryCount(__system__=14, employee=18):
             record.message_post(
                 body='<p>Test Post Performances with an inbox ping</p>',
                 partner_ids=self.user_test.partner_id.ids,
@@ -1092,7 +1092,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
         self.env.flush_all()
         self.env.invalidate_all()
 
-        with self.assertQueryCount(employee=17):
+        with self.assertQueryCount(employee=18):
             res = messages.message_format()
             self.assertEqual(len(res), 2)
             for message in res:
@@ -1120,7 +1120,7 @@ class TestMailComplexPerformance(BaseMailPerformance):
         self.env.flush_all()
         self.env.invalidate_all()
 
-        with self.assertQueryCount(employee=12):
+        with self.assertQueryCount(employee=13):
             res = messages.message_format()
             self.assertEqual(len(res), 6)
 
@@ -1195,7 +1195,7 @@ class TestMailHeavyPerformancePost(BaseMailPerformance):
             ('attach tuple 3', "attachement tupple content 3", {'cid': 'cid2'}),
         ]
         attachments = self.env['ir.attachment'].with_user(self.env.user).create(self.test_attachments_vals)
-        with self.assertQueryCount(employee=49):
+        with self.assertQueryCount(employee=50):
             self.cr.sql_log = self.warm and self.cr.sql_log_count
             record_container.with_context({}).message_post(
                 body='<p>Test body <img src="cid:cid1"> <img src="cid:cid2"></p>',

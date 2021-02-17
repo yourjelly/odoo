@@ -15,7 +15,7 @@
                     'bg-100': !composerView.messageViewInEditing and !composerView.threadView,
                     'pt-3 pb-4': composerView.hasCurrentPartnerAvatar and composerView.hasHeader,
                     'py-4': composerView.hasCurrentPartnerAvatar and !composerView.hasHeader and !composerView.threadView,
-                    'py-1': composerView.hasCurrentPartnerAvatar and !composerView.hasHeader and composerView.threadView, 
+                    'py-1': composerView.hasCurrentPartnerAvatar and !composerView.hasHeader and composerView.threadView,
                 }"
                 t-attf-class="{{ className }}"
                 t-on-keydown="composerView.onKeydown"
@@ -28,34 +28,37 @@
                     />
                 </t>
                 <t t-if="composerView.hasHeader">
-                    <div class="o_Composer_coreHeader text-truncate" t-att-class="{ 'small p-2': composerView.isInChatWindow or composerView.isInDiscuss }">
-                        <t t-if="composerView.threadView and composerView.threadView.replyingToMessageView">
-                            <span class="o_cursor_pointer" t-on-click="composerView.onClickReplyingToMessage">
-                                Replying to <b t-esc="composerView.threadView.replyingToMessageView.message.authorName"/>
-                            </span>
-                            <i t-if="composerView.threadView.thread !== messaging.inbox" class="o_Composer_cancelReply fa fa-lg fa-times-circle rounded-circle p-0 ms-1 o_cursor_pointer" title="Stop replying" t-on-click="composerView.onClickStopReplying"/>
-                        </t>
-                        <t t-if="composerView.hasThreadName">
-                            <span class="o_Composer_threadName">
-                                on: <b><t t-esc="composerView.composer.activeThread.displayName"/></b>
-                            </span>
-                        </t>
-                        <t t-if="composerView.hasFollowers and !composerView.composer.isLog">
-                            <!-- Text for followers -->
-                            <small class="o_Composer_followers flex-shrink-0">
-                                <b class="text-muted">To: </b>
-                                <em class="text-muted">Followers of </em>
-                                <b>
-                                    <t t-if="composerView.composer.activeThread.displayName">
-                                        &#32;&quot;<t t-esc="composerView.composer.activeThread.displayName"/>&quot;
-                                    </t>
-                                    <t t-else="">
-                                        this document
-                                    </t>
-                                </b>
-                            </small>
-                            <ComposerSuggestedRecipientList record="composerView.composerSuggestedRecipientListView"/>
-                        </t>
+                    <div class="o_Composer_coreHeader" t-att-class="{ 'small p-2': composerView.isInChatWindow or composerView.isInDiscuss }">
+                        <div class="text-truncate">
+                            <t t-if="composerView.threadView and composerView.threadView.replyingToMessageView">
+                                <span class="o_cursor_pointer" t-on-click="composerView.onClickReplyingToMessage">
+                                    Replying to <b t-esc="composerView.threadView.replyingToMessageView.message.authorName"/>
+                                </span>
+                                <i t-if="composerView.threadView.thread !== messaging.inbox" class="o_Composer_cancelReply fa fa-lg fa-times-circle rounded-circle p-0 ms-1 o_cursor_pointer" title="Stop replying" t-on-click="composerView.onClickStopReplying"/>
+                            </t>
+                            <t t-if="composerView.hasThreadName">
+                                <span class="o_Composer_threadName">
+                                    on: <b><t t-esc="composerView.composer.activeThread.displayName"/></b>
+                                </span>
+                            </t>
+                            <t t-if="composerView.hasFollowers and !composerView.composer.isLog">
+                                <!-- Text for followers -->
+                                <small class="o_Composer_followers flex-shrink-0">
+                                    <b class="text-muted">To: </b>
+                                    <em class="text-muted">Followers of </em>
+                                    <b>
+                                        <t t-if="composerView.composer.activeThread.displayName">
+                                            &#32;&quot;<t t-esc="composerView.composer.activeThread.displayName"/>&quot;
+                                        </t>
+                                        <t t-else="">
+                                            this document
+                                        </t>
+                                    </b>
+                                </small>
+                                <ComposerSuggestedRecipientList record="composerView.composerSuggestedRecipientListView"/>
+                            </t>
+                        </div>
+                        <LinkPreviewList t-if="composerView.linkPreviewListView" record="composerView.linkPreviewListView"/>
                     </div>
                 </t>
                 <t t-if="composerView.hasCurrentPartnerAvatar">

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.LinkPreviewGif" owl="1">
+        <div class="o_LinkPreviewGif position-relative mr-3 mb-2" t-attf-class="{{ className }}" t-ref="root" t-on-mouseenter="linkPreviewGifView.linkPreviewAsideView.onMouseEnterParent" t-on-mouseleave="linkPreviewGifView.linkPreviewAsideView.onMouseLeaveParent">
+            <img t-if="linkPreviewGifView.linkPreview.image_url" class="img-fluid rounded" t-att-src="linkPreviewGifView.linkPreview.image_url" t-att-alt="linkPreviewGifView.linkPreview.title" />
+            <div class="LinkPreviewGif_overlay position-absolute top-0 bottom-0 end-0 p-2 text-white">
+                <LinkPreviewAsideView className="'btn btn-sm btn-dark rounded opacity-75 opacity-100-hover'" record="linkPreviewGifView.linkPreviewAsideView"/>
+            </div>
+        </div>
+    </t>
+</templates>

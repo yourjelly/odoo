@@ -11,6 +11,7 @@ registerModel({
         'attachmentImageOwnerAsAttachmentDeleteConfirm',
         'attachmentListOwnerAsAttachmentView',
         'followerOwnerAsSubtypeList',
+        'linkPreviewOwnerAsLinkPreviewDeleteConfirm',
         'messageActionListOwnerAsDeleteConfirm',
     ]],
     lifecycleHooks: {
@@ -94,6 +95,9 @@ registerModel({
             if (this.followerSubtypeList) {
                 return 'FollowerSubtypeList';
             }
+            if (this.linkPreviewDeleteConfirmView || this.linkPreviewImageDeleteConfirmView) {
+                return 'LinkPreviewDeleteConfirm';
+            }
             return clear();
         },
         /**
@@ -111,7 +115,6 @@ registerModel({
             return this.followerOwnerAsSubtypeList ? insertAndReplace() : clear();
         },
         /**
-        /**
          * @private
          * @returns {boolean}
          */
@@ -124,6 +127,13 @@ registerModel({
                 return !this.attachmentViewer.isDragging;
             }
             return true;
+        },
+        /**
+         * @private
+         * @returns {FieldCommand}
+         */
+        _computeLinkPreviewDeleteConfirmView() {
+            return this.linkPreviewOwnerAsLinkPreviewDeleteConfirm ? insertAndReplace() : clear();
         },
         /**
          * @private
@@ -148,6 +158,12 @@ registerModel({
             }
             if (this.deleteMessageConfirmView) {
                 return replace(this.deleteMessageConfirmView);
+            }
+            if (this.linkPreviewDeleteConfirmView) {
+                return replace(this.linkPreviewDeleteConfirmView);
+            }
+            if (this.linkPreviewImageDeleteConfirmView) {
+                return replace(this.linkPreviewImageDeleteConfirmView);
             }
             if (this.followerSubtypeList) {
                 return replace(this.followerSubtypeList);
@@ -223,6 +239,15 @@ registerModel({
             compute: '_computeDeleteMessageConfirmView',
             inverse: 'dialogOwner',
             isCausal: true,
+        }),
+        linkPreviewDeleteConfirmView: one('LinkPreviewDeleteConfirmView', {
+            compute: '_computeLinkPreviewDeleteConfirmView',
+            inverse: 'dialogOwner',
+            isCausal: true,
+        }),
+        linkPreviewOwnerAsLinkPreviewDeleteConfirm: one('LinkPreviewAsideView', {
+            inverse: 'linkPreviewDeleteConfirmDialog',
+            readonly: true,
         }),
         followerOwnerAsSubtypeList: one('Follower', {
             inverse: 'followerSubtypeListDialog',

@@ -363,6 +363,12 @@ registerModel({
             }
             return clear();
         },
+        _computeLinkPreviewListView() {
+            if (this.message && this.message.linkPreviews.length > 0) {
+                return insertAndReplace();
+            }
+            return clear();
+        },
         /**
          * @private
          * @returns {FieldCommand}
@@ -563,6 +569,11 @@ registerModel({
         isSquashed: attr({
             compute: '_computeIsSquashed',
             default: false,
+        }),
+        linkPreviewListView: one('LinkPreviewListView', {
+            compute: '_computeLinkPreviewListView',
+            inverse: 'messageView',
+            isCausal: true,
         }),
         /**
          * Determines the message action list of this message view (if any).

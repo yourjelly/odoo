@@ -403,6 +403,9 @@ registerModel({
         isInQUnitTest: attr({
             default: false,
         }),
+        isLinkPreviewEnabled: attr({
+            default: true,
+        }),
         isNotificationBlocked: attr({
             compute: '_computeIsNotificationBlocked',
         }),

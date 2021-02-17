@@ -230,7 +230,7 @@ class DiscussController(http.Controller):
     # --------------------------------------------------------------------------
 
     def _get_allowed_message_post_params(self):
-        return {'attachment_ids', 'body', 'message_type', 'partner_ids', 'subtype_xmlid', 'parent_id'}
+        return {'attachment_ids', 'body', 'link_preview_ids', 'message_type', 'partner_ids', 'subtype_xmlid', 'parent_id'}
 
     @http.route('/mail/message/post', methods=['POST'], type='json', auth='public')
     def mail_message_post(self, thread_model, thread_id, post_data, **kwargs):
@@ -239,6 +239,17 @@ class DiscussController(http.Controller):
             thread = channel_member_sudo.channel_id
         else:
             thread = request.env[thread_model].browse(int(thread_id)).exists()
+        if post_data['link_preview_ids']:
+            link_previews = request.env['mail.link.preview'].sudo().search([('id', 'in', post_data['link_preview_ids'])])
+            if not request.env.user._is_public():
+                users = link_previews.create_uid
+                if request.env.user != users:
+                    raise NotFound()
+            if request.env.user._is_public():
+                if link_previews.guest_id:
+                    guest = request.env['mail.guest']._get_guest_from_request(request)
+                    if link_previews.guest_id != guest:
+                        raise NotFound()
         return thread.message_post(**{key: value for key, value in post_data.items() if key in self._get_allowed_message_post_params()}).message_format()[0]
 
     @http.route('/mail/message/update_content', methods=['POST'], type='json', auth='public')
@@ -573,3 +584,29 @@ class DiscussController(http.Controller):
         if guest_to_rename_sudo != guest and not request.env.user._is_admin():
             raise NotFound()
         guest_to_rename_sudo._update_name(name)
+
+    # --------------------------------------------------------------------------
+    # Link preview API
+    # --------------------------------------------------------------------------
+
+    @http.route('/mail/link_preview', methods=['POST'], type='json', auth='public')
+    def link_preview(self, urls):
+        throttle = request.env['ir.config_parameter'].sudo().get_param('mail.link_preview_throttle', 99)
+        if int(throttle) == 0:
+            return [('clear',)]
+        guest = request.env['mail.guest']._get_guest_from_request(request)
+        link_preview_datas = []
+        for url in urls:
+            link_preview_data = request.env['mail.link.preview'].sudo().with_context(guest=guest)._create_link_preview(url)
+            if link_preview_data:
+                link_preview_datas.append(('insert', link_preview_data._link_preview_format()[0]))
+        return link_preview_datas
+
+    @http.route('/mail/link_preview/delete', methods=['POST'], type='json', auth='public')
+    def mail_link_preview_delete(self, link_preview_id):
+        link_preview_sudo = request.env['mail.link.preview'].browse(int(link_preview_id)).sudo().exists()
+        guest = request.env['mail.guest']._get_guest_from_request(request)
+        if link_preview_sudo.message_id and not link_preview_sudo.message_id.is_current_user_or_guest_author and not guest.env.user._is_admin():
+            raise NotFound()
+        if link_preview_sudo:
+            link_preview_sudo._delete_and_notify()

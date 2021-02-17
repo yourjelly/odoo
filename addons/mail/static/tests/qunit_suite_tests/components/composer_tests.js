@@ -6,6 +6,7 @@ import {
     dropFiles,
     nextAnimationFrame,
     pasteFiles,
+    pasteText,
     start,
     startServer,
 } from '@mail/../tests/helpers/test_utils';
@@ -1556,6 +1557,31 @@ QUnit.test('send button on mail.channel should have "Send" as label', async func
         document.querySelector('.o_Composer_buttonSend').textContent,
         "Send",
         "Send button of mail.channel composer should have 'Send' as label",
+    );
+});
+
+QUnit.test('composer text input: generate link preview', async function (assert) {
+    assert.expect(1);
+
+    const pyEnv = await startServer();
+    const mailChannelId = pyEnv['mail.channel'].create({});
+    const { openDiscuss } = await start({
+        discuss: {
+            params: {
+                default_active_id: `mail.channel_${mailChannelId}`,
+            },
+        },
+    });
+    await openDiscuss();
+
+    await afterNextRender(() =>
+        pasteText(`.o_ComposerTextInput`, 'my text https://make-link-preview.com')
+    );
+
+    assert.containsOnce(
+        document.body,
+        '.o_LinkPreviewCard',
+        "Composer should have a link preview"
     );
 });
 

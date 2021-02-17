@@ -35,6 +35,10 @@ class ResConfigSettings(models.TransientModel):
         'Twilio Account Auth Token',
         config_parameter='mail.twilio_account_token',
     )
+    link_preview_throttle = fields.Char(
+        'Link Preview Throttle value',
+        config_parameter='mail.link_preview_throttle',
+    )
 
     def _compute_fail_counter(self):
         previous_date = fields.Datetime.now() - datetime.timedelta(days=30)

@@ -80,6 +80,8 @@ registerModel({
                             return this._handleNotificationPartnerMarkAsRead(message.payload);
                         case 'mail.message/notification_update':
                             return this._handleNotificationPartnerMessageNotificationUpdate(message.payload);
+                        case 'mail.link_preview/delete':
+                            return this._handleNotificationLinkPreviewDelete(message.payload);
                         case 'simple_notification':
                             return this._handleNotificationSimpleNotification(message.payload);
                         case 'mail.message/toggle_star':
@@ -698,5 +700,11 @@ registerModel({
                 }
             }
         },
+        _handleNotificationLinkPreviewDelete(payload) {
+            const linkPreview = this.messaging.models['LinkPreview'].findFromIdentifyingData(payload);
+            if (linkPreview) {
+                linkPreview.delete();
+            }
+        }
     },
 });

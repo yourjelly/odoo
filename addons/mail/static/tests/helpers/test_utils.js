@@ -554,6 +554,18 @@ function pasteFiles(el, files) {
     el.dispatchEvent(ev);
 }
 
+/**
+ * Paste some text on a DOM element
+ *
+ * @param {string} selector
+ * @param {string} text text to paste
+ */
+function pasteText(selector, text) {
+    const ev = new ClipboardEvent('paste', { clipboardData: new DataTransfer() });
+    ev.clipboardData.setData('text/plain', text);
+    document.querySelector(selector).dispatchEvent(ev);
+}
+
 //------------------------------------------------------------------------------
 // Public: input utilities
 //------------------------------------------------------------------------------
@@ -602,5 +614,6 @@ export {
     nextAnimationFrame,
     nextTick,
     pasteFiles,
+    pasteText,
     start,
 };

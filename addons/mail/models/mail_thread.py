@@ -1860,7 +1860,7 @@ class MailThread(models.AbstractModel):
                      body='', subject=None, message_type='notification',
                      email_from=None, author_id=None, parent_id=False,
                      subtype_xmlid=None, subtype_id=False, partner_ids=None,
-                     attachments=None, attachment_ids=None,
+                     attachments=None, attachment_ids=None, link_preview_ids=None,
                      **kwargs):
         """ Post a new message in an existing thread, returning the new mail.message.
 
@@ -1959,7 +1959,7 @@ class MailThread(models.AbstractModel):
         attachment_ids = attachment_ids or []
         attachement_values = self._message_post_process_attachments(attachments, attachment_ids, msg_values)
         msg_values.update(attachement_values)  # attachement_ids, [body]
-
+        msg_values['link_preview_ids'] = link_preview_ids
         new_message = self._message_create(msg_values)
 
         # Set main attachment field if necessary

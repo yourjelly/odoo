@@ -4,7 +4,7 @@ import { registerModel } from '@mail/model/model_core';
 import { attr, many, one } from '@mail/model/model_field';
 import { clear, insertAndReplace, link, replace, unlink } from '@mail/model/model_field_command';
 import { OnChange } from '@mail/model/model_onchange';
-import { addLink, escapeAndCompactTextContent, parseAndTransform } from '@mail/js/utils';
+import { addLink, escapeAndCompactTextContent, parseAndTransform, urlRegexp } from '@mail/js/utils';
 import { isEventHandled, markEventHandled } from '@mail/utils/utils';
 
 import { escape, sprintf } from '@web/core/utils/strings';
@@ -505,10 +505,14 @@ registerModel({
          * @param {ClipboardEvent} ev
          */
         async onPasteTextInput(ev) {
-            if (!ev.clipboardData || !ev.clipboardData.files) {
-                return;
+            if (ev.clipboardData) {
+                if (ev.clipboardData.getData && ev.clipboardData.getData('text') && this.messaging.isLinkPreviewEnabled) {
+                    this.refreshLinkPreview(ev.clipboardData.getData('text'));
+                }
+                if (ev.clipboardData.files.length > 0) {
+                    await this.fileUploader.uploadFiles(ev.clipboardData.files);
+                }
             }
-            await this.fileUploader.uploadFiles(ev.clipboardData.files);
         },
         /**
          * Open the full composer modal.
@@ -565,6 +569,10 @@ registerModel({
             if (this.messaging.currentPartner) { // not supported for guest
                 composer.thread.unregisterCurrentPartnerIsTyping({ immediateNotify: true });
             }
+            composer.update({ isPostingMessage: true });
+            if (this.messaging.isLinkPreviewEnabled) {
+                await this.refreshLinkPreview(composer.textInputContent);
+            }
             const postData = this._getMessageData();
             const params = {
                 'post_data': postData,
@@ -572,7 +580,6 @@ registerModel({
                 'thread_model': composer.thread.model,
             };
             try {
-                composer.update({ isPostingMessage: true });
                 if (composer.thread.model === 'mail.channel') {
                     Object.assign(postData, {
                         subtype_xmlid: 'mail.mt_comment',
@@ -861,7 +868,8 @@ registerModel({
             return Boolean(
                 (this.hasThreadName && this.composer.thread) ||
                 (this.hasFollowers && !this.composer.isLog) ||
-                this.threadView && this.threadView.replyingToMessageView
+                (this.threadView && this.threadView.replyingToMessageView) ||
+                this.linkPreviewListView
             );
         },
         /**
@@ -1210,6 +1218,7 @@ registerModel({
             return {
                 attachment_ids: this.composer.attachments.map(attachment => attachment.id),
                 body,
+                link_preview_ids: this.composer.linkPreviews.map(linkPreview => linkPreview.id),
                 message_type: 'comment',
                 partner_ids: this.composer.recipients.map(partner => partner.id),
             };
@@ -1357,7 +1366,32 @@ registerModel({
                 return insertAndReplace();
             }
             return clear();
-        }
+        },
+        async performRPCLinkPreview(urls) {
+            const linkPreviews = await this.messaging.rpc({
+                route: '/mail/link_preview',
+                params: { urls },
+            }, { shadow: true });
+            return linkPreviews;
+        },
+        /**
+         * Try to fetch link preview when urls are inserted inside the composer.
+         */
+        async refreshLinkPreview(text) {
+            const urls = text.match(urlRegexp) || false;
+            if (!urls) {
+                return;
+            }
+            const existingUrls = this.composer.linkPreviews.map(att => att.url);
+            let filteredUrls = urls.filter(url => !existingUrls.includes(url));
+            if (this.composer.isPostingMessage) {
+                filteredUrls = filteredUrls.filter(
+                    url => !this.composer.linkPreviewsRemovedUrls.includes(url)
+                );
+            }
+            const linkPreviews = await this.performRPCLinkPreview(filteredUrls);
+            this.composer.update({ linkPreviews });
+        },
     },
     fields: {
         /**
@@ -1509,6 +1543,11 @@ registerModel({
         }),
         isFocused: attr({
             default: false,
+        }),
+        linkPreviewListView: one('LinkPreviewListView', {
+            default: insertAndReplace(),
+            inverse: 'composerView',
+            isCausal: true,
         }),
         /**
          * Determines if we are in the Discuss view.
