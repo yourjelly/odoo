@@ -269,9 +269,8 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
         // Observe changes to mark dirty structures and fields.
         this.observer = new MutationObserver(records => {
+            records = this.wysiwyg.odooEditor.filterMutationRecords(records);
             for (const record of records) {
-                if (!this.wysiwyg.odooEditor.filterMutationRecord(record)) continue;
-
                 const $savable = $(record.target).closest(this.savableSelector);
 
                 this.wysiwyg.odooEditor.observerUnactive();
