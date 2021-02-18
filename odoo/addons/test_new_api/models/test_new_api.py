@@ -1277,3 +1277,31 @@ class TriggerRight(models.Model):
     def _compute_left_size(self):
         for record in self:
             record.left_size = len(record.left_ids)
+
+
+class DomainCoModel(models.Model):
+    _name = 'test_new_api.domain_field_comodel'
+    _description = 'Test model on which the Domain field will be tested'
+
+    foo = fields.Integer()
+    bar = fields.Char()
+
+
+class DomainField(models.Model):
+    _name = 'test_new_api.domain_field_model'
+    _description = 'Test model for testing the features of the Domain field'
+
+    foo = fields.Domain(model='test_new_api.domain_field_comodel')
+    is_in_domain = fields.Boolean(compute='_compute_is_in_domain')
+    bar = fields.Domain()
+    bar_qty = fields.Integer(compute='_compute_bar_qty')
+
+    @api.depends('foo')
+    def _compute_is_in_domain(self):
+        for rec in self:
+            rec.is_in_domain = any(self.env['test_new_api.domain_field_comodel'].search(rec.foo))
+
+    @api.depends('bar')
+    def _compute_bar_qty(self):
+        for rec in self:
+            rec.bar_qty = self.env['test_new_api.domain_field_model'].search(rec.bar)

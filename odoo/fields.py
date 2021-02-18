@@ -7,6 +7,7 @@ from collections import defaultdict
 from datetime import date, datetime, time
 from operator import attrgetter
 from xmlrpc.client import MAXINT
+import ast
 import itertools
 import logging
 import base64
@@ -1650,6 +1651,22 @@ class Char(_String):
         if value is None or value is False:
             return None
         return pycompat.to_text(value)[:self.size]
+
+
+class Domain(Char):
+
+    type = 'domain'
+
+    model = None
+    model_field = None
+
+    def convert_to_record(self, value, record):
+        return ast.literal_eval(value or "[]")
+
+    _related_model = property(attrgetter('model'))
+    _related_model_field = property(attrgetter('size'))
+    _description_model = property(attrgetter('model'))
+    _description_model_field = property(attrgetter('size'))
 
 
 class Text(_String):

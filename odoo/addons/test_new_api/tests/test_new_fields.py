@@ -3291,3 +3291,49 @@ class TestUnlinkConstraints(common.TransactionCase):
         # should fail since it's at_uninstall=True
         with self.assertRaises(ValueError, msg="You didn't say if you wanted it crudo or cotto..."):
             self.undeletable_foo_uninstall.unlink()
+
+
+@common.tagged("test_domain_field")
+class TestDomainField(common.TransactionCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.Model = cls.env['test_new_api.domain_field_model']
+        cls.CoModel = cls.env['test_new_api.domain_field_comodel']
+
+    def test_default_init(self):
+        # test that a Domain field with no initial value can plug into a domain-consuming function
+        # i.e. that it returns [] and not False, so that Model.search(my_rec.my_domain_field)
+        # will always work
+        domain_rec = self.Model.create({})
+        for i in range(10):
+            self.CoModel.create({'foo': i})
+        records_foo = self.CoModel.search(domain_rec.foo).mapped('foo')
+        self.assertEqual(records_foo, list(range(10)))
+
+    def test_str_to_list_conversion(self):
+        domain_rec = self.Model.create({'foo': "[('foo', '=', 69)]"})
+        self.assertEqual(domain_rec.foo, [('foo', '=', 69)])
+
+        domain_rec.foo = "[]"
+        self.assertEqual(domain_rec.foo, [])
+
+    def test_domain_explicit_model(self):
+        rec1 = self.CoModel.create({'foo': 1})
+        rec2 = self.CoModel.create({'foo': 2})
+
+        # two CoModel records with foo values 1 and 2, so the domain shouldn't return any records
+        domain_rec = self.Model.create({'foo': "[('foo', '=', 3)]"})
+        self.assertFalse(domain_rec.is_in_domain)
+
+        # one CoModel record with foo value 2 so is_in_domain should return True
+        domain_rec = self.Model.create({'foo': "[('foo', '=', 2)]"})
+        self.assertTrue(domain_rec.is_in_domain)
+
+        # one CoModel record with foo value 1 so is_in_domain should return True
+        domain_rec = self.Model.create({'foo': "[('foo', '=', 1)]"})
+        self.assertTrue(domain_rec.is_in_domain)
+
+    def test_domain_implicit_model(self):
+        ...
