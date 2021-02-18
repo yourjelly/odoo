@@ -74,6 +74,7 @@ tour.register('rte_translator', {
     trigger: '[data-oe-translation-id]',
 }, {
     content: "translate text",
+    extra_trigger: '.editor_started',
     trigger: '#wrap p font:first',
     run: function (action_helper) {
         action_helper.text('translated french text');
