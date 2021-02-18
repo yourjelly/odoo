@@ -291,6 +291,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
             attributeOldValue: true,
             characterData: true,
         });
+        $('body').addClass('editor_started');
     },
     /**
      * Call preventDefault of an event.
