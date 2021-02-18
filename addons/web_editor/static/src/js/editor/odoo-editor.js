@@ -2131,6 +2131,8 @@ var exportVariable = (function (exports) {
             dom.oid = 1; // convention: root node is ID 1
             this.dom = this.options.toSanitize ? sanitize(dom) : dom;
             this.resetHistory();
+            window.h = this.history;
+            window.editor = this;
             this.undos = new Map();
 
             // set contenteditable before clone as FF updates the content at this point
@@ -2299,8 +2301,9 @@ var exportVariable = (function (exports) {
         }
 
         observerApply(destel, records) {
+            window.h = this.history;
+            records = this.filterMutationRecords(records);
             for (let record of records) {
-                if (!this.filterMutationRecord(record)) continue;
                 switch (record.type) {
                     case 'characterData': {
                         this.history[this.history.length - 1].dom.push({
@@ -2369,14 +2372,27 @@ var exportVariable = (function (exports) {
                 }
             }
         }
-        filterMutationRecord(record) {
-            // discard attribute mutations that gets back to the same value.
-            if (
-                record.type === 'attribute' &&
-                record.oldValue === record.target.getAttribute(record.attributeName)
-            )
-                return false;
-            return true;
+        filterMutationRecords(records) {
+            const attributeCache = new Map();
+            const filteredRecords = [];
+
+            for (const record of records) {
+                if (record.type === 'attributes') {
+                    attributeCache.set(record.target, attributeCache.get(record.target) || {});
+                    if (
+                        typeof attributeCache.get(record.target)[record.attributeName] === 'undefined'
+                    ) {
+                        const oldValue = record.oldvalue === undefined ? null : record.oldValue;
+                        attributeCache.get(record.target)[record.attributeName] =
+                            oldValue !== record.target.getAttribute(record.attributeName);
+                    }
+                    if (!attributeCache.get(record.target)[record.attributeName]) {
+                        continue;
+                    }
+                }
+                filteredRecords.push(record);
+            }
+            return filteredRecords;
         }
 
         resetHistory() {
@@ -3203,11 +3219,13 @@ var exportVariable = (function (exports) {
                     paragraphDropdownButton.classList.toggle(newClass, isStateTrue);
                 }
             }
-            const closestsStartContainer = closestElement(sel.getRangeAt(0).startContainer, '*');
-            const selectionStartStyle = getComputedStyle(closestsStartContainer);
-            const fontSizeValue = this.toolbar.querySelector('#fontSizeCurrentValue');
-            if (fontSizeValue) {
-                fontSizeValue.innerHTML = /\d+/.exec(selectionStartStyle.fontSize).pop();
+            if (sel.rangeCount) {
+                const closestsStartContainer = closestElement(sel.getRangeAt(0).startContainer, '*');
+                const selectionStartStyle = getComputedStyle(closestsStartContainer);
+                const fontSizeValue = this.toolbar.querySelector('#fontSizeCurrentValue');
+                if (fontSizeValue) {
+                    fontSizeValue.innerHTML = /\d+/.exec(selectionStartStyle.fontSize).pop();
+                }
             }
             this._updateColorpickerLabels();
             let block = closestBlock(sel.anchorNode);
@@ -3222,7 +3240,9 @@ var exportVariable = (function (exports) {
                 ['checklist', 'CL', true],
             ]) {
                 const button = this.toolbar.querySelector('#' + style);
-                if (button) {
+                if (button && !block) {
+                    button.classList.toggle('active', false);
+                } else if (button) {
                     const isActive = isList
                         ? block.tagName === 'LI' && getListMode(block.parentElement) === tag
                         : block.tagName === tag;
@@ -3253,8 +3273,9 @@ var exportVariable = (function (exports) {
             const hiliteColorInput = this.toolbar.querySelector('#hiliteColor input');
             if (hiliteColorInput) {
                 const sel = this.document.defaultView.getSelection();
-                const startContainer = sel.getRangeAt(0).startContainer;
-                let closestBgColor = closestElement(startContainer, '[style*="background-color"]');
+                const startContainer = sel.rangeCount && sel.getRangeAt(0).startContainer;
+                let closestBgColor =
+                    startContainer && closestElement(startContainer, '[style*="background-color"]');
                 const hasBgColorStyle = !!closestBgColor;
                 closestBgColor = closestBgColor || closestElement(startContainer);
                 const hiliteColor = hasBgColorStyle
@@ -3401,14 +3422,15 @@ var exportVariable = (function (exports) {
                 if (this._applyCommand('indentList', ev.shiftKey ? 'outdent' : 'indent')) {
                     ev.preventDefault();
                 }
+            } else if (ev.key === 'Z' && ev.ctrlKey) {
+                console.log('redo');
+                // Ctrl-Y
+                ev.preventDefault();
+                this.historyRedo();
             } else if (ev.key === 'z' && ev.ctrlKey) {
                 // Ctrl-Z
                 ev.preventDefault();
                 this.historyUndo();
-            } else if (ev.key === 'y' && ev.ctrlKey) {
-                // Ctrl-Y
-                ev.preventDefault();
-                this.historyRedo();
             }
         }
         /**
