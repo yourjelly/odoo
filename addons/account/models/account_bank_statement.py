@@ -461,13 +461,13 @@ class AccountBankStatement(models.Model):
         return {
             'name': _('Journal Entries'),
             'view_mode': 'tree',
-            'res_model': 'account.move',
-            'view_id': False,
-            'view_name': 'account.bank.statement.move.tree',
+            'res_model': 'account.move.line',
+            'view_id': self.env.ref('account.view_move_line_tree_grouped_bank_cash').id,
             'type': 'ir.actions.act_window',
-            'domain': [('id', 'in', self.line_ids.move_id.ids)],
+            'domain': [('move_id', 'in', self.line_ids.move_id.ids)],
             'context': {
                 'journal_id': self.journal_id.id,
+                'group_by': 'move_id',
             }
         }
 
