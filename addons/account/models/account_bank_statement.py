@@ -7,6 +7,7 @@ from odoo.tools import float_compare, float_round, float_repr
 from odoo.tools.misc import formatLang, format_date
 from odoo.exceptions import UserError, ValidationError
 
+
 import time
 import math
 import base64
