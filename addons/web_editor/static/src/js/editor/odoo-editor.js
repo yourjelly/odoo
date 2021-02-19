@@ -2437,6 +2437,7 @@ var exportVariable = (function (exports) {
                 dom: [],
             });
             this._recordHistoryCursor();
+            this.dispatchEvent(new Event('historyStep'));
         }
 
         // apply changes according to some records
@@ -2479,7 +2480,6 @@ var exportVariable = (function (exports) {
                     }
                 }
             }
-            this.dispatchEvent(new Event('historyApply'));
         }
 
         // send changes to server
