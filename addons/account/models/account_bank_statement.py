@@ -460,9 +460,10 @@ class AccountBankStatement(models.Model):
     def button_journal_entries(self):
         return {
             'name': _('Journal Entries'),
-            'view_mode': 'tree,form',
+            'view_mode': 'tree',
             'res_model': 'account.move',
             'view_id': False,
+            'view_name': 'account.bank.statement.move.tree',
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', self.line_ids.move_id.ids)],
             'context': {
