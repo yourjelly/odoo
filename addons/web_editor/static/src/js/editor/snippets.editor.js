@@ -2134,11 +2134,14 @@ var SnippetsMenu = Widget.extend({
                     );
                     return dragSnip;
                 },
-                start: function () {
+                start: function (ev, ui) {
                     self.$el.find('.oe_snippet_thumbnail').addClass('o_we_already_dragging');
 
                     dropped = false;
                     $snippet = $(this);
+                    const $wrapwrap = $("#wrapwrap");
+                    const initalScrollTop = $wrapwrap[0].scrollTop
+                    $snippet.css("margin-top",  (ui.offset.top - ui.position.top) + "px");
                     var $baseBody = $snippet.find('.oe_snippet_body');
                     var $selectorSiblings = $();
                     var $selectorChildren = $();
@@ -2203,7 +2206,8 @@ var SnippetsMenu = Widget.extend({
 
                     // Trigger a scroll on the draggable element so that jQuery updates
                     // the position of the drop zones.
-                    self.draggableComponent.$scrollTarget.on('scroll.scrolling_element', function () {
+                    self.draggableComponent.$scrollTarget.on('scroll.scrolling_element', function (e) {
+                        $snippet.css("margin-top",  (ui.offset.top - ui.position.top + $wrapwrap[0].scrollTop - initalScrollTop) + "px");
                         self.$el.trigger('scroll');
                     });
 
@@ -2223,7 +2227,6 @@ var SnippetsMenu = Widget.extend({
                     }
 
                     self.getEditableArea().find('.oe_drop_zone').droppable('destroy').remove();
-
                     if (dropped) {
                         var prev = $toInsert.first()[0].previousSibling;
                         var next = $toInsert.last()[0].nextSibling;
