@@ -38,8 +38,9 @@ class ChatRoomMixin(models.AbstractModel):
             if any(values.get(fmatch[0]) for fmatch in self.ROOM_CONFIG_FIELDS) and not values.get('chat_room_id'):
                 if values.get('room_name'):
                     values['room_name'] = self._jitsi_sanitize_name(values['room_name'])
-                room_values = dict((fmatch[1], values.pop(fmatch[0])) for fmatch in self.ROOM_CONFIG_FIELDS if values.get(fmatch[0]))
+                room_values = {'name': values.get('room_name'), 'max_capacity': values.get('room_max_capacity')}
                 values['chat_room_id'] = self.env['chat.room'].create(room_values).id
+                values['room_max_capacity'] = self.env['chat.room'].create(room_values).max_capacity
         return super(ChatRoomMixin, self).create(values_list)
 
     def write(self, values):
@@ -59,6 +60,7 @@ class ChatRoomMixin(models.AbstractModel):
             if 'room_name' not in default:
                 chat_room_default['name'] = self._jitsi_sanitize_name(self.chat_room_id.name)
             default['chat_room_id'] = self.chat_room_id.copy(default=chat_room_default).id
+            default['room_max_capacity'] = self.chat_room_id.max_capacity
         return super(ChatRoomMixin, self).copy_data(default=default)
 
     def unlink(self):

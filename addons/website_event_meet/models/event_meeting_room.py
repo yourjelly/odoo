@@ -14,6 +14,12 @@ class EventMeetingRoom(models.Model):
         'website.published.mixin',
     ]
 
+    @api.model
+    def default_get(self, fields):
+        res = super(EventMeetingRoom, self).default_get(fields)
+        res['room_max_capacity'] = '8'
+        return res
+
     name = fields.Char("Topic", required=True, translate=True)
     active = fields.Boolean('Active', default=True)
     is_published = fields.Boolean(copy=True)  # make the inherited field copyable
