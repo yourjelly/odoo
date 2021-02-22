@@ -17,7 +17,6 @@
     <template id="assets_mail_themes">
         <link rel="stylesheet" type="text/scss" href="/mass_mailing/static/src/scss/themes/theme_basic.scss"/>
         <link rel="stylesheet" type="text/scss" href="/mass_mailing/static/src/scss/themes/theme_default.scss"/>
-        <t t-call="mass_mailing.mass_mailing_mail_style"/>
     </template>
 
     <template id="assets_mail_themes_edition"> <!-- maybe to remove and convert into a field dumy with attr invisible if the template is not selected -->
@@ -29,6 +28,7 @@
 
     <template id="iframe_css_assets_edit" groups="base.group_user">
         <t t-call-assets="mass_mailing.assets_mail_themes" t-js="false"/>
+        <t t-call="mass_mailing.mass_mailing_mail_style"/>
         <t t-call-assets="mass_mailing.assets_mail_themes_edition" t-js="false"/>
     </template>
 
@@ -51,6 +51,12 @@
     </template>
 
     <template id="mass_mailing_mail_style">
+        <!--
+        Reference: https://litmus.com/community/learning/24-how-to-code-a-responsive-email-from-scratch
+        https://www.campaignmonitor.com/css/link-element/link-in-head/
+
+        This template is meant to put inline CSS into an email's head
+        -->
         <style>
             @media screen and (max-width: 768px) {
                 .o_mail_col_mv {
