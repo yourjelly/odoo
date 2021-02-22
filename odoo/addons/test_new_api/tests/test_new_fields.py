@@ -3309,31 +3309,80 @@ class TestDomainField(common.TransactionCase):
         domain_rec = self.Model.create({})
         for i in range(10):
             self.CoModel.create({'foo': i})
-        records_foo = self.CoModel.search(domain_rec.foo).mapped('foo')
+        records_foo = self.CoModel.search(domain_rec.domain_foo).mapped('foo')
         self.assertEqual(records_foo, list(range(10)))
 
     def test_str_to_list_conversion(self):
-        domain_rec = self.Model.create({'foo': "[('foo', '=', 69)]"})
-        self.assertEqual(domain_rec.foo, [('foo', '=', 69)])
+        # test that a str domain converts to a list when reading from record
+        domain_rec = self.Model.create({'domain_foo': "[('foo', '=', 69)]"})
+        self.assertEqual(domain_rec.domain_foo, [('foo', '=', 69)])
 
-        domain_rec.foo = "[]"
-        self.assertEqual(domain_rec.foo, [])
+        domain_rec.domain_foo = "[]"
+        self.assertEqual(domain_rec.domain_foo, [])
+
+    def test_create(self):
+        # test that creating with str and list as values for the domain works
+        rec1 = self.Model.create({'domain_foo': "[('foo', '=', 92)]"})
+        rec2 = self.Model.create({'domain_foo': [('foo', '=', 92)]})
+
+        self.assertEqual(rec1.domain_foo, rec2.domain_foo)
+
+    def test_write(self):
+        # test that writing to a Domain field with str and list as values for the domain works
+        rec1 = self.Model.create({})
+        rec2 = self.Model.create({})
+
+        rec1.domain_foo = "[('foo', '=', 2077)]"
+        rec2.domain_foo = [('foo', '=', 2077)]
+
+        self.assertEqual(rec1.domain_foo, rec2.domain_foo)
+
+    def test_domain_validation(self):
+        # test that when assigning a domain field the domain is valid for the target model
+        with self.assertRaises(ValueError):
+            self.Model.create({'domain_foo': "[('non_existing_field', '=', 42)]"})
+
+        rec = self.Model.create({})
+        with self.assertRaises(ValueError):
+            rec.domain_foo = [('non_existing_field', '=', 42)]
 
     def test_domain_explicit_model(self):
         rec1 = self.CoModel.create({'foo': 1})
         rec2 = self.CoModel.create({'foo': 2})
 
         # two CoModel records with foo values 1 and 2, so the domain shouldn't return any records
-        domain_rec = self.Model.create({'foo': "[('foo', '=', 3)]"})
+        domain_rec = self.Model.create({'domain_foo': "[('foo', '=', 3)]"})
         self.assertFalse(domain_rec.is_in_domain)
 
         # one CoModel record with foo value 2 so is_in_domain should return True
-        domain_rec = self.Model.create({'foo': "[('foo', '=', 2)]"})
+        domain_rec = self.Model.create({'domain_foo': "[('foo', '=', 2)]"})
         self.assertTrue(domain_rec.is_in_domain)
 
         # one CoModel record with foo value 1 so is_in_domain should return True
-        domain_rec = self.Model.create({'foo': "[('foo', '=', 1)]"})
+        domain_rec = self.Model.create({'domain_foo': "[('foo', '=', 1)]"})
         self.assertTrue(domain_rec.is_in_domain)
 
     def test_domain_implicit_model(self):
-        ...
+        # by default, if no model or model_field are given in the field's declaration, the ORM
+        # will automatically assume it's for the model it's declared in
+        self.assertEqual(self.Model._fields['domain_bar'].model, self.Model._name)
+
+
+@common.tagged('test_domain_field_advanced')
+class TestDomainFieldSetup(common.TransactionCase):
+    def test_model_validation(self):
+        # test that the model or model_field given in the Domain field declaration is valid
+        self.addCleanup(self.registry.model_cache.clear)
+
+        class Foo(models.Model):
+            _module = None
+            _name = _description = 'test_new_api.domain_field_model_validation'
+
+            domain = fields.Domain(model='this_model_doesnt_exist')
+
+        Foo._build_model(self.registry, self.env.cr)
+        self.addCleanup(self.registry.__delitem__, Foo._name)
+
+        with self.assertRaises(ValueError):
+            self.registry.setup_models(self.env.cr)
+

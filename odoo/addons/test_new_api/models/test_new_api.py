@@ -1291,17 +1291,18 @@ class DomainField(models.Model):
     _name = 'test_new_api.domain_field_model'
     _description = 'Test model for testing the features of the Domain field'
 
-    foo = fields.Domain(model='test_new_api.domain_field_comodel')
+    domain_foo = fields.Domain(model='test_new_api.domain_field_comodel')
     is_in_domain = fields.Boolean(compute='_compute_is_in_domain')
-    bar = fields.Domain()
+    domain_bar = fields.Domain()
     bar_qty = fields.Integer(compute='_compute_bar_qty')
 
-    @api.depends('foo')
+    @api.depends('domain_foo')
     def _compute_is_in_domain(self):
         for rec in self:
-            rec.is_in_domain = any(self.env['test_new_api.domain_field_comodel'].search(rec.foo))
+            rec.is_in_domain = any(self.env['test_new_api.domain_field_comodel'].search(rec.domain_foo))
 
-    @api.depends('bar')
+    @api.depends('domain_bar')
     def _compute_bar_qty(self):
         for rec in self:
-            rec.bar_qty = self.env['test_new_api.domain_field_model'].search(rec.bar)
+            rec.bar_qty = self.env['test_new_api.domain_field_model'].search(rec.domain_bar)
+

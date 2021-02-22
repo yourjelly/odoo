@@ -361,7 +361,12 @@ class Field(MetaField('DummyField', (object,), {})):
         return attrs
 
     def _setup_attrs(self, model, name):
-        """ Initialize the field parameter attributes. """
+        """
+        Initialize the field parameter attributes.
+
+        :param model: instance of the model that defines the field to set up.
+        :param str name: name of the field to set up.
+        """
         attrs = self._get_attrs(model, name)
         # validate arguments
         for key in attrs:
@@ -1659,6 +1664,27 @@ class Domain(Char):
 
     model = None
     model_field = None
+
+    def _get_attrs(self, model, name):
+        attrs = super()._get_attrs(model, name)
+        if not attrs.get('model', False) and not attrs.get('model_field', False):
+            # if no model or model_field are defined in the field declaration, use the model in
+            # which the field is defined
+            attrs['model'] = model._name
+        return attrs
+
+    def _setup_attrs(self, model, name):
+        super()._setup_attrs(model, name)
+        for field in reversed(resolve_mro(model, name, self._can_setup_from)):
+            if 'model' in field.args:
+                domain_model = field.args['model']
+                if domain_model not in model.env:
+                    raise ValueError(
+                        f"Field {name} defined in model {model._name} contains a wrong value for "
+                        f"the model attribute: {self.model}, {self.model} is not a valid model "
+                        f"name.\nMake sure that {self.model} exists and that the module that "
+                        f"implements it is installed."
+                    )
 
     def convert_to_record(self, value, record):
         return ast.literal_eval(value or "[]")
