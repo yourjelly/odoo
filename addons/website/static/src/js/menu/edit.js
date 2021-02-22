@@ -270,18 +270,20 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         // Observe changes to mark dirty structures and fields.
         this.observer = new MutationObserver(records => {
             records = this.wysiwyg.odooEditor.filterMutationRecords(records);
+            this.wysiwyg.odooEditor.automaticStepUnactive('dirty_mutations');
+
             for (const record of records) {
                 const $savable = $(record.target).closest(this.savableSelector);
 
-                this.wysiwyg.odooEditor.observerUnactive();
                 $savable.not('.o_dirty').each(function() {
                     const $el = $(this);
                     if (!$el.closest('[data-oe-readonly]').length) {
                         $el.addClass('o_dirty');
                     }
                 });
-                this.wysiwyg.odooEditor.observerActive();
             }
+
+            this.wysiwyg.odooEditor.automaticStepActive('dirty_mutations');
         });
 
         this.observer.observe(document.body, {
