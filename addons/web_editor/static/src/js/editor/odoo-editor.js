@@ -644,7 +644,7 @@ var exportVariable = (function (exports) {
     }
 
     function isUnbreakable(node) {
-        if (!node || node.nodeType === Node.TEXT_NODE) {
+        if (!node || node.nodeType === Node.TEXT_NODE || !node.isContentEditable) {
             return false;
         }
         if (node.nodeType !== Node.ELEMENT_NODE) {
