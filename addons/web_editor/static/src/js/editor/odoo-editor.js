@@ -2488,7 +2488,7 @@ var exportVariable = (function (exports) {
                     if (
                         typeof attributeCache.get(record.target)[record.attributeName] === 'undefined'
                     ) {
-                        const oldValue = record.oldvalue === undefined ? null : record.oldValue;
+                        const oldValue = record.oldValue === undefined ? null : record.oldValue;
                         attributeCache.get(record.target)[record.attributeName] =
                             oldValue !== record.target.getAttribute(record.attributeName);
                     }
