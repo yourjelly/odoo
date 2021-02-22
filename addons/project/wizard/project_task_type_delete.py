@@ -54,7 +54,7 @@ class ProjectTaskTypeDelete(models.TransientModel):
     def _get_action(self):
         project_id = self.env.context.get('default_project_id')
 
-        # TODO mba: check pivot row groupby on m2m
+        # TODO: support m2m pivot_row_groupby
         if project_id:
             action = self.env["ir.actions.actions"]._for_xml_id("project.action_view_task")
             action['domain'] = [('project_id', '=', project_id)]

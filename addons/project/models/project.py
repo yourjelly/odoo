@@ -600,10 +600,12 @@ class Task(models.Model):
     planned_hours = fields.Float("Initially Planned Hours", help='Time planned to achieve this task (including its sub-tasks).', tracking=True)
     subtask_planned_hours = fields.Float("Sub-tasks Planned Hours", compute='_compute_subtask_planned_hours',
         help="Sum of the time planned of all the sub-tasks linked to this task. Usually less than or equal to the initially planned time of this task.")
+    # TODO: support tracking on m2m
     user_ids = fields.Many2many('res.users', 'project_task_assigned_user_rel',
-        string='Assignees',
+        string='Assignees', check_company=True,
         default=lambda self: [Command.link(self.env.uid)],
         index=True, tracking=True)
+    current_user_id = fields.Many2one('res.users', compute='_compute_current_user_id', store=False, readonly=True)
     partner_id = fields.Many2one('res.partner',
         string='Customer',
         compute='_compute_partner_id', store=True, readonly=False,
@@ -970,6 +972,13 @@ class Task(models.Model):
             else:
                 task.stage_id = False
 
+    @api.depends_context('uid')
+    @api.depends('user_ids')
+    def _compute_current_user_id(self):
+        uid = self.env.uid
+        for task in self:
+            task.current_user_id = uid if uid in task.user_ids.ids else False
+
     @api.returns('self', lambda value: value.id)
     def copy(self, default=None):
         if default is None:
@@ -1206,7 +1215,6 @@ class Task(models.Model):
 
     def _track_subtype(self, init_values):
         self.ensure_one()
-        # TODO mba: track user_ids m2m as it's not working in standard way....
         if 'kanban_state_label' in init_values and self.kanban_state == 'blocked':
             return self.env.ref('project.mt_task_blocked')
         elif 'kanban_state_label' in init_values and self.kanban_state == 'done':

@@ -11,7 +11,6 @@ class ReportProjectTaskUser(models.Model):
     _auto = False
 
     name = fields.Char(string='Task Title', readonly=True)
-    # TODO mba: convert to m2m or update query.
     user_id = fields.Many2one('res.users', string='Assigned To', readonly=True)
     date_assign = fields.Datetime(string='Assignment Date', readonly=True)
     date_end = fields.Datetime(string='Ending Date', readonly=True)
@@ -49,6 +48,7 @@ class ReportProjectTaskUser(models.Model):
                     t.date_end as date_end,
                     t.date_last_stage_update as date_last_stage_update,
                     t.date_deadline as date_deadline,
+                    user_rel.res_users_id as user_id,
                     t.project_id,
                     t.priority,
                     t.name as name,
@@ -77,7 +77,8 @@ class ReportProjectTaskUser(models.Model):
                     t.name,
                     t.company_id,
                     t.partner_id,
-                    t.stage_id
+                    t.stage_id,
+                    user_rel.res_users_id
         """
         return group_by_str
 
@@ -87,6 +88,7 @@ class ReportProjectTaskUser(models.Model):
             CREATE view %s as
               %s
               FROM project_task t
+              LEFT JOIN project_task_assigned_user_rel user_rel ON user_rel.project_task_id = t.id
                 WHERE t.active = 'true'
                 %s
         """ % (self._table, self._select(), self._group_by()))

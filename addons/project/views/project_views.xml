@@ -53,6 +53,7 @@
             </field>
         </record>
 
+        <!-- TODO: support m2m pivot_row_groupby -->
         <record id="act_project_project_2_project_task_all" model="ir.actions.act_window">
             <field name="name">Tasks</field>
             <field name="res_model">project.task</field>
@@ -649,9 +650,10 @@
                     <field name="repeat_show_week" invisible="1" />
                     <field name="repeat_show_month" invisible="1" />
                     <field name="recurrence_id" invisible="1" />
+                    <field name="current_user_id" invisible="1"/>
                     <header>
                         <button name="action_assign_to_me" string="Assign to Me" type="object" class="oe_highlight"
-                            attrs="{'invisible' : [('user_ids', '!=', [])]}"/>
+                            attrs="{'invisible' : [('current_user_id', '!=', False)]}"/>
                         <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '=', False)]}"/>
                     </header>
                     <div class="text-center alert alert-primary" role="alert" attrs="{'invisible': ['|', ('ribbon_message', '=', False), ('ribbon_message', '=', '')]}">
@@ -827,7 +829,7 @@
                 <form>
                     <group>
                         <field name="name" string = "Task Title"/>
-                        <field name="user_ids" widget="many2many_tags" options="{'no_open': True,'no_create': True}" domain="[('share', '=', False)]"/>
+                        <field name="user_ids" widget="many2many_tags" options="{'no_open': True,'no_create': True}" domain="[('share', '=', False), '|', ('company_id', '=', company_id), ('company_id', '=', False)]"/>
                         <field name="project_id" required="1" invisible="context.get('all_task', 1)"/>
                         <field name="company_id" invisible="1"/>
                         <field name="parent_id" invisible="1"/>
