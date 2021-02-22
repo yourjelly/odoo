@@ -652,7 +652,7 @@ var exportVariable = (function (exports) {
         }
         return (
             isUnremovable(node) || // An unremovable node is always unbreakable.
-            ['THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'SECTION'].includes(node.tagName) ||
+            ['THEAD', 'TBODY', 'TFOOT', 'TR', 'TH', 'TD', 'SECTION', 'DIV'].includes(node.tagName) ||
             node.hasAttribute('t') ||
             node.classList.contains('oe_unbreakable')
         );
@@ -1887,9 +1887,10 @@ var exportVariable = (function (exports) {
 
         const restoreCursor = preserveCursor(this.ownerDocument);
         if (li.parentNode.parentNode.tagName === 'LI') {
-            let toremove = !li.previousElementSibling ? li.parentNode.parentNode : null;
-            let ul = li.parentNode;
-            li.parentNode.parentNode.after(li);
+            const ul = li.parentNode;
+            const shouldRemoveParentLi = !li.previousElementSibling && !ul.previousElementSibling;
+            const toremove = shouldRemoveParentLi ? ul.parentNode : null;
+            ul.parentNode.after(li);
             if (toremove) {
                 if (toremove.classList.contains('oe-nested')) {
                     // <li>content<ul>...</ul></li>
@@ -2479,6 +2480,8 @@ var exportVariable = (function (exports) {
             }
         }
         filterMutationRecords(records) {
+            // Save the first attribute in a cache to compare only the first
+            // attribute record of node to its latest state.
             const attributeCache = new Map();
             const filteredRecords = [];
 
@@ -3180,8 +3183,11 @@ var exportVariable = (function (exports) {
             }
         }
         _bold() {
+            const isAlreadyBold = !getTraversedNodes(this.document)
+                .filter(n => n.nodeType === Node.TEXT_NODE)
+                .find(n => Number.parseInt(getComputedStyle(n.parentElement).fontWeight) < 700);
             this._applyInlineStyle(el => {
-                el.style.fontWeight = 'bold';
+                el.style.fontWeight = isAlreadyBold ? 'normal' : 'bold';
             });
         }
 
@@ -3630,15 +3636,14 @@ var exportVariable = (function (exports) {
                 if (this._applyCommand('indentList', ev.shiftKey ? 'outdent' : 'indent')) {
                     ev.preventDefault();
                 }
-            } else if (ev.key === 'Z' && ev.ctrlKey) {
-                console.log('redo');
-                // Ctrl-Y
-                ev.preventDefault();
-                this.historyRedo();
             } else if (ev.key === 'z' && ev.ctrlKey) {
                 // Ctrl-Z
                 ev.preventDefault();
                 this.historyUndo();
+            } else if (ev.key === 'y' && ev.ctrlKey) {
+                // Ctrl-Y
+                ev.preventDefault();
+                this.historyRedo();
             }
         }
         /**
