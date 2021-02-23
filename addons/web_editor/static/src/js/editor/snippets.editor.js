@@ -1057,6 +1057,7 @@ var SnippetsMenu = Widget.extend({
     init: function (parent, options) {
         this._super.apply(this, arguments);
         options = options || {};
+        this.$body = $((options.document || document).body);
 
         this.options = options;
         if (!this.options.snippets) {
