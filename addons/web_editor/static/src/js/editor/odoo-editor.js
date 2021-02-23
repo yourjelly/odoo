@@ -2225,6 +2225,7 @@ var exportVariable = (function (exports) {
         constructor(dom, options = {}) {
             super();
             this.options = options;
+            window.editor = this;
 
             if (typeof this.options.toSanitize === 'undefined') {
                 this.options.toSanitize = true;
@@ -2242,6 +2243,7 @@ var exportVariable = (function (exports) {
             this.dom = this.options.toSanitize ? sanitize(dom) : dom;
             this.resetHistory();
             this.undos = new Map();
+            this._observerTimeoutUnactive = new Set();
 
             // set contenteditable before clone as FF updates the content at this point
             if (this.options.setContentEditable) {
@@ -2382,6 +2384,13 @@ var exportVariable = (function (exports) {
             return this.collaborate ? objectToNode(obj) : obj;
         }
 
+        automaticStepActive(label) {
+            this._observerTimeoutUnactive.delete(label);
+        }
+        automaticStepUnactive(label) {
+            clearTimeout(this.observerTimeout);
+            this._observerTimeoutUnactive.add(label);
+        }
         observerUnactive() {
             clearTimeout(this.observerTimeout);
             this.observer.disconnect();
@@ -2395,9 +2404,11 @@ var exportVariable = (function (exports) {
             if (!this.observer) {
                 this.observer = new MutationObserver(records => {
                     clearTimeout(this.observerTimeout);
-                    this.observerTimeout = setTimeout(() => {
-                        this.historyStep();
-                    }, 100);
+                    if (this._observerTimeoutUnactive.size === 0) {
+                        this.observerTimeout = setTimeout(() => {
+                            this.historyStep();
+                        }, 100);
+                    }
                     this.observerApply(this.vdom, records);
                 });
             }
@@ -2435,7 +2446,7 @@ var exportVariable = (function (exports) {
                         break;
                     }
                     case 'childList': {
-                        record.addedNodes.forEach((added, index) => {
+                        record.addedNodes.forEach(added => {
                             this.torollback =
                                 this.torollback ||
                                 (containsUnremovable(added) && UNREMOVABLE_ROLLBACK_CODE);
@@ -2446,6 +2457,8 @@ var exportVariable = (function (exports) {
                                 action.append = record.target.oid;
                             } else if (record.nextSibling.oid) {
                                 action.before = record.nextSibling.oid;
+                            } else if (!record.previousSibling && record.target.oid) {
+                                action.prepend = record.target.oid;
                             } else if (record.previousSibling.oid) {
                                 action.after = record.previousSibling.oid;
                             } else {
@@ -2698,6 +2711,8 @@ var exportVariable = (function (exports) {
          * 2: The position has been undone and is considered consumed.
          */
         historyUndo() {
+            // The last step is considered an uncommited draft so always revert it.
+            this.historyRevert(this.history[this.history.length - 1]);
             const pos = this._getNextUndoIndex();
             if (pos >= 0) {
                 // Consider the position consumed.
@@ -2781,7 +2796,7 @@ var exportVariable = (function (exports) {
         }
 
         historySetCursor(step) {
-            if (step.cursor.anchorNode) {
+            if (step.cursor && step.cursor.anchorNode) {
                 const anchorNode = this.idFind(this.dom, step.cursor.anchorNode);
                 const focusNode = step.cursor.focusNode
                     ? this.idFind(this.dom, step.cursor.focusNode)
