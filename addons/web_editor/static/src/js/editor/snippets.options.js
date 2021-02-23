@@ -3750,14 +3750,15 @@ const SnippetOptionWidget = Widget.extend({
                 return;
             }
 
+            // Call widget option methods and update $target
+            await this._select(previewMode, widget);
+
             // If it is not preview mode, the user selected the option for good
             // (so record the action)
             if (shouldRecordUndo) {
                 this.options.wysiwyg.odooEditor.historyStep();
             }
 
-            // Call widget option methods and update $target
-            await this._select(previewMode, widget);
             if (previewMode) {
                 return;
             }
