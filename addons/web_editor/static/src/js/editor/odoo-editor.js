@@ -2225,7 +2225,6 @@ var exportVariable = (function (exports) {
         constructor(dom, options = {}) {
             super();
             this.options = options;
-            window.editor = this;
 
             if (typeof this.options.toSanitize === 'undefined') {
                 this.options.toSanitize = true;
