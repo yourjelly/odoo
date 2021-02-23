@@ -69,6 +69,7 @@ const Wysiwyg = Widget.extend({
             ? this.options.autohideToolbar
             : !options.snippets;
         this.saving_mutex = new concurrency.Mutex();
+        this._onBlur = this._onBlur.bind(this);
     },
     /**
      *
@@ -86,12 +87,7 @@ const Wysiwyg = Widget.extend({
         this.$editable.data('wysiwyg', this);
         this.$editable.data('oe-model', options.recordInfo.res_model);
         this.$editable.data('oe-id', options.recordInfo.res_id);
-        $(document).on('mousedown', this._blur);
-        this.$editable.on('blur', (e) => {
-            if(!e.relatedTarget || !e.relatedTarget.closest('.oe-toolbar')){
-                this.trigger_up('wysiwyg_blur');
-            }
-        });
+        $(document).on('mousedown', this._onBlur);
 
         this.toolbar = new Toolbar(this, this.options.toolbarTemplate);
         await this.toolbar.appendTo(document.createElement('void'));
@@ -160,7 +156,7 @@ const Wysiwyg = Widget.extend({
      * @override
      */
     destroy: function () {
-        $(document).off('mousedown', this._blur);
+        $(document).off('mousedown', this._onBlur);
         const $body = $(document.body);
         $body.off('mousedown', this.resizerMousemove);
         $body.off('mouseup', this.resizerMouseup);
@@ -1083,6 +1079,17 @@ const Wysiwyg = Widget.extend({
             window.location.reload(true);
         }
         return new Promise(function(){});
+    },
+    _onBlur: function (e) {
+        if (
+            e.target.closest('.o_wysiwyg_wrapper') ||
+            e.target.closest('.o_wysiwyg_resizer') ||
+            e.target.closest('.oe-toolbar')
+        ) {
+            return;
+        } else {
+            this.trigger_up('wysiwyg_blur');
+        }
     },
 });
 //--------------------------------------------------------------------------
