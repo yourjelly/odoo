@@ -1270,9 +1270,11 @@ var SnippetsMenu = Widget.extend({
             for (const snippetEditor of this.snippetEditors) {
                 this._mutex.exec(() => snippetEditor.destroy());
             }
-            const target = this.$document[0].getSelection().getRangeAt(0).startContainer.parentElement;
-            console.log("target:", target);
-            this._activateSnippet($(target));
+            const selection = this.$document[0].getSelection();
+            if (selection.rangeCount) {
+                const target = selection.getRangeAt(0).startContainer.parentElement;
+                this._activateSnippet($(target));
+            }
         }, 500);
         this.options.wysiwyg.odooEditor.addEventListener('historyUndo', refreshSnippetEditors);
         this.options.wysiwyg.odooEditor.addEventListener('historyRedo', refreshSnippetEditors);
