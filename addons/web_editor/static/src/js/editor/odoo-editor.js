@@ -2269,6 +2269,9 @@ var exportVariable = (function (exports) {
             if (this.options.toolbar) {
                 this.toolbar = this.options.toolbar;
                 this.toolbar.addEventListener('mousedown', this._onToolbarClick.bind(this));
+                // Ensure anchors in the toolbar don't trigger a hash change.
+                const toolbarAnchors = this.toolbar.querySelectorAll('a');
+                toolbarAnchors.forEach(a => a.addEventListener('click', e => e.preventDefault()));
                 this.tablePicker = this.toolbar.querySelector('.tablepicker');
                 if (this.tablePicker) {
                     this.tablePickerSizeView = this.toolbar.querySelector('.tablepicker-size');
