@@ -2238,6 +2238,9 @@ var exportVariable = (function (exports) {
             // keyboard type detection, happens only at the first keydown event
             this.keyboardType = KEYBOARD_TYPES.UNKNOWN;
 
+            // Wether we should check for unbreakable the next history step.
+            this._checkStepUnbreakable = true;
+
             dom.oid = 1; // convention: root node is ID 1
             this.dom = this.options.toSanitize ? sanitize(dom) : dom;
             this.resetHistory();
@@ -2463,7 +2466,7 @@ var exportVariable = (function (exports) {
                             } else {
                                 return false;
                             }
-                            this.idSet(added, undefined, true);
+                            this.idSet(added, undefined, this._checkStepUnbreakable);
                             action.id = added.oid;
                             action.node = this.serialize(added);
                             this.history[this.history.length - 1].dom.push(action);
@@ -2560,6 +2563,7 @@ var exportVariable = (function (exports) {
                 cursor: {},
                 dom: [],
             });
+            this._checkStepUnbreakable = true;
             this._recordHistoryCursor();
             this.dispatchEvent(new Event('historyStep'));
         }
@@ -2812,6 +2816,10 @@ var exportVariable = (function (exports) {
                     );
                 }
             }
+        }
+        unbreakableStepUnactive() {
+            this.torollback = this.torollback === UNBREAKABLE_ROLLBACK_CODE ? false : this.torollback;
+            this._checkStepUnbreakable = false;
         }
 
         /**
