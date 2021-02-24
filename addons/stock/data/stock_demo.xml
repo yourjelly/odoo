@@ -12,7 +12,7 @@
         </record>
 
 
-        <!-- Resource: stock.quant -->
+        <!-- Resource: stock.quant, i.e. initial inventory -->
 
         <record id="stock_inventory_1" model="stock.quant">
             <field name="product_id" ref="product.product_product_24"/>
@@ -96,6 +96,25 @@
             <field name="location_id" model="stock.location" eval="obj().env.ref('stock.warehouse0').lot_stock_id.id"/>
         </record>
 
+        <function model="stock.quant" name="action_apply_inventory">
+            <function eval="[[('id', 'in', (ref('stock_inventory_1'),
+                                            ref('stock_inventory_2'),
+                                            ref('stock_inventory_3'),
+                                            ref('stock_inventory_4'),
+                                            ref('stock_inventory_5'),
+                                            ref('stock_inventory_6'),
+                                            ref('stock_inventory_6b'),
+                                            ref('stock_inventory_7'),
+                                            ref('stock_inventory_7b'),
+                                            ref('stock_inventory_7c'),
+                                            ref('stock_inventory_7d'),
+                                            ref('stock_inventory_11'),
+                                            ref('stock_inventory_12'),
+                                            ref('stock_inventory_13'),
+                                            ref('stock_inventory_14'),
+                                            ref('stock_inventory_15'),
+                                            ))]]" model="stock.quant" name="search"/>
+        </function>
 
         <!--  Multi Company -->
 
@@ -167,6 +186,10 @@
                     ], limit=1)"
             />
         </record>
+
+        <function model="stock.quant" name="action_apply_inventory">
+            <function eval="[[('id', '=', (ref('stock_inventory_16')))]]" model="stock.quant" name="search"/>
+        </function>
 
         <!-- Activate Lots options as demo data depends on it -->
         <record id="base.group_user" model="res.groups">
