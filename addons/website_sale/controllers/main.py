@@ -200,6 +200,62 @@ class WebsiteSale(http.Controller):
             if not qs or qs.lower() in loc:
                 yield {'loc': loc}
 
+
+    @http.route([
+        '''/shop2''',
+        '''/shop2/page/<int:page>''',
+        '''/shop2/category/<model("product.public.category"):category>''',
+        '''/shop2/category/<model("product.public.category"):category>/page/<int:page>'''
+    ], type='http', auth="public", website=True, sitemap=sitemap_shop)
+    def shop2(self, page=0, category=None, search='', ppg=False, **post):
+        ignore_cache = '''
+           post.get('add_qty')
+           category
+           search
+        '''
+
+        category = request.env['product.public.category']
+        ppg = request.env['website'].get_current_website().shop_ppg or 20
+        ppr = request.env['website'].get_current_website().shop_ppr or 4
+
+        domain = self._get_search_domain(search, category, [])
+        keep = QueryURL('/shop', category=category and int(category), search=search, attrib=[], order=post.get('order'))
+
+        pricelist_context, pricelist = self._get_pricelist_context()
+        request.context = dict(request.context, pricelist=pricelist.id, partner=request.env.user.partner_id)
+
+        url = "/shop"
+
+        Product = request.env['product.template'].with_context(bin_size=True)
+        search_product = Product.search(domain, order=self._get_search_order(post))
+
+        product_count = len(search_product)
+        pager = request.website.pager(url=url, total=product_count, page=page, step=ppg, scope=7, url_args=post)
+        offset = pager['offset']
+
+        products = search_product[offset: offset + ppg]
+
+        layout_mode = request.session.get('website_sale_shop_layout_mode')
+        if not layout_mode:
+            if request.website.viewref('website_sale.products_list_view').active:
+                layout_mode = 'list'
+            else:
+                layout_mode = 'grid'
+
+        values = {
+            'pricelist': pricelist,
+            'pager': pager,
+            'products': products,
+            'bins': TableCompute().process(products, ppg, ppr),
+            'keep': keep,
+            'layout_mode': layout_mode,
+        }
+        if category:
+            values['main_object'] = category
+        return request.render("website_sale.products_cached", values)
+
+
+
     @http.route([
         '''/shop''',
         '''/shop/page/<int:page>''',

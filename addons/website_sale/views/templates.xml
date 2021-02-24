@@ -404,6 +404,521 @@
         </t>
     </template>
 
+
+    <template id="products_cached" name="Products">
+&lt;!DOCTYPE html&gt;
+<html lang="en-US" data-website-id="1" data-oe-company-name="My Company (San Francisco)">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="generator" content="Odoo"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:title" content="Products | My Website"/>
+    <meta property="og:site_name" content="My Company (San Francisco)"/>
+    <meta property="og:url" content="http://127.0.0.1:8069/shop"/>
+    <meta property="og:image" content="http://127.0.0.1:8069/web/image/website/1/logo?unique=b2d68e5"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Products | My Website"/>
+    <meta name="twitter:image" content="http://127.0.0.1:8069/web/image/website/1/logo?unique=b2d68e5"/>
+    <meta name="twitter:site" content="@Odoo"/>
+    <link rel="canonical" href="http://127.0.0.1:8069/shop"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin=""/>
+
+    <title> Shop | My Website </title>
+    <link type="image/x-icon" rel="shortcut icon" href="/web/image/website/1/favicon?unique=b2d68e5"/>
+
+<!-- NOTCACHED START -->
+
+    <t t-call-assets="web.assets_common" t-js="false"/>
+    <t t-call-assets="web.assets_frontend" t-js="false"/>
+    <script type="text/javascript">
+        odoo.session_info = <t t-raw="json.dumps(request.env['ir.http'].get_frontend_session_info())"/>;
+        if (!/(^|;\s)tz=/.test(document.cookie)) {
+            const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.cookie = `tz=${userTZ}; path=/`;
+        }
+    </script>
+    <t t-call-assets="web.assets_common_minimal_js" t-css="false" defer_load="True"/>
+    <t t-call-assets="web.assets_frontend_minimal_js" t-css="false" defer_load="True"/>
+    <t t-call="web.conditional_assets_tests"/>
+    <t t-call-assets="web.assets_common_lazy" t-css="false" lazy_load="True"/>
+    <t t-call-assets="web.assets_frontend_lazy" t-css="false" lazy_load="True"/>
+<!-- NOTCACHED END -->
+
+</head>
+<body class="">
+    <div id="wrapwrap" class="   ">
+        <header id="top" data-anchor="true" data-name="Header" class="  o_header_standard">
+            <nav data-name="Navbar" class="navbar navbar-expand-lg navbar-light o_colored_level o_cc shadow-sm">
+                <div id="top_menu_container" class="container justify-content-start justify-content-lg-between">
+                    <a href="/" class="navbar-brand logo mr-4">
+                        <span role="img" aria-label="Logo of My Website" title="My Website"><img src="/web/image/website/1/logo/My%20Website?unique=b2d68e5" class="img img-fluid" alt="My Website" loading="lazy"/></span>
+                    </a>
+                    <button type="button" data-toggle="collapse" data-target="#top_menu_collapse" class="navbar-toggler ml-auto">
+                        <span class="navbar-toggler-icon o_not_editable"></span>
+                    </button>
+                    <div id="top_menu_collapse" class="collapse navbar-collapse order-last order-lg-0">
+                        <ul id="top_menu" class="nav navbar-nav o_menu_loading flex-grow-1">
+                            <li class="nav-item">
+                                <a role="menuitem" href="/" class="nav-link ">
+                                    <span>Home</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a role="menuitem" href="/shop" class="nav-link active">
+                                    <span>Shop</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a role="menuitem" href="/contactus" class="nav-link ">
+                                    <span>Contact us</span>
+                                </a>
+                            </li>
+<!-- NOTCACHED START -->
+                        <t t-call="portal.placeholder_user_sign_in">
+                            <t t-set="_item_class" t-value="'nav-item'"/>
+                            <t t-set="_link_class" t-value="'nav-link'"/>
+                        </t>
+                        <t t-call="portal.user_dropdown">
+                            <t t-set="_user_name" t-value="true"/>
+                            <t t-set="_item_class" t-value="'nav-item dropdown'"/>
+                            <t t-set="_link_class" t-value="'nav-link'"/>
+                            <t t-set="_dropdown_menu_class" t-value="'dropdown-menu-right'"/>
+                        </t>
+
+<!-- NOTCACHED END -->
+
+                        </ul>
+                    </div>
+                    <div class="oe_structure oe_structure_solo" id="oe_structure_header_default_1">
+                        <section class="s_text_block" data-snippet="s_text_block" data-name="Text">
+                            <div class="container">
+                                <a href="/contactus" class="btn btn-primary ml-4">Contact Us</a>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <main>
+            <div id="wrap" class="js_sale">
+                <div class="oe_structure oe_empty" id="oe_structure_website_sale_products_1"></div>
+                <div class="container oe_website_sale">
+                    <div class="products_pager form-inline flex-md-nowrap justify-content-between justify-content-md-center">
+                        <form method="get" class="o_wsale_products_searchbar_form o_wait_lazy_js w-100 w-md-auto mt-2" action="/shop">
+                            <div role="search" class="input-group">
+                                <input type="search" name="search" class="search-query form-control oe_search_box" data-limit="5" data-display-description="true" data-display-price="true" data-display-image="true" placeholder="Search..." value=""/>
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-primary oe_search_button" aria-label="Search" title="Search"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                            <input name="order" type="hidden" class="o_wsale_search_order_by" value=""/>
+                        </form>
+
+<!-- NOTCACHED START -->
+                        <t t-call="website_sale.pricelist_list">
+                            <t t-set="_classes" t-valuef="mt-2 ml-md-2"/>
+                        </t>
+<!-- NOTCACHED END -->
+
+
+                        <ul class=" pagination m-0 mt-2 ml-md-2">
+                            <li class="page-item disabled">
+                                <a href="" class="page-link ">Prev</a>
+                            </li>
+                            <li class="page-item active"> <a href="/shop" class="page-link ">1</a></li>
+                            <li class="page-item "> <a href="/shop/page/2" class="page-link ">2</a></li>
+                            <li class="page-item ">
+                                <a href="/shop/page/2" class="page-link ">Next</a>
+                            </li>
+                        </ul>
+                        <div class="btn-group btn-group-toggle mt-2 ml-md-2 d-none d-sm-inline-flex o_wsale_apply_layout" data-toggle="buttons">
+                            <label title="Grid" class="btn btn-secondary active fa fa-th-large o_wsale_apply_grid">
+                                <input type="radio" name="wsale_products_layout" checked="checked"/>
+                            </label>
+                            <label title="List" class="btn btn-secondary  fa fa-th-list o_wsale_apply_list">
+                                <input type="radio" name="wsale_products_layout"/>
+                            </label>
+                        </div>
+                        <div class="dropdown mt-2 ml-md-2 dropdown_sorty_by">
+                            <a role="button" href="#" class="dropdown-toggle btn btn-secondary" data-toggle="dropdown">
+                                <span class="d-none d-lg-inline">
+                                    Sort by
+                                </span>
+                                <i class="fa fa-sort-amount-asc d-lg-none"></i>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" role="menu">
+                                <a role="menuitem" rel="noindex,nofollow" class="dropdown-item" href="/shop?order=list_price+desc">
+                                    <span>Catalog price: High to Low</span>
+                                </a>
+                                <a role="menuitem" rel="noindex,nofollow" class="dropdown-item" href="/shop?order=list_price+asc">
+                                    <span>Catalog price: Low to High</span>
+                                </a>
+                                <a role="menuitem" rel="noindex,nofollow" class="dropdown-item" href="/shop?order=name+asc">
+                                    <span>Name: A to Z</span>
+                                </a>
+                                <a role="menuitem" rel="noindex,nofollow" class="dropdown-item" href="/shop?order=name+desc">
+                                    <span>Name: Z to A</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row o_wsale_products_main_row">
+                        <div id="products_grid_before" class="col-lg-3">
+                            <button type="button" class="btn btn-link d-lg-none" data-target="#wsale_products_attributes_collapse" data-toggle="collapse">
+                                Show options
+                            </button>
+                            <div class="collapse d-lg-block" id="wsale_products_attributes_collapse">
+                                <form class="js_attributes mb-2" method="get">
+                                    <input type="hidden" name="search" value=""/>
+                                    <ul class="nav nav-pills flex-column">
+                                        <li class="nav-item">
+                                            <div>
+                                                <strong>Legs</strong>
+                                            </div>
+                                            <ul class="nav nav-pills flex-column">
+                                                <li class="nav-item">
+                                                    <label style="padding: 0; margin: 0" class="nav-link">
+                                                        <input type="checkbox" name="attrib" value="1-1"/>
+                                                        <span style="font-weight: normal">Steel</span>
+                                                    </label>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <label style="padding: 0; margin: 0" class="nav-link">
+                                                        <input type="checkbox" name="attrib" value="1-2"/>
+                                                        <span style="font-weight: normal">Aluminium</span>
+                                                    </label>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <label style="padding: 0; margin: 0" class="nav-link">
+                                                        <input type="checkbox" name="attrib" value="1-7"/>
+                                                        <span style="font-weight: normal">Custom</span>
+                                                    </label>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li class="nav-item">
+                                            <div>
+                                                <strong>Color</strong>
+                                            </div>
+                                            <label style="background-color:#FFFFFF" class="css_attribute_color ">
+                                                <input type="checkbox" name="attrib" value="2-3" title="White"/>
+                                            </label>
+                                            <label style="background-color:#000000" class="css_attribute_color ">
+                                                <input type="checkbox" name="attrib" value="2-4" title="Black"/>
+                                            </label>
+                                        </li>
+                                        <li class="nav-item">
+                                            <div>
+                                                <strong>Duration</strong>
+                                            </div>
+                                            <select class="form-control" name="attrib">
+                                                <option value=""></option>
+                                                <option value="3-5">1 year</option>
+                                                <option value="3-6">2 year</option>
+                                            </select>
+                                        </li>
+                                    </ul>
+                                </form>
+                            </div>
+                            <button type="button" class="btn btn-link d-lg-none" data-target="#wsale_products_categories_collapse" data-toggle="collapse">
+                                Show categories
+                            </button>
+                            <div class="collapse d-lg-block" id="wsale_products_categories_collapse">
+                                <ul class="nav nav-pills flex-column mb-2">
+                                    <li class="nav-item">
+                                        <a href="/shop" class="nav-link active o_not_editable">All Products</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/desks-1" class="nav-link ">
+                                            <span>Desks</span>
+                                        </a>
+                                        <ul class="nav nav-pills flex-column nav-hierarchy">
+                                            <li class="nav-item">
+                                                <a href="/shop/category/desks-components-10" class="nav-link ">
+                                                    <span>Components</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/furnitures-2" class="nav-link ">
+                                            <span>Furnitures</span>
+                                        </a>
+                                        <ul class="nav nav-pills flex-column nav-hierarchy">
+                                            <li class="nav-item">
+                                                <a href="/shop/category/furnitures-chairs-11" class="nav-link ">
+                                                    <span>Chairs</span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="/shop/category/furnitures-couches-12" class="nav-link ">
+                                                    <span>Couches</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/boxes-3" class="nav-link ">
+                                            <span>Boxes</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/drawers-4" class="nav-link ">
+                                            <span>Drawers</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/cabinets-5" class="nav-link ">
+                                            <span>Cabinets</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/bins-6" class="nav-link ">
+                                            <span>Bins</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/lamps-7" class="nav-link ">
+                                            <span>Lamps</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/services-8" class="nav-link ">
+                                            <span>Services</span>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="/shop/category/multimedia-9" class="nav-link ">
+                                            <span>Multimedia</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+
+<!-- NOTCACHED START -->
+                        <div t-if="enable_left_column" id="products_grid_before" class="col-lg-3"/>
+                        <div id="products_grid" t-attf-class="col #{'o_wsale_layout_list' if layout_mode == 'list' else ''}">
+                            <t t-if="category">
+                                <t t-set='editor_msg'>Drag building blocks here to customize the header for "<t t-esc='category.name'/>" category.</t>
+                                <div class="mb16" id="category_header" t-att-data-editor-message="editor_msg" t-field="category.website_description"/>
+                            </t>
+                            <div t-if="bins" class="o_wsale_products_grid_table_wrapper">
+                                <table class="table table-borderless m-0" t-att-data-ppg="ppg" t-att-data-ppr="ppr">
+                                    <colgroup t-ignore="true">
+                                        <!-- Force the number of columns (useful when only one row of (x < ppr) products) -->
+                                        <col t-foreach="ppr" t-as="p"/>
+                                    </colgroup>
+                                    <tbody>
+                                        <tr t-foreach="bins" t-as="tr_product">
+                                            <t t-foreach="tr_product" t-as="td_product">
+                                                <t t-if="td_product">
+                                                    <t t-set="product" t-value="td_product['product']" />
+                                                    <!-- We use t-attf-class here to allow easier customization -->
+                                                    <td t-att-colspan="td_product['x'] != 1 and td_product['x']"
+                                                        t-att-rowspan="td_product['y'] != 1 and td_product['y']"
+                                                        t-attf-class="oe_product"
+                                                        t-att-data-ribbon-id="td_product['ribbon'].id">
+                                                        <div t-attf-class="o_wsale_product_grid_wrapper o_wsale_product_grid_wrapper_#{td_product['x']}_#{td_product['y']}">
+                                                            <t t-call="website_sale.products_item">
+                                                                <t t-set="product_image_big" t-value="td_product['x'] + td_product['y'] &gt; 2"/>
+                                                            </t>
+                                                        </div>
+                                                    </td>
+                                                </t>
+                                                <td t-else=""/>
+                                            </t>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <t t-else="">
+                                <div class="text-center text-muted">
+                                    <t t-if="not search">
+                                        <h3 class="mt8">No product defined</h3>
+                                        <p t-if="category">No product defined in category "<strong t-esc="category.display_name"/>".</p>
+                                    </t>
+                                    <t t-else="">
+                                        <h3 class="mt8">No results</h3>
+                                        <p>No results for "<strong t-esc='search'/>"<t t-if="category"> in category "<strong t-esc="category.display_name"/>"</t>.</p>
+                                    </t>
+                                    <p t-ignore="true" groups="sales_team.group_sale_manager">Click <i>'New'</i> in the top-right corner to create your first product.</p>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+<!-- NOTCACHED END -->
+
+
+                    <div class="products_pager form-inline justify-content-center py-3">
+                        <ul class=" pagination m-0 ">
+                            <li class="page-item disabled">
+                                <a href="" class="page-link ">Prev</a>
+                            </li>
+                            <li class="page-item active"> <a href="/shop" class="page-link ">1</a></li>
+                            <li class="page-item "> <a href="/shop/page/2" class="page-link ">2</a></li>
+                            <li class="page-item ">
+                                <a href="/shop/page/2" class="page-link ">Next</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="oe_structure oe_empty" id="oe_structure_website_sale_products_2"></div>
+            </div>
+        </main>
+        <footer id="bottom" data-anchor="true" data-name="Footer" class="o_footer o_colored_level o_cc ">
+            <div id="footer" class="oe_structure oe_structure_solo">
+                <section class="s_text_block pt40 pb16" data-snippet="s_text_block" data-name="Text">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-2 pt24 pb24">
+                                <h5 class="mb-3">Useful Links</h5>
+                                <ul class="list-unstyled">
+                                    <li><a href="/">Home</a></li>
+                                    <li><a href="#">About us</a></li>
+                                    <li><a href="#">Products</a></li>
+                                    <li><a href="#">Services</a></li>
+                                    <li><a href="#">Legal</a></li>
+                                    <li><a href="/contactus">Contact us</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-5 pt24 pb24">
+                                <h5 class="mb-3">About us</h5>
+                                <p>We are a team of passionate people whose goal is to improve everyone\'s life through disruptive products. We build great products to solve your business problems.
+                                    <br/><br/>Our products are designed for small to medium size companies willing to optimize their performance.</p>
+                                </div>
+                                <div id="connect" class="col-lg-4 offset-lg-1 pt24 pb24">
+                                    <h5 class="mb-3">Connect with us</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fa fa-comment fa-fw mr-2"></i><span><a href="/contactus">Contact us</a></span></li>
+                                        <li><i class="fa fa-envelope fa-fw mr-2"></i><span><a href="mailto:info@yourcompany.example.com">info@yourcompany.example.com</a></span></li>
+                                        <li><i class="fa fa-phone fa-fw mr-2"></i><span class="o_force_ltr"><a href="tel:+1 (650) 691-3277">+1 (650) 691-3277</a></span></li>
+                                    </ul>
+                                    <div class="s_share text-left" data-name="Social Media">
+                                        <h5 class="s_share_title d-none">Follow us</h5>
+                                        <a href="/website/social/facebook" class="s_share_facebook" target="_blank">
+                                            <i class="fa fa-facebook rounded-circle shadow-sm"></i>
+                                        </a>
+                                        <a href="/website/social/twitter" class="s_share_twitter" target="_blank">
+                                            <i class="fa fa-twitter rounded-circle shadow-sm"></i>
+                                        </a>
+                                        <a href="/website/social/linkedin" class="s_share_linkedin" target="_blank">
+                                            <i class="fa fa-linkedin rounded-circle shadow-sm"></i>
+                                        </a>
+                                        <a href="/" class="text-800 float-right">
+                                            <i class="fa fa-home rounded-circle shadow-sm"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+                <div class="o_footer_copyright o_colored_level o_cc" data-name="Copyright">
+                    <div class="container py-3">
+                        <div class="row">
+                            <div class="col-sm text-center text-sm-left text-muted">
+                                <span class="o_footer_copyright_name mr-2">Copyright &amp;copy; Company name</span>
+                            </div>
+                            <div class="col-sm text-center text-sm-right o_not_editable">
+                                <div class="o_brand_promotion">
+                                    Powered by 
+                                    <a target="_blank" class="badge badge-light" href="http://www.odoo.com?utm_source=db&amp;utm_medium=website">
+                                        <img alt="Odoo" src="/web/static/src/img/odoo_logo_tiny.png" style="height: 1em; vertical-align: baseline;" loading="lazy"/>
+                                    </a>
+                                    - 
+                                    The #1 <a target="_blank" href="http://www.odoo.com/page/e-commerce?utm_source=db&amp;utm_medium=website">Open Source eCommerce</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>
+
+
+        <t t-call="website.layout">
+            <t t-set="additional_title">Shop</t>
+            <div id="wrap" class="js_sale">
+                <div class="oe_structure oe_empty" id="oe_structure_website_sale_products_1"/>
+                <div class="container oe_website_sale">
+                    <div class="products_pager form-inline flex-md-nowrap justify-content-between justify-content-md-center">
+                        <t t-call="website_sale.search">
+                            <t t-set="_classes" t-valuef="w-100 w-md-auto mt-2"/>
+                        </t>
+                        <t t-call="website_sale.pricelist_list">
+                            <t t-set="_classes" t-valuef="mt-2 ml-md-2"/>
+                        </t>
+                        <t t-call="website.pager">
+                            <t t-set="_classes" t-valuef="mt-2 ml-md-2"/>
+                        </t>
+                    </div>
+                    <div class="row o_wsale_products_main_row">
+                        <div t-if="enable_left_column" id="products_grid_before" class="col-lg-3"/>
+                        <div id="products_grid" t-attf-class="col #{'o_wsale_layout_list' if layout_mode == 'list' else ''}">
+                            <t t-if="category">
+                                <t t-set='editor_msg'>Drag building blocks here to customize the header for "<t t-esc='category.name'/>" category.</t>
+                                <div class="mb16" id="category_header" t-att-data-editor-message="editor_msg" t-field="category.website_description"/>
+                            </t>
+                            <div t-if="bins" class="o_wsale_products_grid_table_wrapper">
+                                <table class="table table-borderless m-0" t-att-data-ppg="ppg" t-att-data-ppr="ppr">
+                                    <colgroup t-ignore="true">
+                                        <!-- Force the number of columns (useful when only one row of (x < ppr) products) -->
+                                        <col t-foreach="ppr" t-as="p"/>
+                                    </colgroup>
+                                    <tbody>
+                                        <tr t-foreach="bins" t-as="tr_product">
+                                            <t t-foreach="tr_product" t-as="td_product">
+                                                <t t-if="td_product">
+                                                    <t t-set="product" t-value="td_product['product']" />
+                                                    <!-- We use t-attf-class here to allow easier customization -->
+                                                    <td t-att-colspan="td_product['x'] != 1 and td_product['x']"
+                                                        t-att-rowspan="td_product['y'] != 1 and td_product['y']"
+                                                        t-attf-class="oe_product"
+                                                        t-att-data-ribbon-id="td_product['ribbon'].id">
+                                                        <div t-attf-class="o_wsale_product_grid_wrapper o_wsale_product_grid_wrapper_#{td_product['x']}_#{td_product['y']}">
+                                                            <t t-call="website_sale.products_item">
+                                                                <t t-set="product_image_big" t-value="td_product['x'] + td_product['y'] &gt; 2"/>
+                                                            </t>
+                                                        </div>
+                                                    </td>
+                                                </t>
+                                                <td t-else=""/>
+                                            </t>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <t t-else="">
+                                <div class="text-center text-muted">
+                                    <t t-if="not search">
+                                        <h3 class="mt8">No product defined</h3>
+                                        <p t-if="category">No product defined in category "<strong t-esc="category.display_name"/>".</p>
+                                    </t>
+                                    <t t-else="">
+                                        <h3 class="mt8">No results</h3>
+                                        <p>No results for "<strong t-esc='search'/>"<t t-if="category"> in category "<strong t-esc="category.display_name"/>"</t>.</p>
+                                    </t>
+                                    <p t-ignore="true" groups="sales_team.group_sale_manager">Click <i>'New'</i> in the top-right corner to create your first product.</p>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="products_pager form-inline justify-content-center py-3">
+                        <t t-call="website.pager"/>
+                    </div>
+                </div>
+                <div class="oe_structure oe_empty" id="oe_structure_website_sale_products_2"/>
+            </div>
+        </t>
+    </template>
+
     <!-- (Option) Products: Enable image full for all products : Images Full -->
     <template id="products_images_full" name="Images Full" inherit_id="website_sale.products" active="False" customize_show="True">
         <xpath expr="//t[@t-foreach='tr_product']//td" position="attributes">
