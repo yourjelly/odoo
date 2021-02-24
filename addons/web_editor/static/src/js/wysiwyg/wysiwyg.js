@@ -1086,8 +1086,9 @@ const Wysiwyg = Widget.extend({
             e.target.closest('.o_wysiwyg_resizer') ||
             e.target.closest('.oe-toolbar')
         ) {
-            return;
-        } else {
+            this._focus = true;
+        } else if (this._focus) {
+            this._focus = false;
             this.trigger_up('wysiwyg_blur');
         }
     },
