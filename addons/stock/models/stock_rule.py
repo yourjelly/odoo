@@ -527,7 +527,7 @@ class ProcurementGroup(models.Model):
             self._cr.commit()
 
         # Run cyclic inventories
-        self.env['stock.inventory']._run_inventory_tasks(company_id)
+        # self.env['stock.inventory']._run_inventory_tasks(company_id)
 
         if use_new_cursor:
             self._cr.commit()
