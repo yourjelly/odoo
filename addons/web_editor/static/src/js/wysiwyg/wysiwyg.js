@@ -207,7 +207,7 @@ const Wysiwyg = Widget.extend({
                 $body.off('mousemove', this.resizerMousemove);
                 $body.off('mouseup', this.resizerMouseup);
             };
-            this.$resizer.on('mousedown', resizerMousedown)
+            this.$resizer.on('mousedown', resizerMousedown);
         } else {
             this._replaceElement(this.$editable);
         }
