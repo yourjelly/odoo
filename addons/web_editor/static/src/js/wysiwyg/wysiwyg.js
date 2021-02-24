@@ -158,7 +158,7 @@ const Wysiwyg = Widget.extend({
     destroy: function () {
         $(document).off('mousedown', this._onBlur);
         const $body = $(document.body);
-        $body.off('mousedown', this.resizerMousemove);
+        $body.off('mousemove', this.resizerMousemove);
         $body.off('mouseup', this.resizerMouseup);
         this._super();
     },
