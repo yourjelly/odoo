@@ -158,7 +158,7 @@ const Wysiwyg = Widget.extend({
      * @override
      */
     destroy: function () {
-        this.$editable.off('blur', this._onBlur);
+        this.$editable && this.$editable.off('blur', this._onBlur);
         document.removeEventListener('mousedown', this._onDocumentMousedown, true);
         const $body = $(document.body);
         $body.off('mousemove', this.resizerMousemove);
