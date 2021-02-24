@@ -2245,7 +2245,6 @@ var SnippetsMenu = Widget.extend({
 
                         var $target = $toInsert;
                         await self._scrollToSnippet($target);
-                        self.options.wysiwyg.odooEditor.historyStep();
 
                         _.defer(async function () {
                             self.trigger_up('snippet_dropped', {$target: $target});
@@ -2258,6 +2257,9 @@ var SnippetsMenu = Widget.extend({
                             });
                             $target.trigger('content_changed');
                             await self._updateInvisibleDOM();
+
+                            self.options.wysiwyg.odooEditor.unbreakableStepUnactive();
+                            self.options.wysiwyg.odooEditor.historyStep();
 
                             self.$el.find('.oe_snippet_thumbnail').removeClass('o_we_already_dragging');
                         });
