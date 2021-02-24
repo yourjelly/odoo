@@ -71,6 +71,12 @@
             <field name="lot_id" ref="lot_product_product_cable_management_box_1"/>
         </record>
 
+        <function model="stock.quant" name="action_apply_inventory">
+            <function eval="[[('id', 'in', (ref('stock_inventory_icecream_lot_0'),
+                                            ref('stock_inventory_icecream_lot_1')
+                                            ))]]" model="stock.quant" name="search"/>
+        </function>
+
         <!-- Create STOCK_MOVE for OUT -->
         <record id="outgoing_shipment_main_warehouse" model="stock.picking">
             <field name="picking_type_id" ref="stock.picking_type_out"/>
