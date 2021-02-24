@@ -60,6 +60,7 @@ class StockQuant(models.Model):
     product_uom_id = fields.Many2one(
         'uom.uom', 'Unit of Measure',
         readonly=True, related='product_id.uom_id')
+    product_category_id = fields.Many2one(related='product_id.categ_id', store=True)
     company_id = fields.Many2one(related='location_id.company_id', string='Company', store=True, readonly=True)
     location_id = fields.Many2one(
         'stock.location', 'Location',
@@ -80,9 +81,6 @@ class StockQuant(models.Model):
         'Quantity',
         help='Quantity of products in this quant, in the default unit of measure of the product',
         readonly=True)
-    inventory_quantity = fields.Float(
-        'Inventoried Quantity', compute='_compute_inventory_quantity',
-        inverse='_set_inventory_quantity', groups='stock.group_stock_manager')
     reserved_quantity = fields.Float(
         'Reserved Quantity',
         default=0.0,
@@ -96,18 +94,27 @@ class StockQuant(models.Model):
     tracking = fields.Selection(related='product_id.tracking', readonly=True)
     on_hand = fields.Boolean('On Hand', store=False, search='_search_on_hand')
 
+    # Inventory Field
+    inventory_quantity = fields.Float(
+        'Inventoried Quantity', groups='stock.group_stock_manager')
+    inventory_diff_quantity = fields.Float(
+        'Difference', compute='_compute_inventory_diff_quantity',
+        help='Indicates the gap between the product\'s theoretical quantity and its newest quantity.',
+        readonly=True, digits='Product Unit of Measure', search='_search_difference_qty',
+        groups='stock.group_stock_manager')
+    inventory_date = fields.Datetime(
+        'Inventory Date', readonly=True, default=fields.Datetime.now,
+        help="Last date at which the On Hand Quantity has been computed.")
+
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
         for quant in self:
             quant.available_quantity = quant.quantity - quant.reserved_quantity
 
-    @api.depends('quantity')
-    def _compute_inventory_quantity(self):
-        if not self._is_inventory_mode():
-            self.inventory_quantity = 0
-            return
+    @api.depends('quantity', 'inventory_quantity')
+    def _compute_inventory_diff_quantity(self):
         for quant in self:
-            quant.inventory_quantity = quant.quantity
+            quant.inventory_diff_quantity = quant.quantity - quant.inventory_quantity
 
     def _set_inventory_quantity(self):
         """ Inverse method to create stock move when `inventory_quantity` is set
