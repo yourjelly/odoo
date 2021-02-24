@@ -114,28 +114,7 @@ class StockQuant(models.Model):
     @api.depends('quantity', 'inventory_quantity')
     def _compute_inventory_diff_quantity(self):
         for quant in self:
-            quant.inventory_diff_quantity = quant.quantity - quant.inventory_quantity
-
-    def _set_inventory_quantity(self):
-        """ Inverse method to create stock move when `inventory_quantity` is set
-        (`inventory_quantity` is only accessible in inventory mode).
-        """
-        if not self._is_inventory_mode():
-            return
-        for quant in self:
-            # Get the quantity to create a move for.
-            rounding = quant.product_id.uom_id.rounding
-            diff = float_round(quant.inventory_quantity - quant.quantity, precision_rounding=rounding)
-            diff_float_compared = float_compare(diff, 0, precision_rounding=rounding)
-            # Create and vaidate a move so that the quant matches its `inventory_quantity`.
-            if diff_float_compared == 0:
-                continue
-            elif diff_float_compared > 0:
-                move_vals = quant._get_inventory_move_values(diff, quant.product_id.with_company(quant.company_id).property_stock_inventory, quant.location_id)
-            else:
-                move_vals = quant._get_inventory_move_values(-diff, quant.location_id, quant.product_id.with_company(quant.company_id).property_stock_inventory, out=True)
-            move = quant.env['stock.move'].with_context(inventory_mode=False).create(move_vals)
-            move._action_done()
+            quant.inventory_diff_quantity = quant.inventory_quantity - quant.quantity
 
     def _search_on_hand(self, operator, value):
         """Handle the "on_hand" filter, indirectly calling `_get_domain_locations`."""
@@ -238,6 +217,22 @@ class StockQuant(models.Model):
         if self.user_has_groups('stock.group_stock_manager'):
             self = self.with_context(inventory_mode=True)
         return self._get_quants_action(extend=True)
+
+    def action_apply_inventory(self):
+        for quant in self:
+            # Get the quantity to create a move for.
+            rounding = quant.product_id.uom_id.rounding
+            diff = float_round(quant.inventory_quantity - quant.quantity, precision_rounding=rounding)
+            diff_float_compared = float_compare(diff, 0, precision_rounding=rounding)
+            # Create and vaidate a move so that the quant matches its `inventory_quantity`.
+            if diff_float_compared == 0:
+                continue
+            elif diff_float_compared > 0:
+                move_vals = quant._get_inventory_move_values(diff, quant.product_id.with_company(quant.company_id).property_stock_inventory, quant.location_id)
+            else:
+                move_vals = quant._get_inventory_move_values(-diff, quant.location_id, quant.product_id.with_company(quant.company_id).property_stock_inventory, out=True)
+            move = quant.env['stock.move'].with_context(inventory_mode=False).create(move_vals)
+            move._action_done()
 
     @api.constrains('product_id')
     def check_product_id(self):
