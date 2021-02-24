@@ -98,7 +98,7 @@ class StockQuant(models.Model):
     inventory_quantity = fields.Float(
         'Inventoried Quantity', groups='stock.group_stock_manager')
     inventory_diff_quantity = fields.Float(
-        'Difference', compute='_compute_inventory_diff_quantity',
+        'Difference', compute='_compute_inventory_diff_quantity', store=True,
         help='Indicates the gap between the product\'s theoretical quantity and its newest quantity.',
         readonly=True, digits='Product Unit of Measure', search='_search_difference_qty',
         groups='stock.group_stock_manager')
@@ -111,7 +111,7 @@ class StockQuant(models.Model):
         for quant in self:
             quant.available_quantity = quant.quantity - quant.reserved_quantity
 
-    @api.depends('quantity', 'inventory_quantity')
+    @api.depends('inventory_quantity')
     def _compute_inventory_diff_quantity(self):
         for quant in self:
             quant.inventory_diff_quantity = quant.inventory_quantity - quant.quantity
@@ -219,20 +219,26 @@ class StockQuant(models.Model):
         return self._get_quants_action(extend=True)
 
     def action_apply_inventory(self):
-        for quant in self:
-            # Get the quantity to create a move for.
-            rounding = quant.product_id.uom_id.rounding
-            diff = float_round(quant.inventory_quantity - quant.quantity, precision_rounding=rounding)
-            diff_float_compared = float_compare(diff, 0, precision_rounding=rounding)
-            # Create and vaidate a move so that the quant matches its `inventory_quantity`.
-            if diff_float_compared == 0:
-                continue
-            elif diff_float_compared > 0:
-                move_vals = quant._get_inventory_move_values(diff, quant.product_id.with_company(quant.company_id).property_stock_inventory, quant.location_id)
-            else:
-                move_vals = quant._get_inventory_move_values(-diff, quant.location_id, quant.product_id.with_company(quant.company_id).property_stock_inventory, out=True)
-            move = quant.env['stock.move'].with_context(inventory_mode=False).create(move_vals)
-            move._action_done()
+        quants_tracked_without_lot = self.filtered(
+            lambda q: q.product_id.tracking in ['lot', 'serial'] and
+            not q.lot_id and q.inventory_quantity != q.quantity)
+        quants_duplicate_sn = self.filtered(
+            lambda q: float_compare(q.quantity, 1, precision_rounding=q.product_uom_id.rounding) > 0 and
+            q.product_id.tracking == 'serial' and q.lot_id)
+        if quants_tracked_without_lot and not quants_duplicate_sn:
+            return {
+                'name': _('Tracked Products in Inventory Adjustment'),
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'views': [(False, 'form')],
+                'res_model': 'stock.track.confirmation',
+                'target': 'new',
+                'context': {
+                    'default_quant_ids': self.ids,
+                    'default_product_ids': quants_tracked_without_lot.mapped('product_id').ids,
+                },
+            }
+        self._apply_inventory()
 
     @api.constrains('product_id')
     def check_product_id(self):
@@ -380,6 +386,22 @@ class StockQuant(models.Model):
             if message:
                 return {'warning': {'title': _('Warning'), 'message': message}}
 
+    def _apply_inventory(self):
+        for quant in self:
+            # Create and vaidate a move so that the quant matches its `inventory_quantity`.
+            if quant.inventory_diff_quantity == 0:
+                continue
+            elif quant.inventory_diff_quantity > 0:
+                move_vals = quant._get_inventory_move_values(quant.inventory_diff_quantity, quant.product_id.with_company(
+                    quant.company_id).property_stock_inventory, quant.location_id)
+            else:
+                move_vals = quant._get_inventory_move_values(-quant.inventory_diff_quantity, quant.location_id, quant.product_id.with_company(
+                    quant.company_id).property_stock_inventory, out=True)
+            move = quant.env['stock.move'].with_context(
+                inventory_mode=False).create(move_vals)
+            move._action_done()
+            quant.inventory_quantity = 0
+
     @api.model
     def _update_available_quantity(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None, in_date=None):
         """ Increase or decrease `reserved_quantity` of a set of quants for a given set of
@@ -518,6 +540,7 @@ class StockQuant(models.Model):
                             SELECT min(id) as to_update_quant_id,
                                 (array_agg(id ORDER BY id))[2:array_length(array_agg(id), 1)] as to_delete_quant_ids,
                                 SUM(reserved_quantity) as reserved_quantity,
+                                SUM(inventory_quantity) as inventory_quantity,
                                 SUM(quantity) as quantity,
                                 MIN(in_date) as in_date
                             FROM stock_quant
@@ -528,6 +551,7 @@ class StockQuant(models.Model):
                             UPDATE stock_quant q
                                 SET quantity = d.quantity,
                                     reserved_quantity = d.reserved_quantity,
+                                    inventory_quantity = d.inventory_quantity,
                                     in_date = d.in_date
                             FROM dupes d
                             WHERE d.to_update_quant_id = q.id
