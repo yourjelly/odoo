@@ -427,7 +427,6 @@ class AccountChartTemplate(models.Model):
         del(vals['chart_template_id'])
         return vals
 
-    @api.model
     def generate_journals(self, acc_template_ref, company, journals_dict=None):
         """
         This method is used for creating journals.

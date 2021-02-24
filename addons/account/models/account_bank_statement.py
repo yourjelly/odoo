@@ -575,7 +575,6 @@ class AccountBankStatementLine(models.Model):
                 other_lines += line
         return liquidity_lines, suspense_lines, other_lines
 
-    @api.model
     def _prepare_liquidity_move_line_vals(self):
         ''' Prepare values to create a new account.move.line record corresponding to the
         liquidity line (having the bank/cash account).
@@ -620,7 +619,6 @@ class AccountBankStatementLine(models.Model):
             'amount_currency': amount_currency,
         }
 
-    @api.model
     def _prepare_counterpart_move_line_vals(self, counterpart_vals, move_line=None):
         ''' Prepare values to create a new account.move.line move_line.
         By default, without specified 'counterpart_vals' or 'move_line', the counterpart line is
@@ -724,7 +722,6 @@ class AccountBankStatementLine(models.Model):
             'amount_currency': amount_currency,
         }
 
-    @api.model
     def _prepare_move_line_default_vals(self, counterpart_account_id=None):
         ''' Prepare the dictionary to create the default account.move.lines for the current account.bank.statement.line
         record.

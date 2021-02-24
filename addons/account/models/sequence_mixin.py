@@ -83,7 +83,6 @@ class SequenceMixin(models.AbstractModel):
             record.sequence_prefix = sequence[:matching.start(1)]
             record.sequence_number = int(matching.group(1) or 0)
 
-    @api.model
     def _deduce_sequence_number_reset(self, name):
         """Detect if the used sequence resets yearly, montly or never.
 

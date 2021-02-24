@@ -18,6 +18,7 @@ import logging
 from collections import defaultdict
 from collections.abc import Mapping
 from contextlib import contextmanager
+import functools
 from inspect import signature
 from pprint import pformat
 from weakref import WeakSet
@@ -371,7 +372,12 @@ def model(method):
     if method.__name__ == 'create':
         return model_create_single(method)
     method._api = 'model'
-    return method
+    # return method
+
+    @functools.wraps(method)
+    def patched(self, *args, **kwargs):
+        return method(self.browse(), *args, **kwargs)
+    return patched
 
 
 _create_logger = logging.getLogger(__name__ + '.create')
