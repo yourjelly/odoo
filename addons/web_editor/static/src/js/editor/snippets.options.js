@@ -3484,6 +3484,7 @@ const SnippetOptionWidget = Widget.extend({
             // If it is not preview mode, the user selected the option for good
             // (so record the action)
             if (shouldRecordUndo) {
+                this.options.wysiwyg.odooEditor.unbreakableStepUnactive();
                 this.options.wysiwyg.odooEditor.historyStep();
             }
 
