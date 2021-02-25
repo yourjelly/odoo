@@ -16,6 +16,12 @@
 
 .o_FollowButton_unfollow {
     color: gray('600');
+    min-width: 8rem;
+
+    &.btn {
+        padding-right: $grid-gutter-width*0.25;
+        padding-left: $grid-gutter-width*0.25;
+    }
 
     &.o-following {
         color: $green;
