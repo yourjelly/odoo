@@ -79,16 +79,6 @@
     }
 }
 
-.oe_edited_link {
-    position: relative;
-    &::before {
-        content: '';
-        border: dashed 3px #01bad2;
-        position: absolute;
-        inset: -5px;
-    }
-}
-
 // TRANSLATIONS
 .oe_translate_examples li {
     margin: 10px;
