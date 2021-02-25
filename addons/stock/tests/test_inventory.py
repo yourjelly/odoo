@@ -312,35 +312,47 @@ class TestInventory(TransactionCase):
         self.assertEqual(inventory_quant.inventory_quantity, 0)
         self.assertEqual(inventory_quant.quantity, 42)
 
-    # def test_inventory_outdate_1(self):
-    #     """ Checks that inventory adjustment line is marked as outdated after
-    #     its corresponding quant is modify and its value was correctly updated
-    #     after user refreshed it.
-    #     """
-    #     # Set initial quantity to 7
-    #     self.env['stock.quant']._update_available_quantity(self.product1, self.stock_location, 7)
-    #     inventory_quant = self.env['stock.quant'].search([
-    #         ('location_id', '=', self.stock_location.id),
-    #         ('product_id', '=', self.product1.id)
-    #     ])
-    #     # When a quant is created, it must not be marked as outdated
-    #     # and its `inventory_quantity` must be equals to zero.
-    #     self.assertEqual(inventory_quant.inventory_quantity, 0)
+    def test_inventory_outdate_1(self):
+        """ Checks that inventory adjustment line is marked as outdated after
+        its corresponding quant is modify and its value was correctly updated
+        after user refreshed it.
+        """
+        # Set initial quantity to 7
+        self.env['stock.quant']._update_available_quantity(self.product1, self.stock_location, 7)
+        inventory_quant = self.env['stock.quant'].search([
+            ('location_id', '=', self.stock_location.id),
+            ('product_id', '=', self.product1.id)
+        ])
+        # When a quant is created, it must not be marked as outdated
+        # and its `inventory_quantity` must be equals to zero.
+        self.assertEqual(inventory_quant.inventory_quantity, 0)
 
-    #     # Creates a new quant who'll update the existing one and so set product
-    #     # quantity to 5. Then expects inventory line has been marked as outdated.
-    #     vals = {
-    #         'product_id': self.product1.id,
-    #         'location_id': self.stock_location.id,
-    #         'inventory_quantity': 5,
-    #     }
-    #     self.env['stock.quant'].with_context(inventory_mode=True).create(vals)
-    #     self.assertEqual(inventory.line_ids.outdated, True)
-    #     self.assertEqual(inventory.line_ids.theoretical_qty, 7)
-    #     # Refreshes inventory line and expects quantity was recomputed to 5
-    #     inventory.line_ids.action_refresh_quantity()
-    #     self.assertEqual(inventory.line_ids.outdated, False)
-    #     self.assertEqual(inventory.line_ids.theoretical_qty, 5)
+        inventory_quant.inventory_quantity = 5
+        self.assertEqual(inventory_quant.inventory_diff_quantity, -2)
+
+        # Deliver 3 units
+        move_out = self.env['stock.move'].create({
+            'name': 'Outgoing move of 3 units',
+            'location_id': self.stock_location.id,
+            'location_dest_id': self.customer_location.id,
+            'product_id': self.product1.id,
+            'product_uom': self.uom_unit.id,
+            'product_uom_qty': 3.0,
+        })
+        move_out.action_confirm()
+        move_out._action_assign()
+        move_out.move_line_ids.qty_done = 3
+        move_out._action_done()
+
+        # Ensure that diff didn't move.
+        self.assertEqual(inventory_quant.inventory_diff_quantity, -2)
+        self.assertEqual(inventory_quant.inventory_quantity, 5)
+        self.assertEqual(inventory_quant.quantity, 4)
+
+        conflict_wizard_values = inventory_quant.action_apply_inventory()
+        conflict_wizard_form = Form(self.env['stock.inventory.conflict'].with_context(conflict_wizard_values['context']))
+        conflict_wizard = conflict_wizard_form.save()
+        self.assertEqual(len(conflict_wizard.quant_to_fix_ids), 1)
 
     # def test_inventory_outdate_2(self):
     #     """ Checks that inventory adjustment line is marked as outdated when a

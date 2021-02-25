@@ -4,6 +4,7 @@
 from . import stock_assign_serial_numbers
 from . import stock_picking_return
 from . import stock_change_product_qty
+from . import stock_conflict_inventory
 from . import stock_scheduler_compute
 from . import stock_immediate_transfer
 from . import stock_backorder_confirmation
