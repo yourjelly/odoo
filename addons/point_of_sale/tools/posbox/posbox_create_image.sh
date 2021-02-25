@@ -28,9 +28,9 @@ __base="$(basename ${__file} .sh)"
 MOUNT_POINT="${__dir}/root_mount"
 OVERWRITE_FILES_BEFORE_INIT_DIR="${__dir}/overwrite_before_init"
 OVERWRITE_FILES_AFTER_INIT_DIR="${__dir}/overwrite_after_init"
-VERSION=14.0
+VERSION=14.0-iot-build-qle
 VERSION_IOTBOX=21.02
-REPO=https://github.com/odoo/odoo.git
+REPO=https://github.com/odoo-dev/odoo.git
 
 if ! file_exists *raspios*.img ; then
     wget 'http://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip' -O raspios.img.zip
