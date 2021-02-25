@@ -8,7 +8,7 @@ from psycopg2 import Error, OperationalError
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools.float_utils import float_compare, float_is_zero, float_round
+from odoo.tools.float_utils import float_compare, float_is_zero
 
 _logger = logging.getLogger(__name__)
 
@@ -100,8 +100,7 @@ class StockQuant(models.Model):
     inventory_diff_quantity = fields.Float(
         'Difference', compute='_compute_inventory_diff_quantity', store=True,
         help='Indicates the gap between the product\'s theoretical quantity and its newest quantity.',
-        readonly=True, digits='Product Unit of Measure', search='_search_difference_qty',
-        groups='stock.group_stock_manager')
+        readonly=True, digits='Product Unit of Measure', groups='stock.group_stock_manager')
     inventory_date = fields.Datetime(
         'Inventory Date', readonly=True, default=fields.Datetime.now,
         help="Last date at which the On Hand Quantity has been computed.")
@@ -219,12 +218,32 @@ class StockQuant(models.Model):
         return self._get_quants_action(extend=True)
 
     def action_apply_inventory(self):
-        quants_tracked_without_lot = self.filtered(
-            lambda q: q.product_id.tracking in ['lot', 'serial'] and
-            not q.lot_id and q.inventory_quantity != q.quantity)
-        quants_duplicate_sn = self.filtered(
-            lambda q: float_compare(q.quantity, 1, precision_rounding=q.product_uom_id.rounding) > 0 and
-            q.product_id.tracking == 'serial' and q.lot_id)
+        quants_outdated = self.env['stock.quant']
+        quants_tracked_without_lot = self.env['stock.quant']
+        quants_duplicate_sn = self.env['stock.quant']
+        for quant in self:
+            # TODO float_compare
+            if (quant.inventory_quantity - quant.inventory_diff_quantity) != quant.quantity:
+                quants_outdated |= self
+            if quant.product_id.tracking in ['lot', 'serial'] and\
+                    not quant.lot_id and quant.inventory_quantity != quant.quantity:
+                quants_tracked_without_lot |= self
+            if float_compare(quant.quantity, 1, precision_rounding=quant.product_uom_id.rounding) > 0 and\
+                    quant.product_id.tracking == 'serial' and quant.lot_id:
+                quants_duplicate_sn |= self
+        if quants_outdated:
+            return {
+                'name': _('Conflict in Inventory Adjustment'),
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'views': [(False, 'form')],
+                'res_model': 'stock.inventory.conflict',
+                'target': 'new',
+                'context': {
+                    'default_quant_ids': self.ids,
+                    'default_quant_to_fix_ids': quants_outdated.ids,
+                },
+            }
         if quants_tracked_without_lot and not quants_duplicate_sn:
             return {
                 'name': _('Tracked Products in Inventory Adjustment'),
