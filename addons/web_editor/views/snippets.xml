@@ -3,8 +3,8 @@
 <template id="snippets" groups="base.group_user">
     <div class="o_we_website_top_actions">
         <div class="o_we_external_history_buttons">
-            <button type="button" data-action="undo" class="btn btn-secondary fa fa-undo"/>
-            <button type="button" data-action="redo" class="btn btn-secondary fa fa-repeat"/>
+            <button type="button" data-action="undo" class="btn btn-secondary fa fa-undo" disabled="true"/>
+            <button type="button" data-action="redo" class="btn btn-secondary fa fa-repeat" disabled="true"/>
         </div>
         <form class="ml-auto">
             <button type="button" class="btn btn-secondary" name="mobile" data-action="mobilePreview"><i class="fa fa-mobile"></i></button>
