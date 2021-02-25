@@ -6,6 +6,7 @@ const OdooEditorLib = require('web_editor.odoo-editor');
 const Widget = require('web.Widget');
 
 const getInSelection = OdooEditorLib.getInSelection;
+const getDeepRange = OdooEditorLib.getDeepRange;
 
 const _t = core._t;
 
@@ -187,20 +188,31 @@ const LinkTools = Widget.extend({
         };
     },
     _getOrCreateLink: function () {
-        const range = this.editable.ownerDocument.getSelection().getRangeAt(0);
+        const doc = this.editable.ownerDocument;
+        const range = getDeepRange(doc, { splitText: true, select: true });
         this.needLabel = false;
-        let link = getInSelection(this.editable.ownerDocument, 'a');
-        if (link) {
-            const $link = $(link);
-            $link.after($link.contents());
-            range.surroundContents(link);
-        } else {
+        let link = getInSelection(doc, 'a');
+        const $link = $(link);
+        if (link && (!$link.has(range.startContainer).length || !$link.has(range.endContainer).length)) {
+            // Expand the current link to include the whole selection.
+            let before = link.previousSibling;
+            while (range.intersectsNode(before)) {
+                link.insertBefore(before, link.firstChild);
+                before = link.previousSibling;
+            }
+            let after = link.nextSibling;
+            while (range.intersectsNode(after)) {
+                link.appendChild(after);
+                after = link.nextSibling;
+            }
+        } else if (!link) {
             link = document.createElement('a');
             if (range.collapsed) {
                 range.insertNode(link);
                 this.needLabel = true;
             } else {
-                range.surroundContents(link);
+                link.appendChild(range.extractContents());
+                range.insertNode(link);
             }
         }
         link.classList.add('oe_edited_link');
