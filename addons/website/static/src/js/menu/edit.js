@@ -210,7 +210,6 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
 
         await this._createWysiwyg();
 
-        this._addEditorMessages();
         var res = await new Promise(function (resolve, reject) {
             self.trigger_up('widgets_start_request', {
                 editableMode: true,
@@ -265,6 +264,7 @@ var EditPageMenu = websiteNavbarData.WebsiteNavbarActionWidget.extend({
         $('#wrapwrap *').each((key, el) => {delete el.ouid});
         $(this.savableSelector).not('[data-oe-readonly]').attr('contenteditable', 'true');
         this.wysiwyg.odooEditor.idSet($('#wrapwrap')[0]);
+        this._addEditorMessages(); // Insert editor messages in the DOM without observing.
         this.wysiwyg.odooEditor.observerActive();
 
         // Observe changes to mark dirty structures and fields.
