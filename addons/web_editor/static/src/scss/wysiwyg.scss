@@ -75,7 +75,6 @@ $o-we-zindex: $o-we-overlay-zindex + 1 !default;
         box-shadow: $o-we-dropdown-shadow;
 
         &.colorpicker-menu {
-            top: auto;
             bottom: 100%;
             margin-top: 0;
             margin-bottom: 0.125rem;
